@@ -88,16 +88,7 @@ describe('HostEventModal', () => {
     );
 
     /* eslint-disable react/button-has-type */
-    expect(
-      wrapper
-        .find('Tabs')
-        .containsAllMatchingElements([
-          <button aria-label="Details tab">Details</button>,
-          <button aria-label="JSON tab">JSON</button>,
-          <button aria-label="Standard out tab">Standard Out</button>,
-          <button aria-label="Standard error tab">Standard Error</button>,
-        ])
-    ).toEqual(true);
+    expect(wrapper.find('Tabs TabButton').length).toEqual(4);
   });
 
   test('should show details tab content on mount', () => {

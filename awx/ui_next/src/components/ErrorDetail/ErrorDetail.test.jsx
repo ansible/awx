@@ -39,7 +39,7 @@ describe('ErrorDetail', () => {
         }
       />
     );
-    wrapper.find('Expandable').prop('onToggle')();
+    wrapper.find('ExpandableSection').prop('onToggle')();
     wrapper.update();
   });
 });

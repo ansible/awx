@@ -21,7 +21,6 @@ from split_settings.tools import optional, include
 # Load default settings.
 from .defaults import *  # NOQA
 
-# don't use memcache when running tests
 if "pytest" in sys.modules:
     CACHES = {
         'default': {
@@ -184,5 +183,4 @@ else:
     except Exception:
         pass
 
-WEBSOCKET_ORIGIN_WHITELIST = ['https://localhost:8043', 'https://localhost:3000']
 AWX_CALLBACK_PROFILE = True

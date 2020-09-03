@@ -19,6 +19,7 @@ import DatalistToolbar from '../../../components/DataListToolbar';
 import AlertModal from '../../../components/AlertModal/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
 import InventorySourceListItem from './InventorySourceListItem';
+import useWsInventorySources from './useWsInventorySources';
 
 const QS_CONFIG = getQSConfig('inventory', {
   not__source: '',
@@ -34,7 +35,7 @@ function InventorySourceList({ i18n }) {
   const {
     isLoading,
     error: fetchError,
-    result: { sources, sourceCount, sourceChoices, sourceChoicesOptions },
+    result: { result, sourceCount, sourceChoices, sourceChoicesOptions },
     request: fetchSources,
   } = useRequest(
     useCallback(async () => {
@@ -44,18 +45,21 @@ function InventorySourceList({ i18n }) {
         InventorySourcesAPI.readOptions(),
       ]);
       return {
-        sources: results[0].data.results,
+        result: results[0].data.results,
         sourceCount: results[0].data.count,
         sourceChoices: results[1].data.actions.GET.source.choices,
         sourceChoicesOptions: results[1].data.actions,
       };
     }, [id, search]),
     {
-      sources: [],
+      result: [],
       sourceCount: 0,
       sourceChoices: [],
     }
   );
+
+  const sources = useWsInventorySources(result);
+
   const canSyncSources =
     sources.length > 0 &&
     sources.every(source => source.summary_fields.user_capabilities.start);

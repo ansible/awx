@@ -6,6 +6,9 @@ persistence:
 {% if pg_persistence_storageClass is defined %}
   storageClass: {{ pg_persistence_storageClass }}
 {% endif %}
+{% if pg_persistence_existingclaim is defined %}
+  existingClaim: {{ pg_persistence_existingclaim }}
+{% endif %}
 {% if pg_cpu_limit is defined or pg_mem_limit is defined %}
 resources:
   limits:
@@ -31,12 +34,22 @@ master:
 {{ affinity | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
 {% endif %}
 {% endif %}
-{% if pg_image_registry is defined %}
 image:
+{% if pg_image_registry is defined %}
   registry: {{ pg_image_registry }}
+{% endif %}
+  # The default bitnami image from the chart doesn't work on ARM
+  repository: postgres
+  tag: '11'
 volumePermissions:
   image:
+{% if pg_image_registry is defined %}
     registry: {{ pg_image_registry }}
+{% endif %}
+    # The default bitnami image from the chart doesn't work on ARM
+    repository: alpine
+    tag: '3'
+{% if pg_image_registry is defined %}
 metrics:
   image:
     registry: {{ pg_image_registry }}

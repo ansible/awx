@@ -19,7 +19,7 @@ const mockHost = {
     },
     user_capabilities: {
       delete: true,
-      update: true,
+      edit: true,
     },
     recent_jobs: [],
   },
@@ -66,6 +66,18 @@ describe('<HostToggle>', () => {
     wrapper.update();
     expect(wrapper.find('Switch').prop('isChecked')).toEqual(true);
     expect(onToggle).toHaveBeenCalledWith(true);
+  });
+
+  test('should be enabled', async () => {
+    const wrapper = mountWithContexts(<HostToggle host={mockHost} />);
+    expect(wrapper.find('Switch').prop('isDisabled')).toEqual(false);
+  });
+
+  test('should be disabled', async () => {
+    const wrapper = mountWithContexts(
+      <HostToggle isDisabled host={mockHost} />
+    );
+    expect(wrapper.find('Switch').prop('isDisabled')).toEqual(true);
   });
 
   test('should show error modal', async () => {

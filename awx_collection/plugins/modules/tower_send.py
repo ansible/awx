@@ -81,7 +81,7 @@ import os
 import sys
 
 from ansible.module_utils.six.moves import StringIO
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, HAS_TOWER_CLI
+from ..module_utils.tower_legacy import TowerLegacyModule, tower_auth_config, HAS_TOWER_CLI
 
 from tempfile import mkstemp
 
@@ -103,7 +103,7 @@ def main():
         password_management=dict(default='default', choices=['default', 'random']),
     )
 
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=False)
+    module = TowerLegacyModule(argument_spec=argument_spec, supports_check_mode=False)
 
     module.deprecate(msg="This module is deprecated and will be replaced by the AWX CLI import command", version="awx.awx:14.0.0")
 

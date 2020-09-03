@@ -61,6 +61,36 @@ def test_credential_validation_error_with_bad_user(post, admin, credentialtype_s
 
 
 @pytest.mark.django_db
+def test_credential_validation_error_with_no_owner_field(post, admin, credentialtype_ssh):
+    params = {
+        'credential_type': credentialtype_ssh.id,
+        'inputs': {'username': 'someusername'},
+        'name': 'Some name',
+    }
+    response = post(reverse('api:credential_list'), params, admin)
+    assert response.status_code == 400
+    assert response.data['detail'][0] == "Missing 'user', 'team', or 'organization'."
+
+
+@pytest.mark.django_db
+def test_credential_validation_error_with_multiple_owner_fields(post, admin, alice, team, organization, credentialtype_ssh):
+    params = {
+        'credential_type': credentialtype_ssh.id,
+        'inputs': {'username': 'someusername'},
+        'team': team.id,
+        'user': alice.id,
+        'organization': organization.id,
+        'name': 'Some name',
+    }
+    response = post(reverse('api:credential_list'), params, admin)
+    assert response.status_code == 400
+    assert response.data['detail'][0] == (
+        "Only one of 'user', 'team', or 'organization' should be provided, "
+        "received organization, team, user fields."
+    )
+
+
+@pytest.mark.django_db
 def test_create_user_credential_via_user_credentials_list(post, get, alice, credentialtype_ssh):
     params = {
         'credential_type': 1,
@@ -1121,6 +1151,22 @@ def test_cloud_credential_type_mutability(patch, organization, admin, credential
     jt.delete()
     response = _change_credential_type()
     assert response.status_code == 200
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('field', ['password', 'ssh_key_data'])
+def test_secret_fields_cannot_be_special_encrypted_variable(post, organization, admin, credentialtype_ssh, field):
+    params = {
+        'name': 'Best credential ever',
+        'credential_type': credentialtype_ssh.id,
+        'inputs': {
+            'username': 'joe',
+            field: '$encrypted$',
+        },
+        'organization': organization.id,
+    }
+    response = post(reverse('api:credential_list'), params, admin, status=400)
+    assert str(response.data['inputs'][0]) == f'$encrypted$ is a reserved keyword, and cannot be used for {field}.'
 
 
 @pytest.mark.django_db

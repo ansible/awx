@@ -21,7 +21,7 @@ describe('<SurveyToolbar />', () => {
       );
     });
 
-    expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
+    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
       true
     );
   });
@@ -43,7 +43,7 @@ describe('<SurveyToolbar />', () => {
     expect(
       wrapper.find('Checkbox[aria-label="Select all"]').prop('isChecked')
     ).toBe(true);
-    expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
+    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
       false
     );
   });
@@ -102,13 +102,13 @@ describe('<SurveyToolbar />', () => {
     });
     expect(
       wrapper
-        .find('DataToolbar')
+        .find('Toolbar')
         .find('Checkbox')
         .prop('isDisabled')
     ).toBe(true);
     expect(wrapper.find('Switch').prop('isDisabled')).toBe(true);
     expect(wrapper.find('ToolbarAddButton').prop('isDisabled')).toBe(true);
-    expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
+    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
       true
     );
   });

@@ -126,46 +126,6 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 includeInventoryFileNotFoundError: true,
                 subForm: 'sourceSubForm'
             },
-            source_regions: {
-                label: i18n._('Regions'),
-                type: 'select',
-                ngOptions: 'source.label for source in source_region_choices track by source.value',
-                multiSelect: true,
-                ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure_rm')",
-                dataTitle: i18n._('Source Regions'),
-                dataPlacement: 'right',
-                awPopOver: "<p>" + i18n._("Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose") +
-                        "<em>" + i18n._("All") + "</em> " + i18n._("to include all regions. Only Hosts associated with the selected regions will be updated.") + "</p>",
-                dataContainer: 'body',
-                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
-                subForm: 'sourceSubForm'
-            },
-            instance_filters: {
-                label: i18n._("Instance Filters"),
-                type: 'text',
-                ngShow: "source && (source.value == 'ec2' || source.value == 'vmware' || source.value == 'tower')",
-                dataTitle: i18n._('Instance Filters'),
-                dataPlacement: 'right',
-                awPopOverWatch: 'instanceFilterPopOver',
-                awPopOver: '{{ instanceFilterPopOver }}',
-                dataContainer: 'body',
-                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
-                subForm: 'sourceSubForm'
-            },
-            group_by: {
-                label: i18n._('Only Group By'),
-                type: 'select',
-                ngShow: "source && (source.value == 'ec2' || source.value == 'vmware')",
-                ngOptions: 'source.label for source in group_by_choices track by source.value',
-                multiSelect: true,
-                dataTitle: i18n._("Only Group By"),
-                dataPlacement: 'right',
-                awPopOverWatch: 'groupByPopOver',
-                awPopOver: '{{ groupByPopOver }}',
-                dataContainer: 'body',
-                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
-                subForm: 'sourceSubForm'
-            },
             inventory_script: {
                 label :  i18n._("Custom Inventory Script"),
                 type: 'lookup',
@@ -215,7 +175,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
                 awPopOver: "<p>" + i18n._("Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables ") +
-                    "<a href=\"https://github.com/ansible-collections/community.aws/blob/master/scripts/inventory/ec2.ini\" target=\"_blank\">" +
+                    "<a href=\"https://github.com/ansible-collections/community.aws/blob/main/scripts/inventory/ec2.ini\" target=\"_blank\">" +
                     i18n._("view ec2.ini in the community.aws repo.") + "</a></p>" +
                     "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     i18n._("JSON:") + "<br />\n" +
@@ -239,7 +199,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
                 awPopOver: "<p>" + i18n._("Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables ") +
-                    "<a href=\"https://github.com/ansible-collections/vmware/blob/master/scripts/inventory/vmware_inventory.ini\" target=\"_blank\">" +
+                    "<a href=\"https://github.com/ansible-collections/vmware/blob/main/scripts/inventory/vmware_inventory.ini\" target=\"_blank\">" +
                     i18n._("view vmware_inventory.ini in the vmware community repo.") + "</a></p>" +
                     "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     i18n._("JSON:") + "<br />\n" +
@@ -262,9 +222,9 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 parseTypeName: 'envParseType',
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
-                awPopOver: i18n._(`Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration
-                    <a href=\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\" target=\"_blank\">
-                    view openstack.yml in the Openstack github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.`),
+                awPopOver: i18n._("Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration") +
+                    '<a href=\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\" target=\"_blank\">' +
+                    i18n._("view openstack.yml in the Openstack github repo.") + "</a>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."),
                 dataContainer: 'body',
                 subForm: 'sourceSubForm'
             },
@@ -279,9 +239,9 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 parseTypeName: 'envParseType',
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
-                awPopOver: i18n._(`Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration
-                    <a href=\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\" target=\"_blank\">
-                    view cloudforms.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.`),
+                awPopOver: i18n._("Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration") +
+                    '<a href=\"https://github.com/ansible-collections/community.general/blob/main/scripts/inventory/cloudforms.ini\" target=\"_blank\">' +
+                    i18n._("view cloudforms.ini in the Ansible Collections github repo.") + "</a>" + i18n._(" Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."),
                 dataContainer: 'body',
                 subForm: 'sourceSubForm'
             },
@@ -296,9 +256,9 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 parseTypeName: 'envParseType',
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
-                awPopOver: i18n._(`Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration
-                    <a href=\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/foreman.ini\" target=\"_blank\">
-                    view foreman.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.`),
+                awPopOver: i18n._("Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration") + 
+                    '<a href=\"https://github.com/ansible-collections/community.general/blob/main/scripts/inventory/foreman.ini\" target=\"_blank\">' + 
+                    i18n._("view foreman.ini in the Ansible Collections github repo.") + "</a>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."),
                 dataContainer: 'body',
                 subForm: 'sourceSubForm'
             },
@@ -314,7 +274,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
                 awPopOver: "<p>" + i18n._("Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables ") +
-                    "<a href=\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/azure_rm.ini\" target=\"_blank\">" +
+                    "<a href=\"https://github.com/ansible-collections/community.general/blob/main/scripts/inventory/azure_rm.ini\" target=\"_blank\">" +
                     i18n._("view azure_rm.ini in the Ansible community.general github repo.") + "</a></p>" +
                     "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     i18n._("JSON:") + "<br />\n" +
@@ -337,6 +297,36 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 dataTitle: i18n._('Verbosity'),
                 dataPlacement: 'right',
                 dataContainer: "body",
+                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+                subForm: 'sourceSubForm'
+            },
+            host_filter: {
+                label: i18n._("Host Filter"),
+                type: 'text',
+                dataTitle: i18n._('Host Filter'),
+                dataPlacement: 'right',
+                awPopOver: "<p>" + i18n._("Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied.") + "</p>",
+                dataContainer: 'body',
+                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+                subForm: 'sourceSubForm'
+            },
+            enabled_var: {
+                label: i18n._("Enabled Variable"),
+                type: 'text',
+                dataTitle: i18n._('Enabled Variable'),
+                dataPlacement: 'right',
+                awPopOver: "<p>" + i18n._("Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'") + "</p>",
+                dataContainer: 'body',
+                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+                subForm: 'sourceSubForm'
+            },
+            enabled_value: {
+                label: i18n._("Enabled Value"),
+                type: 'text',
+                dataTitle: i18n._('Enabled Value'),
+                dataPlacement: 'right',
+                awPopOver: "<p>" + i18n._("This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import.") + "</p>",
+                dataContainer: 'body',
                 ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
                 subForm: 'sourceSubForm'
             },

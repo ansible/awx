@@ -11,7 +11,14 @@ import AnsibleSelect from '../../../../components/AnsibleSelect';
 import { FieldTooltip } from '../../../../components/FormField';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
-import { VerbosityField, OptionsField, SourceVarsField } from './SharedFields';
+import {
+  OptionsField,
+  SourceVarsField,
+  VerbosityField,
+  EnabledVarField,
+  EnabledValueField,
+  HostFilterField,
+} from './SharedFields';
 
 const SCMSubForm = ({ i18n }) => {
   const [credentialField, , credentialHelpers] = useField('credential');
@@ -83,18 +90,22 @@ const SCMSubForm = ({ i18n }) => {
       <FormGroup
         fieldId="source_path"
         helperTextInvalid={sourcePathError?.message || sourcePathMeta.error}
-        isValid={
+        validated={
           (!sourcePathMeta.error || !sourcePathMeta.touched) &&
           !sourcePathError?.message
+            ? 'default'
+            : 'error'
         }
         isRequired
         label={i18n._(t`Inventory file`)}
-      >
-        <FieldTooltip
-          content={i18n._(t`Select the inventory file
+        labelIcon={
+          <FieldTooltip
+            content={i18n._(t`Select the inventory file
           to be synced by this source. You can select from
           the dropdown or enter a file within the input.`)}
-        />
+          />
+        }
+      >
         <AnsibleSelect
           {...sourcePathField}
           id="source_path"
@@ -117,7 +128,10 @@ const SCMSubForm = ({ i18n }) => {
         />
       </FormGroup>
       <VerbosityField />
-      <OptionsField />
+      <HostFilterField />
+      <EnabledVarField />
+      <EnabledValueField />
+      <OptionsField showProjectUpdate />
       <SourceVarsField />
     </>
   );

@@ -7,6 +7,8 @@ import { BrandName } from './variables';
 document.title = `Ansible ${BrandName}`;
 
 ReactDOM.render(
-  <App />,
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
   document.getElementById('app') || document.createElement('div')
 );

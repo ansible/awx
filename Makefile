@@ -79,6 +79,7 @@ clean-ui: clean-languages
 	rm -rf awx/ui/test/e2e/reports/
 	rm -rf awx/ui/client/languages/
 	rm -rf awx/ui_next/node_modules/
+	rm -rf node_modules
 	rm -rf awx/ui_next/coverage/
 	rm -rf awx/ui_next/build/locales/_build/
 	rm -f $(UI_DEPS_FLAG_FILE)
@@ -362,13 +363,13 @@ TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/ss
 
 # Run all API unit tests.
 test:
-	@if [ "$(VENV_BASE)" ]; then \
+	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
 	cmp VERSION awxkit/VERSION || "VERSION and awxkit/VERSION *must* match"
-	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py2,py3
-	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
+	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
+	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
 
 COLLECTION_TEST_DIRS ?= awx_collection/test/awx
 COLLECTION_TEST_TARGET ?=
@@ -377,10 +378,11 @@ COLLECTION_NAMESPACE ?= awx
 COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
 
 test_collection:
-	@if [ "$(VENV_BASE)" ]; then \
+	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
+	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	PYTHONPATH=$(PYTHONPATH):$(VENV_BASE)/awx/lib/python3.6/site-packages:/usr/lib/python3.6/site-packages py.test $(COLLECTION_TEST_DIRS)
+	py.test $(COLLECTION_TEST_DIRS) -v
 	# The python path needs to be modified so that the tests can find Ansible within the container
 	# First we will use anything expility set as PYTHONPATH
 	# Second we will load any libraries out of the virtualenv (if it's unspecified that should be ok because python should not load out of an empty directory)
@@ -400,11 +402,11 @@ symlink_collection:
 
 build_collection:
 	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION) -e '{"awx_template_version":false}'
-	ansible-galaxy collection build awx_collection --force --output-path=awx_collection
+	ansible-galaxy collection build awx_collection_build --force --output-path=awx_collection_build
 
 install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
-	ansible-galaxy collection install awx_collection/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(VERSION).tar.gz
+	ansible-galaxy collection install awx_collection_build/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(VERSION).tar.gz
 
 test_collection_sanity: install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test sanity
@@ -567,14 +569,28 @@ ui-zuul-lint-and-test:
 # UI NEXT TASKS
 # --------------------------------------
 
-ui-next-lint:
+awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next install
-	$(NPM_BIN) run --prefix awx/ui_next lint
-	$(NPM_BIN) run --prefix awx/ui_next prettier-check
 
-ui-next-test:
-	$(NPM_BIN) --prefix awx/ui_next install
-	$(NPM_BIN) run --prefix awx/ui_next test
+ui-release-next:
+	mkdir -p awx/ui_next/build/static
+	touch awx/ui_next/build/static/.placeholder
+
+ui-devel-next: awx/ui_next/node_modules
+	$(NPM_BIN) --prefix awx/ui_next run extract-strings
+	$(NPM_BIN) --prefix awx/ui_next run compile-strings
+	$(NPM_BIN) --prefix awx/ui_next run build
+	mkdir -p awx/public/static/css
+	mkdir -p awx/public/static/js
+	mkdir -p awx/public/static/media
+	cp -r awx/ui_next/build/static/css/* awx/public/static/css
+	cp -r awx/ui_next/build/static/js/* awx/public/static/js
+	cp -r awx/ui_next/build/static/media/* awx/public/static/media
+
+clean-ui-next:
+	rm -rf node_modules
+	rm -rf awx/ui_next/node_modules
+	rm -rf awx/ui_next/build
 
 ui-next-zuul-lint-and-test:
 	$(NPM_BIN) --prefix awx/ui_next install
@@ -593,10 +609,10 @@ dev_build:
 release_build:
 	$(PYTHON) setup.py release_build
 
-dist/$(SDIST_TAR_FILE): ui-release VERSION
+dist/$(SDIST_TAR_FILE): ui-release ui-release-next VERSION
 	$(PYTHON) setup.py $(SDIST_COMMAND)
 
-dist/$(WHEEL_FILE): ui-release
+dist/$(WHEEL_FILE): ui-release ui-release-next
 	$(PYTHON) setup.py $(WHEEL_COMMAND)
 
 sdist: dist/$(SDIST_TAR_FILE)

@@ -172,9 +172,7 @@ describe('<JobTemplateAdd />', () => {
       playbook: 'Baz',
       inventory: 2,
       webhook_credential: undefined,
-      webhook_key: '',
       webhook_service: '',
-      webhook_url: '',
     });
   });
 
@@ -243,7 +241,9 @@ describe('<JobTemplateAdd />', () => {
       });
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
+    await act(async () => {
+      wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
+    });
     expect(history.location.pathname).toEqual('/templates');
   });
 });

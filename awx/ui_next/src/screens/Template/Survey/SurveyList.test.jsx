@@ -59,7 +59,7 @@ describe('<SurveyList />', () => {
     });
     wrapper.update();
 
-    expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
+    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
       true
     );
     expect(
@@ -76,11 +76,11 @@ describe('<SurveyList />', () => {
     expect(
       wrapper.find('Checkbox[aria-label="Select all"]').prop('isChecked')
     ).toBe(true);
-    expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
+    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
       false
     );
     act(() => {
-      wrapper.find('Button[variant="danger"]').invoke('onClick')();
+      wrapper.find('Button[variant="secondary"]').invoke('onClick')();
     });
 
     wrapper.update();
@@ -142,13 +142,13 @@ describe('<SurveyList />', () => {
 
     expect(
       wrapper
-        .find('DataToolbar')
+        .find('Toolbar')
         .find('Checkbox')
         .prop('isDisabled')
     ).toBe(true);
     expect(wrapper.find('Switch').prop('isDisabled')).toBe(true);
     expect(wrapper.find('ToolbarAddButton').prop('isDisabled')).toBe(true);
-    expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
+    expect(wrapper.find('Button[variant="secondary"]').prop('isDisabled')).toBe(
       true
     );
   });
@@ -163,7 +163,7 @@ describe('Survey with no questions', () => {
         <SurveyList template={mockJobTemplateData} />
       );
     });
-    expect(wrapper.find('ContentEmpty').length).toBe(1);
+    expect(wrapper.find('EmptyState').length).toBe(1);
     expect(wrapper.find('SurveyListItem').length).toBe(0);
   });
 });

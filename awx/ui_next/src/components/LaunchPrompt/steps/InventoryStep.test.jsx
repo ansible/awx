@@ -21,6 +21,16 @@ describe('InventoryStep', () => {
         count: 3,
       },
     });
+
+    InventoriesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
   });
 
   test('should load inventories', async () => {

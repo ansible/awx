@@ -11,7 +11,7 @@
     jt2_name: "AWX-Collection-tests-tower_workflow_job_template-jt2-{{ test_id }}"
     wfjt_name: "AWX-Collection-tests-tower_workflow_job_template-wfjt-{{ test_id }}"
     email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
-    webhook_not: "AWX-Collection-tests-tower_notification-wehbook-not-{{ test_id }}"
+    webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ test_id }}"
 
 - name: Create an SCM Credential
   tower_credential:
@@ -25,7 +25,7 @@
       - "result is changed"
 
 - name: Add email notification
-  tower_notification:
+  tower_notification_template:
     name: "{{ email_not }}"
     organization: Default
     notification_type: email
@@ -41,7 +41,7 @@
     state: present
 
 - name: Add webhook notification
-  tower_notification:
+  tower_notification_template:
     name: "{{ webhook_not }}"
     organization: Default
     notification_type: webhook
@@ -264,13 +264,13 @@
       - "result is changed"
 
 - name: Delete email notification
-  tower_notification:
+  tower_notification_template:
     name: "{{ email_not }}"
     organization: Default
     state: absent
 
 - name: Delete webhook notification
-  tower_notification:
+  tower_notification_template:
     name: "{{ webhook_not }}"
     organization: Default
     state: absent

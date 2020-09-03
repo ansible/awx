@@ -4,7 +4,10 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '../../../../../contexts/Workflow';
-import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
+import {
+  waitForElement,
+  mountWithContexts,
+} from '../../../../../../testUtils/enzymeHelpers';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
@@ -37,6 +40,15 @@ describe('NodeModal', () => {
         ],
       },
     });
+    JobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     ProjectsAPI.read.mockResolvedValue({
       data: {
         count: 1,
@@ -48,6 +60,15 @@ describe('NodeModal', () => {
             url: '/api/v2/projects/1',
           },
         ],
+      },
+    });
+    ProjectsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
       },
     });
     InventorySourcesAPI.read.mockResolvedValue({
@@ -63,6 +84,15 @@ describe('NodeModal', () => {
         ],
       },
     });
+    InventorySourcesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     WorkflowJobTemplatesAPI.read.mockResolvedValue({
       data: {
         count: 1,
@@ -74,6 +104,15 @@ describe('NodeModal', () => {
             url: '/api/v2/workflow_job_templates/1',
           },
         ],
+      },
+    });
+    WorkflowJobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
       },
     });
   });
@@ -95,6 +134,7 @@ describe('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
     });
 
     afterAll(() => {
@@ -307,6 +347,7 @@ describe('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('project_sync');
       await act(async () => {
         wrapper.find('AnsibleSelect').prop('onChange')(null, 'approval');
@@ -388,6 +429,7 @@ describe('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('approval');
       await act(async () => {
         wrapper.find('AnsibleSelect').prop('onChange')(

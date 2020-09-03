@@ -11,15 +11,15 @@ DOCUMENTATION = """
       - pytz
       - python.dateutil >= 2.7.0
     description:
-      - Returns a string based on criteria which represent an rule
+      - Returns a string based on criteria which represents an rrule
     options:
       _terms:
         description:
           - The frequency of the schedule
           - none - Run this schedule once
-          - minute - Run this schedule ever x minutes
+          - minute - Run this schedule every x minutes
           - hour - Run this schedule every x hours
-          - day - Run this schedule ever x days
+          - day - Run this schedule every x days
           - week - Run this schedule weekly
           - month - Run this schedule monthly
         required: True
@@ -39,36 +39,36 @@ DOCUMENTATION = """
         type: str
       every:
         description:
-          - The repition in months, weeks, days hours or minutes
+          - The repetition in months, weeks, days hours or minutes
           - Used for all types except none
         type: int
       end_on:
         description:
           - How to end this schedule
-          - If this is not defined this schedule will never end
-          - If this is a positive integer this schedule will end after this number of occurances
-          - If this is a date in the format YYYY-MM-DD [HH:MM:SS] this schedule end after this date
+          - If this is not defined, this schedule will never end
+          - If this is a positive integer, this schedule will end after this number of occurences
+          - If this is a date in the format YYYY-MM-DD [HH:MM:SS], this schedule ends after this date
           - Used for all types except none
         type: str
       on_days:
         description:
           - The days to run this schedule on
-          - A comma seperated list which can contain values sunday, monday, tuesday, wednesday, thursday, friday
+          - A comma-separated list which can contain values sunday, monday, tuesday, wednesday, thursday, friday
           - Used for week type schedules
       month_day_number:
         description:
           - The day of the month this schedule will run on (0-31)
           - Used for month type schedules
-          - Can not be used with on_the parameter
+          - Cannot be used with on_the parameter
         type: int
       on_the:
         description:
           - A description on when this schedule will run
-          - Two strings seperated by space
+          - Two strings separated by a space
           - First string is one of first, second, third, fourth, last
           - Second string is one of sunday, monday, tuesday, wednesday, thursday, friday
           - Used for month type schedules
-          - Can not be used with month_day_number parameters
+          - Cannot be used with month_day_number parameters
 """
 
 EXAMPLES = """
@@ -189,7 +189,7 @@ class LookupModule(LookupBase):
                     except Exception:
                         raise AnsibleError('Parameter end_on must either be an integer or in the format YYYY-MM-DD [HH:MM:SS]')
 
-            # A week based frequency can also take the on_days parameter
+            # A week-based frequency can also take the on_days parameter
             if frequency == 'week' and 'on_days' in kwargs:
                 days = []
                 for day in kwargs['on_days'].split(','):
@@ -200,10 +200,10 @@ class LookupModule(LookupBase):
 
                 rrule_kwargs['byweekday'] = days
 
-            # A month based frequency can also deal with month_day_number and on_the options
+            # A month-based frequency can also deal with month_day_number and on_the options
             if frequency == 'month':
                 if 'month_day_number' in kwargs and 'on_the' in kwargs:
-                    raise AnsibleError('Month based frquencies can have month_day_number or on_the but not both')
+                    raise AnsibleError('Month based frequencies can have month_day_number or on_the but not both')
 
                 if 'month_day_number' in kwargs:
                     try:
@@ -219,7 +219,7 @@ class LookupModule(LookupBase):
                     try:
                         (occurance, weekday) = kwargs['on_the'].split(' ')
                     except Exception:
-                        raise AnsibleError('on_the parameter must be two space seperated words')
+                        raise AnsibleError('on_the parameter must be two words separated by a space')
 
                     if weekday not in LookupModule.weekdays:
                         raise AnsibleError('Weekday portion of on_the parameter is not valid')
@@ -231,7 +231,7 @@ class LookupModule(LookupBase):
 
         my_rule = rrule.rrule(**rrule_kwargs)
 
-        # All frequencies can use a timezone but rrule can't support the format that tower uses.
+        # All frequencies can use a timezone but rrule can't support the format that Tower uses.
         # So we will do a string manip here if we need to
         timezone = 'America/New_York'
         if 'timezone' in kwargs:
@@ -239,9 +239,9 @@ class LookupModule(LookupBase):
                 raise AnsibleError('Timezone parameter is not valid')
             timezone = kwargs['timezone']
 
-        # rrule puts a \n in the rule instad of a space and can't hand timezones
+        # rrule puts a \n in the rule instad of a space and can't handle timezones
         return_rrule = str(my_rule).replace('\n', ' ').replace('DTSTART:', 'DTSTART;TZID={0}:'.format(timezone))
-        # Tower requires an interval. rrule will not add interval if its set to 1
+        # Tower requires an interval. rrule will not add interval if it's set to 1
         if kwargs.get('every', 1) == 1:
             return_rrule = "{0};INTERVAL=1".format(return_rrule)
 

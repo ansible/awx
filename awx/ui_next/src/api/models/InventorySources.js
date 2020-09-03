@@ -1,8 +1,11 @@
 import Base from '../Base';
 import NotificationsMixin from '../mixins/Notifications.mixin';
 import LaunchUpdateMixin from '../mixins/LaunchUpdate.mixin';
+import SchedulesMixin from '../mixins/Schedules.mixin';
 
-class InventorySources extends LaunchUpdateMixin(NotificationsMixin(Base)) {
+class InventorySources extends LaunchUpdateMixin(
+  NotificationsMixin(SchedulesMixin(Base))
+) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/inventory_sources/';

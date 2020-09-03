@@ -15,6 +15,7 @@ from crum import get_current_user
 
 # AWX
 from awx.main.utils import encrypt_field, parse_yaml_or_json
+from awx.main.constants import CLOUD_PROVIDERS
 
 __all__ = ['prevent_search', 'VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
            'PasswordFieldsModel', 'PrimordialModel', 'CommonModel',
@@ -50,7 +51,7 @@ PROJECT_UPDATE_JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Check')),
 ]
 
-CLOUD_INVENTORY_SOURCES = ['ec2', 'vmware', 'gce', 'azure_rm', 'openstack', 'rhv', 'custom', 'satellite6', 'cloudforms', 'scm', 'tower',]
+CLOUD_INVENTORY_SOURCES = list(CLOUD_PROVIDERS) + ['scm', 'custom']
 
 VERBOSITY_CHOICES = [
     (0, '0 (Normal)'),
@@ -406,7 +407,7 @@ def prevent_search(relation):
         sensitive_data = prevent_search(models.CharField(...))
 
     The flag set by this function is used by
-    `awx.api.filters.FieldLookupBackend` to blacklist fields and relations that
+    `awx.api.filters.FieldLookupBackend` to block fields and relations that
     should not be searchable/filterable via search query params
     """
     setattr(relation, '__prevent_search__', True)

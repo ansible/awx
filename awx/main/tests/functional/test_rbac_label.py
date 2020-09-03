@@ -20,8 +20,19 @@ def test_label_get_queryset_su(label, user):
 
 
 @pytest.mark.django_db
-def test_label_access(label, user):
+def test_label_read_access(label, user):
     access = LabelAccess(user('user', False))
+    assert not access.can_read(label)
+    label.organization.member_role.members.add(user('user', False))
+    assert access.can_read(label)
+
+
+@pytest.mark.django_db
+def test_label_jt_read_access(label, user, job_template):
+    access = LabelAccess(user('user', False))
+    assert not access.can_read(label)
+    job_template.read_role.members.add(user('user', False))
+    job_template.labels.add(label)
     assert access.can_read(label)
 
 

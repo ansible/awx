@@ -43,7 +43,7 @@ class Control(object):
             for reply in conn.events(select_timeout=timeout, yield_timeouts=True):
                 if reply is None:
                     logger.error(f'{self.service} did not reply within {timeout}s')
-                    raise RuntimeError("{self.service} did not reply within {timeout}s")
+                    raise RuntimeError(f"{self.service} did not reply within {timeout}s")
                 break
 
         return json.loads(reply.payload)

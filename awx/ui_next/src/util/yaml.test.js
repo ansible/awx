@@ -1,4 +1,4 @@
-import { yamlToJson, jsonToYaml } from './yaml';
+import { yamlToJson, jsonToYaml, parseVariableField } from './yaml';
 
 describe('yamlToJson', () => {
   test('should convert to json', () => {
@@ -66,5 +66,46 @@ two: two
 
   test('should throw if invalid json given', () => {
     expect(() => jsonToYaml('bad data')).toThrow();
+  });
+});
+
+describe('parseVariableField', () => {
+  const injector = `
+  extra_vars:
+    password: '{{ password }}'
+    username: '{{ username }}'
+`;
+
+  const input = `{
+  "fields": [
+    {
+      "id": "username",
+      "type": "string",
+      "label": "Username"
+    },
+    {
+      "id": "password",
+      "type": "string",
+      "label": "Password",
+      "secret": true
+    }
+  ]
+}`;
+  test('should convert empty yaml to an object', () => {
+    expect(parseVariableField('---')).toEqual({});
+  });
+
+  test('should convert empty json to an object', () => {
+    expect(parseVariableField('{}')).toEqual({});
+  });
+
+  test('should convert yaml string to json object', () => {
+    expect(parseVariableField(injector)).toEqual(
+      JSON.parse(yamlToJson(injector))
+    );
+  });
+
+  test('should convert json string to json object', () => {
+    expect(parseVariableField(input)).toEqual(JSON.parse(input));
   });
 });

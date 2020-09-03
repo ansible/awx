@@ -30,13 +30,13 @@ describe('<SurveyListItem />', () => {
         .find('b')
         .at(0)
         .text()
-    ).toBe('Type:');
+    ).toBe('Type');
     expect(
       wrapper
         .find('b')
         .at(1)
         .text()
-    ).toBe('Default:');
+    ).toBe('Default');
     expect(wrapper.find('DataListCheck').length).toBe(1);
     expect(wrapper.find('DataListCell').length).toBe(3);
   });

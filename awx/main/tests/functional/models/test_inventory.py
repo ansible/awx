@@ -2,7 +2,6 @@
 
 import pytest
 from unittest import mock
-import json
 
 from django.core.exceptions import ValidationError
 
@@ -17,7 +16,6 @@ from awx.main.models import (
     Job
 )
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.models.inventory import PluginFileInjector
 from awx.main.utils.filters import SmartFilter
 
 
@@ -170,7 +168,8 @@ class TestSCMUpdateFeatures:
         inventory_update = InventoryUpdate(
             inventory_source=scm_inventory_source,
             source_path=scm_inventory_source.source_path)
-        assert inventory_update.get_actual_source_path().endswith('_92__test_proj/inventory_file')
+        p = scm_inventory_source.source_project
+        assert inventory_update.get_actual_source_path().endswith(f'_{p.id}__test_proj/inventory_file')
 
     def test_no_unwanted_updates(self, scm_inventory_source):
         # Changing the non-sensitive fields should not trigger update
@@ -227,13 +226,6 @@ class TestSCMClean:
 
 @pytest.mark.django_db
 class TestInventorySourceInjectors:
-    def test_should_use_plugin(self):
-        class foo(PluginFileInjector):
-            plugin_name = 'foo_compute'
-            initial_version = '2.7.8'
-        assert not foo('2.7.7').should_use_plugin()
-        assert foo('2.8').should_use_plugin()
-
     def test_extra_credentials(self, project, credential):
         inventory_source = InventorySource.objects.create(
             name='foo', source='custom', source_project=project
@@ -263,45 +255,22 @@ class TestInventorySourceInjectors:
         are named correctly, because Ansible will reject files that do
         not have these exact names
         """
-        injector = InventorySource.injectors[source]('2.7.7')
+        injector = InventorySource.injectors[source]()
         assert injector.filename == filename
 
-    @pytest.mark.parametrize('source,script_name', [
-        ('ec2', 'ec2.py'),
-        ('rhv', 'ovirt4.py'),
-        ('satellite6', 'foreman.py'),
-        ('openstack', 'openstack_inventory.py')
-    ], ids=['ec2', 'rhv', 'satellite6', 'openstack'])
-    def test_script_filenames(self, source, script_name):
-        """Ansible has several exceptions in naming of scripts
-        """
-        injector = InventorySource.injectors[source]('2.7.7')
-        assert injector.script_name == script_name
-
-    def test_group_by_azure(self):
-        injector = InventorySource.injectors['azure_rm']('2.9')
-        inv_src = InventorySource(
-            name='azure source', source='azure_rm',
-            source_vars={'group_by_os_family': True}
-        )
-        group_by_on = injector.inventory_as_dict(inv_src, '/tmp/foo')
-        # suspicious, yes, that is just what the script did
-        expected_groups = 6
-        assert len(group_by_on['keyed_groups']) == expected_groups
-        inv_src.source_vars = json.dumps({'group_by_os_family': False})
-        group_by_off = injector.inventory_as_dict(inv_src, '/tmp/foo')
-        # much better, everyone should turn off the flag and live in the future
-        assert len(group_by_off['keyed_groups']) == expected_groups - 1
-
-    def test_tower_plugin_named_url(self):
-        injector = InventorySource.injectors['tower']('2.9')
-        inv_src = InventorySource(
-            name='my tower source', source='tower',
-            # named URL pattern "inventory++organization"
-            instance_filters='Designer hair 읰++Cosmetic_products䵆'
-        )
-        result = injector.inventory_as_dict(inv_src, '/tmp/foo')
-        assert result['inventory_id'] == 'Designer%20hair%20%EC%9D%B0++Cosmetic_products%E4%B5%86'
+    @pytest.mark.parametrize('source,proper_name', [
+        ('ec2', 'amazon.aws.aws_ec2'),
+        ('openstack', 'openstack.cloud.openstack'),
+        ('gce', 'google.cloud.gcp_compute'),
+        ('azure_rm', 'azure.azcollection.azure_rm'),
+        ('vmware', 'community.vmware.vmware_vm_inventory'),
+        ('rhv', 'ovirt.ovirt.ovirt'),
+        ('satellite6', 'theforeman.foreman.foreman'),
+        ('tower', 'awx.awx.tower'),
+    ])
+    def test_plugin_proper_names(self, source, proper_name):
+        injector = InventorySource.injectors[source]()
+        assert injector.get_proper_name() == proper_name
 
 
 @pytest.mark.django_db

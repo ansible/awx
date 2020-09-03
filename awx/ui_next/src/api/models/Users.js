@@ -12,6 +12,10 @@ class Users extends Base {
     });
   }
 
+  createToken(userId, data) {
+    return this.http.post(`${this.baseUrl}${userId}/authorized_tokens/`, data);
+  }
+
   disassociateRole(userId, roleId) {
     return this.http.post(`${this.baseUrl}${userId}/roles/`, {
       id: roleId,
@@ -43,6 +47,22 @@ class Users extends Base {
 
   readTeamsOptions(userId) {
     return this.http.options(`${this.baseUrl}${userId}/teams/`);
+  }
+
+  readTokens(userId, params) {
+    return this.http.get(`${this.baseUrl}${userId}/tokens/`, {
+      params,
+    });
+  }
+
+  readAdminOfOrganizations(userId, params) {
+    return this.http.get(`${this.baseUrl}${userId}/admin_of_organizations/`, {
+      params,
+    });
+  }
+
+  readTokenOptions(userId) {
+    return this.http.options(`${this.baseUrl}${userId}/tokens/`);
   }
 }
 

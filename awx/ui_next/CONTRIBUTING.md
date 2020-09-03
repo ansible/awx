@@ -26,6 +26,7 @@ Have questions about this document or anything not covered here? Feel free to re
     - [Class constructors vs Class properties](#class-constructors-vs-class-properties)
     - [Binding](#binding)
     - [Typechecking with PropTypes](#typechecking-with-proptypes)
+    - [Custom Hooks](#custom-hooks)
     - [Naming Functions](#naming-functions)
     - [Default State Initialization](#default-state-initialization)
     - [Testing components that use contexts](#testing-components-that-use-contexts)
@@ -243,6 +244,15 @@ About.defaultProps = {
 };
 ```
 
+### Custom Hooks
+
+There are currently a few custom hooks:
+
+1. [useRequest](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useRequest.js#L21) encapsulates main actions related to requests.
+2. [useDismissableError](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useRequest.js#L71) provides controls for "dismissing" an error message.
+3. [useDeleteItems](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useRequest.js#L98) handles deletion of items from a paginated item list.
+4. [useSelected](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useSelected.jsx#L14) provides a way to read and update a selected list.
+
 ### Naming Functions
 Here are the guidelines for how to name functions.
 
@@ -295,7 +305,7 @@ them is rendering properly.
 
 The object containing context values looks for five known contexts, identified by the keys `linguiPublisher`, `router`, `config`, `network`, and `dialog` — the latter three each referring to the contexts defined in `src/contexts`. You can pass `false` for any of these values, and the corresponding context will be omitted from your test. For example, this will mount your component without the dialog context:
 
-```
+```javascript
 mountWithContexts(<Organization />< {
   context: {
     dialog: false,

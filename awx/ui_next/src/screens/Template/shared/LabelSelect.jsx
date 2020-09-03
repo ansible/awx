@@ -83,8 +83,8 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
       }}
       isDisabled={isLoading}
       selections={selections}
-      isExpanded={isExpanded}
-      ariaLabelledBy="label-select"
+      isOpen={isExpanded}
+      aria-labelledby="label-select"
       placeholderText={placeholder}
       createText={createText}
     >

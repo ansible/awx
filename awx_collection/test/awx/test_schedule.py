@@ -84,7 +84,7 @@ def test_empty_schedule_rrule(collection_import, freq):
         'Parameter on_days must only contain values monday, tuesday, wednesday, thursday, friday, saturday, sunday'),
     # Test combo of both month_day_number and on_the
     ('month', dict(start_date='2020-4-16 03:45:07', on_the='something', month_day_number='else'),
-        "Month based frquencies can have month_day_number or on_the but not both"),
+        "Month based frequencies can have month_day_number or on_the but not both"),
     # Test month_day_number as not an integer
     ('month', dict(start_date='2020-4-16 03:45:07', month_day_number='junk'), "month_day_number must be between 1 and 31"),
     # Test month_day_number < 1
@@ -92,7 +92,7 @@ def test_empty_schedule_rrule(collection_import, freq):
     # Test month_day_number > 31
     ('month', dict(start_date='2020-4-16 03:45:07', month_day_number='32'), "month_day_number must be between 1 and 31"),
     # Test on_the as junk
-    ('month', dict(start_date='2020-4-16 03:45:07', on_the='junk'), "on_the parameter must be two space seperated words"),
+    ('month', dict(start_date='2020-4-16 03:45:07', on_the='junk'), "on_the parameter must be two words separated by a space"),
     # Test on_the with invalid occurance
     ('month', dict(start_date='2020-4-16 03:45:07', on_the='junk wednesday'), "The first string of the on_the parameter is not valid"),
     # Test on_the with invalid weekday

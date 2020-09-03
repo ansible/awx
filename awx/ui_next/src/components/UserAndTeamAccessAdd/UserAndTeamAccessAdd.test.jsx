@@ -43,6 +43,15 @@ describe('<UserAndTeamAccessAdd/>', () => {
       count: 1,
     },
   };
+  const options = {
+    data: {
+      actions: {
+        GET: {},
+        POST: {},
+      },
+      related_search_fields: [],
+    },
+  };
   let wrapper;
   beforeEach(async () => {
     await act(async () => {
@@ -56,6 +65,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
         />
       );
     });
+    await waitForElement(wrapper, 'PFWizard');
   });
   afterEach(() => {
     wrapper.unmount();
@@ -68,12 +78,12 @@ describe('<UserAndTeamAccessAdd/>', () => {
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
     expect(
       wrapper
-        .find('WizardNavItem[text="Select items from list"]')
+        .find('WizardNavItem[content="Select items from list"]')
         .prop('isDisabled')
     ).toBe(true);
     expect(
       wrapper
-        .find('WizardNavItem[text="Select roles to apply"]')
+        .find('WizardNavItem[content="Select roles to apply"]')
         .prop('isDisabled')
     ).toBe(true);
     await act(async () =>
@@ -81,7 +91,9 @@ describe('<UserAndTeamAccessAdd/>', () => {
         fetchItems: JobTemplatesAPI.read,
         label: 'Job template',
         selectedResource: 'jobTemplate',
-        searchColumns: [{ name: 'Name', key: 'name', isDefault: true }],
+        searchColumns: [
+          { name: 'Name', key: 'name__icontains', isDefault: true },
+        ],
         sortColumns: [{ name: 'Name', key: 'name' }],
       })
     );
@@ -90,30 +102,36 @@ describe('<UserAndTeamAccessAdd/>', () => {
     );
     wrapper.update();
     expect(
-      wrapper.find('WizardNavItem[text="Add resource type"]').prop('isDisabled')
-    ).toBe(false);
-    expect(
       wrapper
-        .find('WizardNavItem[text="Select items from list"]')
+        .find('WizardNavItem[content="Add resource type"]')
         .prop('isDisabled')
     ).toBe(false);
     expect(
       wrapper
-        .find('WizardNavItem[text="Select roles to apply"]')
+        .find('WizardNavItem[content="Select items from list"]')
+        .prop('isDisabled')
+    ).toBe(false);
+    expect(
+      wrapper
+        .find('WizardNavItem[content="Select roles to apply"]')
         .prop('isDisabled')
     ).toBe(true);
   });
 
   test('should call api to associate role', async () => {
     JobTemplatesAPI.read.mockResolvedValue(resources);
+    JobTemplatesAPI.readOptions.mockResolvedValue(options);
     UsersAPI.associateRole.mockResolvedValue({});
 
     await act(async () =>
       wrapper.find('SelectableCard[label="Job templates"]').prop('onClick')({
         fetchItems: JobTemplatesAPI.read,
+        fetchOptions: JobTemplatesAPI.readOptions,
         label: 'Job template',
         selectedResource: 'jobTemplate',
-        searchColumns: [{ name: 'Name', key: 'name', isDefault: true }],
+        searchColumns: [
+          { name: 'Name', key: 'name__icontains', isDefault: true },
+        ],
         sortColumns: [{ name: 'Name', key: 'name' }],
       })
     );
@@ -162,6 +180,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
 
   test('should throw error', async () => {
     JobTemplatesAPI.read.mockResolvedValue(resources);
+    JobTemplatesAPI.readOptions.mockResolvedValue(options);
     UsersAPI.associateRole.mockRejectedValue(
       new Error({
         response: {
@@ -185,9 +204,12 @@ describe('<UserAndTeamAccessAdd/>', () => {
     await act(async () =>
       wrapper.find('SelectableCard[label="Job templates"]').prop('onClick')({
         fetchItems: JobTemplatesAPI.read,
+        fetchOptions: JobTemplatesAPI.readOptions,
         label: 'Job template',
         selectedResource: 'jobTemplate',
-        searchColumns: [{ name: 'Name', key: 'name', isDefault: true }],
+        searchColumns: [
+          { name: 'Name', key: 'name__icontains', isDefault: true },
+        ],
         sortColumns: [{ name: 'Name', key: 'name' }],
       })
     );

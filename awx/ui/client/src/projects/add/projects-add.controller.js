@@ -15,7 +15,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
         let form = ProjectsForm(),
             base = $location.path().replace(/^\//, '').split('/')[0],
             defaultUrl = GetBasePath('projects'),
-            master = {};
+            main = {};
 
         init();
 
@@ -23,7 +23,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             $scope.canEditOrg = true;
             const virtualEnvs = ConfigData.custom_virtualenvs || [];
             $scope.custom_virtualenvs_options = virtualEnvs;
-            
+
             const [ProjectModel] = resolvedModels;
             $scope.canAdd = ProjectModel.options('actions.POST');
 
@@ -46,7 +46,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             GenerateForm.applyDefaults(form, $scope);
         }
 
-        GetProjectPath({ scope: $scope, master: master });
+        GetProjectPath({ scope: $scope, main: main });
 
         if ($scope.removeChoicesReady) {
             $scope.removeChoicesReady();
@@ -67,7 +67,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             });
 
             $scope.scmRequired = false;
-            master.scm_type = $scope.scm_type;
+            main.scm_type = $scope.scm_type;
         });
 
         // Load the list of options for Kind
@@ -169,6 +169,14 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
                             $scope.credRequired = false;
                             $scope.lookupType = 'scm_credential';
                             $scope.scmBranchLabel = i18n._('SCM Branch/Tag/Revision');
+                            break;
+                        case 'archive':
+                            $scope.credentialLabel = "SCM " + i18n._("Credential");
+                            $scope.urlPopover = '<p>' + i18n._('Example URLs for Remote Archive SCM include:') + '</p>' +
+                                '<ul class=\"no-bullets\"><li>https://github.com/username/project/archive/v0.0.1.tar.gz</li>' +
+                                '<li>http://github.com/username/project/archive/v0.0.2.zip</li></ul>';
+                            $scope.credRequired = false;
+                            $scope.lookupType = 'scm_credential';
                             break;
                         case 'insights':
                             $scope.pathRequired = false;

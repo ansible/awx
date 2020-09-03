@@ -117,7 +117,7 @@ tower_token:
   returned: on successful create
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def return_token(module, last_response):
@@ -143,7 +143,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(
+    module = TowerAPIModule(
         argument_spec=argument_spec,
         mutually_exclusive=[
             ('existing_token', 'existing_token_id'),

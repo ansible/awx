@@ -131,10 +131,10 @@ function NodeViewModal({ i18n }) {
 
   return (
     <Modal
-      isLarge
+      variant="large"
       isOpen
-      isFooterLeftAligned
       title={unifiedJobTemplate.name}
+      aria-label={i18n._(t`Workflow node view modal`)}
       onClose={() => dispatch({ type: 'SET_NODE_TO_VIEW', value: null })}
       actions={[
         <Button

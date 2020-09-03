@@ -131,8 +131,8 @@ def mock_cache():
 
 def pytest_runtest_teardown(item, nextitem):
     # clear Django cache at the end of every test ran
-    # NOTE: this should not be memcache, see test_cache in test_env.py
-    # this is a local test cache, so we want every test to start with empty cache
+    # NOTE: this should not be memcache (as it is deprecated), nor should it be redis.
+    # This is a local test cache, so we want every test to start with an empty cache
     cache.clear()
 
 

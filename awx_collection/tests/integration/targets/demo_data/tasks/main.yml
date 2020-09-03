@@ -16,6 +16,15 @@
     name: "Demo Inventory"
     organization: Default
 
+- name: Create a Host
+  tower_host:
+    name: "localhost"
+    inventory: "Demo Inventory"
+    state: present
+    variables:
+      ansible_connection: local
+  register: result
+
 - name: Assure that demo job template exists
   tower_job_template:
     name: "Demo Job Template"

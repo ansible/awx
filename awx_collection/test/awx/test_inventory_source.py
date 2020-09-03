@@ -151,6 +151,31 @@ def test_custom_venv_no_op(run_module, admin_user, base_inventory, mocker, proje
     assert inv_src.description == 'this is the changed description'
 
 
+@pytest.mark.django_db
+def test_falsy_value(run_module, admin_user, base_inventory):
+    result = run_module('tower_inventory_source', dict(
+        name='falsy-test',
+        inventory=base_inventory.name,
+        source='ec2',
+        update_on_launch=True
+    ), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed', None), result
+
+    inv_src = InventorySource.objects.get(name='falsy-test')
+    assert inv_src.update_on_launch is True
+
+    result = run_module('tower_inventory_source', dict(
+        name='falsy-test',
+        inventory=base_inventory.name,
+        # source='ec2',
+        update_on_launch=False
+    ), admin_user)
+
+    inv_src.refresh_from_db()
+    assert inv_src.update_on_launch is False
+
+
 # Tests related to source-specific parameters
 #
 # We want to let the API return issues with "this doesn't support that", etc.
@@ -165,9 +190,6 @@ def test_custom_venv_no_op(run_module, admin_user, base_inventory, mocker, proje
 # overwrite_vars	?	?	o	o	o	o		o	o	o		o		o	o	o
 # update_on_launch	?	?	o	o	o	o		o	o	o		o		o	o	o
 # UoPL          	?	?	o	-	-	-		-	-	-		-		-	-	-
-# source_regions	?	?	-	o	o	o		-	-	-		-		-	-	-
-# instance_filters	?	?	-	o	-	-		o	-	-		-		-	o	-
-# group_by			?	?	-	o	-	-		o	-	-		-		-	-	-
 # source_vars*		?	?	-	o	-	o		o	o	o		o		-	-	-
 # environmet vars*	?	?	o	-	-	-		-	-	-		-		-	-	o
 # source_script		?	?	-	-	-	-		-	-	-		-		-	-	r

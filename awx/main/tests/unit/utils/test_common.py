@@ -215,11 +215,3 @@ def test_get_custom_venv_choices():
             os.path.join(temp_dir, ''),
             os.path.join(custom_venv_1, '')
         ]
-
-
-def test_region_sorting():
-    s = [('Huey', 'China1'),
-         ('Dewey', 'UK1'),
-         ('Lewie', 'US1'),
-         ('All', 'All')]
-    assert [x[1] for x in sorted(s, key=common.region_sorting)] == ['All', 'US1', 'China1', 'UK1']

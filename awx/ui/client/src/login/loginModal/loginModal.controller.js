@@ -88,6 +88,7 @@ export default ['$log', '$cookies', '$rootScope', 'ProcessErrors',
         }
         scope.customLoginInfo = $AnsibleConfig.custom_login_info;
         scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
+        scope.customLoginInfoIsHTML = /<\/?[a-z][\s\S]*>/i.test(scope.customLoginInfo);
     });
 
     if (scope.removeAuthorizationGetLicense) {

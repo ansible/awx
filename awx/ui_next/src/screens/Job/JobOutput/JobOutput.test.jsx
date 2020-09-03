@@ -338,7 +338,7 @@ describe('<JobOutput />', () => {
     wrapper.find('Modal button[aria-label="Delete"]').simulate('click');
     await waitForElement(wrapper, 'Modal ErrorDetail');
     const errorModalCloseBtn = wrapper.find(
-      'ModalBox div[aria-label="Job Delete Error"] button[aria-label="Close"]'
+      'ModalBox[aria-label="Job Delete Error"] ModalBoxCloseButton'
     );
     errorModalCloseBtn.simulate('click');
     await waitForElement(wrapper, 'Modal ErrorDetail', el => el.length === 0);

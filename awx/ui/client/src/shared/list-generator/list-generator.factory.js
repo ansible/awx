@@ -352,7 +352,7 @@ export default ['$compile', 'Attr', 'Icon',
                         innerTable += '<select-list-item item=\"' + list.iterator + '\" disabled="'+list.disableRowValue+'"></select-list-item>';
                     } else {
                         if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
-                            innerTable += `<input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator})" ng-disabled="${list.disableRowValue}">`;
+                            innerTable += `<input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator})" ng-disabled="${list.disableRowValue}" />`;
                         }
                         else { // its assumed that options.input_type = checkbox
                             innerTable += "<input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +

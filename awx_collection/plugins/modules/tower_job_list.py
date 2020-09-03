@@ -80,7 +80,7 @@ results:
 '''
 
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def main():
@@ -93,7 +93,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(
+    module = TowerAPIModule(
         argument_spec=argument_spec,
         mutually_exclusive=[
             ('page', 'all_pages'),

@@ -98,7 +98,7 @@
         POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
           get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
         {{ kubectl_or_oc }} exec $POD -n {{ kubernetes_namespace }} -- bash -c "\
-          psql --dbname=template1 -c 'ALTER USER {{ pg_username }} CREATEDB;'"
+          psql --dbname=template1 -c 'ALTER USER \"{{ pg_username }}\" CREATEDB;'"
 
     - name: Perform a PostgreSQL restore
       shell: |
@@ -113,7 +113,7 @@
         POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
           get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
         {{ kubectl_or_oc }} exec $POD -n {{ kubernetes_namespace }} -- bash -c "\
-          psql --dbname=template1 -c 'ALTER USER {{ pg_username }} NOCREATEDB;'"
+          psql --dbname=template1 -c 'ALTER USER \"{{ pg_username }}\" NOCREATEDB;'"
   when: pg_hostname is not defined or pg_hostname == ''
 
 - name: Remove restore directory

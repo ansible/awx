@@ -338,7 +338,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
 
             if isinstance(self, JobEvent):
                 hostnames = self._hostnames()
-                self._update_host_summary_from_stats(hostnames)
+                self._update_host_summary_from_stats(set(hostnames))
                 if self.job.inventory:
                     try:
                         self.job.inventory.update_computed_fields()
@@ -521,7 +521,9 @@ class JobEvent(BasePlaybookEvent):
                 for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host_id')
             )
             for h in all_hosts:
-                h.last_job_id = job.id
+                # if the hostname *shows up* in the playbook_on_stats event
+                if h.name in hostnames:
+                    h.last_job_id = job.id
                 if h.id in host_mapping:
                     h.last_job_host_summary_id = host_mapping[h.id]
             Host.objects.bulk_update(all_hosts, ['last_job_id', 'last_job_host_summary_id'])

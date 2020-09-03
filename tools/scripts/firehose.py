@@ -26,9 +26,11 @@
 
 import argparse
 import datetime
+import itertools
 import json
 import multiprocessing
 import pkg_resources
+import random
 import subprocess
 import sys
 from io import StringIO
@@ -58,40 +60,52 @@ u = str(uuid4())
 
 STATUS_OPTIONS = ('successful', 'failed', 'error', 'canceled')
 
+EVENT_OPTIONS = ('runner_on_ok', 'runner_on_failed', 'runner_on_changed', 'runner_on_skipped', 'runner_on_unreachable')
+
+MODULE_OPTIONS = ('yup', 'stonchronize', 'templotz', 'deboog')
+
 
 class YieldedRows(StringIO):
 
     def __init__(self, job_id, rows, created_stamp, modified_stamp, *args, **kwargs):
         self.rows = rows
-        self.row = "\t".join([
-            f"{created_stamp}",
-            f"{modified_stamp}",
-            "playbook_on_start",
-            "{}",
-            'false',
-            'false',
-            "localhost",
-            "Example Play",
-            "Hello World",
-            "",
-            "0",
-            "1",
-            job_id,
-            u,
-            "",
-            "1",
-            "hello_world.yml",
-            "0",
-            "X",
-            "1",
-        ]) + '\n'
+        self.rowlist = []
+        for (event, module) in itertools.product(EVENT_OPTIONS, MODULE_OPTIONS):
+            event_data_json = {
+                "task_action": module,
+                "name": "Do a {} thing".format(module),
+                "task": "Do a {} thing".format(module)
+            }
+            row = "\t".join([
+                f"{created_stamp}",
+                f"{modified_stamp}",
+                event,
+                json.dumps(event_data_json),
+                str(event in ('runner_on_failed', 'runner_on_unreachable')),
+                str(event == 'runner_on_changed'),
+                "localhost",
+                "Example Play",
+                "Hello World",
+                "",
+                "0",
+                "1",
+                job_id,
+                u,
+                "",
+                "1",
+                "hello_world.yml",
+                "0",
+                "X",
+                "1",
+            ]) + '\n'
+            self.rowlist.append(row)
 
     def read(self, x):
         if self.rows <= 0:
             self.close()
             return ''
-        self.rows -= 10000
-        return self.row * 10000
+        self.rows -= 1000
+        return self.rowlist[random.randrange(len(self.rowlist))] * 1000
 
 
 def firehose(job, count, created_stamp, modified_stamp):

@@ -45,7 +45,7 @@ describe('<HostStatusBar />', () => {
   test('empty host counts should display tooltip and one bar segment', () => {
     wrapper = mountWithContexts(<HostStatusBar />);
     expect(wrapper.find('BarSegment').length).toBe(1);
-    expect(wrapper.find('TooltipContent').text()).toEqual(
+    expect(wrapper.find('Tooltip').prop('content')).toEqual(
       'Host status information for this job is unavailable.'
     );
   });

@@ -126,7 +126,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('source', 'last_updated', 'status'),
     'custom_inventory_script': DEFAULT_SUMMARY_FIELDS,
-    'source_script': ('name', 'description'),
+    'source_script': DEFAULT_SUMMARY_FIELDS,
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
     'instance_group': ('id', 'name', 'controller_id', 'is_containerized'),
@@ -1336,6 +1336,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
             errors['local_path'] = _('This path is already being used by another manual project.')
+        if attrs.get('scm_branch') and scm_type == 'archive':
+            errors['scm_branch'] = _('SCM branch cannot be used with archive projects.')
         if attrs.get('scm_refspec') and scm_type != 'git':
             errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
 
@@ -1697,9 +1699,13 @@ class HostSerializer(BaseSerializerWithVariables):
         d.setdefault('recent_jobs', [{
             'id': j.job.id,
             'name': j.job.job_template.name if j.job.job_template is not None else "",
+            'type': j.job.job_type_name,
             'status': j.job.status,
             'finished': j.job.finished,
-        } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created')[:5]])
+        } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created').defer(
+            'job__extra_vars',
+            'job__artifacts',
+        )[:5]])
         return d
 
     def _get_host_port_from_name(self, name):
@@ -1731,6 +1737,7 @@ class HostSerializer(BaseSerializerWithVariables):
 
     def validate(self, attrs):
         name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         host, port = self._get_host_port_from_name(name)
 
         if port:
@@ -1739,7 +1746,9 @@ class HostSerializer(BaseSerializerWithVariables):
             vars_dict = parse_yaml_or_json(variables)
             vars_dict['ansible_ssh_port'] = port
             attrs['variables'] = json.dumps(vars_dict)
-
+        if Group.objects.filter(name=name, inventory=inventory).exists():
+            raise serializers.ValidationError(_('A Group with that name already exists.'))
+            
         return super(HostSerializer, self).validate(attrs)
 
     def to_representation(self, obj):
@@ -1804,6 +1813,13 @@ class GroupSerializer(BaseSerializerWithVariables):
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         return res
+
+    def validate(self, attrs):
+        name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
+        if Host.objects.filter(name=name, inventory=inventory).exists():
+            raise serializers.ValidationError(_('A Host with that name already exists.'))
+        return super(GroupSerializer, self).validate(attrs)
 
     def validate_name(self, value):
         if value in ('all', '_meta'):
@@ -1921,7 +1937,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
-                  'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                  'enabled_var', 'enabled_value', 'host_filter', 'overwrite', 'overwrite_vars',
                   'custom_virtualenv', 'timeout', 'verbosity')
 
     def get_related(self, obj):
@@ -1936,12 +1952,12 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     def validate_source_vars(self, value):
         ret = vars_validate_or_raise(value)
         for env_k in parse_yaml_or_json(value):
-            if env_k in settings.INV_ENV_VARIABLE_BLACKLIST:
+            if env_k in settings.INV_ENV_VARIABLE_BLOCKED:
                 raise serializers.ValidationError(_("`{}` is a prohibited environment variable".format(env_k)))
         return ret
 
     def validate(self, attrs):
-        # TODO: Validate source, validate source_regions
+        # TODO: Validate source
         errors = {}
 
         source = attrs.get('source', self.instance and self.instance.source or '')
@@ -2644,8 +2660,16 @@ class CredentialSerializerCreate(CredentialSerializer):
                     owner_fields.add(field)
                 else:
                     attrs.pop(field)
+
         if not owner_fields:
             raise serializers.ValidationError({"detail": _("Missing 'user', 'team', or 'organization'.")})
+
+        if len(owner_fields) > 1:
+            received = ", ".join(sorted(owner_fields))
+            raise serializers.ValidationError({"detail": _(
+                "Only one of 'user', 'team', or 'organization' should be provided, "
+                "received {} fields.".format(received)
+            )})
 
         if attrs.get('team'):
             attrs['organization'] = attrs['team'].organization
@@ -2823,7 +2847,7 @@ class JobTemplateMixin(object):
         return [{
             'id': x.id, 'status': x.status, 'finished': x.finished, 'canceled_on': x.canceled_on,
             # Make type consistent with API top-level key, for instance workflow_job
-            'type': x.get_real_instance_class()._meta.verbose_name.replace(' ', '_')
+            'type': x.job_type_name
         } for x in optimized_qs[:10]]
 
     def get_summary_fields(self, obj):
@@ -3600,7 +3624,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             ujt = self.instance.unified_job_template
         if ujt is None:
             ret = {}
-            for fd in ('workflow_job_template', 'identifier'):
+            for fd in ('workflow_job_template', 'identifier', 'all_parents_must_converge'):
                 if fd in attrs:
                     ret[fd] = attrs[fd]
             return ret
@@ -4081,7 +4105,8 @@ class JobLaunchSerializer(BaseSerializer):
                 errors.setdefault('credentials', []).append(_(
                     'Cannot assign multiple {} credentials.'
                 ).format(cred.unique_hash(display=True)))
-            if cred.credential_type.kind not in ('ssh', 'vault', 'cloud', 'net'):
+            if cred.credential_type.kind not in ('ssh', 'vault', 'cloud',
+                                                 'net', 'kubernetes'):
                 errors.setdefault('credentials', []).append(_(
                     'Cannot assign a Credential of kind `{}`'
                 ).format(cred.credential_type.kind))
@@ -4644,6 +4669,8 @@ class InstanceSerializer(BaseSerializer):
 
 
 class InstanceGroupSerializer(BaseSerializer):
+
+    show_capabilities = ['edit', 'delete']
 
     committed_capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()

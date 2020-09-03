@@ -10,16 +10,16 @@ import {
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
-
+import { PencilAltIcon } from '@patternfly/react-icons';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { PencilAltIcon } from '@patternfly/react-icons';
 import { timeOfDay } from '../../../util/dates';
 import { InventoriesAPI } from '../../../api';
 import { Inventory } from '../../../types';
 import DataListCell from '../../../components/DataListCell';
 import CopyButton from '../../../components/CopyButton';
+import SyncStatusIndicator from '../../../components/SyncStatusIndicator';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
@@ -52,6 +52,14 @@ function InventoryListItem({
   }, [inventory.id, inventory.name, fetchInventories]);
 
   const labelId = `check-action-${inventory.id}`;
+
+  let syncStatus = 'disabled';
+  if (inventory.isSourceSyncRunning) {
+    syncStatus = 'syncing';
+  } else if (inventory.has_inventory_sources) {
+    syncStatus =
+      inventory.inventory_sources_with_failures > 0 ? 'error' : 'success';
+  }
   return (
     <DataListItem
       key={inventory.id}
@@ -67,7 +75,10 @@ function InventoryListItem({
         />
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="divider">
+            <DataListCell key="sync-status" isIcon>
+              <SyncStatusIndicator status={syncStatus} />
+            </DataListCell>,
+            <DataListCell key="name">
               <Link to={`${detailUrl}`}>
                 <b>{inventory.name}</b>
               </Link>

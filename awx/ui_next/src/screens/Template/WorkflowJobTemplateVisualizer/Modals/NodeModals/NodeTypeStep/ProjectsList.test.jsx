@@ -38,6 +38,15 @@ describe('ProjectsList', () => {
         ],
       },
     });
+    ProjectsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <ProjectsList

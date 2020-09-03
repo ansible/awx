@@ -1,10 +1,15 @@
 import 'styled-components/macro';
 import React, { useState, useEffect } from 'react';
-import { string, node, number } from 'prop-types';
+import { node, number, oneOfType, shape, string } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '../DetailList';
 import MultiButtonToggle from '../MultiButtonToggle';
-import { yamlToJson, jsonToYaml, isJson } from '../../util/yaml';
+import {
+  yamlToJson,
+  jsonToYaml,
+  isJsonObject,
+  isJsonString,
+} from '../../util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
 
@@ -15,7 +20,7 @@ function getValueAsMode(value, mode) {
     }
     return '---';
   }
-  const modeMatches = isJson(value) === (mode === JSON_MODE);
+  const modeMatches = isJsonString(value) === (mode === JSON_MODE);
   if (modeMatches) {
     return value;
   }
@@ -23,12 +28,21 @@ function getValueAsMode(value, mode) {
 }
 
 function VariablesDetail({ value, label, rows, fullHeight }) {
-  const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
-  const [currentValue, setCurrentValue] = useState(value || '---');
+  const [mode, setMode] = useState(
+    isJsonObject(value) || isJsonString(value) ? JSON_MODE : YAML_MODE
+  );
+  const [currentValue, setCurrentValue] = useState(
+    isJsonObject(value) ? JSON.stringify(value, null, 2) : value || '---'
+  );
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setCurrentValue(getValueAsMode(value, mode));
+    setCurrentValue(
+      getValueAsMode(
+        isJsonObject(value) ? JSON.stringify(value, null, 2) : value,
+        mode
+      )
+    );
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [value]);
 
@@ -39,7 +53,7 @@ function VariablesDetail({ value, label, rows, fullHeight }) {
         fullWidth
         css="grid-column: 1 / -1"
       >
-        <Split gutter="sm">
+        <Split hasGutter>
           <SplitItem>
             <div className="pf-c-form__label">
               <span
@@ -95,7 +109,7 @@ function VariablesDetail({ value, label, rows, fullHeight }) {
   );
 }
 VariablesDetail.propTypes = {
-  value: string.isRequired,
+  value: oneOfType([shape({}), string]).isRequired,
   label: node.isRequired,
   rows: number,
 };

@@ -7,9 +7,9 @@ import {
   DropdownItem,
   DropdownToggle,
   DropdownPosition,
-  Toolbar,
-  ToolbarGroup,
-  ToolbarItem,
+  PageHeaderTools,
+  PageHeaderToolsGroup,
+  PageHeaderToolsItem,
   Tooltip,
 } from '@patternfly/react-core';
 import { QuestionCircleIcon, UserIcon } from '@patternfly/react-icons';
@@ -62,10 +62,10 @@ class PageHeaderToolbar extends Component {
     } = this.props;
 
     return (
-      <Toolbar>
-        <ToolbarGroup>
+      <PageHeaderTools>
+        <PageHeaderToolsGroup>
           <Tooltip position="left" content={<div>{i18n._(t`Info`)}</div>}>
-            <ToolbarItem>
+            <PageHeaderToolsItem>
               <Dropdown
                 isPlain
                 isOpen={isHelpOpen}
@@ -93,10 +93,10 @@ class PageHeaderToolbar extends Component {
                   </DropdownItem>,
                 ]}
               />
-            </ToolbarItem>
+            </PageHeaderToolsItem>
           </Tooltip>
           <Tooltip position="left" content={<div>{i18n._(t`User`)}</div>}>
-            <ToolbarItem>
+            <PageHeaderToolsItem>
               <Dropdown
                 id="toolbar-user-dropdown"
                 isPlain
@@ -134,10 +134,10 @@ class PageHeaderToolbar extends Component {
                   </DropdownItem>,
                 ]}
               />
-            </ToolbarItem>
+            </PageHeaderToolsItem>
           </Tooltip>
-        </ToolbarGroup>
-      </Toolbar>
+        </PageHeaderToolsGroup>
+      </PageHeaderTools>
     );
   }
 }

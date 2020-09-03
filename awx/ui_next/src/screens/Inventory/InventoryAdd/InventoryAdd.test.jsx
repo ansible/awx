@@ -51,11 +51,13 @@ describe('<InventoryAdd />', () => {
     ];
     await waitForElement(wrapper, 'isLoading', el => el.length === 0);
 
-    wrapper.find('InventoryForm').prop('onSubmit')({
-      name: 'new Foo',
-      organization: { id: 2 },
-      insights_credential: { id: 47 },
-      instanceGroups,
+    await act(async () => {
+      wrapper.find('InventoryForm').prop('onSubmit')({
+        name: 'new Foo',
+        organization: { id: 2 },
+        insights_credential: { id: 47 },
+        instanceGroups,
+      });
     });
     await sleep(1);
     expect(InventoriesAPI.create).toHaveBeenCalledWith({
@@ -74,7 +76,9 @@ describe('<InventoryAdd />', () => {
 
   test('handleCancel should return the user back to the inventories list', async () => {
     await waitForElement(wrapper, 'isLoading', el => el.length === 0);
-    wrapper.find('Button[aria-label="Cancel"]').simulate('click');
+    await act(async () => {
+      wrapper.find('Button[aria-label="Cancel"]').simulate('click');
+    });
     expect(history.location.pathname).toEqual('/inventories');
   });
 });

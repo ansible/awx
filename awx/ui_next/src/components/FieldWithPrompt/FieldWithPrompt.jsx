@@ -7,16 +7,11 @@ import { CheckboxField, FieldTooltip } from '../FormField';
 
 const FieldHeader = styled.div`
   display: flex;
-  justify-content: space-between;
-  padding-bottom: var(--pf-c-form__label--PaddingBottom);
-
-  label {
-    --pf-c-form__label--PaddingBottom: 0px;
-  }
 `;
 
 const StyledCheckboxField = styled(CheckboxField)`
   --pf-c-check__label--FontSize: var(--pf-c-form__label--FontSize);
+  margin-left: auto;
 `;
 
 function FieldWithPrompt({

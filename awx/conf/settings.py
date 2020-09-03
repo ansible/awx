@@ -31,18 +31,18 @@ logger = logging.getLogger('awx.conf.settings')
 # Store a special value to indicate when a setting is not set in the database.
 SETTING_CACHE_NOTSET = '___notset___'
 
-# Cannot store None in memcached; use a special value instead to indicate None.
+# Cannot store None in cache; use a special value instead to indicate None.
 # If the special value for None is the same as the "not set" value, then a value
 # of None will be equivalent to the setting not being set (and will raise an
 # AttributeError if there is no other default defined).
 # SETTING_CACHE_NONE = '___none___'
 SETTING_CACHE_NONE = SETTING_CACHE_NOTSET
 
-# Cannot store empty list/tuple in memcached; use a special value instead to
+# Cannot store empty list/tuple in cache; use a special value instead to
 # indicate an empty list.
 SETTING_CACHE_EMPTY_LIST = '___[]___'
 
-# Cannot store empty dict in memcached; use a special value instead to indicate
+# Cannot store empty dict in cache; use a special value instead to indicate
 # an empty dict.
 SETTING_CACHE_EMPTY_DICT = '___{}___'
 

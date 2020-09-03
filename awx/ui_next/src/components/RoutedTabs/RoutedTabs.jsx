@@ -1,6 +1,6 @@
 import React from 'react';
 import { shape, string, number, arrayOf, node, oneOfType } from 'prop-types';
-import { Tab, Tabs } from '@patternfly/react-core';
+import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import { useHistory } from 'react-router-dom';
 
 function RoutedTabs(props) {
@@ -36,7 +36,7 @@ function RoutedTabs(props) {
           eventKey={tab.id}
           key={tab.id}
           link={tab.link}
-          title={tab.name}
+          title={<TabTitleText>{tab.name}</TabTitleText>}
         />
       ))}
     </Tabs>

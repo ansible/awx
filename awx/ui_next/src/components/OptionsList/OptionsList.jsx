@@ -18,7 +18,7 @@ import DataListToolbar from '../DataListToolbar';
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
 const ModalList = styled.div`
-  .pf-c-data-toolbar__content {
+  .pf-c-toolbar__content {
     padding: 0 !important;
   }
 `;
@@ -30,6 +30,8 @@ function OptionsList({
   optionCount,
   searchColumns,
   sortColumns,
+  searchableKeys,
+  relatedSearchableKeys,
   multiple,
   header,
   name,
@@ -40,6 +42,7 @@ function OptionsList({
   renderItemChip,
   isLoading,
   i18n,
+  displayKey,
 }) {
   return (
     <ModalList>
@@ -47,10 +50,10 @@ function OptionsList({
         <SelectedList
           label={i18n._(t`Selected`)}
           selected={value}
-          showOverflowAfter={5}
           onRemove={item => deselectItem(item)}
           isReadOnly={readOnly}
           renderItemChip={renderItemChip}
+          displayKey={displayKey}
         />
       )}
       <PaginatedDataList
@@ -61,14 +64,16 @@ function OptionsList({
         qsConfig={qsConfig}
         toolbarSearchColumns={searchColumns}
         toolbarSortColumns={sortColumns}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         hasContentLoading={isLoading}
         onRowClick={selectItem}
         renderItem={item => (
           <CheckboxListItem
             key={item.id}
             itemId={item.id}
-            name={multiple ? item.name : name}
-            label={item.name}
+            name={multiple ? item[displayKey] : name}
+            label={item[displayKey]}
             isSelected={value.some(i => i.id === item.id)}
             onSelect={() => selectItem(item)}
             onDeselect={() => deselectItem(item)}
@@ -88,22 +93,24 @@ const Item = shape({
   url: string,
 });
 OptionsList.propTypes = {
-  value: arrayOf(Item).isRequired,
-  options: arrayOf(Item).isRequired,
-  optionCount: number.isRequired,
-  searchColumns: SearchColumns,
-  sortColumns: SortColumns,
-  multiple: bool,
-  qsConfig: QSConfig.isRequired,
-  selectItem: func.isRequired,
   deselectItem: func.isRequired,
+  displayKey: string,
+  multiple: bool,
+  optionCount: number.isRequired,
+  options: arrayOf(Item).isRequired,
+  qsConfig: QSConfig.isRequired,
   renderItemChip: func,
+  searchColumns: SearchColumns,
+  selectItem: func.isRequired,
+  sortColumns: SortColumns,
+  value: arrayOf(Item).isRequired,
 };
 OptionsList.defaultProps = {
   multiple: false,
   renderItemChip: null,
   searchColumns: [],
   sortColumns: [],
+  displayKey: 'name',
 };
 
 export default withI18n()(OptionsList);

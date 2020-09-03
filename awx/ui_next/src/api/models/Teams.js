@@ -28,6 +28,20 @@ class Teams extends Base {
   readRoleOptions(teamId) {
     return this.http.options(`${this.baseUrl}${teamId}/roles/`);
   }
+
+  readAccessList(teamId, params) {
+    return this.http.get(`${this.baseUrl}${teamId}/access_list/`, {
+      params,
+    });
+  }
+
+  readAccessOptions(id) {
+    return this.http.options(`${this.baseUrl}${id}/access_list/`);
+  }
+
+  readUsersAccessOptions(teamId) {
+    return this.http.options(`${this.baseUrl}${teamId}/users/`);
+  }
 }
 
 export default Teams;

@@ -589,7 +589,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (field.readonly) ? "disabled " : "";
                     html += (field.ngChange) ? "ng-change=\"" +field.ngChange + "\" " : "";
                     html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
-                    html += `><span class="Form-inputLabel">${field.label}</span></label>`;
+                    html += `/><span class="Form-inputLabel">${field.label}</span></label>`;
                     html += (field.awPopOver) ? Attr(field, 'awPopOver', fld) : "";
                     html += `</div>`;
 
@@ -781,7 +781,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                             }
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
-                            html += ">\n";
+                            html += "/>\n";
                         }
 
                         if (field.clear) {
@@ -806,7 +806,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                         data-placement="top"
                                         id="${this.form.name}_${fld}_gen_btn"
                                     >
-                                        <i class="fa fa-refresh" />
+                                        <i class="fa fa-refresh"></i>
                                     </button>
                                 </span>`;
                             const genHashButtonTemplate = _.get(field, 'genHashButtonTemplate', defaultGenHashButtonTemplate);
@@ -900,7 +900,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                             }
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
-                            html += ">\n";
+                            html += "/>\n";
                         }
 
                         html += "</div>\n";
@@ -1117,7 +1117,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
                             html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                         }
-                        html += " >\n";
+                        html += " />\n";
 
                         // Add error messages
                         if (field.required) {
@@ -1219,7 +1219,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.ngChange) ? Attr(field, 'ngChange') : "";
                         html += (field.readonly) ? "disabled " : "";
                         html += (field.ngDisabled) ? Attr(field, 'ngDisabled') : "";
-                        html += " > ";
+                        html += " /> ";
                         html += field.label;
                         html += "</label>\n";
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" +
@@ -1286,7 +1286,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.watchBasePath !== undefined) ? ` watchBasePath=${field.watchBasePath} ` : "";
                         html += `ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 300, 'blur': 0 } }"`;
                         html += (field.awLookupWhen !== undefined) ? this.attr(field, 'awLookupWhen') : "";
-                        html += " awlookup >\n";
+                        html += " awlookup />\n";
                         html += "</div>\n";
 
                         // Add error messages

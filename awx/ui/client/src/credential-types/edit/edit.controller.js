@@ -18,7 +18,7 @@ export default ['Rest', 'Wait',
             data = credential_typeData,
             id = credential_typeData.id,
             form = CredentialTypesForm,
-            master = {},
+            main = {},
             url = GetBasePath('credential_types');
 
         init();
@@ -123,7 +123,7 @@ export default ['Rest', 'Wait',
                 for (fld in form.fields) {
                     if (data[fld]  && fld !== 'inputs' || fld !== 'injectors') {
                         $scope[fld] = data[fld];
-                        master[fld] = data[fld];
+                        main[fld] = data[fld];
                     }
 
                     if (fld === "kind") {
@@ -131,7 +131,7 @@ export default ['Rest', 'Wait',
                         for (i = 0; i < $scope.credential_kind_options.length; i++) {
                             if ($scope.kind === $scope.credential_kind_options[i].value) {
                                 $scope.kind = $scope.credential_kind_options[i];
-                                master[fld] = $scope.credential_kind_options[i];
+                                main[fld] = $scope.credential_kind_options[i];
                                 break;
                             }
                         }

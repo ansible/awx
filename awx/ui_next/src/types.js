@@ -42,6 +42,18 @@ export const AccessRecord = shape({
   type: string,
 });
 
+export const Application = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+  organization: number,
+  summary_fields: shape({
+    organization: shape({
+      id: number.isRequired,
+      name: string.isRequired,
+    }),
+  }),
+});
+
 export const Organization = shape({
   id: number.isRequired,
   name: string.isRequired,
@@ -95,7 +107,18 @@ export const Inventory = shape({
   total_inventory_sources: number,
 });
 
+export const InventoryScript = shape({
+  description: string,
+  id: number.isRequired,
+  name: string,
+});
+
 export const InstanceGroup = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+});
+
+export const Instance = shape({
   id: number.isRequired,
   name: string.isRequired,
 });
@@ -130,7 +153,7 @@ export const Project = shape({
   created: string,
   name: string.isRequired,
   description: string,
-  scm_type: oneOf(['', 'git', 'hg', 'svn', 'insights']),
+  scm_type: oneOf(['', 'git', 'hg', 'svn', 'archive', 'insights']),
   scm_url: string,
   scm_branch: string,
   scm_refspec: string,
@@ -214,6 +237,13 @@ export const Team = shape({
   id: number.isRequired,
   name: string.isRequired,
   organization: number,
+});
+
+export const Token = shape({
+  id: number.isRequired,
+  expires: string.isRequired,
+  summary_fields: shape({}),
+  scope: string.isRequired,
 });
 
 export const User = shape({
@@ -323,4 +353,17 @@ export const Survey = shape({
   name: string,
   description: string,
   spec: arrayOf(SurveyQuestion),
+});
+
+export const CredentialType = shape({
+  id: number.isRequired,
+  type: string.isRequired,
+  url: string.isRequired,
+  related: shape({}),
+  summary_fields: shape({}),
+  name: string.isRequired,
+  description: string,
+  kind: string.isRequired,
+  namespace: string,
+  inputs: shape({}).isRequired,
 });

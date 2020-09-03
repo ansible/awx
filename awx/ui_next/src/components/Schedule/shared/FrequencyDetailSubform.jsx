@@ -181,42 +181,32 @@ const FrequencyDetailSubform = ({ i18n }) => {
   };
 
   const getRunEveryLabel = () => {
+    const intervalValue = interval.value;
+
     switch (frequency.value) {
       case 'minute':
-        return i18n.plural({
-          value: interval.value,
-          one: 'minute',
-          other: 'minutes',
+        return i18n._('{intervalValue, plural, one {minute} other {minutes}}', {
+          intervalValue,
         });
       case 'hour':
-        return i18n.plural({
-          value: interval.value,
-          one: 'hour',
-          other: 'hours',
+        return i18n._('{intervalValue, plural, one {hour} other {hours}}', {
+          intervalValue,
         });
       case 'day':
-        return i18n.plural({
-          value: interval.value,
-          one: 'day',
-          other: 'days',
+        return i18n._('{intervalValue, plural, one {day} other {days}}', {
+          intervalValue,
         });
       case 'week':
-        return i18n.plural({
-          value: interval.value,
-          one: 'week',
-          other: 'weeks',
+        return i18n._('{intervalValue, plural, one {week} other {weeks}}', {
+          intervalValue,
         });
       case 'month':
-        return i18n.plural({
-          value: interval.value,
-          one: 'month',
-          other: 'months',
+        return i18n._('{intervalValue, plural, one {month} other {months}}', {
+          intervalValue,
         });
       case 'year':
-        return i18n.plural({
-          value: interval.value,
-          one: 'year',
-          other: 'years',
+        return i18n._('{intervalValue, plural, one {year} other {years}}', {
+          intervalValue,
         });
       default:
         throw new Error(i18n._(t`Frequency did not match an expected value`));
@@ -231,7 +221,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
         fieldId="schedule-run-every"
         helperTextInvalid={intervalMeta.error}
         isRequired
-        isValid={!intervalMeta.touched || !intervalMeta.error}
+        validated={
+          !intervalMeta.touched || !intervalMeta.error ? 'default' : 'error'
+        }
         label={i18n._(t`Run every`)}
       >
         <div css="display: flex">
@@ -255,7 +247,11 @@ const FrequencyDetailSubform = ({ i18n }) => {
           fieldId="schedule-days-of-week"
           helperTextInvalid={daysOfWeekMeta.error}
           isRequired
-          isValid={!daysOfWeekMeta.touched || !daysOfWeekMeta.error}
+          validated={
+            !daysOfWeekMeta.touched || !daysOfWeekMeta.error
+              ? 'default'
+              : 'error'
+          }
           label={i18n._(t`On days`)}
         >
           <div css="display: flex">
@@ -339,7 +335,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
             fieldId="schedule-run-on"
             helperTextInvalid={runOnMeta.error}
             isRequired
-            isValid={!runOnMeta.touched || !runOnMeta.error}
+            validated={
+              !runOnMeta.touched || !runOnMeta.error ? 'default' : 'error'
+            }
             label={i18n._(t`Run on`)}
           >
             <RunOnRadio
@@ -502,7 +500,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
         fieldId="schedule-end"
         helperTextInvalid={endMeta.error}
         isRequired
-        isValid={!endMeta.touched || !endMeta.error}
+        validated={!endMeta.touched || !endMeta.error ? 'default' : 'error'}
         label={i18n._(t`End`)}
       >
         <Radio
@@ -556,7 +554,11 @@ const FrequencyDetailSubform = ({ i18n }) => {
           fieldId="schedule-end-datetime"
           helperTextInvalid={endDateTimeMeta.error}
           isRequired
-          isValid={!endDateTimeMeta.touched || !endDateTimeMeta.error}
+          validated={
+            !endDateTimeMeta.touched || !endDateTimeMeta.error
+              ? 'default'
+              : 'error'
+          }
           label={i18n._(t`End date/time`)}
         >
           <input

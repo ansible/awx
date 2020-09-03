@@ -46,8 +46,8 @@ class MattermostBackend(AWXBaseEmailBackend, CustomNotificationBase):
             r = requests.post("{}".format(m.recipients()[0]),
                               json=payload, verify=(not self.mattermost_no_verify_ssl))
             if r.status_code >= 400:
-                logger.error(smart_text(_("Error sending notification mattermost: {}").format(r.text)))
+                logger.error(smart_text(_("Error sending notification mattermost: {}").format(r.status_code)))
                 if not self.fail_silently:
-                    raise Exception(smart_text(_("Error sending notification mattermost: {}").format(r.text)))
+                    raise Exception(smart_text(_("Error sending notification mattermost: {}").format(r.status_code)))
             sent_messages += 1
         return sent_messages

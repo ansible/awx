@@ -32,7 +32,13 @@ function InventoryGroupHostList({ i18n }) {
   const history = useHistory();
 
   const {
-    result: { hosts, hostCount, actions },
+    result: {
+      hosts,
+      hostCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchHosts,
@@ -48,11 +54,20 @@ function InventoryGroupHostList({ i18n }) {
         hosts: response.data.results,
         hostCount: response.data.count,
         actions: actionsResponse.data.actions,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [groupId, inventoryId, location.search]),
     {
       hosts: [],
       hostCount: 0,
+      actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -96,6 +111,11 @@ function InventoryGroupHostList({ i18n }) {
     [groupId, inventoryId]
   );
 
+  const fetchHostsOptions = useCallback(
+    () => InventoriesAPI.readHostsOptions(inventoryId),
+    [inventoryId]
+  );
+
   const { request: handleAssociate, error: associateErr } = useRequest(
     useCallback(
       async hostsToAssociate => {
@@ -136,16 +156,16 @@ function InventoryGroupHostList({ i18n }) {
         toolbarSearchColumns={[
           {
             name: i18n._(t`Name`),
-            key: 'name',
+            key: 'name__icontains',
             isDefault: true,
           },
           {
             name: i18n._(t`Created By (Username)`),
-            key: 'created_by__username',
+            key: 'created_by__username__icontains',
           },
           {
             name: i18n._(t`Modified By (Username)`),
-            key: 'modified_by__username',
+            key: 'modified_by__username__icontains',
           },
         ]}
         toolbarSortColumns={[
@@ -154,6 +174,8 @@ function InventoryGroupHostList({ i18n }) {
             key: 'name',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderToolbar={props => (
           <DataListToolbar
             {...props}
@@ -210,6 +232,7 @@ function InventoryGroupHostList({ i18n }) {
         <AssociateModal
           header={i18n._(t`Hosts`)}
           fetchRequest={fetchHostsToAssociate}
+          optionsRequest={fetchHostsOptions}
           isModalOpen={isModalOpen}
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}

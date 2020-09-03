@@ -23,7 +23,7 @@ export default ['Rest', 'Wait',
         var generator = GenerateForm,
             id = notification_template.id,
             form = NotificationsFormObject,
-            master = {},
+            main = {},
             url = GetBasePath('notification_templates'),
             defaultMessages = {};
 
@@ -73,25 +73,25 @@ export default ['Rest', 'Wait',
                     for (fld in form.fields) {
                         if (data[fld]) {
                             $scope[fld] = data[fld];
-                            master[fld] = data[fld];
+                            main[fld] = data[fld];
                         }
 
                         if(data.notification_configuration.use_ssl === true){
                             $scope.email_options = "use_ssl";
-                            master.email_options = "use_ssl";
+                            main.email_options = "use_ssl";
                             $scope.use_ssl = true;
-                            master.use_ssl = true;
+                            main.use_ssl = true;
                             $scope.use_tls = false;
-                            master.use_tls = false;
+                            main.use_tls = false;
                         }
 
                         if(data.notification_configuration.use_tls === true){
                             $scope.email_options = "use_tls";
-                            master.email_options = "use_tls";
+                            main.email_options = "use_tls";
                             $scope.use_ssl = false;
-                            master.use_ssl = false;
+                            main.use_ssl = false;
                             $scope.use_tls = true;
-                            master.use_tls = true;
+                            main.use_tls = true;
                         }
 
                         if (data.notification_configuration.timeout === null ||
@@ -101,7 +101,7 @@ export default ['Rest', 'Wait',
 
                         if (data.notification_configuration[fld]) {
                             $scope[fld] = data.notification_configuration[fld];
-                            master[fld] = data.notification_configuration[fld];
+                            main[fld] = data.notification_configuration[fld];
 
                             if (form.fields[fld].type === 'textarea') {
                                 if (form.fields[fld].name === 'headers') {
@@ -116,7 +116,7 @@ export default ['Rest', 'Wait',
                             data.summary_fields[form.fields[fld].sourceModel]) {
                             $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                                 data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                            master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                            main[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                                 data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                         }
                     }
@@ -128,7 +128,7 @@ export default ['Rest', 'Wait',
                         }
                     }
 
-                    master.notification_type = $scope.notification_type;
+                    main.notification_type = $scope.notification_type;
                     CreateSelect2({
                         element: '#notification_template_notification_type',
                         multiple: false

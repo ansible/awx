@@ -12,7 +12,6 @@ import sys
 import time
 import traceback
 import shutil
-from distutils.version import LooseVersion as Version
 
 # Django
 from django.conf import settings
@@ -39,7 +38,6 @@ from awx.main.utils import (
     build_proot_temp_dir,
     get_licenser
 )
-from awx.main.utils.common import _get_ansible_version
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.utils.pglock import advisory_lock
@@ -136,15 +134,10 @@ class AnsibleInventoryLoader(object):
         # inside of /venv/ansible, so we override the specified interpreter
         # https://github.com/ansible/ansible/issues/50714
         bargs = ['python', ansible_inventory_path, '-i', self.source]
-        ansible_version = _get_ansible_version(ansible_inventory_path[:-len('-inventory')])
-        if ansible_version != 'unknown':
-            this_version = Version(ansible_version)
-            if this_version >= Version('2.5'):
-                bargs.extend(['--playbook-dir', self.source_dir])
-            if this_version >= Version('2.8'):
-                if self.verbosity:
-                    # INFO: -vvv, DEBUG: -vvvvv, for inventory, any more than 3 makes little difference
-                    bargs.append('-{}'.format('v' * min(5, self.verbosity * 2 + 1)))
+        bargs.extend(['--playbook-dir', self.source_dir])
+        if self.verbosity:
+            # INFO: -vvv, DEBUG: -vvvvv, for inventory, any more than 3 makes little difference
+            bargs.append('-{}'.format('v' * min(5, self.verbosity * 2 + 1)))
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 
@@ -271,7 +264,7 @@ class Command(BaseCommand):
                                      logging.DEBUG, 0]))
         logger.setLevel(log_levels.get(self.verbosity, 0))
 
-    def _get_instance_id(self, from_dict, default=''):
+    def _get_instance_id(self, variables, default=''):
         '''
         Retrieve the instance ID from the given dict of host variables.
 
@@ -279,15 +272,23 @@ class Command(BaseCommand):
         the lookup will traverse into nested dicts, equivalent to:
 
         from_dict.get('foo', {}).get('bar', default)
+
+        Multiple ID variables may be specified as 'foo.bar,foobar', so that
+        it will first try to find 'bar' inside of 'foo', and if unable,
+        will try to find 'foobar' as a fallback
         '''
         instance_id = default
         if getattr(self, 'instance_id_var', None):
-            for key in self.instance_id_var.split('.'):
-                if not hasattr(from_dict, 'get'):
-                    instance_id = default
+            for single_instance_id in self.instance_id_var.split(','):
+                from_dict = variables
+                for key in single_instance_id.split('.'):
+                    if not hasattr(from_dict, 'get'):
+                        instance_id = default
+                        break
+                    instance_id = from_dict.get(key, default)
+                    from_dict = instance_id
+                if instance_id:
                     break
-                instance_id = from_dict.get(key, default)
-                from_dict = instance_id
         return smart_text(instance_id)
 
     def _get_enabled(self, from_dict, default=None):
@@ -422,7 +423,7 @@ class Command(BaseCommand):
             for mem_host in self.all_group.all_hosts.values():
                 instance_id = self._get_instance_id(mem_host.variables)
                 if not instance_id:
-                    logger.warning('Host "%s" has no "%s" variable',
+                    logger.warning('Host "%s" has no "%s" variable(s)',
                                    mem_host.name, self.instance_id_var)
                     continue
                 mem_host.instance_id = instance_id

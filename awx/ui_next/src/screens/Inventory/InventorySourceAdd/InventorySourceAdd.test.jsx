@@ -52,7 +52,6 @@ describe('<InventorySourceAdd />', () => {
               ['openstack', 'OpenStack'],
               ['rhv', 'Red Hat Virtualization'],
               ['tower', 'Ansible Tower'],
-              ['custom', 'Custom Script'],
             ],
           },
         },
@@ -115,6 +114,7 @@ describe('<InventorySourceAdd />', () => {
       ...invSourceData,
       credential: 222,
       source_project: 999,
+      source_script: null,
     });
   });
 

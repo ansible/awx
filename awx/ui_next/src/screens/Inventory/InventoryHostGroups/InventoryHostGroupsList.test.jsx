@@ -199,6 +199,15 @@ describe('<InventoryHostGroupsList />', () => {
         results: [{ id: 123, name: 'foo', url: '/api/v2/groups/123/' }],
       },
     });
+    InventoriesAPI.readGroupsOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     await act(async () => {
       wrapper.find('ToolbarAddButton').simulate('click');
     });

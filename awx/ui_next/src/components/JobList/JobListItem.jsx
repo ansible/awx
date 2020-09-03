@@ -75,7 +75,7 @@ function JobListItem({
                 ]
               : []),
             <DataListCell key="finished">
-              {formatDateString(job.finished)}
+              {job.finished ? formatDateString(job.finished) : ''}
             </DataListCell>,
           ]}
         />

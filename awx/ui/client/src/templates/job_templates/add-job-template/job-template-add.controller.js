@@ -24,7 +24,7 @@
             let defaultUrl = GetBasePath('job_templates'),
                 form = JobTemplateForm(),
                 generator = GenerateForm,
-                master = {},
+                main = {},
                 selectPlaybook, checkSCMStatus,
                 callback;
 
@@ -157,14 +157,14 @@
 
             hashSetup({
                 scope: $scope,
-                master: master,
+                main: main,
                 check_field: 'allow_callbacks',
                 default_val: false
             });
             CallbackHelpInit({ scope: $scope });
             // set initial vals for webhook checkbox
             $scope.enable_webhook = false;
-            master.enable_webhook = false;
+            main.enable_webhook = false;
 
             $scope.surveyTooltip = i18n._('Please save before adding a survey to this job template.');
 

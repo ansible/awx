@@ -13,6 +13,7 @@ from . import page
 class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, UnifiedJobTemplate):
 
     optional_dependencies = [Organization]
+    NATURAL_KEY = ('organization', 'name')
 
     def launch(self, payload={}):
         """Launch using related->launch endpoint."""

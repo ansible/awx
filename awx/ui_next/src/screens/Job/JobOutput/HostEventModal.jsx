@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal as PFModal, Tab, Tabs as PFTabs } from '@patternfly/react-core';
+import { Modal, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -12,48 +12,11 @@ import CodeMirrorInput from '../../../components/CodeMirrorInput';
 
 const entities = new AllHtmlEntities();
 
-const Modal = styled(PFModal)`
-  --pf-c-modal-box__footer--MarginTop: 0;
-  align-self: flex-start;
-  margin-top: 200px;
-  .pf-c-modal-box__body {
-    overflow-y: hidden;
-  }
-  .pf-c-tab-content {
-    padding: 24px 0;
-  }
-`;
-
 const HostNameDetailValue = styled.div`
   align-items: center;
   display: inline-grid;
   grid-gap: 10px;
   grid-template-columns: auto auto;
-`;
-
-const Tabs = styled(PFTabs)`
-  --pf-c-tabs__button--PaddingLeft: 20px;
-  --pf-c-tabs__button--PaddingRight: 20px;
-
-  .pf-c-tabs__list {
-    li:first-of-type .pf-c-tabs__button {
-      &::after {
-        margin-left: 0;
-      }
-    }
-  }
-
-  &:not(.pf-c-tabs__item)::before {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    content: '';
-    border-bottom: solid var(--pf-c-tabs__item--BorderColor);
-    border-width: var(--pf-c-tabs__item--BorderWidth) 0
-      var(--pf-c-tabs__item--BorderWidth) 0;
-  }
 `;
 
 const processEventStatus = event => {
@@ -133,11 +96,11 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
 
   return (
     <Modal
-      isFooterLeftAligned
-      isLarge
       isOpen={isOpen}
       onClose={onClose}
       title={i18n._(t`Host Details`)}
+      aria-label={i18n._(t`Host details modal`)}
+      width="75%"
     >
       <Tabs
         aria-label={i18n._(t`Tabs`)}
@@ -147,9 +110,12 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
         <Tab
           aria-label={i18n._(t`Details tab`)}
           eventKey={0}
-          title={i18n._(t`Details`)}
+          title={<TabTitleText>{i18n._(t`Details`)}</TabTitleText>}
         >
-          <DetailList style={{ alignItems: 'center' }} gutter="sm">
+          <DetailList
+            style={{ alignItems: 'center', marginTop: '20px' }}
+            gutter="sm"
+          >
             <Detail
               label={i18n._(t`Host Name`)}
               value={
@@ -175,7 +141,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
         </Tab>
         <Tab
           eventKey={1}
-          title={i18n._(t`JSON`)}
+          title={<TabTitleText>{i18n._(t`JSON`)}</TabTitleText>}
           aria-label={i18n._(t`JSON tab`)}
         >
           {activeTabKey === 1 && jsonObj ? (
@@ -193,7 +159,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
         </Tab>
         <Tab
           eventKey={2}
-          title={i18n._(t`Standard Out`)}
+          title={<TabTitleText>{i18n._(t`Standard Out`)}</TabTitleText>}
           aria-label={i18n._(t`Standard out tab`)}
         >
           {activeTabKey === 2 && stdOut ? (
@@ -211,7 +177,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
         </Tab>
         <Tab
           eventKey={3}
-          title={i18n._(t`Standard Error`)}
+          title={<TabTitleText>{i18n._(t`Standard Error`)}</TabTitleText>}
           aria-label={i18n._(t`Standard error tab`)}
         >
           {activeTabKey === 3 && stdErr ? (

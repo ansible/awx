@@ -19,6 +19,8 @@
     job_type: run
     project: "{{ proj_name }}"
     inventory: "Demo Inventory"
+    extra_vars:
+      sleep_interval: 300
 
 - name: Check deprecation warnings
   tower_job_wait:

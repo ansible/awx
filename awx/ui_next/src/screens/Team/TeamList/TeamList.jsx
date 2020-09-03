@@ -29,7 +29,13 @@ function TeamList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { teams, itemCount, actions },
+    result: {
+      teams,
+      itemCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchTeams,
@@ -44,12 +50,20 @@ function TeamList({ i18n }) {
         teams: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
       teams: [],
       itemCount: 0,
       actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -109,20 +123,20 @@ function TeamList({ i18n }) {
             toolbarSearchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: i18n._(t`Organization Name`),
-                key: 'organization__name',
+                key: 'organization__name__icontains',
               },
               {
                 name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username',
+                key: 'created_by__username__icontains',
               },
               {
                 name: i18n._(t`Modified By (Username)`),
-                key: 'modified_by__username',
+                key: 'modified_by__username__icontains',
               },
             ]}
             toolbarSortColumns={[
@@ -131,6 +145,8 @@ function TeamList({ i18n }) {
                 key: 'name',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             renderToolbar={props => (
               <DataListToolbar
                 {...props}

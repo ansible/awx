@@ -26,6 +26,9 @@
  				description: $scope.description,
  				enabled: $scope.host.enabled
  			};
+                        if (typeof $scope.host.instance_id !== 'undefined') {
+                            host.instance_id = $scope.host.instance_id;
+                        }
  			HostsService.put(host).then(function(){
  				$state.go('.', null, {reload: true});
  			});

@@ -5,6 +5,7 @@ import {
   noWhiteSpace,
   integer,
   combine,
+  regExp,
 } from './validators';
 
 const i18n = { _: val => val };
@@ -127,5 +128,14 @@ describe('validators', () => {
       id: 'This field must not be blank',
     });
     expect(combine(validators)('ok')).toBeUndefined();
+  });
+
+  test('regExp rejects invalid regular expression', () => {
+    expect(regExp(i18n)('[')).toEqual({
+      id: 'This field must be a regular expression',
+    });
+    expect(regExp(i18n)('')).toBeUndefined();
+    expect(regExp(i18n)('ok')).toBeUndefined();
+    expect(regExp(i18n)('[^a-zA-Z]')).toBeUndefined();
   });
 });

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, PageSection, CardActions } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import {
   Switch,
   useParams,
@@ -11,8 +12,6 @@ import {
   Redirect,
   Link,
 } from 'react-router-dom';
-import { TabbedCardHeader } from '../../components/Card';
-import CardCloseButton from '../../components/CardCloseButton';
 import { ResourceAccessList } from '../../components/ResourceAccessList';
 import ContentError from '../../components/ContentError';
 import RoutedTabs from '../../components/RoutedTabs';
@@ -46,6 +45,16 @@ function Credential({ i18n, setBreadcrumb }) {
   }, [id, pathname, setBreadcrumb]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Credentials`)}
+        </>
+      ),
+      link: `/credentials`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `/credentials/${id}/details`, id: 0 },
   ];
 
@@ -57,17 +66,10 @@ function Credential({ i18n, setBreadcrumb }) {
     });
   }
 
-  let cardHeader = hasContentLoading ? null : (
-    <TabbedCardHeader>
-      <RoutedTabs tabsArray={tabsArray} />
-      <CardActions>
-        <CardCloseButton linkTo="/credentials" />
-      </CardActions>
-    </TabbedCardHeader>
-  );
+  let showCardHeader = true;
 
   if (pathname.endsWith('edit') || pathname.endsWith('add')) {
-    cardHeader = null;
+    showCardHeader = false;
   }
 
   if (!hasContentLoading && contentError) {
@@ -77,8 +79,10 @@ function Credential({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response && contentError.response.status === 404 && (
               <span>
-                {i18n._(`Credential not found.`)}{' '}
-                <Link to="/credentials">{i18n._(`View all Credentials.`)}</Link>
+                {i18n._(t`Credential not found.`)}{' '}
+                <Link to="/credentials">
+                  {i18n._(t`View all Credentials.`)}
+                </Link>
               </span>
             )}
           </ContentError>
@@ -90,7 +94,7 @@ function Credential({ i18n, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        {cardHeader}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect
             from="/credentials/:id"
@@ -117,7 +121,7 @@ function Credential({ i18n, setBreadcrumb }) {
                 <ContentError isNotFound>
                   {match.params.id && (
                     <Link to={`/credentials/${match.params.id}/details`}>
-                      {i18n._(`View Credential Details`)}
+                      {i18n._(t`View Credential Details`)}
                     </Link>
                   )}
                 </ContentError>
@@ -129,7 +133,7 @@ function Credential({ i18n, setBreadcrumb }) {
               <ContentError isNotFound>
                 {id && (
                   <Link to={`/credentials/${id}/details`}>
-                    {i18n._(`View Credential Details`)}
+                    {i18n._(t`View Credential Details`)}
                   </Link>
                 )}
               </ContentError>

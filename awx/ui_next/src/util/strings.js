@@ -17,3 +17,7 @@ export const toTitleCase = string => {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 };
+
+export const arrayToString = value => value.join(',');
+
+export const stringToArray = value => value.split(',').filter(val => !!val);

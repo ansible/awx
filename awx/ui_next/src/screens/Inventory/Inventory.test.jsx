@@ -30,7 +30,7 @@ describe('<Inventory />', () => {
       wrapper = mountWithContexts(<Inventory setBreadcrumb={() => {}} />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 6);
+    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 7);
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

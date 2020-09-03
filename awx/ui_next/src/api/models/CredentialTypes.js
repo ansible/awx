@@ -7,7 +7,7 @@ class CredentialTypes extends Base {
   }
 
   async loadAllTypes(
-    acceptableKinds = ['machine', 'cloud', 'net', 'ssh', 'vault']
+    acceptableKinds = ['machine', 'cloud', 'net', 'ssh', 'vault', 'kubernetes']
   ) {
     const pageSize = 200;
     // The number of credential types a user can have is unlimited. In practice, it is unlikely for
@@ -26,6 +26,10 @@ class CredentialTypes extends Base {
     return results
       .concat(nextResults)
       .filter(type => acceptableKinds.includes(type.kind));
+  }
+
+  test(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/test/`, data);
   }
 }
 

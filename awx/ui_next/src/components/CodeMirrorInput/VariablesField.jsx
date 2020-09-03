@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import { Split, SplitItem } from '@patternfly/react-core';
 import { CheckboxField, FieldTooltip } from '../FormField';
 import MultiButtonToggle from '../MultiButtonToggle';
-import { yamlToJson, jsonToYaml, isJson } from '../../util/yaml';
+import { yamlToJson, jsonToYaml, isJsonString } from '../../util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
 
@@ -30,12 +30,14 @@ function VariablesField({
   tooltip,
 }) {
   const [field, meta, helpers] = useField(name);
-  const [mode, setMode] = useState(isJson(field.value) ? JSON_MODE : YAML_MODE);
+  const [mode, setMode] = useState(
+    isJsonString(field.value) ? JSON_MODE : YAML_MODE
+  );
 
   return (
     <div className="pf-c-form__group">
       <FieldHeader>
-        <Split gutter="sm">
+        <Split hasGutter>
           <SplitItem>
             <label htmlFor={id} className="pf-c-form__label">
               <span className="pf-c-form__label-text">{label}</span>

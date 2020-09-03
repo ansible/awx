@@ -475,6 +475,7 @@ class JobOutput extends Component {
             variant="danger"
             onClose={() => this.setState({ deletionError: null })}
             title={i18n._(t`Job Delete Error`)}
+            label={i18n._(t`Job Delete Error`)}
           >
             <ErrorDetail error={deletionError} />
           </AlertModal>

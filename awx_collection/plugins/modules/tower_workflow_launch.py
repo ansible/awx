@@ -91,9 +91,8 @@ EXAMPLES = '''
     wait: False
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 import json
-import time
 
 
 def main():
@@ -111,7 +110,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     optional_args = {}
     # Extract our parameters
@@ -178,26 +177,13 @@ def main():
     if not wait:
         module.exit_json(**module.json_output)
 
-    # Grab our start time to compare against for the timeout
-    start = time.time()
-
-    job_url = result['json']['url']
-    while not result['json']['finished']:
-        # If we are past our time out fail with a message
-        if timeout and timeout < time.time() - start:
-            module.json_output['msg'] = "Monitoring aborted due to timeout"
-            module.fail_json(**module.json_output)
-
-        # Put the process to sleep for our interval
-        time.sleep(interval)
-
-        result = module.get_endpoint(job_url)
-        module.json_output['status'] = result['json']['status']
-
-    # If the job has failed, we want to raise a task failure for that so we get a non-zero response.
-    if result['json']['failed']:
-        module.json_output['msg'] = 'The workflow "{0}" failed'.format(name)
-        module.fail_json(**module.json_output)
+    # Invoke wait function
+    module.wait_on_url(
+        url=result['json']['url'],
+        object_name=name,
+        object_type='Workflow Job',
+        timeout=timeout, interval=interval
+    )
 
     module.exit_json(**module.json_output)
 

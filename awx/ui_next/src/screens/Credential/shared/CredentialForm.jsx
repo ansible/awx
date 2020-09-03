@@ -1,32 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func, object, shape } from 'prop-types';
-import { Form, FormGroup, Title } from '@patternfly/react-core';
+import { ActionGroup, Button, Form, FormGroup } from '@patternfly/react-core';
 import FormField, { FormSubmitError } from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
+import {
+  FormColumnLayout,
+  FormFullWidthLayout,
+} from '../../../components/FormLayout';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import { required } from '../../../util/validators';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import {
-  FormColumnLayout,
-  SubFormLayout,
-} from '../../../components/FormLayout';
-import {
-  GoogleComputeEngineSubForm,
-  ManualSubForm,
-  SourceControlSubForm,
-} from './CredentialSubForms';
+import TypeInputsSubForm from './TypeInputsSubForm';
+import ExternalTestModal from './ExternalTestModal';
 
 function CredentialFormFields({
   i18n,
   credentialTypes,
   formik,
-  gceCredentialTypeId,
   initialValues,
-  scmCredentialTypeId,
-  sshCredentialTypeId,
 }) {
   const [orgField, orgMeta, orgHelpers] = useField('organization');
   const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
@@ -34,23 +27,53 @@ function CredentialFormFields({
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
 
-  const credentialTypeOptions = Object.keys(credentialTypes).map(key => {
-    return {
-      value: credentialTypes[key].id,
-      key: credentialTypes[key].kind,
-      label: credentialTypes[key].name,
-    };
-  });
+  const credentialTypeOptions = Object.keys(credentialTypes)
+    .map(key => {
+      return {
+        value: credentialTypes[key].id,
+        key: credentialTypes[key].id,
+        label: credentialTypes[key].name,
+      };
+    })
+    .sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
 
-  const resetSubFormFields = (value, form) => {
-    Object.keys(form.initialValues.inputs).forEach(label => {
-      if (parseInt(value, 10) === form.initialValues.credential_type) {
-        form.setFieldValue(`inputs.${label}`, initialValues.inputs[label]);
-      } else {
-        form.setFieldValue(`inputs.${label}`, '');
+  const resetSubFormFields = (newCredentialType, form) => {
+    const fields = credentialTypes[newCredentialType].inputs.fields || [];
+    fields.forEach(
+      ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
+        if (
+          parseInt(newCredentialType, 10) === form.initialValues.credential_type
+        ) {
+          form.setFieldValue(`inputs.${id}`, initialValues.inputs[id]);
+          if (ask_at_runtime) {
+            form.setFieldValue(
+              `passwordPrompts.${id}`,
+              initialValues.passwordPrompts[id]
+            );
+          }
+        } else {
+          switch (type) {
+            case 'string':
+              form.setFieldValue(`inputs.${id}`, defaultValue || '');
+              break;
+            case 'boolean':
+              form.setFieldValue(`inputs.${id}`, defaultValue || false);
+              break;
+            default:
+              break;
+          }
+
+          if (choices) {
+            form.setFieldValue(`inputs.${id}`, defaultValue);
+          }
+
+          if (ask_at_runtime) {
+            form.setFieldValue(`passwordPrompts.${id}`, false);
+          }
+        }
+        form.setFieldTouched(`inputs.${id}`, false);
       }
-      form.setFieldTouched(`inputs.${label}`, false);
-    });
+    );
   };
 
   return (
@@ -84,7 +107,9 @@ function CredentialFormFields({
         fieldId="credential-credentialType"
         helperTextInvalid={credTypeMeta.error}
         isRequired
-        isValid={!credTypeMeta.touched || !credTypeMeta.error}
+        validated={
+          !credTypeMeta.touched || !credTypeMeta.error ? 'default' : 'error'
+        }
         label={i18n._(t`Credential Type`)}
       >
         <AnsibleSelect
@@ -105,23 +130,19 @@ function CredentialFormFields({
           }}
         />
       </FormGroup>
-      {credTypeField.value !== undefined && credTypeField.value !== '' && (
-        <SubFormLayout>
-          <Title size="md">{i18n._(t`Type Details`)}</Title>
-          {
-            {
-              [gceCredentialTypeId]: <GoogleComputeEngineSubForm />,
-              [sshCredentialTypeId]: <ManualSubForm />,
-              [scmCredentialTypeId]: <SourceControlSubForm />,
-            }[credTypeField.value]
-          }
-        </SubFormLayout>
-      )}
+      {credTypeField.value !== undefined &&
+        credTypeField.value !== '' &&
+        credentialTypes[credTypeField.value]?.inputs?.fields && (
+          <TypeInputsSubForm
+            credentialType={credentialTypes[credTypeField.value]}
+          />
+        )}
     </>
   );
 }
 
 function CredentialForm({
+  i18n,
   credential = {},
   credentialTypes,
   inputSources,
@@ -130,23 +151,49 @@ function CredentialForm({
   submitError,
   ...rest
 }) {
+  const [showExternalTestModal, setShowExternalTestModal] = useState(false);
   const initialValues = {
     name: credential.name || '',
     description: credential.description || '',
     organization: credential?.summary_fields?.organization || null,
     credential_type: credential.credential_type || '',
-    inputs: {
-      become_method: credential?.inputs?.become_method || '',
-      become_password: credential?.inputs?.become_password || '',
-      become_username: credential?.inputs?.become_username || '',
-      password: credential?.inputs?.password || '',
-      project: credential?.inputs?.project || '',
-      ssh_key_data: credential?.inputs?.ssh_key_data || '',
-      ssh_key_unlock: credential?.inputs?.ssh_key_unlock || '',
-      ssh_public_key_data: credential?.inputs?.ssh_public_key_data || '',
-      username: credential?.inputs?.username || '',
-    },
+    inputs: {},
+    passwordPrompts: {},
   };
+
+  Object.values(credentialTypes).forEach(credentialType => {
+    const fields = credentialType.inputs.fields || [];
+    fields.forEach(
+      ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
+        if (credential?.inputs && credential.inputs[id]) {
+          if (ask_at_runtime) {
+            initialValues.passwordPrompts[id] =
+              credential.inputs[id] === 'ASK' || false;
+          }
+          initialValues.inputs[id] = credential.inputs[id];
+        } else {
+          switch (type) {
+            case 'string':
+              initialValues.inputs[id] = defaultValue || '';
+              break;
+            case 'boolean':
+              initialValues.inputs[id] = defaultValue || false;
+              break;
+            default:
+              break;
+          }
+
+          if (choices) {
+            initialValues.inputs[id] = defaultValue;
+          }
+
+          if (ask_at_runtime) {
+            initialValues.passwordPrompts[id] = false;
+          }
+        }
+      }
+    );
+  });
 
   Object.values(inputSources).forEach(inputSource => {
     initialValues.inputs[inputSource.input_field_name] = {
@@ -155,82 +202,69 @@ function CredentialForm({
     };
   });
 
-  const scmCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].namespace === 'scm')
-    .map(key => credentialTypes[key].id)[0];
-  const sshCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].namespace === 'ssh')
-    .map(key => credentialTypes[key].id)[0];
-  const gceCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].namespace === 'gce')
-    .map(key => credentialTypes[key].id)[0];
-
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={values => {
-        const scmKeys = [
-          'username',
-          'password',
-          'ssh_key_data',
-          'ssh_key_unlock',
-        ];
-        const sshKeys = [
-          'username',
-          'password',
-          'ssh_key_data',
-          'ssh_public_key_data',
-          'ssh_key_unlock',
-          'become_method',
-          'become_username',
-          'become_password',
-        ];
-        const gceKeys = ['username', 'ssh_key_data', 'project'];
-        if (parseInt(values.credential_type, 10) === scmCredentialTypeId) {
-          Object.keys(values.inputs).forEach(key => {
-            if (scmKeys.indexOf(key) < 0) {
-              delete values.inputs[key];
-            }
-          });
-        } else if (
-          parseInt(values.credential_type, 10) === sshCredentialTypeId
-        ) {
-          Object.keys(values.inputs).forEach(key => {
-            if (sshKeys.indexOf(key) < 0) {
-              delete values.inputs[key];
-            }
-          });
-        } else if (
-          parseInt(values.credential_type, 10) === gceCredentialTypeId
-        ) {
-          Object.keys(values.inputs).forEach(key => {
-            if (gceKeys.indexOf(key) < 0) {
-              delete values.inputs[key];
-            }
-          });
-        }
         onSubmit(values);
       }}
     >
       {formik => (
-        <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-          <FormColumnLayout>
-            <CredentialFormFields
-              formik={formik}
-              initialValues={initialValues}
-              credentialTypes={credentialTypes}
-              gceCredentialTypeId={gceCredentialTypeId}
-              scmCredentialTypeId={scmCredentialTypeId}
-              sshCredentialTypeId={sshCredentialTypeId}
-              {...rest}
+        <>
+          <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+            <FormColumnLayout>
+              <CredentialFormFields
+                formik={formik}
+                initialValues={initialValues}
+                credentialTypes={credentialTypes}
+                i18n={i18n}
+                {...rest}
+              />
+              <FormSubmitError error={submitError} />
+              <FormFullWidthLayout>
+                <ActionGroup>
+                  <Button
+                    aria-label={i18n._(t`Save`)}
+                    variant="primary"
+                    type="button"
+                    onClick={formik.handleSubmit}
+                  >
+                    {i18n._(t`Save`)}
+                  </Button>
+                  {formik?.values?.credential_type &&
+                    credentialTypes[formik.values.credential_type]?.kind ===
+                      'external' && (
+                      <Button
+                        aria-label={i18n._(t`Test`)}
+                        variant="secondary"
+                        type="button"
+                        onClick={() => setShowExternalTestModal(true)}
+                        isDisabled={!formik.isValid}
+                      >
+                        {i18n._(t`Test`)}
+                      </Button>
+                    )}
+                  <Button
+                    aria-label={i18n._(t`Cancel`)}
+                    variant="secondary"
+                    type="button"
+                    onClick={onCancel}
+                  >
+                    {i18n._(t`Cancel`)}
+                  </Button>
+                </ActionGroup>
+              </FormFullWidthLayout>
+            </FormColumnLayout>
+          </Form>
+          {showExternalTestModal && (
+            <ExternalTestModal
+              credential={credential}
+              credentialType={credentialTypes[formik.values.credential_type]}
+              credentialFormValues={formik.values}
+              onClose={() => setShowExternalTestModal(false)}
             />
-            <FormSubmitError error={submitError} />
-            <FormActionGroup
-              onCancel={onCancel}
-              onSubmit={formik.handleSubmit}
-            />
-          </FormColumnLayout>
-        </Form>
+          )}
+        </>
       )}
     </Formik>
   );
@@ -239,13 +273,16 @@ function CredentialForm({
 CredentialForm.proptype = {
   handleSubmit: func.isRequired,
   handleCancel: func.isRequired,
+  credentialTypes: shape({}).isRequired,
   credential: shape({}),
   inputSources: arrayOf(object),
+  submitError: shape({}),
 };
 
 CredentialForm.defaultProps = {
   credential: {},
   inputSources: [],
+  submitError: null,
 };
 
 export default withI18n()(CredentialForm);

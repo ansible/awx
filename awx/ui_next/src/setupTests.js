@@ -12,3 +12,10 @@ require('@nteract/mockument');
 
 // eslint-disable-next-line import/prefer-default-export
 export const asyncFlush = () => new Promise(resolve => setImmediate(resolve));
+
+// this ensures that debug messages don't get logged out to the console
+// while tests are running i.e. websocket connect/disconnect
+global.console = {
+  ...console,
+  debug: jest.fn(),
+};

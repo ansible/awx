@@ -9,6 +9,7 @@ import {
   Switch,
   Checkbox,
   TextInput,
+  Title,
 } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
@@ -27,6 +28,7 @@ import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
+  SubFormLayout,
 } from '../../../components/FormLayout';
 import { VariablesField } from '../../../components/CodeMirrorInput';
 import { required } from '../../../util/validators';
@@ -89,6 +91,15 @@ function JobTemplateForm({
   const [jobTagsField, , jobTagsHelpers] = useField('job_tags');
   const [skipTagsField, , skipTagsHelpers] = useField('skip_tags');
 
+  const [, webhookServiceMeta, webhookServiceHelpers] = useField(
+    'webhook_service'
+  );
+  const [, webhookUrlMeta, webhookUrlHelpers] = useField('webhook_url');
+  const [, webhookKeyMeta, webhookKeyHelpers] = useField('webhook_key');
+  const [, webhookCredentialMeta, webhookCredentialHelpers] = useField(
+    'webhook_credential'
+  );
+
   const {
     request: fetchProject,
     error: projectContentError,
@@ -123,6 +134,21 @@ function JobTemplateForm({
   useEffect(() => {
     loadRelatedInstanceGroups();
   }, [loadRelatedInstanceGroups]);
+
+  useEffect(() => {
+    if (enableWebhooks) {
+      webhookServiceHelpers.setValue(webhookServiceMeta.initialValue);
+      webhookUrlHelpers.setValue(webhookUrlMeta.initialValue);
+      webhookKeyHelpers.setValue(webhookKeyMeta.initialValue);
+      webhookCredentialHelpers.setValue(webhookCredentialMeta.initialValue);
+    } else {
+      webhookServiceHelpers.setValue('');
+      webhookUrlHelpers.setValue('');
+      webhookKeyHelpers.setValue('');
+      webhookCredentialHelpers.setValue(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enableWebhooks]);
 
   const handleProjectValidation = project => {
     if (!project && projectMeta.touched) {
@@ -291,13 +317,19 @@ function JobTemplateForm({
         <FormGroup
           fieldId="template-playbook"
           helperTextInvalid={playbookMeta.error}
-          isValid={!playbookMeta.touched || !playbookMeta.error}
+          validated={
+            !playbookMeta.touched || !playbookMeta.error ? 'default' : 'error'
+          }
           isRequired
           label={i18n._(t`Playbook`)}
+          labelIcon={
+            <FieldTooltip
+              content={i18n._(
+                t`Select the playbook to be executed by this job.`
+              )}
+            />
+          }
         >
-          <FieldTooltip
-            content={i18n._(t`Select the playbook to be executed by this job.`)}
-          />
           <PlaybookSelect
             projectId={projectField.value?.id}
             isValid={!playbookMeta.touched || !playbookMeta.error}
@@ -326,12 +358,17 @@ function JobTemplateForm({
               onError={setContentError}
             />
           </FieldWithPrompt>
-          <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
-            <FieldTooltip
-              content={i18n._(t`Optional labels that describe this job template,
+          <FormGroup
+            label={i18n._(t`Labels`)}
+            labelIcon={
+              <FieldTooltip
+                content={i18n._(t`Optional labels that describe this job template,
                       such as 'dev' or 'test'. Labels can be used to group and filter
                       job templates and completed jobs.`)}
-            />
+              />
+            }
+            fieldId="template-labels"
+          >
             <LabelSelect
               value={labelsField.value}
               onChange={labels => labelsHelpers.setValue(labels)}
@@ -381,7 +418,9 @@ function JobTemplateForm({
               <TextInput
                 id="template-limit"
                 {...limitField}
-                isValid={!limitMeta.touched || !limitMeta.error}
+                validated={
+                  !limitMeta.touched || !limitMeta.error ? 'default' : 'error'
+                }
                 onChange={value => {
                   limitHelpers.setValue(value);
                 }}
@@ -543,30 +582,53 @@ function JobTemplateForm({
                 </FormCheckboxLayout>
               </FormGroup>
             </FormFullWidthLayout>
-            <WebhookSubForm
-              enableWebhooks={enableWebhooks}
-              templateType={template.type}
-            />
-            {allowCallbacks && (
+
+            {(allowCallbacks || enableWebhooks) && (
               <>
-                {callbackUrl && (
-                  <FormGroup
-                    label={i18n._(t`Provisioning Callback URL`)}
-                    fieldId="template-callback-url"
-                  >
-                    <TextInput
-                      id="template-callback-url"
-                      isDisabled
-                      value={callbackUrl}
-                    />
-                  </FormGroup>
-                )}
-                <FormField
-                  id="template-host-config-key"
-                  name="host_config_key"
-                  label={i18n._(t`Host Config Key`)}
-                  validate={allowCallbacks ? required(null, i18n) : null}
-                />
+                <SubFormLayout>
+                  {allowCallbacks && (
+                    <>
+                      <Title size="md" headingLevel="h4">
+                        {i18n._(t`Provisioning Callback details`)}
+                      </Title>
+                      <FormColumnLayout>
+                        {callbackUrl && (
+                          <FormGroup
+                            label={i18n._(t`Provisioning Callback URL`)}
+                            fieldId="template-callback-url"
+                          >
+                            <TextInput
+                              id="template-callback-url"
+                              isDisabled
+                              value={callbackUrl}
+                            />
+                          </FormGroup>
+                        )}
+                        <FormField
+                          id="template-host-config-key"
+                          name="host_config_key"
+                          label={i18n._(t`Host Config Key`)}
+                          validate={
+                            allowCallbacks ? required(null, i18n) : null
+                          }
+                        />
+                      </FormColumnLayout>
+                    </>
+                  )}
+
+                  {allowCallbacks && enableWebhooks && <br />}
+
+                  {enableWebhooks && (
+                    <>
+                      <Title size="md" headingLevel="h4">
+                        {i18n._(t`Webhook details`)}
+                      </Title>
+                      <FormColumnLayout>
+                        <WebhookSubForm templateType={template.type} />
+                      </FormColumnLayout>
+                    </>
+                  )}
+                </SubFormLayout>
               </>
             )}
           </FormColumnLayout>

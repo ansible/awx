@@ -31,8 +31,8 @@ register(
     label=_('Custom Login Info'),
     help_text=_('If needed, you can add specific information (such as a legal '
                 'notice or a disclaimer) to a text box in the login modal using '
-                'this setting. Any content added must be in plain text, as '
-                'custom HTML or other markup languages are not supported.'),
+                'this setting. Any content added must be in plain text or an '
+                'HTML fragment, as other markup languages are not supported.'),
     category=_('UI'),
     category_slug='ui',
 )

@@ -43,7 +43,7 @@ options:
     source:
       description:
         - The source to use for this group.
-      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "cloudforms", "openstack", "rhv", "tower", "custom" ]
+      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower", "custom" ]
       type: str
     source_path:
       description:
@@ -57,27 +57,26 @@ options:
       description:
         - The variables or environment fields to apply to this source type.
       type: dict
+    enabled_var:
+      description:
+        - The variable to use to determine enabled state e.g., "status.power_state"
+      type: str
+    enabled_value:
+      description:
+        - Value when the host is considered enabled, e.g., "powered_on"
+      type: str
+    host_filter:
+      description:
+        - If specified, AWX will only import hosts that match this regular expression.
+      type: str
     credential:
       description:
         - Credential to use for the source.
-      type: str
-    source_regions:
-      description:
-        - Regions for cloud provider.
-      type: str
-    instance_filters:
-      description:
-        - Comma-separated list of filter expressions for matching hosts.
-      type: str
-    group_by:
-      description:
-        - Limit groups automatically created from inventory source.
       type: str
     overwrite:
       description:
         - Delete child groups and hosts not found in source.
       type: bool
-      default: 'no'
     overwrite_vars:
       description:
         - Override vars in child groups and hosts with those from external source.
@@ -86,7 +85,6 @@ options:
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
-      default: ''
     timeout:
       description: The amount of time (in seconds) to run before the task is canceled.
       type: int
@@ -98,7 +96,6 @@ options:
       description:
         - Refresh inventory data from its source each time a job is run.
       type: bool
-      default: 'no'
     update_cache_timeout:
       description:
         - Time in seconds to consider an inventory sync to be current.
@@ -147,7 +144,7 @@ EXAMPLES = '''
       private: false
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 from json import dumps
 
 
@@ -162,18 +159,18 @@ def main():
         # How do we handle manual and file? Tower does not seem to be able to activate them
         #
         source=dict(choices=["scm", "ec2", "gce",
-                             "azure_rm", "vmware", "satellite6", "cloudforms",
+                             "azure_rm", "vmware", "satellite6",
                              "openstack", "rhv", "tower", "custom"]),
         source_path=dict(),
         source_script=dict(),
         source_vars=dict(type='dict'),
+        enabled_var=dict(),
+        enabled_value=dict(),
+        host_filter=dict(),
         credential=dict(),
-        source_regions=dict(),
-        instance_filters=dict(),
-        group_by=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
-        custom_virtualenv=dict(default=''),
+        custom_virtualenv=dict(),
         timeout=dict(type='int'),
         verbosity=dict(type='int', choices=[0, 1, 2]),
         update_on_launch=dict(type='bool'),
@@ -187,7 +184,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -248,16 +245,15 @@ def main():
 
     OPTIONAL_VARS = (
         'description', 'source', 'source_path', 'source_vars',
-        'source_regions', 'instance_filters', 'group_by',
         'overwrite', 'overwrite_vars', 'custom_virtualenv',
         'timeout', 'verbosity', 'update_on_launch', 'update_cache_timeout',
-        'update_on_project_update'
+        'update_on_project_update', 'enabled_var', 'enabled_value', 'host_filter',
     )
 
     # Layer in all remaining optional information
     for field_name in OPTIONAL_VARS:
         field_val = module.params.get(field_name)
-        if field_val:
+        if field_val is not None:
             inventory_source_fields[field_name] = field_val
 
     # Attempt to JSON encode source vars

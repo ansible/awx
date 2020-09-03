@@ -72,6 +72,18 @@ def test_node_accepts_prompted_fields(inventory, project, workflow_job_template,
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("field_name, field_value", [
+    ('all_parents_must_converge', True),
+    ('all_parents_must_converge', False),
+])
+def test_create_node_with_field(field_name, field_value, workflow_job_template, post, admin_user):
+    url = reverse('api:workflow_job_template_workflow_nodes_list',
+                  kwargs={'pk': workflow_job_template.pk})
+    res = post(url, {field_name: field_value}, user=admin_user, expect=201)
+    assert res.data[field_name] == field_value
+
+
+@pytest.mark.django_db
 class TestApprovalNodes():
     def test_approval_node_creation(self, post, approval_node, admin_user):
         url = reverse('api:workflow_job_template_node_create_approval',

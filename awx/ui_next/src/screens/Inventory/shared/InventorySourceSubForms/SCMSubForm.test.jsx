@@ -15,9 +15,10 @@ const initialValues = {
   overwrite_vars: false,
   source_path: '',
   source_project: null,
+  source_script: null,
   source_vars: '---\n',
   update_cache_timeout: 0,
-  update_on_launch: false,
+  update_on_launch: true,
   update_on_project_update: false,
   verbosity: 1,
 };
@@ -68,7 +69,10 @@ describe('<SCMSubForm />', () => {
     expect(wrapper.find('FormGroup[label="Verbosity"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Update options"]')).toHaveLength(1);
     expect(
-      wrapper.find('VariablesField[label="Environment variables"]')
+      wrapper.find('FormGroup[label="Cache timeout (seconds)"]')
+    ).toHaveLength(1);
+    expect(
+      wrapper.find('VariablesField[label="Source variables"]')
     ).toHaveLength(1);
   });
 

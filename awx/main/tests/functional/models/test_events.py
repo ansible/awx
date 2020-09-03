@@ -3,7 +3,7 @@ import pytest
 
 from django.utils.timezone import now
 
-from awx.main.models import Job, JobEvent, Inventory, Host
+from awx.main.models import Job, JobEvent, Inventory, Host, JobHostSummary
 
 
 @pytest.mark.django_db
@@ -153,3 +153,58 @@ def test_host_summary_generation_with_deleted_hosts():
     assert ids == [-1, -1, -1, -1, -1, 6, 7, 8, 9, 10]
     assert names == ['Host 0', 'Host 1', 'Host 2', 'Host 3', 'Host 4', 'Host 5',
                      'Host 6', 'Host 7', 'Host 8', 'Host 9']
+
+
+@pytest.mark.django_db
+def test_host_summary_generation_with_limit():
+    # Make an inventory with 10 hosts, run a playbook with a --limit
+    # pointed at *one* host,
+    # Verify that *only* that host has an associated JobHostSummary and that
+    # *only* that host has an updated value for .last_job.
+    hostnames = [f'Host {i}' for i in range(10)]
+    inv = Inventory()
+    inv.save()
+    Host.objects.bulk_create([
+        Host(created=now(), modified=now(), name=h, inventory_id=inv.id)
+        for h in hostnames
+    ])
+    j = Job(inventory=inv)
+    j.save()
+
+    # host map is a data structure that tracks a mapping of host name --> ID
+    # for the inventory, _regardless_ of whether or not there's a limit
+    # applied to the actual playbook run
+    host_map = dict((host.name, host.id) for host in inv.hosts.all())
+
+    # by making the playbook_on_stats *only* include Host 1, we're emulating
+    # the behavior of a `--limit=Host 1`
+    matching_host = Host.objects.get(name='Host 1')
+    JobEvent.create_from_data(
+        job_id=j.pk,
+        parent_uuid='abc123',
+        event='playbook_on_stats',
+        event_data={
+            'ok': {matching_host.name: len(matching_host.name)}, # effectively, limit=Host 1
+            'changed': {},
+            'dark': {},
+            'failures': {},
+            'ignored': {},
+            'processed': {},
+            'rescued': {},
+            'skipped': {},
+        },
+        host_map=host_map
+    ).save()
+
+    # since the playbook_on_stats only references one host,
+    # there should *only* be on JobHostSummary record (and it should
+    # be related to the appropriate Host)
+    assert JobHostSummary.objects.count() == 1
+    for h in Host.objects.all():
+        if h.name == 'Host 1':
+            assert h.last_job_id == j.id
+            assert h.last_job_host_summary_id == JobHostSummary.objects.first().id
+        else:
+            # all other hosts in the inventory should remain untouched
+            assert h.last_job_id is None
+            assert h.last_job_host_summary_id is None

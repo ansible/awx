@@ -2,7 +2,7 @@ export default
     function GetProjectPath(i18n, Rest, GetBasePath, ProcessErrors) {
         return function(params) {
             var scope = params.scope,
-                master = params.master;
+                main = params.main;
 
             function arraySort(data) {
                 //Sort nodes by name
@@ -54,8 +54,8 @@ export default
                         }
                     }
                     scope.base_dir = data.project_base_dir || i18n._('You do not have access to view this property');
-                    master.local_path = scope.local_path;
-                    master.base_dir = scope.base_dir; // Keep in master object so that it doesn't get
+                    main.local_path = scope.local_path;
+                    main.base_dir = scope.base_dir; // Keep in main object so that it doesn't get
                     // wiped out on form reset.
                     if (opts.length === 0) {
                         // trigger display of alert block when scm_type == manual

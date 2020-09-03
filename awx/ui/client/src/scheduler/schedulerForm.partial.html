@@ -29,7 +29,7 @@
                     id="schedulerName"
                     ng-model="schedulerName" required
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
-                    placeholder="{{strings.get('form.SCHEDULE_NAME')}}">
+                    placeholder="{{strings.get('form.SCHEDULE_NAME')}}" />
                 <div class="error"
                     ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required">
                     {{ strings.get('form.NAME_REQUIRED_MESSAGE') }}
@@ -74,7 +74,7 @@
                         placeholder="{{strings.get('form.HH24')}}"
                         aw-min="0" min="0" aw-max="23"
                         max="23" data-zero-pad="2" required
-                        ng-change="timeChange()" >
+                        ng-change="timeChange()" />
                     <span
                         class="SchedulerTime-separator">
                         :
@@ -90,7 +90,7 @@
                         placeholder="{{strings.get('form.MM')}}"
                         min="0" max="59" data-zero-pad="2"
                         required
-                        ng-change="timeChange()" >
+                        ng-change="timeChange()" />
                     <span
                         class="SchedulerTime-separator">
                         :
@@ -106,7 +106,7 @@
                         placeholder="{{strings.get('form.SS')}}"
                         min="0" max="59" data-zero-pad="2"
                         required
-                        ng-change="timeChange()" >
+                        ng-change="timeChange()" />
                 </div>
                 <div class="error"
                     ng-show="scheduler_startTime_error">
@@ -173,7 +173,7 @@
                         min="1"
                         max="999"
                         ng-change="resetError('scheduler_interval_error')"
-                    >
+                    />
                     <label class="inline-label
                         RepeatFrequencyOptions-inlineLabel"
                         ng-bind="schedulerIntervalLabel">
@@ -196,7 +196,7 @@
                                 ng-model="$parent.monthlyRepeatOption"
                                 ng-change="monthlyRepeatChange()"
                                 name="monthlyRepeatOption"
-                                id="monthlyRepeatOption">
+                                id="monthlyRepeatOption" />
                             {{ strings.get('form.ON_DAY') }}
                         </label>
                     </div>
@@ -209,7 +209,7 @@
                         aw-spinner="$parent.monthDay"
                         ng-model="$parent.monthDay"
                         min="1" max="31"
-                        ng-change="resetError('scheduler_monthDay_error')" >
+                        ng-change="resetError('scheduler_monthDay_error')" />
                     <div class="error"
                         ng-show="$parent.scheduler_monthDay_error">
                         {{ strings.get('form.MONTH_DAY_ERROR_MESSAGE') }}
@@ -228,7 +228,7 @@
                                 ng-model="$parent.monthlyRepeatOption"
                                 ng-change="monthlyRepeatChange()"
                                 name="monthlyRepeatOption"
-                                id="monthlyRepeatOption">
+                                id="monthlyRepeatOption" />
                             {{ strings.get('form.ON_THE') }}
                         </label>
                     </div>
@@ -267,7 +267,7 @@
                                 ng-model="$parent.yearlyRepeatOption"
                                 ng-change="yearlyRepeatChange()"
                                 name="yearlyRepeatOption"
-                                id="yearlyRepeatOption">
+                                id="yearlyRepeatOption" />
                             {{ strings.get('form.ON') }}
                         </label>
                     </div>
@@ -292,7 +292,7 @@
                             ng-model="$parent.yearlyMonthDay"
                             min="1" max="31"
                             ng-change="resetError('scheduler_yearlyMonthDay_error')"
-                        >
+                        />
                     </div>
                     <div class="error"
                         ng-show="$parent.scheduler_yearlyMonthDay_error">
@@ -312,7 +312,7 @@
                                 ng-model="$parent.yearlyRepeatOption"
                                 ng-change="yearlyRepeatChange()"
                                 name="yearlyRepeatOption"
-                                id="yearlyRepeatOption">
+                                id="yearlyRepeatOption" />
                             {{ strings.get('form.ON_THE') }}
                         </label>
                     </div>
@@ -524,7 +524,7 @@
                             placeholder="{{strings.get('form.HH24')}}"
                             aw-min="0" min="0" aw-max="23"
                             max="23" data-zero-pad="2" required
-                            ng-change="schedulerEndChange('schedulerEndHour', $parent.schedulerEndHour)" >
+                            ng-change="schedulerEndChange('schedulerEndHour', $parent.schedulerEndHour)" />
                         <span
                             class="SchedulerTime-separator">
                             :
@@ -540,7 +540,7 @@
                             placeholder="{{strings.get('form.MM')}}"
                             min="0" max="59" data-zero-pad="2"
                             required
-                            ng-change="schedulerEndChange('schedulerEndMinute', $parent.schedulerEndMinute)" >
+                            ng-change="schedulerEndChange('schedulerEndMinute', $parent.schedulerEndMinute)" />
                         <span
                             class="SchedulerTime-separator">
                             :
@@ -556,7 +556,7 @@
                             placeholder="{{strings.get('form.SS')}}"
                             min="0" max="59" data-zero-pad="2"
                             required
-                            ng-change="schedulerEndChange('schedulerEndSecond', $parent.schedulerEndSecond)" >
+                            ng-change="schedulerEndChange('schedulerEndSecond', $parent.schedulerEndSecond)" />
                     </div>
                     <div class="error"
                         ng-show="scheduler_startTime_error">
@@ -604,7 +604,7 @@
                             class="SchedulerFormDetail-radioButton"
                             ng-model="dateChoice"
                             id="date-choice-local"
-                            value="local" >
+                            value="local" />
                         {{ strings.get('form.LOCAL_TIME_ZONE') }}
                     </label>
                     <label class="radio-inline
@@ -613,7 +613,7 @@
                             class="SchedulerFormDetail-radioButton"
                             ng-model="dateChoice"
                             id="date-choice-utc"
-                            value="utc" >
+                            value="utc" />
                         UTC
                     </label>
                 </div>

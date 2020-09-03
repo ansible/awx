@@ -218,7 +218,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                                 data-placement="top"
                                 id="workflow_job_template_webhook_key_gen_btn"
                             >
-                                <i class="fa fa-refresh" />
+                                <i class="fa fa-refresh"></i>
                             </button>
                         </span>
                     `,

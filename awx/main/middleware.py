@@ -14,7 +14,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.migrations.executor import MigrationExecutor
 from django.db import connection
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.apps import apps
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import ugettext_lazy as _
@@ -148,7 +148,21 @@ class URLModificationMiddleware(MiddlewareMixin):
     def _named_url_to_pk(cls, node, resource, named_url):
         kwargs = {}
         if node.populate_named_url_query_kwargs(kwargs, named_url):
-            return str(get_object_or_404(node.model, **kwargs).pk)
+            match = node.model.objects.filter(**kwargs).first()
+            if match:
+                return str(match.pk)
+            else:
+                # if the name does *not* resolve to any actual resource,
+                # we should still attempt to route it through so that 401s are
+                # respected
+                # using "zero" here will cause the URL regex to match e.g.,
+                # /api/v2/users/<integer>/, but it also means that anonymous
+                # users will go down the path of having their credentials
+                # verified; in this way, *anonymous* users will that visit
+                # /api/v2/users/invalid-username/ *won't* see a 404, they'll
+                # see a 401 as if they'd gone to /api/v2/users/0/
+                #
+                return '0'
         if resource == 'job_templates' and '++' not in named_url:
             # special case for deprecated job template case
             # will not raise a 404 on its own
@@ -178,6 +192,7 @@ class URLModificationMiddleware(MiddlewareMixin):
             old_path = request.path_info
         new_path = self._convert_named_url(old_path)
         if request.path_info != new_path:
+            request.environ['awx.named_url_rewritten'] = request.path
             request.path = request.path.replace(request.path_info, new_path)
             request.path_info = new_path
 

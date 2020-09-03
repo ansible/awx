@@ -8,10 +8,11 @@ import {
   shape,
   checkPropTypes,
 } from 'prop-types';
-import { Button, Tooltip } from '@patternfly/react-core';
+import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
+import { Kebabified } from '../../contexts/Kebabified';
 
 const requireNameOrUsername = props => {
   const { name, username } = props;
@@ -63,10 +64,12 @@ class ToolbarDeleteButton extends React.Component {
     onDelete: func.isRequired,
     itemsToDelete: arrayOf(ItemToDelete).isRequired,
     pluralizedItemName: string,
+    errorMessage: string,
   };
 
   static defaultProps = {
     pluralizedItemName: 'Items',
+    errorMessage: '',
   };
 
   constructor(props) {
@@ -96,7 +99,12 @@ class ToolbarDeleteButton extends React.Component {
   }
 
   renderTooltip() {
-    const { itemsToDelete, pluralizedItemName, i18n } = this.props;
+    const {
+      itemsToDelete,
+      pluralizedItemName,
+      errorMessage,
+      i18n,
+    } = this.props;
 
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
@@ -105,9 +113,11 @@ class ToolbarDeleteButton extends React.Component {
     if (itemsToDelete.some(cannotDelete)) {
       return (
         <div>
-          {i18n._(
-            t`You do not have permission to delete the following ${pluralizedItemName}: ${itemsUnableToDelete}`
-          )}
+          {errorMessage.length > 0
+            ? errorMessage
+            : i18n._(
+                t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}`
+              )}
         </div>
       );
     }
@@ -129,54 +139,69 @@ class ToolbarDeleteButton extends React.Component {
     // we can delete the extra <div> around the <DeleteButton> below.
     // See: https://github.com/patternfly/patternfly-react/issues/1894
     return (
-      <Fragment>
-        <Tooltip content={this.renderTooltip()} position="top">
-          <div>
-            <Button
-              variant="danger"
-              aria-label={i18n._(t`Delete`)}
-              onClick={this.handleConfirmDelete}
-              isDisabled={isDisabled}
-            >
-              {i18n._(t`Delete`)}
-            </Button>
-          </div>
-        </Tooltip>
-        {isModalOpen && (
-          <AlertModal
-            variant="danger"
-            title={modalTitle}
-            isOpen={isModalOpen}
-            onClose={this.handleCancelDelete}
-            actions={[
-              <Button
-                key="delete"
-                variant="danger"
-                aria-label={i18n._(t`confirm delete`)}
-                onClick={this.handleDelete}
+      <Kebabified>
+        {({ isKebabified }) => (
+          <Fragment>
+            {isKebabified ? (
+              <DropdownItem
+                key="add"
+                isDisabled={isDisabled}
+                component="Button"
+                onClick={this.handleConfirmDelete}
               >
                 {i18n._(t`Delete`)}
-              </Button>,
-              <Button
-                key="cancel"
-                variant="secondary"
-                aria-label={i18n._(t`cancel delete`)}
-                onClick={this.handleCancelDelete}
+              </DropdownItem>
+            ) : (
+              <Tooltip content={this.renderTooltip()} position="top">
+                <div>
+                  <Button
+                    variant="secondary"
+                    aria-label={i18n._(t`Delete`)}
+                    onClick={this.handleConfirmDelete}
+                    isDisabled={isDisabled}
+                  >
+                    {i18n._(t`Delete`)}
+                  </Button>
+                </div>
+              </Tooltip>
+            )}
+            {isModalOpen && (
+              <AlertModal
+                variant="danger"
+                title={modalTitle}
+                isOpen={isModalOpen}
+                onClose={this.handleCancelDelete}
+                actions={[
+                  <Button
+                    key="delete"
+                    variant="danger"
+                    aria-label={i18n._(t`confirm delete`)}
+                    onClick={this.handleDelete}
+                  >
+                    {i18n._(t`Delete`)}
+                  </Button>,
+                  <Button
+                    key="cancel"
+                    variant="secondary"
+                    aria-label={i18n._(t`cancel delete`)}
+                    onClick={this.handleCancelDelete}
+                  >
+                    {i18n._(t`Cancel`)}
+                  </Button>,
+                ]}
               >
-                {i18n._(t`Cancel`)}
-              </Button>,
-            ]}
-          >
-            <div>{i18n._(t`This action will delete the following:`)}</div>
-            {itemsToDelete.map(item => (
-              <span key={item.id}>
-                <strong>{item.name || item.username}</strong>
-                <br />
-              </span>
-            ))}
-          </AlertModal>
+                <div>{i18n._(t`This action will delete the following:`)}</div>
+                {itemsToDelete.map(item => (
+                  <span key={item.id}>
+                    <strong>{item.name || item.username}</strong>
+                    <br />
+                  </span>
+                ))}
+              </AlertModal>
+            )}
+          </Fragment>
         )}
-      </Fragment>
+      </Kebabified>
     );
   }
 }

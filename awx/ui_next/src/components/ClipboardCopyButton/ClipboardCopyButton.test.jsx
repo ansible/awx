@@ -12,6 +12,8 @@ describe('ClipboardCopyButton', () => {
       <ClipboardCopyButton
         clickTip="foo"
         hoverTip="bar"
+        copyTip="baz"
+        copiedSuccessTip="qux"
         stringToCopy="foobar!"
         isDisabled={false}
       />
@@ -23,6 +25,8 @@ describe('ClipboardCopyButton', () => {
       <ClipboardCopyButton
         clickTip="foo"
         hoverTip="bar"
+        copyTip="baz"
+        copiedSuccessTip="qux"
         stringToCopy="foobar!"
         isDisabled={false}
       />
@@ -40,6 +44,8 @@ describe('ClipboardCopyButton', () => {
       <ClipboardCopyButton
         clickTip="foo"
         hoverTip="bar"
+        copyTip="baz"
+        copiedSuccessTip="qux"
         stringToCopy="foobar!"
         isDisabled
       />

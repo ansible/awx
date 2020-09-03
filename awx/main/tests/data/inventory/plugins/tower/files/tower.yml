@@ -1,3 +1,0 @@
-include_metadata: true
-inventory_id: 42
-plugin: awx.awx.tower

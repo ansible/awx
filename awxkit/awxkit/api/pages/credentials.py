@@ -149,6 +149,8 @@ def get_payload_field_and_value_from_kwargs_or_config_cred(
 
 class CredentialType(HasCreate, base.Base):
 
+    NATURAL_KEY = ('name', 'kind')
+
     def silent_delete(self):
         if not self.managed_by_tower:
             return super(CredentialType, self).silent_delete()
@@ -204,6 +206,7 @@ class Credential(HasCopy, HasCreate, base.Base):
 
     dependencies = [CredentialType]
     optional_dependencies = [Organization, User, Team]
+    NATURAL_KEY = ('organization', 'name', 'credential_type')
 
     def payload(
             self,
@@ -307,7 +310,7 @@ class Credential(HasCopy, HasCreate, base.Base):
             credential_type=CredentialType,
             user=None,
             team=None,
-            organization=Organization,
+            organization=None,
             inputs=None,
             **kwargs):
         payload = self.create_payload(
@@ -320,7 +323,7 @@ class Credential(HasCopy, HasCreate, base.Base):
         return self.update_identity(
             Credentials(
                 self.connection)).post(payload)
- 
+
     def test(self, data):
         """Test the credential endpoint."""
         response = self.connection.post(urljoin(str(self.url), 'test/'), data)

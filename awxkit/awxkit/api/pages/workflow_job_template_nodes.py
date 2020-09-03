@@ -10,6 +10,7 @@ from . import page
 class WorkflowJobTemplateNode(HasCreate, base.Base):
 
     dependencies = [WorkflowJobTemplate, UnifiedJobTemplate]
+    NATURAL_KEY = ('workflow_job_template', 'identifier')
 
     def payload(self, workflow_job_template, unified_job_template, **kwargs):
         if not unified_job_template:
@@ -122,8 +123,8 @@ class WorkflowJobTemplateNode(HasCreate, base.Base):
 
 
 page.register_page([resources.workflow_job_template_node,
-                    (resources.workflow_job_template_nodes,
-                     'post')],
+                    (resources.workflow_job_template_nodes, 'post'),
+                    (resources.workflow_job_template_workflow_nodes, 'post')],
                    WorkflowJobTemplateNode)
 
 

@@ -218,7 +218,6 @@ Each Tower instance is made up of several different services working collaborati
 * **Callback Receiver** - Receives job events that result from running Ansible jobs.
 * **Celery** - The worker queue that processes and runs all jobs.
 * **Redis** - this is used as a queue for AWX to process ansible playbook callback events.
-* **Memcached** - A local caching service for the instance it lives on.
 
 Tower is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently (often in a short span of time), then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.
 

@@ -220,7 +220,7 @@ def test_create_valid_kind(kind, get, post, admin):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('kind', ['ssh', 'vault', 'scm', 'insights'])
+@pytest.mark.parametrize('kind', ['ssh', 'vault', 'scm', 'insights', 'kubernetes'])
 def test_create_invalid_kind(kind, get, post, admin):
     response = post(reverse('api:credential_type_list'), {
         'kind': kind,

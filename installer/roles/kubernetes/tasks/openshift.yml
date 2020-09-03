@@ -18,8 +18,8 @@
     - name: Ensure PostgreSQL PVC is available
       assert:
         that:
-          - pg_pvc_status.stdout == "Bound"
-        msg: "Ensure a PVC named '{{ openshift_pg_pvc_name }}' is created and bound in the '{{ openshift_project }}' namespace."
+          - pg_pvc_status.stdout in ["Bound", "Pending"]
+        msg: "Ensure a PVC named '{{ openshift_pg_pvc_name }}' is available in the namespace '{{ openshift_project }}'."
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - openshift_pg_emptydir is defined and (openshift_pg_emptydir | bool) != true

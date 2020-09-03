@@ -43,7 +43,7 @@ This document provides a guide for installing AWX.
 - [Installing the AWX CLI](#installing-the-awx-cli)
   * [Building the CLI Documentation](#building-the-cli-documentation)
 
-    
+
 ## Getting started
 
 ### Clone the repo
@@ -351,7 +351,7 @@ Once you access the AWX server, you will be prompted with a login dialog. The de
 A Kubernetes deployment will require you to have access to a Kubernetes cluster as well as the following tools:
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [helm](https://docs.helm.sh/using_helm/#quickstart-guide)
+- [helm](https://helm.sh/docs/intro/quickstart/)
 
 The installation program will reference `kubectl` directly. `helm` is only necessary if you are letting the installer configure PostgreSQL for you.
 
@@ -382,9 +382,11 @@ Before starting the install process, review the [inventory](./installer/inventor
 
 ### Configuring Helm
 
-If you want the AWX installer to manage creating the database pod (rather than installing and configuring postgres on your own). Then you will need to have a working `helm` installation, you can find details here: [https://docs.helm.sh/using_helm/#quickstart-guide](https://docs.helm.sh/using_helm/#quickstart-guide).
+If you want the AWX installer to manage creating the database pod (rather than installing and configuring postgres on your own). Then you will need to have a working `helm` installation, you can find details here: [https://helm.sh/docs/intro/quickstart/](https://helm.sh/docs/intro/quickstart/).
 
-Newer Kubernetes clusters with RBAC enabled will need to make sure a service account is created, make sure to follow the instructions here [https://docs.helm.sh/using_helm/#role-based-access-control](https://docs.helm.sh/using_helm/#role-based-access-control)
+You do not need to create a [Persistent Volume Claim](https://docs.openshift.org/latest/dev_guide/persistent_volumes.html) as Helm does it for you. However, an existing one may be used by setting the `pg_persistence_existingclaim` variable.
+
+Newer Kubernetes clusters with RBAC enabled will need to make sure a service account is created, make sure to follow the instructions here [https://helm.sh/docs/topics/rbac/](https://helm.sh/docs/topics/rbac/)
 
 ### Run the installer
 
@@ -575,7 +577,7 @@ If you're deploying using Docker Compose, container names will be prefixed by th
 Immediately after the containers start, the *awx_task* container will perform required setup tasks, including database migrations. These tasks need to complete before the web interface can be accessed. To monitor the progress, you can follow the container's STDOUT by running the following:
 
 ```bash
-# Tail the the awx_task log
+# Tail the awx_task log
 $ docker logs -f awx_task
 ```
 
@@ -651,16 +653,14 @@ Potential uses include:
 * Checking on the status and output of job runs
 * Managing objects like organizations, users, teams, etc...
 
-The preferred way to install the AWX CLI is through pip directly from GitHub:
+The preferred way to install the AWX CLI is through pip directly from PyPI:
 
-    pip install "https://github.com/ansible/awx/archive/$VERSION.tar.gz#egg=awxkit&subdirectory=awxkit"
+    pip3 install awxkit
     awx --help
-
-...where ``$VERSION`` is the version of AWX you're running.  To see a list of all available releases, visit: https://github.com/ansible/awx/releases
 
 ## Building the CLI Documentation
 
-To build the docs, spin up a real AWX server, `pip install sphinx sphinxcontrib-autoprogram`, and run:
+To build the docs, spin up a real AWX server, `pip3 install sphinx sphinxcontrib-autoprogram`, and run:
 
     ~ TOWER_HOST=https://awx.example.org TOWER_USERNAME=example TOWER_PASSWORD=secret make clean html
     ~ cd build/html/ && python -m http.server

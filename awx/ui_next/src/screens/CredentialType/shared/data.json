@@ -1,0 +1,62 @@
+{
+    "id": 28,
+    "type": "credential_type",
+    "url": "/api/v2/credential_types/28/",
+    "related": {
+        "named_url": "/api/v2/credential_types/Jenkins Credential+cloud/",
+        "created_by": "/api/v2/users/1/",
+        "modified_by": "/api/v2/users/1/",
+        "credentials": "/api/v2/credential_types/28/credentials/",
+        "activity_stream": "/api/v2/credential_types/28/activity_stream/"
+    },
+    "summary_fields": {
+        "created_by": {
+            "id": 1,
+            "username": "admin",
+            "first_name": "",
+            "last_name": ""
+        },
+        "modified_by": {
+            "id": 1,
+            "username": "admin",
+            "first_name": "",
+            "last_name": ""
+        },
+        "user_capabilities": {
+            "edit": true,
+            "delete": true
+        }
+    },
+    "created": "2020-06-18T14:48:47.869002Z",
+    "modified": "2020-06-18T14:48:47.869017Z",
+    "name": "Jenkins Credential",
+    "description": "Jenkins Credential",
+    "kind": "cloud",
+    "namespace": null,
+    "managed_by_tower": false,
+    "inputs": {
+        "fields": [
+            {
+                "id": "username",
+                "type": "string",
+                "label": "Jenkins username"
+            },
+            {
+                "id": "password",
+                "type": "string",
+                "label": "Jenkins password",
+                "secret": true
+            }
+        ],
+        "required": [
+            "username",
+            "password"
+        ]
+    },
+    "injectors": {
+        "extra_vars": {
+            "Jenkins_password": "{{ password }}",
+            "Jenkins_username": "{{ username }}"
+        }
+    }
+}

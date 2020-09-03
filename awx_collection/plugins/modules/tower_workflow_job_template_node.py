@@ -157,7 +157,7 @@ EXAMPLES = '''
       - my-first-node
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def main():
@@ -185,7 +185,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     identifier = module.params.get('identifier')
@@ -224,7 +224,7 @@ def main():
 
     inventory = module.params.get('inventory')
     if inventory:
-        new_fields['inventory'] = module.resolve_name_to_id('inventory', inventory)
+        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
     # Create the data that gets sent for create and update
     for field_name in (

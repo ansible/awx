@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { ChipGroup as PFChipGroup } from '@patternfly/react-core';
 import { number, shape } from 'prop-types';
 
-function ChipGroup({ i18n, numChips, totalChips, ...props }) {
+function ChipGroup({ i18n, numChips, totalChips, i18nHash, ...props }) {
   return (
     <PFChipGroup
       {...props}

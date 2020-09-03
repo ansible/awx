@@ -33,7 +33,13 @@ function HostGroupsList({ i18n, host }) {
   const invId = host.summary_fields.inventory.id;
 
   const {
-    result: { groups, itemCount, actions },
+    result: {
+      groups,
+      itemCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchGroups,
@@ -55,11 +61,20 @@ function HostGroupsList({ i18n, host }) {
         groups: results,
         itemCount: count,
         actions: actionsResponse.data.actions,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [hostId, search]),
     {
       groups: [],
       itemCount: 0,
+      actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -103,6 +118,11 @@ function HostGroupsList({ i18n, host }) {
     [invId, hostId]
   );
 
+  const fetchGroupsOptions = useCallback(
+    () => InventoriesAPI.readGroupsOptions(invId),
+    [invId]
+  );
+
   const { request: handleAssociate, error: associateError } = useRequest(
     useCallback(
       async groupsToAssociate => {
@@ -136,16 +156,16 @@ function HostGroupsList({ i18n, host }) {
         toolbarSearchColumns={[
           {
             name: i18n._(t`Name`),
-            key: 'name',
+            key: 'name__icontains',
             isDefault: true,
           },
           {
             name: i18n._(t`Created By (Username)`),
-            key: 'created_by__username',
+            key: 'created_by__username__icontains',
           },
           {
             name: i18n._(t`Modified By (Username)`),
-            key: 'modified_by__username',
+            key: 'modified_by__username__icontains',
           },
         ]}
         toolbarSortColumns={[
@@ -154,6 +174,8 @@ function HostGroupsList({ i18n, host }) {
             key: 'name',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderItem={item => (
           <HostGroupItem
             key={item.id}
@@ -207,6 +229,7 @@ function HostGroupsList({ i18n, host }) {
         <AssociateModal
           header={i18n._(t`Groups`)}
           fetchRequest={fetchGroupsToAssociate}
+          optionsRequest={fetchGroupsOptions}
           isModalOpen={isModalOpen}
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}

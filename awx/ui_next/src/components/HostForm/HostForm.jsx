@@ -25,14 +25,20 @@ const InventoryLookupField = withI18n()(({ i18n, host }) => {
   return (
     <FormGroup
       label={i18n._(t`Inventory`)}
+      labelIcon={
+        <FieldTooltip
+          content={i18n._(
+            t`Select the inventory that this host will belong to.`
+          )}
+        />
+      }
       isRequired
       fieldId="inventory-lookup"
-      isValid={!inventoryMeta.touched || !inventoryMeta.error}
+      validated={
+        !inventoryMeta.touched || !inventoryMeta.error ? 'default' : 'error'
+      }
       helperTextInvalid={inventoryMeta.error}
     >
-      <FieldTooltip
-        content={i18n._(t`Select the inventory that this host will belong to.`)}
-      />
       <InventoryLookup
         value={inventory}
         onBlur={() => inventoryHelpers.setTouched()}

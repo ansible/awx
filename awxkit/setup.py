@@ -54,7 +54,10 @@ class CleanCommand(Command):
 setup(
     name='awxkit',
     version=get_version(),
-    description='awx cli client',
+    description='The official command line interface for Ansible AWX',
+    author='Red Hat, Inc.',
+    author_email='info@ansible.com',
+    url='https://github.com/ansible/awx',
     packages=find_packages(exclude=['test']),
     cmdclass={
         'clean': CleanCommand,
@@ -70,6 +73,20 @@ setup(
         'websockets': ['websocket-client>0.54.0'],
         'crypto': ['cryptography']
     },
+    license='Apache 2.0',
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: Apache Software License',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: System :: Software Distribution',
+        'Topic :: System :: Systems Administration',
+    ],
     entry_points={
         'console_scripts': [
             'akit=awxkit.scripts.basic_session:load_interactive',

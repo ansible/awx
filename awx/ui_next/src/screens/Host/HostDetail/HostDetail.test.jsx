@@ -76,12 +76,19 @@ describe('<HostDetail />', () => {
     beforeAll(() => {
       const readOnlyHost = { ...mockHost };
       readOnlyHost.summary_fields.user_capabilities.edit = false;
+      readOnlyHost.summary_fields.recent_jobs = [];
 
       wrapper = mountWithContexts(<HostDetail host={mockHost} />);
     });
 
     afterAll(() => {
       wrapper.unmount();
+    });
+
+    test('should hide activity stream when there are no recent jobs', async () => {
+      expect(wrapper.find(`Detail[label="Activity"] Sparkline`)).toHaveLength(
+        0
+      );
     });
 
     test('should hide edit button for users without edit permission', async () => {

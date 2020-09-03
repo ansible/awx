@@ -15,6 +15,7 @@ from awxkit.utils import (
     is_list_or_tuple,
     to_str
 )
+from awxkit.api import utils
 from awxkit.api.client import Connection
 from awxkit.api.registry import URLRegistry
 from awxkit.config import config
@@ -273,7 +274,7 @@ class Page(object):
     def get(self, all_pages=False, **query_parameters):
         r = self.connection.get(self.endpoint, query_parameters)
         page = self.page_identity(r)
-        if all_pages and page.next:
+        if all_pages and getattr(page, 'next', None):
             paged_results = [r.json()['results']]
             while page.next:
                 r = self.connection.get(self.next, query_parameters)
@@ -317,6 +318,28 @@ class Page(object):
         page_cls = get_registered_page(endpoint)
         return page_cls(self.connection, endpoint=endpoint).get(**kw)
 
+    def get_natural_key(self, cache=None):
+        if cache is None:
+            cache = PageCache()
+
+        if not getattr(self, 'NATURAL_KEY', None):
+            log.warning("This object does not have a natural key: %s", getattr(self, 'endpoint', ''))
+            return None
+
+        natural_key = {}
+        for key in self.NATURAL_KEY:
+            if key in self.related:
+                related_endpoint = cache.get_page(self.related[key])
+                if related_endpoint is not None:
+                    natural_key[key] = related_endpoint.get_natural_key(cache=cache)
+                else:
+                    natural_key[key] = None
+            elif key in self:
+                natural_key[key] = self[key]
+
+        natural_key['type'] = self['type']
+        return natural_key
+
 
 _exception_map = {http.NO_CONTENT: exc.NoContent,
                   http.NOT_FOUND: exc.NotFound,
@@ -333,6 +356,8 @@ def exception_from_status_code(status_code):
 
 
 class PageList(object):
+
+    NATURAL_KEY = None
 
     @property
     def __item_class__(self):
@@ -375,6 +400,10 @@ class PageList(object):
 
     def create(self, *a, **kw):
         return self.__item_class__(self.connection).create(*a, **kw)
+
+    def get_natural_key(self, cache=None):
+        log.warning("This object does not have a natural key: %s", getattr(self, 'endpoint', ''))
+        return None
 
 
 class TentativePage(str):
@@ -502,3 +531,67 @@ class TentativePage(str):
 
     def __ne__(self, other):
         return self.endpoint != other
+
+
+class PageCache(object):
+    def __init__(self):
+        self.options = {}
+        self.pages_by_url = {}
+        self.pages_by_natural_key = {}
+
+    def get_options(self, page):
+        url = page.endpoint if isinstance(page, Page) else str(page)
+        if url in self.options:
+            return self.options[url]
+
+        try:
+            options = page.options()
+        except exc.Common:
+            log.error("This endpoint raised an error: %s", url)
+            return self.options.setdefault(url, None)
+
+        warning = options.r.headers.get('Warning', '')
+        if '299' in warning and 'deprecated' in warning:
+            log.warning("This endpoint is deprecated: %s", url)
+            return self.options.setdefault(url, None)
+
+        return self.options.setdefault(url, options)
+
+    def set_page(self, page):
+        log.debug("set_page: %s %s", type(page), page.endpoint)
+        self.pages_by_url[page.endpoint] = page
+        if getattr(page, 'NATURAL_KEY', None):
+            log.debug("set_page has natural key fields.")
+            natural_key = page.get_natural_key(cache=self)
+            if natural_key is not None:
+                log.debug("set_page natural_key: %s", repr(natural_key))
+                self.pages_by_natural_key[utils.freeze(natural_key)] = page.endpoint
+        if 'results' in page:
+            for p in page.results:
+                self.set_page(p)
+        return page
+
+    def get_page(self, page):
+        url = page.endpoint if isinstance(page, Page) else str(page)
+        if url in self.pages_by_url:
+            return self.pages_by_url[url]
+
+        try:
+            page = page.get(all_pages=True)
+        except exc.Common:
+            log.error("This endpoint raised an error: %s", url)
+            return self.pages_by_url.setdefault(url, None)
+
+        warning = page.r.headers.get('Warning', '')
+        if '299' in warning and 'deprecated' in warning:
+            log.warning("This endpoint is deprecated: %s", url)
+            return self.pages_by_url.setdefault(url, None)
+
+        log.debug("get_page: %s", page.endpoint)
+        return self.set_page(page)
+
+    def get_by_natural_key(self, natural_key):
+        endpoint = self.pages_by_natural_key.get(utils.freeze(natural_key))
+        log.debug("get_by_natural_key: %s, endpoint: %s", repr(natural_key), endpoint)
+        if endpoint:
+            return self.get_page(endpoint)

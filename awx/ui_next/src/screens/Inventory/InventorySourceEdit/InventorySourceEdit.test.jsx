@@ -54,7 +54,6 @@ describe('<InventorySourceAdd />', () => {
               ['openstack', 'OpenStack'],
               ['rhv', 'Red Hat Virtualization'],
               ['tower', 'Ansible Tower'],
-              ['custom', 'Custom Script'],
             ],
           },
         },
@@ -118,7 +117,7 @@ describe('<InventorySourceAdd />', () => {
     );
   });
 
-  test('should navigate to inventory sources list when cancel is clicked', async () => {
+  test('should navigate to inventory source detail when cancel is clicked', async () => {
     await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });

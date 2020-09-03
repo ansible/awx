@@ -35,6 +35,15 @@ describe('NodeTypeStep', () => {
         ],
       },
     });
+    JobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     ProjectsAPI.read.mockResolvedValue({
       data: {
         count: 1,
@@ -46,6 +55,15 @@ describe('NodeTypeStep', () => {
             url: '/api/v2/projects/1',
           },
         ],
+      },
+    });
+    ProjectsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
       },
     });
     InventorySourcesAPI.read.mockResolvedValue({
@@ -61,6 +79,15 @@ describe('NodeTypeStep', () => {
         ],
       },
     });
+    InventorySourcesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     WorkflowJobTemplatesAPI.read.mockResolvedValue({
       data: {
         count: 1,
@@ -72,6 +99,15 @@ describe('NodeTypeStep', () => {
             url: '/api/v2/workflow_job_templates/1',
           },
         ],
+      },
+    });
+    WorkflowJobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
       },
     });
   });

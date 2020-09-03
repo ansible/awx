@@ -445,7 +445,7 @@ function(NotificationsList, i18n) {
                                 data-placement="top"
                                 id="job_template_webhook_key_gen_btn"
                             >
-                                <i class="fa fa-refresh" />
+                                <i class="fa fa-refresh"></i>
                             </button>
                         </span>
                     `,

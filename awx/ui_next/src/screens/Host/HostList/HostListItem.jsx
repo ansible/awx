@@ -30,11 +30,6 @@ const DataListAction = styled(_DataListAction)`
 
 function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
   const labelId = `check-action-${host.id}`;
-  const recentPlaybookJobs = host.summary_fields.recent_jobs.map(job => ({
-    ...job,
-    type: 'job',
-  }));
-
   return (
     <DataListItem key={host.id} aria-labelledby={labelId} id={`${host.id}`}>
       <DataListItemRow>
@@ -52,18 +47,14 @@ function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
               </Link>
             </DataListCell>,
             <DataListCell key="recentJobs">
-              <Sparkline jobs={recentPlaybookJobs} />
+              <Sparkline jobs={host.summary_fields.recent_jobs} />
             </DataListCell>,
             <DataListCell key="inventory">
               {host.summary_fields.inventory && (
                 <Fragment>
                   <b css="margin-right: 24px">{i18n._(t`Inventory`)}</b>
                   <Link
-                    to={`/inventories/${
-                      host.summary_fields.inventory.kind === 'smart'
-                        ? 'smart_inventory'
-                        : 'inventory'
-                    }/${host.summary_fields.inventory.id}/details`}
+                    to={`/inventories/inventory/${host.summary_fields.inventory.id}/details`}
                   >
                     {host.summary_fields.inventory.name}
                   </Link>

@@ -98,10 +98,6 @@ function PromptInventorySourceDetail({ i18n, resource }) {
         />
       )}
       <Detail label={i18n._(t`Inventory File`)} value={source_path} />
-      <Detail
-        label={i18n._(t`Custom Inventory Script`)}
-        value={summary_fields?.source_script?.name}
-      />
       <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[verbosity]} />
       <Detail
         label={i18n._(t`Cache Timeout`)}

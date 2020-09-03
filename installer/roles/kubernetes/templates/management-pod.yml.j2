@@ -11,7 +11,7 @@ spec:
 {% endif %}
   containers:
     - name: ansible-tower-management
-      image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
+      image: "{{ kubernetes_awx_image }}:{{ kubernetes_awx_version }}"
       imagePullPolicy: Always
       command: ["sleep", "infinity"]
       volumeMounts:

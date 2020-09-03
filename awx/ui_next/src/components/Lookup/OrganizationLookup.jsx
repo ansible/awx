@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { node, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -7,6 +7,7 @@ import { FormGroup } from '@patternfly/react-core';
 import { OrganizationsAPI } from '../../api';
 import { Organization } from '../../types';
 import { getQSConfig, parseQueryString } from '../../util/qs';
+import useRequest from '../../util/useRequest';
 import OptionsList from '../OptionsList';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
@@ -27,29 +28,46 @@ function OrganizationLookup({
   value,
   history,
 }) {
-  const [organizations, setOrganizations] = useState([]);
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
+  const {
+    result: { itemCount, organizations, relatedSearchableKeys, searchableKeys },
+    error: contentError,
+    request: fetchOrganizations,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const [response, actionsResponse] = await Promise.all([
+        OrganizationsAPI.read(params),
+        OrganizationsAPI.readOptions(),
+      ]);
+      return {
+        organizations: response.data.results,
+        itemCount: response.data.count,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+      };
+    }, [history.location.search]),
+    {
+      organizations: [],
+      itemCount: 0,
+      relatedSearchableKeys: [],
+      searchableKeys: [],
+    }
+  );
 
   useEffect(() => {
-    (async () => {
-      const params = parseQueryString(QS_CONFIG, history.location.search);
-      try {
-        const { data } = await OrganizationsAPI.read(params);
-        setOrganizations(data.results);
-        setCount(data.count);
-      } catch (err) {
-        setError(err);
-      }
-    })();
-  }, [history.location]);
+    fetchOrganizations();
+  }, [fetchOrganizations]);
 
   return (
     <FormGroup
       fieldId="organization"
       helperTextInvalid={helperTextInvalid}
       isRequired={required}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Organization`)}
     >
       <Lookup
@@ -65,7 +83,7 @@ function OrganizationLookup({
           <OptionsList
             value={state.selectedItems}
             options={organizations}
-            optionCount={count}
+            optionCount={itemCount}
             multiple={state.multiple}
             header={i18n._(t`Organization`)}
             name="organization"
@@ -73,16 +91,16 @@ function OrganizationLookup({
             searchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username',
+                key: 'created_by__username__icontains',
               },
               {
                 name: i18n._(t`Modified By (Username)`),
-                key: 'modified_by__username',
+                key: 'modified_by__username__icontains',
               },
             ]}
             sortColumns={[
@@ -91,13 +109,15 @@ function OrganizationLookup({
                 key: 'name',
               },
             ]}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
             readOnly={!canDelete}
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
           />
         )}
       />
-      <LookupErrorMessage error={error} />
+      <LookupErrorMessage error={contentError} />
     </FormGroup>
   );
 }

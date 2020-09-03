@@ -11,7 +11,7 @@ This IP address can be found by making a GET to any page on the browsable API an
 awx_1        | 14:42:08 uwsgi.1     | 172.18.0.1 GET /api/v2/tokens/ - HTTP/1.1 200
 ```
 
-Whitelist this IP address by adding it to the `INTERNAL_IPS` variable in `local_settings`, then navigate to the API and you should see DDT on the
+Allow this IP address by adding it to the `INTERNAL_IPS` variable in `local_settings`, then navigate to the API and you should see DDT on the
 right side.  If you don't see it, make sure to set `DEBUG=True`.  
 > Note that enabling DDT is detrimental to the performance of AWX and adds overhead to every API request.  It is
 recommended to keep this turned off when you are not using it.  

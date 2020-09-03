@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 Wizard.displayName = 'PFWizard';
 export default styled(Wizard)`
-  .pf-c-data-toolbar__content {
+  .pf-c-toolbar__content {
     padding: 0 !important;
   }
 `;

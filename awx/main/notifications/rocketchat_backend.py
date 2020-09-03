@@ -46,9 +46,9 @@ class RocketChatBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
             if r.status_code >= 400:
                 logger.error(smart_text(
-                    _("Error sending notification rocket.chat: {}").format(r.text)))
+                    _("Error sending notification rocket.chat: {}").format(r.status_code)))
                 if not self.fail_silently:
                     raise Exception(smart_text(
-                        _("Error sending notification rocket.chat: {}").format(r.text)))
+                        _("Error sending notification rocket.chat: {}").format(r.status_code)))
             sent_messages += 1
         return sent_messages

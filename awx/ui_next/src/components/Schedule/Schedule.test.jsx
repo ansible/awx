@@ -6,10 +6,12 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { SchedulesAPI } from '../../api';
+import { JobTemplatesAPI, SchedulesAPI } from '../../api';
 import Schedule from './Schedule';
 
+jest.mock('../../api/models/JobTemplates');
 jest.mock('../../api/models/Schedules');
+jest.mock('../../api/models/WorkflowJobTemplates');
 
 SchedulesAPI.readDetail.mockResolvedValue({
   data: {
@@ -59,6 +61,22 @@ SchedulesAPI.readCredentials.mockResolvedValue({
   data: {
     count: 0,
     results: [],
+  },
+});
+
+JobTemplatesAPI.readLaunch.mockResolvedValue({
+  data: {
+    ask_credential_on_launch: false,
+    ask_diff_mode_on_launch: false,
+    ask_inventory_on_launch: false,
+    ask_job_type_on_launch: false,
+    ask_limit_on_launch: false,
+    ask_scm_branch_on_launch: false,
+    ask_skip_tags_on_launch: false,
+    ask_tags_on_launch: false,
+    ask_variables_on_launch: false,
+    ask_verbosity_on_launch: false,
+    survey_enabled: false,
   },
 });
 

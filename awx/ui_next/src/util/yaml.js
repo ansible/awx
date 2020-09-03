@@ -22,7 +22,11 @@ export function jsonToYaml(jsonString) {
   return yaml.safeDump(value);
 }
 
-export function isJson(jsonString) {
+export function isJsonObject(value) {
+  return typeof value === 'object' && value !== null;
+}
+
+export function isJsonString(jsonString) {
   if (typeof jsonString !== 'string') {
     return false;
   }
@@ -34,4 +38,16 @@ export function isJson(jsonString) {
   }
 
   return typeof value === 'object' && value !== null;
+}
+
+export function parseVariableField(variableField) {
+  if (variableField === '---' || variableField === '{}') {
+    return {};
+  }
+  if (!isJsonString(variableField)) {
+    variableField = yamlToJson(variableField);
+  }
+  variableField = JSON.parse(variableField);
+
+  return variableField;
 }

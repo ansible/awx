@@ -15,6 +15,70 @@ imagePullSecrets:
   - name: "{{ kubernetes_image_pull_secrets }}"
 {% endif %}
 
+{% if awx_psp_create is defined and awx_psp_create | bool %}
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ awx_psp_name }}-psp
+spec:
+{% if awx_psp_privileged is defined %}
+  privileged: {{ awx_psp_privileged }}
+  allowPrivilegeEscalation: {{ awx_psp_privileged }}
+{% endif %}
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ kubernetes_namespace }}
+  name: {{ awx_psp_name }}-role
+rules:
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  resourceNames:
+  - {{ awx_psp_name }}-psp
+  verbs:
+  - use
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ awx_psp_name }}-role-binding
+  namespace: {{ kubernetes_namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ awx_psp_name }}-role
+subjects:
+- kind: ServiceAccount
+  name: awx
+  namespace: {{ kubernetes_namespace }}
+{% endif %}
+
 ---
 apiVersion: {{ kubernetes_deployment_api_version }}
 kind: Deployment
@@ -40,6 +104,8 @@ spec:
         app: {{ kubernetes_deployment_name }}
     spec:
       serviceAccountName: awx
+      securityContext:
+        fsGroup: 0
       terminationGracePeriodSeconds: 10
 {% if custom_venvs is defined %}
 {% set trusted_hosts = "" %}
@@ -89,7 +155,13 @@ spec:
 {% endif %}
       containers:
         - name: {{ kubernetes_deployment_name }}-web
-          image: "{{ kubernetes_awx_image }}:{{ kubernetes_web_version }}"
+{% if web_security_context_enabled is defined and web_security_context_enabled | bool %}
+          securityContext:
+{% if web_security_context_privileged is defined %}
+            privileged: {{ web_security_context_privileged }}
+{% endif %}
+{% endif %}
+          image: "{{ kubernetes_awx_image }}:{{ kubernetes_awx_version }}"
           imagePullPolicy: Always
           ports:
             - containerPort: 8052
@@ -161,9 +233,6 @@ spec:
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
 
-            - name: {{ kubernetes_deployment_name }}-memcached-socket
-              mountPath: "/var/run/memcached"
-
           resources:
             requests:
               memory: "{{ web_mem_request }}Gi"
@@ -178,9 +247,13 @@ spec:
               cpu: "{{ web_cpu_limit }}m"
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-task
+{% if task_security_context_enabled is defined and task_security_context_enabled | bool %}
           securityContext:
-            privileged: true
-          image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
+{% if task_security_context_privileged is defined %}
+            privileged: {{ task_security_context_privileged }}
+{% endif %}
+{% endif %}
+          image: "{{ kubernetes_awx_image }}:{{ kubernetes_awx_version }}"
           command:
             - /usr/bin/launch_awx_task.sh
           imagePullPolicy: Always
@@ -236,9 +309,6 @@ spec:
 
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
-
-            - name: {{ kubernetes_deployment_name }}-memcached-socket
-              mountPath: "/var/run/memcached"
           env:
             - name: SUPERVISOR_WEB_CONFIG_PATH
               value: "/etc/supervisord.conf"
@@ -270,6 +340,15 @@ spec:
               cpu: "{{ task_cpu_limit }}m"
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-redis
+{% if redis_security_context_enabled is defined and redis_security_context_enabled | bool %}
+          securityContext:
+{% if redis_security_context_privileged is defined %}
+            privileged: {{ redis_security_context_privileged }}
+{% endif %}
+{% if redis_security_context_user is defined %}
+            runAsUser: {{ redis_security_context_user }}
+{% endif %}
+{% endif %}
           image: {{ kubernetes_redis_image }}:{{ kubernetes_redis_image_tag }}
           imagePullPolicy: Always
           args: ["redis-server", "{{ kubernetes_redis_config_mount_path }}"]
@@ -293,31 +372,6 @@ spec:
 {% endif %}
 {% if redis_cpu_limit is defined %}
               cpu: "{{ redis_cpu_limit }}m"
-{% endif %}
-        - name: {{ kubernetes_deployment_name }}-memcached
-          image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
-          imagePullPolicy: Always
-          command:
-            - 'memcached'
-            - '-s'
-            - '/var/run/memcached/memcached.sock'
-            - '-a'
-            - '0666'
-          volumeMounts:
-            - name: {{ kubernetes_deployment_name }}-memcached-socket
-              mountPath: "/var/run/memcached"
-          resources:
-            requests:
-              memory: "{{ memcached_mem_request }}Gi"
-              cpu: "{{ memcached_cpu_request }}m"
-{% if memcached_mem_limit is defined or memcached_cpu_limit is defined %}
-            limits:
-{% endif %}
-{% if memcached_mem_limit is defined %}
-              memory: "{{ memcached_mem_limit }}Gi"
-{% endif %}
-{% if memcached_cpu_limit is defined %}
-              cpu: "{{ memcached_cpu_limit }}m"
 {% endif %}
 {% if tolerations is defined %}
       tolerations:
@@ -424,9 +478,6 @@ spec:
         - name: {{ kubernetes_deployment_name }}-redis-socket
           emptyDir: {}
 
-        - name: {{ kubernetes_deployment_name }}-memcached-socket
-          emptyDir: {}
-
 ---
 apiVersion: v1
 kind: Service
@@ -436,10 +487,13 @@ metadata:
   labels:
     name: {{ kubernetes_deployment_name }}-web-svc
 spec:
-  type: "NodePort"
+  type: {{ kubernetes_web_svc_type }}
   ports:
     - name: http
       port: 80
+{% if kubernetes_web_svc_type == "ClusterIP" %}
+      nodePort: null
+{% endif %}
       targetPort: 8052
   selector:
     name: {{ kubernetes_deployment_name }}-web-deploy

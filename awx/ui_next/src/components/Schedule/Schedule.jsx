@@ -10,13 +10,10 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { CardActions } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import CardCloseButton from '../CardCloseButton';
 import RoutedTabs from '../RoutedTabs';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
-import { TabbedCardHeader } from '../Card';
 import ScheduleDetail from './ScheduleDetail';
 import ScheduleEdit from './ScheduleEdit';
 import { SchedulesAPI } from '../../api';
@@ -35,7 +32,6 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
       try {
         const { data } = await SchedulesAPI.readDetail(scheduleId);
         setSchedule(data);
-        setBreadcrumb(unifiedJobTemplate, data);
       } catch (err) {
         setContentError(err);
       } finally {
@@ -44,8 +40,14 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
     };
 
     loadData();
-  }, [location.pathname, scheduleId, unifiedJobTemplate, setBreadcrumb]);
+  }, [location.pathname, scheduleId]);
 
+  useEffect(() => {
+    if (schedule) {
+      setBreadcrumb(unifiedJobTemplate, schedule);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schedule, unifiedJobTemplate]);
   const tabsArray = [
     {
       name: (
@@ -85,23 +87,17 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
     return <ContentError error={contentError} />;
   }
 
-  let cardHeader = null;
+  let showCardHeader = true;
+
   if (
-    location.pathname.includes('schedules/') &&
-    !location.pathname.endsWith('edit')
+    !location.pathname.includes('schedules/') ||
+    location.pathname.endsWith('edit')
   ) {
-    cardHeader = (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo={`${pathRoot}schedules`} />
-        </CardActions>
-      </TabbedCardHeader>
-    );
+    showCardHeader = false;
   }
   return (
     <>
-      {cardHeader}
+      {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
       <Switch>
         <Redirect
           from={`${pathRoot}schedules/:scheduleId`}

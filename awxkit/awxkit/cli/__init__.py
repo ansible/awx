@@ -23,6 +23,8 @@ def run(stdout=sys.stdout, stderr=sys.stderr, argv=[]):
         cli.parse_args(argv or sys.argv)
         cli.connect()
         cli.parse_resource()
+    except KeyboardInterrupt:
+        sys.exit(1)
     except ConnectionError as e:
         cli.parser.print_help()
         msg = (

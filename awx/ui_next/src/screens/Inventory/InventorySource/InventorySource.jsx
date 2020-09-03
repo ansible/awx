@@ -10,7 +10,6 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import { CardActions } from '@patternfly/react-core';
 import useRequest from '../../../util/useRequest';
 
 import {
@@ -18,8 +17,7 @@ import {
   InventorySourcesAPI,
   OrganizationsAPI,
 } from '../../../api';
-import { TabbedCardHeader } from '../../../components/Card';
-import CardCloseButton from '../../../components/CardCloseButton';
+import { Schedules } from '../../../components/Schedule';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import RoutedTabs from '../../../components/RoutedTabs';
@@ -64,6 +62,15 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
     }
   }, [inventory, source, setBreadcrumb]);
 
+  const loadSchedules = params =>
+    InventorySourcesAPI.readSchedules(source?.id, params);
+
+  const createSchedule = data =>
+    InventorySourcesAPI.createSchedule(source?.id, data);
+
+  const loadScheduleOptions = () =>
+    InventorySourcesAPI.readScheduleOptions(source?.id);
+
   const tabsArray = [
     {
       name: (
@@ -102,16 +109,15 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
     return <ContentError error={error} />;
   }
 
+  let showCardHeader = true;
+
+  if (['edit', 'schedules/'].some(name => location.pathname.includes(name))) {
+    showCardHeader = false;
+  }
+
   return (
     <>
-      {['edit'].some(name => location.pathname.includes(name)) ? null : (
-        <TabbedCardHeader>
-          <RoutedTabs tabsArray={tabsArray} />
-          <CardActions>
-            <CardCloseButton linkTo={sourceListUrl} />
-          </CardActions>
-        </TabbedCardHeader>
-      )}
+      {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
 
       {isLoading && <ContentLoading />}
 
@@ -144,10 +150,24 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
               apiModel={InventorySourcesAPI}
             />
           </Route>
+          <Route
+            key="schedules"
+            path="/inventories/inventory/:id/sources/:sourceId/schedules"
+          >
+            <Schedules
+              createSchedule={createSchedule}
+              setBreadcrumb={(unifiedJobTemplate, schedule) =>
+                setBreadcrumb(inventory, source, schedule)
+              }
+              unifiedJobTemplate={source}
+              loadSchedules={loadSchedules}
+              loadScheduleOptions={loadScheduleOptions}
+            />
+          </Route>
           <Route key="not-found" path="*">
             <ContentError isNotFound>
               <Link to={`${match.url}/details`}>
-                {i18n._(`View inventory source details`)}
+                {i18n._(t`View inventory source details`)}
               </Link>
             </ContentError>
           </Route>

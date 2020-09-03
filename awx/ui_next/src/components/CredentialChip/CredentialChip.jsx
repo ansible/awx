@@ -6,7 +6,7 @@ import { Chip } from '@patternfly/react-core';
 import { Credential } from '../../types';
 import { toTitleCase } from '../../util/strings';
 
-function CredentialChip({ credential, i18n, ...props }) {
+function CredentialChip({ credential, i18n, i18nHash, ...props }) {
   let type;
   if (credential.cloud) {
     type = i18n._(t`Cloud`);

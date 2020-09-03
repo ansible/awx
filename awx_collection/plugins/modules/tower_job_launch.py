@@ -81,6 +81,22 @@ options:
       description:
         - Passwords for credentials which are set to prompt on launch
       type: dict
+    wait:
+      description:
+        - Wait for the job to complete.
+      default: False
+      type: bool
+    interval:
+      description:
+        - The interval to request an update from Tower.
+      required: False
+      default: 1
+      type: float
+    timeout:
+      description:
+        - If waiting for the job to complete this will abort after this
+          amount of seconds
+      type: int
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -124,7 +140,7 @@ status:
     sample: pending
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def main():
@@ -143,10 +159,13 @@ def main():
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
         diff_mode=dict(type='bool'),
         credential_passwords=dict(type='dict'),
+        wait=dict(default=False, type='bool'),
+        interval=dict(default=1.0, type='float'),
+        timeout=dict(default=None, type='int'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     optional_args = {}
     # Extract our parameters
@@ -162,6 +181,9 @@ def main():
     optional_args['verbosity'] = module.params.get('verbosity')
     optional_args['diff_mode'] = module.params.get('diff_mode')
     optional_args['credential_passwords'] = module.params.get('credential_passwords')
+    wait = module.params.get('wait')
+    interval = module.params.get('interval')
+    timeout = module.params.get('timeout')
 
     # Create a datastructure to pass into our job launch
     post_data = {}
@@ -215,6 +237,21 @@ def main():
 
     if results['status_code'] != 201:
         module.fail_json(msg="Failed to launch job, see response for details", **{'response': results})
+
+    if not wait:
+        module.exit_json(**{
+            'changed': True,
+            'id': results['json']['id'],
+            'status': results['json']['status'],
+        })
+
+    # Invoke wait function
+    results = module.wait_on_url(
+        url=results['json']['url'],
+        object_name=name,
+        object_type='Job',
+        timeout=timeout, interval=interval
+    )
 
     module.exit_json(**{
         'changed': True,

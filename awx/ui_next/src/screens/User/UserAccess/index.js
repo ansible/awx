@@ -1,2 +1,2 @@
-export { default as UserAccessListList } from './UserAccessList';
+export { default as UserAccessList } from './UserAccessList';
 export { default as UserAccessListItem } from './UserAccessListItem';

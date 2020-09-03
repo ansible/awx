@@ -158,7 +158,7 @@ def test_cred_type_injectors_schema(injectors, valid):
     )
     field = CredentialType._meta.get_field('injectors')
     if valid is False:
-        with pytest.raises(ValidationError, message="Injector was supposed to throw a validation error, data: {}".format(injectors)):
+        with pytest.raises(ValidationError):
             field.clean(injectors, type_)
     else:
         field.clean(injectors, type_)

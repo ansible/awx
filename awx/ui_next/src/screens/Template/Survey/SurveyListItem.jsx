@@ -110,11 +110,11 @@ function SurveyListItem({
             </DataListCell>,
 
             <DataListCell key="type">
-              <Label>{i18n._(t`Type:`)}</Label>
+              <Label>{i18n._(t`Type`)}</Label>
               {question.type}
             </DataListCell>,
             <DataListCell key="default">
-              <Label>{i18n._(t`Default:`)}</Label>
+              <Label>{i18n._(t`Default`)}</Label>
               {[question.type].includes('password') && (
                 <span>{i18n._(t`encrypted`).toUpperCase()}</span>
               )}

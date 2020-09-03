@@ -54,6 +54,10 @@ class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
     });
   }
 
+  readAccessOptions(id) {
+    return this.http.options(`${this.baseUrl}${id}/access_list/`);
+  }
+
   readSurvey(id) {
     return this.http.get(`${this.baseUrl}${id}/survey_spec/`);
   }
@@ -64,6 +68,27 @@ class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
 
   destroySurvey(id) {
     return this.http.delete(`${this.baseUrl}${id}/survey_spec/`);
+  }
+
+  readNotificationTemplatesApprovals(id, params) {
+    return this.http.get(
+      `${this.baseUrl}${id}/notification_templates_approvals/`,
+      { params }
+    );
+  }
+
+  associateNotificationTemplatesApprovals(resourceId, notificationId) {
+    return this.http.post(
+      `${this.baseUrl}${resourceId}/notification_templates_approvals/`,
+      { id: notificationId }
+    );
+  }
+
+  disassociateNotificationTemplatesApprovals(resourceId, notificationId) {
+    return this.http.post(
+      `${this.baseUrl}${resourceId}/notification_templates_approvals/`,
+      { id: notificationId, disassociate: true }
+    );
   }
 }
 

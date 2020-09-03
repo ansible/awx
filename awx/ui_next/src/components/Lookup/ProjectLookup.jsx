@@ -32,25 +32,36 @@ function ProjectLookup({
   history,
 }) {
   const {
-    result: { projects, count },
+    result: { projects, count, relatedSearchableKeys, searchableKeys },
     request: fetchProjects,
     error,
     isLoading,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
-      const { data } = await ProjectsAPI.read(params);
+      const [{ data }, actionsResponse] = await Promise.all([
+        ProjectsAPI.read(params),
+        ProjectsAPI.readOptions(),
+      ]);
       if (data.count === 1 && autocomplete) {
         autocomplete(data.results[0]);
       }
       return {
         count: data.count,
         projects: data.results,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [history.location.search, autocomplete]),
     {
       count: 0,
       projects: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -63,10 +74,10 @@ function ProjectLookup({
       fieldId="project"
       helperTextInvalid={helperTextInvalid}
       isRequired={required}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Project`)}
+      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
     >
-      {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="project"
         header={i18n._(t`Project`)}
@@ -83,31 +94,32 @@ function ProjectLookup({
             searchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: i18n._(t`Type`),
-                key: 'scm_type',
+                key: 'or__scm_type',
                 options: [
                   [``, i18n._(t`Manual`)],
                   [`git`, i18n._(t`Git`)],
                   [`hg`, i18n._(t`Mercurial`)],
                   [`svn`, i18n._(t`Subversion`)],
+                  [`archive`, i18n._(t`Remote Archive`)],
                   [`insights`, i18n._(t`Red Hat Insights`)],
                 ],
               },
               {
                 name: i18n._(t`Source Control URL`),
-                key: 'scm_url',
+                key: 'scm_url__icontains',
               },
               {
                 name: i18n._(t`Modified By (Username)`),
-                key: 'modified_by__username',
+                key: 'modified_by__username__icontains',
               },
               {
                 name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username',
+                key: 'created_by__username__icontains',
               },
             ]}
             sortColumns={[
@@ -116,6 +128,8 @@ function ProjectLookup({
                 key: 'name',
               },
             ]}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
             options={projects}
             optionCount={count}
             multiple={state.multiple}

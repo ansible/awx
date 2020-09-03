@@ -566,7 +566,6 @@ class WebhookMixin(models.Model):
 
     def update_webhook_status(self, status):
         if not self.webhook_credential:
-            logger.debug("No credential configured to post back webhook status, skipping.")
             return
 
         status_api = self.extra_vars_dict.get('tower_webhook_status_api')
