@@ -134,11 +134,9 @@ def main():
     # Attempt to look up the related items the user specified (these will fail the module if not found)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('users', **{
-        'data': {
-            'username': username,
-        }
-    })
+    existing_item = module.get_one('users', name_or_id=username)
+    # If we got an item back make sure the name field reflects the actual name (incase we were passed an ID)
+    username = existing_item['username'] if (existing_item) else username
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

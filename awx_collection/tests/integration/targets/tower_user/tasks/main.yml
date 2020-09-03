@@ -15,9 +15,9 @@
     that:
       - "result is changed"
 
-- name: Change a User
+- name: Change a User by ID
   tower_user:
-    username: "{{ username }}"
+    username: "{{ result.id }}"
     last_name: User
     email: joe@example.org
     state: present
