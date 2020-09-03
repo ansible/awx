@@ -82,9 +82,9 @@
     that:
       - "result is changed"
 
-- name: Re-create the Org-specific credential (new school)
+- name: Re-create the Org-specific credential (new school) with an ID
   tower_credential:
-    name: "{{ ssh_cred_name1 }}"
+    name: "{{ result.id }}"
     organization: Default
     credential_type: 'Machine'
     state: present
