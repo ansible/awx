@@ -36,18 +36,23 @@ function Template({ i18n, me, setBreadcrumb }) {
     request: loadTemplateAndRoles,
   } = useRequest(
     useCallback(async () => {
-      const [{ data }, notifAdminRes] = await Promise.all([
+      const [{ data }, actions, notifAdminRes] = await Promise.all([
         JobTemplatesAPI.readDetail(templateId),
+        JobTemplatesAPI.readTemplateOptions(templateId),
         OrganizationsAPI.read({
           page_size: 1,
           role_level: 'notification_admin_role',
         }),
       ]);
-      if (data.webhook_service && data?.related?.webhook_key) {
-        const {
-          data: { webhook_key },
-        } = await JobTemplatesAPI.readWebhookKey(templateId);
-        data.webhook_key = webhook_key;
+
+      if (actions.data.actions.PUT) {
+        if (data.webhook_service && data?.related?.webhook_key) {
+          const {
+            data: { webhook_key },
+          } = await JobTemplatesAPI.readWebhookKey(templateId);
+
+          data.webhook_key = webhook_key;
+        }
       }
       setBreadcrumb(data);
 
