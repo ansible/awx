@@ -48,7 +48,8 @@ export default typeFieldNames;
 const initialConfigValues = {};
 Object.keys(typeFieldNames).forEach(key => {
   typeFieldNames[key].forEach(fieldName => {
-    initialConfigValues[fieldName] = '';
+    const isBoolean = fieldName.includes('_ssl');
+    initialConfigValues[fieldName] = isBoolean ? false : '';
   });
 });
 

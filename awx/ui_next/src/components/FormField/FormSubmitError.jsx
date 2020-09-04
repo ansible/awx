@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFormikContext } from 'formik';
 import { Alert } from '@patternfly/react-core';
+import { FormFullWidthLayout } from '../FormLayout';
 
 const findErrorStrings = (obj, messages = []) => {
   if (typeof obj === 'string') {
@@ -35,7 +36,13 @@ function FormSubmitError({ error }) {
       typeof error.response.data === 'object' &&
       Object.keys(error.response.data).length > 0
     ) {
-      const errorMessages = error.response.data;
+      const errorMessages = {};
+      Object.keys(error.response.data).forEach(fieldName => {
+        const errors = error.response.data[fieldName];
+        if (errors && errors.length) {
+          errorMessages[fieldName] = errors.join(' ');
+        }
+      });
       setErrors(errorMessages);
 
       const messages = findErrorStrings(error.response.data);
@@ -52,15 +59,17 @@ function FormSubmitError({ error }) {
   }
 
   return (
-    <Alert
-      variant="danger"
-      isInline
-      title={
-        Array.isArray(errorMessage)
-          ? errorMessage.map(msg => <div key={msg}>{msg}</div>)
-          : errorMessage
-      }
-    />
+    <FormFullWidthLayout>
+      <Alert
+        variant="danger"
+        isInline
+        title={
+          Array.isArray(errorMessage)
+            ? errorMessage.map(msg => <div key={msg}>{msg}</div>)
+            : errorMessage
+        }
+      />
+    </FormFullWidthLayout>
   );
 }
 

@@ -78,6 +78,9 @@ export function integer(i18n) {
 
 export function url(i18n) {
   return value => {
+    if (!value) {
+      return undefined;
+    }
     // URL regex from https://urlregex.com/
     if (
       // eslint-disable-next-line max-len

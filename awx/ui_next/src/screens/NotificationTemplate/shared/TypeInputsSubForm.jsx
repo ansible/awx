@@ -20,6 +20,7 @@ import {
   required,
   requiredEmail,
   url,
+  minMaxValue,
 } from '../../../util/validators';
 import { NotificationType } from '../../../types';
 
@@ -104,16 +105,17 @@ function EmailFields({ i18n }) {
         label={i18n._(t`Port`)}
         name="notification_configuration.port"
         type="number"
-        validate={required(null, i18n)}
+        validate={combine([required(null, i18n), minMaxValue(1, 65535, i18n)])}
         isRequired
         min="0"
+        max="65535"
       />
       <FormField
         id="email-timeout"
         label={i18n._(t`Timeout`)}
         name="notification_configuration.timeout"
         type="number"
-        validate={required(null, i18n)}
+        validate={combine([required(null, i18n), minMaxValue(1, 120, i18n)])}
         isRequired
         min="1"
         max="120"
@@ -306,7 +308,7 @@ function PagerdutyFields({ i18n }) {
         label={i18n._(t`Pagerduty subdomain`)}
         name="notification_configuration.subdomain"
         type="text"
-        validate={required(i18n)}
+        validate={required(null, i18n)}
         isRequired
       />
       <FormField
@@ -314,7 +316,7 @@ function PagerdutyFields({ i18n }) {
         label={i18n._(t`API service/integration key`)}
         name="notification_configuration.service_key"
         type="text"
-        validate={required(i18n)}
+        validate={required(null, i18n)}
         isRequired
       />
       <FormField
@@ -322,7 +324,7 @@ function PagerdutyFields({ i18n }) {
         label={i18n._(t`Client identifier`)}
         name="notification_configuration.client_name"
         type="text"
-        validate={required(i18n)}
+        validate={required(null, i18n)}
         isRequired
       />
     </>

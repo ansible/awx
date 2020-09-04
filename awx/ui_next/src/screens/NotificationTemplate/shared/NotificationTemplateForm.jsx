@@ -54,12 +54,13 @@ function NotificationTemplateFormFields({ i18n, defaultMessages }) {
         fieldId="notification-type"
         helperTextInvalid={typeMeta.error}
         isRequired
-        validated={!typeMeta.touched || typeMeta.error ? 'default' : 'error'}
+        validated={!typeMeta.touched || !typeMeta.error ? 'default' : 'error'}
         label={i18n._(t`Type`)}
       >
         <AnsibleSelect
           {...typeField}
           id="notification-type"
+          isValid={!typeMeta.touched || !typeMeta.error}
           data={[
             {
               value: '',
