@@ -87,9 +87,8 @@ def main():
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up team based on the provided name and org ID
-    team = module.get_one('teams', **{
+    team, name = module.get_one('teams', name_or_id=name, **{
         'data': {
-            'name': name,
             'organization': org_id
         }
     })

@@ -117,11 +117,7 @@ def main():
     state = module.params.get('state')
 
     # Attempt to look up organization based on the provided name
-    organization = module.get_one('organizations', **{
-        'data': {
-            'name': name,
-        }
-    })
+    organization, name = module.get_one('organizations', name_or_id=name)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

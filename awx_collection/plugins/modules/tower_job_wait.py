@@ -130,7 +130,7 @@ def main():
         )
 
     # Attempt to look up job based on the provided id
-    job = module.get_one('jobs', **{
+    job, junk = module.get_one('jobs', **{
         'data': {
             'id': job_id,
         }

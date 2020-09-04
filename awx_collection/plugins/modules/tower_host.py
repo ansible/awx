@@ -104,9 +104,8 @@ def main():
     inventory_id = module.resolve_name_to_id('inventories', inventory)
 
     # Attempt to look up host based on the provided name and inventory ID
-    host = module.get_one('hosts', **{
+    host, name = module.get_one('hosts', name_or_id=name, **{
         'data': {
-            'name': name,
             'inventory': inventory_id
         }
     })

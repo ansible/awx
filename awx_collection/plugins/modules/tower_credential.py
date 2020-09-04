@@ -370,9 +370,7 @@ def main():
     if organization:
         lookup_data['organization'] = org_id
 
-    credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
-    # If we got an item back make sure the name field reflects the actual name (incase we were passed an ID)
-    name = credential['name'] if (credential) else name
+    credential, name = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

@@ -380,9 +380,8 @@ def main():
         organization_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('notification_templates', **{
+    existing_item, name = module.get_one('notification_templates', name_or_id=name, **{
         'data': {
-            'name': name,
             'organization': organization_id,
         }
     })

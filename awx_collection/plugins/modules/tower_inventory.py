@@ -109,9 +109,8 @@ def main():
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up inventory based on the provided name and org ID
-    inventory = module.get_one('inventories', **{
+    inventory, name = module.get_one('inventories', name_or_id=name, **{
         'data': {
-            'name': name,
             'organization': org_id
         }
     })

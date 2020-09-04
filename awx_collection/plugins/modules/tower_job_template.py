@@ -409,7 +409,7 @@ def main():
         credentials.append(credential)
 
     new_fields = {}
-    search_fields = {'name': name}
+    search_fields = {}
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
@@ -419,7 +419,7 @@ def main():
         search_fields['organization'] = new_fields['organization'] = organization_id
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('job_templates', **{'data': search_fields})
+    existing_item, name = module.get_one('job_templates', name_or_id=name, **{'data': search_fields})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -453,9 +453,8 @@ def main():
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
     if project is not None:
         if organization_id is not None:
-            project_data = module.get_one('projects', **{
+            project_data, project = module.get_one('projects', name_or_id=project, **{
                 'data': {
-                    'name': project,
                     'organization': organization_id,
                 }
             })

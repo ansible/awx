@@ -190,11 +190,7 @@ def main():
         unified_job_template_id = module.resolve_name_to_id('unified_job_templates', unified_job_template)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('schedules', **{
-        'data': {
-            'name': name,
-        }
-    })
+    existing_item, name = module.get_one('schedules', name_or_id=name)
 
     # Create the data that gets sent for create and update
     new_fields = {}

@@ -202,17 +202,17 @@ def main():
     source_project = module.params.get('source_project')
     state = module.params.get('state')
 
-    lookup_data = {'name': inventory}
+<<<<<<< HEAD
+    lookup_data = {}
     if organization:
         lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
-    inventory_object = module.get_one('inventories', data=lookup_data)
+    inventory_object = module.get_one('inventories', name_or_id=inventory, data=lookup_data)
 
     if not inventory_object:
         module.fail_json(msg='The specified inventory, {0}, was not found.'.format(lookup_data))
 
-    inventory_source_object = module.get_one('inventory_sources', **{
+    inventory_source_object = module.get_one('inventory_sources', name_or_id=name, **{
         'data': {
-            'name': name,
             'inventory': inventory_object['id'],
         }
     })

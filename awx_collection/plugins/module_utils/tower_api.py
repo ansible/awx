@@ -141,18 +141,18 @@ class TowerAPIModule(TowerModule):
             self.fail_json(msg="The endpoint did not provide count and results")
 
         if response['json']['count'] == 0:
-            return None
+            return None, name_or_id
         elif response['json']['count'] > 1:
             if name_or_id:
                 # Since we did a name or ID search and got > 1 return something if the id matches
                 for asset in response['json']['results']:
                     if asset['id'] == name_or_id:
-                        return asset
+                        return asset, asset['id'][name_field]
             # We got > 1 and either didn't find something by ID (which means multiple names)
             # Or we weren't running with a or search and just got back too many to begin with.
             self.fail_json(msg="An unexpected number of items was returned from the API ({0})".format(response['json']['count']))
 
-        return response['json']['results'][0]
+        return response['json']['results'][0], response['json']['results'][0][name_field]
 
     def get_one_by_name_or_id(self, endpoint, name_or_id):
         name_field = self.get_name_field_from_endpoint(endpoint)

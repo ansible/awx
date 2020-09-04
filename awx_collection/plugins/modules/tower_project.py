@@ -239,9 +239,8 @@ def main():
         credential = module.resolve_name_to_id('credentials', credential)
 
     # Attempt to look up project based on the provided name and org ID
-    project = module.get_one('projects', **{
+    project, name = module.get_one('projects', name_or_id=name, **{
         'data': {
-            'name': name,
             'organization': org_id
         }
     })

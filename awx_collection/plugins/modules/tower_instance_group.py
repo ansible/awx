@@ -109,11 +109,7 @@ def main():
     state = module.params.get('state')
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('instance_groups', **{
-        'data': {
-            'name': name,
-        }
-    })
+    existing_item, name = module.get_one('instance_groups', name_or_id=name)
 
     if state is 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

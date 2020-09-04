@@ -164,7 +164,7 @@ def main():
 
     if state == 'absent':
         if not existing_token:
-            existing_token = module.get_one('tokens', **{
+            existing_token, token_name = module.get_one('tokens', **{
                 'data': {
                     'id': existing_token_id,
                 }

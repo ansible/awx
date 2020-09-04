@@ -128,11 +128,7 @@ def main():
         credential_type_params['injectors'] = module.params.get('injectors')
 
     # Attempt to look up credential_type based on the provided name
-    credential_type = module.get_one('credential_types', **{
-        'data': {
-            'name': name,
-        }
-    })
+    credential_type, name = module.get_one('credential_types', name_or_id=name)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

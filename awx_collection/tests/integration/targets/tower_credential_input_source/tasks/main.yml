@@ -13,11 +13,11 @@
       url: "https://cyberark.example.com"
       app_id: "My-App-ID"
     organization: Default
-  register: result
+  register: src_cred_result
 
 - assert:
     that:
-      - "result is changed"
+      - "src_cred_result is changed"
 
 - name: Add Tower credential Target
   tower_credential:
@@ -27,17 +27,17 @@
     inputs:
       username: user
     organization: Default
-  register: result
+  register: target_cred_result
 
 - assert:
     that:
-      - "result is changed"
+      - "target_cred_result is changed"
 
 - name: Add credential Input Source
   tower_credential_input_source:
     input_field_name: password
-    target_credential: "{{ target_cred_name }}"
-    source_credential: "{{ src_cred_name }}"
+    target_credential: "{{ target_cred_result.id }}"
+    source_credential: "{{ src_cred_result.id }}"
     metadata:
       object_query: "Safe=MY_SAFE;Object=AWX-user"
       object_query_format: "Exact"

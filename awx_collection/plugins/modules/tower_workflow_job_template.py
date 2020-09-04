@@ -184,7 +184,7 @@ def main():
     state = module.params.get('state')
 
     new_fields = {}
-    search_fields = {'name': name}
+    search_fields = {}
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization = module.params.get('organization')
@@ -193,7 +193,7 @@ def main():
         search_fields['organization'] = new_fields['organization'] = organization_id
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_templates', **{'data': search_fields})
+    existing_item, name = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

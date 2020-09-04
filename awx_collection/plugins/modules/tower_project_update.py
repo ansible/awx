@@ -109,10 +109,10 @@ def main():
             module.fail_json(msg='Could not find Project with ID: {0}'.format(name))
         project = results['json']['results'][0]
     else:
-        lookup_data = {'name': name}
+        lookup_data = {}
         if organization:
             lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
-        project = module.get_one('projects', data=lookup_data)
+        project, name = module.get_one('projects', name_or_id=name, data=lookup_data)
         if project is None:
             module.fail_json(msg="Unable to find project")
 

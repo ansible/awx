@@ -198,12 +198,14 @@ def main():
     workflow_job_template = module.params.get('workflow_job_template')
     workflow_job_template_id = None
     if workflow_job_template:
-        wfjt_search_fields = {'name': workflow_job_template}
+        wfjt_search_fields = {}
         organization = module.params.get('organization')
         if organization:
             organization_id = module.resolve_name_to_id('organizations', organization)
             wfjt_search_fields['organization'] = organization_id
-        wfjt_data = module.get_one('workflow_job_templates', **{'data': wfjt_search_fields})
+        wfjt_data, workflow_job_template = module.get_one('workflow_job_templates', name_or_id=workflow_job_template, **{
+            'data': wfjt_search_fields
+        })
         if wfjt_data is None:
             module.fail_json(msg="The workflow {0} in organization {1} was not found on the Tower server".format(
                 workflow_job_template, organization
@@ -212,7 +214,7 @@ def main():
         search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+    existing_item, junk = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -249,7 +251,7 @@ def main():
                 lookup_data = {'identifier': sub_name}
                 if workflow_job_template_id:
                     lookup_data['workflow_job_template'] = workflow_job_template_id
-            sub_obj = module.get_one(endpoint, **{'data': lookup_data})
+            sub_obj, junk = module.get_one(endpoint, **{'data': lookup_data})
             if sub_obj is None:
                 module.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
             id_list.append(sub_obj['id'])
