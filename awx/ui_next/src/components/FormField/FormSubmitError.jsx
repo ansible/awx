@@ -39,8 +39,13 @@ function FormSubmitError({ error }) {
       const errorMessages = {};
       Object.keys(error.response.data).forEach(fieldName => {
         const errors = error.response.data[fieldName];
-        if (errors && errors.length) {
+        if (!errors) {
+          return;
+        }
+        if (Array.isArray(errors.length)) {
           errorMessages[fieldName] = errors.join(' ');
+        } else {
+          errorMessages[fieldName] = errors;
         }
       });
       setErrors(errorMessages);
