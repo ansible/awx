@@ -228,7 +228,7 @@ def query_info(since, collection_type):
 
 # Copies Job Events from db to a .csv to be shipped
 @table_version('events_table.csv', '1.1')
-@table_version('unified_jobs_table.csv', '1.1')
+@table_version('unified_jobs_table.csv', '1.0')
 @table_version('unified_job_template_table.csv', '1.0')
 @table_version('workflow_job_node_table.csv', '1.0')
 @table_version('workflow_job_template_node_table.csv', '1.0')
@@ -272,8 +272,6 @@ def copy_tables(since, full_path, subset=None):
                                  django_content_type.model,
                                  main_unifiedjob.organization_id,
                                  main_organization.name as organization_name,
-                                 main_job.inventory_id, 
-                                 main_inventory.name, 
                                  main_unifiedjob.created,  
                                  main_unifiedjob.name,  
                                  main_unifiedjob.unified_job_template_id, 
@@ -291,8 +289,6 @@ def copy_tables(since, full_path, subset=None):
                                  main_unifiedjob.instance_group_id
                                  FROM main_unifiedjob
                                  JOIN django_content_type ON main_unifiedjob.polymorphic_ctype_id = django_content_type.id
-                                 LEFT JOIN main_job ON main_unifiedjob.id = main_job.unifiedjob_ptr_id
-                                 LEFT JOIN main_inventory ON main_job.inventory_id = main_inventory.id
                                  LEFT JOIN main_organization ON main_organization.id = main_unifiedjob.organization_id
                                  WHERE (main_unifiedjob.created > {0} OR main_unifiedjob.finished > {0})
                                        AND main_unifiedjob.launch_type != 'sync'
