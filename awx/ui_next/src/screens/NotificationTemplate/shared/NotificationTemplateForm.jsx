@@ -121,6 +121,8 @@ function NotificationTemplateForm({
     };
   };
 
+  const { headers } = template?.notification_configuration || {};
+
   return (
     <Formik
       initialValues={{
@@ -130,6 +132,7 @@ function NotificationTemplateForm({
         notification_configuration: {
           ...initialConfigValues,
           ...template.notification_configuration,
+          headers: headers ? JSON.stringify(headers, null, 2) : null,
         },
         emailOptions,
         organization: template.summary_fields?.organization,
@@ -261,6 +264,9 @@ function normalizeTypeFields(values) {
   if (values.notification_type === 'email') {
     stripped.use_ssl = values.emailOptions === 'ssl';
     stripped.use_tls = !stripped.use_ssl;
+  }
+  if (values.notification_type === 'webhook') {
+    stripped.headers = stripped.headers ? JSON.parse(stripped.headers) : {};
   }
   const { emailOptions, ...rest } = values;
 

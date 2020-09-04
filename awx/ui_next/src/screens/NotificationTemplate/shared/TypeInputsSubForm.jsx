@@ -11,11 +11,10 @@ import {
 import FormField, {
   PasswordField,
   CheckboxField,
-  FieldTooltip,
   ArrayTextField,
 } from '../../../components/FormField';
 import AnsibleSelect from '../../../components/AnsibleSelect';
-import CodeMirrorInput from '../../../components/CodeMirrorInput';
+import { CodeMirrorField } from '../../../components/CodeMirrorInput';
 import {
   combine,
   required,
@@ -438,10 +437,6 @@ function TwilioFields({ i18n }) {
 }
 
 function WebhookFields({ i18n }) {
-  const [headersField, headersMeta, headersHelpers] = useField({
-    name: 'notification_configuration.headers',
-    validate: required(i18n._(t`Select enter a value for this field`), i18n),
-  });
   const [methodField, methodMeta] = useField({
     name: 'notification_configuration.http_method',
     validate: required(i18n._(t`Select a value for this field`), i18n),
@@ -473,31 +468,15 @@ function WebhookFields({ i18n }) {
         name="notification_configuration.disable_ssl_verification"
       />
       <FormFullWidthLayout>
-        <FormGroup
-          fieldId="webhook-headers"
-          helperTextInvalid={headersMeta.error}
-          isRequired
-          validated={
-            !headersMeta.touched || !headersMeta.error ? 'default' : 'error'
-          }
-          label={i18n._(t`HTTP headers`)}
-          labelIcon={
-            <FieldTooltip
-              content={i18n._(t`Specify HTTP Headers in JSON format. Refer to
-              the Ansible Tower documentation for example syntax.`)}
-            />
-          }
-        >
-          <CodeMirrorInput
-            {...headersField}
-            id="webhook-headers"
-            onChange={value => {
-              headersHelpers.setValue(value);
-            }}
-            mode="javascript"
-            rows={5}
-          />
-        </FormGroup>
+        <CodeMirrorField
+          id="webhook-headers"
+          name="notification_configuration.headers"
+          label={i18n._(t`HTTP Headers`)}
+          mode="javascript"
+          tooltip={i18n._(t`Specify HTTP Headers in JSON format. Refer to
+        the Ansible Tower documentation for example syntax.`)}
+          rows={5}
+        />
       </FormFullWidthLayout>
       <FormGroup
         fieldId="webhook-http-method"

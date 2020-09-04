@@ -8,7 +8,7 @@ import {
   FormFullWidthLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import { CodeMirrorField } from '../../../components/CodeMirrorInput';
+import CodeMirrorField from '../../../components/CodeMirrorInput/CodeMirrorField';
 
 function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
   const [useCustomField, , useCustomHelpers] = useField('useCustomMessages');
