@@ -36,7 +36,6 @@ options:
       description:
         - Name of the inventory source's inventory's organization.
       type: str
-      required: True
     wait:
       description:
         - Wait for the job to complete.
@@ -91,7 +90,7 @@ def main():
     argument_spec = dict(
         inventory=dict(required=True),
         inventory_source=dict(required=True),
-        organization=dict(required=True),
+        organization=dict(),
         wait=dict(default=False, type='bool'),
         interval=dict(default=1.0, type='float'),
         timeout=dict(default=None, type='int'),
@@ -108,13 +107,10 @@ def main():
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
 
-    org_id = module.resolve_name_to_id('organizations', organization)
-    inventory_object = module.get_one('inventories', **{
-        'data': {
-            'name': inventory,
-            'organization': org_id,
-        }
-    })
+    lookup_data = {'name': inventory}
+    if organization:
+        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+    inventory_object = module.get_one('inventories', data=lookup_data)
 
     if not inventory_object:
         module.fail_json(msg='The specified inventory was not found.')

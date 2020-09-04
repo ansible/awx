@@ -34,14 +34,14 @@
         organization: "{{ org_name }}"
         state: present
 
-    - name: Create another inventory w/ same name
+    - name: Create another inventory w/ same name, different org
       tower_inventory:
         name: "{{ inv_name }}"
         organization: Default
         state: present
       register: created_inventory
 
-    - name: Create an Inventory Source
+    - name: Create an Inventory Source (specifically connected to the randomly generated org)
       tower_inventory_source:
         name: "{{ inv_source1 }}"
         source: scm
@@ -51,7 +51,7 @@
         organization: "{{ created_org.id }}"
         inventory: "{{ inv_name }}"
 
-    - name: Create Another Inventory Source (for testing org-based lookup)
+    - name: Create Another Inventory Source
       tower_inventory_source:
         name: "{{ inv_source2 }}"
         source: scm
@@ -61,7 +61,7 @@
         organization: Default
         inventory: "{{ inv_name }}"
 
-    - name: Create Yet Another Inventory Source (one more to make lookup plugin find multiple inventory sources)
+    - name: Create Yet Another Inventory Source (to make lookup plugin find multiple inv sources)
       tower_inventory_source:
         name: "{{ inv_source3 }}"
         source: scm

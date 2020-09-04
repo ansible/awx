@@ -131,7 +131,6 @@ options:
     organization:
       description:
         - Name of the inventory source's inventory's organization.
-      required: True
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -174,7 +173,7 @@ def main():
         enabled_value=dict(),
         host_filter=dict(),
         credential=dict(),
-        organization=dict(required=True),
+        organization=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
         custom_virtualenv=dict(),
@@ -203,14 +202,10 @@ def main():
     source_project = module.params.get('source_project')
     state = module.params.get('state')
 
-    # Attempt to look up inventory source based on the provided name and inventory ID
-    org_id = module.resolve_name_to_id('organizations', organization)
-    inventory_object = module.get_one('inventories', **{
-        'data': {
-            'name': inventory,
-            'organization': org_id,
-        }
-    })
+    lookup_data = {'name': inventory}
+    if organization:
+        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+    inventory_object = module.get_one('inventories', data=lookup_data)
 
     if not inventory_object:
         module.fail_json(msg='The specified inventory was not found.')

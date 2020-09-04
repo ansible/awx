@@ -31,7 +31,6 @@
     credential: "{{ openstack_cred }}"
     overwrite: true
     update_on_launch: true
-    organization: Default
     source_vars:
       private: false
     source: openstack
@@ -48,7 +47,6 @@
     credential: "Does Not Exit"
     source_project: "Does Not Exist"
     source_script: "Does Not Exist"
-    organization: Default
     state: absent
 
 - assert:
