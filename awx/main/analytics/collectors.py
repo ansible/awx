@@ -273,7 +273,7 @@ def copy_tables(since, full_path, subset=None):
                                  main_unifiedjob.organization_id,
                                  main_organization.name as organization_name,
                                  main_job.inventory_id, 
-                                 main_inventory.name, 
+                                 main_inventory.name as inventory_name,
                                  main_unifiedjob.created,  
                                  main_unifiedjob.name,  
                                  main_unifiedjob.unified_job_template_id, 
