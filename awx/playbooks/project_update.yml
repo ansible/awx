@@ -24,9 +24,7 @@
   tasks:
 
     - name: delete project directory before update
-      file:
-        path: "{{project_path|quote}}"
-        state: absent
+      command: "rm -rf {{project_path}}/*"  # volume mounted, cannot delete folder itself
       tags:
         - delete
 
