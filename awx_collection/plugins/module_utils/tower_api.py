@@ -42,6 +42,33 @@ class TowerAPIModule(TowerModule):
         }
         return exceptions.get(name, '{0}s'.format(name))
 
+    @staticmethod
+    def get_name_field_from_endpoint(endpoint):
+        if endpoint == 'users':
+            return 'username'
+        elif endpoint == 'instances':
+            return 'hostname'
+        return 'name'
+
+    @staticmethod
+    def get_item_name(item):
+        if 'name' in item:
+            return item['name']
+        elif 'username' in item:
+            return item['username']
+        elif 'identifier' in item:
+            return item['identifier']
+        elif 'hostname' in item:
+            return item['hostname']
+        elif item.get('type', None) == 'o_auth2_access_token':
+            # An oauth2 token has no name, instead we will use its id for any of the messages
+            rerurn item['id']
+        elif item.get('type', None) == 'credential_input_source':
+            # An credential_input_source has no name, instead we will use its id for any of the messages
+            return existing_item['id']
+        return 'Unknown'
+
+
     def head_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('HEAD', endpoint, **kwargs)
 
@@ -87,13 +114,6 @@ class TowerAPIModule(TowerModule):
             next_page = next_response['json']['next']
             response['json']['next'] = next_page
         return response
-
-    def get_name_field_from_endpoint(self, endpoint):
-        if endpoint == 'users':
-            return 'username'
-        elif endpoint == 'instances':
-            return 'hostname'
-        return 'name'
 
     def get_one(self, endpoint, name_or_id=None, *args, **kwargs):
         if name_or_id:
@@ -343,23 +363,9 @@ class TowerAPIModule(TowerModule):
                 item_url = existing_item['url']
                 item_type = existing_item['type']
                 item_id = existing_item['id']
+                item_name = self.get_item_name(existing_item)
             except KeyError as ke:
                 self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
-
-            if 'name' in existing_item:
-                item_name = existing_item['name']
-            elif 'username' in existing_item:
-                item_name = existing_item['username']
-            elif 'identifier' in existing_item:
-                item_name = existing_item['identifier']
-            elif item_type == 'o_auth2_access_token':
-                # An oauth2 token has no name, instead we will use its id for any of the messages
-                item_name = existing_item['id']
-            elif item_type == 'credential_input_source':
-                # An credential_input_source has no name, instead we will use its id for any of the messages
-                item_name = existing_item['id']
-            else:
-                self.fail_json(msg="Unable to process delete of {0} due to missing name".format(item_type))
 
             response = self.delete_endpoint(item_url)
 
@@ -433,12 +439,7 @@ class TowerAPIModule(TowerModule):
 
             # We have to rely on item_type being passed in since we don't have an existing item that declares its type
             # We will pull the item_name out from the new_item, if it exists
-            for key in ('name', 'username', 'identifier', 'hostname'):
-                if key in new_item:
-                    item_name = new_item[key]
-                    break
-            else:
-                item_name = 'unknown'
+            item_name = self.get_item_name(new_item)
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
             if response['status_code'] == 201:
