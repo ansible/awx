@@ -1632,11 +1632,6 @@ class RunJob(BaseTask):
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
-        if job.use_fact_cache:
-            library_source = self.get_path_to('..', 'plugins', 'library')
-            library_dest = os.path.join(private_data_dir, 'library')
-            copy_tree(library_source, library_dest)
-            env['ANSIBLE_LIBRARY'] = library_dest
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
