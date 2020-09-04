@@ -9,6 +9,7 @@
     inv_name: "AWX-Collection-tests-tower_inventory_source_update-inv-{{ test_id }}"
     inv_source1: "AWX-Collection-tests-tower_inventory_source_update-source1-{{ test_id }}"
     inv_source2: "AWX-Collection-tests-tower_inventory_source_update-source2-{{ test_id }}"
+    inv_source3: "AWX-Collection-tests-tower_inventory_source_update-source3-{{ test_id }}"
     org_name: "AWX-Collection-tests-tower_inventory_source_update-org-{{ test_id }}"
 
 
@@ -56,6 +57,16 @@
         source: scm
         source_project: "{{ project_name }}"
         source_path: inventories/create_10_hosts.ini
+        description: Source for Test inventory
+        organization: Default
+        inventory: "{{ inv_name }}"
+
+    - name: Create Yet Another Inventory Source (one more to make lookup plugin find multiple inventory sources)
+      tower_inventory_source:
+        name: "{{ inv_source3 }}"
+        source: scm
+        source_project: "{{ project_name }}"
+        source_path: inventories/create_100_hosts.ini
         description: Source for Test inventory
         organization: Default
         inventory: "{{ inv_name }}"

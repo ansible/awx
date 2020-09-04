@@ -135,19 +135,22 @@ def main():
     if inventory_source_update_results['status_code'] != 202:
         module.fail_json(msg="Failed to update inventory source, see response for details", **{'response': inventory_source_update_results})
 
-    if wait:
-        inventory_source_update_results = module.wait_on_url(
-            url=inventory_source_update_results['json']['url'],
-            object_name=inventory_object,
-            object_type='inventory_update',
-            timeout=timeout, interval=interval
-        )
+    module.json_output['changed'] = True
+    module.json_output['id'] = inventory_source_update_results['json']['id']
+    module.json_output['status'] = inventory_source_update_results['json']['status']
 
-    module.exit_json(**{
-        'changed': True,
-        'id': inventory_source_update_results['json']['id'],
-        'status': inventory_source_update_results['json']['status'],
-    })
+    if not wait:
+        module.exit_json(**module.json_output)
+
+    # Invoke wait function
+    module.wait_on_url(
+        url=inventory_source_update_results['json']['url'],
+        object_name=inventory_object,
+        object_type='inventory_update',
+        timeout=timeout, interval=interval
+    )
+
+    module.exit_json(**module.json_output)
 
 
 if __name__ == '__main__':
