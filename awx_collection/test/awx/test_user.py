@@ -52,7 +52,7 @@ def test_update_password_on_create(run_module, admin_user, mock_auth_stuff):
         result = run_module('tower_user', dict(
             username='Bob',
             password='pass4word',
-            update_password='on_create'
+            update_secrets=False
         ), admin_user)
         assert not result.get('failed', False), result.get('msg', result)
 

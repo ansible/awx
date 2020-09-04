@@ -28,6 +28,7 @@ class TowerAPIModule(TowerModule):
         'workflow_job_template_nodes': 'identifier',
         'instances': 'hostname'
     }
+    ENCRYPTED_STRING = "$encrypted$"
 
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
@@ -35,6 +36,11 @@ class TowerAPIModule(TowerModule):
         super(TowerAPIModule, self).__init__(argument_spec=argument_spec, direct_params=direct_params,
                                              error_callback=error_callback, warn_callback=warn_callback, **kwargs)
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
+
+        if 'update_secrets' in self.params:
+            self.update_secrets = self.params.pop('update_secrets')
+        else:
+            self.update_secrets = True
 
     @staticmethod
     def param_to_endpoint(name):
@@ -478,6 +484,25 @@ class TowerAPIModule(TowerModule):
             return True
         return False
 
+    @staticmethod
+    def fields_could_be_same(old_field, new_field):
+        """Treating $encrypted$ as a wild card,
+        return False if the two values are KNOWN to be different
+        return True if the two values are the same, or could potentially be the same,
+        depending on the unknown $encrypted$ value or sub-values
+        """
+        if isinstance(old_field, dict) and isinstance(new_field, dict):
+            if set(old_field.keys()) != set(new_field.keys()):
+                return False
+            for key in new_field.keys():
+                if not TowerAPIModule.fields_could_be_same(old_field[key], new_field[key]):
+                    return False
+            return True  # all sub-fields are either equal or could be equal
+        else:
+            if old_field == TowerAPIModule.ENCRYPTED_STRING:
+                return True
+            return bool(new_field == old_field)
+
     def objects_could_be_different(self, old, new, field_set=None, warning=False):
         if field_set is None:
             field_set = set(fd for fd in new.keys() if fd not in ('modified', 'related', 'summary_fields'))
@@ -485,11 +510,13 @@ class TowerAPIModule(TowerModule):
             new_field = new.get(field, None)
             old_field = old.get(field, None)
             if old_field != new_field:
-                return True  # Something doesn't match
+                if self.update_secrets or (not self.fields_could_be_same(old_field, new_field)):
+                    return True  # Something doesn't match, or something might not match
             elif self.has_encrypted_values(new_field) or field not in new:
-                # case of 'field not in new' - user password write-only field that API will not display
-                self._encrypted_changed_warning(field, old, warning=warning)
-                return True
+                if self.update_secrets or (not self.fields_could_be_same(old_field, new_field)):
+                    # case of 'field not in new' - user password write-only field that API will not display
+                    self._encrypted_changed_warning(field, old, warning=warning)
+                    return True
         return False
 
     def update_if_needed(self, existing_item, new_item, on_update=None, associations=None):

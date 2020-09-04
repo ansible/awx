@@ -52,6 +52,12 @@ options:
           Refer to the Ansible Tower documentation for example syntax.
         - Any fields in this dict will take prescedence over any fields mentioned below (i.e. host, username, etc)
       type: dict
+    update_secrets:
+      description:
+        - C(true) will always update encrypted values.
+        - C(false) will only updated encrypted values if a change is absolutely known to be needed.
+      type: bool
+      default: true
     user:
       description:
         - User that should own this credential.
@@ -308,6 +314,7 @@ def main():
         organization=dict(),
         credential_type=dict(),
         inputs=dict(type='dict', no_log=True),
+        update_secrets=dict(type='bool', default=True, no_log=False),
         user=dict(),
         team=dict(),
         # These are for backwards compatability

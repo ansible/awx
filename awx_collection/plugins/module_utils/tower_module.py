@@ -52,7 +52,6 @@ class TowerModule(AnsibleModule):
     oauth_token_id = None
     authenticated = False
     config_name = 'tower_cli.cfg'
-    ENCRYPTED_STRING = "$encrypted$"
     version_checked = False
     error_callback = None
     warn_callback = None
