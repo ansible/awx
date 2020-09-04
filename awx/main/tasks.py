@@ -1036,6 +1036,8 @@ class BaseTask(object):
             results_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
             if not os.path.isdir(results_dir):
                 os.makedirs(results_dir, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+            # FIXME: develop some better means of referencing paths inside containers
+            container_results_dir = os.path.join('/runner', 'artifacts/playbook_profiling')
 
             logger.debug('Collected the following resource profiling intervals: cpu: {} mem: {} pid: {}'
                          .format(cpu_poll_interval, mem_poll_interval, pid_poll_interval))
@@ -1045,7 +1047,7 @@ class BaseTask(object):
                                               'resource_profiling_cpu_poll_interval': cpu_poll_interval,
                                               'resource_profiling_memory_poll_interval': mem_poll_interval,
                                               'resource_profiling_pid_poll_interval': pid_poll_interval,
-                                              'resource_profiling_results_dir': results_dir})
+                                              'resource_profiling_results_dir': container_results_dir})
 
         return resource_profiling_params
 
