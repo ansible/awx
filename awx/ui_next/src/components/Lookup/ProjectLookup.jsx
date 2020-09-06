@@ -32,7 +32,7 @@ function ProjectLookup({
   history,
 }) {
   const {
-    result: { projects, count, relatedSearchableKeys, searchableKeys },
+    result: { projects, count, relatedSearchableKeys, searchableKeys, canEdit },
     request: fetchProjects,
     error,
     isLoading,
@@ -55,6 +55,7 @@ function ProjectLookup({
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        canEdit: Boolean(actionsResponse.data.actions.POST),
       };
     }, [history.location.search, autocomplete]),
     {
@@ -62,6 +63,7 @@ function ProjectLookup({
       projects: [],
       relatedSearchableKeys: [],
       searchableKeys: [],
+      canEdit: false,
     }
   );
 
@@ -87,6 +89,7 @@ function ProjectLookup({
         onChange={onChange}
         required={required}
         isLoading={isLoading}
+        isDisabled={!canEdit}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList

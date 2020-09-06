@@ -11,6 +11,8 @@ import {
   LabelsAPI,
   OrganizationsAPI,
   InventoriesAPI,
+  ProjectsAPI,
+  CredentialTypesAPI,
 } from '../../../api';
 
 jest.mock('../../../api/models/CredentialTypes');
@@ -18,6 +20,8 @@ jest.mock('../../../api/models/WorkflowJobTemplates');
 jest.mock('../../../api/models/Labels');
 jest.mock('../../../api/models/Organizations');
 jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/Projects');
+jest.mock('../../../api/models/Credentials');
 
 describe('<WorkflowJobTemplateForm/>', () => {
   let wrapper;
@@ -70,6 +74,15 @@ describe('<WorkflowJobTemplateForm/>', () => {
         { id: 1, name: 'Foo' },
         { id: 2, name: 'Bar' },
       ],
+    });
+    CredentialTypesAPI.read.mockResolvedValue({
+      data: { results: [{ id: 1 }] },
+    });
+    InventoriesAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+    ProjectsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
     });
 
     history = createMemoryHistory({

@@ -39,7 +39,7 @@ import {
   ProjectLookup,
   MultiCredentialsLookup,
 } from '../../../components/Lookup';
-import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
+import { JobTemplatesAPI } from '../../../api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
@@ -101,18 +101,6 @@ function JobTemplateForm({
   );
 
   const {
-    request: fetchProject,
-    error: projectContentError,
-    contentLoading: hasProjectLoading,
-  } = useRequest(
-    useCallback(async () => {
-      if (template?.project) {
-        await ProjectsAPI.readDetail(template?.project);
-      }
-    }, [template])
-  );
-
-  const {
     request: loadRelatedInstanceGroups,
     error: instanceGroupError,
     contentLoading: instanceGroupLoading,
@@ -126,10 +114,6 @@ function JobTemplateForm({
       setFieldValue('instanceGroups', [...data.results]);
     }, [setFieldValue, template])
   );
-
-  useEffect(() => {
-    fetchProject();
-  }, [fetchProject]);
 
   useEffect(() => {
     loadRelatedInstanceGroups();
@@ -204,16 +188,12 @@ function JobTemplateForm({
     callbackUrl = `${origin}${path}`;
   }
 
-  if (instanceGroupLoading || hasProjectLoading) {
+  if (instanceGroupLoading) {
     return <ContentLoading />;
   }
 
-  if (contentError || instanceGroupError || projectContentError) {
-    return (
-      <ContentError
-        error={contentError || instanceGroupError || projectContentError}
-      />
-    );
+  if (contentError || instanceGroupError) {
+    return <ContentError error={contentError || instanceGroupError} />;
   }
 
   return (
@@ -254,17 +234,15 @@ function JobTemplateForm({
             }}
           />
         </FieldWithPrompt>
-        <FieldWithPrompt
-          fieldId="template-inventory"
-          isRequired={!askInventoryOnLaunchField.value}
-          label={i18n._(t`Inventory`)}
-          promptId="template-ask-inventory-on-launch"
-          promptName="ask_inventory_on_launch"
-          tooltip={i18n._(t`Select the inventory containing the hosts
-            you want this job to manage.`)}
-        >
+        <>
           <InventoryLookup
             value={inventory}
+            fieldId="template-inventory"
+            promptId="template-ask-inventory-on-launch"
+            promptName="ask_inventory_on_launch"
+            isPromptableField
+            tooltip={i18n._(t`Select the inventory containing the hosts
+            you want this job to manage.`)}
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={value => {
               inventoryHelpers.setValue(value ? value.id : null);
@@ -283,7 +261,7 @@ function JobTemplateForm({
                 {inventoryMeta.error}
               </div>
             )}
-        </FieldWithPrompt>
+        </>
         <ProjectLookup
           value={projectField.value}
           onBlur={() => projectHelpers.setTouched()}
