@@ -128,6 +128,10 @@ options:
         - list of notifications to send on error
       type: list
       elements: str
+    organization:
+      description:
+        - Name of the inventory source's inventory's organization.
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -140,6 +144,7 @@ EXAMPLES = '''
     credential: previously-created-credential
     overwrite: True
     update_on_launch: True
+    organization: Default
     source_vars:
       private: false
 '''
@@ -168,6 +173,7 @@ def main():
         enabled_value=dict(),
         host_filter=dict(),
         credential=dict(),
+        organization=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
         custom_virtualenv=dict(),
@@ -190,23 +196,30 @@ def main():
     name = module.params.get('name')
     new_name = module.params.get('new_name')
     inventory = module.params.get('inventory')
+    organization = module.params.get('organization')
     source_script = module.params.get('source_script')
     credential = module.params.get('credential')
     source_project = module.params.get('source_project')
     state = module.params.get('state')
 
-    # Attempt to look up inventory source based on the provided name and inventory ID
-    inventory_id = module.resolve_name_to_id('inventories', inventory)
-    inventory_source = module.get_one('inventory_sources', **{
+    lookup_data = {'name': inventory}
+    if organization:
+        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+    inventory_object = module.get_one('inventories', data=lookup_data)
+
+    if not inventory_object:
+        module.fail_json(msg='The specified inventory, {0}, was not found.'.format(lookup_data))
+
+    inventory_source_object = module.get_one('inventory_sources', **{
         'data': {
             'name': name,
-            'inventory': inventory_id,
+            'inventory': inventory_object['id'],
         }
     })
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(inventory_source)
+        module.delete_if_needed(inventory_source_object)
 
     # Attempt to look up associated field items the user specified.
     association_fields = {}
@@ -232,7 +245,7 @@ def main():
     # Create the data that gets sent for create and update
     inventory_source_fields = {
         'name': new_name if new_name else name,
-        'inventory': inventory_id,
+        'inventory': inventory_object['id'],
     }
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
@@ -261,12 +274,12 @@ def main():
         inventory_source_fields['source_vars'] = dumps(inventory_source_fields['source_vars'])
 
     # Sanity check on arguments
-    if state == 'present' and not inventory_source and not inventory_source_fields['source']:
+    if state == 'present' and not inventory_source_object and not inventory_source_fields['source']:
         module.fail_json(msg="If creating a new inventory source, the source param must be present")
 
-    # If the state was present we can let the module build or update the existing inventory_source, this will return on its own
+    # If the state was present we can let the module build or update the existing inventory_source_object, this will return on its own
     module.create_or_update_if_needed(
-        inventory_source, inventory_source_fields,
+        inventory_source_object, inventory_source_fields,
         endpoint='inventory_sources', item_type='inventory source',
         associations=association_fields
     )
