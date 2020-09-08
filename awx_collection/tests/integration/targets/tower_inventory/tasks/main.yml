@@ -29,7 +29,7 @@
       tower_inventory:
         name: "{{ inv_name1 }}"
         organization: Default
-        insights_credential: "{{ results.id }}"
+        insights_credential: "{{ result.id }}"
         state: present
       register: result
 
