@@ -57,7 +57,7 @@ options:
       type: str
     update_secrets:
       description:
-        - C(true) will always password if user specifies password and API gives $encrypted$ for password.
+        - C(true) will always change password if user specifies password, even if API gives $encrypted$ for password.
         - C(false) will only set the password if other values change too.
       type: bool
       default: true

@@ -22,7 +22,6 @@ class TowerAPIModule(TowerModule):
         'tower': 'Red Hat Ansible Tower',
     }
     session = None
-    cookie_jar = CookieJar()
     IDENTITY_FIELDS = {
         'users': 'username',
         'workflow_job_template_nodes': 'identifier',
