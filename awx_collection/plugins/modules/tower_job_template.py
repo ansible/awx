@@ -453,7 +453,7 @@ def main():
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
     if project is not None:
         if organization_id is not None:
-            project_data, project = module.get_one('projects', name_or_id=project, **{
+            project_data = module.get_one('projects', name_or_id=project, **{
                 'data': {
                     'organization': organization_id,
                 }
