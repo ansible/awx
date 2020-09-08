@@ -143,7 +143,7 @@ def main():
     # Create the data that gets sent for create and update
     new_fields = {}
     if username:
-        new_fields['username'] = module.get_item_name(existing_item) if existing_item else name
+        new_fields['username'] = module.get_item_name(existing_item) if existing_item else username
     if first_name:
         new_fields['first_name'] = first_name
     if last_name:
