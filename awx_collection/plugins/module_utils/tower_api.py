@@ -25,6 +25,11 @@ class TowerAPIModule(TowerModule):
     }
     session = None
     cookie_jar = CookieJar()
+    IDENTITY_FIELDS = {
+        'users': 'username',
+        'workflow_job_template_nodes': 'identifier',
+        'instances': 'hostname'
+    }
 
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
@@ -44,30 +49,20 @@ class TowerAPIModule(TowerModule):
 
     @staticmethod
     def get_name_field_from_endpoint(endpoint):
-        if endpoint == 'users':
-            return 'username'
-        elif endpoint == 'instances':
-            return 'hostname'
-        return 'name'
+        return TowerAPIModule.IDENTITY_FIELDS.get(endpoint, 'name')
 
-    @staticmethod
-    def get_item_name(item):
+    def get_item_name(self, item):
         if 'name' in item:
             return item['name']
-        elif 'username' in item:
-            return item['username']
-        elif 'identifier' in item:
-            return item['identifier']
-        elif 'hostname' in item:
-            return item['hostname']
-        elif item.get('type', None) == 'o_auth2_access_token':
-            # An oauth2 token has no name, instead we will use its id for any of the messages
-            rerurn item['id']
-        elif item.get('type', None) == 'credential_input_source':
-            # An credential_input_source has no name, instead we will use its id for any of the messages
-            return existing_item['id']
-        return 'Unknown'
 
+        for field_name in TowerAPIModule.IDENTITY_FIELDS.values():
+            if field_name in item:
+                return item[field_name]
+
+        if item.get('type', None) in ('o_auth2_access_token', 'credential_input_source'):
+            return item['id']
+
+        self.exit_json(msg='Cannot determine identity field for {0} object.'.format(item.get('type', 'unknown')))
 
     def head_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('HEAD', endpoint, **kwargs)
@@ -141,18 +136,18 @@ class TowerAPIModule(TowerModule):
             self.fail_json(msg="The endpoint did not provide count and results")
 
         if response['json']['count'] == 0:
-            return None, name_or_id
+            return None
         elif response['json']['count'] > 1:
             if name_or_id:
                 # Since we did a name or ID search and got > 1 return something if the id matches
                 for asset in response['json']['results']:
                     if asset['id'] == name_or_id:
-                        return asset, asset['id'][name_field]
+                        return asset
             # We got > 1 and either didn't find something by ID (which means multiple names)
             # Or we weren't running with a or search and just got back too many to begin with.
             self.fail_json(msg="An unexpected number of items was returned from the API ({0})".format(response['json']['count']))
 
-        return response['json']['results'][0], response['json']['results'][0][name_field]
+        return response['json']['results'][0]
 
     def get_one_by_name_or_id(self, endpoint, name_or_id):
         name_field = self.get_name_field_from_endpoint(endpoint)

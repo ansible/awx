@@ -190,13 +190,13 @@ def main():
         unified_job_template_id = module.resolve_name_to_id('unified_job_templates', unified_job_template)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item, name = module.get_one('schedules', name_or_id=name)
+    existing_item = module.get_one('schedules', name_or_id=name)
 
     # Create the data that gets sent for create and update
     new_fields = {}
     if rrule is not None:
         new_fields['rrule'] = rrule
-    new_fields['name'] = new_name if new_name else name
+    new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
     if description is not None:
         new_fields['description'] = description
     if extra_data is not None:

@@ -80,7 +80,7 @@ def main():
         organization_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item, name = module.get_one('labels', name_or_id=name, **{
+    existing_item = module.get_one('labels', name_or_id=name, **{
         'data': {
             'organization': organization_id,
         }
@@ -88,7 +88,7 @@ def main():
 
     # Create the data that gets sent for create and update
     new_fields = {}
-    new_fields['name'] = new_name if new_name else name
+    new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
     if organization:
         new_fields['organization'] = organization_id
 

@@ -68,7 +68,7 @@ def main():
     fail_if_not_running = module.params.get('fail_if_not_running')
 
     # Attempt to look up the job based on the provided name
-    job, job_name = module.get_one('jobs', **{
+    job = module.get_one('jobs', **{
         'data': {
             'id': job_id,
         }

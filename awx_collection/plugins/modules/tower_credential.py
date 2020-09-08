@@ -370,7 +370,7 @@ def main():
     if organization:
         lookup_data['organization'] = org_id
 
-    credential, name = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
+    credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -396,7 +396,7 @@ def main():
 
     # Create the data that gets sent for create and update
     credential_fields = {
-        'name': new_name if new_name else name,
+        'name': new_name if new_name else (module.get_item_name(credential) if credential else name),
         'credential_type': cred_type_id,
     }
     if has_inputs:

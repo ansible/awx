@@ -115,7 +115,6 @@ def main():
 
     # These will be passed into the create/updates
     credential_type_params = {
-        'name': new_name if new_name else name,
         'managed_by_tower': False,
     }
     if kind:
@@ -128,11 +127,13 @@ def main():
         credential_type_params['injectors'] = module.params.get('injectors')
 
     # Attempt to look up credential_type based on the provided name
-    credential_type, name = module.get_one('credential_types', name_or_id=name)
+    credential_type = module.get_one('credential_types', name_or_id=name)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(credential_type)
+
+    credential_type_params['name'] = new_name if new_name else (module.get_item_name(credential_type) if credential_type else name)
 
     # If the state was present and we can let the module build or update the existing credential type, this will return on its own
     module.create_or_update_if_needed(credential_type, credential_type_params, endpoint='credential_types', item_type='credential type')

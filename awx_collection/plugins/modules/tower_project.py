@@ -239,7 +239,7 @@ def main():
         credential = module.resolve_name_to_id('credentials', credential)
 
     # Attempt to look up project based on the provided name and org ID
-    project, name = module.get_one('projects', name_or_id=name, **{
+    project = module.get_one('projects', name_or_id=name, **{
         'data': {
             'organization': org_id
         }
@@ -272,7 +272,7 @@ def main():
 
     # Create the data that gets sent for create and update
     project_fields = {
-        'name': name,
+        'name': module.get_item_name(project) if project else name,
         'scm_type': scm_type,
         'scm_url': scm_url,
         'scm_branch': scm_branch,

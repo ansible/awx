@@ -102,7 +102,7 @@ def main():
         'target_credential': target_credential_id,
         'input_field_name': input_field_name,
     }
-    credential_input_source, junk = module.get_one('credential_input_sources', **{'data': lookup_data})
+    credential_input_source = module.get_one('credential_input_sources', **{'data': lookup_data})
 
     if state == 'absent':
         module.delete_if_needed(credential_input_source)
