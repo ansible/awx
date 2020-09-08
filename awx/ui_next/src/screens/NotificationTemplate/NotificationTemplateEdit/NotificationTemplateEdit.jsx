@@ -2,33 +2,17 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { CardBody } from '../../../components/Card';
-import { OrganizationsAPI } from '../../../api';
-import { Config } from '../../../contexts/Config';
-
+import { NotificationTemplatesAPI } from '../../../api';
 import NotificationTemplateForm from '../shared/NotificationTemplateForm';
 
-function NotificationTemplateEdit({ template }) {
+function NotificationTemplateEdit({ template, defaultMessages }) {
   const detailsUrl = `/notification_templates/${template.id}/details`;
   const history = useHistory();
   const [formError, setFormError] = useState(null);
 
-  const handleSubmit = async (
-    values,
-    groupsToAssociate,
-    groupsToDisassociate
-  ) => {
+  const handleSubmit = async values => {
     try {
-      await OrganizationsAPI.update(template.id, values);
-      await Promise.all(
-        groupsToAssociate.map(id =>
-          OrganizationsAPI.associateInstanceGroup(template.id, id)
-        )
-      );
-      await Promise.all(
-        groupsToDisassociate.map(id =>
-          OrganizationsAPI.disassociateInstanceGroup(template.id, id)
-        )
-      );
+      await NotificationTemplatesAPI.update(template.id, values);
       history.push(detailsUrl);
     } catch (error) {
       setFormError(error);
@@ -41,17 +25,13 @@ function NotificationTemplateEdit({ template }) {
 
   return (
     <CardBody>
-      <Config>
-        {({ me }) => (
-          <NotificationTemplateForm
-            template={template}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            me={me || {}}
-            submitError={formError}
-          />
-        )}
-      </Config>
+      <NotificationTemplateForm
+        template={template}
+        defaultMessages={defaultMessages}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        submitError={formError}
+      />
     </CardBody>
   );
 }

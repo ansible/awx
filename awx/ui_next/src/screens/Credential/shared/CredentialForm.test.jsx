@@ -136,23 +136,24 @@ describe('<CredentialForm />', () => {
     test('should display cred type subform when scm type select has a value', async () => {
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential_type"]')
+          .find('AnsibleSelect[id="credential-type"]')
           .invoke('onChange')(null, 1);
       });
       wrapper.update();
       machineFieldExpects();
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential_type"]')
+          .find('AnsibleSelect[id="credential-type"]')
           .invoke('onChange')(null, 2);
       });
       wrapper.update();
       sourceFieldExpects();
     });
+
     test('should update expected fields when gce service account json file uploaded', async () => {
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential_type"]')
+          .find('AnsibleSelect[id="credential-type"]')
           .invoke('onChange')(null, 10);
       });
       wrapper.update();
@@ -182,6 +183,7 @@ describe('<CredentialForm />', () => {
         '-----BEGIN PRIVATE KEY-----\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n-----END PRIVATE KEY-----\n'
       );
     });
+
     test('should clear expected fields when file clear button clicked', async () => {
       await act(async () => {
         wrapper
@@ -212,7 +214,7 @@ describe('<CredentialForm />', () => {
     test('should show error when error thrown parsing JSON', async () => {
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential_type"]')
+          .find('AnsibleSelect[id="credential-type"]')
           .invoke('onChange')(null, 10);
       });
       wrapper.update();
@@ -243,7 +245,7 @@ describe('<CredentialForm />', () => {
     test('should show Test button when external credential type is selected', async () => {
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential_type"]')
+          .find('AnsibleSelect[id="credential-type"]')
           .invoke('onChange')(null, 21);
       });
       wrapper.update();

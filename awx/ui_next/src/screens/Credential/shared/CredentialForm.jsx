@@ -104,7 +104,7 @@ function CredentialFormFields({
         error={orgMeta.error}
       />
       <FormGroup
-        fieldId="credential-credentialType"
+        fieldId="credential-Type"
         helperTextInvalid={credTypeMeta.error}
         isRequired
         validated={
@@ -114,7 +114,7 @@ function CredentialFormFields({
       >
         <AnsibleSelect
           {...credTypeField}
-          id="credential_type"
+          id="credential-type"
           data={[
             {
               value: '',

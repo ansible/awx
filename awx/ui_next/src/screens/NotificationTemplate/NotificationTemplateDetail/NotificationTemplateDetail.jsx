@@ -234,7 +234,7 @@ function NotificationTemplateDetail({ i18n, template }) {
             <Detail
               label={i18n._(t`Username`)}
               value={configuration.rocketchat_username}
-              dataCy="nt-detail-pagerduty-rocketchat-username"
+              dataCy="nt-detail-rocketchat-username"
             />
             <Detail
               label={i18n._(t`Icon URL`)}
