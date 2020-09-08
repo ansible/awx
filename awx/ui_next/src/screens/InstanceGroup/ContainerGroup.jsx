@@ -17,10 +17,10 @@ import { InstanceGroupsAPI } from '../../api';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
+import JobList from '../../components/JobList';
 
 import ContainerGroupDetails from './ContainerGroupDetails';
 import ContainerGroupEdit from './ContainerGroupEdit';
-import Jobs from './Jobs';
 
 function ContainerGroup({ i18n, setBreadcrumb }) {
   const { id } = useParams();
@@ -117,7 +117,10 @@ function ContainerGroup({ i18n, setBreadcrumb }) {
                   <ContainerGroupDetails />
                 </Route>
                 <Route path="/instance_groups/container_group/:id/jobs">
-                  <Jobs />
+                  <JobList
+                    showTypeColumn
+                    defaultParams={{ instance_group: instanceGroup.id }}
+                  />
                 </Route>
               </>
             )}
