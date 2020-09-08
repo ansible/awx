@@ -1,5 +1,5 @@
-import React from 'react';
-import { useField } from 'formik';
+import React, { useCallback } from 'react';
+import { useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
@@ -13,16 +13,23 @@ import {
 } from './SharedFields';
 
 const EC2SubForm = ({ i18n }) => {
-  const [credentialField, , credentialHelpers] = useField('credential');
+  const { setFieldValue } = useFormikContext();
+  const [credentialField] = useField('credential');
+
+  const handleCredentialUpdate = useCallback(
+    value => {
+      setFieldValue('credential', value);
+    },
+    [setFieldValue]
+  );
+
   return (
     <>
       <CredentialLookup
         credentialTypeNamespace="aws"
         label={i18n._(t`Credential`)}
         value={credentialField.value}
-        onChange={value => {
-          credentialHelpers.setValue(value);
-        }}
+        onChange={handleCredentialUpdate}
       />
       <VerbosityField />
       <HostFilterField />

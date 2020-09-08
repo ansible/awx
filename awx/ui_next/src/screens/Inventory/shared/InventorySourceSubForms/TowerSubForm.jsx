@@ -1,5 +1,5 @@
-import React from 'react';
-import { useField } from 'formik';
+import React, { useCallback } from 'react';
+import { useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
@@ -11,9 +11,17 @@ import {
   HostFilterField,
 } from './SharedFields';
 
-const TowerSubForm = ({ i18n }) => {
+const TowerSubForm = ({ autoPopulateCredential, i18n }) => {
+  const { setFieldValue } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] = useField(
     'credential'
+  );
+
+  const handleCredentialUpdate = useCallback(
+    value => {
+      setFieldValue('credential', value);
+    },
+    [setFieldValue]
   );
 
   return (
@@ -24,11 +32,10 @@ const TowerSubForm = ({ i18n }) => {
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}
         onBlur={() => credentialHelpers.setTouched()}
-        onChange={value => {
-          credentialHelpers.setValue(value);
-        }}
+        onChange={handleCredentialUpdate}
         value={credentialField.value}
         required
+        autoPopulate={autoPopulateCredential}
       />
       <VerbosityField />
       <HostFilterField />

@@ -9,7 +9,7 @@ import {
   InputGroup,
   Button,
 } from '@patternfly/react-core';
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import useRequest from '../../../util/useRequest';
@@ -24,6 +24,7 @@ import {
 } from '../../../api';
 
 function WebhookSubForm({ i18n, templateType }) {
+  const { setFieldValue } = useFormikContext();
   const { id } = useParams();
   const { pathname } = useLocation();
   const { origin } = document.location;
@@ -82,6 +83,14 @@ function WebhookSubForm({ i18n, templateType }) {
   const changeWebhookKey = async () => {
     await fetchWebhookKey();
   };
+
+  const onCredentialChange = useCallback(
+    value => {
+      setFieldValue('webhook_credential', value || null);
+    },
+    [setFieldValue]
+  );
+
   const isUpdateKeyDisabled =
     pathname.endsWith('/add') ||
     webhookKeyMeta.initialValue ===
@@ -211,9 +220,7 @@ function WebhookSubForm({ i18n, templateType }) {
             t`Optionally select the credential to use to send status updates back to the webhook service.`
           )}
           credentialTypeId={credTypeId}
-          onChange={value => {
-            webhookCredentialHelpers.setValue(value || null);
-          }}
+          onChange={onCredentialChange}
           isValid={!webhookCredentialMeta.error}
           helperTextInvalid={webhookCredentialMeta.error}
           value={webhookCredentialField.value}

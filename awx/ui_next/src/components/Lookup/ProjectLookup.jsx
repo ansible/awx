@@ -8,6 +8,7 @@ import { ProjectsAPI } from '../../api';
 import { Project } from '../../types';
 import { FieldTooltip } from '../FormField';
 import OptionsList from '../OptionsList';
+import useAutoPopulateLookup from '../../util/useAutoPopulateLookup';
 import useRequest from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
@@ -21,7 +22,7 @@ const QS_CONFIG = getQSConfig('project', {
 
 function ProjectLookup({
   helperTextInvalid,
-  autocomplete,
+  autoPopulate,
   i18n,
   isValid,
   onChange,
@@ -31,6 +32,7 @@ function ProjectLookup({
   onBlur,
   history,
 }) {
+  const autoPopulateLookup = useAutoPopulateLookup(onChange);
   const {
     result: { projects, count, relatedSearchableKeys, searchableKeys, canEdit },
     request: fetchProjects,
@@ -43,8 +45,8 @@ function ProjectLookup({
         ProjectsAPI.read(params),
         ProjectsAPI.readOptions(),
       ]);
-      if (data.count === 1 && autocomplete) {
-        autocomplete(data.results[0]);
+      if (autoPopulate) {
+        autoPopulateLookup(data.results);
       }
       return {
         count: data.count,
@@ -57,7 +59,7 @@ function ProjectLookup({
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
         canEdit: Boolean(actionsResponse.data.actions.POST),
       };
-    }, [history.location.search, autocomplete]),
+    }, [autoPopulate, autoPopulateLookup, history.location.search]),
     {
       count: 0,
       projects: [],
@@ -151,7 +153,7 @@ function ProjectLookup({
 }
 
 ProjectLookup.propTypes = {
-  autocomplete: func,
+  autoPopulate: bool,
   helperTextInvalid: node,
   isValid: bool,
   onBlur: func,
@@ -162,7 +164,7 @@ ProjectLookup.propTypes = {
 };
 
 ProjectLookup.defaultProps = {
-  autocomplete: () => {},
+  autoPopulate: false,
   helperTextInvalid: '',
   isValid: true,
   onBlur: () => {},

@@ -88,4 +88,66 @@ describe('CredentialLookup', () => {
     expect(_CredentialLookup.defaultProps.onBlur).toBeInstanceOf(Function);
     expect(_CredentialLookup.defaultProps.onBlur).not.toThrow();
   });
+
+  test('should auto-select credential when only one available and autoPopulate prop is true', async () => {
+    CredentialsAPI.read.mockReturnValue({
+      data: {
+        results: [{ id: 1 }],
+        count: 1,
+      },
+    });
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <CredentialLookup
+          autoPopulate
+          credentialTypeId={1}
+          label="Foo"
+          onChange={onChange}
+        />
+      );
+    });
+    expect(onChange).toHaveBeenCalledWith({ id: 1 });
+  });
+
+  test('should not auto-select credential when autoPopulate prop is false', async () => {
+    CredentialsAPI.read.mockReturnValue({
+      data: {
+        results: [{ id: 1 }],
+        count: 1,
+      },
+    });
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <CredentialLookup
+          credentialTypeId={1}
+          label="Foo"
+          onChange={onChange}
+        />
+      );
+    });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  test('should not auto-select credential when multiple available', async () => {
+    CredentialsAPI.read.mockReturnValue({
+      data: {
+        results: [{ id: 1 }, { id: 2 }],
+        count: 2,
+      },
+    });
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <CredentialLookup
+          credentialTypeId={1}
+          label="Foo"
+          autoPopulate
+          onChange={onChange}
+        />
+      );
+    });
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

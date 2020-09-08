@@ -10,6 +10,7 @@ import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
 import { FieldTooltip } from '../FormField';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
+import useAutoPopulateLookup from '../../util/useAutoPopulateLookup';
 import useRequest from '../../util/useRequest';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
@@ -34,7 +35,9 @@ function CredentialLookup({
   i18n,
   tooltip,
   isDisabled,
+  autoPopulate,
 }) {
+  const autoPopulateLookup = useAutoPopulateLookup(onChange);
   const {
     result: { count, credentials, relatedSearchableKeys, searchableKeys },
     error,
@@ -62,6 +65,11 @@ function CredentialLookup({
         ),
         CredentialsAPI.readOptions,
       ]);
+
+      if (autoPopulate) {
+        autoPopulateLookup(data.results);
+      }
+
       return {
         count: data.count,
         credentials: data.results,
@@ -73,6 +81,8 @@ function CredentialLookup({
         ).filter(key => actionsResponse.data?.actions?.GET[key]?.filterable),
       };
     }, [
+      autoPopulate,
+      autoPopulateLookup,
       credentialTypeId,
       credentialTypeKind,
       credentialTypeNamespace,
@@ -182,6 +192,8 @@ CredentialLookup.propTypes = {
   onChange: func.isRequired,
   required: bool,
   value: Credential,
+  isDisabled: bool,
+  autoPopulate: bool,
 };
 
 CredentialLookup.defaultProps = {
@@ -192,6 +204,8 @@ CredentialLookup.defaultProps = {
   onBlur: () => {},
   required: false,
   value: null,
+  isDisabled: false,
+  autoPopulate: false,
 };
 
 export { CredentialLookup as _CredentialLookup };

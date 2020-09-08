@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Formik, useField } from 'formik';
+import React, { useCallback, useState } from 'react';
+import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func, object, shape } from 'prop-types';
@@ -21,6 +21,7 @@ function CredentialFormFields({
   formik,
   initialValues,
 }) {
+  const { setFieldValue } = useFormikContext();
   const [orgField, orgMeta, orgHelpers] = useField('organization');
   const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
     name: 'credential_type',
@@ -76,6 +77,13 @@ function CredentialFormFields({
     );
   };
 
+  const onOrganizationChange = useCallback(
+    value => {
+      setFieldValue('organization', value);
+    },
+    [setFieldValue]
+  );
+
   return (
     <>
       <FormField
@@ -96,9 +104,7 @@ function CredentialFormFields({
         helperTextInvalid={orgMeta.error}
         isValid={!orgMeta.touched || !orgMeta.error}
         onBlur={() => orgHelpers.setTouched()}
-        onChange={value => {
-          orgHelpers.setValue(value);
-        }}
+        onChange={onOrganizationChange}
         value={orgField.value}
         touched={orgMeta.touched}
         error={orgMeta.error}
