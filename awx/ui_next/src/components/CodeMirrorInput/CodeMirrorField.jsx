@@ -30,6 +30,7 @@ function CodeMirrorField({
 
   return (
     <FormGroup
+      id={`${id}-field`}
       fieldId={id}
       helperText={helperText}
       helperTextInvalid={meta.error}
@@ -39,7 +40,7 @@ function CodeMirrorField({
       labelIcon={<FieldTooltip content={tooltip} />}
     >
       <CodeMirrorInput
-        id="webhook-headers"
+        id={id}
         {...rest}
         {...field}
         onChange={value => {

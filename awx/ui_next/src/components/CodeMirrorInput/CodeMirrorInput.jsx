@@ -107,6 +107,7 @@ CodeMirrorInput.propTypes = {
   hasErrors: bool,
   fullHeight: bool,
   rows: number,
+  className: string,
 };
 CodeMirrorInput.defaultProps = {
   readOnly: false,
@@ -114,6 +115,7 @@ CodeMirrorInput.defaultProps = {
   rows: 6,
   fullHeight: false,
   hasErrors: false,
+  className: '',
 };
 
 export default CodeMirrorInput;
