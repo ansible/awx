@@ -1457,7 +1457,8 @@ class BaseTask(object):
 
             if containerized:
                 # We don't want HOME passed through to container groups.
-                params['envvars'].pop('HOME')
+                # TODO: remove this conditional after everything is containerized
+                params['envvars'].pop('HOME', None)
 
             if isinstance(self.instance, AdHocCommand):
                 params['module'] = self.build_module_name(self.instance)
