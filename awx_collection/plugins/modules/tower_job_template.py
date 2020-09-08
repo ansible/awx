@@ -484,7 +484,7 @@ def main():
 # Code to use once Issue #7567 is resolved
 #            search_fields = {'name': item}
 #            if organization:
-#                search_fields['organization'] = organization_id  
+#                search_fields['organization'] = organization_id
 #            label_id = module.get_one('labels', **{'data': search_fields})
 #            association_fields['labels'].append(label_id)
 
