@@ -52,20 +52,24 @@ class TowerAPIModule(TowerModule):
         return TowerAPIModule.IDENTITY_FIELDS.get(endpoint, 'name')
 
     def get_item_name(self, item, allow_unknown=False):
-        if 'name' in item:
-            return item['name']
+        if item:
+            if 'name' in item:
+                return item['name']
 
-        for field_name in TowerAPIModule.IDENTITY_FIELDS.values():
-            if field_name in item:
-                return item[field_name]
+            for field_name in TowerAPIModule.IDENTITY_FIELDS.values():
+                if field_name in item:
+                    return item[field_name]
 
-        if item.get('type', None) in ('o_auth2_access_token', 'credential_input_source'):
-            return item['id']
+            if item.get('type', None) in ('o_auth2_access_token', 'credential_input_source'):
+                return item['id']
 
         if allow_unknown:
             return 'unknown'
 
-        self.exit_json(msg='Cannot determine identity field for {0} object.'.format(item.get('type', 'unknown')))
+        if item:
+            self.exit_json(msg='Cannot determine identity field for {0} object.'.format(item.get('type', 'unknown')))
+        else:
+            self.exit_json(msg='Cannot determine identity field for Undefined object.')
 
     def head_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('HEAD', endpoint, **kwargs)
