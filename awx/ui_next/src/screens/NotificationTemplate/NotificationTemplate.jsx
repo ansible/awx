@@ -106,6 +106,7 @@ function NotificationTemplate({ setBreadcrumb, i18n }) {
               <Route path="/notification_templates/:id/details">
                 <NotificationTemplateDetail
                   template={template}
+                  defaultMessages={defaultMessages}
                   isLoading={isLoading}
                 />
               </Route>

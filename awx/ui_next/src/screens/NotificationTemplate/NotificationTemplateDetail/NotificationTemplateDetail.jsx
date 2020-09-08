@@ -11,19 +11,21 @@ import {
   DetailList,
   DeletedDetail,
 } from '../../../components/DetailList';
-import ObjectDetail from '../../../components/DetailList/ObjectDetail';
+import CodeDetail from '../../../components/DetailList/CodeDetail';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
 import { NotificationTemplatesAPI } from '../../../api';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import hasCustomMessages from '../shared/hasCustomMessages';
 import { NOTIFICATION_TYPES } from '../constants';
 
-function NotificationTemplateDetail({ i18n, template }) {
+function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
   const history = useHistory();
 
   const {
     notification_configuration: configuration,
     summary_fields,
+    messages,
   } = template;
 
   const { request: deleteTemplate, isLoading, error: deleteError } = useRequest(
@@ -34,6 +36,7 @@ function NotificationTemplateDetail({ i18n, template }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
+  const typeMessageDefaults = defaultMessages[template.notification_type];
 
   return (
     <CardBody>
@@ -275,7 +278,7 @@ function NotificationTemplateDetail({ i18n, template }) {
               dataCy="nt-detail-twilio-source-phone"
             />
             <ArrayDetail
-              label={i18n._(t`Destination SMS Number`)}
+              label={i18n._(t`Destination SMS Number(s)`)}
               value={configuration.to_numbers}
               dataCy="nt-detail-twilio-destination-numbers"
             />
@@ -312,13 +315,22 @@ function NotificationTemplateDetail({ i18n, template }) {
               value={configuration.http_method}
               dataCy="nt-detail-webhook-http-method"
             />
-            <ObjectDetail
+            <CodeDetail
               label={i18n._(t`HTTP Headers`)}
-              value={configuration.headers}
+              value={JSON.stringify(configuration.headers)}
+              mode="json"
               rows="6"
               dataCy="nt-detail-webhook-headers"
             />
           </>
+        )}
+        {hasCustomMessages(messages, typeMessageDefaults) && (
+          <CustomMessageDetails
+            messages={messages}
+            defaults={typeMessageDefaults}
+            type={template.notification_type}
+            i18n={i18n}
+          />
         )}
       </DetailList>
       <CardActionsRow>
@@ -356,6 +368,166 @@ function NotificationTemplateDetail({ i18n, template }) {
         </AlertModal>
       )}
     </CardBody>
+  );
+}
+
+function CustomMessageDetails({ messages, defaults, type, i18n }) {
+  const showMessages = type !== 'webhook';
+  const showBodies = ['email', 'pagerduty', 'webhook'].includes(type);
+
+  return (
+    <>
+      {showMessages && (
+        <CodeDetail
+          label={i18n._(t`Start message`)}
+          value={messages.started.message || defaults.started.message}
+          mode="jinja2"
+          rows="2"
+          fullWidth
+        />
+      )}
+      {showBodies && (
+        <CodeDetail
+          label={i18n._(t`Start message body`)}
+          value={messages.started.body || defaults.started.body}
+          mode="jinja2"
+          rows="6"
+          fullWidth
+        />
+      )}
+      {showMessages && (
+        <CodeDetail
+          label={i18n._(t`Success message`)}
+          value={messages.success.message || defaults.success.message}
+          mode="jinja2"
+          rows="2"
+          fullWidth
+        />
+      )}
+      {showBodies && (
+        <CodeDetail
+          label={i18n._(t`Success message body`)}
+          value={messages.success.body || defaults.success.body}
+          mode="jinja2"
+          rows="6"
+          fullWidth
+        />
+      )}
+      {showMessages && (
+        <CodeDetail
+          label={i18n._(t`Error message`)}
+          value={messages.error.message || defaults.error.message}
+          mode="jinja2"
+          rows="2"
+          fullWidth
+        />
+      )}
+      {showBodies && (
+        <CodeDetail
+          label={i18n._(t`Error message body`)}
+          value={messages.error.body || defaults.error.body}
+          mode="jinja2"
+          rows="6"
+          fullWidth
+        />
+      )}
+      {showMessages && (
+        <CodeDetail
+          label={i18n._(t`Workflow approved message`)}
+          value={
+            messages.workflow_approval.approved.message ||
+            defaults.workflow_approval.approved.message
+          }
+          mode="jinja2"
+          rows="2"
+          fullWidth
+        />
+      )}
+      {showBodies && (
+        <CodeDetail
+          label={i18n._(t`Workflow approved message body`)}
+          value={
+            messages.workflow_approval.approved.body ||
+            defaults.workflow_approval.approved.body
+          }
+          mode="jinja2"
+          rows="6"
+          fullWidth
+        />
+      )}
+      {showMessages && (
+        <CodeDetail
+          label={i18n._(t`Workflow denied message`)}
+          value={
+            messages.workflow_approval.denied.message ||
+            defaults.workflow_approval.denied.message
+          }
+          mode="jinja2"
+          rows="2"
+          fullWidth
+        />
+      )}
+      {showBodies && (
+        <CodeDetail
+          label={i18n._(t`Workflow denied message body`)}
+          value={
+            messages.workflow_approval.denied.body ||
+            defaults.workflow_approval.denied.body
+          }
+          mode="jinja2"
+          rows="6"
+          fullWidth
+        />
+      )}
+      {showMessages && (
+        <CodeDetail
+          label={i18n._(t`Workflow pending message`)}
+          value={
+            messages.workflow_approval.running.message ||
+            defaults.workflow_approval.running.message
+          }
+          mode="jinja2"
+          rows="2"
+          fullWidth
+        />
+      )}
+      {showBodies && (
+        <CodeDetail
+          label={i18n._(t`Workflow pending message body`)}
+          value={
+            messages.workflow_approval.running.body ||
+            defaults.workflow_approval.running.body
+          }
+          mode="jinja2"
+          rows="6"
+          fullWidth
+        />
+      )}
+      {showMessages && (
+        <CodeDetail
+          label={i18n._(t`Workflow timed out message`)}
+          value={
+            messages.workflow_approval.timed_out.message ||
+            defaults.workflow_approval.timed_out.message
+          }
+          mode="jinja2"
+          rows="2"
+          fullWidth
+        />
+      )}
+      {showBodies && (
+        <CodeDetail
+          label={i18n._(t`Workflow timed out message body`)}
+          value={
+            messages.workflow_approval.timed_out.body ||
+            defaults.workflow_approval.timed_out.body
+          }
+          mode="jinja2"
+          rows="6"
+          fullWidth
+        />
+      )}
+    </>
   );
 }
 
