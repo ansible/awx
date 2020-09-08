@@ -203,6 +203,9 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # The number of job events to migrate per-transaction when moving from int -> bigint
 JOB_EVENT_MIGRATION_CHUNK_SIZE = 1000000
 
+# The maximum allowed jobs to start on a given task manager cycle
+START_TASK_LIMIT = 100
+
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
 
