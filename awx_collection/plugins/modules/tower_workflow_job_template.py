@@ -184,7 +184,7 @@ def main():
     state = module.params.get('state')
 
     new_fields = {}
-    search_fields = {'name': name}
+    search_fields = {}
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization = module.params.get('organization')
@@ -193,7 +193,7 @@ def main():
         search_fields['organization'] = new_fields['organization'] = organization_id
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_templates', **{'data': search_fields})
+    existing_item = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -208,7 +208,7 @@ def main():
         new_fields['webhook_credential'] = module.resolve_name_to_id('webhook_credential', webhook_credential)
 
     # Create the data that gets sent for create and update
-    new_fields['name'] = new_name if new_name else name
+    new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
     for field_name in (
             'description', 'survey_enabled', 'allow_simultaneous',
             'limit', 'scm_branch', 'extra_vars',

@@ -108,9 +108,8 @@ def main():
     inventory_id = module.resolve_name_to_id('inventories', inventory)
 
     # Attempt to look up the object based on the provided name and inventory ID
-    group = module.get_one('groups', **{
+    group = module.get_one('groups', name_or_id=name, **{
         'data': {
-            'name': name,
             'inventory': inventory_id
         }
     })
@@ -121,7 +120,7 @@ def main():
 
     # Create the data that gets sent for create and update
     group_fields = {
-        'name': new_name if new_name else name,
+        'name': new_name if new_name else (module.get_item_name(group) if group else name),
         'inventory': inventory_id,
     }
     if description is not None:
@@ -136,8 +135,8 @@ def main():
             continue
         id_list = []
         for sub_name in name_list:
-            sub_obj = module.get_one(resource, **{
-                'data': {'inventory': inventory_id, 'name': sub_name}
+            sub_obj = module.get_one(resource, name_or_id=sub_name, **{
+                'data': {'inventory': inventory_id},
             })
             if sub_obj is None:
                 module.fail_json(msg='Could not find {0} with name {1}'.format(resource, sub_name))

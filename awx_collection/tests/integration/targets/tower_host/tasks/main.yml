@@ -9,11 +9,12 @@
     name: "{{ inv_name }}"
     organization: Default
     state: present
+  register: result
 
 - name: Create a Host
   tower_host:
     name: "{{ host_name }}"
-    inventory: "{{ inv_name }}"
+    inventory: "{{ result.id }}"
     state: present
     variables:
       foo: bar
@@ -25,7 +26,7 @@
 
 - name: Delete a Host
   tower_host:
-    name: "{{ host_name }}"
+    name: "{{ result.id }}"
     inventory: "{{ inv_name }}"
     state: absent
   register: result
