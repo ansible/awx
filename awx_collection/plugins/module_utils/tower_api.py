@@ -51,7 +51,7 @@ class TowerAPIModule(TowerModule):
     def get_name_field_from_endpoint(endpoint):
         return TowerAPIModule.IDENTITY_FIELDS.get(endpoint, 'name')
 
-    def get_item_name(self, item):
+    def get_item_name(self, item, allow_unknown=False):
         if 'name' in item:
             return item['name']
 
@@ -61,6 +61,9 @@ class TowerAPIModule(TowerModule):
 
         if item.get('type', None) in ('o_auth2_access_token', 'credential_input_source'):
             return item['id']
+
+        if allow_unknown:
+            return 'unknown'
 
         self.exit_json(msg='Cannot determine identity field for {0} object.'.format(item.get('type', 'unknown')))
 
@@ -358,7 +361,7 @@ class TowerAPIModule(TowerModule):
                 item_url = existing_item['url']
                 item_type = existing_item['type']
                 item_id = existing_item['id']
-                item_name = self.get_item_name(existing_item)
+                item_name = self.get_item_name(existing_item, allow_unknown=True)
             except KeyError as ke:
                 self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
 
@@ -434,7 +437,7 @@ class TowerAPIModule(TowerModule):
 
             # We have to rely on item_type being passed in since we don't have an existing item that declares its type
             # We will pull the item_name out from the new_item, if it exists
-            item_name = self.get_item_name(new_item)
+            item_name = self.get_item_name(new_item, allow_unknown=True)
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
             if response['status_code'] == 201:
