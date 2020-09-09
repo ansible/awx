@@ -85,28 +85,22 @@ job runs. It will populate the cache id set by the last "check" type update.
 
 ### Galaxy Server Selection
 
-Ansible core default settings will download collections from the public
-Galaxy server at `https://galaxy.ansible.com`. For details on
-how Galaxy servers are configured in Ansible in general see:
+For details on how Galaxy servers are configured in Ansible in general see:
 
 https://docs.ansible.com/ansible/devel/user_guide/collections_using.html
 (if "devel" link goes stale in the future, it is for Ansible 2.9)
 
-You can set a different server to be the primary Galaxy server to download
-roles and collections from in AWX project updates.
-This is done via the setting `PRIMARY_GALAXY_URL` and similar
-`PRIMARY_GALAXY_xxxx` settings for authentication.
+You can specify a list of zero or more servers to download roles and
+collections from for AWX Project Updates.  This is done by associating Galaxy
+credentials (in sequential order) via the API at
+`/api/v2/organizations/N/galaxy_credentials/`.  Authentication
+via an API token is optional (i.e., https://galaxy.ansible.com/), but other
+content sources (such as Red Hat Ansible Automation Hub) require proper
+configuration of the Auth URL and Token.
 
-If the `PRIMARY_GALAXY_URL` setting is not blank, then the server list is defined
-to be `primary_galaxy,galaxy`. The `primary_galaxy` server definition uses the URL
-from those settings, as well as username, password, and/or token and auth_url if applicable.
-the `galaxy` server definition uses public Galaxy (`https://galaxy.ansible.com`)
-with no authentication.
-
-This configuration causes requirements to be downloaded from the user-specified
-primary galaxy server if they are available there. If a requirement is
-not available from the primary galaxy server, then it will fallback to
-downloading it from the public Galaxy server.
+If no credentials are defined at this endpoint for an Organization, then roles and
+collections will *not* be installed based on requirements.yml for Project Updates
+in that Organization.
 
 Even when these settings are enabled, this can still be bypassed for a specific
 requirement by using the `source:` option, as described in Ansible documentation.

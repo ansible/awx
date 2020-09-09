@@ -82,6 +82,7 @@ def config_cred_from_kind(kind):
 
 credential_type_name_to_config_kind_map = {
     'amazon web services': 'aws',
+    'ansible galaxy/automation hub api token': 'galaxy',
     'ansible tower': 'tower',
     'google compute engine': 'gce',
     'insights': 'insights',

@@ -124,6 +124,7 @@ from awx.api.views.organization import ( # noqa
     OrganizationNotificationTemplatesSuccessList,
     OrganizationNotificationTemplatesApprovalList,
     OrganizationInstanceGroupsList,
+    OrganizationGalaxyCredentialsList,
     OrganizationAccessList,
     OrganizationObjectRolesList,
 )
@@ -1354,6 +1355,13 @@ class CredentialDetail(RetrieveUpdateDestroyAPIView):
 
     model = models.Credential
     serializer_class = serializers.CredentialSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.managed_by_tower:
+            raise PermissionDenied(detail=_("Deletion not allowed for managed credentials"))
+        return super(CredentialDetail, self).destroy(request, *args, **kwargs)
+
 
 
 class CredentialActivityStreamList(SubListAPIView):
