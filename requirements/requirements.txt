@@ -11,7 +11,6 @@ automat==20.2.0           # via twisted
 azure-common==1.1.25      # via azure-keyvault
 azure-keyvault==1.1.0     # via -r /awx_devel/requirements/requirements.in
 azure-nspkg==3.0.2        # via azure-keyvault
-boto==2.49.0              # via -r /awx_devel/requirements/requirements.in
 cachetools==4.0.0         # via google-auth
 certifi==2019.11.28       # via kubernetes, msrest, requests
 cffi==1.14.0              # via cryptography
