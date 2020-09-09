@@ -885,7 +885,18 @@ class BaseTask(object):
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
     def build_execution_environment_params(self, instance):
-        params = {}
+        if getattr(instance, 'execution_environment', None):
+            # TODO: process heirarchy, JT-project-org, maybe here
+            # or maybe in create_unified_job
+            logger.info('using custom image {}'.format(instance.execution_environment.image))
+            image = instance.execution_environment.image
+        else:
+            logger.info('using default image')
+            image = settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE
+        params = {
+            "container_image": image,
+            "process_isolation": True
+        }
         if settings.AWX_PROOT_SHOW_PATHS:
             params['container_volume_mounts'] = []
             for this_path in settings.AWX_PROOT_SHOW_PATHS:
@@ -1992,15 +2003,6 @@ class RunJob(BaseTask):
             if inventory is not None:
                 update_inventory_computed_fields.delay(inventory.id)
 
-    def build_execution_environment_params(self, instance):
-        params = super(RunJob, self).build_execution_environment_params(instance)
-        params.update({
-            "container_image": settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE,
-            "process_isolation": True
-        })
-        return params
-
-
 
 @task(queue=get_local_queuename)
 class RunProjectUpdate(BaseTask):
@@ -2489,8 +2491,6 @@ class RunProjectUpdate(BaseTask):
         params = super(RunProjectUpdate, self).build_execution_environment_params(instance)
         project_path = instance.get_project_path(check_if_exists=False)
         cache_path = instance.get_cache_path()
-        params['process_isolation'] = True
-        params['container_image'] = settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE
         params.setdefault('container_volume_mounts', [])
         params['container_volume_mounts'].extend([
             f"{project_path}:{project_path}:Z",
@@ -2524,6 +2524,9 @@ class RunInventoryUpdate(BaseTask):
         if inventory_update.source in InventorySource.injectors:
             injector = InventorySource.injectors[inventory_update.source]()
             return injector.build_private_data(inventory_update, private_data_dir)
+
+    def build_execution_environment_params(self, inventory_update):
+        return {}  # TODO: containerize inventory updates
 
     def build_env(self, inventory_update, private_data_dir, isolated, private_data_files=None):
         """Build environment dictionary for ansible-inventory.
@@ -2986,13 +2989,6 @@ class RunAdHocCommand(BaseTask):
         if isolated_manager_instance:
             isolated_manager_instance.cleanup()
 
-    def build_execution_environment_params(self, instance):
-        execution_environment_params = {
-            "container_image": settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE,
-            "process_isolation": True
-        }
-        return execution_environment_params
-
 
 @task(queue=get_local_queuename)
 class RunSystemJob(BaseTask):
@@ -3000,6 +2996,9 @@ class RunSystemJob(BaseTask):
     model = SystemJob
     event_model = SystemJobEvent
     event_data_key = 'system_job_id'
+
+    def build_execution_environment_params(self, system_job):
+        return {}
 
     def build_args(self, system_job, private_data_dir, passwords):
         args = ['awx-manage', system_job.job_type]
