@@ -6,13 +6,14 @@ from django.db import connection
 from django.db.models import Count
 from django.conf import settings
 from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _
 
 from awx.conf.license import get_license
 from awx.main.utils import (get_awx_version, get_ansible_version,
                             get_custom_venv_choices, camelcase_to_underscore)
 from awx.main import models
 from django.contrib.sessions.models import Session
-from awx.main.analytics import register, table_version
+from awx.main.analytics import register
 
 '''
 This module is used to define metrics collected by awx.main.analytics.gather()
@@ -31,7 +32,7 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 '''
 
 
-@register('config', '1.1')
+@register('config', '1.1', description=_('General platform configuration'))
 def config(since):
     license_info = get_license(show_key=False)
     install_type = 'traditional'
@@ -63,7 +64,7 @@ def config(since):
     }
 
 
-@register('counts', '1.0')
+@register('counts', '1.0', description=_('Counts of objects such as organizations, inventories, and projects'))
 def counts(since):
     counts = {}
     for cls in (models.Organization, models.Team, models.User,
@@ -98,7 +99,7 @@ def counts(since):
     return counts
 
     
-@register('org_counts', '1.0')
+@register('org_counts', '1.0', description=_('Counts of users and teams by organization'))
 def org_counts(since):
     counts = {}
     for org in models.Organization.objects.annotate(num_users=Count('member_role__members', distinct=True), 
@@ -110,7 +111,7 @@ def org_counts(since):
     return counts
     
     
-@register('cred_type_counts', '1.0')
+@register('cred_type_counts', '1.0', description=_('Counts of credentials by credential type'))
 def cred_type_counts(since):
     counts = {}
     for cred_type in models.CredentialType.objects.annotate(num_credentials=Count(
@@ -122,7 +123,7 @@ def cred_type_counts(since):
     return counts
     
     
-@register('inventory_counts', '1.2')
+@register('inventory_counts', '1.2', description=_('Inventories, their inventory sources, and host counts'))
 def inventory_counts(since):
     counts = {}
     for inv in models.Inventory.objects.filter(kind='').annotate(num_sources=Count('inventory_sources', distinct=True), 
@@ -147,7 +148,7 @@ def inventory_counts(since):
     return counts
 
 
-@register('projects_by_scm_type', '1.0')
+@register('projects_by_scm_type', '1.0', description=_('Counts of projects by source control type'))
 def projects_by_scm_type(since):
     counts = dict(
         (t[0] or 'manual', 0)
@@ -166,7 +167,7 @@ def _get_isolated_datetime(last_check):
     return last_check
 
 
-@register('instance_info', '1.0')
+@register('instance_info', '1.0', description=_('Cluster topology and capacity'))
 def instance_info(since, include_hostnames=False):
     info = {}
     instances = models.Instance.objects.values_list('hostname').values(
@@ -192,7 +193,7 @@ def instance_info(since, include_hostnames=False):
     return info
 
 
-@register('job_counts', '1.0')
+@register('job_counts', '1.0', description=_('Counts of jobs by status'))
 def job_counts(since):
     counts = {}
     counts['total_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()
@@ -202,7 +203,7 @@ def job_counts(since):
     return counts
     
     
-@register('job_instance_counts', '1.0')
+@register('job_instance_counts', '1.0', description=_('Counts of jobs by execution node'))
 def job_instance_counts(since):
     counts = {}
     job_types = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
@@ -217,7 +218,7 @@ def job_instance_counts(since):
     return counts
 
 
-@register('query_info', '1.0')
+@register('query_info', '1.0', description=_('Metadata about the analytics collected'))
 def query_info(since, collection_type):
     query_info = {}
     query_info['last_run'] = str(since)
@@ -226,21 +227,17 @@ def query_info(since, collection_type):
     return query_info
 
 
-# Copies Job Events from db to a .csv to be shipped
-@table_version('events_table.csv', '1.1')
-@table_version('unified_jobs_table.csv', '1.1')
-@table_version('unified_job_template_table.csv', '1.0')
-@table_version('workflow_job_node_table.csv', '1.0')
-@table_version('workflow_job_template_node_table.csv', '1.0')
-def copy_tables(since, full_path, subset=None):
-    def _copy_table(table, query, path):
-        file_path = os.path.join(path, table + '_table.csv')
-        file = open(file_path, 'w', encoding='utf-8')
-        with connection.cursor() as cursor:
-            cursor.copy_expert(query, file)
-            file.close()
-        return file_path
+def _copy_table(table, query, path):
+    file_path = os.path.join(path, table + '_table.csv')
+    file = open(file_path, 'w', encoding='utf-8')
+    with connection.cursor() as cursor:
+        cursor.copy_expert(query, file)
+        file.close()
+    return file_path
 
+
+@register('events_table', '1.1', format='csv', description=_('Automation task records'))
+def events_table(since, full_path):
     events_query = '''COPY (SELECT main_jobevent.id, 
                               main_jobevent.created,
                               main_jobevent.uuid,
@@ -264,9 +261,11 @@ def copy_tables(since, full_path, subset=None):
                               FROM main_jobevent 
                               WHERE main_jobevent.created > {}
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))
-    if not subset or 'events' in subset:
-        _copy_table(table='events', query=events_query, path=full_path)
+    return _copy_table(table='events', query=events_query, path=full_path)
 
+
+@register('unified_jobs_table', '1.1', format='csv', description=_('Data on jobs run'))
+def unified_jobs_table(since, full_path):
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
                                  django_content_type.model,
@@ -297,9 +296,11 @@ def copy_tables(since, full_path, subset=None):
                                  WHERE (main_unifiedjob.created > {0} OR main_unifiedjob.finished > {0})
                                        AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
-    if not subset or 'unified_jobs' in subset:
-        _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
+    return _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
+
+@register('unified_job_template_table', '1.0', format='csv', description=_('Data on job templates'))
+def unified_job_template_table(since, full_path):
     unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id, 
                                  main_unifiedjobtemplate.polymorphic_ctype_id,
                                  django_content_type.model,
@@ -318,9 +319,11 @@ def copy_tables(since, full_path, subset=None):
                                  FROM main_unifiedjobtemplate, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
                                  ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''  
-    if not subset or 'unified_job_template' in subset:
-        _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
+    return _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
 
+
+@register('workflow_job_node_table', '1.0', format='csv', description=_('Data on workflow runs'))
+def workflow_job_node_table(since, full_path):
     workflow_job_node_query = '''COPY (SELECT main_workflowjobnode.id,
                                  main_workflowjobnode.created,
                                  main_workflowjobnode.modified, 
@@ -351,9 +354,11 @@ def copy_tables(since, full_path, subset=None):
                                  ) always_nodes ON main_workflowjobnode.id = always_nodes.from_workflowjobnode_id
                                  WHERE main_workflowjobnode.modified > {}
                                  ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
-    if not subset or 'workflow_job_node' in subset:
-        _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
+    return _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
 
+
+@register('workflow_job_template_node_table', '1.0', format='csv', description=_('Data on workflows'))
+def workflow_job_template_node_table(since, full_path):
     workflow_job_template_node_query = '''COPY (SELECT main_workflowjobtemplatenode.id, 
                                  main_workflowjobtemplatenode.created,
                                  main_workflowjobtemplatenode.modified, 
@@ -381,7 +386,4 @@ def copy_tables(since, full_path, subset=None):
                                      GROUP BY from_workflowjobtemplatenode_id
                                  ) always_nodes ON main_workflowjobtemplatenode.id = always_nodes.from_workflowjobtemplatenode_id
                                  ORDER BY main_workflowjobtemplatenode.id ASC) TO STDOUT WITH CSV HEADER'''   
-    if not subset or 'workflow_job_template_node' in subset:
-        _copy_table(table='workflow_job_template_node', query=workflow_job_template_node_query, path=full_path)
-
-    return
+    return _copy_table(table='workflow_job_template_node', query=workflow_job_template_node_query, path=full_path)

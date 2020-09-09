@@ -373,8 +373,9 @@ def gather_analytics():
             if acquired is False:
                 logger.debug('Not gathering analytics, another task holds lock')
                 return
+            subset = list(all_collectors().keys())
             try:
-                tgz = analytics.gather()
+                tgz = analytics.gather(subset=subset)
                 if not tgz:
                     return
                 logger.info('gathered analytics: {}'.format(tgz))
