@@ -181,7 +181,12 @@ class TowerAPIModule(TowerModule):
                 if str(tower_object['id']) == name_or_id:
                     return tower_object
             # We didn't match on an ID but we found more than 1 object, therefore the results are ambiguous
-            self.fail_json(msg="The requested name or id was ambiguous and resulted in too many items")
+            self.fail_json(**{
+                'msg': "The requested name or id {0} was ambiguous and resulted in too many items from endpoint {1}".format(name_or_id, endpoint),
+                'query': query_params,
+                'first_two_results': response['json']['results'][0:1],
+                'total_results': response['json']['count'],
+            })
         elif response['json']['count'] == 0:
             self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
 

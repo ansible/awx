@@ -4,7 +4,7 @@ __metaclass__ = type
 import json
 import sys
 
-from awx.main.models import Organization, Team
+from awx.main.models import Organization, Team, Project, Inventory
 from requests.models import Response
 from unittest import mock
 
@@ -125,3 +125,17 @@ def test_conflicting_name_and_id(run_module, admin_user):
         'Lookup by id should be preferenced over name in cases of conflict.'
     )
     assert team.organization.name == 'foo'
+
+def test_multiple_lookup(run_module, admin_user):
+    org1 = Organization.objects.create(name='foo')
+    org2 = Organization.objects.create(name='bar')
+    inv = Inventory.objects.create(name='Foo Inv')
+    proj1 = Project.objects.create(name='foo', organization=org1, scm_type='git', scm_url="https://github.com/ansible/ansible-tower-samples",)
+    proj2 = Project.objects.create(name='foo', organization=org2, scm_type='git', scm_url="https://github.com/ansible/ansible-tower-samples",)
+    result = run_module('tower_job_template', {
+        'name': 'Demo Job Template', 'project': proj1.name, 'inventory': inv.id, 'playbook': 'hello_world.yml'
+    }, admin_user)
+    assert result.get('failed', False)
+    assert result['msg'] == 'The requested name or id {} was ambiguous and resulted in too many items from endpoint projects'.format(proj1.name)
+    assert 'query' in result
+
