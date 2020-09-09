@@ -276,6 +276,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
                   pluralizedItemName="Jobs"
                 />,
                 <JobListCancelButton
+                  key="cancel"
                   onCancel={handleJobCancel}
                   jobsToCancel={selected}
                 />,

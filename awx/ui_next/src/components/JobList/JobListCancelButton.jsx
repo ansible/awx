@@ -62,14 +62,17 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
 
   return (
     <Kebabified>
-      {({ isKebabified }) => (
+      {({ isKebabified, onKebabModalChange }) => (
         <>
           {isKebabified ? (
             <DropdownItem
               key="cancel-job"
               isDisabled={isDisabled}
-              component="Button"
-              onClick={() => setIsModalOpen(true)}
+              component="button"
+              onClick={() => {
+                onKebabModalChange(true);
+                setIsModalOpen(true);
+              }}
             >
               {cancelJobText}
             </DropdownItem>
@@ -92,14 +95,24 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
               variant="danger"
               title={cancelJobText}
               isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
+              onClose={() => {
+                if (isKebabified) {
+                  onKebabModalChange(false);
+                }
+                setIsModalOpen(false);
+              }}
               actions={[
                 <Button
                   id="cancel-job-confirm-button"
                   key="delete"
                   variant="danger"
                   aria-label={cancelJobText}
-                  onClick={handleCancel}
+                  onClick={() => {
+                    if (isKebabified) {
+                      onKebabModalChange(false);
+                    }
+                    handleCancel();
+                  }}
                 >
                   {cancelJobText}
                 </Button>,
@@ -108,7 +121,12 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
                   key="cancel"
                   variant="secondary"
                   aria-label={i18n._(t`Return`)}
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    if (isKebabified) {
+                      onKebabModalChange(false);
+                    }
+                    setIsModalOpen(false);
+                  }}
                 >
                   {i18n._(t`Return`)}
                 </Button>,

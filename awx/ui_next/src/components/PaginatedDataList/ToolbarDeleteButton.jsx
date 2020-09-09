@@ -140,14 +140,17 @@ class ToolbarDeleteButton extends React.Component {
     // See: https://github.com/patternfly/patternfly-react/issues/1894
     return (
       <Kebabified>
-        {({ isKebabified }) => (
+        {({ isKebabified, onKebabModalChange }) => (
           <Fragment>
             {isKebabified ? (
               <DropdownItem
                 key="add"
                 isDisabled={isDisabled}
-                component="Button"
-                onClick={this.handleConfirmDelete}
+                component="button"
+                onClick={() => {
+                  onKebabModalChange(true);
+                  this.handleConfirmDelete();
+                }}
               >
                 {i18n._(t`Delete`)}
               </DropdownItem>
@@ -170,13 +173,23 @@ class ToolbarDeleteButton extends React.Component {
                 variant="danger"
                 title={modalTitle}
                 isOpen={isModalOpen}
-                onClose={this.handleCancelDelete}
+                onClose={() => {
+                  if (isKebabified) {
+                    onKebabModalChange(false);
+                  }
+                  this.handleCancelDelete();
+                }}
                 actions={[
                   <Button
                     key="delete"
                     variant="danger"
                     aria-label={i18n._(t`confirm delete`)}
-                    onClick={this.handleDelete}
+                    onClick={() => {
+                      if (isKebabified) {
+                        onKebabModalChange(false);
+                      }
+                      this.handleDelete();
+                    }}
                   >
                     {i18n._(t`Delete`)}
                   </Button>,
@@ -184,7 +197,12 @@ class ToolbarDeleteButton extends React.Component {
                     key="cancel"
                     variant="secondary"
                     aria-label={i18n._(t`cancel delete`)}
-                    onClick={this.handleCancelDelete}
+                    onClick={() => {
+                      if (isKebabified) {
+                        onKebabModalChange(false);
+                      }
+                      this.handleCancelDelete();
+                    }}
                   >
                     {i18n._(t`Cancel`)}
                   </Button>,

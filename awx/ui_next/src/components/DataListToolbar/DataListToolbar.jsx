@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -43,12 +43,19 @@ function DataListToolbar({
 }) {
   const showExpandCollapse = onCompact && onExpand;
   const [kebabIsOpen, setKebabIsOpen] = useState(false);
+  const [kebabModalIsOpen, setKebabkebabModalIsOpen] = useState(false);
   const [advancedSearchShown, setAdvancedSearchShown] = useState(false);
 
   const onShowAdvancedSearch = shown => {
     setAdvancedSearchShown(shown);
     setKebabIsOpen(false);
   };
+
+  useEffect(() => {
+    if (!kebabModalIsOpen) {
+      setKebabIsOpen(false);
+    }
+  }, [kebabModalIsOpen]);
 
   return (
     <Toolbar
@@ -104,18 +111,27 @@ function DataListToolbar({
         )}
         {advancedSearchShown && (
           <ToolbarItem>
-            <Dropdown
-              toggle={<KebabToggle onToggle={setKebabIsOpen} />}
-              isOpen={kebabIsOpen}
-              isPlain
-              dropdownItems={additionalControls.map(control => {
-                return (
-                  <KebabifiedProvider value={{ isKebabified: true }}>
-                    {control}
-                  </KebabifiedProvider>
-                );
-              })}
-            />
+            <KebabifiedProvider
+              value={{
+                isKebabified: true,
+                onKebabModalChange: isOpen => setKebabkebabModalIsOpen(isOpen),
+              }}
+            >
+              <Dropdown
+                toggle={
+                  <KebabToggle
+                    onToggle={isOpen => {
+                      if (!kebabModalIsOpen) {
+                        setKebabIsOpen(isOpen);
+                      }
+                    }}
+                  />
+                }
+                isOpen={kebabIsOpen}
+                isPlain
+                dropdownItems={additionalControls}
+              />
+            </KebabifiedProvider>
           </ToolbarItem>
         )}
         {!advancedSearchShown && (
