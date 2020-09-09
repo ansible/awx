@@ -28,6 +28,7 @@ def sqlite_copy_expert(request):
     def write_stdout(self, sql, fd):
         # Would be cool if we instead properly disected the SQL query and verified
         # it that way. But instead, we just take the nieve approach here.
+        sql = sql.strip()
         assert sql.startswith("COPY (")
         assert sql.endswith(") TO STDOUT WITH CSV HEADER")
 
@@ -86,7 +87,7 @@ def test_copy_tables_unified_job_query(
     job_name = job_template.create_unified_job().name
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        collectors.unified_jobs_table(time_start, tmpdir, subset="unified_jobs")
+        collectors.unified_jobs_table(time_start, tmpdir, until = now() + timedelta(seconds=1))
         with open(os.path.join(tmpdir, "unified_jobs_table.csv")) as f:
             lines = "".join([line for line in f])
 
@@ -134,7 +135,7 @@ def test_copy_tables_workflow_job_node_query(sqlite_copy_expert, workflow_job):
     time_start = now() - timedelta(hours=9)
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        collectors.workflow_job_node_table(time_start, tmpdir, subset="workflow_job_node_query")
+        collectors.workflow_job_node_table(time_start, tmpdir, until = now() + timedelta(seconds=1))
         with open(os.path.join(tmpdir, "workflow_job_node_table.csv")) as f:
             reader = csv.reader(f)
             # Pop the headers

@@ -17,13 +17,10 @@ from awx.main.access import access_registry
 from awx.main.models.ha import TowerAnalyticsState
 from awx.main.utils import get_awx_http_client_headers, set_environ
 
-
 __all__ = ['register', 'gather', 'ship']
 
 
 logger = logging.getLogger('awx.main.analytics')
-
-manifest = dict()
 
 
 def _valid_license():
@@ -51,7 +48,18 @@ def all_collectors():
     return collector_dict
 
 
-def register(key, version, description=None, format='json'):
+def expensive_collectors():
+    from awx.main.analytics import collectors
+
+    ret = []
+    module = collectors
+    for name, func in inspect.getmembers(module):
+        if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__') and func.__awx_expensive__:
+            ret.append(func.__awx_analytics_key__)
+    return ret
+
+
+def register(key, version, description=None, format='json', expensive=False):
     """
     A decorator used to register a function as a metric collector.
 
@@ -69,12 +77,13 @@ def register(key, version, description=None, format='json'):
         f.__awx_analytics_version__ = version
         f.__awx_analytics_description__ = description
         f.__awx_analytics_type__ = format
+        f.__awx_expensive__ = expensive
         return f
 
     return decorate
 
 
-def gather(dest=None, module=None, subset = None, collection_type='scheduled'):
+def gather(dest=None, module=None, subset = None, since = None, until = now(), collection_type='scheduled'):
     """
     Gather all defined metrics and write them as JSON files in a .tgz
 
@@ -91,6 +100,9 @@ def gather(dest=None, module=None, subset = None, collection_type='scheduled'):
     max_interval = now() - timedelta(weeks=4)
     if last_run < max_interval or not last_run:
         last_run = max_interval
+    if since:
+        last_run = since
+        logger.debug("Gathering overriden to start at: {}".format(since))
 
     if _valid_license() is False:
         logger.exception("Invalid License provided, or No License Provided")
@@ -112,29 +124,48 @@ def gather(dest=None, module=None, subset = None, collection_type='scheduled'):
         ):
             collector_list.append((name, func))
 
+    manifest = dict()
     dest = dest or tempfile.mkdtemp(prefix='awx_analytics')
     for name, func in collector_list:
         if func.__awx_analytics_type__ == 'json':
             key = func.__awx_analytics_key__
-            manifest['{}.json'.format(key)] = func.__awx_analytics_version__
             path = '{}.json'.format(os.path.join(dest, key))
             with open(path, 'w', encoding='utf-8') as f:
                 try:
-                    if func.__name__ == 'query_info':
-                        json.dump(func(last_run, collection_type=collection_type), f)
-                    else:
-                        json.dump(func(last_run), f)
+                    json.dump(func(last_run, collection_type=collection_type, until=until), f)
+                    manifest['{}.json'.format(key)] = func.__awx_analytics_version__
                 except Exception:
                     logger.exception("Could not generate metric {}.json".format(key))
                     f.close()
                     os.remove(f.name)
         elif func.__awx_analytics_type__ == 'csv':
             key = func.__awx_analytics_key__
-            manifest['{}.csv'.format(key)] = func.__awx_analytics_version__
             try:
-                func(last_run, full_path=dest)
+                if func(last_run, full_path=dest, until=until):
+                    manifest['{}.csv'.format(key)] = func.__awx_analytics_version__
             except Exception:
                 logger.exception("Could not generate metric {}.csv".format(key))
+
+    if not manifest:
+        # No data was collected
+        logger.warning("No data from {} to {}".format(last_run, until))
+        shutil.rmtree(dest)
+        return None
+
+    # Always include config.json if we're using our collectors
+    if 'config.json' not in manifest.keys() and not module:
+        from awx.main.analytics import collectors
+        path = '{}.json'.format(os.path.join(dest, key))
+        with open(path, 'w', encoding='utf-8') as f:
+            try:
+                json.dump(collectors.config(last_run), f)
+                manifest['config.json'] = collectors.config.__awx_analytics_version__
+            except Exception:
+                logger.exception("Could not generate metric {}.json".format(key))
+                f.close()
+                os.remove(f.name)
+                shutil.rmtree(dest)
+                return None
 
     path = os.path.join(dest, 'manifest.json')
     with open(path, 'w', encoding='utf-8') as f:

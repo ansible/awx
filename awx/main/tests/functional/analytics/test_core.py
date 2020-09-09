@@ -10,17 +10,17 @@ from awx.main.analytics import gather, register
 
 
 @register('example', '1.0')
-def example(since):
+def example(since, **kwargs):
     return {'awx': 123}
 
 
 @register('bad_json', '1.0')
-def bad_json(since):
+def bad_json(since, **kwargs):
     return set()
 
 
 @register('throws_error', '1.0')
-def throws_error(since):
+def throws_error(since, **kwargs):
     raise ValueError()
     
 

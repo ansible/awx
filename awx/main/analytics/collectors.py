@@ -32,8 +32,8 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 '''
 
 
-@register('config', '1.1', description=_('General platform configuration'))
-def config(since):
+@register('config', '1.1', description=_('General platform configuration.'))
+def config(since, **kwargs):
     license_info = get_license(show_key=False)
     install_type = 'traditional'
     if os.environ.get('container') == 'oci':
@@ -65,7 +65,7 @@ def config(since):
 
 
 @register('counts', '1.0', description=_('Counts of objects such as organizations, inventories, and projects'))
-def counts(since):
+def counts(since, **kwargs):
     counts = {}
     for cls in (models.Organization, models.Team, models.User,
                 models.Inventory, models.Credential, models.Project,
@@ -100,7 +100,7 @@ def counts(since):
 
     
 @register('org_counts', '1.0', description=_('Counts of users and teams by organization'))
-def org_counts(since):
+def org_counts(since, **kwargs):
     counts = {}
     for org in models.Organization.objects.annotate(num_users=Count('member_role__members', distinct=True), 
                                                     num_teams=Count('teams', distinct=True)).values('name', 'id', 'num_users', 'num_teams'):
@@ -112,7 +112,7 @@ def org_counts(since):
     
     
 @register('cred_type_counts', '1.0', description=_('Counts of credentials by credential type'))
-def cred_type_counts(since):
+def cred_type_counts(since, **kwargs):
     counts = {}
     for cred_type in models.CredentialType.objects.annotate(num_credentials=Count(
                                                             'credentials', distinct=True)).values('name', 'id', 'managed_by_tower', 'num_credentials'):  
@@ -124,7 +124,7 @@ def cred_type_counts(since):
     
     
 @register('inventory_counts', '1.2', description=_('Inventories, their inventory sources, and host counts'))
-def inventory_counts(since):
+def inventory_counts(since, **kwargs):
     counts = {}
     for inv in models.Inventory.objects.filter(kind='').annotate(num_sources=Count('inventory_sources', distinct=True), 
                                                                  num_hosts=Count('hosts', distinct=True)).only('id', 'name', 'kind'):
@@ -149,7 +149,7 @@ def inventory_counts(since):
 
 
 @register('projects_by_scm_type', '1.0', description=_('Counts of projects by source control type'))
-def projects_by_scm_type(since):
+def projects_by_scm_type(since, **kwargs):
     counts = dict(
         (t[0] or 'manual', 0)
         for t in models.Project.SCM_TYPE_CHOICES
@@ -168,7 +168,7 @@ def _get_isolated_datetime(last_check):
 
 
 @register('instance_info', '1.0', description=_('Cluster topology and capacity'))
-def instance_info(since, include_hostnames=False):
+def instance_info(since, include_hostnames=False, **kwargs):
     info = {}
     instances = models.Instance.objects.values_list('hostname').values(
         'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'last_isolated_check', 'enabled')
@@ -194,7 +194,7 @@ def instance_info(since, include_hostnames=False):
 
 
 @register('job_counts', '1.0', description=_('Counts of jobs by status'))
-def job_counts(since):
+def job_counts(since, **kwargs):
     counts = {}
     counts['total_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()
     counts['status'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list('status').annotate(Count('status')).order_by())
@@ -204,7 +204,7 @@ def job_counts(since):
     
     
 @register('job_instance_counts', '1.0', description=_('Counts of jobs by execution node'))
-def job_instance_counts(since):
+def job_instance_counts(since, **kwargs):
     counts = {}
     job_types = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
         'execution_node', 'launch_type').annotate(job_launch_type=Count('launch_type')).order_by()
@@ -219,7 +219,7 @@ def job_instance_counts(since):
 
 
 @register('query_info', '1.0', description=_('Metadata about the analytics collected'))
-def query_info(since, collection_type):
+def query_info(since, collection_type, **kwargs):
     query_info = {}
     query_info['last_run'] = str(since)
     query_info['current_time'] = str(now())
@@ -233,11 +233,19 @@ def _copy_table(table, query, path):
     with connection.cursor() as cursor:
         cursor.copy_expert(query, file)
         file.close()
+    # Ensure we actually dumped data, and not just headers
+    file = open(file_path, 'r', encoding='utf-8')
+    file.readline()
+    data = file.readline()
+    file.close()
+    if not data:
+        os.remove(file_path)
+        return None
     return file_path
 
 
-@register('events_table', '1.1', format='csv', description=_('Automation task records'))
-def events_table(since, full_path):
+@register('events_table', '1.1', format='csv', description=_('Automation task records'), expensive=True)
+def events_table(since, full_path, until, **kwargs):
     events_query = '''COPY (SELECT main_jobevent.id, 
                               main_jobevent.created,
                               main_jobevent.uuid,
@@ -259,13 +267,14 @@ def events_table(since, full_path):
                               main_jobevent.event_data::json->'res'->'warnings' AS warnings,
                               main_jobevent.event_data::json->'res'->'deprecations' AS deprecations
                               FROM main_jobevent 
-                              WHERE main_jobevent.created > {}
-                              ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))
+                              WHERE (main_jobevent.created > {} AND main_jobevent.created <= {})
+                              ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER
+                   '''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"),until.strftime("'%Y-%m-%d %H:%M:%S'"))
     return _copy_table(table='events', query=events_query, path=full_path)
 
 
-@register('unified_jobs_table', '1.1', format='csv', description=_('Data on jobs run'))
-def unified_jobs_table(since, full_path):
+@register('unified_jobs_table', '1.1', format='csv', description=_('Data on jobs run'), expensive=True)
+def unified_jobs_table(since, full_path, until, **kwargs):
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
                                  django_content_type.model,
@@ -293,14 +302,16 @@ def unified_jobs_table(since, full_path):
                                  LEFT JOIN main_job ON main_unifiedjob.id = main_job.unifiedjob_ptr_id
                                  LEFT JOIN main_inventory ON main_job.inventory_id = main_inventory.id
                                  LEFT JOIN main_organization ON main_organization.id = main_unifiedjob.organization_id
-                                 WHERE (main_unifiedjob.created > {0} OR main_unifiedjob.finished > {0})
+                                 WHERE ((main_unifiedjob.created > {0} AND main_unifiedjob.created <= {1})
+                                       OR (main_unifiedjob.finished > {0} AND main_unifiedjob.finished <= {1}))
                                        AND main_unifiedjob.launch_type != 'sync'
-                                 ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
+                                 ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER
+                        '''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"),until.strftime("'%Y-%m-%d %H:%M:%S'"))
     return _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
 
 @register('unified_job_template_table', '1.0', format='csv', description=_('Data on job templates'))
-def unified_job_template_table(since, full_path):
+def unified_job_template_table(since, full_path, **kwargs):
     unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id, 
                                  main_unifiedjobtemplate.polymorphic_ctype_id,
                                  django_content_type.model,
@@ -322,8 +333,8 @@ def unified_job_template_table(since, full_path):
     return _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
 
 
-@register('workflow_job_node_table', '1.0', format='csv', description=_('Data on workflow runs'))
-def workflow_job_node_table(since, full_path):
+@register('workflow_job_node_table', '1.0', format='csv', description=_('Data on workflow runs'), expensive=True)
+def workflow_job_node_table(since, full_path, until, **kwargs):
     workflow_job_node_query = '''COPY (SELECT main_workflowjobnode.id,
                                  main_workflowjobnode.created,
                                  main_workflowjobnode.modified, 
@@ -352,13 +363,14 @@ def workflow_job_node_table(since, full_path):
                                      FROM main_workflowjobnode_always_nodes
                                      GROUP BY from_workflowjobnode_id
                                  ) always_nodes ON main_workflowjobnode.id = always_nodes.from_workflowjobnode_id
-                                 WHERE main_workflowjobnode.modified > {}
-                                 ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
+                                 WHERE (main_workflowjobnode.modified > {} AND main_workflowjobnode.modified <= {})
+                                 ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER
+                              '''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"),until.strftime("'%Y-%m-%d %H:%M:%S'"))
     return _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
 
 
 @register('workflow_job_template_node_table', '1.0', format='csv', description=_('Data on workflows'))
-def workflow_job_template_node_table(since, full_path):
+def workflow_job_template_node_table(since, full_path, **kwargs):
     workflow_job_template_node_query = '''COPY (SELECT main_workflowjobtemplatenode.id, 
                                  main_workflowjobtemplatenode.created,
                                  main_workflowjobtemplatenode.modified, 
