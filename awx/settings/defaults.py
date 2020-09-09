@@ -203,6 +203,9 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # The number of job events to migrate per-transaction when moving from int -> bigint
 JOB_EVENT_MIGRATION_CHUNK_SIZE = 1000000
 
+# The maximum allowed jobs to start on a given task manager cycle
+START_TASK_LIMIT = 100
+
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
 
@@ -477,6 +480,7 @@ SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
     'awx.sso.pipeline.update_user_orgs',
     'awx.sso.pipeline.update_user_teams',
 )
+SAML_AUTO_CREATE_OBJECTS = True
 
 SOCIAL_AUTH_LOGIN_URL = '/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
@@ -789,7 +793,7 @@ ASGI_APPLICATION = "awx.main.routing.application"
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "awx.main.consumers.ExpiringRedisChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [BROKER_URL],
             "capacity": 10000,

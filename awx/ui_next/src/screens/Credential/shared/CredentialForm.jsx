@@ -104,7 +104,7 @@ function CredentialFormFields({
         error={orgMeta.error}
       />
       <FormGroup
-        fieldId="credential-credentialType"
+        fieldId="credential-Type"
         helperTextInvalid={credTypeMeta.error}
         isRequired
         validated={
@@ -114,7 +114,7 @@ function CredentialFormFields({
       >
         <AnsibleSelect
           {...credTypeField}
-          id="credential_type"
+          id="credential-type"
           data={[
             {
               value: '',
@@ -224,6 +224,7 @@ function CredentialForm({
               <FormFullWidthLayout>
                 <ActionGroup>
                   <Button
+                    id="credential-form-save-button"
                     aria-label={i18n._(t`Save`)}
                     variant="primary"
                     type="button"
@@ -235,6 +236,7 @@ function CredentialForm({
                     credentialTypes[formik.values.credential_type]?.kind ===
                       'external' && (
                       <Button
+                        id="credential-form-test-button"
                         aria-label={i18n._(t`Test`)}
                         variant="secondary"
                         type="button"
@@ -245,6 +247,7 @@ function CredentialForm({
                       </Button>
                     )}
                   <Button
+                    id="credential-form-cancel-button"
                     aria-label={i18n._(t`Cancel`)}
                     variant="secondary"
                     type="button"

@@ -12,6 +12,10 @@ class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
     return this.http.get(`${this.baseUrl}${id}/webhook_key/`);
   }
 
+  readWorkflowJobTemplateOptions(id) {
+    return this.http.options(`${this.baseUrl}/${id}/`);
+  }
+
   updateWebhookKey(id) {
     return this.http.post(`${this.baseUrl}${id}/webhook_key/`);
   }

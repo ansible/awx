@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { number, string, oneOfType } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -7,6 +7,7 @@ import { ProjectsAPI } from '../../../api';
 import useRequest from '../../../util/useRequest';
 
 function PlaybookSelect({ projectId, isValid, field, onBlur, onError, i18n }) {
+  const [isDisabled, setIsDisabled] = useState(false);
   const {
     result: options,
     request: fetchOptions,
@@ -18,6 +19,7 @@ function PlaybookSelect({ projectId, isValid, field, onBlur, onError, i18n }) {
         return [];
       }
       const { data } = await ProjectsAPI.readPlaybooks(projectId);
+
       const opts = (data || []).map(playbook => ({
         value: playbook,
         key: playbook,
@@ -42,18 +44,30 @@ function PlaybookSelect({ projectId, isValid, field, onBlur, onError, i18n }) {
 
   useEffect(() => {
     if (error) {
-      onError(error);
+      if (error.response.status === 403) {
+        setIsDisabled(true);
+      } else {
+        onError(error);
+      }
     }
   }, [error, onError]);
 
+  const isDisabledData = [
+    {
+      value: field.value || '',
+      label: field.value || '',
+      key: 1,
+      isDisabled: true,
+    },
+  ];
   return (
     <AnsibleSelect
       id="template-playbook"
-      data={options}
+      data={isDisabled ? isDisabledData : options}
       isValid={isValid}
       {...field}
       onBlur={onBlur}
-      isDisabled={isLoading}
+      isDisabled={isLoading || isDisabled}
     />
   );
 }

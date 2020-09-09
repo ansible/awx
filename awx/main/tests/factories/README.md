@@ -52,11 +52,11 @@ patterns
 --------
 
 `mk` functions are single object fixtures. They should create only a single object with the minimum deps.
-They should also accept a `persited` flag, if they must be persisted to work, they raise an error if persisted=False
+They should also accept a `persisted` flag, if they must be persisted to work, they raise an error if persisted=False
 
 `generate` and `apply` functions are helpers that build up the various parts of a `create` functions objects. These
 should be useful for more than one create function to use and should explicitly accept all of the values needed
-to execute. These functions should also be robust and have very speciifc error reporting about constraints and/or
+to execute. These functions should also be robust and have very specific error reporting about constraints and/or
 bad values.
 
 `create` functions compose many of the `mk` and `generate` functions to make different object

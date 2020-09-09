@@ -24,6 +24,10 @@ class JobTemplates extends SchedulesMixin(
     return this.http.post(`${this.baseUrl}${id}/launch/`, data);
   }
 
+  readTemplateOptions(id) {
+    return this.http.options(`${this.baseUrl}/${id}/`);
+  }
+
   readLaunch(id) {
     return this.http.get(`${this.baseUrl}${id}/launch/`);
   }

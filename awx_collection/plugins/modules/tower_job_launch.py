@@ -201,11 +201,7 @@ def main():
             post_data['credentials'].append(module.resolve_name_to_id('credentials', credential))
 
     # Attempt to look up job_template based on the provided name
-    job_template = module.get_one('job_templates', **{
-        'data': {
-            'name': name,
-        }
-    })
+    job_template = module.get_one('job_templates', name_or_id=name)
 
     if job_template is None:
         module.fail_json(msg="Unable to find job template by name {0}".format(name))

@@ -4,9 +4,9 @@ ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upg
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 boto  # replacement candidate https://github.com/ansible/awx/issues/2115
 channels
-channels-redis
+channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
 daphne
-django==2.2.11  # see UPGRADE BLOCKERs
+django==2.2.16  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers
 django-crum

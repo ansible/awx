@@ -110,23 +110,21 @@ function WorkflowJobTemplateForm({
           value={organizationField.value}
           isValid={!organizationMeta.error}
         />
-
-        <FieldWithPrompt
-          fieldId="wfjt-inventory"
-          label={i18n._(t`Inventory`)}
-          promptId="wfjt-ask-inventory-on-launch"
-          promptName="ask_inventory_on_launch"
-          tooltip={i18n._(
-            t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
-          )}
-        >
+        <>
           <InventoryLookup
+            promptId="wfjt-ask-inventory-on-launch"
+            promptName="ask_inventory_on_launch"
+            tooltip={i18n._(
+              t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
+            )}
+            fieldId="wfjt-inventory"
+            isPromptableField
             value={inventoryField.value}
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={value => {
               inventoryHelpers.setValue(value);
             }}
-            required={askInventoryOnLaunchField.value}
+            required={!askInventoryOnLaunchField.value}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
           />
@@ -139,8 +137,7 @@ function WorkflowJobTemplateForm({
                 {inventoryMeta.error}
               </div>
             )}
-        </FieldWithPrompt>
-
+        </>
         <FieldWithPrompt
           fieldId="wjft-limit"
           label={i18n._(t`Limit`)}

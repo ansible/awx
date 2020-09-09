@@ -24,7 +24,8 @@
         "instance_groups": "/api/v2/job_templates/7/instance_groups/",
         "slice_workflow_jobs": "/api/v2/job_templates/7/slice_workflow_jobs/",
         "copy": "/api/v2/job_templates/7/copy/",
-        "webhook_receiver": "/api/v2/job_templates/7/github/"
+        "webhook_receiver": "/api/v2/job_templates/7/github/",
+        "webhook_key": "/api/v2/job_templates/7/webhook_key/"
     },
     "summary_fields": {
         "inventory": {

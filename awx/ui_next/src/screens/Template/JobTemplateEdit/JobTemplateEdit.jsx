@@ -4,13 +4,11 @@ import { withRouter, Redirect } from 'react-router-dom';
 import { CardBody } from '../../../components/Card';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
-import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
+import { JobTemplatesAPI } from '../../../api';
 import { JobTemplate } from '../../../types';
 import { getAddedAndRemoved } from '../../../util/lists';
 import JobTemplateForm from '../shared/JobTemplateForm';
 
-const loadRelatedProjectPlaybooks = async project =>
-  ProjectsAPI.readPlaybooks(project);
 class JobTemplateEdit extends Component {
   static propTypes = {
     template: JobTemplate.isRequired,
@@ -43,17 +41,8 @@ class JobTemplateEdit extends Component {
   }
 
   async loadRelated() {
-    const {
-      template: { project },
-    } = this.props;
     this.setState({ contentError: null, hasContentLoading: true });
     try {
-      if (project) {
-        const { data: playbook = [] } = await loadRelatedProjectPlaybooks(
-          project
-        );
-        this.setState({ relatedProjectPlaybooks: playbook });
-      }
       const [relatedCredentials] = await this.loadRelatedCredentials();
       this.setState({
         relatedCredentials,

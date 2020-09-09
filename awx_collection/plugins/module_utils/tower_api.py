@@ -25,6 +25,11 @@ class TowerAPIModule(TowerModule):
     }
     session = None
     cookie_jar = CookieJar()
+    IDENTITY_FIELDS = {
+        'users': 'username',
+        'workflow_job_template_nodes': 'identifier',
+        'instances': 'hostname'
+    }
 
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
@@ -41,6 +46,30 @@ class TowerAPIModule(TowerModule):
             'workflow': 'workflow_job_templates'
         }
         return exceptions.get(name, '{0}s'.format(name))
+
+    @staticmethod
+    def get_name_field_from_endpoint(endpoint):
+        return TowerAPIModule.IDENTITY_FIELDS.get(endpoint, 'name')
+
+    def get_item_name(self, item, allow_unknown=False):
+        if item:
+            if 'name' in item:
+                return item['name']
+
+            for field_name in TowerAPIModule.IDENTITY_FIELDS.values():
+                if field_name in item:
+                    return item[field_name]
+
+            if item.get('type', None) in ('o_auth2_access_token', 'credential_input_source'):
+                return item['id']
+
+        if allow_unknown:
+            return 'unknown'
+
+        if item:
+            self.exit_json(msg='Cannot determine identity field for {0} object.'.format(item.get('type', 'unknown')))
+        else:
+            self.exit_json(msg='Cannot determine identity field for Undefined object.')
 
     def head_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('HEAD', endpoint, **kwargs)
@@ -88,7 +117,21 @@ class TowerAPIModule(TowerModule):
             response['json']['next'] = next_page
         return response
 
-    def get_one(self, endpoint, *args, **kwargs):
+    def get_one(self, endpoint, name_or_id=None, *args, **kwargs):
+        if name_or_id:
+            name_field = self.get_name_field_from_endpoint(endpoint)
+            new_args = kwargs.get('data', {}).copy()
+            if name_field in new_args:
+                self.fail_json(msg="You can't specify the field {0} in your search data if using the name_or_id field".format(name_field))
+
+            new_args['or__{0}'.format(name_field)] = name_or_id
+            try:
+                new_args['or__id'] = int(name_or_id)
+            except ValueError:
+                # If we get a value error, then we didn't have an integer so we can just pass and fall down to the fail
+                pass
+            kwargs['data'] = new_args
+
         response = self.get_endpoint(endpoint, *args, **kwargs)
         if response['status_code'] != 200:
             fail_msg = "Got a {0} response when trying to get one from {1}".format(response['status_code'], endpoint)
@@ -102,16 +145,19 @@ class TowerAPIModule(TowerModule):
         if response['json']['count'] == 0:
             return None
         elif response['json']['count'] > 1:
+            if name_or_id:
+                # Since we did a name or ID search and got > 1 return something if the id matches
+                for asset in response['json']['results']:
+                    if asset['id'] == name_or_id:
+                        return asset
+            # We got > 1 and either didn't find something by ID (which means multiple names)
+            # Or we weren't running with a or search and just got back too many to begin with.
             self.fail_json(msg="An unexpected number of items was returned from the API ({0})".format(response['json']['count']))
 
         return response['json']['results'][0]
 
     def get_one_by_name_or_id(self, endpoint, name_or_id):
-        name_field = 'name'
-        if endpoint == 'users':
-            name_field = 'username'
-        elif endpoint == 'instances':
-            name_field = 'hostname'
+        name_field = self.get_name_field_from_endpoint(endpoint)
 
         query_params = {'or__{0}'.format(name_field): name_or_id}
         try:
@@ -319,23 +365,9 @@ class TowerAPIModule(TowerModule):
                 item_url = existing_item['url']
                 item_type = existing_item['type']
                 item_id = existing_item['id']
+                item_name = self.get_item_name(existing_item, allow_unknown=True)
             except KeyError as ke:
                 self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
-
-            if 'name' in existing_item:
-                item_name = existing_item['name']
-            elif 'username' in existing_item:
-                item_name = existing_item['username']
-            elif 'identifier' in existing_item:
-                item_name = existing_item['identifier']
-            elif item_type == 'o_auth2_access_token':
-                # An oauth2 token has no name, instead we will use its id for any of the messages
-                item_name = existing_item['id']
-            elif item_type == 'credential_input_source':
-                # An credential_input_source has no name, instead we will use its id for any of the messages
-                item_name = existing_item['id']
-            else:
-                self.fail_json(msg="Unable to process delete of {0} due to missing name".format(item_type))
 
             response = self.delete_endpoint(item_url)
 
@@ -409,12 +441,7 @@ class TowerAPIModule(TowerModule):
 
             # We have to rely on item_type being passed in since we don't have an existing item that declares its type
             # We will pull the item_name out from the new_item, if it exists
-            for key in ('name', 'username', 'identifier', 'hostname'):
-                if key in new_item:
-                    item_name = new_item[key]
-                    break
-            else:
-                item_name = 'unknown'
+            item_name = self.get_item_name(new_item, allow_unknown=True)
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
             if response['status_code'] == 201:

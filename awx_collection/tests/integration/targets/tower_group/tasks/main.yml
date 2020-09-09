@@ -14,11 +14,12 @@
     name: "{{ inv_name }}"
     organization: Default
     state: present
+  register: result
 
 - name: Create a Group
   tower_group:
     name: "{{ group_name1 }}"
-    inventory: "{{ inv_name }}"
+    inventory: "{{ result.id }}"
     state: present
     variables:
       foo: bar
@@ -30,7 +31,7 @@
 
 - name: Delete a Group
   tower_group:
-    name: "{{ group_name1 }}"
+    name: "{{ result.id }}"
     inventory: "{{ inv_name }}"
     state: absent
   register: result

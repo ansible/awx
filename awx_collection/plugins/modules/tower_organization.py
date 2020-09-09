@@ -117,11 +117,7 @@ def main():
     state = module.params.get('state')
 
     # Attempt to look up organization based on the provided name
-    organization = module.get_one('organizations', **{
-        'data': {
-            'name': name,
-        }
-    })
+    organization = module.get_one('organizations', name_or_id=name)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -154,7 +150,7 @@ def main():
             association_fields['notification_templates_approvals'].append(module.resolve_name_to_id('notification_templates', item))
 
     # Create the data that gets sent for create and update
-    org_fields = {'name': name}
+    org_fields = {'name': module.get_item_name(organization) if organization else name}
     if description is not None:
         org_fields['description'] = description
     if custom_virtualenv is not None:
