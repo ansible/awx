@@ -460,7 +460,7 @@ function Visualizer({ template, i18n }) {
           />
         )}
         {showDeleteAllNodesModal && <DeleteAllNodesModal />}
-        {nodeToView && <NodeViewModal />}
+        {nodeToView && <NodeViewModal readOnly={readOnly} />}
       </WorkflowDispatchContext.Provider>
     </WorkflowStateContext.Provider>
   );
