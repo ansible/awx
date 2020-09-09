@@ -61,6 +61,6 @@ describe('FieldWithPrompt', () => {
       </Formik>
     );
     expect(wrapper.find('.pf-c-form__label-required')).toHaveLength(1);
-    expect(wrapper.find('Tooltip')).toHaveLength(1);
+    expect(wrapper.find('Popover')).toHaveLength(1);
   });
 });

@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React, { useEffect, useRef } from 'react';
 import { withI18n } from '@lingui/react';
-import { t, Trans } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import { useField, useFormikContext } from 'formik';
 import { Switch, Text } from '@patternfly/react-core';
 import {
@@ -69,32 +69,30 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
             css="margin-bottom: var(--pf-c-content--MarginBottom)"
           >
             <small>
-              <Trans>
-                Use custom messages to change the content of notifications sent
-                when a job starts, succeeds, or fails. Use curly braces to
-                access information about the job:{' '}
-                <code>
-                  {'{{'} job_friendly_name {'}}'}
-                </code>
-                ,{' '}
-                <code>
-                  {'{{'} url {'}}'}
-                </code>
-                , or attributes of the job such as{' '}
-                <code>
-                  {'{{'} job.status {'}}'}
-                </code>
-                . You may apply a number of possible variables in the message.
-                Refer to the{' '}
-                <a
-                  href="https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Ansible Tower documentation
-                </a>{' '}
-                for more details.
-              </Trans>
+              Use custom messages to change the content of notifications sent
+              when a job starts, succeeds, or fails. Use curly braces to access
+              information about the job:{' '}
+              <code>
+                {'{{'} job_friendly_name {'}}'}
+              </code>
+              ,{' '}
+              <code>
+                {'{{'} url {'}}'}
+              </code>
+              , or attributes of the job such as{' '}
+              <code>
+                {'{{'} job.status {'}}'}
+              </code>
+              . You may apply a number of possible variables in the message.
+              Refer to the{' '}
+              <a
+                href="https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Ansible Tower documentation
+              </a>{' '}
+              for more details.
             </small>
           </Text>
           <FormFullWidthLayout>

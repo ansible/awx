@@ -99,6 +99,17 @@ class Inventories extends InstanceGroupsMixin(Base) {
       `${this.baseUrl}${inventoryId}/update_inventory_sources/`
     );
   }
+
+  readAdHocOptions(inventoryId) {
+    return this.http.options(`${this.baseUrl}${inventoryId}/ad_hoc_commands/`);
+  }
+
+  launchAdHocCommands(inventoryId, values) {
+    return this.http.post(
+      `${this.baseUrl}${inventoryId}/ad_hoc_commands/`,
+      values
+    );
+  }
 }
 
 export default Inventories;
