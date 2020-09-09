@@ -284,7 +284,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
             ['name', 'description', 'organization', 'survey_passwords', 'labels', 'credentials',
-             'job_slice_number', 'job_slice_count']
+             'job_slice_number', 'job_slice_count', 'execution_environment']
         )
 
     @property
