@@ -114,12 +114,14 @@ class Licenser(object):
                         key, value = line.split(': ')
                         cert_dict.update({key:value})
                 
+                verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
+                
                 # curl https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os --cert /etc/tower/certs/entitlement_cert_key_generic.pem -i
                 # TODO: create this URL from Satellite setting
                 content_repo_url = 'https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os'
                 request = requests.get(url=content_repo_url, 
                                        cert=f.name, 
-                                       verify=False,
+                                       verify=verify,
                                        # verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
                                        # headers=get_awx_http_client_headers(),
                                        # timeout=(5, 5)
@@ -151,6 +153,7 @@ class Licenser(object):
                                 sku=cert_dict.get('SKU', ''),
                                 instance_count=cert_dict.get('Quantity', 0),
                                 support_level=cert_dict.get('Service Level', ''),
+                                pool_id=cert_dict.get('Pool ID'),
                                 # license_date=cert_dict.get('End Date', 2524626011), # Need to convert to seconds
                                 product_name="Red Hat Ansible Tower",
                                 valid_key=True,
@@ -199,6 +202,7 @@ class Licenser(object):
         if 'license_date' in kwargs:
             kwargs['license_date'] = int(kwargs['license_date'])
         self._attrs.update(kwargs)
+
 
     def validate_rh(self, user, pw):
         host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
@@ -250,10 +254,10 @@ class Licenser(object):
         products = sub.get('providedProducts', [])
         if any(map(lambda product: product.get('productId', None) == "480", products)):
             return True
-        # Legacy: products that claim they are Ansible Tower
-        attributes = sub.get('productAttributes', [])
-        if any(map(lambda attr: attr.get('name') == 'ph_product_name' and attr.get('value').startswith('Ansible Tower'), attributes)): # noqa
-            return True
+        # # Legacy: products that claim they are Ansible Tower
+        # attributes = sub.get('productAttributes', [])
+        # if any(map(lambda attr: attr.get('name') == 'ph_product_name' and attr.get('value').startswith('Ansible Tower'), attributes)): # noqa
+        #     return True
         return False
 
     def generate_license_options_from_entitlements(self, json):
@@ -286,6 +290,7 @@ class Licenser(object):
                 sku = sub['productId']
                 trial = sku.startswith('S')  # i.e.,, SER/SVC
                 support_level = ''
+                pool_id = sub['id']
                 for attr in sub.get('productAttributes', []):
                     if attr.get('name') == 'support_level':
                         support_level = attr.get('value')
@@ -318,6 +323,9 @@ class Licenser(object):
                 license._attrs['subscription_name'] = subscription_name
                 license.update(
                     license_date=sub.end_date.strftime('%s')
+                )
+                license.update(
+                    pool_id=pool_id
                 )
                 licenses.append(license._attrs.copy())
             return licenses

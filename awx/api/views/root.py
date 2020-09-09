@@ -178,7 +178,7 @@ class ApiV2PingView(APIView):
 class ApiV2SubscriptionView(APIView):
 
     permission_classes = (IsAuthenticated,)
-    name = _('Configuration')
+    name = _('Subscriptions')
     swagger_topic = 'System Configuration'
 
     def check_permissions(self, request):
@@ -218,6 +218,70 @@ class ApiV2SubscriptionView(APIView):
             return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(validated)
+
+
+class ApiV2AttachView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    name = _('Attach Subscription')
+    swagger_topic = 'System Configuration'
+
+    def check_permissions(self, request):
+        super(ApiV2AttachView, self).check_permissions(request)
+        if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
+            self.permission_denied(request)  # Raises PermissionDenied exception.
+
+    def post(self, request):
+        from awx.main.utils.common import get_licenser
+        data = request.data.copy()
+        pool_id = data.get('pool_id', None)
+        user = getattr(settings, 'REDHAT_USERNAME', None)
+        pw = getattr(settings, 'REDHAT_PASSWORD', None)
+        if pool_id and user and pw:
+            try:
+                # TODO: Replace this with logic that uses the user, pw to get the entitlement cert for that pool_id
+                
+                # Attempt to get entitlement cert from RHSM 
+                
+                # Save the cert as a setting
+                
+                # Validate and apply entitlement cert
+                # Call get_licenser().validate()
+                
+                return Response({pool_id})
+                # with set_environ(**settings.AWX_TASK_ENV):  # TODO: better understand what is going on here
+                #     validated = get_licenser().validate_rh(user, pw)
+
+                # # Should we make the UI provide the USERNAME/PASSWORD again here, or rely on it being in settings?
+                # if user:
+                #     settings.REDHAT_USERNAME = data['rh_username']
+                # if pw:
+                #     settings.REDHAT_PASSWORD = data['rh_password']
+
+
+                    # Attempt to get entitlement cert from RHSM 
+
+            except Exception as exc:
+                msg = _("changeme")
+                # msg = _("Invalid License")
+                # if (
+                #     isinstance(exc, requests.exceptions.HTTPError) and
+                #     getattr(getattr(exc, 'response', None), 'status_code', None) == 401
+                # ):
+                #     msg = _("The provided credentials are invalid (HTTP 401).")
+                # elif isinstance(exc, requests.exceptions.ProxyError):
+                #     msg = _("Unable to connect to proxy server.")
+                # elif isinstance(exc, requests.exceptions.ConnectionError):
+                #     msg = _("Could not connect to subscription service.")
+                # elif isinstance(exc, (ValueError, OSError)) and exc.args:
+                #     msg = exc.args[0]
+                # else:
+                #     logger.exception(smart_text(u"Invalid license submitted."),
+                #                      extra=dict(actor=request.user.username))
+                return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(validated)
+
 
 
 class ApiV2ConfigView(APIView):
@@ -312,7 +376,7 @@ class ApiV2ConfigView(APIView):
             logger.warning(smart_text(u"Invalid license submitted."),
                            extra=dict(actor=request.user.username))
             # If License invalid, clear entitlment cert value  # TODO: maybe do this inside licensing.py
-            settings.ENTITLEMENT_CERT = None
+            settings.ENTITLEMENT_CERT = ''
             return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
 
         # If the license is valid, write it to the database.
@@ -330,7 +394,7 @@ class ApiV2ConfigView(APIView):
     def delete(self, request):
         try:
             settings.LICENSE = {}
-            settings.ENTITLEMENT_CERT = None
+            settings.ENTITLEMENT_CERT = ''
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception:
             # FIX: Log
