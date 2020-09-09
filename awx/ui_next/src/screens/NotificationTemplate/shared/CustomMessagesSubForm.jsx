@@ -69,7 +69,6 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
             css="margin-bottom: var(--pf-c-content--MarginBottom)"
           >
             <small>
-              <Trans>
                 Use custom messages to change the content of notifications sent
                 when a job starts, succeeds, or fails. Use curly braces to
                 access information about the job:{' '}
@@ -94,7 +93,6 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
                   Ansible Tower documentation
                 </a>{' '}
                 for more details.
-              </Trans>
             </small>
           </Text>
           <FormFullWidthLayout>
