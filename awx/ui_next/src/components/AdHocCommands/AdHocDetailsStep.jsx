@@ -88,7 +88,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
               module_nameField.value ? (
                 <>
                   {i18n._(
-                    t`These arguments are used with the specified module. You can find information about the ${module_nameField.value} by clicking `
+                    t`These arguments are used with the specified module. You can find information about ${module_nameField.value} by clicking `
                   )}
                   <a
                     href={`https://docs.ansible.com/ansible/latest/modules/${module_nameField.value}_module.html`}
