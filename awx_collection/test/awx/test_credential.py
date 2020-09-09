@@ -127,7 +127,9 @@ def test_missing_credential_type(run_module, admin_user, organization):
         state='present'
     ), admin_user)
     assert result.get('failed', False), result
-    assert 'foobar was not found on the Tower server' in result['msg']
+    assert 'credential_type' in result['msg']
+    assert 'foobar' in result['msg']
+    assert 'returned 0 items, expected 1' in result['msg']
 
 
 @pytest.mark.django_db
