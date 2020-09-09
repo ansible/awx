@@ -119,9 +119,11 @@
 
     - assert:
         that:
+          - "result is failed"
           - "result is not changed"
-          - "result.msg =='Failed to update inventory, organization not found: The requested object could not be found.'
-            or result.msg =='The organizations test-non-existing-org was not found on the Tower server'"
+          - "'test-non-existing-org' in result.msg"
+          - "result.total_results == 0"
+
   always:
     - name: Delete Inventories
       tower_inventory:

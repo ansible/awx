@@ -123,12 +123,12 @@ class TowerAPIModule(TowerModule):
             if name_field in new_data:
                 self.fail_json(msg="You can't specify the field {0} in your search data if using the name_or_id field".format(name_field))
 
-            new_data['or__{0}'.format(name_field)] = name_or_id
             try:
                 new_data['or__id'] = int(name_or_id)
+                new_data['or__{0}'.format(name_field)] = name_or_id
             except ValueError:
                 # If we get a value error, then we didn't have an integer so we can just pass and fall down to the fail
-                pass
+                new_data[name_field] = name_or_id
             new_kwargs['data'] = new_data
 
         response = self.get_endpoint(endpoint, **new_kwargs)
@@ -160,11 +160,13 @@ class TowerAPIModule(TowerModule):
 
     def fail_wanted_one(self, response, endpoint, query_params):
         sample = response.copy()
-        if len(sample['json']['results']) < 1:
+        if len(sample['json']['results']) > 1:
             sample['json']['results'] = sample['json']['results'][:2] + ['...more results snipped...']
+        url = self.build_url(endpoint, query_params)
+        display_endpoint = url.geturl()[len(self.host):]  # truncate to not include the base URL
         self.fail_json(
             msg="Request to {0} returned {1} items, expected 1".format(
-                self.build_url(endpoint, query_params).geturl(), response['json']['count']
+                display_endpoint, response['json']['count']
             ),
             query=query_params,
             response=sample,

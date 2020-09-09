@@ -288,7 +288,7 @@
 - name: Create an invalid SSH credential (Organization not found)
   tower_credential:
     name: SSH Credential
-    organization: Missing Organization
+    organization: Missing_Organization
     state: present
     kind: ssh
     username: joe
@@ -298,7 +298,9 @@
 - assert:
     that:
       - "result is failed"
-      - "'The organizations Missing Organization was not found on the Tower server' in result.msg"
+      - "result is not changed"
+      - "'Missing_Organization' in result.msg"
+      - "result.total_results == 0"
 
 - name: Delete an SSH credential
   tower_credential:
@@ -750,5 +752,7 @@
 
 - assert:
     that:
-      - result is failed
-      - "result.msg =='The organizations test-non-existing-org was not found on the Tower server'"
+      - "result is failed"
+      - "result is not changed"
+      - "'test-non-existing-org' in result.msg"
+      - "result.total_results == 0"

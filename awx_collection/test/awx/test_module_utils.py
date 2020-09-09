@@ -126,6 +126,7 @@ def test_conflicting_name_and_id(run_module, admin_user):
     )
     assert team.organization.name == 'foo'
 
+
 def test_multiple_lookup(run_module, admin_user):
     org1 = Organization.objects.create(name='foo')
     org2 = Organization.objects.create(name='bar')
@@ -140,4 +141,3 @@ def test_multiple_lookup(run_module, admin_user):
     assert 'foo' in result['msg']
     assert 'returned 2 items, expected 1' in result['msg']
     assert 'query' in result
-
