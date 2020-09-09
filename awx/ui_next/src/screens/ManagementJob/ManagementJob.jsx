@@ -6,33 +6,34 @@ import {
   Switch,
   useLocation,
   useParams,
+  useRouteMatch,
 } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import { useRouteMatch } from 'react-router-dom';
 
 import { SystemJobTemplatesAPI } from '../../api';
-
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
 import RoutedTabs from '../../components/RoutedTabs';
+import { Schedules } from '../../components/Schedule';
 import { useConfig } from '../../contexts/Config';
 import useRequest from '../../util/useRequest';
 
 import ManagementJobDetails from './ManagementJobDetails';
 import ManagementJobEdit from './ManagementJobEdit';
 import ManagementJobNotifications from './ManagementJobNotifications';
-import ManagementJobSchedules from './ManagementJobSchedules';
 
 function ManagementJob({ i18n, setBreadcrumb }) {
-  const segment = '/management_jobs';
+  const basePath = '/management_jobs';
 
   const match = useRouteMatch();
   const { id } = useParams();
   const { pathname } = useLocation();
   const { me, isNotificationAdmin } = useConfig();
+
+  const canReadNotifications = isNotificationAdmin || me?.is_system_auditor;
 
   const { isLoading, error, request, result } = useRequest(
     useCallback(async () => SystemJobTemplatesAPI.readDetail(id), [id])
@@ -48,10 +49,17 @@ function ManagementJob({ i18n, setBreadcrumb }) {
     setBreadcrumb(result);
   }, [result, setBreadcrumb]);
 
+  const createSchedule = data =>
+    SystemJobTemplatesAPI.createSchedule(result.id, data);
+  const loadSchedules = params =>
+    SystemJobTemplatesAPI.readSchedules(result.id, params);
+  const loadScheduleOptions = () =>
+    SystemJobTemplatesAPI.readScheduleOptions(result.id);
+
   const tabsArray = [
     {
       id: 99,
-      link: segment,
+      link: basePath,
       name: (
         <>
           <CaretLeftIcon />
@@ -61,7 +69,7 @@ function ManagementJob({ i18n, setBreadcrumb }) {
     },
     {
       id: 0,
-      link: `${segment}/${id}/details`,
+      link: `${basePath}/${id}/details`,
       name: i18n._(t`Details`),
     },
     {
@@ -71,7 +79,7 @@ function ManagementJob({ i18n, setBreadcrumb }) {
     },
   ];
 
-  if (me?.is_system_auditor || isNotificationAdmin) {
+  if (canReadNotifications) {
     tabsArray.push({
       id: 2,
       name: i18n._(t`Notifications`),
@@ -79,12 +87,15 @@ function ManagementJob({ i18n, setBreadcrumb }) {
     });
   }
 
+  let Tabs = <RoutedTabs tabsArray={tabsArray} />;
+  if (pathname.includes('edit') || pathname.includes('schedules/')) {
+    Tabs = null;
+  }
+
   const LoadingScreen = (
     <PageSection>
       <Card>
-        {pathname.endsWith('edit') ? null : (
-          <RoutedTabs tabsArray={tabsArray} />
-        )}
+        {Tabs}
         <ContentLoading />
       </Card>
     </PageSection>
@@ -98,7 +109,7 @@ function ManagementJob({ i18n, setBreadcrumb }) {
             <span>
               {i18n._(t`Management job not found.`)}
               {''}
-              <Link to={segment}>{i18n._(t`View all management jobs`)}</Link>
+              <Link to={basePath}>{i18n._(t`View all management jobs`)}</Link>
             </span>
           )}
         </ContentError>
@@ -117,26 +128,30 @@ function ManagementJob({ i18n, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        {pathname.endsWith('edit') ? null : (
-          <RoutedTabs tabsArray={tabsArray} />
-        )}
+        {Tabs}
         <Switch>
           <Redirect
             exact
-            from={`${segment}/:id`}
-            to={`${segment}/:id/details`}
+            from={`${basePath}/:id`}
+            to={`${basePath}/:id/details`}
           />
-          <Route path={`${segment}/:id/details`}>
+          <Route path={`${basePath}/:id/details`}>
             <ManagementJobDetails managementJob={result} />
           </Route>
-          <Route path={`${segment}/:id/edit`}>
+          <Route path={`${basePath}/:id/edit`}>
             <ManagementJobEdit managementJob={result} />
           </Route>
-          <Route path={`${segment}/:id/notifications`}>
+          <Route path={`${basePath}/:id/notifications`}>
             <ManagementJobNotifications managementJob={result} />
           </Route>
-          <Route path={`${segment}/:id/schedules`}>
-            <ManagementJobSchedules managementJob={result} />
+          <Route path={`${basePath}/:id/schedules`}>
+            <Schedules
+              unifiedJobTemplate={result}
+              createSchedule={createSchedule}
+              loadSchedules={loadSchedules}
+              loadScheduleOptions={loadScheduleOptions}
+              setBreadcrumb={setBreadcrumb}
+            />
           </Route>
         </Switch>
       </Card>
