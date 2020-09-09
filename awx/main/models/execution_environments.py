@@ -11,7 +11,7 @@ __all__ = ['ExecutionEnvironment']
 class ExecutionEnvironment(PrimordialModel):
     class Meta:
         unique_together = ('organization', 'image')
-        ordering = (models.F('organization_id').asc(nulls_first=True), 'image')
+        ordering = ('-created',)
 
     organization = models.ForeignKey(
         'Organization',

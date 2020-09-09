@@ -12,6 +12,7 @@ from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
+from awx.main.models import ExecutionEnvironment
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -161,6 +162,18 @@ register(
     category=_('System'),
     category_slug='system',
     read_only=True,
+)
+
+register(
+    'DEFAULT_EXECUTION_ENVIRONMENT',
+    field_class=fields.PrimaryKeyRelatedField,
+    allow_null=True,
+    default=None,
+    queryset=ExecutionEnvironment.objects.all(),
+    label=_('Global default execution environment'),
+    help_text=_('.'),
+    category=_('System'),
+    category_slug='system',
 )
 
 register(
