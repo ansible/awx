@@ -1,13 +1,19 @@
 import Base from '../Base';
+import NotificationsMixin from '../mixins/Notifications.mixin';
+import SchedulesMixin from '../mixins/Schedules.mixin';
 
-class SystemJobTemplates extends Base {
+const Mixins = SchedulesMixin(NotificationsMixin(Base));
+
+class SystemJobTemplates extends Mixins {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/system_job_templates/';
   }
 
   readDetail(id) {
-    return this.http.get(`${this.baseUrl}${id}/`).then(({ data }) => data);
+    const path = `${this.baseUrl}${id}/`;
+
+    return this.http.get(path).then(({ data }) => data);
   }
 }
 
