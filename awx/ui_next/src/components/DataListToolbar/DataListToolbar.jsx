@@ -43,7 +43,7 @@ function DataListToolbar({
 }) {
   const showExpandCollapse = onCompact && onExpand;
   const [kebabIsOpen, setKebabIsOpen] = useState(false);
-  const [kebabModalIsOpen, setKebabkebabModalIsOpen] = useState(false);
+  const [kebabModalIsOpen, setKebabModalIsOpen] = useState(false);
   const [advancedSearchShown, setAdvancedSearchShown] = useState(false);
 
   const onShowAdvancedSearch = shown => {
@@ -114,7 +114,7 @@ function DataListToolbar({
             <KebabifiedProvider
               value={{
                 isKebabified: true,
-                onKebabModalChange: isOpen => setKebabkebabModalIsOpen(isOpen),
+                onKebabModalChange: isOpen => setKebabModalIsOpen(isOpen),
               }}
             >
               <Dropdown
