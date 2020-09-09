@@ -16,6 +16,7 @@ import { Card, PageSection } from '@patternfly/react-core';
 import { SystemJobTemplatesAPI } from '../../api';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
+import NotificationList from '../../components/NotificationList';
 import RoutedTabs from '../../components/RoutedTabs';
 import { Schedules } from '../../components/Schedule';
 import { useConfig } from '../../contexts/Config';
@@ -23,7 +24,6 @@ import useRequest from '../../util/useRequest';
 
 import ManagementJobDetails from './ManagementJobDetails';
 import ManagementJobEdit from './ManagementJobEdit';
-import ManagementJobNotifications from './ManagementJobNotifications';
 
 function ManagementJob({ i18n, setBreadcrumb }) {
   const basePath = '/management_jobs';
@@ -141,9 +141,15 @@ function ManagementJob({ i18n, setBreadcrumb }) {
           <Route path={`${basePath}/:id/edit`}>
             <ManagementJobEdit managementJob={result} />
           </Route>
-          <Route path={`${basePath}/:id/notifications`}>
-            <ManagementJobNotifications managementJob={result} />
-          </Route>
+          {canReadNotifications ? (
+            <Route path={`${basePath}/:id/notifications`}>
+              <NotificationList
+                id={Number(result?.id)}
+                canToggleNotifications={isNotificationAdmin}
+                apiModel={SystemJobTemplatesAPI}
+              />
+            </Route>
+          ) : null}
           <Route path={`${basePath}/:id/schedules`}>
             <Schedules
               unifiedJobTemplate={result}
