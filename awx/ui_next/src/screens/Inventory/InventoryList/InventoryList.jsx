@@ -72,7 +72,7 @@ function InventoryList({ i18n }) {
 
   const fetchInventoriesById = useCallback(
     async ids => {
-      const params = parseQueryString(QS_CONFIG, location.search);
+      const params = { ...parseQueryString(QS_CONFIG, location.search) };
       params.id__in = ids.join(',');
       const { data } = await InventoriesAPI.read(params);
       return data.results;
