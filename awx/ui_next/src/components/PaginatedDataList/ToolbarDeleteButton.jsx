@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   func,
   bool,
@@ -75,11 +75,14 @@ function ToolbarDeleteButton({
   };
 
   const toggleModal = () => {
-    if (isKebabified) {
-      onKebabModalChange(!isModalOpen);
-    }
     setIsModalOpen(!isModalOpen);
   };
+
+  useEffect(() => {
+    if (isKebabified) {
+      onKebabModalChange(isModalOpen);
+    }
+  }, [isKebabified, isModalOpen, onKebabModalChange]);
 
   const renderTooltip = () => {
     const itemsUnableToDelete = itemsToDelete

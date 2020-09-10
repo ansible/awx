@@ -26,8 +26,8 @@ describe('<ToolbarDeleteButton />', () => {
     const wrapper = mountWithContexts(
       <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[itemA]} />
     );
+    expect(wrapper.find('Modal')).toHaveLength(0);
     wrapper.find('button').simulate('click');
-    expect(wrapper.find('ToolbarDeleteButton').state('isModalOpen')).toBe(true);
     wrapper.update();
     expect(wrapper.find('Modal')).toHaveLength(1);
   });
@@ -37,15 +37,14 @@ describe('<ToolbarDeleteButton />', () => {
     const wrapper = mountWithContexts(
       <ToolbarDeleteButton onDelete={onDelete} itemsToDelete={[itemA]} />
     );
-    wrapper.find('ToolbarDeleteButton').setState({ isModalOpen: true });
+    wrapper.find('button').simulate('click');
     wrapper.update();
     wrapper
       .find('ModalBoxFooter button[aria-label="confirm delete"]')
       .simulate('click');
+    wrapper.update();
     expect(onDelete).toHaveBeenCalled();
-    expect(wrapper.find('ToolbarDeleteButton').state('isModalOpen')).toBe(
-      false
-    );
+    expect(wrapper.find('Modal')).toHaveLength(0);
   });
 
   test('should disable button when no delete permissions', () => {

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func } from 'prop-types';
@@ -23,11 +23,14 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
   };
 
   const toggleModal = () => {
-    if (isKebabified) {
-      onKebabModalChange(!isModalOpen);
-    }
     setIsModalOpen(!isModalOpen);
   };
+
+  useEffect(() => {
+    if (isKebabified) {
+      onKebabModalChange(isModalOpen);
+    }
+  }, [isKebabified, isModalOpen, onKebabModalChange]);
 
   const renderTooltip = () => {
     const jobsUnableToCancel = jobsToCancel

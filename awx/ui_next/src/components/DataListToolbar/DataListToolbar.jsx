@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -42,14 +42,20 @@ function DataListToolbar({
   pagination,
 }) {
   const showExpandCollapse = onCompact && onExpand;
-  const [kebabIsOpen, setKebabIsOpen] = useState(false);
-  const [kebabModalIsOpen, setKebabModalIsOpen] = useState(false);
-  const [advancedSearchShown, setAdvancedSearchShown] = useState(false);
+  const [isKebabOpen, setIsKebabOpen] = useState(false);
+  const [isKebabModalOpen, setIsKebabModalOpen] = useState(false);
+  const [isAdvancedSearchShown, setIsAdvancedSearchShown] = useState(false);
 
   const onShowAdvancedSearch = shown => {
-    setAdvancedSearchShown(shown);
-    setKebabIsOpen(false);
+    setIsAdvancedSearchShown(shown);
+    setIsKebabOpen(false);
   };
+
+  useEffect(() => {
+    if (!isKebabModalOpen) {
+      setIsKebabOpen(false);
+    }
+  }, [isKebabModalOpen]);
 
   return (
     <Toolbar
@@ -103,44 +109,39 @@ function DataListToolbar({
             </>
           </ToolbarGroup>
         )}
-        {advancedSearchShown && (
+        {isAdvancedSearchShown && (
           <ToolbarItem>
             <KebabifiedProvider
               value={{
                 isKebabified: true,
-                onKebabModalChange: isOpen => {
-                  if (kebabIsOpen && kebabModalIsOpen && !isOpen) {
-                    setKebabIsOpen(false);
-                  }
-                  setKebabModalIsOpen(isOpen);
-                },
+                onKebabModalChange: setIsKebabModalOpen,
               }}
             >
               <Dropdown
                 toggle={
                   <KebabToggle
                     onToggle={isOpen => {
-                      if (!kebabModalIsOpen) {
-                        setKebabIsOpen(isOpen);
+                      if (!isKebabModalOpen) {
+                        setIsKebabOpen(isOpen);
                       }
                     }}
                   />
                 }
-                isOpen={kebabIsOpen || kebabModalIsOpen}
+                isOpen={isKebabOpen}
                 isPlain
                 dropdownItems={additionalControls}
               />
             </KebabifiedProvider>
           </ToolbarItem>
         )}
-        {!advancedSearchShown && (
+        {!isAdvancedSearchShown && (
           <ToolbarGroup>
             {additionalControls.map(control => (
               <ToolbarItem key={control.key}>{control}</ToolbarItem>
             ))}
           </ToolbarGroup>
         )}
-        {!advancedSearchShown && pagination && itemCount > 0 && (
+        {!isAdvancedSearchShown && pagination && itemCount > 0 && (
           <ToolbarItem variant="pagination">{pagination}</ToolbarItem>
         )}
       </ToolbarContent>
