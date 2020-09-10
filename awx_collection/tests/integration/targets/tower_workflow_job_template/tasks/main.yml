@@ -9,6 +9,7 @@
     demo_project_name: "AWX-Collection-tests-tower_workflow_job_template-proj-{{ test_id }}"
     jt1_name: "AWX-Collection-tests-tower_workflow_job_template-jt1-{{ test_id }}"
     jt2_name: "AWX-Collection-tests-tower_workflow_job_template-jt2-{{ test_id }}"
+    lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
     wfjt_name: "AWX-Collection-tests-tower_workflow_job_template-wfjt-{{ test_id }}"
     email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
     webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ test_id }}"
@@ -50,6 +51,11 @@
       X-Custom-Header: value123
     state: present
   register: result
+
+- name: Create Label
+  tower_label:
+    name: "{{ lab1 }}"
+    organization: Default
 
 - name: Create a Demo Project
   tower_project:
@@ -117,6 +123,8 @@
     name: "{{ wfjt_name }}"
     inventory: Demo Inventory
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
+    labels:
+      - "{{ lab1 }}"
   register: result
 
 - assert:

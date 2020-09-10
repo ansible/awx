@@ -480,6 +480,12 @@ def main():
         association_fields['labels'] = []
         for item in labels:
             association_fields['labels'].append(module.resolve_name_to_id('labels', item))
+# Code to use once Issue #7567 is resolved
+#            search_fields = {'name': item}
+#            if organization:
+#                search_fields['organization'] = organization_id
+#            label_id = module.get_one('labels', **{'data': search_fields})
+#            association_fields['labels'].append(label_id)
 
     notifications_start = module.params.get('notification_templates_started')
     if notifications_start is not None:
