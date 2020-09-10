@@ -75,38 +75,56 @@ export default function useWsInventories(
         return;
       }
 
+      const params = parseQueryString(qsConfig, location.search);
+
       const inventory = inventories[index];
       const updatedInventory = {
         ...inventory,
       };
 
-      if (lastMessage.group_name === 'inventories') {
-        if (lastMessage.status === 'pending_deletion') {
-          updatedInventory.pending_deletion = true;
-        } else if (lastMessage.status === 'deleted') {
-          if (inventories.length === 1) {
-            const params = parseQueryString(qsConfig, location.search);
-            if (params.page > 1) {
-              const newParams = encodeNonDefaultQueryString(
-                qsConfig,
-                replaceParams(params, {
-                  page: params.page - 1,
-                })
-              );
-              history.push(`${location.pathname}?${newParams}`);
-            }
-          } else {
-            fetchInventories();
-          }
-        } else {
-          return;
-        }
-      } else {
-        if (!['pending', 'waiting', 'running'].includes(lastMessage.status)) {
-          enqueueId(lastMessage.inventory_id);
-          return;
-        }
+      if (
+        lastMessage.group_name === 'inventories' &&
+        lastMessage.status === 'deleted' &&
+        inventories.length === 1 &&
+        params.page > 1
+      ) {
+        // We've deleted the last inventory on this page so we'll
+        // try to navigate back to the previous page
+        const newParams = encodeNonDefaultQueryString(
+          qsConfig,
+          replaceParams(params, {
+            page: params.page - 1,
+          })
+        );
+        history.push(`${location.pathname}?${newParams}`);
+        return;
+      }
 
+      if (
+        lastMessage.group_name === 'inventories' &&
+        lastMessage.status === 'deleted'
+      ) {
+        fetchInventories();
+        return;
+      }
+
+      if (
+        !['pending', 'waiting', 'running', 'pending_deletion'].includes(
+          lastMessage.status
+        )
+      ) {
+        enqueueId(lastMessage.inventory_id);
+        return;
+      }
+
+      if (
+        lastMessage.group_name === 'inventories' &&
+        lastMessage.status === 'pending_deletion'
+      ) {
+        updatedInventory.pending_deletion = true;
+      }
+
+      if (lastMessage.group_name !== 'inventories') {
         updatedInventory.isSourceSyncRunning = true;
       }
 

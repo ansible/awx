@@ -31,6 +31,10 @@ function Test({
   return <TestInner inventories={syncedInventories} />;
 }
 
+const QS_CONFIG = {
+  defaultParams: {},
+};
+
 describe('useWsInventories hook', () => {
   let debug;
   let wrapper;
@@ -41,14 +45,16 @@ describe('useWsInventories hook', () => {
 
   afterEach(() => {
     global.console.debug = debug;
+    WS.clean();
   });
 
   test('should return inventories list', () => {
     const inventories = [{ id: 1 }];
-    wrapper = mountWithContexts(<Test inventories={inventories} />);
+    wrapper = mountWithContexts(
+      <Test inventories={inventories} qsConfig={QS_CONFIG} />
+    );
 
     expect(wrapper.find('TestInner').prop('inventories')).toEqual(inventories);
-    WS.clean();
   });
 
   test('should establish websocket connection', async () => {
@@ -57,7 +63,9 @@ describe('useWsInventories hook', () => {
 
     const inventories = [{ id: 1 }];
     await act(async () => {
-      wrapper = await mountWithContexts(<Test inventories={inventories} />);
+      wrapper = await mountWithContexts(
+        <Test inventories={inventories} qsConfig={QS_CONFIG} />
+      );
     });
 
     await mockServer.connected;
@@ -71,7 +79,6 @@ describe('useWsInventories hook', () => {
         },
       })
     );
-    WS.clean();
   });
 
   test('should update inventory sync status', async () => {
@@ -80,7 +87,9 @@ describe('useWsInventories hook', () => {
 
     const inventories = [{ id: 1 }];
     await act(async () => {
-      wrapper = await mountWithContexts(<Test inventories={inventories} />);
+      wrapper = await mountWithContexts(
+        <Test inventories={inventories} qsConfig={QS_CONFIG} />
+      );
     });
 
     await mockServer.connected;
@@ -108,7 +117,6 @@ describe('useWsInventories hook', () => {
     expect(
       wrapper.find('TestInner').prop('inventories')[0].isSourceSyncRunning
     ).toEqual(true);
-    WS.clean();
   });
 
   test('should fetch fresh inventory after sync runs', async () => {
@@ -123,6 +131,7 @@ describe('useWsInventories hook', () => {
           inventories={inventories}
           fetchInventories={fetchInventories}
           fetchInventoriesById={fetchInventoriesById}
+          qsConfig={QS_CONFIG}
         />
       );
     });
@@ -139,7 +148,6 @@ describe('useWsInventories hook', () => {
     });
 
     expect(fetchInventoriesById).toHaveBeenCalledWith([1]);
-    WS.clean();
   });
 
   test('should update inventory pending_deletion', async () => {
@@ -148,7 +156,9 @@ describe('useWsInventories hook', () => {
 
     const inventories = [{ id: 1, pending_deletion: false }];
     await act(async () => {
-      wrapper = await mountWithContexts(<Test inventories={inventories} />);
+      wrapper = await mountWithContexts(
+        <Test inventories={inventories} qsConfig={QS_CONFIG} />
+      );
     });
 
     await mockServer.connected;
@@ -176,7 +186,6 @@ describe('useWsInventories hook', () => {
     expect(
       wrapper.find('TestInner').prop('inventories')[0].pending_deletion
     ).toEqual(true);
-    WS.clean();
   });
 
   test('should refetch inventories after an inventory is deleted', async () => {
@@ -191,6 +200,7 @@ describe('useWsInventories hook', () => {
           inventories={inventories}
           fetchInventories={fetchInventories}
           fetchInventoriesById={fetchInventoriesById}
+          qsConfig={QS_CONFIG}
         />
       );
     });
@@ -207,6 +217,5 @@ describe('useWsInventories hook', () => {
     });
 
     expect(fetchInventories).toHaveBeenCalled();
-    WS.clean();
   });
 });
