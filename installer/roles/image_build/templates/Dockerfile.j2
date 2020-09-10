@@ -137,6 +137,7 @@ RUN dnf -y update && \
     sudo \
     vim-minimal \
     which \
+    unzip \
     xmlsec1-openssl && \
     dnf -y install centos-release-stream && dnf -y install "rsyslog >= 8.1911.0" && dnf -y remove centos-release-stream && \
     dnf -y clean all
