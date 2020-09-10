@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -51,12 +51,6 @@ function DataListToolbar({
     setKebabIsOpen(false);
   };
 
-  useEffect(() => {
-    if (!kebabModalIsOpen) {
-      setKebabIsOpen(false);
-    }
-  }, [kebabModalIsOpen]);
-
   return (
     <Toolbar
       id={`${qsConfig.namespace}-list-toolbar`}
@@ -98,7 +92,7 @@ function DataListToolbar({
         </ToolbarToggleGroup>
         {showExpandCollapse && (
           <ToolbarGroup>
-            <Fragment>
+            <>
               <ToolbarItem>
                 <ExpandCollapse
                   isCompact={isCompact}
@@ -106,7 +100,7 @@ function DataListToolbar({
                   onExpand={onExpand}
                 />
               </ToolbarItem>
-            </Fragment>
+            </>
           </ToolbarGroup>
         )}
         {advancedSearchShown && (
@@ -114,7 +108,12 @@ function DataListToolbar({
             <KebabifiedProvider
               value={{
                 isKebabified: true,
-                onKebabModalChange: isOpen => setKebabModalIsOpen(isOpen),
+                onKebabModalChange: isOpen => {
+                  if (kebabIsOpen && kebabModalIsOpen && !isOpen) {
+                    setKebabIsOpen(false);
+                  }
+                  setKebabModalIsOpen(isOpen);
+                },
               }}
             >
               <Dropdown
@@ -127,7 +126,7 @@ function DataListToolbar({
                     }}
                   />
                 }
-                isOpen={kebabIsOpen}
+                isOpen={kebabIsOpen || kebabModalIsOpen}
                 isPlain
                 dropdownItems={additionalControls}
               />

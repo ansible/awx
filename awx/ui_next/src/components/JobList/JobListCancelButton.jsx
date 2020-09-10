@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func } from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
-import { Kebabified } from '../../contexts/Kebabified';
+import { KebabifiedContext } from '../../contexts/Kebabified';
 import AlertModal from '../AlertModal';
 import { Job } from '../../types';
 
@@ -12,13 +12,21 @@ function cannotCancel(job) {
 }
 
 function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
+  const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const numJobsToCancel = jobsToCancel.length;
   const zeroOrOneJobSelected = numJobsToCancel < 2;
 
-  const handleCancel = () => {
+  const handleCancelJob = () => {
     onCancel();
-    setIsModalOpen(false);
+    toggleModal();
+  };
+
+  const toggleModal = () => {
+    if (isKebabified) {
+      onKebabModalChange(!isModalOpen);
+    }
+    setIsModalOpen(!isModalOpen);
   };
 
   const renderTooltip = () => {
@@ -61,96 +69,74 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
   );
 
   return (
-    <Kebabified>
-      {({ isKebabified, onKebabModalChange }) => (
-        <>
-          {isKebabified ? (
-            <DropdownItem
-              key="cancel-job"
+    <>
+      {isKebabified ? (
+        <DropdownItem
+          key="cancel-job"
+          isDisabled={isDisabled}
+          component="button"
+          onClick={toggleModal}
+        >
+          {cancelJobText}
+        </DropdownItem>
+      ) : (
+        <Tooltip content={renderTooltip()} position="top">
+          <div>
+            <Button
+              variant="secondary"
+              aria-label={cancelJobText}
+              onClick={toggleModal}
               isDisabled={isDisabled}
-              component="button"
-              onClick={() => {
-                onKebabModalChange(true);
-                setIsModalOpen(true);
-              }}
             >
               {cancelJobText}
-            </DropdownItem>
-          ) : (
-            <Tooltip content={renderTooltip()} position="top">
-              <div>
-                <Button
-                  variant="secondary"
-                  aria-label={cancelJobText}
-                  onClick={() => setIsModalOpen(true)}
-                  isDisabled={isDisabled}
-                >
-                  {cancelJobText}
-                </Button>
-              </div>
-            </Tooltip>
-          )}
-          {isModalOpen && (
-            <AlertModal
-              variant="danger"
-              title={cancelJobText}
-              isOpen={isModalOpen}
-              onClose={() => {
-                if (isKebabified) {
-                  onKebabModalChange(false);
-                }
-                setIsModalOpen(false);
-              }}
-              actions={[
-                <Button
-                  id="cancel-job-confirm-button"
-                  key="delete"
-                  variant="danger"
-                  aria-label={cancelJobText}
-                  onClick={() => {
-                    if (isKebabified) {
-                      onKebabModalChange(false);
-                    }
-                    handleCancel();
-                  }}
-                >
-                  {cancelJobText}
-                </Button>,
-                <Button
-                  id="cancel-job-return-button"
-                  key="cancel"
-                  variant="secondary"
-                  aria-label={i18n._(t`Return`)}
-                  onClick={() => {
-                    if (isKebabified) {
-                      onKebabModalChange(false);
-                    }
-                    setIsModalOpen(false);
-                  }}
-                >
-                  {i18n._(t`Return`)}
-                </Button>,
-              ]}
-            >
-              <div>
-                {i18n._(
-                  '{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}',
-                  {
-                    numJobsToCancel,
-                  }
-                )}
-              </div>
-              {jobsToCancel.map(job => (
-                <span key={job.id}>
-                  <strong>{job.name}</strong>
-                  <br />
-                </span>
-              ))}
-            </AlertModal>
-          )}
-        </>
+            </Button>
+          </div>
+        </Tooltip>
       )}
-    </Kebabified>
+      {isModalOpen && (
+        <AlertModal
+          variant="danger"
+          title={cancelJobText}
+          isOpen={isModalOpen}
+          onClose={toggleModal}
+          actions={[
+            <Button
+              id="cancel-job-confirm-button"
+              key="delete"
+              variant="danger"
+              aria-label={cancelJobText}
+              onClick={handleCancelJob}
+            >
+              {cancelJobText}
+            </Button>,
+            <Button
+              id="cancel-job-return-button"
+              key="cancel"
+              variant="secondary"
+              aria-label={i18n._(t`Return`)}
+              onClick={toggleModal}
+            >
+              {i18n._(t`Return`)}
+            </Button>,
+          ]}
+        >
+          <div>
+            {i18n._(
+              '{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}',
+              {
+                numJobsToCancel,
+              }
+            )}
+          </div>
+          {jobsToCancel.map(job => (
+            <span key={job.id}>
+              <strong>{job.name}</strong>
+              <br />
+            </span>
+          ))}
+        </AlertModal>
+      )}
+    </>
   );
 }
 
