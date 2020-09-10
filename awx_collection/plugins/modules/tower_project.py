@@ -104,7 +104,6 @@ options:
       description:
         - Name of organization for project.
       type: str
-      required: True
     state:
       description:
         - Desired state of the resource.
@@ -200,7 +199,7 @@ def main():
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
         timeout=dict(type='int', default=0, aliases=['job_timeout']),
         custom_virtualenv=dict(),
-        organization=dict(required=True),
+        organization=dict(),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
@@ -234,20 +233,21 @@ def main():
     wait = module.params.get('wait')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    org_id = module.resolve_name_to_id('organizations', organization)
-    if credential is not None:
-        credential = module.resolve_name_to_id('credentials', credential)
+    lookup_data = {}
+    org_id = None
+    if organization:
+        org_id = module.resolve_name_to_id('organizations', organization)
+        lookup_data['organization'] = org_id
 
     # Attempt to look up project based on the provided name and org ID
-    project = module.get_one('projects', name_or_id=name, **{
-        'data': {
-            'organization': org_id
-        }
-    })
+    project = module.get_one('projects', name_or_id=name, data=lookup_data)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(project)
+
+    if credential is not None:
+        credential = module.resolve_name_to_id('credentials', credential)
 
     # Attempt to look up associated field items the user specified.
     association_fields = {}

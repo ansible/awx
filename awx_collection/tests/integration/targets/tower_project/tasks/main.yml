@@ -93,7 +93,7 @@
 - name: Check module fails with correct msg when given non-existing org as param
   tower_project:
     name: "{{ project_name2 }}"
-    organization: Non Existing Org
+    organization: Non_Existing_Org
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
     scm_credential: "{{ cred_name }}"
@@ -102,8 +102,10 @@
 
 - assert:
     that:
-      - "result.msg == 'The organizations Non Existing Org was not found on the Tower server' or
-        result.msg == 'Failed to update project, organization not found: Non Existing Org'"
+      - "result is failed"
+      - "result is not changed"
+      - "'Non_Existing_Org' in result.msg"
+      - "result.total_results == 0"
 
 - name: Check module fails with correct msg when given non-existing credential as param
   tower_project:
@@ -111,14 +113,16 @@
     organization: "{{ org_name }}"
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
-    scm_credential: Non Existing Credential
+    scm_credential: Non_Existing_Credential
   register: result
   ignore_errors: true
 
 - assert:
     that:
-      - "result.msg =='The credentials Non Existing Credential was not found on the Tower server' or
-        result.msg =='Failed to update project, credential not found: Non Existing Credential'"
+      - "result is failed"
+      - "result is not changed"
+      - "'Non_Existing_Credential' in result.msg"
+      - "result.total_results == 0"
 
 - name: Create a git project without credentials without waiting
   tower_project:

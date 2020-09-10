@@ -51,8 +51,10 @@
 
 - assert:
     that:
-      - "result.msg =='Failed to update the group, inventory not found: The requested object could not be found.' or
-        result.msg =='The inventories test-non-existing-inventory was not found on the Tower server'"
+      - "result is failed"
+      - "result is not changed"
+      - "'test-non-existing-inventory' in result.msg"
+      - "result.total_results == 0"
 
 - name: add hosts
   tower_host:

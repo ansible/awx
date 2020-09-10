@@ -207,13 +207,16 @@
 - name: Check module fails with correct msg
   tower_workflow_job_template:
     name: "{{ wfjt_name }}"
-    organization: Non Existing Organization
+    organization: Non_Existing_Organization
   register: result
   ignore_errors: true
 
 - assert:
     that:
-      - "'The organizations Non Existing Organization was not found' in result.msg"
+      - "result is failed"
+      - "result is not changed"
+      - "'Non_Existing_Organization' in result.msg"
+      - "result.total_results == 0"
 
 - name: Delete the Job Template
   tower_job_template:

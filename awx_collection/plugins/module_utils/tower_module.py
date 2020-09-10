@@ -2,9 +2,9 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
-from ansible.module_utils.six import PY2, string_types
+from ansible.module_utils.six import string_types
 from ansible.module_utils.six.moves import StringIO
-from ansible.module_utils.six.moves.urllib.parse import urlparse
+from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
 from socket import gethostbyname
 import re
@@ -111,6 +111,23 @@ class TowerModule(AnsibleModule):
             gethostbyname(hostname)
         except Exception as e:
             self.fail_json(msg="Unable to resolve tower_host ({1}): {0}".format(hostname, e))
+
+    def build_url(self, endpoint, query_params=None):
+        # Make sure we start with /api/vX
+        if not endpoint.startswith("/"):
+            endpoint = "/{0}".format(endpoint)
+        if not endpoint.startswith("/api/"):
+            endpoint = "/api/v2{0}".format(endpoint)
+        if not endpoint.endswith('/') and '?' not in endpoint:
+            endpoint = "{0}/".format(endpoint)
+
+        # Update the URL path with the endpoint
+        url = self.url._replace(path=endpoint)
+
+        if query_params:
+            url = url._replace(query=urlencode(query_params))
+
+        return url
 
     def load_config_files(self):
         # Load configs like TowerCLI would have from least import to most
