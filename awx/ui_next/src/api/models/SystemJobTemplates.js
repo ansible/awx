@@ -15,6 +15,10 @@ class SystemJobTemplates extends Mixins {
 
     return this.http.get(path).then(({ data }) => data);
   }
+
+  launch(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/launch/`, data);
+  }
 }
 
 export default SystemJobTemplates;
