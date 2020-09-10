@@ -1,19 +1,21 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { useLocation } from 'react-router-dom';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import { SystemJobTemplatesAPI } from '../../../api';
-import { useConfig } from '../../../contexts/Config';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useRequest from '../../../util/useRequest';
+import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList from '../../../components/PaginatedDataList';
+import { useConfig } from '../../../contexts/Config';
+import { parseQueryString, getQSConfig } from '../../../util/qs';
+import useRequest from '../../../util/useRequest';
 
 import ManagementJobListItem from './ManagementJobListItem';
 
-const QS_CONFIG = getQSConfig('management_jobs', {
+const QS_CONFIG = getQSConfig('system_job_templates', {
   page: 1,
   page_size: 20,
 });
@@ -46,6 +48,7 @@ const loadManagementJobs = async search => {
 function ManagementJobList({ i18n }) {
   const { search } = useLocation();
   const { me } = useConfig();
+  const [launchError, setLaunchError] = useState(null);
 
   const {
     request,
@@ -85,15 +88,26 @@ function ManagementJobList({ i18n }) {
             )}
             renderItem={({ id, name, description }) => (
               <ManagementJobListItem
-                isSuperUser={me?.is_superuser}
+                key={id}
                 id={id}
                 name={name}
                 description={description}
+                isSuperUser={me?.is_superuser}
+                onLaunchError={setLaunchError}
               />
             )}
           />
         </Card>
       </PageSection>
+      <AlertModal
+        isOpen={Boolean(launchError)}
+        variant="error"
+        title={i18n._(t`Error!`)}
+        onClose={() => setLaunchError(null)}
+      >
+        {i18n._(t`Failed to launch job.`)}
+        <ErrorDetail error={launchError} />
+      </AlertModal>
     </>
   );
 }
