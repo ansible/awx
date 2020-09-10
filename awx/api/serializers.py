@@ -2695,6 +2695,7 @@ class CredentialSerializerCreate(CredentialSerializer):
             attrs['organization'] = attrs['team'].organization
 
         if (
+            'credential_type' in attrs and
             attrs['credential_type'].kind == 'galaxy' and
             list(owner_fields) != ['organization']
         ):
