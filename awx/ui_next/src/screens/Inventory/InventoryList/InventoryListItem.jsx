@@ -52,6 +52,14 @@ function InventoryListItem({
     await fetchInventories();
   }, [inventory.id, inventory.name, fetchInventories]);
 
+  const handleCopyStart = useCallback(() => {
+    setIsDisabled(true);
+  }, []);
+
+  const handleCopyFinish = useCallback(() => {
+    setIsDisabled(false);
+  }, []);
+
   const labelId = `check-action-${inventory.id}`;
 
   let syncStatus = 'disabled';
@@ -128,8 +136,8 @@ function InventoryListItem({
               <CopyButton
                 copyItem={copyInventory}
                 isDisabled={isDisabled}
-                onLoading={() => setIsDisabled(true)}
-                onDoneLoading={() => setIsDisabled(false)}
+                onCopyStart={handleCopyStart}
+                onCopyFinish={handleCopyFinish}
                 helperText={{
                   tooltip: i18n._(t`Copy Inventory`),
                   errorMessage: i18n._(t`Failed to copy inventory.`),

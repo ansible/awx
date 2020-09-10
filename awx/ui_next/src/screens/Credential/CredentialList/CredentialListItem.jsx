@@ -48,6 +48,14 @@ function CredentialListItem({
     await fetchCredentials();
   }, [credential.id, credential.name, fetchCredentials]);
 
+  const handleCopyStart = useCallback(() => {
+    setIsDisabled(true);
+  }, []);
+
+  const handleCopyFinish = useCallback(() => {
+    setIsDisabled(false);
+  }, []);
+
   return (
     <DataListItem
       key={credential.id}
@@ -95,8 +103,8 @@ function CredentialListItem({
           {credential.summary_fields.user_capabilities.copy && (
             <CopyButton
               isDisabled={isDisabled}
-              onLoading={() => setIsDisabled(true)}
-              onDoneLoading={() => setIsDisabled(false)}
+              onCopyStart={handleCopyStart}
+              onCopyFinish={handleCopyFinish}
               copyItem={copyCredential}
               helperText={{
                 tooltip: i18n._(t`Copy Credential`),
