@@ -1001,7 +1001,7 @@ LOGGING = {
             'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.analytics': {
-            'handlers': ['external_logger'],
+            'handlers': ['task_system', 'external_logger'],
             'level': 'INFO',
             'propagate': False
         },
