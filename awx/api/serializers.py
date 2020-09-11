@@ -1396,7 +1396,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     class Meta:
         model = Project
         fields = ('*', 'organization', 'scm_update_on_launch',
-                  'scm_update_cache_timeout', 'allow_override', 'custom_virtualenv',) + \
+                  'scm_update_cache_timeout', 'allow_override', 'custom_virtualenv', 'default_environment') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
 
     def get_related(self, obj):
@@ -1421,6 +1421,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail',
                                                kwargs={'pk': obj.organization.pk})
+        if obj.default_environment:
+            res['default_environment'] = self.reverse('api:execution_environment_detail',
+                                                      kwargs={'pk': obj.default_environment_id})
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = self.reverse('api:project_update_detail',
