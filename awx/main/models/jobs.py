@@ -1140,22 +1140,58 @@ class SystemJobOptions(BaseModel):
     Common fields for SystemJobTemplate and SystemJob.
     '''
 
-    SYSTEM_JOB_TYPE = [
-        ('cleanup_jobs', _('Remove jobs older than a certain number of days')),
-        ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
-        ('cleanup_sessions', _('Removes expired browser sessions from the database')),
-        ('cleanup_tokens', _('Removes expired OAuth 2 access tokens and refresh tokens'))
-    ]
-
     class Meta:
         abstract = True
 
+    SYSTEM_CLEANUP_JOBS = (
+        'cleanup_jobs',
+        _('Remove jobs older than a certain number of days')
+    )
+    SYSTEM_CLEANUP_ACTIVITY = (
+        'cleanup_activitystream',
+        _('Remove activity stream entries older than a certain number of days')
+    )
+    SYSTEM_CLEANUP_SESSIONS = (
+        'cleanup_sessions',
+        _('Removes expired browser sessions from the database')
+    )
+    SYSTEM_CLEANUP_TOKENS = (
+        'cleanup_tokens',
+        _('Removes expired OAuth 2 access tokens and refresh tokens')
+    )
+
+    SYSTEM_JOB_TYPES = (
+        SYSTEM_CLEANUP_JOBS,
+        SYSTEM_CLEANUP_ACTIVITY,
+        SYSTEM_CLEANUP_SESSIONS,
+        SYSTEM_CLEANUP_TOKENS,
+    )
+    CONFIGURABLE_RETENTION_TYPES = (
+        SYSTEM_CLEANUP_JOBS,
+        SYSTEM_CLEANUP_ACTIVITY,
+    )
+
     job_type = models.CharField(
         max_length=32,
-        choices=SYSTEM_JOB_TYPE,
+        choices=SYSTEM_JOB_TYPES,
         blank=True,
         default='',
     )
+    default_days = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        default=None,
+    )
+
+    @property
+    def has_configurable_retention(self):
+        return self.job_type in (name for (name, _) in SystemJobTemplate.CONFIGURABLE_RETENTION_TYPES)
+
+    def clean_default_days(self):
+        if not self.has_configurable_retention:
+            if self.default_days is not None:
+                raise ValidationError(_(f'Data retention isn\'t configurable for type {self.job_type}'))
+        return self.default_days
 
 
 class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
@@ -1219,7 +1255,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
             for key in unallowed_vars:
                 rejected[key] = data.pop(key)
 
-        if self.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+        if self.has_configurable_retention:
             if 'days' in data:
                 try:
                     if isinstance(data['days'], (bool, type(None))):

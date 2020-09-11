@@ -747,7 +747,10 @@ def workflow_job_factory(workflow_job_template, admin):
 
 @pytest.fixture
 def system_job_template():
-    sys_jt = SystemJobTemplate(name='test-system_job_template', job_type='cleanup_jobs')
+    sys_jt = SystemJobTemplate(
+        name='test-system_job_template',
+        job_type=SystemJobTemplate.SYSTEM_CLEANUP_JOBS[0]
+    )
     sys_jt.save()
     return sys_jt
 
