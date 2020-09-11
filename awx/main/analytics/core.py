@@ -105,11 +105,11 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
     
     if _valid_license() is False:
         logger.exception("Invalid License provided, or No License Provided")
-        return "Error: Invalid License provided, or No License Provided"
+        return None
 
     if collection_type != 'dry-run' and not settings.INSIGHTS_TRACKING_STATE:
         logger.error("Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
-        return
+        return None
 
     collector_list = []
     if module:
