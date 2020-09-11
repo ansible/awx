@@ -93,7 +93,7 @@ SkippedBottom.displayName = 'SkippedBottom';
 
 const StatusIcon = ({ status, ...props }) => {
   return (
-    <div {...props}>
+    <div {...props} data-job-status={status}>
       {status === 'running' && <RunningJob />}
       {(status === 'new' ||
         status === 'pending' ||
