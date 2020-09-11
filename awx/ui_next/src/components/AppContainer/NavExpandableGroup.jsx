@@ -7,7 +7,7 @@ class NavExpandableGroup extends Component {
   constructor(props) {
     super(props);
     const { routes } = this.props;
-    this.state = { isExpanded: false };
+    this.state = { isExpanded: true };
 
     // Extract a list of paths from the route params and store them for later. This creates
     // an array of url paths associated with any NavItem component rendered by this component.
