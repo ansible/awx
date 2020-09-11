@@ -55,6 +55,7 @@ function CredentialPluginInput(props) {
             )}
           >
             <Button
+              id={`credential-${fieldOptions.id}-external-button`}
               variant={ButtonVariant.control}
               aria-label={i18n._(
                 t`Populate field from an external secret management system`
