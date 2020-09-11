@@ -1,3 +1,4 @@
+from collections import namedtuple
 from unittest import mock
 import pytest
 import yaml
@@ -6,7 +7,7 @@ import json
 from awx.api.serializers import JobLaunchSerializer
 from awx.main.models.credential import Credential
 from awx.main.models.inventory import Inventory, Host
-from awx.main.models.jobs import Job, JobTemplate, UnifiedJobTemplate
+from awx.main.models.jobs import Job, JobTemplate, UnifiedJobTemplate, SystemJob
 
 from awx.api.versioning import reverse
 
@@ -696,3 +697,28 @@ def test_callback_extra_var_takes_priority_over_host_name(mocker, get, job_templ
         r = get(reverse('api:job_template_callback', kwargs={'pk': job_template.pk}),
                 user=admin_user, expect=200)
         assert not r.data['matching_hosts']
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('default_days,launch_vars,expected_vars', [
+    (9000, {}, {'days': 9000}),
+    (None, {}, {}),
+    (9000, {'days': 9001}, {'days': 9001}),
+    (None, {'days': 9001}, {'days': 9001}),
+])
+def test_system_job_launch_default_retention(system_job_template, admin_user, post,
+                                             default_days, launch_vars, expected_vars):
+    system_job_template.default_days = default_days
+    system_job_template.save()
+    launch_url = reverse(
+        'api:system_job_template_launch',
+        kwargs={'pk': system_job_template.pk}
+    )
+    mock_stdout = namedtuple('MockHandle', ['read'])(lambda: '')
+    with mock.patch.object(SystemJob, 'result_stdout_raw_handle', return_value=mock_stdout):
+        with mock.patch.object(SystemJob, 'signal_start') as signal_start:
+            res = post(launch_url, {'extra_vars': launch_vars}, admin_user, expect=201)
+            signal_start.assert_called()
+
+            res_vars = SystemJob.objects.get(id=res.data['id']).extra_vars
+            assert json.loads(res_vars) == expected_vars
