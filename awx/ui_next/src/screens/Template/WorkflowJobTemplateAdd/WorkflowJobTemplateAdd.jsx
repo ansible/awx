@@ -30,7 +30,7 @@ function WorkflowJobTemplateAdd() {
         data: { id },
       } = await WorkflowJobTemplatesAPI.create(templatePayload);
       await Promise.all(await submitLabels(id, labels, organizationId));
-      history.push(`/templates/workflow_job_template/${id}/details`);
+      history.push(`/templates/workflow_job_template/${id}/visualizer`);
     } catch (err) {
       setFormSubmitError(err);
     }

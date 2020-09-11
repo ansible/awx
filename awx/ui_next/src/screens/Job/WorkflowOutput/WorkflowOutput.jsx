@@ -16,6 +16,7 @@ import workflowReducer, {
 import { WorkflowJobsAPI } from '../../../api';
 import WorkflowOutputGraph from './WorkflowOutputGraph';
 import WorkflowOutputToolbar from './WorkflowOutputToolbar';
+import useWsWorkflowOutput from './useWsWorkflowOutput';
 
 const CardBody = styled(PFCardBody)`
   display: flex;
@@ -78,6 +79,12 @@ function WorkflowOutput({ job, i18n }) {
       dispatch({ type: 'SET_NODE_POSITIONS', value: newNodePositions });
     }
   }, [job.id, links, nodes]);
+
+  const updatedNodes = useWsWorkflowOutput(job.id, nodes);
+
+  useEffect(() => {
+    dispatch({ type: 'SET_NODES', value: updatedNodes });
+  }, [updatedNodes]);
 
   if (isLoading) {
     return (

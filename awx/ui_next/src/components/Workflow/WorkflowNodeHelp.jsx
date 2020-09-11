@@ -33,10 +33,11 @@ const StyledExclamationTriangleIcon = styled(ExclamationTriangleIcon)`
 
 function WorkflowNodeHelp({ node, i18n }) {
   let nodeType;
-  if (node.unifiedJobTemplate || node.job) {
+  const job = node?.originalNodeObject?.summary_fields?.job;
+  if (node.unifiedJobTemplate || job) {
     const type = node.unifiedJobTemplate
       ? node.unifiedJobTemplate.unified_job_type || node.unifiedJobTemplate.type
-      : node.job.type;
+      : job.type;
     switch (type) {
       case 'job_template':
       case 'job':
@@ -64,8 +65,8 @@ function WorkflowNodeHelp({ node, i18n }) {
   }
 
   let jobStatus;
-  if (node.job) {
-    switch (node.job.status) {
+  if (job) {
+    switch (job.status) {
       case 'new':
         jobStatus = i18n._(t`New`);
         break;
@@ -112,23 +113,22 @@ function WorkflowNodeHelp({ node, i18n }) {
 
   return (
     <>
-      {!node.unifiedJobTemplate &&
-        (!node.job || node.job.type !== 'workflow_approval') && (
-          <>
-            <ResourceDeleted job={node.job}>
-              <StyledExclamationTriangleIcon />
-              <Trans>
-                The resource associated with this node has been deleted.
-              </Trans>
-            </ResourceDeleted>
-          </>
-        )}
-      {node.job && (
+      {!node.unifiedJobTemplate && (!job || job.type !== 'workflow_approval') && (
+        <>
+          <ResourceDeleted job={job}>
+            <StyledExclamationTriangleIcon />
+            <Trans>
+              The resource associated with this node has been deleted.
+            </Trans>
+          </ResourceDeleted>
+        </>
+      )}
+      {job && (
         <GridDL>
           <dt>
             <b>{i18n._(t`Name`)}</b>
           </dt>
-          <dd id="workflow-node-help-name">{node.job.name}</dd>
+          <dd id="workflow-node-help-name">{job.name}</dd>
           <dt>
             <b>{i18n._(t`Type`)}</b>
           </dt>
@@ -137,19 +137,19 @@ function WorkflowNodeHelp({ node, i18n }) {
             <b>{i18n._(t`Job Status`)}</b>
           </dt>
           <dd id="workflow-node-help-status">{jobStatus}</dd>
-          {typeof node.job.elapsed === 'number' && (
+          {typeof job.elapsed === 'number' && (
             <>
               <dt>
                 <b>{i18n._(t`Elapsed`)}</b>
               </dt>
               <dd id="workflow-node-help-elapsed">
-                {secondsToHHMMSS(node.job.elapsed)}
+                {secondsToHHMMSS(job.elapsed)}
               </dd>
             </>
           )}
         </GridDL>
       )}
-      {node.unifiedJobTemplate && !node.job && (
+      {node.unifiedJobTemplate && !job && (
         <GridDL>
           <dt>
             <b>{i18n._(t`Name`)}</b>
@@ -161,7 +161,7 @@ function WorkflowNodeHelp({ node, i18n }) {
           <dd id="workflow-node-help-type">{nodeType}</dd>
         </GridDL>
       )}
-      {node.job && node.job.type !== 'workflow_approval' && (
+      {job && job.type !== 'workflow_approval' && (
         <p css="margin-top: 10px">{i18n._(t`Click to view job details`)}</p>
       )}
     </>
