@@ -52,7 +52,8 @@ class Command(BaseCommand):
             return
         tgzfiles = gather(collection_type='manual' if not opt_dry_run else 'dry-run', since = since, until = until)
         if tgzfiles:
-            self.logger.debug(tgzfiles)
+            for tgz in tgzfiles:
+                self.logger.debug(tgz)
         else:
             self.logger.error('No analytics collected')
         if opt_ship:
