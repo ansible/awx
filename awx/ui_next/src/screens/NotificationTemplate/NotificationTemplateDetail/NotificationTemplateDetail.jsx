@@ -435,7 +435,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
         <CodeDetail
           label={i18n._(t`Workflow approved message`)}
           value={
-            messages.workflow_approval.approved.message ||
+            messages.workflow_approval?.approved?.message ||
             defaults.workflow_approval.approved.message
           }
           mode="jinja2"
@@ -447,7 +447,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
         <CodeDetail
           label={i18n._(t`Workflow approved message body`)}
           value={
-            messages.workflow_approval.approved.body ||
+            messages.workflow_approval?.approved?.body ||
             defaults.workflow_approval.approved.body
           }
           mode="jinja2"
@@ -459,7 +459,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
         <CodeDetail
           label={i18n._(t`Workflow denied message`)}
           value={
-            messages.workflow_approval.denied.message ||
+            messages.workflow_approval?.denied?.message ||
             defaults.workflow_approval.denied.message
           }
           mode="jinja2"
@@ -471,7 +471,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
         <CodeDetail
           label={i18n._(t`Workflow denied message body`)}
           value={
-            messages.workflow_approval.denied.body ||
+            messages.workflow_approval?.denied?.body ||
             defaults.workflow_approval.denied.body
           }
           mode="jinja2"
@@ -483,7 +483,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
         <CodeDetail
           label={i18n._(t`Workflow pending message`)}
           value={
-            messages.workflow_approval.running.message ||
+            messages.workflow_approval?.running?.message ||
             defaults.workflow_approval.running.message
           }
           mode="jinja2"
@@ -495,7 +495,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
         <CodeDetail
           label={i18n._(t`Workflow pending message body`)}
           value={
-            messages.workflow_approval.running.body ||
+            messages.workflow_approval?.running?.body ||
             defaults.workflow_approval.running.body
           }
           mode="jinja2"
@@ -507,7 +507,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
         <CodeDetail
           label={i18n._(t`Workflow timed out message`)}
           value={
-            messages.workflow_approval.timed_out.message ||
+            messages.workflow_approval?.timed_out?.message ||
             defaults.workflow_approval.timed_out.message
           }
           mode="jinja2"
@@ -519,7 +519,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
         <CodeDetail
           label={i18n._(t`Workflow timed out message body`)}
           value={
-            messages.workflow_approval.timed_out.body ||
+            messages.workflow_approval?.timed_out?.body ||
             defaults.workflow_approval.timed_out.body
           }
           mode="jinja2"
