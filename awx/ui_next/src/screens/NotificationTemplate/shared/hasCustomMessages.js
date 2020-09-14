@@ -8,19 +8,19 @@ export default function hasCustomMessages(messages, defaults) {
     isCustomized(messages.success, defaults.success) ||
     isCustomized(messages.error, defaults.error) ||
     isCustomized(
-      messages.workflow_approval.approved,
+      messages.workflow_approval?.approved,
       defaults.workflow_approval.approved
     ) ||
     isCustomized(
-      messages.workflow_approval.denied,
+      messages.workflow_approval?.denied,
       defaults.workflow_approval.denied
     ) ||
     isCustomized(
-      messages.workflow_approval.running,
+      messages.workflow_approval?.running,
       defaults.workflow_approval.running
     ) ||
     isCustomized(
-      messages.workflow_approval.timed_out,
+      messages.workflow_approval?.timed_out,
       defaults.workflow_approval.timed_out
     )
   );
