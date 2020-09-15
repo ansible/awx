@@ -2,7 +2,6 @@ import os
 import yaml
 import glob
 import logging
-from py.path import local
 
 
 log = logging.getLogger(__name__)
@@ -82,6 +81,7 @@ def load_file(filename):
       - "{random_uuid}"
       random_thing: "{random_string:24}"
     """
+    from py.path import local
     if filename is None:
         this_file = os.path.abspath(__file__)
         path = local(this_file).new(basename='../data.yaml')
