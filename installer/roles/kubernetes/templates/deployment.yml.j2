@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: awx
+  name: {{ kubernetes_serviceaccount_name }}
   namespace: {{ kubernetes_namespace }}
 {% if kubernetes_service_account_annotations is defined %}
   annotations:
@@ -75,7 +75,7 @@ roleRef:
   name: {{ awx_psp_name }}-role
 subjects:
 - kind: ServiceAccount
-  name: awx
+  name: {{ kubernetes_serviceaccount_name }}
   namespace: {{ kubernetes_namespace }}
 {% endif %}
 
@@ -103,7 +103,7 @@ spec:
         service: django
         app: {{ kubernetes_deployment_name }}
     spec:
-      serviceAccountName: awx
+      serviceAccountName: {{ kubernetes_serviceaccount_name }}
       securityContext:
         fsGroup: 0
       terminationGracePeriodSeconds: 10

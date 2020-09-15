@@ -40,6 +40,7 @@ openshift_pg_emptydir: false
 openshift_pg_pvc_name: postgresql
 
 kubernetes_deployment_name: awx
+kubernetes_serviceaccount_name: awx
 
 kubernetes_deployment_replica_size: 1
 
