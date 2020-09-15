@@ -14,7 +14,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon, BellIcon } from '@patternfly/react-icons';
-import { NotificationTemplatesAPI } from '../../../api';
+import { NotificationTemplatesAPI, NotificationsAPI } from '../../../api';
 import DataListCell from '../../../components/DataListCell';
 import StatusLabel from '../../../components/StatusLabel';
 import useRequest from '../../../util/useRequest';
@@ -26,6 +26,9 @@ const DataListAction = styled(_DataListAction)`
   grid-gap: 16px;
   grid-template-columns: 40px 40px;
 `;
+
+const NUM_RETRIES = 25;
+const RETRY_TIMEOUT = 5000;
 
 function NotificationTemplateListItem({
   template,
@@ -45,9 +48,29 @@ function NotificationTemplateListItem({
   }, [latestStatus]);
 
   const { request: sendTestNotification, isLoading, error } = useRequest(
-    useCallback(() => {
-      NotificationTemplatesAPI.test(template.id);
+    useCallback(async () => {
+      const request = NotificationTemplatesAPI.test(template.id);
       setStatus('running');
+      let retries = NUM_RETRIES;
+      const {
+        data: { notification: notificationId },
+      } = await request;
+
+      async function pollForStatusChange() {
+        const { data: notification } = await NotificationsAPI.readDetail(
+          notificationId
+        );
+        if (notification.status !== 'pending') {
+          setStatus(notification.status);
+          return;
+        }
+        retries--;
+        if (retries > 0) {
+          setTimeout(pollForStatusChange, RETRY_TIMEOUT);
+        }
+      }
+
+      setTimeout(pollForStatusChange, RETRY_TIMEOUT);
     }, [template.id])
   );
 
