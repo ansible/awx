@@ -3,7 +3,7 @@ import awxkit.exceptions as exc
 from awxkit.api.pages import base, WorkflowJobTemplate, UnifiedJobTemplate, JobTemplate
 from awxkit.api.mixins import HasCreate, DSAdapter
 from awxkit.api.resources import resources
-from awxkit.utils import update_payload, PseudoNamespace, suppress, random_title
+from awxkit.utils import update_payload, PseudoNamespace, suppress, random_title, poll_until
 from . import page
 
 
@@ -118,6 +118,7 @@ class WorkflowJobTemplateNode(HasCreate, base.Base):
         return self.get()
 
     def get_job_node(self, workflow_job):
+        poll_until(lambda: workflow_job.get_related('workflow_nodes', identifier=self.identifier).count > 0, timeout=60)
         candidates = workflow_job.get_related('workflow_nodes', identifier=self.identifier)
         return candidates.results.pop()
 
