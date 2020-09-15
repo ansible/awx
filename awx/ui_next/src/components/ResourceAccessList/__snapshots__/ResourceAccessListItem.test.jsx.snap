@@ -407,12 +407,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   "componentStyle": ComponentStyle {
                                     "componentId": "sc-bwzfXH",
                                     "isStatic": false,
-                                    "lastClassName": "kVCDmm",
+                                    "lastClassName": "gAzXep",
                                     "rules": Array [
                                       "
   display: grid;
   grid-gap: 20px;
-  align-items: center;
+  align-items: start;
   ",
                                       [Function],
                                       "
@@ -433,15 +433,15 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                               stacked={true}
                             >
                               <DetailList
-                                className="sc-bwzfXH kVCDmm"
+                                className="sc-bwzfXH gAzXep"
                                 stacked={true}
                               >
                                 <TextList
-                                  className="sc-bwzfXH kVCDmm"
+                                  className="sc-bwzfXH gAzXep"
                                   component="dl"
                                 >
                                   <dl
-                                    className="sc-bwzfXH kVCDmm"
+                                    className="sc-bwzfXH gAzXep"
                                     data-pf-content={true}
                                   >
                                     <Detail
@@ -630,12 +630,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   "componentStyle": ComponentStyle {
                                     "componentId": "sc-bwzfXH",
                                     "isStatic": false,
-                                    "lastClassName": "kVCDmm",
+                                    "lastClassName": "gAzXep",
                                     "rules": Array [
                                       "
   display: grid;
   grid-gap: 20px;
-  align-items: center;
+  align-items: start;
   ",
                                       [Function],
                                       "
@@ -656,15 +656,15 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                               stacked={true}
                             >
                               <DetailList
-                                className="sc-bwzfXH kVCDmm"
+                                className="sc-bwzfXH gAzXep"
                                 stacked={true}
                               >
                                 <TextList
-                                  className="sc-bwzfXH kVCDmm"
+                                  className="sc-bwzfXH gAzXep"
                                   component="dl"
                                 >
                                   <dl
-                                    className="sc-bwzfXH kVCDmm"
+                                    className="sc-bwzfXH gAzXep"
                                     data-pf-content={true}
                                   >
                                     <Detail
