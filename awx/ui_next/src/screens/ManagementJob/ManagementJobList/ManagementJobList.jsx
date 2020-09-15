@@ -86,13 +86,19 @@ function ManagementJobList({ i18n }) {
                 qsConfig={QS_CONFIG}
               />
             )}
-            renderItem={({ id, name, description }) => (
+            renderItem={({
+              id,
+              name,
+              description,
+              has_configurable_retention,
+            }) => (
               <ManagementJobListItem
                 key={id}
                 id={id}
                 name={name}
                 description={description}
                 isSuperUser={me?.is_superuser}
+                isConfigurable={has_configurable_retention}
                 onLaunchError={setLaunchError}
               />
             )}

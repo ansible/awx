@@ -26,6 +26,7 @@ const DataListAction = styled(_DataListAction)`
 function ManagementJobListItem({
   i18n,
   onLaunchError,
+  isConfigurable,
   isSuperUser,
   id,
   name,
@@ -91,17 +92,22 @@ function ManagementJobListItem({
                   <RocketIcon />
                 </Button>
               </Tooltip>
-              <Tooltip content={i18n._(t`Edit management job`)} position="top">
-                <Button
-                  aria-label={i18n._(t`Edit management job`)}
-                  variant="plain"
-                  component={Link}
-                  to={editUrl}
-                  isDisabled={isLaunchLoading}
+              {isConfigurable ? (
+                <Tooltip
+                  content={i18n._(t`Edit management job`)}
+                  position="top"
                 >
-                  <PencilAltIcon />
-                </Button>
-              </Tooltip>
+                  <Button
+                    aria-label={i18n._(t`Edit management job`)}
+                    variant="plain"
+                    component={Link}
+                    to={editUrl}
+                    isDisabled={isLaunchLoading}
+                  >
+                    <PencilAltIcon />
+                  </Button>
+                </Tooltip>
+              ) : null}
             </>
           ) : null}
         </DataListAction>
