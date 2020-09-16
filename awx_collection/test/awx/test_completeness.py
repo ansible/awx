@@ -30,7 +30,7 @@ no_endpoint_for_module = [
 
 # Global module parameters we can ignore
 ignore_parameters = [
-    'state', 'new_name',
+    'state', 'new_name', 'update_secrets'
 ]
 
 # Some modules take additional parameters that do not appear in the API

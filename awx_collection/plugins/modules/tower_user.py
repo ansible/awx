@@ -55,6 +55,12 @@ options:
       description:
         - Write-only field used to change the password.
       type: str
+    update_secrets:
+      description:
+        - C(true) will always change password if user specifies password, even if API gives $encrypted$ for password.
+        - C(false) will only set the password if other values change too.
+      type: bool
+      default: true
     state:
       description:
         - Desired state of the resource.
@@ -115,6 +121,7 @@ def main():
         is_superuser=dict(type='bool', default=False, aliases=['superuser']),
         is_system_auditor=dict(type='bool', default=False, aliases=['auditor']),
         password=dict(no_log=True),
+        update_secrets=dict(type='bool', default=True, no_log=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
