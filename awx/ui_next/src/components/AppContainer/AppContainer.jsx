@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory, useLocation, withRouter } from 'react-router-dom';
 import {
   Nav,
@@ -40,15 +40,16 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
   const [config, setConfig] = useState({});
   const [configError, setConfigError] = useState(null);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   const handleAboutModalOpen = () => setIsAboutModalOpen(true);
   const handleAboutModalClose = () => setIsAboutModalOpen(false);
   const handleConfigErrorClose = () => setConfigError(null);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await RootAPI.logout();
     history.replace('/login');
-  };
+  }, [history]);
 
   useEffect(() => {
     const loadConfig = async () => {
@@ -63,12 +64,21 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
           },
         ] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
         setConfig({ ...data, me });
+        setIsReady(true);
       } catch (err) {
+        if (err.response.status === 401) {
+          handleLogout();
+          return;
+        }
         setConfigError(err);
       }
     };
     loadConfig();
-  }, [config, pathname]);
+  }, [config, pathname, handleLogout]);
+
+  if (!isReady) {
+    return null;
+  }
 
   const header = (
     <PageHeader
