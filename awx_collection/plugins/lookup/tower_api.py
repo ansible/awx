@@ -72,6 +72,10 @@ EXAMPLES = """
   set_fact:
     tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui') }}"
 
+- name: Load the UI settings specifying the connection info
+  set_fact:
+    tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui' host='tower.example.com', username='admin', password=my_pass_var, verify_ssl=False) }}"
+
 - name: Report the usernames of all users with admin privs
   debug:
     msg: "Admin users: {{ query('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
