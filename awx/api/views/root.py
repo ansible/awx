@@ -1,10 +1,13 @@
 # Copyright (c) 2018 Ansible, Inc.
 # All Rights Reserved.
 
+import json
 import logging
 import operator
-import json
+import os
 from collections import OrderedDict
+import subprocess
+import re
 
 from django.conf import settings
 from django.utils.encoding import smart_text
@@ -232,6 +235,7 @@ class ApiV2AttachView(APIView):
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
     def post(self, request):
+        
         from awx.main.utils.common import get_licenser
         data = request.data.copy()
         pool_id = data.get('pool_id', None)
@@ -241,13 +245,52 @@ class ApiV2AttachView(APIView):
             try:
                 # TODO: Replace this with logic that uses the user, pw to get the entitlement cert for that pool_id
                 
+                # # Retrieve consumer_uuid from consumer cert
+                # consumer_pem = '/etc/pki/consumer/cert.pem'
+                # if os.path.exists(consumer_pem):
+                #     cmd = ["openssl", "x509", "-noout", "-subject", "-in", consumer_pem]
+                #     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                #     stdout, stderr = proc.communicate()
+                #     output = re.split('CN = ', smart_text(stdout))
+                #     consumer_uuid = output[-1]
+                
+                
+                # import sdb; sdb.set_trace()
+                
+                # Add subman to the python path in order to import it
+                # Isolate this by running it in a thread or fork, look at other places where we thread in awx
+                #   - maybe put this in an awx-manage command?
+                import sys
+                sys.path.append('/usr/lib64/python3.6/site-packages')
+                sys.path.append('/usr/lib/python3.6/site-packages')
+
+
+                # Create connection
+                from rhsm.connection import UEPConnection
+                uep = UEPConnection(username=user, password=pw, insecure=True)
+                
+                
+                # Attach Subscription using pool_id chosen by user
+                consumer = uep.registerConsumer(name="test_tower_consumer", type="system") # TODO: replace name with rand hash?
+                
+                # Save consumer_uuid in db
+                
+                
                 # Attempt to get entitlement cert from RHSM 
+                certs = uep.getCertificates(consumer_uuid=consumer['uuid'], serials=[])
+                
+                # Get just the cert with the pool_id you want
                 
                 # Save the cert as a setting
+                # - create setting first
+                
                 
                 # Validate and apply entitlement cert
                 # Call get_licenser().validate()
                 
+                
+                
+                # Placeholder
                 return Response({pool_id})
                 # with set_environ(**settings.AWX_TASK_ENV):  # TODO: better understand what is going on here
                 #     validated = get_licenser().validate_rh(user, pw)
@@ -261,7 +304,7 @@ class ApiV2AttachView(APIView):
 
                     # Attempt to get entitlement cert from RHSM 
 
-            except Exception as exc:
+            except Exception as e:
                 msg = _("changeme")
                 # msg = _("Invalid License")
                 # if (
@@ -278,7 +321,7 @@ class ApiV2AttachView(APIView):
                 # else:
                 #     logger.exception(smart_text(u"Invalid license submitted."),
                 #                      extra=dict(actor=request.user.username))
-                return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": e}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(validated)
 
