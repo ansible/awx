@@ -391,3 +391,13 @@ export const NotificationTemplate = shape({
     organization: Organization,
   }),
 });
+
+export const ExecutionEnvironment = shape({
+  id: number.isRequired,
+  organization: number,
+  credential: number,
+  image: string.isRequired,
+  url: string,
+  summary_fields: shape({}),
+  description: string,
+});
