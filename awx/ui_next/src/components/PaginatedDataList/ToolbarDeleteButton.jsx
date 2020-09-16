@@ -62,7 +62,7 @@ const ItemToDelete = shape({
 });
 
 function cannotDelete(item) {
-  return !item.summary_fields.user_capabilities.delete;
+  return !item.summary_fields?.user_capabilities?.delete;
 }
 
 function ToolbarDeleteButton({
