@@ -4,6 +4,7 @@ import Config from './models/Config';
 import CredentialInputSources from './models/CredentialInputSources';
 import CredentialTypes from './models/CredentialTypes';
 import Credentials from './models/Credentials';
+import ExecutionEnvironments from './models/ExecutionEnvironments';
 import Groups from './models/Groups';
 import Hosts from './models/Hosts';
 import InstanceGroups from './models/InstanceGroups';
@@ -41,6 +42,7 @@ const ConfigAPI = new Config();
 const CredentialInputSourcesAPI = new CredentialInputSources();
 const CredentialTypesAPI = new CredentialTypes();
 const CredentialsAPI = new Credentials();
+const ExecutionEnvironmentsAPI = new ExecutionEnvironments();
 const GroupsAPI = new Groups();
 const HostsAPI = new Hosts();
 const InstanceGroupsAPI = new InstanceGroups();
@@ -79,6 +81,7 @@ export {
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
   CredentialsAPI,
+  ExecutionEnvironmentsAPI,
   GroupsAPI,
   HostsAPI,
   InstanceGroupsAPI,
