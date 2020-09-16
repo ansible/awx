@@ -101,18 +101,17 @@ class JobTemplate(
 
         if kwargs.get('project'):
             payload.update(project=kwargs.get('project').id, playbook=playbook)
-        if kwargs.get('inventory'):
-            payload.update(inventory=kwargs.get('inventory').id)
-        if kwargs.get('credential'):
-            payload.update(credential=kwargs.get('credential').id)
-        if kwargs.get('webhook_credential'):
-            webhook_cred = kwargs.get('webhook_credential')
-            if isinstance(webhook_cred, int):
-                payload.update(webhook_credential=int(webhook_cred))
-            elif hasattr(webhook_cred, 'id'):
-                payload.update(webhook_credential=webhook_cred.id)
+
+        for fk_field in ('inventory', 'credential', 'webhook_credential', 'execution_environment'):
+            rel_obj = kwargs.get(fk_field)
+            if rel_obj is None:
+                continue
+            elif isinstance(rel_obj, int):
+                payload.update(**{fk_field: int(rel_obj)})
+            elif hasattr(rel_obj, 'id'):
+                payload.update(**{fk_field: rel_obj.id})
             else:
-                raise AttributeError("Webhook credential must either be integer of pkid or Credential object")
+                raise AttributeError(f'Related field {fk_field} must be either integer of pkid or object')
 
         return payload
 
