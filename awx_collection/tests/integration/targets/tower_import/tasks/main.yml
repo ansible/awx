@@ -25,7 +25,7 @@
                 notification_templates_error: []
                 notification_templates_approvals: []
               natural_key:
-                name: "Default"
+                name: "{{ org_name1 }}"
                 type: "organization"
       register: import_output
 
@@ -48,7 +48,7 @@
                 notification_templates_error: []
                 notification_templates_approvals: []
               natural_key:
-                name: "Default"
+                name: "{{ org_name1 }}"
                 type: "organization"
       register: import_output
       ignore_errors: true
@@ -76,7 +76,7 @@
                                 "notification_templates_approvals": []
                            },
                            "natural_key": {
-                                "name": "Default",
+                                "name": "{{ org_name2 }}",
                                 "type": "organization"
                            }
                       }
