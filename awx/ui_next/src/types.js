@@ -407,3 +407,13 @@ export const WorkflowApproval = shape({
   approval_expiration: string,
   timed_out: bool,
 });
+
+export const ExecutionEnvironment = shape({
+  id: number.isRequired,
+  organization: number,
+  credential: number,
+  image: string.isRequired,
+  url: string,
+  summary_fields: shape({}),
+  description: string,
+});
