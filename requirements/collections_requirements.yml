@@ -1,8 +1,7 @@
 ---
 collections:
   - name: awx.awx
-  - name: https://github.com/ansible-collections/azure.git  # spec points to requirements-azure.txt
-    type: git  # PR 220 merged
+  - name: azure.azcollection  # PR 220 is in 1.1.0
   - name: amazon.aws  # PR 125 is in 1.1.0
   - name: theforeman.foreman  # has requirements.txt (which -r to another file)
   - name: google.cloud  # has requirements.txt, mainly for google-auth
