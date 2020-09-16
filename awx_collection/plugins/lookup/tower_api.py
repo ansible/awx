@@ -131,6 +131,8 @@ class LookupModule(LookupBase):
         if len(terms) != 1:
             raise AnsibleError('You must pass exactly one endpoint to query')
 
+        self.set_options(direct=kwargs)
+
         # Defer processing of params to logic shared with the modules
         module_params = {}
         for plugin_param, module_param in TowerAPIModule.short_params.items():
@@ -143,8 +145,6 @@ class LookupModule(LookupBase):
             argument_spec={}, direct_params=module_params,
             error_callback=self.handle_error, warn_callback=self.warn_callback
         )
-
-        self.set_options(direct=kwargs)
 
         response = module.get_endpoint(terms[0], data=self.get_option('query_params', {}))
 

@@ -32,6 +32,16 @@
   register: user_creation_results
 
 - block:
+    - name: Specify the connection params
+      debug:
+        msg: "{{ query(plugin_name, 'ping', host='DNE://junk.com', username='john', password='not_legit', verify_ssl=True) }}"
+      register: results
+      ignore_errors: True
+
+    - assert:
+        that:
+          - "'DNE' in results.msg"
+
     - name: Create our hosts
       tower_host:
         name: "{{ item }}"
