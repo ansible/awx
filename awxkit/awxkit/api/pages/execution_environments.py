@@ -1,11 +1,12 @@
 import logging
 
-from awxkit.api.mixins import HasCreate
+from awxkit.api.mixins import DSAdapter, HasCreate
 from awxkit.api.pages import (
     Credential,
     Organization,
 )
 from awxkit.api.resources import resources
+from awxkit.utils import random_title, PseudoNamespace
 
 from . import base
 from . import page
@@ -18,6 +19,29 @@ class ExecutionEnvironment(HasCreate, base.Base):
 
     dependencies = [Organization, Credential]
     NATURAL_KEY = ('organization', 'image')
+
+    # fields are image, organization, managed_by_tower, credential
+    def create(self, image='quay.io/ansible/ansible-runner:devel', credential=None, **kwargs):
+        # we do not want to make a credential by default
+        payload = self.create_payload(image=image, credential=credential, **kwargs)
+        ret = self.update_identity(ExecutionEnvironments(self.connection).post(payload))
+        return ret
+
+    def create_payload(self, organization=Organization, **kwargs):
+        self.create_and_update_dependencies(organization)
+        payload = self.payload(organization=self.ds.organization, **kwargs)
+        payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
+        return payload
+
+    def payload(self, image=None, organization=None, credential=None, **kwargs):
+        payload = PseudoNamespace(
+            image=image or random_title(10),
+            organization=organization.id if organization else None,
+            credential=credential.id if credential else None,
+            **kwargs
+        )
+
+        return payload
 
 
 page.register_page([resources.execution_environment,
