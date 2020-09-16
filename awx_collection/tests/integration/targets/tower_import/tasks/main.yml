@@ -33,7 +33,7 @@
         that:
           - import_output is changed
 
-    - name: "Import something again (awxkit is not idempotent, this tests a failure)"
+    - name: "Import the same thing again"
       tower_import:
         assets:
           organizations:
@@ -55,8 +55,8 @@
 
     - assert:
         that:
-          - import_output is failed
-          - "'Organization with this Name already exists' in import_output.msg"
+          - import_output is not failed
+          # - import_output is not changed  # FIXME: module not idempotent
 
     - name: "Write out a json file"
       copy:
