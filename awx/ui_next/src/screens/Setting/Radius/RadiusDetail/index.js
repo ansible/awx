@@ -1,1 +1,1 @@
-export { default } from './RadiusDetail';
+export { default } from './RADIUSDetail';

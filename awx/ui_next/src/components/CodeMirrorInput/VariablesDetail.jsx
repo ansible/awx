@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { useState, useEffect } from 'react';
-import { node, number, oneOfType, shape, string } from 'prop-types';
+import { node, number, oneOfType, shape, string, arrayOf } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '../DetailList';
 import MultiButtonToggle from '../MultiButtonToggle';
@@ -109,7 +109,7 @@ function VariablesDetail({ value, label, rows, fullHeight }) {
   );
 }
 VariablesDetail.propTypes = {
-  value: oneOfType([shape({}), string]).isRequired,
+  value: oneOfType([shape({}), arrayOf(string), string]).isRequired,
   label: node.isRequired,
   rows: number,
 };

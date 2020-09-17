@@ -1,16 +1,16 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
-import RadiusEdit from './RadiusEdit';
+import RADIUSEdit from './RADIUSEdit';
 
-describe('<RadiusEdit />', () => {
+describe('<RADIUSEdit />', () => {
   let wrapper;
   beforeEach(() => {
-    wrapper = mountWithContexts(<RadiusEdit />);
+    wrapper = mountWithContexts(<RADIUSEdit />);
   });
   afterEach(() => {
     wrapper.unmount();
   });
   test('initially renders without crashing', () => {
-    expect(wrapper.find('RadiusEdit').length).toBe(1);
+    expect(wrapper.find('RADIUSEdit').length).toBe(1);
   });
 });

@@ -1,25 +1,31 @@
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Link, Redirect, Route, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
-import RadiusDetail from './RadiusDetail';
-import RadiusEdit from './RadiusEdit';
+import ContentError from '../../../components/ContentError';
+import RADIUSDetail from './RADIUSDetail';
+import RADIUSEdit from './RADIUSEdit';
 
-function Radius({ i18n }) {
-  const baseUrl = '/settings/radius';
-
+function RADIUS({ i18n }) {
+  const baseURL = '/settings/radius';
   return (
     <PageSection>
       <Card>
-        {i18n._(t`Radius settings`)}
         <Switch>
-          <Redirect from={baseUrl} to={`${baseUrl}/details`} exact />
-          <Route path={`${baseUrl}/details`}>
-            <RadiusDetail />
+          <Redirect from={baseURL} to={`${baseURL}/details`} exact />
+          <Route path={`${baseURL}/details`}>
+            <RADIUSDetail />
           </Route>
-          <Route path={`${baseUrl}/edit`}>
-            <RadiusEdit />
+          <Route path={`${baseURL}/edit`}>
+            <RADIUSEdit />
+          </Route>
+          <Route key="not-found" path={`${baseURL}/*`}>
+            <ContentError isNotFound>
+              <Link to={`${baseURL}/details`}>
+                {i18n._(t`View RADIUS settings`)}
+              </Link>
+            </ContentError>
           </Route>
         </Switch>
       </Card>
@@ -27,4 +33,4 @@ function Radius({ i18n }) {
   );
 }
 
-export default withI18n()(Radius);
+export default withI18n()(RADIUS);

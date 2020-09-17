@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CardBody, CardActionsRow } from '../../../../components/Card';
 
-function RadiusEdit({ i18n }) {
+function RADIUSEdit({ i18n }) {
   return (
     <CardBody>
       {i18n._(t`Edit form coming soon :)`)}
@@ -22,4 +22,4 @@ function RadiusEdit({ i18n }) {
   );
 }
 
-export default withI18n()(RadiusEdit);
+export default withI18n()(RADIUSEdit);

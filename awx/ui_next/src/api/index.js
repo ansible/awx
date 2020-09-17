@@ -24,6 +24,7 @@ import Projects from './models/Projects';
 import Roles from './models/Roles';
 import Root from './models/Root';
 import Schedules from './models/Schedules';
+import Settings from './models/Settings';
 import SystemJobs from './models/SystemJobs';
 import Teams from './models/Teams';
 import Tokens from './models/Tokens';
@@ -61,6 +62,7 @@ const ProjectsAPI = new Projects();
 const RolesAPI = new Roles();
 const RootAPI = new Root();
 const SchedulesAPI = new Schedules();
+const SettingsAPI = new Settings();
 const SystemJobsAPI = new SystemJobs();
 const TeamsAPI = new Teams();
 const TokensAPI = new Tokens();
@@ -99,6 +101,7 @@ export {
   RolesAPI,
   RootAPI,
   SchedulesAPI,
+  SettingsAPI,
   SystemJobsAPI,
   TeamsAPI,
   TokensAPI,
