@@ -873,11 +873,12 @@ class BaseTask(object):
 
         path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk, dir=pdd_wrapper_path)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-        runner_project_folder = os.path.join(path, 'project')
-        if not os.path.exists(runner_project_folder):
-            # Ansible Runner requires that this directory exists.
-            # Specifically, when using process isolation
-            os.mkdir(runner_project_folder)
+        # Ansible runner requires that project exists,
+        # and we will write files in the other folders without pre-creating the folder
+        for subfolder in ('project', 'inventory', 'env'):
+            runner_subfolder = os.path.join(path, subfolder)
+            if not os.path.exists(runner_subfolder):
+                os.mkdir(runner_subfolder)
         return path
 
     def build_private_data_files(self, instance, private_data_dir):
@@ -921,7 +922,7 @@ class BaseTask(object):
                 # Instead, ssh private key file is explicitly passed via an
                 # env variable.
                 else:
-                    handle, path = tempfile.mkstemp(dir=private_data_dir)
+                    handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
                     f = os.fdopen(handle, 'w')
                     f.write(data)
                     f.close()
@@ -2460,7 +2461,7 @@ class RunInventoryUpdate(BaseTask):
         if injector is not None:
             content = injector.inventory_contents(inventory_update, private_data_dir)
             # must be a statically named file
-            inventory_path = os.path.join(private_data_dir, injector.filename)
+            inventory_path = os.path.join(private_data_dir, 'inventory', injector.filename)
             with open(inventory_path, 'w') as f:
                 f.write(content)
             os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)

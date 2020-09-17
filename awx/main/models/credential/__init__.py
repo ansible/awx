@@ -493,7 +493,7 @@ class CredentialType(CommonModelNameNotUnique):
 
         for file_label, file_tmpl in file_tmpls.items():
             data = sandbox_env.from_string(file_tmpl).render(**namespace)
-            _, path = tempfile.mkstemp(dir=private_data_dir)
+            _, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
             with open(path, 'w') as f:
                 f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
@@ -526,7 +526,7 @@ class CredentialType(CommonModelNameNotUnique):
                 extra_vars[var_name] = sandbox_env.from_string(tmpl).render(**namespace)
 
             def build_extra_vars_file(vars, private_dir):
-                handle, path = tempfile.mkstemp(dir=private_dir)
+                handle, path = tempfile.mkstemp(dir=os.path.join(private_dir, 'env'))
                 f = os.fdopen(handle, 'w')
                 f.write(safe_dump(vars))
                 f.close()

@@ -25,7 +25,7 @@ def gce(cred, env, private_data_dir):
         env['GCE_PROJECT'] = project
     json_cred['token_uri'] = 'https://oauth2.googleapis.com/token'
 
-    handle, path = tempfile.mkstemp(dir=private_data_dir)
+    handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
     f = os.fdopen(handle, 'w')
     json.dump(json_cred, f, indent=2)
     f.close()
@@ -96,7 +96,7 @@ def _openstack_data(cred):
 
 
 def openstack(cred, env, private_data_dir):
-    handle, path = tempfile.mkstemp(dir=private_data_dir)
+    handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
     f = os.fdopen(handle, 'w')
     openstack_data = _openstack_data(cred)
     yaml.safe_dump(openstack_data, f, default_flow_style=False, allow_unicode=True)
@@ -111,7 +111,7 @@ def kubernetes_bearer_token(cred, env, private_data_dir):
     env['K8S_AUTH_API_KEY'] = cred.get_input('bearer_token', default='')
     if cred.get_input('verify_ssl') and 'ssl_ca_cert' in cred.inputs:
         env['K8S_AUTH_VERIFY_SSL'] = 'True'
-        handle, path = tempfile.mkstemp(dir=private_data_dir)
+        handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
         with os.fdopen(handle, 'w') as f:
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
             f.write(cred.get_input('ssl_ca_cert'))
