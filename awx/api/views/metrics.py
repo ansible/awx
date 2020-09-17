@@ -22,7 +22,7 @@ from awx.api.generics import (
 )
 
 
-logger = logging.getLogger('awx.main.analytics')
+logger = logging.getLogger('awx.analytics')
 
 
 class MetricsView(APIView):
