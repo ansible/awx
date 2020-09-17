@@ -987,6 +987,11 @@ LOGGING = {
             'handlers': ['task_system', 'external_logger'],
             'propagate': False
         },
+        'awx.main.analytics': {
+            'handlers': ['task_system', 'external_logger'],
+            'level': 'INFO',
+            'propagate': False
+        },
         'awx.main.scheduler': {
             'handlers': ['task_system', 'external_logger'],
             'propagate': False
@@ -1001,7 +1006,7 @@ LOGGING = {
             'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.analytics': {
-            'handlers': ['task_system', 'external_logger'],
+            'handlers': ['external_logger'],
             'level': 'INFO',
             'propagate': False
         },

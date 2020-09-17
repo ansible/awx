@@ -20,7 +20,7 @@ from django.conf import settings
 BROADCAST_WEBSOCKET_REDIS_KEY_NAME = 'broadcast_websocket_stats'
 
 
-logger = logging.getLogger('awx.main.analytics.broadcast_websocket')
+logger = logging.getLogger('awx.analytics.broadcast_websocket')
 
 
 def dt_to_seconds(dt):
