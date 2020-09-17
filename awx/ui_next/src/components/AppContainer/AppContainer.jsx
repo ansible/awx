@@ -76,10 +76,6 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
     loadConfig();
   }, [config, pathname, handleLogout]);
 
-  if (!isReady) {
-    return null;
-  }
-
   const header = (
     <PageHeader
       showNavToggle
@@ -119,7 +115,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
   return (
     <>
       <Page isManagedSidebar header={header} sidebar={sidebar}>
-        <ConfigProvider value={config}>{children}</ConfigProvider>
+        {isReady && <ConfigProvider value={config}>{children}</ConfigProvider>}
       </Page>
       <About
         ansible_version={config?.ansible_version}
