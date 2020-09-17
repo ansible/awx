@@ -36,7 +36,7 @@
       debug:
         msg: "{{ query(plugin_name, 'ping', host='DNE://junk.com', username='john', password='not_legit', verify_ssl=True) }}"
       register: results
-      ignore_errors: True
+      ignore_errors: true
 
     - assert:
         that:
