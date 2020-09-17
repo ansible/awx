@@ -1,12 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 import { ConfigAPI, MeAPI, RootAPI } from '../../api';
-
 import AppContainer from './AppContainer';
 
 jest.mock('../../api');
@@ -58,6 +56,7 @@ describe('<AppContainer />', () => {
         </AppContainer>
       );
     });
+    wrapper.update();
 
     // page components
     expect(wrapper.length).toBe(1);
