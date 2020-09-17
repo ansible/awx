@@ -218,7 +218,6 @@ class Licenser(object):
             verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
 
             json = []
-
             try:
                 subs = requests.get(
                     '/'.join([host, 'subscription/users/{}/owners'.format(user)]),
@@ -244,8 +243,8 @@ class Licenser(object):
                 json.extend(resp.json())
 
             return self.generate_license_options_from_entitlements(json)
-
         return []
+
 
     def is_appropriate_sub(self, sub):
         if sub['activeSubscription'] is False:
@@ -263,8 +262,7 @@ class Licenser(object):
     def generate_license_options_from_entitlements(self, json):
         from dateutil.parser import parse
 
-        ValidSub = collections.namedtuple('ValidSub', 'sku name end_date trial quantity')
-
+        ValidSub = collections.namedtuple('ValidSub', 'sku name end_date trial quantity pool_id')
         valid_subs = collections.OrderedDict()
         for sub in json:
             if self.is_appropriate_sub(sub):
@@ -297,7 +295,7 @@ class Licenser(object):
 
                 sub_key = (end_date.date(), support_level)
                 valid_subs.setdefault(sub_key, []).append(ValidSub(
-                    sku, sub['productName'], end_date, trial, quantity
+                    sku, sub['productName'], end_date, trial, quantity, pool_id
                 ))
 
         if valid_subs:
@@ -325,7 +323,7 @@ class Licenser(object):
                     license_date=sub.end_date.strftime('%s')
                 )
                 license.update(
-                    pool_id=pool_id
+                    pool_id=sub.pool_id
                 )
                 licenses.append(license._attrs.copy())
             return licenses
