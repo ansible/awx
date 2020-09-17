@@ -43,6 +43,9 @@ class WorkerSignalHandler:
 
 
 class AWXConsumerBase(object):
+
+    last_stats = time.time()
+
     def __init__(self, name, worker, queues=[], pool=None):
         self.should_stop = False
 
@@ -54,6 +57,7 @@ class AWXConsumerBase(object):
         if pool is None:
             self.pool = WorkerPool()
         self.pool.init_workers(self.worker.work_loop)
+        self.redis = redis.Redis.from_url(settings.BROKER_URL)
 
     @property
     def listening_on(self):
@@ -99,6 +103,16 @@ class AWXConsumerBase(object):
             queue = 0
         self.pool.write(queue, body)
         self.total_messages += 1
+        self.record_statistics()
+
+    def record_statistics(self):
+        if time.time() - self.last_stats > 1:  # buffer stat recording to once per second
+            try:
+                self.redis.set(f'awx_{self.name}_statistics', self.pool.debug())
+                self.last_stats = time.time()
+            except Exception:
+                logger.exception(f"encountered an error communicating with redis to store {self.name} statistics")
+                self.last_stats = time.time()
 
     def run(self, *args, **kwargs):
         signal.signal(signal.SIGINT, self.stop)
@@ -120,10 +134,9 @@ class AWXConsumerRedis(AWXConsumerBase):
 
         time_to_sleep = 1
         while True:
-            queue = redis.Redis.from_url(settings.BROKER_URL)
             while True:
                 try:
-                    res = queue.blpop(self.queues)
+                    res = self.redis.blpop(self.queues)
                     time_to_sleep = 1
                     res = json.loads(res[1])
                     self.process_task(res)

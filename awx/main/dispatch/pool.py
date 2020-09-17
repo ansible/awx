@@ -5,6 +5,7 @@ import signal
 import sys
 import time
 import traceback
+from datetime import datetime
 from uuid import uuid4
 
 import collections
@@ -257,13 +258,13 @@ class WorkerPool(object):
         return idx, worker
 
     def debug(self, *args, **kwargs):
-        self.cleanup()
         tmpl = Template(
+            'Recorded at: {{ dt }} \n'
             '{{ pool.name }}[pid:{{ pool.pid }}] workers total={{ workers|length }} {{ meta }} \n'
             '{% for w in workers %}'
             '.  worker[pid:{{ w.pid }}]{% if not w.alive %} GONE exit={{ w.exitcode }}{% endif %}'
             ' sent={{ w.messages_sent }}'
-            ' finished={{ w.messages_finished }}'
+            '{% if w.messages_finished %} finished={{ w.messages_finished }}{% endif %}'
             ' qsize={{ w.managed_tasks|length }}'
             ' rss={{ w.mb }}MB'
             '{% for task in w.managed_tasks.values() %}'
@@ -281,7 +282,11 @@ class WorkerPool(object):
             '\n'
             '{% endfor %}'
         )
-        return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta)
+        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+        return tmpl.render(
+            pool=self, workers=self.workers, meta=self.debug_meta,
+            dt=now
+        )
 
     def write(self, preferred_queue, body):
         queue_order = sorted(range(len(self.workers)), key=lambda x: -1 if x==preferred_queue else x)
@@ -331,6 +336,10 @@ class AutoscalePool(WorkerPool):
 
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
+
+    def debug(self, *args, **kwargs):
+        self.cleanup()
+        return super(AutoscalePool, self).debug(*args, **kwargs)
 
     @property
     def should_grow(self):
