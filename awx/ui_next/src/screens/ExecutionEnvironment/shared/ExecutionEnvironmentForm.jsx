@@ -17,7 +17,7 @@ function ExecutionEnvironmentFormFields({ i18n }) {
     <>
       <FormField
         id="execution-environment-image"
-        label={i18n._(t`Image`)}
+        label={i18n._(t`Image name`)}
         name="image"
         type="text"
         validate={url(i18n)}
@@ -33,9 +33,9 @@ function ExecutionEnvironmentFormFields({ i18n }) {
         type="text"
       />
       <CredentialLookup
-        label={i18n._(t`Registry Credential`)}
+        label={i18n._(t`Registry credential`)}
         onChange={value => credentialHelpers.setValue(value)}
-        value={credentialField.value || null}
+        value={credentialField.value}
       />
     </>
   );
