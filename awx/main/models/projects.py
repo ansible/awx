@@ -189,9 +189,8 @@ class ProjectOptions(models.Model):
         return cred
 
     def get_project_path(self, check_if_exists=True):
-        local_path = os.path.basename(self.local_path)
-        if local_path and not local_path.startswith('.'):
-            proj_path = os.path.join(settings.PROJECTS_ROOT, local_path)
+        if self.local_path and not self.local_path.startswith('.'):
+            proj_path = os.path.join(settings.PROJECTS_ROOT, self.local_path)
             if not check_if_exists or os.path.exists(smart_str(proj_path)):
                 return proj_path
 
