@@ -103,7 +103,6 @@ pyyaml==5.3.1             # via -r /awx_devel/requirements/requirements.in, ansi
 redis==3.4.1              # via -r /awx_devel/requirements/requirements.in, django-redis
 requests-oauthlib==1.3.0  # via kubernetes, msrest, social-auth-core
 requests==2.23.0          # via -r /awx_devel/requirements/requirements.in, adal, azure-keyvault, django-oauth-toolkit, kubernetes, msrest, requests-oauthlib, slackclient, social-auth-core, twilio
-rhsm==1.19.2              # via -r /awx_devel/requirements/requirements.in
 rsa==4.0                  # via google-auth
 ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.10      # via openshift
