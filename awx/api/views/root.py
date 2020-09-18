@@ -240,6 +240,7 @@ class ApiV2AttachView(APIView):
         from awx.main.utils.common import get_licenser
         data = request.data.copy()
         pool_id = data.get('pool_id', None)
+        org = data.get('org', None)
         if not pool_id:
             return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
         user = getattr(settings, 'REDHAT_USERNAME', None)
@@ -255,29 +256,45 @@ class ApiV2AttachView(APIView):
                 sys.path.insert(0, '/usr/lib64/python3.6/site-packages')
                 sys.path.insert(0, '/usr/lib/python3.6/site-packages')
 
-
                 # Create connection
-                from rhsm.connection import UEPConnection
+                from rhsm.connection import UEPConnection, RestlibException
                 uep = UEPConnection(username=user, password=pw, insecure=True)
                 
                 # Check if consumer already exists
                 consumer = getattr(settings, 'ENTITLEMENT_CONSUMER', dict())
                 
+                # Get owner/org list and try the first owner key when creating consumer
+                if not org:
+                    org = uep.getOwnerList(user)[0]['key']
+                    # Request org if there are multiple as we cannot be sure which the user intends to use
+                    if len(org) > 1:
+                        return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
+                
+                
+                # Use org key if provided, but not already on consumer record in db
+                if not getattr(consumer, 'org', None) and consumer != {}:
+                    consumer['org'] = org
+                    settings.ENTITLEMENT_CONSUMER = consumer
+                
                 if consumer == {}:
-                    # Attach Subscription using pool_id chosen by user
-                    consumer = {}
+                    consumer['org'] = org
                     consumer['name'] = "Ansible-Tower-" + str(random.randint(1,1000000000))
-                    consumer_resp = uep.registerConsumer(name=consumer['name'], type="system") # TODO: try this with my RH account and make sure it doesn't need Org ID specified, ask khowells about other things that might be required for other accounts
-                    consumer['uuid'] = consumer_resp['uuid']
-
+                    try:
+                        # Register consumer
+                        consumer_resp = uep.registerConsumer(name=consumer['name'], type="system", owner=consumer['org'])
+                        consumer['uuid'] = consumer_resp['uuid']
+                    except RestlibException as e:
+                        return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
+                    except Exception as e:
+                        pass
+                    
                     # Save consumer_uuid in db
-                    settings.ENTITLEMENT_CONSUMER_UUID = consumer
+                    settings.ENTITLEMENT_CONSUMER = consumer
                 
                 # Attach subscription to consumer
                 try:
                     attach = uep.bindByEntitlementPool(consumerId=consumer['uuid'], poolId=pool_id, quantity=None)
                     consumer['serial_id'] = str(attach[0]['certificates'][0]['serial']['id'])
-
                 except Exception as e:
                     # A 404 was received because pool does not exist for this consumer
                     # A 403 was recieved because the sub was already attached to this consumer

@@ -345,14 +345,12 @@ register(
 
 register(
     'ENTITLEMENT_CONSUMER',
-    field_class=fields.CharField,
-    allow_blank=True,
+    field_class=fields.DictField,
     required=True,
     label=_('RHSM consumer name and UUID.'),
     help_text=_('Consumer used with RH username and password to obtain entitlement cert.'),
     category=_('SYSTEM'),
     category_slug='system',
-    encrypted=True,
 )
 
 register(
