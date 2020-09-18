@@ -67,12 +67,13 @@ class Licenser(object):
             self._generate_open_config()
 
 
+    # Product Cert Name: ansible-tower-3.7-rhel-7.x86_64.pem
+    # TODO: Maybe check validity of Product Cert somehow?
     def _check_product_cert(self):
         if os.path.exists('/etc/tower/certs') and os.path.exists('/var/lib/awx/.tower_version'):
             return True
         return False
-        # Product Cert Name: ansible-tower-3.7-rhel-7.x86_64.pem
-        # Maybe check validity of Product Cert somehow?
+
 
 
     def _generate_open_config(self):
@@ -83,14 +84,18 @@ class Licenser(object):
             ))
         settings.LICENSE = self._attrs
 
-
+    
+    def _clear_license_setting(self):
+        self._attrs.update(self.UNLICENSED_DATA)
+        settings.LICENSE = {}
+    
+    
     def _generate_product_config(self):
         raw_cert = getattr(settings, 'ENTITLEMENT_CERT', None)
         
         # Fail early if no entitlement cert is available
         if not raw_cert or raw_cert == '':
-            self._attrs.update(self.UNLICENSED_DATA)
-            settings.LICENSE = {}
+            self._clear_license_setting()
             return
         
         # Catch/check if subman is installed
@@ -103,6 +108,7 @@ class Licenser(object):
                 f.flush()
                 os.fsync(f)
 
+                # TODO: Consider refactoring this to be done with subman directly
                 cmd = ["rct", "cat-cert", f.name, "--no-content"]
                 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
@@ -114,10 +120,10 @@ class Licenser(object):
                         key, value = line.split(': ')
                         cert_dict.update({key:value})
                 
-                verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
-                
                 # curl https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os --cert /etc/tower/certs/entitlement_cert_key_generic.pem -i
                 # TODO: create this URL from Satellite setting
+                # Verify the entitlment cert is authorized to access appropriate content
+                verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
                 content_repo_url = 'https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os'
                 request = requests.get(url=content_repo_url, 
                                        cert=f.name, 
@@ -126,7 +132,6 @@ class Licenser(object):
                                        # headers=get_awx_http_client_headers(),
                                        # timeout=(5, 5)
                                        )
-
 
                 if request.status_code != 200:
                     logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
@@ -137,13 +142,11 @@ class Licenser(object):
             return
         except FileNotFoundError as e:
             logger.exception('Subscription-manager is not installed')
-            self._attrs.update(self.UNLICENSED_DATA)
-            settings.LICENSE = {}
+            self._clear_license_setting()
             return
         except Exception as e:
             logger.exception(e)
-            self._attrs.update(self.UNLICENSED_DATA)
-            settings.LICENSE = {}
+            self._clear_license_setting()
             return
         
         type = 'enterprise'
@@ -154,46 +157,13 @@ class Licenser(object):
                                 instance_count=cert_dict.get('Quantity', 0),
                                 support_level=cert_dict.get('Service Level', ''),
                                 pool_id=cert_dict.get('Pool ID'),
-                                # license_date=cert_dict.get('End Date', 2524626011), # Need to convert to seconds
+                                # license_date=cert_dict.get('End Date', 2524626011), # TODO: Need to convert to seconds
                                 product_name="Red Hat Ansible Tower",
                                 valid_key=True,
                                 license_type=type
                                 ))
         settings.LICENSE = self._attrs
-
-    # # TODO: Revisit Cloudforms license code and make sure this works for the CF team
-    # def _generate_cloudforms_subscription(self):
-    #     self._attrs.update(dict(company_name="Red Hat CloudForms License",
-    #                             instance_count=MAX_INSTANCES,
-    #                             license_date=253370764800,
-    #                             license_key='xxxx',
-    #                             license_type='enterprise',
-    #                             subscription_name='Red Hat CloudForms License'))
-    #
-    # def _check_cloudforms_subscription(self):
-    #     if os.path.exists('/var/lib/awx/i18n.db'):
-    #         return True
-    #     if os.path.isdir("/opt/rh/cfme-appliance") and os.path.isdir("/opt/rh/cfme-gemset"):
-    #         try:
-    #             has_rpms = subprocess.call(["rpm", "--quiet", "-q", "cfme", "cfme-appliance", "cfme-gemset"])
-    #             if has_rpms == 0:
-    #                 return True
-    #         except OSError:
-    #             pass
-    #     return False
-
-    # def _generate_subscription_name(self):
-    #     name_parts = ['Ansible Tower by Red Hat', ' (%d Managed Nodes)' % int(self._attrs['instance_count'])]
-    #     license_type = self._attrs.get('license_type', 'legacy')
-    #     if license_type == 'legacy':
-    #         name_parts.insert(1, ', Legacy')
-    #     elif license_type == 'basic':
-    #         name_parts.insert(1, ', Self-Support')
-    #     elif license_type == 'enterprise':
-    #         name_parts.insert(1, ', Standard')
-    #     if self._attrs.get('trial', False):
-    #         name_parts.append(' Trial')
-    #     return ''.join(name_parts)
+    
 
     def update(self, **kwargs):
         # Update attributes of the current license.
@@ -332,14 +302,14 @@ class Licenser(object):
             'No valid Red Hat Ansible Automation subscription could be found for this account.'  # noqa
         )
 
-    # TODO: Make this work for x509 Certs
+
     def validate(self):
         # Return license attributes with additional validation info.
         attrs = copy.deepcopy(self._attrs)
         key = attrs.get('license_type', 'none')
 
-        # Use requests to attempt a GET to the CDN/Satellite content repo
-        repo_response = False  #if 403, make this True
+        # TODO: Use requests to attempt a GET to the CDN/Satellite content repo
+        # repo_response = False  #if 403, make this True
 
         if (key == 'UNLICENSED' or False): # TODO: add logic to check against the CDN here.
             attrs.update(dict(valid_key=False, compliant=False))

@@ -7,6 +7,7 @@ import operator
 import os
 from collections import OrderedDict
 import subprocess
+import random
 import re
 
 from django.conf import settings
@@ -239,59 +240,74 @@ class ApiV2AttachView(APIView):
         from awx.main.utils.common import get_licenser
         data = request.data.copy()
         pool_id = data.get('pool_id', None)
+        if not pool_id:
+            return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
         user = getattr(settings, 'REDHAT_USERNAME', None)
         pw = getattr(settings, 'REDHAT_PASSWORD', None)
         if pool_id and user and pw:
             try:
                 # TODO: Replace this with logic that uses the user, pw to get the entitlement cert for that pool_id
                 
-                # # Retrieve consumer_uuid from consumer cert
-                # consumer_pem = '/etc/pki/consumer/cert.pem'
-                # if os.path.exists(consumer_pem):
-                #     cmd = ["openssl", "x509", "-noout", "-subject", "-in", consumer_pem]
-                #     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                #     stdout, stderr = proc.communicate()
-                #     output = re.split('CN = ', smart_text(stdout))
-                #     consumer_uuid = output[-1]
-                
-                
-                # import sdb; sdb.set_trace()
-                
                 # Add subman to the python path in order to import it
                 # Isolate this by running it in a thread or fork, look at other places where we thread in awx
                 #   - maybe put this in an awx-manage command?
                 import sys
-                sys.path.append('/usr/lib64/python3.6/site-packages')
-                sys.path.append('/usr/lib/python3.6/site-packages')
+                sys.path.insert(0, '/usr/lib64/python3.6/site-packages')
+                sys.path.insert(0, '/usr/lib/python3.6/site-packages')
 
 
                 # Create connection
                 from rhsm.connection import UEPConnection
                 uep = UEPConnection(username=user, password=pw, insecure=True)
                 
+                # Check if consumer already exists
+                consumer = getattr(settings, 'ENTITLEMENT_CONSUMER', dict())
                 
-                # Attach Subscription using pool_id chosen by user
-                consumer = uep.registerConsumer(name="test_tower_consumer", type="system") # TODO: replace name with rand hash?
+                if consumer == {}:
+                    # Attach Subscription using pool_id chosen by user
+                    consumer = {}
+                    consumer['name'] = "Ansible-Tower-" + str(random.randint(1,1000000000))
+                    consumer_resp = uep.registerConsumer(name=consumer['name'], type="system") # TODO: try this with my RH account and make sure it doesn't need Org ID specified, ask khowells about other things that might be required for other accounts
+                    consumer['uuid'] = consumer_resp['uuid']
+
+                    # Save consumer_uuid in db
+                    settings.ENTITLEMENT_CONSUMER_UUID = consumer
                 
-                # Save consumer_uuid in db
-                
+                # Attach subscription to consumer
+                try:
+                    attach = uep.bindByEntitlementPool(consumerId=consumer['uuid'], poolId=pool_id, quantity=None)
+                    consumer['serial_id'] = str(attach[0]['certificates'][0]['serial']['id'])
+
+                except Exception as e:
+                    # A 404 was received because pool does not exist for this consumer
+                    # A 403 was recieved because the sub was already attached to this consumer
+                    # Or the subscription could not be attached to this consumer
+                    pass
                 
                 # Attempt to get entitlement cert from RHSM 
-                certs = uep.getCertificates(consumer_uuid=consumer['uuid'], serials=[])
+                entitlements = uep.getCertificates(consumer_uuid=consumer['uuid'], serials=[consumer['serial_id']])
+                # Concatenate certs and keys for the associated entitlement together
+                cert_key = ''
+
+                for entitlement in entitlements:
+                    # We could either `rct cat-cert` each cert here to get the pool_id for the cert, or save the serial # for the entitlement when we attach the sub
+                    # The problem with saving the serial # is that if the sub has already been attached, Tower has no way of getting the serial #
+                    # Currently, we use the serial # and save it in the db, because it should be _much_ faster.  
+                    
+                    # TODO: Find a big account with old certs and try this out with that to make sure we don't get a lot of outdated entitlement certs
+                    cert_key = entitlement['cert'] + entitlement['key']  # Potentially make this `=` --> '+='
                 
-                # Get just the cert with the pool_id you want
                 
                 # Save the cert as a setting
-                # - create setting first
+                if cert_key != '':
+                    settings.ENTITLEMENT_CERT = cert_key
+                else:
+                    return Response({"error": _("Could not attach subscription or find entitlement certificate.")}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Return a 200 to denote the subscription has been successfully attached
+                # The UI will now make a separate POST to the config endpoint to validate and apply entitlement cert
+                return Response({}, status=status.HTTP_200_OK)
                 
-                
-                # Validate and apply entitlement cert
-                # Call get_licenser().validate()
-                
-                
-                
-                # Placeholder
-                return Response({pool_id})
                 # with set_environ(**settings.AWX_TASK_ENV):  # TODO: better understand what is going on here
                 #     validated = get_licenser().validate_rh(user, pw)
 
@@ -301,12 +317,10 @@ class ApiV2AttachView(APIView):
                 # if pw:
                 #     settings.REDHAT_PASSWORD = data['rh_password']
 
-
-                    # Attempt to get entitlement cert from RHSM 
-
             except Exception as e:
-                msg = _("changeme")
-                # msg = _("Invalid License")
+
+                msg = _("Invalid Subscription.")
+                # TODO: Catch specific errors
                 # if (
                 #     isinstance(exc, requests.exceptions.HTTPError) and
                 #     getattr(getattr(exc, 'response', None), 'status_code', None) == 401
@@ -321,7 +335,7 @@ class ApiV2AttachView(APIView):
                 # else:
                 #     logger.exception(smart_text(u"Invalid license submitted."),
                 #                      extra=dict(actor=request.user.username))
-                return Response({"error": e}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": msg + e}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(validated)
 
@@ -405,27 +419,26 @@ class ApiV2ConfigView(APIView):
 
         # Save Entitlement Cert/Key
         license_data = json.loads(data_actual)
-        if license_data['entitlement_cert']:
-            settings.ENTITLEMENT_CERT = license_data['entitlement_cert']
+        entitlement_cert = getattr(license_data, 'entitlement_cert', None)
+        if entitlement_cert:
+            settings.ENTITLEMENT_CERT = entitlement_cert
 
-        # TODO: Validate Entitlement Cert by verifying with the CDN/Satellite
-        # potentially do this in Licenser().validate() or ._check_product_cert and just make a call to that here.  
+
         
         try:
-            from awx.main.utils.common import get_licenser
             # Validate entitlement cert and get subscription metadata
+            # validate() will clear the entitlement cert if not valid
+            from awx.main.utils.common import get_licenser
             license_data_validated = get_licenser().validate()
         except Exception:
             logger.warning(smart_text(u"Invalid license submitted."),
                            extra=dict(actor=request.user.username))
-            # If License invalid, clear entitlment cert value  # TODO: maybe do this inside licensing.py
+            # If License invalid, clear entitlment cert value
             settings.ENTITLEMENT_CERT = ''
             return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
 
         # If the license is valid, write it to the database.
         if license_data_validated['valid_key']:
-            # TODO: Think about if it is better to set this here, or within Licenser()._generate_product_config
-            # settings.LICENSE = license_data
             if not settings_registry.is_setting_read_only('TOWER_URL_BASE'):
                 settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
