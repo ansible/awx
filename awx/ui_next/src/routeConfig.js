@@ -140,7 +140,7 @@ function getRouteConfig(i18n) {
           screen: Applications,
         },
         {
-          title: i18n._(t`Execution environments`),
+          title: i18n._(t`Execution Environments`),
           path: '/execution_environments',
           screen: ExecutionEnvironments,
         },
