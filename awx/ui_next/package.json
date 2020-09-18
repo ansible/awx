@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@babel/polyfill": "^7.8.7",
-    "@lingui/cli": "^2.9.1",
+    "@lingui/cli": "^2.9.2",
     "@lingui/macro": "^2.9.1",
     "@nteract/mockument": "^1.0.4",
     "babel-core": "^7.0.0-bridge.0",
