@@ -114,7 +114,7 @@ function ContainerGroup({ i18n, setBreadcrumb }) {
                   <ContainerGroupEdit instanceGroup={instanceGroup} />
                 </Route>
                 <Route path="/instance_groups/container_group/:id/details">
-                  <ContainerGroupDetails />
+                  <ContainerGroupDetails instanceGroup={instanceGroup} />
                 </Route>
                 <Route path="/instance_groups/container_group/:id/jobs">
                   <JobList
