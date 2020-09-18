@@ -33,7 +33,7 @@ function ExecutionEnvironmentFormFields({ i18n }) {
         type="text"
       />
       <CredentialLookup
-        label={i18n._(t`Credential`)}
+        label={i18n._(t`Registry Credential`)}
         onChange={value => credentialHelpers.setValue(value)}
         value={credentialField.value || null}
       />
