@@ -99,7 +99,13 @@ def read_content(private_data_dir, raw_env, inventory_update):
     dir_contents = {}
     referenced_paths = set()
     file_aliases = {}
-    filename_list = sorted(os.listdir(private_data_dir), key=lambda fn: inverse_env.get(os.path.join(private_data_dir, fn), [fn])[0])
+    filename_list = os.listdir(private_data_dir)
+    for subdir in ('env', 'inventory'):
+        if subdir in filename_list:
+            filename_list.remove(subdir)
+            for filename in os.listdir(os.path.join(private_data_dir, subdir)):
+                filename_list.append(os.path.join(subdir, filename))
+    filename_list = sorted(filename_list, key=lambda fn: inverse_env.get(os.path.join(private_data_dir, fn), [fn])[0])
     for filename in filename_list:
         if filename in ('args', 'project'):
             continue  # Ansible runner
