@@ -110,7 +110,9 @@ function ExecutionEnvironment({ i18n, setBreadcrumb }) {
                   />
                 </Route>
                 <Route path="/execution_environments/:id/details">
-                  <ExecutionEnvironmentDetails />
+                  <ExecutionEnvironmentDetails
+                    executionEnvironment={executionEnvironment}
+                  />
                 </Route>
               </>
             )}
