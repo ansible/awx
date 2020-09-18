@@ -171,6 +171,7 @@ function ExecutionEnvironmentList({ i18n }) {
             )}
             renderItem={executionEnvironment => (
               <ExecutionEnvironmentsListItem
+                key={executionEnvironment.id}
                 executionEnvironment={executionEnvironment}
                 detailUrl={`${match.url}/${executionEnvironment.id}/details`}
                 onSelect={() => handleSelect(executionEnvironment)}
