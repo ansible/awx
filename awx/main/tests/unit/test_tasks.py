@@ -48,6 +48,10 @@ class TestJobExecution(object):
 @pytest.fixture
 def private_data_dir():
     private_data = tempfile.mkdtemp(prefix='awx_')
+    for subfolder in ('inventory', 'env'):
+        runner_subfolder = os.path.join(private_data, subfolder)
+        if not os.path.exists(runner_subfolder):
+            os.mkdir(runner_subfolder)
     yield private_data
     shutil.rmtree(private_data, True)
 
