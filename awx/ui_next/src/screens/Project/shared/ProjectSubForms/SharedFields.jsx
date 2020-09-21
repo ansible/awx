@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { useField } from 'formik';
+import { useFormikContext } from 'formik';
 import { FormGroup, Title } from '@patternfly/react-core';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import FormField, { CheckboxField } from '../../../../components/FormField';
@@ -39,17 +39,22 @@ export const BranchFormField = withI18n()(({ i18n, label }) => (
 
 export const ScmCredentialFormField = withI18n()(
   ({ i18n, credential, onCredentialSelection }) => {
-    const credHelpers = useField('credential')[2];
+    const { setFieldValue } = useFormikContext();
+
+    const onCredentialChange = useCallback(
+      value => {
+        onCredentialSelection('scm', value);
+        setFieldValue('credential', value ? value.id : '');
+      },
+      [onCredentialSelection, setFieldValue]
+    );
 
     return (
       <CredentialLookup
         credentialTypeId={credential.typeId}
         label={i18n._(t`Source Control Credential`)}
         value={credential.value}
-        onChange={value => {
-          onCredentialSelection('scm', value);
-          credHelpers.setValue(value ? value.id : '');
-        }}
+        onChange={onCredentialChange}
       />
     );
   }

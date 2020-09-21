@@ -146,18 +146,11 @@ function JobTemplateForm({
 
   const handleProjectUpdate = useCallback(
     value => {
-      playbookHelpers.setValue(0);
-      scmHelpers.setValue('');
-      projectHelpers.setValue(value);
+      setFieldValue('playbook', 0);
+      setFieldValue('scm_branch', '');
+      setFieldValue('project', value);
     },
-    [] // eslint-disable-line react-hooks/exhaustive-deps
-  );
-
-  const handleProjectAutocomplete = useCallback(
-    val => {
-      projectHelpers.setValue(val);
-    },
-    [] // eslint-disable-line react-hooks/exhaustive-deps
+    [setFieldValue]
   );
 
   const jobTypeOptions = [
@@ -270,8 +263,8 @@ function JobTemplateForm({
           isValid={!projectMeta.touched || !projectMeta.error}
           helperTextInvalid={projectMeta.error}
           onChange={handleProjectUpdate}
-          autocomplete={handleProjectAutocomplete}
           required
+          autoPopulate={!template?.id}
         />
         {projectField.value?.allow_override && (
           <FieldWithPrompt

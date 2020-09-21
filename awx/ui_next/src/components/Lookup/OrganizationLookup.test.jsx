@@ -48,4 +48,50 @@ describe('OrganizationLookup', () => {
     expect(_OrganizationLookup.defaultProps.onBlur).toBeInstanceOf(Function);
     expect(_OrganizationLookup.defaultProps.onBlur).not.toThrow();
   });
+
+  test('should auto-select organization when only one available and autoPopulate prop is true', async () => {
+    OrganizationsAPI.read.mockReturnValue({
+      data: {
+        results: [{ id: 1 }],
+        count: 1,
+      },
+    });
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationLookup autoPopulate onChange={onChange} />
+      );
+    });
+    expect(onChange).toHaveBeenCalledWith({ id: 1 });
+  });
+
+  test('should not auto-select organization when autoPopulate prop is false', async () => {
+    OrganizationsAPI.read.mockReturnValue({
+      data: {
+        results: [{ id: 1 }],
+        count: 1,
+      },
+    });
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(<OrganizationLookup onChange={onChange} />);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  test('should not auto-select organization when multiple available', async () => {
+    OrganizationsAPI.read.mockReturnValue({
+      data: {
+        results: [{ id: 1 }, { id: 2 }],
+        count: 2,
+      },
+    });
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationLookup autoPopulate onChange={onChange} />
+      );
+    });
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

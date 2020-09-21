@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import PropTypes, { shape } from 'prop-types';
 
 import { withI18n } from '@lingui/react';
-import { useField, withFormik } from 'formik';
+import { useField, useFormikContext, withFormik } from 'formik';
 import {
   Form,
   FormGroup,
@@ -43,6 +43,7 @@ function WorkflowJobTemplateForm({
   i18n,
   submitError,
 }) {
+  const { setFieldValue } = useFormikContext();
   const [enableWebhooks, setEnableWebhooks] = useState(
     Boolean(template.webhook_service)
   );
@@ -53,9 +54,7 @@ function WorkflowJobTemplateForm({
   );
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta, limitHelpers] = useField('limit');
-  const [organizationField, organizationMeta, organizationHelpers] = useField(
-    'organization'
-  );
+  const [organizationField, organizationMeta] = useField('organization');
   const [scmField, , scmHelpers] = useField('scm_branch');
   const [, webhookServiceMeta, webhookServiceHelpers] = useField(
     'webhook_service'
@@ -81,6 +80,13 @@ function WorkflowJobTemplateForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enableWebhooks]);
 
+  const onOrganizationChange = useCallback(
+    value => {
+      setFieldValue('organization', value);
+    },
+    [setFieldValue]
+  );
+
   if (hasContentError) {
     return <ContentError error={hasContentError} />;
   }
@@ -104,9 +110,7 @@ function WorkflowJobTemplateForm({
         />
         <OrganizationLookup
           helperTextInvalid={organizationMeta.error}
-          onChange={value => {
-            organizationHelpers.setValue(value || null);
-          }}
+          onChange={onOrganizationChange}
           value={organizationField.value}
           isValid={!organizationMeta.error}
         />
