@@ -57,13 +57,7 @@ RUN python3 -m ensurepip && pip3 install "virtualenv < 20"
 # Install & build requirements
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
-ADD requirements/requirements_ansible.txt \
-    requirements/requirements_ansible_uninstall.txt \
-    requirements/requirements_ansible_git.txt \
-    requirements/requirements.txt \
-    requirements/requirements_tower_uninstall.txt \
-    requirements/requirements_git.txt \
-    requirements/collections_requirements.yml \
+COPY requirements \
     /tmp/requirements/
 
 RUN cd /tmp && make requirements_awx requirements_ansible_py3

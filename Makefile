@@ -183,6 +183,8 @@ requirements_ansible: virtualenv_ansible
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 	# Same effect as using --system-site-packages flag on venv creation
 	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
+	find $(VENV_BASE)/ansible -path "*/site-packages*/requests/certs.py" -exec cp -f requirements/certifi-vendor/certs.py {} \;
+	$(VENV_BASE)/ansible/bin/pip install $(shell pwd)/requirements/certifi-vendor
 
 requirements_ansible_py3: virtualenv_ansible_py3
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
@@ -193,6 +195,8 @@ requirements_ansible_py3: virtualenv_ansible_py3
 	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 	# Same effect as using --system-site-packages flag on venv creation
 	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
+	find $(VENV_BASE)/ansible -path "*/site-packages*/requests/certs.py" -exec cp -f requirements/certifi-vendor/certs.py {} \;
+	$(VENV_BASE)/ansible/bin/pip install $(shell pwd)/requirements/certifi-vendor
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
@@ -208,6 +212,8 @@ requirements_awx: virtualenv_awx
 	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
 	fi
 	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
+	find $(VENV_BASE)/awx -path "*/site-packages*/requests/certs.py" -exec cp -f requirements/certifi-vendor/certs.py {} \;
+	$(VENV_BASE)/awx/bin/pip install $(shell pwd)/requirements/certifi-vendor
 
 requirements_awx_dev:
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt

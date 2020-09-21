@@ -1,1 +1,2 @@
 rsa	# stop adding new crypto libs
+certifi	# use the system cert store
