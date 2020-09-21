@@ -193,16 +193,16 @@ class ApiV2SubscriptionView(APIView):
     def post(self, request):
         from awx.main.utils.common import get_licenser
         data = request.data.copy()
-        if data.get('rh_password') == '$encrypted$':
-            data['rh_password'] = settings.REDHAT_PASSWORD
+        if data.get('subscriptions_password') == '$encrypted$':
+            data['subscriptions_password'] = settings.SUBSCRIPTIONS_PASSWORD
         try:
-            user, pw = data.get('rh_username'), data.get('rh_password')
+            user, pw = data.get('subscriptions_username'), data.get('subscriptions_password')
             with set_environ(**settings.AWX_TASK_ENV):
                 validated = get_licenser().validate_rh(user, pw)
             if user:
-                settings.REDHAT_USERNAME = data['rh_username']
+                settings.SUBSCRIPTIONS_USERNAME = data['subscriptions_username']
             if pw:
-                settings.REDHAT_PASSWORD = data['rh_password']
+                settings.SUBSCRIPTIONS_PASSWORD = data['subscriptions_password']
         except Exception as exc:
             msg = _("Invalid License")
             if (
@@ -243,8 +243,8 @@ class ApiV2AttachView(APIView):
         org = data.get('org', None)
         if not pool_id:
             return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
-        user = getattr(settings, 'REDHAT_USERNAME', None)
-        pw = getattr(settings, 'REDHAT_PASSWORD', None)
+        user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
+        pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
         if pool_id and user and pw:
             try:
                 # TODO: Replace this with logic that uses the user, pw to get the entitlement cert for that pool_id
@@ -263,22 +263,29 @@ class ApiV2AttachView(APIView):
                 # Check if consumer already exists
                 consumer = getattr(settings, 'ENTITLEMENT_CONSUMER', dict())
                 
-                # Get owner/org list and try the first owner key when creating consumer
-                if not org:
-                    orgs = uep.getOwnerList(user)
-                    if len(org) == 0:
+
+                # Get owner/org list
+                orgs = uep.getOwnerList(user)
+                if org:
+                    org_ids = []
+                    for item in orgs:
+                        org_ids.append(item['key'])
+                    if org not in org_ids:
+                        return Response({"error": _("No organizations with that ID are associated with that account")}, status=status.HTTP_400_BAD_REQUEST)
+                
+                else:
+                    if len(orgs) == 0:
                         return Response({"error": _("No organizations associated with that account")}, status=status.HTTP_400_BAD_REQUEST)
                     # Request org if there are multiple as we cannot be sure which the user intends to use
-                    if len(org) > 1:
+                    if len(orgs) > 1:
                         return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
                     else:
+                        # Try the first owner key when creating consumer
                         org = uep.getOwnerList(user)[0]['key']
-                
                 
                 # Use org key if provided, but not already on consumer record in db
                 if not getattr(consumer, 'org', None) and consumer != {}:
                     consumer['org'] = org
-                    settings.ENTITLEMENT_CONSUMER = consumer
                 
                 if consumer == {}:
                     consumer['org'] = org
@@ -294,8 +301,8 @@ class ApiV2AttachView(APIView):
                     except Exception as e:
                         pass
                     
-                    # Save consumer_uuid in db
-                    settings.ENTITLEMENT_CONSUMER = consumer
+                # Save consumer_uuid in db
+                settings.ENTITLEMENT_CONSUMER = consumer
                 
                 # Attach subscription to consumer
                 try:
@@ -331,14 +338,9 @@ class ApiV2AttachView(APIView):
                 # The UI will now make a separate POST to the config endpoint to validate and apply entitlement cert
                 return Response({}, status=status.HTTP_200_OK)
                 
-                # with set_environ(**settings.AWX_TASK_ENV):  # TODO: better understand what is going on here
+                # with set_environ(**settings.AWX_TASK_ENV):  # TODO: better understand what is going on here,
                 #     validated = get_licenser().validate_rh(user, pw)
 
-                # # Should we make the UI provide the USERNAME/PASSWORD again here, or rely on it being in settings?
-                # if user:
-                #     settings.REDHAT_USERNAME = data['rh_username']
-                # if pw:
-                #     settings.REDHAT_PASSWORD = data['rh_password']
 
             except Exception as e:
 
@@ -360,7 +362,7 @@ class ApiV2AttachView(APIView):
                 #                      extra=dict(actor=request.user.username))
                 return Response({"error": msg + e}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(validated)
+        return Response({"error": _("No pool_id provided, or SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD are not set.")}, status=status.HTTP_400_BAD_REQUEST)
 
 
 

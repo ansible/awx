@@ -154,7 +154,7 @@ class Licenser(object):
         # Parse output for subscription metadata to build config
         self._attrs.update(dict(subscription_name=cert_dict.get('Name'),
                                 sku=cert_dict.get('SKU', ''),
-                                instance_count=cert_dict.get('Quantity', 0),
+                                instance_count=int(cert_dict.get('Quantity', 0)),
                                 support_level=cert_dict.get('Service Level', ''),
                                 pool_id=cert_dict.get('Pool ID'),
                                 # license_date=cert_dict.get('End Date', 2524626011), # TODO: Need to convert to seconds
@@ -273,7 +273,7 @@ class Licenser(object):
             for key, subs in valid_subs.items():
                 license = self.__class__(subscription_name='Ansible Tower by Red Hat')
                 for sub in subs:
-                    license._attrs['instance_count'] += sub.quantity
+                    license._attrs['instance_count'] = int(sub.quantity)
                     license._attrs['license_type'] = 'enterprise'
                     if sub.trial:
                         license._attrs['trial'] = True
