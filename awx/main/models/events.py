@@ -4,6 +4,7 @@ import datetime
 import logging
 from collections import defaultdict
 
+from django.conf import settings
 from django.db import models, DatabaseError, connection
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
@@ -57,7 +58,18 @@ def create_host_status_counts(event_data):
     return dict(host_status_counts)
 
 
+MINIMAL_EVENTS = set([
+    'playbook_on_play_start', 'playbook_on_task_start',
+    'playbook_on_stats', 'EOF'
+])
+
+
 def emit_event_detail(event):
+    if (
+        settings.UI_LIVE_UPDATES_ENABLED is False and
+        event.event not in MINIMAL_EVENTS
+    ):
+        return
     cls = event.__class__
     relation = {
         JobEvent: 'job_id',
