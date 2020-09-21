@@ -4,7 +4,7 @@ import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import { ProjectsAPI } from '../../../../api';
 import ProjectsList from './ProjectsList';
 
-jest.mock('../../../../../../api/models/Projects');
+jest.mock('../../../../api/models/Projects');
 
 const nodeResource = {
   id: 1,

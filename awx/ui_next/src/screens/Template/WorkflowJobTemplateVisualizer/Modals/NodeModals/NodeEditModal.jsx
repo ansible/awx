@@ -13,10 +13,13 @@ function NodeEditModal({ i18n }) {
       config?.defaults?.credentials,
       values?.credentials
     );
-
+    if (added?.length > 0) {
+      values.addedCredentals = added;
+    }
+    if (removed?.length > 0) {
+      values.removedCredentals = removed;
+    }
     values.inventory = values?.inventory?.id;
-    values.addedCredentials = added;
-    values.removedCredentials = removed;
     delete values.linkType;
     const node = {
       nodeResource: values.nodeResource,
@@ -27,9 +30,10 @@ function NodeEditModal({ i18n }) {
     ) {
       node.promptValues = values;
     }
+    console.log(node, 'node');
     dispatch({
       type: 'UPDATE_NODE',
-      node
+      node,
     });
   };
 

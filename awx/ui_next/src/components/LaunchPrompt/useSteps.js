@@ -1,10 +1,5 @@
-import {
-  useState,
-  useEffect
-} from 'react';
-import {
-  useFormikContext
-} from 'formik'
+import { useState, useEffect } from 'react';
+import { useFormikContext } from 'formik';
 import useInventoryStep from './steps/useInventoryStep';
 import useCredentialsStep from './steps/useCredentialsStep';
 import useOtherPromptsStep from './steps/useOtherPromptsStep';
@@ -13,48 +8,84 @@ import usePreviewStep from './steps/usePreviewStep';
 import useRunTypeStep from './steps/useRunTypeStep';
 import useNodeTypeStep from './steps/useNodeTypeStep';
 
-export default function useSteps(config, loadedResource, i18n, needsPreviewStep, askLinkType,
-  isWorkflowNode, currentResource) {
+export default function useSteps(
+  config,
+  loadedResource,
+  i18n,
+  needsPreviewStep,
+  askLinkType,
+  isWorkflowNode,
+  currentResource
+) {
   const [visited, setVisited] = useState({});
   const steps = [
     useRunTypeStep(askLinkType, i18n),
     useNodeTypeStep(isWorkflowNode, i18n, loadedResource, currentResource),
-    useInventoryStep(config, visited, i18n, loadedResource?.originalNodeObject ? loadedResource.originalNodeObject : loadedResource, currentResource),
-    useCredentialsStep(config, i18n, loadedResource?.originalNodeObject ? loadedResource.originalNodeObject : loadedResource, currentResource),
-    useOtherPromptsStep(config, visited, i18n, loadedResource?.originalNodeObject ? loadedResource.originalNodeObject : loadedResource, currentResource),
+    useInventoryStep(
+      config,
+      visited,
+      i18n,
+      loadedResource?.originalNodeObject
+        ? loadedResource.originalNodeObject
+        : loadedResource,
+      currentResource
+    ),
+    useCredentialsStep(
+      config,
+      i18n,
+      loadedResource?.originalNodeObject
+        ? loadedResource.originalNodeObject
+        : loadedResource,
+      currentResource
+    ),
+    useOtherPromptsStep(
+      config,
+      visited,
+      i18n,
+      loadedResource?.originalNodeObject
+        ? loadedResource.originalNodeObject
+        : loadedResource,
+      currentResource
+    ),
     useSurveyStep(config, visited, i18n),
   ];
-  const {
-    values: formikValues,
-    errors,
-    setErrors
-  } = useFormikContext()
+  const { values: formikValues, errors, setErrors } = useFormikContext();
 
   useEffect(() => {
-    setErrors({})
-    setVisited({})
-  }, [formikValues.nodeType, formikValues.nodeResource, setErrors])
+    setErrors({});
+    setVisited({});
+  }, [formikValues.nodeType, formikValues.nodeResource, setErrors]);
 
-  const formErrorsContent = []
+  const formErrorsContent = [];
 
   if (config.ask_inventory_on_launch && !formikValues.inventory) {
     formErrorsContent.push({
-      inventory: true
-    })
+      inventory: true,
+    });
   }
-  const hasSurveyError = Object.keys(errors).find(e => e.includes('survey'))
+  const hasSurveyError = Object.keys(errors).find(e => e.includes('survey'));
 
-  if (config.survey_enabled &&
+  if (
+    config.survey_enabled &&
     (config.variables_needed_to_start ||
-      config.variables_needed_to_start.length === 0) && hasSurveyError) {
+      config.variables_needed_to_start.length === 0) &&
+    hasSurveyError
+  ) {
     formErrorsContent.push({
-      survey: true
-    })
+      survey: true,
+    });
   }
 
   steps.push(
-    usePreviewStep(config, loadedResource, steps[3].survey, formErrorsContent,
-      i18n, currentResource, needsPreviewStep)
+    usePreviewStep(
+      config,
+      loadedResource,
+      steps[3].survey,
+      formErrorsContent,
+      i18n,
+      currentResource,
+      needsPreviewStep
+    )
   );
 
   const pfSteps = steps.map(s => s.step).filter(s => s != null);
@@ -87,10 +118,11 @@ export default function useSteps(config, loadedResource, i18n, needsPreviewStep,
     initialValues,
     isReady,
     validate,
-    visitStep: stepId => setVisited({
-      ...visited,
-      [stepId]: true
-    }),
+    visitStep: stepId =>
+      setVisited({
+        ...visited,
+        [stepId]: true,
+      }),
     visitAllSteps: setFieldsTouched => {
       setVisited({
         inventory: true,

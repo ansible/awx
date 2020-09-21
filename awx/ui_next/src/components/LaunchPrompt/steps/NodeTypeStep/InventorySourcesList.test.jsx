@@ -4,7 +4,7 @@ import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import { InventorySourcesAPI } from '../../../../api';
 import InventorySourcesList from './InventorySourcesList';
 
-jest.mock('../../../../../../api/models/InventorySources');
+jest.mock('../../../../api/models/InventorySources');
 
 const nodeResource = {
   id: 1,

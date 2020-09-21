@@ -49,36 +49,17 @@ describe('PreviewStep', () => {
 
     const detail = wrapper.find('PromptDetail');
     expect(detail).toHaveLength(1);
-    expect(detail.prop('resource')).toEqual(resource);
-    expect(detail.prop('overrides')).toEqual({
-      extra_vars: 'foo: abc\n',
-      limit: '4',
-      survey_foo: 'abc',
-    });
-  });
 
-  test('should render PromptDetail without survey', async () => {
-    let wrapper;
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <Formik initialValues={{ limit: '4' }}>
-          <PreviewStep
-            resource={resource}
-            config={{
-              ask_limit_on_launch: true,
-            }}
-            formErrors={formErrors}
-          />
-        </Formik>
-      );
-    });
-
-    const detail = wrapper.find('PromptDetail');
-    expect(detail).toHaveLength(1);
     expect(detail.prop('resource')).toEqual(resource);
-    expect(detail.prop('overrides')).toEqual({
-      limit: '4',
-    });
+    expect(wrapper.find('CodeMirrorInput').prop('value')).toBe(
+      'foo: abc\n\nsurvey_foo: abc'
+    );
+    expect(
+      wrapper
+        .find('Detail[label="Limit"]')
+        .at(1)
+        .prop('value')
+    ).toBe('4');
   });
 
   test('should handle extra vars without survey', async () => {

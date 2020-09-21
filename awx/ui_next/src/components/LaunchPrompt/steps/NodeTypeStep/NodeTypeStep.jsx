@@ -79,7 +79,6 @@ function NodeTypeStep({ i18n }) {
             ]}
             value={nodeTypeField.value}
             onChange={(e, val) => {
-              // handleNodeTypeChange(val);
               nodeTypeHelpers.setValue(val);
               nodeResourceHelpers.setValue(null);
               approvalNameHelpers.setValue('');
@@ -119,6 +118,7 @@ function NodeTypeStep({ i18n }) {
             <FormField
               name="approvalName"
               fieldId="approval-name"
+              id="approval-name"
               isRequired
               validate={required(null, i18n)}
               validated={isValid ? 'default' : 'error'}
@@ -127,6 +127,7 @@ function NodeTypeStep({ i18n }) {
             <FormField
               name="approvalDescription"
               fieldId="approval-description"
+              id="approval-description"
               label={i18n._(t`Description`)}
             />
             <FormGroup
@@ -136,6 +137,7 @@ function NodeTypeStep({ i18n }) {
             >
               <div css="display: flex;align-items: center;">
                 <TimeoutInput
+                  aria-label={i18n._(t`timeout-minutes`)}
                   name="timeoutMinutes"
                   id="approval-timeout-Seconds"
                   type="number"
@@ -159,6 +161,7 @@ function NodeTypeStep({ i18n }) {
                   name="timeoutSeconds"
                   id="approval-timeout-seconds"
                   type="number"
+                  aria-label={i18n._(t`timeout-seconds`)}
                   min="0"
                   step="1"
                   value={timeoutSeconds}

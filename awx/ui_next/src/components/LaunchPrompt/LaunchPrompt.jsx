@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Wizard } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -12,28 +12,14 @@ import AlertModal from '../AlertModal';
 import getSurveyValues from './getSurveyValues';
 
 function PromptModalForm({ onSubmit, onCancel, i18n, config, resource }) {
-  const { values, resetForm, setTouched, validateForm } = useFormikContext();
+  const { values, setTouched, validateForm } = useFormikContext();
 
-  const {
-    steps,
-    initialValues,
-    isReady,
-    visitStep,
-    visitAllSteps,
-    contentError,
-  } = useSteps(config, resource, i18n, true);
-
-  useEffect(() => {
-    if (Object.values(initialValues).length > 0 && isReady) {
-      resetForm({
-        values: {
-          ...initialValues,
-          verbosity: initialValues?.verbosity?.toString(),
-        },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [steps.length, isReady]);
+  const { steps, isReady, visitStep, visitAllSteps, contentError } = useSteps(
+    config,
+    resource,
+    i18n,
+    true
+  );
 
   const handleSave = () => {
     const postValues = {};
@@ -102,7 +88,12 @@ function PromptModalForm({ onSubmit, onCancel, i18n, config, resource }) {
       steps={
         isReady
           ? steps
-          : [{ name: ContentLoading, component: <ContentLoading /> }]
+          : [
+              {
+                name: i18n._(t`Content Loading`),
+                component: <ContentLoading />,
+              },
+            ]
       }
       backButtonText={i18n._(t`Back`)}
       cancelButtonText={i18n._(t`Cancel`)}
@@ -113,7 +104,21 @@ function PromptModalForm({ onSubmit, onCancel, i18n, config, resource }) {
 
 function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
   return (
-    <Formik initialValues={{}} onSubmit={values => onLaunch(values)}>
+    <Formik
+      initialValues={{
+        verbosity: resource?.verbosity || 0,
+        inventory: resource.summary_fields?.inventory || null,
+        credentials: resource.summary_fields?.credentials || null,
+        diff_mode: resource.diff_mode || false,
+        extra_vars: resource.extra_vars || '---',
+        job_type: resource.job_type || '',
+        job_tags: resource.job_tags || '',
+        skip_tags: resource.skip_tags || '',
+        scm_branch: resource.scm_branch || '',
+        limit: resource.limit || '',
+      }}
+      onSubmit={values => onLaunch(values)}
+    >
       <PromptModalForm
         onSubmit={values => onLaunch(values)}
         onCancel={onCancel}
