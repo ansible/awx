@@ -265,10 +265,14 @@ class ApiV2AttachView(APIView):
                 
                 # Get owner/org list and try the first owner key when creating consumer
                 if not org:
-                    org = uep.getOwnerList(user)[0]['key']
+                    orgs = uep.getOwnerList(user)
+                    if len(org) == 0:
+                        return Response({"error": _("No organizations associated with that account")}, status=status.HTTP_400_BAD_REQUEST)
                     # Request org if there are multiple as we cannot be sure which the user intends to use
                     if len(org) > 1:
                         return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        org = uep.getOwnerList(user)[0]['key']
                 
                 
                 # Use org key if provided, but not already on consumer record in db
