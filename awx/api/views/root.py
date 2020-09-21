@@ -290,9 +290,15 @@ class ApiV2AttachView(APIView):
                 if consumer == {}:
                     consumer['org'] = org
                     consumer['name'] = "Ansible-Tower-" + str(random.randint(1,1000000000))
+                    facts = {
+                        "system.certificate_version": "3.2",
+                        "uname.sysname": "Linux",
+                        "virt.is_guest": "False",
+                        "uname.machine": "x86_64", 
+                    }
                     try:
                         # Register consumer
-                        consumer_resp = uep.registerConsumer(name=consumer['name'], type="system", owner=consumer['org'])
+                        consumer_resp = uep.registerConsumer(name=consumer['name'], type="system", owner=consumer['org'], facts=facts)
                         consumer['uuid'] = consumer_resp['uuid']
                     except RestlibException as e:
                         if e.code == 404 and 'owner with key' in e.msg:
@@ -300,7 +306,7 @@ class ApiV2AttachView(APIView):
                         return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
                     except Exception as e:
                         pass
-                    
+                
                 # Save consumer_uuid in db
                 settings.ENTITLEMENT_CONSUMER = consumer
                 
@@ -313,6 +319,10 @@ class ApiV2AttachView(APIView):
                     # A 403 was recieved because the sub was already attached to this consumer
                     # Or the subscription could not be attached to this consumer
                     pass
+
+                
+                # Save consumer_uuid in db
+                settings.ENTITLEMENT_CONSUMER = consumer
                 
                 # Attempt to get entitlement cert from RHSM 
                 entitlements = uep.getCertificates(consumer_uuid=consumer['uuid'], serials=[consumer['serial_id']])
@@ -327,7 +337,7 @@ class ApiV2AttachView(APIView):
                     # TODO: Find a big account with old certs and try this out with that to make sure we don't get a lot of outdated entitlement certs
                     cert_key = entitlement['cert'] + entitlement['key']  # Potentially make this `=` --> '+='
                 
-                
+
                 # Save the cert as a setting
                 if cert_key != '':
                     settings.ENTITLEMENT_CERT = cert_key
