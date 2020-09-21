@@ -288,6 +288,8 @@ class ApiV2AttachView(APIView):
                         consumer_resp = uep.registerConsumer(name=consumer['name'], type="system", owner=consumer['org'])
                         consumer['uuid'] = consumer_resp['uuid']
                     except RestlibException as e:
+                        if e.code == 404 and 'owner with key' in e.msg:
+                            return Response({"error": _("Satellite Organization does not exist. ")}, status=status.HTTP_400_BAD_REQUEST)
                         return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
                     except Exception as e:
                         pass
