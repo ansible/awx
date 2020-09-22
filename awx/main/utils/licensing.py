@@ -108,7 +108,7 @@ class Licenser(object):
                 f.flush()
                 os.fsync(f)
 
-                # TODO: Consider refactoring this to be done with subman directly
+                # TODO: Consider refactoring this to be done with subman directly, or rhsm.certificate?
                 cmd = ["rct", "cat-cert", f.name, "--no-content"]
                 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
@@ -178,10 +178,10 @@ class Licenser(object):
         host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
 
         if not user:
-            raise ValueError('rh_username is required')
+            raise ValueError('subscriptions_username is required')
 
         if not pw:
-            raise ValueError('rh_password is required')
+            raise ValueError('subscriptions_password is required')
 
         if host and user and pw:
             import requests
