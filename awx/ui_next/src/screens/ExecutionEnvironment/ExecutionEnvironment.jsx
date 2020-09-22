@@ -17,6 +17,7 @@ import { ExecutionEnvironmentsAPI } from '../../api';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 
 import ExecutionEnvironmentDetails from './ExecutionEnvironmentDetails';
 import ExecutionEnvironmentEdit from './ExecutionEnvironmentEdit';
@@ -63,6 +64,11 @@ function ExecutionEnvironment({ i18n, setBreadcrumb }) {
       name: i18n._(t`Details`),
       link: `/execution_environments/${id}/details`,
       id: 0,
+    },
+    {
+      name: i18n._(t`Access`),
+      link: `/execution_environments/${id}/access`,
+      id: 1,
     },
   ];
 
@@ -112,6 +118,12 @@ function ExecutionEnvironment({ i18n, setBreadcrumb }) {
                 <Route path="/execution_environments/:id/details">
                   <ExecutionEnvironmentDetails
                     executionEnvironment={executionEnvironment}
+                  />
+                </Route>
+                <Route path="/execution_environments/:id/access">
+                  <ResourceAccessList
+                    resource={executionEnvironment}
+                    apiModel={ExecutionEnvironmentsAPI}
                   />
                 </Route>
               </>
