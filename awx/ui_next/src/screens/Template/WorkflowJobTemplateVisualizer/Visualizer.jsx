@@ -419,7 +419,7 @@ function Visualizer({ template, i18n }) {
     await Promise.all(disassociateCredentialRequests);
     await Promise.all(associateCredentialRequests);
 
-    // history.push(`/templates/workflow_job_template/${template.id}/details`);
+    history.push(`/templates/workflow_job_template/${template.id}/details`);
   };
 
   useEffect(() => {
