@@ -37,13 +37,13 @@ options:
       default: "password"
       choices: ["password", "authorization-code"]
       type: str
-      required: True
+      required: False
     client_type:
       description:
         - Set to public or confidential depending on how secure the client device is.
       choices: ["public", "confidential"]
       type: str
-      required: True
+      required: False
     organization:
       description:
         - Name of organization for application.
@@ -74,7 +74,7 @@ EXAMPLES = '''
     description: "Foo bar application"
     organization: "test"
     state: present
-    authorization-grant-type: password
+    authorization_grant_type: password
     client-type: public
 
 - name: Add Foo application
@@ -83,14 +83,15 @@ EXAMPLES = '''
     description: "Foo bar application"
     organization: "test"
     state: present
-    authorization-grant-type: authorization-code
+    authorization_grant_type: authorization-code
     client-type: confidential
-    redirect_uris: http://tower.com/api/v2/
+    redirect_uris:
+      - http://tower.com/api/v2/
 '''
 
 import time
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def main():
@@ -98,8 +99,8 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         description=dict(),
-        authorization_grant_type=dict(required=True),
-        client_type=dict(required=True, choices=['public', 'confidential']),
+        authorization_grant_type=dict(choices=["password", "authorization-code"]),
+        client_type=dict(choices=['public', 'confidential']),
         organization=dict(required=True),
         redirect_uris=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
@@ -107,7 +108,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -115,16 +116,15 @@ def main():
     authorization_grant_type = module.params.get('authorization_grant_type')
     client_type = module.params.get('client_type')
     organization = module.params.get('organization')
-    redirect_uris = ' '.join(module.params.get('redirect_uris'))
+    redirect_uris = module.params.get('redirect_uris')
     state = module.params.get('state')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up application based on the provided name and org ID
-    application = module.get_one('applications', **{
+    application = module.get_one('applications', name_or_id=name, **{
         'data': {
-            'name': name,
             'organization': org_id
         }
     })
@@ -139,14 +139,16 @@ def main():
     # Create the data that gets sent for create and update
     application_fields = {
         'name': name,
-        'authorization_grant_type': authorization_grant_type,
-        'client_type': client_type,
         'organization': org_id,
     }
+    if authorization_grant_type is not None:
+        application_fields['authorization_grant_type'] = authorization_grant_type
+    if client_type is not None:
+        application_fields['client_type'] = client_type
     if description is not None:
         application_fields['description'] = description
     if redirect_uris is not None:
-        application_fields['redirect_uris'] = redirect_uris
+        application_fields['redirect_uris'] = ' '.join(redirect_uris)
 
     # If the state was present and we can let the module build or update the existing application, this will return on its own
     module.create_or_update_if_needed(
