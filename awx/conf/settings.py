@@ -17,6 +17,8 @@ from django.utils.functional import cached_property
 # Django REST Framework
 from rest_framework.fields import empty, SkipField
 
+import cachetools
+
 # Tower
 from awx.main.utils import encrypt_field, decrypt_field
 from awx.conf import settings_registry
@@ -27,6 +29,8 @@ from awx.conf.migrations._reencrypt import decrypt_field as old_decrypt_field
 # ready (or during migrations).
 
 logger = logging.getLogger('awx.conf.settings')
+
+SETTING_MEMORY_TTL = 5 if 'callback_receiver' in ' '.join(sys.argv) else 0
 
 # Store a special value to indicate when a setting is not set in the database.
 SETTING_CACHE_NOTSET = '___notset___'
@@ -406,6 +410,7 @@ class SettingsWrapper(UserSettingsHolder):
     def SETTINGS_MODULE(self):
         return self._get_default('SETTINGS_MODULE')
 
+    @cachetools.cached(cache=cachetools.TTLCache(maxsize=2048, ttl=SETTING_MEMORY_TTL))
     def __getattr__(self, name):
         value = empty
         if name in self.all_supported_settings:
