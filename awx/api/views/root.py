@@ -389,11 +389,12 @@ class ApiV2ConfigView(APIView):
 
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
+        # TODO: Update this to just get settings.LICENSE.['valid_key'] from the settings to avoid transaction violations and get quicker HTTP responses=
         license_data = get_license()
+        # license_data = settings.LICENSE
+
         if not license_data.get('valid_key', False):
             license_data = {}
-        # TODO: Update this to just get settings.LICENSE.['valid_key'] from the settings to avoid transaction violations and get quicker HTTP responses
-        # license_data = settings.LICENSE
 
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 

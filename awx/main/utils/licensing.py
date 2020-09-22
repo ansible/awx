@@ -33,6 +33,22 @@ from awx.main.utils import get_awx_http_client_headers
 logger = logging.getLogger(__name__)
 
 
+def str_to_datetime(string):
+    if not string:
+        return 0
+    t_parts = re.split('-| |:|\+', string)
+
+    year = int(t_parts[0])
+    month = int(t_parts[1])
+    day = int(t_parts[2])
+    hour = int(t_parts[3])
+    minute = int(t_parts[4])
+    second = int(t_parts[5])
+    microsecond = int(t_parts[7])
+
+    return datetime(year, month, day, hour, minute, second, microsecond)
+
+
 class Licenser(object):
     # warn when there is a month (30 days) left on the license
     LICENSE_TIMEOUT = 60 * 60 * 24 * 30
@@ -73,7 +89,6 @@ class Licenser(object):
         if os.path.exists('/etc/tower/certs') and os.path.exists('/var/lib/awx/.tower_version'):
             return True
         return False
-
 
 
     def _generate_open_config(self):
@@ -157,13 +172,13 @@ class Licenser(object):
                                 instance_count=int(cert_dict.get('Quantity', 0)),
                                 support_level=cert_dict.get('Service Level', ''),
                                 pool_id=cert_dict.get('Pool ID'),
-                                # license_date=cert_dict.get('End Date', 2524626011), # TODO: Need to convert to seconds
+                                license_date=str_to_datetime(cert_dict.get('End Date', None)).strftime('%s'),
                                 product_name="Red Hat Ansible Tower",
                                 valid_key=True,
                                 license_type=type
                                 ))
         settings.LICENSE = self._attrs
-    
+
 
     def update(self, **kwargs):
         # Update attributes of the current license.
