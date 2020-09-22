@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ kubernetes_deployment_name }}-postgres-root-ca-cert
+  namespace: {{ kubernetes_namespace }}
+data:
+  postgres_root_ca.crt: |
+    {{ postgres_root_ca_cert | indent(width=4) }}
