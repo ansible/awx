@@ -382,7 +382,7 @@ function Visualizer({ template, i18n }) {
               unified_job_template: node.unifiedJobTemplate.id,
             })
           );
-          if (node.promptValues.addedCredentials.length > 0) {
+          if (node?.promptValues?.addedCredentials?.length > 0) {
             node.promptValues.addedCredentials.forEach(cred =>
               associateCredentialRequests.push(
                 WorkflowJobTemplateNodesAPI.associateCredentials(
@@ -392,7 +392,7 @@ function Visualizer({ template, i18n }) {
               )
             );
           }
-          if (node.promptValues.removedCredentials.length > 0) {
+          if (node?.promptValues?.removedCredentials?.length > 0) {
             node.promptValues.removedCredentials.forEach(cred =>
               disassociateCredentialRequests.push(
                 WorkflowJobTemplateNodesAPI.disassociateCredentials(

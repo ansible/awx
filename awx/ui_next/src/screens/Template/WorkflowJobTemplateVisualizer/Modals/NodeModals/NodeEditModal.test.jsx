@@ -59,7 +59,7 @@ describe('NodeEditModal', () => {
       el => el.length === 0
     );
     await act(async () => {
-      wrapper.find('NodeModal').prop('onSave')({}, values);
+      wrapper.find('NodeModal').prop('onSave')(values, {});
     });
     expect(dispatch).toHaveBeenCalledWith({
       node: {

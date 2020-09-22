@@ -12,7 +12,8 @@ function NodeAddModal({ i18n }) {
   const dispatch = useContext(WorkflowDispatchContext);
   const { addNodeSource } = useContext(WorkflowStateContext);
 
-  const addNode = (config, values, linkType) => {
+  const addNode = (values, linkType, config) => {
+    const { approvalName, approvalDescription, approvalTimeout } = values;
     if (values) {
       const { added, removed } = getAddedAndRemoved(
         config?.defaults?.credentials,
@@ -23,15 +24,27 @@ function NodeAddModal({ i18n }) {
       values.addedCredentials = added;
       values.removedCredentials = removed;
     }
-    const node = {
-      linkType,
-      nodeResource: values.nodeResource,
-    };
-    if (
-      values?.nodeType === 'job_template' ||
-      values?.nodeType === 'workflow_job_template'
-    ) {
-      node.promptValues = values;
+    let node;
+    if (values.nodeType === 'approval') {
+      node = {
+        nodeResource: {
+          description: approvalDescription,
+          name: approvalName,
+          timeout: approvalTimeout,
+          type: 'workflow_approval_template',
+        },
+      };
+    } else {
+      node = {
+        linkType,
+        nodeResource: values.nodeResource,
+      };
+      if (
+        values?.nodeType === 'job_template' ||
+        values?.nodeType === 'workflow_job_template'
+      ) {
+        node.promptValues = values;
+      }
     }
     dispatch({
       type: 'CREATE_NODE',

@@ -8,7 +8,7 @@ import NodeModal from './NodeModal';
 function NodeEditModal({ i18n }) {
   const dispatch = useContext(WorkflowDispatchContext);
 
-  const updateNode = (config, values) => {
+  const updateNode = (values, linkType, config) => {
     const { added, removed } = getAddedAndRemoved(
       config?.defaults?.credentials,
       values?.credentials
@@ -30,7 +30,6 @@ function NodeEditModal({ i18n }) {
     ) {
       node.promptValues = values;
     }
-    console.log(node, 'node');
     dispatch({
       type: 'UPDATE_NODE',
       node,

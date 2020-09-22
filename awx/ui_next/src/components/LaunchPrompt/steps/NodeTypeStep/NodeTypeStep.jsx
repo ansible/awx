@@ -36,7 +36,7 @@ function NodeTypeStep({ i18n }) {
   const [, , approvalDescriptionHelpers] = useField('approvalDescription');
   const [, , timeoutHelpers] = useField('timeout');
 
-  const isValid = !approvalNameMeta.touched || !approvalNameMeta.touched;
+  const isValid = !approvalNameMeta.touched || !approvalNameMeta.error;
   return (
     <>
       <div css="display: flex; align-items: center; margin-bottom: 20px;">
@@ -139,7 +139,7 @@ function NodeTypeStep({ i18n }) {
                 <TimeoutInput
                   aria-label={i18n._(t`timeout-minutes`)}
                   name="timeoutMinutes"
-                  id="approval-timeout-Seconds"
+                  id="approval-timeout-minutes"
                   type="number"
                   min="0"
                   step="1"

@@ -84,7 +84,7 @@ function getInitialValues(config, loadedResource, currentResource) {
   }
   if (config.ask_variables_on_launch) {
     initialValues.extra_vars =
-      currentResource?.extra_vars || loadedResource.extra_vars || '---';
+      currentResource?.extra_vars || loadedResource?.extra_vars || '---';
   }
   if (config.ask_scm_branch_on_launch) {
     initialValues.scm_branch =

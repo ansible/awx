@@ -22,7 +22,11 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '../../../../../contexts/Workflow';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../../../api';
+import {
+  JobTemplatesAPI,
+  WorkflowJobTemplatesAPI,
+  WorkflowJobTemplateNodesAPI,
+} from '../../../../../api';
 import Wizard from '../../../../../components/Wizard';
 import useSteps from '../../../../../components/LaunchPrompt/useSteps';
 import AlertModal from '../../../../../components/AlertModal';
@@ -45,66 +49,17 @@ function canLaunchWithoutPrompt(nodeType, launchData) {
   );
 }
 
-function NodeModalForm({ askLinkType, i18n, onSave, title }) {
+function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
   const history = useHistory();
   const dispatch = useContext(WorkflowDispatchContext);
   const { nodeToEdit } = useContext(WorkflowStateContext);
   const {
     values,
-    resetForm,
     setTouched,
     validateForm,
     setFieldValue,
+    resetForm,
   } = useFormikContext();
-
-  // let defaultApprovalDescription = '';
-  // let defaultApprovalName = '';
-  // let defaultApprovalTimeout = 0;
-  // let defaultNodeResource = null;
-  // let defaultNodeType = 'job_template';
-  // if (nodeToEdit && nodeToEdit.unifiedJobTemplate) {
-  //   if (
-  //     nodeToEdit &&
-  //     nodeToEdit.unifiedJobTemplate &&
-  //     (nodeToEdit.unifiedJobTemplate.type ||
-  //       nodeToEdit.unifiedJobTemplate.unified_job_type)
-  //   ) {
-  //     const ujtType =
-  //       nodeToEdit.unifiedJobTemplate.type ||
-  //       nodeToEdit.unifiedJobTemplate.unified_job_type;
-  //     switch (ujtType) {
-  //       case 'job_template':
-  //       case 'job':
-  //         defaultNodeType = 'job_template';
-  //         defaultNodeResource = nodeToEdit.unifiedJobTemplate;
-  //         break;
-  //       case 'project':
-  //       case 'project_update':
-  //         defaultNodeType = 'project_sync';
-  //         defaultNodeResource = nodeToEdit.unifiedJobTemplate;
-  //         break;
-  //       case 'inventory_source':
-  //       case 'inventory_update':
-  //         defaultNodeType = 'inventory_source_sync';
-  //         defaultNodeResource = nodeToEdit.unifiedJobTemplate;
-  //         break;
-  //       case 'workflow_job_template':
-  //       case 'workflow_job':
-  //         defaultNodeType = 'workflow_job_template';
-  //         defaultNodeResource = nodeToEdit.unifiedJobTemplate;
-  //         break;
-  //       case 'workflow_approval_template':
-  //       case 'workflow_approval':
-  //         defaultNodeType = 'approval';
-  //         defaultApprovalName = nodeToEdit.unifiedJobTemplate.name;
-  //         defaultApprovalDescription =
-  //           nodeToEdit.unifiedJobTemplate.description;
-  //         defaultApprovalTimeout = nodeToEdit.unifiedJobTemplate.timeout;
-  //         break;
-  //       default:
-  //     }
-  //   }
-  // }
 
   const [triggerNext, setTriggerNext] = useState(0);
 
@@ -118,13 +73,20 @@ function NodeModalForm({ askLinkType, i18n, onSave, title }) {
     history.replace(`${history.location.pathname}?${otherParts.join('&')}`);
   };
   useEffect(() => {
+    if (values?.nodeResource?.summary_fields?.credentials?.length > 0) {
+      setFieldValue(
+        'credentials',
+        values.nodeResource.summary_fields.credentials
+      );
+    }
     if (nodeToEdit?.unified_job_type === 'workflow_job') {
       setFieldValue('nodeType', 'workflow_job_template');
     }
     if (nodeToEdit?.unified_job_type === 'job') {
       setFieldValue('nodeType', 'job_template');
     }
-  }, [nodeToEdit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodeToEdit, values.nodeResource]);
 
   const {
     request: readLaunchConfig,
@@ -159,6 +121,7 @@ function NodeModalForm({ askLinkType, i18n, onSave, title }) {
         }
       }
       return {};
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values.nodeResource, values.nodeType]),
     {}
   );
@@ -169,7 +132,7 @@ function NodeModalForm({ askLinkType, i18n, onSave, title }) {
 
   const {
     steps: promptSteps,
-    initialValues: promptStepsInitialValues,
+    initialValues,
     isReady,
     visitStep,
     visitAllSteps,
@@ -186,20 +149,7 @@ function NodeModalForm({ askLinkType, i18n, onSave, title }) {
 
   const handleSaveNode = () => {
     clearQueryParams();
-    // nodeToEdit id, original node object,  unified job template,
-
-    // const resource =
-    //   values.nodeType === 'approval'
-    //     ? {
-    //         description: values.approvalDescription,
-    //         name: values.approvalName,
-    //         timeout: values.approvalTimeout,
-    //         type: 'workflow_approval_template',
-    //       }
-    //     : values.nodeResource;
-    // const editedNode = { id: 1, unified_job_template: { type: 'approval' } };
-    console.log(values, 'values');
-    onSave(launchConfig, values, askLinkType ? values.linkType : null);
+    onSave(values, askLinkType ? values.linkType : null, launchConfig);
   };
 
   const handleCancel = () => {
@@ -208,22 +158,18 @@ function NodeModalForm({ askLinkType, i18n, onSave, title }) {
   };
 
   const { error, dismissError } = useDismissableError(
-    launchConfigError || contentError
+    launchConfigError || contentError || credentialError
   );
 
   useEffect(() => {
-    if (Object.values(promptStepsInitialValues).length > 0 && isReady) {
+    if (Object.values(initialValues).length > 0 && isReady) {
       resetForm({
         values: {
-          ...promptStepsInitialValues,
-          nodeResource:
-            values.nodeResource || promptStepsInitialValues.nodeResource,
-          nodeType:
-            values.nodeType ||
-            promptStepsInitialValues.nodeType ||
-            'job_template',
-          linkType: 'success',
-          verbosity: promptStepsInitialValues?.verbosity?.toString(),
+          ...initialValues,
+          nodeResource: values.nodeResource || initialValues.nodeResource,
+          nodeType: values.nodeType || initialValues.nodeType || 'job_template',
+          linkType: values.linkType || 'success',
+          verbosity: initialValues?.verbosity?.toString(),
         },
       });
     }
@@ -295,7 +241,12 @@ function NodeModalForm({ askLinkType, i18n, onSave, title }) {
       steps={
         isReady
           ? steps
-          : [{ name: ContentLoading, component: <ContentLoading /> }]
+          : [
+              {
+                name: i18n._(t`Content Loading`),
+                component: <ContentLoading />,
+              },
+            ]
       }
       css="overflow: scroll"
       title={wizardTitle}
@@ -312,17 +263,55 @@ function NodeModalForm({ askLinkType, i18n, onSave, title }) {
 }
 
 const NodeModal = ({ onSave, i18n, askLinkType, title }) => {
-  const onSaveForm = (resource, linkType, values) => {
-    onSave(resource, linkType, values);
+  const { nodeToEdit } = useContext(WorkflowStateContext);
+  const onSaveForm = (values, linkType, config) => {
+    onSave(values, linkType, config);
   };
+  const { request: fetchCredentials, result, error } = useRequest(
+    useCallback(async () => {
+      const {
+        data: { results },
+      } = await WorkflowJobTemplateNodesAPI.readCredentials(
+        nodeToEdit.originalNodeObject.id
+      );
+      return results;
+    }, [nodeToEdit])
+  );
+  useEffect(() => {
+    if (nodeToEdit?.originalNodeObject?.related?.credentials) {
+      fetchCredentials();
+    }
+  }, [fetchCredentials, nodeToEdit]);
   return (
-    <Formik initialValues={{}} onSave={() => onSaveForm}>
+    <Formik
+      initialValues={{
+        linkType: 'success',
+        nodeResource:
+          nodeToEdit?.originalNodeObject?.summary_fields
+            ?.unified_job_template || null,
+        inventory:
+          nodeToEdit?.originalNodeObject?.summary_fields?.inventory || null,
+        credentials: result || null,
+        verbosity: nodeToEdit?.originalNodeObject?.verbosity || 0,
+        diff_mode: nodeToEdit?.originalNodeObject?.verbosty,
+        skip_tags: nodeToEdit?.originalNodeObject?.skip_tags || '',
+        job_tags: nodeToEdit?.originalNodeObject?.job_tags || '',
+        scm_branch:
+          nodeToEdit?.originalNodeObject?.scm_branch !== null
+            ? nodeToEdit?.originalNodeObject?.scm_branch
+            : '',
+        job_type: nodeToEdit?.originalNodeObject?.job_type || 'run',
+        extra_vars: nodeToEdit?.originalNodeObject?.extra_data || '---',
+      }}
+      onSave={() => onSaveForm}
+    >
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <NodeModalForm
             onSave={onSaveForm}
             i18n={i18n}
             title={title}
+            credentialError={error}
             askLinkType={askLinkType}
           />
         </Form>

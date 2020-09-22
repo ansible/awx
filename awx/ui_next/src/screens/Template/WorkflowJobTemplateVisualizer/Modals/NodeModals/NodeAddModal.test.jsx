@@ -40,11 +40,19 @@ describe('NodeAddModal', () => {
       el => el.length === 0
     );
     await act(async () => {
-      wrapper.find('NodeModal').prop('onSave')({}, nodeResource, 'success');
+      wrapper.find('NodeModal').prop('onSave')({ nodeResource }, 'success', {});
     });
 
     expect(dispatch).toHaveBeenCalledWith({
-      node: { linkType: 'success', nodeResource: undefined },
+      node: {
+        linkType: 'success',
+        nodeResource: {
+          id: 448,
+          name: 'Test JT',
+          summary_fields: { credentials: [] },
+          type: 'job_template',
+        },
+      },
       type: 'CREATE_NODE',
     });
   });

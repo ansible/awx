@@ -17,6 +17,6 @@ export function getAddedAndRemoved(original, current) {
 
   return {
     added,
-    removed
+    removed,
   };
 }

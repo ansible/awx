@@ -1,6 +1,4 @@
-import {
-  t
-} from '@lingui/macro';
+import { t } from '@lingui/macro';
 
 export function initReducer() {
   return {
@@ -41,8 +39,8 @@ export default function visualizerReducer(state, action) {
       return {
         ...state,
         addNodeSource: null,
-          addNodeTarget: null,
-          nodeToEdit: null,
+        addNodeTarget: null,
+        nodeToEdit: null,
       };
     case 'DELETE_ALL_NODES':
       return deleteAllNodes(state);
@@ -78,11 +76,13 @@ export default function visualizerReducer(state, action) {
       };
     case 'SET_LINK_TO_EDIT':
       return {
-        ...state, linkToEdit: action.value
+        ...state,
+        linkToEdit: action.value,
       };
     case 'SET_NODES':
       return {
-        ...state, nodes: action.value
+        ...state,
+        nodes: action.value,
       };
     case 'SET_NODE_POSITIONS':
       return {
@@ -113,7 +113,7 @@ export default function visualizerReducer(state, action) {
       return {
         ...state,
         addNodeSource: action.sourceNodeId,
-          addNodeTarget: action.targetNodeId || null,
+        addNodeTarget: action.targetNodeId || null,
       };
     case 'START_DELETE_LINK':
       return startDeleteLink(state, action.link);
@@ -137,12 +137,7 @@ export default function visualizerReducer(state, action) {
 }
 
 function createLink(state, linkType) {
-  const {
-    addLinkSourceNode,
-    addLinkTargetNode,
-    links,
-    nodes
-  } = state;
+  const { addLinkSourceNode, addLinkTargetNode, links, nodes } = state;
   const newLinks = [...links];
   const newNodes = [...nodes];
 
@@ -179,13 +174,7 @@ function createLink(state, linkType) {
 }
 
 function createNode(state, node) {
-  const {
-    addNodeSource,
-    addNodeTarget,
-    links,
-    nodes,
-    nextNodeId
-  } = state;
+  const { addNodeSource, addNodeTarget, links, nodes, nextNodeId } = state;
   const newNodes = [...nodes];
   const newLinks = [...links];
 
@@ -237,9 +226,7 @@ function createNode(state, node) {
 }
 
 function cancelLink(state) {
-  const {
-    nodes
-  } = state;
+  const { nodes } = state;
   const newNodes = [...nodes];
 
   newNodes.forEach(node => {
@@ -257,9 +244,7 @@ function cancelLink(state) {
 }
 
 function deleteAllNodes(state) {
-  const {
-    nodes
-  } = state;
+  const { nodes } = state;
   return {
     ...state,
     addLinkSourceNode: null,
@@ -279,13 +264,10 @@ function deleteAllNodes(state) {
 }
 
 function deleteLink(state) {
-  const {
-    links,
-    linkToDelete
-  } = state;
+  const { links, linkToDelete } = state;
   const newLinks = [...links];
 
-  for (let i = newLinks.length; i--;) {
+  for (let i = newLinks.length; i--; ) {
     const link = newLinks[i];
 
     if (
@@ -361,7 +343,7 @@ function removeLinksFromDeletedNode(
   children,
   parents
 ) {
-  for (let i = newLinks.length; i--;) {
+  for (let i = newLinks.length; i--; ) {
     const link = newLinks[i];
 
     if (!linkParentMapping[link.target.id]) {
@@ -385,11 +367,7 @@ function removeLinksFromDeletedNode(
 }
 
 function deleteNode(state) {
-  const {
-    links,
-    nodes,
-    nodeToDelete
-  } = state;
+  const { links, nodes, nodeToDelete } = state;
 
   const nodeId = nodeToDelete.id;
   const newNodes = [...nodes];
@@ -426,12 +404,14 @@ function generateNodes(workflowNodes, i18n) {
   const chartNodeIdToIndexMapping = {};
   const nodeIdToChartNodeIdMapping = {};
   let nodeIdCounter = 2;
-  const arrayOfNodesForChart = [{
-    id: 1,
-    unifiedJobTemplate: {
-      name: i18n._(t `START`),
+  const arrayOfNodesForChart = [
+    {
+      id: 1,
+      unifiedJobTemplate: {
+        name: i18n._(t`START`),
+      },
     },
-  }, ];
+  ];
   workflowNodes.forEach(node => {
     node.workflowMakerNodeId = nodeIdCounter;
 
@@ -548,10 +528,7 @@ function generateNodesAndLinks(state, workflowNodes, i18n) {
 }
 
 function selectSourceForLinking(state, sourceNode) {
-  const {
-    links,
-    nodes
-  } = state;
+  const { links, nodes } = state;
   const newNodes = [...nodes];
   const parentMap = {};
   const invalidLinkTargetIds = [];
@@ -602,9 +579,7 @@ function selectSourceForLinking(state, sourceNode) {
 }
 
 function startDeleteLink(state, link) {
-  const {
-    links
-  } = state;
+  const { links } = state;
   const parentMap = {};
   links.forEach(existingLink => {
     if (!parentMap[existingLink.target.id]) {
@@ -622,9 +597,7 @@ function startDeleteLink(state, link) {
 }
 
 function toggleDeleteAllNodesModal(state) {
-  const {
-    showDeleteAllNodesModal
-  } = state;
+  const { showDeleteAllNodesModal } = state;
   return {
     ...state,
     showDeleteAllNodesModal: !showDeleteAllNodesModal,
@@ -632,9 +605,7 @@ function toggleDeleteAllNodesModal(state) {
 }
 
 function toggleLegend(state) {
-  const {
-    showLegend
-  } = state;
+  const { showLegend } = state;
   return {
     ...state,
     showLegend: !showLegend,
@@ -642,9 +613,7 @@ function toggleLegend(state) {
 }
 
 function toggleTools(state) {
-  const {
-    showTools
-  } = state;
+  const { showTools } = state;
   return {
     ...state,
     showTools: !showTools,
@@ -652,9 +621,7 @@ function toggleTools(state) {
 }
 
 function toggleUnsavedChangesModal(state) {
-  const {
-    showUnsavedChangesModal
-  } = state;
+  const { showUnsavedChangesModal } = state;
   return {
     ...state,
     showUnsavedChangesModal: !showUnsavedChangesModal,
@@ -662,10 +629,7 @@ function toggleUnsavedChangesModal(state) {
 }
 
 function updateLink(state, linkType) {
-  const {
-    linkToEdit,
-    links
-  } = state;
+  const { linkToEdit, links } = state;
   const newLinks = [...links];
 
   newLinks.forEach(link => {
@@ -686,16 +650,13 @@ function updateLink(state, linkType) {
 }
 
 function updateNode(state, editedNode) {
-  const {
-    nodeToEdit,
-    nodes
-  } = state;
+  const { nodeToEdit, nodes } = state;
   const newNodes = [...nodes];
 
   const matchingNode = newNodes.find(node => node.id === nodeToEdit.id);
   matchingNode.unifiedJobTemplate = editedNode.nodeResource;
   matchingNode.isEdited = true;
-  matchingNode.promptValues = editedNode.promptValues
+  matchingNode.promptValues = editedNode.promptValues;
 
   return {
     ...state,
@@ -706,10 +667,7 @@ function updateNode(state, editedNode) {
 }
 
 function refreshNode(state, refreshedNode) {
-  const {
-    nodeToView,
-    nodes
-  } = state;
+  const { nodeToView, nodes } = state;
   const newNodes = [...nodes];
 
   const matchingNode = newNodes.find(node => node.id === nodeToView.id);

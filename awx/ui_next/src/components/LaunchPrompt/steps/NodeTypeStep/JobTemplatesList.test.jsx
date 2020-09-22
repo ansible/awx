@@ -4,7 +4,7 @@ import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import { JobTemplatesAPI } from '../../../../api';
 import JobTemplatesList from './JobTemplatesList';
 
-jest.mock('../../../../../../api/models/JobTemplates');
+jest.mock('../../../../api/models/JobTemplates');
 
 const nodeResource = {
   id: 1,

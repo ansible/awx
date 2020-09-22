@@ -51,7 +51,6 @@ function getStep(config, meta, i18n, visitedSteps) {
 }
 
 function getInitialValues(config, loadedResource, currentResource) {
-
   if (
     !config.ask_inventory_on_launch &&
     !loadedResource?.summary_fields?.inventory

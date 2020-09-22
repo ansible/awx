@@ -1,6 +1,5 @@
 import React from 'react';
 import { act, isElementOfType } from 'react-dom/test-utils';
-import { Formik } from 'formik';
 import {
   mountWithContexts,
   waitForElement,

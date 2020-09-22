@@ -251,7 +251,7 @@ describe('NodeModal', () => {
       wrapper.update();
 
       expect(JobTemplatesAPI.readLaunch).toBeCalledWith(1);
-      expect(JobTemplatesAPI.readSurvey).toBeCalledWith(1);
+      expect(JobTemplatesAPI.readSurvey).toBeCalledWith(25);
       wrapper.update();
       expect(wrapper.find('NodeNextButton').prop('buttonText')).toBe('Next');
       wrapper
@@ -265,26 +265,20 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
-          id: 1,
-          name: 'Test Job Template',
-          type: 'job_template',
-          url: '/api/v2/job_templates/1',
-          summary_fields: {
-            recent_jobs: [],
+          linkType: 'always',
+          nodeResource: {
+            id: 1,
+            name: 'Test Job Template',
+            related: { webhook_receiver: '' },
+            summary_fields: { recent_jobs: [] },
+            type: 'job_template',
+            url: '/api/v2/job_templates/1',
           },
-          related: { webhook_receiver: '' },
+          nodeType: 'job_template',
+          verbosity: undefined,
         },
         'always',
-        {
-          credentials: [],
-          diff_mode: false,
-          extra_vars: '---',
-          inventory: null,
-          job_tags: '',
-          job_type: '',
-          skip_tags: '',
-          verbosity: '0',
-        }
+        {}
       );
     });
 
@@ -307,10 +301,15 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
-          id: 1,
-          name: 'Test Project',
-          type: 'project',
-          url: '/api/v2/projects/1',
+          linkType: 'failure',
+          nodeResource: {
+            id: 1,
+            name: 'Test Project',
+            type: 'project',
+            url: '/api/v2/projects/1',
+          },
+          nodeType: 'project_sync',
+          verbosity: undefined,
         },
         'failure',
         {}
@@ -339,10 +338,15 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
-          id: 1,
-          name: 'Test Inventory Source',
-          type: 'inventory_source',
-          url: '/api/v2/inventory_sources/1',
+          linkType: 'failure',
+          nodeResource: {
+            id: 1,
+            name: 'Test Inventory Source',
+            type: 'inventory_source',
+            url: '/api/v2/inventory_sources/1',
+          },
+          nodeType: 'inventory_source_sync',
+          verbosity: undefined,
         },
         'failure',
         {}
@@ -367,16 +371,42 @@ describe('NodeModal', () => {
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
+      wrapper.update();
 
+      await act(async () => {
+        wrapper.find('button#next-node-modal').simulate('click');
+      });
       expect(onSave).toBeCalledWith(
         {
-          id: 1,
-          name: 'Test Workflow Job Template',
-          type: 'workflow_job_template',
-          url: '/api/v2/workflow_job_templates/1',
+          linkType: 'success',
+          nodeResource: {
+            id: 1,
+            name: 'Test Workflow Job Template',
+            type: 'workflow_job_template',
+            url: '/api/v2/workflow_job_templates/1',
+          },
+          nodeType: 'workflow_job_template',
+          verbosity: undefined,
         },
         'success',
-        {}
+        {
+          ask_inventory_on_launch: false,
+          ask_limit_on_launch: false,
+          ask_scm_branch_on_launch: false,
+          ask_variables_on_launch: false,
+          can_start_without_user_input: false,
+          defaults: {
+            extra_vars: '---',
+            inventory: { id: null, name: null },
+            limit: '',
+            scm_branch: '',
+          },
+          node_prompts_rejected: [272, 273],
+          node_templates_missing: [],
+          survey_enabled: false,
+          variables_needed_to_start: [],
+          workflow_job_template_data: { description: '', id: 53, name: 'jt' },
+        }
       );
     });
 
@@ -395,10 +425,13 @@ describe('NodeModal', () => {
 
       await act(async () => {
         wrapper.find('input#approval-name').simulate('change', {
-          target: { value: 'Test Approval', name: 'name' },
+          target: { value: 'Test Approval', name: 'approvalName' },
         });
         wrapper.find('input#approval-description').simulate('change', {
-          target: { value: 'Test Approval Description', name: 'description' },
+          target: {
+            value: 'Test Approval Description',
+            name: 'approvalDescription',
+          },
         });
         wrapper.find('input#approval-timeout-minutes').simulate('change', {
           target: { value: 5, name: 'timeoutMinutes' },
@@ -433,10 +466,13 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
-          description: 'Test Approval Description',
-          name: 'Test Approval',
+          approvalDescription: 'Test Approval Description',
+          approvalName: 'Test Approval',
+          linkType: 'always',
+          nodeResource: undefined,
+          nodeType: 'approval',
           timeout: 330,
-          type: 'workflow_approval_template',
+          verbosity: undefined,
         },
         'always',
         {}
@@ -483,6 +519,7 @@ describe('NodeModal', () => {
         );
       });
       await waitForElement(newWrapper, 'PFWizard');
+      newWrapper.update();
       expect(newWrapper.find('AnsibleSelect').prop('value')).toBe(
         'project_sync'
       );
@@ -492,10 +529,13 @@ describe('NodeModal', () => {
       newWrapper.update();
       await act(async () => {
         newWrapper.find('input#approval-name').simulate('change', {
-          target: { value: 'Test Approval', name: 'name' },
+          target: { value: 'Test Approval', name: 'approvalName' },
         });
         newWrapper.find('input#approval-description').simulate('change', {
-          target: { value: 'Test Approval Description', name: 'description' },
+          target: {
+            value: 'Test Approval Description',
+            name: 'approvalDescription',
+          },
         });
         newWrapper.find('input#approval-timeout-minutes').simulate('change', {
           target: { value: 5, name: 'timeoutMinutes' },
@@ -530,10 +570,13 @@ describe('NodeModal', () => {
 
       expect(onSave).toBeCalledWith(
         {
-          description: 'Test Approval Description',
-          name: 'Test Approval',
+          approvalDescription: 'Test Approval Description',
+          approvalName: 'Test Approval',
+          linkType: 'success',
+          nodeResource: undefined,
+          nodeType: 'approval',
           timeout: 330,
-          type: 'workflow_approval_template',
+          verbosity: undefined,
         },
         null,
         {}
@@ -582,15 +625,41 @@ describe('NodeModal', () => {
       await act(async () => {
         newWrapper.find('button#next-node-modal').simulate('click');
       });
+      newWrapper.update();
+      await act(async () => {
+        newWrapper.find('button#next-node-modal').simulate('click');
+      });
       expect(onSave).toBeCalledWith(
         {
-          id: 1,
-          name: 'Test Workflow Job Template',
-          type: 'workflow_job_template',
-          url: '/api/v2/workflow_job_templates/1',
+          linkType: 'success',
+          nodeResource: {
+            id: 1,
+            name: 'Test Workflow Job Template',
+            type: 'workflow_job_template',
+            url: '/api/v2/workflow_job_templates/1',
+          },
+          nodeType: 'workflow_job_template',
+          verbosity: undefined,
         },
         null,
-        {}
+        {
+          ask_inventory_on_launch: false,
+          ask_limit_on_launch: false,
+          ask_scm_branch_on_launch: false,
+          ask_variables_on_launch: false,
+          can_start_without_user_input: false,
+          defaults: {
+            extra_vars: '---',
+            inventory: { id: null, name: null },
+            limit: '',
+            scm_branch: '',
+          },
+          node_prompts_rejected: [272, 273],
+          node_templates_missing: [],
+          survey_enabled: false,
+          variables_needed_to_start: [],
+          workflow_job_template_data: { description: '', id: 53, name: 'jt' },
+        }
       );
     });
   });
