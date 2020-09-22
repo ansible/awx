@@ -104,7 +104,7 @@
 							</div>
 							<div class="License-helperText License-licenseStepHelp" translate>Upload an entitlement certificate and key pair</div>
 							<div class="License-filePicker">
-								<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser || (rhCreds.username && rhCreds.username.length > 0) || (rhCreds.password && rhCreds.password.length > 0)" translate>Browse</span>
+								<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser || (subscriptionCreds.username && subscriptionCreds.username.length > 0) || (subscriptionCreds.password && subscriptionCreds.password.length > 0)" translate>Browse</span>
 								<span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
 								<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
 							</div>
@@ -119,12 +119,12 @@
 						<div class="d-block w-100">
 							<div class="AddPermissions-directions">
 								<span class="License-helperText">
-									<translate>Provide your Red Hat customer credentials and you can choose from a list of your available Subscriptions.  The credentials you use will be stored for future use in retrieving renewal or expanded Subscriptions. You can update or remove them in SETTINGS > SYSTEM.</translate>
+									<translate>Provide your Red Hat customer credentials and you can choose from a list of your available Subscriptions.  If you are a Satellite user, or you have multiple organizations on your Red Hat account, please specify the organization ID you wish to associate this Tower Installation to.  The credentials you use will be stored for future use in retrieving renewal or expanded Subscriptions.</translate>
 								</span>
 							</div>
 							<div class="License-rhCredField">
 								<label class="License-label d-block" translate>USERNAME</label>
-								<input class="form-control Form-textInput" type="text" ng-model="rhCreds.username" ng-disabled="!user_is_superuser || newLicense.file" />
+								<input class="form-control Form-textInput" type="text" ng-model="subscriptionCreds.username" ng-disabled="!user_is_superuser || newLicense.file" />
 							</div>
 							<div class="License-rhCredField">
 								<label class="License-label d-block" translate>PASSWORD</label>
@@ -137,11 +137,15 @@
 									</span>
 								</div>
 								<div class="input-group" ng-if="!showPlaceholderPassword">
-									<input id="rh-password" class="form-control Form-textInput" type="password" ng-model="rhCreds.password" ng-disabled="!user_is_superuser || newLicense.file" />
+									<input id="rh-password" class="form-control Form-textInput" type="password" ng-model="subscriptionCreds.password" ng-disabled="!user_is_superuser || newLicense.file" />
 								</div>
 							</div>
+							<div class="License-rhCredField">
+								<label class="License-label d-block" translate>(OPTIONAL) ORGANIZATION ID</label>
+								<input class="form-control Form-textInput" type="text" ng-model="subscriptionCreds.organization_id" ng-disabled="!user_is_superuser || newLicense.file" />
+							</div>
 							<div class="License-getLicensesButton">
-								<span ng-click="lookupLicenses()" class="btn btn-primary" ng-disabled="!rhCreds.username || !rhCreds.password" translate>GET LICENSES</button>
+								<span ng-click="lookupLicenses()" class="btn btn-primary" ng-disabled="!subscriptionCreds.username || !subscriptionCreds.password" translate>GET LICENSES</button>
 							</div>
 							<div ng-if="selectedLicense.fullLicense">
 								<div class="at-RowItem-label" translate>
@@ -217,12 +221,12 @@
 						<div class="Modal-body ng-binding">
 							<div class="License-modalBody">
 								<form>
-									<div class="License-modalRow" ng-repeat="license in rhLicenses track by license.license_key">
+									<div class="License-modalRow" ng-repeat="license in rhLicenses track by license.pool_id">
 										<div class="License-modalRowRadio">
-											<input type="radio" id="license-{{license.license_key}}" ng-model="selectedLicense.modalKey" value="{{license.license_key}}" />
+											<input type="radio" id="license-{{license.pool_id}}" ng-model="selectedLicense.modalPoolId" value="{{license.pool_id}}"/>
 										</div>
 										<div class="License-modalRowDetails">
-											<label for="license-{{license.license_key}}" class="License-modalRowDetailsLabel">
+											<label for="license-{{license.pool_id}}" class="License-modalRowDetailsLabel">
 												<div class="License-modalRowDetailsRow">
 													<div class="License-trialTag" ng-if="license.trial" translate>
 														Trial
@@ -254,7 +258,7 @@
 								<button
 										ng-click="confirmLicenseSelection()"
 										class="btn Modal-footerButton btn-success"
-										ng-disabled="!selectedLicense.modalKey"
+										ng-disabled="!selectedLicense.modalPoolId"
 										translate
 								>
 										SELECT

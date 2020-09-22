@@ -8,9 +8,9 @@ import {N_} from "../i18n";
 
 export default
     ['Wait', '$state', '$scope', '$rootScope', 'ProcessErrors', 'CheckLicense', 'moment', '$timeout', 'Rest', 'LicenseStrings',
-    '$window', 'ConfigService', 'pendoService', 'insightsEnablementService', 'i18n', 'config', 'rhCreds', 'GetBasePath',
+    '$window', 'ConfigService', 'pendoService', 'insightsEnablementService', 'i18n', 'config', 'subscriptionCreds', 'GetBasePath',
     function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment, $timeout, Rest, LicenseStrings,
-    $window, ConfigService, pendoService, insightsEnablementService, i18n, config, rhCreds, GetBasePath) {
+    $window, ConfigService, pendoService, insightsEnablementService, i18n, config, subscriptionCreds, GetBasePath) {
 
         $scope.strings = LicenseStrings;
 
@@ -35,7 +35,7 @@ export default
 
         const reset = function() {
             $scope.newLicense.eula = undefined;
-            $scope.rhCreds = {};
+            $scope.subscriptionCreds = {};
             $scope.selectedLicense = {};
         };
 
@@ -62,31 +62,40 @@ export default
                 insights: true
             };
 
-            $scope.rhCreds = {};
+            $scope.subscriptionCreds = {};
 
-            if (rhCreds.REDHAT_USERNAME && rhCreds.REDHAT_USERNAME !== "") {
-                $scope.rhCreds.username = rhCreds.REDHAT_USERNAME;
+            if (subscriptionCreds.SUBSCRIPTIONS_USERNAME && subscriptionCreds.SUBSCRIPTIONS_USERNAME !== "") {
+                $scope.subscriptionCreds.username = subscriptionCreds.SUBSCRIPTIONS_USERNAME;
             }
 
-            if (rhCreds.REDHAT_PASSWORD && rhCreds.REDHAT_PASSWORD !== "") {
-                $scope.rhCreds.password = rhCreds.REDHAT_PASSWORD;
+            if (subscriptionCreds.SUBSCRIPTIONS_PASSWORD && subscriptionCreds.SUBSCRIPTIONS_PASSWORD !== "") {
+                $scope.subscriptionCreds.password = subscriptionCreds.SUBSCRIPTIONS_PASSWORD;
+                $scope.showPlaceholderPassword = true;
+            }
+
+            if (subscriptionCreds.ORGANIZATION_ID && subscriptionCreds.ORGANIZATION_ID !== "") {
+                $scope.subscriptionCreds.organization_id = subscriptionCreds.ORGANIZATION_ID;
                 $scope.showPlaceholderPassword = true;
             }
         };
 
-        const updateRHCreds = (config) => {
+        const updateSubscriptionCreds = (config) => {
             Rest.setUrl(`${GetBasePath('settings')}system/`);
             Rest.get()
                 .then(({data}) => {
                     initVars(config);
 
-                    if (data.REDHAT_USERNAME && data.REDHAT_USERNAME !== "") {
-                        $scope.rhCreds.username = data.REDHAT_USERNAME;
+                    if (data.SUBSCRIPTIONS_USERNAME && data.SUBSCRIPTIONS_USERNAME !== "") {
+                        $scope.subscriptionCreds.username = data.SUBSCRIPTIONS_USERNAME;
                     }
 
-                    if (data.REDHAT_PASSWORD && data.REDHAT_PASSWORD !== "") {
-                        $scope.rhCreds.password = data.REDHAT_PASSWORD;
+                    if (data.SUBSCRIPTIONS_PASSWORD && data.SUBSCRIPTIONS_PASSWORD !== "") {
+                        $scope.subscriptionCreds.password = data.SUBSCRIPTIONS_PASSWORD;
                         $scope.showPlaceholderPassword = true;
+                    }
+
+                    if (data.ENTITLEMENT_CONSUMER && data.ENTITLEMENT_CONSUMER.org && data.ENTITLEMENT_CONSUMER.org !== "") {
+                        $scope.subscriptionCreds.organization_id = data.ENTITLEMENT_CONSUMER.org;
                     }
                 }).catch(() => {
                     initVars(config);
@@ -116,7 +125,7 @@ export default
         // HTML5 spec doesn't provide a way to customize file input css
         // So we hide the default input, show our own, and simulate clicks to the hidden input
         $scope.fakeClick = function() {
-            if($scope.user_is_superuser && (!$scope.rhCreds.username || $scope.rhCreds.username === '') && (!$scope.rhCreds.password || $scope.rhCreds.password === '')) {
+            if($scope.user_is_superuser && (!$scope.subscriptionCreds.username || $scope.subscriptionCreds.username === '') && (!$scope.subscriptionCreds.password || $scope.subscriptionCreds.password === '')) {
                 $('#License-file').click();
             }
         };
@@ -128,7 +137,7 @@ export default
         $scope.replacePassword = () => {
             if ($scope.user_is_superuser && !$scope.newLicense.entitlement_cert) {
                 $scope.showPlaceholderPassword = false;
-                $scope.rhCreds.password = "";
+                $scope.subscriptionCreds.password = "";
                 $timeout(() => {
                     $('.tooltip').remove();
                     $('#rh-password').focus();
@@ -137,9 +146,9 @@ export default
         };
 
         $scope.lookupLicenses = () => {
-            if ($scope.rhCreds.username && $scope.rhCreds.password) {
+            if ($scope.subscriptionCreds.username && $scope.subscriptionCreds.password) {
                 Wait('start');
-                ConfigService.getSubscriptions($scope.rhCreds.username, $scope.rhCreds.password)
+                ConfigService.getSubscriptions($scope.subscriptionCreds.username, $scope.subscriptionCreds.password)
                     .then(({data}) => {
                         Wait('stop');
                         if (data && data.length > 0) {
@@ -167,29 +176,31 @@ export default
         $scope.confirmLicenseSelection = () => {
             $scope.showLicenseModal = false;
             $scope.selectedLicense.fullLicense = $scope.rhLicenses.find((license) => {
-                return license.license_key === $scope.selectedLicense.modalKey;
+                return license.pool_id === $scope.selectedLicense.modalPoolId;
             });
-            $scope.selectedLicense.modalKey = undefined;
+            $scope.selectedLicense.modalPoolId = undefined;
         };
 
         $scope.cancelLicenseLookup = () => {
             $scope.showLicenseModal = false;
-            $scope.selectedLicense.modalKey = undefined;
+            $scope.selectedLicense.modalPoolId = undefined;
         };
 
         $scope.submit = function() {
             Wait('start');
             let payload = {};
+            let attach = false;
             if ($scope.newLicense.entitlement_cert) {
                 payload.entitlement_cert = $scope.newLicense.entitlement_cert;
             } else if ($scope.selectedLicense.fullLicense) {
-                payload.entitlement_cert = $scope.selectedLicense.fullLicense;
+                payload.pool_id = $scope.selectedLicense.fullLicense.pool_id;
+                payload.org = $scope.subscriptionCreds.organization_id;
+                attach = true;
             }
             
-            CheckLicense.post(payload, $scope.newLicense.eula)
-                .then((licenseInfo) => {
+            CheckLicense.post(payload, $scope.newLicense.eula, attach)
+                .finally((licenseInfo) => {
                     reset();
-
                     ConfigService.delete();
                     ConfigService.getConfig(licenseInfo)
                         .then(function(config) {
@@ -212,7 +223,7 @@ export default
                                         licenseMissing: false
                                 });
                             } else {
-                                updateRHCreds(config);
+                                updateSubscriptionCreds(config);
                                 $scope.success = true;
                                 $rootScope.licenseMissing = false;
                                 // for animation purposes
