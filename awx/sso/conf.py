@@ -575,7 +575,7 @@ register(
     'SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS',
     field_class=fields.StringListField,
     default=[],
-    label=_('Google OAuth2 Whitelisted Domains'),
+    label=_('Google OAuth2 Allowed Domains'),
     help_text=_('Update this setting to restrict the domains who are allowed to '
                 'login using Google OAuth2.'),
     category=_('Google OAuth2'),
