@@ -42,6 +42,11 @@ from awx.main.models import (
     JobTemplate,
 )
 from awx.main.utils import set_environ
+from awx.main.utils.subscriptions import (
+    SubscriptionManager,
+    SubscriptionManagerSettingsError,
+    SubscriptionManagerRefreshError,
+)
 
 logger = logging.getLogger('awx.api.views.root')
 
@@ -392,6 +397,29 @@ class ApiV2AttachView(APIView):
 
         return Response({"error": _("No pool_id provided, or SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD are not set.")}, 
                         status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApiV2RefreshView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    name = _('Refresh Subscription')
+    swagger_topic = 'System Configuration'
+
+    def check_permissions(self, request):
+        super().check_permissions(request)
+        if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
+            self.permission_denied(request)  # Raises PermissionDenied exception.
+
+    def post(self, request):
+        try:
+            params = SubscriptionManager.get_init_params()
+            submgr = SubscriptionManager(*params)
+            submgr.refresh_entitlement_certs_and_save()
+        except SubscriptionManagerSettingsError as e:
+            return Response({"errors": [_(e) for e in e.error_msgs]}, status=status.HTTP_400_BAD_REQUEST)
+        except SubscriptionManagerRefreshError as e:
+            return Response({"errors": [_(e.message)]}, status=status.HTTP_502_BAD_GATEWAY)
+        return Response({}, status=status.HTTP_200_OK)
 
 
 class ApiV2ConfigView(APIView):
