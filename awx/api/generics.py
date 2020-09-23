@@ -48,7 +48,6 @@ from awx.main.utils import (
     decrypt_field,
     get_awx_version,
 )
-from awx.main.utils.licensing import Licenser
 from awx.main.utils.db import get_all_field_names
 from awx.main.views import ApiErrorView
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
@@ -224,9 +223,6 @@ class APIView(views.APIView):
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
         response['X-API-Product-Version'] = get_awx_version()
-        # currently, this violates atomic transactions when hitting the `api/v2/config` endpoint. 
-        # check settings.LICENSE for license_type==open
-        # response['X-API-Product-Name'] = 'AWX' if Licenser().validate().get('license_type') is 'open' else 'Red Hat Ansible Tower'
         response['X-API-Product-Name'] = 'AWX' if settings.LICENSE.get('license_type', 'UNLICENSED') in 'open' else 'Red Hat Ansible Tower'
         
         response['X-API-Node'] = settings.CLUSTER_HOST_ID

@@ -22,6 +22,7 @@ def validate_entitlement_cert(data, min_keys=0, max_keys=None, min_certs=0, max_
     # This is a temporary hack that should not be merged. Look at Ln:92
     pass
 
+
 def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
     """
     Validate the given PEM data is valid and contains the required numbers of
