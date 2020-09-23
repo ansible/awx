@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import PropTypes, { shape } from 'prop-types';
 
 import { withI18n } from '@lingui/react';
-import { useField, withFormik } from 'formik';
+import { useField, useFormikContext, withFormik } from 'formik';
 import {
   Form,
   FormGroup,
@@ -43,6 +43,7 @@ function WorkflowJobTemplateForm({
   i18n,
   submitError,
 }) {
+  const { setFieldValue } = useFormikContext();
   const [enableWebhooks, setEnableWebhooks] = useState(
     Boolean(template.webhook_service)
   );
@@ -53,9 +54,7 @@ function WorkflowJobTemplateForm({
   );
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta, limitHelpers] = useField('limit');
-  const [organizationField, organizationMeta, organizationHelpers] = useField(
-    'organization'
-  );
+  const [organizationField, organizationMeta] = useField('organization');
   const [scmField, , scmHelpers] = useField('scm_branch');
   const [, webhookServiceMeta, webhookServiceHelpers] = useField(
     'webhook_service'
@@ -81,6 +80,13 @@ function WorkflowJobTemplateForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enableWebhooks]);
 
+  const onOrganizationChange = useCallback(
+    value => {
+      setFieldValue('organization', value);
+    },
+    [setFieldValue]
+  );
+
   if (hasContentError) {
     return <ContentError error={hasContentError} />;
   }
@@ -104,29 +110,25 @@ function WorkflowJobTemplateForm({
         />
         <OrganizationLookup
           helperTextInvalid={organizationMeta.error}
-          onChange={value => {
-            organizationHelpers.setValue(value || null);
-          }}
+          onChange={onOrganizationChange}
           value={organizationField.value}
           isValid={!organizationMeta.error}
         />
-
-        <FieldWithPrompt
-          fieldId="wfjt-inventory"
-          label={i18n._(t`Inventory`)}
-          promptId="wfjt-ask-inventory-on-launch"
-          promptName="ask_inventory_on_launch"
-          tooltip={i18n._(
-            t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
-          )}
-        >
+        <>
           <InventoryLookup
+            promptId="wfjt-ask-inventory-on-launch"
+            promptName="ask_inventory_on_launch"
+            tooltip={i18n._(
+              t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
+            )}
+            fieldId="wfjt-inventory"
+            isPromptableField
             value={inventoryField.value}
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={value => {
               inventoryHelpers.setValue(value);
             }}
-            required={askInventoryOnLaunchField.value}
+            required={!askInventoryOnLaunchField.value}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
           />
@@ -139,8 +141,7 @@ function WorkflowJobTemplateForm({
                 {inventoryMeta.error}
               </div>
             )}
-        </FieldWithPrompt>
-
+        </>
         <FieldWithPrompt
           fieldId="wjft-limit"
           label={i18n._(t`Limit`)}

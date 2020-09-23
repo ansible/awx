@@ -52,6 +52,12 @@ options:
           Refer to the Ansible Tower documentation for example syntax.
         - Any fields in this dict will take prescedence over any fields mentioned below (i.e. host, username, etc)
       type: dict
+    update_secrets:
+      description:
+        - C(true) will always update encrypted values.
+        - C(false) will only updated encrypted values if a change is absolutely known to be needed.
+      type: bool
+      default: true
     user:
       description:
         - User that should own this credential.
@@ -308,6 +314,7 @@ def main():
         organization=dict(),
         credential_type=dict(),
         inputs=dict(type='dict', no_log=True),
+        update_secrets=dict(type='bool', default=True, no_log=False),
         user=dict(),
         team=dict(),
         # These are for backwards compatability
@@ -365,13 +372,12 @@ def main():
 
     # Attempt to look up the object based on the provided name, credential type and optional organization
     lookup_data = {
-        'name': name,
         'credential_type': cred_type_id,
     }
     if organization:
         lookup_data['organization'] = org_id
 
-    credential = module.get_one('credentials', **{'data': lookup_data})
+    credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -397,7 +403,7 @@ def main():
 
     # Create the data that gets sent for create and update
     credential_fields = {
-        'name': new_name if new_name else name,
+        'name': new_name if new_name else (module.get_item_name(credential) if credential else name),
         'credential_type': cred_type_id,
     }
     if has_inputs:

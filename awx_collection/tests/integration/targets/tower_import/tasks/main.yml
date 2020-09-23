@@ -25,7 +25,7 @@
                 notification_templates_error: []
                 notification_templates_approvals: []
               natural_key:
-                name: "Default"
+                name: "{{ org_name1 }}"
                 type: "organization"
       register: import_output
 
@@ -33,7 +33,7 @@
         that:
           - import_output is changed
 
-    - name: "Import something again (awxkit is not idempotent, this tests a failure)"
+    - name: "Import the same thing again"
       tower_import:
         assets:
           organizations:
@@ -48,15 +48,15 @@
                 notification_templates_error: []
                 notification_templates_approvals: []
               natural_key:
-                name: "Default"
+                name: "{{ org_name1 }}"
                 type: "organization"
       register: import_output
       ignore_errors: true
 
     - assert:
         that:
-          - import_output is failed
-          - "'Organization with this Name already exists' in import_output.msg"
+          - import_output is not failed
+          # - import_output is not changed  # FIXME: module not idempotent
 
     - name: "Write out a json file"
       copy:
@@ -76,7 +76,7 @@
                                 "notification_templates_approvals": []
                            },
                            "natural_key": {
-                                "name": "Default",
+                                "name": "{{ org_name2 }}",
                                 "type": "organization"
                            }
                       }

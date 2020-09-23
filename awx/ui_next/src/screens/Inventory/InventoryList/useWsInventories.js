@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import useWebsocket from '../../../util/useWebsocket';
 import useThrottle from '../../../util/useThrottle';
 
-export default function useWsProjects(
+export default function useWsInventories(
   initialInventories,
   fetchInventoriesById
 ) {

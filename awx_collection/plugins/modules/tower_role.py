@@ -129,12 +129,7 @@ def main():
 
         resource_name = params.get(param)
         if resource_name:
-            resource = module.get_one_by_name_or_id(module.param_to_endpoint(param), resource_name)
-            if not resource:
-                module.fail_json(
-                    msg='Failed to update role, {0} not found in {1}'.format(param, endpoint),
-                    changed=False
-                )
+            resource = module.get_exactly_one(module.param_to_endpoint(param), resource_name)
             resource_data[param] = resource
 
     # separate actors from resources

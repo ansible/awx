@@ -10,6 +10,7 @@ import logging
 from social_core.exceptions import AuthException
 
 # Django
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q
 
@@ -80,11 +81,18 @@ def _update_m2m_from_expression(user, related, expr, remove=True):
 
 def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_auditors):
     from awx.main.models import Organization
+    from django.conf import settings
 
     org_ids = []
 
     for org_name in attr:
-        org = Organization.objects.get_or_create(name=org_name)[0]
+        try:
+            if settings.SAML_AUTO_CREATE_OBJECTS:
+                org = Organization.objects.get_or_create(name=org_name)[0]
+            else:
+                org = Organization.objects.get(name=org_name)
+        except ObjectDoesNotExist:
+            continue
 
         org_ids.append(org.id)
         getattr(org, related).members.add(user)
@@ -199,11 +207,24 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
 
             if organization_alias:
                 organization_name = organization_alias
-            org = Organization.objects.get_or_create(name=organization_name)[0]
+
+            try:
+                if settings.SAML_AUTO_CREATE_OBJECTS:
+                    org = Organization.objects.get_or_create(name=organization_name)[0]
+                else:
+                    org = Organization.objects.get(name=organization_name)
+            except ObjectDoesNotExist:
+                continue
 
             if team_alias:
                 team_name = team_alias
-            team = Team.objects.get_or_create(name=team_name, organization=org)[0]
+            try:
+                if settings.SAML_AUTO_CREATE_OBJECTS:
+                    team = Team.objects.get_or_create(name=team_name, organization=org)[0]
+                else:
+                    team = Team.objects.get(name=team_name, organization=org)
+            except ObjectDoesNotExist:
+                continue
 
             team_ids.append(team.id)
             team.member_role.members.add(user)

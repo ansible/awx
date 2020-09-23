@@ -175,9 +175,8 @@ def main():
 {% endfor %}
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('{{ item_type }}', **{
+    existing_item = module.get_one('{{ item_type }}', name_or_id={{ name_option }}, **{
         'data': {
-            '{{ name_option }}': {{ name_option }},
 {% if 'organization' in item['json']['actions']['POST'] and item['json']['actions']['POST']['organization']['type'] == 'id' %}
             'organization': org_id,
 {% endif %}
@@ -195,7 +194,7 @@ def main():
     new_fields = {}
 {% for option in item['json']['actions']['POST'] %}
 {% if option == name_option %}
-    new_fields['{{ name_option }}'] = new_{{ name_option }} if new_{{ name_option }} else {{ name_option }}
+    new_fields['{{ name_option }}'] = new_{{ name_option }} if new_{{ name_option }} else (module.get_item_name(existing_item) if existing_item else {{ name_option }}t)
 {% else %}
     if {{ option }} is not None:
 {% if item['json']['actions']['POST'][option]['type'] == 'id' %}

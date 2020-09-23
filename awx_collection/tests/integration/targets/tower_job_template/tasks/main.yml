@@ -22,14 +22,14 @@
     state: present
     scm_type: git
     scm_url: https://github.com/ansible/ansible-tower-samples.git
-
-  register: result
+  register: proj_result
 
 - name: Create Credential1
   tower_credential:
     name: "{{ cred1 }}"
     organization: Default
     kind: tower
+  register: cred1_result
 
 - name: Create Credential2
   tower_credential:
@@ -84,19 +84,19 @@
     credentials: ["{{ cred1 }}", "{{ cred2 }}"]
     job_type: run
     state: present
-  register: result
+  register: jt1_result
 
 - assert:
     that:
-      - "result is changed"
+      - "jt1_result is changed"
 
 - name: Add a credential to this JT
   tower_job_template:
     name: "{{ jt1 }}"
-    project: "{{ proj1 }}"
+    project: "{{ proj_result.id }}"
     playbook: hello_world.yml
     credentials:
-      - "{{ cred1 }}"
+      - "{{ cred1_result.id }}"
   register: result
 
 - assert:
@@ -105,7 +105,7 @@
 
 - name: Try to add the same credential to this JT
   tower_job_template:
-    name: "{{ jt1 }}"
+    name: "{{ jt1_result.id }}"
     project: "{{ proj1 }}"
     playbook: hello_world.yml
     credentials:

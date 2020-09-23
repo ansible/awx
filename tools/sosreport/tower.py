@@ -7,6 +7,7 @@ SOSREPORT_TOWER_COMMANDS = [
     "awx-manage --version", # tower version
     "awx-manage list_instances", # tower cluster configuration
     "awx-manage run_dispatcher --status", # tower dispatch worker status
+    "awx-manage run_callback_receiver --status", # tower callback worker status
     "awx-manage check_license --data", # tower license status
     "awx-manage run_wsbroadcast --status", # tower broadcast websocket status
     "supervisorctl status",   # tower process status

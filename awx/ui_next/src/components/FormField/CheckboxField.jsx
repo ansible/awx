@@ -9,10 +9,19 @@ const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
 `;
 
-function CheckboxField({ id, name, label, tooltip, validate, ...rest }) {
+function CheckboxField({
+  id,
+  name,
+  label,
+  tooltip,
+  validate,
+  isDisabled,
+  ...rest
+}) {
   const [field] = useField({ name, validate });
   return (
     <Checkbox
+      isDisabled={isDisabled}
       aria-label={label}
       label={
         <span>

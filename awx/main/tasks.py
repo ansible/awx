@@ -51,8 +51,9 @@ import ansible_runner
 
 # AWX
 from awx import __version__ as awx_application_version
-from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, GALAXY_SERVER_FIELDS
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.access import access_registry
+from awx.main.analytics import all_collectors, expensive_collectors
 from awx.main.redact import UriCleaner
 from awx.main.models import (
     Schedule, TowerScheduleState, Instance, InstanceGroup,
@@ -355,6 +356,26 @@ def send_notifications(notification_list, job_id=None):
 
 @task(queue=get_local_queuename)
 def gather_analytics():
+    def _gather_and_ship(subset, since, until):
+        tgzfiles = []
+        try:
+            tgzfiles = analytics.gather(subset=subset, since=since, until=until)
+            # empty analytics without raising an exception is not an error
+            if not tgzfiles:
+                return True
+            logger.info('Gathered analytics from {} to {}: {}'.format(since, until, tgzfiles))
+            for tgz in tgzfiles:
+                analytics.ship(tgz)
+        except Exception:
+            logger.exception('Error gathering and sending analytics for {} to {}.'.format(since,until))
+            return False
+        finally:
+            if tgzfiles:
+                for tgz in tgzfiles:
+                    if os.path.exists(tgz):
+                        os.remove(tgz)
+        return True
+
     from awx.conf.models import Setting
     from rest_framework.fields import DateTimeField
     if not settings.INSIGHTS_TRACKING_STATE:
@@ -373,16 +394,29 @@ def gather_analytics():
             if acquired is False:
                 logger.debug('Not gathering analytics, another task holds lock')
                 return
-            try:
-                tgz = analytics.gather()
-                if not tgz:
-                    return
-                logger.info('gathered analytics: {}'.format(tgz))
-                analytics.ship(tgz)
-                settings.AUTOMATION_ANALYTICS_LAST_GATHER = gather_time
-            finally:
-                if os.path.exists(tgz):
-                    os.remove(tgz)
+            subset = list(all_collectors().keys())
+            incremental_collectors = []
+            for collector in expensive_collectors():
+                if collector in subset:
+                    subset.remove(collector)
+                    incremental_collectors.append(collector)
+
+            # Cap gathering at 4 weeks of data if there has been no data gathering
+            since = last_time or (gather_time - timedelta(weeks=4))
+
+            if incremental_collectors:
+                start = since
+                until = None
+                while start < gather_time:
+                    until = start + timedelta(hours = 4)
+                    if (until > gather_time):
+                        until = gather_time
+                    if not _gather_and_ship(incremental_collectors, since=start, until=until):
+                        break
+                    start = until
+                    settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
+            if subset:
+                _gather_and_ship(subset, since=since, until=gather_time)
 
 
 @task(queue=get_local_queuename)
@@ -1632,11 +1666,6 @@ class RunJob(BaseTask):
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
-        if job.use_fact_cache:
-            library_source = self.get_path_to('..', 'plugins', 'library')
-            library_dest = os.path.join(private_data_dir, 'library')
-            copy_tree(library_source, library_dest)
-            env['ANSIBLE_LIBRARY'] = library_dest
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
@@ -2020,35 +2049,25 @@ class RunProjectUpdate(BaseTask):
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
         if settings.GALAXY_IGNORE_CERTS:
             env['ANSIBLE_GALAXY_IGNORE'] = True
-        # Set up the public Galaxy server, if enabled
-        galaxy_configured = False
-        if settings.PUBLIC_GALAXY_ENABLED:
-            galaxy_servers = [settings.PUBLIC_GALAXY_SERVER]  # static setting
-        else:
-            galaxy_configured = True
-            galaxy_servers = []
-        # Set up fallback Galaxy servers, if configured
-        if settings.FALLBACK_GALAXY_SERVERS:
-            galaxy_configured = True
-            galaxy_servers = settings.FALLBACK_GALAXY_SERVERS + galaxy_servers
-        # Set up the primary Galaxy server, if configured
-        if settings.PRIMARY_GALAXY_URL:
-            galaxy_configured = True
-            galaxy_servers = [{'id': 'primary_galaxy'}] + galaxy_servers
-            for key in GALAXY_SERVER_FIELDS:
-                value = getattr(settings, 'PRIMARY_GALAXY_{}'.format(key.upper()))
-                if value:
-                    galaxy_servers[0][key] = value
-        if galaxy_configured:
-            for server in galaxy_servers:
-                for key in GALAXY_SERVER_FIELDS:
-                    if not server.get(key):
-                        continue
-                    env_key = ('ANSIBLE_GALAXY_SERVER_{}_{}'.format(server.get('id', 'unnamed'), key)).upper()
-                    env[env_key] = server[key]
-            if galaxy_servers:
-                # now set the precedence of galaxy servers
-                env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join([server.get('id', 'unnamed') for server in galaxy_servers])
+
+        # build out env vars for Galaxy credentials (in order)
+        galaxy_server_list = []
+        if project_update.project.organization:
+            for i, cred in enumerate(
+                project_update.project.organization.galaxy_credentials.all()
+            ):
+                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_URL'] = cred.get_input('url')
+                auth_url = cred.get_input('auth_url', default=None)
+                token = cred.get_input('token', default=None)
+                if token:
+                    env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_TOKEN'] = token
+                if auth_url:
+                    env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_AUTH_URL'] = auth_url
+                galaxy_server_list.append(f'server{i}')
+
+        if galaxy_server_list:
+            env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join(galaxy_server_list)
+
         return env
 
     def _build_scm_url_extra_vars(self, project_update):
@@ -2121,6 +2140,19 @@ class RunProjectUpdate(BaseTask):
                 raise RuntimeError('Could not determine a revision to run from project.')
         elif not scm_branch:
             scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
+
+        galaxy_creds_are_defined = (
+            project_update.project.organization and
+            project_update.project.organization.galaxy_credentials.exists()
+        )
+        if not galaxy_creds_are_defined and (
+            settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED
+        ):
+            logger.debug(
+                'Galaxy role/collection syncing is enabled, but no '
+                f'credentials are configured for {project_update.project.organization}.'
+            )
+
         extra_vars.update({
             'projects_root': settings.PROJECTS_ROOT.rstrip('/'),
             'local_path': os.path.basename(project_update.project.local_path),
@@ -2131,8 +2163,8 @@ class RunProjectUpdate(BaseTask):
             'scm_url': scm_url,
             'scm_branch': scm_branch,
             'scm_clean': project_update.scm_clean,
-            'roles_enabled': settings.AWX_ROLES_ENABLED,
-            'collections_enabled': settings.AWX_COLLECTIONS_ENABLED,
+            'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
+            'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
         })
         # apply custom refspec from user for PR refs and the like
         if project_update.scm_refspec:

@@ -198,12 +198,14 @@ def main():
     workflow_job_template = module.params.get('workflow_job_template')
     workflow_job_template_id = None
     if workflow_job_template:
-        wfjt_search_fields = {'name': workflow_job_template}
+        wfjt_search_fields = {}
         organization = module.params.get('organization')
         if organization:
             organization_id = module.resolve_name_to_id('organizations', organization)
             wfjt_search_fields['organization'] = organization_id
-        wfjt_data = module.get_one('workflow_job_templates', **{'data': wfjt_search_fields})
+        wfjt_data = module.get_one('workflow_job_templates', name_or_id=workflow_job_template, **{
+            'data': wfjt_search_fields
+        })
         if wfjt_data is None:
             module.fail_json(msg="The workflow {0} in organization {1} was not found on the Tower server".format(
                 workflow_job_template, organization

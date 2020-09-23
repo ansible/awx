@@ -17,6 +17,7 @@ import Jobs from './models/Jobs';
 import Labels from './models/Labels';
 import Me from './models/Me';
 import NotificationTemplates from './models/NotificationTemplates';
+import Notifications from './models/Notifications';
 import Organizations from './models/Organizations';
 import ProjectUpdates from './models/ProjectUpdates';
 import Projects from './models/Projects';
@@ -53,6 +54,7 @@ const JobsAPI = new Jobs();
 const LabelsAPI = new Labels();
 const MeAPI = new Me();
 const NotificationTemplatesAPI = new NotificationTemplates();
+const NotificationsAPI = new Notifications();
 const OrganizationsAPI = new Organizations();
 const ProjectUpdatesAPI = new ProjectUpdates();
 const ProjectsAPI = new Projects();
@@ -90,6 +92,7 @@ export {
   LabelsAPI,
   MeAPI,
   NotificationTemplatesAPI,
+  NotificationsAPI,
   OrganizationsAPI,
   ProjectUpdatesAPI,
   ProjectsAPI,

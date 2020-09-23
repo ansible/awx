@@ -124,7 +124,7 @@ function NotificationTemplatesList({ i18n }) {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={() => setSelected([...templates])}
+                onSelectAll={set => setSelected(set ? [...templates] : [])}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd

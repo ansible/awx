@@ -47,6 +47,7 @@ describe('VisualizerToolbar', () => {
             onSave={save}
             template={template}
             hasUnsavedChanges={false}
+            readOnly={false}
           />
         </WorkflowStateContext.Provider>
       </WorkflowDispatchContext.Provider>
@@ -96,6 +97,45 @@ describe('VisualizerToolbar', () => {
     });
   });
 
+  test('Save button calls expected function', () => {
+    wrapper.find('button[aria-label="Save"]').simulate('click');
+    expect(save).toHaveBeenCalled();
+  });
+
+  test('Close button calls expected function', () => {
+    wrapper.find('TimesIcon').simulate('click');
+    expect(close).toHaveBeenCalled();
+  });
+
+  test('Launch button should be hidden when user cannot start workflow', () => {
+    const nodes = [
+      {
+        id: 1,
+      },
+    ];
+    const toolbar = mountWithContexts(
+      <WorkflowDispatchContext.Provider value={dispatch}>
+        <WorkflowStateContext.Provider value={{ ...workflowContext, nodes }}>
+          <VisualizerToolbar
+            onClose={close}
+            onSave={save}
+            template={{
+              ...template,
+              summary_fields: {
+                user_capabilities: {
+                  start: false,
+                },
+              },
+            }}
+            hasUnsavedChanges
+            readOnly={false}
+          />
+        </WorkflowStateContext.Provider>
+      </WorkflowDispatchContext.Provider>
+    );
+    expect(toolbar.find('LaunchButton button').length).toBe(0);
+  });
+
   test('Launch button should be disabled when there are unsaved changes', () => {
     expect(wrapper.find('LaunchButton button').prop('disabled')).toEqual(false);
     const nodes = [
@@ -111,6 +151,7 @@ describe('VisualizerToolbar', () => {
             onSave={save}
             template={template}
             hasUnsavedChanges
+            readOnly={false}
           />
         </WorkflowStateContext.Provider>
       </WorkflowDispatchContext.Provider>
@@ -120,13 +161,26 @@ describe('VisualizerToolbar', () => {
     ).toEqual(true);
   });
 
-  test('Save button calls expected function', () => {
-    wrapper.find('button[aria-label="Save"]').simulate('click');
-    expect(save).toHaveBeenCalled();
-  });
-
-  test('Close button calls expected function', () => {
-    wrapper.find('TimesIcon').simulate('click');
-    expect(close).toHaveBeenCalled();
+  test('Buttons should be hidden when user cannot edit workflow', () => {
+    const nodes = [
+      {
+        id: 1,
+      },
+    ];
+    const toolbar = mountWithContexts(
+      <WorkflowDispatchContext.Provider value={dispatch}>
+        <WorkflowStateContext.Provider value={{ ...workflowContext, nodes }}>
+          <VisualizerToolbar
+            onClose={close}
+            onSave={save}
+            template={template}
+            hasUnsavedChanges={false}
+            readOnly
+          />
+        </WorkflowStateContext.Provider>
+      </WorkflowDispatchContext.Provider>
+    );
+    expect(toolbar.find('#visualizer-delete-all').length).toBe(0);
+    expect(toolbar.find('#visualizer-save').length).toBe(0);
   });
 });

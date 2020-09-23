@@ -261,7 +261,9 @@ describe('<TemplateList />', () => {
       },
     });
 
-    wrapper.find('button[aria-label="Delete"]').prop('onClick')();
+    await act(async () => {
+      wrapper.find('button[aria-label="Delete"]').prop('onClick')();
+    });
     wrapper.update();
     await act(async () => {
       await wrapper
@@ -302,7 +304,9 @@ describe('<TemplateList />', () => {
         summary_fields: { user_capabilities: { delete: true } },
       },
     });
-    wrapper.find('button[aria-label="Delete"]').prop('onClick')();
+    await act(async () => {
+      wrapper.find('button[aria-label="Delete"]').prop('onClick')();
+    });
     wrapper.update();
     await act(async () => {
       await wrapper

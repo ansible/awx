@@ -122,7 +122,8 @@ def source_cred_hashi_secret(organization):
             "url": "https://secret.hash.example.com",
             "token": "myApiKey",
             "role_id": "role",
-            "secret_id": "secret"
+            "secret_id": "secret",
+            "default_auth_path": "path-to-approle"
         }
     )
 

@@ -575,7 +575,7 @@ register(
     'SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS',
     field_class=fields.StringListField,
     default=[],
-    label=_('Google OAuth2 Whitelisted Domains'),
+    label=_('Google OAuth2 Allowed Domains'),
     help_text=_('Update this setting to restrict the domains who are allowed to '
                 'login using Google OAuth2.'),
     category=_('Google OAuth2'),
@@ -918,6 +918,17 @@ def get_saml_metadata_url():
 def get_saml_entity_id():
     return settings.TOWER_URL_BASE
 
+
+register(
+    'SAML_AUTO_CREATE_OBJECTS',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Automatically Create Organizations and Teams on SAML Login'),
+    help_text=_('When enabled (the default), mapped Organizations and Teams '
+                'will be created automatically on successful SAML login.'),
+    category=_('SAML'),
+    category_slug='saml',
+)
 
 register(
     'SOCIAL_AUTH_SAML_CALLBACK_URL',

@@ -1,11 +1,11 @@
 import 'styled-components/macro';
 import React from 'react';
-import { shape, node, number } from 'prop-types';
+import { shape, node, number, oneOf } from 'prop-types';
 import { TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from './Detail';
 import CodeMirrorInput from '../CodeMirrorInput';
 
-function ObjectDetail({ value, label, rows, fullHeight }) {
+function CodeDetail({ value, label, mode, rows, fullHeight }) {
   return (
     <>
       <DetailName
@@ -28,8 +28,8 @@ function ObjectDetail({ value, label, rows, fullHeight }) {
         css="grid-column: 1 / -1; margin-top: -20px"
       >
         <CodeMirrorInput
-          mode="json"
-          value={JSON.stringify(value)}
+          mode={mode}
+          value={value}
           readOnly
           rows={rows}
           fullHeight={fullHeight}
@@ -39,13 +39,14 @@ function ObjectDetail({ value, label, rows, fullHeight }) {
     </>
   );
 }
-ObjectDetail.propTypes = {
+CodeDetail.propTypes = {
   value: shape.isRequired,
   label: node.isRequired,
   rows: number,
+  mode: oneOf(['json', 'yaml', 'jinja2']).isRequired,
 };
-ObjectDetail.defaultProps = {
+CodeDetail.defaultProps = {
   rows: null,
 };
 
-export default ObjectDetail;
+export default CodeDetail;

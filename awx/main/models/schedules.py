@@ -205,10 +205,15 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                     'A valid TZID must be provided (e.g., America/New_York)'
                 )
 
-        if fast_forward and ('MINUTELY' in rrule or 'HOURLY' in rrule):
+        if (
+            fast_forward and
+            ('MINUTELY' in rrule or 'HOURLY' in rrule) and
+            'COUNT=' not in rrule
+        ):
             try:
                 first_event = x[0]
-                if first_event < now():
+                # If the first event was over a week ago...
+                if (now() - first_event).days > 7:
                     # hourly/minutely rrules with far-past DTSTART values
                     # are *really* slow to precompute
                     # start *from* one week ago to speed things up drastically

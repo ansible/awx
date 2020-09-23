@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Formik, useField } from 'formik';
+import React, { useCallback, useState } from 'react';
+import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func, object, shape } from 'prop-types';
@@ -21,6 +21,7 @@ function CredentialFormFields({
   formik,
   initialValues,
 }) {
+  const { setFieldValue } = useFormikContext();
   const [orgField, orgMeta, orgHelpers] = useField('organization');
   const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
     name: 'credential_type',
@@ -76,6 +77,13 @@ function CredentialFormFields({
     );
   };
 
+  const onOrganizationChange = useCallback(
+    value => {
+      setFieldValue('organization', value);
+    },
+    [setFieldValue]
+  );
+
   return (
     <>
       <FormField
@@ -96,15 +104,13 @@ function CredentialFormFields({
         helperTextInvalid={orgMeta.error}
         isValid={!orgMeta.touched || !orgMeta.error}
         onBlur={() => orgHelpers.setTouched()}
-        onChange={value => {
-          orgHelpers.setValue(value);
-        }}
+        onChange={onOrganizationChange}
         value={orgField.value}
         touched={orgMeta.touched}
         error={orgMeta.error}
       />
       <FormGroup
-        fieldId="credential-credentialType"
+        fieldId="credential-Type"
         helperTextInvalid={credTypeMeta.error}
         isRequired
         validated={
@@ -114,7 +120,7 @@ function CredentialFormFields({
       >
         <AnsibleSelect
           {...credTypeField}
-          id="credential_type"
+          id="credential-type"
           data={[
             {
               value: '',
@@ -224,6 +230,7 @@ function CredentialForm({
               <FormFullWidthLayout>
                 <ActionGroup>
                   <Button
+                    id="credential-form-save-button"
                     aria-label={i18n._(t`Save`)}
                     variant="primary"
                     type="button"
@@ -235,6 +242,7 @@ function CredentialForm({
                     credentialTypes[formik.values.credential_type]?.kind ===
                       'external' && (
                       <Button
+                        id="credential-form-test-button"
                         aria-label={i18n._(t`Test`)}
                         variant="secondary"
                         type="button"
@@ -245,6 +253,7 @@ function CredentialForm({
                       </Button>
                     )}
                   <Button
+                    id="credential-form-cancel-button"
                     aria-label={i18n._(t`Cancel`)}
                     variant="secondary"
                     type="button"

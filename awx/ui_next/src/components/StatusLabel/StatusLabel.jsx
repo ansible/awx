@@ -26,6 +26,7 @@ const RunningIcon = styled(SyncAltIcon)`
 
 const colors = {
   success: 'green',
+  successful: 'green',
   failed: 'red',
   error: 'red',
   running: 'blue',
@@ -35,6 +36,7 @@ const colors = {
 };
 const icons = {
   success: CheckCircleIcon,
+  successful: CheckCircleIcon,
   failed: ExclamationCircleIcon,
   error: ExclamationCircleIcon,
   running: RunningIcon,
@@ -58,6 +60,7 @@ export default function StatusLabel({ status }) {
 StatusLabel.propTypes = {
   status: oneOf([
     'success',
+    'successful',
     'failed',
     'error',
     'running',

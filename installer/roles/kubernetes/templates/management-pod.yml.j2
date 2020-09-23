@@ -25,7 +25,12 @@ spec:
           mountPath: "/etc/tower/settings.py"
           subPath: settings.py
           readOnly: true
-
+{% if postgres_root_ca_cert is defined %}
+        - name: {{ kubernetes_deployment_name }}-postgres-root-ca-cert
+          mountPath: {{ ca_trust_bundle }}
+          subPath: {{ postgres_root_ca_filename }}
+          readOnly: true
+{% endif %}
         - name: "{{ kubernetes_deployment_name }}-application-credentials"
           mountPath: "/etc/tower/conf.d/"
           readOnly: true
@@ -70,7 +75,14 @@ spec:
         items:
           - key: {{ kubernetes_deployment_name }}_settings
             path: settings.py
-
+{% if postgres_root_ca_cert is defined %}
+    - name: {{ kubernetes_deployment_name }}-postgres-root-ca-cert
+      configMap:
+        name: {{ kubernetes_deployment_name }}-postgres-root-ca-cert
+        items:
+        - key: postgres_root_ca.crt
+          path: postgres_root_ca.crt
+{% endif %}
     - name: {{ kubernetes_deployment_name }}-secret-key
       secret:
         secretName: "{{ kubernetes_deployment_name }}-secrets"

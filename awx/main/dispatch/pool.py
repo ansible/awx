@@ -5,6 +5,7 @@ import signal
 import sys
 import time
 import traceback
+from datetime import datetime
 from uuid import uuid4
 
 import collections
@@ -25,6 +26,12 @@ if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 else:
     logger = logging.getLogger('awx.main.dispatch')
+
+
+class NoOpResultQueue(object):
+
+    def put(self, item):
+        pass
 
 
 class PoolWorker(object):
@@ -56,11 +63,13 @@ class PoolWorker(object):
     It is "idle" when self.managed_tasks is empty.
     '''
 
-    def __init__(self, queue_size, target, args):
+    track_managed_tasks = False
+
+    def __init__(self, queue_size, target, args, **kwargs):
         self.messages_sent = 0
         self.messages_finished = 0
         self.managed_tasks = collections.OrderedDict()
-        self.finished = MPQueue(queue_size)
+        self.finished = MPQueue(queue_size) if self.track_managed_tasks else NoOpResultQueue()
         self.queue = MPQueue(queue_size)
         self.process = Process(target=target, args=(self.queue, self.finished) + args)
         self.process.daemon = True
@@ -74,7 +83,8 @@ class PoolWorker(object):
             if not body.get('uuid'):
                 body['uuid'] = str(uuid4())
             uuid = body['uuid']
-        self.managed_tasks[uuid] = body
+        if self.track_managed_tasks:
+            self.managed_tasks[uuid] = body
         self.queue.put(body, block=True, timeout=5)
         self.messages_sent += 1
         self.calculate_managed_tasks()
@@ -111,6 +121,8 @@ class PoolWorker(object):
         return str(self.process.exitcode)
 
     def calculate_managed_tasks(self):
+        if not self.track_managed_tasks:
+            return
         # look to see if any tasks were finished
         finished = []
         for _ in range(self.finished.qsize()):
@@ -135,6 +147,8 @@ class PoolWorker(object):
 
     @property
     def current_task(self):
+        if not self.track_managed_tasks:
+            return None
         self.calculate_managed_tasks()
         # the task at [0] is the one that's running right now (or is about to
         # be running)
@@ -145,6 +159,8 @@ class PoolWorker(object):
 
     @property
     def orphaned_tasks(self):
+        if not self.track_managed_tasks:
+            return []
         orphaned = []
         if not self.alive:
             # if this process had a running task that never finished,
@@ -179,6 +195,11 @@ class PoolWorker(object):
         return not self.busy
 
 
+class StatefulPoolWorker(PoolWorker):
+
+    track_managed_tasks = True
+
+
 class WorkerPool(object):
     '''
     Creates a pool of forked PoolWorkers.
@@ -200,6 +221,7 @@ class WorkerPool(object):
     )
     '''
 
+    pool_cls = PoolWorker
     debug_meta = ''
 
     def __init__(self, min_workers=None, queue_size=None):
@@ -225,7 +247,7 @@ class WorkerPool(object):
         # for the DB and cache connections (that way lies race conditions)
         django_connection.close()
         django_cache.close()
-        worker = PoolWorker(self.queue_size, self.target, (idx,) + self.target_args)
+        worker = self.pool_cls(self.queue_size, self.target, (idx,) + self.target_args)
         self.workers.append(worker)
         try:
             worker.start()
@@ -236,13 +258,13 @@ class WorkerPool(object):
         return idx, worker
 
     def debug(self, *args, **kwargs):
-        self.cleanup()
         tmpl = Template(
+            'Recorded at: {{ dt }} \n'
             '{{ pool.name }}[pid:{{ pool.pid }}] workers total={{ workers|length }} {{ meta }} \n'
             '{% for w in workers %}'
             '.  worker[pid:{{ w.pid }}]{% if not w.alive %} GONE exit={{ w.exitcode }}{% endif %}'
             ' sent={{ w.messages_sent }}'
-            ' finished={{ w.messages_finished }}'
+            '{% if w.messages_finished %} finished={{ w.messages_finished }}{% endif %}'
             ' qsize={{ w.managed_tasks|length }}'
             ' rss={{ w.mb }}MB'
             '{% for task in w.managed_tasks.values() %}'
@@ -260,7 +282,11 @@ class WorkerPool(object):
             '\n'
             '{% endfor %}'
         )
-        return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta)
+        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+        return tmpl.render(
+            pool=self, workers=self.workers, meta=self.debug_meta,
+            dt=now
+        )
 
     def write(self, preferred_queue, body):
         queue_order = sorted(range(len(self.workers)), key=lambda x: -1 if x==preferred_queue else x)
@@ -293,6 +319,8 @@ class AutoscalePool(WorkerPool):
     down based on demand
     '''
 
+    pool_cls = StatefulPoolWorker
+
     def __init__(self, *args, **kwargs):
         self.max_workers = kwargs.pop('max_workers', None)
         super(AutoscalePool, self).__init__(*args, **kwargs)
@@ -308,6 +336,10 @@ class AutoscalePool(WorkerPool):
 
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
+
+    def debug(self, *args, **kwargs):
+        self.cleanup()
+        return super(AutoscalePool, self).debug(*args, **kwargs)
 
     @property
     def should_grow(self):

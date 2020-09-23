@@ -88,6 +88,10 @@ describe('<InventoryGroupsList />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
+  afterEach(() => {
+    jest.clearAllMocks();
+    wrapper.unmount();
+  });
 
   test('initially renders successfully', () => {
     expect(wrapper.find('InventoryGroupsList').length).toBe(1);
@@ -143,15 +147,17 @@ describe('<InventoryGroupsList />', () => {
       expect(el.props().checked).toBe(false);
     });
   });
-
+});
+describe('<InventoryGroupsList/> error handling', () => {
+  let wrapper;
   test('should show content error when api throws error on initial render', async () => {
-    InventoriesAPI.readGroupsOptions.mockImplementation(() =>
+    InventoriesAPI.readGroupsOptions.mockImplementationOnce(() =>
       Promise.reject(new Error())
     );
     await act(async () => {
       wrapper = mountWithContexts(<InventoryGroupsList />);
     });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
   });
 
   test('should show content error if groups are not successfully fetched from api', async () => {
@@ -159,26 +165,27 @@ describe('<InventoryGroupsList />', () => {
       Promise.reject(new Error())
     );
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')();
+      wrapper = mountWithContexts(<InventoryGroupsList />);
     });
-    wrapper.update();
-    await act(async () => {
-      wrapper.find('Toolbar Button[aria-label="Delete"]').invoke('onClick')();
-    });
-    await waitForElement(
-      wrapper,
-      'InventoryGroupsDeleteModal',
-      el => el.props().isModalOpen === true
-    );
-    await act(async () => {
-      wrapper
-        .find('ModalBoxFooter Button[aria-label="Delete"]')
-        .invoke('onClick')();
-    });
-    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+
+    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
   });
 
   test('should show error modal when group is not successfully deleted from api', async () => {
+    InventoriesAPI.readGroups.mockResolvedValue({
+      data: {
+        count: mockGroups.length,
+        results: mockGroups,
+      },
+    });
+    InventoriesAPI.readGroupsOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+      },
+    });
     GroupsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -190,6 +197,25 @@ describe('<InventoryGroupsList />', () => {
         },
       })
     );
+
+    const history = createMemoryHistory({
+      initialEntries: ['/inventories/inventory/3/groups'],
+    });
+
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route path="/inventories/inventory/:id/groups">
+          <InventoryGroupsList />
+        </Route>,
+        {
+          context: {
+            router: { history, route: { location: history.location } },
+          },
+        }
+      );
+    });
+    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+
     await act(async () => {
       wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')();
     });
@@ -213,11 +239,14 @@ describe('<InventoryGroupsList />', () => {
     });
     await waitForElement(
       wrapper,
-      'AlertModal[title="Error!"] Modal',
+      'AlertModal[aria-label="deletion error"] Modal',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
+
     await act(async () => {
-      wrapper.find('ModalBoxCloseButton').invoke('onClose')();
+      wrapper
+        .find('AlertModal[aria-label="deletion error"]')
+        .invoke('onClose')();
     });
   });
 });

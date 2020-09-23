@@ -64,11 +64,15 @@ const workflowContext = {
     },
     {
       id: 2,
-      job: {
-        name: 'Foo JT',
-        type: 'job',
-        status: 'successful',
-        elapsed: 60,
+      originalNodeObject: {
+        summary_fields: {
+          job: {
+            name: 'Foo JT',
+            type: 'job',
+            status: 'successful',
+            elapsed: 60,
+          },
+        },
       },
     },
     {

@@ -1269,6 +1269,7 @@ class OrganizationSerializer(BaseSerializer):
             object_roles = self.reverse('api:organization_object_roles_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:organization_access_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:organization_instance_groups_list', kwargs={'pk': obj.pk}),
+            galaxy_credentials = self.reverse('api:organization_galaxy_credentials_list', kwargs={'pk': obj.pk}),
         ))
         return res
 
@@ -2536,10 +2537,11 @@ class CredentialTypeSerializer(BaseSerializer):
 class CredentialSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = ['admin', 'use']
+    managed_by_tower = serializers.ReadOnlyField()
 
     class Meta:
         model = Credential
-        fields = ('*', 'organization', 'credential_type', 'inputs', 'kind', 'cloud', 'kubernetes')
+        fields = ('*', 'organization', 'credential_type', 'managed_by_tower', 'inputs', 'kind', 'cloud', 'kubernetes')
         extra_kwargs = {
             'credential_type': {
                 'label': _('Credential Type'),
@@ -2603,12 +2605,30 @@ class CredentialSerializer(BaseSerializer):
 
         return summary_dict
 
+    def validate(self, attrs):
+        if self.instance and self.instance.managed_by_tower:
+            raise PermissionDenied(
+                detail=_("Modifications not allowed for managed credentials")
+            )
+        return super(CredentialSerializer, self).validate(attrs)
+
     def get_validation_exclusions(self, obj=None):
         ret = super(CredentialSerializer, self).get_validation_exclusions(obj)
         for field in ('credential_type', 'inputs'):
             if field in ret:
                 ret.remove(field)
         return ret
+
+    def validate_organization(self, org):
+        if (
+            self.instance and
+            self.instance.credential_type.kind == 'galaxy' and
+            org is None
+        ):
+            raise serializers.ValidationError(_(
+                "Galaxy credentials must be owned by an Organization."
+            ))
+        return org
 
     def validate_credential_type(self, credential_type):
         if self.instance and credential_type.pk != self.instance.credential_type.pk:
@@ -2673,6 +2693,15 @@ class CredentialSerializerCreate(CredentialSerializer):
 
         if attrs.get('team'):
             attrs['organization'] = attrs['team'].organization
+
+        if (
+            'credential_type' in attrs and
+            attrs['credential_type'].kind == 'galaxy' and
+            list(owner_fields) != ['organization']
+        ):
+            raise serializers.ValidationError({"organization": _(
+                "Galaxy credentials must be owned by an Organization."
+            )})
 
         return super(CredentialSerializerCreate, self).validate(attrs)
 

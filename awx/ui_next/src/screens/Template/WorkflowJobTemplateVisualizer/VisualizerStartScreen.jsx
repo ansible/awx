@@ -30,23 +30,31 @@ const StartPanelWrapper = styled.div`
   justify-content: center;
 `;
 
-function VisualizerStartScreen({ i18n }) {
+function VisualizerStartScreen({ i18n, readOnly }) {
   const dispatch = useContext(WorkflowDispatchContext);
   return (
     <div css="flex: 1">
       <StartPanelWrapper>
         <StartPanel>
-          <p>{i18n._(t`Please click the Start button to begin.`)}</p>
-          <Button
-            id="visualizer-start"
-            aria-label={i18n._(t`Start`)}
-            onClick={() =>
-              dispatch({ type: 'START_ADD_NODE', sourceNodeId: 1 })
-            }
-            variant="primary"
-          >
-            {i18n._(t`Start`)}
-          </Button>
+          {readOnly ? (
+            <p>
+              {i18n._(t`This workflow does not have any nodes configured.`)}
+            </p>
+          ) : (
+            <>
+              <p>{i18n._(t`Please click the Start button to begin.`)}</p>
+              <Button
+                id="visualizer-start"
+                aria-label={i18n._(t`Start`)}
+                onClick={() =>
+                  dispatch({ type: 'START_ADD_NODE', sourceNodeId: 1 })
+                }
+                variant="primary"
+              >
+                {i18n._(t`Start`)}
+              </Button>
+            </>
+          )}
         </StartPanel>
       </StartPanelWrapper>
     </div>

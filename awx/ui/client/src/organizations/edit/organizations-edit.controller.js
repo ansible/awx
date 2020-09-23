@@ -6,10 +6,12 @@
 
 export default ['$scope', '$location', '$stateParams', 'isOrgAdmin', 'isNotificationAdmin',
     'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', 'i18n', 'isOrgAuditor',
-    'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', 'ConfigData',
+    'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService',
+    'InstanceGroupsData', 'ConfigData', 'GalaxyCredentialsData', 'MultiCredentialService',
     function($scope, $location, $stateParams, isOrgAdmin, isNotificationAdmin,
         OrganizationForm, Rest, ProcessErrors, Prompt, i18n, isOrgAuditor,
-        GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData, ConfigData) {
+        GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService,
+        InstanceGroupsData, ConfigData, GalaxyCredentialsData, MultiCredentialService) {
 
         let form = OrganizationForm(),
             defaultUrl = GetBasePath('organizations'),
@@ -29,6 +31,7 @@ export default ['$scope', '$location', '$stateParams', 'isOrgAdmin', 'isNotifica
         });
 
         $scope.instance_groups = InstanceGroupsData;
+        $scope.credentials = GalaxyCredentialsData;
         const virtualEnvs = ConfigData.custom_virtualenvs || [];
         $scope.custom_virtualenvs_visible = virtualEnvs.length > 1;
         $scope.custom_virtualenvs_options = virtualEnvs.filter(
@@ -100,7 +103,14 @@ export default ['$scope', '$location', '$stateParams', 'isOrgAdmin', 'isNotifica
             Rest.setUrl(defaultUrl + id + '/');
             Rest.put(params)
                 .then(() => {
-                    InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
+                    MultiCredentialService
+                    .saveRelatedSequentially({
+                        related: {
+                            credentials: $scope.organization_obj.related.galaxy_credentials
+                        }
+                    }, $scope.credentials)
+                    .then(() => {
+                        InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
                         .then(() => {
                             Wait('stop');
                             $state.go($state.current, {}, { reload: true });
@@ -111,6 +121,12 @@ export default ['$scope', '$location', '$stateParams', 'isOrgAdmin', 'isNotifica
                                 msg: 'Failed to update instance groups. POST returned status: ' + status
                             });
                         });
+                    }).catch(({data, status}) => {
+                        ProcessErrors($scope, data, status, form, {
+                            hdr: 'Error!',
+                            msg: 'Failed to save Galaxy credentials. POST returned status: ' + status
+                        });
+                    });
                     $scope.organization_name = $scope.name;
                     main = params;
                 })

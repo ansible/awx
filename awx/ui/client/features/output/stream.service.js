@@ -119,6 +119,10 @@ function OutputStream ($q) {
         this.counters.ready = ready;
         this.counters.used = used;
         this.counters.missing = missing;
+
+        if (!window.liveUpdates) {
+            this.counters.ready = event.counter;
+        }
     };
 
     this.bufferEmpty = threshold => {
@@ -140,6 +144,10 @@ function OutputStream ($q) {
     this.isReadyToRender = () => {
         const { total } = this.counters;
         const readyCount = this.getReadyCount();
+
+        if (!window.liveUpdates) {
+            return true;
+        }
 
         if (readyCount <= 0) {
             return false;

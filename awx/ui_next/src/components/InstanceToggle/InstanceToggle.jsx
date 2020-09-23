@@ -15,7 +15,7 @@ function InstanceToggle({
   onToggle,
   i18n,
 }) {
-  const { me } = useConfig();
+  const { me = {} } = useConfig();
   const [isEnabled, setIsEnabled] = useState(instance.enabled);
   const [showError, setShowError] = useState(false);
 
@@ -58,7 +58,7 @@ function InstanceToggle({
           label={i18n._(t`On`)}
           labelOff={i18n._(t`Off`)}
           isChecked={isEnabled}
-          isDisabled={isLoading || !me.is_superuser}
+          isDisabled={isLoading || !me?.is_superuser}
           onChange={toggleInstance}
           aria-label={i18n._(t`Toggle instance`)}
         />

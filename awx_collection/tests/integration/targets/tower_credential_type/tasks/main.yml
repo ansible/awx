@@ -18,7 +18,7 @@
 
 - name: Remove a Tower credential type
   tower_credential_type:
-    name: "{{ cred_type_name }}"
+    name: "{{ result.id }}"
     state: absent
   register: result
 

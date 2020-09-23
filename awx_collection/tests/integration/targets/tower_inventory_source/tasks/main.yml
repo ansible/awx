@@ -16,6 +16,7 @@
     host: https://example.org:5000
     password: passw0rd
     domain: test
+  register: credential_result
 
 - name: Add a Tower inventory
   tower_inventory:
@@ -28,7 +29,7 @@
     name: "{{ openstack_inv_source }}"
     description: Source for Test inventory
     inventory: "{{ openstack_inv }}"
-    credential: "{{ openstack_cred }}"
+    credential: "{{ credential_result.id }}"
     overwrite: true
     update_on_launch: true
     source_vars:
@@ -42,7 +43,7 @@
 
 - name: Delete the inventory source with an invalid cred, source_project, sourece_script specified
   tower_inventory_source:
-    name: "{{ openstack_inv_source }}"
+    name: "{{ result.id }}"
     inventory: "{{ openstack_inv }}"
     credential: "Does Not Exit"
     source_project: "Does Not Exist"

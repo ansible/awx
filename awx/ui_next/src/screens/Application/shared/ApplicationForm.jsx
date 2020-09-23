@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Formik, useField } from 'formik';
+import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import PropTypes from 'prop-types';
 
@@ -18,10 +18,12 @@ import AnsibleSelect from '../../../components/AnsibleSelect';
 
 function ApplicationFormFields({
   i18n,
+  application,
   authorizationOptions,
   clientTypeOptions,
 }) {
   const match = useRouteMatch();
+  const { setFieldValue } = useFormikContext();
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
     validate: required(null, i18n),
@@ -39,6 +41,13 @@ function ApplicationFormFields({
     name: 'client_type',
     validate: required(null, i18n),
   });
+
+  const onOrganizationChange = useCallback(
+    value => {
+      setFieldValue('organization', value);
+    },
+    [setFieldValue]
+  );
 
   return (
     <>
@@ -60,11 +69,10 @@ function ApplicationFormFields({
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={value => {
-          organizationHelpers.setValue(value);
-        }}
+        onChange={onOrganizationChange}
         value={organizationField.value}
         required
+        autoPopulate={!application?.id}
       />
       <FormGroup
         fieldId="authType"
@@ -166,6 +174,7 @@ function ApplicationForm({
           <FormColumnLayout>
             <ApplicationFormFields
               formik={formik}
+              application={application}
               authorizationOptions={authorizationOptions}
               clientTypeOptions={clientTypeOptions}
               i18n={i18n}

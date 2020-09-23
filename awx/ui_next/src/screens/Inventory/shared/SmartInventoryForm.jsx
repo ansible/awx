@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { Formik, useField } from 'formik';
+import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape, object, arrayOf } from 'prop-types';
@@ -20,7 +20,8 @@ import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
 import { InventoriesAPI } from '../../../api';
 
-const SmartInventoryFormFields = withI18n()(({ i18n }) => {
+const SmartInventoryFormFields = withI18n()(({ i18n, inventory }) => {
+  const { setFieldValue } = useFormikContext();
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
     validate: required(i18n._(t`Select a value for this field`), i18n),
@@ -32,6 +33,12 @@ const SmartInventoryFormFields = withI18n()(({ i18n }) => {
     name: 'host_filter',
     validate: required(null, i18n),
   });
+  const onOrganizationChange = useCallback(
+    value => {
+      setFieldValue('organization', value);
+    },
+    [setFieldValue]
+  );
 
   return (
     <>
@@ -53,11 +60,10 @@ const SmartInventoryFormFields = withI18n()(({ i18n }) => {
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={value => {
-          organizationHelpers.setValue(value);
-        }}
+        onChange={onOrganizationChange}
         value={organizationField.value}
         required
+        autoPopulate={!inventory?.id}
       />
       <HostFilterLookup
         value={hostFilterField.value}
@@ -144,7 +150,7 @@ function SmartInventoryForm({
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
-            <SmartInventoryFormFields />
+            <SmartInventoryFormFields inventory={inventory} />
             {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
               onCancel={onCancel}

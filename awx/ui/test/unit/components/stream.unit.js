@@ -51,7 +51,13 @@ describe('Output | StreamService', () => {
     });
 
     describe('isReadyToRender', () => {
-        it("it's never ready to render unless the result of getReadyCount is greater than 0", () => {
+        it("it's never ready to render when live updates are enabled unless the result of getReadyCount is greater than 0", () => {
+            delete window.liveUpdates;
+            Object.defineProperty(window, 'liveUpdates', {
+                value: true,
+                writable: false
+            });
+
             const params = [
                 [-1, false],
                 [0, false],

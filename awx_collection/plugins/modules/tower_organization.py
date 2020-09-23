@@ -67,6 +67,11 @@ options:
         - list of notifications to send on start
       type: list
       elements: str
+    galaxy_credentials:
+      description:
+        - list of Ansible Galaxy credentials to associate to the organization
+      type: list
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -86,6 +91,14 @@ EXAMPLES = '''
     custom_virtualenv: "/var/lib/awx/venv/foo-venv/"
     state: present
     tower_config_file: "~/tower_cli.cfg"
+
+- name: Create tower organization that pulls content from galaxy.ansible.com
+  tower_organization:
+    name: "Foo"
+    state: present
+    galaxy_credentials:
+      - Ansible Galaxy
+    tower_config_file: "~/tower_cli.cfg"
 '''
 
 from ..module_utils.tower_api import TowerAPIModule
@@ -102,6 +115,7 @@ def main():
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
         notification_templates_approvals=dict(type="list", elements='str'),
+        galaxy_credentials=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -117,11 +131,7 @@ def main():
     state = module.params.get('state')
 
     # Attempt to look up organization based on the provided name
-    organization = module.get_one('organizations', **{
-        'data': {
-            'name': name,
-        }
-    })
+    organization = module.get_one('organizations', name_or_id=name)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -153,8 +163,14 @@ def main():
         for item in notifications_approval:
             association_fields['notification_templates_approvals'].append(module.resolve_name_to_id('notification_templates', item))
 
+    galaxy_credentials = module.params.get('galaxy_credentials')
+    if galaxy_credentials is not None:
+        association_fields['galaxy_credentials'] = []
+        for item in galaxy_credentials:
+            association_fields['galaxy_credentials'].append(module.resolve_name_to_id('credentials', item))
+
     # Create the data that gets sent for create and update
-    org_fields = {'name': name}
+    org_fields = {'name': module.get_item_name(organization) if organization else name}
     if description is not None:
         org_fields['description'] = description
     if custom_virtualenv is not None:

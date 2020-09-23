@@ -103,18 +103,12 @@ def main():
     timeout = module.params.get('timeout')
 
     # Attempt to look up project based on the provided name or id
-    if name.isdigit():
-        results = module.get_endpoint('projects', **{'data': {'id': name}})
-        if results['json']['count'] == 0:
-            module.fail_json(msg='Could not find Project with ID: {0}'.format(name))
-        project = results['json']['results'][0]
-    else:
-        lookup_data = {'name': name}
-        if organization:
-            lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
-        project = module.get_one('projects', data=lookup_data)
-        if project is None:
-            module.fail_json(msg="Unable to find project")
+    lookup_data = {}
+    if organization:
+        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+    project = module.get_one('projects', name_or_id=name, data=lookup_data)
+    if project is None:
+        module.fail_json(msg="Unable to find project")
 
     # Update the project
     result = module.post_endpoint(project['related']['update'])
@@ -138,7 +132,7 @@ def main():
     # Invoke wait function
     module.wait_on_url(
         url=result['json']['url'],
-        object_name=name,
+        object_name=module.get_item_name(project),
         object_type='Project Update',
         timeout=timeout, interval=interval
     )

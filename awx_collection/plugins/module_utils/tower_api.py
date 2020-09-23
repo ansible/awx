@@ -4,11 +4,9 @@ __metaclass__ = type
 from . tower_module import TowerModule
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
 from ansible.module_utils.six import PY2
-from ansible.module_utils.six.moves.urllib.parse import urlencode
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
 import time
-import re
 from json import loads, dumps
 
 
@@ -24,7 +22,12 @@ class TowerAPIModule(TowerModule):
         'tower': 'Red Hat Ansible Tower',
     }
     session = None
-    cookie_jar = CookieJar()
+    IDENTITY_FIELDS = {
+        'users': 'username',
+        'workflow_job_template_nodes': 'identifier',
+        'instances': 'hostname'
+    }
+    ENCRYPTED_STRING = "$encrypted$"
 
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
@@ -32,6 +35,11 @@ class TowerAPIModule(TowerModule):
         super(TowerAPIModule, self).__init__(argument_spec=argument_spec, direct_params=direct_params,
                                              error_callback=error_callback, warn_callback=warn_callback, **kwargs)
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
+
+        if 'update_secrets' in self.params:
+            self.update_secrets = self.params.pop('update_secrets')
+        else:
+            self.update_secrets = True
 
     @staticmethod
     def param_to_endpoint(name):
@@ -41,6 +49,30 @@ class TowerAPIModule(TowerModule):
             'workflow': 'workflow_job_templates'
         }
         return exceptions.get(name, '{0}s'.format(name))
+
+    @staticmethod
+    def get_name_field_from_endpoint(endpoint):
+        return TowerAPIModule.IDENTITY_FIELDS.get(endpoint, 'name')
+
+    def get_item_name(self, item, allow_unknown=False):
+        if item:
+            if 'name' in item:
+                return item['name']
+
+            for field_name in TowerAPIModule.IDENTITY_FIELDS.values():
+                if field_name in item:
+                    return item[field_name]
+
+            if item.get('type', None) in ('o_auth2_access_token', 'credential_input_source'):
+                return item['id']
+
+        if allow_unknown:
+            return 'unknown'
+
+        if item:
+            self.exit_json(msg='Cannot determine identity field for {0} object.'.format(item.get('type', 'unknown')))
+        else:
+            self.exit_json(msg='Cannot determine identity field for Undefined object.')
 
     def head_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('HEAD', endpoint, **kwargs)
@@ -88,8 +120,23 @@ class TowerAPIModule(TowerModule):
             response['json']['next'] = next_page
         return response
 
-    def get_one(self, endpoint, *args, **kwargs):
-        response = self.get_endpoint(endpoint, *args, **kwargs)
+    def get_one(self, endpoint, name_or_id=None, allow_none=True, **kwargs):
+        new_kwargs = kwargs.copy()
+        if name_or_id:
+            name_field = self.get_name_field_from_endpoint(endpoint)
+            new_data = kwargs.get('data', {}).copy()
+            if name_field in new_data:
+                self.fail_json(msg="You can't specify the field {0} in your search data if using the name_or_id field".format(name_field))
+
+            try:
+                new_data['or__id'] = int(name_or_id)
+                new_data['or__{0}'.format(name_field)] = name_or_id
+            except ValueError:
+                # If we get a value error, then we didn't have an integer so we can just pass and fall down to the fail
+                new_data[name_field] = name_or_id
+            new_kwargs['data'] = new_data
+
+        response = self.get_endpoint(endpoint, **new_kwargs)
         if response['status_code'] != 200:
             fail_msg = "Got a {0} response when trying to get one from {1}".format(response['status_code'], endpoint)
             if 'detail' in response.get('json', {}):
@@ -100,60 +147,52 @@ class TowerAPIModule(TowerModule):
             self.fail_json(msg="The endpoint did not provide count and results")
 
         if response['json']['count'] == 0:
-            return None
+            if allow_none:
+                return None
+            else:
+                self.fail_wanted_one(response, endpoint, new_kwargs.get('data'))
         elif response['json']['count'] > 1:
-            self.fail_json(msg="An unexpected number of items was returned from the API ({0})".format(response['json']['count']))
+            if name_or_id:
+                # Since we did a name or ID search and got > 1 return something if the id matches
+                for asset in response['json']['results']:
+                    if str(asset['id']) == name_or_id:
+                        return asset
+            # We got > 1 and either didn't find something by ID (which means multiple names)
+            # Or we weren't running with a or search and just got back too many to begin with.
+            self.fail_wanted_one(response, endpoint, new_kwargs.get('data'))
 
         return response['json']['results'][0]
 
-    def get_one_by_name_or_id(self, endpoint, name_or_id):
-        name_field = 'name'
-        if endpoint == 'users':
-            name_field = 'username'
-        elif endpoint == 'instances':
-            name_field = 'hostname'
+    def fail_wanted_one(self, response, endpoint, query_params):
+        sample = response.copy()
+        if len(sample['json']['results']) > 1:
+            sample['json']['results'] = sample['json']['results'][:2] + ['...more results snipped...']
+        url = self.build_url(endpoint, query_params)
+        display_endpoint = url.geturl()[len(self.host):]  # truncate to not include the base URL
+        self.fail_json(
+            msg="Request to {0} returned {1} items, expected 1".format(
+                display_endpoint, response['json']['count']
+            ),
+            query=query_params,
+            response=sample,
+            total_results=response['json']['count']
+        )
 
-        query_params = {'or__{0}'.format(name_field): name_or_id}
-        try:
-            query_params['or__id'] = int(name_or_id)
-        except ValueError:
-            # If we get a value error, then we didn't have an integer so we can just pass and fall down to the fail
-            pass
-
-        response = self.get_endpoint(endpoint, **{'data': query_params})
-        if response['status_code'] != 200:
-            self.fail_json(
-                msg="Failed to query endpoint {0} for {1} {2} ({3}), see results".format(endpoint, name_field, name_or_id, response['status_code']),
-                resuls=response
-            )
-
-        if response['json']['count'] == 1:
-            return response['json']['results'][0]
-        elif response['json']['count'] > 1:
-            for tower_object in response['json']['results']:
-                # ID takes priority, so we match on that first
-                if str(tower_object['id']) == name_or_id:
-                    return tower_object
-            # We didn't match on an ID but we found more than 1 object, therefore the results are ambiguous
-            self.fail_json(msg="The requested name or id was ambiguous and resulted in too many items")
-        elif response['json']['count'] == 0:
-            self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
+    def get_exactly_one(self, endpoint, name_or_id=None, **kwargs):
+        return self.get_one(endpoint, name_or_id=name_or_id, allow_none=False, **kwargs)
 
     def resolve_name_to_id(self, endpoint, name_or_id):
-        return self.get_one_by_name_or_id(endpoint, name_or_id)['id']
+        return self.get_exactly_one(endpoint, name_or_id)['id']
 
     def make_request(self, method, endpoint, *args, **kwargs):
         # In case someone is calling us directly; make sure we were given a method, let's not just assume a GET
         if not method:
             raise Exception("The HTTP method must be defined")
 
-        # Make sure we start with /api/vX
-        if not endpoint.startswith("/"):
-            endpoint = "/{0}".format(endpoint)
-        if not endpoint.startswith("/api/"):
-            endpoint = "/api/v2{0}".format(endpoint)
-        if not endpoint.endswith('/') and '?' not in endpoint:
-            endpoint = "{0}/".format(endpoint)
+        if method in ['POST', 'PUT', 'PATCH']:
+            url = self.build_url(endpoint)
+        else:
+            url = self.build_url(endpoint, query_params=kwargs.get('data'))
 
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
@@ -166,46 +205,41 @@ class TowerAPIModule(TowerModule):
             # If we have a oauth token, we just use a bearer header
             headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
 
-        # Update the URL path with the endpoint
-        self.url = self.url._replace(path=endpoint)
-
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
             kwargs['headers'] = headers
-        elif kwargs.get('data'):
-            self.url = self.url._replace(query=urlencode(kwargs.get('data')))
 
         data = None  # Important, if content type is not JSON, this should not be dict type
         if headers.get('Content-Type', '') == 'application/json':
             data = dumps(kwargs.get('data', {}))
 
         try:
-            response = self.session.open(method, self.url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)
+            response = self.session.open(method, url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)
         except(SSLValidationError) as ssl_err:
-            self.fail_json(msg="Could not establish a secure connection to your host ({1}): {0}.".format(self.url.netloc, ssl_err))
+            self.fail_json(msg="Could not establish a secure connection to your host ({1}): {0}.".format(url.netloc, ssl_err))
         except(ConnectionError) as con_err:
-            self.fail_json(msg="There was a network error of some kind trying to connect to your host ({1}): {0}.".format(self.url.netloc, con_err))
+            self.fail_json(msg="There was a network error of some kind trying to connect to your host ({1}): {0}.".format(url.netloc, con_err))
         except(HTTPError) as he:
             # Sanity check: Did the server send back some kind of internal error?
             if he.code >= 500:
-                self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(self.url.path, he))
+                self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(url.path, he))
             # Sanity check: Did we fail to authenticate properly?  If so, fail out now; this is always a failure.
             elif he.code == 401:
-                self.fail_json(msg='Invalid Tower authentication credentials for {0} (HTTP 401).'.format(self.url.path))
+                self.fail_json(msg='Invalid Tower authentication credentials for {0} (HTTP 401).'.format(url.path))
             # Sanity check: Did we get a forbidden response, which means that the user isn't allowed to do this? Report that.
             elif he.code == 403:
-                self.fail_json(msg="You don't have permission to {1} to {0} (HTTP 403).".format(self.url.path, method))
+                self.fail_json(msg="You don't have permission to {1} to {0} (HTTP 403).".format(url.path, method))
             # Sanity check: Did we get a 404 response?
             # Requests with primary keys will return a 404 if there is no response, and we want to consistently trap these.
             elif he.code == 404:
                 if kwargs.get('return_none_on_404', False):
                     return None
-                self.fail_json(msg='The requested object could not be found at {0}.'.format(self.url.path))
+                self.fail_json(msg='The requested object could not be found at {0}.'.format(url.path))
             # Sanity check: Did we get a 405 response?
             # A 405 means we used a method that isn't allowed. Usually this is a bad request, but it requires special treatment because the
             # API sends it as a logic error in a few situations (e.g. trying to cancel a job that isn't running).
             elif he.code == 405:
-                self.fail_json(msg="The Tower server says you can't make a request with the {0} method to this endpoing {1}".format(method, self.url.path))
+                self.fail_json(msg="The Tower server says you can't make a request with the {0} method to this endpoing {1}".format(method, url.path))
             # Sanity check: Did we get some other kind of error?  If so, write an appropriate error message.
             elif he.code >= 400:
                 # We are going to return a 400 so the module can decide what to do with it
@@ -219,11 +253,9 @@ class TowerAPIModule(TowerModule):
                 # A 204 is a normal response for a delete function
                 pass
             else:
-                self.fail_json(msg="Unexpected return code when calling {0}: {1}".format(self.url.geturl(), he))
+                self.fail_json(msg="Unexpected return code when calling {0}: {1}".format(url.geturl(), he))
         except(Exception) as e:
-            self.fail_json(msg="There was an unknown error when trying to connect to {2}: {0} {1}".format(type(e).__name__, e, self.url.geturl()))
-        finally:
-            self.url = self.url._replace(query=None)
+            self.fail_json(msg="There was an unknown error when trying to connect to {2}: {0} {1}".format(type(e).__name__, e, url.geturl()))
 
         if not self.version_checked:
             # In PY2 we get back an HTTPResponse object but PY2 is returning an addinfourl
@@ -319,23 +351,9 @@ class TowerAPIModule(TowerModule):
                 item_url = existing_item['url']
                 item_type = existing_item['type']
                 item_id = existing_item['id']
+                item_name = self.get_item_name(existing_item, allow_unknown=True)
             except KeyError as ke:
                 self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
-
-            if 'name' in existing_item:
-                item_name = existing_item['name']
-            elif 'username' in existing_item:
-                item_name = existing_item['username']
-            elif 'identifier' in existing_item:
-                item_name = existing_item['identifier']
-            elif item_type == 'o_auth2_access_token':
-                # An oauth2 token has no name, instead we will use its id for any of the messages
-                item_name = existing_item['id']
-            elif item_type == 'credential_input_source':
-                # An credential_input_source has no name, instead we will use its id for any of the messages
-                item_name = existing_item['id']
-            else:
-                self.fail_json(msg="Unable to process delete of {0} due to missing name".format(item_type))
 
             response = self.delete_endpoint(item_url)
 
@@ -415,12 +433,7 @@ class TowerAPIModule(TowerModule):
 
             # We have to rely on item_type being passed in since we don't have an existing item that declares its type
             # We will pull the item_name out from the new_item, if it exists
-            for key in ('name', 'username', 'identifier', 'hostname'):
-                if key in new_item:
-                    item_name = new_item[key]
-                    break
-            else:
-                item_name = 'unknown'
+            item_name = self.get_item_name(new_item, allow_unknown=True)
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
             if response['status_code'] == 201:
@@ -479,6 +492,25 @@ class TowerAPIModule(TowerModule):
             return True
         return False
 
+    @staticmethod
+    def fields_could_be_same(old_field, new_field):
+        """Treating $encrypted$ as a wild card,
+        return False if the two values are KNOWN to be different
+        return True if the two values are the same, or could potentially be the same,
+        depending on the unknown $encrypted$ value or sub-values
+        """
+        if isinstance(old_field, dict) and isinstance(new_field, dict):
+            if set(old_field.keys()) != set(new_field.keys()):
+                return False
+            for key in new_field.keys():
+                if not TowerAPIModule.fields_could_be_same(old_field[key], new_field[key]):
+                    return False
+            return True  # all sub-fields are either equal or could be equal
+        else:
+            if old_field == TowerAPIModule.ENCRYPTED_STRING:
+                return True
+            return bool(new_field == old_field)
+
     def objects_could_be_different(self, old, new, field_set=None, warning=False):
         if field_set is None:
             field_set = set(fd for fd in new.keys() if fd not in ('modified', 'related', 'summary_fields'))
@@ -486,11 +518,13 @@ class TowerAPIModule(TowerModule):
             new_field = new.get(field, None)
             old_field = old.get(field, None)
             if old_field != new_field:
-                return True  # Something doesn't match
+                if self.update_secrets or (not self.fields_could_be_same(old_field, new_field)):
+                    return True  # Something doesn't match, or something might not match
             elif self.has_encrypted_values(new_field) or field not in new:
-                # case of 'field not in new' - user password write-only field that API will not display
-                self._encrypted_changed_warning(field, old, warning=warning)
-                return True
+                if self.update_secrets or (not self.fields_could_be_same(old_field, new_field)):
+                    # case of 'field not in new' - user password write-only field that API will not display
+                    self._encrypted_changed_warning(field, old, warning=warning)
+                    return True
         return False
 
     def update_if_needed(self, existing_item, new_item, on_update=None, on_continue=None, associations=None):
@@ -615,7 +649,7 @@ class TowerAPIModule(TowerModule):
             # If we are past our time out fail with a message
             if timeout and timeout < time.time() - start:
                 # Account for Legacy messages
-                if object_type is 'legacy_job_wait':
+                if object_type == 'legacy_job_wait':
                     self.json_output['msg'] = 'Monitoring of Job - {0} aborted due to timeout'.format(object_name)
                 else:
                     self.json_output['msg'] = 'Monitoring of {0} - {1} aborted due to timeout'.format(object_type, object_name)
@@ -631,7 +665,7 @@ class TowerAPIModule(TowerModule):
         # If the job has failed, we want to raise a task failure for that so we get a non-zero response.
         if result['json']['failed']:
             # Account for Legacy messages
-            if object_type is 'legacy_job_wait':
+            if object_type == 'legacy_job_wait':
                 self.json_output['msg'] = 'Job with id {0} failed'.format(object_name)
             else:
                 self.json_output['msg'] = 'The {0} - {1}, failed'.format(object_type, object_name)

@@ -8,6 +8,7 @@ import { OrganizationsAPI } from '../../api';
 import { Organization } from '../../types';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import useRequest from '../../util/useRequest';
+import useAutoPopulateLookup from '../../util/useAutoPopulateLookup';
 import OptionsList from '../OptionsList';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
@@ -27,7 +28,10 @@ function OrganizationLookup({
   required,
   value,
   history,
+  autoPopulate,
 }) {
+  const autoPopulateLookup = useAutoPopulateLookup(onChange);
+
   const {
     result: { itemCount, organizations, relatedSearchableKeys, searchableKeys },
     error: contentError,
@@ -39,6 +43,11 @@ function OrganizationLookup({
         OrganizationsAPI.read(params),
         OrganizationsAPI.readOptions(),
       ]);
+
+      if (autoPopulate) {
+        autoPopulateLookup(response.data.results);
+      }
+
       return {
         organizations: response.data.results,
         itemCount: response.data.count,
@@ -49,7 +58,7 @@ function OrganizationLookup({
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
-    }, [history.location.search]),
+    }, [autoPopulate, autoPopulateLookup, history.location.search]),
     {
       organizations: [],
       itemCount: 0,
@@ -129,6 +138,7 @@ OrganizationLookup.propTypes = {
   onChange: func.isRequired,
   required: bool,
   value: Organization,
+  autoPopulate: bool,
 };
 
 OrganizationLookup.defaultProps = {
@@ -137,6 +147,7 @@ OrganizationLookup.defaultProps = {
   onBlur: () => {},
   required: false,
   value: null,
+  autoPopulate: false,
 };
 
 export { OrganizationLookup as _OrganizationLookup };

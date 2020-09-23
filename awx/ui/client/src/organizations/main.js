@@ -12,8 +12,10 @@ import organizationsLinkout from './linkout/main';
 import OrganizationsLinkoutStates from './linkout/organizations-linkout.route';
 import OrganizationForm from './organizations.form';
 import OrganizationList from './organizations.list';
-import { N_ } from '../i18n';
+import galaxyCredentialsMultiselect from './galaxy-credentials-multiselect/galaxy-credentials.directive';
+import galaxyCredentialsModal from './galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.directive';
 
+import { N_ } from '../i18n';
 
 export default
 angular.module('Organizations', [
@@ -24,6 +26,8 @@ angular.module('Organizations', [
     .controller('OrganizationsEdit', OrganizationsEdit)
     .factory('OrganizationForm', OrganizationForm)
     .factory('OrganizationList', OrganizationList)
+    .directive('galaxyCredentialsMultiselect', galaxyCredentialsMultiselect)
+    .directive('galaxyCredentialsModal', galaxyCredentialsModal)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateExtender = $stateExtenderProvider.$get(),
@@ -67,7 +71,29 @@ angular.module('Organizations', [
                                         });
                                     });
 
-                            }]
+                            }],
+                            defaultGalaxyCredential: ['Rest', 'GetBasePath', 'ProcessErrors',
+                                function(Rest, GetBasePath, ProcessErrors){
+                                    Rest.setUrl(GetBasePath('credentials'));
+                                    return Rest.get({
+                                        params: {
+                                            credential_type__kind: 'galaxy',
+                                            managed_by_tower: true
+                                        }
+                                    })
+                                    .then(({data}) => {
+                                        if (data.results.length > 0) {
+                                            return data.results;
+                                        }
+                                    })
+                                    .catch(({data, status}) => {
+                                        ProcessErrors(null, data, status, null, {
+                                            hdr: 'Error!',
+                                            msg: 'Failed to get default Galaxy credential. GET returned ' +
+                                                'status: ' + status
+                                        });
+                                    });
+                            }],
                         },
                         edit: {
                             ConfigData: ['ConfigService', 'ProcessErrors', (ConfigService, ProcessErrors) => {
@@ -79,6 +105,24 @@ angular.module('Organizations', [
                                             msg: 'Failed to get config. GET returned status: ' +
                                                 'status: ' + status
                                         });
+                                    });
+                            }],
+                            GalaxyCredentialsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                                    let path = `${GetBasePath('organizations')}${$stateParams.organization_id}/galaxy_credentials/`;
+                                    Rest.setUrl(path);
+                                    return Rest.get()
+                                        .then(({data}) => {
+                                            if (data.results.length > 0) {
+                                                return data.results;
+                                            }
+                                        })
+                                        .catch(({data, status}) => {
+                                            ProcessErrors(null, data, status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get credentials. GET returned ' +
+                                                    'status: ' + status
+                                            });
                                     });
                             }],
                             InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',

@@ -4,6 +4,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from awx.main.dispatch.control import Control
 from awx.main.dispatch.worker import AWXConsumerRedis, CallbackBrokerWorker
 
 
@@ -15,7 +16,14 @@ class Command(BaseCommand):
     '''
     help = 'Launch the job callback receiver'
 
+    def add_arguments(self, parser):
+        parser.add_argument('--status', dest='status', action='store_true',
+                            help='print the internal state of any running dispatchers')
+
     def handle(self, *arg, **options):
+        if options.get('status'):
+            print(Control('callback_receiver').status())
+            return
         consumer = None
         try:
             consumer = AWXConsumerRedis(

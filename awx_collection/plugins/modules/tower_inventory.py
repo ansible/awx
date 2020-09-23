@@ -109,9 +109,8 @@ def main():
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up inventory based on the provided name and org ID
-    inventory = module.get_one('inventories', **{
+    inventory = module.get_one('inventories', name_or_id=name, **{
         'data': {
-            'name': name,
             'organization': org_id
         }
     })
@@ -122,7 +121,7 @@ def main():
 
     # Create the data that gets sent for create and update
     inventory_fields = {
-        'name': name,
+        'name': module.get_item_name(inventory) if inventory else name,
         'organization': org_id,
         'kind': kind,
         'host_filter': host_filter,
