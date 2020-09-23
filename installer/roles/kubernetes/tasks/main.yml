@@ -201,6 +201,34 @@
   set_fact:
     kubernetes_deployment_api_version: "{{ 'apps/v1' if kube_api_version is version('1.9', '>=') else 'apps/v1beta1' }}"
 
+- name: Use Custom Root CA file for PosgtreSQL SSL communication
+  block:
+    - name: Get Root CA file contents
+      set_fact:
+        postgres_root_ca_cert: "{{ lookup('file', pg_root_ca_file) }}"
+      no_log: true
+
+    - name: Render Root CA template
+      set_fact:
+        postgres_root_ca: "{{ lookup('template', 'postgres_root_ca.yml.j2') }}"
+      no_log: true
+
+    - name: Apply Root CA template
+      shell: |
+        echo {{ postgres_root_ca | quote }} | {{ kubectl_or_oc }} apply -f -
+      no_log: true
+
+    - name: Set Root CA file name
+      set_fact:
+        postgres_root_ca_filename: 'postgres_root_ca.crt'
+
+    - name: Set Root CA file location
+      set_fact:
+        ca_trust_bundle: '/etc/tower/{{ postgres_root_ca_filename }}'
+  when:
+    - pg_root_ca_file is defined
+    - pg_root_ca_file != ''
+
 - name: Render deployment templates
   set_fact:
     "{{ item }}": "{{ lookup('template', item + '.yml.j2') }}"

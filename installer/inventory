@@ -91,6 +91,12 @@ pg_database=awx
 pg_port=5432
 #pg_sslmode=require
 
+# If requiring SSL communication (e.g. pg_sslmode='verify-full') with Postgres
+# and using a self-signed certificate or a certificate signed by a custom CA
+# set pg_root_ca_file to a file containing the self-signed certificate or the
+# root CA certificate chain.
+# pg_root_ca_file='example_root_ca.crt'
+
 # The following variable is only required when using the provided
 # containerized postgres deployment on OpenShift
 # pg_admin_password=postgrespass
