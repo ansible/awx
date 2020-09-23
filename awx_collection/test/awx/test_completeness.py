@@ -54,7 +54,7 @@ no_api_parameter_ok = {
 # that needs to be developed. If the module is found on the file system it will auto-detect that the
 # work is being done and will bypass this check. At some point this module should be removed from this list.
 needs_development = [
-    'tower_ad_hoc_command', 'tower_application', 'tower_inventory_script', 'tower_workflow_approval'
+    'tower_ad_hoc_command', 'tower_inventory_script', 'tower_workflow_approval'
 ]
 needs_param_development = {
     'tower_host': ['instance_id'],
