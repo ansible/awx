@@ -14,6 +14,7 @@ import { JSON_MODE, YAML_MODE } from './constants';
 const FieldHeader = styled.div`
   display: flex;
   justify-content: space-between;
+  padding-bottom: var(--pf-c-form__group-label--PaddingBottom);
 `;
 
 const StyledCheckboxField = styled(CheckboxField)`
