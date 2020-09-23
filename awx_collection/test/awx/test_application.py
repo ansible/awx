@@ -3,7 +3,8 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import Organization, Application
+from awx.main.models import Organization
+from awx.main.models.oauth import OAuth2AccessToken, OAuth2Application
 
 
 @pytest.mark.django_db
@@ -22,7 +23,7 @@ def test_create_application(run_module, admin_user):
     result = run_module('tower_application', module_args, admin_user)
     assert result.get('changed'), result
 
-    application = Application.objects.get(name='foo_app')
+    application = OAuth2Application.objects.get(name='foo_app')
     assert application.description == 'barfoo'
     assert application.organization_id == org.id
 

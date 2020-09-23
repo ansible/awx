@@ -56,7 +56,7 @@
         name: "{{ app3_name }}"
         organization: "Default"
         description: "All Trusting Application"
-        skip_authorization: True
+        skip_authorization: true
         authorization_grant_type: "password"
         client_type: "confidential"
         state: present
