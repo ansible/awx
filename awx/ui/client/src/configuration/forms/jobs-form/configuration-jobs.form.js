@@ -65,6 +65,9 @@ export default ['i18n', function(i18n) {
             PROJECT_UPDATE_VVV: {
                 type: 'toggleSwitch',
             },
+            GALAXY_IGNORE_CERTS: {
+                type: 'toggleSwitch',
+            },
             AWX_ROLES_ENABLED: {
                 type: 'toggleSwitch',
             },
