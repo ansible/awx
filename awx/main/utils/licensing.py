@@ -9,10 +9,7 @@ The Licenser class can do the following:
  - Parse an Entitlement cert to generate license
 '''
 
-
-MAX_INSTANCES = 9999999
-
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 import collections
 import copy
@@ -30,13 +27,15 @@ from django.utils.encoding import smart_text, smart_bytes
 from awx.main.models import Host
 from awx.main.utils import get_awx_http_client_headers
 
+MAX_INSTANCES = 9999999
+
 logger = logging.getLogger(__name__)
 
 
 def str_to_datetime(string):
     if not string:
         return 0
-    t_parts = re.split('-| |:|\+', string)
+    t_parts = re.split('-| |:|\+', string) # noqa
 
     year = int(t_parts[0])
     month = int(t_parts[1])
@@ -83,9 +82,9 @@ class Licenser(object):
             self._generate_open_config()
 
 
-    # Product Cert Name: ansible-tower-3.7-rhel-7.x86_64.pem
-    # TODO: Maybe check validity of Product Cert somehow?
     def _check_product_cert(self):
+        # Product Cert Name: ansible-tower-3.7-rhel-7.x86_64.pem
+        # TODO: Maybe check validity of Product Cert somehow?
         if os.path.exists('/etc/tower/certs') and os.path.exists('/var/lib/awx/.tower_version'):
             return True
         return False
@@ -93,10 +92,10 @@ class Licenser(object):
 
     def _generate_open_config(self):
         self._attrs.update(dict(license_type='open',
-            valid_key=True,
-            subscription_name='OPEN',
-            product_name="AWX",
-            ))
+                                valid_key=True,
+                                subscription_name='OPEN',
+                                product_name="AWX",
+                                ))
         settings.LICENSE = self._attrs
 
     
@@ -135,7 +134,6 @@ class Licenser(object):
                         key, value = line.split(': ')
                         cert_dict.update({key:value})
                 
-                # curl https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os --cert /etc/tower/certs/entitlement_cert_key_generic.pem -i
                 # TODO: create this URL from Satellite setting
                 # Verify the entitlment cert is authorized to access appropriate content
                 verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
@@ -212,7 +210,7 @@ class Licenser(object):
             except requests.exceptions.ConnectionError as error:
                 raise error
             except OSError as error:
-                raise OSError('Unable to open certificate bundle {}. Check that Ansible Tower is running on Red Hat Enterprise Linux.'.format(verify)) from error
+                raise OSError('Unable to open certificate bundle {}. Check that Ansible Tower is running on Red Hat Enterprise Linux.'.format(verify)) from error # noqa
             subs.raise_for_status()
 
             for sub in subs.json():
@@ -314,7 +312,7 @@ class Licenser(object):
             return licenses
 
         raise ValueError(
-            'No valid Red Hat Ansible Automation subscription could be found for this account.'  # noqa
+            'No valid Red Hat Ansible Automation subscription could be found for this account.'
         )
 
 

@@ -12,7 +12,7 @@ from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
-from awx.main.validators import validate_private_key, validate_certificate, validate_entitlement_cert
+from awx.main.validators import validate_entitlement_cert
 
 
 logger = logging.getLogger('awx.main.conf')

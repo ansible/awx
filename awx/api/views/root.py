@@ -6,9 +6,7 @@ import logging
 import operator
 import os
 from collections import OrderedDict
-import subprocess
 import random
-import re
 
 from django.conf import settings
 from django.utils.encoding import smart_text
@@ -237,7 +235,6 @@ class ApiV2AttachView(APIView):
 
     def post(self, request):
         
-        from awx.main.utils.common import get_licenser
         data = request.data.copy()
         pool_id = data.get('pool_id', None)
         org = data.get('org', None)
@@ -330,11 +327,6 @@ class ApiV2AttachView(APIView):
                 cert_key = ''
 
                 for entitlement in entitlements:
-                    # We could either `rct cat-cert` each cert here to get the pool_id for the cert, or save the serial # for the entitlement when we attach the sub
-                    # The problem with saving the serial # is that if the sub has already been attached, Tower has no way of getting the serial #
-                    # Currently, we use the serial # and save it in the db, because it should be _much_ faster.  
-                    
-                    # TODO: Find a big account with old certs and try this out with that to make sure we don't get a lot of outdated entitlement certs
                     cert_key = entitlement['cert'] + entitlement['key']  # Potentially make this `=` --> '+='
                 
 
@@ -372,7 +364,8 @@ class ApiV2AttachView(APIView):
                 #                      extra=dict(actor=request.user.username))
                 return Response({"error": msg + e}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"error": _("No pool_id provided, or SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD are not set.")}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": _("No pool_id provided, or SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD are not set.")}, 
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 
