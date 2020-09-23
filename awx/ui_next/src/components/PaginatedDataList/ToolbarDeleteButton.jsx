@@ -20,11 +20,11 @@ const WarningMessage = styled(Alert)`
   margin-top: 10px;
 `;
 
-const requireNameOrUsername = props => {
-  const { name, username } = props;
-  if (!name && !username) {
+const requiredField = props => {
+  const { name, username, image } = props;
+  if (!name && !username && !image) {
     return new Error(
-      `One of 'name' or 'username' is required by ItemToDelete component.`
+      `One of 'name', 'username' or 'image' is required by ItemToDelete component.`
     );
   }
   if (name) {
@@ -47,13 +47,24 @@ const requireNameOrUsername = props => {
       'ItemToDelete'
     );
   }
+  if (image) {
+    checkPropTypes(
+      {
+        image: string,
+      },
+      { image: props.image },
+      'prop',
+      'ItemToDelete'
+    );
+  }
   return null;
 };
 
 const ItemToDelete = shape({
   id: number.isRequired,
-  name: requireNameOrUsername,
-  username: requireNameOrUsername,
+  name: requiredField,
+  username: requiredField,
+  image: requiredField,
   summary_fields: shape({
     user_capabilities: shape({
       delete: bool.isRequired,
@@ -171,7 +182,7 @@ function ToolbarDeleteButton({
           <div>{i18n._(t`This action will delete the following:`)}</div>
           {itemsToDelete.map(item => (
             <span key={item.id}>
-              <strong>{item.name || item.username}</strong>
+              <strong>{item.name || item.username || item.image}</strong>
               <br />
             </span>
           ))}
