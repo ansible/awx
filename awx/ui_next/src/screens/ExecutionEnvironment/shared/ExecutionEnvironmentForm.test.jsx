@@ -62,7 +62,7 @@ describe('<ExecutionEnvironmentForm/>', () => {
   });
 
   test('should display form fields properly', () => {
-    expect(wrapper.find('FormGroup[label="Image"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="Image name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('CredentialLookup').length).toBe(1);
   });
