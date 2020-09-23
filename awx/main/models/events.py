@@ -533,13 +533,21 @@ class JobEvent(BasePlaybookEvent):
                 (summary['host_id'], summary['id'])
                 for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host_id')
             )
+            updated_hosts = set()
             for h in all_hosts:
                 # if the hostname *shows up* in the playbook_on_stats event
                 if h.name in hostnames:
                     h.last_job_id = job.id
+                    updated_hosts.add(h)
                 if h.id in host_mapping:
                     h.last_job_host_summary_id = host_mapping[h.id]
-            Host.objects.bulk_update(all_hosts, ['last_job_id', 'last_job_host_summary_id'])
+                    updated_hosts.add(h)
+
+            Host.objects.bulk_update(
+                list(updated_hosts),
+                ['last_job_id', 'last_job_host_summary_id'],
+                batch_size=100
+            )
 
 
     @property
