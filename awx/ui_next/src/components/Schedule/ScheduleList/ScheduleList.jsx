@@ -140,6 +140,18 @@ function ScheduleList({
             key: 'name__icontains',
             isDefault: true,
           },
+          {
+            name: i18n._(t`Description`),
+            key: 'description__icontains',
+          },
+          {
+            name: i18n._(t`Created By (Username)`),
+            key: 'created_by__username__icontains',
+          },
+          {
+            name: i18n._(t`Modified By (Username)`),
+            key: 'modified_by__username__icontains',
+          },
         ]}
         toolbarSortColumns={[
           {

@@ -131,6 +131,10 @@ function ProjectList({ i18n }) {
                 isDefault: true,
               },
               {
+                name: i18n._(t`Description`),
+                key: 'description__icontains',
+              },
+              {
                 name: i18n._(t`Type`),
                 key: 'or__scm_type',
                 options: [
