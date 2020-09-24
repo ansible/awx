@@ -1,0 +1,63 @@
+---
+#- name: Generate a random string for test
+#  set_fact:
+#    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+#  when: test_id is not defined
+
+#- name: Generate names
+#  set_fact:
+#    proj_name: "AWX-Collection-tests-tower_job_launch-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Launch an Ad Hoc Command
+  tower_ad_hoc_command:
+    inventory: "Demo Inventory"
+    credential: "Demo Credential"
+    module_name: "command"
+    module_args: "sleep 10"
+  register: command
+
+- assert:
+    that:
+      - "command is changed"
+
+- name: Timeout waiting for the command to cancel
+  tower_ad_hoc_command_cancel:
+    command_id: "{{ command.id }}"
+    timeout: -1
+  register: results
+  ignore_errors: true
+
+- assert:
+    that:
+      - results is failed
+      - "results['msg'] == 'Monitoring of ad hoc command aborted due to timeout'"
+
+- name: Cancel the command
+  tower_ad_hoc_command_cancel:
+    command_id: "{{ command.id }}"
+  register: results
+
+- assert:
+    that:
+      - results is changed
+
+- name: Cancel an already canceled command (assert failure)
+  tower_ad_hoc_command_cancel:
+    command_id: "{{ command.id }}"
+    fail_if_not_running: true
+  register: results
+  ignore_errors: true
+
+- assert:
+    that:
+      - results is failed
+
+- name: Check module fails with correct msg
+  tower_ad_hoc_command_cancel:
+    command_id: 9999999999
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result.msg == 'Unable to find command with id 9999999999'"

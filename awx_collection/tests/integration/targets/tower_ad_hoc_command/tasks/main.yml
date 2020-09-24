@@ -1,0 +1,37 @@
+---
+#- name: Generate a random string for test
+#  set_fact:
+#    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+#  when: test_id is not defined
+
+#- name: Generate names
+#  set_fact:
+#    proj_name: "AWX-Collection-tests-tower_job_launch-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Launch an Ad Hoc Command waiting for it to finish
+  tower_ad_hoc_command:
+    inventory: "Demo Inventory"
+    credential: "Demo Credential"
+    module_name: "command"
+    module_args: "echo I<3 Ansible"
+    wait: True
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'successful'"
+
+- name: Check module fails with correct msg
+  tower_ad_hoc_command:
+    inventory: "Demo Inventory"
+    credential: "Demo Credential"
+    module_name: "Does not exist"
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result is failed"
+      - "result is not changed"
+      - "'Does not exist' in result.response['json']['module_name'][0]"

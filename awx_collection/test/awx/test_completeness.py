@@ -25,7 +25,7 @@ no_module_for_endpoint = []
 no_endpoint_for_module = [
     'tower_import', 'tower_meta', 'tower_export', 'tower_inventory_source_update', 'tower_job_launch', 'tower_job_wait',
     'tower_job_list', 'tower_license', 'tower_ping', 'tower_receive', 'tower_send', 'tower_workflow_launch',
-    'tower_job_cancel', 'tower_workflow_template',
+    'tower_job_cancel', 'tower_workflow_template', 'tower_ad_hoc_command_wait', 'tower_ad_hoc_command_cancel',
 ]
 
 # Global module parameters we can ignore
@@ -48,6 +48,8 @@ no_api_parameter_ok = {
     'tower_workflow_job_template_node': ['organization'],
     # Survey is how we handle associations
     'tower_workflow_job_template': ['survey'],
+    # ad hoc commands support interval and timeout since its more like tower_job_launc
+    'tower_ad_hoc_command': ['interval', 'timeout', 'wait'],
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
