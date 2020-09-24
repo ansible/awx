@@ -1,2 +1,2 @@
-export const BrandName = 'TOWER';
+export const BrandName = 'AWX';
 export const PendoAPIKey = '';
