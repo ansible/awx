@@ -6,6 +6,7 @@ import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import yaml from 'js-yaml';
+import { parseVariableField } from '../../../util/yaml';
 import mergeExtraVars, { maskPasswords } from '../mergeExtraVars';
 import getSurveyValues from '../getSurveyValues';
 import PromptDetail from '../../PromptDetail';
@@ -28,10 +29,18 @@ function PreviewStep({ resource, config, survey, formErrors, i18n }) {
   const surveyValues = getSurveyValues(values);
 
   const overrides = { ...values };
-
+  overrides.extra_vars = parseVariableField(overrides?.extra_vars);
+  Object.entries(overrides).forEach(([key, value]) => {
+    if (key.startsWith('survey')) {
+      overrides.extra_vars[key] = value;
+    }
+  });
+  // Workflow nodes needs an extra_data object that contains
+  // all of the extra vars merged with all of the survey values.
+  values.extra_data = overrides.extra_vars;
   if (config.ask_variables_on_launch || config.survey_enabled) {
     const initialExtraVars = config.ask_variables_on_launch
-      ? values.extra_vars || '---'
+      ? overrides.extra_vars || '---'
       : resource.extra_vars;
     if (survey && survey.spec) {
       const passwordFields = survey.spec

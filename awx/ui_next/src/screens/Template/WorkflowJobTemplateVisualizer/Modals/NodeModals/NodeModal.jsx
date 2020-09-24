@@ -194,7 +194,7 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
                   : i18n._(t`Next`)
               }
             />
-            {activeStep && activeStep.id !== 'runType' && (
+            {activeStep && activeStep.id !== steps[0]?.id && (
               <Button id="back-node-modal" variant="secondary" onClick={onBack}>
                 {i18n._(t`Back`)}
               </Button>
@@ -301,7 +301,7 @@ const NodeModal = ({ onSave, i18n, askLinkType, title }) => {
             ? nodeToEdit?.originalNodeObject?.scm_branch
             : '',
         job_type: nodeToEdit?.originalNodeObject?.job_type || 'run',
-        extra_vars: nodeToEdit?.originalNodeObject?.extra_data || '---',
+        extra_vars: nodeToEdit?.originalNodeObject?.extra_vars || '---',
       }}
       onSave={() => onSaveForm}
     >

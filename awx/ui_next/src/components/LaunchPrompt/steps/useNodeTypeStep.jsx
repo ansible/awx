@@ -63,18 +63,18 @@ function getStep(
 }
 
 function getInitialValues(isWorkflowNode, resource) {
+  let typeOfNode;
   if (
     !isWorkflowNode ||
     (!resource?.unifiedJobTemplate?.type &&
       !resource?.unifiedJobTemplate?.unified_job_type)
   ) {
-    return {};
+    return { nodeType: 'job_template' };
   }
   const {
     unifiedJobTemplate: { type, unified_job_type },
   } = resource;
   const unifiedType = type || unified_job_type;
-  let typeOfNode;
 
   if (unifiedType === 'job' || unifiedType === 'job_template')
     typeOfNode = {

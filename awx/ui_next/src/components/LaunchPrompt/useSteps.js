@@ -1,5 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useFormikContext } from 'formik';
+import {
+  useState,
+  useEffect
+} from 'react';
+import {
+  useFormikContext
+} from 'formik';
 import useInventoryStep from './steps/useInventoryStep';
 import useCredentialsStep from './steps/useCredentialsStep';
 import useOtherPromptsStep from './steps/useOtherPromptsStep';
@@ -25,31 +30,37 @@ export default function useSteps(
       config,
       visited,
       i18n,
-      loadedResource?.originalNodeObject
-        ? loadedResource.originalNodeObject
-        : loadedResource,
+      loadedResource?.originalNodeObject ?
+      loadedResource.originalNodeObject :
+      loadedResource,
       currentResource
     ),
     useCredentialsStep(
       config,
       i18n,
-      loadedResource?.originalNodeObject
-        ? loadedResource.originalNodeObject
-        : loadedResource,
+      loadedResource?.originalNodeObject ?
+      loadedResource.originalNodeObject :
+      loadedResource,
       currentResource
     ),
     useOtherPromptsStep(
       config,
       visited,
       i18n,
-      loadedResource?.originalNodeObject
-        ? loadedResource.originalNodeObject
-        : loadedResource,
+      loadedResource?.originalNodeObject ?
+      loadedResource.originalNodeObject :
+      loadedResource,
       currentResource
     ),
-    useSurveyStep(config, visited, i18n),
+    useSurveyStep(config, visited, i18n, loadedResource?.originalNodeObject ?
+      loadedResource.originalNodeObject :
+      loadedResource ),
   ];
-  const { values: formikValues, errors, setErrors } = useFormikContext();
+  const {
+    values: formikValues,
+    errors,
+    setErrors
+  } = useFormikContext();
 
   useEffect(() => {
     setErrors({});

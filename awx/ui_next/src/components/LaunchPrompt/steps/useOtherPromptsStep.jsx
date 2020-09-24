@@ -1,5 +1,6 @@
 import React from 'react';
 import { t } from '@lingui/macro';
+import { jsonToYaml, parseVariableField } from '../../../util/yaml';
 import OtherPromptsStep from './OtherPromptsStep';
 
 const STEP_ID = 'other';
@@ -62,6 +63,19 @@ function getInitialValues(config, loadedResource, currentResource) {
     return {};
   }
 
+  const getVariablesData = () => {
+    if (loadedResource?.extra_data) {
+      return jsonToYaml(JSON.stringify(loadedResource?.extra_data));
+    }
+    if (currentResource?.extra_vars) {
+      if (currentResource.extra_vars !== '---') {
+        return jsonToYaml(
+          JSON.stringify(parseVariableField(currentResource?.extra_vars))
+        );
+      }
+    }
+    return '---';
+  };
   const initialValues = {};
   if (config.ask_job_type_on_launch) {
     initialValues.job_type =
@@ -83,8 +97,7 @@ function getInitialValues(config, loadedResource, currentResource) {
       currentResource?.skip_tags || loadedResource?.skip_tags || '';
   }
   if (config.ask_variables_on_launch) {
-    initialValues.extra_vars =
-      currentResource?.extra_vars || loadedResource?.extra_vars || '---';
+    initialValues.extra_vars = getVariablesData();
   }
   if (config.ask_scm_branch_on_launch) {
     initialValues.scm_branch =

@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Chip, Divider } from '@patternfly/react-core';
 import { toTitleCase } from '../../util/strings';
-
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import { DetailList, Detail, UserDateDetail } from '../DetailList';
@@ -89,13 +88,6 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
 
   const details = omitOverrides(resource, overrides);
   const hasOverrides = Object.keys(overrides).length > 0;
-  Object.entries(overrides).forEach(item => {
-    if (item[0].startsWith('survey')) {
-      overrides.extra_vars = overrides.extra_vars.concat(
-        `\n${item[0]}: ${item[1]}`
-      );
-    }
-  });
 
   return (
     <>
