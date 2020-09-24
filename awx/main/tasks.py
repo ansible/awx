@@ -1506,6 +1506,8 @@ class BaseTask(object):
                 self.instance.job_explanation = "Job terminated due to timeout"
                 status = 'failed'
                 extra_update_fields['job_explanation'] = self.instance.job_explanation
+                # ensure failure notification sends even if playbook_on_stats event is not triggered
+                handle_success_and_failure_notifications.apply_async([self.instance.job.id])
 
         except InvalidVirtualenvError as e:
             extra_update_fields['job_explanation'] = e.message
