@@ -1,4 +1,5 @@
 import cProfile
+import json
 import logging
 import os
 import pstats
@@ -6,12 +7,15 @@ import signal
 import tempfile
 import time
 import traceback
-from queue import Empty as QueueEmpty
 
 from django.conf import settings
 from django.utils.timezone import now as tz_now
 from django.db import DatabaseError, OperationalError, connection as django_connection
 from django.db.utils import InterfaceError, InternalError, IntegrityError
+
+import psutil
+
+import redis
 
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
@@ -24,10 +28,6 @@ from .base import BaseWorker
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
-# the number of seconds to buffer events in memory before flushing
-# using JobEvent.objects.bulk_create()
-BUFFER_SECONDS = .1
-
 
 class CallbackBrokerWorker(BaseWorker):
     '''
@@ -39,21 +39,57 @@ class CallbackBrokerWorker(BaseWorker):
     '''
 
     MAX_RETRIES = 2
+    last_stats = time.time()
+    total = 0
+    last_event = ''
     prof = None
 
     def __init__(self):
         self.buff = {}
+        self.pid = os.getpid()
+        self.redis = redis.Redis.from_url(settings.BROKER_URL)
+        for key in self.redis.keys('awx_callback_receiver_statistics_*'):
+            self.redis.delete(key)
 
     def read(self, queue):
         try:
-            return queue.get(block=True, timeout=BUFFER_SECONDS)
-        except QueueEmpty:
-            return {'event': 'FLUSH'}
+            res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=settings.JOB_EVENT_BUFFER_SECONDS)
+            if res is None:
+                return {'event': 'FLUSH'}
+            self.total += 1
+            return json.loads(res[1])
+        except redis.exceptions.RedisError:
+            logger.exception("encountered an error communicating with redis")
+            time.sleep(1)
+        except (json.JSONDecodeError, KeyError):
+            logger.exception("failed to decode JSON message from redis")
+        finally:
+            self.record_statistics()
+        return {'event': 'FLUSH'}
+
+    def record_statistics(self):
+        # buffer stat recording to once per (by default) 5s
+        if time.time() - self.last_stats > settings.JOB_EVENT_STATISTICS_INTERVAL:
+            try:
+                self.redis.set(f'awx_callback_receiver_statistics_{self.pid}', self.debug())
+                self.last_stats = time.time()
+            except Exception:
+                logger.exception("encountered an error communicating with redis")
+                self.last_stats = time.time()
+
+    def debug(self):
+        return f'.  worker[pid:{self.pid}] sent={self.total} rss={self.mb}MB {self.last_event}'
+
+    @property
+    def mb(self):
+        return '{:0.3f}'.format(
+            psutil.Process(self.pid).memory_info().rss / 1024.0 / 1024.0
+        )
 
     def toggle_profiling(self, *args):
         if self.prof:
             self.prof.disable()
-            filename = f'callback-{os.getpid()}.pstats'
+            filename = f'callback-{self.pid}.pstats'
             filepath = os.path.join(tempfile.gettempdir(), filename)
             with open(filepath, 'w') as f:
                 pstats.Stats(self.prof, stream=f).sort_stats('cumulative').print_stats()
@@ -108,6 +144,8 @@ class CallbackBrokerWorker(BaseWorker):
     def perform_work(self, body):
         try:
             flush = body.get('event') == 'FLUSH'
+            if flush:
+                self.last_event = ''
             if not flush:
                 event_map = {
                     'job_id': JobEvent,
@@ -122,6 +160,8 @@ class CallbackBrokerWorker(BaseWorker):
                     if key in body:
                         job_identifier = body[key]
                         break
+
+                self.last_event = f'\n\t- {cls.__name__} for #{job_identifier} ({body.get("event", "")} {body.get("uuid", "")})'  # noqa
 
                 if body.get('event') == 'EOF':
                     try:
