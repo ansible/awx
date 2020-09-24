@@ -16,7 +16,7 @@ import CustomMessagesSubForm from './CustomMessagesSubForm';
 import hasCustomMessages from './hasCustomMessages';
 import typeFieldNames, { initialConfigValues } from './typeFieldNames';
 
-function NotificationTemplateFormFields({ i18n, defaultMessages }) {
+function NotificationTemplateFormFields({ i18n, defaultMessages, template }) {
   const { setFieldValue } = useFormikContext();
   const [orgField, orgMeta, orgHelpers] = useField('organization');
   const [typeField, typeMeta] = useField({
@@ -56,6 +56,7 @@ function NotificationTemplateFormFields({ i18n, defaultMessages }) {
         touched={orgMeta.touched}
         error={orgMeta.error}
         required
+        autoPopulate={!template?.id}
       />
       <FormGroup
         fieldId="notification-type"
@@ -185,6 +186,7 @@ function NotificationTemplateForm({
             <NotificationTemplateFormFields
               i18n={i18n}
               defaultMessages={defaultMessages}
+              template={template}
             />
             <FormSubmitError error={submitError} />
             <FormActionGroup

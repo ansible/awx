@@ -21,7 +21,7 @@ import {
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 import { VariablesField } from '../../../components/CodeMirrorInput';
 
-function ContainerGroupFormFields({ i18n }) {
+function ContainerGroupFormFields({ i18n, instanceGroup }) {
   const { setFieldValue } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] = useField(
     'credential'
@@ -57,6 +57,7 @@ function ContainerGroupFormFields({ i18n }) {
         tooltip={i18n._(
           t`Credential to authenticate with Kubernetes or OpenShift.  Must be of type "Kubernetes/OpenShift API Bearer Token”.`
         )}
+        autoPopulate={!instanceGroup?.id}
       />
 
       <FormGroup
@@ -120,7 +121,7 @@ function ContainerGroupForm({
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
-            <ContainerGroupFormFields {...rest} />
+            <ContainerGroupFormFields instanceGroup={instanceGroup} {...rest} />
             {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
               onCancel={onCancel}
