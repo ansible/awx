@@ -34,7 +34,6 @@ options:
     authorization_grant_type:
       description:
         - The grant type the user must use for acquire tokens for this application.
-      default: "password"
       choices: ["password", "authorization-code"]
       type: str
       required: False
@@ -52,7 +51,8 @@ options:
     redirect_uris:
       description:
         - Allowed urls list, space separated. Required when authorization-grant-type=authorization-code
-      type: str
+      type: list
+      elements: str
     state:
       description:
         - Desired state of the resource.
@@ -62,8 +62,9 @@ options:
     skip_authorization:
       description:
         - Set True to skip authorization step for completely trusted applications.
-      default: false
       type: bool
+
+extends_documentation_fragment: awx.awx.auth
 '''
 
 
@@ -104,7 +105,7 @@ def main():
         organization=dict(required=True),
         redirect_uris=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
-        skip_authorization=dict(type=bool)
+        skip_authorization=dict(type='bool')
     )
 
     # Create a module for ourselves

@@ -26,4 +26,3 @@ def test_create_application(run_module, admin_user):
     application = OAuth2Application.objects.get(name='foo_app')
     assert application.description == 'barfoo'
     assert application.organization_id == org.id
-
