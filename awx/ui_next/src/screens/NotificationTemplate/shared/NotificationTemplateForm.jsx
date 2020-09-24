@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { shape, func } from 'prop-types';
-import { Formik, useField } from 'formik';
+import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
@@ -17,11 +17,19 @@ import hasCustomMessages from './hasCustomMessages';
 import typeFieldNames, { initialConfigValues } from './typeFieldNames';
 
 function NotificationTemplateFormFields({ i18n, defaultMessages }) {
+  const { setFieldValue } = useFormikContext();
   const [orgField, orgMeta, orgHelpers] = useField('organization');
   const [typeField, typeMeta] = useField({
     name: 'notification_type',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
+
+  const onOrganizationChange = useCallback(
+    value => {
+      setFieldValue('organization', value);
+    },
+    [setFieldValue]
+  );
 
   return (
     <>
@@ -43,9 +51,7 @@ function NotificationTemplateFormFields({ i18n, defaultMessages }) {
         helperTextInvalid={orgMeta.error}
         isValid={!orgMeta.touched || !orgMeta.error}
         onBlur={() => orgHelpers.setTouched()}
-        onChange={value => {
-          orgHelpers.setValue(value);
-        }}
+        onChange={onOrganizationChange}
         value={orgField.value}
         touched={orgMeta.touched}
         error={orgMeta.error}
