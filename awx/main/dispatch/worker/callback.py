@@ -11,7 +11,7 @@ import traceback
 from django.conf import settings
 from django.utils.timezone import now as tz_now
 from django.db import DatabaseError, OperationalError, connection as django_connection
-from django.db.utils import InterfaceError, InternalError, IntegrityError
+from django.db.utils import InterfaceError, InternalError
 
 import psutil
 
@@ -120,20 +120,12 @@ class CallbackBrokerWorker(BaseWorker):
                     e.modified = now
                 try:
                     cls.objects.bulk_create(events)
-                except Exception as exc:
+                except Exception:
                     # if an exception occurs, we should re-attempt to save the
                     # events one-by-one, because something in the list is
-                    # broken/stale (e.g., an IntegrityError on a specific event)
+                    # broken/stale
                     for e in events:
                         try:
-                            if (
-                                isinstance(exc, IntegrityError) and
-                                getattr(e, 'host_id', '')
-                            ):
-                                # this is one potential IntegrityError we can
-                                # work around - if the host disappears before
-                                # the event can be processed
-                                e.host_id = None
                             e.save()
                         except Exception:
                             logger.exception('Database Error Saving Job Event')
