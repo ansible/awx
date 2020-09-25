@@ -45,7 +45,7 @@ EXAMPLES = '''
   tower_ad_hoc_command:
     inventory: "Demo Inventory"
     credential: "Demo Credential"
-    wait: False
+    wait: false
   register: command
 
 - name: Wait for ad joc command max 120s
