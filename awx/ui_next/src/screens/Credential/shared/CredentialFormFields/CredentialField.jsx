@@ -14,7 +14,7 @@ import { FieldTooltip, PasswordInput } from '../../../../components/FormField';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
 import { CredentialType } from '../../../../types';
 import { required } from '../../../../util/validators';
-import { CredentialPluginField } from './CredentialPlugins';
+import { CredentialPluginField } from '../CredentialPlugins';
 import BecomeMethodField from './BecomeMethodField';
 
 const FileUpload = styled(PFFileUpload)`

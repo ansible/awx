@@ -3,15 +3,17 @@ import { act } from 'react-dom/test-utils';
 import {
   mountWithContexts,
   waitForElement,
-} from '../../../../../../../testUtils/enzymeHelpers';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../../../../api';
-import selectedCredential from '../../../data.cyberArkCredential.json';
-import azureVaultCredential from '../../../data.azureVaultCredential.json';
-import hashiCorpCredential from '../../../data.hashiCorpCredential.json';
+} from '../../../../../../testUtils/enzymeHelpers';
+import { CredentialsAPI, CredentialTypesAPI } from '../../../../../api';
+import selectedCredential from '../../data.cyberArkCredential.json';
+import azureVaultCredential from '../../data.azureVaultCredential.json';
+import hashiCorpCredential from '../../data.hashiCorpCredential.json';
 import CredentialPluginPrompt from './CredentialPluginPrompt';
 
-jest.mock('../../../../../../api/models/Credentials');
-jest.mock('../../../../../../api/models/CredentialTypes');
+jest.mock('../../../../../api/models/Credentials');
+jest.mock('../../../../../api/models/CredentialTypes');
+
+CredentialsAPI.test.mockResolvedValue({});
 
 CredentialsAPI.read.mockResolvedValue({
   data: {
@@ -233,6 +235,14 @@ describe('<CredentialPluginPrompt />', () => {
       expect(
         wrapper.find('input#credential-secret_version').prop('value')
       ).toBe('9000');
+    });
+    test('clicking Test button makes correct call', async () => {
+      await act(async () => {
+        wrapper.find('Button[children="Test"]').simulate('click');
+      });
+      expect(CredentialsAPI.test).toHaveBeenCalledWith(1, {
+        metadata: { secret_path: '/foo/bar', secret_version: '9000' },
+      });
     });
   });
 });

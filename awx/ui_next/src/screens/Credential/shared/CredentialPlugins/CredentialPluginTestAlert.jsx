@@ -16,7 +16,6 @@ function CredentialPluginTestAlert({
 }) {
   const [testMessage, setTestMessage] = useState('');
   const [testVariant, setTestVariant] = useState(false);
-
   useEffect(() => {
     if (errorResponse) {
       if (errorResponse?.response?.data?.inputs) {
