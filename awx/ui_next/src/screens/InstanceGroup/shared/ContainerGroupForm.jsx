@@ -23,9 +23,11 @@ import { VariablesField } from '../../../components/CodeMirrorInput';
 
 function ContainerGroupFormFields({ i18n, instanceGroup }) {
   const { setFieldValue } = useFormikContext();
-  const [credentialField, credentialMeta, credentialHelpers] = useField(
-    'credential'
-  );
+  const [credentialField, credentialMeta, credentialHelpers] = useField({
+    name: 'credential',
+    validate: required(i18n._(t`Select a value for this field`), i18n),
+  });
+
   const [overrideField] = useField('override');
 
   const onCredentialChange = useCallback(
