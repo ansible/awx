@@ -448,7 +448,7 @@ class ApiV2ConfigView(APIView):
 
         # Save Entitlement Cert/Key
         license_data = json.loads(data_actual)
-        if license_data['entitlement_cert']:
+        if 'entitlement_cert' in license_data:
             settings.ENTITLEMENT_CERT = license_data['entitlement_cert']
 
 
