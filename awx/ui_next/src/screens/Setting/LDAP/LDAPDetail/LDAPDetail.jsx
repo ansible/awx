@@ -138,12 +138,15 @@ function LDAPDetail({ i18n }) {
           {!isLoading && error && <ContentError error={error} />}
           {!isLoading && !Object.values(LDAPDetails)?.includes(null) && (
             <DetailList>
-              {Array.from(LDAPDetails[category]).map(([, detail]) => {
+              {LDAPDetails[category].map(([key, detail]) => {
                 return (
                   <SettingDetail
-                    key={detail?.label}
+                    key={key}
+                    id={key}
+                    helpText={detail?.help_text}
                     label={detail?.label}
                     type={detail?.type}
+                    unit={detail?.unit}
                     value={detail?.value}
                   />
                 );

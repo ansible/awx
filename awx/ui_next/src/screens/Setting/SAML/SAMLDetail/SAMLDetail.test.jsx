@@ -75,7 +75,11 @@ describe('<SAMLDetail />', () => {
       'SAML Service Provider Public Certificate',
       'mock_cert'
     );
-    assertDetail(wrapper, 'SAML Service Provider Private Key', 'Unconfigured');
+    assertDetail(
+      wrapper,
+      'SAML Service Provider Private Key',
+      'Not configured'
+    );
     assertVariableDetail(
       wrapper,
       'SAML Service Provider Organization Info',

@@ -29,7 +29,6 @@ function JobsDetail({ i18n }) {
         AWX_ISOLATED_KEY_GENERATION,
         AWX_ISOLATED_PRIVATE_KEY,
         AWX_ISOLATED_PUBLIC_KEY,
-        GALAXY_IGNORE_CERTS,
         STDOUT_MAX_BYTES_DISPLAY,
         EVENT_STDOUT_MAX_BYTES_DISPLAY,
         ...jobsData
@@ -76,12 +75,15 @@ function JobsDetail({ i18n }) {
         {!isLoading && error && <ContentError error={error} />}
         {!isLoading && jobs && (
           <DetailList>
-            {Array.from(jobs).map(([, detail]) => {
+            {jobs.map(([key, detail]) => {
               return (
                 <SettingDetail
-                  key={detail?.label}
+                  key={key}
+                  id={key}
+                  helpText={detail?.help_text}
                   label={detail?.label}
                   type={detail?.type}
+                  unit={detail?.unit}
                   value={detail?.value}
                 />
               );

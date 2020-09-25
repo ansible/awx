@@ -1,3 +1,4 @@
+
 {
   "AD_HOC_COMMANDS": [
       "command"
@@ -23,12 +24,6 @@
   "AWX_ROLES_ENABLED": true,
   "AWX_COLLECTIONS_ENABLED": true,
   "AWX_SHOW_PLAYBOOK_LINKS": false,
-  "PRIMARY_GALAXY_URL": "https://galaxy.server.com",
-  "PRIMARY_GALAXY_USERNAME": "",
-  "PRIMARY_GALAXY_PASSWORD": "",
-  "PRIMARY_GALAXY_TOKEN": "$encrypted$",
-  "PRIMARY_GALAXY_AUTH_URL": "https://galaxy.auth.com",
-  "PUBLIC_GALAXY_ENABLED": true,
   "GALAXY_IGNORE_CERTS": false,
   "STDOUT_MAX_BYTES_DISPLAY": 1048576,
   "EVENT_STDOUT_MAX_BYTES_DISPLAY": 1024,

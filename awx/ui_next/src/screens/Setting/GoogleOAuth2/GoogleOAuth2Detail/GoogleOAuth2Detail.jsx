@@ -62,8 +62,11 @@ function GoogleOAuth2Detail({ i18n }) {
               return (
                 <SettingDetail
                   key={key}
+                  id={key}
+                  helpText={record?.help_text}
                   label={record?.label}
                   type={record?.type}
+                  unit={record?.unit}
                   value={googleOAuth2?.[key]}
                 />
               );

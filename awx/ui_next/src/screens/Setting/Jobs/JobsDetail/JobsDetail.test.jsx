@@ -52,9 +52,9 @@ describe('<JobsDetail />', () => {
   test('should render expected details', () => {
     assertDetail(wrapper, 'Enable job isolation', 'On');
     assertDetail(wrapper, 'Job execution path', '/tmp');
-    assertDetail(wrapper, 'Isolated status check interval', '1');
-    assertDetail(wrapper, 'Isolated launch timeout', '600');
-    assertDetail(wrapper, 'Isolated connection timeout', '10');
+    assertDetail(wrapper, 'Isolated status check interval', '1 seconds');
+    assertDetail(wrapper, 'Isolated launch timeout', '600 seconds');
+    assertDetail(wrapper, 'Isolated connection timeout', '10 seconds');
     assertDetail(wrapper, 'Isolated host key checking', 'Off');
     assertDetail(
       wrapper,
@@ -67,28 +67,15 @@ describe('<JobsDetail />', () => {
     assertDetail(wrapper, 'Follow symlinks', 'Off');
     assertDetail(
       wrapper,
-      'Primary Galaxy Server URL',
-      'https://galaxy.server.com'
+      'Ignore Ansible Galaxy SSL Certificate Verification',
+      'Off'
     );
-    assertDetail(wrapper, 'Primary Galaxy Server Username', 'Unconfigured');
-    assertDetail(wrapper, 'Primary Galaxy Server Password', 'Unconfigured');
-    assertDetail(wrapper, 'Primary Galaxy Server Token', 'Encrypted');
-    assertDetail(
-      wrapper,
-      'Primary Galaxy Authentication URL',
-      'https://galaxy.auth.com'
-    );
-    assertDetail(wrapper, 'Allow Access to Public Galaxy', 'On');
     assertDetail(wrapper, 'Maximum Scheduled Jobs', '10');
-    assertDetail(wrapper, 'Default Job Timeout', 'Unconfigured');
-    assertDetail(wrapper, 'Default Inventory Update Timeout', 'Unconfigured');
-    assertDetail(wrapper, 'Default Project Update Timeout', 'Unconfigured');
-    assertDetail(
-      wrapper,
-      'Per-Host Ansible Fact Cache Timeout',
-      'Unconfigured'
-    );
-    assertDetail(wrapper, 'Maximum number of forks per job.', '200');
+    assertDetail(wrapper, 'Default Job Timeout', '0 seconds');
+    assertDetail(wrapper, 'Default Inventory Update Timeout', '0 seconds');
+    assertDetail(wrapper, 'Default Project Update Timeout', '0 seconds');
+    assertDetail(wrapper, 'Per-Host Ansible Fact Cache Timeout', '0 seconds');
+    assertDetail(wrapper, 'Maximum number of forks per job', '200');
     assertVariableDetail(
       wrapper,
       'Ansible Modules Allowed for Ad Hoc Jobs',

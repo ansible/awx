@@ -72,7 +72,7 @@ describe('<GoogleOAuth2Detail />', () => {
     assertDetail(wrapper, 'Google OAuth2 Secret', 'Encrypted');
     assertVariableDetail(
       wrapper,
-      'Google OAuth2 Whitelisted Domains',
+      'Google OAuth2 Allowed Domains',
       '[\n  "example.com",\n  "example_2.com"\n]'
     );
     assertVariableDetail(wrapper, 'Google OAuth2 Extra Arguments', '{}');

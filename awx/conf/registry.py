@@ -129,12 +129,14 @@ class SettingsRegistry(object):
         placeholder = field_kwargs.pop('placeholder', empty)
         encrypted = bool(field_kwargs.pop('encrypted', False))
         defined_in_file = bool(field_kwargs.pop('defined_in_file', False))
+        unit = field_kwargs.pop('unit', None)
         if getattr(field_kwargs.get('child', None), 'source', None) is not None:
             field_kwargs['child'].source = None
         field_instance = field_class(**field_kwargs)
         field_instance.category_slug = category_slug
         field_instance.category = category
         field_instance.depends_on = depends_on
+        field_instance.unit = unit
         if placeholder is not empty:
             field_instance.placeholder = placeholder
         field_instance.defined_in_file = defined_in_file

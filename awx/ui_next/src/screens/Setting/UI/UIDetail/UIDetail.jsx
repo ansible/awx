@@ -77,8 +77,11 @@ function UIDetail({ i18n }) {
               return (
                 <SettingDetail
                   key={key}
+                  id={key}
+                  helpText={record?.help_text}
                   label={record?.label}
                   type={record?.type}
+                  unit={record?.unit}
                   value={ui?.[key]}
                 />
               );

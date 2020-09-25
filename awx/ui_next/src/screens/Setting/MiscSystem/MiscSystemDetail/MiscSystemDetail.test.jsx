@@ -69,24 +69,28 @@ describe('<MiscSystemDetail />', () => {
   });
 
   test('should render expected details', () => {
-    assertDetail(wrapper, 'Access Token Expiration', '1');
+    assertDetail(wrapper, 'Access Token Expiration', '1 seconds');
     assertDetail(wrapper, 'All Users Visible to Organization Admins', 'On');
     assertDetail(
       wrapper,
       'Allow External Users to Create OAuth2 Tokens',
       'Off'
     );
-    assertDetail(wrapper, 'Authorization Code Expiration', '2');
-    assertDetail(wrapper, 'Automation Analytics Gather Interval', '14400');
+    assertDetail(wrapper, 'Authorization Code Expiration', '2 seconds');
     assertDetail(
       wrapper,
-      'Automation Analytics upload URL.',
+      'Automation Analytics Gather Interval',
+      '14400 seconds'
+    );
+    assertDetail(
+      wrapper,
+      'Automation Analytics upload URL',
       'https://example.com'
     );
     assertDetail(wrapper, 'Base URL of the Tower host', 'https://towerhost');
     assertDetail(wrapper, 'Enable HTTP Basic Auth', 'On');
     assertDetail(wrapper, 'Gather data for Automation Analytics', 'Off');
-    assertDetail(wrapper, 'Idle Time Force Log Out', '30000000000');
+    assertDetail(wrapper, 'Idle Time Force Log Out', '30000000000 seconds');
     assertDetail(
       wrapper,
       'Login redirect override URL',
@@ -104,7 +108,7 @@ describe('<MiscSystemDetail />', () => {
     );
     assertDetail(wrapper, 'Red Hat customer password', 'Encrypted');
     assertDetail(wrapper, 'Red Hat customer username', 'mock name');
-    assertDetail(wrapper, 'Refresh Token Expiration', '3');
+    assertDetail(wrapper, 'Refresh Token Expiration', '3 seconds');
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');
     assertVariableDetail(wrapper, 'Custom virtual environment paths', '[]');
   });

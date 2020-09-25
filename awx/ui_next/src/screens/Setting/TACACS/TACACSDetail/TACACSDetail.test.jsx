@@ -55,7 +55,7 @@ describe('<TACACSDetail />', () => {
     assertDetail(wrapper, 'TACACS+ Server', 'mockhost');
     assertDetail(wrapper, 'TACACS+ Port', '49');
     assertDetail(wrapper, 'TACACS+ Secret', 'Encrypted');
-    assertDetail(wrapper, 'TACACS+ Auth Session Timeout', '5');
+    assertDetail(wrapper, 'TACACS+ Auth Session Timeout', '5 seconds');
     assertDetail(wrapper, 'TACACS+ Authentication Protocol', 'ascii');
   });
 

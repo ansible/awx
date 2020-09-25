@@ -84,8 +84,11 @@ function LoggingDetail({ i18n }) {
             {logging.map(([key, detail]) => (
               <SettingDetail
                 key={key}
+                id={key}
+                helpText={detail?.help_text}
                 label={detail?.label}
                 type={detail?.type}
+                unit={detail?.unit}
                 value={detail?.value}
               />
             ))}

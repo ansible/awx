@@ -148,7 +148,7 @@ register(
     default='https://example.com',
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
-    label=_('Automation Analytics upload URL.'),
+    label=_('Automation Analytics upload URL'),
     help_text=_('This setting is used to to configure data collection for the Automation Analytics dashboard'),
     category=_('System'),
     category_slug='system',
@@ -253,6 +253,7 @@ register(
     help_text=_('The number of seconds to sleep between status checks for jobs running on isolated instances.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -264,6 +265,7 @@ register(
                 'This includes the time needed to copy source control files (playbooks) to the isolated instance.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -276,6 +278,7 @@ register(
                 'Value should be substantially greater than expected network latency.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -497,6 +500,7 @@ register(
                 'timeout should be imposed. A timeout set on an individual job template will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -509,6 +513,7 @@ register(
                 'timeout should be imposed. A timeout set on an individual inventory source will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -521,6 +526,7 @@ register(
                 'timeout should be imposed. A timeout set on an individual project will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -535,6 +541,7 @@ register(
                 'Use a value of 0 to indicate that no timeout should be imposed.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -542,7 +549,7 @@ register(
     field_class=fields.IntegerField,
     allow_null=False,
     default=200,
-    label=_('Maximum number of forks per job.'),
+    label=_('Maximum number of forks per job'),
     help_text=_('Saving a Job Template with more than this number of forks will result in an error. '
                 'When set to 0, no limit is applied.'),
     category=_('Jobs'),
@@ -672,6 +679,7 @@ register(
                 'aggregator protocols.'),
     category=_('Logging'),
     category_slug='logging',
+    unit=_('seconds'),
 )
 register(
     'LOG_AGGREGATOR_VERIFY_CERT',
@@ -752,7 +760,8 @@ register(
     default=14400,	# every 4 hours
     min_value=1800,	# every 30 minutes
     category=_('System'),
-    category_slug='system'
+    category_slug='system',
+    unit=_('seconds'),
 )
 
 

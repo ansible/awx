@@ -58,7 +58,7 @@ describe('<LoggingDetail />', () => {
     assertDetail(wrapper, 'Logging Aggregator Password/Token', 'Encrypted');
     assertDetail(wrapper, 'Log System Tracking Facts Individually', 'Off');
     assertDetail(wrapper, 'Logging Aggregator Protocol', 'https');
-    assertDetail(wrapper, 'TCP Connection Timeout', '5');
+    assertDetail(wrapper, 'TCP Connection Timeout', '5 seconds');
     assertDetail(wrapper, 'Logging Aggregator Level Threshold', 'INFO');
     assertDetail(
       wrapper,

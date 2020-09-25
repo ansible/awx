@@ -515,6 +515,7 @@ register(
     help_text=_('TACACS+ session timeout value in seconds, 0 disables timeout.'),
     category=_('TACACS+'),
     category_slug='tacacsplus',
+    unit=_('seconds'),
 )
 
 register(

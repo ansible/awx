@@ -1,4 +1,3 @@
-
 {
   "name": "Setting Detail",
   "actions": {
@@ -94,7 +93,7 @@
           },
           "AUTOMATION_ANALYTICS_URL": {
               "type": "string",
-              "label": "Automation Analytics upload URL.",
+              "label": "Automation Analytics upload URL",
               "help_text": "This setting is used to to configure data collection for the Automation Analytics dashboard",
               "category": "System",
               "category_slug": "system",
@@ -196,7 +195,8 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "AWX_ISOLATED_LAUNCH_TIMEOUT": {
               "type": "integer",
@@ -205,7 +205,8 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "AWX_ISOLATED_CONNECTION_TIMEOUT": {
               "type": "integer",
@@ -214,7 +215,8 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "AWX_ISOLATED_HOST_KEY_CHECKING": {
               "type": "boolean",
@@ -331,58 +333,10 @@
               "category_slug": "jobs",
               "defined_in_file": false
           },
-          "PRIMARY_GALAXY_URL": {
-              "type": "string",
-              "label": "Primary Galaxy Server URL",
-              "help_text": "For organizations that run their own Galaxy service, this gives the option to specify a host as the primary galaxy server. Requirements will be downloaded from the primary if the specific role or collection is available there. If the content is not avilable in the primary, or if this field is left blank, it will default to galaxy.ansible.com.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "PRIMARY_GALAXY_USERNAME": {
-              "type": "string",
-              "label": "Primary Galaxy Server Username",
-              "help_text": "(This setting is deprecated and will be removed in a future release) For using a galaxy server at higher precedence than the public Ansible Galaxy. The username to use for basic authentication against the Galaxy instance, this is mutually exclusive with PRIMARY_GALAXY_TOKEN.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "PRIMARY_GALAXY_PASSWORD": {
-              "type": "string",
-              "label": "Primary Galaxy Server Password",
-              "help_text": "(This setting is deprecated and will be removed in a future release) For using a galaxy server at higher precedence than the public Ansible Galaxy. The password to use for basic authentication against the Galaxy instance, this is mutually exclusive with PRIMARY_GALAXY_TOKEN.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "PRIMARY_GALAXY_TOKEN": {
-              "type": "string",
-              "label": "Primary Galaxy Server Token",
-              "help_text": "For using a galaxy server at higher precedence than the public Ansible Galaxy. The token to use for connecting with the Galaxy instance, this is mutually exclusive with corresponding username and password settings.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "PRIMARY_GALAXY_AUTH_URL": {
-              "type": "string",
-              "label": "Primary Galaxy Authentication URL",
-              "help_text": "For using a galaxy server at higher precedence than the public Ansible Galaxy. The token_endpoint of a Keycloak server.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "PUBLIC_GALAXY_ENABLED": {
-              "type": "boolean",
-              "label": "Allow Access to Public Galaxy",
-              "help_text": "Allow or deny access to the public Ansible Galaxy during project updates.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
           "GALAXY_IGNORE_CERTS": {
               "type": "boolean",
               "label": "Ignore Ansible Galaxy SSL Certificate Verification",
-              "help_text": "If set to true, certificate validation will not be done wheninstalling content from any Galaxy server.",
+              "help_text": "If set to true, certificate validation will not be done when installing content from any Galaxy server.",
               "category": "Jobs",
               "category_slug": "jobs",
               "defined_in_file": false
@@ -432,7 +386,8 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "DEFAULT_INVENTORY_UPDATE_TIMEOUT": {
               "type": "integer",
@@ -441,7 +396,8 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "DEFAULT_PROJECT_UPDATE_TIMEOUT": {
               "type": "integer",
@@ -450,7 +406,8 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "ANSIBLE_FACT_CACHE_TIMEOUT": {
               "type": "integer",
@@ -459,11 +416,12 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "MAX_FORKS": {
               "type": "integer",
-              "label": "Maximum number of forks per job.",
+              "label": "Maximum number of forks per job",
               "help_text": "Saving a Job Template with more than this number of forks will result in an error. When set to 0, no limit is applied.",
               "category": "Jobs",
               "category_slug": "jobs",
@@ -598,7 +556,8 @@
               "help_text": "Number of seconds for a TCP connection to external log aggregator to timeout. Applies to HTTPS and TCP log aggregator protocols.",
               "category": "Logging",
               "category_slug": "logging",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "LOG_AGGREGATOR_VERIFY_CERT": {
               "type": "boolean",
@@ -677,7 +636,8 @@
               "min_value": 1800,
               "category": "System",
               "category_slug": "system",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "SESSION_COOKIE_AGE": {
               "type": "integer",
@@ -687,7 +647,8 @@
               "max_value": 30000000000,
               "category": "Authentication",
               "category_slug": "authentication",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "SESSIONS_PER_USER": {
               "type": "integer",
@@ -713,6 +674,7 @@
               "category": "Authentication",
               "category_slug": "authentication",
               "defined_in_file": false,
+              "unit": "seconds",
               "child": {
                   "type": "integer",
                   "min_value": 1
@@ -2204,7 +2166,8 @@
               "min_value": 0,
               "category": "TACACS+",
               "category_slug": "tacacsplus",
-              "defined_in_file": false
+              "defined_in_file": false,
+              "unit": "seconds"
           },
           "TACACSPLUS_AUTH_PROTOCOL": {
               "type": "choice",
@@ -2250,7 +2213,7 @@
           },
           "SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS": {
               "type": "list",
-              "label": "Google OAuth2 Whitelisted Domains",
+              "label": "Google OAuth2 Allowed Domains",
               "help_text": "Update this setting to restrict the domains who are allowed to login using Google OAuth2.",
               "category": "Google OAuth2",
               "category_slug": "google-oauth2",
@@ -2541,6 +2504,14 @@
                       "read_only": false
                   }
               }
+          },
+          "SAML_AUTO_CREATE_OBJECTS": {
+              "type": "boolean",
+              "label": "Automatically Create Organizations and Teams on SAML Login",
+              "help_text": "When enabled (the default), mapped Organizations and Teams will be created automatically on successful SAML login.",
+              "category": "SAML",
+              "category_slug": "saml",
+              "defined_in_file": false
           },
           "SOCIAL_AUTH_SAML_CALLBACK_URL": {
               "type": "string",
@@ -2844,7 +2815,7 @@
           "AUTOMATION_ANALYTICS_URL": {
               "type": "string",
               "required": false,
-              "label": "Automation Analytics upload URL.",
+              "label": "Automation Analytics upload URL",
               "help_text": "This setting is used to to configure data collection for the Automation Analytics dashboard",
               "category": "System",
               "category_slug": "system",
@@ -2975,6 +2946,7 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
+              "unit": "seconds",
               "default": 1
           },
           "AWX_ISOLATED_LAUNCH_TIMEOUT": {
@@ -2985,6 +2957,7 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
+              "unit": "seconds",
               "default": 600
           },
           "AWX_ISOLATED_CONNECTION_TIMEOUT": {
@@ -2995,6 +2968,7 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
+              "unit": "seconds",
               "default": 10
           },
           "AWX_ISOLATED_HOST_KEY_CHECKING": {
@@ -3104,65 +3078,11 @@
               "category_slug": "jobs",
               "default": false
           },
-          "PRIMARY_GALAXY_URL": {
-              "type": "string",
-              "required": false,
-              "label": "Primary Galaxy Server URL",
-              "help_text": "For organizations that run their own Galaxy service, this gives the option to specify a host as the primary galaxy server. Requirements will be downloaded from the primary if the specific role or collection is available there. If the content is not avilable in the primary, or if this field is left blank, it will default to galaxy.ansible.com.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": ""
-          },
-          "PRIMARY_GALAXY_USERNAME": {
-              "type": "string",
-              "required": false,
-              "label": "Primary Galaxy Server Username",
-              "help_text": "(This setting is deprecated and will be removed in a future release) For using a galaxy server at higher precedence than the public Ansible Galaxy. The username to use for basic authentication against the Galaxy instance, this is mutually exclusive with PRIMARY_GALAXY_TOKEN.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": ""
-          },
-          "PRIMARY_GALAXY_PASSWORD": {
-              "type": "string",
-              "required": false,
-              "label": "Primary Galaxy Server Password",
-              "help_text": "(This setting is deprecated and will be removed in a future release) For using a galaxy server at higher precedence than the public Ansible Galaxy. The password to use for basic authentication against the Galaxy instance, this is mutually exclusive with PRIMARY_GALAXY_TOKEN.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": ""
-          },
-          "PRIMARY_GALAXY_TOKEN": {
-              "type": "string",
-              "required": false,
-              "label": "Primary Galaxy Server Token",
-              "help_text": "For using a galaxy server at higher precedence than the public Ansible Galaxy. The token to use for connecting with the Galaxy instance, this is mutually exclusive with corresponding username and password settings.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": ""
-          },
-          "PRIMARY_GALAXY_AUTH_URL": {
-              "type": "string",
-              "required": false,
-              "label": "Primary Galaxy Authentication URL",
-              "help_text": "For using a galaxy server at higher precedence than the public Ansible Galaxy. The token_endpoint of a Keycloak server.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": ""
-          },
-          "PUBLIC_GALAXY_ENABLED": {
-              "type": "boolean",
-              "required": false,
-              "label": "Allow Access to Public Galaxy",
-              "help_text": "Allow or deny access to the public Ansible Galaxy during project updates.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": true
-          },
           "GALAXY_IGNORE_CERTS": {
               "type": "boolean",
               "required": false,
               "label": "Ignore Ansible Galaxy SSL Certificate Verification",
-              "help_text": "If set to true, certificate validation will not be done wheninstalling content from any Galaxy server.",
+              "help_text": "If set to true, certificate validation will not be done when installing content from any Galaxy server.",
               "category": "Jobs",
               "category_slug": "jobs",
               "default": false
@@ -3219,6 +3139,7 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
+              "unit": "seconds",
               "default": 0
           },
           "DEFAULT_INVENTORY_UPDATE_TIMEOUT": {
@@ -3229,6 +3150,7 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
+              "unit": "seconds",
               "default": 0
           },
           "DEFAULT_PROJECT_UPDATE_TIMEOUT": {
@@ -3239,6 +3161,7 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
+              "unit": "seconds",
               "default": 0
           },
           "ANSIBLE_FACT_CACHE_TIMEOUT": {
@@ -3249,12 +3172,13 @@
               "min_value": 0,
               "category": "Jobs",
               "category_slug": "jobs",
+              "unit": "seconds",
               "default": 0
           },
           "MAX_FORKS": {
               "type": "integer",
               "required": false,
-              "label": "Maximum number of forks per job.",
+              "label": "Maximum number of forks per job",
               "help_text": "Saving a Job Template with more than this number of forks will result in an error. When set to 0, no limit is applied.",
               "category": "Jobs",
               "category_slug": "jobs",
@@ -3407,6 +3331,7 @@
               "help_text": "Number of seconds for a TCP connection to external log aggregator to timeout. Applies to HTTPS and TCP log aggregator protocols.",
               "category": "Logging",
               "category_slug": "logging",
+              "unit": "seconds",
               "default": 5
           },
           "LOG_AGGREGATOR_VERIFY_CERT": {
@@ -3493,6 +3418,7 @@
               "min_value": 1800,
               "category": "System",
               "category_slug": "system",
+              "unit": "seconds",
               "default": 14400
           },
           "SESSION_COOKIE_AGE": {
@@ -3504,6 +3430,7 @@
               "max_value": 30000000000,
               "category": "Authentication",
               "category_slug": "authentication",
+              "unit": "seconds",
               "default": 1800
           },
           "SESSIONS_PER_USER": {
@@ -3532,6 +3459,7 @@
               "help_text": "Dictionary for customizing OAuth 2 timeouts, available items are `ACCESS_TOKEN_EXPIRE_SECONDS`, the duration of access tokens in the number of seconds, `AUTHORIZATION_CODE_EXPIRE_SECONDS`, the duration of authorization codes in the number of seconds, and `REFRESH_TOKEN_EXPIRE_SECONDS`, the duration of refresh tokens, after expired access tokens, in the number of seconds.",
               "category": "Authentication",
               "category_slug": "authentication",
+              "unit": "seconds",
               "default": {
                   "ACCESS_TOKEN_EXPIRE_SECONDS": 31536000000,
                   "AUTHORIZATION_CODE_EXPIRE_SECONDS": 600,
@@ -5668,6 +5596,7 @@
               "min_value": 0,
               "category": "TACACS+",
               "category_slug": "tacacsplus",
+              "unit": "seconds",
               "default": 5
           },
           "TACACSPLUS_AUTH_PROTOCOL": {
@@ -5712,7 +5641,7 @@
           "SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS": {
               "type": "list",
               "required": false,
-              "label": "Google OAuth2 Whitelisted Domains",
+              "label": "Google OAuth2 Allowed Domains",
               "help_text": "Update this setting to restrict the domains who are allowed to login using Google OAuth2.",
               "category": "Google OAuth2",
               "category_slug": "google-oauth2",
@@ -6207,6 +6136,15 @@
                       "read_only": false
                   }
               }
+          },
+          "SAML_AUTO_CREATE_OBJECTS": {
+              "type": "boolean",
+              "required": false,
+              "label": "Automatically Create Organizations and Teams on SAML Login",
+              "help_text": "When enabled (the default), mapped Organizations and Teams will be created automatically on successful SAML login.",
+              "category": "SAML",
+              "category_slug": "saml",
+              "default": true
           },
           "SOCIAL_AUTH_SAML_SP_ENTITY_ID": {
               "type": "string",

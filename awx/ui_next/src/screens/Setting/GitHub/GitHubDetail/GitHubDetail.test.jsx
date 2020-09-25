@@ -175,9 +175,9 @@ describe('<GitHubDetail />', () => {
         'GitHub Organization OAuth2 Callback URL',
         'https://towerhost/sso/complete/github-org/'
       );
-      assertDetail(wrapper, 'GitHub Organization OAuth2 Key', 'Unconfigured');
+      assertDetail(wrapper, 'GitHub Organization OAuth2 Key', 'Not configured');
       assertDetail(wrapper, 'GitHub Organization OAuth2 Secret', 'Encrypted');
-      assertDetail(wrapper, 'GitHub Organization Name', 'Unconfigured');
+      assertDetail(wrapper, 'GitHub Organization Name', 'Not configured');
       assertVariableDetail(
         wrapper,
         'GitHub Organization OAuth2 Organization Map',

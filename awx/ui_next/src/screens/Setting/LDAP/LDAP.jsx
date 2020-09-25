@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Redirect, Route, Switch } from 'react-router-dom';
+import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
@@ -9,11 +9,23 @@ import LDAPEdit from './LDAPEdit';
 
 function LDAP({ i18n }) {
   const baseURL = '/settings/ldap';
+  const baseRoute = useRouteMatch({ path: '/settings/ldap', exact: true });
+  const categoryRoute = useRouteMatch({
+    path: '/settings/ldap/:category',
+    exact: true,
+  });
+
   return (
     <PageSection>
       <Card>
         <Switch>
-          <Redirect from={baseURL} to={`${baseURL}/default/details`} exact />
+          {baseRoute && <Redirect to={`${baseURL}/default/details`} exact />}
+          {categoryRoute && (
+            <Redirect
+              to={`${baseURL}/${categoryRoute.params.category}/details`}
+              exact
+            />
+          )}
           <Route path={`${baseURL}/:category/details`}>
             <LDAPDetail />
           </Route>

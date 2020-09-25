@@ -49,7 +49,7 @@ describe('<GitHub />', () => {
 
   test('should show content error when user navigates to erroneous route', async () => {
     const history = createMemoryHistory({
-      initialEntries: ['/settings/github/foo'],
+      initialEntries: ['/settings/github/foo/bar'],
     });
     await act(async () => {
       wrapper = mountWithContexts(<GitHub />, {

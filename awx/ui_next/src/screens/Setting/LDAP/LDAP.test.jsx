@@ -49,7 +49,7 @@ describe('<LDAP />', () => {
 
   test('should show content error when user navigates to erroneous route', async () => {
     const history = createMemoryHistory({
-      initialEntries: ['/settings/ldap/foo'],
+      initialEntries: ['/settings/ldap/foo/bar'],
     });
     await act(async () => {
       wrapper = mountWithContexts(<LDAP />, {
