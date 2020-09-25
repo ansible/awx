@@ -25,8 +25,12 @@ const adHocItems = [
   { name: 'Inventory 2 Org 0' },
 ];
 
-const children = ({ openAdHocCommands }) => (
-  <button type="submit" onClick={() => openAdHocCommands()} />
+const children = ({ openAdHocCommands, isDisabled }) => (
+  <button
+    type="submit"
+    disabled={isDisabled}
+    onClick={() => openAdHocCommands()}
+  />
 );
 
 describe('<AdHocCommands />', () => {
@@ -343,5 +347,27 @@ describe('<AdHocCommands />', () => {
     await act(async () => wrapper.find('button').prop('onClick')());
     wrapper.update();
     expect(wrapper.find('ErrorDetail').length).toBe(1);
+  });
+  test('should disable button', async () => {
+    const isDisabled = true;
+    const newChild = ({ openAdHocCommands }) => (
+      <button
+        type="submit"
+        disabled={isDisabled}
+        onClick={() => openAdHocCommands()}
+      />
+    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <AdHocCommands
+          apiModule={InventoriesAPI}
+          adHocItems={adHocItems}
+          itemId={1}
+          credentialTypeId={1}
+        >
+          {newChild}
+        </AdHocCommands>
+      );
+    });
   });
 });

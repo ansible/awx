@@ -2,6 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import {
+  Button,
+  Tooltip,
+  DropdownItem,
+  ToolbarItem,
+} from '@patternfly/react-core';
 import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
 import useRequest, {
   useDismissableError,
@@ -17,6 +23,8 @@ import PaginatedDataList, {
 } from '../../../components/PaginatedDataList';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
+import { Kebabified } from '../../../contexts/Kebabified';
+import AdHocCommandsButton from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryHostGroupItem from './InventoryHostGroupItem';
 
 const QS_CONFIG = getQSConfig('group', {
@@ -201,6 +209,55 @@ function InventoryHostGroupsList({ i18n }) {
                     />,
                   ]
                 : []),
+              <Kebabified>
+                {({ isKebabified }) =>
+                  isKebabified ? (
+                    <AdHocCommandsButton
+                      adHocItems={selected}
+                      apiModule={InventoriesAPI}
+                      itemId={parseInt(invId, 10)}
+                    >
+                      {({ openAdHocCommands, isDisabled }) => (
+                        <DropdownItem
+                          key="run command"
+                          onClick={openAdHocCommands}
+                          isDisabled={itemCount === 0 || isDisabled}
+                        >
+                          {i18n._(t`Run command`)}
+                        </DropdownItem>
+                      )}
+                    </AdHocCommandsButton>
+                  ) : (
+                    <ToolbarItem>
+                      <Tooltip
+                        content={i18n._(
+                          t`Select an inventory source by clicking the check box beside it. The inventory source can be a single group or host, a selection of multiple hosts, or a selection of multiple groups.`
+                        )}
+                        position="top"
+                        key="adhoc"
+                      >
+                        <AdHocCommandsButton
+                          css="margin-right: 20px"
+                          adHocItems={selected}
+                          apiModule={InventoriesAPI}
+                          itemId={parseInt(invId, 10)}
+                        >
+                          {({ openAdHocCommands, isDisabled }) => (
+                            <Button
+                              variant="secondary"
+                              aria-label={i18n._(t`Run command`)}
+                              onClick={openAdHocCommands}
+                              isDisabled={itemCount === 0 || isDisabled}
+                            >
+                              {i18n._(t`Run command`)}
+                            </Button>
+                          )}
+                        </AdHocCommandsButton>
+                      </Tooltip>
+                    </ToolbarItem>
+                  )
+                }
+              </Kebabified>,
               <DisassociateButton
                 key="disassociate"
                 onDisassociate={handleDisassociate}
@@ -208,8 +265,8 @@ function InventoryHostGroupsList({ i18n }) {
                 modalTitle={i18n._(t`Disassociate group from host?`)}
                 modalNote={i18n._(t`
                   Note that you may still see the group in the list after
-                  disassociating if the host is also a member of that group’s 
-                  children.  This list shows all groups the host is associated 
+                  disassociating if the host is also a member of that group’s
+                  children.  This list shows all groups the host is associated
                   with directly and indirectly.
                 `)}
               />,

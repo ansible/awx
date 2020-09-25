@@ -158,11 +158,11 @@ function InventoryGroupsList({ i18n }) {
           apiModule={InventoriesAPI}
           itemId={parseInt(inventoryId, 10)}
         >
-          {({ openAdHocCommands }) => (
+          {({ openAdHocCommands, isDisabled }) => (
             <DropdownItem
               key="run command"
               onClick={openAdHocCommands}
-              isDisabled={groupCount === 0}
+              isDisabled={groupCount === 0 || isDisabled}
             >
               {i18n._(t`Run command`)}
             </DropdownItem>
@@ -270,12 +270,12 @@ function InventoryGroupsList({ i18n }) {
                               apiModule={InventoriesAPI}
                               itemId={parseInt(inventoryId, 10)}
                             >
-                              {({ openAdHocCommands }) => (
+                              {({ openAdHocCommands, isDisabled }) => (
                                 <Button
                                   variant="secondary"
                                   aria-label={i18n._(t`Run command`)}
                                   onClick={openAdHocCommands}
-                                  isDisabled={groupCount === 0}
+                                  isDisabled={groupCount === 0 || isDisabled}
                                 >
                                   {i18n._(t`Run command`)}
                                 </Button>

@@ -25,7 +25,7 @@ function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
   const {
     error: fetchError,
     request: fetchModuleOptions,
-    result: { moduleOptions, credentialTypeId },
+    result: { moduleOptions, credentialTypeId, isDisabled },
   } = useRequest(
     useCallback(async () => {
       const [choices, credId] = await Promise.all([
@@ -44,13 +44,13 @@ function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
       const options = choices.data.actions.GET.module_name.choices.map(
         (choice, index) => itemObject(choice[0], index)
       );
-
       return {
         moduleOptions: [itemObject('', -1), ...options],
         credentialTypeId: credId.data.results[0].id,
+        isDisabled: !choices.data.actions.POST,
       };
     }, [itemId, apiModule]),
-    { moduleOptions: [] }
+    { moduleOptions: [], isDisabled: true }
   );
 
   useEffect(() => {
@@ -118,6 +118,7 @@ function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
     <Fragment>
       {children({
         openAdHocCommands: () => setIsWizardOpen(true),
+        isDisabled,
       })}
 
       {isWizardOpen && (

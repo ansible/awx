@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import {
+  Button,
+  Tooltip,
+  DropdownItem,
+  ToolbarItem,
+} from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { InventoriesAPI, HostsAPI } from '../../../api';
 
@@ -12,6 +18,8 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import { Kebabified } from '../../../contexts/Kebabified';
+import AdHocCommandsButton from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryHostItem from './InventoryHostItem';
 
 const QS_CONFIG = getQSConfig('host', {
@@ -149,6 +157,55 @@ function InventoryHostList({ i18n }) {
                     />,
                   ]
                 : []),
+              <Kebabified>
+                {({ isKebabified }) =>
+                  isKebabified ? (
+                    <AdHocCommandsButton
+                      adHocItems={selected}
+                      apiModule={InventoriesAPI}
+                      itemId={parseInt(id, 10)}
+                    >
+                      {({ openAdHocCommands, isDisabled }) => (
+                        <DropdownItem
+                          key="run command"
+                          onClick={openAdHocCommands}
+                          isDisabled={hostCount === 0 || isDisabled}
+                        >
+                          {i18n._(t`Run command`)}
+                        </DropdownItem>
+                      )}
+                    </AdHocCommandsButton>
+                  ) : (
+                    <ToolbarItem>
+                      <Tooltip
+                        content={i18n._(
+                          t`Select an inventory source by clicking the check box beside it. The inventory source can be a single host or a selection of multiple hosts.`
+                        )}
+                        position="top"
+                        key="adhoc"
+                      >
+                        <AdHocCommandsButton
+                          css="margin-right: 20px"
+                          adHocItems={selected}
+                          apiModule={InventoriesAPI}
+                          itemId={parseInt(id, 10)}
+                        >
+                          {({ openAdHocCommands, isDisabled }) => (
+                            <Button
+                              variant="secondary"
+                              aria-label={i18n._(t`Run command`)}
+                              onClick={openAdHocCommands}
+                              isDisabled={hostCount === 0 || isDisabled}
+                            >
+                              {i18n._(t`Run command`)}
+                            </Button>
+                          )}
+                        </AdHocCommandsButton>
+                      </Tooltip>
+                    </ToolbarItem>
+                  )
+                }
+              </Kebabified>,
               <ToolbarDeleteButton
                 key="delete"
                 onDelete={handleDelete}

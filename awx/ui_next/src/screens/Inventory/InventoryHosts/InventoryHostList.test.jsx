@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { InventoriesAPI, HostsAPI } from '../../../api';
+import { InventoriesAPI, HostsAPI, CredentialTypesAPI } from '../../../api';
 import {
   mountWithContexts,
   waitForElement,
@@ -92,6 +92,17 @@ describe('<InventoryHostList />', () => {
           POST: {},
         },
       },
+    });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: { module_name: { choices: [['module']] } },
+          POST: {},
+        },
+      },
+    });
+    CredentialTypesAPI.read.mockResolvedValue({
+      data: { count: 1, results: [{ id: 1, name: 'cred' }] },
     });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryHostList />);
@@ -292,5 +303,12 @@ describe('<InventoryHostList />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+  test('should render enabled ad hoc commands button', async () => {
+    await waitForElement(
+      wrapper,
+      'button[aria-label="Run command"]',
+      el => el.prop('disabled') === false
+    );
   });
 });
