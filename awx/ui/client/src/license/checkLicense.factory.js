@@ -19,6 +19,10 @@ export default
 					var defaultUrl = GetBasePath('config') + (attach ? 'attach/' : '');
 					Rest.setUrl(defaultUrl);
 					var data = payload;
+					
+					if (!attach) {
+						data.eula_accepted = eula;
+					}
 
 					return Rest.post(JSON.stringify(data))
 						.then((response) =>{
