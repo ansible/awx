@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { SESSION_TIMEOUT_KEY } from '../constants';
 import { encodeQueryString } from '../util/qs';
 
 const defaultHttp = axios.create({
@@ -8,6 +9,16 @@ const defaultHttp = axios.create({
   paramsSerializer(params) {
     return encodeQueryString(params);
   },
+});
+
+defaultHttp.interceptors.response.use(response => {
+  const timeout = response?.headers['session-timeout'];
+  if (timeout) {
+    const timeoutDate = new Date().getTime() + timeout * 1000;
+    window.localStorage.setItem(SESSION_TIMEOUT_KEY, String(timeoutDate));
+    window.dispatchEvent(new Event('storage'));
+  }
+  return response;
 });
 
 class Base {
