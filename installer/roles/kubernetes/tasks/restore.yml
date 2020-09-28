@@ -25,6 +25,18 @@
     dest: "{{ playbook_dir }}/tower-openshift-restore"
     extra_opts: [--strip-components=1]
 
+- name: Verify if common.tar.gz exists
+  stat:
+    path: "{{ playbook_dir }}/tower-openshift-restore/common.tar.gz"
+  register: common_tarball
+
+- name: Unarchive Tower backup from common.tar.gz
+  unarchive:
+    src: "{{ playbook_dir }}/tower-openshift-restore/common.tar.gz"
+    dest: "{{ playbook_dir }}/tower-openshift-restore"
+    extra_opts: [--strip-components=1]
+  when: common_tarball.stat.exists
+
 - set_fact:
     deployment_object: "deployment"
 
@@ -38,6 +50,11 @@
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas=0
+
+- name: Delete management pod
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      delete pod ansible-tower-management --grace-period=0 --ignore-not-found
 
 - name: Wait for scale down
   shell: |
