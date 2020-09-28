@@ -4157,7 +4157,10 @@ class JobLaunchSerializer(BaseSerializer):
         # verify that credentials (either provided or existing) don't
         # require launch-time passwords that have not been provided
         if 'credentials' in accepted:
-            launch_credentials = accepted['credentials']
+            launch_credentials = Credential.unique_dict(
+                list(template_credentials.all()) +
+                list(accepted['credentials'])
+            ).values()
         else:
             launch_credentials = template_credentials
         passwords = attrs.get('credential_passwords', {})  # get from original attrs
