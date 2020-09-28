@@ -2750,6 +2750,9 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
         else:
             return (self.check_related('workflow_approval_template', UnifiedJobTemplate, role_field='admin_role'))
 
+    def can_change(self, obj, data):
+        return self.user.can_access(WorkflowJobTemplate, 'change', obj.workflow_job_template, data={})
+
     def can_start(self, obj, validate_license=False):
         # for copying WFJTs that contain approval nodes
         if self.user.is_superuser:
