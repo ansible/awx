@@ -7,6 +7,7 @@ import { CheckboxField, FieldTooltip } from '../FormField';
 
 const FieldHeader = styled.div`
   display: flex;
+  padding-bottom: var(--pf-c-form__group-label--PaddingBottom);
 `;
 
 const StyledCheckboxField = styled(CheckboxField)`
