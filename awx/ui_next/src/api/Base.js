@@ -2,6 +2,12 @@ import axios from 'axios';
 
 import { SESSION_TIMEOUT_KEY } from '../constants';
 import { encodeQueryString } from '../util/qs';
+import debounce from '../util/debounce';
+
+const updateStorage = debounce((key, val) => {
+  window.localStorage.setItem(key, val);
+  window.dispatchEvent(new Event('storage'));
+}, 500);
 
 const defaultHttp = axios.create({
   xsrfCookieName: 'csrftoken',
@@ -15,8 +21,7 @@ defaultHttp.interceptors.response.use(response => {
   const timeout = response?.headers['session-timeout'];
   if (timeout) {
     const timeoutDate = new Date().getTime() + timeout * 1000;
-    window.localStorage.setItem(SESSION_TIMEOUT_KEY, String(timeoutDate));
-    window.dispatchEvent(new Event('storage'));
+    updateStorage(SESSION_TIMEOUT_KEY, String(timeoutDate));
   }
   return response;
 });
