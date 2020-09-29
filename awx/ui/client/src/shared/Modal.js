@@ -203,7 +203,7 @@ angular.module('ModalDialog', ['Utilities'])
      *  })
      *
      *  Use to resize a textarea field contained on a modal. Has only been tested where the
-     *  form contains 1 textarea and the the textarea is at the bottom of the form/modal.
+     *  form contains 1 textarea and the textarea is at the bottom of the form/modal.
      *
      **/
     .factory('TextareaResize', ['ParseTypeChange', 'Wait', function(ParseTypeChange, Wait){
