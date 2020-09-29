@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { func } from 'prop-types';
+import { func, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -9,25 +9,32 @@ import {
   DropdownToggle,
 } from '@patternfly/react-core';
 
-function AddHostDropdown({ i18n, onAddNew, onAddExisting }) {
+function AddDropdown({
+  i18n,
+  onAddNew,
+  onAddExisting,
+  newTitle,
+  existingTitle,
+  label,
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const dropdownItems = [
     <DropdownItem
       key="add-new"
-      aria-label="add new host"
+      aria-label={`add new ${label}`}
       component="button"
       onClick={onAddNew}
     >
-      {i18n._(t`Add New Host`)}
+      {newTitle}
     </DropdownItem>,
     <DropdownItem
       key="add-existing"
-      aria-label="add existing host"
+      aria-label={`add existing ${label}`}
       component="button"
       onClick={onAddExisting}
     >
-      {i18n._(t`Add Existing Host`)}
+      {existingTitle}
     </DropdownItem>,
   ];
 
@@ -37,8 +44,8 @@ function AddHostDropdown({ i18n, onAddNew, onAddExisting }) {
       position={DropdownPosition.right}
       toggle={
         <DropdownToggle
-          id="add-host-dropdown"
-          aria-label="add host"
+          id={`add-${label}-dropdown`}
+          aria-label={`add ${label}`}
           isPrimary
           onToggle={() => setIsOpen(prevState => !prevState)}
         >
@@ -50,9 +57,12 @@ function AddHostDropdown({ i18n, onAddNew, onAddExisting }) {
   );
 }
 
-AddHostDropdown.propTypes = {
+AddDropdown.propTypes = {
   onAddNew: func.isRequired,
   onAddExisting: func.isRequired,
+  newTitle: string.isRequired,
+  existingTitle: string.isRequired,
+  label: string.isRequired,
 };
 
-export default withI18n()(AddHostDropdown);
+export default withI18n()(AddDropdown);

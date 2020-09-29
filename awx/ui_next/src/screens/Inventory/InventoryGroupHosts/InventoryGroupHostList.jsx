@@ -25,7 +25,7 @@ import DisassociateButton from '../../../components/DisassociateButton';
 import { Kebabified } from '../../../contexts/Kebabified';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
-import AddHostDropdown from './AddHostDropdown';
+import AddHostDropdown from '../shared/AddDropdown';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -216,6 +216,9 @@ function InventoryGroupHostList({ i18n }) {
                       key="associate"
                       onAddExisting={() => setIsModalOpen(true)}
                       onAddNew={() => history.push(addFormUrl)}
+                      newTitle={i18n._(t`Add new host`)}
+                      existingTitle={i18n._(t`Add existing host`)}
+                      label={i18n._(t`host`)}
                     />,
                   ]
                 : []),
@@ -283,6 +286,9 @@ function InventoryGroupHostList({ i18n }) {
               key="associate"
               onAddExisting={() => setIsModalOpen(true)}
               onAddNew={() => history.push(addFormUrl)}
+              newTitle={i18n._(t`Add new host`)}
+              existingTitle={i18n._(t`Add existing host`)}
+              label={i18n._(t`host`)}
             />
           )
         }

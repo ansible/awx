@@ -131,7 +131,7 @@ describe('<InventoryGroupHostList />', () => {
   });
 
   test('should show add dropdown button according to permissions', async () => {
-    expect(wrapper.find('AddHostDropdown').length).toBe(1);
+    expect(wrapper.find('AddDropdown').length).toBe(1);
     InventoriesAPI.readHostsOptions.mockResolvedValueOnce({
       data: {
         actions: {
@@ -143,7 +143,7 @@ describe('<InventoryGroupHostList />', () => {
       wrapper = mountWithContexts(<InventoryGroupHostList />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    expect(wrapper.find('AddHostDropdown').length).toBe(0);
+    expect(wrapper.find('AddDropdown').length).toBe(0);
   });
 
   test('expected api calls are made for multi-delete', async () => {

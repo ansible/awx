@@ -107,7 +107,11 @@ function DisassociateButton({
         >
           {modalNote && <ModalNote>{modalNote}</ModalNote>}
 
-          <div>{i18n._(t`This action will disassociate the following:`)}</div>
+          <div>
+            {i18n._(
+              t`This action will disassociate the following and any of their descendents:`
+            )}
+          </div>
 
           {itemsToDisassociate.map(item => (
             <span key={item.id}>

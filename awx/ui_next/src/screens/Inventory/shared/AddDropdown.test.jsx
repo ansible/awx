@@ -1,8 +1,8 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import AddHostDropdown from './AddHostDropdown';
+import AddDropdown from './AddDropdown';
 
-describe('<AddHostDropdown />', () => {
+describe('<AddDropdown />', () => {
   let wrapper;
   let dropdownToggle;
   const onAddNew = jest.fn();
@@ -10,7 +10,7 @@ describe('<AddHostDropdown />', () => {
 
   beforeEach(() => {
     wrapper = mountWithContexts(
-      <AddHostDropdown onAddNew={onAddNew} onAddExisting={onAddExisting} />
+      <AddDropdown onAddNew={onAddNew} onAddExisting={onAddExisting} />
     );
     dropdownToggle = wrapper.find('DropdownToggle button');
   });
