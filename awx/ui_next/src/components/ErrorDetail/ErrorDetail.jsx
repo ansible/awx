@@ -64,9 +64,9 @@ class ErrorDetail extends Component {
         <CardBody>
           {Array.isArray(message) ? (
             <ul>
-              {message.map(m => (
-                <li key={m}>{m}</li>
-              ))}
+              {message.map(m =>
+                typeof m === 'string' ? <li key={m}>{m}</li> : null
+              )}
             </ul>
           ) : (
             message

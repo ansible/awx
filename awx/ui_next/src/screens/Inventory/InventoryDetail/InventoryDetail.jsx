@@ -3,6 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
+import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import {
   DetailList,
@@ -11,11 +12,12 @@ import {
 } from '../../../components/DetailList';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
 import DeleteButton from '../../../components/DeleteButton';
+import ErrorDetail from '../../../components/ErrorDetail';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import ChipGroup from '../../../components/ChipGroup';
 import { InventoriesAPI } from '../../../api';
-import useRequest from '../../../util/useRequest';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { Inventory } from '../../../types';
 
 function InventoryDetail({ inventory, i18n }) {
@@ -24,7 +26,7 @@ function InventoryDetail({ inventory, i18n }) {
   const {
     result: instanceGroups,
     isLoading,
-    error,
+    error: instanceGroupsError,
     request: fetchInstanceGroups,
   } = useRequest(
     useCallback(async () => {
@@ -38,10 +40,14 @@ function InventoryDetail({ inventory, i18n }) {
     fetchInstanceGroups();
   }, [fetchInstanceGroups]);
 
-  const deleteInventory = async () => {
-    await InventoriesAPI.destroy(inventory.id);
-    history.push(`/inventories`);
-  };
+  const { request: deleteInventory, error: deleteError } = useRequest(
+    useCallback(async () => {
+      await InventoriesAPI.destroy(inventory.id);
+      history.push(`/inventories`);
+    }, [inventory.id, history])
+  );
+
+  const { error, dismissError } = useDismissableError(deleteError);
 
   const {
     organization,
@@ -52,8 +58,8 @@ function InventoryDetail({ inventory, i18n }) {
     return <ContentLoading />;
   }
 
-  if (error) {
-    return <ContentError error={error} />;
+  if (instanceGroupsError) {
+    return <ContentError error={instanceGroupsError} />;
   }
 
   return (
@@ -123,6 +129,18 @@ function InventoryDetail({ inventory, i18n }) {
           </DeleteButton>
         )}
       </CardActionsRow>
+      {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
+      {error && (
+        <AlertModal
+          isOpen={error}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissError}
+        >
+          {i18n._(t`Failed to delete inventory.`)}
+          <ErrorDetail error={error} />
+        </AlertModal>
+      )}
     </CardBody>
   );
 }

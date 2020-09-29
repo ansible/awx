@@ -60,6 +60,14 @@ function TemplateListItem({
     await fetchTemplates();
   }, [fetchTemplates, template.id, template.name, template.type]);
 
+  const handleCopyStart = useCallback(() => {
+    setIsDisabled(true);
+  }, []);
+
+  const handleCopyFinish = useCallback(() => {
+    setIsDisabled(false);
+  }, []);
+
   const missingResourceIcon =
     template.type === 'job_template' &&
     (!template.summary_fields.project ||
@@ -157,8 +165,8 @@ function TemplateListItem({
                 errorMessage: i18n._(t`Failed to copy template.`),
               }}
               isDisabled={isDisabled}
-              onLoading={() => setIsDisabled(true)}
-              onDoneLoading={() => setIsDisabled(false)}
+              onCopyStart={handleCopyStart}
+              onCopyFinish={handleCopyFinish}
               copyItem={copyTemplate}
             />
           )}

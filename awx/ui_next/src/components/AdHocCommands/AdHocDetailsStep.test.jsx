@@ -27,6 +27,7 @@ const initialValues = {
   changes: false,
   escalation: false,
   extra_vars: '---',
+  module_name: 'shell',
 };
 
 describe('<AdHocDetailsStep />', () => {
