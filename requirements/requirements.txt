@@ -12,6 +12,7 @@ azure-common==1.1.25      # via azure-keyvault
 azure-keyvault==1.1.0     # via -r /awx_devel/requirements/requirements.in
 azure-nspkg==3.0.2        # via azure-keyvault
 cachetools==4.0.0         # via google-auth
+# don't add certifi to our requirements, because we have our own specific implementation: https://github.com/ansible/system-certifi
 cffi==1.14.0              # via cryptography
 channels-redis==3.1.0     # via -r /awx_devel/requirements/requirements.in
 channels==2.4.0           # via -r /awx_devel/requirements/requirements.in, channels-redis
@@ -37,7 +38,7 @@ django-split-settings==1.0.0  # via -r /awx_devel/requirements/requirements.in
 django-taggit==1.2.0      # via -r /awx_devel/requirements/requirements.in
 django==2.2.16            # via -r /awx_devel/requirements/requirements.in, channels, django-auth-ldap, django-cors-headers, django-crum, django-jsonfield, django-oauth-toolkit, django-polymorphic, django-taggit, djangorestframework
 djangorestframework-yaml==1.0.3  # via -r /awx_devel/requirements/requirements.in
-djangorestframework==3.11.0  # via -r /awx_devel/requirements/requirements.in
+djangorestframework==3.12.1  # via -r /awx_devel/requirements/requirements.in
 docutils==0.16            # via python-daemon
 future==0.16.0            # via django-radius
 gitdb==4.0.2              # via gitpython
