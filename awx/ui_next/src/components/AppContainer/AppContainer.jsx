@@ -222,6 +222,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
         title={i18n._(t`Your session is about to expire`)}
         isOpen={timeoutWarning && sessionTimeout > 0 && timeRemaining > 0}
         onClose={handleLogout}
+        showClose={false}
         variant="warning"
         actions={[
           <Button
@@ -229,7 +230,10 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
             variant="primary"
             onClick={handleSessionContinue}
           >
-            Continue
+            {i18n._(t`Continue`)}
+          </Button>,
+          <Button key="logout" variant="secondary" onClick={handleLogout}>
+            {i18n._(t`Logout`)}
           </Button>,
         ]}
       >
