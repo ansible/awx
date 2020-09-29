@@ -13,7 +13,6 @@ from datetime import datetime
 import os
 import collections
 import copy
-import hashlib
 import time
 import tempfile
 import logging
@@ -22,10 +21,10 @@ import re
 import requests
 
 from django.conf import settings
-from django.utils.encoding import smart_text, smart_bytes
+from django.utils.encoding import smart_text
 
 from awx.main.models import Host
-from awx.main.utils import get_awx_http_client_headers
+from awx.main.utils import set_environ
 
 MAX_INSTANCES = 9999999
 
@@ -57,7 +56,7 @@ class Licenser(object):
         sku=None,
         support_level=None,
         instance_count=0,
-        license_date=None,
+        license_date=0,
         license_type="UNLICENSED",
         product_name="Red Hat Ansible Tower",
         valid_key=False
@@ -69,22 +68,28 @@ class Licenser(object):
             license_date=0,
             license_type='UNLICENSED',
         )
+        
         if not kwargs:
             kwargs = getattr(settings, 'LICENSE', None) or {}
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
         
         self._attrs.update(kwargs)
-        # self._attrs['license_date'] = int(self._attrs['license_date'])  # TODO: Is this necessary?
+        # self._attrs.update(settings.LICENSE)
+
         if self._check_product_cert():
-            self._generate_product_config()
+            if 'valid_key' in self._attrs:
+                if not self._attrs['valid_key']:
+                    self._attrs = self.UNLICENSED_DATA
+            else:
+                self._attrs = self.UNLICENSED_DATA
         else:
             self._generate_open_config()
 
 
     def _check_product_cert(self):
         # Product Cert Name: ansible-tower-3.7-rhel-7.x86_64.pem
-        # TODO: Maybe check validity of Product Cert somehow?
+        # Maybe check validity of Product Cert somehow?
         if os.path.exists('/etc/tower/certs') and os.path.exists('/var/lib/awx/.tower_version'):
             return True
         return False
@@ -98,15 +103,14 @@ class Licenser(object):
                                 ))
         settings.LICENSE = self._attrs
 
-    
+
     def _clear_license_setting(self):
         self._attrs.update(self.UNLICENSED_DATA)
         settings.LICENSE = {}
-    
-    
+
+
     def _generate_product_config(self):
         raw_cert = getattr(settings, 'ENTITLEMENT_CERT', None)
-        
         # Fail early if no entitlement cert is available
         if not raw_cert or raw_cert == '':
             self._clear_license_setting()
@@ -121,19 +125,18 @@ class Licenser(object):
                 # clear the buffer to ensure the complete cert has been written to the file
                 f.flush()
                 os.fsync(f)
-
+                
                 # TODO: Consider refactoring this to be done with subman directly, or rhsm.certificate?
                 cmd = ["rct", "cat-cert", f.name, "--no-content"]
                 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 output = re.split('\n\n|\n\t', smart_text(stdout))
                 cert_dict = dict()
-                
+
                 for line in output:
                     if ': ' in line:
                         key, value = line.split(': ')
                         cert_dict.update({key:value})
-                
                 # TODO: create this URL from Satellite setting
                 # Verify the entitlment cert is authorized to access appropriate content
                 verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
@@ -148,20 +151,17 @@ class Licenser(object):
 
                 if request.status_code != 200:
                     logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
+                    return
                 
-
         except ValueError:
-            logger.exception('Could not parse entitlement certificate')
-            return
+            raise ValueError('Could not parse entitlement certificate')
         except FileNotFoundError as e:
-            logger.exception('Subscription-manager is not installed')
             self._clear_license_setting()
-            return
+            raise FileNotFoundError('Subscription-manager is not installed. ' + str(e))
         except Exception as e:
-            logger.exception(e)
             self._clear_license_setting()
-            return
-        
+            raise Exception(e)
+            
         type = 'enterprise'
         
         # Parse output for subscription metadata to build config
@@ -176,7 +176,7 @@ class Licenser(object):
                                 license_type=type
                                 ))
         settings.LICENSE = self._attrs
-
+        return self._attrs
 
     def update(self, **kwargs):
         # Update attributes of the current license.
@@ -188,8 +188,9 @@ class Licenser(object):
 
 
     def validate_rh(self, user, pw):
+        # TODO: replace with host grabbed from subman config
         host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
-
+        
         if not user:
             raise ValueError('subscriptions_username is required')
 
@@ -226,8 +227,8 @@ class Licenser(object):
                 json.extend(resp.json())
 
             return self.generate_license_options_from_entitlements(json)
-        return []
 
+        return []
 
     def is_appropriate_sub(self, sub):
         if sub['activeSubscription'] is False:
@@ -236,15 +237,14 @@ class Licenser(object):
         products = sub.get('providedProducts', [])
         if any(map(lambda product: product.get('productId', None) == "480", products)):
             return True
-        # # Legacy: products that claim they are Ansible Tower
-        # attributes = sub.get('productAttributes', [])
-        # if any(map(lambda attr: attr.get('name') == 'ph_product_name' and attr.get('value').startswith('Ansible Tower'), attributes)): # noqa
-        #     return True
+        # Legacy: products that claim they are Ansible Tower
+        attributes = sub.get('productAttributes', [])
+        if any(map(lambda attr: attr.get('name') == 'ph_product_name' and attr.get('value').startswith('Ansible Tower'), attributes)): # noqa
+            return True
         return False
 
     def generate_license_options_from_entitlements(self, json):
         from dateutil.parser import parse
-
         ValidSub = collections.namedtuple('ValidSub', 'sku name end_date trial quantity pool_id')
         valid_subs = collections.OrderedDict()
         for sub in json:
@@ -312,23 +312,25 @@ class Licenser(object):
             return licenses
 
         raise ValueError(
-            'No valid Red Hat Ansible Automation subscription could be found for this account.'
+            'No valid Red Hat Ansible Automation subscription could be found for this account.'  # noqa
         )
 
 
-    def validate(self):
+    def validate(self, new_cert=False):
+        
+        # Generate Config from Entitlement cert if it exists
+        if new_cert:
+            self._generate_product_config()
+
         # Return license attributes with additional validation info.
         attrs = copy.deepcopy(self._attrs)
-        key = attrs.get('license_type', 'none')
 
-        # TODO: Use requests to attempt a GET to the CDN/Satellite content repo
-        # repo_response = False  #if 403, make this True
+        type = attrs.get('license_type', 'none')
 
-        if (key == 'UNLICENSED' or False): # TODO: add logic to check against the CDN here.
+        if (type == 'UNLICENSED' or False):
             attrs.update(dict(valid_key=False, compliant=False))
             return attrs
         attrs['valid_key'] = True
-        attrs['deployment_id'] = hashlib.sha1(smart_bytes(key)).hexdigest()
 
         if Host:
             current_instances = Host.objects.active_count()
