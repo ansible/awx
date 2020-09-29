@@ -241,14 +241,6 @@ class ApiV2AttachView(APIView):
         pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
         if pool_id and user and pw:
             try:
-                # TODO: Replace this with logic that uses the user, pw to get the entitlement cert for that pool_id
-                # Add subman to the python path in order to import it
-                # Isolate this by running it in a thread or fork, look at other places where we thread in awx
-                #   - maybe put this in an awx-manage command?
-                import sys
-                sys.path.insert(0, '/usr/lib64/python3.6/site-packages')
-                sys.path.insert(0, '/usr/lib/python3.6/site-packages')
-
                 # Create connection
                 from rhsm.connection import UEPConnection, RestlibException
                 uep = UEPConnection(username=user, password=pw, insecure=True)
@@ -281,10 +273,16 @@ class ApiV2AttachView(APIView):
                 if consumer == {}:
                     consumer['org'] = org
                     consumer['name'] = "Ansible-Tower-" + str(random.randint(1,1000000000))
+                    # Gather facts
+                    install_type = 'traditional'
+                    if os.environ.get('container') == 'oci':
+                        install_type = 'openshift'
+                    elif 'KUBERNETES_SERVICE_PORT' in os.environ:
+                        install_type = 'k8s'
                     facts = {
                         "system.certificate_version": "3.2",
-                        "uname.sysname": "Linux",
-                        "virt.is_guest": "False",
+                        "tower.cluster_uuid": str(settings.INSTALL_UUID),
+                        "tower.install_type": install_type,
                         "uname.machine": "x86_64", 
                     }
                     try:
@@ -310,11 +308,11 @@ class ApiV2AttachView(APIView):
                     # A 404 was received because pool does not exist for this consumer
                     # A 403 was recieved because the sub was already attached to this consumer
                     # Or the subscription could not be attached to this consumer
-                    Response({"error": _("Unable to attach selected subscription to consumer. " + str(e))}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": _("Unable to attach selected subscription to consumer. " + str(e))}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Save consumer_uuid in db
                 settings.ENTITLEMENT_CONSUMER = consumer
-                
+
                 # Attempt to get entitlement cert from RHSM 
                 entitlements = uep.getCertificates(consumer_uuid=consumer['uuid'], serials=[consumer['serial_id']])
                 # Concatenate certs and keys for the associated entitlement together
