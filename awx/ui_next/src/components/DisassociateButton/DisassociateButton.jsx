@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { arrayOf, func, object, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, Tooltip } from '@patternfly/react-core';
+import { Button, Tooltip, DropdownItem } from '@patternfly/react-core';
 import styled from 'styled-components';
+import { KebabifiedContext } from '../../contexts/Kebabified';
+
 import AlertModal from '../AlertModal';
 
 const ModalNote = styled.div`
@@ -19,11 +21,18 @@ function DisassociateButton({
   verifyCannotDisassociate = true,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
 
   function handleDisassociate() {
     onDisassociate();
     setIsOpen(false);
   }
+
+  useEffect(() => {
+    if (isKebabified) {
+      onKebabModalChange(isOpen);
+    }
+  }, [isKebabified, isOpen, onKebabModalChange]);
 
   function cannotDisassociate(item) {
     return !item.summary_fields?.user_capabilities?.delete;
@@ -67,18 +76,29 @@ function DisassociateButton({
   // See: https://github.com/patternfly/patternfly-react/issues/1894
   return (
     <>
-      <Tooltip content={renderTooltip()} position="top">
-        <div>
-          <Button
-            variant="secondary"
-            aria-label={i18n._(t`Disassociate`)}
-            onClick={() => setIsOpen(true)}
-            isDisabled={isDisabled}
-          >
-            {i18n._(t`Disassociate`)}
-          </Button>
-        </div>
-      </Tooltip>
+      {isKebabified ? (
+        <DropdownItem
+          key="add"
+          isDisabled={isDisabled}
+          component="button"
+          onClick={() => setIsOpen(true)}
+        >
+          {i18n._(t`Delete`)}
+        </DropdownItem>
+      ) : (
+        <Tooltip content={renderTooltip()} position="top">
+          <div>
+            <Button
+              variant="secondary"
+              aria-label={i18n._(t`Disassociate`)}
+              onClick={() => setIsOpen(true)}
+              isDisabled={isDisabled}
+            >
+              {i18n._(t`Disassociate`)}
+            </Button>
+          </div>
+        </Tooltip>
+      )}
 
       {isOpen && (
         <AlertModal
@@ -107,11 +127,7 @@ function DisassociateButton({
         >
           {modalNote && <ModalNote>{modalNote}</ModalNote>}
 
-          <div>
-            {i18n._(
-              t`This action will disassociate the following and any of their descendents:`
-            )}
-          </div>
+          <div>{i18n._(t`This action will disassociate the following:`)}</div>
 
           {itemsToDisassociate.map(item => (
             <span key={item.id}>

@@ -5,13 +5,23 @@ import AddDropdown from './AddDropdown';
 describe('<AddDropdown />', () => {
   let wrapper;
   let dropdownToggle;
-  const onAddNew = jest.fn();
-  const onAddExisting = jest.fn();
+  const dropdownItems = [
+    {
+      onAdd: () => {},
+      title: 'Add existing group',
+      label: 'group',
+      key: 'existing',
+    },
+    {
+      onAdd: () => {},
+      title: 'Add new group',
+      label: 'group',
+      key: 'new',
+    },
+  ];
 
   beforeEach(() => {
-    wrapper = mountWithContexts(
-      <AddDropdown onAddNew={onAddNew} onAddExisting={onAddExisting} />
-    );
+    wrapper = mountWithContexts(<AddDropdown dropdownItems={dropdownItems} />);
     dropdownToggle = wrapper.find('DropdownToggle button');
   });
 

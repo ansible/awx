@@ -166,7 +166,26 @@ function InventoryGroupHostList({ i18n }) {
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_hosts/add`;
+  const addButtonOptions = [];
 
+  if (canAdd) {
+    addButtonOptions.push(
+      {
+        onAdd: () => setIsModalOpen(true),
+        title: i18n._(t`Add existing host`),
+        label: i18n._(t`host`),
+        key: 'existing',
+      },
+      {
+        onAdd: () => history.push(addFormUrl),
+        title: i18n._(t`Add new host`),
+        label: i18n._(t`host`),
+        key: 'new',
+      }
+    );
+  }
+
+  // const addButton = <AddDropdown key="add" dropdownItems={addButtonOptions} />;
   return (
     <>
       <PaginatedDataList

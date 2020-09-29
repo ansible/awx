@@ -28,7 +28,7 @@ const QS_CONFIG = getQSConfig('group', {
   page_size: 20,
   order_by: 'name',
 });
-function InventoryRelatedGroupList({ i18n, inventoryGroup }) {
+function InventoryRelatedGroupList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { id: inventoryId, groupId } = useParams();
   const location = useLocation();
@@ -92,6 +92,26 @@ function InventoryRelatedGroupList({ i18n, inventoryGroup }) {
   );
 
   const addFormUrl = `/home`;
+  const addButtonOptions = [];
+
+  if (canAdd) {
+    addButtonOptions.push(
+      {
+        onAdd: () => setIsModalOpen(true),
+        title: i18n._(t`Add existing group`),
+        label: i18n._(t`group`),
+        key: 'existing',
+      },
+      {
+        onAdd: () => history.push(addFormUrl),
+        title: i18n._(t`Add new group`),
+        label: i18n._(t`group`),
+        key: 'new',
+      }
+    );
+  }
+
+  const addButton = <AddDropdown key="add" dropdownItems={addButtonOptions} />;
 
   return (
     <>
@@ -136,18 +156,7 @@ function InventoryRelatedGroupList({ i18n, inventoryGroup }) {
             }
             qsConfig={QS_CONFIG}
             additionalControls={[
-              ...(canAdd
-                ? [
-                    <AddDropdown
-                      key="associate"
-                      onAddExisting={() => setIsModalOpen(true)}
-                      onAddNew={() => history.push(addFormUrl)}
-                      newTitle={i18n._(t`Add new group`)}
-                      existingTitle={i18n._(t`Add existing group`)}
-                      label={i18n._(t`group`)}
-                    />,
-                  ]
-                : []),
+              ...(canAdd ? [addButton] : []),
               <Kebabified>
                 {({ isKebabified }) =>
                   isKebabified ? (

@@ -134,7 +134,7 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
             key="relatedGroups"
             path="/inventories/inventory/:id/groups/:groupId/nested_groups"
           >
-            <InventoryGroupsRelatedGroup inventoryGroup={inventoryGroup} />
+            <InventoryGroupsRelatedGroup />
           </Route>,
         ]}
         <Route key="not-found" path="*">

@@ -190,11 +190,11 @@ describe('<InventoryGroupHostList />', () => {
 
   test('should show associate host modal when adding an existing host', () => {
     const dropdownToggle = wrapper.find(
-      'DropdownToggle button[aria-label="add host"]'
+      'DropdownToggle button[aria-label="add"]'
     );
     dropdownToggle.simulate('click');
     wrapper
-      .find('DropdownItem[aria-label="add existing host"]')
+      .find('DropdownItem[aria-label="Add existing host"]')
       .simulate('click');
     expect(wrapper.find('AssociateModal').length).toBe(1);
     wrapper.find('ModalBoxCloseButton').simulate('click');
@@ -209,12 +209,10 @@ describe('<InventoryGroupHostList />', () => {
         results: [{ id: 123, name: 'foo', url: '/api/v2/hosts/123/' }],
       },
     });
-    wrapper
-      .find('DropdownToggle button[aria-label="add host"]')
-      .simulate('click');
+    wrapper.find('DropdownToggle button[aria-label="add"]').simulate('click');
     await act(async () => {
       wrapper
-        .find('DropdownItem[aria-label="add existing host"]')
+        .find('DropdownItem[aria-label="Add existing host"]')
         .simulate('click');
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -241,12 +239,10 @@ describe('<InventoryGroupHostList />', () => {
         results: [{ id: 123, name: 'foo', url: '/api/v2/hosts/123/' }],
       },
     });
-    wrapper
-      .find('DropdownToggle button[aria-label="add host"]')
-      .simulate('click');
+    wrapper.find('DropdownToggle button[aria-label="add"]').simulate('click');
     await act(async () => {
       wrapper
-        .find('DropdownItem[aria-label="add existing host"]')
+        .find('DropdownItem[aria-label="Add existing host"]')
         .simulate('click');
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -288,10 +284,10 @@ describe('<InventoryGroupHostList />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const dropdownToggle = wrapper.find(
-      'DropdownToggle button[aria-label="add host"]'
+      'DropdownToggle button[aria-label="add"]'
     );
     dropdownToggle.simulate('click');
-    wrapper.find('DropdownItem[aria-label="add new host"]').simulate('click');
+    wrapper.find('DropdownItem[aria-label="Add new host"]').simulate('click');
     expect(history.location.pathname).toEqual(
       '/inventories/inventory/1/groups/2/nested_hosts/add'
     );
