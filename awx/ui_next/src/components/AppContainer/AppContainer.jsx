@@ -23,6 +23,11 @@ import BrandLogo from './BrandLogo';
 import NavExpandableGroup from './NavExpandableGroup';
 import PageHeaderToolbar from './PageHeaderToolbar';
 
+// The maximum supported timeout for setTimeout(), in milliseconds,
+// is the highest number you can represent as a signed 32bit
+// integer (approximately 25 days)
+const MAX_TIMEOUT = 2 ** (32 - 1) - 1;
+
 // The number of seconds the session timeout warning is displayed
 // before the user is logged out. Increasing this number (up to
 // the total session time, which is 1800s by default) will cause
@@ -117,7 +122,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
     clearInterval(sessionIntervalId.current);
     sessionTimeoutId.current = setTimeout(
       handleSessionTimeout,
-      calcRemaining() - SESSION_WARNING_DURATION * 1000
+      Math.min(calcRemaining() - SESSION_WARNING_DURATION * 1000, MAX_TIMEOUT)
     );
     sessionIntervalId.current = setInterval(updateRemaining, 1000);
     return () => {
