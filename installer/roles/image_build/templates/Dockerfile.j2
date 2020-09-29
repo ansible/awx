@@ -30,7 +30,6 @@ RUN dnf -y update && \
     dnf -y install ansible \
     gcc \
     gcc-c++ \
-    gettext \
     git-core \
     glibc-langpack-en \
     libcurl-devel \
@@ -95,6 +94,7 @@ USER root
 # Install development/test requirements
 RUN dnf -y install \
     gtk3 \
+    gettext \
     alsa-lib \
     libX11-xcb \
     libXScrnSaver \
