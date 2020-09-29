@@ -50,7 +50,7 @@ def str_to_datetime(string):
 class Licenser(object):
     # warn when there is a month (30 days) left on the license
     LICENSE_TIMEOUT = 60 * 60 * 24 * 30
-    
+
     UNLICENSED_DATA = dict(
         subscription_name=None,
         sku=None,
@@ -68,12 +68,10 @@ class Licenser(object):
             license_date=0,
             license_type='UNLICENSED',
         )
-        
         if not kwargs:
             kwargs = getattr(settings, 'LICENSE', None) or {}
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
-        
         self._attrs.update(kwargs)
         # self._attrs.update(settings.LICENSE)
 
@@ -115,7 +113,7 @@ class Licenser(object):
         if not raw_cert or raw_cert == '':
             self._clear_license_setting()
             return
-        
+
         # Catch/check if subman is installed
         try:
             parsed_cert = raw_cert.split('\n')
@@ -125,7 +123,7 @@ class Licenser(object):
                 # clear the buffer to ensure the complete cert has been written to the file
                 f.flush()
                 os.fsync(f)
-                
+
                 # TODO: Consider refactoring this to be done with subman directly, or rhsm.certificate?
                 cmd = ["rct", "cat-cert", f.name, "--no-content"]
                 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -161,9 +159,8 @@ class Licenser(object):
         except Exception as e:
             self._clear_license_setting()
             raise Exception(e)
-            
         type = 'enterprise'
-        
+
         # Parse output for subscription metadata to build config
         self._attrs.update(dict(subscription_name=cert_dict.get('Name'),
                                 sku=cert_dict.get('SKU', ''),
@@ -227,8 +224,8 @@ class Licenser(object):
                 json.extend(resp.json())
 
             return self.generate_license_options_from_entitlements(json)
-
         return []
+
 
     def is_appropriate_sub(self, sub):
         if sub['activeSubscription'] is False:
@@ -242,6 +239,7 @@ class Licenser(object):
         if any(map(lambda attr: attr.get('name') == 'ph_product_name' and attr.get('value').startswith('Ansible Tower'), attributes)): # noqa
             return True
         return False
+
 
     def generate_license_options_from_entitlements(self, json):
         from dateutil.parser import parse
@@ -324,7 +322,6 @@ class Licenser(object):
 
         # Return license attributes with additional validation info.
         attrs = copy.deepcopy(self._attrs)
-
         type = attrs.get('license_type', 'none')
 
         if (type == 'UNLICENSED' or False):
@@ -349,9 +346,7 @@ class Licenser(object):
             attrs['grace_period_remaining'] = time_remaining
         else:
             attrs['grace_period_remaining'] = (license_date + 2592000) - current_date
-
         attrs['compliant'] = bool(time_remaining > 0 and attrs['free_instances'] >= 0)
         attrs['date_warning'] = bool(time_remaining < self.LICENSE_TIMEOUT)
         attrs['date_expired'] = bool(time_remaining <= 0)
-
         return attrs
