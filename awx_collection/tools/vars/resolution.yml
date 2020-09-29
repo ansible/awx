@@ -4,3 +4,4 @@ name_to_id_endpoint_resolution:
   project: projects
   inventory: inventories
   organization: organizations
+  credential: credentials
