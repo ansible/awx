@@ -55,6 +55,7 @@ export default function useRequest(makeRequest, initialValue) {
           }
         }
       },
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
       [makeRequest]
     ),
     setValue: setResult,
