@@ -91,7 +91,7 @@ function InventoryList({ i18n }) {
     selected.length === inventories.length && selected.length > 0;
   const {
     isLoading: isDeleteLoading,
-    deleteItems: deleteTeams,
+    deleteItems: deleteInventories,
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
@@ -104,7 +104,7 @@ function InventoryList({ i18n }) {
   );
 
   const handleInventoryDelete = async () => {
-    await deleteTeams();
+    await deleteInventories();
     setSelected([]);
   };
 
