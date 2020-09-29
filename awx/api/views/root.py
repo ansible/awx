@@ -4,7 +4,6 @@
 import json
 import logging
 import operator
-import os
 from collections import OrderedDict
 import random
 
@@ -32,7 +31,6 @@ from awx.main.utils import (
     to_python_boolean,
 )
 from awx.api.versioning import reverse, drf_reverse
-from awx.conf.license import get_license
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import (
     Project,
@@ -234,7 +232,6 @@ class ApiV2AttachView(APIView):
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
     def post(self, request):
-        
         data = request.data.copy()
         pool_id = data.get('pool_id', None)
         org = data.get('org', None)
@@ -245,7 +242,6 @@ class ApiV2AttachView(APIView):
         if pool_id and user and pw:
             try:
                 # TODO: Replace this with logic that uses the user, pw to get the entitlement cert for that pool_id
-                
                 # Add subman to the python path in order to import it
                 # Isolate this by running it in a thread or fork, look at other places where we thread in awx
                 #   - maybe put this in an awx-manage command?
@@ -256,20 +252,19 @@ class ApiV2AttachView(APIView):
                 # Create connection
                 from rhsm.connection import UEPConnection, RestlibException
                 uep = UEPConnection(username=user, password=pw, insecure=True)
-                
+
                 # Check if consumer already exists
                 consumer = getattr(settings, 'ENTITLEMENT_CONSUMER', dict())
-                
 
                 # Get owner/org list
                 orgs = uep.getOwnerList(user)
+                org_ids = []
+                for item in orgs:
+                    org_ids.append(item['key'])
                 if org:
-                    org_ids = []
-                    for item in orgs:
-                        org_ids.append(item['key'])
                     if org not in org_ids:
                         return Response({"error": _("No organizations with that ID are associated with that account")}, status=status.HTTP_400_BAD_REQUEST)
-                
+
                 else:
                     if len(orgs) == 0:
                         return Response({"error": _("No organizations associated with that account")}, status=status.HTTP_400_BAD_REQUEST)
@@ -278,12 +273,11 @@ class ApiV2AttachView(APIView):
                         return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         # Try the first owner key when creating consumer
-                        org = uep.getOwnerList(user)[0]['key']
-                
+                        org = orgs[0]['key']
+
                 # Use org key if provided, but not already on consumer record in db
                 if not getattr(consumer, 'org', None) and consumer != {}:
                     consumer['org'] = org
-                
                 if consumer == {}:
                     consumer['org'] = org
                     consumer['name'] = "Ansible-Tower-" + str(random.randint(1,1000000000))
@@ -302,11 +296,12 @@ class ApiV2AttachView(APIView):
                             return Response({"error": _("Satellite Organization does not exist. ")}, status=status.HTTP_400_BAD_REQUEST)
                         return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
                     except Exception as e:
+                        logger.exception(e)
                         pass
-                
+
                 # Save consumer_uuid in db
                 settings.ENTITLEMENT_CONSUMER = consumer
-                
+
                 # Attach subscription to consumer
                 try:
                     attach = uep.bindByEntitlementPool(consumerId=consumer['uuid'], poolId=pool_id, quantity=None)
@@ -315,9 +310,8 @@ class ApiV2AttachView(APIView):
                     # A 404 was received because pool does not exist for this consumer
                     # A 403 was recieved because the sub was already attached to this consumer
                     # Or the subscription could not be attached to this consumer
-                    pass
+                    Response({"error": _("Unable to attach selected subscription to consumer. " + str(e))}, status=status.HTTP_400_BAD_REQUEST)
 
-                
                 # Save consumer_uuid in db
                 settings.ENTITLEMENT_CONSUMER = consumer
                 
@@ -328,7 +322,6 @@ class ApiV2AttachView(APIView):
 
                 for entitlement in entitlements:
                     cert_key = entitlement['cert'] + entitlement['key']  # Potentially make this `=` --> '+='
-                
 
                 # Save the cert as a setting
                 if cert_key != '':
@@ -339,9 +332,6 @@ class ApiV2AttachView(APIView):
                 # Return a 200 to denote the subscription has been successfully attached
                 # The UI will now make a separate POST to the config endpoint to validate and apply entitlement cert
                 return Response({}, status=status.HTTP_200_OK)
-                
-                # with set_environ(**settings.AWX_TASK_ENV):  # TODO: better understand what is going on here,
-                #     validated = get_licenser().validate_rh(user, pw)
 
 
             except Exception as e:
@@ -368,7 +358,6 @@ class ApiV2AttachView(APIView):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class ApiV2ConfigView(APIView):
 
     permission_classes = (IsAuthenticated,)
@@ -382,8 +371,9 @@ class ApiV2ConfigView(APIView):
 
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
-        # TODO: Update this to just get settings.LICENSE.['valid_key'] from the settings to avoid transaction violations and get quicker HTTP responses=
-        license_data = get_license()
+
+        from awx.main.utils.common import get_licenser
+        license_data = get_licenser().validate(new_cert=False)
         # license_data = settings.LICENSE
 
         if not license_data.get('valid_key', False):
@@ -426,6 +416,7 @@ class ApiV2ConfigView(APIView):
 
         return Response(data)
 
+
     def post(self, request):
         if not isinstance(request.data, dict):
             return Response({"error": _("Invalid license data")}, status=status.HTTP_400_BAD_REQUEST)
@@ -451,13 +442,11 @@ class ApiV2ConfigView(APIView):
         if 'entitlement_cert' in license_data:
             settings.ENTITLEMENT_CERT = license_data['entitlement_cert']
 
-
-        
         try:
             # Validate entitlement cert and get subscription metadata
             # validate() will clear the entitlement cert if not valid
             from awx.main.utils.common import get_licenser
-            license_data_validated = get_licenser().validate()
+            license_data_validated = get_licenser().validate(new_cert=True)
         except Exception:
             logger.warning(smart_text(u"Invalid license submitted."),
                            extra=dict(actor=request.user.username))

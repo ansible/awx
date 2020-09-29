@@ -307,6 +307,7 @@ class BaseAccess(object):
         return True  # User has access to both, permission check passed
 
     def check_license(self, add_host_name=None, feature=None, check_expiration=True, quiet=False):
+        # TODO: Evaluate if this should be changed to get_licenser() instead of validating the cert
         validation_info = get_licenser().validate()
         if validation_info.get('license_type', 'UNLICENSED') == 'open':
             return
