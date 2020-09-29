@@ -237,9 +237,11 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
           </Button>,
         ]}
       >
-        {i18n._(t`You will be logged out in`)}{' '}
-        {Number(Math.floor(timeRemaining / 1000))}{' '}
-        {i18n._(t`seconds due to inactivity.`)}
+        {i18n._(
+          t`You will be logged out in ${Number(
+            Math.floor(timeRemaining / 1000)
+          )} seconds due to inactivity.`
+        )}
       </AlertModal>
     </>
   );
