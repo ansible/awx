@@ -1207,18 +1207,19 @@ function(SettingsUtils, i18n, $rootScope) {
     };
 }])
 
-.directive('awPasswordToggle', [function() {
+.directive('awPasswordToggle', ['i18n',
+function(i18n) {
     return {
         restrict: 'A',
         link: function(scope, element) {
             $(element).click(function() {
-                var buttonInnerHTML = $(element).html();
-                if (buttonInnerHTML.indexOf("Show") > -1) {
-                    $(element).html("Hide");
-                    $(element).closest('.input-group').find('input').first().attr("type", "text");
+                var input = $(element).closest('.input-group').find('input').first();
+                if (input.attr("type") === "password") {
+                    $(element).html(i18n._("Hide"));
+                    input.attr("type", "text");
                 } else {
-                    $(element).html("Show");
-                    $(element).closest('.input-group').find('input').first().attr("type", "password");
+                    $(element).html(i18n._("Show"));
+                    input.attr("type", "password");
                 }
             });
         }

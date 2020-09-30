@@ -82,9 +82,8 @@ function link($sce, $filter, Empty, scope, element, attrs) {
     //for toggling the input on password inputs
     scope.toggleInput = function(id) {
         var buttonId = id + "_show_input_button",
-            inputId = id,
-            buttonInnerHTML = $(buttonId).html();
-        if (buttonInnerHTML.indexOf("SHOW") > -1) {
+            inputId = id;
+        if ($(inputId).attr("type") === "password") {
             $(buttonId).html("HIDE");
             $(inputId).attr("type", "text");
         } else {

@@ -493,9 +493,8 @@ export default
             scope.toggleInput = function(id) {
                 // Note that the id string passed into this function will have a "#" prepended
                 var buttonId = id + "_show_input_button",
-                    inputId = id,
-                    buttonInnerHTML = $(buttonId).html();
-                if (buttonInnerHTML.indexOf("SHOW") > -1) {
+                    inputId = id;
+                if ($(inputId).attr("type") === "password") {
                     $(buttonId).html(i18n._("HIDE"));
                     $(inputId).attr("type", "text");
                 } else {
