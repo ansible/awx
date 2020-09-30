@@ -204,6 +204,9 @@
             ANSIBLE_FORCE_COLOR: false
             ANSIBLE_COLLECTIONS_PATHS: "{{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_collections"
             GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
+            # Put the local tmp directory in same volume as collection destination
+            # otherwise, files cannot be moved accross volumes and will cause error
+            ANSIBLE_LOCAL_TEMP: "{{projects_root}}/.__awx_cache/{{local_path}}/stage/tmp"
 
       when:
         - "ansible_version.full is version_compare('2.9', '>=')"
