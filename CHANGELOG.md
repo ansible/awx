@@ -7,12 +7,12 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Added support for arbitrary custom inventory plugin configuration: https://github.com/ansible/awx/issues/5150
 - Added improved support for fetching Ansible collections from private Galaxy content sources (such as https://github.com/ansible/galaxy_ng) - https://github.com/ansible/awx/issues/7813
 - Added an optional setting to disable the auto-creation of organizations and teams on successful SAML login. - https://github.com/ansible/awx/pull/8069
-- Added a number of optimizations to Ansible Tower's callback receiver to improve the speed of stdout processing for simultaneous playbooks runs - https://github.com/ansible/awx/pull/8193 https://github.com/ansible/awx/pull/8191
+- Added a number of optimizations to AWX's callback receiver to improve the speed of stdout processing for simultaneous playbooks runs - https://github.com/ansible/awx/pull/8193 https://github.com/ansible/awx/pull/8191
 - Added the ability to use `!include` and `!import` constructors when constructing YAML for use with the AWX CLI - https://github.com/ansible/awx/issues/8135
 - Fixed a bug that prevented certain users from being able to edit approval nodes in Workflows - https://github.com/ansible/awx/pull/8253
 - Fixed a bug that broke password prompting for credentials in certain cases - https://github.com/ansible/awx/issues/8202
 - Fixed a bug which can cause PostgreSQL deadlocks when running many parallel playbooks against large shared inventories - https://github.com/ansible/awx/issues/8145
-- Fixed a bug which can cause delays in Ansible Tower's task manager when large numbers of simultaneous jobs are scheduled - https://github.com/ansible/awx/issues/7655
+- Fixed a bug which can cause delays in AWX's task manager when large numbers of simultaneous jobs are scheduled - https://github.com/ansible/awx/issues/7655
 - Fixed a bug which can cause certain scheduled jobs - those that run every X minute(s) or hour(s) - to fail to run at the proper time - https://github.com/ansible/awx/issues/8071
 - Fixed a performance issue for playbooks that store large amounts of data using the `set_stats` module - https://github.com/ansible/awx/issues/8006
 - Fixed a bug related to AWX's handling of the auth_path argument for the HashiVault KeyValue credential plugin - https://github.com/ansible/awx/pull/7991
