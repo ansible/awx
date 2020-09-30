@@ -17,7 +17,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Fixed a performance issue for playbooks that store large amounts of data using the `set_stats` module - https://github.com/ansible/awx/issues/8006
 - Fixed a bug related to AWX's handling of the auth_path argument for the HashiVault KeyValue credential plugin - https://github.com/ansible/awx/pull/7991
 - Fixed a bug that broke support for Remote Archive SCM Type project syncs on platforms that utilize Python2 - https://github.com/ansible/awx/pull/8057
-- Updated to the latest version of Django Rest Framework.
+- Updated to the latest version of Django Rest Framework to address CVE-2020-25626
 - Updated to the latest version of Django to address CVE-2020-24583 and CVE-2020-24584
 - Updated to the latest verson of channels_redis to address a bug that slowly causes Daphne processes to leak memory over time - https://github.com/django/channels_redis/issues/212
 
