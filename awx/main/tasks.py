@@ -1461,7 +1461,6 @@ class BaseTask(object):
                     'job_timeout': self.get_instance_timeout(self.instance),
                     'suppress_ansible_output': True,
                     #**process_isolation_params,
-                    **execution_environment_params,
                     **resource_profiling_params,
                 },
             }
@@ -1470,6 +1469,10 @@ class BaseTask(object):
                 # We don't want HOME passed through to container groups.
                 # TODO: remove this conditional after everything is containerized
                 params['envvars'].pop('HOME', None)
+            else:
+                # TODO: container group jobs will not work with container isolation settings
+                # but both will run with same settings when worker_in and worker_out are added
+                params['settings'].update(execution_environment_params)
 
             if isinstance(self.instance, AdHocCommand):
                 params['module'] = self.build_module_name(self.instance)
@@ -1497,10 +1500,12 @@ class BaseTask(object):
                     module_args = ansible_runner.utils.args2cmdline(
                         params.get('module_args'),
                     )
-                shutil.move(
-                    params.pop('inventory'),
-                    os.path.join(private_data_dir, 'inventory')
-                )
+                # TODO on merge: delete if https://github.com/ansible/awx/pull/8185 is merged
+                if not os.path.exists(os.path.join(private_data_dir, 'inventory')):
+                    shutil.move(
+                        params.pop('inventory'),
+                        os.path.join(private_data_dir, 'inventory')
+                    )
 
                 ansible_runner.utils.dump_artifacts(params)
                 isolated_manager_instance = isolated_manager.IsolatedManager(
