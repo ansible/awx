@@ -29,13 +29,21 @@ export default function SyncStatusIndicator({ status, title }) {
 
   if (status === 'syncing') {
     return (
-      <PulseWrapper>
-        <CloudIcon color={`var(${color})`} title={title} />
-      </PulseWrapper>
+      <>
+        <PulseWrapper aria-hidden="true">
+          <CloudIcon color={`var(${color})`} title={title} />
+        </PulseWrapper>
+        <span className="pf-screen-reader">{status}</span>
+      </>
     );
   }
 
-  return <CloudIcon color={`var(${color})`} title={title} />;
+  return (
+    <>
+      <CloudIcon color={`var(${color})`} title={title} aria-hidden="true" />
+      <span className="pf-screen-reader">{status}</span>
+    </>
+  );
 }
 SyncStatusIndicator.propTypes = {
   status: oneOf(['success', 'error', 'disabled', 'syncing']).isRequired,
