@@ -5,21 +5,21 @@ import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CardBody, CardActionsRow } from '../../../../components/Card';
 
-function RadiusDetail({ i18n }) {
+function RADIUSEdit({ i18n }) {
   return (
     <CardBody>
-      {i18n._(t`Detail coming soon :)`)}
+      {i18n._(t`Edit form coming soon :)`)}
       <CardActionsRow>
         <Button
-          aria-label={i18n._(t`Edit`)}
+          aria-label={i18n._(t`Cancel`)}
           component={Link}
-          to="/settings/radius/edit"
+          to="/settings/radius/details"
         >
-          {i18n._(t`Edit`)}
+          {i18n._(t`Cancel`)}
         </Button>
       </CardActionsRow>
     </CardBody>
   );
 }
 
-export default withI18n()(RadiusDetail);
+export default withI18n()(RADIUSEdit);

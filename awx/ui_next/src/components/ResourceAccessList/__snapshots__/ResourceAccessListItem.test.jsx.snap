@@ -74,6 +74,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     <Detail
                       alwaysVisible={false}
                       fullWidth={false}
+                      helpText={null}
                       label="Name"
                       value="jane brown"
                     />
@@ -86,6 +87,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     <Detail
                       alwaysVisible={false}
                       fullWidth={false}
+                      helpText={null}
                       label="Team Roles"
                       value={
                         <WithI18n
@@ -138,6 +140,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       <Detail
                         alwaysVisible={false}
                         fullWidth={false}
+                        helpText={null}
                         label="Name"
                         value="jane brown"
                       />
@@ -150,6 +153,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       <Detail
                         alwaysVisible={false}
                         fullWidth={false}
+                        helpText={null}
                         label="Team Roles"
                         value={
                           <WithI18n
@@ -225,6 +229,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         <Detail
                           alwaysVisible={false}
                           fullWidth={false}
+                          helpText={null}
                           label="Name"
                           value="jane brown"
                         />
@@ -237,6 +242,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         <Detail
                           alwaysVisible={false}
                           fullWidth={false}
+                          helpText={null}
                           label="Team Roles"
                           value={
                             <WithI18n
@@ -447,6 +453,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                     <Detail
                                       alwaysVisible={false}
                                       fullWidth={false}
+                                      helpText={null}
                                       label="Name"
                                       value="jane brown"
                                     >
@@ -463,9 +470,9 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "sc-htpNat",
+                                                "componentId": "sc-bxivhb",
                                                 "isStatic": false,
-                                                "lastClassName": "iYJcPm",
+                                                "lastClassName": "gQwVdc",
                                                 "rules": Array [
                                                   "
   font-weight: var(--pf-global--FontWeight--bold);
@@ -478,7 +485,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "sc-htpNat",
+                                              "styledComponentId": "sc-bxivhb",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -489,18 +496,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="sc-htpNat iYJcPm"
+                                            className="sc-bxivhb gQwVdc"
                                             component="dt"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="sc-htpNat iYJcPm"
+                                              className="sc-bxivhb gQwVdc"
                                               component="dt"
                                               data-cy={null}
                                             >
                                               <dt
-                                                className="sc-htpNat iYJcPm"
+                                                className="sc-bxivhb gQwVdc"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -523,9 +530,9 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "sc-bxivhb",
+                                                "componentId": "sc-ifAKCX",
                                                 "isStatic": false,
-                                                "lastClassName": "gxmPlV",
+                                                "lastClassName": "boHWLt",
                                                 "rules": Array [
                                                   "
   word-break: break-all;
@@ -541,7 +548,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "sc-bxivhb",
+                                              "styledComponentId": "sc-ifAKCX",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -552,18 +559,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="sc-bxivhb gxmPlV"
+                                            className="sc-ifAKCX boHWLt"
                                             component="dd"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="sc-bxivhb gxmPlV"
+                                              className="sc-ifAKCX boHWLt"
                                               component="dd"
                                               data-cy={null}
                                             >
                                               <dd
-                                                className="sc-bxivhb gxmPlV"
+                                                className="sc-ifAKCX boHWLt"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -670,6 +677,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                     <Detail
                                       alwaysVisible={false}
                                       fullWidth={false}
+                                      helpText={null}
                                       label="Team Roles"
                                       value={
                                         <WithI18n
@@ -703,9 +711,9 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "sc-htpNat",
+                                                "componentId": "sc-bxivhb",
                                                 "isStatic": false,
-                                                "lastClassName": "iYJcPm",
+                                                "lastClassName": "gQwVdc",
                                                 "rules": Array [
                                                   "
   font-weight: var(--pf-global--FontWeight--bold);
@@ -718,7 +726,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "sc-htpNat",
+                                              "styledComponentId": "sc-bxivhb",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -729,18 +737,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="sc-htpNat iYJcPm"
+                                            className="sc-bxivhb gQwVdc"
                                             component="dt"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="sc-htpNat iYJcPm"
+                                              className="sc-bxivhb gQwVdc"
                                               component="dt"
                                               data-cy={null}
                                             >
                                               <dt
-                                                className="sc-htpNat iYJcPm"
+                                                className="sc-bxivhb gQwVdc"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -763,9 +771,9 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "sc-bxivhb",
+                                                "componentId": "sc-ifAKCX",
                                                 "isStatic": false,
-                                                "lastClassName": "gxmPlV",
+                                                "lastClassName": "boHWLt",
                                                 "rules": Array [
                                                   "
   word-break: break-all;
@@ -781,7 +789,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "sc-bxivhb",
+                                              "styledComponentId": "sc-ifAKCX",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -792,18 +800,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="sc-bxivhb gxmPlV"
+                                            className="sc-ifAKCX boHWLt"
                                             component="dd"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="sc-bxivhb gxmPlV"
+                                              className="sc-ifAKCX boHWLt"
                                               component="dd"
                                               data-cy={null}
                                             >
                                               <dd
-                                                className="sc-bxivhb gxmPlV"
+                                                className="sc-ifAKCX boHWLt"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
