@@ -95,7 +95,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
   const sessionIntervalId = useRef();
   const [sessionTimeout, setSessionTimeout] = useStorage(SESSION_TIMEOUT_KEY);
   const [timeoutWarning, setTimeoutWarning] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(Infinity);
+  const [timeRemaining, setTimeRemaining] = useState(null);
 
   const handleAboutModalOpen = () => setIsAboutModalOpen(true);
   const handleAboutModalClose = () => setIsAboutModalOpen(false);
@@ -132,7 +132,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
   }, [history, sessionTimeout]);
 
   useEffect(() => {
-    if (timeRemaining <= 1) {
+    if (timeRemaining !== null && timeRemaining <= 1) {
       handleLogout();
     }
   }, [handleLogout, timeRemaining]);
@@ -220,7 +220,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
       </AlertModal>
       <AlertModal
         title={i18n._(t`Your session is about to expire`)}
-        isOpen={timeoutWarning && sessionTimeout > 0 && timeRemaining > 0}
+        isOpen={timeoutWarning && sessionTimeout > 0 && timeRemaining !== null}
         onClose={handleLogout}
         showClose={false}
         variant="warning"
@@ -239,7 +239,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
       >
         {i18n._(
           t`You will be logged out in ${Number(
-            Math.floor(timeRemaining / 1000)
+            Math.max(Math.floor(timeRemaining / 1000), 0)
           )} seconds due to inactivity.`
         )}
       </AlertModal>
