@@ -11,12 +11,14 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
+import { required } from '../../../../util/validators';
 
 const CloudFormsSubForm = ({ i18n }) => {
   const { setFieldValue } = useFormikContext();
-  const [credentialField, credentialMeta, credentialHelpers] = useField(
-    'credential'
-  );
+  const [credentialField, credentialMeta, credentialHelpers] = useField({
+    name: 'credential',
+    validate: required(i18n._(t`Select a value for this field`), i18n),
+  });
 
   const handleCredentialUpdate = useCallback(
     value => {
