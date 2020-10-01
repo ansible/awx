@@ -135,15 +135,17 @@ class Licenser(object):
                     if ': ' in line:
                         key, value = line.split(': ')
                         cert_dict.update({key:value})
-                # TODO: create this URL from Satellite setting
+
                 # Verify the entitlment cert is authorized to access appropriate content
+                from rhsm.config import get_config_parser
+                config = get_config_parser()
+                base_url = config.get("rhsm", "baseurl")
+
                 verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
-                content_repo_url = 'https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os'
+                content_repo_url = '{}/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os'.format(base_url)
                 request = requests.get(url=content_repo_url, 
                                        cert=f.name, 
                                        verify=verify,
-                                       # verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
-                                       # headers=get_awx_http_client_headers(),
                                        # timeout=(5, 5)
                                        )
 
