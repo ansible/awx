@@ -283,7 +283,7 @@ class ApiV2AttachView(APIView):
                         "system.certificate_version": "3.2",
                         "tower.cluster_uuid": str(settings.INSTALL_UUID),
                         "tower.install_type": install_type,
-                        "uname.machine": "x86_64", 
+                        "uname.machine": "x86_64",
                     }
                     try:
                         # Register consumer
@@ -319,7 +319,7 @@ class ApiV2AttachView(APIView):
                 cert_key = ''
 
                 for entitlement in entitlements:
-                    cert_key = entitlement['cert'] + entitlement['key']  # Potentially make this `=` --> '+='
+                    cert_key = entitlement['cert'] + entitlement['key']  # Potentially make this `=` --> '+=' to accomodate multiple certs/keys?
 
                 # Save the cert as a setting
                 if cert_key != '':
