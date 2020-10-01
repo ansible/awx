@@ -776,6 +776,10 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.send_approval_notification('running')
         return can_start
 
+    @property
+    def event_processing_finished(self):
+        return True
+
     def send_approval_notification(self, approval_status):
         from awx.main.tasks import send_notifications  # avoid circular import
         if self.workflow_job_template is None:
