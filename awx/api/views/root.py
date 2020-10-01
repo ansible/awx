@@ -233,6 +233,17 @@ class ApiV2AttachView(APIView):
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
     def post(self, request):
+
+        def _list_attached_subs(consumer=None):
+            entitlements = uep.getEntitlementList(consumerId=consumer['uuid'])
+            if entitlements == []:
+                return []
+            pool_list = []
+            for item in entitlements:
+                if item['consumer']['uuid'] == consumer['uuid']:
+                    pool_list.append(item['pool']['id'])
+            return pool_list
+
         data = request.data.copy()
         pool_id = data.get('pool_id', None)
         org = data.get('org', None)
@@ -243,7 +254,7 @@ class ApiV2AttachView(APIView):
         if pool_id and user and pw:
             try:
                 # Create connection
-                from rhsm.connection import UEPConnection, RestlibException, UnauthorizedException
+                from rhsm.connection import UEPConnection, RestlibException, UnauthorizedException, GoneException
                 uep = UEPConnection(username=user, password=pw, insecure=True)
 
                 # Check if consumer already exists
@@ -297,6 +308,20 @@ class ApiV2AttachView(APIView):
                     except Exception as e:
                         logger.exception(e)
                         pass
+                else:
+                    try:
+                        # If consumer exists, and the pool_id is already attached, try to unattach existing sub first before attaching a new one
+                        attached_pools = _list_attached_subs(consumer=consumer)
+                        if pool_id in attached_pools:
+                            consumer = getattr(settings, 'ENTITLEMENT_CONSUMER', dict())
+                            uep.unbindByPoolId(consumer['uuid'], pool_id)
+                    except Exception as e:
+                        if (isinstance(e, GoneException) and getattr(e, 'code', None) == 410):
+                            msg = _("Consumer has been deleted. Clearing consumer from Tower setting.  Please try again." + str(e))
+                            settings.CONSUMER = {}
+                            return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
+                        # If unable to unattach sub from consumer, continue to clear license and cert
+                        pass
 
                 # Save consumer_uuid in db
                 settings.ENTITLEMENT_CONSUMER = consumer
@@ -309,6 +334,10 @@ class ApiV2AttachView(APIView):
                     # A 404 was received because pool does not exist for this consumer
                     # A 403 was recieved because the sub was already attached to this consumer
                     # Or the subscription could not be attached to this consumer
+                    if (isinstance(e, GoneException) and getattr(e, 'code', None) == 410):
+                        msg = _("Consumer has been deleted.  ENTITLEMENT_CONSUMER setting will be cleared.  Please try again." + str(e))
+                        settings.ENTITLEMENT_CONSUMER = {}
+                        return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
                     return Response({"error": _("Unable to attach selected subscription to consumer. " + str(e))}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Save consumer_uuid in db
@@ -342,8 +371,7 @@ class ApiV2AttachView(APIView):
                 ):
                     msg = _("The provided credentials are invalid (HTTP 401). Content host: " + uep.host + \
                         "; Register this node with the correct content host via subscription-manager.")
-
-                # elif isinstance(exc, requests.exceptions.ProxyError):
+                # elif isinstance(e, requests.exceptions.ProxyError):
                 #     msg = _("Unable to connect to proxy server.")
                 # elif isinstance(exc, requests.exceptions.ConnectionError):
                 #     msg = _("Could not connect to subscription service.")
@@ -464,6 +492,7 @@ class ApiV2ConfigView(APIView):
         return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
+        # Clear license and entitlement certificate
         try:
             settings.LICENSE = {}
             settings.ENTITLEMENT_CERT = ''
