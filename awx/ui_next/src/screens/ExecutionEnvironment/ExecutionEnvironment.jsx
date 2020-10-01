@@ -53,7 +53,7 @@ function ExecutionEnvironment({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to execution environments`)}
+          {i18n._(t`Back to Execution Environments`)}
         </>
       ),
       link: '/execution_environments',

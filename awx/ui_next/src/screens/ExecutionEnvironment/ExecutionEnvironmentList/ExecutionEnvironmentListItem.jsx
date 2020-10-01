@@ -26,6 +26,25 @@ function ExecutionEnvironmentListItem({
 }) {
   const labelId = `check-action-${executionEnvironment.id}`;
 
+  function verifyOrganization(execEnvironment) {
+    if (
+      execEnvironment.organization &&
+      execEnvironment.summary_fields?.organization
+    ) {
+      return (
+        <>
+          <b>{i18n._(t`Organization`)}</b>{' '}
+          <Link
+            to={`/organizations/${execEnvironment.summary_fields.organization.id}/details`}
+          >
+            {execEnvironment.summary_fields.organization.name}
+          </Link>
+        </>
+      );
+    }
+    return <>{i18n._(t`Globally available`)}</>;
+  }
+
   return (
     <DataListItem
       key={executionEnvironment.id}
@@ -48,6 +67,12 @@ function ExecutionEnvironmentListItem({
               <Link to={`${detailUrl}`}>
                 <b>{executionEnvironment.image}</b>
               </Link>
+            </DataListCell>,
+            <DataListCell
+              key="organization"
+              aria-label={i18n._(t`execution environment organization`)}
+            >
+              {verifyOrganization(executionEnvironment)}
             </DataListCell>,
           ]}
         />

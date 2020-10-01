@@ -10,8 +10,8 @@ import Breadcrumbs from '../../components/Breadcrumbs';
 
 function ExecutionEnvironments({ i18n }) {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
-    '/execution_environments': i18n._(t`Execution environments`),
-    '/execution_environments/add': i18n._(t`Create Execution environments`),
+    '/execution_environments': i18n._(t`Execution Environments`),
+    '/execution_environments/add': i18n._(t`Create new execution environments`),
   });
 
   const buildBreadcrumbConfig = useCallback(
@@ -20,8 +20,10 @@ function ExecutionEnvironments({ i18n }) {
         return;
       }
       setBreadcrumbConfig({
-        '/execution_environments': i18n._(t`Execution environments`),
-        '/execution_environments/add': i18n._(t`Create Execution environments`),
+        '/execution_environments': i18n._(t`Execution Environments`),
+        '/execution_environments/add': i18n._(
+          t`Create new execution environments`
+        ),
         [`/execution_environments/${executionEnvironments.id}`]: `${executionEnvironments.image}`,
         [`/execution_environments/${executionEnvironments.id}/edit`]: i18n._(
           t`Edit details`

@@ -41,9 +41,27 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           dataCy="execution-environment-detail-image"
         />
         <Detail label={i18n._(t`Description`)} value={description} />
+        {executionEnvironment.summary_fields.organization && (
+          <Detail
+            label={i18n._(t`Organization`)}
+            value={
+              <Link
+                to={`/organizations/${executionEnvironment.summary_fields.organization.id}/details`}
+              >
+                {executionEnvironment.summary_fields.organization.name}
+              </Link>
+            }
+          />
+        )}
+        {!executionEnvironment.organization && (
+          <Detail
+            label={i18n._(t`Organization`)}
+            value={i18n._(t`Globally available`)}
+          />
+        )}
         {executionEnvironment.summary_fields.credential && (
           <Detail
-            label={i18n._(t`Credential`)}
+            label={i18n._(t`Registry credential`)}
             value={
               <Label variant="outline" color="blue">
                 {executionEnvironment.summary_fields.credential.name}

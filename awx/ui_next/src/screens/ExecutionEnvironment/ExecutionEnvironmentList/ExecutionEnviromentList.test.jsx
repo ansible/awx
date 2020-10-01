@@ -17,10 +17,17 @@ const executionEnvironments = {
       {
         id: 1,
         image: 'https://registry.com/r/image/manifest',
-        organization: null,
+        organization: 1,
         credential: null,
         url: '/api/v2/execution_environments/1/',
-        summary_fields: { user_capabilities: { edit: true, delete: true } },
+        summary_fields: {
+          user_capabilities: { edit: true, delete: true },
+          organization: {
+            id: 1,
+            name: 'Default',
+            description: '',
+          },
+        },
       },
       {
         id: 2,
