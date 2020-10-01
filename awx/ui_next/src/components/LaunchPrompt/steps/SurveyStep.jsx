@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
   Form,
@@ -114,15 +115,22 @@ function MultipleChoiceField({ question }) {
   );
 }
 
-function MultiSelectField({ question }) {
+function MultiSelectField({ question, i18n }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [field, meta, helpers] = useField(`survey_${question.variable}`);
+  const [field, meta, helpers] = useField({
+    name: `survey_${question.variable}`,
+    validate: question.isrequired ? required(null, i18n) : null,
+  });
   const id = `survey-question-${question.variable}`;
-  const isValid = !(meta.touched && meta.error);
+  const hasActualValue = !question.required || meta.value.length > 0;
+  const isValid = !meta.touched || (!meta.error && hasActualValue);
+
   return (
     <FormGroup
       fieldId={id}
-      helperTextInvalid={meta.error}
+      helperTextInvalid={
+        meta.error || i18n._(t`Must select a value for this field.`)
+      }
       isRequired={question.required}
       validated={isValid ? 'default' : 'error'}
       label={question.question_name}
@@ -133,7 +141,7 @@ function MultiSelectField({ question }) {
         id={id}
         onToggle={setIsOpen}
         onSelect={(event, option) => {
-          if (field.value.includes(option)) {
+          if (field?.value?.includes(option)) {
             helpers.setValue(field.value.filter(o => o !== option));
           } else {
             helpers.setValue(field.value.concat(option));

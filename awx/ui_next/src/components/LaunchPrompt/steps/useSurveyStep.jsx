@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
+import { useFormikContext } from 'formik';
 import useRequest from '../../../util/useRequest';
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
 import SurveyStep from './SurveyStep';
@@ -7,27 +8,27 @@ import StepName from './StepName';
 
 const STEP_ID = 'survey';
 
-export default function useSurveyStep(config, resource, visitedSteps, i18n) {
-  const [stepErrors, setStepErrors] = useState({});
-
+export default function useSurveyStep(config, visitedSteps, i18n) {
+  const { values } = useFormikContext();
   const { result: survey, request: fetchSurvey, isLoading, error } = useRequest(
     useCallback(async () => {
       if (!config.survey_enabled) {
         return {};
       }
-      const { data } =
-        resource.type === 'workflow_job_template'
-          ? await WorkflowJobTemplatesAPI.readSurvey(resource.id)
-          : await JobTemplatesAPI.readSurvey(resource.id);
+      const { data } = config?.workflow_job_template_data
+        ? await WorkflowJobTemplatesAPI.readSurvey(
+            config?.workflow_job_template_data?.id
+          )
+        : await JobTemplatesAPI.readSurvey(config?.job_template_data?.id);
       return data;
-    }, [config.survey_enabled, resource])
+    }, [config])
   );
 
   useEffect(() => {
     fetchSurvey();
   }, [fetchSurvey]);
 
-  const validate = values => {
+  const validate = () => {
     if (!config.survey_enabled || !survey || !survey.spec) {
       return {};
     }
@@ -42,20 +43,22 @@ export default function useSurveyStep(config, resource, visitedSteps, i18n) {
         errors[`survey_${question.variable}`] = errMessage;
       }
     });
-    setStepErrors(errors);
     return errors;
   };
-
-  const hasErrors = visitedSteps[STEP_ID] && Object.keys(stepErrors).length > 0;
-
+  const formError = validate();
   return {
-    step: getStep(config, survey, hasErrors, i18n),
+    step: getStep(
+      config,
+      survey,
+      Object.keys(formError).length > 0,
+      i18n,
+      visitedSteps
+    ),
+    formError,
     initialValues: getInitialValues(config, survey),
-    validate,
     survey,
     isReady: !isLoading && !!survey,
     contentError: error,
-    formError: stepErrors,
     setTouched: setFieldsTouched => {
       if (!survey || !survey.spec) {
         return;
@@ -87,34 +90,49 @@ function validateField(question, value, i18n) {
       );
     }
   }
-  if (question.required && !value && value !== 0) {
+  if (
+    question.required &&
+    ((!value && value !== 0) || (Array.isArray(value) && value.length === 0))
+  ) {
     return i18n._(t`This field must not be blank`);
   }
   return null;
 }
-
-function getStep(config, survey, hasErrors, i18n) {
+function getStep(config, survey, hasErrors, i18n, visitedSteps) {
   if (!config.survey_enabled) {
     return null;
   }
   return {
     id: STEP_ID,
-    name: <StepName hasErrors={hasErrors}>{i18n._(t`Survey`)}</StepName>,
+    key: 6,
+    name: (
+      <StepName
+        hasErrors={Object.keys(visitedSteps).includes(STEP_ID) && hasErrors}
+      >
+        {i18n._(t`Survey`)}
+      </StepName>
+    ),
     component: <SurveyStep survey={survey} i18n={i18n} />,
+    enableNext: true,
   };
 }
-
 function getInitialValues(config, survey) {
   if (!config.survey_enabled || !survey) {
     return {};
   }
-  const values = {};
+  const surveyValues = {};
   survey.spec.forEach(question => {
     if (question.type === 'multiselect') {
-      values[`survey_${question.variable}`] = question.default.split('\n');
+      if (question.default === '') {
+        surveyValues[`survey_${question.variable}`] = [];
+      } else {
+        surveyValues[`survey_${question.variable}`] = question.default.split(
+          '\n'
+        );
+      }
     } else {
-      values[`survey_${question.variable}`] = question.default;
+      surveyValues[`survey_${question.variable}`] = question.default;
     }
   });
-  return values;
+  return surveyValues;
 }
