@@ -103,7 +103,8 @@ describe('HostEventModal', () => {
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
     }
 
-    assertDetail('Host Name', 'foo');
+    // StatusIcon adds visibly hidden accessibility text " changed "
+    assertDetail('Host Name', ' changed foo');
     assertDetail('Play', 'all');
     assertDetail('Task', 'command');
     assertDetail('Module', 'command');

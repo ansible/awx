@@ -28,14 +28,18 @@ describe('<JobDetail />', () => {
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
     }
 
-    assertDetail('Status', 'Successful');
+    // StatusIcon adds visibly hidden accessibility text " successful "
+    assertDetail('Status', ' successful Successful');
     assertDetail('Started', '8/8/2019, 7:24:18 PM');
     assertDetail('Finished', '8/8/2019, 7:24:50 PM');
     assertDetail('Job Template', mockJobData.summary_fields.job_template.name);
     assertDetail('Job Type', 'Run');
     assertDetail('Launched By', mockJobData.summary_fields.created_by.username);
     assertDetail('Inventory', mockJobData.summary_fields.inventory.name);
-    assertDetail('Project', mockJobData.summary_fields.project.name);
+    assertDetail(
+      'Project',
+      ` successful ${mockJobData.summary_fields.project.name}`
+    );
     assertDetail('Revision', mockJobData.scm_revision);
     assertDetail('Playbook', mockJobData.playbook);
     assertDetail('Verbosity', '0 (Normal)');

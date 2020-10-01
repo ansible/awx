@@ -129,7 +129,7 @@ const StatusIcon = ({ status, ...props }) => {
           <UnreachableBottom />
         </FinishedJob>
       )}
-      <span className="pf-screen-reader">{status}</span>
+      <span className="pf-screen-reader"> {status} </span>
     </div>
   );
 };
