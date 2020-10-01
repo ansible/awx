@@ -179,7 +179,7 @@ export default [
                     selected-id="webhookCredential.modalSelectedId"
                     on-ready="handleWebhookCredentialModalReady"
                     on-item-select="handleWebhookCredentialModalItemSelect"
-                />
+                ></at-lookup-list>
                 <at-action-group col="12" pos="right">
                     <at-action-button
                         variant="tertiary"
