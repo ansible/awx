@@ -236,17 +236,13 @@ class Licenser(object):
         products = sub.get('providedProducts', [])
         if any(map(lambda product: product.get('productId', None) == "480", products)):
             return True
-        # Legacy: products that claim they are Ansible Tower
-        attributes = sub.get('productAttributes', [])
-        if any(map(lambda attr: attr.get('name') == 'ph_product_name' and attr.get('value').startswith('Ansible Tower'), attributes)): # noqa
-            return True
         return False
 
 
     def generate_license_options_from_entitlements(self, json):
         from dateutil.parser import parse
         ValidSub = collections.namedtuple('ValidSub', 'sku name end_date trial quantity pool_id')
-        valid_subs = collections.OrderedDict()
+        valid_subs = []
         for sub in json:
             if self.is_appropriate_sub(sub):
                 try:
@@ -276,20 +272,18 @@ class Licenser(object):
                     if attr.get('name') == 'support_level':
                         support_level = attr.get('value')
 
-                sub_key = (end_date.date(), support_level)
-                valid_subs.setdefault(sub_key, []).append(ValidSub(
+                valid_subs.append(ValidSub(
                     sku, sub['productName'], end_date, trial, quantity, pool_id
                 ))
 
         if valid_subs:
             licenses = []
-            for key, subs in valid_subs.items():
+            for sub in valid_subs:
                 license = self.__class__(subscription_name='Ansible Tower by Red Hat')
-                for sub in subs:
-                    license._attrs['instance_count'] = int(sub.quantity)
-                    license._attrs['license_type'] = 'enterprise'
-                    if sub.trial:
-                        license._attrs['trial'] = True
+                license._attrs['instance_count'] = int(sub.quantity)
+                license._attrs['license_type'] = 'enterprise'
+                if sub.trial:
+                    license._attrs['trial'] = True
                 license._attrs['instance_count'] = min(
                     MAX_INSTANCES, license._attrs['instance_count']
                 )
