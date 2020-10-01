@@ -179,7 +179,8 @@ function InventoryRelatedGroupList({ i18n }) {
                     <ToolbarItem>
                       <Tooltip
                         content={i18n._(
-                          t`Select an inventory source by clicking the check box beside it. The inventory source can be a single host or a selection of multiple hosts.`
+                          t`Select an inventory source by clicking the check box beside it.
+                          The inventory source can be a single host or a selection of multiple hosts.`
                         )}
                         position="top"
                         key="adhoc"
@@ -228,7 +229,6 @@ function InventoryRelatedGroupList({ i18n }) {
         emptyStateControls={
           canAdd && (
             <AddDropdown
-              key="associate"
               onAddExisting={() => setIsModalOpen(true)}
               onAddNew={() => history.push(addFormUrl)}
               newTitle={i18n._(t`Add new group`)}
