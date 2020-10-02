@@ -5,9 +5,9 @@ import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import styled from 'styled-components';
 import { Split, SplitItem } from '@patternfly/react-core';
+import { yamlToJson, jsonToYaml, isJsonString } from 'util/yaml';
 import { CheckboxField, FieldTooltip } from '../FormField';
 import MultiButtonToggle from '../MultiButtonToggle';
-import { yamlToJson, jsonToYaml, isJsonString } from '../../util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
 

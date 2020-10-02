@@ -4,15 +4,15 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Button } from '@patternfly/react-core';
-import { CardBody, CardActionsRow } from '../../../../components/Card';
-import ContentLoading from '../../../../components/ContentLoading';
-import ContentError from '../../../../components/ContentError';
-import { DetailList } from '../../../../components/DetailList';
-import RoutedTabs from '../../../../components/RoutedTabs';
-import useRequest from '../../../../util/useRequest';
-import { useConfig } from '../../../../contexts/Config';
-import { useSettings } from '../../../../contexts/Settings';
-import { SettingsAPI } from '../../../../api';
+import { CardBody, CardActionsRow } from 'components/Card';
+import ContentLoading from 'components/ContentLoading';
+import ContentError from 'components/ContentError';
+import { DetailList } from 'components/DetailList';
+import RoutedTabs from 'components/RoutedTabs';
+import useRequest from 'util/useRequest';
+import { useConfig } from 'contexts/Config';
+import { useSettings } from 'contexts/Settings';
+import { SettingsAPI } from 'api';
 import SettingDetail from '../../shared';
 
 function ActivityStreamDetail({ i18n }) {

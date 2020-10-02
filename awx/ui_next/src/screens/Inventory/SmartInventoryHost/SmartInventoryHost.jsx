@@ -3,12 +3,12 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import RoutedTabs from '../../../components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import RoutedTabs from 'components/RoutedTabs';
+import useRequest from 'util/useRequest';
+import { InventoriesAPI } from 'api';
 import SmartInventoryHostDetail from '../SmartInventoryHostDetail';
-import useRequest from '../../../util/useRequest';
-import { InventoriesAPI } from '../../../api';
 
 function SmartInventoryHost({ i18n, inventory, setBreadcrumb }) {
   const { params, path, url } = useRouteMatch(

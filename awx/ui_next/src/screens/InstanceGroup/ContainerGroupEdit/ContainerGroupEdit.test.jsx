@@ -2,8 +2,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
+import { InstanceGroupsAPI, CredentialsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { InstanceGroupsAPI, CredentialsAPI } from '../../../api';
 import ContainerGroupEdit from './ContainerGroupEdit';
 
 jest.mock('../../../api');

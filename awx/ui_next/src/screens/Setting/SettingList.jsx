@@ -14,9 +14,9 @@ import {
   PageSection,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
+import { useConfig } from 'contexts/Config';
+import ContentLoading from 'components/ContentLoading/ContentLoading';
 import { BrandName } from '../../variables';
-import { useConfig } from '../../contexts/Config';
-import ContentLoading from '../../components/ContentLoading/ContentLoading';
 
 // Setting BrandName to a variable here is necessary to get the jest tests
 // passing.  Attempting to use BrandName in the template literal results

@@ -3,10 +3,10 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
+import Breadcrumbs from 'components/Breadcrumbs';
 import ApplicationsList from './ApplicationsList';
 import ApplicationAdd from './ApplicationAdd';
 import Application from './Application';
-import Breadcrumbs from '../../components/Breadcrumbs';
 
 function Applications({ i18n }) {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({

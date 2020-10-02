@@ -4,11 +4,11 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
-import { InstanceGroupsAPI } from '../../api';
-import { getQSConfig, parseQueryString } from '../../util/qs';
+import { InstanceGroupsAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
 import { FieldTooltip } from '../FormField';
 import OptionsList from '../OptionsList';
-import useRequest from '../../util/useRequest';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 

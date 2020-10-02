@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { InstanceGroupsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 
-import { InstanceGroupsAPI } from '../../../api';
 import InstanceGroupList from './InstanceGroupList';
 
 jest.mock('../../../api/models/InstanceGroups');

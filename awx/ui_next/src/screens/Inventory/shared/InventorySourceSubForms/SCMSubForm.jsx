@@ -3,14 +3,14 @@ import { useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
-import { ProjectsAPI } from '../../../../api';
-import useRequest from '../../../../util/useRequest';
-import { required } from '../../../../util/validators';
+import { ProjectsAPI } from 'api';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
 
-import AnsibleSelect from '../../../../components/AnsibleSelect';
-import { FieldTooltip } from '../../../../components/FormField';
-import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
-import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
+import AnsibleSelect from 'components/AnsibleSelect';
+import { FieldTooltip } from 'components/FormField';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import ProjectLookup from 'components/Lookup/ProjectLookup';
 import {
   OptionsField,
   SourceVarsField,

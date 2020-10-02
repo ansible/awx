@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import useWebsocket from '../../util/useWebsocket';
-import { JobsAPI } from '../../api';
+import useWebsocket from 'util/useWebsocket';
+import { JobsAPI } from 'api';
 
 export default function useWsJob(initialJob) {
   const { type } = useParams();

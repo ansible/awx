@@ -11,8 +11,8 @@ import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import styled from 'styled-components';
 
-import { ConfigAPI, MeAPI, RootAPI } from '../../api';
-import { ConfigProvider } from '../../contexts/Config';
+import { ConfigAPI, MeAPI, RootAPI } from 'api';
+import { ConfigProvider } from 'contexts/Config';
 import About from '../About';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';

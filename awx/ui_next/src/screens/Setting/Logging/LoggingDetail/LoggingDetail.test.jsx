@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { SettingsProvider } from 'contexts/Settings';
+import { SettingsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../../testUtils/enzymeHelpers';
-import { SettingsProvider } from '../../../../contexts/Settings';
-import { SettingsAPI } from '../../../../api';
 import {
   assertDetail,
   assertVariableDetail,

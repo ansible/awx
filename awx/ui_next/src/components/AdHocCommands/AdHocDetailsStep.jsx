@@ -7,6 +7,7 @@ import { useField } from 'formik';
 import { Form, FormGroup, Switch, Checkbox } from '@patternfly/react-core';
 import styled from 'styled-components';
 
+import { required } from 'util/validators';
 import { BrandName } from '../../variables';
 import AnsibleSelect from '../AnsibleSelect';
 import FormField, { FieldTooltip } from '../FormField';
@@ -16,7 +17,6 @@ import {
   FormFullWidthLayout,
   FormCheckboxLayout,
 } from '../FormLayout';
-import { required } from '../../util/validators';
 
 const TooltipWrapper = styled.div`
   text-align: left;

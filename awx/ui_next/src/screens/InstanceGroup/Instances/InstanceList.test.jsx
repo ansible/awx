@@ -3,11 +3,11 @@ import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
+import { InstanceGroupsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { InstanceGroupsAPI } from '../../../api';
 
 import InstanceList from './InstanceList';
 

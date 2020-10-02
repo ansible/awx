@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { ApplicationsAPI, TokensAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { ApplicationsAPI, TokensAPI } from '../../../api';
 import ApplicationTokenList from './ApplicationTokenList';
 
 jest.mock('../../../api/models/Applications');

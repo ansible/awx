@@ -10,16 +10,16 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { UsersAPI, RolesAPI } from '../../../api';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import PaginatedDataList from '../../../components/PaginatedDataList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import AlertModal from '../../../components/AlertModal';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { UsersAPI, RolesAPI } from 'api';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import PaginatedDataList from 'components/PaginatedDataList';
+import ErrorDetail from 'components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
 
-import DatalistToolbar from '../../../components/DataListToolbar';
+import DatalistToolbar from 'components/DataListToolbar';
+import UserAndTeamAccessAdd from 'components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 import UserAccessListItem from './UserAccessListItem';
-import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('roles', {
   page: 1,

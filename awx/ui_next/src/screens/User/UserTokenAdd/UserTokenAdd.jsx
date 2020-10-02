@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
-import { CardBody } from '../../../components/Card';
-import { TokensAPI, UsersAPI } from '../../../api';
-import useRequest from '../../../util/useRequest';
+import { CardBody } from 'components/Card';
+import { TokensAPI, UsersAPI } from 'api';
+import useRequest from 'util/useRequest';
 import UserTokenFrom from '../shared/UserTokenForm';
 
 function UserTokenAdd() {

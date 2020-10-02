@@ -12,7 +12,7 @@ import {
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
+import DataListCell from 'components/DataListCell';
 
 function OrganizationTeamListItem({ i18n, team, detailUrl }) {
   const labelId = `check-action-${team.id}`;

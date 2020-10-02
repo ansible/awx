@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { RootAPI } from '../../api';
+import { RootAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

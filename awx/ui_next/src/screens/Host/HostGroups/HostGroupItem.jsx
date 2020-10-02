@@ -15,8 +15,8 @@ import {
 
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
-import { Group } from '../../../types';
+import DataListCell from 'components/DataListCell';
+import { Group } from 'types';
 
 function HostGroupItem({ i18n, group, inventoryId, isSelected, onSelect }) {
   const labelId = `check-action-${group.id}`;

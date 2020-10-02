@@ -4,18 +4,14 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button, Label } from '@patternfly/react-core';
 
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  Detail,
-  DetailList,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { jsonToYaml, isJsonString } from '../../../util/yaml';
-import { InstanceGroupsAPI } from '../../../api';
+import { VariablesDetail } from 'components/CodeMirrorInput';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { jsonToYaml, isJsonString } from 'util/yaml';
+import { InstanceGroupsAPI } from 'api';
 
 function ContainerGroupDetails({ instanceGroup, i18n }) {
   const { id, name } = instanceGroup;

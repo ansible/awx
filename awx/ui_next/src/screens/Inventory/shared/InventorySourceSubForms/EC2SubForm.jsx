@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
 import {
   OptionsField,
   SourceVarsField,

@@ -3,11 +3,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { List, ListItem } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
-import { Config } from '../../contexts/Config';
+import { Config } from 'contexts/Config';
 
+import { toTitleCase } from 'util/strings';
 import { Detail, DeletedDetail } from '../DetailList';
 import CredentialChip from '../CredentialChip';
-import { toTitleCase } from '../../util/strings';
 
 function PromptProjectDetail({ i18n, resource }) {
   const {

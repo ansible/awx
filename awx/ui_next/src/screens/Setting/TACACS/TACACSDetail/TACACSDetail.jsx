@@ -4,15 +4,15 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import { CardBody, CardActionsRow } from '../../../../components/Card';
-import ContentLoading from '../../../../components/ContentLoading';
-import ContentError from '../../../../components/ContentError';
-import RoutedTabs from '../../../../components/RoutedTabs';
-import { SettingsAPI } from '../../../../api';
-import useRequest from '../../../../util/useRequest';
-import { DetailList } from '../../../../components/DetailList';
-import { useConfig } from '../../../../contexts/Config';
-import { useSettings } from '../../../../contexts/Settings';
+import { CardBody, CardActionsRow } from 'components/Card';
+import ContentLoading from 'components/ContentLoading';
+import ContentError from 'components/ContentError';
+import RoutedTabs from 'components/RoutedTabs';
+import { SettingsAPI } from 'api';
+import useRequest from 'util/useRequest';
+import { DetailList } from 'components/DetailList';
+import { useConfig } from 'contexts/Config';
+import { useSettings } from 'contexts/Settings';
 import SettingDetail from '../../shared';
 
 function TACACSDetail({ i18n }) {

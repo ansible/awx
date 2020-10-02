@@ -1,9 +1,9 @@
 import React from 'react';
+import { ProjectsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { sleep } from '../../../../testUtils/testUtils';
 
 import ProjectSyncButton from './ProjectSyncButton';
-import { ProjectsAPI } from '../../../api';
 
 jest.mock('../../../api');
 

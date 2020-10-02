@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { TeamsAPI } from '../../../api';
+import { TeamsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import TeamList from './TeamList';

@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { InventorySourcesAPI, ProjectsAPI, CredentialsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import InventorySourceForm from './InventorySourceForm';
-import { InventorySourcesAPI, ProjectsAPI, CredentialsAPI } from '../../../api';
 
 jest.mock('../../../api/models/Credentials');
 jest.mock('../../../api/models/InventorySources');

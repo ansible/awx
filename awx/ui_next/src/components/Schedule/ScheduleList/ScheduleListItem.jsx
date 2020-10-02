@@ -15,11 +15,11 @@ import {
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
+import { Schedule } from 'types';
+import { formatDateString } from 'util/dates';
 import DataListCell from '../../DataListCell';
 import { DetailList, Detail } from '../../DetailList';
 import { ScheduleToggle } from '..';
-import { Schedule } from '../../../types';
-import { formatDateString } from '../../../util/dates';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Tooltip } from '@patternfly/react-core';
-import AlertModal from '../AlertModal';
+import useRequest from 'util/useRequest';
+import { InstancesAPI } from 'api';
+import { useConfig } from 'contexts/Config';
 import ErrorDetail from '../ErrorDetail';
-import useRequest from '../../util/useRequest';
-import { InstancesAPI } from '../../api';
-import { useConfig } from '../../contexts/Config';
+import AlertModal from '../AlertModal';
 
 function InstanceToggle({
   className,

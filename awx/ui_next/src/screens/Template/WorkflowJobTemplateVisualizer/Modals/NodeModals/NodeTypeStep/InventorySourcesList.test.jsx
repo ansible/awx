@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { InventorySourcesAPI } from 'api';
 import { mountWithContexts } from '../../../../../../../testUtils/enzymeHelpers';
-import { InventorySourcesAPI } from '../../../../../../api';
 import InventorySourcesList from './InventorySourcesList';
 
 jest.mock('../../../../../../api/models/InventorySources');

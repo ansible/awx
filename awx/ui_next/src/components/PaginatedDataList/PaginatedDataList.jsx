@@ -5,20 +5,18 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { withRouter } from 'react-router-dom';
 
+import {
+  encodeNonDefaultQueryString,
+  parseQueryString,
+  replaceParams,
+} from 'util/qs';
+import { QSConfig, SearchColumns, SortColumns } from 'types';
 import ListHeader from '../ListHeader';
 import ContentEmpty from '../ContentEmpty';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
-
-import {
-  encodeNonDefaultQueryString,
-  parseQueryString,
-  replaceParams,
-} from '../../util/qs';
-
-import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
 import PaginatedDataListItem from './PaginatedDataListItem';
 

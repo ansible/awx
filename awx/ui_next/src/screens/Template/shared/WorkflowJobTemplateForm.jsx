@@ -11,28 +11,25 @@ import {
   TextInput,
   Title,
 } from '@patternfly/react-core';
-import { required } from '../../../util/validators';
+import { required } from 'util/validators';
 
-import FieldWithPrompt from '../../../components/FieldWithPrompt';
-import FormField, {
-  FieldTooltip,
-  FormSubmitError,
-} from '../../../components/FormField';
+import FieldWithPrompt from 'components/FieldWithPrompt';
+import FormField, { FieldTooltip, FormSubmitError } from 'components/FormField';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
   SubFormLayout,
-} from '../../../components/FormLayout';
-import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import { InventoryLookup } from '../../../components/Lookup';
-import { VariablesField } from '../../../components/CodeMirrorInput';
-import FormActionGroup from '../../../components/FormActionGroup';
-import ContentError from '../../../components/ContentError';
-import CheckboxField from '../../../components/FormField/CheckboxField';
+} from 'components/FormLayout';
+import OrganizationLookup from 'components/Lookup/OrganizationLookup';
+import { InventoryLookup } from 'components/Lookup';
+import { VariablesField } from 'components/CodeMirrorInput';
+import FormActionGroup from 'components/FormActionGroup';
+import ContentError from 'components/ContentError';
+import CheckboxField from 'components/FormField/CheckboxField';
+import { WorkFlowJobTemplate } from 'types';
 import LabelSelect from './LabelSelect';
 import WebhookSubForm from './WebhookSubForm';
-import { WorkFlowJobTemplate } from '../../../types';
 
 const urlOrigin = window.location.origin;
 

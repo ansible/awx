@@ -10,10 +10,10 @@ import {
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection } from '@patternfly/react-core';
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import Breadcrumbs from 'components/Breadcrumbs/Breadcrumbs';
+import JobList from 'components/JobList';
 import Job from './Job';
 import JobTypeRedirect from './JobTypeRedirect';
-import JobList from '../../components/JobList';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 function Jobs({ i18n }) {

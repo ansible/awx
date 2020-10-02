@@ -6,7 +6,7 @@ import { t, Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Chip, Divider } from '@patternfly/react-core';
-import { toTitleCase } from '../../util/strings';
+import { toTitleCase } from 'util/strings';
 
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';

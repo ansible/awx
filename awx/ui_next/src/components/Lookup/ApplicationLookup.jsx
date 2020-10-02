@@ -4,12 +4,12 @@ import { withRouter, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
-import { ApplicationsAPI } from '../../api';
-import { Application } from '../../types';
-import { getQSConfig, parseQueryString } from '../../util/qs';
+import { ApplicationsAPI } from 'api';
+import { Application } from 'types';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
-import useRequest from '../../util/useRequest';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('applications', {

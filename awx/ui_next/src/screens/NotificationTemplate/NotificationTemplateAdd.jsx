@@ -4,10 +4,10 @@ import { useHistory, Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { Card, PageSection } from '@patternfly/react-core';
-import { CardBody } from '../../components/Card';
-import { NotificationTemplatesAPI } from '../../api';
-import useRequest from '../../util/useRequest';
-import ContentError from '../../components/ContentError';
+import { CardBody } from 'components/Card';
+import { NotificationTemplatesAPI } from 'api';
+import useRequest from 'util/useRequest';
+import ContentError from 'components/ContentError';
 import NotificationTemplateForm from './shared/NotificationTemplateForm';
 
 function NotificationTemplateAdd({ i18n }) {

@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { CredentialTypesAPI, InventoriesAPI, CredentialsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { CredentialTypesAPI, InventoriesAPI, CredentialsAPI } from '../../api';
 import AdHocCommands from './AdHocCommands';
 
 jest.mock('../../api/models/CredentialTypes');

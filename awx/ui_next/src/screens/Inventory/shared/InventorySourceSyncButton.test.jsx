@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { InventoryUpdatesAPI, InventorySourcesAPI } from '../../../api';
+import { InventoryUpdatesAPI, InventorySourcesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import InventorySourceSyncButton from './InventorySourceSyncButton';
 

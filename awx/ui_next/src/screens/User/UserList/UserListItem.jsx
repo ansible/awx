@@ -15,9 +15,9 @@ import {
 
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
+import DataListCell from 'components/DataListCell';
 
-import { User } from '../../../types';
+import { User } from 'types';
 
 function UserListItem({ user, isSelected, onSelect, detailUrl, i18n }) {
   const labelId = `check-action-${user.id}`;

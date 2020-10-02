@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { CredentialsAPI, InventorySourcesAPI, ProjectsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import InventorySourceEdit from './InventorySourceEdit';
-import { CredentialsAPI, InventorySourcesAPI, ProjectsAPI } from '../../../api';
 
 jest.mock('../../../api/models/Projects');
 jest.mock('../../../api/models/Credentials');

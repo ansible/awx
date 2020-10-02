@@ -3,14 +3,14 @@ import PropTypes from 'prop-types';
 import { withRouter, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import useRequest from '../../util/useRequest';
+import useRequest from 'util/useRequest';
 
-import { SearchColumns, SortColumns } from '../../types';
+import { SearchColumns, SortColumns } from 'types';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import PaginatedDataList from '../PaginatedDataList';
 import DataListToolbar from '../DataListToolbar';
 import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
-import { getQSConfig, parseQueryString } from '../../util/qs';
 
 const QS_Config = sortColumns => {
   return getQSConfig('resource', {

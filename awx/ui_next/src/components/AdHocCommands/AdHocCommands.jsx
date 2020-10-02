@@ -4,9 +4,9 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 
-import useRequest, { useDismissableError } from '../../util/useRequest';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { CredentialTypesAPI } from 'api';
 import AlertModal from '../AlertModal';
-import { CredentialTypesAPI } from '../../api';
 import ErrorDetail from '../ErrorDetail';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
 import ContentLoading from '../ContentLoading';

@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { SettingsAPI } from '../../../api';
 import AzureAD from './AzureAD';
 
 jest.mock('../../../api/models/Settings');

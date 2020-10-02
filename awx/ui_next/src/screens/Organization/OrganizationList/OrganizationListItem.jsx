@@ -16,9 +16,9 @@ import {
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
+import DataListCell from 'components/DataListCell';
 
-import { Organization } from '../../../types';
+import { Organization } from 'types';
 
 const Badge = styled(PFBadge)`
   margin-left: 8px;

@@ -1,10 +1,10 @@
 import React from 'react';
+import { JobsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import JobOutput, { _JobOutput } from './JobOutput';
-import { JobsAPI } from '../../../api';
 import mockJobData from '../shared/data.job.json';
 import mockJobEventsData from './data.job_events.json';
 

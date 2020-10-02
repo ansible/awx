@@ -4,17 +4,17 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { CredentialTypesAPI } from '../../../api';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
+import { CredentialTypesAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'util/useSelected';
 import PaginatedDataList, {
   ToolbarDeleteButton,
   ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import AlertModal from '../../../components/AlertModal';
-import DatalistToolbar from '../../../components/DataListToolbar';
+} from 'components/PaginatedDataList';
+import ErrorDetail from 'components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
+import DatalistToolbar from 'components/DataListToolbar';
 
 import CredentialTypeListItem from './CredentialTypeListItem';
 

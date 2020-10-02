@@ -8,8 +8,8 @@ import {
   Chip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
-import { DetailList, Detail } from '../../../components/DetailList';
-import DataListCell from '../../../components/DataListCell';
+import { DetailList, Detail } from 'components/DetailList';
+import DataListCell from 'components/DataListCell';
 
 function UserAccessListItem({ role, i18n, detailUrl, onSelect }) {
   const labelId = `userRole-${role.id}`;

@@ -13,8 +13,8 @@ import styled from 'styled-components';
 import { Alert, Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { KebabifiedContext } from 'contexts/Kebabified';
 import AlertModal from '../AlertModal';
-import { KebabifiedContext } from '../../contexts/Kebabified';
 
 const WarningMessage = styled(Alert)`
   margin-top: 10px;

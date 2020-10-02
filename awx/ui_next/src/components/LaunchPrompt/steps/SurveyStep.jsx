@@ -8,8 +8,6 @@ import {
   SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
-import FormField, { FieldTooltip } from '../../FormField';
-import AnsibleSelect from '../../AnsibleSelect';
 import {
   required,
   minMaxValue,
@@ -17,8 +15,10 @@ import {
   minLength,
   integer,
   combine,
-} from '../../../util/validators';
-import { Survey } from '../../../types';
+} from 'util/validators';
+import { Survey } from 'types';
+import FormField, { FieldTooltip } from '../../FormField';
+import AnsibleSelect from '../../AnsibleSelect';
 
 function SurveyStep({ survey, i18n }) {
   const fieldTypes = {

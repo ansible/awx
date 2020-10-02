@@ -11,12 +11,12 @@ import {
   useParams,
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
+import { SchedulesAPI } from 'api';
 import RoutedTabs from '../RoutedTabs';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import ScheduleDetail from './ScheduleDetail';
 import ScheduleEdit from './ScheduleEdit';
-import { SchedulesAPI } from '../../api';
 
 function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
   const [schedule, setSchedule] = useState(null);

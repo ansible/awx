@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { JobTemplatesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import SurveyList from './SurveyList';
-import { JobTemplatesAPI } from '../../../api';
 import mockJobTemplateData from '../shared/data.job_template.json';
 
 jest.mock('../../../api/models/JobTemplates');

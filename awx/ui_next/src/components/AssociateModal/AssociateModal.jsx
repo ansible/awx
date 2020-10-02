@@ -3,10 +3,10 @@ import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Modal } from '@patternfly/react-core';
+import useRequest from 'util/useRequest';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useSelected from 'util/useSelected';
 import OptionsList from '../OptionsList';
-import useRequest from '../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../util/qs';
-import useSelected from '../../util/useSelected';
 
 const QS_CONFIG = (order_by = 'name') => {
   return getQSConfig('associate', {

@@ -2,17 +2,17 @@ import React, { useCallback, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
-import useSelected from '../../../util/useSelected';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import { UsersAPI, TokensAPI } from '../../../api';
-import DataListToolbar from '../../../components/DataListToolbar';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
+} from 'components/PaginatedDataList';
+import useSelected from 'util/useSelected';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import { UsersAPI, TokensAPI } from 'api';
+import DataListToolbar from 'components/DataListToolbar';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
 import UserTokensListItem from './UserTokenListItem';
 
 const QS_CONFIG = getQSConfig('user', {

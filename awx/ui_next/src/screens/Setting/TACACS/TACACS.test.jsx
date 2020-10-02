@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { SettingsAPI } from '../../../api';
 import TACACS from './TACACS';
 
 jest.mock('../../../api/models/Settings');

@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '../../../../../../../testUtils/enzymeHelpers';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
-} from '../../../../../../api';
+} from 'api';
+import { mountWithContexts } from '../../../../../../../testUtils/enzymeHelpers';
 import NodeTypeStep from './NodeTypeStep';
 
 jest.mock('../../../../../../api/models/InventorySources');

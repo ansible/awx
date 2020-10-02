@@ -15,9 +15,9 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { formatDateString } from '../../../util/dates';
-import { Application } from '../../../types';
-import DataListCell from '../../../components/DataListCell';
+import { formatDateString } from 'util/dates';
+import { Application } from 'types';
+import DataListCell from 'components/DataListCell';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

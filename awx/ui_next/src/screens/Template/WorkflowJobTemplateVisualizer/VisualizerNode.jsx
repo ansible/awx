@@ -13,13 +13,13 @@ import {
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../contexts/Workflow';
-import { constants as wfConstants } from '../../../components/Workflow/WorkflowUtils';
+} from 'contexts/Workflow';
+import { constants as wfConstants } from 'components/Workflow/WorkflowUtils';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,
   WorkflowNodeTypeLetter,
-} from '../../../components/Workflow';
+} from 'components/Workflow';
 
 const NodeG = styled.g`
   pointer-events: ${props => (props.noPointerEvents ? 'none' : 'initial')};

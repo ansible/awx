@@ -11,18 +11,13 @@ import {
   List,
 } from 'react-virtualized';
 
-import AlertModal from '../../../components/AlertModal';
-import { CardBody } from '../../../components/Card';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import ErrorDetail from '../../../components/ErrorDetail';
-import StatusIcon from '../../../components/StatusIcon';
+import AlertModal from 'components/AlertModal';
+import { CardBody } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import ErrorDetail from 'components/ErrorDetail';
+import StatusIcon from 'components/StatusIcon';
 
-import JobEvent from './JobEvent';
-import JobEventSkeleton from './JobEventSkeleton';
-import PageControls from './PageControls';
-import HostEventModal from './HostEventModal';
-import { HostStatusBar, OutputToolbar } from './shared';
 import {
   JobsAPI,
   ProjectUpdatesAPI,
@@ -30,7 +25,12 @@ import {
   WorkflowJobsAPI,
   InventoriesAPI,
   AdHocCommandsAPI,
-} from '../../../api';
+} from 'api';
+import JobEvent from './JobEvent';
+import JobEventSkeleton from './JobEventSkeleton';
+import PageControls from './PageControls';
+import HostEventModal from './HostEventModal';
+import { HostStatusBar, OutputToolbar } from './shared';
 
 const HeaderTitle = styled.div`
   display: inline-flex;

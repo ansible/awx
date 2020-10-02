@@ -6,7 +6,7 @@ import {
   InventoriesAPI,
   ProjectsAPI,
   OrganizationsAPI,
-} from '../../api';
+} from 'api';
 
 export default function getResourceAccessConfig(i18n) {
   return [

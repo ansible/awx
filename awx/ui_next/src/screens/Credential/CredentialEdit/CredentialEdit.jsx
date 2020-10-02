@@ -1,16 +1,16 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { object } from 'prop-types';
-import { CardBody } from '../../../components/Card';
+import { CardBody } from 'components/Card';
 import {
   CredentialsAPI,
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
-} from '../../../api';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
+} from 'api';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import useRequest from 'util/useRequest';
 import CredentialForm from '../shared/CredentialForm';
-import useRequest from '../../../util/useRequest';
 
 function CredentialEdit({ credential, me }) {
   const [error, setError] = useState(null);

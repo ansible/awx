@@ -2,8 +2,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
+import { CredentialTypesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { CredentialTypesAPI } from '../../../api';
 import CredentialTypeAdd from './CredentialTypeAdd';
 
 jest.mock('../../../api');

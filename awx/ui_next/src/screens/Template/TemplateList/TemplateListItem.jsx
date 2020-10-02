@@ -19,15 +19,15 @@ import {
   RocketIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
+import DataListCell from 'components/DataListCell';
 
-import { timeOfDay } from '../../../util/dates';
+import { timeOfDay } from 'util/dates';
 
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
-import LaunchButton from '../../../components/LaunchButton';
-import Sparkline from '../../../components/Sparkline';
-import { toTitleCase } from '../../../util/strings';
-import CopyButton from '../../../components/CopyButton';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
+import LaunchButton from 'components/LaunchButton';
+import Sparkline from 'components/Sparkline';
+import { toTitleCase } from 'util/strings';
+import CopyButton from 'components/CopyButton';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

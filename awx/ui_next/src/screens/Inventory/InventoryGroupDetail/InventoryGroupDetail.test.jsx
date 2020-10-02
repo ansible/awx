@@ -2,7 +2,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { GroupsAPI } from '../../../api';
+import { GroupsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

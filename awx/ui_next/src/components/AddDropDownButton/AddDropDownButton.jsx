@@ -8,9 +8,9 @@ import {
   DropdownPosition,
   DropdownItem,
 } from '@patternfly/react-core';
+import { toTitleCase } from 'util/strings';
+import { useKebabifiedMenu } from 'contexts/Kebabified';
 import { ToolbarAddButton } from '../PaginatedDataList';
-import { toTitleCase } from '../../util/strings';
-import { useKebabifiedMenu } from '../../contexts/Kebabified';
 
 function AddDropDownButton({ dropdownItems, i18n }) {
   const { isKebabified } = useKebabifiedMenu();

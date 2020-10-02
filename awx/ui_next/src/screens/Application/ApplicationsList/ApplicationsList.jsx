@@ -4,18 +4,18 @@ import { withI18n } from '@lingui/react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 
 import { Card, PageSection } from '@patternfly/react-core';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import ErrorDetail from '../../../components/ErrorDetail';
-import AlertModal from '../../../components/AlertModal';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import ErrorDetail from 'components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
 
-import DatalistToolbar from '../../../components/DataListToolbar';
-import { ApplicationsAPI } from '../../../api';
+import DatalistToolbar from 'components/DataListToolbar';
+import { ApplicationsAPI } from 'api';
 import PaginatedDataList, {
   ToolbarDeleteButton,
   ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
-import useSelected from '../../../util/useSelected';
+} from 'components/PaginatedDataList';
+import useSelected from 'util/useSelected';
 
 import ApplicationListItem from './ApplicationListItem';
 

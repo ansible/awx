@@ -20,10 +20,10 @@ import {
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { QSConfig } from 'types';
 import ChipGroup from '../ChipGroup';
 
 import reducer, { initReducer } from './shared/reducer';
-import { QSConfig } from '../../types';
 
 const ChipHolder = styled.div`
   --pf-c-form-control--Height: auto;

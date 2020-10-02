@@ -4,20 +4,16 @@ import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
-import { Host } from '../../../types';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
-import Sparkline from '../../../components/Sparkline';
-import DeleteButton from '../../../components/DeleteButton';
-import { HostsAPI } from '../../../api';
-import HostToggle from '../../../components/HostToggle';
+import { Host } from 'types';
+import { CardBody, CardActionsRow } from 'components/Card';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import { VariablesDetail } from 'components/CodeMirrorInput';
+import Sparkline from 'components/Sparkline';
+import DeleteButton from 'components/DeleteButton';
+import { HostsAPI } from 'api';
+import HostToggle from 'components/HostToggle';
 
 function HostDetail({ i18n, host }) {
   const {

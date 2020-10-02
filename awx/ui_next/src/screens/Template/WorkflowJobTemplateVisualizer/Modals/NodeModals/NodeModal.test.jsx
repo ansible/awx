@@ -3,17 +3,17 @@ import { act } from 'react-dom/test-utils';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
-import {
-  waitForElement,
-  mountWithContexts,
-} from '../../../../../../testUtils/enzymeHelpers';
+} from 'contexts/Workflow';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
-} from '../../../../../api';
+} from 'api';
+import {
+  waitForElement,
+  mountWithContexts,
+} from '../../../../../../testUtils/enzymeHelpers';
 import NodeModal from './NodeModal';
 
 jest.mock('../../../../../api/models/InventorySources');

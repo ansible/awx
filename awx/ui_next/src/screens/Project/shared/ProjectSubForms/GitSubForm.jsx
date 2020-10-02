@@ -2,7 +2,7 @@ import 'styled-components/macro';
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import FormField from '../../../../components/FormField';
+import FormField from 'components/FormField';
 import {
   UrlFormField,
   BranchFormField,

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { useKebabifiedMenu } from '../../contexts/Kebabified';
+import { useKebabifiedMenu } from 'contexts/Kebabified';
 
 function ToolbarAddButton({
   linkTo,

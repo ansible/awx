@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
 import ExternalTestModal from './ExternalTestModal';
 import credentialTypesArr from './data.credentialTypes.json';
 

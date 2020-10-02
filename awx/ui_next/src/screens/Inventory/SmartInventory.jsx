@@ -12,14 +12,14 @@ import {
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import useRequest from '../../util/useRequest';
-import { InventoriesAPI } from '../../api';
+import useRequest from 'util/useRequest';
+import { InventoriesAPI } from 'api';
 
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import JobList from '../../components/JobList';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
-import RoutedTabs from '../../components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import JobList from 'components/JobList';
+import { ResourceAccessList } from 'components/ResourceAccessList';
+import RoutedTabs from 'components/RoutedTabs';
 import SmartInventoryDetail from './SmartInventoryDetail';
 import SmartInventoryEdit from './SmartInventoryEdit';
 import SmartInventoryHosts from './SmartInventoryHosts';

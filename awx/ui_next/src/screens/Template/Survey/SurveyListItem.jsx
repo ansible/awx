@@ -16,8 +16,8 @@ import {
 } from '@patternfly/react-core';
 import { CaretDownIcon, CaretUpIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
-import ChipGroup from '../../../components/ChipGroup';
+import DataListCell from 'components/DataListCell';
+import ChipGroup from 'components/ChipGroup';
 
 const DataListAction = styled(_DataListAction)`
   margin-left: 0;

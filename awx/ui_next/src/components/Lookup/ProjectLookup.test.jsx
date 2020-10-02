@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ProjectsAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import { ProjectsAPI } from '../../api';
 import ProjectLookup from './ProjectLookup';
 
 jest.mock('../../api');

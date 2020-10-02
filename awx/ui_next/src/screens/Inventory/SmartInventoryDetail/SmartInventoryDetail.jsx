@@ -5,24 +5,20 @@ import { t } from '@lingui/macro';
 import { shape } from 'prop-types';
 import { Button, Chip, Label } from '@patternfly/react-core';
 
-import { Inventory } from '../../../types';
-import { InventoriesAPI, UnifiedJobsAPI } from '../../../api';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
+import { Inventory } from 'types';
+import { InventoriesAPI, UnifiedJobsAPI } from 'api';
+import useRequest, { useDismissableError } from 'util/useRequest';
 
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import ChipGroup from '../../../components/ChipGroup';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import Sparkline from '../../../components/Sparkline';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import ChipGroup from 'components/ChipGroup';
+import { VariablesDetail } from 'components/CodeMirrorInput';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import DeleteButton from 'components/DeleteButton';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import Sparkline from 'components/Sparkline';
 
 function SmartInventoryDetail({ inventory, i18n }) {
   const history = useHistory();

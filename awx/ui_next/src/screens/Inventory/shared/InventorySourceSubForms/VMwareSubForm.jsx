@@ -2,7 +2,8 @@ import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import { required } from 'util/validators';
 import {
   OptionsField,
   SourceVarsField,
@@ -11,7 +12,6 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
-import { required } from '../../../../util/validators';
 
 const VMwareSubForm = ({ autoPopulateCredential, i18n }) => {
   const { setFieldValue } = useFormikContext();

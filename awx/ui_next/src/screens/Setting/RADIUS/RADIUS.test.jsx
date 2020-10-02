@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import RADIUS from './RADIUS';
-import { SettingsAPI } from '../../../api';
 
 jest.mock('../../../api/models/Settings');
 SettingsAPI.readCategory.mockResolvedValue({

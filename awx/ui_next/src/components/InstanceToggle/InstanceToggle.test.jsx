@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { InstancesAPI } from '../../api';
+import { InstancesAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import InstanceToggle from './InstanceToggle';
 

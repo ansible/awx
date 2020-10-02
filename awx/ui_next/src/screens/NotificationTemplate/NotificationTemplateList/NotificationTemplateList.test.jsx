@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import NotificationTemplateList from './NotificationTemplateList';
 

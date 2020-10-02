@@ -2,15 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Host } from '../../../types';
-import { CardBody } from '../../../components/Card';
-import {
-  Detail,
-  DetailList,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import Sparkline from '../../../components/Sparkline';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { Host } from 'types';
+import { CardBody } from 'components/Card';
+import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
+import Sparkline from 'components/Sparkline';
+import { VariablesDetail } from 'components/CodeMirrorInput';
 
 function SmartInventoryHostDetail({ host, i18n }) {
   const {

@@ -11,15 +11,15 @@ import {
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import RoutedTabs from '../../components/RoutedTabs';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import JobList from '../../components/JobList';
+import RoutedTabs from 'components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import JobList from 'components/JobList';
+import { HostsAPI } from 'api';
 import HostFacts from './HostFacts';
 import HostDetail from './HostDetail';
 import HostEdit from './HostEdit';
 import HostGroups from './HostGroups';
-import { HostsAPI } from '../../api';
 
 function Host({ i18n, setBreadcrumb }) {
   const [host, setHost] = useState(null);

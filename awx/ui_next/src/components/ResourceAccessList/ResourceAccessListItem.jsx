@@ -14,11 +14,11 @@ import {
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { AccessRecord } from 'types';
 import DataListCell from '../DataListCell';
 
 import ChipGroup from '../ChipGroup';
 import { DetailList, Detail } from '../DetailList';
-import { AccessRecord } from '../../types';
 
 const DataListItemCells = styled(PFDataListItemCells)`
   align-items: start;

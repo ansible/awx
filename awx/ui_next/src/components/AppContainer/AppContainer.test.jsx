@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ConfigAPI, MeAPI, RootAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { ConfigAPI, MeAPI, RootAPI } from '../../api';
 import AppContainer from './AppContainer';
 
 jest.mock('../../api');

@@ -16,9 +16,9 @@ import {
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
+import DataListCell from 'components/DataListCell';
 
-import { Team } from '../../../types';
+import { Team } from 'types';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

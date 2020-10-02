@@ -4,22 +4,22 @@ import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
-import { jsonToYaml } from '../../../util/yaml';
+import { jsonToYaml } from 'util/yaml';
 
 import FormField, {
   FormSubmitError,
   CheckboxField,
-} from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup';
-import { required } from '../../../util/validators';
+} from 'components/FormField';
+import FormActionGroup from 'components/FormActionGroup';
+import { required } from 'util/validators';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
   SubFormLayout,
-} from '../../../components/FormLayout';
-import CredentialLookup from '../../../components/Lookup/CredentialLookup';
-import { VariablesField } from '../../../components/CodeMirrorInput';
+} from 'components/FormLayout';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import { VariablesField } from 'components/CodeMirrorInput';
 
 function ContainerGroupFormFields({ i18n, instanceGroup }) {
   const { setFieldValue } = useFormikContext();

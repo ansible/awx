@@ -13,11 +13,11 @@ import {
   KebabToggle,
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
+import { SearchColumns, SortColumns, QSConfig } from 'types';
+import { KebabifiedProvider } from 'contexts/Kebabified';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
-import { SearchColumns, SortColumns, QSConfig } from '../../types';
-import { KebabifiedProvider } from '../../contexts/Kebabified';
 
 function DataListToolbar({
   itemCount,

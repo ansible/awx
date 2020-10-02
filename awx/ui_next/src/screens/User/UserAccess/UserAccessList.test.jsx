@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { UsersAPI, RolesAPI } from '../../../api';
+import { UsersAPI, RolesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

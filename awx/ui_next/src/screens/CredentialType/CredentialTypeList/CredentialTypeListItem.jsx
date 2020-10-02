@@ -15,8 +15,8 @@ import {
 import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
-import DataListCell from '../../../components/DataListCell';
-import { CredentialType } from '../../../types';
+import DataListCell from 'components/DataListCell';
+import { CredentialType } from 'types';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

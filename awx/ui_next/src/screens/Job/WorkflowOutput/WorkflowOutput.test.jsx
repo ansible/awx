@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { WorkflowJobsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { WorkflowJobsAPI } from '../../../api';
 import WorkflowOutput from './WorkflowOutput';
 
 jest.mock('../../../api');

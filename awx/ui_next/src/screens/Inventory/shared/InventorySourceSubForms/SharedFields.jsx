@@ -3,17 +3,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { FormGroup } from '@patternfly/react-core';
-import { minMaxValue, regExp } from '../../../../util/validators';
-import AnsibleSelect from '../../../../components/AnsibleSelect';
-import { VariablesField } from '../../../../components/CodeMirrorInput';
-import FormField, {
-  CheckboxField,
-  FieldTooltip,
-} from '../../../../components/FormField';
-import {
-  FormFullWidthLayout,
-  FormCheckboxLayout,
-} from '../../../../components/FormLayout';
+import { minMaxValue, regExp } from 'util/validators';
+import AnsibleSelect from 'components/AnsibleSelect';
+import { VariablesField } from 'components/CodeMirrorInput';
+import FormField, { CheckboxField, FieldTooltip } from 'components/FormField';
+import { FormFullWidthLayout, FormCheckboxLayout } from 'components/FormLayout';
 
 export const SourceVarsField = withI18n()(({ i18n }) => (
   <FormFullWidthLayout>

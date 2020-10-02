@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { CardBody } from '../../../components/Card';
-import { CredentialTypesAPI } from '../../../api';
+import { CardBody } from 'components/Card';
+import { CredentialTypesAPI } from 'api';
+import { parseVariableField } from 'util/yaml';
 import CredentialTypeForm from '../shared/CredentialTypeForm';
-import { parseVariableField } from '../../../util/yaml';
 
 function CredentialTypeEdit({ credentialType }) {
   const history = useHistory();

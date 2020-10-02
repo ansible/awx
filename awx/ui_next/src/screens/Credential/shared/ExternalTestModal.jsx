@@ -12,12 +12,12 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import FormField from '../../../components/FormField';
-import { FormFullWidthLayout } from '../../../components/FormLayout';
-import { required } from '../../../util/validators';
-import useRequest from '../../../util/useRequest';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import AnsibleSelect from 'components/AnsibleSelect';
+import FormField from 'components/FormField';
+import { FormFullWidthLayout } from 'components/FormLayout';
+import { required } from 'util/validators';
+import useRequest from 'util/useRequest';
 import { CredentialPluginTestAlert } from './CredentialPlugins';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`

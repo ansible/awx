@@ -2,15 +2,10 @@ import 'styled-components/macro';
 import React, { useState, useEffect } from 'react';
 import { node, number, oneOfType, shape, string, arrayOf } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
+import { yamlToJson, jsonToYaml, isJsonObject, isJsonString } from 'util/yaml';
 import { DetailName, DetailValue } from '../DetailList';
 import MultiButtonToggle from '../MultiButtonToggle';
 import DetailPopover from '../DetailPopover';
-import {
-  yamlToJson,
-  jsonToYaml,
-  isJsonObject,
-  isJsonString,
-} from '../../util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
 

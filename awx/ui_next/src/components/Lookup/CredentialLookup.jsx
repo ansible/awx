@@ -4,14 +4,14 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
-import { CredentialsAPI } from '../../api';
-import { Credential } from '../../types';
-import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
+import { CredentialsAPI } from 'api';
+import { Credential } from 'types';
+import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
+import useAutoPopulateLookup from 'util/useAutoPopulateLookup';
+import useRequest from 'util/useRequest';
 import { FieldTooltip } from '../FormField';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
-import useAutoPopulateLookup from '../../util/useAutoPopulateLookup';
-import useRequest from '../../util/useRequest';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('credentials', {

@@ -3,13 +3,10 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
 import { FormGroup, Title } from '@patternfly/react-core';
-import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
-import FormField, { CheckboxField } from '../../../../components/FormField';
-import { required } from '../../../../util/validators';
-import {
-  FormCheckboxLayout,
-  FormFullWidthLayout,
-} from '../../../../components/FormLayout';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import FormField, { CheckboxField } from 'components/FormField';
+import { required } from 'util/validators';
+import { FormCheckboxLayout, FormFullWidthLayout } from 'components/FormLayout';
 
 export const UrlFormField = withI18n()(({ i18n, tooltip }) => (
   <FormField

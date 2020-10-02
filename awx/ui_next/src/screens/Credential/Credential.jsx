@@ -12,12 +12,12 @@ import {
   Redirect,
   Link,
 } from 'react-router-dom';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
-import ContentError from '../../components/ContentError';
-import RoutedTabs from '../../components/RoutedTabs';
+import { ResourceAccessList } from 'components/ResourceAccessList';
+import ContentError from 'components/ContentError';
+import RoutedTabs from 'components/RoutedTabs';
+import { CredentialsAPI } from 'api';
 import CredentialDetail from './CredentialDetail';
 import CredentialEdit from './CredentialEdit';
-import { CredentialsAPI } from '../../api';
 
 function Credential({ i18n, setBreadcrumb }) {
   const [credential, setCredential] = useState(null);

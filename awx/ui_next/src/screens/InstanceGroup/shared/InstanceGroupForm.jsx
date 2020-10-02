@@ -5,10 +5,10 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form } from '@patternfly/react-core';
 
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup';
-import { required, minMaxValue } from '../../../util/validators';
-import { FormColumnLayout } from '../../../components/FormLayout';
+import FormField, { FormSubmitError } from 'components/FormField';
+import FormActionGroup from 'components/FormActionGroup';
+import { required, minMaxValue } from 'util/validators';
+import { FormColumnLayout } from 'components/FormLayout';
 
 function InstanceGroupFormFields({ i18n }) {
   const [instanceGroupNameField, ,] = useField('name');

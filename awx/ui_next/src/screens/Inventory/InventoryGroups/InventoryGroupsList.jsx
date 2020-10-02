@@ -9,21 +9,21 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useSelected from '../../../util/useSelected';
-import useRequest from '../../../util/useRequest';
-import { InventoriesAPI, GroupsAPI } from '../../../api';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
-import DataListToolbar from '../../../components/DataListToolbar';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useSelected from 'util/useSelected';
+import useRequest from 'util/useRequest';
+import { InventoriesAPI, GroupsAPI } from 'api';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
+import DataListToolbar from 'components/DataListToolbar';
 import PaginatedDataList, {
   ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+} from 'components/PaginatedDataList';
 
+import AdHocCommandsButton from 'components/AdHocCommands/AdHocCommands';
+import { Kebabified } from 'contexts/Kebabified';
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
-import AdHocCommandsButton from '../../../components/AdHocCommands/AdHocCommands';
-import { Kebabified } from '../../../contexts/Kebabified';
 
 const QS_CONFIG = getQSConfig('group', {
   page: 1,

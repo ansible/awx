@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { InventoriesAPI, UnifiedJobsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import SmartInventoryDetail from './SmartInventoryDetail';
-import { InventoriesAPI, UnifiedJobsAPI } from '../../../api';
 
 import mockSmartInventory from '../shared/data.smart_inventory.json';
 

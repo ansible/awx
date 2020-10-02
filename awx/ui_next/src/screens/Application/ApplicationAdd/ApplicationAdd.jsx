@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { Card, PageSection } from '@patternfly/react-core';
-import useRequest from '../../../util/useRequest';
-import ContentError from '../../../components/ContentError';
+import useRequest from 'util/useRequest';
+import ContentError from 'components/ContentError';
+import { ApplicationsAPI } from 'api';
+import { CardBody } from 'components/Card';
 import ApplicationForm from '../shared/ApplicationForm';
-import { ApplicationsAPI } from '../../../api';
-import { CardBody } from '../../../components/Card';
 
 function ApplicationAdd() {
   const history = useHistory();

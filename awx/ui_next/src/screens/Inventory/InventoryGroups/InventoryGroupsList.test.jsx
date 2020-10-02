@@ -2,11 +2,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { InventoriesAPI, GroupsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { InventoriesAPI, GroupsAPI } from '../../../api';
 import InventoryGroupsList from './InventoryGroupsList';
 
 jest.mock('../../../api');

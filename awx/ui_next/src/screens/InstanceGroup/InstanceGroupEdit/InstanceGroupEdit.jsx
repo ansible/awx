@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { CardBody } from '../../../components/Card';
-import { InstanceGroupsAPI } from '../../../api';
+import { CardBody } from 'components/Card';
+import { InstanceGroupsAPI } from 'api';
 import InstanceGroupForm from '../shared/InstanceGroupForm';
 
 function InstanceGroupEdit({ instanceGroup }) {

@@ -5,17 +5,17 @@ import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
 import { RRule } from 'rrule';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
-import { Config } from '../../../contexts/Config';
-import { SchedulesAPI } from '../../../api';
+import { Config } from 'contexts/Config';
+import { SchedulesAPI } from 'api';
+import { dateToInputDateTime, formatDateStringUTC } from 'util/dates';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
 import AnsibleSelect from '../../AnsibleSelect';
 import ContentError from '../../ContentError';
 import ContentLoading from '../../ContentLoading';
 import FormActionGroup from '../../FormActionGroup/FormActionGroup';
 import FormField, { FormSubmitError } from '../../FormField';
 import { FormColumnLayout, SubFormLayout } from '../../FormLayout';
-import { dateToInputDateTime, formatDateStringUTC } from '../../../util/dates';
-import useRequest from '../../../util/useRequest';
-import { required } from '../../../util/validators';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 
 const generateRunOnTheDay = (days = []) => {

@@ -4,14 +4,14 @@ import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import RoutedTabs from '../../components/RoutedTabs';
-import ContentError from '../../components/ContentError';
-import NotificationList from '../../components/NotificationList/NotificationList';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
+import RoutedTabs from 'components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import NotificationList from 'components/NotificationList/NotificationList';
+import { ResourceAccessList } from 'components/ResourceAccessList';
+import { OrganizationsAPI } from 'api';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationTeams from './OrganizationTeams';
-import { OrganizationsAPI } from '../../api';
 
 class Organization extends Component {
   constructor(props) {

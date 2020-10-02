@@ -2,10 +2,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { sleep } from '../../../../testUtils/testUtils';
-
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import WorkflowJobTemplateForm from './WorkflowJobTemplateForm';
 import {
   WorkflowJobTemplatesAPI,
   LabelsAPI,
@@ -13,7 +9,11 @@ import {
   InventoriesAPI,
   ProjectsAPI,
   CredentialTypesAPI,
-} from '../../../api';
+} from 'api';
+import { sleep } from '../../../../testUtils/testUtils';
+
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import WorkflowJobTemplateForm from './WorkflowJobTemplateForm';
 
 jest.mock('../../../api/models/CredentialTypes');
 jest.mock('../../../api/models/WorkflowJobTemplates');

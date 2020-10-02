@@ -4,18 +4,14 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { TokensAPI } from '../../../api';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { toTitleCase } from '../../../util/strings';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import { TokensAPI } from 'api';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { toTitleCase } from 'util/strings';
 
 function UserTokenDetail({ token, canEditOrDelete, i18n }) {
   const { scope, description, created, modified, summary_fields } = token;

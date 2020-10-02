@@ -1,13 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { InventoriesAPI, CredentialTypesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import { sleep } from '../../../../testUtils/testUtils';
 
-import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
 import InventoryAdd from './InventoryAdd';
 
 jest.mock('../../../api');

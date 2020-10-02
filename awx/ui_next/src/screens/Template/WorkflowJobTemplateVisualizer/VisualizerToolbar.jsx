@@ -18,11 +18,11 @@ import {
   WrenchIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import LaunchButton from '../../../components/LaunchButton';
+import LaunchButton from 'components/LaunchButton';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../contexts/Workflow';
+} from 'contexts/Workflow';
 
 const Badge = styled(PFBadge)`
   align-items: center;

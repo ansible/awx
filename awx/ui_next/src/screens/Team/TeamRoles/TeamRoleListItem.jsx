@@ -8,8 +8,8 @@ import {
   Chip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
-import { DetailList, Detail } from '../../../components/DetailList';
-import DataListCell from '../../../components/DataListCell';
+import { DetailList, Detail } from 'components/DetailList';
+import DataListCell from 'components/DataListCell';
 
 function TeamRoleListItem({ role, i18n, detailUrl, onSelect }) {
   const labelId = `teamRole-${role.id}`;

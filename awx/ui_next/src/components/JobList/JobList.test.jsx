@@ -1,10 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../testUtils/enzymeHelpers';
-import {
   AdHocCommandsAPI,
   InventoryUpdatesAPI,
   JobsAPI,
@@ -12,7 +8,11 @@ import {
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
-} from '../../api';
+} from 'api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
 import JobList from './JobList';
 
 jest.mock('../../api');

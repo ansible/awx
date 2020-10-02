@@ -16,11 +16,11 @@ import {
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
+import DataListCell from 'components/DataListCell';
 
-import HostToggle from '../../../components/HostToggle';
-import Sparkline from '../../../components/Sparkline';
-import { Host } from '../../../types';
+import HostToggle from 'components/HostToggle';
+import Sparkline from 'components/Sparkline';
+import { Host } from 'types';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

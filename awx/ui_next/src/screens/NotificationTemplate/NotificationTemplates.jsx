@@ -2,10 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import Breadcrumbs from 'components/Breadcrumbs/Breadcrumbs';
 import NotificationTemplateList from './NotificationTemplateList';
 import NotificationTemplateAdd from './NotificationTemplateAdd';
 import NotificationTemplate from './NotificationTemplate';
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 
 function NotificationTemplates({ i18n }) {
   const match = useRouteMatch();

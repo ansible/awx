@@ -7,17 +7,17 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '../../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
+} from 'util/useRequest';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { InventoriesAPI, InventorySourcesAPI } from 'api';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
-import useSelected from '../../../util/useSelected';
-import DatalistToolbar from '../../../components/DataListToolbar';
-import AlertModal from '../../../components/AlertModal/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
+} from 'components/PaginatedDataList';
+import useSelected from 'util/useSelected';
+import DatalistToolbar from 'components/DataListToolbar';
+import AlertModal from 'components/AlertModal/AlertModal';
+import ErrorDetail from 'components/ErrorDetail/ErrorDetail';
 import InventorySourceListItem from './InventorySourceListItem';
 import useWsInventorySources from './useWsInventorySources';
 

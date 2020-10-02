@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { SettingsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { SettingsAPI } from '../../../api';
 import LDAP from './LDAP';
 
 jest.mock('../../../api/models/Settings');

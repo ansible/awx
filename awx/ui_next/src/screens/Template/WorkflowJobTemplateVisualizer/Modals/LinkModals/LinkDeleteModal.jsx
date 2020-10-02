@@ -5,8 +5,8 @@ import { t } from '@lingui/macro';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
-import AlertModal from '../../../../../components/AlertModal';
+} from 'contexts/Workflow';
+import AlertModal from 'components/AlertModal';
 
 function LinkDeleteModal({ i18n }) {
   const dispatch = useContext(WorkflowDispatchContext);

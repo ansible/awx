@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Title } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { WorkflowDispatchContext } from '../../../../../contexts/Workflow';
+import { WorkflowDispatchContext } from 'contexts/Workflow';
 import LinkModal from './LinkModal';
 
 function LinkEditModal({ i18n }) {

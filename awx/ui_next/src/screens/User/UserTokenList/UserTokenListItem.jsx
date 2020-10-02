@@ -9,10 +9,10 @@ import {
   DataListItem,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { toTitleCase } from '../../../util/strings';
+import { toTitleCase } from 'util/strings';
 
-import { formatDateString } from '../../../util/dates';
-import DataListCell from '../../../components/DataListCell';
+import { formatDateString } from 'util/dates';
+import DataListCell from 'components/DataListCell';
 
 const Label = styled.b`
   margin-right: 20px;

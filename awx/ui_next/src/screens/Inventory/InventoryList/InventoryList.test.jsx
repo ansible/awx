@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { InventoriesAPI } from '../../../api';
+import { InventoriesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InventoryList from './InventoryList';

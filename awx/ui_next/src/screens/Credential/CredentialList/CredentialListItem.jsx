@@ -14,12 +14,12 @@ import {
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
-import { timeOfDay } from '../../../util/dates';
+import DataListCell from 'components/DataListCell';
+import { timeOfDay } from 'util/dates';
 
-import { Credential } from '../../../types';
-import { CredentialsAPI } from '../../../api';
-import CopyButton from '../../../components/CopyButton';
+import { Credential } from 'types';
+import { CredentialsAPI } from 'api';
+import CopyButton from 'components/CopyButton';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

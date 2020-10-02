@@ -1,11 +1,11 @@
 /* eslint-disable react/jsx-pascal-case */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { getQSConfig } from 'util/qs';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { getQSConfig } from '../../util/qs';
 import Lookup from './Lookup';
 
 /**

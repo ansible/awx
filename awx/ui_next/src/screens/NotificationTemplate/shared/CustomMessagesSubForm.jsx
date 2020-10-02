@@ -4,11 +4,8 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField, useFormikContext } from 'formik';
 import { Switch, Text } from '@patternfly/react-core';
-import {
-  FormFullWidthLayout,
-  SubFormLayout,
-} from '../../../components/FormLayout';
-import CodeMirrorField from '../../../components/CodeMirrorInput/CodeMirrorField';
+import { FormFullWidthLayout, SubFormLayout } from 'components/FormLayout';
+import CodeMirrorField from 'components/CodeMirrorInput/CodeMirrorField';
 
 function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
   const [useCustomField, , useCustomHelpers] = useField('useCustomMessages');

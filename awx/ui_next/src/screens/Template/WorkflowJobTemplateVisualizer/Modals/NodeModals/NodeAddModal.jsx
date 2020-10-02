@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
+} from 'contexts/Workflow';
 import NodeModal from './NodeModal';
 
 function NodeAddModal({ i18n }) {

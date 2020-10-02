@@ -5,12 +5,12 @@ import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { ToolbarItem, Alert } from '@patternfly/react-core';
-import { CredentialsAPI, CredentialTypesAPI } from '../../api';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import useRequest from 'util/useRequest';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import AnsibleSelect from '../AnsibleSelect';
 import CredentialChip from '../CredentialChip';
 import OptionsList from '../OptionsList';
-import useRequest from '../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
 
 const QS_CONFIG = getQSConfig('credentials', {

@@ -11,10 +11,10 @@ import {
 } from '@patternfly/react-core';
 import styled from 'styled-components';
 
-import { Token } from '../../../types';
-import { formatDateString } from '../../../util/dates';
-import { toTitleCase } from '../../../util/strings';
-import DataListCell from '../../../components/DataListCell';
+import { Token } from 'types';
+import { formatDateString } from 'util/dates';
+import { toTitleCase } from 'util/strings';
+import DataListCell from 'components/DataListCell';
 
 const Label = styled.b`
   margin-right: 20px;

@@ -12,16 +12,16 @@ import {
   useParams,
   useRouteMatch,
 } from 'react-router-dom';
-import RoutedTabs from '../../components/RoutedTabs';
-import useRequest from '../../util/useRequest';
-import ContentError from '../../components/ContentError';
-import JobList from '../../components/JobList';
-import NotificationList from '../../components/NotificationList';
-import { Schedules } from '../../components/Schedule';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
+import RoutedTabs from 'components/RoutedTabs';
+import useRequest from 'util/useRequest';
+import ContentError from 'components/ContentError';
+import JobList from 'components/JobList';
+import NotificationList from 'components/NotificationList';
+import { Schedules } from 'components/Schedule';
+import { ResourceAccessList } from 'components/ResourceAccessList';
+import { JobTemplatesAPI, OrganizationsAPI } from 'api';
 import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
-import { JobTemplatesAPI, OrganizationsAPI } from '../../api';
 import TemplateSurvey from './TemplateSurvey';
 
 function Template({ i18n, me, setBreadcrumb }) {

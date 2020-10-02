@@ -12,9 +12,9 @@ import {
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import ContentLoading from '../../../components/ContentLoading';
-import AlertModal from '../../../components/AlertModal';
-import { ToolbarAddButton } from '../../../components/PaginatedDataList';
+import ContentLoading from 'components/ContentLoading';
+import AlertModal from 'components/AlertModal';
+import { ToolbarAddButton } from 'components/PaginatedDataList';
 
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';

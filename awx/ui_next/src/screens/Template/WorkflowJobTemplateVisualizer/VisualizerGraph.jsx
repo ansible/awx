@@ -8,12 +8,12 @@ import * as d3 from 'd3';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../contexts/Workflow';
+} from 'contexts/Workflow';
 import {
   getScaleAndOffsetToFit,
   constants as wfConstants,
   getTranslatePointsForZoom,
-} from '../../../components/Workflow/WorkflowUtils';
+} from 'components/Workflow/WorkflowUtils';
 import {
   WorkflowHelp,
   WorkflowLegend,
@@ -21,7 +21,7 @@ import {
   WorkflowNodeHelp,
   WorkflowStartNode,
   WorkflowTools,
-} from '../../../components/Workflow';
+} from 'components/Workflow';
 import VisualizerLink from './VisualizerLink';
 import VisualizerNode from './VisualizerNode';
 

@@ -14,10 +14,10 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon, BellIcon } from '@patternfly/react-icons';
-import { NotificationTemplatesAPI, NotificationsAPI } from '../../../api';
-import DataListCell from '../../../components/DataListCell';
-import StatusLabel from '../../../components/StatusLabel';
-import useRequest from '../../../util/useRequest';
+import { NotificationTemplatesAPI, NotificationsAPI } from 'api';
+import DataListCell from 'components/DataListCell';
+import StatusLabel from 'components/StatusLabel';
+import useRequest from 'util/useRequest';
 import { NOTIFICATION_TYPES } from '../constants';
 
 const DataListAction = styled(_DataListAction)`

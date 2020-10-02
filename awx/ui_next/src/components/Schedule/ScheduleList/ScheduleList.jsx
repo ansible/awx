@@ -3,7 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { SchedulesAPI } from '../../../api';
+import { SchedulesAPI } from 'api';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import AlertModal from '../../AlertModal';
 import ErrorDetail from '../../ErrorDetail';
 import DataListToolbar from '../../DataListToolbar';
@@ -11,8 +13,6 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../PaginatedDataList';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ScheduleListItem from './ScheduleListItem';
 
 const QS_CONFIG = getQSConfig('schedule', {

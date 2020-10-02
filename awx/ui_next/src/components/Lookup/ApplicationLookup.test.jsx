@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ApplicationsAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import ApplicationLookup from './ApplicationLookup';
-import { ApplicationsAPI } from '../../api';
 
 jest.mock('../../api');
 const application = {

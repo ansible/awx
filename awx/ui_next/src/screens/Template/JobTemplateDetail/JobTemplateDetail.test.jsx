@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { JobTemplatesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import JobTemplateDetail from './JobTemplateDetail';
-import { JobTemplatesAPI } from '../../../api';
 import mockTemplate from '../shared/data.job_template.json';
 
 jest.mock('../../../api');

@@ -3,14 +3,14 @@ import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
-import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import DataListToolbar from 'components/DataListToolbar';
+import PaginatedDataList from 'components/PaginatedDataList';
+import useRequest from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { InventoriesAPI } from 'api';
+import { Inventory } from 'types';
 import SmartInventoryHostListItem from './SmartInventoryHostListItem';
-import useRequest from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { InventoriesAPI } from '../../../api';
-import { Inventory } from '../../../types';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,

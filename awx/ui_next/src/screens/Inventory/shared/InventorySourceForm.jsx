@@ -4,23 +4,17 @@ import { func, shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
-import { InventorySourcesAPI } from '../../../api';
-import { ConfigContext } from '../../../contexts/Config';
-import useRequest from '../../../util/useRequest';
-import { required } from '../../../util/validators';
+import { InventorySourcesAPI } from 'api';
+import { ConfigContext } from 'contexts/Config';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
 
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import FormField, {
-  FieldTooltip,
-  FormSubmitError,
-} from '../../../components/FormField';
-import {
-  FormColumnLayout,
-  SubFormLayout,
-} from '../../../components/FormLayout';
+import AnsibleSelect from 'components/AnsibleSelect';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
+import FormField, { FieldTooltip, FormSubmitError } from 'components/FormField';
+import { FormColumnLayout, SubFormLayout } from 'components/FormLayout';
 
 import {
   AzureSubForm,

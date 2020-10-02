@@ -7,7 +7,7 @@ import {
   SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
-import { FieldTooltip } from '../../../../components/FormField';
+import { FieldTooltip } from 'components/FormField';
 
 function BecomeMethodField({ fieldOptions, isRequired }) {
   const [isOpen, setIsOpen] = useState(false);

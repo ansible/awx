@@ -16,15 +16,15 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import { formatDateString, timeOfDay } from '../../../util/dates';
-import { ProjectsAPI } from '../../../api';
-import ClipboardCopyButton from '../../../components/ClipboardCopyButton';
-import StatusIcon from '../../../components/StatusIcon';
-import DataListCell from '../../../components/DataListCell';
-import { toTitleCase } from '../../../util/strings';
-import CopyButton from '../../../components/CopyButton';
+import { formatDateString, timeOfDay } from 'util/dates';
+import { ProjectsAPI } from 'api';
+import ClipboardCopyButton from 'components/ClipboardCopyButton';
+import StatusIcon from 'components/StatusIcon';
+import DataListCell from 'components/DataListCell';
+import { toTitleCase } from 'util/strings';
+import CopyButton from 'components/CopyButton';
+import { Project } from 'types';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
-import { Project } from '../../../types';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

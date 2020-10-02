@@ -4,15 +4,15 @@ import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { TokensAPI, ApplicationsAPI } from '../../../api';
-import ErrorDetail from '../../../components/ErrorDetail';
-import AlertModal from '../../../components/AlertModal';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
+} from 'components/PaginatedDataList';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { TokensAPI, ApplicationsAPI } from 'api';
+import ErrorDetail from 'components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import DatalistToolbar from 'components/DataListToolbar';
 import ApplicationTokenListItem from './ApplicationTokenListItem';
-import DatalistToolbar from '../../../components/DataListToolbar';
 
 const QS_CONFIG = getQSConfig('applications', {
   page: 1,

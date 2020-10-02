@@ -5,15 +5,15 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { ToolbarItem } from '@patternfly/react-core';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
 import AnsibleSelect from '../../AnsibleSelect';
 import OptionsList from '../../OptionsList';
 import ContentLoading from '../../ContentLoading';
 import CredentialChip from '../../CredentialChip';
 import ContentError from '../../ContentError';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useRequest from '../../../util/useRequest';
-import { required } from '../../../util/validators';
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,

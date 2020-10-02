@@ -5,14 +5,14 @@ import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { useField } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
-import { CredentialsAPI } from '../../api';
+import { CredentialsAPI } from 'api';
+import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
 import { FieldTooltip } from '../FormField';
 
-import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
-import useRequest from '../../util/useRequest';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
-import { required } from '../../util/validators';
 import OptionsList from '../OptionsList';
 
 const QS_CONFIG = getQSConfig('credentials', {

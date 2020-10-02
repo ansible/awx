@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
+import { ProjectsAPI, CredentialsAPI } from 'api';
 import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import SCMSubForm from './SCMSubForm';
-import { ProjectsAPI, CredentialsAPI } from '../../../../api';
 
 jest.mock('../../../../api/models/Projects');
 jest.mock('../../../../api/models/Credentials');

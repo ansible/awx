@@ -11,11 +11,11 @@ import {
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import useRequest from '../../util/useRequest';
-import { UsersAPI } from '../../api';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import RoutedTabs from '../../components/RoutedTabs';
+import useRequest from 'util/useRequest';
+import { UsersAPI } from 'api';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import RoutedTabs from 'components/RoutedTabs';
 import UserDetail from './UserDetail';
 import UserEdit from './UserEdit';
 import UserOrganizations from './UserOrganizations';

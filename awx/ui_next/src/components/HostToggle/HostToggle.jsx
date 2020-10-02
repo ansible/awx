@@ -3,10 +3,10 @@ import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Tooltip } from '@patternfly/react-core';
+import useRequest from 'util/useRequest';
+import { HostsAPI } from 'api';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
-import useRequest from '../../util/useRequest';
-import { HostsAPI } from '../../api';
 
 function HostToggle({
   i18n,

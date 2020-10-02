@@ -10,10 +10,10 @@ import {
   InputGroup,
   TextInput,
 } from '@patternfly/react-core';
-import { FieldTooltip, PasswordInput } from '../../../../components/FormField';
-import AnsibleSelect from '../../../../components/AnsibleSelect';
-import { CredentialType } from '../../../../types';
-import { required } from '../../../../util/validators';
+import { FieldTooltip, PasswordInput } from 'components/FormField';
+import AnsibleSelect from 'components/AnsibleSelect';
+import { CredentialType } from 'types';
+import { required } from 'util/validators';
 import { CredentialPluginField } from '../CredentialPlugins';
 import BecomeMethodField from './BecomeMethodField';
 

@@ -4,20 +4,16 @@ import { withI18n } from '@lingui/react';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
-import AppendBody from '../../components/AppendBody';
-import ContentError from '../../components/ContentError';
-import FullPage from '../../components/FullPage';
-import JobList from '../../components/JobList';
-import RoutedTabs from '../../components/RoutedTabs';
-import { Schedules } from '../../components/Schedule';
-import ContentLoading from '../../components/ContentLoading';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
-import NotificationList from '../../components/NotificationList';
-import {
-  WorkflowJobTemplatesAPI,
-  CredentialsAPI,
-  OrganizationsAPI,
-} from '../../api';
+import AppendBody from 'components/AppendBody';
+import ContentError from 'components/ContentError';
+import FullPage from 'components/FullPage';
+import JobList from 'components/JobList';
+import RoutedTabs from 'components/RoutedTabs';
+import { Schedules } from 'components/Schedule';
+import ContentLoading from 'components/ContentLoading';
+import { ResourceAccessList } from 'components/ResourceAccessList';
+import NotificationList from 'components/NotificationList';
+import { WorkflowJobTemplatesAPI, CredentialsAPI, OrganizationsAPI } from 'api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';

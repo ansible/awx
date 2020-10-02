@@ -13,10 +13,10 @@ import {
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
+import { formatDateString } from 'util/dates';
 import DataListCell from '../DataListCell';
 import LaunchButton from '../LaunchButton';
 import StatusIcon from '../StatusIcon';
-import { formatDateString } from '../../util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 const DataListAction = styled(_DataListAction)`

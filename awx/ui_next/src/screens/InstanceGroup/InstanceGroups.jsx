@@ -3,13 +3,13 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
+import Breadcrumbs from 'components/Breadcrumbs';
 import InstanceGroupAdd from './InstanceGroupAdd';
 import InstanceGroupList from './InstanceGroupList';
 import InstanceGroup from './InstanceGroup';
 
 import ContainerGroupAdd from './ContainerGroupAdd';
 import ContainerGroup from './ContainerGroup';
-import Breadcrumbs from '../../components/Breadcrumbs';
 
 function InstanceGroups({ i18n }) {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({

@@ -4,9 +4,9 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { PageSection, Card } from '@patternfly/react-core';
-import Breadcrumbs from '../../components/Breadcrumbs';
-import { ScheduleList } from '../../components/Schedule';
-import { SchedulesAPI } from '../../api';
+import Breadcrumbs from 'components/Breadcrumbs';
+import { ScheduleList } from 'components/Schedule';
+import { SchedulesAPI } from 'api';
 
 function AllSchedules({ i18n }) {
   const loadScheduleOptions = () => {

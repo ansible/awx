@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../../../testUtils/enzymeHelpers';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../../../api';
 import selectedCredential from '../../data.cyberArkCredential.json';
 import azureVaultCredential from '../../data.azureVaultCredential.json';
 import hashiCorpCredential from '../../data.hashiCorpCredential.json';

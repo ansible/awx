@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { UsersAPI, JobTemplatesAPI } from '../../api';
+import { UsersAPI, JobTemplatesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

@@ -11,9 +11,9 @@ import {
   Radio,
   TextInput,
 } from '@patternfly/react-core';
+import { required } from 'util/validators';
 import AnsibleSelect from '../../AnsibleSelect';
 import FormField from '../../FormField';
-import { required } from '../../../util/validators';
 
 const RunOnRadio = styled(Radio)`
   label {

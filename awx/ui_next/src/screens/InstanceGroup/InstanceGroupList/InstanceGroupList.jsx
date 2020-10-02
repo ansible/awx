@@ -4,17 +4,17 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { InstanceGroupsAPI } from '../../../api';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
+import { InstanceGroupsAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import useSelected from 'util/useSelected';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import AlertModal from '../../../components/AlertModal';
-import DatalistToolbar from '../../../components/DataListToolbar';
-import AddDropDownButton from '../../../components/AddDropDownButton';
+} from 'components/PaginatedDataList';
+import ErrorDetail from 'components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
+import DatalistToolbar from 'components/DataListToolbar';
+import AddDropDownButton from 'components/AddDropDownButton';
 
 import InstanceGroupListItem from './InstanceGroupListItem';
 

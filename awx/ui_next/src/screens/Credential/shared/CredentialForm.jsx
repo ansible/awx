@@ -4,14 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func, object, shape } from 'prop-types';
 import { ActionGroup, Button, Form, FormGroup } from '@patternfly/react-core';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import {
-  FormColumnLayout,
-  FormFullWidthLayout,
-} from '../../../components/FormLayout';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import { required } from '../../../util/validators';
-import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import FormField, { FormSubmitError } from 'components/FormField';
+import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
+import AnsibleSelect from 'components/AnsibleSelect';
+import { required } from 'util/validators';
+import OrganizationLookup from 'components/Lookup/OrganizationLookup';
 import TypeInputsSubForm from './TypeInputsSubForm';
 import ExternalTestModal from './ExternalTestModal';
 

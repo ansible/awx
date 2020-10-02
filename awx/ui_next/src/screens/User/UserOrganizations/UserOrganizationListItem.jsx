@@ -5,7 +5,7 @@ import {
   DataListItemRow,
   DataListItem,
 } from '@patternfly/react-core';
-import DataListCell from '../../../components/DataListCell';
+import DataListCell from 'components/DataListCell';
 
 export default function UserOrganizationListItem({ organization }) {
   const labelId = `organization-${organization.id}`;

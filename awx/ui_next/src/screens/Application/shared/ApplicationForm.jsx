@@ -6,15 +6,12 @@ import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import PropTypes from 'prop-types';
 
-import { required } from '../../../util/validators';
-import FormField, {
-  FormSubmitError,
-  FieldTooltip,
-} from '../../../components/FormField';
-import { FormColumnLayout } from '../../../components/FormLayout';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import AnsibleSelect from '../../../components/AnsibleSelect';
+import { required } from 'util/validators';
+import FormField, { FormSubmitError, FieldTooltip } from 'components/FormField';
+import { FormColumnLayout } from 'components/FormLayout';
+import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
+import OrganizationLookup from 'components/Lookup/OrganizationLookup';
+import AnsibleSelect from 'components/AnsibleSelect';
 
 function ApplicationFormFields({
   i18n,

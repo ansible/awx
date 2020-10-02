@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 import { Button, Tooltip } from '@patternfly/react-core';
 import { CopyIcon } from '@patternfly/react-icons';
-import useRequest, { useDismissableError } from '../../util/useRequest';
+import useRequest, { useDismissableError } from 'util/useRequest';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 

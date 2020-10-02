@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { TokensAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { TokensAPI } from '../../../api';
 import UserToken from './UserToken';
 
 jest.mock('../../../api/models/Tokens');

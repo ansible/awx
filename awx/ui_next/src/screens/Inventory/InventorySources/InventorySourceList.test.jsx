@@ -2,7 +2,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
+import { InventoriesAPI, InventorySourcesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Card, PageSection } from '@patternfly/react-core';
-import { CardBody } from '../../../components/Card';
+import { CardBody } from 'components/Card';
+import useRequest from 'util/useRequest';
+import { InventoriesAPI } from 'api';
 import SmartInventoryForm from '../shared/SmartInventoryForm';
-import useRequest from '../../../util/useRequest';
-import { InventoriesAPI } from '../../../api';
 
 function SmartInventoryAdd() {
   const history = useHistory();

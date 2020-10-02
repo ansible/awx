@@ -2,15 +2,15 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import {
+  CredentialsAPI,
+  CredentialInputSourcesAPI,
+  CredentialTypesAPI,
+} from 'api';
+import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 
-import {
-  CredentialsAPI,
-  CredentialInputSourcesAPI,
-  CredentialTypesAPI,
-} from '../../../api';
 import CredentialAdd from './CredentialAdd';
 
 jest.mock('../../../api');

@@ -15,8 +15,8 @@ import {
 
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
-import { Group } from '../../../types';
+import DataListCell from 'components/DataListCell';
+import { Group } from 'types';
 
 function InventoryHostGroupItem({
   i18n,

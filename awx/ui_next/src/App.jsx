@@ -9,15 +9,15 @@ import {
 } from 'react-router-dom';
 import { I18n, I18nProvider } from '@lingui/react';
 
-import AppContainer from './components/AppContainer';
-import Background from './components/Background';
-import NotFound from './screens/NotFound';
-import Login from './screens/Login';
+import AppContainer from 'components/AppContainer';
+import Background from 'components/Background';
+import NotFound from 'screens/NotFound';
+import Login from 'screens/Login';
 
+import { isAuthenticated } from 'util/auth';
+import { getLanguageWithoutRegionCode } from 'util/language';
 import ja from './locales/ja/messages';
 import en from './locales/en/messages';
-import { isAuthenticated } from './util/auth';
-import { getLanguageWithoutRegionCode } from './util/language';
 
 import getRouteConfig from './routeConfig';
 

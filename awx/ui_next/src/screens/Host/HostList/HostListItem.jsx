@@ -15,11 +15,11 @@ import {
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
+import DataListCell from 'components/DataListCell';
 
-import Sparkline from '../../../components/Sparkline';
-import { Host } from '../../../types';
-import HostToggle from '../../../components/HostToggle';
+import Sparkline from 'components/Sparkline';
+import { Host } from 'types';
+import HostToggle from 'components/HostToggle';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

@@ -5,10 +5,10 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { AllHtmlEntities } from 'html-entities';
-import StatusIcon from '../../../components/StatusIcon';
-import { DetailList, Detail } from '../../../components/DetailList';
-import ContentEmpty from '../../../components/ContentEmpty';
-import CodeMirrorInput from '../../../components/CodeMirrorInput';
+import StatusIcon from 'components/StatusIcon';
+import { DetailList, Detail } from 'components/DetailList';
+import ContentEmpty from 'components/ContentEmpty';
+import CodeMirrorInput from 'components/CodeMirrorInput';
 
 const entities = new AllHtmlEntities();
 

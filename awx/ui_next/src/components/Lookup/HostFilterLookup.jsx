@@ -13,13 +13,13 @@ import {
   InputGroup,
   Modal,
 } from '@patternfly/react-core';
+import { HostsAPI } from 'api';
+import { getQSConfig, mergeParams, parseQueryString } from 'util/qs';
+import useRequest, { useDismissableError } from 'util/useRequest';
 import ChipGroup from '../ChipGroup';
 import DataListToolbar from '../DataListToolbar';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 import PaginatedDataList, { PaginatedDataListItem } from '../PaginatedDataList';
-import { HostsAPI } from '../../api';
-import { getQSConfig, mergeParams, parseQueryString } from '../../util/qs';
-import useRequest, { useDismissableError } from '../../util/useRequest';
 import {
   removeDefaultParams,
   removeNamespacedKeys,

@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { CredentialTypesAPI, ProjectsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import ProjectForm from './ProjectForm';
-import { CredentialTypesAPI, ProjectsAPI } from '../../../api';
 
 jest.mock('../../../api');
 

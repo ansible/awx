@@ -11,9 +11,9 @@ import {
   DataListItemCells,
   DataListItemRow,
 } from '@patternfly/react-core';
-import DataListCell from '../../../components/DataListCell';
-import Sparkline from '../../../components/Sparkline';
-import { Host } from '../../../types';
+import DataListCell from 'components/DataListCell';
+import Sparkline from 'components/Sparkline';
+import { Host } from 'types';
 
 function SmartInventoryHostListItem({
   i18n,

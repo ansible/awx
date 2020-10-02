@@ -16,9 +16,9 @@ import {
   DataListItemCells,
 } from '@patternfly/react-core';
 
-import _DataListCell from '../../../components/DataListCell';
-import InstanceToggle from '../../../components/InstanceToggle';
-import { Instance } from '../../../types';
+import _DataListCell from 'components/DataListCell';
+import InstanceToggle from 'components/InstanceToggle';
+import { Instance } from 'types';
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);

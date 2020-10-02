@@ -3,16 +3,13 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import FormField, {
-  FormSubmitError,
-  FieldTooltip,
-} from '../../../components/FormField';
-import ApplicationLookup from '../../../components/Lookup/ApplicationLookup';
-import { required } from '../../../util/validators';
+import AnsibleSelect from 'components/AnsibleSelect';
+import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
+import FormField, { FormSubmitError, FieldTooltip } from 'components/FormField';
+import ApplicationLookup from 'components/Lookup/ApplicationLookup';
+import { required } from 'util/validators';
 
-import { FormColumnLayout } from '../../../components/FormLayout';
+import { FormColumnLayout } from 'components/FormLayout';
 
 function UserTokenFormFields({ i18n }) {
   const [applicationField, applicationMeta, applicationHelpers] = useField(

@@ -3,7 +3,7 @@ import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
-import ContentError from '../../../components/ContentError';
+import ContentError from 'components/ContentError';
 import GitHubDetail from './GitHubDetail';
 import GitHubEdit from './GitHubEdit';
 

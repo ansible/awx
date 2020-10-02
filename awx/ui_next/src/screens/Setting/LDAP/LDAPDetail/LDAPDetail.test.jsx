@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { useRouteMatch } from 'react-router-dom';
+import { SettingsProvider } from 'contexts/Settings';
+import { SettingsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../../testUtils/enzymeHelpers';
-import { SettingsProvider } from '../../../../contexts/Settings';
-import { SettingsAPI } from '../../../../api';
 import {
   assertDetail,
   assertVariableDetail,

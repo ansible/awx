@@ -4,22 +4,22 @@ import { t } from '@lingui/macro';
 import { useLocation, useParams } from 'react-router-dom';
 import 'styled-components/macro';
 
-import DataListToolbar from '../../../components/DataListToolbar';
+import DataListToolbar from 'components/DataListToolbar';
 import PaginatedDataList, {
   ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
-import DisassociateButton from '../../../components/DisassociateButton';
-import AssociateModal from '../../../components/AssociateModal';
-import AlertModal from '../../../components/AlertModal';
-import ErrorDetail from '../../../components/ErrorDetail';
+} from 'components/PaginatedDataList';
+import DisassociateButton from 'components/DisassociateButton';
+import AssociateModal from 'components/AssociateModal';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
 
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '../../../util/useRequest';
-import useSelected from '../../../util/useSelected';
-import { InstanceGroupsAPI, InstancesAPI } from '../../../api';
-import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
+} from 'util/useRequest';
+import useSelected from 'util/useSelected';
+import { InstanceGroupsAPI, InstancesAPI } from 'api';
+import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 
 import InstanceListItem from './InstanceListItem';
 

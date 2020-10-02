@@ -15,12 +15,12 @@ import { PencilAltIcon } from '@patternfly/react-icons';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { timeOfDay } from '../../../util/dates';
-import { InventoriesAPI } from '../../../api';
-import { Inventory } from '../../../types';
-import DataListCell from '../../../components/DataListCell';
-import CopyButton from '../../../components/CopyButton';
-import SyncStatusIndicator from '../../../components/SyncStatusIndicator';
+import { timeOfDay } from 'util/dates';
+import { InventoriesAPI } from 'api';
+import { Inventory } from 'types';
+import DataListCell from 'components/DataListCell';
+import CopyButton from 'components/CopyButton';
+import SyncStatusIndicator from 'components/SyncStatusIndicator';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

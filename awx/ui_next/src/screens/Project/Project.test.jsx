@@ -1,11 +1,11 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { OrganizationsAPI, ProjectsAPI } from '../../api';
+import { OrganizationsAPI, ProjectsAPI } from 'api';
+import mockOrganization from 'util/data.organization.json';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import mockOrganization from '../../util/data.organization.json';
 import mockDetails from './data.project.json';
 import Project from './Project';
 

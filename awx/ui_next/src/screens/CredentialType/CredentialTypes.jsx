@@ -3,10 +3,10 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
+import Breadcrumbs from 'components/Breadcrumbs';
 import CredentialTypeAdd from './CredentialTypeAdd';
 import CredentialTypeList from './CredentialTypeList';
 import CredentialType from './CredentialType';
-import Breadcrumbs from '../../components/Breadcrumbs';
 
 function CredentialTypes({ i18n }) {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({

@@ -1,9 +1,9 @@
 import React from 'react';
-import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
+} from 'contexts/Workflow';
+import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
 import LinkEditModal from './LinkEditModal';
 
 const dispatch = jest.fn();

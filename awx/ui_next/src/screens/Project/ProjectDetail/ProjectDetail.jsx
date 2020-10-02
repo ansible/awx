@@ -3,22 +3,18 @@ import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, List, ListItem } from '@patternfly/react-core';
-import { Project } from '../../../types';
-import { Config } from '../../../contexts/Config';
+import { Project } from 'types';
+import { Config } from 'contexts/Config';
 
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import CredentialChip from '../../../components/CredentialChip';
-import { ProjectsAPI } from '../../../api';
-import { toTitleCase } from '../../../util/strings';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import CredentialChip from 'components/CredentialChip';
+import { ProjectsAPI } from 'api';
+import { toTitleCase } from 'util/strings';
+import useRequest, { useDismissableError } from 'util/useRequest';
 
 function ProjectDetail({ project, i18n }) {
   const {

@@ -4,21 +4,18 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape, object, arrayOf } from 'prop-types';
 import { Form } from '@patternfly/react-core';
-import { VariablesField } from '../../../components/CodeMirrorInput';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import FormActionGroup from '../../../components/FormActionGroup';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import {
-  FormColumnLayout,
-  FormFullWidthLayout,
-} from '../../../components/FormLayout';
-import HostFilterLookup from '../../../components/Lookup/HostFilterLookup';
-import InstanceGroupsLookup from '../../../components/Lookup/InstanceGroupsLookup';
-import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import useRequest from '../../../util/useRequest';
-import { required } from '../../../util/validators';
-import { InventoriesAPI } from '../../../api';
+import { VariablesField } from 'components/CodeMirrorInput';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import FormActionGroup from 'components/FormActionGroup';
+import FormField, { FormSubmitError } from 'components/FormField';
+import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
+import HostFilterLookup from 'components/Lookup/HostFilterLookup';
+import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
+import OrganizationLookup from 'components/Lookup/OrganizationLookup';
+import useRequest from 'util/useRequest';
+import { required } from 'util/validators';
+import { InventoriesAPI } from 'api';
 
 const SmartInventoryFormFields = withI18n()(({ i18n, inventory }) => {
   const { setFieldValue } = useFormikContext();

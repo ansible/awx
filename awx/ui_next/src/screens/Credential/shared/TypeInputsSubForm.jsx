@@ -7,9 +7,9 @@ import {
   FormColumnLayout,
   FormFullWidthLayout,
   SubFormLayout,
-} from '../../../components/FormLayout';
-import { CheckboxField } from '../../../components/FormField';
-import { CredentialType } from '../../../types';
+} from 'components/FormLayout';
+import { CheckboxField } from 'components/FormField';
+import { CredentialType } from 'types';
 import { CredentialField, GceFileUploadField } from './CredentialFormFields';
 
 function TypeInputsSubForm({ credentialType, i18n }) {

@@ -4,18 +4,14 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  Detail,
-  DetailList,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { CredentialTypesAPI } from '../../../api';
-import { jsonToYaml } from '../../../util/yaml';
+import { VariablesDetail } from 'components/CodeMirrorInput';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import DeleteButton from 'components/DeleteButton';
+import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
+import useRequest, { useDismissableError } from 'util/useRequest';
+import { CredentialTypesAPI } from 'api';
+import { jsonToYaml } from 'util/yaml';
 
 function CredentialTypeDetails({ credentialType, i18n }) {
   const { id, name, description, injectors, inputs } = credentialType;

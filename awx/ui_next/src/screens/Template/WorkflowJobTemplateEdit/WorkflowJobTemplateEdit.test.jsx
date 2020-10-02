@@ -2,11 +2,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import {
-  WorkflowJobTemplatesAPI,
-  OrganizationsAPI,
-  LabelsAPI,
-} from '../../../api';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI, LabelsAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 

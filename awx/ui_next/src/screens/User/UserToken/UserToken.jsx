@@ -11,10 +11,10 @@ import {
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import RoutedTabs from '../../../components/RoutedTabs';
-import ContentError from '../../../components/ContentError';
-import { TokensAPI } from '../../../api';
-import useRequest from '../../../util/useRequest';
+import RoutedTabs from 'components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import { TokensAPI } from 'api';
+import useRequest from 'util/useRequest';
 import UserTokenDetail from '../UserTokenDetail';
 
 function UserToken({ i18n, setBreadcrumb, user }) {

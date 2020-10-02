@@ -12,12 +12,12 @@ import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import useRequest from '../../util/useRequest';
-import { InstanceGroupsAPI } from '../../api';
-import RoutedTabs from '../../components/RoutedTabs';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import JobList from '../../components/JobList';
+import useRequest from 'util/useRequest';
+import { InstanceGroupsAPI } from 'api';
+import RoutedTabs from 'components/RoutedTabs';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import JobList from 'components/JobList';
 
 import ContainerGroupDetails from './ContainerGroupDetails';
 import ContainerGroupEdit from './ContainerGroupEdit';

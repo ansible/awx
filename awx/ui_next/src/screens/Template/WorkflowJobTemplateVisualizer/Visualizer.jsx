@@ -6,11 +6,16 @@ import { shape } from 'prop-types';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../contexts/Workflow';
-import { layoutGraph } from '../../../components/Workflow/WorkflowUtils';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import workflowReducer from '../../../components/Workflow/workflowReducer';
+} from 'contexts/Workflow';
+import { layoutGraph } from 'components/Workflow/WorkflowUtils';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import workflowReducer from 'components/Workflow/workflowReducer';
+import {
+  WorkflowApprovalTemplatesAPI,
+  WorkflowJobTemplateNodesAPI,
+  WorkflowJobTemplatesAPI,
+} from 'api';
 import { DeleteAllNodesModal, UnsavedChangesModal } from './Modals';
 import {
   LinkAddModal,
@@ -26,11 +31,6 @@ import {
 import VisualizerGraph from './VisualizerGraph';
 import VisualizerStartScreen from './VisualizerStartScreen';
 import VisualizerToolbar from './VisualizerToolbar';
-import {
-  WorkflowApprovalTemplatesAPI,
-  WorkflowJobTemplateNodesAPI,
-  WorkflowJobTemplatesAPI,
-} from '../../../api';
 
 const CenteredContent = styled.div`
   align-items: center;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { SchedulesAPI } from '../../../api';
+import { SchedulesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import ScheduleToggle from './ScheduleToggle';
 

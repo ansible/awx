@@ -10,20 +10,16 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import useRequest from '../../../util/useRequest';
+import useRequest from 'util/useRequest';
 
-import {
-  InventoriesAPI,
-  InventorySourcesAPI,
-  OrganizationsAPI,
-} from '../../../api';
-import { Schedules } from '../../../components/Schedule';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import RoutedTabs from '../../../components/RoutedTabs';
+import { InventoriesAPI, InventorySourcesAPI, OrganizationsAPI } from 'api';
+import { Schedules } from 'components/Schedule';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import RoutedTabs from 'components/RoutedTabs';
+import NotificationList from 'components/NotificationList/NotificationList';
 import InventorySourceDetail from '../InventorySourceDetail';
 import InventorySourceEdit from '../InventorySourceEdit';
-import NotificationList from '../../../components/NotificationList/NotificationList';
 
 function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
   const location = useLocation();

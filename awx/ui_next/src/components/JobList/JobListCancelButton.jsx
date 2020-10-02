@@ -3,9 +3,9 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func } from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
-import { KebabifiedContext } from '../../contexts/Kebabified';
+import { KebabifiedContext } from 'contexts/Kebabified';
+import { Job } from 'types';
 import AlertModal from '../AlertModal';
-import { Job } from '../../types';
 
 function cannotCancel(job) {
   return !job.summary_fields.user_capabilities.start;

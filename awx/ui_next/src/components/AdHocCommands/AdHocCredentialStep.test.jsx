@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
+import { CredentialsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { CredentialsAPI } from '../../api';
 import AdHocCredentialStep from './AdHocCredentialStep';
 
 jest.mock('../../api/models/Credentials');

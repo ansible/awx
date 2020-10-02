@@ -11,17 +11,17 @@ import {
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import JobList from '../../components/JobList';
-import RoutedTabs from '../../components/RoutedTabs';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import JobList from 'components/JobList';
+import RoutedTabs from 'components/RoutedTabs';
+import { ResourceAccessList } from 'components/ResourceAccessList';
+import { InventoriesAPI } from 'api';
 import InventoryDetail from './InventoryDetail';
 import InventoryEdit from './InventoryEdit';
 import InventoryGroups from './InventoryGroups';
 import InventoryHosts from './InventoryHosts/InventoryHosts';
 import InventorySources from './InventorySources';
-import { InventoriesAPI } from '../../api';
 
 function Inventory({ i18n, setBreadcrumb }) {
   const [contentError, setContentError] = useState(null);

@@ -4,17 +4,17 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { ProjectsAPI } from '../../../api';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import AlertModal from '../../../components/AlertModal';
-import DataListToolbar from '../../../components/DataListToolbar';
-import ErrorDetail from '../../../components/ErrorDetail';
+import { ProjectsAPI } from 'api';
+import useRequest, { useDeleteItems } from 'util/useRequest';
+import AlertModal from 'components/AlertModal';
+import DataListToolbar from 'components/DataListToolbar';
+import ErrorDetail from 'components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+} from 'components/PaginatedDataList';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import useWsProjects from './useWsProjects';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
 
 import ProjectListItem from './ProjectListItem';
 

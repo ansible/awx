@@ -2,17 +2,17 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
-import JobTemplateAdd from './JobTemplateAdd';
-import {
   CredentialsAPI,
   CredentialTypesAPI,
   JobTemplatesAPI,
   LabelsAPI,
   ProjectsAPI,
-} from '../../../api';
+} from 'api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import JobTemplateAdd from './JobTemplateAdd';
 
 jest.mock('../../../api');
 CredentialsAPI.read.mockResolvedValue({

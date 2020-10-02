@@ -4,15 +4,15 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import { CardBody, CardActionsRow } from '../../../../components/Card';
-import ContentError from '../../../../components/ContentError';
-import ContentLoading from '../../../../components/ContentLoading';
-import { DetailList } from '../../../../components/DetailList';
-import RoutedTabs from '../../../../components/RoutedTabs';
-import { useConfig } from '../../../../contexts/Config';
-import { useSettings } from '../../../../contexts/Settings';
-import useRequest from '../../../../util/useRequest';
-import { SettingsAPI } from '../../../../api';
+import { CardBody, CardActionsRow } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import { DetailList } from 'components/DetailList';
+import RoutedTabs from 'components/RoutedTabs';
+import { useConfig } from 'contexts/Config';
+import { useSettings } from 'contexts/Settings';
+import useRequest from 'util/useRequest';
+import { SettingsAPI } from 'api';
 import SettingDetail from '../../shared';
 
 function GitHubDetail({ i18n }) {

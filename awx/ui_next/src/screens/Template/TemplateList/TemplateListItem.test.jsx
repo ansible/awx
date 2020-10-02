@@ -2,8 +2,8 @@ import React from 'react';
 
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
+import { JobTemplatesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { JobTemplatesAPI } from '../../../api';
 import mockJobTemplateData from '../shared/data.job_template.json';
 import TemplateListItem from './TemplateListItem';
 

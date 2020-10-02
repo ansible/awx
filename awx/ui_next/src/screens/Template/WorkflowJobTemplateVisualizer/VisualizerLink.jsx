@@ -7,16 +7,16 @@ import { PencilAltIcon, PlusIcon, TrashAltIcon } from '@patternfly/react-icons';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../contexts/Workflow';
+} from 'contexts/Workflow';
 import {
   generateLine,
   getLinePoints,
   getLinkOverlayPoints,
-} from '../../../components/Workflow/WorkflowUtils';
+} from 'components/Workflow/WorkflowUtils';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,
-} from '../../../components/Workflow';
+} from 'components/Workflow';
 
 const LinkG = styled.g`
   pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};

@@ -4,12 +4,12 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
 import { Chip, List, ListItem } from '@patternfly/react-core';
+import { toTitleCase } from 'util/strings';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import { Detail } from '../DetailList';
 import { VariablesDetail } from '../CodeMirrorInput';
 import Sparkline from '../Sparkline';
-import { toTitleCase } from '../../util/strings';
 
 function PromptWFJobTemplateDetail({ i18n, resource }) {
   const {

@@ -12,8 +12,8 @@ import {
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
-import Wizard from '../../../../../components/Wizard';
+} from 'contexts/Workflow';
+import Wizard from 'components/Wizard';
 import { NodeTypeStep } from './NodeTypeStep';
 import RunStep from './RunStep';
 import NodeNextButton from './NodeNextButton';

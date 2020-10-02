@@ -2,7 +2,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { SchedulesAPI, JobTemplatesAPI } from '../../../api';
+import { SchedulesAPI, JobTemplatesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

@@ -2,13 +2,13 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { UsersAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 
 import UserOrganizationsList from './UserOrganizationsList';
-import { UsersAPI } from '../../../api';
 
 jest.mock('../../../api/models/Users');
 

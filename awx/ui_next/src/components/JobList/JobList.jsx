@@ -4,18 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Card } from '@patternfly/react-core';
-import AlertModal from '../AlertModal';
-import DatalistToolbar from '../DataListToolbar';
-import ErrorDetail from '../ErrorDetail';
-import PaginatedDataList, { ToolbarDeleteButton } from '../PaginatedDataList';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../util/qs';
-import JobListItem from './JobListItem';
-import JobListCancelButton from './JobListCancelButton';
-import useWsJobs from './useWsJobs';
+} from 'util/useRequest';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import {
   AdHocCommandsAPI,
   InventoryUpdatesAPI,
@@ -24,7 +17,14 @@ import {
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
-} from '../../api';
+} from 'api';
+import AlertModal from '../AlertModal';
+import DatalistToolbar from '../DataListToolbar';
+import ErrorDetail from '../ErrorDetail';
+import PaginatedDataList, { ToolbarDeleteButton } from '../PaginatedDataList';
+import JobListItem from './JobListItem';
+import JobListCancelButton from './JobListCancelButton';
+import useWsJobs from './useWsJobs';
 
 function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   const QS_CONFIG = getQSConfig(

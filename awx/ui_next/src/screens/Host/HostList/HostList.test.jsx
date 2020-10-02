@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { HostsAPI } from '../../../api';
+import { HostsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,

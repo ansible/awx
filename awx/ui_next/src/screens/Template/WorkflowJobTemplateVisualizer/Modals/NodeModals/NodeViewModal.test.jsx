@@ -3,12 +3,12 @@ import { act } from 'react-dom/test-utils';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '../../../../../contexts/Workflow';
+} from 'contexts/Workflow';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../../../testUtils/enzymeHelpers';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../../../api';
 import NodeViewModal from './NodeViewModal';
 
 jest.mock('../../../../../api/models/JobTemplates');

@@ -11,11 +11,11 @@ import {
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { QSConfig, SearchColumns, SortColumns } from 'types';
 import SelectedList from '../SelectedList';
 import PaginatedDataList from '../PaginatedDataList';
 import CheckboxListItem from '../CheckboxListItem';
 import DataListToolbar from '../DataListToolbar';
-import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
 const ModalList = styled.div`
   .pf-c-toolbar__content {

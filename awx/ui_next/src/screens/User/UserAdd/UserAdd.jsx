@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Card, PageSection } from '@patternfly/react-core';
-import { CardBody } from '../../../components/Card';
+import { CardBody } from 'components/Card';
+import { OrganizationsAPI } from 'api';
 import UserForm from '../shared/UserForm';
-import { OrganizationsAPI } from '../../../api';
 
 function UserAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);

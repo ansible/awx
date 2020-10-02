@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { TeamsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import TeamDetail from './TeamDetail';
-import { TeamsAPI } from '../../../api';
 
 jest.mock('../../../api');
 

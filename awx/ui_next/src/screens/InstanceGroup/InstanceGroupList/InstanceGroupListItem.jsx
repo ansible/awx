@@ -21,8 +21,8 @@ import {
 import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
-import _DataListCell from '../../../components/DataListCell';
-import { InstanceGroup } from '../../../types';
+import _DataListCell from 'components/DataListCell';
+import { InstanceGroup } from 'types';
 
 const DataListCell = styled(_DataListCell)`
   white-space: nowrap;

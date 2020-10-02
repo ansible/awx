@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { TeamsAPI, UsersAPI } from '../../api';
+import { TeamsAPI, UsersAPI } from 'api';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import useRequest, { useDeleteItems } from 'util/useRequest';
 import AddResourceRole from '../AddRole/AddResourceRole';
 import AlertModal from '../AlertModal';
 import DataListToolbar from '../DataListToolbar';
 import PaginatedDataList, { ToolbarAddButton } from '../PaginatedDataList';
-import { getQSConfig, parseQueryString } from '../../util/qs';
-import useRequest, { useDeleteItems } from '../../util/useRequest';
 import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';
 import ResourceAccessListItem from './ResourceAccessListItem';
 

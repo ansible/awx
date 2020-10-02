@@ -12,13 +12,13 @@ import { withI18n } from '@lingui/react';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import useRequest from '../../../util/useRequest';
-import { ApplicationsAPI } from '../../../api';
-import ContentError from '../../../components/ContentError';
+import useRequest from 'util/useRequest';
+import { ApplicationsAPI } from 'api';
+import ContentError from 'components/ContentError';
+import RoutedTabs from 'components/RoutedTabs';
 import ApplicationEdit from '../ApplicationEdit';
 import ApplicationDetails from '../ApplicationDetails';
 import ApplicationTokens from '../ApplicationTokens';
-import RoutedTabs from '../../../components/RoutedTabs';
 
 function Application({ setBreadcrumb, i18n }) {
   const { id } = useParams();

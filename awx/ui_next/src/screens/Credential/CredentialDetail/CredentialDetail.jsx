@@ -5,20 +5,16 @@ import { t } from '@lingui/macro';
 import { shape } from 'prop-types';
 
 import { Button, List, ListItem } from '@patternfly/react-core';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import DeleteButton from '../../../components/DeleteButton';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
-import { Credential } from '../../../types';
-import useRequest, { useDismissableError } from '../../../util/useRequest';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import DeleteButton from 'components/DeleteButton';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import { CredentialsAPI, CredentialTypesAPI } from 'api';
+import { Credential } from 'types';
+import useRequest, { useDismissableError } from 'util/useRequest';
 
 function CredentialDetail({ i18n, credential }) {
   const {

@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { CardBody } from '../../../components/Card';
-import { InstanceGroupsAPI } from '../../../api';
+import { CardBody } from 'components/Card';
+import { InstanceGroupsAPI } from 'api';
+import useRequest from 'util/useRequest';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 import ContainerGroupForm from '../shared/ContainerGroupForm';
-import useRequest from '../../../util/useRequest';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
 
 function ContainerGroupEdit({ instanceGroup }) {
   const history = useHistory();

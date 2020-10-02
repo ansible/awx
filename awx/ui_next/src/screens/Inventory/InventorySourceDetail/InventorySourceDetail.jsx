@@ -4,23 +4,19 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Button, List, ListItem } from '@patternfly/react-core';
-import AlertModal from '../../../components/AlertModal';
-import { CardBody, CardActionsRow } from '../../../components/Card';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
-import CredentialChip from '../../../components/CredentialChip';
-import DeleteButton from '../../../components/DeleteButton';
-import { FieldTooltip } from '../../../components/FormField';
+import AlertModal from 'components/AlertModal';
+import { CardBody, CardActionsRow } from 'components/Card';
+import { VariablesDetail } from 'components/CodeMirrorInput';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import CredentialChip from 'components/CredentialChip';
+import DeleteButton from 'components/DeleteButton';
+import { FieldTooltip } from 'components/FormField';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import ErrorDetail from 'components/ErrorDetail';
+import useRequest from 'util/useRequest';
+import { InventorySourcesAPI } from 'api';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
-import {
-  DetailList,
-  Detail,
-  UserDateDetail,
-} from '../../../components/DetailList';
-import ErrorDetail from '../../../components/ErrorDetail';
-import useRequest from '../../../util/useRequest';
-import { InventorySourcesAPI } from '../../../api';
 
 function InventorySourceDetail({ inventorySource, i18n }) {
   const {

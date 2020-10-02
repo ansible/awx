@@ -5,17 +5,14 @@ import { t } from '@lingui/macro';
 import { func, number, shape } from 'prop-types';
 
 import { Form } from '@patternfly/react-core';
-import { VariablesField } from '../../../components/CodeMirrorInput';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup';
-import { required } from '../../../util/validators';
-import InstanceGroupsLookup from '../../../components/Lookup/InstanceGroupsLookup';
-import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import CredentialLookup from '../../../components/Lookup/CredentialLookup';
-import {
-  FormColumnLayout,
-  FormFullWidthLayout,
-} from '../../../components/FormLayout';
+import { VariablesField } from 'components/CodeMirrorInput';
+import FormField, { FormSubmitError } from 'components/FormField';
+import FormActionGroup from 'components/FormActionGroup';
+import { required } from 'util/validators';
+import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
+import OrganizationLookup from 'components/Lookup/OrganizationLookup';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
+import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
 
 function InventoryFormFields({ i18n, credentialTypeId, inventory }) {
   const { setFieldValue } = useFormikContext();

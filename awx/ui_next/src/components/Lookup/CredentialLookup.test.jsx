@@ -1,8 +1,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { CredentialsAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import CredentialLookup, { _CredentialLookup } from './CredentialLookup';
-import { CredentialsAPI } from '../../api';
 
 jest.mock('../../api');
 

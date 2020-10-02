@@ -3,9 +3,13 @@ import { Link, Route, Switch, Redirect } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
+import Breadcrumbs from 'components/Breadcrumbs';
+import { SettingsProvider } from 'contexts/Settings';
+import { useConfig } from 'contexts/Config';
+import { SettingsAPI } from 'api';
+import useRequest from 'util/useRequest';
 import ActivityStream from './ActivityStream';
 import AzureAD from './AzureAD';
 import GitHub from './GitHub';
@@ -20,10 +24,6 @@ import SAML from './SAML';
 import SettingList from './SettingList';
 import TACACS from './TACACS';
 import UI from './UI';
-import { SettingsProvider } from '../../contexts/Settings';
-import { useConfig } from '../../contexts/Config';
-import { SettingsAPI } from '../../api';
-import useRequest from '../../util/useRequest';
 
 function Settings({ i18n }) {
   const { license_info = {}, me } = useConfig();

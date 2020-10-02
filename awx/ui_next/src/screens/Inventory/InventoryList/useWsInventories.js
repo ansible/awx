@@ -4,9 +4,9 @@ import {
   parseQueryString,
   replaceParams,
   encodeNonDefaultQueryString,
-} from '../../../util/qs';
-import useWebsocket from '../../../util/useWebsocket';
-import useThrottle from '../../../util/useThrottle';
+} from 'util/qs';
+import useWebsocket from 'util/useWebsocket';
+import useThrottle from 'util/useThrottle';
 
 export default function useWsInventories(
   initialInventories,

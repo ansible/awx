@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { number, string, oneOfType } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import AnsibleSelect from '../../../components/AnsibleSelect';
-import { ProjectsAPI } from '../../../api';
-import useRequest from '../../../util/useRequest';
+import AnsibleSelect from 'components/AnsibleSelect';
+import { ProjectsAPI } from 'api';
+import useRequest from 'util/useRequest';
 
 function PlaybookSelect({ projectId, isValid, field, onBlur, onError, i18n }) {
   const [isDisabled, setIsDisabled] = useState(false);
