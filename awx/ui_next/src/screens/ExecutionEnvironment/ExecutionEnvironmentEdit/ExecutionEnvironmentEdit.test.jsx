@@ -9,6 +9,11 @@ import ExecutionEnvironmentEdit from './ExecutionEnvironmentEdit';
 
 jest.mock('../../../api');
 
+const mockMe = {
+  is_superuser: true,
+  is_system_auditor: false,
+};
+
 const executionEnvironmentData = {
   id: 42,
   credential: { id: 4 },
@@ -31,6 +36,7 @@ describe('<ExecutionEnvironmentEdit/>', () => {
       wrapper = mountWithContexts(
         <ExecutionEnvironmentEdit
           executionEnvironment={executionEnvironmentData}
+          me={mockMe}
         />,
         {
           context: { router: { history } },
@@ -53,6 +59,7 @@ describe('<ExecutionEnvironmentEdit/>', () => {
       expect(ExecutionEnvironmentsAPI.update).toHaveBeenCalledWith(42, {
         ...updateExecutionEnvironmentData,
         credential: null,
+        organization: null,
       });
     });
 
