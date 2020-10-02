@@ -29,6 +29,7 @@ function OrganizationLookup({
   value,
   history,
   autoPopulate,
+  helperText,
 }) {
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
 
@@ -78,6 +79,7 @@ function OrganizationLookup({
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Organization`)}
+      helperText={helperText}
     >
       <Lookup
         id="organization"
