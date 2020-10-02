@@ -47,6 +47,7 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
     values,
     initialValues,
     resetForm,
+    setFieldTouched,
     setFieldValue,
   } = useFormikContext();
   const [sourceField, sourceMeta] = useField({
@@ -92,6 +93,7 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
       };
       Object.keys(defaults).forEach(label => {
         setFieldValue(label, defaults[label]);
+        setFieldTouched(label, false);
       });
     }
   };
@@ -255,7 +257,7 @@ const InventorySourceForm = ({
     overwrite: source?.overwrite || false,
     overwrite_vars: source?.overwrite_vars || false,
     source: source?.source || '',
-    source_path: source?.source_path === '' ? '/ (project root)' : '',
+    source_path: source?.source_path || '',
     source_project: source?.summary_fields?.source_project || null,
     source_script: source?.summary_fields?.source_script || null,
     source_vars: source?.source_vars || '---\n',

@@ -21,7 +21,7 @@ import {
 } from './SharedFields';
 
 const SCMSubForm = ({ autoPopulateProject, i18n }) => {
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField] = useField('credential');
   const [projectField, projectMeta, projectHelpers] = useField({
     name: 'source_project',
@@ -47,16 +47,20 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
   useEffect(() => {
     if (projectMeta.initialValue) {
       fetchSourcePath(projectMeta.initialValue.id);
-    }
+      if (sourcePathField.value === '') {
+        sourcePathHelpers.setValue('/ (project root)');
+      }
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchSourcePath, projectMeta.initialValue]);
 
   const handleProjectUpdate = useCallback(
     value => {
-      setFieldValue('source_path', '');
       setFieldValue('source_project', value);
+      setFieldValue('source_path', '');
+      setFieldTouched('source_path', false);
       fetchSourcePath(value.id);
     },
-    [fetchSourcePath, setFieldValue]
+    [fetchSourcePath, setFieldValue, setFieldTouched]
   );
 
   const handleCredentialUpdate = useCallback(
