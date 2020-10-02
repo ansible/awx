@@ -30,6 +30,7 @@ function OrganizationLookup({
   history,
   autoPopulate,
   isDisabled,
+  helperText,
 }) {
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
 
@@ -79,6 +80,7 @@ function OrganizationLookup({
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Organization`)}
+      helperText={helperText}
     >
       <Lookup
         isDisabled={isDisabled}

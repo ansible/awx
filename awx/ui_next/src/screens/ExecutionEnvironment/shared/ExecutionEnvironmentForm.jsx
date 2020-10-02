@@ -1,18 +1,42 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { func, shape } from 'prop-types';
-import { Formik, useField } from 'formik';
+import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
 import { Form } from '@patternfly/react-core';
-import FormField, { FormSubmitError } from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup';
-import CredentialLookup from '../../../components/Lookup/CredentialLookup';
-import { url } from '../../../util/validators';
-import { FormColumnLayout } from '../../../components/FormLayout';
 
-function ExecutionEnvironmentFormFields({ i18n }) {
-  const [credentialField, , credentialHelpers] = useField('credential');
+import CredentialLookup from '../../../components/Lookup/CredentialLookup';
+import FormActionGroup from '../../../components/FormActionGroup';
+import FormField, { FormSubmitError } from '../../../components/FormField';
+import { FormColumnLayout } from '../../../components/FormLayout';
+import { OrganizationLookup } from '../../../components/Lookup';
+import { required, url } from '../../../util/validators';
+
+function ExecutionEnvironmentFormFields({ i18n, me, executionEnvironment }) {
+  const [credentialField] = useField('credential');
+  const [organizationField, organizationMeta, organizationHelpers] = useField({
+    name: 'organization',
+    validate:
+      !me?.is_superuser &&
+      required(i18n._(t`Select a value for this field`), i18n),
+  });
+
+  const { setFieldValue } = useFormikContext();
+
+  const onCredentialChange = useCallback(
+    value => {
+      setFieldValue('credential', value);
+    },
+    [setFieldValue]
+  );
+
+  const onOrganizationChange = useCallback(
+    value => {
+      setFieldValue('organization', value);
+    },
+    [setFieldValue]
+  );
+
   return (
     <>
       <FormField
@@ -32,9 +56,26 @@ function ExecutionEnvironmentFormFields({ i18n }) {
         name="description"
         type="text"
       />
+      <OrganizationLookup
+        helperTextInvalid={organizationMeta.error}
+        isValid={!organizationMeta.touched || !organizationMeta.error}
+        onBlur={() => organizationHelpers.setTouched()}
+        onChange={onOrganizationChange}
+        value={organizationField.value}
+        required={!me.is_superuser}
+        helperText={
+          me?.is_superuser
+            ? i18n._(
+                t`Leave this field blank to make the execution environment globally available.`
+              )
+            : null
+        }
+        autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
+      />
+
       <CredentialLookup
         label={i18n._(t`Registry credential`)}
-        onChange={value => credentialHelpers.setValue(value)}
+        onChange={onCredentialChange}
         value={credentialField.value}
       />
     </>
@@ -46,19 +87,21 @@ function ExecutionEnvironmentForm({
   onSubmit,
   onCancel,
   submitError,
+  me,
   ...rest
 }) {
   const initialValues = {
     image: executionEnvironment.image || '',
     description: executionEnvironment.description || '',
-    credential: executionEnvironment?.summary_fields?.credential || null,
+    credential: executionEnvironment.summary_fields?.credential || null,
+    organization: executionEnvironment.summary_fields?.organization || null,
   };
   return (
     <Formik initialValues={initialValues} onSubmit={values => onSubmit(values)}>
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
-            <ExecutionEnvironmentFormFields {...rest} />
+            <ExecutionEnvironmentFormFields me={me} {...rest} />
             {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
               onCancel={onCancel}
