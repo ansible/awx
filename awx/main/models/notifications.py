@@ -393,7 +393,11 @@ class JobNotificationMixin(object):
             'job': job_context,
             'job_friendly_name': self.get_notification_friendly_name(),
             'url': self.get_ui_url(),
-            'job_metadata': json.dumps(self.notification_data(), indent=4)
+            'job_metadata': json.dumps(
+                self.notification_data(),
+                ensure_ascii=False,
+                indent=4
+            )
         }
 
         def build_context(node, fields, allowed_fields):
