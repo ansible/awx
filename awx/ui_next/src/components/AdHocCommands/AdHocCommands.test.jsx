@@ -18,20 +18,16 @@ const credentials = [
   { id: 4, kind: 'Machine', name: 'Cred 4', url: 'www.google.com' },
   { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
 ];
+const moduleOptions = [
+  ['command', 'command'],
+  ['shell', 'shell'],
+];
 const adHocItems = [
   {
     name: 'Inventory 1 Org 0',
   },
   { name: 'Inventory 2 Org 0' },
 ];
-
-const children = ({ openAdHocCommands, isDisabled }) => (
-  <button
-    type="submit"
-    disabled={isDisabled}
-    onClick={() => openAdHocCommands()}
-  />
-);
 
 describe('<AdHocCommands />', () => {
   let wrapper;
@@ -44,111 +40,38 @@ describe('<AdHocCommands />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommands
-          apiModule={InventoriesAPI}
-          adHocItems={adHocItems}
+          css="margin-right: 20px"
+          onClose={() => {}}
           itemId={1}
           credentialTypeId={1}
-        >
-          {children}
-        </AdHocCommands>
+          adHocItems={adHocItems}
+          moduleOptions={moduleOptions}
+        />
       );
     });
     expect(wrapper.find('AdHocCommands').length).toBe(1);
-  });
-  test('calls api on Mount', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <AdHocCommands
-          apiModule={InventoriesAPI}
-          adHocItems={adHocItems}
-          itemId={1}
-          credentialTypeId={1}
-        >
-          {children}
-        </AdHocCommands>
-      );
-    });
-    expect(wrapper.find('AdHocCommands').length).toBe(1);
-    expect(InventoriesAPI.readAdHocOptions).toBeCalledWith(1);
-    expect(CredentialTypesAPI.read).toBeCalledWith({ namespace: 'ssh' });
-  });
-  test('should open the wizard', async () => {
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: {
-            module_name: {
-              choices: [
-                ['command', 'command'],
-                ['foo', 'foo'],
-              ],
-            },
-            verbosity: { choices: [[1], [2]] },
-          },
-        },
-      },
-    });
-    CredentialTypesAPI.read.mockResolvedValue({
-      data: { results: [{ id: 1 }] },
-    });
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <AdHocCommands
-          apiModule={InventoriesAPI}
-          adHocItems={adHocItems}
-          itemId={1}
-          credentialTypeId={1}
-        >
-          {children}
-        </AdHocCommands>
-      );
-    });
-    await act(async () => wrapper.find('button').prop('onClick')());
-
-    wrapper.update();
-
-    expect(wrapper.find('AdHocCommandsWizard').length).toBe(1);
   });
 
   test('should submit properly', async () => {
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: {
-            module_name: {
-              choices: [
-                ['command', 'command'],
-                ['foo', 'foo'],
-              ],
-            },
-            verbosity: { choices: [[1], [2]] },
-          },
-        },
-      },
-    });
-    CredentialTypesAPI.read.mockResolvedValue({
-      data: { results: [{ id: 1 }] },
-    });
+    InventoriesAPI.launchAdHocCommands.mockResolvedValue({ data: { id: 1 } });
     CredentialsAPI.read.mockResolvedValue({
       data: {
         results: credentials,
         count: 5,
       },
     });
-    InventoriesAPI.launchAdHocCommands.mockResolvedValue({ data: { id: 1 } });
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommands
-          apiModule={InventoriesAPI}
-          adHocItems={adHocItems}
+          css="margin-right: 20px"
+          onClose={() => {}}
           itemId={1}
           credentialTypeId={1}
-        >
-          {children}
-        </AdHocCommands>
+          adHocItems={adHocItems}
+          moduleOptions={moduleOptions}
+        />
       );
     });
-    await act(async () => wrapper.find('button').prop('onClick')());
 
     wrapper.update();
 
@@ -181,6 +104,7 @@ describe('<AdHocCommands />', () => {
     );
     await waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
     // second step of wizard
+
     await act(async () => {
       wrapper
         .find('input[aria-labelledby="check-action-item-4"]')
@@ -209,10 +133,6 @@ describe('<AdHocCommands />', () => {
       module_name: 'command',
       verbosity: 1,
     });
-
-    wrapper.update();
-
-    expect(wrapper.find('AdHocCommandsWizard').length).toBe(0);
   });
 
   test('should throw error on submission properly', async () => {
@@ -255,16 +175,15 @@ describe('<AdHocCommands />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommands
-          apiModule={InventoriesAPI}
-          adHocItems={adHocItems}
-          itemId={1}
+          css="margin-right: 20px"
+          onClose={() => {}}
           credentialTypeId={1}
-        >
-          {children}
-        </AdHocCommands>
+          itemId={1}
+          adHocItems={adHocItems}
+          moduleOptions={moduleOptions}
+        />
       );
     });
-    await act(async () => wrapper.find('button').prop('onClick')());
 
     wrapper.update();
 
@@ -316,58 +235,6 @@ describe('<AdHocCommands />', () => {
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
 
-    waitForElement(wrapper, 'ErrorDetail', el => el.length > 0);
-    expect(wrapper.find('AdHocCommandsWizard').length).toBe(0);
-  });
-  test('should open alert modal when error on fetching data', async () => {
-    InventoriesAPI.readAdHocOptions.mockRejectedValue(
-      new Error({
-        response: {
-          config: {
-            method: 'options',
-            url: '/api/v2/inventories/1/',
-          },
-          data: 'An error occurred',
-          status: 403,
-        },
-      })
-    );
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <AdHocCommands
-          apiModule={InventoriesAPI}
-          adHocItems={adHocItems}
-          itemId={1}
-          credentialTypeId={1}
-        >
-          {children}
-        </AdHocCommands>
-      );
-    });
-    await act(async () => wrapper.find('button').prop('onClick')());
-    wrapper.update();
-    expect(wrapper.find('ErrorDetail').length).toBe(1);
-  });
-  test('should disable button', async () => {
-    const isDisabled = true;
-    const newChild = ({ openAdHocCommands }) => (
-      <button
-        type="submit"
-        disabled={isDisabled}
-        onClick={() => openAdHocCommands()}
-      />
-    );
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <AdHocCommands
-          apiModule={InventoriesAPI}
-          adHocItems={adHocItems}
-          itemId={1}
-          credentialTypeId={1}
-        >
-          {newChild}
-        </AdHocCommands>
-      );
-    });
+    await waitForElement(wrapper, 'ErrorDetail', el => el.length > 0);
   });
 });

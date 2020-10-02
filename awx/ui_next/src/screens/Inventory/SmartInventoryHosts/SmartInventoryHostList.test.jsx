@@ -12,7 +12,6 @@ import mockHosts from '../shared/data.hosts.json';
 jest.mock('../../../api');
 
 describe('<SmartInventoryHostList />', () => {
-  // describe('User has adhoc permissions', () => {
   let wrapper;
   const clonedInventory = {
     ...mockInventory,
@@ -41,17 +40,7 @@ describe('<SmartInventoryHostList />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <SmartInventoryHostList inventory={clonedInventory}>
-          {({ openAdHocCommands, isDisabled }) => (
-            <button
-              type="button"
-              variant="secondary"
-              className="run-command"
-              onClick={openAdHocCommands}
-              disabled={isDisabled}
-            />
-          )}
-        </SmartInventoryHostList>
+        <SmartInventoryHostList inventory={clonedInventory} />
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -77,6 +66,7 @@ describe('<SmartInventoryHostList />', () => {
     });
     const runCommandsButton = wrapper.find('button[aria-label="Run command"]');
     expect(runCommandsButton.length).toBe(1);
+    expect(runCommandsButton.prop('disabled')).toBe(false);
   });
 
   test('should select and deselect all items', async () => {
@@ -96,14 +86,6 @@ describe('<SmartInventoryHostList />', () => {
     });
   });
 
-  test('should render enabled ad hoc commands button', async () => {
-    await waitForElement(
-      wrapper,
-      'button[aria-label="Run command"]',
-      el => el.prop('disabled') === false
-    );
-  });
-
   test('should show content error when api throws an error', async () => {
     InventoriesAPI.readHosts.mockImplementation(() =>
       Promise.reject(new Error())
@@ -114,5 +96,25 @@ describe('<SmartInventoryHostList />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+  test('should disable run commands button', async () => {
+    InventoriesAPI.readHosts.mockResolvedValue({
+      data: { results: [], count: 0 },
+    });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: { module_name: { choices: [['module']] } },
+        },
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <SmartInventoryHostList inventory={clonedInventory} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    const runCommandsButton = wrapper.find('button[aria-label="Run command"]');
+    expect(runCommandsButton.prop('disabled')).toBe(true);
   });
 });

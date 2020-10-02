@@ -35,6 +35,17 @@ describe('<InventoryGroupHostList />', () => {
         },
       },
     });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: { module_name: { choices: [['module']] } },
+          POST: {},
+        },
+      },
+    });
+    CredentialTypesAPI.read.mockResolvedValue({
+      data: { count: 1, results: [{ id: 1, name: 'cred' }] },
+    });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryGroupHostList />);
     });
@@ -108,31 +119,8 @@ describe('<InventoryGroupHostList />', () => {
         },
       },
     });
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: { module_name: { choices: [['module']] } },
-          POST: {},
-        },
-      },
-    });
-    CredentialTypesAPI.read.mockResolvedValue({
-      data: { count: 1, results: [{ id: 1, name: 'cred' }] },
-    });
     await act(async () => {
-      wrapper = mountWithContexts(
-        <InventoryGroupHostList>
-          {({ openAdHocCommands, isDisabled }) => (
-            <button
-              type="button"
-              variant="secondary"
-              className="run-command"
-              onClick={openAdHocCommands}
-              disabled={isDisabled}
-            />
-          )}
-        </InventoryGroupHostList>
-      );
+      wrapper = mountWithContexts(<InventoryGroupHostList />);
     });
 
     await waitForElement(

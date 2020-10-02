@@ -88,17 +88,7 @@ describe('<InventoryGroupsList />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Route path="/inventories/inventory/:id/groups">
-          <InventoryGroupsList>
-            {({ openAdHocCommands, isDisabled }) => (
-              <button
-                type="button"
-                variant="secondary"
-                className="run-command"
-                onClick={openAdHocCommands}
-                disabled={isDisabled}
-              />
-            )}
-          </InventoryGroupsList>
+          <InventoryGroupsList />
         </Route>,
         {
           context: {
@@ -299,17 +289,7 @@ describe('<InventoryGroupsList/> error handling', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Route path="/inventories/inventory/:id/groups">
-          <InventoryGroupsList>
-            {({ openAdHocCommands, isDisabled }) => (
-              <button
-                type="button"
-                variant="secondary"
-                className="run-command"
-                onClick={openAdHocCommands}
-                disabled={isDisabled}
-              />
-            )}
-          </InventoryGroupsList>
+          <InventoryGroupsList />
         </Route>,
         {
           context: {

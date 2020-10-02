@@ -85,7 +85,7 @@ describe('<InventoryHostList />', () => {
         results: mockHosts,
       },
     });
-    InventoriesAPI.readOptions.mockResolvedValue({
+    InventoriesAPI.readHostsOptions.mockResolvedValue({
       data: {
         actions: {
           GET: {},
@@ -276,8 +276,15 @@ describe('<InventoryHostList />', () => {
     expect(wrapper.find('ToolbarAddButton').length).toBe(1);
   });
 
+  test('should render enabled ad hoc commands button', async () => {
+    await waitForElement(
+      wrapper,
+      'button[aria-label="Run command"]',
+      el => el.prop('disabled') === false
+    );
+  });
   test('should hide Add button for users without ability to POST', async () => {
-    InventoriesAPI.readOptions.mockResolvedValueOnce({
+    InventoriesAPI.readHostsOptions.mockResolvedValueOnce({
       data: {
         actions: {
           GET: {},
@@ -294,7 +301,7 @@ describe('<InventoryHostList />', () => {
   });
 
   test('should show content error when api throws error on initial render', async () => {
-    InventoriesAPI.readOptions.mockImplementation(() =>
+    InventoriesAPI.readHostsOptions.mockImplementation(() =>
       Promise.reject(new Error())
     );
     await act(async () => {
@@ -303,12 +310,5 @@ describe('<InventoryHostList />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-  });
-  test('should render enabled ad hoc commands button', async () => {
-    await waitForElement(
-      wrapper,
-      'button[aria-label="Run command"]',
-      el => el.prop('disabled') === false
-    );
   });
 });

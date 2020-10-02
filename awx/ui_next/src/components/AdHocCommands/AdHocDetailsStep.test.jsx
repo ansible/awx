@@ -12,9 +12,8 @@ const verbosityOptions = [
   { key: 1, value: 1, label: '1', isDisabled: false },
 ];
 const moduleOptions = [
-  { key: -1, value: '', label: '', isDisabled: false },
-  { key: 0, value: 'command', label: 'command', isDisabled: false },
-  { key: 1, value: 'shell', label: 'shell', isDisabled: false },
+  ['command', 'command'],
+  ['shell', 'shell'],
 ];
 const onLimitChange = jest.fn();
 const initialValues = {

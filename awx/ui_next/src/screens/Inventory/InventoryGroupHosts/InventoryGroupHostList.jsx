@@ -9,7 +9,7 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import { getQSConfig, mergeParams, parseQueryString } from '../../../util/qs';
-import { GroupsAPI, InventoriesAPI } from '../../../api';
+import { GroupsAPI, InventoriesAPI, CredentialTypesAPI } from '../../../api';
 
 import useRequest, {
   useDeleteItems,
@@ -23,7 +23,7 @@ import PaginatedDataList from '../../../components/PaginatedDataList';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
 import { Kebabified } from '../../../contexts/Kebabified';
-import AdHocCommandsButton from '../../../components/AdHocCommands/AdHocCommands';
+import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
 import AddHostDropdown from './AddHostDropdown';
 
@@ -35,6 +35,7 @@ const QS_CONFIG = getQSConfig('host', {
 
 function InventoryGroupHostList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAdHocCommandsOpen, setIsAdHocCommandsOpen] = useState(false);
   const { id: inventoryId, groupId } = useParams();
   const location = useLocation();
   const history = useHistory();
@@ -46,6 +47,9 @@ function InventoryGroupHostList({ i18n }) {
       actions,
       relatedSearchableKeys,
       searchableKeys,
+      moduleOptions,
+      credentialTypeId,
+      isAdHocDisabled,
     },
     error: contentError,
     isLoading,
@@ -53,9 +57,16 @@ function InventoryGroupHostList({ i18n }) {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const [response, actionsResponse] = await Promise.all([
+      const [
+        response,
+        actionsResponse,
+        adHocOptions,
+        cred,
+      ] = await Promise.all([
         GroupsAPI.readAllHosts(groupId, params),
         InventoriesAPI.readHostsOptions(inventoryId),
+        InventoriesAPI.readAdHocOptions(inventoryId),
+        CredentialTypesAPI.read({ namespace: 'ssh' }),
       ]);
 
       return {
@@ -68,6 +79,9 @@ function InventoryGroupHostList({ i18n }) {
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
+        credentialTypeId: cred.data.results[0].id,
+        isAdHocDisabled: !adHocOptions.data.actions.POST,
       };
     }, [groupId, inventoryId, location.search]),
     {
@@ -76,6 +90,8 @@ function InventoryGroupHostList({ i18n }) {
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
+      moduleOptions: [],
+      isAdHocDisabled: true,
     }
   );
 
@@ -206,47 +222,32 @@ function InventoryGroupHostList({ i18n }) {
               <Kebabified>
                 {({ isKebabified }) =>
                   isKebabified ? (
-                    <AdHocCommandsButton
-                      adHocItems={selected}
-                      apiModule={InventoriesAPI}
-                      itemId={parseInt(inventoryId, 10)}
+                    <DropdownItem
+                      variant="secondary"
+                      aria-label={i18n._(t`Run command`)}
+                      onClick={() => setIsAdHocCommandsOpen(true)}
+                      isDisabled={hostCount === 0 || isAdHocDisabled}
                     >
-                      {({ openAdHocCommands, isDisabled }) => (
-                        <DropdownItem
-                          key="run command"
-                          onClick={openAdHocCommands}
-                          isDisabled={hostCount === 0 || isDisabled}
-                        >
-                          {i18n._(t`Run command`)}
-                        </DropdownItem>
-                      )}
-                    </AdHocCommandsButton>
+                      {i18n._(t`Run command`)}
+                    </DropdownItem>
                   ) : (
                     <ToolbarItem>
                       <Tooltip
                         content={i18n._(
-                          t`Select an inventory source by clicking the check box beside it. The inventory source can be a single host or a selection of multiple hosts.`
+                          t`Select an inventory source by clicking the check box beside it.
+                          The inventory source can be a single host or a selection of multiple hosts.`
                         )}
                         position="top"
                         key="adhoc"
                       >
-                        <AdHocCommandsButton
-                          css="margin-right: 20px"
-                          adHocItems={selected}
-                          apiModule={InventoriesAPI}
-                          itemId={parseInt(inventoryId, 10)}
+                        <Button
+                          variant="secondary"
+                          aria-label={i18n._(t`Run command`)}
+                          onClick={() => setIsAdHocCommandsOpen(true)}
+                          isDisabled={hostCount === 0 || isAdHocDisabled}
                         >
-                          {({ openAdHocCommands, isDisabled }) => (
-                            <Button
-                              variant="secondary"
-                              aria-label={i18n._(t`Run command`)}
-                              onClick={openAdHocCommands}
-                              isDisabled={hostCount === 0 || isDisabled}
-                            >
-                              {i18n._(t`Run command`)}
-                            </Button>
-                          )}
-                        </AdHocCommandsButton>
+                          {i18n._(t`Run command`)}
+                        </Button>
                       </Tooltip>
                     </ToolbarItem>
                   )
@@ -279,6 +280,7 @@ function InventoryGroupHostList({ i18n }) {
         emptyStateControls={
           canAdd && (
             <AddHostDropdown
+              key="associate"
               onAddExisting={() => setIsModalOpen(true)}
               onAddNew={() => history.push(addFormUrl)}
             />
@@ -294,6 +296,16 @@ function InventoryGroupHostList({ i18n }) {
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}
           title={i18n._(t`Select Hosts`)}
+        />
+      )}
+      {isAdHocCommandsOpen && (
+        <AdHocCommands
+          css="margin-right: 20px"
+          adHocItems={selected}
+          itemId={parseInt(inventoryId, 10)}
+          onClose={() => setIsAdHocCommandsOpen(false)}
+          credentialTypeId={credentialTypeId}
+          moduleOptions={moduleOptions}
         />
       )}
       {associateError && (
