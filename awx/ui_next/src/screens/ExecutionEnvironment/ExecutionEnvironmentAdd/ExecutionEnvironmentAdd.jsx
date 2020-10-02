@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Card, PageSection } from '@patternfly/react-core';
 import { useHistory } from 'react-router-dom';
 
-import ExecutionEnvironmentForm from '../shared/ExecutionEnvironmentForm';
-import { CardBody } from '../../../components/Card';
 import { ExecutionEnvironmentsAPI } from '../../../api';
+import { Config } from '../../../contexts/Config';
+import { CardBody } from '../../../components/Card';
+import ExecutionEnvironmentForm from '../shared/ExecutionEnvironmentForm';
 
 function ExecutionEnvironmentAdd() {
   const history = useHistory();
@@ -14,7 +15,8 @@ function ExecutionEnvironmentAdd() {
     try {
       const { data: response } = await ExecutionEnvironmentsAPI.create({
         ...values,
-        credential: values?.credential?.id,
+        credential: values.credential?.id,
+        organization: values.organization?.id,
       });
       history.push(`/execution_environments/${response.id}/details`);
     } catch (error) {
@@ -29,11 +31,16 @@ function ExecutionEnvironmentAdd() {
     <PageSection>
       <Card>
         <CardBody>
-          <ExecutionEnvironmentForm
-            onSubmit={handleSubmit}
-            submitError={submitError}
-            onCancel={handleCancel}
-          />
+          <Config>
+            {({ me }) => (
+              <ExecutionEnvironmentForm
+                onSubmit={handleSubmit}
+                submitError={submitError}
+                onCancel={handleCancel}
+                me={me || {}}
+              />
+            )}
+          </Config>
         </CardBody>
       </Card>
     </PageSection>
