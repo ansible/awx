@@ -8,6 +8,11 @@ import ExecutionEnvironmentAdd from './ExecutionEnvironmentAdd';
 
 jest.mock('../../../api');
 
+const mockMe = {
+  is_superuser: true,
+  is_system_auditor: false,
+};
+
 const executionEnvironmentData = {
   credential: 4,
   description: 'A simple EE',
@@ -29,7 +34,7 @@ describe('<ExecutionEnvironmentAdd/>', () => {
       initialEntries: ['/execution_environments'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<ExecutionEnvironmentAdd />, {
+      wrapper = mountWithContexts(<ExecutionEnvironmentAdd me={mockMe} />, {
         context: { router: { history } },
       });
     });

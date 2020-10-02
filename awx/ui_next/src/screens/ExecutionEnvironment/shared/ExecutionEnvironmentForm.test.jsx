@@ -6,6 +6,11 @@ import ExecutionEnvironmentForm from './ExecutionEnvironmentForm';
 
 jest.mock('../../../api');
 
+const mockMe = {
+  is_superuser: true,
+  is_super_auditor: false,
+};
+
 const executionEnvironment = {
   id: 16,
   type: 'execution_environment',
@@ -47,6 +52,7 @@ describe('<ExecutionEnvironmentForm/>', () => {
           onCancel={onCancel}
           onSubmit={onSubmit}
           executionEnvironment={executionEnvironment}
+          me={mockMe}
         />
       );
     });
@@ -75,8 +81,8 @@ describe('<ExecutionEnvironmentForm/>', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  test('should update form values', () => {
-    act(() => {
+  test('should update form values', async () => {
+    await act(async () => {
       wrapper.find('input#execution-environment-image').simulate('change', {
         target: {
           value: 'https://registry.com/image/container2',
@@ -93,8 +99,19 @@ describe('<ExecutionEnvironmentForm/>', () => {
         id: 99,
         name: 'credential',
       });
+
+      wrapper.find('OrganizationLookup').invoke('onBlur')();
+      wrapper.find('OrganizationLookup').invoke('onChange')({
+        id: 3,
+        name: 'organization',
+      });
     });
+
     wrapper.update();
+    expect(wrapper.find('OrganizationLookup').prop('value')).toEqual({
+      id: 3,
+      name: 'organization',
+    });
     expect(
       wrapper.find('input#execution-environment-image').prop('value')
     ).toEqual('https://registry.com/image/container2');
