@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { CardBody } from '../../../components/Card';
 import { ExecutionEnvironmentsAPI } from '../../../api';
 import ExecutionEnvironmentForm from '../shared/ExecutionEnvironmentForm';
+import { Config } from '../../../contexts/Config';
 
 function ExecutionEnvironmentEdit({ executionEnvironment }) {
   const history = useHistory();
@@ -15,6 +16,7 @@ function ExecutionEnvironmentEdit({ executionEnvironment }) {
       await ExecutionEnvironmentsAPI.update(executionEnvironment.id, {
         ...values,
         credential: values.credential ? values.credential.id : null,
+        organization: values.organization ? values.organization.id : null,
       });
       history.push(detailsUrl);
     } catch (error) {
@@ -27,12 +29,17 @@ function ExecutionEnvironmentEdit({ executionEnvironment }) {
   };
   return (
     <CardBody>
-      <ExecutionEnvironmentForm
-        executionEnvironment={executionEnvironment}
-        onSubmit={handleSubmit}
-        submitError={submitError}
-        onCancel={handleCancel}
-      />
+      <Config>
+        {({ me }) => (
+          <ExecutionEnvironmentForm
+            executionEnvironment={executionEnvironment}
+            onSubmit={handleSubmit}
+            submitError={submitError}
+            onCancel={handleCancel}
+            me={me || {}}
+          />
+        )}
+      </Config>
     </CardBody>
   );
 }
