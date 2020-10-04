@@ -10,6 +10,7 @@ import {
   DataListItemRow,
   Label,
   Tooltip,
+  Badge as PFBadge,
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { t } from '@lingui/macro';
@@ -27,6 +28,18 @@ const DataListAction = styled(_DataListAction)`
   display: grid;
   grid-gap: 16px;
   grid-template-columns: repeat(2, 40px);
+`;
+
+const Badge = styled(PFBadge)`
+  margin-left: 8px;
+`;
+
+const ListGroup = styled.span`
+  margin-left: 24px;
+
+  &:first-of-type {
+    margin-left: 0;
+  }
 `;
 
 function InventoryListItem({
@@ -97,11 +110,33 @@ function InventoryListItem({
                 </Link>
               )}
             </DataListCell>,
+
             <DataListCell key="kind">
               {inventory.kind === 'smart'
                 ? i18n._(t`Smart Inventory`)
                 : i18n._(t`Inventory`)}
             </DataListCell>,
+            <DataListCell key="groups-hosts-sources-counts">
+              <ListGroup>
+                {i18n._(t`Groups`)}
+                <Badge isRead>
+                  {inventory.total_groups}
+                </Badge>
+              </ListGroup>
+              <ListGroup>
+                {i18n._(t`Hosts`)}
+                <Badge isRead>
+                  {inventory.total_hosts}
+                </Badge>
+              </ListGroup>
+              <ListGroup>
+                {i18n._(t`Sources`)}
+                <Badge isRead>
+                  {inventory.total_inventory_sources}
+                </Badge>
+              </ListGroup>
+            </DataListCell>,
+
             inventory.pending_deletion && (
               <DataListCell alignRight isFilled={false} key="pending-delete">
                 <Label color="red">{i18n._(t`Pending delete`)}</Label>
