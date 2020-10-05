@@ -23,7 +23,6 @@ import fcntl
 from pathlib import Path
 from uuid import uuid4
 import urllib.parse as urlparse
-import shlex
 
 # Django
 from django.conf import settings
@@ -2566,47 +2565,18 @@ class RunInventoryUpdate(BaseTask):
         if inventory is None:
             raise RuntimeError('Inventory Source is not associated with an Inventory.')
 
-        # Piece together the initial command to run via. the shell.
-        args = ['awx-manage', 'inventory_import']
-        args.extend(['--inventory-id', str(inventory.pk)])
+        args = ['ansible-inventory', '--list', '--export']
 
-        # Add appropriate arguments for overwrite if the inventory_update
-        # object calls for it.
-        if inventory_update.overwrite:
-            args.append('--overwrite')
-        if inventory_update.overwrite_vars:
-            args.append('--overwrite-vars')
-
-        # Declare the virtualenv the management command should activate
-        # as it calls ansible-inventory
-        args.extend(['--venv', inventory_update.ansible_virtualenv_path])
-
-        src = inventory_update.source
-        if inventory_update.enabled_var:
-            args.extend(['--enabled-var', shlex.quote(inventory_update.enabled_var)])
-            args.extend(['--enabled-value', shlex.quote(inventory_update.enabled_value)])
-        else:
-            if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
-                args.extend(['--enabled-var',
-                            getattr(settings, '%s_ENABLED_VAR' % src.upper())])
-            if getattr(settings, '%s_ENABLED_VALUE' % src.upper(), False):
-                args.extend(['--enabled-value',
-                            getattr(settings, '%s_ENABLED_VALUE' % src.upper())])
-        if inventory_update.host_filter:
-            args.extend(['--host-filter', shlex.quote(inventory_update.host_filter)])
-        if getattr(settings, '%s_EXCLUDE_EMPTY_GROUPS' % src.upper()):
-            args.append('--exclude-empty-groups')
-        if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):
-            args.extend(['--instance-id-var',
-                        "'{}'".format(getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper())),])
-        # Add arguments for the source inventory script
-        args.append('--source')
+        # Add arguments for the source inventory file/script/thing
+        args.append('-i')
         args.append(self.pseudo_build_inventory(inventory_update, private_data_dir))
-        if src == 'custom':
-            args.append("--custom")
-        args.append('-v%d' % inventory_update.verbosity)
-        if settings.DEBUG:
-            args.append('--traceback')
+
+        args.append('--output')
+        args.append(os.path.join(private_data_dir, 'artifacts', 'output.json'))
+
+        if inventory_update.verbosity:
+            args.append('-' + 'v' * inventory_update.verbosity)
+
         return args
 
     def build_inventory(self, inventory_update, private_data_dir):
@@ -2646,11 +2616,9 @@ class RunInventoryUpdate(BaseTask):
 
     def build_cwd(self, inventory_update, private_data_dir):
         '''
-        There are two cases where the inventory "source" is in a different
+        There is one case where the inventory "source" is in a different
         location from the private data:
-         - deprecated vendored inventory scripts in awx/plugins/inventory
          - SCM, where source needs to live in the project folder
-        in these cases, the inventory does not exist in the standard tempdir
         '''
         src = inventory_update.source
         if src == 'scm' and inventory_update.source_project_update:
@@ -2707,6 +2675,58 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'scm' and inventory_update.launch_type == 'scm' and source_project:
             # This follows update, not sync, so make copy here
             RunProjectUpdate.make_local_copy(source_project, private_data_dir)
+
+    def post_run_hook(self, inventory_update, status):
+        if status != 'successful':
+            return # nothing to save, step out of the way to allow error reporting
+
+        private_data_dir = inventory_update.job_env['AWX_PRIVATE_DATA_DIR']
+        expected_output = os.path.join(private_data_dir, 'artifacts', 'output.json')
+        with open(expected_output) as f:
+            data = json.load(f)
+
+        # build inventory save options
+        options = dict(
+            overwrite=inventory_update.overwrite,
+            overwrite_vars=inventory_update.overwrite_vars,
+        )
+        src = inventory_update.source
+
+        if inventory_update.enabled_var:
+            options['enabled_var'] = inventory_update.enabled_var
+            options['enabled_value'] = inventory_update.enabled_value
+        else:
+            if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
+                options['enabled_var'] = getattr(settings, '%s_ENABLED_VAR' % src.upper())
+            if getattr(settings, '%s_ENABLED_VALUE' % src.upper(), False):
+                options['enabled_value'] = getattr(settings, '%s_ENABLED_VALUE' % src.upper())
+
+        if inventory_update.host_filter:
+            options['host_filter'] = inventory_update.host_filter
+
+        if getattr(settings, '%s_EXCLUDE_EMPTY_GROUPS' % src.upper()):
+            options['exclude_empty_groups'] = True
+        if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):
+            options['instance_id_var'] = getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper())
+
+        # Verbosity is applied to saving process, as well as ansible-inventory CLI option
+        if inventory_update.verbosity:
+            options['verbosity'] = inventory_update.verbosity
+
+        from awx.main.management.commands.inventory_import import Command as InventoryImportCommand
+        cmd = InventoryImportCommand()
+        save_status, tb, exc = cmd.perform_update(options, data, inventory_update)
+
+        model_updates = {}
+        if save_status != inventory_update.status:
+            model_updates['status'] = save_status
+        if tb:
+            model_updates['result_traceback'] = tb
+
+        if model_updates:
+            logger.debug('{} saw problems saving to database.'.format(inventory_update.log_format))
+            model_updates['job_explanation'] = 'Update failed to save all changes to database properly'
+            self.update_model(inventory_update.pk, **model_updates)
 
 
 @task(queue=get_local_queuename)
