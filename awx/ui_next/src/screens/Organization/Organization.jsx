@@ -22,6 +22,7 @@ import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationTeams from './OrganizationTeams';
 import { OrganizationsAPI } from '../../api';
+import OrganizationExecEnvList from './OrganizationExecEnvList';
 
 function Organization({ i18n, setBreadcrumb, me }) {
   const location = useLocation();
@@ -122,6 +123,11 @@ function Organization({ i18n, setBreadcrumb, me }) {
     { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
     { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
     { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 },
+    {
+      name: i18n._(t`Execution Environments`),
+      link: `${match.url}/execution_environments`,
+      id: 4,
+    },
   ];
 
   if (canSeeNotificationsTab) {
@@ -206,6 +212,11 @@ function Organization({ i18n, setBreadcrumb, me }) {
                 apiModel={OrganizationsAPI}
                 showApprovalsToggle
               />
+            </Route>
+          )}
+          {organization && (
+            <Route path="/organizations/:id/execution_environments">
+              <OrganizationExecEnvList organization={organization} />
             </Route>
           )}
           <Route key="not-found" path="*">
