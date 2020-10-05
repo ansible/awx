@@ -42,6 +42,9 @@ class Organizations extends Component {
       [`/organizations/${organization.id}/notifications`]: i18n._(
         t`Notifications`
       ),
+      [`/organizations/${organization.id}/execution_environments`]: i18n._(
+        t`Execution Environments`
+      ),
     };
 
     this.setState({ breadcrumbConfig });
