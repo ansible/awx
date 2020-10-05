@@ -94,11 +94,11 @@ SkippedBottom.displayName = 'SkippedBottom';
 const StatusIcon = ({ status, ...props }) => {
   return (
     <div {...props} data-job-status={status} aria-label={status}>
-      {status === 'running' && <RunningJob />}
+      {status === 'running' && <RunningJob aria-hidden="true" />}
       {(status === 'new' ||
         status === 'pending' ||
         status === 'waiting' ||
-        status === 'never updated') && <WaitingJob />}
+        status === 'never updated') && <WaitingJob aria-hidden="true" />}
       {(status === 'failed' || status === 'error' || status === 'canceled') && (
         <FinishedJob aria-hidden="true">
           <FailedTop />
