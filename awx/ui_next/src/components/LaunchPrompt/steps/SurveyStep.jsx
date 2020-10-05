@@ -146,9 +146,14 @@ function MultiSelectField({ question, i18n }) {
           } else {
             helpers.setValue(field.value.concat(option));
           }
+          helpers.setTouched(true);
         }}
         isOpen={isOpen}
         selections={field.value}
+        onClear={() => {
+          helpers.setTouched(true);
+          helpers.setValue([]);
+        }}
       >
         {question.choices.split('\n').map(opt => (
           <SelectOption key={opt} value={opt} />

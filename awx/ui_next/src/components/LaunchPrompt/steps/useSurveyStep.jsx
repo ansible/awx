@@ -45,15 +45,9 @@ export default function useSurveyStep(config, visitedSteps, i18n) {
     });
     return errors;
   };
-  const formError = validate();
+  const formError = Object.keys(validate()).length > 0;
   return {
-    step: getStep(
-      config,
-      survey,
-      Object.keys(formError).length > 0,
-      i18n,
-      visitedSteps
-    ),
+    step: getStep(config, survey, formError, i18n, visitedSteps),
     formError,
     initialValues: getInitialValues(config, survey),
     survey,
