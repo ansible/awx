@@ -31,7 +31,7 @@ msgstr "(最初の 10 件に制限)"
 msgid "(defaults to %s)"
 msgstr "(%s にデフォルト設定)"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:396
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
 msgid "(seconds)"
 msgstr "(秒)"
 
@@ -218,26 +218,17 @@ msgstr "すべてのアクティビティー"
 msgid "ALL GROUPS"
 msgstr "すべてのグループ"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "ANY"
-msgstr "任意"
-
 #: client/src/credentials/credentials.form.js:198
 msgid "API Key"
 msgstr "API キー"
 
-#: client/src/notifications/notificationTemplates.form.js:263
+#: client/src/notifications/notificationTemplates.form.js:247
 msgid "API Service/Integration Key"
 msgstr "API サービス/統合キー"
 
 #: client/src/notifications/shared/type-change.service.js:66
 msgid "API Token"
 msgstr "API トークン"
-
-#: client/src/notifications/notificationTemplates.form.js:348
-msgid "API URL"
-msgstr "API URL"
 
 #: client/features/users/tokens/tokens.strings.js:40
 msgid "APPLICATION"
@@ -295,11 +286,11 @@ msgstr "アクセスキー"
 msgid "Access Token Expiration"
 msgstr "アクセストークンの有効期限"
 
-#: client/src/notifications/notificationTemplates.form.js:241
+#: client/src/notifications/notificationTemplates.form.js:225
 msgid "Account SID"
 msgstr "アカウント SID"
 
-#: client/src/notifications/notificationTemplates.form.js:200
+#: client/src/notifications/notificationTemplates.form.js:184
 msgid "Account Token"
 msgstr "アカウントトークン"
 
@@ -328,8 +319,8 @@ msgstr "アクティビティーストリーム"
 #: client/src/credentials/credentials.form.js:446
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:113
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:110
-#: client/src/organizations/organizations.form.js:108
-#: client/src/organizations/organizations.form.js:150
+#: client/src/organizations/organizations.form.js:117
+#: client/src/organizations/organizations.form.js:159
 #: client/src/projects/projects.form.js:285
 #: client/src/teams/teams.form.js:169
 #: client/src/teams/teams.form.js:85
@@ -382,7 +373,7 @@ msgstr "ユーザーの追加"
 msgid "Add Users"
 msgstr "ユーザーの追加"
 
-#: client/src/organizations/organizations.form.js:109
+#: client/src/organizations/organizations.form.js:118
 msgid "Add Users to this organization."
 msgstr "ユーザーをこの組織に追加してください。"
 
@@ -426,7 +417,7 @@ msgstr "新規トークンの追加"
 #: client/src/credentials/credentials.form.js:447
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:115
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:112
-#: client/src/organizations/organizations.form.js:151
+#: client/src/organizations/organizations.form.js:160
 #: client/src/projects/projects.form.js:286
 #: client/src/templates/job_templates/job-template.form.js:541
 #: client/src/templates/workflows.form.js:296
@@ -453,7 +444,7 @@ msgstr "管理"
 msgid "Admins"
 msgstr "管理者"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:376
 msgid "After every project update where the SCM revision changes, refresh the inventory from the selected source before executing job tasks. This is intended for static content, like the Ansible inventory .ini file format."
 msgstr "SCM リビジョンが変更されるプロジェクトの毎回の更新後に、選択されたソースのインベントリーを更新してからジョブのタスクを実行します。これは、Ansible インベントリーの .ini ファイル形式のような静的コンテンツが対象であることが意図されています。"
 
@@ -463,7 +454,6 @@ msgstr "SCM リビジョンが変更されるプロジェクトの毎回の更�
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:49
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:72
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:80
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:138
 msgid "All"
 msgstr "すべて"
 
@@ -680,11 +670,6 @@ msgstr "承認"
 msgid "Authorize Password"
 msgstr "パスワードの承認"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:241
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:253
-msgid "Availability Zone:"
-msgstr "アベイラビリティーゾーン"
-
 #: client/src/configuration/forms/auth-form/configuration-auth.controller.js:91
 msgid "Azure AD"
 msgstr "Azure AD"
@@ -742,12 +727,13 @@ msgstr "デフォルトでは、Tower は Tower の使用状況に関する解�
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:16
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:16
 #: client/src/license/license.partial.html:259
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:17
 #: client/src/partials/survey-maker-modal.html:17
 #: client/src/partials/survey-maker-modal.html:82
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:17
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:131
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:180
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:68
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:69
 #: client/src/templates/workflows/add-workflow/workflow-add.controller.js:149
 #: client/src/templates/workflows/edit-workflow/workflow-edit.controller.js:188
 msgid "CANCEL"
@@ -886,7 +872,7 @@ msgstr "認証情報"
 msgid "CREDENTIAL TYPE"
 msgstr "認証情報タイプ"
 
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:60
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:61
 msgid "CREDENTIAL TYPE:"
 msgstr "認証情報タイプ:"
 
@@ -908,8 +894,8 @@ msgstr "認証情報"
 msgid "CREDENTIALS PERMISSIONS"
 msgstr "認証情報のパーミッション"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:396
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:408
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:398
 #: client/src/projects/projects.form.js:231
 msgid "Cache Timeout"
 msgstr "キャッシュタイムアウト"
@@ -1019,7 +1005,7 @@ msgstr "この場所を変更するには {{BRAND_NAME}} のデプロイ時に %
 msgid "Changes"
 msgstr "変更"
 
-#: client/src/notifications/notificationTemplates.form.js:460
+#: client/src/notifications/notificationTemplates.form.js:432
 msgid "Channel"
 msgstr "チャネル"
 
@@ -1060,7 +1046,7 @@ msgstr "回答タイプの選択"
 msgid "Choose an answer type or format you want as the prompt for the user. Refer to the Ansible Tower Documentation for more additional information about each option."
 msgstr "ユーザーのプロンプトが表示される際に、必要な回答タイプを選択します。それぞれのオプションの詳細については、Ansible Tower ドキュメントを参照してください。"
 
-#: client/src/notifications/notificationTemplates.form.js:560
+#: client/src/notifications/notificationTemplates.form.js:532
 msgid "Choose an email option"
 msgstr "メールオプションの選択"
 
@@ -1113,10 +1099,6 @@ msgstr "行をクリックしてこれを選択し、終了したら「終了」
 msgid "Click on a row to select it, and click Finished when done. Use the %s button to create a new job template."
 msgstr "行をクリックしてこれを選択し、終了したら「終了」をクリックします。%s ボタンをクリックして新規ジョブテンプレートを作成します。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:137
-msgid "Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose"
-msgstr "リージョンフィールドをクリックして、クラウドプロバイダーの一覧を表示します。複数のリージョンを選択したり、以下を選択したりできます。"
-
 #: client/src/organizations/linkout/controllers/organizations-projects.controller.js:277
 msgid "Click the"
 msgstr "次をクリックしてください:"
@@ -1137,7 +1119,7 @@ msgstr "クリックしてリンクを表示します"
 msgid "Client ID"
 msgstr "クライアント ID"
 
-#: client/src/notifications/notificationTemplates.form.js:274
+#: client/src/notifications/notificationTemplates.form.js:258
 msgid "Client Identifier"
 msgstr "クライアント識別子"
 
@@ -1149,6 +1131,7 @@ msgstr "クライアントシークレット"
 #: client/src/inventories-hosts/inventories/insights/insights.partial.html:92
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:618
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:7
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:8
 #: client/src/organizations/linkout/addUsers/addUsers.partial.html:11
 #: client/src/partials/survey-maker-modal.html:28
 #: client/src/partials/survey-maker-modal.html:7
@@ -1241,6 +1224,10 @@ msgstr "コンテナーグループ"
 msgid "Container Groups Help"
 msgstr "コンテナーグループのヘルプ"
 
+#: client/src/login/authenticationServices/timer.factory.js:136
+msgid "Continue"
+msgstr "続行"
+
 #: client/lib/components/components.strings.js:130
 msgid "Continue workflow job?"
 msgstr "ワークフロージョブを続行しますか?"
@@ -1250,7 +1237,7 @@ msgstr "ワークフロージョブを続行しますか?"
 msgid "Control the level of output ansible will produce as the playbook executes."
 msgstr "Playbook の実行時に Ansible が生成する出力のレベルを制御します。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:336
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:296
 msgid "Control the level of output ansible will produce for inventory source update jobs."
 msgstr "インベントリーソースの更新ジョブ用に Ansible が生成する出力のレベルを制御します。"
 
@@ -1406,11 +1393,13 @@ msgstr "作成日 (降順)"
 #: client/src/projects/add/projects-add.controller.js:140
 #: client/src/projects/add/projects-add.controller.js:153
 #: client/src/projects/add/projects-add.controller.js:162
-#: client/src/projects/add/projects-add.controller.js:181
+#: client/src/projects/add/projects-add.controller.js:174
+#: client/src/projects/add/projects-add.controller.js:189
 #: client/src/projects/edit/projects-edit.controller.js:263
 #: client/src/projects/edit/projects-edit.controller.js:274
 #: client/src/projects/edit/projects-edit.controller.js:283
-#: client/src/projects/edit/projects-edit.controller.js:302
+#: client/src/projects/edit/projects-edit.controller.js:295
+#: client/src/projects/edit/projects-edit.controller.js:310
 msgid "Credential"
 msgstr "認証情報"
 
@@ -1460,7 +1449,7 @@ msgstr "現在のイメージ:"
 msgid "Currently following output as it arrives. Click to unfollow"
 msgstr "現在、受信時の出力をフォローしています。クリックしてフォローを解除します"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:170
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
 msgid "Custom Inventory Script"
 msgstr "カスタムインベントリースクリプト"
 
@@ -1477,7 +1466,7 @@ msgstr "カスタムスクリプト"
 msgid "Customize Pod Spec"
 msgstr "Pod 仕様のカスタマイズ"
 
-#: client/src/notifications/notificationTemplates.form.js:577
+#: client/src/notifications/notificationTemplates.form.js:549
 msgid "Customize messages…"
 msgstr "メッセージのカスタマイズ…"
 
@@ -1496,7 +1485,7 @@ msgstr "ダッシュボード"
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:24
 #: client/src/inventory-scripts/list/list.controller.js:130
 #: client/src/notifications/notification-templates-list/list.controller.js:235
-#: client/src/organizations/edit/organizations-edit.controller.js:164
+#: client/src/organizations/edit/organizations-edit.controller.js:180
 #: client/src/organizations/linkout/controllers/organizations-admins.controller.js:69
 #: client/src/organizations/linkout/controllers/organizations-users.controller.js:68
 #: client/src/organizations/list/organizations-list.controller.js:202
@@ -1591,7 +1580,7 @@ msgstr "システムレベルの機能および関数の定義"
 #: client/src/inventory-scripts/list/list.controller.js:126
 #: client/src/notifications/notification-templates-list/list.controller.js:231
 #: client/src/notifications/notificationTemplates.list.js:105
-#: client/src/organizations/edit/organizations-edit.controller.js:161
+#: client/src/organizations/edit/organizations-edit.controller.js:177
 #: client/src/organizations/linkout/controllers/organizations-admins.controller.js:66
 #: client/src/organizations/linkout/controllers/organizations-users.controller.js:65
 #: client/src/organizations/list/organizations-list.controller.js:198
@@ -1731,11 +1720,6 @@ msgstr "この {{ resourceType }} を削除すると、以下のリソースが�
 msgid "Depending on the size of the repository this may significantly increase the amount of time required to complete an update."
 msgstr "リポジトリーのサイズにより、更新の完了までに必要な時間が大幅に長くなる可能性があります。"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:261
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:274
-msgid "Describe Instances documentation"
-msgstr "インスタンスの概要ドキュメント"
-
 #: client/features/applications/add-applications.controller.js:36
 #: client/features/templates/templates.strings.js:17
 #: client/features/users/tokens/users-tokens-add.controller.js:26
@@ -1767,18 +1751,16 @@ msgstr "説明"
 
 #: client/src/notifications/notificationTemplates.form.js:156
 #: client/src/notifications/notificationTemplates.form.js:160
-#: client/src/notifications/notificationTemplates.form.js:172
-#: client/src/notifications/notificationTemplates.form.js:176
 msgid "Destination Channels"
 msgstr "送信先チャネル"
 
-#: client/src/notifications/notificationTemplates.form.js:535
-#: client/src/notifications/notificationTemplates.form.js:539
+#: client/src/notifications/notificationTemplates.form.js:507
+#: client/src/notifications/notificationTemplates.form.js:511
 msgid "Destination Channels or Users"
 msgstr "送信先チャネルまたはユーザー"
 
-#: client/src/notifications/notificationTemplates.form.js:225
-#: client/src/notifications/notificationTemplates.form.js:226
+#: client/src/notifications/notificationTemplates.form.js:209
+#: client/src/notifications/notificationTemplates.form.js:210
 msgid "Destination SMS Number"
 msgstr "送信先 SMS 番号"
 
@@ -1791,10 +1773,10 @@ msgstr "送信先 SMS 番号"
 msgid "Details"
 msgstr "詳細"
 
-#: client/src/notifications/notificationTemplates.form.js:341
-#: client/src/notifications/notificationTemplates.form.js:403
-#: client/src/notifications/notificationTemplates.form.js:474
-#: client/src/notifications/notificationTemplates.form.js:506
+#: client/src/notifications/notificationTemplates.form.js:325
+#: client/src/notifications/notificationTemplates.form.js:375
+#: client/src/notifications/notificationTemplates.form.js:446
+#: client/src/notifications/notificationTemplates.form.js:478
 msgid "Disable SSL Verification"
 msgstr "SSL 検証の無効化"
 
@@ -1935,7 +1917,7 @@ msgstr "期限切れ"
 msgid "EXTRA VARIABLES"
 msgstr "追加の変数"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:375
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:365
 msgid "Each time a job runs using this inventory, refresh the inventory from the selected source before executing job tasks."
 msgstr "このインベントリーでジョブを実行する際は常に、選択されたソースのインベントリーを更新してからジョブのタスクを実行します。"
 
@@ -2070,8 +2052,8 @@ msgstr "経過時間"
 msgid "Email"
 msgstr "メール"
 
-#: client/src/notifications/notificationTemplates.form.js:558
-#: client/src/notifications/notificationTemplates.form.js:559
+#: client/src/notifications/notificationTemplates.form.js:530
+#: client/src/notifications/notificationTemplates.form.js:531
 msgid "Email Options"
 msgstr "メールオプション"
 
@@ -2125,6 +2107,16 @@ msgstr "このジョブテンプレートの Webhook を有効にします。"
 msgid "Enable webhook for this workflow job template."
 msgstr "このワークフローのジョブテンプレートの Webhook を有効にします。"
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+msgid "Enabled Value"
+msgstr "有効な値"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:314
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:316
+msgid "Enabled Variable"
+msgstr "有効な変数"
+
 #: client/src/templates/job_templates/job-template.form.js:335
 msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {{BRAND_NAME}} and request a configuration update using this job template."
 msgstr "プロビジョニングコールバック URL の作成を有効にします。ホストは、この URL を使用して {{BRAND_NAME}} に接続でき、このジョブテンプレートを使用して設定の更新を要求できます。"
@@ -2158,19 +2150,18 @@ msgstr "使用許諾契約書"
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して 2 つの間の切り替えを行います。"
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:227
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:244
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:261
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:74
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
 msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用してこれらの間で切り替えを行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
-#: client/src/notifications/notificationTemplates.form.js:335
+#: client/src/notifications/notificationTemplates.form.js:319
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "各行に、コンマなしでアノテーションタグを 1 つ入力してください。"
 
-#: client/src/notifications/notificationTemplates.form.js:175
-msgid "Enter one HipChat channel per line. The pound symbol (#) is not required."
-msgstr "各行に 1 つの HipChat チャンネルを入力します。シャープ記号 (#) は不要です。"
-
-#: client/src/notifications/notificationTemplates.form.js:538
+#: client/src/notifications/notificationTemplates.form.js:510
 msgid "Enter one IRC channel or username per line. The pound symbol (#) for channels, and the at (@) symbol for users, are not required."
 msgstr "各行に 1 つの IRC チャンネルまたはユーザー名を入力します。チャンネルのシャープ記号 (#) およびユーザーのアットマーク (@) 記号は不要です。"
 
@@ -2182,7 +2173,7 @@ msgstr "各行に 1 つの Slack チャンネルを入力します。チャン�
 msgid "Enter one email address per line to create a recipient list for this type of notification."
 msgstr "各行に 1 つのメールアドレスを入力し、この通知タイプの受信者リストを作成します。"
 
-#: client/src/notifications/notificationTemplates.form.js:229
+#: client/src/notifications/notificationTemplates.form.js:213
 msgid "Enter one phone number per line to specify where to route SMS messages."
 msgstr "各行に 1 つの電話番号を入力し、SMS メッセージのルート先を指定します。"
 
@@ -2201,14 +2192,14 @@ msgstr "Red Hat Satellite 6 Server に対応する %sURL を入力します (%s�
 msgid "Enter the hostname or IP address which corresponds to your VMware vCenter."
 msgstr "VMware vCenter に対応するホスト名または IP アドレスを入力します。"
 
-#: client/src/notifications/notificationTemplates.form.js:215
+#: client/src/notifications/notificationTemplates.form.js:199
 msgid "Enter the number associated with the \"Messaging Service\" in Twilio in the format +18005550199."
 msgstr "Twilio の \"メッセージングサービス\" に関連付けられた番号を入力します (形式: +18005550199)。 "
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:196
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:220
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:244
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:319
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:156
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:180
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:204
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:279
 msgid "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "JSON または YAML 構文のいずれかを使用して変数を入力します。ラジオボタンを使用してこれら 2 つの間の切り替えを行います。"
 
@@ -2216,8 +2207,8 @@ msgstr "JSON または YAML 構文のいずれかを使用して変数を入力�
 msgid "Environment"
 msgstr "環境"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:186
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:193
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:146
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:153
 msgid "Environment Variables"
 msgstr "環境変数"
 
@@ -2233,11 +2224,11 @@ msgstr "エラーの詳細"
 msgid "Error Fetching Licenses"
 msgstr "ライセンスの取得エラー"
 
-#: client/src/notifications/notificationTemplates.form.js:643
+#: client/src/notifications/notificationTemplates.form.js:615
 msgid "Error Message"
 msgstr "エラーメッセージ"
 
-#: client/src/notifications/notificationTemplates.form.js:654
+#: client/src/notifications/notificationTemplates.form.js:626
 msgid "Error Message Body"
 msgstr "エラーメッセージボディー"
 
@@ -2265,13 +2256,13 @@ msgstr "エラーメッセージボディー"
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:153
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:203
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:222
-#: client/src/login/loginModal/loginModal.controller.js:143
+#: client/src/login/loginModal/loginModal.controller.js:144
 #: client/src/management-jobs/card/card.controller.js:122
 #: client/src/management-jobs/card/card.controller.js:28
 #: client/src/management-jobs/card/card.controller.js:58
-#: client/src/organizations/main.js:111
-#: client/src/organizations/main.js:124
-#: client/src/organizations/main.js:139
+#: client/src/organizations/main.js:155
+#: client/src/organizations/main.js:168
+#: client/src/organizations/main.js:183
 #: client/src/projects/add/projects-add.controller.js:120
 #: client/src/projects/edit/projects-edit.controller.js:154
 #: client/src/projects/edit/projects-edit.controller.js:220
@@ -2333,6 +2324,11 @@ msgstr "GIT SCM のサンプル URL には以下が含まれます:"
 #: client/src/projects/edit/projects-edit.controller.js:284
 msgid "Example URLs for Mercurial SCM include:"
 msgstr "Mercurial SCM のサンプル URL には以下が含まれます:"
+
+#: client/src/projects/add/projects-add.controller.js:175
+#: client/src/projects/edit/projects-edit.controller.js:296
+msgid "Example URLs for Remote Archive SCM include:"
+msgstr "リモートアーカイブ SCM のサンプル URL には以下が含まれます:"
 
 #: client/src/projects/add/projects-add.controller.js:154
 #: client/src/projects/edit/projects-edit.controller.js:275
@@ -2524,7 +2520,7 @@ msgstr "ダッシュボードの新規ジョブを取得できませんでした
 msgid "Failed to get new templates for dashboard:"
 msgstr "ダッシュボードの新規テンプレートを取得できませんでした:"
 
-#: client/src/organizations/main.js:140
+#: client/src/organizations/main.js:184
 msgid "Failed to get organizations for which this user is a notification admin. GET returned"
 msgstr "このユーザーが通知管理者の組織を取得できませんでした。GET で以下が返されました"
 
@@ -2564,7 +2560,7 @@ msgid "Failed to get workflow job template. GET returned status:"
 msgstr "ワークフロージョブテンプレートの取得に失敗しました。GET で返されたステータス:"
 
 #: client/src/app.js:229
-#: client/src/login/loginModal/loginModal.controller.js:144
+#: client/src/login/loginModal/loginModal.controller.js:145
 msgid "Failed to get workflow jobs pending approval. GET returned status:"
 msgstr "ワークフロージョブの保留中の承認取得に失敗しました。GET で返されたステータス:"
 
@@ -2606,11 +2602,11 @@ msgstr "検索結果の更新に失敗しました。"
 msgid "Failed updating job %s with variables. POST returned: %d"
 msgstr "変数でジョブ %s を更新できませんでした。POST で返されたステータス: %d"
 
-#: client/src/organizations/main.js:112
+#: client/src/organizations/main.js:156
 msgid "Failed while checking to see if user is a notification administrator of this organization. GET returned"
 msgstr "ユーザーがこの組織の通知管理者かどうかを確認中に失敗しました。GET で以下が返されました"
 
-#: client/src/organizations/main.js:125
+#: client/src/organizations/main.js:169
 msgid "Failed while checking to see if user is an administrator of this organization. GET returned"
 msgstr "ユーザーがこの組織の管理者かどうかを確認中に失敗しました。GET で以下が返されました"
 
@@ -2654,7 +2650,7 @@ msgstr "名"
 msgid "First Run"
 msgstr "初回実行日時"
 
-#: client/src/organizations/organizations.form.js:124
+#: client/src/organizations/organizations.form.js:133
 msgid "First name"
 msgstr "名"
 
@@ -2728,6 +2724,11 @@ msgstr "<a ui-sref=\"notifications.add\" translate=\"\">通知</a>へ移動:"
 #: client/src/inventories-hosts/hosts/related/groups/hosts-related-groups.route.js:45
 msgid "GROUPS"
 msgstr "グループ"
+
+#: client/src/organizations/organizations.form.js:59
+#: client/src/organizations/organizations.form.js:62
+msgid "Galaxy Credentials"
+msgstr "Galaxy 認証情報"
 
 #: client/src/shared/form-generator.js:801
 msgid "Generate field"
@@ -2803,11 +2804,11 @@ msgstr "リストの前のページに移動"
 msgid "Google OAuth2"
 msgstr "Google OAuth2"
 
-#: client/src/notifications/notificationTemplates.form.js:300
+#: client/src/notifications/notificationTemplates.form.js:284
 msgid "Grafana API Key"
 msgstr "Grafana API キー"
 
-#: client/src/notifications/notificationTemplates.form.js:285
+#: client/src/notifications/notificationTemplates.form.js:269
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
@@ -2866,13 +2867,13 @@ msgstr "ヒント: 以下のフィールドに非公開ファイルをドラッ�
 msgid "HOSTS"
 msgstr "ホスト"
 
-#: client/src/notifications/notificationTemplates.form.js:410
-#: client/src/notifications/notificationTemplates.form.js:411
+#: client/src/notifications/notificationTemplates.form.js:382
+#: client/src/notifications/notificationTemplates.form.js:383
 msgid "HTTP Headers"
 msgstr "HTTP ヘッダー"
 
-#: client/src/notifications/notificationTemplates.form.js:427
-#: client/src/notifications/notificationTemplates.form.js:428
+#: client/src/notifications/notificationTemplates.form.js:399
+#: client/src/notifications/notificationTemplates.form.js:400
 msgid "HTTP Method"
 msgstr "HTTP メソッド"
 
@@ -2912,6 +2913,11 @@ msgstr "ホスト設定キー"
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:39
 msgid "Host Enabled"
 msgstr "有効なホスト"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:304
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:306
+msgid "Host Filter"
+msgstr "ホストフィルター"
 
 #: client/features/output/output.strings.js:66
 msgid "Host Limit Error"
@@ -2974,20 +2980,15 @@ msgstr "残りのホスト"
 msgid "Hosts Used"
 msgstr "使用されたホスト"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "Hosts are imported to"
-msgstr "ホストのインポート先"
-
 #: client/features/output/output.strings.js:129
 msgid "ID"
 msgstr "ID"
 
-#: client/src/notifications/notificationTemplates.form.js:313
+#: client/src/notifications/notificationTemplates.form.js:297
 msgid "ID of the Dashboard (optional)"
 msgstr "ダッシュボード ID (オプション)"
 
-#: client/src/notifications/notificationTemplates.form.js:321
+#: client/src/notifications/notificationTemplates.form.js:305
 msgid "ID of the Panel (optional)"
 msgstr "パネル ID (オプション)"
 
@@ -3036,11 +3037,11 @@ msgstr "インベントリースクリプト"
 msgid "INVENTORY SCRIPTS"
 msgstr "インベントリースクリプト"
 
-#: client/src/notifications/notificationTemplates.form.js:524
+#: client/src/notifications/notificationTemplates.form.js:496
 msgid "IRC Nick"
 msgstr "IRC ニック"
 
-#: client/src/notifications/notificationTemplates.form.js:513
+#: client/src/notifications/notificationTemplates.form.js:485
 msgid "IRC Server Address"
 msgstr "IRC サーバーアドレス"
 
@@ -3064,8 +3065,8 @@ msgstr "問題: {{report.rule.description}}"
 msgid "ITEMS"
 msgstr "項目"
 
-#: client/src/notifications/notificationTemplates.form.js:467
-#: client/src/notifications/notificationTemplates.form.js:499
+#: client/src/notifications/notificationTemplates.form.js:439
+#: client/src/notifications/notificationTemplates.form.js:471
 msgid "Icon URL"
 msgstr "アイコン URL"
 
@@ -3073,16 +3074,11 @@ msgstr "アイコン URL"
 msgid "Idle Session"
 msgstr "アイドル状態のセッション"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:251
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:263
-msgid "If blank, all groups above are created except"
-msgstr "空白の場合には、以下を除く上のすべてのグループが作成されます。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:364
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
 msgid "If checked, all variables for child groups and hosts will be removed and replaced by those found on the external source."
 msgstr "チェックが付けられている場合、子グループおよびホストのすべての変数が削除され、外部ソースにあるものによって置き換えられます。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:353
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:343
 msgid "If checked, any hosts and groups that were previously present on the external source but are now removed will be removed from the Tower inventory. Hosts and groups that were not managed by the inventory source will be promoted to the next manually created group or if there is no manually created group to promote them into, they will be left in the \"all\" default group for the inventory."
 msgstr "チェックが付けられている場合、以前は外部ソースにあり、現在は削除されているホストおよびグループが Tower インベントリーから削除されます。インベントリーソースで管理されていなかったホストおよびグループは次に手動で作成されるグループにプロモートされるか、またはプロモート先となる手動で作成されたグループがない場合は、それらはインベントリーの「すべて」のデフォルトグループに残ります。"
 
@@ -3119,11 +3115,6 @@ msgstr "組織が指定されない場合、認証情報はそれを作成する
 msgid "If you are ready to upgrade, please contact us by clicking the button below"
 msgstr "アップグレードの準備ができましたら、以下のボタンをクリックしてお問い合わせください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:242
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:254
-msgid "Image ID:"
-msgstr "イメージ ID:"
-
 #: client/src/inventories-hosts/hosts/host.form.js:34
 #: client/src/inventories-hosts/hosts/host.list.js:35
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:33
@@ -3158,11 +3149,6 @@ msgstr "Insights"
 msgid "Insights Credential"
 msgstr "Insights 認証情報"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:144
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:147
-msgid "Instance Filters"
-msgstr "インスタンスフィルター"
-
 #: client/features/output/output.strings.js:67
 #: client/src/instance-groups/instance-groups.strings.js:43
 msgid "Instance Group"
@@ -3187,21 +3173,6 @@ msgstr "インスタンスグループ"
 #: client/src/instance-groups/instance-groups.strings.js:37
 msgid "Instance Groups Help"
 msgstr "インスタンスグループのヘルプ"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:251
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:263
-msgid "Instance ID"
-msgstr "インスタンス ID"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:243
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:255
-msgid "Instance ID:"
-msgstr "インスタンス ID:"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:244
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:256
-msgid "Instance Type:"
-msgstr "インスタンスタイプ:"
 
 #: client/lib/components/components.strings.js:85
 #: client/src/instance-groups/instance-groups.strings.js:20
@@ -3359,10 +3330,10 @@ msgstr "ジョブ"
 msgid "JSON"
 msgstr "JSON"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:197
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:221
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:245
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:320
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:157
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:181
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
 msgid "JSON:"
 msgstr "JSON:"
 
@@ -3440,11 +3411,6 @@ msgstr "キー"
 #: client/src/shared/smart-search/smart-search.partial.html:14
 msgid "Key"
 msgstr "キー"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:245
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:257
-msgid "Key Name:"
-msgstr "キー名:"
 
 #: client/src/credential-types/credential-types.list.js:31
 #: client/src/credentials/credentials.list.js:33
@@ -3551,7 +3517,7 @@ msgstr "最終使用日時 (降順)"
 msgid "Last logged in:"
 msgstr "最終ログイン:"
 
-#: client/src/organizations/organizations.form.js:128
+#: client/src/organizations/organizations.form.js:137
 msgid "Last name"
 msgstr "姓"
 
@@ -3629,21 +3595,6 @@ msgstr "ライセンスタイプ"
 #: client/src/templates/workflows.form.js:97
 msgid "Limit"
 msgstr "制限"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:255
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:268
-msgid "Limit to hosts having a tag:"
-msgstr "タグを持つホストに制限:"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:257
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:270
-msgid "Limit to hosts using either key pair:"
-msgstr "いずれかのキーペアを使用するホストに制限:"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:259
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:272
-msgid "Limit to hosts where the Name tag begins with"
-msgstr "名前タグの開始点となるホストに制限"
 
 #: client/src/scheduler/scheduler.strings.js:51
 msgid "Limited to first 10"
@@ -3760,8 +3711,8 @@ msgstr "手動プロジェクトに SCM 更新は不要です"
 msgid "Max 512 characters per label."
 msgstr "最大 512 文字 (ラベルあたり)"
 
-#: client/src/organizations/organizations.form.js:59
-#: client/src/organizations/organizations.form.js:66
+#: client/src/organizations/organizations.form.js:68
+#: client/src/organizations/organizations.form.js:75
 msgid "Max Hosts"
 msgstr "最大ホスト数"
 
@@ -3947,7 +3898,7 @@ msgstr "何も選択されていません"
 msgid "NOTE: This field assumes the remote name is \"origin\"."
 msgstr "注: このフィールドは、リモート名が \"origin\" であることが前提です。"
 
-#: client/src/login/loginModal/loginModal.partial.html:101
+#: client/src/login/loginModal/loginModal.partial.html:102
 msgid "NOTICE"
 msgstr "通知"
 
@@ -3962,7 +3913,7 @@ msgstr "通知テンプレート"
 
 #: client/lib/components/components.strings.js:131
 #: client/src/inventories-hosts/inventories/related/sources/edit/sources-notifications.route.js:9
-#: client/src/management-jobs/notifications/notification.route.js:46
+#: client/src/management-jobs/notifications/notification.route.js:59
 #: client/src/notifications/main.js:44
 #: client/src/notifications/main.js:95
 #: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
@@ -4239,10 +4190,10 @@ msgstr "インベントリーの同期に設定されていません。"
 msgid "Note that only hosts directly in this group can be disassociated.  Hosts in sub-groups must be disassociated directly from the sub-group level that they belong."
 msgstr "このグループに直接含まれるホストのみの関連付けを解除できることに注意してください。サブグループのホストの関連付けの解除については、それらのホストが属するサブグループのレベルで直接実行する必要があります。"
 
-#: client/src/notifications/notificationTemplates.form.js:371
-#: client/src/notifications/notificationTemplates.form.js:372
-#: client/src/notifications/notificationTemplates.form.js:568
-#: client/src/notifications/notificationTemplates.form.js:569
+#: client/src/notifications/notificationTemplates.form.js:343
+#: client/src/notifications/notificationTemplates.form.js:344
+#: client/src/notifications/notificationTemplates.form.js:540
+#: client/src/notifications/notificationTemplates.form.js:541
 msgid "Notification Color"
 msgstr "通知の色"
 
@@ -4250,7 +4201,7 @@ msgstr "通知の色"
 msgid "Notification Failed."
 msgstr "通知に失敗しました。"
 
-#: client/src/notifications/notificationTemplates.form.js:360
+#: client/src/notifications/notificationTemplates.form.js:332
 msgid "Notification Label"
 msgstr "通知レベル"
 
@@ -4268,7 +4219,7 @@ msgstr "通知がタイムアウトしました。"
 msgid "Notifications"
 msgstr "通知"
 
-#: client/src/notifications/notificationTemplates.form.js:385
+#: client/src/notifications/notificationTemplates.form.js:357
 msgid "Notify Channel"
 msgstr "通知チャネル"
 
@@ -4304,7 +4255,7 @@ msgstr "組織"
 
 #: client/src/activity-stream/get-target-title.factory.js:29
 #: client/src/organizations/list/organizations-list.partial.html:6
-#: client/src/organizations/main.js:51
+#: client/src/organizations/main.js:55
 msgid "ORGANIZATIONS"
 msgstr "組織"
 
@@ -4331,10 +4282,9 @@ msgstr "障害発生時"
 msgid "On Success"
 msgstr "成功時"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:156
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:161
-msgid "Only Group By"
-msgstr "グループ化のみ"
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials.partial.html:3
+msgid "Open Galaxy credentials"
+msgstr "Galaxy 認証情報を開く"
 
 #: client/src/templates/job_templates/multi-credential/multi-credential.partial.html:4
 msgid "Open credential lookup"
@@ -4420,49 +4370,38 @@ msgstr "他のプロンプト"
 msgid "Others (Cloud Providers)"
 msgstr "その他 (クラウドプロバイダー)"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:316
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:276
 msgid "Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables"
 msgstr "azure_rm.ini にあり、インベントリー更新スクリプトで使用される変数を上書きします。これらの変数の詳細な説明については、次を参照してください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
-msgid ""
-"Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                    view cloudforms.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "cloudforms.ini にあり、インベントリー更新スクリプトで使用される変数を上書きします。たとえば、変数の設定\n"
-"                <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                は Ansible Collections github リポジトリーで cloudforms.ini を表示します。</a> JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用してこの 2 つの間の切り替えを行います。構文のサンプルについては、Ansible Tower ドキュメントを参照してください。"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:242
+msgid "Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration"
+msgstr "cloudforms.ini にあり、インベントリー更新スクリプトが使用する変数を上書きします。変数の設定例については次を参照してください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:217
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:177
 msgid "Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables"
 msgstr "ec2.ini にあり、インベントリー更新スクリプトで使用される変数を上書きします。これらの変数の詳細な説明については、次を参照してください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:299
-msgid ""
-"Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
-"                    view foreman.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "foreman.ini にあり、インベントリー更新スクリプトで使用される変数を上書きします。たとえば、変数の設定                <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/foreman.ini\\\" target=\\\"_blank\\\">                は Ansible Collections github リポジトリーで foreman.ini を表示します。</a> JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用してこの  2 つの間の切り替えを行います。構文のサンプルについては、Ansible Tower ドキュメントを参照してください。"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:259
+msgid "Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration"
+msgstr "foreman.ini にあり、インベントリー更新スクリプトが使用する変数を上書きします。変数の設定例については次を参照してください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:265
-msgid ""
-"Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
-"                    view openstack.yml in the Openstack github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "openstack.yml にあり、インベントリー更新スクリプトで使用される変数を上書きします。たとえば、変数の設定                <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">                は Openstack github リポジトリーで openstack.yml を表示します。</a> JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して  2 つの間の切り替えを行います。構文のサンプルについては、Ansible Tower ドキュメントを参照してください。"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:225
+msgid "Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration"
+msgstr "openstack.yml にあり、インベントリー更新スクリプトが使用する変数を上書きします。変数の設定例については次を参照してください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:241
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
 msgid "Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables"
 msgstr "vmware.ini にあり、インベントリー更新スクリプトで使用される変数を上書きします。これらの変数の詳細な説明については、次を参照してください。"
 
 #: client/features/output/output.strings.js:83
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:350
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:340
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:345
 msgid "Overwrite"
 msgstr "上書き"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:361
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:366
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:351
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:356
 msgid "Overwrite Variables"
 msgstr "変数の上書き"
 
@@ -4543,7 +4482,7 @@ msgstr "PUT"
 msgid "Page"
 msgstr "ページ"
 
-#: client/src/notifications/notificationTemplates.form.js:252
+#: client/src/notifications/notificationTemplates.form.js:236
 msgid "Pagerduty subdomain"
 msgstr "Pagerduty サブドメイン"
 
@@ -4638,7 +4577,7 @@ msgstr "パーミッションのエラー"
 #: client/src/credentials/credentials.form.js:438
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:104
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:101
-#: client/src/organizations/organizations.form.js:143
+#: client/src/organizations/organizations.form.js:152
 #: client/src/projects/projects.form.js:278
 #: client/src/teams/teams.form.js:128
 #: client/src/templates/job_templates/job-template.form.js:532
@@ -4884,14 +4823,14 @@ msgstr "Survey をこのワークフローに追加する前に保存してく�
 msgid "Please save before adding notifications."
 msgstr "通知を追加する前に保存してください。"
 
-#: client/src/organizations/organizations.form.js:95
+#: client/src/organizations/organizations.form.js:104
 #: client/src/teams/teams.form.js:72
 msgid "Please save before adding users."
 msgstr "ユーザーを追加する前に保存してください。"
 
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:100
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:97
-#: client/src/organizations/organizations.form.js:135
+#: client/src/organizations/organizations.form.js:144
 #: client/src/projects/projects.form.js:270
 #: client/src/teams/teams.form.js:124
 #: client/src/templates/job_templates/job-template.form.js:525
@@ -5139,16 +5078,6 @@ msgstr "プロンプト"
 msgid "Prompt on launch"
 msgstr "起動プロンプト"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:253
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:266
-msgid "Provide a comma-separated list of filter expressions."
-msgstr "フィルター式のカンマ区切りリストを指定します。"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:269
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:284
-msgid "Provide a comma-separated list of filter expressions. Hosts are imported when all of the filters match. Refer to Ansible Tower documentation for more detail."
-msgstr "カンマ区切りのフィルター式の一覧を提供します。ホストは、フィルターのすべてが一致する場合にインポートされます。詳細については、Ansible Tower ドキュメントを参照してください。"
-
 #: client/src/inventories-hosts/hosts/host.form.js:49
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:48
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:50
@@ -5168,14 +5097,9 @@ msgstr "ワークフローからの影響を受けるホストまたはワーク
 msgid "Provide account information using Google Compute Engine JSON credentials file."
 msgstr "Google Compute Engine JSON 認証情報ファイルを使用してアカウント情報を指定します。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:195
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:155
 msgid "Provide environment variables to pass to the custom inventory script."
 msgstr "カスタムインベントリースクリプトに渡す環境変数を指定します。"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:272
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:287
-msgid "Provide the named URL encoded name or id of the remote Tower inventory to be imported."
-msgstr "インポートされるリモート Tower インベントリーの名前付き URL のエンコードされた名前または ID を指定します。"
 
 #: client/src/license/license.partial.html:128
 msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS > SYSTEM."
@@ -5266,7 +5190,7 @@ msgid "RESULTS"
 msgstr "結果"
 
 #: client/features/templates/templates.strings.js:39
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:50
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:51
 msgid "REVERT"
 msgstr "元に戻す"
 
@@ -5387,14 +5311,9 @@ msgstr "ページの更新"
 msgid "Refspec"
 msgstr "Refspec"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:246
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:258
-msgid "Region:"
-msgstr "リージョン:"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
-msgid "Regions"
-msgstr "リージョン"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:308
+msgid "Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied."
+msgstr "一致するホスト名のみがインポートされる正規表現。このフィルターは、インベントリープラグインフィルターが適用された後、後処理ステップとして適用されます。"
 
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:81
 msgid "Related Groups"
@@ -5478,6 +5397,10 @@ msgstr "リソース"
 msgid "Resources are missing from this template."
 msgstr "リソースがこのテンプレートにありません。"
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:318
+msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
+msgstr "ホスト変数の指定された辞書から有効な状態を取得します。有効な変数は、ドット表記を使用して指定できます (例: 「foo.bar」)。"
+
 #: client/lib/services/base-string.service.js:111
 msgid "Return"
 msgstr "戻る"
@@ -5505,7 +5428,7 @@ msgstr "戻す"
 #: client/src/configuration/forms/auth-form/sub-forms/auth-radius.form.js:34
 #: client/src/configuration/forms/auth-form/sub-forms/auth-saml.form.js:121
 #: client/src/configuration/forms/auth-form/sub-forms/auth-tacacs.form.js:47
-#: client/src/configuration/forms/jobs-form/configuration-jobs.form.js:129
+#: client/src/configuration/forms/jobs-form/configuration-jobs.form.js:110
 #: client/src/configuration/forms/system-form/sub-forms/system-activity-stream.form.js:26
 #: client/src/configuration/forms/system-form/sub-forms/system-logging.form.js:74
 #: client/src/configuration/forms/system-form/sub-forms/system-misc.form.js:95
@@ -5527,7 +5450,7 @@ msgstr "リビジョン #"
 #: client/src/credentials/credentials.form.js:461
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:130
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:127
-#: client/src/organizations/organizations.form.js:165
+#: client/src/organizations/organizations.form.js:174
 #: client/src/projects/projects.form.js:301
 #: client/src/teams/teams.form.js:109
 #: client/src/teams/teams.form.js:148
@@ -5561,6 +5484,7 @@ msgstr "SAML"
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal.partial.html:17
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:17
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:17
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:18
 #: client/src/partials/survey-maker-modal.html:84
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:18
 msgid "SAVE"
@@ -5669,7 +5593,7 @@ msgstr "検索"
 #: client/src/license/license.partial.html:260
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:137
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:186
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:74
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:75
 #: client/src/templates/workflows/add-workflow/workflow-add.controller.js:155
 #: client/src/templates/workflows/edit-workflow/workflow-edit.controller.js:194
 msgid "SELECT"
@@ -5729,7 +5653,7 @@ msgstr "設定"
 msgid "SHOW"
 msgstr "表示"
 
-#: client/src/login/loginModal/loginModal.partial.html:109
+#: client/src/login/loginModal/loginModal.partial.html:114
 msgid "SIGN IN"
 msgstr "サインイン"
 
@@ -5767,7 +5691,7 @@ msgstr "SSH パスワード"
 msgid "SSH key description"
 msgstr "SSH キーの説明"
 
-#: client/src/notifications/notificationTemplates.form.js:551
+#: client/src/notifications/notificationTemplates.form.js:523
 msgid "SSL Connection"
 msgstr "SSL 接続"
 
@@ -5871,7 +5795,7 @@ msgstr "スケジュール名"
 
 #: client/lib/components/components.strings.js:72
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:434
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:424
 #: client/src/projects/projects.form.js:321
 #: client/src/templates/job_templates/job-template.form.js:578
 #: client/src/templates/workflows.form.js:333
@@ -5891,11 +5815,6 @@ msgstr "検索"
 msgid "Secret Key"
 msgstr "シークレットキー"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:247
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:259
-msgid "Security Group:"
-msgstr "セキュリティーグループ:"
-
 #: client/src/credentials/credentials.form.js:124
 msgid "Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users."
 msgstr "セキュリティートークンサービス (STS) は、AWS Identity and Access Management (IAM) ユーザーの一時的な、権限の制限された認証情報を要求できる web サービスです。"
@@ -5905,6 +5824,14 @@ msgstr "セキュリティートークンサービス (STS) は、AWS Identity a
 #: client/src/shared/lookup/lookup-modal.partial.html:20
 msgid "Select"
 msgstr "選択"
+
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:5
+msgid "Select Galaxy Credentials"
+msgstr "Galaxy 認証情報を選択します"
+
+#: client/src/organizations/organizations.form.js:61
+msgid "Select Galaxy credentials. The selection order sets the order in which Tower will download roles/collections using `ansible-galaxy`."
+msgstr "Galaxy 認証情報を選択します。選択したこの順序は、Tower が「ansible-galaxy」を使用してロール/コレクションをダウンロードする順序を設定します。"
 
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:5
 msgid "Select Instance Groups"
@@ -6050,11 +5977,6 @@ msgstr "このジョブで実行する Playbook が含まれるプロジェク�
 #: client/src/configuration/forms/system-form/configuration-system.controller.js:188
 msgid "Select types"
 msgstr "タイプの選択"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:239
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:251
-msgid "Select which groups to create automatically."
-msgstr "自動作成するグループを選択します。"
 
 #: client/src/license/license.partial.html:153
 msgid "Selected"
@@ -6223,8 +6145,8 @@ msgstr "ソース認証情報"
 msgid "Source Details"
 msgstr "ソース詳細"
 
-#: client/src/notifications/notificationTemplates.form.js:212
-#: client/src/notifications/notificationTemplates.form.js:213
+#: client/src/notifications/notificationTemplates.form.js:196
+#: client/src/notifications/notificationTemplates.form.js:197
 msgid "Source Phone Number"
 msgstr "発信元の電話番号"
 
@@ -6232,22 +6154,18 @@ msgstr "発信元の電話番号"
 msgid "Source Project"
 msgstr "ソースプロジェクト"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:135
-msgid "Source Regions"
-msgstr "ソースリージョン"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:208
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:215
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:232
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:239
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:256
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:263
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:273
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:290
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:297
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:307
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:314
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:168
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:175
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:192
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:199
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:216
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:223
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:233
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:240
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:250
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:267
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
 msgid "Source Variables"
 msgstr "ソース変数"
 
@@ -6265,7 +6183,7 @@ msgstr "ソースワークフロー"
 msgid "Sources"
 msgstr "ソース"
 
-#: client/src/notifications/notificationTemplates.form.js:420
+#: client/src/notifications/notificationTemplates.form.js:392
 msgid "Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax."
 msgstr "JSON 形式で HTTP ヘッダーを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
 
@@ -6273,11 +6191,11 @@ msgstr "JSON 形式で HTTP ヘッダーを指定します。構文のサンプ�
 msgid "Specify a method for %s operations. This is equivalent to specifying the %s parameter, where %s could be %s"
 msgstr "%s 操作のメソッドを指定します。これは %s を指定することに相当します。%s は %s にすることができます。"
 
-#: client/src/notifications/notificationTemplates.form.js:574
+#: client/src/notifications/notificationTemplates.form.js:546
 msgid "Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc) ."
 msgstr "通知の色を指定します。使用できる色: 16 進数の色コード (例: #3af または #789abc) "
 
-#: client/src/notifications/notificationTemplates.form.js:375
+#: client/src/notifications/notificationTemplates.form.js:347
 msgid "Specify a notification color. Acceptable colors are: yellow, green, red purple, gray or random."
 msgstr "通知の色を指定します。使用できる色: 黄、緑、赤紫、灰色、またはランダム"
 
@@ -6285,14 +6203,9 @@ msgstr "通知の色を指定します。使用できる色: 黄、緑、赤紫�
 msgid "Specify a scope for the token's access"
 msgstr "トークンのアクセスのスコープを指定します"
 
-#: client/src/notifications/notificationTemplates.form.js:432
+#: client/src/notifications/notificationTemplates.form.js:404
 msgid "Specify an HTTP method for the webhook. Acceptable choices are: POST or PUT"
 msgstr "Webhook の HTTP メソッドを指定します。許容できる選択肢は、POST か PUT です。"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:268
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:283
-msgid "Specify which groups to create automatically. Group names will be created similar to the options selected. If blank, all groups above are created. Refer to Ansible Tower documentation for more detail."
-msgstr "自動作成するグループを指定します。選択したオプションと同様のグループ名が作成されます。空白の場合は、上のすべてのグループが作成されます。詳細については、Ansible Tower ドキュメントを参照してください。"
 
 #: client/features/output/output.strings.js:135
 msgid "Standard Error"
@@ -6312,11 +6225,11 @@ msgstr "開始"
 msgid "Start Date"
 msgstr "開始日"
 
-#: client/src/notifications/notificationTemplates.form.js:597
+#: client/src/notifications/notificationTemplates.form.js:569
 msgid "Start Message"
 msgstr "開始メッセージ"
 
-#: client/src/notifications/notificationTemplates.form.js:608
+#: client/src/notifications/notificationTemplates.form.js:580
 msgid "Start Message Body"
 msgstr "開始メッセージのボディー"
 
@@ -6382,11 +6295,11 @@ msgstr "サブスクリプション ID は、ユーザー名にマップされ�
 msgid "Success"
 msgstr "成功"
 
-#: client/src/notifications/notificationTemplates.form.js:620
+#: client/src/notifications/notificationTemplates.form.js:592
 msgid "Success Message"
 msgstr "成功メッセージ"
 
-#: client/src/notifications/notificationTemplates.form.js:631
+#: client/src/notifications/notificationTemplates.form.js:603
 msgid "Success Message Body"
 msgstr "成功メッセージボディー"
 
@@ -6528,32 +6441,22 @@ msgstr "トークン"
 msgid "TOTAL NODES"
 msgstr "ノードの合計"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:250
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:262
-msgid "Tag None:"
-msgstr "タグ None:"
-
 #: client/features/templates/templates.strings.js:55
 #: client/src/templates/job_templates/job-template.form.js:212
 msgid "Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags."
 msgstr "タグは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分を実行する必要がある場合に役立ちます。カンマを使って複数のタグを区切ります。タグの使用方法の詳細については、Ansible Tower ドキュメントを参照してください。"
 
-#: client/src/notifications/notificationTemplates.form.js:330
+#: client/src/notifications/notificationTemplates.form.js:314
 msgid "Tags for the Annotation"
 msgstr "アノテーションのタグ"
 
-#: client/src/notifications/notificationTemplates.form.js:329
+#: client/src/notifications/notificationTemplates.form.js:313
 msgid "Tags for the Annotation (optional)"
 msgstr "アノテーションのタグ (オプション)"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:248
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:260
-msgid "Tags:"
-msgstr "タグ:"
-
-#: client/src/notifications/notificationTemplates.form.js:392
-#: client/src/notifications/notificationTemplates.form.js:442
-#: client/src/notifications/notificationTemplates.form.js:481
+#: client/src/notifications/notificationTemplates.form.js:364
+#: client/src/notifications/notificationTemplates.form.js:414
+#: client/src/notifications/notificationTemplates.form.js:453
 msgid "Target URL"
 msgstr "ターゲット URL"
 
@@ -6565,7 +6468,7 @@ msgstr "タスク"
 #: client/src/credentials/credentials.form.js:467
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:136
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:133
-#: client/src/organizations/organizations.form.js:171
+#: client/src/organizations/organizations.form.js:180
 #: client/src/projects/projects.form.js:307
 #: client/src/templates/workflows.form.js:317
 msgid "Team Roles"
@@ -6655,7 +6558,7 @@ msgstr "プロジェクト ID は GCE によって割り当てられる識別情
 msgid "The Project selected has a status of"
 msgstr "選択されたプロジェクトのステータス"
 
-#: client/src/projects/edit/projects-edit.controller.js:331
+#: client/src/projects/edit/projects-edit.controller.js:339
 msgid "The SCM update process is running."
 msgstr "SCM 更新プロセスが実行中です。"
 
@@ -6683,7 +6586,7 @@ msgstr "回答が最大文字数を超えています。回答を短くしてく
 msgid "The answer is shorter than the minimium length. Please make the answer longer."
 msgstr "回答が最小文字数より短くなっています。回答を長くしてください。"
 
-#: client/src/notifications/notificationTemplates.form.js:287
+#: client/src/notifications/notificationTemplates.form.js:271
 msgid "The base URL of the Grafana server - the /api/annotations endpoint will be added automatically to the base Grafana URL."
 msgstr "Grafana サーバーのベース URL。/api/annotations エンドポイントは、ベース Grafana URL に自動的に追加されます。"
 
@@ -6762,7 +6665,7 @@ msgstr "最大長の値が小さすぎます。設定した最大長よりも大
 msgid "The maximum length you entered is not a valid number.  Please enter a whole number."
 msgstr "入力した最大長の数字が無効です。整数を入力してください"
 
-#: client/src/organizations/organizations.form.js:69
+#: client/src/organizations/organizations.form.js:78
 msgid "The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details."
 msgstr "この組織で管理可能な最大ホスト数。デフォルト値は 0 で、管理可能な数に制限がありません。詳細は、Ansible ドキュメントを参照してください。"
 
@@ -6897,6 +6800,10 @@ msgstr "この認証情報タイプは現在 1 つ以上の認証情報で使用
 msgid "This feature is currently in tech preview and is subject to change in a future release.  Click here for documentation."
 msgstr "この機能は現在テクノロジープレビュー機能となっており、今後のリリースで変更される可能性があります。こちらをクリックしてドキュメントを確認してください。"
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:328
+msgid "This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import."
+msgstr "有効な変数が設定されていない限り、このフィールドは無視されます。有効な変数がこの値と一致すると、インポート時にこのホストが有効になります。"
+
 #: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:25
 msgid "This group contains at least one group or host"
 msgstr "このグループには、少なくとも 1 つのグループまたはホストが含まれています。"
@@ -6983,7 +6890,7 @@ msgstr "残りの時間"
 msgid "Time in seconds to consider a project to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, and a new project update will be performed."
 msgstr "プロジェクトが最新であることを判別するための時間 (秒単位) です。ジョブ実行およびコールバック時に、タスクシステムは最新のプロジェクト更新のタイムスタンプを評価します。これがキャッシュタイムアウトよりも古い場合には、最新とは見なされず、新規のプロジェクト更新が実行されます。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:405
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:395
 msgid "Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, and a new inventory sync will be performed."
 msgstr "インベントリーの同期が最新の状態であることを判別するために使用される時間 (秒単位) です。ジョブの実行およびコールバック時に、タスクシステムは最新の同期のタイムスタンプを評価します。これがキャッシュタイムアウトよりも古い場合は最新とは見なされず、インベントリーの同期が新たに実行されます。"
 
@@ -7073,8 +6980,8 @@ msgstr "タイプの詳細"
 msgid "UNLINK"
 msgstr "リンクの削除"
 
-#: client/src/projects/add/projects-add.controller.js:182
-#: client/src/projects/edit/projects-edit.controller.js:303
+#: client/src/projects/add/projects-add.controller.js:190
+#: client/src/projects/edit/projects-edit.controller.js:311
 msgid "URL popover text"
 msgstr "URL ポップオーバーテキスト"
 
@@ -7193,7 +7100,7 @@ msgstr "サポートされない入力タイプ"
 msgid "Update Not Found"
 msgstr "更新が見つかりません"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:344
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:334
 msgid "Update Options"
 msgstr "オプションの更新"
 
@@ -7211,7 +7118,7 @@ msgstr "更新が取り消されました。クリックして詳細を確認し
 msgid "Update failed. Click for details"
 msgstr "更新に失敗しました。クリックして詳細を確認してください。"
 
-#: client/src/projects/edit/projects-edit.controller.js:331
+#: client/src/projects/edit/projects-edit.controller.js:339
 msgid "Update in Progress"
 msgstr "更新が進行中です"
 
@@ -7220,13 +7127,13 @@ msgstr "更新が進行中です"
 msgid "Update missing. Click for details"
 msgstr "更新がありません。クリックして詳細を確認してください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:372
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:377
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:362
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:367
 msgid "Update on Launch"
 msgstr "起動時の更新"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:383
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:389
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:373
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:379
 msgid "Update on Project Update"
 msgstr "プロジェクト更新時の更新"
 
@@ -7274,7 +7181,7 @@ msgstr "SSL の使用"
 msgid "Use TLS"
 msgstr "TLS の使用"
 
-#: client/src/notifications/notificationTemplates.form.js:586
+#: client/src/notifications/notificationTemplates.form.js:558
 msgid "Use custom messages to change the content of notifications sent when a job starts, succeeds, or fails. Use curly braces to access information about the job: <code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>, or attributes of the job such as <code ng-non-bindable>{{ job.status }}</code>. You may apply a number of possible variables in the message. Refer to the <a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower documentation</a> for more details."
 msgstr "カスタムメッセージを使用して、ジョブの開始時、成功時、または失敗時に送信する通知内容を変更します。中括弧を使用して、ジョブの情報 (<code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>) またはジョブの属性 (<code ng-non-bindable>{{ job.status }}</code>) にアクセスします。メッセージには、使用可能な変数を複数適用できます。詳細は、<a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower ドキュメント</a> を参照してください。"
 
@@ -7291,8 +7198,8 @@ msgstr "Git、Subversion (svn)、または Mercurial (hg) などのリモート�
 #: client/src/credentials/credentials.form.js:456
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:125
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:122
-#: client/src/organizations/organizations.form.js:119
-#: client/src/organizations/organizations.form.js:160
+#: client/src/organizations/organizations.form.js:128
+#: client/src/organizations/organizations.form.js:169
 #: client/src/projects/projects.form.js:296
 #: client/src/teams/teams.form.js:96
 #: client/src/templates/workflows.form.js:306
@@ -7315,8 +7222,8 @@ msgstr "ユーザータイプ"
 #: client/src/credentials/factories/kind-change.factory.js:40
 #: client/src/credentials/factories/kind-change.factory.js:73
 #: client/src/credentials/factories/kind-change.factory.js:94
-#: client/src/notifications/notificationTemplates.form.js:453
-#: client/src/notifications/notificationTemplates.form.js:492
+#: client/src/notifications/notificationTemplates.form.js:425
+#: client/src/notifications/notificationTemplates.form.js:464
 #: client/src/notifications/notificationTemplates.form.js:64
 #: client/src/users/users.form.js:59
 #: client/src/users/users.list.js:29
@@ -7338,7 +7245,7 @@ msgstr "指定されたクラウドまたはインフラストラクチャープ
 #: client/lib/components/components.strings.js:80
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:35
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:38
-#: client/src/organizations/organizations.form.js:101
+#: client/src/organizations/organizations.form.js:110
 #: client/src/teams/teams.form.js:78
 msgid "Users"
 msgstr "ユーザー"
@@ -7376,11 +7283,6 @@ msgstr "詳細を表示"
 msgid "VIEW PER PAGE"
 msgstr "ページ別のビュー"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:249
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:261
-msgid "VPC ID:"
-msgstr "VPC ID:"
-
 #: client/src/license/license.partial.html:10
 msgid "Valid License"
 msgstr "有効なライセンス"
@@ -7409,8 +7311,8 @@ msgstr "Vault パスワード"
 #: client/features/templates/templates.strings.js:60
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:82
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:91
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:330
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:337
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:290
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:297
 #: client/src/templates/job_templates/job-template.form.js:189
 #: client/src/templates/job_templates/job-template.form.js:196
 msgid "Verbosity"
@@ -7451,10 +7353,10 @@ msgstr "Insights の表示"
 msgid "View Insights Data"
 msgstr "Insights データの表示"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:225
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:249
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:161
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:185
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:209
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:284
 msgid "View JSON examples at"
 msgstr "JSON サンプルの表示: "
 
@@ -7488,10 +7390,10 @@ msgstr "プロジェクトのチェックアウト結果を表示"
 msgid "View Survey"
 msgstr "Survey の表示"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:202
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:226
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:250
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:325
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:162
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:186
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:210
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:285
 msgid "View YAML examples at"
 msgstr "YAML サンプルの表示: "
 
@@ -7566,11 +7468,6 @@ msgstr "チームの表示"
 #: client/src/templates/templates.list.js:103
 msgid "View template"
 msgstr "テンプレートの表示"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:261
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:274
-msgid "View the"
-msgstr "次の表示:"
 
 #: client/features/output/output.strings.js:22
 #: client/lib/components/components.strings.js:63
@@ -7719,11 +7616,11 @@ msgstr "Ansible Tower へようこそ! ライセンスを取得するために�
 msgid "Welcome to Ansible {{BRAND_NAME}}! &nbsp;Please sign in."
 msgstr "Ansible {{BRAND_NAME}} へようこそ! &nbsp;サインインしてください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:365
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
 msgid "When not checked, a merge will be performed, combining local variables with those found on the external source."
 msgstr "チェックが付けられていない場合、ローカル変数と外部ソースにあるものを組み合わせるマージが実行されます。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:344
 msgid "When not checked, local child hosts and groups not found on the external source will remain untouched by the inventory update process."
 msgstr "チェックが付けられていない場合、外部ソースにないローカルの子ホストおよびグループは、インベントリーの更新プロセスによって処理されないままになります。"
 
@@ -7740,19 +7637,19 @@ msgstr "このプロジェクトがジョブテンプレートで使用されて
 msgid "Workflow"
 msgstr "ワークフロー"
 
-#: client/src/notifications/notificationTemplates.form.js:666
+#: client/src/notifications/notificationTemplates.form.js:638
 msgid "Workflow Approved Message"
 msgstr "ワークフロー承認メッセージ"
 
-#: client/src/notifications/notificationTemplates.form.js:677
+#: client/src/notifications/notificationTemplates.form.js:649
 msgid "Workflow Approved Message Body"
 msgstr "ワークフロー承認メッセージのボディー"
 
-#: client/src/notifications/notificationTemplates.form.js:689
+#: client/src/notifications/notificationTemplates.form.js:661
 msgid "Workflow Denied Message"
 msgstr "ワークフロー拒否メッセージ"
 
-#: client/src/notifications/notificationTemplates.form.js:700
+#: client/src/notifications/notificationTemplates.form.js:672
 msgid "Workflow Denied Message Body"
 msgstr "ワークフロー拒否メッセージのボディー"
 
@@ -7768,11 +7665,11 @@ msgstr "ワークフロージョブテンプレートのノード"
 msgid "Workflow Job Templates"
 msgstr "ワークフロージョブテンプレート"
 
-#: client/src/notifications/notificationTemplates.form.js:712
+#: client/src/notifications/notificationTemplates.form.js:684
 msgid "Workflow Pending Approval Message"
 msgstr "ワークフロー承認待ちメッセージ"
 
-#: client/src/notifications/notificationTemplates.form.js:723
+#: client/src/notifications/notificationTemplates.form.js:695
 msgid "Workflow Pending Approval Message Body"
 msgstr "ワークフロー承認待ちメッセージのボディー"
 
@@ -7787,11 +7684,11 @@ msgstr "ワークフローテンプレート"
 msgid "Workflow Templates"
 msgstr "ワークフローテンプレート"
 
-#: client/src/notifications/notificationTemplates.form.js:735
+#: client/src/notifications/notificationTemplates.form.js:707
 msgid "Workflow Timed Out Message"
 msgstr "ワークフローのタイムアウトメッセージ"
 
-#: client/src/notifications/notificationTemplates.form.js:746
+#: client/src/notifications/notificationTemplates.form.js:718
 msgid "Workflow Timed Out Message Body"
 msgstr "ワークフローのタイムアウトメッセージのボディー"
 
@@ -7809,10 +7706,10 @@ msgstr "書き込み"
 msgid "YAML"
 msgstr "YAML"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:199
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:223
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:247
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:322
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:159
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:183
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:207
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
 msgid "YAML:"
 msgstr "YAML:"
 
@@ -7943,11 +7840,6 @@ msgstr "エラー"
 msgid "failed"
 msgstr "失敗"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:262
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:275
-msgid "for a complete list of supported filters."
-msgstr "サポートされるフィルターの詳細の一覧"
-
 #: client/src/inventories-hosts/inventories/related/hosts/related-groups-labels/relatedGroupsLabelsList.directive.js:82
 msgid "from the"
 msgstr "  削除元:"
@@ -7998,11 +7890,6 @@ msgstr "新規"
 #: client/src/shared/paginate/paginate.partial.html:45
 msgid "of"
 msgstr " /"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "of the filters match."
-msgstr "フィルターの一致:"
 
 #: client/src/scheduler/scheduler.strings.js:34
 msgid "on"
@@ -8063,11 +7950,6 @@ msgstr "同期が失敗しているソースです。クリックして詳細を
 msgid "successful"
 msgstr "成功"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:259
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:272
-msgid "test"
-msgstr "test (テスト)"
-
 #: client/src/activity-stream/factories/build-description.factory.js:136
 msgid "timed out"
 msgstr "タイムアウト"
@@ -8077,10 +7959,6 @@ msgstr "タイムアウト"
 #: client/src/templates/prompt/steps/survey/prompt-survey.partial.html:30
 msgid "to"
 msgstr " 〜 "
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:138
-msgid "to include all regions. Only Hosts associated with the selected regions will be updated."
-msgstr "すべてのリージョンが含まれます。選択したリージョンに関連付けられたホストのみが更新されます。"
 
 #: client/src/inventories-hosts/inventories/related/sources/factories/get-sync-status-msg.factory.js:17
 msgid "to start it now."
@@ -8106,31 +7984,33 @@ msgstr "v3 デフォルト%s  - 「デフォルト」に設定"
 msgid "v3 multi-domain%s - your domain name"
 msgstr "v3 マルチドメイン%s - ドメイン名"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:318
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:278
 msgid "view azure_rm.ini in the Ansible community.general github repo."
-msgstr "Ansible community.general github リポジトリーで azure_rm.ini を表示します。"
+msgstr "Ansible community.general github リポジトリーの azure_rm.ini を表示します。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:219
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:244
+msgid "view cloudforms.ini in the Ansible Collections github repo."
+msgstr "Ansible Collections github リポジトリーのcloudforms.ini を表示します。"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
 msgid "view ec2.ini in the community.aws repo."
-msgstr "community.awsリポジトリーで ec2.ini を表示します。"
+msgstr "community.aws リポジトリーの ec2.ini を表示します。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:243
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:261
+msgid "view foreman.ini in the Ansible Collections github repo."
+msgstr "Ansible Collections github リポジトリーの foreman.ini を表示します。"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:227
+msgid "view openstack.yml in the Openstack github repo."
+msgstr "Openstack github リポジトリーの openstack.yml を表示します。"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:203
 msgid "view vmware_inventory.ini in the vmware community repo."
-msgstr "vmware コミュニティーリポジトリーで vmware_inventory.ini を表示します。"
+msgstr "vmware コミュニティーリポジトリーの vmware_inventory.ini を表示します。"
 
 #: client/features/jobs/jobs.strings.js:24
 msgid "waiting"
 msgstr "待機中"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "when"
-msgstr "日付"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:240
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:252
-msgid "will create group names similar to the following examples based on the options selected:"
-msgstr "選択されたオプションに基づいて以下のサンプルと同様のグループ名が作成されます。"
 
 #: client/index.template.ejs:158
 msgid "working..."
