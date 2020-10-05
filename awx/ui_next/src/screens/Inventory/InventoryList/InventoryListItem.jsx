@@ -36,10 +36,6 @@ const Badge = styled(PFBadge)`
 
 const ListGroup = styled.span`
   margin-left: 24px;
-
-  &:first-of-type {
-    margin-left: 0;
-  }
 `;
 
 function InventoryListItem({
@@ -110,7 +106,6 @@ function InventoryListItem({
                 </Link>
               )}
             </DataListCell>,
-
             <DataListCell key="kind">
               {inventory.kind === 'smart'
                 ? i18n._(t`Smart Inventory`)
@@ -136,7 +131,6 @@ function InventoryListItem({
                 </Badge>
               </ListGroup>
             </DataListCell>,
-
             inventory.pending_deletion && (
               <DataListCell alignRight isFilled={false} key="pending-delete">
                 <Label color="red">{i18n._(t`Pending delete`)}</Label>
