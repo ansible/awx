@@ -213,33 +213,36 @@
         - install_collections
 
     - block:
-        - name: detect requirements.yml
+        - name: detect requirements.(yml/yaml)
           stat:
-            path: "{{project_path|quote}}/requirements.yml"
+            path: "{{project_path|quote}}/requirements{{ item.ext }}"
+          with_items: "{{ yaml_exts }}"
           register: doesRequirementsExist
 
-        - name: fetch galaxy roles from requirements.yml
+        - name: fetch galaxy roles from requirements.(yml/yaml)
           command: >
-            ansible-galaxy role install -r requirements.yml
+            ansible-galaxy role install -r {{ item.path }}
             --roles-path {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_roles
             {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
             chdir: "{{project_path|quote}}"
           register: galaxy_result
+          with_items: "{{ doesRequirementsExist.results }}"
           when: doesRequirementsExist.stat.exists and roles_enabled|bool
           changed_when: "'was installed successfully' in galaxy_result.stdout"
           environment:
             ANSIBLE_FORCE_COLOR: false
             GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
 
-        - name: fetch galaxy collections from requirements.yml
+        - name: fetch galaxy collections from requirements.(yml/yaml)
           command: >
-            ansible-galaxy collection install -r requirements.yml
+            ansible-galaxy collection install -r {{ item.path }}
             --collections-path {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_collections
             {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
             chdir: "{{project_path|quote}}"
           register: galaxy_collection_result
+          with_items: "{{ doesRequirementsExist.results }}"
           when: doesRequirementsExist.stat.exists and collections_enabled|bool
           changed_when: "'Installing ' in galaxy_collection_result.stdout"
           environment:
