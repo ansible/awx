@@ -114,21 +114,15 @@ function InventoryListItem({
             <DataListCell key="groups-hosts-sources-counts">
               <ListGroup>
                 {i18n._(t`Groups`)}
-                <Badge isRead>
-                  {inventory.total_groups}
-                </Badge>
+                <Badge isRead>{inventory.total_groups}</Badge>
               </ListGroup>
               <ListGroup>
                 {i18n._(t`Hosts`)}
-                <Badge isRead>
-                  {inventory.total_hosts}
-                </Badge>
+                <Badge isRead>{inventory.total_hosts}</Badge>
               </ListGroup>
               <ListGroup>
                 {i18n._(t`Sources`)}
-                <Badge isRead>
-                  {inventory.total_inventory_sources}
-                </Badge>
+                <Badge isRead>{inventory.total_inventory_sources}</Badge>
               </ListGroup>
             </DataListCell>,
             inventory.pending_deletion && (
