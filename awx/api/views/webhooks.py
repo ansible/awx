@@ -286,7 +286,7 @@ class BitbucketWebhookReceiver(WebhookReceiverBase):
         return self.request.META.get('HTTP_X_EVENT_KEY')
 
     def get_event_guid(self):
-        return self.request.META.get('HTTP_X_REQUEST_UUID')
+        return self.request.META.get('HTTP_X_REQUEST_UUID') or self.request.META.get('HTTP_X_REQUEST_ID')
 
     def get_event_status_api(self):
         # repo:refs_changed - push
