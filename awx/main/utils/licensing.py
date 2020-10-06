@@ -73,9 +73,9 @@ class Licenser(object):
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
         self._attrs.update(kwargs)
-        # self._attrs.update(settings.LICENSE)
-
         if self._check_product_cert():
+            if 'license_key' in self._attrs:
+                self._attrs = self.UNLICENSED_DATA
             if 'valid_key' in self._attrs:
                 if not self._attrs['valid_key']:
                     self._attrs = self.UNLICENSED_DATA
