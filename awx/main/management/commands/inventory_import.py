@@ -217,10 +217,10 @@ class Command(BaseCommand):
                             'specifies the unique, immutable instance ID, may be '
                             'specified as "foo.bar" to traverse nested dicts.')
 
-    def set_logging_level(self):
+    def set_logging_level(self, verbosity):
         log_levels = dict(enumerate([logging.WARNING, logging.INFO,
                                      logging.DEBUG, 0]))
-        logger.setLevel(log_levels.get(self.verbosity, 0))
+        logger.setLevel(log_levels.get(verbosity, 0))
 
     def _get_instance_id(self, variables, default=''):
         '''
@@ -826,7 +826,7 @@ class Command(BaseCommand):
         # special check for tower-type inventory sources
         # but only if running the plugin
         TOWER_SOURCE_FILES = ['tower.yml', 'tower.yaml']
-        if self.inventory_source.source == 'tower' and any(f in self.source for f in TOWER_SOURCE_FILES):
+        if self.inventory_source.source == 'tower' and any(f in self.inventory_source.source_path for f in TOWER_SOURCE_FILES):
             # only if this is the 2nd call to license check, we cannot compare before running plugin
             if hasattr(self, 'all_group'):
                 self.remote_tower_license_compare(local_license_type)
@@ -871,6 +871,15 @@ class Command(BaseCommand):
         elif not inventory_name and not inventory_id:
             raise CommandError('--inventory-name or --inventory-id is required')
 
+        # Obtain rest of the options needed to run update
+        raw_source = options.get('source', None)
+        if not raw_source:
+            raise CommandError('--source is required')
+        source = Command.get_source_absolute_path(raw_source)
+        verbosity = int(options.get('verbosity', 1))
+        self.set_logging_level(verbosity)
+        venv_path = options.get('venv', None)
+
         # Load inventory object based on name or ID.
         if inventory_id:
             q = dict(id=inventory_id)
@@ -883,14 +892,6 @@ class Command(BaseCommand):
         except Inventory.MultipleObjectsReturned:
             raise CommandError('Inventory with %s = %s returned multiple results' % list(q.items())[0])
         logger.info('Updating inventory %d: %s' % (inventory.pk, inventory.name))
-
-        # Obtain rest of the options needed to run update
-        raw_source = options.get('source', None)
-        if not raw_source:
-            raise CommandError('--source is required')
-        source = Command.get_source_absolute_path(raw_source)
-        verbosity = int(options.get('verbosity', 1))
-        venv_path = options.get('venv', None)
 
         # Create ad-hoc inventory source and inventory update objects
         with ignore_inventory_computed_fields():
@@ -944,8 +945,6 @@ class Command(BaseCommand):
         self.inventory_update = inventory_update
 
         # the update options, could be parser object or dict
-        self.verbosity = int(options.get('verbosity', 1))
-        self.set_logging_level()
         self.overwrite = bool(options.get('overwrite', False))
         self.overwrite_vars = bool(options.get('overwrite_vars', False))
         self.enabled_var = options.get('enabled_var', None)
@@ -1039,19 +1038,9 @@ class Command(BaseCommand):
                                     queries_before2 = len(connection.queries)
                                 self.inventory.update_computed_fields()
                             if settings.SQL_DEBUG:
-                                logger.warning('loading into database...')
-                            with ignore_inventory_computed_fields():
-                                if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
-                                    self.load_into_database()
-                                else:
-                                    with disable_activity_stream():
-                                        self.load_into_database()
-                                if settings.SQL_DEBUG:
-                                    queries_before2 = len(connection.queries)
-                                self.inventory.update_computed_fields()
-                                if settings.SQL_DEBUG:
-                                    logger.warning('update computed fields took %d queries',
-                                                   len(connection.queries) - queries_before2)
+                                logger.warning('update computed fields took %d queries',
+                                               len(connection.queries) - queries_before2)
+
                             # Check if the license is valid.
                             # If the license is not valid, a CommandError will be thrown,
                             # and inventory update will be marked as invalid.
@@ -1064,9 +1053,9 @@ class Command(BaseCommand):
                             self.check_org_host_limit()
                     except CommandError as e:
                         if license_fail:
-                            self.mark_license_failure()
+                            self.mark_license_failure(save=True)
                         else:
-                            self.mark_org_limits_failure()
+                            self.mark_org_limits_failure(save=True)
                         raise e
 
                     if settings.SQL_DEBUG:

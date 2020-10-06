@@ -83,7 +83,7 @@ class MockLoader:
         return self._data
 
 
-def mock_logging(self):
+def mock_logging(self, level):
     pass
 
 

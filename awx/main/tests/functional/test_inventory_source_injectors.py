@@ -214,6 +214,8 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
             f"'{inventory_filename}' file not found in inventory update runtime files {content.keys()}"
 
         env.pop('ANSIBLE_COLLECTIONS_PATHS', None)  # collection paths not relevant to this test
+        env.pop('PYTHONPATH')
+        env.pop('VIRTUAL_ENV')
         base_dir = os.path.join(DATA, 'plugins')
         if not os.path.exists(base_dir):
             os.mkdir(base_dir)
