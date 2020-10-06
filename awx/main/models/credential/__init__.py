@@ -1022,6 +1022,22 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
+    namespace='bitbucket_token',
+    kind='token',
+    name=ugettext_noop('Bitbucket Personal Access Token'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'token',
+            'label': ugettext_noop('Token'),
+            'type': 'string',
+            'secret': True,
+        }],
+        'required': ['token'],
+    },
+)
+
+ManagedCredentialType(
     namespace='insights',
     kind='insights',
     name=ugettext_noop('Insights'),

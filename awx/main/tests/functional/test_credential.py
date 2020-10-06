@@ -79,6 +79,7 @@ def test_default_cred_types():
         'aws',
         'azure_kv',
         'azure_rm',
+        'bitbucket_token',
         'cloudforms',
         'conjur',
         'galaxy_api_token',
