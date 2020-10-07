@@ -297,7 +297,7 @@ class Licenser(object):
                 )
                 license._attrs['subscription_name'] = subscription_name
                 license.update(
-                    license_date=sub.end_date.strftime('%s')
+                    license_date=int(sub.end_date.strftime('%s'))
                 )
                 license.update(
                     pool_id=sub.pool_id

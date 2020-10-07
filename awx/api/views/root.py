@@ -243,7 +243,7 @@ class ApiV2AttachView(APIView):
         if pool_id and user and pw:
             try:
                 # Create connection
-                from rhsm.connection import UEPConnection, RestlibException
+                from rhsm.connection import UEPConnection, RestlibException, UnauthorizedException
                 uep = UEPConnection(username=user, password=pw, insecure=True)
 
                 # Check if consumer already exists
@@ -337,11 +337,13 @@ class ApiV2AttachView(APIView):
 
                 msg = _("Invalid Subscription.")
                 # TODO: Catch specific errors
-                # if (
-                #     isinstance(exc, requests.exceptions.HTTPError) and
-                #     getattr(getattr(exc, 'response', None), 'status_code', None) == 401
-                # ):
-                #     msg = _("The provided credentials are invalid (HTTP 401).")
+                if (
+                    isinstance(e, UnauthorizedException) and
+                    getattr(e, 'code', None) == 401
+                ):
+                    msg = _("The provided credentials are invalid (HTTP 401). Content host: " + uep.host + \
+                        "; Register this node with the correct content host via subscription-manager.")
+
                 # elif isinstance(exc, requests.exceptions.ProxyError):
                 #     msg = _("Unable to connect to proxy server.")
                 # elif isinstance(exc, requests.exceptions.ConnectionError):
@@ -373,7 +375,6 @@ class ApiV2ConfigView(APIView):
 
         from awx.main.utils.common import get_licenser
         license_data = get_licenser().validate(new_cert=False)
-        # license_data = settings.LICENSE
 
         if not license_data.get('valid_key', False):
             license_data = {}
