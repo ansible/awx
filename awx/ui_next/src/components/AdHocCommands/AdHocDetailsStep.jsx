@@ -47,7 +47,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
     moduleNameField.value === 'command' || moduleNameField.value === 'shell';
   const [, argumentsMeta, argumentsHelpers] = useField({
     name: 'module_args',
-    validate: argumentsRequired ? required(null, i18n) : null,
+    validate: argumentsRequired && required(null, i18n),
   });
 
   const isValid = !argumentsMeta.error || !argumentsMeta.touched;
@@ -58,6 +58,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
         <FormFullWidthLayout>
           <FormGroup
             fieldId="module_name"
+            aria-label={i18n._(t`Module`)}
             label={i18n._(t`Module`)}
             isRequired
             helperTextInvalid={moduleNameMeta.error}
@@ -103,9 +104,11 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
           <FormField
             id="module_args"
             name="module_args"
+            aria-label={i18n._(t`Arguments`)}
             type="text"
             label={i18n._(t`Arguments`)}
             validated={isValid ? 'default' : 'error'}
+            onBlur={() => argumentsHelpers.setTouched(true)}
             placeholder={i18n._(t`Enter arguments`)}
             isRequired={
               moduleNameField.value === 'command' ||
@@ -133,6 +136,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
           />
           <FormGroup
             fieldId="verbosity"
+            aria-label={i18n._(t`Verbosity`)}
             label={i18n._(t`Verbosity`)}
             isRequired
             validated={
@@ -164,6 +168,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             name="limit"
             type="text"
             label={i18n._(t`Limit`)}
+            aria-label={i18n._(t`Limit`)}
             tooltip={
               <span>
                 {i18n._(
@@ -185,6 +190,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             type="number"
             min="0"
             label={i18n._(t`Forks`)}
+            aria-label={i18n._(t`Forks`)}
             tooltip={
               <span>
                 {i18n._(
@@ -203,6 +209,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
           <FormColumnLayout>
             <FormGroup
               label={i18n._(t`Show changes`)}
+              aria-label={i18n._(t`Show changes`)}
               labelIcon={
                 <FieldTooltip
                   content={i18n._(
@@ -300,6 +307,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
               </TooltipWrapper>
             }
             label={i18n._(t`Extra variables`)}
+            aria-label={i18n._(t`Extra variables`)}
           />
         </FormFullWidthLayout>
       </FormColumnLayout>

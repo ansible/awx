@@ -1,12 +1,25 @@
 import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/react-icons';
+import { Tooltip } from '@patternfly/react-core';
 import { withFormik, useFormikContext } from 'formik';
 import PropTypes from 'prop-types';
 
+import styled from 'styled-components';
 import Wizard from '../Wizard';
 import AdHocCredentialStep from './AdHocCredentialStep';
 import AdHocDetailsStep from './AdHocDetailsStep';
+
+const AlertText = styled.div`
+  color: var(--pf-global--danger-color--200);
+  font-weight: var(--pf-global--FontWeight--bold);
+`;
+
+const ExclamationCircleIcon = styled(PFExclamationCircleIcon)`
+  margin-left: 10px;
+  color: var(--pf-global--danger-color--100);
+`;
 
 function AdHocCommandsWizard({
   onLaunch,
@@ -19,7 +32,7 @@ function AdHocCommandsWizard({
   const [currentStepId, setCurrentStepId] = useState(1);
   const [enableLaunch, setEnableLaunch] = useState(false);
 
-  const { values } = useFormikContext();
+  const { values, errors, touched } = useFormikContext();
 
   const enabledNextOnDetailsStep = () => {
     if (!values.module_name) {
@@ -36,11 +49,26 @@ function AdHocCommandsWizard({
     }
     return undefined; // makes the linter happy;
   };
+  const hasDetailsStepError = errors.module_args && touched.module_args;
+
   const steps = [
     {
       id: 1,
       key: 1,
-      name: i18n._(t`Details`),
+      name: hasDetailsStepError ? (
+        <AlertText>
+          {i18n._(t`Details`)}
+          <Tooltip
+            position="right"
+            content={i18n._(t`This step contains errors`)}
+            trigger="click mouseenter focus"
+          >
+            <ExclamationCircleIcon />
+          </Tooltip>
+        </AlertText>
+      ) : (
+        i18n._(t`Details`)
+      ),
       component: (
         <AdHocDetailsStep
           moduleOptions={moduleOptions}
@@ -60,7 +88,7 @@ function AdHocCommandsWizard({
           onEnableLaunch={() => setEnableLaunch(true)}
         />
       ),
-      enableNext: enableLaunch,
+      enableNext: enableLaunch && Object.values(errors).length === 0,
       nextButtonText: i18n._(t`Launch`),
       canJumpTo: currentStepId >= 2,
     },
