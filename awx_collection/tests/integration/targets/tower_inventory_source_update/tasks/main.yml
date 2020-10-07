@@ -73,8 +73,8 @@
 
     - name: Test Inventory Source Update
       tower_inventory_source_update:
+        name: "{{ inv_source2 }}"
         inventory: "{{ inv_name }}"
-        inventory_source: "{{ inv_source2 }}"
         organization: Default
       register: result
 
@@ -84,8 +84,8 @@
 
     - name: Test Inventory Source Update for All Sources
       tower_inventory_source_update:
+        name: "{{ item.name }}"
         inventory: "{{ inv_name }}"
-        inventory_source: "{{ item.name }}"
         organization: Default
         wait: true
       loop: "{{ query('awx.awx.tower_api', 'inventory_sources', query_params={ 'inventory': created_inventory.id }, expect_objects=True, return_objects=True) }}"
