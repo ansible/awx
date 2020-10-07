@@ -21,6 +21,7 @@ import re
 import requests
 
 from django.conf import settings
+from awx.conf.models import Setting
 from django.utils.encoding import smart_text
 
 from awx.main.models import Host
@@ -69,7 +70,6 @@ class Licenser(object):
             license_type='UNLICENSED',
         )
         if not kwargs:
-            from awx.conf.models import Setting
             kwargs = Setting.objects.filter(key='LICENSE').first().value
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
@@ -177,6 +177,7 @@ class Licenser(object):
         settings.LICENSE = self._attrs
         return self._attrs
 
+
     def update(self, **kwargs):
         # Update attributes of the current license.
         if 'instance_count' in kwargs:
@@ -187,8 +188,11 @@ class Licenser(object):
 
 
     def validate_rh(self, user, pw):
-        # TODO: replace with host grabbed from subman config
-        host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
+        from rhsm.config import get_config_parser
+        config = get_config_parser()
+        host = 'https://' + str(config.get("server", "hostname"))
+        if not host:
+            host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
         
         if not user:
             raise ValueError('subscriptions_username is required')
