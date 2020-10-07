@@ -334,7 +334,6 @@ class ApiV2AttachView(APIView):
 
 
             except Exception as e:
-
                 msg = _("Invalid Subscription.")
                 # TODO: Catch specific errors
                 if (
@@ -350,10 +349,10 @@ class ApiV2AttachView(APIView):
                 #     msg = _("Could not connect to subscription service.")
                 # elif isinstance(exc, (ValueError, OSError)) and exc.args:
                 #     msg = exc.args[0]
-                # else:
-                #     logger.exception(smart_text(u"Invalid license submitted."),
-                #                      extra=dict(actor=request.user.username))
-                return Response({"error": msg + e}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    logger.exception(smart_text(u"Invalid subscription submitted."),
+                                     extra=dict(actor=request.user.username))
+                return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"error": _("No pool_id provided, or SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD are not set.")}, 
                         status=status.HTTP_400_BAD_REQUEST)

@@ -69,7 +69,8 @@ class Licenser(object):
             license_type='UNLICENSED',
         )
         if not kwargs:
-            kwargs = getattr(settings, 'LICENSE', None) or {}
+            from awx.conf.models import Setting
+            kwargs = Setting.objects.filter(key='LICENSE').first().value
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
         self._attrs.update(kwargs)
@@ -148,7 +149,6 @@ class Licenser(object):
                                        verify=verify,
                                        # timeout=(5, 5)
                                        )
-
                 if request.status_code != 200:
                     logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
                     return
@@ -311,7 +311,7 @@ class Licenser(object):
 
 
     def validate(self, new_cert=False):
-        
+
         # Generate Config from Entitlement cert if it exists
         if new_cert:
             self._generate_product_config()
