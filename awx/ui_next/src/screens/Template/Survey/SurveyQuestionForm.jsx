@@ -10,9 +10,9 @@ import FormField, {
   CheckboxField,
   PasswordField,
   FormSubmitError,
-  FieldTooltip,
 } from '../../../components/FormField';
 import AnsibleSelect from '../../../components/AnsibleSelect';
+import Popover from '../../../components/Popover';
 import {
   required,
   noWhiteSpace,
@@ -30,7 +30,7 @@ function AnswerTypeField({ i18n }) {
     <FormGroup
       label={i18n._(t`Answer Type`)}
       labelIcon={
-        <FieldTooltip
+        <Popover
           content={i18n._(
             t`Choose an answer type or format you want as the prompt for the user.
           Refer to the Ansible Tower Documentation for more additional

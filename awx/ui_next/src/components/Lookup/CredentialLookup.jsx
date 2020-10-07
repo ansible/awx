@@ -15,7 +15,7 @@ import { FormGroup } from '@patternfly/react-core';
 import { CredentialsAPI } from '../../api';
 import { Credential } from '../../types';
 import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
-import { FieldTooltip } from '../FormField';
+import Popover from '../Popover';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
 import useAutoPopulateLookup from '../../util/useAutoPopulateLookup';
@@ -117,7 +117,7 @@ function CredentialLookup({
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
       label={label}
-      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
+      labelIcon={tooltip && <Popover content={tooltip} />}
       helperTextInvalid={helperTextInvalid}
     >
       <Lookup

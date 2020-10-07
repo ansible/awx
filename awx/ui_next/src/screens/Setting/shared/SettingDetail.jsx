@@ -3,7 +3,6 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Detail } from '../../../components/DetailList';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
-// import DetailPopover from '../../../components/DetailList/DetailPopover';
 
 export default withI18n()(
   ({ i18n, helpText, id, label, type, unit = '', value }) => {

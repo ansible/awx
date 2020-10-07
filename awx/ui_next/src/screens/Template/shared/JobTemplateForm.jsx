@@ -20,7 +20,6 @@ import useRequest from '../../../util/useRequest';
 import FormActionGroup from '../../../components/FormActionGroup';
 import FormField, {
   CheckboxField,
-  FieldTooltip,
   FormSubmitError,
 } from '../../../components/FormField';
 import FieldWithPrompt from '../../../components/FieldWithPrompt';
@@ -39,6 +38,7 @@ import {
   ProjectLookup,
   MultiCredentialsLookup,
 } from '../../../components/Lookup';
+import Popover from '../../../components/Popover';
 import { JobTemplatesAPI } from '../../../api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
@@ -295,7 +295,7 @@ function JobTemplateForm({
           isRequired
           label={i18n._(t`Playbook`)}
           labelIcon={
-            <FieldTooltip
+            <Popover
               content={i18n._(
                 t`Select the playbook to be executed by this job.`
               )}
@@ -333,7 +333,7 @@ function JobTemplateForm({
           <FormGroup
             label={i18n._(t`Labels`)}
             labelIcon={
-              <FieldTooltip
+              <Popover
                 content={i18n._(t`Optional labels that describe this job template,
                       such as 'dev' or 'test'. Labels can be used to group and filter
                       job templates and completed jobs.`)}
@@ -505,7 +505,7 @@ function JobTemplateForm({
                       <span>
                         {i18n._(t`Provisioning Callbacks`)}
                         &nbsp;
-                        <FieldTooltip
+                        <Popover
                           content={i18n._(t`Enables creation of a provisioning
                               callback URL. Using the URL a host can contact BRAND_NAME
                               and request a configuration update using this job
@@ -525,7 +525,7 @@ function JobTemplateForm({
                       <span>
                         {i18n._(t`Enable Webhook`)}
                         &nbsp;
-                        <FieldTooltip
+                        <Popover
                           content={i18n._(t`Enable webhook for this template.`)}
                         />
                       </span>

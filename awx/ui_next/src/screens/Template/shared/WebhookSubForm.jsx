@@ -16,7 +16,7 @@ import useRequest from '../../../util/useRequest';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import { CredentialLookup } from '../../../components/Lookup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
-import { FieldTooltip } from '../../../components/FormField';
+import Popover from '../../../components/Popover';
 import {
   JobTemplatesAPI,
   WorkflowJobTemplatesAPI,
@@ -129,9 +129,7 @@ function WebhookSubForm({ i18n, templateType }) {
         fieldId="webhook_service"
         helperTextInvalid={webhookServiceMeta.error}
         label={i18n._(t`Webhook Service`)}
-        labelIcon={
-          <FieldTooltip content={i18n._(t`Select a webhook service.`)} />
-        }
+        labelIcon={<Popover content={i18n._(t`Select a webhook service.`)} />}
       >
         <AnsibleSelect
           {...webhookServiceField}
@@ -168,7 +166,7 @@ function WebhookSubForm({ i18n, templateType }) {
           fieldId="jt-webhookURL"
           label={i18n._(t`Webhook URL`)}
           labelIcon={
-            <FieldTooltip
+            <Popover
               content={i18n._(
                 t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`
               )}
@@ -186,7 +184,7 @@ function WebhookSubForm({ i18n, templateType }) {
         <FormGroup
           label={i18n._(t`Webhook Key`)}
           labelIcon={
-            <FieldTooltip
+            <Popover
               content={i18n._(
                 t`Webhook services can use this as a shared secret.`
               )}

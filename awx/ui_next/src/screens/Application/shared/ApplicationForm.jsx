@@ -7,14 +7,12 @@ import { Form, FormGroup } from '@patternfly/react-core';
 import PropTypes from 'prop-types';
 
 import { required } from '../../../util/validators';
-import FormField, {
-  FormSubmitError,
-  FieldTooltip,
-} from '../../../components/FormField';
+import FormField, { FormSubmitError } from '../../../components/FormField';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
+import Popover from '../../../components/Popover';
 
 function ApplicationFormFields({
   i18n,
@@ -85,7 +83,7 @@ function ApplicationFormFields({
         isRequired
         label={i18n._(t`Authorization grant type`)}
         labelIcon={
-          <FieldTooltip
+          <Popover
             content={i18n._(
               t`The Grant type the user must use for acquire tokens for this application`
             )}
@@ -129,7 +127,7 @@ function ApplicationFormFields({
         isRequired
         label={i18n._(t`Client type`)}
         labelIcon={
-          <FieldTooltip
+          <Popover
             content={i18n._(
               t`Set to Public or Confidential depending on how secure the client device is.`
             )}

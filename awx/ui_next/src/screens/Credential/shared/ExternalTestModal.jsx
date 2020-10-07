@@ -1,28 +1,17 @@
 import React, { useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import styled from 'styled-components';
 import { func, shape } from 'prop-types';
 import { Formik } from 'formik';
-import {
-  Button,
-  Form,
-  FormGroup,
-  Modal,
-  Tooltip,
-} from '@patternfly/react-core';
-import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
+import { Button, Form, FormGroup, Modal } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import FormField from '../../../components/FormField';
 import { FormFullWidthLayout } from '../../../components/FormLayout';
+import Popover from '../../../components/Popover';
 import { required } from '../../../util/validators';
 import useRequest from '../../../util/useRequest';
 import { CredentialPluginTestAlert } from './CredentialPlugins';
-
-const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
-  margin-left: 10px;
-`;
 
 function ExternalTestModal({
   i18n,
@@ -124,12 +113,7 @@ function ExternalTestModal({
                           label={field.label}
                           labelIcon={
                             field.help_text && (
-                              <Tooltip
-                                content={field.help_text}
-                                position="right"
-                              >
-                                <QuestionCircleIcon />
-                              </Tooltip>
+                              <Popover content={field.help_text} />
                             )
                           }
                           isRequired={isRequired}
