@@ -3,6 +3,7 @@ import sortErrorMessages from './sortErrorMessages';
 describe('sortErrorMessages', () => {
   let consoleError;
   beforeEach(() => {
+    // Component logs errors to console. Hide those during testing.
     consoleError = global.console.error;
     global.console.error = () => {};
   });
