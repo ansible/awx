@@ -1,10 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import {
+  Button,
+  Tooltip,
+  DropdownItem,
+  ToolbarItem,
+} from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { InventoriesAPI, HostsAPI } from '../../../api';
-
+import { InventoriesAPI, HostsAPI, CredentialTypesAPI } from '../../../api';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -12,6 +18,8 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import { Kebabified } from '../../../contexts/Kebabified';
+import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryHostItem from './InventoryHostItem';
 
 const QS_CONFIG = getQSConfig('host', {
@@ -21,48 +29,64 @@ const QS_CONFIG = getQSConfig('host', {
 });
 
 function InventoryHostList({ i18n }) {
-  const [actions, setActions] = useState(null);
-  const [contentError, setContentError] = useState(null);
-  const [deletionError, setDeletionError] = useState(null);
-  const [hostCount, setHostCount] = useState(0);
-  const [hosts, setHosts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAdHocCommandsOpen, setIsAdHocCommandsOpen] = useState(false);
   const [selected, setSelected] = useState([]);
   const { id } = useParams();
   const { search } = useLocation();
 
-  const fetchHosts = (hostId, queryString) => {
-    const params = parseQueryString(QS_CONFIG, queryString);
-    return InventoriesAPI.readHosts(hostId, params);
-  };
+  const {
+    result: {
+      hosts,
+      hostCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+      moduleOptions,
+      credentialTypeId,
+      isAdHocDisabled,
+    },
+    error: contentError,
+    isLoading,
+    request: fetchData,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, search);
+      const [response, hostOptions, adHocOptions, cred] = await Promise.all([
+        InventoriesAPI.readHosts(id, params),
+        InventoriesAPI.readHostsOptions(id),
+        InventoriesAPI.readAdHocOptions(id),
+        CredentialTypesAPI.read({ namespace: 'ssh' }),
+      ]);
+
+      return {
+        hosts: response.data.results,
+        hostCount: response.data.count,
+        actions: hostOptions.data.actions,
+        relatedSearchableKeys: (
+          hostOptions?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(hostOptions.data.actions?.GET || {}).filter(
+          key => hostOptions.data.actions?.GET[key].filterable
+        ),
+        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
+        credentialTypeId: cred.data.results[0].id,
+        isAdHocDisabled: !adHocOptions.data.actions.POST,
+      };
+    }, [id, search]),
+    {
+      hosts: [],
+      hostCount: 0,
+      actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
+      moduleOptions: [],
+      isAdHocDisabled: true,
+    }
+  );
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [
-          {
-            data: { count, results },
-          },
-          {
-            data: { actions: optionActions },
-          },
-        ] = await Promise.all([
-          fetchHosts(id, search),
-          InventoriesAPI.readOptions(),
-        ]);
-
-        setHosts(results);
-        setHostCount(count);
-        setActions(optionActions);
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
     fetchData();
-  }, [id, search]);
+  }, [fetchData]);
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...hosts] : []);
@@ -75,30 +99,17 @@ function InventoryHostList({ i18n }) {
       setSelected(selected.concat(row));
     }
   };
-
-  const handleDelete = async () => {
-    setIsLoading(true);
-
-    try {
+  const {
+    isLoading: isDeleteLoading,
+    deleteItems: deleteHosts,
+    deletionError,
+    clearDeletionError,
+  } = useDeleteItems(
+    useCallback(async () => {
       await Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
-    } catch (error) {
-      setDeletionError(error);
-    } finally {
-      setSelected([]);
-      try {
-        const {
-          data: { count, results },
-        } = await fetchHosts(id, search);
-
-        setHosts(results);
-        setHostCount(count);
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+    }, [selected]),
+    { qsConfig: QS_CONFIG, fetchItems: fetchData }
+  );
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
@@ -108,7 +119,7 @@ function InventoryHostList({ i18n }) {
     <>
       <PaginatedDataList
         contentError={contentError}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isDeleteLoading}
         items={hosts}
         itemCount={hostCount}
         pluralizedItemName={i18n._(t`Hosts`)}
@@ -133,6 +144,8 @@ function InventoryHostList({ i18n }) {
             isNumeric: true,
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderToolbar={props => (
           <DataListToolbar
             {...props}
@@ -149,9 +162,43 @@ function InventoryHostList({ i18n }) {
                     />,
                   ]
                 : []),
+              <Kebabified>
+                {({ isKebabified }) =>
+                  isKebabified ? (
+                    <DropdownItem
+                      key="run command"
+                      onClick={() => setIsAdHocCommandsOpen(true)}
+                      isDisabled={hostCount === 0 || isAdHocDisabled}
+                      aria-label={i18n._(t`Run command`)}
+                    >
+                      {i18n._(t`Run command`)}
+                    </DropdownItem>
+                  ) : (
+                    <ToolbarItem>
+                      <Tooltip
+                        content={i18n._(
+                          t`Select an inventory source by clicking the check box beside it. The inventory source can be a single host or a selection of multiple hosts.`
+                        )}
+                        position="top"
+                        key="adhoc"
+                      >
+                        <Button
+                          variant="secondary"
+                          key="run command"
+                          aria-label={i18n._(t`Run command`)}
+                          onClick={() => setIsAdHocCommandsOpen(true)}
+                          isDisabled={hostCount === 0 || isAdHocDisabled}
+                        >
+                          {i18n._(t`Run command`)}
+                        </Button>
+                      </Tooltip>
+                    </ToolbarItem>
+                  )
+                }
+              </Kebabified>,
               <ToolbarDeleteButton
                 key="delete"
-                onDelete={handleDelete}
+                onDelete={deleteHosts}
                 itemsToDelete={selected}
                 pluralizedItemName={i18n._(t`Hosts`)}
               />,
@@ -177,12 +224,22 @@ function InventoryHostList({ i18n }) {
           )
         }
       />
+      {isAdHocCommandsOpen && (
+        <AdHocCommands
+          css="margin-right: 20px"
+          adHocItems={selected}
+          onClose={() => setIsAdHocCommandsOpen(false)}
+          credentialTypeId={credentialTypeId}
+          moduleOptions={moduleOptions}
+          itemId={id}
+        />
+      )}
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={() => setDeletionError(null)}
+          onClose={clearDeletionError}
         >
           {i18n._(t`Failed to delete one or more hosts.`)}
           <ErrorDetail error={deletionError} />

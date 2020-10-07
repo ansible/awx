@@ -65,6 +65,7 @@ function AdHocCredentialStep({ i18n, credentialTypeId, onEnableLaunch }) {
       <FormGroup
         fieldId="credential"
         label={i18n._(t`Machine Credential`)}
+        aria-label={i18n._(t`Machine Credential`)}
         isRequired
         validated={
           !credentialMeta.touched || !credentialMeta.error ? 'default' : 'error'

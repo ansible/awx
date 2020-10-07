@@ -12,7 +12,7 @@ import {
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useSelected from '../../../util/useSelected';
 import useRequest from '../../../util/useRequest';
-import { InventoriesAPI, GroupsAPI } from '../../../api';
+import { InventoriesAPI, GroupsAPI, CredentialTypesAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import DataListToolbar from '../../../components/DataListToolbar';
@@ -22,7 +22,8 @@ import PaginatedDataList, {
 
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
-import AdHocCommandsButton from '../../../components/AdHocCommands/AdHocCommands';
+
+import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import { Kebabified } from '../../../contexts/Kebabified';
 
 const QS_CONFIG = getQSConfig('group', {
@@ -51,6 +52,7 @@ const useModal = () => {
 function InventoryGroupsList({ i18n }) {
   const [deletionError, setDeletionError] = useState(null);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [isAdHocCommandsOpen, setIsAdHocCommandsOpen] = useState(false);
   const location = useLocation();
   const { isModalOpen, toggleModal } = useModal();
   const { id: inventoryId } = useParams();
@@ -62,27 +64,36 @@ function InventoryGroupsList({ i18n }) {
       actions,
       relatedSearchableKeys,
       searchableKeys,
+      moduleOptions,
+      credentialTypeId,
+      isAdHocDisabled,
     },
     error: contentError,
     isLoading,
-    request: fetchGroups,
+    request: fetchData,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const [response, actionsResponse] = await Promise.all([
+      const [response, groupOptions, adHocOptions, cred] = await Promise.all([
         InventoriesAPI.readGroups(inventoryId, params),
         InventoriesAPI.readGroupsOptions(inventoryId),
+        InventoriesAPI.readAdHocOptions(inventoryId),
+        CredentialTypesAPI.read({ namespace: 'ssh' }),
       ]);
+
       return {
         groups: response.data.results,
         groupCount: response.data.count,
-        actions: actionsResponse.data.actions,
+        actions: groupOptions.data.actions,
         relatedSearchableKeys: (
-          actionsResponse?.data?.related_search_fields || []
+          groupOptions?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
         searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+          groupOptions.data.actions?.GET || {}
+        ).filter(key => groupOptions.data.actions?.GET[key].filterable),
+        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
+        credentialTypeId: cred.data.results[0].id,
+        isAdHocDisabled: !adHocOptions.data.actions.POST,
       };
     }, [inventoryId, location]),
     {
@@ -95,8 +106,8 @@ function InventoryGroupsList({ i18n }) {
   );
 
   useEffect(() => {
-    fetchGroups();
-  }, [fetchGroups]);
+    fetchData();
+  }, [fetchData]);
 
   const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
     groups
@@ -144,7 +155,7 @@ function InventoryGroupsList({ i18n }) {
     }
 
     toggleModal();
-    fetchGroups();
+    fetchData();
     setSelected([]);
     setIsDeleteLoading(false);
   };
@@ -153,21 +164,14 @@ function InventoryGroupsList({ i18n }) {
   const kebabedAdditionalControls = () => {
     return (
       <>
-        <AdHocCommandsButton
-          adHocItems={selected}
-          apiModule={InventoriesAPI}
-          itemId={parseInt(inventoryId, 10)}
+        <DropdownItem
+          key="run command"
+          onClick={() => setIsAdHocCommandsOpen(true)}
+          isDisabled={groupCount === 0 || isAdHocDisabled}
         >
-          {({ openAdHocCommands }) => (
-            <DropdownItem
-              key="run command"
-              onClick={openAdHocCommands}
-              isDisabled={groupCount === 0}
-            >
-              {i18n._(t`Run command`)}
-            </DropdownItem>
-          )}
-        </AdHocCommandsButton>
+          {i18n._(t`Run command`)}
+        </DropdownItem>
+
         <DropdownItem
           variant="danger"
           aria-label={i18n._(t`Delete`)}
@@ -264,23 +268,14 @@ function InventoryGroupsList({ i18n }) {
                             position="top"
                             key="adhoc"
                           >
-                            <AdHocCommandsButton
-                              css="margin-right: 20px"
-                              adHocItems={selected}
-                              apiModule={InventoriesAPI}
-                              itemId={parseInt(inventoryId, 10)}
+                            <Button
+                              variant="secondary"
+                              aria-label={i18n._(t`Run command`)}
+                              onClick={() => setIsAdHocCommandsOpen(true)}
+                              isDisabled={groupCount === 0 || isAdHocDisabled}
                             >
-                              {({ openAdHocCommands }) => (
-                                <Button
-                                  variant="secondary"
-                                  aria-label={i18n._(t`Run command`)}
-                                  onClick={openAdHocCommands}
-                                  isDisabled={groupCount === 0}
-                                >
-                                  {i18n._(t`Run command`)}
-                                </Button>
-                              )}
-                            </AdHocCommandsButton>
+                              {i18n._(t`Run command`)}
+                            </Button>
                           </Tooltip>
                         </ToolbarItem>
                         <ToolbarItem>
@@ -321,6 +316,16 @@ function InventoryGroupsList({ i18n }) {
           )
         }
       />
+      {isAdHocCommandsOpen && (
+        <AdHocCommands
+          css="margin-right: 20px"
+          adHocItems={selected}
+          itemId={parseInt(inventoryId, 10)}
+          onClose={() => setIsAdHocCommandsOpen(false)}
+          credentialTypeId={credentialTypeId}
+          moduleOptions={moduleOptions}
+        />
+      )}
       {deletionError && (
         <AlertModal
           isOpen={deletionError}

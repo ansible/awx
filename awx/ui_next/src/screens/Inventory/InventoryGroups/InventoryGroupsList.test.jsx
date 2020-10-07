@@ -6,7 +6,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { InventoriesAPI, GroupsAPI } from '../../../api';
+import { InventoriesAPI, GroupsAPI, CredentialTypesAPI } from '../../../api';
 import InventoryGroupsList from './InventoryGroupsList';
 
 jest.mock('../../../api');
@@ -70,6 +70,17 @@ describe('<InventoryGroupsList />', () => {
           POST: {},
         },
       },
+    });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: { module_name: { choices: [['module']] } },
+          POST: {},
+        },
+      },
+    });
+    CredentialTypesAPI.read.mockResolvedValue({
+      data: { count: 1, results: [{ id: 1, name: 'cred' }] },
     });
     const history = createMemoryHistory({
       initialEntries: ['/inventories/inventory/3/groups'],
@@ -147,31 +158,17 @@ describe('<InventoryGroupsList />', () => {
       expect(el.props().checked).toBe(false);
     });
   });
+  test('should render enabled ad hoc commands button', async () => {
+    await waitForElement(
+      wrapper,
+      'button[aria-label="Run command"]',
+      el => el.prop('disabled') === false
+    );
+  });
 });
 describe('<InventoryGroupsList/> error handling', () => {
   let wrapper;
-  test('should show content error when api throws error on initial render', async () => {
-    InventoriesAPI.readGroupsOptions.mockImplementationOnce(() =>
-      Promise.reject(new Error())
-    );
-    await act(async () => {
-      wrapper = mountWithContexts(<InventoryGroupsList />);
-    });
-    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
-  });
-
-  test('should show content error if groups are not successfully fetched from api', async () => {
-    InventoriesAPI.readGroups.mockImplementation(() =>
-      Promise.reject(new Error())
-    );
-    await act(async () => {
-      wrapper = mountWithContexts(<InventoryGroupsList />);
-    });
-
-    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
-  });
-
-  test('should show error modal when group is not successfully deleted from api', async () => {
+  beforeEach(() => {
     InventoriesAPI.readGroups.mockResolvedValue({
       data: {
         count: mockGroups.length,
@@ -197,7 +194,42 @@ describe('<InventoryGroupsList/> error handling', () => {
         },
       })
     );
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: { module_name: { choices: [['module']] } },
+        },
+      },
+    });
+    CredentialTypesAPI.read.mockResolvedValue({
+      data: { count: 1, results: [{ id: 1, name: 'cred' }] },
+    });
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+    wrapper.unmount();
+  });
+  test('should show content error when api throws error on initial render', async () => {
+    InventoriesAPI.readGroupsOptions.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryGroupsList />);
+    });
+    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
+  });
 
+  test('should show content error if groups are not successfully fetched from api', async () => {
+    InventoriesAPI.readGroups.mockImplementation(() =>
+      Promise.reject(new Error())
+    );
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryGroupsList />);
+    });
+    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
+  });
+
+  test('should show error modal when group is not successfully deleted from api', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/inventories/inventory/3/groups'],
     });
@@ -248,5 +280,28 @@ describe('<InventoryGroupsList/> error handling', () => {
         .find('AlertModal[aria-label="deletion error"]')
         .invoke('onClose')();
     });
+  });
+  test('should render disabled ad hoc button', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/inventories/inventory/3/groups'],
+    });
+
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route path="/inventories/inventory/:id/groups">
+          <InventoryGroupsList />
+        </Route>,
+        {
+          context: {
+            router: { history, route: { location: history.location } },
+          },
+        }
+      );
+    });
+
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(
+      wrapper.find('button[aria-label="Run command"]').prop('disabled')
+    ).toBe(true);
   });
 });
