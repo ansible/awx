@@ -79,4 +79,68 @@ describe('sortErrorMessages', () => {
       },
     });
   });
+
+  test('should give nested field error messages', () => {
+    const error = {
+      response: {
+        data: {
+          inputs: {
+            url: ['URL Error'],
+            other: {
+              stuff: ['Other stuff error'],
+            },
+          },
+        },
+      },
+    };
+    const formValues = {
+      inputs: {
+        url: '',
+        other: {
+          stuff: '',
+        },
+      },
+    };
+    const parsed = sortErrorMessages(error, formValues);
+    expect(parsed).toEqual({
+      formError: '',
+      fieldErrors: {
+        inputs: {
+          url: 'URL Error',
+          other: {
+            stuff: 'Other stuff error',
+          },
+        },
+      },
+    });
+  });
+
+  test('should give unknown nested field error as form error', () => {
+    const error = {
+      response: {
+        data: {
+          inputs: {
+            url: ['URL Error'],
+            other: {
+              stuff: ['Other stuff error'],
+            },
+          },
+        },
+      },
+    };
+    const formValues = {
+      inputs: {
+        url: '',
+      },
+    };
+    const parsed = sortErrorMessages(error, formValues);
+    expect(parsed).toEqual({
+      formError: 'Other stuff error',
+      fieldErrors: {
+        inputs: {
+          url: 'URL Error',
+        },
+      },
+    });
+  });
 });

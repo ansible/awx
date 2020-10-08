@@ -3,33 +3,56 @@ export default function sortErrorMessages(error, formValues = {}) {
     return {};
   }
 
-  const fieldErrors = {};
-  let formErrors = [];
   if (
     error?.response?.data &&
     typeof error.response.data === 'object' &&
     Object.keys(error.response.data).length > 0
   ) {
-    Object.keys(error.response.data).forEach(fieldName => {
-      const errors = error.response.data[fieldName];
-      if (!errors) {
-        return;
-      }
-      const errorsArray = Array.isArray(errors) ? errors : [errors];
-      if (typeof formValues[fieldName] === 'undefined') {
-        formErrors = [...formErrors, ...errorsArray];
-      } else {
-        fieldErrors[fieldName] = errorsArray.join('; ');
-      }
-    });
-  } else {
-    /* eslint-disable-next-line no-console */
-    console.error(error);
-    formErrors.push(error.message);
+    const parsed = parseFieldErrors(error.response.data, formValues);
+    return {
+      formError: parsed.formErrors.join('; '),
+      fieldErrors: Object.keys(parsed.fieldErrors).length
+        ? parsed.fieldErrors
+        : null,
+    };
   }
-
+  /* eslint-disable-next-line no-console */
+  console.error(error);
   return {
-    formError: formErrors.join('; '),
-    fieldErrors: Object.keys(fieldErrors).length ? fieldErrors : null,
+    formError: error.message,
+    fieldErrors: null,
   };
+}
+
+// Recursively traverse field errors object and build up field/form errors
+function parseFieldErrors(obj, formValues) {
+  let fieldErrors = {};
+  let formErrors = [];
+  Object.keys(obj).forEach(key => {
+    const value = obj[key];
+    if (typeof value === 'string') {
+      if (typeof formValues[key] === 'undefined') {
+        formErrors.push(value);
+      } else {
+        fieldErrors[key] = value;
+      }
+    } else if (Array.isArray(value)) {
+      if (typeof formValues[key] === 'undefined') {
+        formErrors = formErrors.concat(value);
+      } else {
+        fieldErrors[key] = value.join('; ');
+      }
+    } else if (typeof value === 'object') {
+      const parsed = parseFieldErrors(value, formValues[key] || {});
+      if (Object.keys(parsed.fieldErrors).length) {
+        fieldErrors = {
+          ...fieldErrors,
+          [key]: parsed.fieldErrors,
+        };
+      }
+      formErrors = formErrors.concat(parsed.formErrors);
+    }
+  });
+
+  return { fieldErrors, formErrors };
 }
