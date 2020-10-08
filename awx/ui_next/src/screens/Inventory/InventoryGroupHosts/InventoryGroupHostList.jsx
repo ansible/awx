@@ -25,7 +25,7 @@ import DisassociateButton from '../../../components/DisassociateButton';
 import { Kebabified } from '../../../contexts/Kebabified';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
-import AddHostDropdown from '../shared/AddDropdown';
+import AddDropdown from '../shared/AddDropdown';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -185,7 +185,7 @@ function InventoryGroupHostList({ i18n }) {
     );
   }
 
-  // const addButton = <AddDropdown key="add" dropdownItems={addButtonOptions} />;
+  const addButton = <AddDropdown key="add" dropdownItems={addButtonOptions} />;
   return (
     <>
       <PaginatedDataList
@@ -229,18 +229,7 @@ function InventoryGroupHostList({ i18n }) {
             }
             qsConfig={QS_CONFIG}
             additionalControls={[
-              ...(canAdd
-                ? [
-                    <AddHostDropdown
-                      key="associate"
-                      onAddExisting={() => setIsModalOpen(true)}
-                      onAddNew={() => history.push(addFormUrl)}
-                      newTitle={i18n._(t`Add new host`)}
-                      existingTitle={i18n._(t`Add existing host`)}
-                      label={i18n._(t`host`)}
-                    />,
-                  ]
-                : []),
+              ...(canAdd ? [addButton] : []),
               <Kebabified>
                 {({ isKebabified }) =>
                   isKebabified ? (
@@ -299,18 +288,7 @@ function InventoryGroupHostList({ i18n }) {
             onSelect={() => handleSelect(o)}
           />
         )}
-        emptyStateControls={
-          canAdd && (
-            <AddHostDropdown
-              key="associate"
-              onAddExisting={() => setIsModalOpen(true)}
-              onAddNew={() => history.push(addFormUrl)}
-              newTitle={i18n._(t`Add new host`)}
-              existingTitle={i18n._(t`Add existing host`)}
-              label={i18n._(t`host`)}
-            />
-          )
-        }
+        emptyStateControls={canAdd && addButton}
       />
       {isModalOpen && (
         <AssociateModal

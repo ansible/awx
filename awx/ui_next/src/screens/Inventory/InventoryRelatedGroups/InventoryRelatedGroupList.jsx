@@ -19,7 +19,7 @@ import PaginatedDataList from '../../../components/PaginatedDataList';
 import InventoryGroupRelatedGroupListItem from './InventoryRelatedGroupListItem';
 import AddDropdown from '../shared/AddDropdown';
 import { Kebabified } from '../../../contexts/Kebabified';
-import AdHocCommandsButton from '../../../components/AdHocCommands/AdHocCommands';
+import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
 
@@ -160,7 +160,7 @@ function InventoryRelatedGroupList({ i18n }) {
               <Kebabified>
                 {({ isKebabified }) =>
                   isKebabified ? (
-                    <AdHocCommandsButton
+                    <AdHocCommands
                       adHocItems={selected}
                       apiModule={InventoriesAPI}
                       itemId={parseInt(inventoryId, 10)}
@@ -174,7 +174,7 @@ function InventoryRelatedGroupList({ i18n }) {
                           {i18n._(t`Run command`)}
                         </DropdownItem>
                       )}
-                    </AdHocCommandsButton>
+                    </AdHocCommands>
                   ) : (
                     <ToolbarItem>
                       <Tooltip
@@ -185,7 +185,7 @@ function InventoryRelatedGroupList({ i18n }) {
                         position="top"
                         key="adhoc"
                       >
-                        <AdHocCommandsButton
+                        <AdHocCommands
                           css="margin-right: 20px"
                           adHocItems={selected}
                           apiModule={InventoriesAPI}
@@ -201,7 +201,7 @@ function InventoryRelatedGroupList({ i18n }) {
                               {i18n._(t`Run command`)}
                             </Button>
                           )}
-                        </AdHocCommandsButton>
+                        </AdHocCommands>
                       </Tooltip>
                     </ToolbarItem>
                   )
