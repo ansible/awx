@@ -88,6 +88,26 @@ def oauth2_getattribute(self, attr):
     return val
 
 
+class LazyApplicationName(str):
+    def __init__(self, cluster_host_id):
+        self.cluster_host_id = cluster_host_id
+
+    def __str__(self):
+        return f'{self.cluster_host_id}-{os.getpid()}-{" ".join(sys.argv)}'
+
+    def __repr__(self):
+        return str(self)
+
+
+def set_database_application_name(database_settings, cluster_host_id):
+    '''
+    Must wrap application_name value in a lazy evaluator to account ensure
+    pid is up-to-date when forking.
+    '''
+    options = database_settings.get('OPTIONS', {})
+    options.setdefault('application_name', LazyApplicationName(cluster_host_id))
+    database_settings['OPTIONS'] = options
+
 def prepare_env():
     # Update the default settings environment variable based on current mode.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'awx.settings.%s' % MODE)
@@ -104,6 +124,10 @@ def prepare_env():
     # in django.conf settings each time, not just once during import
     import oauth2_provider.settings
     oauth2_provider.settings.OAuth2ProviderSettings.__getattribute__ = oauth2_getattribute
+
+    # Add application_name to database connection. Tracing from database
+    # will tell you the '<awx_hostname>-<pid>-<commandline_arguments>'
+    set_database_application_name(settings.DATABASES['default'], settings.CLUSTER_HOST_ID)
 
     # Use the AWX_TEST_DATABASE_* environment variables to specify the test
     # database settings to use when management command is run as an external
