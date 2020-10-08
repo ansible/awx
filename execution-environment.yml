@@ -6,5 +6,5 @@ additional_build_steps:
   prepend:
     - RUN pip3 install --upgrade pip setuptools
   append:
-    - COPY --from=quay.io/shanemcd/receptor /usr/bin/receptor /usr/bin/receptor
+    - COPY --from=quay.io/project-receptor/receptor /usr/bin/receptor /usr/bin/receptor
     - RUN mkdir -m 0770 /var/run/receptor
