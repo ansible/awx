@@ -33,6 +33,7 @@ services:
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "redis_socket:/var/run/redis/:rw"
+      - "receptor:/var/run/receptor/"
       - "/sys/fs/cgroup:/sys/fs/cgroup"
     privileged: true
     tty: true
@@ -42,8 +43,16 @@ services:
   #   build:
   #     context: ./docker-compose
   #     dockerfile: Dockerfile-logstash
-
-  # Postgres Database Container
+  ee:
+    image: quay.io/awx/ee
+    user: ${CURRENT_UID}
+    volumes:
+      - "./docker-compose/receptor.cfg:/receptor.cfg"
+      - "receptor:/var/run/receptor/"
+    command:
+      - receptor
+      - --config
+      - /receptor.cfg
   postgres:
     image: postgres:12
     container_name: tools_postgres_1
@@ -66,3 +75,4 @@ services:
 volumes:
   awx_db:
   redis_socket:
+  receptor:
