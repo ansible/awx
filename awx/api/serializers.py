@@ -3438,10 +3438,10 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization.pk})
         if obj.webhook_credential_id:
             res['webhook_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.webhook_credential_id})
-        if obj.inventory:
+        if obj.inventory_id:
             res['inventory'] = self.reverse(
                 'api:inventory_detail', kwargs={
-                    'pk': obj.inventory.pk
+                    'pk': obj.inventory_id
                 }
             )
         return res
