@@ -1,2 +1,3 @@
 git+https://github.com/ansible/system-certifi.git@devel#egg=certifi
 git+git://github.com/ansible/ansible-runner@devel#egg=ansible-runner
+git+https://github.com/project-receptor/receptor.git@#egg=receptorctl&subdirectory=receptorctl
