@@ -6,9 +6,12 @@
 
 # Locations - set globally to be used across stages
 ARG COLLECTION_BASE="/var/lib/awx/vendor/awx_ansible_collections"
+ARG ANSIBLE_BRANCH=devel
 
 # Build container
 FROM centos:8 as builder
+
+ARG ANSIBLE_BRANCH
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -22,7 +25,7 @@ RUN dnf -y update && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
     dnf module -y enable 'postgresql:12' && \
     dnf config-manager --set-enabled powertools && \
-    dnf -y install ansible \
+    dnf -y install \
     gcc \
     gcc-c++ \
     git-core \
@@ -46,7 +49,8 @@ RUN dnf -y update && \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN python3 -m ensurepip && pip3 install "virtualenv < 20"
+RUN python3 -m ensurepip && pip3 install "virtualenv < 20" && \
+    pip3 install --no-cache-dir https://github.com/ansible/ansible/archive/${ANSIBLE_BRANCH}.tar.gz
 
 # Install & build requirements
 ADD Makefile /tmp/Makefile
@@ -81,6 +85,7 @@ RUN make sdist && \
 FROM centos:8
 
 ARG COLLECTION_BASE
+ARG ANSIBLE_BRANCH
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -95,7 +100,6 @@ RUN dnf -y update && \
     dnf module -y enable 'postgresql:12' && \
     dnf config-manager --set-enabled powertools && \
     dnf -y install acl \
-    ansible \
     bubblewrap \
     git-core \
     git-lfs \
@@ -132,7 +136,8 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master
 RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \
     chmod +x /usr/bin/tini
 
-RUN python3 -m ensurepip && pip3 install "virtualenv < 20" supervisor {% if build_dev|bool %}flake8{% endif %}
+RUN python3 -m ensurepip && pip3 install "virtualenv < 20" supervisor {% if build_dev|bool %}flake8{% endif %} && \
+    pip3 install --no-cache-dir https://github.com/ansible/ansible/archive/${ANSIBLE_BRANCH}.tar.gz
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
