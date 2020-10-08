@@ -134,8 +134,7 @@ const FormikApp = withFormik({
 
 FormikApp.propTypes = {
   onLaunch: PropTypes.func.isRequired,
-  moduleOptions: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string))
-    .isRequired,
+  moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
   verbosityOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
   onCloseWizard: PropTypes.func.isRequired,
   credentialTypeId: PropTypes.number.isRequired,

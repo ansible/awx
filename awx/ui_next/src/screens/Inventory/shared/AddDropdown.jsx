@@ -48,7 +48,7 @@ function AddDropdown({ dropdownItems, i18n }) {
     <div ref={element} key="add">
       <Dropdown
         isOpen={isOpen}
-        position={DropdownPosition.right}
+        position={DropdownPosition.left}
         toggle={
           <DropdownToggle
             id="add"
