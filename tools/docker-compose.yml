@@ -25,6 +25,7 @@ services:
     links:
       - postgres
       - redis
+      - ee
     #   - sync
     # volumes_from:
     #   - sync
@@ -32,6 +33,7 @@ services:
     volumes:
       - "../:/awx_devel"
       - "../awx/projects/:/var/lib/awx/projects/"
+      - "receptor:/var/run/receptor/"
       - "./redis/redis_socket_standalone:/var/run/redis/"
       - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
       - "/sys/fs/cgroup:/sys/fs/cgroup"
@@ -43,8 +45,16 @@ services:
   #   build:
   #     context: ./docker-compose
   #     dockerfile: Dockerfile-logstash
-
-  # Postgres Database Container
+  ee:
+    image: quay.io/awx/ee
+    user: ${CURRENT_UID}
+    volumes:
+      - "./docker-compose/receptor.cfg:/receptor.cfg"
+      - "receptor:/var/run/receptor/"
+    command:
+      - receptor
+      - --config
+      - /receptor.cfg
   postgres:
     image: postgres:12
     container_name: tools_postgres_1
@@ -63,3 +73,4 @@ services:
 
 volumes:
   awx_db:
+  receptor:
