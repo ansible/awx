@@ -110,7 +110,8 @@ def read_content(private_data_dir, raw_env, inventory_update):
             continue  # Ansible runner
         abs_file_path = os.path.join(private_data_dir, filename)
         file_aliases[abs_file_path] = filename
-        if abs_file_path in inverse_env:
+        runner_path = os.path.join('/runner', os.path.basename(abs_file_path))
+        if runner_path in inverse_env:
             referenced_paths.add(abs_file_path)
             alias = 'file_reference'
             for i in range(10):
@@ -121,7 +122,7 @@ def read_content(private_data_dir, raw_env, inventory_update):
                 raise RuntimeError('Test not able to cope with >10 references by env vars. '
                                    'Something probably went very wrong.')
             file_aliases[abs_file_path] = alias
-            for env_key in inverse_env[abs_file_path]:
+            for env_key in inverse_env[runner_path]:
                 env[env_key] = '{{{{ {} }}}}'.format(alias)
         try:
             with open(abs_file_path, 'r') as f:
