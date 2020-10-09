@@ -179,7 +179,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {i18n._(`here`)}
+                  {i18n._(t`here`)}
                 </a>
               </span>
             }
