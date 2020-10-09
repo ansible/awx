@@ -875,7 +875,6 @@ class Command(BaseCommand):
         raw_source = options.get('source', None)
         if not raw_source:
             raise CommandError('--source is required')
-        source = Command.get_source_absolute_path(raw_source)
         verbosity = int(options.get('verbosity', 1))
         self.set_logging_level(verbosity)
         venv_path = options.get('venv', None)
@@ -893,8 +892,11 @@ class Command(BaseCommand):
             raise CommandError('Inventory with %s = %s returned multiple results' % list(q.items())[0])
         logger.info('Updating inventory %d: %s' % (inventory.pk, inventory.name))
 
+
         # Create ad-hoc inventory source and inventory update objects
         with ignore_inventory_computed_fields():
+            source = Command.get_source_absolute_path(raw_source)
+
             inventory_source, created = InventorySource.objects.get_or_create(
                 inventory=inventory,
                 source='file',
