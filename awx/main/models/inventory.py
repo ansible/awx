@@ -1544,7 +1544,7 @@ class openstack(PluginFileInjector):
         env = super(openstack, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
         credential = inventory_update.get_cloud_credential()
         cred_data = private_data_files['credentials']
-        env['OS_CLIENT_CONFIG_FILE'] = cred_data[credential]
+        env['OS_CLIENT_CONFIG_FILE'] = os.path.join('/runner', os.path.basename(cred_data[credential]))
         return env
 
 
