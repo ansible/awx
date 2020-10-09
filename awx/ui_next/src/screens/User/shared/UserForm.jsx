@@ -18,6 +18,10 @@ function UserFormFields({ user, i18n }) {
   const [organization, setOrganization] = useState(null);
   const { setFieldValue } = useFormikContext();
 
+  const ldapUser = user.ldap_dn;
+  const socialAuthUser = user.auth?.length > 0;
+  const externalAccount = user.external_account;
+
   const userTypeOptions = [
     {
       value: 'normal',
@@ -63,8 +67,12 @@ function UserFormFields({ user, i18n }) {
         label={i18n._(t`Username`)}
         name="username"
         type="text"
-        validate={required(null, i18n)}
-        isRequired
+        validate={
+          !ldapUser && externalAccount === null
+            ? required(null, i18n)
+            : () => undefined
+        }
+        isRequired={!ldapUser && externalAccount === null}
       />
       <FormField
         id="user-email"
@@ -73,28 +81,32 @@ function UserFormFields({ user, i18n }) {
         validate={requiredEmail(i18n)}
         isRequired
       />
-      <PasswordField
-        id="user-password"
-        label={i18n._(t`Password`)}
-        name="password"
-        validate={
-          !user.id
-            ? required(i18n._(t`This field must not be blank`), i18n)
-            : () => undefined
-        }
-        isRequired={!user.id}
-      />
-      <PasswordField
-        id="user-confirm-password"
-        label={i18n._(t`Confirm Password`)}
-        name="confirm_password"
-        validate={
-          !user.id
-            ? required(i18n._(t`This field must not be blank`), i18n)
-            : () => undefined
-        }
-        isRequired={!user.id}
-      />
+      {!ldapUser && !(socialAuthUser && externalAccount) && (
+        <>
+          <PasswordField
+            id="user-password"
+            label={i18n._(t`Password`)}
+            name="password"
+            validate={
+              !user.id
+                ? required(i18n._(t`This field must not be blank`), i18n)
+                : () => undefined
+            }
+            isRequired={!user.id}
+          />
+          <PasswordField
+            id="user-confirm-password"
+            label={i18n._(t`Confirm Password`)}
+            name="confirm_password"
+            validate={
+              !user.id
+                ? required(i18n._(t`This field must not be blank`), i18n)
+                : () => undefined
+            }
+            isRequired={!user.id}
+          />
+        </>
+      )}
       <FormField
         id="user-first-name"
         label={i18n._(t`First Name`)}

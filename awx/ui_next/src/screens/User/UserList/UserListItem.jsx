@@ -10,6 +10,7 @@ import {
   DataListItem,
   DataListItemCells,
   DataListItemRow,
+  Label,
   Tooltip,
 } from '@patternfly/react-core';
 
@@ -31,6 +32,9 @@ function UserListItem({ user, isSelected, onSelect, detailUrl, i18n }) {
     user_type = i18n._(t`Normal User`);
   }
 
+  const ldapUser = user.ldap_dn;
+  const socialAuthUser = user.auth.length > 0;
+
   return (
     <DataListItem key={user.id} aria-labelledby={labelId} id={`${user.id}`}>
       <DataListItemRow>
@@ -43,9 +47,25 @@ function UserListItem({ user, isSelected, onSelect, detailUrl, i18n }) {
         <DataListItemCells
           dataListCells={[
             <DataListCell key="username" aria-label={i18n._(t`username`)}>
-              <Link to={`${detailUrl}`} id={labelId}>
-                <b>{user.username}</b>
-              </Link>
+              <span id={labelId}>
+                <Link to={`${detailUrl}`} id={labelId}>
+                  <b>{user.username}</b>
+                </Link>
+              </span>
+              {ldapUser && (
+                <span css="margin-left: 12px">
+                  <Label aria-label={i18n._(t`ldap user`)}>
+                    {i18n._(t`LDAP`)}
+                  </Label>
+                </span>
+              )}
+              {socialAuthUser && (
+                <span css="margin-left: 12px">
+                  <Label aria-label={i18n._(t`social login`)}>
+                    {i18n._(t`SOCIAL`)}
+                  </Label>
+                </span>
+              )}
             </DataListCell>,
             <DataListCell
               key="first-name"
