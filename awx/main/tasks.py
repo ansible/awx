@@ -1100,6 +1100,9 @@ class BaseTask(object):
         # Also set environment variables configured in AWX_TASK_ENV setting.
         for key, value in settings.AWX_TASK_ENV.items():
             env[key] = str(value)
+
+        env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
+
         return env
 
     def should_use_resource_profiling(self, job):
