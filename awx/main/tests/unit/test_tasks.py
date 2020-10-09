@@ -347,11 +347,12 @@ def pytest_generate_tests(metafunc):
             )
 
 
-def parse_extra_vars(args):
+def parse_extra_vars(args, private_data_dir):
     extra_vars = {}
     for chunk in args:
-        if chunk.startswith('@/tmp/'):
-            with open(chunk.strip('@'), 'r') as f:
+        if chunk.startswith('@/runner/'):
+            local_path = os.path.join(private_data_dir, os.path.basename(chunk.strip('@')))
+            with open(local_path, 'r') as f:
                 extra_vars.update(yaml.load(f, Loader=SafeLoader))
     return extra_vars
 
@@ -597,7 +598,7 @@ class TestGenericRun():
         assert resource_profiling_params['resource_profiling_cpu_poll_interval'] == '0.25'
         assert resource_profiling_params['resource_profiling_memory_poll_interval'] == '0.25'
         assert resource_profiling_params['resource_profiling_pid_poll_interval'] == '0.25'
-        assert resource_profiling_params['resource_profiling_results_dir'] == '/fake_private_data_dir/artifacts/playbook_profiling'
+        assert resource_profiling_params['resource_profiling_results_dir'] == '/runner/artifacts/playbook_profiling'
 
 
     @pytest.mark.parametrize("scenario, profiling_enabled", [
@@ -655,30 +656,6 @@ class TestGenericRun():
         with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
             env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
-
-    def test_valid_custom_virtualenv(self, patch_Job, private_data_dir):
-        job = Job(project=Project(), inventory=Inventory())
-
-        with TemporaryDirectory(dir=settings.BASE_VENV_PATH) as tempdir:
-            job.project.custom_virtualenv = tempdir
-            os.makedirs(os.path.join(tempdir, 'lib'))
-            os.makedirs(os.path.join(tempdir, 'bin', 'activate'))
-
-            task = tasks.RunJob()
-            env = task.build_env(job, private_data_dir)
-
-            assert env['PATH'].startswith(os.path.join(tempdir, 'bin'))
-            assert env['VIRTUAL_ENV'] == tempdir
-
-    def test_invalid_custom_virtualenv(self, patch_Job, private_data_dir):
-        job = Job(project=Project(), inventory=Inventory())
-        job.project.custom_virtualenv = '/var/lib/awx/venv/missing'
-        task = tasks.RunJob()
-
-        with pytest.raises(tasks.InvalidVirtualenvError) as e:
-            task.build_env(job, private_data_dir)
-
-        assert 'Invalid virtual environment selected: /var/lib/awx/venv/missing' == str(e.value)
 
 
 class TestAdhocRun(TestJobExecution):
@@ -1203,7 +1180,9 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(
             credential, env, safe_env, [], private_data_dir
         )
-        json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
+        runner_path = env['GCE_CREDENTIALS_FILE_PATH']
+        local_path = os.path.join(private_data_dir, os.path.basename(runner_path))
+        json_data = json.load(open(local_path, 'rb'))
         assert json_data['type'] == 'service_account'
         assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
         assert json_data['client_email'] == 'bob'
@@ -1344,7 +1323,7 @@ class TestJobCredentials(TestJobExecution):
         )
 
         config = configparser.ConfigParser()
-        config.read(env['OVIRT_INI_PATH'])
+        config.read(os.path.join(private_data_dir, os.path.basename(env['OVIRT_INI_PATH'])))
         assert config.get('ovirt', 'ovirt_url') == 'some-ovirt-host.example.org'
         assert config.get('ovirt', 'ovirt_username') == 'bob'
         assert config.get('ovirt', 'ovirt_password') == 'some-pass'
@@ -1577,7 +1556,7 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(
             credential, {}, {}, args, private_data_dir
         )
-        extra_vars = parse_extra_vars(args)
+        extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["api_token"] == "ABC123"
         assert hasattr(extra_vars["api_token"], '__UNSAFE__')
@@ -1612,7 +1591,7 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(
             credential, {}, {}, args, private_data_dir
         )
-        extra_vars = parse_extra_vars(args)
+        extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["turbo_button"] == "True"
         return ['successful', 0]
@@ -1647,7 +1626,7 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(
             credential, {}, {}, args, private_data_dir
         )
-        extra_vars = parse_extra_vars(args)
+        extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["turbo_button"] == "FAST!"
 
@@ -1687,7 +1666,7 @@ class TestJobCredentials(TestJobExecution):
             credential, {}, {}, args, private_data_dir
         )
 
-        extra_vars = parse_extra_vars(args)
+        extra_vars = parse_extra_vars(args, private_data_dir)
         assert extra_vars["password"] == "SUPER-SECRET-123"
 
     def test_custom_environment_injectors_with_file(self, private_data_dir):
@@ -1722,7 +1701,8 @@ class TestJobCredentials(TestJobExecution):
             credential, env, {}, [], private_data_dir
         )
 
-        assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == '[mycloud]\nABC123'
+        path = os.path.join(private_data_dir, os.path.basename(env['MY_CLOUD_INI_FILE']))
+        assert open(path, 'r').read() == '[mycloud]\nABC123'
 
     def test_custom_environment_injectors_with_unicode_content(self, private_data_dir):
         value = 'Iñtërnâtiônàlizætiøn'
@@ -1746,7 +1726,8 @@ class TestJobCredentials(TestJobExecution):
             credential, env, {}, [], private_data_dir
         )
 
-        assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == value
+        path = os.path.join(private_data_dir, os.path.basename(env['MY_CLOUD_INI_FILE']))
+        assert open(path, 'r').read() == value
 
     def test_custom_environment_injectors_with_files(self, private_data_dir):
         some_cloud = CredentialType(
@@ -1786,8 +1767,10 @@ class TestJobCredentials(TestJobExecution):
             credential, env, {}, [], private_data_dir
         )
 
-        assert open(env['MY_CERT_INI_FILE'], 'r').read() == '[mycert]\nCERT123'
-        assert open(env['MY_KEY_INI_FILE'], 'r').read() == '[mykey]\nKEY123'
+        cert_path = os.path.join(private_data_dir, os.path.basename(env['MY_CERT_INI_FILE']))
+        key_path = os.path.join(private_data_dir, os.path.basename(env['MY_KEY_INI_FILE']))
+        assert open(cert_path, 'r').read() == '[mycert]\nCERT123'
+        assert open(key_path, 'r').read() == '[mykey]\nKEY123'
 
     def test_multi_cloud(self, private_data_dir):
         gce = CredentialType.defaults['gce']()
@@ -1826,7 +1809,8 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
 
-        json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
+        path = os.path.join(private_data_dir, os.path.basename(env['GCE_CREDENTIALS_FILE_PATH']))
+        json_data = json.load(open(path, 'rb'))
         assert json_data['type'] == 'service_account'
         assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
         assert json_data['client_email'] == 'bob'
@@ -2307,7 +2291,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
+        path = os.path.join(private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE']))
+        shade_config = open(path, 'r').read()
         assert '\n'.join([
             'clouds:',
             '  devstack:',
