@@ -35,8 +35,8 @@ def gce(cred, env, private_data_dir):
     json.dump(json_cred, f, indent=2)
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-    env['GCE_CREDENTIALS_FILE_PATH'] = path
-    env['GCP_SERVICE_ACCOUNT_FILE'] = path
+    env['GCE_CREDENTIALS_FILE_PATH'] = os.path.join('/runner', os.path.basename(path))
+    env['GCP_SERVICE_ACCOUNT_FILE'] = os.path.join('/runner', os.path.basename(path))
 
     # Handle env variables for new module types.
     # This includes gcp_compute inventory plugin and
