@@ -16,16 +16,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='unifiedjob',
-            name='pull',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='unifiedjobtemplate',
-            name='pull',
-            field=models.BooleanField(default=True),
-        ),
         migrations.CreateModel(
             name='ExecutionEnvironment',
             fields=[
