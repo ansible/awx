@@ -34,8 +34,9 @@ const Badge = styled(PFBadge)`
   margin-left: 8px;
 `;
 
-const ListGroup = styled.span`
-  margin-left: 24px;
+const ListGroup = styled.div`
+  margin-left: 8px;
+  display: inline-block;
 `;
 
 function InventoryListItem({
