@@ -166,6 +166,10 @@ def main():
         identifier=dict(required=True),
         workflow_job_template=dict(required=True, aliases=['workflow']),
         organization=dict(),
+        approval_node=dict(type='bool'),
+        name=dict(),
+        description=dict(),
+        timeout=dict(type='int'),
         extra_data=dict(type='dict'),
         inventory=dict(),
         scm_branch=dict(),
@@ -180,6 +184,7 @@ def main():
         success_nodes=dict(type='list', elements='str'),
         always_nodes=dict(type='list', elements='str'),
         failure_nodes=dict(type='list', elements='str'),
+        approval_nodes=dict(type='list', elements='str'),
         credentials=dict(type='list', elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
@@ -190,7 +195,10 @@ def main():
     # Extract our parameters
     identifier = module.params.get('identifier')
     state = module.params.get('state')
-
+    approval_node = module.params.get('approval_node')
+    name = module.params.get('name')
+    description = module.params.get('description')
+    timeout = module.params.get('timeout')
     new_fields = {}
     search_fields = {'identifier': identifier}
 
@@ -237,7 +245,7 @@ def main():
             new_fields[field_name] = field_val
 
     association_fields = {}
-    for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
+    for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'approval_nodes', 'credentials'):
         name_list = module.params.get(association)
         if name_list is None:
             continue
@@ -264,10 +272,31 @@ def main():
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
         existing_item, new_fields,
-        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node',
+        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', on_continue=approval_node,
         associations=association_fields
     )
-
-
+    if approval_node:
+        # Set Approval Fields
+        new_fields = {}
+        if name is not None:
+            new_fields['name'] = name        
+        if description is not None:
+            new_fields['description'] = description
+        if timeout is not None:
+            new_fields['timeout'] = timeout
+        # Find created approval node ID
+        search_fields = {'identifier': identifier}
+        search_fields['workflow_job_template'] = workflow_job_template_id
+        workflow_job_template_node = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+        workflow_job_template_node_id = workflow_job_template_node['id']
+        # Due to not able to lookup workflow_approval_templates, none existing item
+        existing_item = {}
+        # module.fail_json(msg="workflow_job_template_nodes/{0}/create_approval_template/".format(workflow_job_template_node_id))
+        module.create_or_update_if_needed(
+            existing_item, new_fields,
+            endpoint='workflow_job_template_nodes/' + str(workflow_job_template_node_id) + '/create_approval_template/', item_type='workflow_job_template_approval_node', on_continue=approval_node,
+            associations=association_fields
+        )
+    module.exit_json(**module.json_output)
 if __name__ == '__main__':
     main()

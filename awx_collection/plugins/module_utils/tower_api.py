@@ -336,8 +336,8 @@ class TowerAPIModule(TowerModule):
 
         # If we have neither of these, then we can try un-authenticated access
         self.authenticated = True
-
-    def delete_if_needed(self, existing_item, on_delete=None):
+    
+    def delete_if_needed(self, existing_item, on_delete=None, on_continue=None):
         # This will exit from the module on its own.
         # If the method successfully deletes an item and on_delete param is defined,
         #   the on_delete parameter will be called as a method pasing in this object and the json from the response
@@ -363,6 +363,10 @@ class TowerAPIModule(TowerModule):
                 self.json_output['changed'] = True
                 self.json_output['id'] = item_id
                 self.exit_json(**self.json_output)
+                if on_continue is not None:
+                    return self.json_output
+                else:
+                    self.exit_json(**self.json_output)
             else:
                 if 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
@@ -375,7 +379,10 @@ class TowerAPIModule(TowerModule):
                 else:
                     self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['status_code']))
         else:
-            self.exit_json(**self.json_output)
+            if on_continue is not None:
+                return None
+            else:
+                self.exit_json(**self.json_output)
 
     def modify_associations(self, association_endpoint, new_association_list):
         # if we got None instead of [] we are not modifying the association_list
@@ -403,8 +410,8 @@ class TowerAPIModule(TowerModule):
             else:
                 self.fail_json(msg="Failed to associate item {0}".format(response['json']['detail']))
 
-    def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, item_type='unknown', associations=None):
-
+    def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, on_continue=None, item_type='unknown', associations=None):
+    
         # This will exit from the module on its own
         # If the method successfully creates an item and on_create param is defined,
         #    the on_create parameter will be called as a method pasing in this object and the json from the response
@@ -430,7 +437,17 @@ class TowerAPIModule(TowerModule):
             item_name = self.get_item_name(new_item, allow_unknown=True)
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
+            
             if response['status_code'] == 201:
+                self.json_output['name'] = 'unknown'
+                for key in ('name', 'username', 'identifier', 'hostname'):
+                    if key in response['json']:
+                        self.json_output['name'] = response['json'][key]
+                self.json_output['id'] = response['json']['id']
+                self.json_output['changed'] = True
+                item_url = response['json']['url']
+            # 200 is response from approval node creation
+            elif response['status_code'] == 200 and  item_type == 'workflow_job_template_approval_node':
                 self.json_output['name'] = 'unknown'
                 for key in ('name', 'username', 'identifier', 'hostname'):
                     if key in response['json']:
@@ -455,6 +472,9 @@ class TowerAPIModule(TowerModule):
         # If we have an on_create method and we actually changed something we can call on_create
         if on_create is not None and self.json_output['changed']:
             on_create(self, response['json'])
+        elif on_continue is not None:
+            last_data = response['json']
+            return last_data
         else:
             self.exit_json(**self.json_output)
 
@@ -518,7 +538,7 @@ class TowerAPIModule(TowerModule):
                     return True
         return False
 
-    def update_if_needed(self, existing_item, new_item, on_update=None, associations=None):
+    def update_if_needed(self, existing_item, new_item, on_update=None, on_continue=None, associations=None):
         # This will exit from the module on its own
         # If the method successfully updates an item and on_update param is defined,
         #   the on_update parameter will be called as a method pasing in this object and the json from the response
@@ -578,14 +598,20 @@ class TowerAPIModule(TowerModule):
             else:
                 last_data = response['json']
             on_update(self, last_data)
+        elif on_continue is not None:
+            if response is None:
+                last_data = existing_item
+            else:
+                last_data = response['json']
+            return last_data
         else:
             self.exit_json(**self.json_output)
-
-    def create_or_update_if_needed(self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, associations=None):
+    
+    def create_or_update_if_needed(self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, on_continue=None, associations=None):
         if existing_item:
-            return self.update_if_needed(existing_item, new_item, on_update=on_update, associations=associations)
+            return self.update_if_needed(existing_item, new_item, on_update=on_update, on_continue=on_continue, associations=associations)
         else:
-            return self.create_if_needed(existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, associations=associations)
+            return self.create_if_needed(existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, on_continue=on_continue, associations=associations)
 
     def logout(self):
         if self.authenticated and self.oauth_token_id:
