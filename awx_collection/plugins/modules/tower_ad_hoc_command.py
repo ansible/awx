@@ -28,6 +28,11 @@ options:
         - Job_type to use for the ad hoc command.
       type: str
       choices: [ 'run', 'check' ]
+    execution_environment:
+      description:
+        - Execution Environment to use for the ad hoc command.
+      required: False
+      type: str
     inventory:
       description:
         - Inventory to use for the ad hoc command.
