@@ -6,7 +6,6 @@ import os
 import shutil
 import tempfile
 
-from backports.tempfile import TemporaryDirectory
 import fcntl
 from unittest import mock
 import pytest
