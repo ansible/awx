@@ -31,6 +31,10 @@ options:
       description:
         - Description to use for the project.
       type: str
+    execution_environment:
+      description:
+        - Execution Environment to use for the project.
+      type: str
     scm_type:
       description:
         - Type of SCM resource.
