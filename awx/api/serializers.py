@@ -649,7 +649,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
     class Meta:
         model = UnifiedJobTemplate
         fields = ('*', 'last_job_run', 'last_job_failed',
-                  'next_job_run', 'status', 'execution_environment', 'pull')
+                  'next_job_run', 'status', 'execution_environment')
 
     def get_related(self, obj):
         res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
@@ -716,7 +716,7 @@ class UnifiedJobSerializer(BaseSerializer):
     class Meta:
         model = UnifiedJob
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
-                  'execution_environment', 'pull',
+                  'execution_environment',
                   'failed', 'started', 'finished', 'canceled_on', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation',
                   'execution_node', 'controller_node',
