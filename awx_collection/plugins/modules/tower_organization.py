@@ -36,6 +36,10 @@ options:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
       default: ''
+    default_environment:
+      description:
+        - Default Execution Environment to use for the Organization.
+      type: str
     max_hosts:
       description:
         - The max hosts allowed in this organizations
