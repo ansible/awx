@@ -454,7 +454,6 @@ class ExecutionEnvironmentMixin(models.Model):
         related_name='%(class)ss',
         help_text=_('The container image to be used for execution.'),
     )
-    pull = models.BooleanField(default=True)
 
 
 class CustomVirtualEnvMixin(models.Model):
