@@ -138,6 +138,7 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
         if not api_option and module_option and module_option.get('type', 'str') == 'list':
             return "OK, Field appears to be relation"
             # TODO, at some point try and check the object model to confirm its actually a relation
+
         return cause_error('Failed, option mismatch')
 
     # We made it through all of the checks so we are ok

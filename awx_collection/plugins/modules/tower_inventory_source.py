@@ -73,6 +73,10 @@ options:
       description:
         - Credential to use for the source.
       type: str
+    execution_environment:
+      description:
+        - Execution Environment to use for the source.
+      type: str
     overwrite:
       description:
         - Delete child groups and hosts not found in source.

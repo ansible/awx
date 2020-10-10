@@ -60,6 +60,10 @@ options:
       description:
         - Path to the playbook to use for the job template within the project provided.
       type: str
+    execution_environment:
+      description:
+        - Execution Environment to use for the JT.
+      type: str
     credential:
       description:
         - Name of the credential to use for the job template.
