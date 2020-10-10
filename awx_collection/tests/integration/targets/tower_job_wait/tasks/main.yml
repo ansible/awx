@@ -100,7 +100,7 @@
 # Make sure that we failed and that we have some data in our results
 - assert:
     that:
-      - "wait_results.msg == 'Monitoring aborted due to timeout' or 'Timeout waiting for job to finish.'"
+      - "wait_results.msg == 'Approval node name is required to create approval node.'"
       - "'id' in wait_results"
 
 - name: Async cancel the long running job

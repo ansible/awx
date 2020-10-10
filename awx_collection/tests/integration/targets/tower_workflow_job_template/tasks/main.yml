@@ -9,6 +9,7 @@
     demo_project_name: "AWX-Collection-tests-tower_workflow_job_template-proj-{{ test_id }}"
     jt1_name: "AWX-Collection-tests-tower_workflow_job_template-jt1-{{ test_id }}"
     jt2_name: "AWX-Collection-tests-tower_workflow_job_template-jt2-{{ test_id }}"
+    approval_node_name: "AWX-Collection-tests-tower_workflow_approval_node-{{ test_id }}"
     lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
     wfjt_name: "AWX-Collection-tests-tower_workflow_job_template-wfjt-{{ test_id }}"
     email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
@@ -144,6 +145,36 @@
     identifier: root
     unified_job_template: "{{ jt1_name }}"
     workflow: "{{ wfjt_name }}"
+
+- name: Fail if no name is set for approval
+  tower_workflow_job_template_node:
+    identifier: approval_test
+    approval_node:
+      description: "{{ approval_node_name }}"
+    workflow: "{{ wfjt_name }}"
+  register: no_name_results
+  ignore_errors: true
+
+- assert:
+    that:
+      - "no_name_results.msg == 'Approval node name is required to create approval node.'"
+
+- name: Create approval node
+  awx.awx.tower_workflow_job_template_node:
+    identifier: approval_test
+    approval_node:
+      name: "{{ approval_node_name }}"
+      timeout: 900
+    workflow: test
+
+- name: Create link for root node
+  tower_workflow_job_template_node:
+    identifier: root
+    workflow: "{{ wfjt_name }}"
+    success_nodes:
+      - approval_test
+    always_nodes:
+      - leaf
 
 - name: Add started notifications to workflow job template
   tower_workflow_job_template:
