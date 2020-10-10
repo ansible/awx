@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
@@ -20,8 +20,9 @@ import {
   HostFilterField,
 } from './SharedFields';
 
-const SCMSubForm = ({ i18n }) => {
-  const [credentialField, , credentialHelpers] = useField('credential');
+const SCMSubForm = ({ autoPopulateProject, i18n }) => {
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const [credentialField] = useField('credential');
   const [projectField, projectMeta, projectHelpers] = useField({
     name: 'source_project',
     validate: required(i18n._(t`Select a value for this field`), i18n),
@@ -46,26 +47,27 @@ const SCMSubForm = ({ i18n }) => {
   useEffect(() => {
     if (projectMeta.initialValue) {
       fetchSourcePath(projectMeta.initialValue.id);
-    }
+      if (sourcePathField.value === '') {
+        sourcePathHelpers.setValue('/ (project root)');
+      }
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchSourcePath, projectMeta.initialValue]);
 
   const handleProjectUpdate = useCallback(
     value => {
-      sourcePathHelpers.setValue('');
-      projectHelpers.setValue(value);
+      setFieldValue('source_project', value);
+      setFieldValue('source_path', '');
+      setFieldTouched('source_path', false);
       fetchSourcePath(value.id);
     },
-    [] // eslint-disable-line react-hooks/exhaustive-deps
+    [fetchSourcePath, setFieldValue, setFieldTouched]
   );
 
-  const handleProjectAutocomplete = useCallback(
-    val => {
-      projectHelpers.setValue(val);
-      if (!projectMeta.initialValue) {
-        fetchSourcePath(val.id);
-      }
+  const handleCredentialUpdate = useCallback(
+    value => {
+      setFieldValue('credential', value);
     },
-    [] // eslint-disable-line react-hooks/exhaustive-deps
+    [setFieldValue]
   );
 
   return (
@@ -74,18 +76,16 @@ const SCMSubForm = ({ i18n }) => {
         credentialTypeKind="cloud"
         label={i18n._(t`Credential`)}
         value={credentialField.value}
-        onChange={value => {
-          credentialHelpers.setValue(value);
-        }}
+        onChange={handleCredentialUpdate}
       />
       <ProjectLookup
-        autocomplete={handleProjectAutocomplete}
         value={projectField.value}
         isValid={!projectMeta.touched || !projectMeta.error}
         helperTextInvalid={projectMeta.error}
         onBlur={() => projectHelpers.setTouched()}
         onChange={handleProjectUpdate}
         required
+        autoPopulate={autoPopulateProject}
       />
       <FormGroup
         fieldId="source_path"

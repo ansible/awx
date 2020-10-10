@@ -17,12 +17,14 @@ import Jobs from './models/Jobs';
 import Labels from './models/Labels';
 import Me from './models/Me';
 import NotificationTemplates from './models/NotificationTemplates';
+import Notifications from './models/Notifications';
 import Organizations from './models/Organizations';
 import ProjectUpdates from './models/ProjectUpdates';
 import Projects from './models/Projects';
 import Roles from './models/Roles';
 import Root from './models/Root';
 import Schedules from './models/Schedules';
+import Settings from './models/Settings';
 import SystemJobs from './models/SystemJobs';
 import Teams from './models/Teams';
 import Tokens from './models/Tokens';
@@ -53,12 +55,14 @@ const JobsAPI = new Jobs();
 const LabelsAPI = new Labels();
 const MeAPI = new Me();
 const NotificationTemplatesAPI = new NotificationTemplates();
+const NotificationsAPI = new Notifications();
 const OrganizationsAPI = new Organizations();
 const ProjectUpdatesAPI = new ProjectUpdates();
 const ProjectsAPI = new Projects();
 const RolesAPI = new Roles();
 const RootAPI = new Root();
 const SchedulesAPI = new Schedules();
+const SettingsAPI = new Settings();
 const SystemJobsAPI = new SystemJobs();
 const TeamsAPI = new Teams();
 const TokensAPI = new Tokens();
@@ -90,12 +94,14 @@ export {
   LabelsAPI,
   MeAPI,
   NotificationTemplatesAPI,
+  NotificationsAPI,
   OrganizationsAPI,
   ProjectUpdatesAPI,
   ProjectsAPI,
   RolesAPI,
   RootAPI,
   SchedulesAPI,
+  SettingsAPI,
   SystemJobsAPI,
   TeamsAPI,
   TokensAPI,

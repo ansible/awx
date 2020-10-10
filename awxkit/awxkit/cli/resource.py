@@ -2,7 +2,7 @@ import yaml
 import json
 import os
 
-from awxkit import api, config
+from awxkit import api, config, yaml_file
 from awxkit.exceptions import ImportExportError
 from awxkit.utils import to_str
 from awxkit.api.pages import Page
@@ -140,7 +140,7 @@ class Import(CustomCommand):
         if fmt == 'json':
             data = json.load(client.stdin)
         elif fmt == 'yaml':
-            data = yaml.safe_load(client.stdin)
+            data = yaml.load(client.stdin, Loader=yaml_file.Loader)
         else:
             raise ImportExportError("Unsupported format for Import: " + fmt)
 

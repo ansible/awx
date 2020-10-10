@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { node } from 'prop-types';
-import { Tooltip } from '@patternfly/react-core';
+import { Popover } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
@@ -9,18 +9,20 @@ const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
 `;
 
 function FieldTooltip({ content, ...rest }) {
+  const [showTooltip, setShowTooltip] = useState(false);
   if (!content) {
     return null;
   }
   return (
-    <Tooltip
-      position="right"
-      content={content}
-      trigger="click mouseenter focus"
+    <Popover
+      bodyContent={content}
+      isVisible={showTooltip}
+      hideOnOutsideClick
+      shouldClose={() => setShowTooltip(false)}
       {...rest}
     >
-      <QuestionCircleIcon />
-    </Tooltip>
+      <QuestionCircleIcon onClick={() => setShowTooltip(!showTooltip)} />
+    </Popover>
   );
 }
 FieldTooltip.propTypes = {

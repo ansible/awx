@@ -67,8 +67,6 @@ The new task manager should, in essence, work like the old one. Old task manager
 * Tasks that are not blocked run whenever there is capacity available in the instance group that they are set to run in (one job is always allowed to run per instance group, even if there isn't enough capacity)
 * Only one Project Update for a Project may be running at a time
 * Only one Inventory Update for an Inventory Source may be running at a time
-* For a related Project, only a Job xor Project Update may be running at a time
-* For a related Inventory, only a Job xor Inventory Update(s) may be running at a time
 * Only one Job for a Job Template may be running at a time (the `allow_simultaneous` feature relaxes this condition)
 * Only one System Job may be running at a time
 

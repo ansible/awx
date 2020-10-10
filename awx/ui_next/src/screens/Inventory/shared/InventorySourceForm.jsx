@@ -42,11 +42,12 @@ const buildSourceChoiceOptions = options => {
   return sourceChoices.filter(({ key }) => key !== 'file');
 };
 
-const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
+const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
   const {
     values,
     initialValues,
     resetForm,
+    setFieldTouched,
     setFieldValue,
   } = useFormikContext();
   const [sourceField, sourceMeta] = useField({
@@ -92,6 +93,7 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
       };
       Object.keys(defaults).forEach(label => {
         setFieldValue(label, defaults[label]);
+        setFieldTouched(label, false);
       });
     }
   };
@@ -170,16 +172,67 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
           <FormColumnLayout>
             {
               {
-                azure_rm: <AzureSubForm sourceOptions={sourceOptions} />,
+                azure_rm: (
+                  <AzureSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'azure_rm'
+                    }
+                    sourceOptions={sourceOptions}
+                  />
+                ),
                 cloudforms: <CloudFormsSubForm />,
                 ec2: <EC2SubForm sourceOptions={sourceOptions} />,
-                gce: <GCESubForm sourceOptions={sourceOptions} />,
-                openstack: <OpenStackSubForm />,
-                rhv: <VirtualizationSubForm />,
-                satellite6: <SatelliteSubForm />,
-                scm: <SCMSubForm />,
-                tower: <TowerSubForm />,
-                vmware: <VMwareSubForm sourceOptions={sourceOptions} />,
+                gce: (
+                  <GCESubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'gce'
+                    }
+                    sourceOptions={sourceOptions}
+                  />
+                ),
+                openstack: (
+                  <OpenStackSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'openstack'
+                    }
+                  />
+                ),
+                rhv: (
+                  <VirtualizationSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'rhv'
+                    }
+                  />
+                ),
+                satellite6: (
+                  <SatelliteSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'satellite6'
+                    }
+                  />
+                ),
+                scm: (
+                  <SCMSubForm
+                    autoPopulateProject={
+                      !source?.id || source?.source !== 'scm'
+                    }
+                  />
+                ),
+                tower: (
+                  <TowerSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'tower'
+                    }
+                  />
+                ),
+                vmware: (
+                  <VMwareSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'vmware'
+                    }
+                    sourceOptions={sourceOptions}
+                  />
+                ),
               }[sourceField.value]
             }
           </FormColumnLayout>
@@ -204,7 +257,7 @@ const InventorySourceForm = ({
     overwrite: source?.overwrite || false,
     overwrite_vars: source?.overwrite_vars || false,
     source: source?.source || '',
-    source_path: source?.source_path === '' ? '/ (project root)' : '',
+    source_path: source?.source_path || '',
     source_project: source?.summary_fields?.source_project || null,
     source_script: source?.summary_fields?.source_script || null,
     source_vars: source?.source_vars || '---\n',
@@ -255,6 +308,7 @@ const InventorySourceForm = ({
             <InventorySourceFormFields
               formik={formik}
               i18n={i18n}
+              source={source}
               sourceOptions={sourceOptions}
             />
             {submitError && <FormSubmitError error={submitError} />}

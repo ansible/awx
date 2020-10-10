@@ -21,6 +21,7 @@ import requests
 
 from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
+from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
 from awx.main.utils import (
     get_awx_version,
@@ -252,6 +253,7 @@ class ApiV2ConfigView(APIView):
             ansible_version=get_ansible_version(),
             eula=render_to_string("eula.md") if license_data.get('license_type', 'UNLICENSED') != 'open' else '',
             analytics_status=pendo_state,
+            analytics_collectors=all_collectors(),
             become_methods=PRIVILEGE_ESCALATION_METHODS,
         )
 

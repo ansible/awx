@@ -109,11 +109,7 @@ def main():
     state = module.params.get('state')
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('instance_groups', **{
-        'data': {
-            'name': name,
-        }
-    })
+    existing_item = module.get_one('instance_groups', name_or_id=name)
 
     if state is 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -131,7 +127,7 @@ def main():
 
     # Create the data that gets sent for create and update
     new_fields = {}
-    new_fields['name'] = new_name if new_name else name
+    new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
     if credential is not None:
         new_fields['credential'] = credential_id
     if policy_instance_percentage is not None:

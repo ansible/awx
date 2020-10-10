@@ -39,7 +39,7 @@ import {
   ProjectLookup,
   MultiCredentialsLookup,
 } from '../../../components/Lookup';
-import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
+import { JobTemplatesAPI } from '../../../api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
@@ -101,18 +101,6 @@ function JobTemplateForm({
   );
 
   const {
-    request: fetchProject,
-    error: projectContentError,
-    contentLoading: hasProjectLoading,
-  } = useRequest(
-    useCallback(async () => {
-      if (template?.project) {
-        await ProjectsAPI.readDetail(template?.project);
-      }
-    }, [template])
-  );
-
-  const {
     request: loadRelatedInstanceGroups,
     error: instanceGroupError,
     contentLoading: instanceGroupLoading,
@@ -126,10 +114,6 @@ function JobTemplateForm({
       setFieldValue('instanceGroups', [...data.results]);
     }, [setFieldValue, template])
   );
-
-  useEffect(() => {
-    fetchProject();
-  }, [fetchProject]);
 
   useEffect(() => {
     loadRelatedInstanceGroups();
@@ -162,18 +146,11 @@ function JobTemplateForm({
 
   const handleProjectUpdate = useCallback(
     value => {
-      playbookHelpers.setValue(0);
-      scmHelpers.setValue('');
-      projectHelpers.setValue(value);
+      setFieldValue('playbook', 0);
+      setFieldValue('scm_branch', '');
+      setFieldValue('project', value);
     },
-    [] // eslint-disable-line react-hooks/exhaustive-deps
-  );
-
-  const handleProjectAutocomplete = useCallback(
-    val => {
-      projectHelpers.setValue(val);
-    },
-    [] // eslint-disable-line react-hooks/exhaustive-deps
+    [setFieldValue]
   );
 
   const jobTypeOptions = [
@@ -204,16 +181,12 @@ function JobTemplateForm({
     callbackUrl = `${origin}${path}`;
   }
 
-  if (instanceGroupLoading || hasProjectLoading) {
+  if (instanceGroupLoading) {
     return <ContentLoading />;
   }
 
-  if (contentError || instanceGroupError || projectContentError) {
-    return (
-      <ContentError
-        error={contentError || instanceGroupError || projectContentError}
-      />
-    );
+  if (contentError || instanceGroupError) {
+    return <ContentError error={contentError || instanceGroupError} />;
   }
 
   return (
@@ -254,17 +227,24 @@ function JobTemplateForm({
             }}
           />
         </FieldWithPrompt>
-        <FieldWithPrompt
-          fieldId="template-inventory"
+        <FormGroup
+          fieldId="inventory-lookup"
+          validated={
+            !(inventoryMeta.touched || askInventoryOnLaunchField.value) ||
+            !inventoryMeta.error
+              ? 'default'
+              : 'error'
+          }
+          helperTextInvalid={inventoryMeta.error}
           isRequired={!askInventoryOnLaunchField.value}
-          label={i18n._(t`Inventory`)}
-          promptId="template-ask-inventory-on-launch"
-          promptName="ask_inventory_on_launch"
-          tooltip={i18n._(t`Select the inventory containing the hosts
-            you want this job to manage.`)}
         >
           <InventoryLookup
             value={inventory}
+            promptId="template-ask-inventory-on-launch"
+            promptName="ask_inventory_on_launch"
+            isPromptableField
+            tooltip={i18n._(t`Select the inventory containing the hosts
+            you want this job to manage.`)}
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={value => {
               inventoryHelpers.setValue(value ? value.id : null);
@@ -274,16 +254,7 @@ function JobTemplateForm({
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
           />
-          {(inventoryMeta.touched || askInventoryOnLaunchField.value) &&
-            inventoryMeta.error && (
-              <div
-                className="pf-c-form__helper-text pf-m-error"
-                aria-live="polite"
-              >
-                {inventoryMeta.error}
-              </div>
-            )}
-        </FieldWithPrompt>
+        </FormGroup>
         <ProjectLookup
           value={projectField.value}
           onBlur={() => projectHelpers.setTouched()}
@@ -292,8 +263,8 @@ function JobTemplateForm({
           isValid={!projectMeta.touched || !projectMeta.error}
           helperTextInvalid={projectMeta.error}
           onChange={handleProjectUpdate}
-          autocomplete={handleProjectAutocomplete}
           required
+          autoPopulate={!template?.id}
         />
         {projectField.value?.allow_override && (
           <FieldWithPrompt

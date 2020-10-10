@@ -9,11 +9,12 @@
     name: "{{ inv_name }}"
     organization: Default
     state: present
+  register: result
 
 - name: Create a Host
   tower_host:
     name: "{{ host_name }}"
-    inventory: "{{ inv_name }}"
+    inventory: "{{ result.id }}"
     state: present
     variables:
       foo: bar
@@ -25,7 +26,7 @@
 
 - name: Delete a Host
   tower_host:
-    name: "{{ host_name }}"
+    name: "{{ result.id }}"
     inventory: "{{ inv_name }}"
     state: absent
   register: result
@@ -45,5 +46,6 @@
 
 - assert:
     that:
-      - "result.msg =='The inventories test-non-existing-inventory was not found on the Tower server' or
-        result.msg =='Failed to update host, inventory not found: The requested object could not be found.'"
+      - "result is failed"
+      - "'test-non-existing-inventory' in result.msg"
+      - "result.total_results == 0"

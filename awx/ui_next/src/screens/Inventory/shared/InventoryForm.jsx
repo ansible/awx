@@ -1,5 +1,5 @@
-import React from 'react';
-import { Formik, useField } from 'formik';
+import React, { useCallback } from 'react';
+import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, number, shape } from 'prop-types';
@@ -17,18 +17,29 @@ import {
   FormFullWidthLayout,
 } from '../../../components/FormLayout';
 
-function InventoryFormFields({ i18n, credentialTypeId }) {
+function InventoryFormFields({ i18n, credentialTypeId, inventory }) {
+  const { setFieldValue } = useFormikContext();
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
-  const instanceGroupsFieldArr = useField('instanceGroups');
-  const instanceGroupsField = instanceGroupsFieldArr[0];
-  const instanceGroupsHelpers = instanceGroupsFieldArr[2];
+  const [instanceGroupsField, , instanceGroupsHelpers] = useField(
+    'instanceGroups'
+  );
+  const [insightsCredentialField] = useField('insights_credential');
+  const onOrganizationChange = useCallback(
+    value => {
+      setFieldValue('organization', value);
+    },
+    [setFieldValue]
+  );
+  const onCredentialChange = useCallback(
+    value => {
+      setFieldValue('insights_credential', value);
+    },
+    [setFieldValue]
+  );
 
-  const insightsCredentialFieldArr = useField('insights_credential');
-  const insightsCredentialField = insightsCredentialFieldArr[0];
-  const insightsCredentialHelpers = insightsCredentialFieldArr[2];
   return (
     <>
       <FormField
@@ -49,18 +60,17 @@ function InventoryFormFields({ i18n, credentialTypeId }) {
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-        onChange={value => {
-          organizationHelpers.setValue(value);
-        }}
+        onChange={onOrganizationChange}
         value={organizationField.value}
         touched={organizationMeta.touched}
         error={organizationMeta.error}
         required
+        autoPopulate={!inventory?.id}
       />
       <CredentialLookup
         label={i18n._(t`Insights Credential`)}
         credentialTypeId={credentialTypeId}
-        onChange={value => insightsCredentialHelpers.setValue(value)}
+        onChange={onCredentialChange}
         value={insightsCredentialField.value}
       />
       <InstanceGroupsLookup
@@ -115,7 +125,7 @@ function InventoryForm({
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
-            <InventoryFormFields {...rest} />
+            <InventoryFormFields {...rest} inventory={inventory} />
             <FormSubmitError error={submitError} />
             <FormActionGroup
               onCancel={onCancel}

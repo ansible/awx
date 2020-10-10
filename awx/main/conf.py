@@ -2,7 +2,6 @@
 import json
 import logging
 import os
-from distutils.version import LooseVersion as Version
 
 # Django
 from django.utils.translation import ugettext_lazy as _
@@ -149,7 +148,7 @@ register(
     default='https://example.com',
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
-    label=_('Automation Analytics upload URL.'),
+    label=_('Automation Analytics upload URL'),
     help_text=_('This setting is used to to configure data collection for the Automation Analytics dashboard'),
     category=_('System'),
     category_slug='system',
@@ -254,6 +253,7 @@ register(
     help_text=_('The number of seconds to sleep between status checks for jobs running on isolated instances.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -265,6 +265,7 @@ register(
                 'This includes the time needed to copy source control files (playbooks) to the isolated instance.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -277,6 +278,7 @@ register(
                 'Value should be substantially greater than expected network latency.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -437,92 +439,11 @@ register(
 )
 
 register(
-    'PRIMARY_GALAXY_URL',
-    field_class=fields.URLField,
-    required=False,
-    allow_blank=True,
-    label=_('Primary Galaxy Server URL'),
-    help_text=_(
-        'For organizations that run their own Galaxy service, this gives the option to specify a '
-        'host as the primary galaxy server. Requirements will be downloaded from the primary if the '
-        'specific role or collection is available there. If the content is not avilable in the primary, '
-        'or if this field is left blank, it will default to galaxy.ansible.com.'
-    ),
-    category=_('Jobs'),
-    category_slug='jobs'
-)
-
-register(
-    'PRIMARY_GALAXY_USERNAME',
-    field_class=fields.CharField,
-    required=False,
-    allow_blank=True,
-    label=_('Primary Galaxy Server Username'),
-    help_text=_('(This setting is deprecated and will be removed in a future release) '
-                'For using a galaxy server at higher precedence than the public Ansible Galaxy. '
-                'The username to use for basic authentication against the Galaxy instance, '
-                'this is mutually exclusive with PRIMARY_GALAXY_TOKEN.'),
-    category=_('Jobs'),
-    category_slug='jobs'
-)
-
-register(
-    'PRIMARY_GALAXY_PASSWORD',
-    field_class=fields.CharField,
-    encrypted=True,
-    required=False,
-    allow_blank=True,
-    label=_('Primary Galaxy Server Password'),
-    help_text=_('(This setting is deprecated and will be removed in a future release) '
-                'For using a galaxy server at higher precedence than the public Ansible Galaxy. '
-                'The password to use for basic authentication against the Galaxy instance, '
-                'this is mutually exclusive with PRIMARY_GALAXY_TOKEN.'),
-    category=_('Jobs'),
-    category_slug='jobs'
-)
-
-register(
-    'PRIMARY_GALAXY_TOKEN',
-    field_class=fields.CharField,
-    encrypted=True,
-    required=False,
-    allow_blank=True,
-    label=_('Primary Galaxy Server Token'),
-    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
-                'The token to use for connecting with the Galaxy instance, '
-                'this is mutually exclusive with corresponding username and password settings.'),
-    category=_('Jobs'),
-    category_slug='jobs'
-)
-
-register(
-    'PRIMARY_GALAXY_AUTH_URL',
-    field_class=fields.CharField,
-    required=False,
-    allow_blank=True,
-    label=_('Primary Galaxy Authentication URL'),
-    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
-                'The token_endpoint of a Keycloak server.'),
-    category=_('Jobs'),
-    category_slug='jobs'
-)
-
-register(
-    'PUBLIC_GALAXY_ENABLED',
-    field_class=fields.BooleanField,
-    default=True,
-    label=_('Allow Access to Public Galaxy'),
-    help_text=_('Allow or deny access to the public Ansible Galaxy during project updates.'),
-    category=_('Jobs'),
-    category_slug='jobs'
-)
-
-register(
     'GALAXY_IGNORE_CERTS',
     field_class=fields.BooleanField,
     default=False,
     label=_('Ignore Ansible Galaxy SSL Certificate Verification'),
-    help_text=_('If set to true, certificate validation will not be done when'
+    help_text=_('If set to true, certificate validation will not be done when '
                 'installing content from any Galaxy server.'),
     category=_('Jobs'),
     category_slug='jobs'
@@ -579,6 +500,7 @@ register(
                 'timeout should be imposed. A timeout set on an individual job template will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -591,6 +513,7 @@ register(
                 'timeout should be imposed. A timeout set on an individual inventory source will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -603,6 +526,7 @@ register(
                 'timeout should be imposed. A timeout set on an individual project will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -617,6 +541,7 @@ register(
                 'Use a value of 0 to indicate that no timeout should be imposed.'),
     category=_('Jobs'),
     category_slug='jobs',
+    unit=_('seconds'),
 )
 
 register(
@@ -624,7 +549,7 @@ register(
     field_class=fields.IntegerField,
     allow_null=False,
     default=200,
-    label=_('Maximum number of forks per job.'),
+    label=_('Maximum number of forks per job'),
     help_text=_('Saving a Job Template with more than this number of forks will result in an error. '
                 'When set to 0, no limit is applied.'),
     category=_('Jobs'),
@@ -754,6 +679,7 @@ register(
                 'aggregator protocols.'),
     category=_('Logging'),
     category_slug='logging',
+    unit=_('seconds'),
 )
 register(
     'LOG_AGGREGATOR_VERIFY_CERT',
@@ -834,7 +760,8 @@ register(
     default=14400,	# every 4 hours
     min_value=1800,	# every 30 minutes
     category=_('System'),
-    category_slug='system'
+    category_slug='system',
+    unit=_('seconds'),
 )
 
 
@@ -856,84 +783,4 @@ def logging_validate(serializer, attrs):
     return attrs
 
 
-def galaxy_validate(serializer, attrs):
-    """Ansible Galaxy config options have mutual exclusivity rules, these rules
-    are enforced here on serializer validation so that users will not be able
-    to save settings which obviously break all project updates.
-    """
-    prefix = 'PRIMARY_GALAXY_'
-    errors = {}
-
-    def _new_value(setting_name):
-        if setting_name in attrs:
-            return attrs[setting_name]
-        elif not serializer.instance:
-            return ''
-        return getattr(serializer.instance, setting_name, '')
-
-    if not _new_value('PRIMARY_GALAXY_URL'):
-        if _new_value('PUBLIC_GALAXY_ENABLED') is False:
-            msg = _('A URL for Primary Galaxy must be defined before disabling public Galaxy.')
-            # put error in both keys because UI has trouble with errors in toggles
-            for key in ('PRIMARY_GALAXY_URL', 'PUBLIC_GALAXY_ENABLED'):
-                errors.setdefault(key, [])
-                errors[key].append(msg)
-            raise serializers.ValidationError(errors)
-
-    from awx.main.constants import GALAXY_SERVER_FIELDS
-    if not any('{}{}'.format(prefix, subfield.upper()) in attrs for subfield in GALAXY_SERVER_FIELDS):
-        return attrs
-
-    galaxy_data = {}
-    for subfield in GALAXY_SERVER_FIELDS:
-        galaxy_data[subfield] = _new_value('{}{}'.format(prefix, subfield.upper()))
-    if not galaxy_data['url']:
-        for k, v in galaxy_data.items():
-            if v:
-                setting_name = '{}{}'.format(prefix, k.upper())
-                errors.setdefault(setting_name, [])
-                errors[setting_name].append(_(
-                    'Cannot provide field if PRIMARY_GALAXY_URL is not set.'
-                ))
-    for k in GALAXY_SERVER_FIELDS:
-        if galaxy_data[k]:
-            setting_name = '{}{}'.format(prefix, k.upper())
-            if (not serializer.instance) or (not getattr(serializer.instance, setting_name, '')):
-                # new auth is applied, so check if compatible with version
-                from awx.main.utils import get_ansible_version
-                current_version = get_ansible_version()
-                min_version = '2.9'
-                if Version(current_version) < Version(min_version):
-                    errors.setdefault(setting_name, [])
-                    errors[setting_name].append(_(
-                        'Galaxy server settings are not available until Ansible {min_version}, '
-                        'you are running {current_version}.'
-                    ).format(min_version=min_version, current_version=current_version))
-    if (galaxy_data['password'] or galaxy_data['username']) and (galaxy_data['token'] or galaxy_data['auth_url']):
-        for k in ('password', 'username', 'token', 'auth_url'):
-            setting_name = '{}{}'.format(prefix, k.upper())
-            if setting_name in attrs:
-                errors.setdefault(setting_name, [])
-                errors[setting_name].append(_(
-                    'Setting Galaxy token and authentication URL is mutually exclusive with username and password.'
-                ))
-    if bool(galaxy_data['username']) != bool(galaxy_data['password']):
-        msg = _('If authenticating via username and password, both must be provided.')
-        for k in ('username', 'password'):
-            setting_name = '{}{}'.format(prefix, k.upper())
-            errors.setdefault(setting_name, [])
-            errors[setting_name].append(msg)
-    if bool(galaxy_data['token']) != bool(galaxy_data['auth_url']):
-        msg = _('If authenticating via token, both token and authentication URL must be provided.')
-        for k in ('token', 'auth_url'):
-            setting_name = '{}{}'.format(prefix, k.upper())
-            errors.setdefault(setting_name, [])
-            errors[setting_name].append(msg)
-
-    if errors:
-        raise serializers.ValidationError(errors)
-    return attrs
-
-
 register_validate('logging', logging_validate)
-register_validate('jobs', galaxy_validate)

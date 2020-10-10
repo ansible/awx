@@ -39,7 +39,9 @@ describe('<NotificationTemplateListItem />', () => {
   });
 
   test('should send test notification', async () => {
-    NotificationTemplatesAPI.test.mockResolvedValue({});
+    NotificationTemplatesAPI.test.mockResolvedValue({
+      data: { notification: 1 },
+    });
 
     const wrapper = mountWithContexts(
       <NotificationTemplateListItem

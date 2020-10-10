@@ -7,6 +7,7 @@ import { CheckboxField, FieldTooltip } from '../FormField';
 
 const FieldHeader = styled.div`
   display: flex;
+  padding-bottom: var(--pf-c-form__group-label--PaddingBottom);
 `;
 
 const StyledCheckboxField = styled(CheckboxField)`
@@ -23,6 +24,7 @@ function FieldWithPrompt({
   promptId,
   promptName,
   tooltip,
+  isDisabled,
 }) {
   return (
     <div className="pf-c-form__group">
@@ -39,6 +41,7 @@ function FieldWithPrompt({
           {tooltip && <FieldTooltip content={tooltip} />}
         </div>
         <StyledCheckboxField
+          isDisabled={isDisabled}
           id={promptId}
           label={i18n._(t`Prompt on launch`)}
           name={promptName}

@@ -2,6 +2,9 @@ import logging
 import uuid
 import json
 
+from django.conf import settings
+import redis
+
 from awx.main.dispatch import get_local_queuename
 
 from . import pg_bus_conn
@@ -21,7 +24,15 @@ class Control(object):
         self.queuename = host or get_local_queuename()
 
     def status(self, *args, **kwargs):
-        return self.control_with_reply('status', *args, **kwargs)
+        r = redis.Redis.from_url(settings.BROKER_URL)
+        if self.service == 'dispatcher':
+            stats = r.get(f'awx_{self.service}_statistics') or b''
+            return stats.decode('utf-8')
+        else:
+            workers = []
+            for key in r.keys('awx_callback_receiver_statistics_*'):
+                workers.append(r.get(key).decode('utf-8'))
+            return '\n'.join(workers)
 
     def running(self, *args, **kwargs):
         return self.control_with_reply('running', *args, **kwargs)

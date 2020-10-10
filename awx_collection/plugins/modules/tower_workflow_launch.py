@@ -138,10 +138,10 @@ def main():
         post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
     # Attempt to look up job_template based on the provided name
-    lookup_data = {'name': name}
+    lookup_data = {}
     if organization:
         lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
-    workflow_job_template = module.get_one('workflow_job_templates', data=lookup_data)
+    workflow_job_template = module.get_one('workflow_job_templates', name_or_id=name, data=lookup_data)
 
     if workflow_job_template is None:
         module.fail_json(msg="Unable to find workflow job template")

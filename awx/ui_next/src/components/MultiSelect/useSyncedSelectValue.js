@@ -11,11 +11,21 @@ export default function useSyncedSelectValue(value, onChange) {
   const [selections, setSelections] = useState([]);
 
   useEffect(() => {
+    const newOptions = [];
     if (value !== selections && options.length) {
-      const syncedValue = value.map(item =>
-        options.find(i => i.id === item.id)
-      );
+      const syncedValue = value.map(item => {
+        const match = options.find(i => {
+          return i.id === item.id;
+        });
+        if (!match) {
+          newOptions.push(item);
+        }
+        return match || item;
+      });
       setSelections(syncedValue);
+    }
+    if (newOptions.length > 0) {
+      setOptions(options.concat(newOptions));
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [value, options]);
@@ -27,7 +37,6 @@ export default function useSyncedSelectValue(value, onChange) {
       onChange(selections.concat(item));
     }
   };
-
   return {
     selections: options.length ? addToStringToObjects(selections) : [],
     onSelect,

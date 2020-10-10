@@ -32,11 +32,12 @@ function RoutedTabs(props) {
     <Tabs activeKey={getActiveTabId()} onSelect={handleTabSelect}>
       {tabsArray.map(tab => (
         <Tab
-          aria-label={`${tab.name}`}
+          aria-label={typeof tab.name === 'string' ? tab.name : ''}
           eventKey={tab.id}
           key={tab.id}
           link={tab.link}
           title={<TabTitleText>{tab.name}</TabTitleText>}
+          role="tab"
         />
       ))}
     </Tabs>

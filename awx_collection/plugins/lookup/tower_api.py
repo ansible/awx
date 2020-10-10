@@ -72,6 +72,10 @@ EXAMPLES = """
   set_fact:
     tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui') }}"
 
+- name: Load the UI settings specifying the connection info
+  set_fact:
+    tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui' host='tower.example.com', username='admin', password=my_pass_var, verify_ssl=False) }}"
+
 - name: Report the usernames of all users with admin privs
   debug:
     msg: "Admin users: {{ query('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
@@ -131,6 +135,8 @@ class LookupModule(LookupBase):
         if len(terms) != 1:
             raise AnsibleError('You must pass exactly one endpoint to query')
 
+        self.set_options(direct=kwargs)
+
         # Defer processing of params to logic shared with the modules
         module_params = {}
         for plugin_param, module_param in TowerAPIModule.short_params.items():
@@ -143,8 +149,6 @@ class LookupModule(LookupBase):
             argument_spec={}, direct_params=module_params,
             error_callback=self.handle_error, warn_callback=self.warn_callback
         )
-
-        self.set_options(direct=kwargs)
 
         response = module.get_endpoint(terms[0], data=self.get_option('query_params', {}))
 

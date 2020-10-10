@@ -132,6 +132,10 @@ function OrganizationsList({ i18n }) {
                 isDefault: true,
               },
               {
+                name: i18n._(t`Description`),
+                key: 'description__icontains',
+              },
+              {
                 name: i18n._(t`Created By (Username)`),
                 key: 'created_by__username__icontains',
               },

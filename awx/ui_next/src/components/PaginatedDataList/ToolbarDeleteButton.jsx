@@ -1,18 +1,24 @@
-import React, { Fragment } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   func,
   bool,
+  node,
   number,
   string,
   arrayOf,
   shape,
   checkPropTypes,
 } from 'prop-types';
-import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
+import styled from 'styled-components';
+import { Alert, Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
-import { Kebabified } from '../../contexts/Kebabified';
+import { KebabifiedContext } from '../../contexts/Kebabified';
+
+const WarningMessage = styled(Alert)`
+  margin-top: 10px;
+`;
 
 const requireNameOrUsername = props => {
   const { name, username } = props;
@@ -59,53 +65,33 @@ function cannotDelete(item) {
   return !item.summary_fields.user_capabilities.delete;
 }
 
-class ToolbarDeleteButton extends React.Component {
-  static propTypes = {
-    onDelete: func.isRequired,
-    itemsToDelete: arrayOf(ItemToDelete).isRequired,
-    pluralizedItemName: string,
-    errorMessage: string,
-  };
+function ToolbarDeleteButton({
+  itemsToDelete,
+  pluralizedItemName,
+  errorMessage,
+  onDelete,
+  warningMessage,
+  i18n,
+}) {
+  const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  static defaultProps = {
-    pluralizedItemName: 'Items',
-    errorMessage: '',
-  };
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isModalOpen: false,
-    };
-
-    this.handleConfirmDelete = this.handleConfirmDelete.bind(this);
-    this.handleCancelDelete = this.handleCancelDelete.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-  }
-
-  handleConfirmDelete() {
-    this.setState({ isModalOpen: true });
-  }
-
-  handleCancelDelete() {
-    this.setState({ isModalOpen: false });
-  }
-
-  handleDelete() {
-    const { onDelete } = this.props;
+  const handleDelete = () => {
     onDelete();
-    this.setState({ isModalOpen: false });
-  }
+    toggleModal();
+  };
 
-  renderTooltip() {
-    const {
-      itemsToDelete,
-      pluralizedItemName,
-      errorMessage,
-      i18n,
-    } = this.props;
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
 
+  useEffect(() => {
+    if (isKebabified) {
+      onKebabModalChange(isModalOpen);
+    }
+  }, [isKebabified, isModalOpen, onKebabModalChange]);
+
+  const renderTooltip = () => {
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
       .map(item => item.name)
@@ -125,85 +111,94 @@ class ToolbarDeleteButton extends React.Component {
       return i18n._(t`Delete`);
     }
     return i18n._(t`Select a row to delete`);
-  }
+  };
 
-  render() {
-    const { itemsToDelete, pluralizedItemName, i18n } = this.props;
-    const { isModalOpen } = this.state;
-    const modalTitle = i18n._(t`Delete ${pluralizedItemName}?`);
+  const modalTitle = i18n._(t`Delete ${pluralizedItemName}?`);
 
-    const isDisabled =
-      itemsToDelete.length === 0 || itemsToDelete.some(cannotDelete);
+  const isDisabled =
+    itemsToDelete.length === 0 || itemsToDelete.some(cannotDelete);
 
-    // NOTE: Once PF supports tooltips on disabled elements,
-    // we can delete the extra <div> around the <DeleteButton> below.
-    // See: https://github.com/patternfly/patternfly-react/issues/1894
-    return (
-      <Kebabified>
-        {({ isKebabified }) => (
-          <Fragment>
-            {isKebabified ? (
-              <DropdownItem
-                key="add"
-                isDisabled={isDisabled}
-                component="Button"
-                onClick={this.handleConfirmDelete}
-              >
-                {i18n._(t`Delete`)}
-              </DropdownItem>
-            ) : (
-              <Tooltip content={this.renderTooltip()} position="top">
-                <div>
-                  <Button
-                    variant="secondary"
-                    aria-label={i18n._(t`Delete`)}
-                    onClick={this.handleConfirmDelete}
-                    isDisabled={isDisabled}
-                  >
-                    {i18n._(t`Delete`)}
-                  </Button>
-                </div>
-              </Tooltip>
-            )}
-            {isModalOpen && (
-              <AlertModal
-                variant="danger"
-                title={modalTitle}
-                isOpen={isModalOpen}
-                onClose={this.handleCancelDelete}
-                actions={[
-                  <Button
-                    key="delete"
-                    variant="danger"
-                    aria-label={i18n._(t`confirm delete`)}
-                    onClick={this.handleDelete}
-                  >
-                    {i18n._(t`Delete`)}
-                  </Button>,
-                  <Button
-                    key="cancel"
-                    variant="secondary"
-                    aria-label={i18n._(t`cancel delete`)}
-                    onClick={this.handleCancelDelete}
-                  >
-                    {i18n._(t`Cancel`)}
-                  </Button>,
-                ]}
-              >
-                <div>{i18n._(t`This action will delete the following:`)}</div>
-                {itemsToDelete.map(item => (
-                  <span key={item.id}>
-                    <strong>{item.name || item.username}</strong>
-                    <br />
-                  </span>
-                ))}
-              </AlertModal>
-            )}
-          </Fragment>
-        )}
-      </Kebabified>
-    );
-  }
+  // NOTE: Once PF supports tooltips on disabled elements,
+  // we can delete the extra <div> around the <DeleteButton> below.
+  // See: https://github.com/patternfly/patternfly-react/issues/1894
+  return (
+    <>
+      {isKebabified ? (
+        <DropdownItem
+          key="add"
+          isDisabled={isDisabled}
+          component="button"
+          onClick={toggleModal}
+        >
+          {i18n._(t`Delete`)}
+        </DropdownItem>
+      ) : (
+        <Tooltip content={renderTooltip()} position="top">
+          <div>
+            <Button
+              variant="secondary"
+              aria-label={i18n._(t`Delete`)}
+              onClick={toggleModal}
+              isDisabled={isDisabled}
+            >
+              {i18n._(t`Delete`)}
+            </Button>
+          </div>
+        </Tooltip>
+      )}
+      {isModalOpen && (
+        <AlertModal
+          variant="danger"
+          title={modalTitle}
+          isOpen={isModalOpen}
+          onClose={toggleModal}
+          actions={[
+            <Button
+              key="delete"
+              variant="danger"
+              aria-label={i18n._(t`confirm delete`)}
+              onClick={handleDelete}
+            >
+              {i18n._(t`Delete`)}
+            </Button>,
+            <Button
+              key="cancel"
+              variant="secondary"
+              aria-label={i18n._(t`cancel delete`)}
+              onClick={toggleModal}
+            >
+              {i18n._(t`Cancel`)}
+            </Button>,
+          ]}
+        >
+          <div>{i18n._(t`This action will delete the following:`)}</div>
+          {itemsToDelete.map(item => (
+            <span key={item.id}>
+              <strong>{item.name || item.username}</strong>
+              <br />
+            </span>
+          ))}
+          {warningMessage && (
+            <WarningMessage variant="warning" isInline title={warningMessage} />
+          )}
+        </AlertModal>
+      )}
+    </>
+  );
 }
+
+ToolbarDeleteButton.propTypes = {
+  onDelete: func.isRequired,
+  itemsToDelete: arrayOf(ItemToDelete).isRequired,
+  pluralizedItemName: string,
+  errorMessage: string,
+  warningMessage: node,
+};
+
+ToolbarDeleteButton.defaultProps = {
+  pluralizedItemName: 'Items',
+  errorMessage: '',
+  warningMessage: null,
+};
 
 export default withI18n()(ToolbarDeleteButton);

@@ -41,7 +41,7 @@ function getNodeType(node) {
   }
 }
 
-function NodeViewModal({ i18n }) {
+function NodeViewModal({ i18n, readOnly }) {
   const dispatch = useContext(WorkflowDispatchContext);
   const { nodeToView } = useContext(WorkflowStateContext);
   const { unifiedJobTemplate } = nodeToView;
@@ -136,15 +136,20 @@ function NodeViewModal({ i18n }) {
       title={unifiedJobTemplate.name}
       aria-label={i18n._(t`Workflow node view modal`)}
       onClose={() => dispatch({ type: 'SET_NODE_TO_VIEW', value: null })}
-      actions={[
-        <Button
-          key="edit"
-          aria-label={i18n._(t`Edit Node`)}
-          onClick={handleEdit}
-        >
-          {i18n._(t`Edit`)}
-        </Button>,
-      ]}
+      actions={
+        readOnly
+          ? []
+          : [
+              <Button
+                id="node-view-edit-button"
+                key="edit"
+                aria-label={i18n._(t`Edit Node`)}
+                onClick={handleEdit}
+              >
+                {i18n._(t`Edit`)}
+              </Button>,
+            ]
+      }
     >
       {Content}
     </Modal>

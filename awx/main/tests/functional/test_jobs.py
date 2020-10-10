@@ -1,3 +1,4 @@
+import redis
 import pytest
 from unittest import mock
 import json
@@ -25,7 +26,8 @@ def test_orphan_unified_job_creation(instance, inventory):
 @mock.patch('awx.main.utils.common.get_mem_capacity', lambda: (8000,62))
 def test_job_capacity_and_with_inactive_node():
     i = Instance.objects.create(hostname='test-1')
-    i.refresh_capacity()
+    with mock.patch.object(redis.client.Redis, 'ping', lambda self: True):
+        i.refresh_capacity()
     assert i.capacity == 62
     i.enabled = False
     i.save()
@@ -33,6 +35,19 @@ def test_job_capacity_and_with_inactive_node():
         cluster_node_heartbeat()
         i = Instance.objects.get(id=i.id)
         assert i.capacity == 0
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.utils.common.get_cpu_capacity', lambda: (2,8))
+@mock.patch('awx.main.utils.common.get_mem_capacity', lambda: (8000,62))
+def test_job_capacity_with_redis_disabled():
+    i = Instance.objects.create(hostname='test-1')
+
+    def _raise(self):
+        raise redis.ConnectionError()
+    with mock.patch.object(redis.client.Redis, 'ping', _raise):
+        i.refresh_capacity()
+    assert i.capacity == 0
 
 
 @pytest.mark.django_db

@@ -1,34 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { shape, string } from 'prop-types';
+import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
+  FileUpload as PFFileUpload,
   FormGroup,
   InputGroup,
-  TextArea,
   TextInput,
 } from '@patternfly/react-core';
 import { FieldTooltip, PasswordInput } from '../../../../components/FormField';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
 import { CredentialType } from '../../../../types';
 import { required } from '../../../../util/validators';
-import { CredentialPluginField } from './CredentialPlugins';
+import { CredentialPluginField } from '../CredentialPlugins';
 import BecomeMethodField from './BecomeMethodField';
 
+const FileUpload = styled(PFFileUpload)`
+  flex-grow: 1;
+`;
+
 function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
-  const [subFormField, meta] = useField(`inputs.${fieldOptions.id}`);
+  const [fileName, setFileName] = useState('');
+  const [fileIsUploading, setFileIsUploading] = useState(false);
+  const [subFormField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const isValid = !(meta.touched && meta.error);
   if (fieldOptions.multiline) {
+    const handleFileChange = (value, filename) => {
+      helpers.setValue(value);
+      setFileName(filename);
+    };
+
     return (
-      <TextArea
+      <FileUpload
         {...subFormField}
         id={`credential-${fieldOptions.id}`}
-        rows={6}
-        resizeOrientation="vertical"
-        onChange={(value, event) => {
-          subFormField.onChange(event);
-        }}
+        type="text"
+        filename={fileName}
+        onChange={handleFileChange}
+        onReadStarted={() => setFileIsUploading(true)}
+        onReadFinished={() => setFileIsUploading(false)}
+        isLoading={fileIsUploading}
+        allowEditingUploadedText
         validated={isValid ? 'default' : 'error'}
       />
     );

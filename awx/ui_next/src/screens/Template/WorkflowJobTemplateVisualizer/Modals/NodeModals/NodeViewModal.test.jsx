@@ -168,6 +168,40 @@ describe('NodeViewModal', () => {
       wrapper.unmount();
       jest.clearAllMocks();
     });
+
+    test('edit button shoud be shown when readOnly prop is false', async () => {
+      let wrapper;
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <WorkflowDispatchContext.Provider value={dispatch}>
+            <WorkflowStateContext.Provider value={workflowContext}>
+              <NodeViewModal />
+            </WorkflowStateContext.Provider>
+          </WorkflowDispatchContext.Provider>
+        );
+      });
+      waitForLoaded(wrapper);
+      expect(wrapper.find('Button#node-view-edit-button').length).toBe(1);
+      wrapper.unmount();
+      jest.clearAllMocks();
+    });
+
+    test('edit button shoud be hidden when readOnly prop is true', async () => {
+      let wrapper;
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <WorkflowDispatchContext.Provider value={dispatch}>
+            <WorkflowStateContext.Provider value={workflowContext}>
+              <NodeViewModal readOnly />
+            </WorkflowStateContext.Provider>
+          </WorkflowDispatchContext.Provider>
+        );
+      });
+      waitForLoaded(wrapper);
+      expect(wrapper.find('Button#node-view-edit-button').length).toBe(0);
+      wrapper.unmount();
+      jest.clearAllMocks();
+    });
   });
 
   describe('Project node', () => {

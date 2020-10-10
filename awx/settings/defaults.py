@@ -197,11 +197,22 @@ LOCAL_STDOUT_EXPIRE_TIME = 2592000
 # events into the database
 JOB_EVENT_WORKERS = 4
 
+# The number of seconds (must be an integer) to buffer callback receiver bulk
+# writes in memory before flushing via JobEvent.objects.bulk_create()
+JOB_EVENT_BUFFER_SECONDS = 1
+
+# The interval at which callback receiver statistics should be
+# recorded
+JOB_EVENT_STATISTICS_INTERVAL = 5
+
 # The maximum size of the job event worker queue before requests are blocked
 JOB_EVENT_MAX_QUEUE_SIZE = 10000
 
 # The number of job events to migrate per-transaction when moving from int -> bigint
 JOB_EVENT_MIGRATION_CHUNK_SIZE = 1000000
+
+# The maximum allowed jobs to start on a given task manager cycle
+START_TASK_LIMIT = 100
 
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
@@ -477,6 +488,7 @@ SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
     'awx.sso.pipeline.update_user_orgs',
     'awx.sso.pipeline.update_user_teams',
 )
+SAML_AUTO_CREATE_OBJECTS = True
 
 SOCIAL_AUTH_LOGIN_URL = '/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
@@ -567,27 +579,8 @@ AWX_COLLECTIONS_ENABLED = True
 # Follow symlinks when scanning for playbooks
 AWX_SHOW_PLAYBOOK_LINKS = False
 
-# Settings for primary galaxy server, should be set in the UI
-PRIMARY_GALAXY_URL = ''
-PRIMARY_GALAXY_USERNAME = ''
-PRIMARY_GALAXY_TOKEN = ''
-PRIMARY_GALAXY_PASSWORD = ''
-PRIMARY_GALAXY_AUTH_URL = ''
-
-# Settings for the public galaxy server(s).
-PUBLIC_GALAXY_ENABLED = True
-PUBLIC_GALAXY_SERVER = {
-    'id': 'galaxy',
-    'url': 'https://galaxy.ansible.com'
-}
-
 # Applies to any galaxy server
 GALAXY_IGNORE_CERTS = False
-
-# List of dicts of fallback (additional) Galaxy servers.  If configured, these
-# will be higher precedence than public Galaxy, but lower than primary Galaxy.
-# Available options: 'id', 'url', 'username', 'password', 'token', 'auth_url'
-FALLBACK_GALAXY_SERVERS = []
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
@@ -789,7 +782,7 @@ ASGI_APPLICATION = "awx.main.routing.application"
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "awx.main.consumers.ExpiringRedisChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [BROKER_URL],
             "capacity": 10000,
@@ -1000,6 +993,11 @@ LOGGING = {
         },
         'awx.main.tasks': {
             'handlers': ['task_system', 'external_logger'],
+            'propagate': False
+        },
+        'awx.main.analytics': {
+            'handlers': ['task_system', 'external_logger'],
+            'level': 'INFO',
             'propagate': False
         },
         'awx.main.scheduler': {

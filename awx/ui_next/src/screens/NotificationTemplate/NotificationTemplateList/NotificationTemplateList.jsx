@@ -105,6 +105,10 @@ function NotificationTemplatesList({ i18n }) {
                 isDefault: true,
               },
               {
+                name: i18n._(t`Description`),
+                key: 'description__icontains',
+              },
+              {
                 name: i18n._(t`Type`),
                 key: 'notification_type',
               },
@@ -124,7 +128,7 @@ function NotificationTemplatesList({ i18n }) {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={() => setSelected([...templates])}
+                onSelectAll={set => setSelected(set ? [...templates] : [])}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd

@@ -3,6 +3,18 @@
   tower_organization:
     name: Default
 
+- name: HACK - delete orphaned projects from preload data where organization deletd
+  tower_project:
+    name: "{{ item['id'] }}"
+    scm_type: git
+    state: absent
+  loop: >
+    {{ query('awx.awx.tower_api', 'projects',
+       query_params={'organization__isnull': true, 'name': 'Demo Project'})
+    }}
+  loop_control:
+    label: "Deleting Demo Project with null organization id={{ item['id'] }}"
+
 - name: Assure that demo project exists
   tower_project:
     name: "Demo Project"

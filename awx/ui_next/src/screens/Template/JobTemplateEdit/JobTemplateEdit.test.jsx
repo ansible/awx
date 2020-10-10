@@ -12,6 +12,7 @@ import {
   JobTemplatesAPI,
   LabelsAPI,
   ProjectsAPI,
+  InventoriesAPI,
 } from '../../../api';
 import JobTemplateEdit from './JobTemplateEdit';
 
@@ -180,6 +181,12 @@ JobTemplatesAPI.readCredentials.mockResolvedValue({
 });
 ProjectsAPI.readPlaybooks.mockResolvedValue({
   data: mockRelatedProjectPlaybooks,
+});
+InventoriesAPI.readOptions.mockResolvedValue({
+  data: { actions: { GET: {}, POST: {} } },
+});
+ProjectsAPI.readOptions.mockResolvedValue({
+  data: { actions: { GET: {}, POST: {} } },
 });
 LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
 CredentialsAPI.read.mockResolvedValue({

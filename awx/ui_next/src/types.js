@@ -367,3 +367,27 @@ export const CredentialType = shape({
   namespace: string,
   inputs: shape({}).isRequired,
 });
+
+export const NotificationType = oneOf([
+  'email',
+  'grafana',
+  'irc',
+  'mattermost',
+  'pagerduty',
+  'rocketchat',
+  'slack',
+  'twilio',
+  'webhook',
+]);
+
+export const NotificationTemplate = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+  description: string,
+  url: string.isRequired,
+  organization: number.isRequired,
+  notification_type: NotificationType,
+  summary_fields: shape({
+    organization: Organization,
+  }),
+});

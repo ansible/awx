@@ -7,14 +7,14 @@ class Roles extends Base {
   }
 
   disassociateUserRole(roleId, userId) {
-    return this.http.post(`${this.baseUrl}/${roleId}/users/`, {
+    return this.http.post(`${this.baseUrl}${roleId}/users/`, {
       disassociate: true,
       id: userId,
     });
   }
 
   disassociateTeamRole(roleId, teamId) {
-    return this.http.post(`${this.baseUrl}/${roleId}/teams/`, {
+    return this.http.post(`${this.baseUrl}${roleId}/teams/`, {
       disassociate: true,
       id: teamId,
     });

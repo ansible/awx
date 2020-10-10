@@ -15,7 +15,7 @@ import re
 # Normally a read-only endpoint should not have a module (i.e. /api/v2/me) but sometimes we reuse a name
 # For example, we have a tower_role module but /api/v2/roles is a read only endpoint.
 # This list indicates which read-only endpoints have associated modules with them.
-read_only_endpoints_with_modules = ['tower_settings', 'tower_role']
+read_only_endpoints_with_modules = ['tower_settings', 'tower_role', 'tower_project_update']
 
 # If a module should not be created for an endpoint and the endpoint is not read-only add it here
 # THINK HARD ABOUT DOING THIS
@@ -23,14 +23,14 @@ no_module_for_endpoint = []
 
 # Some modules work on the related fields of an endpoint. These modules will not have an auto-associated endpoint
 no_endpoint_for_module = [
-    'tower_import', 'tower_meta', 'tower_export', 'tower_job_launch', 'tower_job_wait', 'tower_job_list',
-    'tower_license', 'tower_ping', 'tower_receive', 'tower_send', 'tower_workflow_launch', 'tower_job_cancel',
-    'tower_workflow_template',
+    'tower_import', 'tower_meta', 'tower_export', 'tower_inventory_source_update', 'tower_job_launch', 'tower_job_wait',
+    'tower_job_list', 'tower_license', 'tower_ping', 'tower_receive', 'tower_send', 'tower_workflow_launch',
+    'tower_job_cancel', 'tower_workflow_template', 'tower_ad_hoc_command_wait', 'tower_ad_hoc_command_cancel',
 ]
 
 # Global module parameters we can ignore
 ignore_parameters = [
-    'state', 'new_name',
+    'state', 'new_name', 'update_secrets'
 ]
 
 # Some modules take additional parameters that do not appear in the API
@@ -43,17 +43,20 @@ no_api_parameter_ok = {
     # /survey spec is now how we handle associations
     # We take an organization here to help with the lookups only
     'tower_job_template': ['survey_spec', 'organization'],
-    # Organization is how we looking job templates
+    'tower_inventory_source': ['organization'],
+    # Organization is how we are looking up job templates
     'tower_workflow_job_template_node': ['organization'],
     # Survey is how we handle associations
     'tower_workflow_job_template': ['survey'],
+    # ad hoc commands support interval and timeout since its more like tower_job_launc
+    'tower_ad_hoc_command': ['interval', 'timeout', 'wait'],
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
 # that needs to be developed. If the module is found on the file system it will auto-detect that the
 # work is being done and will bypass this check. At some point this module should be removed from this list.
 needs_development = [
-    'tower_ad_hoc_command', 'tower_application', 'tower_inventory_script', 'tower_workflow_approval'
+    'tower_inventory_script', 'tower_workflow_approval'
 ]
 needs_param_development = {
     'tower_host': ['instance_id'],

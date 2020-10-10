@@ -4,6 +4,7 @@ import {
   maxLength,
   noWhiteSpace,
   integer,
+  url,
   combine,
   regExp,
 } from './validators';
@@ -108,6 +109,26 @@ describe('validators', () => {
   test('integer should reject string containing alphanum', () => {
     expect(integer(i18n)('15a')).toEqual({
       id: 'This field must be an integer',
+    });
+  });
+
+  test('url should reject incomplete url', () => {
+    expect(url(i18n)('abcd')).toEqual({
+      id: 'Please enter a valid URL',
+    });
+  });
+
+  test('url should accept fully qualified url', () => {
+    expect(url(i18n)('http://example.com/foo')).toBeUndefined();
+  });
+
+  test('url should accept url with query params', () => {
+    expect(url(i18n)('https://example.com/foo?bar=baz')).toBeUndefined();
+  });
+
+  test('url should reject short protocol', () => {
+    expect(url(i18n)('h://example.com/foo')).toEqual({
+      id: 'Please enter a valid URL',
     });
   });
 

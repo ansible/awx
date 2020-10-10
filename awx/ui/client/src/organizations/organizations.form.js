@@ -55,6 +55,15 @@ export default ['NotificationsList', 'i18n',
                     ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)',
                     ngShow: 'custom_virtualenvs_visible'
                 },
+                credential: {
+                    label: i18n._('Galaxy Credentials'),
+                    type: 'custom',
+                    awPopOver: "<p>" + i18n._("Select Galaxy credentials. The selection order sets the order in which Tower will download roles/collections using `ansible-galaxy`.") + "</p>",
+                    dataTitle: i18n._('Galaxy Credentials'),
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    control: '<galaxy-credentials-multiselect galaxy-credentials="credentials" field-is-disabled="!(organization_obj.summary_fields.user_capabilities.edit || canAdd) || (!current_user.is_superuser && isOrgAdmin)"></galaxy-credentials-multiselect>',
+                },
                 max_hosts: {
                     label: i18n._('Max Hosts'),
                     type: 'number',
@@ -69,7 +78,7 @@ export default ['NotificationsList', 'i18n',
                     awPopOver: "<p>" + i18n._("The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details.") + "</p>",
                     ngDisabled: '!current_user.is_superuser',
                     ngShow: 'BRAND_NAME === "Tower"'
-                }
+                },
             },
 
             buttons: { //for now always generates <button> tags

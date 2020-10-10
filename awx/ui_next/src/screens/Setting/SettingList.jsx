@@ -75,7 +75,7 @@ function SettingList({ i18n }) {
           path: '/settings/ldap',
         },
         {
-          title: i18n._(t`Radius settings`),
+          title: i18n._(t`RADIUS settings`),
           path: '/settings/radius',
         },
         {
@@ -107,11 +107,11 @@ function SettingList({ i18n }) {
       id: 'system',
       routes: [
         {
-          title: i18n._(t`Miscellaneous system settings`),
+          title: i18n._(t`Miscellaneous System settings`),
           path: '/settings/miscellaneous_system',
         },
         {
-          title: i18n._(t`Activity stream settings`),
+          title: i18n._(t`Activity Stream settings`),
           path: '/settings/activity_stream',
         },
         {
@@ -121,15 +121,15 @@ function SettingList({ i18n }) {
       ],
     },
     {
-      header: i18n._(t`User interface`),
+      header: i18n._(t`User Interface`),
       description: i18n._(
         t`Set preferences for data collection, logos, and logins`
       ),
-      id: 'user_interface',
+      id: 'ui',
       routes: [
         {
-          title: i18n._(t`User interface settings`),
-          path: '/settings/user_interface',
+          title: i18n._(t`User Interface settings`),
+          path: '/settings/ui',
         },
       ],
     },

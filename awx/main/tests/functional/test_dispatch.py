@@ -10,7 +10,7 @@ import pytest
 
 from awx.main.models import Job, WorkflowJob, Instance
 from awx.main.dispatch import reaper
-from awx.main.dispatch.pool import PoolWorker, WorkerPool, AutoscalePool
+from awx.main.dispatch.pool import StatefulPoolWorker, WorkerPool, AutoscalePool
 from awx.main.dispatch.publish import task
 from awx.main.dispatch.worker import BaseWorker, TaskWorker
 
@@ -80,7 +80,7 @@ class SlowResultWriter(BaseWorker):
 class TestPoolWorker:
 
     def setup_method(self, test_method):
-        self.worker = PoolWorker(1000, self.tick, tuple())
+        self.worker = StatefulPoolWorker(1000, self.tick, tuple())
 
     def tick(self):
         self.worker.finished.put(self.worker.queue.get()['uuid'])

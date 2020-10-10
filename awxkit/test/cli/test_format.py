@@ -63,6 +63,7 @@ def test_yaml_import():
           - name: Workflow1
         """
     )
+    yaml_fd.name = 'file.yaml'
     cli = CLI(stdin=yaml_fd)
     cli.parse_args(['--conf.format', 'yaml'])
     cli.v2 = MockedV2()

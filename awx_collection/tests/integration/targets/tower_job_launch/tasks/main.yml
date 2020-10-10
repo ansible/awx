@@ -29,16 +29,16 @@
 
 - name: Check module fails with correct msg
   tower_job_launch:
-    job_template: "Non Existing Job Template"
-    inventory: "Test Inventory"
-    credential: "Test Credential"
+    job_template: "Non_Existing_Job_Template"
+    inventory: "Demo Inventory"
   register: result
   ignore_errors: true
 
 - assert:
     that:
-      - "result.msg =='Unable to launch job, job_template/Non Existing Job Template was not found: The requested object could not be found.'
-        or result.msg == 'The inventories Test Inventory was not found on the Tower server'"
+      - "result is failed"
+      - "result is not changed"
+      - "'Non_Existing_Job_Template' in result.msg"
 
 - name: Create a Job Template for testing prompt on launch
   tower_job_template:

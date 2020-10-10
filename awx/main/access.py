@@ -1103,11 +1103,6 @@ class CredentialTypeAccess(BaseAccess):
     def can_use(self, obj):
         return True
 
-    def get_method_capability(self, method, obj, parent_obj):
-        if obj.managed_by_tower:
-            return False
-        return super(CredentialTypeAccess, self).get_method_capability(method, obj, parent_obj)
-
     def filtered_queryset(self):
         return self.model.objects.all()
 
@@ -1182,6 +1177,8 @@ class CredentialAccess(BaseAccess):
     def get_user_capabilities(self, obj, **kwargs):
         user_capabilities = super(CredentialAccess, self).get_user_capabilities(obj, **kwargs)
         user_capabilities['use'] = self.can_use(obj)
+        if getattr(obj, 'managed_by_tower', False) is True:
+            user_capabilities['edit'] = user_capabilities['delete'] = False
         return user_capabilities
 
 
@@ -2752,6 +2749,9 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
             return False
         else:
             return (self.check_related('workflow_approval_template', UnifiedJobTemplate, role_field='admin_role'))
+
+    def can_change(self, obj, data):
+        return self.user.can_access(WorkflowJobTemplate, 'change', obj.workflow_job_template, data={})
 
     def can_start(self, obj, validate_license=False):
         # for copying WFJTs that contain approval nodes

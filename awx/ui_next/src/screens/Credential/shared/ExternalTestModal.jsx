@@ -18,7 +18,7 @@ import FormField from '../../../components/FormField';
 import { FormFullWidthLayout } from '../../../components/FormLayout';
 import { required } from '../../../util/validators';
 import useRequest from '../../../util/useRequest';
-import { CredentialPluginTestAlert } from './CredentialFormFields/CredentialPlugins';
+import { CredentialPluginTestAlert } from './CredentialPlugins';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;

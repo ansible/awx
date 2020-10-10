@@ -424,6 +424,8 @@ function Visualizer({ template, i18n }) {
     );
   }
 
+  const readOnly = !template?.summary_fields?.user_capabilities?.edit;
+
   return (
     <WorkflowStateContext.Provider value={state}>
       <WorkflowDispatchContext.Provider value={dispatch}>
@@ -433,13 +435,12 @@ function Visualizer({ template, i18n }) {
             onSave={handleVisualizerSave}
             hasUnsavedChanges={unsavedChanges}
             template={template}
+            readOnly={readOnly}
           />
           {links.length > 0 ? (
-            <VisualizerGraph
-              readOnly={!template.summary_fields.user_capabilities.edit}
-            />
+            <VisualizerGraph readOnly={readOnly} />
           ) : (
-            <VisualizerStartScreen />
+            <VisualizerStartScreen readOnly={readOnly} />
           )}
         </Wrapper>
         {nodeToDelete && <NodeDeleteModal />}
@@ -459,7 +460,7 @@ function Visualizer({ template, i18n }) {
           />
         )}
         {showDeleteAllNodesModal && <DeleteAllNodesModal />}
-        {nodeToView && <NodeViewModal />}
+        {nodeToView && <NodeViewModal readOnly={readOnly} />}
       </WorkflowDispatchContext.Provider>
     </WorkflowStateContext.Provider>
   );

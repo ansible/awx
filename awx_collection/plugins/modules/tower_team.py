@@ -87,9 +87,8 @@ def main():
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up team based on the provided name and org ID
-    team = module.get_one('teams', **{
+    team = module.get_one('teams', name_or_id=name, **{
         'data': {
-            'name': name,
             'organization': org_id
         }
     })
@@ -100,7 +99,7 @@ def main():
 
     # Create the data that gets sent for create and update
     team_fields = {
-        'name': new_name if new_name else name,
+        'name': new_name if new_name else (module.get_item_name(team) if team else name),
         'organization': org_id
     }
     if description is not None:

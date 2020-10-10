@@ -24,7 +24,7 @@ class TowerAWXKitModule(TowerModule):
 
         # Die if we don't have AWX_KIT installed
         if not HAS_AWX_KIT:
-            self.exit_json(msg=missing_required_lib('awxkit'))
+            self.fail_json(msg=missing_required_lib('awxkit'))
 
         # Establish our conneciton object
         self.connection = Connection(self.host, verify=self.verify_ssl)
@@ -38,7 +38,7 @@ class TowerAWXKitModule(TowerModule):
                 self.connection.login(username=self.username, password=self.password)
                 self.authenticated = True
         except Exception:
-            self.exit_json("Failed to authenticate")
+            self.fail_json("Failed to authenticate")
 
     def get_api_v2_object(self):
         if not self.apiV2Ref:

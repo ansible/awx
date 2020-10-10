@@ -19,4 +19,12 @@ describe('VisualizerStartScreen', () => {
       sourceNodeId: 1,
     });
   });
+  test('start button hidden in read-only mode', () => {
+    const wrapper = mountWithContexts(
+      <WorkflowDispatchContext.Provider value={dispatch}>
+        <VisualizerStartScreen readOnly />
+      </WorkflowDispatchContext.Provider>
+    );
+    expect(wrapper.find('Button').length).toBe(0);
+  });
 });

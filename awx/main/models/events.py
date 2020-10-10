@@ -4,6 +4,8 @@ import datetime
 import logging
 from collections import defaultdict
 
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, DatabaseError, connection
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
@@ -57,7 +59,18 @@ def create_host_status_counts(event_data):
     return dict(host_status_counts)
 
 
+MINIMAL_EVENTS = set([
+    'playbook_on_play_start', 'playbook_on_task_start',
+    'playbook_on_stats', 'EOF'
+])
+
+
 def emit_event_detail(event):
+    if (
+        settings.UI_LIVE_UPDATES_ENABLED is False and
+        event.event not in MINIMAL_EVENTS
+    ):
+        return
     cls = event.__class__
     relation = {
         JobEvent: 'job_id',
@@ -337,41 +350,47 @@ class BasePlaybookEvent(CreatedModifiedModel):
                 pass
 
             if isinstance(self, JobEvent):
-                hostnames = self._hostnames()
-                self._update_host_summary_from_stats(set(hostnames))
-                if self.job.inventory:
-                    try:
-                        self.job.inventory.update_computed_fields()
-                    except DatabaseError:
-                        logger.exception('Computed fields database error saving event {}'.format(self.pk))
+                try:
+                    job = self.job
+                except ObjectDoesNotExist:
+                    job = None
+                if job:
+                    hostnames = self._hostnames()
+                    self._update_host_summary_from_stats(set(hostnames))
+                    if job.inventory:
+                        try:
+                            job.inventory.update_computed_fields()
+                        except DatabaseError:
+                            logger.exception('Computed fields database error saving event {}'.format(self.pk))
 
-                # find parent links and progagate changed=T and failed=T
-                changed = self.job.job_events.filter(changed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()  # noqa
-                failed = self.job.job_events.filter(failed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()  # noqa
+                    # find parent links and progagate changed=T and failed=T
+                    changed = job.job_events.filter(changed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()  # noqa
+                    failed = job.job_events.filter(failed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()  # noqa
 
-                JobEvent.objects.filter(
-                    job_id=self.job_id, uuid__in=changed
-                ).update(changed=True)
-                JobEvent.objects.filter(
-                    job_id=self.job_id, uuid__in=failed
-                ).update(failed=True)
+                    JobEvent.objects.filter(
+                        job_id=self.job_id, uuid__in=changed
+                    ).update(changed=True)
+                    JobEvent.objects.filter(
+                        job_id=self.job_id, uuid__in=failed
+                    ).update(failed=True)
 
-                # send success/failure notifications when we've finished handling the playbook_on_stats event
-                from awx.main.tasks import handle_success_and_failure_notifications  # circular import
+                    # send success/failure notifications when we've finished handling the playbook_on_stats event
+                    from awx.main.tasks import handle_success_and_failure_notifications  # circular import
 
-                def _send_notifications():
-                    handle_success_and_failure_notifications.apply_async([self.job.id])
-                connection.on_commit(_send_notifications)
+                    def _send_notifications():
+                        handle_success_and_failure_notifications.apply_async([job.id])
+                    connection.on_commit(_send_notifications)
 
 
         for field in ('playbook', 'play', 'task', 'role'):
             value = force_text(event_data.get(field, '')).strip()
             if value != getattr(self, field):
                 setattr(self, field, value)
-        analytics_logger.info(
-            'Event data saved.',
-            extra=dict(python_objects=dict(job_event=self))
-        )
+        if settings.LOG_AGGREGATOR_ENABLED:
+            analytics_logger.info(
+                'Event data saved.',
+                extra=dict(python_objects=dict(job_event=self))
+            )
 
     @classmethod
     def create_from_data(cls, **kwargs):
@@ -484,7 +503,11 @@ class JobEvent(BasePlaybookEvent):
 
     def _update_host_summary_from_stats(self, hostnames):
         with ignore_inventory_computed_fields():
-            if not self.job or not self.job.inventory:
+            try:
+                if not self.job or not self.job.inventory:
+                    logger.info('Event {} missing job or inventory, host summaries not updated'.format(self.pk))
+                    return
+            except ObjectDoesNotExist:
                 logger.info('Event {} missing job or inventory, host summaries not updated'.format(self.pk))
                 return
             job = self.job
@@ -520,13 +543,21 @@ class JobEvent(BasePlaybookEvent):
                 (summary['host_id'], summary['id'])
                 for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host_id')
             )
+            updated_hosts = set()
             for h in all_hosts:
                 # if the hostname *shows up* in the playbook_on_stats event
                 if h.name in hostnames:
                     h.last_job_id = job.id
+                    updated_hosts.add(h)
                 if h.id in host_mapping:
                     h.last_job_host_summary_id = host_mapping[h.id]
-            Host.objects.bulk_update(all_hosts, ['last_job_id', 'last_job_host_summary_id'])
+                    updated_hosts.add(h)
+
+            Host.objects.bulk_update(
+                list(updated_hosts),
+                ['last_job_id', 'last_job_host_summary_id'],
+                batch_size=100
+            )
 
 
     @property

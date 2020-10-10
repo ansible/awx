@@ -81,6 +81,7 @@ def test_default_cred_types():
         'azure_rm',
         'cloudforms',
         'conjur',
+        'galaxy_api_token',
         'gce',
         'github_token',
         'gitlab_token',

@@ -2,11 +2,10 @@ aiohttp
 ansible-runner>=1.4.6
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
-boto  # replacement candidate https://github.com/ansible/awx/issues/2115
 channels
-channels-redis
+channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
 daphne
-django==2.2.11  # see UPGRADE BLOCKERs
+django==2.2.16  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers
 django-crum
@@ -21,7 +20,7 @@ django-redis
 django-solo
 django-split-settings
 django-taggit
-djangorestframework
+djangorestframework>=3.12.1
 djangorestframework-yaml
 GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc

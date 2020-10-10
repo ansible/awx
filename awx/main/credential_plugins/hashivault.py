@@ -40,6 +40,13 @@ base_inputs = {
         'multiline': False,
         'secret': True,
         'help_text': _('The Secret ID for AppRole Authentication')
+    }, {
+        'id': 'default_auth_path',
+        'label': _('Path to Approle Auth'),
+        'type': 'string',
+        'multiline': False,
+        'default': 'approle',
+        'help_text': _('The AppRole Authentication path to use if one isn\'t provided in the metadata when linking to an input field. Defaults to \'approle\'')
     }
     ],
     'metadata': [{
@@ -47,10 +54,11 @@ base_inputs = {
         'label': _('Path to Secret'),
         'type': 'string',
         'help_text': _('The path to the secret stored in the secret backend e.g, /some/secret/')
-    },{
+    }, {
         'id': 'auth_path',
         'label': _('Path to Auth'),
         'type': 'string',
+        'multiline': False,
         'help_text': _('The path where the Authentication method is mounted e.g, approle')
     }],
     'required': ['url', 'secret_path'],
@@ -118,7 +126,9 @@ def handle_auth(**kwargs):
 def approle_auth(**kwargs):
     role_id = kwargs['role_id']
     secret_id = kwargs['secret_id']
-    auth_path = kwargs.get('auth_path') or 'approle'
+    # we first try to use the 'auth_path' from the metadata
+    # if not found we try to fetch the 'default_auth_path' from inputs
+    auth_path = kwargs.get('auth_path') or kwargs['default_auth_path']
 
     url = urljoin(kwargs['url'], 'v1')
     cacert = kwargs.get('cacert', None)

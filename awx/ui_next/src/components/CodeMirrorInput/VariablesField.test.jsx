@@ -83,7 +83,7 @@ describe('VariablesField', () => {
         )}
       </Formik>
     );
-    expect(wrapper.find('Tooltip').length).toBe(1);
+    expect(wrapper.find('Popover').length).toBe(1);
   });
 
   it('should submit value through Formik', async () => {

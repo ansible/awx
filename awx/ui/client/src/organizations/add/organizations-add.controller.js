@@ -4,11 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$stateParams',
-    'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'GetBasePath', 'Wait', 'CreateSelect2', '$state','InstanceGroupsService', 'ConfigData',
-    function($scope, $rootScope, $location, $stateParams, OrganizationForm,
-    GenerateForm, Rest, Alert, ProcessErrors, GetBasePath, Wait, CreateSelect2, $state, InstanceGroupsService, ConfigData) {
+export default ['$scope', '$rootScope', '$location', '$stateParams', 'OrganizationForm', 
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'Wait', 'CreateSelect2', 
+    '$state','InstanceGroupsService', 'ConfigData', 'MultiCredentialService', 'defaultGalaxyCredential',
+    function($scope, $rootScope, $location, $stateParams, OrganizationForm, 
+        GenerateForm, Rest, Alert, ProcessErrors, GetBasePath, Wait, CreateSelect2, 
+        $state, InstanceGroupsService, ConfigData, MultiCredentialService, defaultGalaxyCredential) {
 
         Rest.setUrl(GetBasePath('organizations'));
         Rest.options()
@@ -37,6 +38,8 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
 
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
+
+            $scope.credentials = defaultGalaxyCredential || [];
         }
 
         // Save
@@ -57,18 +60,32 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
                     const organization_id = data.id,
                         instance_group_url = data.related.instance_groups;
 
-                    InstanceGroupsService.addInstanceGroups(instance_group_url, $scope.instance_groups)
+                    MultiCredentialService
+                        .saveRelatedSequentially({
+                            related: {
+                                credentials: data.related.galaxy_credentials
+                            }
+                        }, $scope.credentials)
                         .then(() => {
-                            Wait('stop');
-                            $rootScope.$broadcast("EditIndicatorChange", "organizations", organization_id);
-                            $state.go('organizations.edit', {organization_id: organization_id}, {reload: true});
-                        })
-                        .catch(({data, status}) => {
+                            InstanceGroupsService.addInstanceGroups(instance_group_url, $scope.instance_groups)
+                            .then(() => {
+                                Wait('stop');
+                                $rootScope.$broadcast("EditIndicatorChange", "organizations", organization_id);
+                                $state.go('organizations.edit', {organization_id: organization_id}, {reload: true});
+                            })
+                            .catch(({data, status}) => {
+                                ProcessErrors($scope, data, status, form, {
+                                    hdr: 'Error!',
+                                    msg: 'Failed to save instance groups. POST returned status: ' + status
+                                });
+                            });
+                        }).catch(({data, status}) => {
                             ProcessErrors($scope, data, status, form, {
                                 hdr: 'Error!',
-                                msg: 'Failed to save instance groups. POST returned status: ' + status
+                                msg: 'Failed to save Galaxy credentials. POST returned status: ' + status
                             });
                         });
+
                 })
                 .catch(({data, status}) => {
                     let explanation = _.has(data, "name") ? data.name[0] : "";

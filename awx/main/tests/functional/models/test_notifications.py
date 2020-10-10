@@ -123,6 +123,15 @@ class TestJobNotificationMixin(object):
         context = job.context(job_serialization)
         check_structure(TestJobNotificationMixin.CONTEXT_STRUCTURE, context)
 
+
+    @pytest.mark.django_db
+    def test_context_job_metadata_with_unicode(self):
+        job = Job.objects.create(name='批量安装项目')
+        job_serialization = UnifiedJobSerializer(job).to_representation(job)
+        context = job.context(job_serialization)
+        assert '批量安装项目' in context['job_metadata']
+
+
     def test_context_stub(self):
         """The context stub is a fake context used to validate custom notification messages. Ensure that
         this also has the expected structure. Furthermore, ensure that the stub context contains

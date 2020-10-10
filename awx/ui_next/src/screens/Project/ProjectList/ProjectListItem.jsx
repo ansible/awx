@@ -79,6 +79,14 @@ function ProjectListItem({
     );
   };
 
+  const handleCopyStart = useCallback(() => {
+    setIsDisabled(true);
+  }, []);
+
+  const handleCopyFinish = useCallback(() => {
+    setIsDisabled(false);
+  }, []);
+
   const labelId = `check-action-${project.id}`;
   return (
     <DataListItem
@@ -182,8 +190,8 @@ function ProjectListItem({
             <CopyButton
               copyItem={copyProject}
               isDisabled={isDisabled}
-              onLoading={() => setIsDisabled(true)}
-              onDoneLoading={() => setIsDisabled(false)}
+              onCopyStart={handleCopyStart}
+              onCopyFinish={handleCopyFinish}
               helperText={{
                 tooltip: i18n._(t`Copy Project`),
                 errorMessage: i18n._(t`Failed to copy project.`),

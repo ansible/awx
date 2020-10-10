@@ -12,6 +12,8 @@
 - name: "Create a new organization"
   tower_organization:
     name: "{{ org_name }}"
+    galaxy_credentials:
+      - Ansible Galaxy
   register: result
 
 - assert:

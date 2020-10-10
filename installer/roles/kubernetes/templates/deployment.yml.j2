@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: awx
+  name: {{ kubernetes_serviceaccount_name }}
   namespace: {{ kubernetes_namespace }}
 {% if kubernetes_service_account_annotations is defined %}
   annotations:
@@ -75,7 +75,7 @@ roleRef:
   name: {{ awx_psp_name }}-role
 subjects:
 - kind: ServiceAccount
-  name: awx
+  name: {{ kubernetes_serviceaccount_name }}
   namespace: {{ kubernetes_namespace }}
 {% endif %}
 
@@ -103,7 +103,7 @@ spec:
         service: django
         app: {{ kubernetes_deployment_name }}
     spec:
-      serviceAccountName: awx
+      serviceAccountName: {{ kubernetes_serviceaccount_name }}
       securityContext:
         fsGroup: 0
       terminationGracePeriodSeconds: 10
@@ -171,6 +171,12 @@ spec:
               value: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 {% endif %}
           volumeMounts:
+{% if postgres_root_ca_cert is defined %}
+            - name: {{ kubernetes_deployment_name }}-postgres-root-ca-cert
+              mountPath: {{ ca_trust_bundle }}
+              subPath: {{ postgres_root_ca_filename }}
+              readOnly: true
+{% endif %}
             - name: supervisor-socket
               mountPath: "/var/run/supervisor"
             - name: rsyslog-socket
@@ -258,6 +264,12 @@ spec:
             - /usr/bin/launch_awx_task.sh
           imagePullPolicy: Always
           volumeMounts:
+{% if postgres_root_ca_cert is defined %}
+            - name: {{ kubernetes_deployment_name }}-postgres-root-ca-cert
+              mountPath: {{ ca_trust_bundle }}
+              subPath: {{ postgres_root_ca_filename }}
+              readOnly: true
+{% endif %}
             - name: supervisor-socket
               mountPath: "/var/run/supervisor"
             - name: rsyslog-socket
@@ -386,6 +398,14 @@ spec:
 {{ affinity | to_nice_yaml(indent=2) | indent(width=8, indentfirst=True) }}
 {% endif %}
       volumes:
+{% if postgres_root_ca_cert is defined %}
+        - name: {{ kubernetes_deployment_name }}-postgres-root-ca-cert
+          configMap:
+            name: {{ kubernetes_deployment_name }}-postgres-root-ca-cert
+            items:
+            - key: postgres_root_ca.crt
+              path: postgres_root_ca.crt
+{% endif %}
         - name: supervisor-socket
           emptyDir: {}
         - name: rsyslog-socket

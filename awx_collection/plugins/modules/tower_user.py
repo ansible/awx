@@ -55,6 +55,12 @@ options:
       description:
         - Write-only field used to change the password.
       type: str
+    update_secrets:
+      description:
+        - C(true) will always change password if user specifies password, even if API gives $encrypted$ for password.
+        - C(false) will only set the password if other values change too.
+      type: bool
+      default: true
     state:
       description:
         - Desired state of the resource.
@@ -115,6 +121,7 @@ def main():
         is_superuser=dict(type='bool', default=False, aliases=['superuser']),
         is_system_auditor=dict(type='bool', default=False, aliases=['auditor']),
         password=dict(no_log=True),
+        update_secrets=dict(type='bool', default=True, no_log=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -134,11 +141,7 @@ def main():
     # Attempt to look up the related items the user specified (these will fail the module if not found)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('users', **{
-        'data': {
-            'username': username,
-        }
-    })
+    existing_item = module.get_one('users', name_or_id=username)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -147,7 +150,7 @@ def main():
     # Create the data that gets sent for create and update
     new_fields = {}
     if username:
-        new_fields['username'] = username
+        new_fields['username'] = module.get_item_name(existing_item) if existing_item else username
     if first_name:
         new_fields['first_name'] = first_name
     if last_name:

@@ -45,6 +45,12 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         blank=True,
         through='OrganizationInstanceGroupMembership'
     )
+    galaxy_credentials = OrderedManyToManyField(
+        'Credential',
+        blank=True,
+        through='OrganizationGalaxyCredentialMembership',
+        related_name='%(class)s_galaxy_credentials'
+    )
     max_hosts = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -106,6 +112,23 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     '''
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(organization=self)
+
+
+class OrganizationGalaxyCredentialMembership(models.Model):
+
+    organization = models.ForeignKey(
+        'Organization',
+        on_delete=models.CASCADE
+    )
+    credential = models.ForeignKey(
+        'Credential',
+        on_delete=models.CASCADE
+    )
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
 
 
 class Team(CommonModelNameNotUnique, ResourceMixin):

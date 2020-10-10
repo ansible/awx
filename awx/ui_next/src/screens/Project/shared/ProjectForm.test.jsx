@@ -173,7 +173,7 @@ describe('<ProjectForm />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    act(() => {
+    await act(async () => {
       wrapper.find('OrganizationLookup').invoke('onBlur')();
       wrapper.find('OrganizationLookup').invoke('onChange')({
         id: 1,
