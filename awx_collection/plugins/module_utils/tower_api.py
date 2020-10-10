@@ -336,7 +336,7 @@ class TowerAPIModule(TowerModule):
 
         # If we have neither of these, then we can try un-authenticated access
         self.authenticated = True
-    
+
     def delete_if_needed(self, existing_item, on_delete=None, on_continue=None):
         # This will exit from the module on its own.
         # If the method successfully deletes an item and on_delete param is defined,
@@ -411,7 +411,7 @@ class TowerAPIModule(TowerModule):
                 self.fail_json(msg="Failed to associate item {0}".format(response['json']['detail']))
 
     def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, on_continue=None, item_type='unknown', associations=None):
-    
+
         # This will exit from the module on its own
         # If the method successfully creates an item and on_create param is defined,
         #    the on_create parameter will be called as a method pasing in this object and the json from the response
@@ -437,7 +437,7 @@ class TowerAPIModule(TowerModule):
             item_name = self.get_item_name(new_item, allow_unknown=True)
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
-            
+
             if response['status_code'] == 201:
                 self.json_output['name'] = 'unknown'
                 for key in ('name', 'username', 'identifier', 'hostname'):
@@ -447,7 +447,7 @@ class TowerAPIModule(TowerModule):
                 self.json_output['changed'] = True
                 item_url = response['json']['url']
             # 200 is response from approval node creation
-            elif response['status_code'] == 200 and  item_type == 'workflow_job_template_approval_node':
+            elif response['status_code'] == 200 and item_type == 'workflow_job_template_approval_node':
                 self.json_output['name'] = 'unknown'
                 for key in ('name', 'username', 'identifier', 'hostname'):
                     if key in response['json']:
@@ -606,7 +606,7 @@ class TowerAPIModule(TowerModule):
             return last_data
         else:
             self.exit_json(**self.json_output)
-    
+
     def create_or_update_if_needed(self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, on_continue=None, associations=None):
         if existing_item:
             return self.update_if_needed(existing_item, new_item, on_update=on_update, on_continue=on_continue, associations=associations)
