@@ -27,6 +27,8 @@ options:
         - The name or id of the inventory source to update.
       required: True
       type: str
+      aliases:
+        - inventory_source
     inventory:
       description:
         - Name or id of the inventory that contains the inventory source(s) to update.
