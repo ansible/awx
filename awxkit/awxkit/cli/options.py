@@ -178,6 +178,9 @@ class ResourceOptionsParser(object):
                     except Exception:
                         raise argparse.ArgumentTypeError("{} is not valid JSON or YAML".format(v))
 
+                if not isinstance(parsed, dict):
+                    raise argparse.ArgumentTypeError("{} is not valid JSON or YAML".format(v))
+
                 for k, v in parsed.items():
                     # add support for file reading at top-level JSON keys
                     # (to make things like SSH key data easier to work with)
