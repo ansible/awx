@@ -40,14 +40,14 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
       ? 'smart_inventory'
       : 'inventory';
 
-  const recentJobs = summary_fields.recent_jobs.map(job => ({
+  const recentJobs = summary_fields?.recent_jobs?.map(job => ({
     ...job,
     type: 'job',
   }));
 
   return (
     <>
-      {summary_fields.recent_jobs?.length > 0 && (
+      {summary_fields?.recent_jobs?.length > 0 && (
         <Detail
           value={<Sparkline jobs={recentJobs} />}
           label={i18n._(t`Activity`)}
@@ -84,7 +84,7 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
         value={toTitleCase(webhook_service)}
       />
       <Detail label={i18n._(t`Webhook Key`)} value={webhook_key} />
-      {related.webhook_receiver && (
+      {related?.webhook_receiver && (
         <Detail
           label={i18n._(t`Webhook URL`)}
           value={`${window.location.origin}${related.webhook_receiver}`}

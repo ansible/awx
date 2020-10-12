@@ -72,7 +72,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
       ? 'smart_inventory'
       : 'inventory';
 
-  const recentJobs = summary_fields.recent_jobs.map(job => ({
+  const recentJobs = summary_fields?.recent_jobs?.map(job => ({
     ...job,
     type: 'job',
   }));

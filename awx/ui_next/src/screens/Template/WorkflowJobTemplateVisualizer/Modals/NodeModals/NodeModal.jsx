@@ -1,86 +1,66 @@
 import 'styled-components/macro';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { Formik, useFormikContext } from 'formik';
+
 import { bool, node, func } from 'prop-types';
 import {
   Button,
   WizardContextConsumer,
   WizardFooter,
+  Form,
 } from '@patternfly/react-core';
+import ContentError from '../../../../../components/ContentError';
+import ContentLoading from '../../../../../components/ContentLoading';
+
+import useRequest, {
+  useDismissableError,
+} from '../../../../../util/useRequest';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '../../../../../contexts/Workflow';
+import {
+  JobTemplatesAPI,
+  WorkflowJobTemplatesAPI,
+  WorkflowJobTemplateNodesAPI,
+} from '../../../../../api';
 import Wizard from '../../../../../components/Wizard';
-import { NodeTypeStep } from './NodeTypeStep';
-import RunStep from './RunStep';
+import useWorkflowNodeSteps from './useWorkflowNodeSteps';
+import AlertModal from '../../../../../components/AlertModal';
+
 import NodeNextButton from './NodeNextButton';
 
-function NodeModal({ askLinkType, i18n, onSave, title }) {
+function canLaunchWithoutPrompt(nodeType, launchData) {
+  if (nodeType !== 'workflow_job_template' && nodeType !== 'job_template') {
+    return true;
+  }
+  return (
+    launchData.can_start_without_user_input &&
+    !launchData.ask_inventory_on_launch &&
+    !launchData.ask_variables_on_launch &&
+    !launchData.ask_limit_on_launch &&
+    !launchData.ask_scm_branch_on_launch &&
+    !launchData.survey_enabled &&
+    (!launchData.variables_needed_to_start ||
+      launchData.variables_needed_to_start.length === 0)
+  );
+}
+
+function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
   const history = useHistory();
   const dispatch = useContext(WorkflowDispatchContext);
   const { nodeToEdit } = useContext(WorkflowStateContext);
+  const {
+    values,
+    setTouched,
+    validateForm,
+    setFieldValue,
+    resetForm,
+  } = useFormikContext();
 
-  let defaultApprovalDescription = '';
-  let defaultApprovalName = '';
-  let defaultApprovalTimeout = 0;
-  let defaultNodeResource = null;
-  let defaultNodeType = 'job_template';
-  if (nodeToEdit && nodeToEdit.unifiedJobTemplate) {
-    if (
-      nodeToEdit &&
-      nodeToEdit.unifiedJobTemplate &&
-      (nodeToEdit.unifiedJobTemplate.type ||
-        nodeToEdit.unifiedJobTemplate.unified_job_type)
-    ) {
-      const ujtType =
-        nodeToEdit.unifiedJobTemplate.type ||
-        nodeToEdit.unifiedJobTemplate.unified_job_type;
-      switch (ujtType) {
-        case 'job_template':
-        case 'job':
-          defaultNodeType = 'job_template';
-          defaultNodeResource = nodeToEdit.unifiedJobTemplate;
-          break;
-        case 'project':
-        case 'project_update':
-          defaultNodeType = 'project_sync';
-          defaultNodeResource = nodeToEdit.unifiedJobTemplate;
-          break;
-        case 'inventory_source':
-        case 'inventory_update':
-          defaultNodeType = 'inventory_source_sync';
-          defaultNodeResource = nodeToEdit.unifiedJobTemplate;
-          break;
-        case 'workflow_job_template':
-        case 'workflow_job':
-          defaultNodeType = 'workflow_job_template';
-          defaultNodeResource = nodeToEdit.unifiedJobTemplate;
-          break;
-        case 'workflow_approval_template':
-        case 'workflow_approval':
-          defaultNodeType = 'approval';
-          defaultApprovalName = nodeToEdit.unifiedJobTemplate.name;
-          defaultApprovalDescription =
-            nodeToEdit.unifiedJobTemplate.description;
-          defaultApprovalTimeout = nodeToEdit.unifiedJobTemplate.timeout;
-          break;
-        default:
-      }
-    }
-  }
-  const [approvalDescription, setApprovalDescription] = useState(
-    defaultApprovalDescription
-  );
-  const [approvalName, setApprovalName] = useState(defaultApprovalName);
-  const [approvalTimeout, setApprovalTimeout] = useState(
-    defaultApprovalTimeout
-  );
-  const [linkType, setLinkType] = useState('success');
-  const [nodeResource, setNodeResource] = useState(defaultNodeResource);
-  const [nodeType, setNodeType] = useState(defaultNodeType);
   const [triggerNext, setTriggerNext] = useState(0);
 
   const clearQueryParams = () => {
@@ -92,21 +72,82 @@ function NodeModal({ askLinkType, i18n, onSave, title }) {
     );
     history.replace(`${history.location.pathname}?${otherParts.join('&')}`);
   };
+  useEffect(() => {
+    if (values?.nodeResource?.summary_fields?.credentials?.length > 0) {
+      setFieldValue(
+        'credentials',
+        values.nodeResource.summary_fields.credentials
+      );
+    }
+    if (nodeToEdit?.unified_job_type === 'workflow_job') {
+      setFieldValue('nodeType', 'workflow_job_template');
+    }
+    if (nodeToEdit?.unified_job_type === 'job') {
+      setFieldValue('nodeType', 'job_template');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodeToEdit, values.nodeResource]);
+
+  const {
+    request: readLaunchConfig,
+    error: launchConfigError,
+    result: launchConfig,
+    isLoading,
+  } = useRequest(
+    useCallback(async () => {
+      const readLaunch = (type, id) =>
+        type === 'workflow_job_template'
+          ? WorkflowJobTemplatesAPI.readLaunch(id)
+          : JobTemplatesAPI.readLaunch(id);
+      if (
+        (values?.nodeType === 'workflow_job_template' &&
+          values.nodeResource?.unified_job_type === 'job') ||
+        (values?.nodeType === 'job_template' &&
+          values.nodeResource?.unified_job_type === 'workflow_job')
+      ) {
+        return {};
+      }
+      if (
+        values.nodeType === 'workflow_job_template' ||
+        values.nodeType === 'job_template'
+      ) {
+        if (values.nodeResource) {
+          const { data } = await readLaunch(
+            values.nodeType,
+            values?.nodeResource?.id
+          );
+
+          return data;
+        }
+      }
+      return {};
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [values.nodeResource, values.nodeType]),
+    {}
+  );
+
+  useEffect(() => {
+    readLaunchConfig();
+  }, [readLaunchConfig, values.nodeResource, values.nodeType]);
+
+  const {
+    steps: promptSteps,
+    initialValues,
+    isReady,
+    visitStep,
+    visitAllSteps,
+    contentError,
+  } = useWorkflowNodeSteps(
+    launchConfig,
+    i18n,
+    values.nodeResource,
+    askLinkType,
+    !canLaunchWithoutPrompt(values.nodeType, launchConfig)
+  );
 
   const handleSaveNode = () => {
     clearQueryParams();
-
-    const resource =
-      nodeType === 'approval'
-        ? {
-            description: approvalDescription,
-            name: approvalName,
-            timeout: approvalTimeout,
-            type: 'workflow_approval_template',
-          }
-        : nodeResource;
-
-    onSave(resource, askLinkType ? linkType : null);
+    onSave(values, askLinkType ? values.linkType : null, launchConfig);
   };
 
   const handleCancel = () => {
@@ -114,53 +155,24 @@ function NodeModal({ askLinkType, i18n, onSave, title }) {
     dispatch({ type: 'CANCEL_NODE_MODAL' });
   };
 
-  const handleNodeTypeChange = newNodeType => {
-    setNodeType(newNodeType);
-    setNodeResource(null);
-    setApprovalName('');
-    setApprovalDescription('');
-    setApprovalTimeout(0);
-  };
-
-  const steps = [
-    ...(askLinkType
-      ? [
-          {
-            name: i18n._(t`Run Type`),
-            key: 'run_type',
-            component: (
-              <RunStep linkType={linkType} onUpdateLinkType={setLinkType} />
-            ),
-            enableNext: linkType !== null,
-          },
-        ]
-      : []),
-    {
-      name: i18n._(t`Node Type`),
-      key: 'node_resource',
-      enableNext:
-        (nodeType !== 'approval' && nodeResource !== null) ||
-        (nodeType === 'approval' && approvalName !== ''),
-      component: (
-        <NodeTypeStep
-          description={approvalDescription}
-          name={approvalName}
-          nodeResource={nodeResource}
-          nodeType={nodeType}
-          onUpdateDescription={setApprovalDescription}
-          onUpdateName={setApprovalName}
-          onUpdateNodeResource={setNodeResource}
-          onUpdateNodeType={handleNodeTypeChange}
-          onUpdateTimeout={setApprovalTimeout}
-          timeout={approvalTimeout}
-        />
-      ),
-    },
-  ];
-
-  steps.forEach((step, n) => {
-    step.id = n + 1;
-  });
+  const { error, dismissError } = useDismissableError(
+    launchConfigError || contentError || credentialError
+  );
+  useEffect(() => {
+    if (isReady) {
+      resetForm({
+        values: {
+          ...initialValues,
+          nodeResource: values.nodeResource,
+          nodeType: values.nodeType || 'job_template',
+          linkType: values.linkType || 'success',
+          verbosity: initialValues?.verbosity?.toString(),
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [launchConfig, values.nodeType, isReady, values.nodeResource]);
+  const steps = [...(isReady ? [...promptSteps] : [])];
 
   const CustomFooter = (
     <WizardFooter>
@@ -173,12 +185,13 @@ function NodeModal({ askLinkType, i18n, onSave, title }) {
               onNext={onNext}
               onClick={() => setTriggerNext(triggerNext + 1)}
               buttonText={
-                activeStep.key === 'node_resource'
+                activeStep.id === steps[steps?.length - 1]?.id ||
+                activeStep.name === 'Preview'
                   ? i18n._(t`Save`)
                   : i18n._(t`Next`)
               }
             />
-            {activeStep && activeStep.id !== 1 && (
+            {activeStep && activeStep.id !== steps[0]?.id && (
               <Button id="back-node-modal" variant="secondary" onClick={onBack}>
                 {i18n._(t`Back`)}
               </Button>
@@ -196,20 +209,122 @@ function NodeModal({ askLinkType, i18n, onSave, title }) {
     </WizardFooter>
   );
 
-  const wizardTitle = nodeResource ? `${title} | ${nodeResource.name}` : title;
+  const wizardTitle = values.nodeResource
+    ? `${title} | ${values.nodeResource.name}`
+    : title;
 
+  if (error && !isLoading) {
+    return (
+      <AlertModal
+        isOpen={error}
+        variant="error"
+        title={i18n._(t`Error!`)}
+        onClose={() => {
+          dismissError();
+        }}
+      >
+        <ContentError error={error} />
+      </AlertModal>
+    );
+  }
   return (
     <Wizard
       footer={CustomFooter}
-      isOpen
+      isOpen={!error || !contentError}
       onClose={handleCancel}
-      onSave={handleSaveNode}
-      steps={steps}
+      onSave={() => {
+        handleSaveNode();
+      }}
+      onGoToStep={async (nextStep, prevStep) => {
+        if (nextStep.id === 'preview') {
+          visitAllSteps(setTouched);
+        } else {
+          visitStep(prevStep.prevId);
+        }
+        await validateForm();
+      }}
+      steps={
+        isReady
+          ? steps
+          : [
+              {
+                name: i18n._(t`Content Loading`),
+                component: <ContentLoading />,
+              },
+            ]
+      }
       css="overflow: scroll"
       title={wizardTitle}
+      onNext={async (nextStep, prevStep) => {
+        if (nextStep.id === 'preview') {
+          visitAllSteps(setTouched);
+        } else {
+          visitStep(prevStep.prevId);
+        }
+        await validateForm();
+      }}
     />
   );
 }
+
+const NodeModal = ({ onSave, i18n, askLinkType, title }) => {
+  const { nodeToEdit } = useContext(WorkflowStateContext);
+  const onSaveForm = (values, linkType, config) => {
+    onSave(values, linkType, config);
+  };
+  const { request: fetchCredentials, result, error } = useRequest(
+    useCallback(async () => {
+      const {
+        data: { results },
+      } = await WorkflowJobTemplateNodesAPI.readCredentials(
+        nodeToEdit.originalNodeObject.id
+      );
+      return results;
+    }, [nodeToEdit])
+  );
+  useEffect(() => {
+    if (nodeToEdit?.originalNodeObject?.related?.credentials) {
+      fetchCredentials();
+    }
+  }, [fetchCredentials, nodeToEdit]);
+
+  return (
+    <Formik
+      initialValues={{
+        linkType: 'success',
+        nodeResource:
+          nodeToEdit?.originalNodeObject?.summary_fields
+            ?.unified_job_template || null,
+        inventory:
+          nodeToEdit?.originalNodeObject?.summary_fields?.inventory || null,
+        credentials: result || null,
+        verbosity: nodeToEdit?.originalNodeObject?.verbosity || 0,
+        diff_mode: nodeToEdit?.originalNodeObject?.verbosty,
+        skip_tags: nodeToEdit?.originalNodeObject?.skip_tags || '',
+        job_tags: nodeToEdit?.originalNodeObject?.job_tags || '',
+        scm_branch:
+          nodeToEdit?.originalNodeObject?.scm_branch !== null
+            ? nodeToEdit?.originalNodeObject?.scm_branch
+            : '',
+        job_type: nodeToEdit?.originalNodeObject?.job_type || 'run',
+        extra_vars: nodeToEdit?.originalNodeObject?.extra_vars || '---',
+      }}
+      onSave={() => onSaveForm}
+    >
+      {formik => (
+        <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+          <NodeModalForm
+            onSave={onSaveForm}
+            i18n={i18n}
+            title={title}
+            credentialError={error}
+            askLinkType={askLinkType}
+          />
+        </Form>
+      )}
+    </Formik>
+  );
+};
 
 NodeModal.propTypes = {
   askLinkType: bool.isRequired,

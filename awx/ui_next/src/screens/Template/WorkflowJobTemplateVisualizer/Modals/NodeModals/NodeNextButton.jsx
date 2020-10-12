@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { func, number, shape, string } from 'prop-types';
+import { func, oneOfType, number, shape, string } from 'prop-types';
 import { Button } from '@patternfly/react-core';
 
 function NodeNextButton({
@@ -34,7 +34,7 @@ NodeNextButton.propTypes = {
   buttonText: string.isRequired,
   onClick: func.isRequired,
   onNext: func.isRequired,
-  triggerNext: number.isRequired,
+  triggerNext: oneOfType([string, number]).isRequired,
 };
 
 export default NodeNextButton;

@@ -1,15 +1,18 @@
 import React from 'react';
+import { Formik } from 'formik';
+import { act } from 'react-dom/test-utils';
+
 import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
 import RunStep from './RunStep';
 
 let wrapper;
-const linkType = 'always';
-const onUpdateLinkType = jest.fn();
 
 describe('RunStep', () => {
   beforeAll(() => {
     wrapper = mountWithContexts(
-      <RunStep linkType={linkType} onUpdateLinkType={onUpdateLinkType} />
+      <Formik initialValues={{ linkType: 'success' }}>
+        <RunStep />
+      </Formik>
     );
   });
 
@@ -18,23 +21,20 @@ describe('RunStep', () => {
   });
 
   test('Default selected card matches default link type when present', () => {
-    expect(wrapper.find('#link-type-success').props().isSelected).toBe(false);
+    expect(wrapper.find('#link-type-success').props().isSelected).toBe(true);
     expect(wrapper.find('#link-type-failure').props().isSelected).toBe(false);
+    expect(wrapper.find('#link-type-always').props().isSelected).toBe(false);
+  });
+
+  test('Clicking success card makes expected callback', async () => {
+    await act(async () => wrapper.find('#link-type-always').simulate('click'));
+    wrapper.update();
     expect(wrapper.find('#link-type-always').props().isSelected).toBe(true);
   });
 
-  test('Clicking success card makes expected callback', () => {
-    wrapper.find('#link-type-success').simulate('click');
-    expect(onUpdateLinkType).toHaveBeenCalledWith('success');
-  });
-
-  test('Clicking failure card makes expected callback', () => {
-    wrapper.find('#link-type-failure').simulate('click');
-    expect(onUpdateLinkType).toHaveBeenCalledWith('failure');
-  });
-
-  test('Clicking always card makes expected callback', () => {
-    wrapper.find('#link-type-always').simulate('click');
-    expect(onUpdateLinkType).toHaveBeenCalledWith('always');
+  test('Clicking failure card makes expected callback', async () => {
+    await act(async () => wrapper.find('#link-type-failure').simulate('click'));
+    wrapper.update();
+    expect(wrapper.find('#link-type-failure').props().isSelected).toBe(true);
   });
 });

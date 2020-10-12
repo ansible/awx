@@ -53,6 +53,7 @@ function buildResourceLink(resource) {
 
 function hasPromptData(launchData) {
   return (
+    launchData.survey_enabled ||
     launchData.ask_credential_on_launch ||
     launchData.ask_diff_mode_on_launch ||
     launchData.ask_inventory_on_launch ||

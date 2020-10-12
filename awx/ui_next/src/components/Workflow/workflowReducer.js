@@ -55,27 +55,60 @@ export default function visualizerReducer(state, action) {
     case 'SELECT_SOURCE_FOR_LINKING':
       return selectSourceForLinking(state, action.node);
     case 'SET_ADD_LINK_TARGET_NODE':
-      return { ...state, addLinkTargetNode: action.value };
+      return {
+        ...state,
+        addLinkTargetNode: action.value,
+      };
     case 'SET_CONTENT_ERROR':
-      return { ...state, contentError: action.value };
+      return {
+        ...state,
+        contentError: action.value,
+      };
     case 'SET_IS_LOADING':
-      return { ...state, isLoading: action.value };
+      return {
+        ...state,
+        isLoading: action.value,
+      };
     case 'SET_LINK_TO_DELETE':
-      return { ...state, linkToDelete: action.value };
+      return {
+        ...state,
+        linkToDelete: action.value,
+      };
     case 'SET_LINK_TO_EDIT':
-      return { ...state, linkToEdit: action.value };
+      return {
+        ...state,
+        linkToEdit: action.value,
+      };
     case 'SET_NODES':
-      return { ...state, nodes: action.value };
+      return {
+        ...state,
+        nodes: action.value,
+      };
     case 'SET_NODE_POSITIONS':
-      return { ...state, nodePositions: action.value };
+      return {
+        ...state,
+        nodePositions: action.value,
+      };
     case 'SET_NODE_TO_DELETE':
-      return { ...state, nodeToDelete: action.value };
+      return {
+        ...state,
+        nodeToDelete: action.value,
+      };
     case 'SET_NODE_TO_EDIT':
-      return { ...state, nodeToEdit: action.value };
+      return {
+        ...state,
+        nodeToEdit: action.value,
+      };
     case 'SET_NODE_TO_VIEW':
-      return { ...state, nodeToView: action.value };
+      return {
+        ...state,
+        nodeToView: action.value,
+      };
     case 'SET_SHOW_DELETE_ALL_NODES_MODAL':
-      return { ...state, showDeleteAllNodesModal: action.value };
+      return {
+        ...state,
+        showDeleteAllNodesModal: action.value,
+      };
     case 'START_ADD_NODE':
       return {
         ...state,
@@ -113,8 +146,12 @@ function createLink(state, linkType) {
   });
 
   newLinks.push({
-    source: { id: addLinkSourceNode.id },
-    target: { id: addLinkTargetNode.id },
+    source: {
+      id: addLinkSourceNode.id,
+    },
+    target: {
+      id: addLinkTargetNode.id,
+    },
     linkType,
   });
 
@@ -145,6 +182,7 @@ function createNode(state, node) {
     id: nextNodeId,
     unifiedJobTemplate: node.nodeResource,
     isInvalidLinkTarget: false,
+    promptValues: node.promptValues,
   });
 
   // Ensures that root nodes appear to always run
@@ -154,8 +192,12 @@ function createNode(state, node) {
   }
 
   newLinks.push({
-    source: { id: addNodeSource },
-    target: { id: nextNodeId },
+    source: {
+      id: addNodeSource,
+    },
+    target: {
+      id: nextNodeId,
+    },
     linkType: node.linkType,
   });
 
@@ -165,7 +207,9 @@ function createNode(state, node) {
         linkToCompare.source.id === addNodeSource &&
         linkToCompare.target.id === addNodeTarget
       ) {
-        linkToCompare.source = { id: nextNodeId };
+        linkToCompare.source = {
+          id: nextNodeId,
+        };
       }
     });
   }
@@ -268,15 +312,23 @@ function addLinksFromParentsToChildren(
         // doesn't have any other parents
         if (linkParentMapping[child.id].length === 1) {
           newLinks.push({
-            source: { id: parentId },
-            target: { id: child.id },
+            source: {
+              id: parentId,
+            },
+            target: {
+              id: child.id,
+            },
             linkType: 'always',
           });
         }
       } else if (!linkParentMapping[child.id].includes(parentId)) {
         newLinks.push({
-          source: { id: parentId },
-          target: { id: child.id },
+          source: {
+            id: parentId,
+          },
+          target: {
+            id: child.id,
+          },
           linkType: child.linkType,
         });
       }
@@ -302,7 +354,10 @@ function removeLinksFromDeletedNode(
 
     if (link.source.id === nodeId || link.target.id === nodeId) {
       if (link.source.id === nodeId) {
-        children.push({ id: link.target.id, linkType: link.linkType });
+        children.push({
+          id: link.target.id,
+          linkType: link.linkType,
+        });
       } else if (link.target.id === nodeId) {
         parents.push(link.source.id);
       }
@@ -601,6 +656,7 @@ function updateNode(state, editedNode) {
   const matchingNode = newNodes.find(node => node.id === nodeToEdit.id);
   matchingNode.unifiedJobTemplate = editedNode.nodeResource;
   matchingNode.isEdited = true;
+  matchingNode.promptValues = editedNode.promptValues;
 
   return {
     ...state,

@@ -1,17 +1,19 @@
 import 'styled-components/macro';
-import React from 'react';
+import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
-import { func, number, shape, string } from 'prop-types';
 import styled from 'styled-components';
-import { Formik, Field } from 'formik';
+import { useField } from 'formik';
 import { Form, FormGroup, TextInput } from '@patternfly/react-core';
+import { required } from '../../../../../../util/validators';
+
 import { FormFullWidthLayout } from '../../../../../../components/FormLayout';
 import AnsibleSelect from '../../../../../../components/AnsibleSelect';
 import InventorySourcesList from './InventorySourcesList';
 import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';
 import WorkflowJobTemplatesList from './WorkflowJobTemplatesList';
+import FormField from '../../../../../../components/FormField';
 
 const TimeoutInput = styled(TextInput)`
   width: 200px;
@@ -25,19 +27,16 @@ const TimeoutLabel = styled.p`
   margin-left: 10px;
 `;
 
-function NodeTypeStep({
-  description,
-  i18n,
-  name,
-  nodeResource,
-  nodeType,
-  timeout,
-  onUpdateDescription,
-  onUpdateName,
-  onUpdateNodeResource,
-  onUpdateNodeType,
-  onUpdateTimeout,
-}) {
+function NodeTypeStep({ i18n }) {
+  const [timeoutMinutes, setTimeoutMinutes] = useState(0);
+  const [timeoutSeconds, setTimeoutSeconds] = useState(0);
+  const [nodeTypeField, , nodeTypeHelpers] = useField('nodeType');
+  const [nodeResourceField, , nodeResourceHelpers] = useField('nodeResource');
+  const [, approvalNameMeta, approvalNameHelpers] = useField('approvalName');
+  const [, , approvalDescriptionHelpers] = useField('approvalDescription');
+  const [, , timeoutHelpers] = useField('timeout');
+
+  const isValid = !approvalNameMeta.touched || !approvalNameMeta.error;
   return (
     <>
       <div css="display: flex; align-items: center; margin-bottom: 20px;">
@@ -78,189 +77,114 @@ function NodeTypeStep({
                 isDisabled: false,
               },
             ]}
-            value={nodeType}
+            value={nodeTypeField.value}
             onChange={(e, val) => {
-              onUpdateNodeType(val);
+              nodeTypeHelpers.setValue(val);
+              nodeResourceHelpers.setValue(null);
+              approvalNameHelpers.setValue('');
+              approvalDescriptionHelpers.setValue('');
+              timeoutHelpers.setValue(0);
             }}
           />
         </div>
       </div>
-      {nodeType === 'job_template' && (
+      {nodeTypeField.value === 'job_template' && (
         <JobTemplatesList
-          nodeResource={nodeResource}
-          onUpdateNodeResource={onUpdateNodeResource}
+          nodeResource={nodeResourceField.value}
+          onUpdateNodeResource={nodeResourceHelpers.setValue}
         />
       )}
-      {nodeType === 'project_sync' && (
+      {nodeTypeField.value === 'project_sync' && (
         <ProjectsList
-          nodeResource={nodeResource}
-          onUpdateNodeResource={onUpdateNodeResource}
+          nodeResource={nodeResourceField.value}
+          onUpdateNodeResource={nodeResourceHelpers.setValue}
         />
       )}
-      {nodeType === 'inventory_source_sync' && (
+      {nodeTypeField.value === 'inventory_source_sync' && (
         <InventorySourcesList
-          nodeResource={nodeResource}
-          onUpdateNodeResource={onUpdateNodeResource}
+          nodeResource={nodeResourceField.value}
+          onUpdateNodeResource={nodeResourceHelpers.setValue}
         />
       )}
-      {nodeType === 'workflow_job_template' && (
+      {nodeTypeField.value === 'workflow_job_template' && (
         <WorkflowJobTemplatesList
-          nodeResource={nodeResource}
-          onUpdateNodeResource={onUpdateNodeResource}
+          nodeResource={nodeResourceField.value}
+          onUpdateNodeResource={nodeResourceHelpers.setValue}
         />
       )}
-      {nodeType === 'approval' && (
-        <Formik
-          initialValues={{
-            name: name || '',
-            description: description || '',
-            timeoutMinutes: Math.floor(timeout / 60),
-            timeoutSeconds: timeout - Math.floor(timeout / 60) * 60,
-          }}
-        >
-          {() => (
-            <Form css="margin-top: 20px;">
-              <FormFullWidthLayout>
-                <Field name="name">
-                  {({ field, form }) => {
-                    const isValid =
-                      form &&
-                      (!form.touched[field.name] || !form.errors[field.name]);
-
-                    return (
-                      <FormGroup
-                        fieldId="approval-name"
-                        isRequired
-                        validated={isValid ? 'default' : 'error'}
-                        label={i18n._(t`Name`)}
-                      >
-                        <TextInput
-                          autoFocus
-                          id="approval-name"
-                          isRequired
-                          validated={isValid ? 'default' : 'error'}
-                          type="text"
-                          {...field}
-                          onChange={(value, evt) => {
-                            onUpdateName(evt.target.value);
-                            field.onChange(evt);
-                          }}
-                        />
-                      </FormGroup>
+      {nodeTypeField.value === 'approval' && (
+        <Form css="margin-top: 20px;">
+          <FormFullWidthLayout>
+            <FormField
+              name="approvalName"
+              fieldId="approval-name"
+              id="approval-name"
+              isRequired
+              validate={required(null, i18n)}
+              validated={isValid ? 'default' : 'error'}
+              label={i18n._(t`Name`)}
+            />
+            <FormField
+              name="approvalDescription"
+              fieldId="approval-description"
+              id="approval-description"
+              label={i18n._(t`Description`)}
+            />
+            <FormGroup
+              label={i18n._(t`Timeout`)}
+              fieldId="approval-timeout"
+              name="timeout"
+            >
+              <div css="display: flex;align-items: center;">
+                <TimeoutInput
+                  aria-label={i18n._(t`timeout-minutes`)}
+                  name="timeoutMinutes"
+                  id="approval-timeout-minutes"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={timeoutMinutes}
+                  onChange={(value, evt) => {
+                    if (!evt.target.value || evt.target.value === '') {
+                      evt.target.value = 0;
+                    }
+                    setTimeoutMinutes(evt.target.value);
+                    timeoutHelpers.setValue(
+                      Number(evt.target.value) * 60 + Number(timeoutSeconds)
                     );
                   }}
-                </Field>
-                <Field name="description">
-                  {({ field }) => (
-                    <FormGroup
-                      fieldId="approval-description"
-                      label={i18n._(t`Description`)}
-                    >
-                      <TextInput
-                        id="approval-description"
-                        type="text"
-                        {...field}
-                        onChange={(value, evt) => {
-                          onUpdateDescription(evt.target.value);
-                          field.onChange(evt);
-                        }}
-                      />
-                    </FormGroup>
-                  )}
-                </Field>
-                <FormGroup
-                  label={i18n._(t`Timeout`)}
-                  fieldId="approval-timeout"
-                >
-                  <div css="display: flex;align-items: center;">
-                    <Field name="timeoutMinutes">
-                      {({ field, form }) => (
-                        <>
-                          <TimeoutInput
-                            id="approval-timeout-minutes"
-                            type="number"
-                            min="0"
-                            step="1"
-                            {...field}
-                            onChange={(value, evt) => {
-                              if (
-                                !evt.target.value ||
-                                evt.target.value === ''
-                              ) {
-                                evt.target.value = 0;
-                              }
-                              onUpdateTimeout(
-                                Number(evt.target.value) * 60 +
-                                  Number(form.values.timeoutSeconds)
-                              );
-                              field.onChange(evt);
-                            }}
-                          />
-                          <TimeoutLabel>
-                            <Trans>min</Trans>
-                          </TimeoutLabel>
-                        </>
-                      )}
-                    </Field>
-                    <Field name="timeoutSeconds">
-                      {({ field, form }) => (
-                        <>
-                          <TimeoutInput
-                            id="approval-timeout-seconds"
-                            type="number"
-                            min="0"
-                            step="1"
-                            {...field}
-                            onChange={(value, evt) => {
-                              if (
-                                !evt.target.value ||
-                                evt.target.value === ''
-                              ) {
-                                evt.target.value = 0;
-                              }
-                              onUpdateTimeout(
-                                Number(evt.target.value) +
-                                  Number(form.values.timeoutMinutes) * 60
-                              );
-                              field.onChange(evt);
-                            }}
-                          />
-                          <TimeoutLabel>
-                            <Trans>sec</Trans>
-                          </TimeoutLabel>
-                        </>
-                      )}
-                    </Field>
-                  </div>
-                </FormGroup>
-              </FormFullWidthLayout>
-            </Form>
-          )}
-        </Formik>
+                />
+                <TimeoutLabel>
+                  <Trans>min</Trans>
+                </TimeoutLabel>
+                <TimeoutInput
+                  name="timeoutSeconds"
+                  id="approval-timeout-seconds"
+                  type="number"
+                  aria-label={i18n._(t`timeout-seconds`)}
+                  min="0"
+                  step="1"
+                  value={timeoutSeconds}
+                  onChange={(value, evt) => {
+                    if (!evt.target.value || evt.target.value === '') {
+                      evt.target.value = 0;
+                    }
+                    setTimeoutSeconds(evt.target.value);
+
+                    timeoutHelpers.setValue(
+                      Number(evt.target.value) + Number(timeoutMinutes) * 60
+                    );
+                  }}
+                />
+                <TimeoutLabel>
+                  <Trans>sec</Trans>
+                </TimeoutLabel>
+              </div>
+            </FormGroup>
+          </FormFullWidthLayout>
+        </Form>
       )}
     </>
   );
 }
-
-NodeTypeStep.propTypes = {
-  description: string,
-  name: string,
-  nodeResource: shape(),
-  nodeType: string,
-  timeout: number,
-  onUpdateDescription: func.isRequired,
-  onUpdateName: func.isRequired,
-  onUpdateNodeResource: func.isRequired,
-  onUpdateNodeType: func.isRequired,
-  onUpdateTimeout: func.isRequired,
-};
-
-NodeTypeStep.defaultProps = {
-  description: '',
-  name: '',
-  nodeResource: null,
-  nodeType: 'job_template',
-  timeout: 0,
-};
-
 export default withI18n()(NodeTypeStep);

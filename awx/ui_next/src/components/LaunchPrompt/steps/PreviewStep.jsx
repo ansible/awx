@@ -28,10 +28,9 @@ function PreviewStep({ resource, config, survey, formErrors, i18n }) {
   const surveyValues = getSurveyValues(values);
 
   const overrides = { ...values };
-
   if (config.ask_variables_on_launch || config.survey_enabled) {
     const initialExtraVars = config.ask_variables_on_launch
-      ? values.extra_vars || '---'
+      ? overrides.extra_vars || '---'
       : resource.extra_vars;
     if (survey && survey.spec) {
       const passwordFields = survey.spec
@@ -45,6 +44,10 @@ function PreviewStep({ resource, config, survey, formErrors, i18n }) {
       overrides.extra_vars = initialExtraVars;
     }
   }
+  // Api expects extra vars to be merged with the survey data.
+  // We put the extra_data key/value pair on the values object here
+  // so that we don't have to do this loop again inside of the NodeAddModal.jsx
+  values.extra_data = overrides.extra_vars;
 
   return (
     <Fragment>

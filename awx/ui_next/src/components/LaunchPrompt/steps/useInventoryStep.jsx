@@ -6,14 +6,17 @@ import StepName from './StepName';
 
 const STEP_ID = 'inventory';
 
-export default function useInventoryStep(config, visitedSteps, i18n) {
+export default function useInventoryStep(config, i18n, visitedSteps, resource) {
   const [, meta] = useField('inventory');
+  const formError =
+    Object.keys(visitedSteps).includes(STEP_ID) && (!meta.value || meta.error);
 
   return {
-    step: getStep(config, meta, i18n, visitedSteps),
+    step: getStep(config, i18n, formError),
+    initialValues: getInitialValues(config, resource),
     isReady: true,
     contentError: null,
-    formError: !meta.value,
+    formError: config.ask_inventory_on_launch && formError,
     setTouched: setFieldsTouched => {
       setFieldsTouched({
         inventory: true,
@@ -21,24 +24,25 @@ export default function useInventoryStep(config, visitedSteps, i18n) {
     },
   };
 }
-function getStep(config, meta, i18n, visitedSteps) {
+function getStep(config, i18n, formError) {
   if (!config.ask_inventory_on_launch) {
     return null;
   }
   return {
     id: STEP_ID,
     key: 3,
-    name: (
-      <StepName
-        hasErrors={
-          Object.keys(visitedSteps).includes(STEP_ID) &&
-          (!meta.value || meta.error)
-        }
-      >
-        {i18n._(t`Inventory`)}
-      </StepName>
-    ),
+    name: <StepName hasErrors={formError}>{i18n._(t`Inventory`)}</StepName>,
     component: <InventoryStep i18n={i18n} />,
     enableNext: true,
+  };
+}
+
+function getInitialValues(config, resource) {
+  if (!config.ask_inventory_on_launch) {
+    return {};
+  }
+
+  return {
+    inventory: resource?.summary_fields?.inventory,
   };
 }

@@ -9,10 +9,10 @@ import usePreviewStep from './steps/usePreviewStep';
 export default function useLaunchSteps(config, resource, i18n) {
   const [visited, setVisited] = useState({});
   const steps = [
-    useInventoryStep(config, visited, i18n),
+    useInventoryStep(config, i18n, visited ),
     useCredentialsStep(config, i18n),
     useOtherPromptsStep(config, i18n),
-    useSurveyStep(config, visited, i18n),
+    useSurveyStep(config, i18n, visited ),
   ];
   const { resetForm, values: formikValues } = useFormikContext();
   const hasErrors = steps.some(step => step.formError);
@@ -21,10 +21,11 @@ export default function useLaunchSteps(config, resource, i18n) {
   steps.push(
     usePreviewStep(
       config,
+      i18n,
       resource,
       steps[surveyStepIndex]?.survey,
       hasErrors,
-      i18n
+
     )
   );
 

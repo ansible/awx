@@ -8,7 +8,7 @@ import StepName from './StepName';
 
 const STEP_ID = 'survey';
 
-export default function useSurveyStep(config, visitedSteps, i18n) {
+export default function useSurveyStep(config, i18n, visitedSteps, resource) {
   const { values } = useFormikContext();
   const { result: survey, request: fetchSurvey, isLoading, error } = useRequest(
     useCallback(async () => {
@@ -28,11 +28,11 @@ export default function useSurveyStep(config, visitedSteps, i18n) {
     fetchSurvey();
   }, [fetchSurvey]);
 
+  const errors = {};
   const validate = () => {
     if (!config.survey_enabled || !survey || !survey.spec) {
       return {};
     }
-    const errors = {};
     survey.spec.forEach(question => {
       const errMessage = validateField(
         question,
@@ -47,12 +47,13 @@ export default function useSurveyStep(config, visitedSteps, i18n) {
   };
   const formError = Object.keys(validate()).length > 0;
   return {
-    step: getStep(config, survey, formError, i18n, visitedSteps),
-    formError,
-    initialValues: getInitialValues(config, survey),
+    step: getStep(config, survey, validate, i18n, visitedSteps),
+    initialValues: getInitialValues(config, survey, resource),
+    validate,
     survey,
     isReady: !isLoading && !!survey,
     contentError: error,
+    formError,
     setTouched: setFieldsTouched => {
       if (!survey || !survey.spec) {
         return;
@@ -84,24 +85,25 @@ function validateField(question, value, i18n) {
       );
     }
   }
-  if (
-    question.required &&
-    ((!value && value !== 0) || (Array.isArray(value) && value.length === 0))
-  ) {
+  if (question.required && !value && value !== 0) {
     return i18n._(t`This field must not be blank`);
   }
   return null;
 }
-function getStep(config, survey, hasErrors, i18n, visitedSteps) {
+function getStep(config, survey, validate, i18n, visitedSteps) {
   if (!config.survey_enabled) {
     return null;
   }
+
   return {
     id: STEP_ID,
     key: 6,
     name: (
       <StepName
-        hasErrors={Object.keys(visitedSteps).includes(STEP_ID) && hasErrors}
+        hasErrors={
+          Object.keys(visitedSteps).includes(STEP_ID) &&
+          Object.keys(validate()).length
+        }
       >
         {i18n._(t`Survey`)}
       </StepName>
@@ -110,23 +112,33 @@ function getStep(config, survey, hasErrors, i18n, visitedSteps) {
     enableNext: true,
   };
 }
-function getInitialValues(config, survey) {
+
+function getInitialValues(config, survey, resource) {
   if (!config.survey_enabled || !survey) {
     return {};
   }
-  const surveyValues = {};
-  survey.spec.forEach(question => {
-    if (question.type === 'multiselect') {
-      if (question.default === '') {
-        surveyValues[`survey_${question.variable}`] = [];
+
+  const values = {};
+  if (survey && survey.spec) {
+    survey.spec.forEach(question => {
+      if (question.type === 'multiselect') {
+        values[`survey_${question.variable}`] = question.default.split('\n');
       } else {
-        surveyValues[`survey_${question.variable}`] = question.default.split(
-          '\n'
-        );
+        values[`survey_${question.variable}`] = question.default;
       }
-    } else {
-      surveyValues[`survey_${question.variable}`] = question.default;
-    }
-  });
-  return surveyValues;
+      if (resource?.extra_data) {
+        Object.entries(resource?.extra_data).forEach(([key, value]) => {
+          if (key === question.variable) {
+            if (question.type === 'multiselect') {
+              values[`survey_${question.variable}`] = value.split('\n');
+            } else {
+              values[`survey_${question.variable}`] = value;
+            }
+          }
+        });
+      }
+    });
+  }
+
+  return values;
 }
