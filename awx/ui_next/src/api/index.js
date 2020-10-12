@@ -32,6 +32,7 @@ import Tokens from './models/Tokens';
 import UnifiedJobTemplates from './models/UnifiedJobTemplates';
 import UnifiedJobs from './models/UnifiedJobs';
 import Users from './models/Users';
+import WorkflowApprovals from './models/WorkflowApprovals';
 import WorkflowApprovalTemplates from './models/WorkflowApprovalTemplates';
 import WorkflowJobTemplateNodes from './models/WorkflowJobTemplateNodes';
 import WorkflowJobTemplates from './models/WorkflowJobTemplates';
@@ -71,6 +72,7 @@ const TokensAPI = new Tokens();
 const UnifiedJobTemplatesAPI = new UnifiedJobTemplates();
 const UnifiedJobsAPI = new UnifiedJobs();
 const UsersAPI = new Users();
+const WorkflowApprovalsAPI = new WorkflowApprovals();
 const WorkflowApprovalTemplatesAPI = new WorkflowApprovalTemplates();
 const WorkflowJobTemplateNodesAPI = new WorkflowJobTemplateNodes();
 const WorkflowJobTemplatesAPI = new WorkflowJobTemplates();
@@ -111,6 +113,7 @@ export {
   UnifiedJobTemplatesAPI,
   UnifiedJobsAPI,
   UsersAPI,
+  WorkflowApprovalsAPI,
   WorkflowApprovalTemplatesAPI,
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,

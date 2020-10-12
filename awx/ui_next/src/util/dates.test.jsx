@@ -21,9 +21,14 @@ const i18n = {
 describe('formatDateString', () => {
   test('it returns the expected value', () => {
     const lang = 'en-US';
+    expect(formatDateString(null, lang)).toEqual(null);
     expect(formatDateString('', lang)).toEqual('Invalid Date');
     expect(formatDateString({}, lang)).toEqual('Invalid Date');
     expect(formatDateString(undefined, lang)).toEqual('Invalid Date');
+    expect(formatDateString('foobar', lang)).toEqual('Invalid Date');
+    expect(formatDateString('2018-011-31T01:14:52.969227Z', lang)).toEqual(
+      'Invalid Date'
+    );
     expect(formatDateString('2018-01-31T01:14:52.969227Z', lang)).toEqual(
       '1/31/2018, 1:14:52 AM'
     );
@@ -33,9 +38,14 @@ describe('formatDateString', () => {
 describe('formatDateStringUTC', () => {
   test('it returns the expected value', () => {
     const lang = 'en-US';
+    expect(formatDateStringUTC(null, lang)).toEqual(null);
     expect(formatDateStringUTC('', lang)).toEqual('Invalid Date');
     expect(formatDateStringUTC({}, lang)).toEqual('Invalid Date');
     expect(formatDateStringUTC(undefined, lang)).toEqual('Invalid Date');
+    expect(formatDateStringUTC('foobar', lang)).toEqual('Invalid Date');
+    expect(formatDateStringUTC('2018-011-31T01:14:52.969227Z', lang)).toEqual(
+      'Invalid Date'
+    );
     expect(formatDateStringUTC('2018-01-31T01:14:52.969227Z', lang)).toEqual(
       '1/31/2018, 1:14:52 AM'
     );

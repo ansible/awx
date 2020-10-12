@@ -391,3 +391,19 @@ export const NotificationTemplate = shape({
     organization: Organization,
   }),
 });
+
+export const WorkflowApproval = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+  description: string,
+  url: string.isRequired,
+  failed: bool,
+  started: string,
+  finished: string,
+  canceled_on: string,
+  elapsed: number,
+  job_explanation: string,
+  can_approve_or_deny: bool,
+  approval_expiration: string,
+  timed_out: bool,
+});

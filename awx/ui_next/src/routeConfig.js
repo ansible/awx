@@ -17,6 +17,7 @@ import Settings from './screens/Setting';
 import Teams from './screens/Team';
 import Templates from './screens/Template';
 import Users from './screens/User';
+import WorkflowApprovals from './screens/WorkflowApproval';
 
 // Ideally, this should just be a regular object that we export, but we
 // need the i18n. When lingui3 arrives, we will be able to import i18n
@@ -125,6 +126,11 @@ function getRouteConfig(i18n) {
           title: i18n._(t`Applications`),
           path: '/applications',
           screen: Applications,
+        },
+        {
+          title: i18n._(t`Workflow Approvals`),
+          path: '/workflow_approvals',
+          screen: WorkflowApprovals,
         },
       ],
     },
