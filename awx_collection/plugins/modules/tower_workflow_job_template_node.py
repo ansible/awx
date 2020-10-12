@@ -236,56 +236,62 @@ def main():
     existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
 
     if state == 'absent':
+        # Look up existing approval node for deletion
+        if existing_item['related'].get('unified_job_template') is not None:
+            existing_approval_node = module.get_endpoint(existing_item['related']['unified_job_template'])['json']
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item, on_continue=True,)
-    else:
-        unified_job_template = module.params.get('unified_job_template')
-        if unified_job_template:
-            new_fields['unified_job_template'] = module.resolve_name_to_id('unified_job_templates', unified_job_template)
+        # Delete the Approval Node
+        module.delete_if_needed(existing_approval_node, on_continue=True,)
+        # Delete Workflow Node
+        module.delete_if_needed(existing_item)
 
-        inventory = module.params.get('inventory')
-        if inventory:
-            new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
+    unified_job_template = module.params.get('unified_job_template')
+    if unified_job_template:
+        new_fields['unified_job_template'] = module.resolve_name_to_id('unified_job_templates', unified_job_template)
 
-        # Create the data that gets sent for create and update
-        for field_name in (
-                'identifier', 'extra_data', 'scm_branch', 'job_type', 'job_tags', 'skip_tags',
-                'limit', 'diff_mode', 'verbosity', 'all_parents_must_converge',):
-            field_val = module.params.get(field_name)
-            if field_val:
-                new_fields[field_name] = field_val
+    inventory = module.params.get('inventory')
+    if inventory:
+        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
-        association_fields = {}
-        for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
-            name_list = module.params.get(association)
-            if name_list is None:
-                continue
-            id_list = []
-            for sub_name in name_list:
-                if association == 'credentials':
-                    endpoint = 'credentials'
-                    lookup_data = {'name': sub_name}
-                else:
-                    endpoint = 'workflow_job_template_nodes'
-                    lookup_data = {'identifier': sub_name}
-                    if workflow_job_template_id:
-                        lookup_data['workflow_job_template'] = workflow_job_template_id
-                sub_obj = module.get_one(endpoint, **{'data': lookup_data})
-                if sub_obj is None:
-                    module.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
-                id_list.append(sub_obj['id'])
-            if id_list:
-                association_fields[association] = id_list
+    # Create the data that gets sent for create and update
+    for field_name in (
+            'identifier', 'extra_data', 'scm_branch', 'job_type', 'job_tags', 'skip_tags',
+            'limit', 'diff_mode', 'verbosity', 'all_parents_must_converge',):
+        field_val = module.params.get(field_name)
+        if field_val:
+            new_fields[field_name] = field_val
 
-        # In the case of a new object, the utils need to know it is a node
-        new_fields['type'] = 'workflow_job_template_node'
+    association_fields = {}
+    for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
+        name_list = module.params.get(association)
+        if name_list is None:
+            continue
+        id_list = []
+        for sub_name in name_list:
+            if association == 'credentials':
+                endpoint = 'credentials'
+                lookup_data = {'name': sub_name}
+            else:
+                endpoint = 'workflow_job_template_nodes'
+                lookup_data = {'identifier': sub_name}
+                if workflow_job_template_id:
+                    lookup_data['workflow_job_template'] = workflow_job_template_id
+            sub_obj = module.get_one(endpoint, **{'data': lookup_data})
+            if sub_obj is None:
+                module.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
+            id_list.append(sub_obj['id'])
+        if id_list:
+            association_fields[association] = id_list
 
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', on_continue=approval_node,
-            associations=association_fields
-        )
+    # In the case of a new object, the utils need to know it is a node
+    new_fields['type'] = 'workflow_job_template_node'
+
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', on_continue=approval_node,
+        associations=association_fields
+    )
 
     # Create approval node unified template or update existing
     if approval_node:
@@ -311,9 +317,6 @@ def main():
         # Due to not able to lookup workflow_approval_templates, find the existing item in another place
         if workflow_job_template_node['related'].get('unified_job_template') is not None:
             existing_item = module.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
-        if state == 'absent':
-            # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-            module.delete_if_needed(existing_item)
         module.create_or_update_if_needed(
             existing_item, new_fields,
             endpoint='workflow_job_template_nodes/' + str(workflow_job_template_node_id) + '/create_approval_template/', item_type='workflow_job_template_approval_node', on_continue=approval_node,
