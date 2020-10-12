@@ -31,16 +31,38 @@ EXPORTABLE_RELATIONS = [
     'NotificationTemplates',
     'WorkflowJobTemplateNodes',
     'Credentials',
+    'Hosts',
+    'Groups',
 ]
 
 
-EXPORTABLE_DEPENDENT_OBJECTS = [
-    'Labels',
-    'SurveySpec',
-    'Schedules',
-    # WFJT Nodes are a special case, we want full data for the create
-    # view and natural keys for the attach views.
-    'WorkflowJobTemplateNodes',
+# These are special-case related objects, where we want only in this
+# case to export a full object instead of a natural key reference.
+DEPENDENT_EXPORT = [
+    ('JobTemplate', 'labels'),
+    ('JobTemplate', 'survey_spec'),
+    ('JobTemplate', 'schedules'),
+    ('WorkflowJobTemplate', 'labels'),
+    ('WorkflowJobTemplate', 'survey_spec'),
+    ('WorkflowJobTemplate', 'schedules'),
+    ('WorkflowJobTemplate', 'workflow_nodes'),
+    ('Project', 'schedules'),
+    ('InventorySource', 'schedules'),
+    ('Inventory', 'groups'),
+    ('Inventory', 'hosts'),
+]
+
+
+# This is for related views where it is unneeded to export anything,
+# such as because it is a calculated subset of objects covered by a
+# different view.
+DEPENDENT_NONEXPORT = [
+    ('InventorySource', 'groups'),
+    ('InventorySource', 'hosts'),
+    ('Inventory', 'root_groups'),
+    ('Group', 'all_hosts'),
+    ('Group', 'potential_children'),
+    ('Host', 'all_groups'),
 ]
 
 
@@ -60,6 +82,9 @@ class ApiV2(base.Base):
         # Drop any (credential_type) assets that are being managed by the Tower instance.
         if _page.json.get('managed_by_tower'):
             log.debug("%s is managed by Tower, skipping.", _page.endpoint)
+            return None
+        # Drop any hosts, groups, or inventories that were pulled in programmatically by an inventory source.
+        if _page.json.get('has_inventory_sources'):
             return None
         if post_fields is None:  # Deprecated endpoint or insufficient permissions
             log.error("Object export failed: %s", _page.endpoint)
@@ -96,8 +121,9 @@ class ApiV2(base.Base):
 
             rel = rel_endpoint._create()
             is_relation = rel.__class__.__name__ in EXPORTABLE_RELATIONS
-            is_dependent = rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS
-            if not (is_relation or is_dependent):
+            is_dependent = (_page.__item_class__.__name__, key) in DEPENDENT_EXPORT
+            is_blocked = (_page.__item_class__.__name__, key) in DEPENDENT_NONEXPORT
+            if is_blocked or not (is_relation or is_dependent):
                 continue
 
             rel_post_fields = utils.get_post_fields(rel_endpoint, self._cache)
@@ -106,10 +132,10 @@ class ApiV2(base.Base):
                 continue
             is_attach = 'id' in rel_post_fields  # This is not a create-only endpoint.
 
-            if is_relation and is_attach:
-                by_natural_key = True
-            elif is_dependent:
+            if is_dependent:
                 by_natural_key = False
+            elif is_relation and is_attach and not is_blocked:
+                by_natural_key = True
             else:
                 continue
 
