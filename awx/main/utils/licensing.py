@@ -141,12 +141,17 @@ class Licenser(object):
                         cert_dict.update({key:value})
 
                 # Verify the entitlment cert is authorized to access appropriate content
-                from rhsm.config import get_config_parser
-                config = get_config_parser()
-                base_url = config.get("rhsm", "baseurl")
-
+                try:
+                    from rhsm.config import get_config_parser
+                    config = get_config_parser()
+                    base_url = config.get("rhsm", "baseurl")
+                except:
+                    content_url = getattr(settings, 'REDHAT_CONTENT_URL', None)
+                    if content_url:
+                        base_url = content_url
+                content_path = getattr(settings, 'REDHAT_CONTENT_PATH', None)
                 verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
-                content_repo_url = '{}/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os'.format(base_url)
+                content_repo_url = '{0}{1}'.format(base_url, content_path)
                 request = requests.get(url=content_repo_url, 
                                        cert=f.name, 
                                        verify=verify,
