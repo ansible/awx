@@ -70,7 +70,10 @@ class Licenser(object):
             license_type='UNLICENSED',
         )
         if not kwargs:
-            kwargs = Setting.objects.filter(key='LICENSE').first().value
+            license_setting = Setting.objects.filter(key='LICENSE').first()
+            if license_setting is not None:
+                kwargs = license_setting.value
+
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
         self._attrs.update(kwargs)
