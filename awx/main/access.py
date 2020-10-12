@@ -307,8 +307,7 @@ class BaseAccess(object):
         return True  # User has access to both, permission check passed
 
     def check_license(self, add_host_name=None, feature=None, check_expiration=True, quiet=False):
-        # TODO: Evaluate if this should be changed to get_licenser() instead of validating the cert
-        validation_info = get_licenser().validate()
+        validation_info = get_licenser().validate(new_cert=False)
         if validation_info.get('license_type', 'UNLICENSED') == 'open':
             return
 
@@ -346,7 +345,7 @@ class BaseAccess(object):
             report_violation(_("Host count exceeds available instances."))
 
     def check_org_host_limit(self, data, add_host_name=None):
-        validation_info = get_licenser().validate()
+        validation_info = get_licenser().validate(new_cert=False)
         if validation_info.get('license_type', 'UNLICENSED') == 'open':
             return
 

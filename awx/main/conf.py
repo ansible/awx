@@ -359,8 +359,8 @@ register(
 register(
     'ENTITLEMENT_CERT',
     field_class=fields.CharField,
-    allow_blank=True,
-    required=True,
+    default='',
+    required=False,
     validators=[validate_entitlement_cert],  # TODO: may need to use/modify `validate_certificate` validator
     label=_('RHSM Entitlement Public Certificate and Private Key'),
     help_text=_('Obtain a key pair via subscription-manager, or https://access.redhat.com. Refer to Ansible Tower docs for formatting key pair.'),
@@ -372,7 +372,8 @@ register(
 register(
     'ENTITLEMENT_CONSUMER',
     field_class=fields.DictField,
-    required=True,
+    default={},
+    required=False,
     label=_('RHSM consumer name and UUID.'),
     help_text=_('Consumer used with RH username and password to obtain entitlement cert.'),
     category=_('SYSTEM'),
