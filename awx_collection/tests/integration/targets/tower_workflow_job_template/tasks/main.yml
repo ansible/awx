@@ -177,7 +177,7 @@
       - leaf
 
 - name: Delete approval node
-  awx.awx.tower_workflow_job_template_node:
+  tower_workflow_job_template_node:
     identifier: approval_test
     approval_node:
       name: "{{ approval_node_name }}"
