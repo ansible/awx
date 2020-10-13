@@ -359,6 +359,7 @@ register(
 register(
     'ENTITLEMENT_CERT',
     field_class=fields.CharField,
+    allow_blank=True,
     default='',
     required=False,
     validators=[validate_entitlement_cert],  # TODO: may need to use/modify `validate_certificate` validator
