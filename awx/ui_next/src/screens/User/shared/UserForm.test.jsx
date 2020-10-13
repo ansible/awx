@@ -111,7 +111,7 @@ describe('<UserForm />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <UserForm
-          user={mockData}
+          user={{ ...mockData, external_account: '', auth: [] }}
           handleSubmit={jest.fn()}
           handleCancel={jest.fn()}
         />
@@ -123,6 +123,22 @@ describe('<UserForm />', () => {
     expect(passwordFields.length).toBe(2);
     expect(passwordFields.at(0).prop('isRequired')).toBe(false);
     expect(passwordFields.at(1).prop('isRequired')).toBe(false);
+  });
+
+  test('password fields are not displayed for social/ldap login', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <UserForm
+          user={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      );
+    });
+
+    const passwordFields = wrapper.find('PasswordField');
+
+    expect(passwordFields.length).toBe(0);
   });
 
   test('should call handleSubmit when Submit button is clicked', async () => {

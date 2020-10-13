@@ -35,10 +35,13 @@ describe('UserListItem with full permissions', () => {
     expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
   });
 
-  test('should display user type', () => {
+  test('should display user data', () => {
     expect(
       wrapper.find('DataListCell[aria-label="user type"]').prop('children')
     ).toEqual('System Administrator');
+    expect(
+      wrapper.find('Label[aria-label="social login"]').prop('children')
+    ).toEqual('SOCIAL');
   });
 });
 
