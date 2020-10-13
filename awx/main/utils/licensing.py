@@ -27,6 +27,8 @@ from django.utils.encoding import smart_text
 from awx.main.models import Host
 from awx.main.utils import set_environ
 
+from rhsm import certificate
+
 MAX_INSTANCES = 9999999
 
 logger = logging.getLogger(__name__)
@@ -118,70 +120,56 @@ class Licenser(object):
             self._clear_license_setting()
             return
 
-        # Catch/check if subman is installed
+        # Read certificate
+        certinfo = certificate.create_from_pem(raw_cert)
+        if not certinfo.is_valid():
+            raise ValueError("Could not parse entitlement certificate")
+        if certinfo.is_expired():
+            raise ValueError("Certificate is expired")
+        if not any(map(lambda x: x.id == '480', certinfo.products)):
+            self._clear_license_setting()
+            raise ValueError("Certificate is for another product")
+
+        # Verify the entitlment cert is authorized to access appropriate content
         try:
-            parsed_cert = raw_cert.split('\n')
-            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8') as f:
-                for line in parsed_cert:
-                    f.write(line + '\n')
-                # clear the buffer to ensure the complete cert has been written to the file
-                f.flush()
-                os.fsync(f)
-
-                # TODO: Consider refactoring this to be done with subman directly, or rhsm.certificate?
-                cmd = ["rct", "cat-cert", f.name, "--no-content"]
-                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = proc.communicate()
-                output = re.split('\n\n|\n\t', smart_text(stdout))
-                cert_dict = dict()
-
-                for line in output:
-                    if ': ' in line:
-                        key, value = line.split(': ')
-                        cert_dict.update({key:value})
-
-                # Verify the entitlment cert is authorized to access appropriate content
-                try:
-                    from rhsm.config import get_config_parser
-                    config = get_config_parser()
-                    base_url = config.get("rhsm", "baseurl")
-                except:
-                    content_url = getattr(settings, 'REDHAT_CONTENT_URL', None)
-                    if content_url:
-                        base_url = content_url
-                content_path = getattr(settings, 'REDHAT_CONTENT_PATH', None)
-                verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
-                content_repo_url = '{0}{1}'.format(base_url, content_path)
-                request = requests.get(url=content_repo_url, 
-                                       cert=f.name, 
-                                       verify=verify,
-                                       # timeout=(5, 5)
-                                       )
-                if request.status_code != 200:
-                    logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
-                    return
-                
+            from rhsm.config import get_config_parser
+            config = get_config_parser()
+            base_url = config.get("rhsm", "baseurl")
         except ValueError:
-            raise ValueError('Could not parse entitlement certificate')
-        except FileNotFoundError as e:
-            self._clear_license_setting()
-            raise FileNotFoundError('Subscription-manager is not installed. ' + str(e))
-        except Exception as e:
-            self._clear_license_setting()
-            raise Exception(e)
+            content_url = getattr(settings, 'REDHAT_CONTENT_URL', None)
+            if content_url:
+                base_url = content_url
+        content_path = getattr(settings, 'REDHAT_CONTENT_PATH', None)
+        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
+        content_repo_url = '{0}{1}'.format(base_url, content_path)
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8') as f:
+            f.write(raw_cert)
+            # clear the buffer to ensure the complete cert has been written to the file
+            f.flush()
+            os.fsync(f)
+
+            request = requests.get(url=content_repo_url,
+                                   cert=f.name,
+                                   verify=verify,
+                                   # timeout=(5, 5)
+                                   )
+            if request.status_code != 200:
+                logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
+                return
+
         type = 'enterprise'
 
         # Parse output for subscription metadata to build config
-        self._attrs.update(dict(subscription_name=cert_dict.get('Name'),
-                                sku=cert_dict.get('SKU', ''),
-                                instance_count=int(cert_dict.get('Quantity', 0)),
-                                support_level=cert_dict.get('Service Level', ''),
-                                pool_id=cert_dict.get('Pool ID'),
-                                license_date=str_to_datetime(cert_dict.get('End Date', None)).strftime('%s'),
-                                product_name="Red Hat Ansible Tower",
-                                valid_key=True,
-                                license_type=type
-                                ))
+        license = dict()
+        license['sku'] = certinfo.order.sku
+        license['instance_count'] = int(certinfo.order.quantity_used)
+        license['support_level'] = certinfo.order.service_level
+        license['subscription_name'] = certinfo.order.name
+        license['pool_id'] = certinfo.pool.id
+        license['license_date'] = certinfo.end.strftime('%s')
+        license['product_name'] = certinfo.order.name
+
+        self._attrs.update(license)
         settings.LICENSE = self._attrs
         return self._attrs
 
