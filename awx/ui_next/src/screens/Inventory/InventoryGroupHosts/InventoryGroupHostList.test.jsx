@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { GroupsAPI, InventoriesAPI } from '../../../api';
+import { GroupsAPI, InventoriesAPI, CredentialTypesAPI } from '../../../api';
 import {
   mountWithContexts,
   waitForElement,
@@ -11,6 +11,7 @@ import mockHosts from '../shared/data.hosts.json';
 
 jest.mock('../../../api/models/Groups');
 jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/CredentialTypes');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
@@ -33,6 +34,17 @@ describe('<InventoryGroupHostList />', () => {
           POST: {},
         },
       },
+    });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: { module_name: { choices: [['module']] } },
+          POST: {},
+        },
+      },
+    });
+    CredentialTypesAPI.read.mockResolvedValue({
+      data: { count: 1, results: [{ id: 1, name: 'cred' }] },
     });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryGroupHostList />);
@@ -93,6 +105,29 @@ describe('<InventoryGroupHostList />', () => {
     wrapper.find('DataListCheck').forEach(el => {
       expect(el.props().checked).toBe(false);
     });
+  });
+
+  test('should render enabled ad hoc commands button', async () => {
+    GroupsAPI.readAllHosts.mockResolvedValue({
+      data: { ...mockHosts },
+    });
+    InventoriesAPI.readHostsOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryGroupHostList />);
+    });
+
+    await waitForElement(
+      wrapper,
+      'button[aria-label="Run command"]',
+      el => el.prop('disabled') === false
+    );
   });
 
   test('should show add dropdown button according to permissions', async () => {

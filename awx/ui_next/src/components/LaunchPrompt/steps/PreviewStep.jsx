@@ -48,7 +48,7 @@ function PreviewStep({ resource, config, survey, formErrors, i18n }) {
 
   return (
     <Fragment>
-      {formErrors.length > 0 && (
+      {formErrors && (
         <ErrorMessageWrapper>
           {i18n._(t`Some of the previous step(s) have errors`)}
           <Tooltip

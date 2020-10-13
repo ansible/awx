@@ -9,7 +9,7 @@ When trying to fix a bug, it is best to replicate its behavior within a test wit
 
 The unit tests are stored in the `test/awx` directory and, where possible, test interactions between the collections modules and the AWX database. This is achieved by  using a Python testing suite and having a mocked layer which emulates interactions with the Tower API. You do not need a server to run these unit tests. The depth of testing is not fixed and can change from module to module.
 
-Let’s take a closer look at the `test_token.py` file (which tests the `tower_token` module):
+Let's take a closer look at the `test_token.py` file (which tests the `tower_token` module):
 
 ```
 from __future__ import (absolute_import, division, print_function)
@@ -56,7 +56,7 @@ A completeness failure will generate a large ASCII table in the Zuul log indicat
 
 ![Completeness Test Output](images/completeness_test_output.png)
 
-To find the error, look at the last column and search for the term “failure”. There will most likely be some failures which have been deemed acceptable and will typically say “non-blocking” next to them. Those errors can be safely ignored.
+To find the error, look at the last column and search for the term "failure". There will most likely be some failures which have been deemed acceptable and will typically say "non-blocking" next to them. Those errors can be safely ignored.
 
 
 ## Integration Tests

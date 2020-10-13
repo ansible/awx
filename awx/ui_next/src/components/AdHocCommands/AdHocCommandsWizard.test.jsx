@@ -148,6 +148,20 @@ describe('<AdHocCommandsWizard/>', () => {
 
     expect(onLaunch).toHaveBeenCalled();
   });
+  test('should show error in navigation bar', async () => {
+    await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
+
+    await act(async () => {
+      wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
+        {},
+        'command'
+      );
+      wrapper.find('input#module_args').simulate('change', {
+        target: { value: '', name: 'module_args' },
+      });
+    });
+    waitForElement(wrapper, 'ExclamationCircleIcon', el => el.length > 0);
+  });
 
   test('expect credential step to throw error', async () => {
     CredentialsAPI.read.mockRejectedValue(

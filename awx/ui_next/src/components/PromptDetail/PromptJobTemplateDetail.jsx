@@ -135,7 +135,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
       <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[verbosity]} />
       <Detail
         label={i18n._(t`Show Changes`)}
-        value={diff_mode ? 'On' : 'Off'}
+        value={diff_mode ? i18n._(t`On`) : i18n._(t`Off`)}
       />
       <Detail label={i18n._(t` Job Slicing`)} value={job_slice_count} />
       <Detail label={i18n._(t`Host Config Key`)} value={host_config_key} />

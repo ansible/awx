@@ -51,6 +51,7 @@ function OtherPromptsStep({ config, i18n }) {
           id="prompt-job-tags"
           name="job_tags"
           label={i18n._(t`Job Tags`)}
+          aria-label={i18n._(t`Job Tags`)}
           tooltip={i18n._(t`Tags are useful when you have a large
             playbook, and you want to run a specific part of a play or task.
             Use commas to separate multiple tags. Refer to Ansible Tower
@@ -62,6 +63,7 @@ function OtherPromptsStep({ config, i18n }) {
           id="prompt-skip-tags"
           name="skip_tags"
           label={i18n._(t`Skip Tags`)}
+          aria-label={i18n._(t`Skip Tags`)}
           tooltip={i18n._(t`Skip tags are useful when you have a large
             playbook, and you want to skip specific parts of a play or task.
             Use commas to separate multiple tags. Refer to Ansible Tower
@@ -108,6 +110,7 @@ function JobTypeField({ i18n }) {
       and report problems without executing the playbook.`)}
         />
       }
+      isRequired
       validated={isValid ? 'default' : 'error'}
     >
       <AnsibleSelect
@@ -129,6 +132,7 @@ function VerbosityField({ i18n }) {
     { value: '3', key: '3', label: i18n._(t`3 (Debug)`) },
     { value: '4', key: '4', label: i18n._(t`4 (Connection Debug)`) },
   ];
+
   const isValid = !(meta.touched && meta.error);
 
   return (
@@ -171,6 +175,7 @@ function ShowChangesToggle({ i18n }) {
         </label>
       </FieldHeader>
       <Switch
+        aria-label={field.value ? i18n._(t`On`) : i18n._(t`Off`)}
         id="prompt-show-changes"
         label={i18n._(t`On`)}
         labelOff={i18n._(t`Off`)}

@@ -104,4 +104,31 @@ describe('PreviewStep', () => {
       extra_vars: 'one: 1',
     });
   });
+
+  test('should remove survey with empty array value', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik
+          initialValues={{ extra_vars: 'one: 1' }}
+          values={{ extra_vars: 'one: 1', survey_foo: [] }}
+        >
+          <PreviewStep
+            resource={resource}
+            config={{
+              ask_variables_on_launch: true,
+            }}
+            formErrors={formErrors}
+          />
+        </Formik>
+      );
+    });
+
+    const detail = wrapper.find('PromptDetail');
+    expect(detail).toHaveLength(1);
+    expect(detail.prop('resource')).toEqual(resource);
+    expect(detail.prop('overrides')).toEqual({
+      extra_vars: 'one: 1',
+    });
+  });
 });

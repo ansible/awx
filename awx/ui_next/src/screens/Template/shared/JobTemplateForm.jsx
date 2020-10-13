@@ -227,10 +227,19 @@ function JobTemplateForm({
             }}
           />
         </FieldWithPrompt>
-        <>
+        <FormGroup
+          fieldId="inventory-lookup"
+          validated={
+            !(inventoryMeta.touched || askInventoryOnLaunchField.value) ||
+            !inventoryMeta.error
+              ? 'default'
+              : 'error'
+          }
+          helperTextInvalid={inventoryMeta.error}
+          isRequired={!askInventoryOnLaunchField.value}
+        >
           <InventoryLookup
             value={inventory}
-            fieldId="template-inventory"
             promptId="template-ask-inventory-on-launch"
             promptName="ask_inventory_on_launch"
             isPromptableField
@@ -245,16 +254,7 @@ function JobTemplateForm({
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
           />
-          {(inventoryMeta.touched || askInventoryOnLaunchField.value) &&
-            inventoryMeta.error && (
-              <div
-                className="pf-c-form__helper-text pf-m-error"
-                aria-live="polite"
-              >
-                {inventoryMeta.error}
-              </div>
-            )}
-        </>
+        </FormGroup>
         <ProjectLookup
           value={projectField.value}
           onBlur={() => projectHelpers.setTouched()}

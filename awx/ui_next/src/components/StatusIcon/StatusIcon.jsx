@@ -93,42 +93,43 @@ SkippedBottom.displayName = 'SkippedBottom';
 
 const StatusIcon = ({ status, ...props }) => {
   return (
-    <div {...props} data-job-status={status}>
-      {status === 'running' && <RunningJob />}
+    <div {...props} data-job-status={status} aria-label={status}>
+      {status === 'running' && <RunningJob aria-hidden="true" />}
       {(status === 'new' ||
         status === 'pending' ||
         status === 'waiting' ||
-        status === 'never updated') && <WaitingJob />}
+        status === 'never updated') && <WaitingJob aria-hidden="true" />}
       {(status === 'failed' || status === 'error' || status === 'canceled') && (
-        <FinishedJob>
+        <FinishedJob aria-hidden="true">
           <FailedTop />
           <FailedBottom />
         </FinishedJob>
       )}
       {(status === 'successful' || status === 'ok') && (
-        <FinishedJob>
+        <FinishedJob aria-hidden="true">
           <SuccessfulTop />
           <SuccessfulBottom />
         </FinishedJob>
       )}
       {status === 'changed' && (
-        <FinishedJob>
+        <FinishedJob aria-hidden="true">
           <ChangedTop />
           <ChangedBottom />
         </FinishedJob>
       )}
       {status === 'skipped' && (
-        <FinishedJob>
+        <FinishedJob aria-hidden="true">
           <SkippedTop />
           <SkippedBottom />
         </FinishedJob>
       )}
       {status === 'unreachable' && (
-        <FinishedJob>
+        <FinishedJob aria-hidden="true">
           <UnreachableTop />
           <UnreachableBottom />
         </FinishedJob>
       )}
+      <span className="pf-screen-reader"> {status} </span>
     </div>
   );
 };
