@@ -36,6 +36,53 @@ def test_create_job_template(run_module, admin_user, project, inventory):
 
 
 @pytest.mark.django_db
+def test_resete_job_template_values(run_module, admin_user, project, inventory):
+
+    module_args = {
+        'name': 'foo', 'playbook': 'helloworld.yml',
+        'project': project.name, 'inventory': inventory.name,
+        'extra_vars': {'foo': 'bar'},
+        'job_type': 'run',
+        'state': 'present',
+        'forks': 20,
+        'timeout': 50,
+        'allow_simultaneous': True,
+        'ask_limit_on_launch': True,
+    }
+
+    result = run_module('tower_job_template', module_args, admin_user)
+
+    jt = JobTemplate.objects.get(name='foo')
+    assert jt.forks == 20
+    assert jt.timeout == 50
+    assert jt.allow_simultaneous
+    assert jt.ask_limit_on_launch
+
+    module_args = {
+        'name': 'foo', 'playbook': 'helloworld.yml',
+        'project': project.name, 'inventory': inventory.name,
+        'extra_vars': {'foo': 'bar'},
+        'job_type': 'run',
+        'state': 'present',
+        'forks': 0,
+        'timeout': 0,
+        'allow_simultaneous': False,
+        'ask_limit_on_launch': False,
+    }
+
+    result = run_module('tower_job_template', module_args, admin_user)
+    assert result['changed']
+
+    jt = JobTemplate.objects.get(name='foo')
+    assert jt.forks == 0
+    assert jt.timeout == 0
+    assert not jt.allow_simultaneous
+    assert not jt.ask_limit_on_launch
+
+
+
+
+@pytest.mark.django_db
 def test_job_launch_with_prompting(run_module, admin_user, project, inventory, machine_credential):
     JobTemplate.objects.create(
         name='foo',
