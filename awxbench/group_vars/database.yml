@@ -1,0 +1,53 @@
+---
+db_benchmark_database_name: "awx_benchmark_job_events"
+db_benchmark_files_base_path: "/var/lib/awx/benchmark_job_events"
+db_benchmark_results_base_path: "/var/lib/awx/benchmark_job_events/results"
+db_benchmark_files:
+  - "templates/job_events_copy_from_1000.sql"
+  - "templates/job_events_copy_from_1000.csv"
+  - "templates/job_events_insert_batch_1000.sql"
+  - "templates/job_events_create_table.sql"
+db_benchmark_experiments:
+  tranaction_count: 10
+  runs:
+    - client_count: 1
+      script: "job_events_insert_batch_1000.sql"
+    - client_count: 2
+      script: "job_events_insert_batch_1000.sql"
+    - client_count: 3
+      script: "job_events_insert_batch_1000.sql"
+    - client_count: 4
+      script: "job_events_insert_batch_1000.sql"
+    - client_count: 5
+      script: "job_events_insert_batch_1000.sql"
+    - client_count: 6
+      script: "job_events_insert_batch_1000.sql"
+    - client_count: 7
+      script: "job_events_insert_batch_1000.sql"
+    - client_count: 8
+      script: "job_events_insert_batch_1000.sql"
+    - client_count: 16
+      script: "job_events_insert_batch_1000.sql"
+    - client_count: 32
+      script: "job_events_insert_batch_1000.sql"
+
+    - client_count: 1
+      script: "job_events_copy_from_1000.sql"
+    - client_count: 2
+      script: "job_events_copy_from_1000.sql"
+    - client_count: 3
+      script: "job_events_copy_from_1000.sql"
+    - client_count: 4
+      script: "job_events_copy_from_1000.sql"
+    - client_count: 5
+      script: "job_events_copy_from_1000.sql"
+    - client_count: 6
+      script: "job_events_copy_from_1000.sql"
+    - client_count: 7
+      script: "job_events_copy_from_1000.sql"
+    - client_count: 8
+      script: "job_events_copy_from_1000.sql"
+    - client_count: 16
+      script: "job_events_copy_from_1000.sql"
+    - client_count: 32
+      script: "job_events_copy_from_1000.sql"

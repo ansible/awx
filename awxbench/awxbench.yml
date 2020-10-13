@@ -1,0 +1,82 @@
+- hosts: database
+  environment:
+    PATH: "/opt/rh/rh-postgresql10/root/usr/bin/:{{ ansible_env.PATH }}"
+    LD_LIBRARY_PATH: "/opt/rh/rh-postgresql10/root/usr/lib64"
+  tasks:
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+
+    - name: "Generate workload files locally"
+      local_action:
+        module: shell
+        args: "scripts/generate_pgbench_workload.py templates/"
+
+    - name: "Remove previous benchmark results"
+      file:
+        path: "{{ db_benchmark_results_base_path }}/"
+        state: absent
+
+    - name: "Create benchmark dirs"
+      file:
+        state: directory
+        owner: root
+        group: postgres
+        mode: '0775'
+        path: "{{ item }}"
+        recurse: true
+      with_items:
+        - "{{ db_benchmark_files_base_path }}"
+        - "{{ db_benchmark_results_base_path }}"
+
+    - name: "Put benchmark files on the server"
+      template:
+        owner: postgres
+        group: postgres
+        src: "{{ item }}"
+        mode: '0644'
+        dest: "{{ db_benchmark_files_base_path }}/"
+      with_items: "{{ db_benchmark_files }}"
+
+    - name: "Create benchmark database"
+      community.general.postgresql_db:
+        name: "{{ db_benchmark_database_name }}"
+        owner: "{{ pg_username }}"
+        state: present
+        login_user: postgres
+      become_user: postgres
+      become: True
+
+    - name: "Create benchmark table"
+      community.general.postgresql_db:
+        name: "{{ db_benchmark_database_name }}"
+        login_user: postgres
+        state: restore
+        target: "{{ db_benchmark_files_base_path }}/job_events_create_table.sql"
+      become_user: postgres
+      become: True
+
+    - name: "Begin benchmark run loop"
+      include_tasks: run_loop.yml
+      with_items: "{{ db_benchmark_experiments.runs }}"
+
+    - name: "Gather list of result files"
+      shell: (cd {{ db_benchmark_results_base_path }}; find . -maxdepth 1 -type f) | cut -d'/' -f2
+      register: files_to_copy
+
+    - name: "Fetch benchmark results"
+      fetch:
+        src: "{{ db_benchmark_results_base_path }}/{{ item }}"
+        dest: "results/"
+        flat: yes
+      with_items: "{{ files_to_copy.stdout_lines }}"
+
+    - name: "Generate benchmark report"
+      local_action:
+        module: shell
+        args: "scripts/awxbench_report.py results report.txt"
+
+    - name: Enable SELinux
+      selinux:
+        policy: targeted
+        state: enforcing

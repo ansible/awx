@@ -1,0 +1,19 @@
+- name: "Truncate benchmark table"
+  community.general.postgresql_query:
+    db: "{{ db_benchmark_database_name }}"
+    query: TRUNCATE main_jobevent
+    login_user: postgres
+  become: True
+  become_user: postgres
+
+- name: "Run benchmarks"
+  shell: >
+    pgbench --username=postgres \
+    -f '{{ db_benchmark_files_base_path }}/{{ item.script }}' \
+    -c {{ item.client_count }} \
+    -t {{ db_benchmark_experiments.tranaction_count }} \
+    -l \
+    {{ db_benchmark_database_name }} \
+    > '{{ db_benchmark_results_base_path }}/{{ item.script }}_{{ item.client_count }}.log'
+  become: True
+  become_user: postgres

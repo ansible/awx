@@ -1,0 +1,4 @@
+[database]
+
+[database:vars]
+pg_username='awx'
