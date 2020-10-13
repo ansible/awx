@@ -91,11 +91,13 @@ options:
       description:
         - Name of unified job template to run in the workflow.
         - Can be a job template, project, inventory source, etc.
-        - Omit if creating an approval node (not yet implemented).
+        - Omit if creating an approval node.
+        - This parameter is mutually exclusive with C(approval_node).
       type: str
     approval_node:
       description:
         - A dictionary of Name, description, and timeout values for the approval node.
+        - This parameter is mutually exclusive with C(unified_job_template).
       type: dict
       suboptions:
         name:
@@ -202,9 +204,15 @@ def main():
         credentials=dict(type='list', elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
+    mutually_exclusive = [("unified_job_template", "approval_node")]
+    required_one_of = [["unified_job_template", "approval_node", "success_nodes", "always_nodes", "failure_nodes"]]
 
     # Create a module for ourselves
-    module = TowerAPIModule(argument_spec=argument_spec)
+    module = TowerAPIModule(
+        argument_spec=argument_spec,
+        mutually_exclusive=mutually_exclusive,
+        required_one_of=required_one_of,
+    )
 
     # Extract our parameters
     identifier = module.params.get('identifier')
@@ -236,13 +244,7 @@ def main():
     existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
 
     if state == 'absent':
-        # Look up existing approval node for deletion
-        if existing_item['related'].get('unified_job_template') is not None:
-            existing_approval_node = module.get_endpoint(existing_item['related']['unified_job_template'])['json']
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        # Delete the Approval Node
-        module.delete_if_needed(existing_approval_node, on_continue=True,)
-        # Delete Workflow Node
         module.delete_if_needed(existing_item)
 
     unified_job_template = module.params.get('unified_job_template')
@@ -289,7 +291,7 @@ def main():
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
         existing_item, new_fields,
-        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', on_continue=approval_node,
+        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=not approval_node,
         associations=association_fields
     )
 
@@ -319,7 +321,7 @@ def main():
             existing_item = module.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
         module.create_or_update_if_needed(
             existing_item, new_fields,
-            endpoint='workflow_job_template_nodes/' + str(workflow_job_template_node_id) + '/create_approval_template/', item_type='workflow_job_template_approval_node', on_continue=approval_node,
+            endpoint='workflow_job_template_nodes/' + str(workflow_job_template_node_id) + '/create_approval_template/', item_type='workflow_job_template_approval_node',
             associations=association_fields
         )
     module.exit_json(**module.json_output)

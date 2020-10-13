@@ -176,6 +176,14 @@
     always_nodes:
       - leaf
 
+- name: Delete approval node
+  awx.awx.tower_workflow_job_template_node:
+    identifier: approval_test
+    approval_node:
+      name: "{{ approval_node_name }}"
+    state: absent
+    workflow: "{{ wfjt_name }}"
+
 - name: Add started notifications to workflow job template
   tower_workflow_job_template:
     name: "{{ wfjt_name }}"
