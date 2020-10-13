@@ -157,7 +157,7 @@ class Licenser(object):
                 logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
                 return
 
-        type = 'enterprise'
+        license_type = 'enterprise'
 
         # Parse output for subscription metadata to build config
         license = dict()
@@ -168,6 +168,8 @@ class Licenser(object):
         license['pool_id'] = certinfo.pool.id
         license['license_date'] = certinfo.end.strftime('%s')
         license['product_name'] = certinfo.order.name
+        license['valid_key'] = True
+        license['license_type'] = license_type
 
         self._attrs.update(license)
         settings.LICENSE = self._attrs
