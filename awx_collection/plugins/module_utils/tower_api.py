@@ -607,11 +607,14 @@ class TowerAPIModule(TowerModule):
                 last_data = response['json']
             return last_data
 
-    def create_or_update_if_needed(self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, auto_exit=True, associations=None):
+    def create_or_update_if_needed(
+        self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, auto_exit=True, associations=None
+    ):
         if existing_item:
             return self.update_if_needed(existing_item, new_item, on_update=on_update, auto_exit=auto_exit, associations=associations)
         else:
-            return self.create_if_needed(existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, auto_exit=auto_exit, associations=associations)
+            return self.create_if_needed(
+                existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, auto_exit=auto_exit, associations=associations)
 
     def logout(self):
         if self.authenticated and self.oauth_token_id:
