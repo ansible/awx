@@ -165,7 +165,7 @@
     approval_node:
       name: "{{ approval_node_name }}"
       timeout: 900
-    workflow: test
+    workflow: "{{ wfjt_name }}"
 
 - name: Create link for root node
   tower_workflow_job_template_node:
