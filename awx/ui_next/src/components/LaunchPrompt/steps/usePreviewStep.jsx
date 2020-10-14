@@ -12,7 +12,8 @@ export default function usePreviewStep(
   hasErrors,
   needsPreviewStep
 ) {
-  const showStep = needsPreviewStep && resource && Object.keys(config).length > 0;
+  const showStep =
+    needsPreviewStep && resource && Object.keys(config).length > 0;
   return {
     step: showStep
       ? {

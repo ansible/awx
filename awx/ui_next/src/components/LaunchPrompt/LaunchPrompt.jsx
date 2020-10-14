@@ -107,16 +107,22 @@ function LaunchPrompt({ config, resource = {}, onLaunch, onCancel, i18n }) {
   return (
     <Formik
       initialValues={{
-        verbosity: resource.verbosity || 0,
-        inventory: resource.summary_fields?.inventory || null,
-        credentials: resource.summary_fields?.credentials || null,
-        diff_mode: resource.diff_mode || false,
-        extra_vars: resource.extra_vars || '---',
-        job_type: resource.job_type || '',
-        job_tags: resource.job_tags || '',
-        skip_tags: resource.skip_tags || '',
-        scm_branch: resource.scm_branch || '',
-        limit: resource.limit || '',
+        verbosity: config.ask_verbosity_on_launch && (resource.verbosity || 0),
+        inventory:
+          config.ask_inventoryon_launch && resource.summary_fields?.inventory,
+        credentials:
+          config.ask_credential_on_launch &&
+          resource.summary_fields?.credentials,
+        diff_mode:
+          config.ask_diff_mode_on_launch && (resource.diff_mode || false),
+        extra_vars:
+          config.ask_variables_on_launch && (resource.extra_vars || '---'),
+        job_type: config.ask_job_type_on_launch && (resource.job_type || ''),
+        job_tags: config.ask_job_tags_on_launch && (resource.job_tags || ''),
+        skip_tags: config.ask_skip_tags_on_launch && (resource.skip_tags || ''),
+        scm_branch:
+          config.ask_scm_branch_on_launch && (resource.scm_branch || ''),
+        limit: config.ask_limit_on_launch && (resource.limit || ''),
       }}
       onSubmit={values => onLaunch(values)}
     >

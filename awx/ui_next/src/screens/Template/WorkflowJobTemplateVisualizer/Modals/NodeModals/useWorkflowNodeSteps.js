@@ -1,10 +1,5 @@
-import {
-  useState,
-  useEffect
-} from 'react';
-import {
-  useFormikContext
-} from 'formik';
+import { useState, useEffect } from 'react';
+import { useFormikContext } from 'formik';
 import useInventoryStep from '../../../../../components/LaunchPrompt/steps/useInventoryStep';
 import useCredentialsStep from '../../../../../components/LaunchPrompt/steps/useCredentialsStep';
 import useOtherPromptsStep from '../../../../../components/LaunchPrompt/steps/useOtherPromptsStep';
@@ -18,21 +13,25 @@ export default function useWorkflowNodeSteps(
   i18n,
   resource,
   askLinkType,
-  needsPreviewStep
+  needsPreviewStep,
+  nodeToEdit
 ) {
   const [visited, setVisited] = useState({});
   const steps = [
     useRunTypeStep(i18n, askLinkType),
-    useNodeTypeStep(i18n, resource),
-    useInventoryStep(config, i18n, visited, resource),
-    useCredentialsStep(config, i18n, resource),
-    useOtherPromptsStep(config, i18n, resource),
+    useNodeTypeStep(i18n, nodeToEdit),
+    useInventoryStep(
+      config,
+      i18n,
+      visited,
+      resource,
+      nodeToEdit?.originalNodeObject
+    ),
+    useCredentialsStep(config, i18n, resource, nodeToEdit?.originalNodeObject),
+    useOtherPromptsStep(config, i18n, resource, nodeToEdit?.originalNodeObject),
     useSurveyStep(config, i18n, visited, resource),
   ];
-  const {
-    resetForm,
-    values: formikValues
-  } = useFormikContext();
+  const { resetForm, values: formikValues } = useFormikContext();
   const hasErrors = steps.some(step => step.formError);
   const surveyStepIndex = steps.findIndex(step => step.survey);
   steps.push(
@@ -55,16 +54,22 @@ export default function useWorkflowNodeSteps(
     };
   }, {});
   useEffect(() => {
-    if (surveyStepIndex > -1 && isReady) {
+    if (isReady) {
       resetForm({
         values: {
-          ...formikValues,
-          ...steps[surveyStepIndex].initialValues,
+          ...initialValues,
+          nodeResource: formikValues.nodeResource,
+          nodeType: formikValues.nodeType || initialValues.nodeType,
+          linkType: formikValues.linkType || 'success',
+          verbosity: initialValues?.verbosity?.toString(),
         },
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady]);
+  }, [
+    config,
+    isReady,
+  ]);
 
   const stepWithError = steps.find(s => s.contentError);
   const contentError = stepWithError ? stepWithError.contentError : null;

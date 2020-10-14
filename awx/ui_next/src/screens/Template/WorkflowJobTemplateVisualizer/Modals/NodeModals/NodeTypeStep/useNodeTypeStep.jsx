@@ -5,7 +5,7 @@ import NodeTypeStep from './NodeTypeStep';
 
 const STEP_ID = 'nodeType';
 
-export default function useNodeTypeStep(i18n, resource) {
+export default function useNodeTypeStep(i18n, resource, nodeToEdit) {
   const [, meta] = useField('nodeType');
   const [approvalNameField] = useField('approvalName');
   const [nodeTypeField, ,] = useField('nodeType');
@@ -13,13 +13,12 @@ export default function useNodeTypeStep(i18n, resource) {
 
   return {
     step: getStep(
-      meta,
       i18n,
       nodeTypeField,
       approvalNameField,
       nodeResouceField
     ),
-    initialValues: getInitialValues(resource),
+    initialValues: getInitialValues(nodeToEdit),
     isReady: true,
     contentError: null,
     formError: meta.error,
@@ -31,7 +30,6 @@ export default function useNodeTypeStep(i18n, resource) {
   };
 }
 function getStep(
-  meta,
   i18n,
   nodeTypeField,
   approvalNameField,
@@ -56,24 +54,24 @@ function getStep(
   };
 }
 
-function getInitialValues(resource) {
+function getInitialValues(nodeToEdit) {
   let typeOfNode;
   if (
-    !resource?.unifiedJobTemplate?.type &&
-    !resource?.unifiedJobTemplate?.unified_job_type
+    !nodeToEdit?.unifiedJobTemplate?.type &&
+    !nodeToEdit?.unifiedJobTemplate?.unified_job_type
   ) {
     return { nodeType: 'job_template' };
   }
   const {
     unifiedJobTemplate: { type, unified_job_type },
-  } = resource;
+  } = nodeToEdit;
   const unifiedType = type || unified_job_type;
 
   if (unifiedType === 'job' || unifiedType === 'job_template')
     typeOfNode = {
       nodeType: 'job_template',
       nodeResource:
-        resource.originalNodeObject.summary_fields.unified_job_template,
+        nodeToEdit.originalNodeObject.summary_fields.unified_job_template,
     };
   if (unifiedType === 'project' || unifiedType === 'project_update') {
     typeOfNode = { nodeType: 'project_sync' };
@@ -88,7 +86,9 @@ function getInitialValues(resource) {
     unifiedType === 'workflow_job' ||
     unifiedType === 'workflow_job_template'
   ) {
-    typeOfNode = { nodeType: 'workflow_job_template' };
+    typeOfNode = {
+      nodeType: 'workflow_job_template',
+    };
   }
   if (
     unifiedType === 'workflow_approval_template' ||

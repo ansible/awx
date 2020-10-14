@@ -5,7 +5,13 @@ import OtherPromptsStep from './OtherPromptsStep';
 
 const STEP_ID = 'other';
 
-export default function useOtherPrompt(config, i18n, resource) {
+export default function useOtherPrompt(
+  config,
+  i18n,
+  selectedResource,
+  nodeToEdit
+) {
+  const resource = nodeToEdit || selectedResource;
   return {
     step: getStep(config, i18n),
     initialValues: getInitialValues(config, resource),

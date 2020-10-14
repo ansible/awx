@@ -22,11 +22,7 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '../../../../../contexts/Workflow';
-import {
-  JobTemplatesAPI,
-  WorkflowJobTemplatesAPI,
-  WorkflowJobTemplateNodesAPI,
-} from '../../../../../api';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../../../api';
 import Wizard from '../../../../../components/Wizard';
 import useWorkflowNodeSteps from './useWorkflowNodeSteps';
 import AlertModal from '../../../../../components/AlertModal';
@@ -57,8 +53,6 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
     values,
     setTouched,
     validateForm,
-    setFieldValue,
-    resetForm,
   } = useFormikContext();
 
   const [triggerNext, setTriggerNext] = useState(0);
@@ -72,21 +66,6 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
     );
     history.replace(`${history.location.pathname}?${otherParts.join('&')}`);
   };
-  useEffect(() => {
-    if (values?.nodeResource?.summary_fields?.credentials?.length > 0) {
-      setFieldValue(
-        'credentials',
-        values.nodeResource.summary_fields.credentials
-      );
-    }
-    if (nodeToEdit?.unified_job_type === 'workflow_job') {
-      setFieldValue('nodeType', 'workflow_job_template');
-    }
-    if (nodeToEdit?.unified_job_type === 'job') {
-      setFieldValue('nodeType', 'job_template');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodeToEdit, values.nodeResource]);
 
   const {
     request: readLaunchConfig,
@@ -120,6 +99,7 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
           return data;
         }
       }
+
       return {};
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values.nodeResource, values.nodeType]),
@@ -132,7 +112,6 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
 
   const {
     steps: promptSteps,
-    initialValues,
     isReady,
     visitStep,
     visitAllSteps,
@@ -142,7 +121,8 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
     i18n,
     values.nodeResource,
     askLinkType,
-    !canLaunchWithoutPrompt(values.nodeType, launchConfig)
+    !canLaunchWithoutPrompt(values.nodeType, launchConfig),
+    nodeToEdit
   );
 
   const handleSaveNode = () => {
@@ -158,21 +138,17 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
   const { error, dismissError } = useDismissableError(
     launchConfigError || contentError || credentialError
   );
-  useEffect(() => {
-    if (isReady) {
-      resetForm({
-        values: {
-          ...initialValues,
-          nodeResource: values.nodeResource,
-          nodeType: values.nodeType || 'job_template',
-          linkType: values.linkType || 'success',
-          verbosity: initialValues?.verbosity?.toString(),
-        },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [launchConfig, values.nodeType, isReady, values.nodeResource]);
-  const steps = [...(isReady ? [...promptSteps] : [])];
+
+  const steps = [
+    ...(isReady
+      ? [...promptSteps]
+      : [
+          {
+            name: i18n._(t`Content Loading`),
+            component: <ContentLoading />,
+          },
+        ]),
+  ];
 
   const CustomFooter = (
     <WizardFooter>
@@ -243,16 +219,7 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
         }
         await validateForm();
       }}
-      steps={
-        isReady
-          ? steps
-          : [
-              {
-                name: i18n._(t`Content Loading`),
-                component: <ContentLoading />,
-              },
-            ]
-      }
+      steps={steps}
       css="overflow: scroll"
       title={wizardTitle}
       onNext={async (nextStep, prevStep) => {
@@ -272,42 +239,13 @@ const NodeModal = ({ onSave, i18n, askLinkType, title }) => {
   const onSaveForm = (values, linkType, config) => {
     onSave(values, linkType, config);
   };
-  const { request: fetchCredentials, result, error } = useRequest(
-    useCallback(async () => {
-      const {
-        data: { results },
-      } = await WorkflowJobTemplateNodesAPI.readCredentials(
-        nodeToEdit.originalNodeObject.id
-      );
-      return results;
-    }, [nodeToEdit])
-  );
-  useEffect(() => {
-    if (nodeToEdit?.originalNodeObject?.related?.credentials) {
-      fetchCredentials();
-    }
-  }, [fetchCredentials, nodeToEdit]);
 
   return (
     <Formik
       initialValues={{
-        linkType: 'success',
         nodeResource:
           nodeToEdit?.originalNodeObject?.summary_fields
             ?.unified_job_template || null,
-        inventory:
-          nodeToEdit?.originalNodeObject?.summary_fields?.inventory || null,
-        credentials: result || null,
-        verbosity: nodeToEdit?.originalNodeObject?.verbosity || 0,
-        diff_mode: nodeToEdit?.originalNodeObject?.verbosty,
-        skip_tags: nodeToEdit?.originalNodeObject?.skip_tags || '',
-        job_tags: nodeToEdit?.originalNodeObject?.job_tags || '',
-        scm_branch:
-          nodeToEdit?.originalNodeObject?.scm_branch !== null
-            ? nodeToEdit?.originalNodeObject?.scm_branch
-            : '',
-        job_type: nodeToEdit?.originalNodeObject?.job_type || 'run',
-        extra_vars: nodeToEdit?.originalNodeObject?.extra_vars || '---',
       }}
       onSave={() => onSaveForm}
     >
@@ -317,7 +255,6 @@ const NodeModal = ({ onSave, i18n, askLinkType, title }) => {
             onSave={onSaveForm}
             i18n={i18n}
             title={title}
-            credentialError={error}
             askLinkType={askLinkType}
           />
         </Form>

@@ -24,6 +24,7 @@ function NodeAddModal({ i18n }) {
       values.addedCredentials = added;
       values.removedCredentials = removed;
     }
+
     let node;
     if (values.nodeType === 'approval') {
       node = {

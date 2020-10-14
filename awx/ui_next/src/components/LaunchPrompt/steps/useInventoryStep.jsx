@@ -6,8 +6,15 @@ import StepName from './StepName';
 
 const STEP_ID = 'inventory';
 
-export default function useInventoryStep(config, i18n, visitedSteps, resource) {
+export default function useInventoryStep(
+  config,
+  i18n,
+  visitedSteps,
+  selectedResource,
+  nodeToEdit
+) {
   const [, meta] = useField('inventory');
+  const resource = nodeToEdit || selectedResource;
   const formError =
     Object.keys(visitedSteps).includes(STEP_ID) && (!meta.value || meta.error);
 
