@@ -246,7 +246,7 @@ class Licenser(object):
 
     def generate_license_options_from_entitlements(self, json):
         from dateutil.parser import parse
-        ValidSub = collections.namedtuple('ValidSub', 'sku name end_date trial quantity pool_id')
+        ValidSub = collections.namedtuple('ValidSub', 'sku name support_level end_date trial quantity pool_id')
         valid_subs = []
         for sub in json:
             if self.is_appropriate_sub(sub):
