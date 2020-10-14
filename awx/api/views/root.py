@@ -22,6 +22,7 @@ from rest_framework import status
 import requests
 
 from awx.api.generics import APIView
+from awx.api.parsers import ConfigJSONParser
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
@@ -391,6 +392,7 @@ class ApiV2ConfigView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Configuration')
     swagger_topic = 'System Configuration'
+    parser_classes = (ConfigJSONParser,)
 
     def check_permissions(self, request):
         super(ApiV2ConfigView, self).check_permissions(request)
