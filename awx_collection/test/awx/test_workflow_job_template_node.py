@@ -54,14 +54,13 @@ def test_create_workflow_job_template_node(run_module, admin_user, wfjt, job_tem
 
 @pytest.mark.django_db
 def test_create_workflow_job_template_node_no_template(run_module, admin_user, wfjt, job_template):
-    """This is a part of the API contract for creating approval nodes
-    and at some point in the future, tha feature will be supported by the collection
-    """
+    """This is a part of the API contract for creating approval nodes"""
     this_identifier = '42🐉'
     result = run_module('tower_workflow_job_template_node', {
         'identifier': this_identifier,
         'workflow_job_template': wfjt.name,
         'organization': wfjt.organization.name,
+        'approval_node': {'name': 'foo-jt'}
     }, admin_user)
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed', False), result
