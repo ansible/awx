@@ -65,10 +65,7 @@ def test_create_workflow_job_template_node_no_template(run_module, admin_user, w
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed', False), result
 
-    node = WorkflowJobTemplateNode.objects.get(pk=result['id'])
-    # node = WorkflowJobTemplateNode.objects.first()
-
-    assert result['id'] == node.id
+    node = WorkflowJobTemplateNode.objects.get(identifier=this_identifier)
 
     assert node.identifier == this_identifier
     assert node.workflow_job_template_id == wfjt.id
