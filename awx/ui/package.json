@@ -97,7 +97,7 @@
   },
   "dependencies": {
     "@uirouter/angularjs": "1.0.18",
-    "angular": "^1.7.9",
+    "angular": "^1.8.1",
     "angular-breadcrumb": "git+https://git@github.com/ansible/angular-breadcrumb#0.4.1",
     "angular-codemirror": "git+https://git@github.com/ansible/angular-codemirror.git#v1.2.1",
     "angular-cookies": "^1.7.9",
