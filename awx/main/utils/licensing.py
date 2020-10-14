@@ -9,24 +9,24 @@ The Licenser class can do the following:
  - Parse an Entitlement cert to generate license
 '''
 
-from datetime import datetime
 import os
+from datetime import datetime
 import collections
 import copy
-import time
 import tempfile
 import logging
-import subprocess
 import re
 import requests
+import time
 
+# Django
 from django.conf import settings
+
+# AWX
 from awx.conf.models import Setting
-from django.utils.encoding import smart_text
-
 from awx.main.models import Host
-from awx.main.utils import set_environ
 
+# RHSM
 from rhsm import certificate
 
 MAX_INSTANCES = 9999999
@@ -72,9 +72,9 @@ class Licenser(object):
             license_type='UNLICENSED',
         )
         if not kwargs:
-            license_setting = Setting.objects.filter(key='LICENSE').first()
+            license_setting = settings.LICENSE
             if license_setting is not None:
-                kwargs = license_setting.value
+                kwargs = license_setting
 
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
@@ -279,7 +279,7 @@ class Licenser(object):
                         support_level = attr.get('value')
 
                 valid_subs.append(ValidSub(
-                    sku, sub['productName'], end_date, trial, quantity, pool_id
+                    sku, sub['productName'], support_level, end_date, trial, quantity, pool_id
                 ))
 
         if valid_subs:
@@ -288,6 +288,7 @@ class Licenser(object):
                 license = self.__class__(subscription_name='Ansible Tower by Red Hat')
                 license._attrs['instance_count'] = int(sub.quantity)
                 license._attrs['sku'] = sub.sku
+                license._attrs['support_level'] = sub.support_level
                 license._attrs['license_type'] = 'enterprise'
                 if sub.trial:
                     license._attrs['trial'] = True

@@ -369,8 +369,8 @@ class ApiV2AttachView(APIView):
                     isinstance(e, UnauthorizedException) and
                     getattr(e, 'code', None) == 401
                 ):
-                    msg = _("The provided credentials are invalid (HTTP 401). Content host: " + uep.host + \
-                        "; Register this node with the correct content host via subscription-manager.")
+                    msg = _("The provided credentials are invalid (HTTP 401). Content host: " + uep.host +
+                            "; Register this node with the correct content host via subscription-manager.")
                 # elif isinstance(e, requests.exceptions.ProxyError):
                 #     msg = _("Unable to connect to proxy server.")
                 # elif isinstance(exc, requests.exceptions.ConnectionError):
