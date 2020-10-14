@@ -81,12 +81,12 @@ class Licenser(object):
         self._attrs.update(kwargs)
         if self._check_product_cert():
             if 'license_key' in self._attrs:
-                self._attrs = self.UNLICENSED_DATA
+                self._unset_attrs()
             if 'valid_key' in self._attrs:
                 if not self._attrs['valid_key']:
-                    self._attrs = self.UNLICENSED_DATA
+                    self._unset_attrs()
             else:
-                self._attrs = self.UNLICENSED_DATA
+                self._unset_attrs()
         else:
             self._generate_open_config()
 
@@ -108,8 +108,12 @@ class Licenser(object):
         settings.LICENSE = self._attrs
 
 
+    def _unset_attrs(self):
+        self._attrs = self.UNLICENSED_DATA.copy()
+
+
     def _clear_license_setting(self):
-        self._attrs.update(self.UNLICENSED_DATA)
+        self.unset_attrs()
         settings.LICENSE = {}
 
 
