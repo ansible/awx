@@ -283,6 +283,7 @@ class Licenser(object):
             for sub in valid_subs:
                 license = self.__class__(subscription_name='Ansible Tower by Red Hat')
                 license._attrs['instance_count'] = int(sub.quantity)
+                license._attrs['sku'] = sub.sku
                 license._attrs['license_type'] = 'enterprise'
                 if sub.trial:
                     license._attrs['trial'] = True
