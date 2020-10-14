@@ -36,7 +36,7 @@ def test_create_job_template(run_module, admin_user, project, inventory):
 
 
 @pytest.mark.django_db
-def test_resete_job_template_values(run_module, admin_user, project, inventory):
+def test_resets_job_template_values(run_module, admin_user, project, inventory):
 
     module_args = {
         'name': 'foo', 'playbook': 'helloworld.yml',
@@ -78,8 +78,6 @@ def test_resete_job_template_values(run_module, admin_user, project, inventory):
     assert jt.timeout == 0
     assert not jt.allow_simultaneous
     assert not jt.ask_limit_on_launch
-
-
 
 
 @pytest.mark.django_db
