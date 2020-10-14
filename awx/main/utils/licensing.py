@@ -23,7 +23,6 @@ import time
 from django.conf import settings
 
 # AWX
-from awx.conf.models import Setting
 from awx.main.models import Host
 
 # RHSM
@@ -72,7 +71,7 @@ class Licenser(object):
             license_type='UNLICENSED',
         )
         if not kwargs:
-            license_setting = settings.LICENSE
+            license_setting = getattr(settings, 'LICENSE', None)
             if license_setting is not None:
                 kwargs = license_setting
 
@@ -340,7 +339,7 @@ class Licenser(object):
         available_instances = int(attrs.get('instance_count', None) or 0)
         attrs['current_instances'] = current_instances
         attrs['available_instances'] = available_instances
-        attrs['free_instances'] = available_instances - current_instances
+        attrs['free_instances'] = max(0, available_instances - current_instances)
 
         license_date = int(attrs.get('license_date', None) or 0)
         current_date = int(time.time())
