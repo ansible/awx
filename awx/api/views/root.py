@@ -327,9 +327,16 @@ class ApiV2AttachView(APIView):
                 # Save consumer_uuid in db
                 settings.ENTITLEMENT_CONSUMER = consumer
 
+                # Determine maximum quantity of pool
+                try:
+                    pool = uep.getPool(poolId=pool_id, consumerId=consumer['uuid'])
+                    pool_quantity = pool['quantity']
+                except Exception as e:
+                    Response({"error": _("Unable to determine quantity of pool to be applied. Please try again.")}, status=status.HTTP_400_BAD_REQUEST)
+
                 # Attach subscription to consumer
                 try:
-                    attach = uep.bindByEntitlementPool(consumerId=consumer['uuid'], poolId=pool_id, quantity=None)
+                    attach = uep.bindByEntitlementPool(consumerId=consumer['uuid'], poolId=pool_id, quantity=pool_quantity)
                     consumer['serial_id'] = str(attach[0]['certificates'][0]['serial']['id'])
                 except Exception as e:
                     # A 404 was received because pool does not exist for this consumer
