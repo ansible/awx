@@ -44,6 +44,11 @@ function getRouteConfig(i18n) {
           path: '/schedules',
           screen: Schedules,
         },
+        {
+          title: i18n._(t`Workflow Approvals`),
+          path: '/workflow_approvals',
+          screen: WorkflowApprovals,
+        },
       ],
     },
     {
@@ -126,11 +131,6 @@ function getRouteConfig(i18n) {
           title: i18n._(t`Applications`),
           path: '/applications',
           screen: Applications,
-        },
-        {
-          title: i18n._(t`Workflow Approvals`),
-          path: '/workflow_approvals',
-          screen: WorkflowApprovals,
         },
       ],
     },

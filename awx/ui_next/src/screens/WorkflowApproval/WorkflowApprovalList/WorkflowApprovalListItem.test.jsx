@@ -1,16 +1,17 @@
 import React from 'react';
-
-import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowApprovalListItem from './WorkflowApprovalListItem';
-import { WorkflowApprovalsAPI } from '../../../api';
 import workflowApproval from '../data.workflowApproval.json';
 
 jest.mock('../../../api/models/WorkflowApprovals');
 
 describe('<WorkflowApprovalListItem />', () => {
-  test('action buttons shown to users with ability to approve/deny', () => {
-    const wrapper = mountWithContexts(
+  let wrapper;
+  afterEach(() => {
+    wrapper.unmount();
+  });
+  test('should display never expires status', () => {
+    wrapper = mountWithContexts(
       <WorkflowApprovalListItem
         isSelected={false}
         detailUrl={`/workflow_approvals/${workflowApproval.id}`}
@@ -18,38 +19,83 @@ describe('<WorkflowApprovalListItem />', () => {
         workflowApproval={workflowApproval}
       />
     );
-    expect(wrapper.find('WorkflowApprovalActionButtons').exists()).toBeTruthy();
+    expect(wrapper.find('Label[children="Never expires"]').length).toBe(1);
   });
-
-  test('action buttons hidden from users without ability to approve/deny', () => {
-    const wrapper = mountWithContexts(
+  test('should display timed out status', () => {
+    wrapper = mountWithContexts(
       <WorkflowApprovalListItem
         isSelected={false}
         detailUrl={`/workflow_approvals/${workflowApproval.id}`}
         onSelect={() => {}}
-        workflowApproval={{ ...workflowApproval, can_approve_or_deny: false }}
+        workflowApproval={{
+          ...workflowApproval,
+          status: 'failed',
+          timed_out: true,
+        }}
       />
     );
-    expect(wrapper.find('WorkflowApprovalActionButtons').exists()).toBeFalsy();
+    expect(wrapper.find('Label[children="Timed out"]').length).toBe(1);
   });
-
-  test('should hide action buttons after successful action', async () => {
-    WorkflowApprovalsAPI.approve.mockResolvedValue();
-    const wrapper = mountWithContexts(
+  test('should display canceled status', () => {
+    wrapper = mountWithContexts(
       <WorkflowApprovalListItem
         isSelected={false}
         detailUrl={`/workflow_approvals/${workflowApproval.id}`}
         onSelect={() => {}}
-        workflowApproval={workflowApproval}
+        workflowApproval={{
+          ...workflowApproval,
+          canceled_on: '2020-10-09T19:59:26.974046Z',
+          status: 'canceled',
+        }}
       />
     );
-    expect(wrapper.find('WorkflowApprovalActionButtons').exists()).toBeTruthy();
-    await act(async () =>
-      wrapper.find('Button[aria-label="Approve"]').prop('onClick')()
+    expect(wrapper.find('Label[children="Canceled"]').length).toBe(1);
+  });
+  test('should display approved status', () => {
+    wrapper = mountWithContexts(
+      <WorkflowApprovalListItem
+        isSelected={false}
+        detailUrl={`/workflow_approvals/${workflowApproval.id}`}
+        onSelect={() => {}}
+        workflowApproval={{
+          ...workflowApproval,
+          status: 'successful',
+          summary_fields: {
+            ...workflowApproval.summary_fields,
+            approved_or_denied_by: {
+              id: 1,
+              username: 'admin',
+              first_name: '',
+              last_name: '',
+            },
+          },
+        }}
+      />
     );
-    wrapper.update();
-    expect(WorkflowApprovalsAPI.approve).toHaveBeenCalled();
-    expect(wrapper.find('WorkflowApprovalActionButtons').exists()).toBeFalsy();
-    jest.clearAllMocks();
+    expect(wrapper.find('Label[children="Approved"]').length).toBe(1);
+  });
+  test('should display denied status', () => {
+    wrapper = mountWithContexts(
+      <WorkflowApprovalListItem
+        isSelected={false}
+        detailUrl={`/workflow_approvals/${workflowApproval.id}`}
+        onSelect={() => {}}
+        workflowApproval={{
+          ...workflowApproval,
+          failed: true,
+          status: 'failed',
+          summary_fields: {
+            ...workflowApproval.summary_fields,
+            approved_or_denied_by: {
+              id: 1,
+              username: 'admin',
+              first_name: '',
+              last_name: '',
+            },
+          },
+        }}
+      />
+    );
+    expect(wrapper.find('Label[children="Denied"]').length).toBe(1);
   });
 });

@@ -1,27 +1,26 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { string, bool, func } from 'prop-types';
 import {
-  DataListAction as _DataListAction,
   DataListCheck,
   DataListItem,
   DataListItemCells,
   DataListItemRow,
+  Label,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import DataListCell from '../../../components/DataListCell';
 import { WorkflowApproval } from '../../../types';
 import { formatDateString } from '../../../util/dates';
-import WorkflowApprovalActionButtons from '../shared/WorkflowApprovalActionButtons';
 import WorkflowApprovalStatus from '../shared/WorkflowApprovalStatus';
 
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: repeat(2, 40px);
+const StatusCell = styled(DataListCell)`
+  @media screen and (min-width: 768px) {
+    display: flex;
+    justify-content: flex-end;
+  }
 `;
 
 const JobLabel = styled.b`
@@ -35,7 +34,6 @@ function WorkflowApprovalListItem({
   detailUrl,
   i18n,
 }) {
-  const [actionTaken, setActionTaken] = useState(false);
   const labelId = `check-action-${workflowApproval.id}`;
   const workflowJob = workflowApproval?.summary_fields?.source_workflow_job;
 
@@ -44,22 +42,24 @@ function WorkflowApprovalListItem({
       workflowApproval.status === 'pending' &&
       workflowApproval.approval_expiration
     ) {
-      return i18n._(
-        t`Expires on ${formatDateString(workflowApproval.approval_expiration)}`
+      return (
+        <Label>
+          {i18n._(
+            t`Expires on ${formatDateString(
+              workflowApproval.approval_expiration
+            )}`
+          )}
+        </Label>
       );
     }
     if (
       workflowApproval.status === 'pending' &&
       !workflowApproval.approval_expiration
     ) {
-      return i18n._(t`Never expires`);
+      return <Label>{i18n._(t`Never expires`)}</Label>;
     }
     return <WorkflowApprovalStatus workflowApproval={workflowApproval} />;
   };
-
-  const handleSuccesfulAction = useCallback(() => {
-    setActionTaken(true);
-  }, []);
 
   return (
     <DataListItem
@@ -91,19 +91,9 @@ function WorkflowApprovalListItem({
                 </>
               )}
             </DataListCell>,
-            <DataListCell key="status">{getStatus()}</DataListCell>,
+            <StatusCell key="status">{getStatus()}</StatusCell>,
           ]}
         />
-        <DataListAction aria-label="actions" aria-labelledby={labelId}>
-          {workflowApproval.can_approve_or_deny && !actionTaken ? (
-            <WorkflowApprovalActionButtons
-              workflowApproval={workflowApproval}
-              onSuccessfulAction={handleSuccesfulAction}
-            />
-          ) : (
-            ''
-          )}
-        </DataListAction>
       </DataListItemRow>
     </DataListItem>
   );

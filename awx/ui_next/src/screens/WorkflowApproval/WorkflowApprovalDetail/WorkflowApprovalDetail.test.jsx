@@ -48,7 +48,8 @@ describe('<WorkflowApprovalDetail />', () => {
     );
     assertDetail('Last Modified', formatDateString(workflowApproval.modified));
     assertDetail('Elapsed', '00:00:22');
-    expect(wrapper.find('WorkflowApprovalActionButtons').length).toBe(1);
+    expect(wrapper.find('Button[aria-label="Approve"]').length).toBe(1);
+    expect(wrapper.find('Button[aria-label="Deny"]').length).toBe(1);
     expect(wrapper.find('DeleteButton').length).toBe(1);
   });
 
@@ -157,6 +158,66 @@ describe('<WorkflowApprovalDetail />', () => {
       />
     );
     expect(wrapper.find('WorkflowApprovalActionButtons').length).toBe(0);
+  });
+
+  test('Error dialog shown for failed approval', async () => {
+    WorkflowApprovalsAPI.approve.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+    const wrapper = mountWithContexts(
+      <WorkflowApprovalDetail workflowApproval={workflowApproval} />
+    );
+    await waitForElement(
+      wrapper,
+      'WorkflowApprovalDetail Button[aria-label="Approve"]'
+    );
+    await act(async () => {
+      wrapper.find('Button[aria-label="Approve"]').invoke('onClick')();
+    });
+    expect(WorkflowApprovalsAPI.approve).toHaveBeenCalledTimes(1);
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 1
+    );
+    await act(async () => {
+      wrapper.find('Modal[title="Error!"]').invoke('onClose')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 0
+    );
+  });
+
+  test('Error dialog shown for failed denial', async () => {
+    WorkflowApprovalsAPI.deny.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+    const wrapper = mountWithContexts(
+      <WorkflowApprovalDetail workflowApproval={workflowApproval} />
+    );
+    await waitForElement(
+      wrapper,
+      'WorkflowApprovalDetail Button[aria-label="Deny"]'
+    );
+    await act(async () => {
+      wrapper.find('Button[aria-label="Deny"]').invoke('onClick')();
+    });
+    expect(WorkflowApprovalsAPI.deny).toHaveBeenCalledTimes(1);
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 1
+    );
+    await act(async () => {
+      wrapper.find('Modal[title="Error!"]').invoke('onClose')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 0
+    );
   });
 
   test('delete button should be hidden when user cannot delete', () => {

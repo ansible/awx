@@ -2,7 +2,7 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Label, Tooltip } from '@patternfly/react-core';
-import { InfoCircleIcon } from '@patternfly/react-icons';
+import { CheckIcon, InfoCircleIcon } from '@patternfly/react-icons';
 import { WorkflowApproval } from '../../../types';
 import { formatDateString } from '../../../util/dates';
 
@@ -35,7 +35,7 @@ function WorkflowApprovalStatus({ workflowApproval, i18n }) {
         )}
         position="top"
       >
-        <Label color="red" icon={<InfoCircleIcon />}>
+        <Label variant="outline" color="red" icon={<InfoCircleIcon />}>
           {i18n._(t`Denied`)}
         </Label>
       </Tooltip>
@@ -52,7 +52,7 @@ function WorkflowApprovalStatus({ workflowApproval, i18n }) {
         )}
         position="top"
       >
-        <Label color="green" icon={<InfoCircleIcon />}>
+        <Label variant="outline" color="green" icon={<CheckIcon />}>
           {i18n._(t`Approved`)}
         </Label>
       </Tooltip>

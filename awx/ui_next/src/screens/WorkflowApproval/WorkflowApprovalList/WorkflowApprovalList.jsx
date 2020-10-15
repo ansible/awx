@@ -11,10 +11,15 @@ import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import DataListToolbar from '../../../components/DataListToolbar';
 import WorkflowApprovalListItem from './WorkflowApprovalListItem';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import useRequest, {
+  useDeleteItems,
+  useDismissableError,
+} from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useWsWorkflowApprovals from './useWsWorkflowApprovals';
+import WorkflowApprovalListApproveButton from './WorkflowApprovalListApproveButton';
+import WorkflowApprovalListDenyButton from './WorkflowApprovalListDenyButton';
 
 const QS_CONFIG = getQSConfig('workflow_approvals', {
   page: 1,
@@ -106,13 +111,64 @@ function WorkflowApprovalsList({ i18n }) {
     setSelected([]);
   };
 
+  const {
+    error: approveApprovalError,
+    isLoading: isApproveLoading,
+    request: approveWorkflowApprovals,
+  } = useRequest(
+    useCallback(async () => {
+      return Promise.all(
+        selected.map(({ id }) => WorkflowApprovalsAPI.approve(id))
+      );
+    }, [selected]),
+    {}
+  );
+
+  const handleApprove = async () => {
+    await approveWorkflowApprovals();
+    setSelected([]);
+  };
+
+  const {
+    error: approveError,
+    dismissError: dismissApproveError,
+  } = useDismissableError(approveApprovalError);
+
+  const {
+    error: denyApprovalError,
+    isLoading: isDenyLoading,
+    request: denyWorkflowApprovals,
+  } = useRequest(
+    useCallback(async () => {
+      return Promise.all(
+        selected.map(({ id }) => WorkflowApprovalsAPI.deny(id))
+      );
+    }, [selected]),
+    {}
+  );
+
+  const handleDeny = async () => {
+    await denyWorkflowApprovals();
+    setSelected([]);
+  };
+
+  const {
+    error: denyError,
+    dismissError: dismissDenyError,
+  } = useDismissableError(denyApprovalError);
+
   return (
     <>
       <PageSection>
         <Card>
           <PaginatedDataList
             contentError={contentError}
-            hasContentLoading={isWorkflowApprovalsLoading || isDeleteLoading}
+            hasContentLoading={
+              isWorkflowApprovalsLoading ||
+              isDeleteLoading ||
+              isApproveLoading ||
+              isDenyLoading
+            }
             items={workflowApprovals}
             itemCount={count}
             pluralizedItemName={i18n._(t`Workflow Approvals`)}
@@ -147,6 +203,16 @@ function WorkflowApprovalsList({ i18n }) {
                 }
                 qsConfig={QS_CONFIG}
                 additionalControls={[
+                  <WorkflowApprovalListApproveButton
+                    key="approve"
+                    onApprove={handleApprove}
+                    selectedItems={selected}
+                  />,
+                  <WorkflowApprovalListDenyButton
+                    key="deny"
+                    onDeny={handleDeny}
+                    selectedItems={selected}
+                  />,
                   <ToolbarDeleteButton
                     key="delete"
                     onDelete={handleDelete}
@@ -171,15 +237,39 @@ function WorkflowApprovalsList({ i18n }) {
           />
         </Card>
       </PageSection>
-      <AlertModal
-        isOpen={deletionError}
-        variant="error"
-        title={i18n._(t`Error!`)}
-        onClose={clearDeletionError}
-      >
-        {i18n._(t`Failed to delete one or more workflow approval.`)}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={clearDeletionError}
+        >
+          {i18n._(t`Failed to delete one or more workflow approval.`)}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
+      {approveError && (
+        <AlertModal
+          isOpen={approveError}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissApproveError}
+        >
+          {i18n._(t`Failed to approve one or more workflow approval.`)}
+          <ErrorDetail error={approveError} />
+        </AlertModal>
+      )}
+      {denyError && (
+        <AlertModal
+          isOpen={denyError}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissDenyError}
+        >
+          {i18n._(t`Failed to deny one or more workflow approval.`)}
+          <ErrorDetail error={denyError} />
+        </AlertModal>
+      )}
     </>
   );
 }
