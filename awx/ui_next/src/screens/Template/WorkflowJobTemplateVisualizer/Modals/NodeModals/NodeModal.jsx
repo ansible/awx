@@ -49,11 +49,7 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
   const history = useHistory();
   const dispatch = useContext(WorkflowDispatchContext);
   const { nodeToEdit } = useContext(WorkflowStateContext);
-  const {
-    values,
-    setTouched,
-    validateForm,
-  } = useFormikContext();
+  const { values, setTouched, validateForm } = useFormikContext();
 
   const [triggerNext, setTriggerNext] = useState(0);
 
@@ -149,7 +145,11 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
           },
         ]),
   ];
-
+  const nextButtonText = activeStep =>
+    activeStep.id === steps[steps?.length - 1]?.id ||
+    activeStep.name === 'Preview'
+      ? i18n._(t`Save`)
+      : i18n._(t`Next`);
   const CustomFooter = (
     <WizardFooter>
       <WizardContextConsumer>
@@ -158,23 +158,25 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
             <NodeNextButton
               triggerNext={triggerNext}
               activeStep={activeStep}
+              aria-label={nextButtonText(activeStep)}
               onNext={onNext}
               onClick={() => setTriggerNext(triggerNext + 1)}
-              buttonText={
-                activeStep.id === steps[steps?.length - 1]?.id ||
-                activeStep.name === 'Preview'
-                  ? i18n._(t`Save`)
-                  : i18n._(t`Next`)
-              }
+              buttonText={nextButtonText(activeStep)}
             />
             {activeStep && activeStep.id !== steps[0]?.id && (
-              <Button id="back-node-modal" variant="secondary" onClick={onBack}>
+              <Button
+                id="back-node-modal"
+                variant="secondary"
+                aria-label={i18n._(t`Back`)}
+                onClick={onBack}
+              >
                 {i18n._(t`Back`)}
               </Button>
             )}
             <Button
               id="cancel-node-modal"
               variant="link"
+              aria-label={i18n._(t`Cancel`)}
               onClick={handleCancel}
             >
               {i18n._(t`Cancel`)}

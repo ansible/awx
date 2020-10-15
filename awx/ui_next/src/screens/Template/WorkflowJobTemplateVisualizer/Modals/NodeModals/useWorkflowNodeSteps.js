@@ -29,8 +29,15 @@ export default function useWorkflowNodeSteps(
     ),
     useCredentialsStep(config, i18n, resource, nodeToEdit?.originalNodeObject),
     useOtherPromptsStep(config, i18n, resource, nodeToEdit?.originalNodeObject),
-    useSurveyStep(config, i18n, visited, resource),
+    useSurveyStep(
+      config,
+      i18n,
+      visited,
+      resource,
+      nodeToEdit?.originalNodeObject
+    ),
   ];
+
   const { resetForm, values: formikValues } = useFormikContext();
   const hasErrors = steps.some(step => step.formError);
   const surveyStepIndex = steps.findIndex(step => step.survey);
@@ -66,10 +73,7 @@ export default function useWorkflowNodeSteps(
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    config,
-    isReady,
-  ]);
+  }, [config, isReady]);
 
   const stepWithError = steps.find(s => s.contentError);
   const contentError = stepWithError ? stepWithError.contentError : null;

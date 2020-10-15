@@ -5,19 +5,14 @@ import NodeTypeStep from './NodeTypeStep';
 
 const STEP_ID = 'nodeType';
 
-export default function useNodeTypeStep(i18n, resource, nodeToEdit) {
+export default function useNodeTypeStep(i18n, nodeToEdit) {
   const [, meta] = useField('nodeType');
   const [approvalNameField] = useField('approvalName');
   const [nodeTypeField, ,] = useField('nodeType');
   const [nodeResouceField] = useField('nodeResource');
 
   return {
-    step: getStep(
-      i18n,
-      nodeTypeField,
-      approvalNameField,
-      nodeResouceField
-    ),
+    step: getStep(i18n, nodeTypeField, approvalNameField, nodeResouceField),
     initialValues: getInitialValues(nodeToEdit),
     isReady: true,
     contentError: null,
@@ -29,12 +24,7 @@ export default function useNodeTypeStep(i18n, resource, nodeToEdit) {
     },
   };
 }
-function getStep(
-  i18n,
-  nodeTypeField,
-  approvalNameField,
-  nodeResouceField
-) {
+function getStep(i18n, nodeTypeField, approvalNameField, nodeResouceField) {
   const isEnabled = () => {
     if (
       (nodeTypeField.value !== 'approval' && nodeResouceField.value === null) ||

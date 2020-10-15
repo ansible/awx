@@ -6,6 +6,7 @@ import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import yaml from 'js-yaml';
+import { parseVariableField } from '../../../util/yaml';
 import mergeExtraVars, { maskPasswords } from '../mergeExtraVars';
 import getSurveyValues from '../getSurveyValues';
 import PromptDetail from '../../PromptDetail';
@@ -27,11 +28,12 @@ function PreviewStep({ resource, config, survey, formErrors, i18n }) {
   const { values } = useFormikContext();
   const surveyValues = getSurveyValues(values);
 
-  const overrides = { ...values };
+  const overrides = {
+    ...values,
+  };
   if (config.ask_variables_on_launch || config.survey_enabled) {
-    const initialExtraVars = config.ask_variables_on_launch
-      ? overrides.extra_vars || '---'
-      : resource.extra_vars;
+    const initialExtraVars =
+      config.ask_variables_on_launch && (overrides.extra_vars || '---');
     if (survey && survey.spec) {
       const passwordFields = survey.spec
         .filter(q => q.type === 'password')
@@ -47,8 +49,8 @@ function PreviewStep({ resource, config, survey, formErrors, i18n }) {
   // Api expects extra vars to be merged with the survey data.
   // We put the extra_data key/value pair on the values object here
   // so that we don't have to do this loop again inside of the NodeAddModal.jsx
-  values.extra_data = overrides.extra_vars;
-
+  values.extra_data =
+    overrides.extra_vars && parseVariableField(overrides?.extra_vars);
   return (
     <Fragment>
       {formErrors && (

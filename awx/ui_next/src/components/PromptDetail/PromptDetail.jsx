@@ -143,7 +143,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                 value={toTitleCase(overrides.job_type)}
               />
             )}
-            {overrides?.credentials && (
+            {overrides?.credentials?.length > 0 && (
               <Detail
                 fullWidth
                 label={i18n._(t`Credentials`)}

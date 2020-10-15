@@ -8,7 +8,13 @@ import StepName from './StepName';
 
 const STEP_ID = 'survey';
 
-export default function useSurveyStep(config, i18n, visitedSteps, resource) {
+export default function useSurveyStep(
+  config,
+  i18n,
+  visitedSteps,
+  resource,
+  nodeToEdit
+) {
   const { values } = useFormikContext();
   const { result: survey, request: fetchSurvey, isLoading, error } = useRequest(
     useCallback(async () => {
@@ -48,7 +54,7 @@ export default function useSurveyStep(config, i18n, visitedSteps, resource) {
   const formError = Object.keys(validate()).length > 0;
   return {
     step: getStep(config, survey, validate, i18n, visitedSteps),
-    initialValues: getInitialValues(config, survey, resource),
+    initialValues: getInitialValues(config, survey, nodeToEdit),
     validate,
     survey,
     isReady: !isLoading && !!survey,
@@ -113,7 +119,7 @@ function getStep(config, survey, validate, i18n, visitedSteps) {
   };
 }
 
-function getInitialValues(config, survey, resource) {
+function getInitialValues(config, survey, nodeToEdit) {
   if (!config.survey_enabled || !survey) {
     return {};
   }
@@ -126,11 +132,11 @@ function getInitialValues(config, survey, resource) {
       } else {
         values[`survey_${question.variable}`] = question.default;
       }
-      if (resource?.extra_data) {
-        Object.entries(resource?.extra_data).forEach(([key, value]) => {
+      if (nodeToEdit?.extra_data) {
+        Object.entries(nodeToEdit?.extra_data).forEach(([key, value]) => {
           if (key === question.variable) {
             if (question.type === 'multiselect') {
-              values[`survey_${question.variable}`] = value.split('\n');
+              values[`survey_${question.variable}`] = value;
             } else {
               values[`survey_${question.variable}`] = value;
             }
