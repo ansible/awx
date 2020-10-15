@@ -124,9 +124,11 @@ function User({ i18n, setBreadcrumb, me }) {
             <Route path="/users/:id/organizations">
               <UserOrganizations id={Number(match.params.id)} />
             </Route>
-            <Route path="/users/:id/teams">
-              <UserTeams userId={Number(match.params.id)} />
-            </Route>
+            {user && (
+              <Route path="/users/:id/teams">
+                <UserTeams />
+              </Route>
+            )}
             {user && (
               <Route path="/users/:id/roles">
                 <UserRolesList user={user} />
