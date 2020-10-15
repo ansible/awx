@@ -393,7 +393,7 @@ class TowerAPIModule(TowerModule):
             if response['status_code'] == 204:
                 self.json_output['changed'] = True
             else:
-                self.fail_json(msg="Failed to disassociate item {0}".format(response['json']['detail']))
+                self.fail_json(msg="Failed to disassociate item {0}".format(response['json'].get('detail', response['json'])))
 
         # Associate anything that is in new_association_list but not in `association`
         for an_id in list(set(new_association_list) - set(existing_associated_ids)):
@@ -401,7 +401,7 @@ class TowerAPIModule(TowerModule):
             if response['status_code'] == 204:
                 self.json_output['changed'] = True
             else:
-                self.fail_json(msg="Failed to associate item {0}".format(response['json']['detail']))
+                self.fail_json(msg="Failed to associate item {0}".format(response['json'].get('detail', response['json'])))
 
     def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, item_type='unknown', associations=None):
 
