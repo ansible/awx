@@ -7,6 +7,7 @@ export default ['$rootScope', '$scope', '$location', 'ConfigService', 'lastPath'
             $scope.ansible_version = config.ansible_version;
             $scope.subscription = config.license_info.subscription_name;
             $scope.speechBubble = createSpeechBubble($rootScope.BRAND_NAME, config.version);
+            $scope.currentYear = new Date().getFullYear();
             $('#about-modal').modal('show');
         });
 
