@@ -11,10 +11,10 @@ import {
 
 import NodeTypeStep from './NodeTypeStep';
 
-jest.mock('../../../../api/models/InventorySources');
-jest.mock('../../../../api/models/JobTemplates');
-jest.mock('../../../../api/models/Projects');
-jest.mock('../../../../api/models/WorkflowJobTemplates');
+jest.mock('../../../../../../api/models/InventorySources');
+jest.mock('../../../../../../api/models/JobTemplates');
+jest.mock('../../../../../../api/models/Projects');
+jest.mock('../../../../../../api/models/WorkflowJobTemplates');
 
 describe('NodeTypeStep', () => {
   beforeAll(() => {

@@ -111,7 +111,15 @@ describe('NodeModal', () => {
       data: {
         name: '',
         description: '',
-        spec: [{ question_name: 'Foo', required: true }],
+        spec: [
+          {
+            question_name: 'Foo',
+            required: true,
+            variable: 'bar',
+            type: 'text',
+            default: 'answer',
+          },
+        ],
         type: 'text',
         variable: 'bar',
       },
@@ -254,10 +262,12 @@ describe('NodeModal', () => {
       expect(JobTemplatesAPI.readSurvey).toBeCalledWith(25);
       wrapper.update();
       expect(wrapper.find('NodeNextButton').prop('buttonText')).toBe('Next');
-      wrapper
-        .find('WizardNavItem[content="Preview"]')
-        .find('a')
-        .prop('onClick')();
+      act(() => {
+        wrapper
+          .find('WizardNavItem[content="Preview"]')
+          .find('a')
+          .prop('onClick')();
+      });
       wrapper.update();
 
       await act(async () => {
@@ -469,7 +479,7 @@ describe('NodeModal', () => {
           approvalDescription: 'Test Approval Description',
           approvalName: 'Test Approval',
           linkType: 'always',
-          nodeResource: undefined,
+          nodeResource: null,
           nodeType: 'approval',
           timeout: 330,
           verbosity: undefined,
@@ -573,7 +583,7 @@ describe('NodeModal', () => {
           approvalDescription: 'Test Approval Description',
           approvalName: 'Test Approval',
           linkType: 'success',
-          nodeResource: undefined,
+          nodeResource: null,
           nodeType: 'approval',
           timeout: 330,
           verbosity: undefined,
