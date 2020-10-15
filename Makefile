@@ -214,7 +214,11 @@ requirements_awx_dev:
 
 requirements_collections:
 	mkdir -p $(COLLECTION_BASE)
-	ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE)
+	n=0; \
+	until [ "$$n" -ge 5 ]; do \
+	    ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE) && break; \
+	    n=$$((n+1)); \
+	done
 
 requirements: requirements_ansible requirements_awx requirements_collections
 
