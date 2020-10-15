@@ -27,7 +27,7 @@ export default
 					return Rest.post(JSON.stringify(data))
 						.then((response) =>{
 							if (attach) {
-								var configPayload = {}
+								var configPayload = {};
 								configPayload.eula_accepted = eula;
 								Rest.setUrl(GetBasePath('config'));
 								return Rest.post(configPayload)
