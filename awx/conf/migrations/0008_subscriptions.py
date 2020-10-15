@@ -2,7 +2,7 @@
 
 import logging
 
-from django.db import migrations, models
+from django.db import migrations
 
 from awx.conf.migrations import _subscriptions as subscriptions
 

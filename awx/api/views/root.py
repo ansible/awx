@@ -337,7 +337,7 @@ class ApiV2AttachView(APIView):
                     pool = uep.getPool(poolId=pool_id, consumerId=consumer['uuid'])
                     pool_quantity = pool['quantity']
                 except Exception as e:
-                    Response({"error": _("Unable to determine quantity of pool to be applied. Please try again.")}, status=status.HTTP_400_BAD_REQUEST)
+                    Response({"error": _("Unable to determine quantity of pool to be applied. Please try again.") + str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Attach subscription to consumer
                 try:

@@ -67,6 +67,32 @@ class SubscriptionManager:
 
         return (username, password, consumer_uuid, verify)
 
+
+    def list_attached_subs(self):
+        entitlements = self.rhsm.getEntitlementList(consumerId=self.consumer_id)
+        attached_pools = []
+        for item in entitlements:
+            if item['consumer']['uuid'] == self.consumer_id:
+                attached_pools.append(item['pool']['id'])
+        return attached_pools
+
+
+    def unattach_unneeded_pools(self):
+        def _unattach(pool_id):
+            try:
+                self.rhsm.unbindByPoolId(self.consumer_id, pool_id)
+            except Exception:
+                return False
+            return True
+
+        pool_id = settings.LICENSE['pool_id']
+        attached_pools = self.list_attached_subs()
+        for pool in attached_pools:
+            if pool == pool_id:
+                _unattach(pool)
+        return
+
+
     def get_entitlement_id(self):
         '''
         This function relies on there being 1 and only 1 entitlement associated with the consumer.
@@ -83,11 +109,17 @@ class SubscriptionManager:
 
         if len(res) == 0:
             raise SubscriptionManagerRefreshError(f"No entitlements for consumer '{self.consumer_id}' found.")
+        # If multiple pools are attached to the consumer, unattach all that are unneeded
         if len(res) > 1:
-            raise SubscriptionManagerRefreshError(f"Found '{len(res)}' entitlements for consumer '{self.consumer_id}' when 1 was expected.")
+            self.unattach_unneeded_pools()
+            try:
+                res = self.rhsm.getEntitlementList(self.consumer_id)
+            except RestlibException as e:
+                raise SubscriptionManagerRefreshError(f"{trace()} RHSM error {e}")
         if 'id' not in res[0]:
             raise SubscriptionManagerRefreshError("Key 'id' not found in entitlement")
         return res[0]['id']
+
 
     def get_certificate_for_entitlement(self, entitlement_id: str):
         '''
@@ -104,6 +136,7 @@ class SubscriptionManager:
             raise SubscriptionManagerRefreshError(f"{trace()} RHSM error {e}")
 
         return res.get('certificates', [{}])[0]
+
 
     def refresh_entitlement_certs(self):
         '''
@@ -151,5 +184,5 @@ class SubscriptionManager:
 
         try:
             Licenser().validate(new_cert=True)
-        except Exception(e):
+        except Exception as e:
             raise SubscriptionManagerRefreshError(f"Refreshed license and saved new license. However, validating new license failed '{e}'")
