@@ -68,7 +68,7 @@ def test_create_workflow_job_template_node_no_template(run_module, admin_user, w
     node = WorkflowJobTemplateNode.objects.get(identifier=this_identifier)
     approval_node = UnifiedJobTemplate.objects.get(name='foo-jt-approval')
 
-    assert result['id'] == node.id
+    assert result['id'] == approval_node.id
 
     assert node.identifier == this_identifier
     assert node.workflow_job_template_id == wfjt.id
