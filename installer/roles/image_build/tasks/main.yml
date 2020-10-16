@@ -42,7 +42,7 @@
   delegate_to: localhost
 
 - name: Build sdist builder image
-  docker_image:
+  community.general.docker_image:
     build:
       path: "{{ role_path }}/files"
       dockerfile: Dockerfile.sdist
