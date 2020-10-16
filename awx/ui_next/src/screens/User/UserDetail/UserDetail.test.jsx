@@ -12,7 +12,7 @@ import mockDetails from '../data.user.json';
 jest.mock('../../../api');
 
 describe('<UserDetail />', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(<UserDetail user={mockDetails} />);
   });
 
@@ -22,6 +22,7 @@ describe('<UserDetail />', () => {
       expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
     }
+
     assertDetail('Username', mockDetails.username);
     assertDetail('Email', mockDetails.email);
     assertDetail('First Name', mockDetails.first_name);
@@ -29,6 +30,7 @@ describe('<UserDetail />', () => {
     assertDetail('User Type', 'System Administrator');
     assertDetail('Last Login', `11/4/2019, 11:12:36 PM`);
     assertDetail('Created', `10/28/2019, 3:01:07 PM`);
+    assertDetail('Type', `SOCIAL`);
   });
 
   test('User Type Detail should render expected strings', async () => {

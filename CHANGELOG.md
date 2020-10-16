@@ -3,9 +3,10 @@
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
 ## 15.0.0 (September 30, 2020)
+- Added improved support for fetching Ansible collections from private Galaxy content sources (such as https://github.com/ansible/galaxy_ng) - https://github.com/ansible/awx/issues/7813
+  **Note:** as part of this change, new Organizations created in the AWX API will _no longer_ automatically synchronize roles and collections from galaxy.ansible.com by default.  More details on this change can be found at:  https://github.com/ansible/awx/issues/8341#issuecomment-707310633
 - AWX now utilizes a version of certifi that auto-discovers certificates in the system certificate store - https://github.com/ansible/awx/pull/8242
 - Added support for arbitrary custom inventory plugin configuration: https://github.com/ansible/awx/issues/5150
-- Added improved support for fetching Ansible collections from private Galaxy content sources (such as https://github.com/ansible/galaxy_ng) - https://github.com/ansible/awx/issues/7813
 - Added an optional setting to disable the auto-creation of organizations and teams on successful SAML login. - https://github.com/ansible/awx/pull/8069
 - Added a number of optimizations to AWX's callback receiver to improve the speed of stdout processing for simultaneous playbooks runs - https://github.com/ansible/awx/pull/8193 https://github.com/ansible/awx/pull/8191
 - Added the ability to use `!include` and `!import` constructors when constructing YAML for use with the AWX CLI - https://github.com/ansible/awx/issues/8135

@@ -662,6 +662,7 @@ The preferred way to install the AWX CLI is through pip directly from PyPI:
 
 To build the docs, spin up a real AWX server, `pip3 install sphinx sphinxcontrib-autoprogram`, and run:
 
+    ~ cd awxkit/awxkit/cli/docs
     ~ TOWER_HOST=https://awx.example.org TOWER_USERNAME=example TOWER_PASSWORD=secret make clean html
     ~ cd build/html/ && python -m http.server
     Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ..
