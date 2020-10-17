@@ -96,6 +96,18 @@
         that:
           - "result is not changed"
 
+    - name: Add Joe to workflow approve role
+      tower_role:
+        user: "{{ username }}"
+        role: approval
+        workflow: test-role-workflow
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
   always:
     - name: Delete a User
       tower_user:
