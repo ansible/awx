@@ -5,11 +5,11 @@
 
 - name: Generate names
   set_fact:
-    username:     "AWX-Collection-tests-tower_role-user-{{ test_id }}"
+    username: "AWX-Collection-tests-tower_role-user-{{ test_id }}"
     project_name: "AWX-Collection-tests-tower_role-project-1-{{ test_id }}"
-    jt1:          "AWX-Collection-tests-tower_role-jt1-{{ test_id }}"
-    jt2:          "AWX-Collection-tests-tower_role-jt2-{{ test_id }}"
-    wfjt_name:    "AWX-Collection-tests-tower_role-project-wfjt-{{ test_id }}"
+    jt1: "AWX-Collection-tests-tower_role-jt1-{{ test_id }}"
+    jt2: "AWX-Collection-tests-tower_role-jt2-{{ test_id }}"
+    wfjt_name: "AWX-Collection-tests-tower_role-project-wfjt-{{ test_id }}"
 
 - block:
     - name: Create a User
