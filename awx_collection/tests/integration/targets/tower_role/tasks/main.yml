@@ -5,8 +5,11 @@
 
 - name: Generate names
   set_fact:
-    username: "AWX-Collection-tests-tower_role-user-{{ test_id }}"
-    project_name: "AWX-Collection-tests-tower_role-project-{{ test_id }}"
+    username:     "AWX-Collection-tests-tower_role-user-{{ test_id }}"
+    project_name: "AWX-Collection-tests-tower_role-project-1-{{ test_id }}"
+    jt1:          "AWX-Collection-tests-tower_role-jt1-{{ test_id }}"
+    jt2:          "AWX-Collection-tests-tower_role-jt2-{{ test_id }}"
+    wfjt_name:    "AWX-Collection-tests-tower_role-project-wfjt-{{ test_id }}"
 
 - block:
     - name: Create a User
@@ -29,17 +32,33 @@
         organization: Default
         scm_type: git
         scm_url: https://github.com/ansible/test-playbooks
-        wait: false
+        wait: true
       register: project_info
 
     - assert:
         that:
           - project_info is changed
 
-    - name: Add Joe to the update role of the default Project
+    - name: Create job templates
+      tower_job_template:
+        name: "{{ item }}"
+        project: "{{ project_name }}"
+        inventory: "Demo Inventory"
+        playbook: become.yml
+      with_items:
+        - jt1
+        - jt2
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add Joe to the update role of the default Project with lookup Organization
       tower_role:
         user: "{{ username }}"
         role: update
+        lookup_organization: Default
         project: "Demo Project"
         state: "{{ item }}"
       register: result
@@ -77,6 +96,9 @@
         user: "{{ username }}"
         role: execute
         workflow: test-role-workflow
+        job_templates:
+          - jt1
+          - jt2
         state: present
       register: result
 
@@ -114,6 +136,18 @@
         username: "{{ username }}"
         email: joe@example.org
         state: absent
+      register: result
+
+    - name: Delete job templates
+      tower_job_template:
+        name: "{{ item }}"
+        project: "{{ project_name }}"
+        inventory: "Demo Inventory"
+        playbook: debug.yml
+        state: absent
+      with_items:
+        - jt1
+        - jt2
       register: result
 
     - name: Delete the project
