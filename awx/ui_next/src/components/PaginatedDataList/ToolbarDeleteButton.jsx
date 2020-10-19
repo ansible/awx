@@ -94,7 +94,7 @@ function ToolbarDeleteButton({
   const renderTooltip = () => {
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
-      .map(item => item.name)
+      .map(item => item.name || item.username)
       .join(', ');
     if (itemsToDelete.some(cannotDelete)) {
       return (
