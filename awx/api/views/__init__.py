@@ -3043,7 +3043,7 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
             approval_template,
             context=self.get_serializer_context()
         ).data
-        return Response(data, status=status.HTTP_201_OK)
+        return Response(data, status=status.HTTP_201_CREATED)
 
     def check_permissions(self, request):
         obj = self.get_object().workflow_job_template
