@@ -134,7 +134,6 @@ function TemplateList({ i18n }) {
     jtActions && Object.prototype.hasOwnProperty.call(jtActions, 'POST');
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
-  // spreading Set() returns only unique keys
   const addButtonOptions = [];
 
   if (canAddJT) {
