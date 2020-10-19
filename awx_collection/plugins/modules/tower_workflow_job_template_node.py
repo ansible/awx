@@ -325,8 +325,8 @@ def main():
             endpoint=approval_endpoint, item_type='workflow_job_template_approval_node',
             associations=association_fields
         )
-
-
     module.exit_json(**module.json_output)
+
+
 if __name__ == '__main__':
     main()

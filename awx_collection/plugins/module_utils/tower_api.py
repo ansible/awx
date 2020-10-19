@@ -366,7 +366,7 @@ class TowerAPIModule(TowerModule):
                 if auto_exit:
                     self.exit_json(**self.json_output)
                 else:
-                    return self.json_output #########
+                    return self.json_output
             else:
                 if 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
