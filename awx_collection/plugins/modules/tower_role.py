@@ -147,7 +147,7 @@ def main():
     argument_spec = dict(
         user=dict(),
         team=dict(),
-        role=dict(choices=["admin", "read", "member", "execute", "adhoc", "update", "use", "approval", 
+        role=dict(choices=["admin", "read", "member", "execute", "adhoc", "update", "use", "approval",
                            "auditor", "project_admin", "inventory_admin", "credential_admin",
                            "workflow_admin", "notification_admin", "job_template_admin"], required=True),
         target_team=dict(),
