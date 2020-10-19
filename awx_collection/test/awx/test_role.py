@@ -48,6 +48,7 @@ def test_grant_workflow_permission(run_module, admin_user, organization, state):
     else:
         assert rando not in wfjt.execute_role
 
+
 @pytest.mark.django_db
 @pytest.mark.parametrize('state', ('present', 'absent'))
 def test_grant_workflow_list_permission(run_module, admin_user, organization, state):
@@ -70,6 +71,7 @@ def test_grant_workflow_list_permission(run_module, admin_user, organization, st
     else:
         assert rando not in wfjt.execute_role
 
+
 @pytest.mark.django_db
 @pytest.mark.parametrize('state', ('present', 'absent'))
 def test_grant_workflow_approval_permission(run_module, admin_user, organization, state):
@@ -90,6 +92,7 @@ def test_grant_workflow_approval_permission(run_module, admin_user, organization
         assert rando in wfjt.approval_role
     else:
         assert rando not in wfjt.approval_role
+
 
 @pytest.mark.django_db
 def test_invalid_role(run_module, admin_user, project):
