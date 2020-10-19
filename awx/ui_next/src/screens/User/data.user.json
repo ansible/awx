@@ -30,6 +30,10 @@
   "is_system_auditor": false,
   "ldap_dn": "",
   "last_login": "2019-11-04T23:12:36.777783Z",
-  "external_account": null,
-  "auth": []
+  "external_account": "social",
+  "auth": [
+    {
+        "provider": "github-org",
+        "uid": "9053044"
+    }]
 }

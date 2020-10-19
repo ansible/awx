@@ -445,6 +445,7 @@ class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
 
     default_error_messages = {
         'type_error': _('Expected an instance of LDAPGroupType but got {input_type} instead.'),
+        'missing_parameters': _('Missing required parameters in {dependency}.')
     }
 
     def __init__(self, choices=None, **kwargs):
@@ -479,7 +480,10 @@ class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
             if attr in params:
                 params_sanitized[attr] = params[attr]
 
-        return cls(**params_sanitized)
+        try:
+            return cls(**params_sanitized)
+        except TypeError:
+            self.fail('missing_parameters', dependency=list(self.depends_on)[0])
 
 
 class LDAPGroupTypeParamsField(fields.DictField, DependsOnMixin):

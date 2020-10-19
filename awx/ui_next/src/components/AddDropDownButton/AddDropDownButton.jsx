@@ -48,7 +48,12 @@ function AddDropDownButton({ dropdownItems, i18n }) {
         isPlain
         isOpen={isOpen}
         position={DropdownPosition.right}
-        toggle={<ToolbarAddButton onClick={() => setIsOpen(!isOpen)} />}
+        toggle={
+          <ToolbarAddButton
+            showToggleIndicator
+            onClick={() => setIsOpen(!isOpen)}
+          />
+        }
         dropdownItems={dropdownItems.map(item => (
           <Link
             className="pf-c-dropdown__menu-item"

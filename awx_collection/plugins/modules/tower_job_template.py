@@ -436,7 +436,7 @@ def main():
         'become_enabled', 'diff_mode', 'allow_simultaneous', 'custom_virtualenv', 'job_slice_count', 'webhook_service',
     ):
         field_val = module.params.get(field_name)
-        if field_val:
+        if field_val is not None:
             new_fields[field_name] = field_val
 
         # Special treatment of extra_vars parameter

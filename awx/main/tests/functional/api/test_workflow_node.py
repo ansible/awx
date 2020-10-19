@@ -89,7 +89,7 @@ class TestApprovalNodes():
         url = reverse('api:workflow_job_template_node_create_approval',
                       kwargs={'pk': approval_node.pk, 'version': 'v2'})
         post(url, {'name': 'Test', 'description': 'Approval Node', 'timeout': 0},
-             user=admin_user, expect=200)
+             user=admin_user, expect=201)
 
         approval_node = WorkflowJobTemplateNode.objects.get(pk=approval_node.pk)
         assert isinstance(approval_node.unified_job_template, WorkflowApprovalTemplate)
@@ -108,9 +108,9 @@ class TestApprovalNodes():
         assert {'name': ['This field may not be blank.']} == json.loads(r.content)
 
     @pytest.mark.parametrize("is_admin, is_org_admin, status", [
-        [True, False, 200], # if they're a WFJT admin, they get a 200
+        [True, False, 201], # if they're a WFJT admin, they get a 201
         [False, False, 403], # if they're not a WFJT *nor* org admin, they get a 403
-        [False, True, 200], # if they're an organization admin, they get a 200
+        [False, True, 201], # if they're an organization admin, they get a 201
     ])
     def test_approval_node_creation_rbac(self, post, approval_node, alice, is_admin, is_org_admin, status):
         url = reverse('api:workflow_job_template_node_create_approval',
@@ -165,7 +165,7 @@ class TestApprovalNodes():
         url = reverse('api:workflow_job_template_node_create_approval',
                       kwargs={'pk': node.pk, 'version': 'v2'})
         post(url, {'name': 'Approve Test', 'description': '', 'timeout': 0},
-             user=admin_user, expect=200)
+             user=admin_user, expect=201)
         post(reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}),
              user=admin_user, expect=201)
         wf_job = WorkflowJob.objects.first()
@@ -195,7 +195,7 @@ class TestApprovalNodes():
         url = reverse('api:workflow_job_template_node_create_approval',
                       kwargs={'pk': node.pk, 'version': 'v2'})
         post(url, {'name': 'Deny Test', 'description': '', 'timeout': 0},
-             user=admin_user, expect=200)
+             user=admin_user, expect=201)
         post(reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}),
              user=admin_user, expect=201)
         wf_job = WorkflowJob.objects.first()
