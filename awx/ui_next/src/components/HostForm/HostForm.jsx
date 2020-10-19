@@ -41,6 +41,7 @@ const InventoryLookupField = withI18n()(({ i18n, host }) => {
       helperTextInvalid={inventoryMeta.error}
     >
       <InventoryLookup
+        fieldId="inventory-lookup"
         value={inventory}
         onBlur={() => inventoryHelpers.setTouched()}
         tooltip={i18n._(t`Select the inventory that this host will belong to.`)}
