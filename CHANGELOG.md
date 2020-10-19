@@ -2,6 +2,22 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 15.0.1 (October 20, 2020)
+- Added several optimizations to improve performance for a variety of high-load simultaneous job launch use cases https://github.com/ansible/awx/pull/8403
+- Added the ability to source roles and collections from requirements.yaml files (not just requirements.yml) - https://github.com/ansible/awx/issues/4540
+- awx.awx collection modules now provide a clearer error message for incompatible versions of awxkit - https://github.com/ansible/awx/issues/8127
+- Fixed a bug in notification messages that contain certain unicode characters - https://github.com/ansible/awx/issues/7400
+- Fixed a bug that prevents the deletion of Workflow Approval records - https://github.com/ansible/awx/issues/8305
+- Fixed a bug that broke the selection of webhook credentials - https://github.com/ansible/awx/issues/7892
+- Fixed a bug which can cause confusing behavior for social auth logins across distinct browser tabs - https://github.com/ansible/awx/issues/8154
+- Fixed several bugs in the output of Workflow Job Templates using the `awx export` tool - https://github.com/ansible/awx/issues/7798 https://github.com/ansible/awx/pull/7847
+- Fixed a race condition that can lead to missing hosts when running parallel inventory syncs - https://github.com/ansible/awx/issues/5571
+- Fixed an HTTP 500 error when certain LDAP group parameters aren't properly set - https://github.com/ansible/awx/issues/7622
+- Updated a few dependencies in response to several CVEs:
+    * CVE-2020-7720
+    * CVE-2020-7743
+    * CVE-2020-7676
+
 ## 15.0.0 (September 30, 2020)
 - Added improved support for fetching Ansible collections from private Galaxy content sources (such as https://github.com/ansible/galaxy_ng) - https://github.com/ansible/awx/issues/7813
   **Note:** as part of this change, new Organizations created in the AWX API will _no longer_ automatically synchronize roles and collections from galaxy.ansible.com by default.  More details on this change can be found at:  https://github.com/ansible/awx/issues/8341#issuecomment-707310633
