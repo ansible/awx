@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
 import { Formik } from 'formik';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import VariablesField from './VariablesField';
 
 describe('VariablesField', () => {
@@ -11,7 +11,7 @@ describe('VariablesField', () => {
 
   it('should render code mirror input', () => {
     const value = '---\n';
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }}>
         {() => (
           <VariablesField id="the-field" name="variables" label="Variables" />
@@ -24,7 +24,7 @@ describe('VariablesField', () => {
 
   it('should render yaml/json toggles', async () => {
     const value = '---\n';
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }}>
         {() => (
           <VariablesField id="the-field" name="variables" label="Variables" />
@@ -52,7 +52,7 @@ describe('VariablesField', () => {
 
   it('should set Formik error if yaml is invalid', async () => {
     const value = '---\nfoo bar\n';
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }}>
         {() => (
           <VariablesField id="the-field" name="variables" label="Variables" />
@@ -71,7 +71,7 @@ describe('VariablesField', () => {
   });
   it('should render tooltip', () => {
     const value = '---\n';
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }}>
         {() => (
           <VariablesField
@@ -89,7 +89,7 @@ describe('VariablesField', () => {
   it('should submit value through Formik', async () => {
     const value = '---\nfoo: bar\n';
     const handleSubmit = jest.fn();
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }} onSubmit={handleSubmit}>
         {formik => (
           <form onSubmit={formik.handleSubmit}>
@@ -116,7 +116,7 @@ describe('VariablesField', () => {
 
   it('should initialize to JSON if value is JSON', async () => {
     const value = '{"foo": "bar"}';
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }} onSubmit={jest.fn()}>
         {formik => (
           <form onSubmit={formik.handleSubmit}>
