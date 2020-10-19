@@ -382,7 +382,7 @@ class TowerAPIModule(TowerModule):
             if auto_exit:
                 self.exit_json(**self.json_output)
             else:
-                return None
+                return self.json_output
 
     def modify_associations(self, association_endpoint, new_association_list):
         # if we got None instead of [] we are not modifying the association_list
@@ -438,16 +438,8 @@ class TowerAPIModule(TowerModule):
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
 
-            if response['status_code'] == 201:
-                self.json_output['name'] = 'unknown'
-                for key in ('name', 'username', 'identifier', 'hostname'):
-                    if key in response['json']:
-                        self.json_output['name'] = response['json'][key]
-                self.json_output['id'] = response['json']['id']
-                self.json_output['changed'] = True
-                item_url = response['json']['url']
             # 200 is response from approval node creation
-            elif response['status_code'] == 200 and item_type == 'workflow_job_template_approval_node':
+            if response['status_code'] == 201:
                 self.json_output['name'] = 'unknown'
                 for key in ('name', 'username', 'identifier', 'hostname'):
                     if key in response['json']:

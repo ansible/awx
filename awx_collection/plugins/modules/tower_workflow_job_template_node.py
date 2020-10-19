@@ -319,7 +319,7 @@ def main():
         # Due to not able to lookup workflow_approval_templates, find the existing item in another place
         if workflow_job_template_node['related'].get('unified_job_template') is not None:
             existing_item = module.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
-        approval_endpoint = 'workflow_job_template_nodes/' + str(workflow_job_template_node_id) + '/create_approval_template/'
+        approval_endpoint = 'workflow_job_template_nodes/{0}/create_approval_template/'.format(workflow_job_template_node_id)
         module.create_or_update_if_needed(
             existing_item, new_fields,
             endpoint=approval_endpoint, item_type='workflow_job_template_approval_node',
