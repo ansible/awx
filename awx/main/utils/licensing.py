@@ -202,36 +202,71 @@ class Licenser(object):
             raise ValueError('subscriptions_password is required')
 
         if host and user and pw:
-            import requests
-            verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
-
-            json = []
-            try:
-                subs = requests.get(
-                    '/'.join([host, 'subscription/users/{}/owners'.format(user)]),
-                    verify=verify,
-                    auth=(user, pw)
-                )
-            except requests.exceptions.ConnectionError as error:
-                raise error
-            except OSError as error:
-                raise OSError('Unable to open certificate bundle {}. Check that Ansible Tower is running on Red Hat Enterprise Linux.'.format(verify)) from error # noqa
-            subs.raise_for_status()
-
-            for sub in subs.json():
-                resp = requests.get(
-                    '/'.join([
-                        host,
-                        'subscription/owners/{}/pools/?match=*tower*'.format(sub['key'])
-                    ]),
-                    verify=verify,
-                    auth=(user, pw)
-                )
-                resp.raise_for_status()
-                json.extend(resp.json())
-
+            if 'subscription.rhsm.redhat.com' in host:
+                json = self.get_rhsm_subs(host, user, pw)
+            else:
+                json = self.get_satellite_subs(host, user, pw)
             return self.generate_license_options_from_entitlements(json)
         return []
+
+
+    def get_rhsm_subs(self, host, user, pw):
+        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
+        json = []
+        try:
+            subs = requests.get(
+                '/'.join([host, 'subscription/users/{}/owners'.format(user)]),
+                verify=verify,
+                auth=(user, pw)
+            )
+        except requests.exceptions.ConnectionError as error:
+            raise error
+        except OSError as error:
+            raise OSError('Unable to open certificate bundle {}. Check that Ansible Tower is running on Red Hat Enterprise Linux.'.format(verify)) from error # noqa
+        subs.raise_for_status()
+
+        for sub in subs.json():
+            resp = requests.get(
+                '/'.join([
+                    host,
+                    'subscription/owners/{}/pools/?match=*tower*'.format(sub['key'])
+                ]),
+                verify=verify,
+                auth=(user, pw)
+            )
+            resp.raise_for_status()
+            json.extend(resp.json())
+        return json
+
+
+    def get_satellite_subs(self, host, user, pw):
+        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
+        json = []
+        try:
+            orgs = requests.get(
+                '/'.join([host, 'katello/api/organizations']),
+                verify=verify,
+                auth=(user, pw)
+            )
+        except requests.exceptions.ConnectionError as error:
+            raise error
+        except OSError as error:
+            raise OSError('Unable to open certificate bundle {}. Check that Ansible Tower is running on Red Hat Enterprise Linux.'.format(verify)) from error # noqa
+        orgs.raise_for_status()
+        
+        for org in orgs.json()['results']:
+            resp = requests.get(
+                '/'.join([
+                    host,
+                    '/katello/api/organizations/{}/subscriptions/?search=Red Hat Ansible Automation'.format(org['id'])
+                ]),
+                verify=verify,
+                auth=(user, pw)
+            )
+            resp.raise_for_status()
+            if resp.json()['results'] != []:
+                json.extend(resp.json()['results'])
+        return json
 
 
     def is_appropriate_sub(self, sub):

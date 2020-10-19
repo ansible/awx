@@ -13,9 +13,4 @@
 
 
 
-# Error is Subscription Manager is not installed
-
-
-
-
 # Test license_date is always seconds

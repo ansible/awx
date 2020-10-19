@@ -370,16 +370,6 @@ register(
     encrypted=True,
 )
 
-register(
-    'ENTITLEMENT_CONSUMER',
-    field_class=fields.DictField,
-    default={},
-    required=False,
-    label=_('RHSM consumer name and UUID.'),
-    help_text=_('Consumer used with RH username and password to obtain entitlement cert.'),
-    category=_('SYSTEM'),
-    category_slug='system',
-)
 
 register(
     'AWX_RESOURCE_PROFILING_ENABLED',

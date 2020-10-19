@@ -1,12 +1,10 @@
 # Copyright (c) 2018 Ansible, Inc.
 # All Rights Reserved.
 
-import os
 import json
 import logging
 import operator
 from collections import OrderedDict
-import random
 
 from django.conf import settings
 from django.utils.encoding import smart_text
@@ -236,7 +234,7 @@ class ApiV2AttachView(APIView):
     def post(self, request):
         data = request.data.copy()
         pool_id = data.get('pool_id', None)
-        org = data.get('org', None)
+        # org = data.get('org', None)  # if we want allow to user to specify the org, we will need to pass this
         if not pool_id:
             return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
         user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
@@ -271,178 +269,6 @@ class ApiV2AttachView(APIView):
                 return Response(sub)
 
         return Response({"error": _("Error processing subscription metadata.")}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class ApiV2AttachView(APIView):
-# 
-#     permission_classes = (IsAuthenticated,)
-#     name = _('Attach Subscription')
-#     swagger_topic = 'System Configuration'
-# 
-#     def check_permissions(self, request):
-#         super(ApiV2AttachView, self).check_permissions(request)
-#         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
-#             self.permission_denied(request)  # Raises PermissionDenied exception.
-# 
-#     def post(self, request):
-# 
-#         def _list_attached_subs(consumer=None):
-#             entitlements = uep.getEntitlementList(consumerId=consumer['uuid'])
-#             if entitlements == []:
-#                 return []
-#             pool_list = []
-#             for item in entitlements:
-#                 if item['consumer']['uuid'] == consumer['uuid']:
-#                     pool_list.append(item['pool']['id'])
-#             return pool_list
-# 
-#         data = request.data.copy()
-#         pool_id = data.get('pool_id', None)
-#         org = data.get('org', None)
-#         if not pool_id:
-#             return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
-#         user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
-#         pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
-#         if pool_id and user and pw:
-#             try:
-#                 # Create connection
-#                 from rhsm.connection import UEPConnection, RestlibException, UnauthorizedException, GoneException
-#                 uep = UEPConnection(username=user, password=pw, insecure=True)
-# 
-#                 # Check if consumer already exists
-#                 consumer = getattr(settings, 'ENTITLEMENT_CONSUMER', dict())
-# 
-#                 # Get owner/org list
-#                 orgs = uep.getOwnerList(user)
-#                 org_ids = []
-#                 for item in orgs:
-#                     org_ids.append(item['key'])
-#                 if org:
-#                     if org not in org_ids:
-#                         return Response({"error": _("No organizations with that ID are associated with that account")}, status=status.HTTP_400_BAD_REQUEST)
-# 
-#                 else:
-#                     if len(orgs) == 0:
-#                         return Response({"error": _("No organizations associated with that account")}, status=status.HTTP_400_BAD_REQUEST)
-#                     # Request org if there are multiple as we cannot be sure which the user intends to use
-#                     if len(orgs) > 1:
-#                         return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
-#                     else:
-#                         # Try the first owner key when creating consumer
-#                         org = orgs[0]['key']
-# 
-#                 # Use org key if provided, but not already on consumer record in db
-#                 if not getattr(consumer, 'org', None) and consumer != {}:
-#                     consumer['org'] = org
-#                 if consumer == {}:
-#                     consumer['org'] = org
-#                     consumer['name'] = "Ansible-Tower-" + str(random.randint(1,1000000000))
-#                     # Gather facts
-#                     install_type = 'traditional'
-#                     if os.environ.get('container') == 'oci':
-#                         install_type = 'openshift'
-#                     elif 'KUBERNETES_SERVICE_PORT' in os.environ:
-#                         install_type = 'k8s'
-#                     facts = {
-#                         "system.certificate_version": "3.2",
-#                         "tower.cluster_uuid": str(settings.INSTALL_UUID),
-#                         "tower.install_type": install_type,
-#                         "uname.machine": "x86_64",
-#                     }
-#                     try:
-#                         # Register consumer
-#                         consumer_resp = uep.registerConsumer(name=consumer['name'], type="system", owner=consumer['org'], facts=facts)
-#                         consumer['uuid'] = consumer_resp['uuid']
-#                     except RestlibException as e:
-#                         if e.code == 404 and 'owner with key' in e.msg:
-#                             return Response({"error": _("Satellite Organization does not exist. ")}, status=status.HTTP_400_BAD_REQUEST)
-#                         return Response({"error": _("You must specify your Satellite Organization")}, status=status.HTTP_400_BAD_REQUEST)
-#                     except Exception as e:
-#                         logger.exception(e)
-#                         pass
-#                 else:
-#                     try:
-#                         # If consumer exists, and the pool_id is already attached, try to unattach existing sub first before attaching a new one
-#                         attached_pools = _list_attached_subs(consumer=consumer)
-#                         if pool_id in attached_pools:
-#                             consumer = getattr(settings, 'ENTITLEMENT_CONSUMER', dict())
-#                             uep.unbindByPoolId(consumer['uuid'], pool_id)
-#                     except Exception as e:
-#                         if (isinstance(e, GoneException) and getattr(e, 'code', None) == 410):
-#                             msg = _("Consumer has been deleted. Clearing consumer from Tower setting.  Please try again." + str(e))
-#                             settings.CONSUMER = {}
-#                             return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
-#                         # If unable to unattach sub from consumer, continue to clear license and cert
-#                         pass
-# 
-#                 # Save consumer_uuid in db
-#                 settings.ENTITLEMENT_CONSUMER = consumer
-# 
-#                 # Determine maximum quantity of pool
-#                 try:
-#                     pool = uep.getPool(poolId=pool_id, consumerId=consumer['uuid'])
-#                     pool_quantity = pool['quantity']
-#                 except Exception as e:
-#                     Response({"error": _("Unable to determine quantity of pool to be applied. Please try again.") + str(e)}, status=status.HTTP_400_BAD_REQUEST)
-# 
-#                 # Attach subscription to consumer
-#                 try:
-#                     attach = uep.bindByEntitlementPool(consumerId=consumer['uuid'], poolId=pool_id, quantity=pool_quantity)
-#                     consumer['serial_id'] = str(attach[0]['certificates'][0]['serial']['id'])
-#                 except Exception as e:
-#                     # A 404 was received because pool does not exist for this consumer
-#                     # A 403 was recieved because the sub was already attached to this consumer
-#                     # Or the subscription could not be attached to this consumer
-#                     if (isinstance(e, GoneException) and getattr(e, 'code', None) == 410):
-#                         msg = _("Consumer has been deleted.  ENTITLEMENT_CONSUMER setting will be cleared.  Please try again." + str(e))
-#                         settings.ENTITLEMENT_CONSUMER = {}
-#                         return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
-#                     return Response({"error": _("Unable to attach selected subscription to consumer. " + str(e))}, status=status.HTTP_400_BAD_REQUEST)
-# 
-#                 # Save consumer_uuid in db
-#                 settings.ENTITLEMENT_CONSUMER = consumer
-# 
-#                 # Attempt to get entitlement cert from RHSM 
-#                 entitlements = uep.getCertificates(consumer_uuid=consumer['uuid'], serials=[consumer['serial_id']])
-#                 # Concatenate certs and keys for the associated entitlement together
-#                 cert_key = ''
-# 
-#                 for entitlement in entitlements:
-#                     cert_key = entitlement['cert'] + entitlement['key']  # Potentially make this `=` --> '+=' to accomodate multiple certs/keys?
-# 
-#                 # Save the cert as a setting
-#                 if cert_key != '':
-#                     settings.ENTITLEMENT_CERT = cert_key
-#                 else:
-#                     return Response({"error": _("Could not attach subscription or find entitlement certificate.")}, status=status.HTTP_400_BAD_REQUEST)
-# 
-#                 # Return a 200 to denote the subscription has been successfully attached
-#                 # The UI will now make a separate POST to the config endpoint to validate and apply entitlement cert
-#                 return Response({}, status=status.HTTP_200_OK)
-# 
-# 
-#             except Exception as e:
-#                 msg = _("Invalid Subscription.")
-#                 # TODO: Catch specific errors
-#                 if (
-#                     isinstance(e, UnauthorizedException) and
-#                     getattr(e, 'code', None) == 401
-#                 ):
-#                     msg = _("The provided credentials are invalid (HTTP 401). Content host: " + uep.host +
-#                             "; Register this node with the correct content host via subscription-manager.")
-#                 # elif isinstance(e, requests.exceptions.ProxyError):
-#                 #     msg = _("Unable to connect to proxy server.")
-#                 # elif isinstance(exc, requests.exceptions.ConnectionError):
-#                 #     msg = _("Could not connect to subscription service.")
-#                 # elif isinstance(exc, (ValueError, OSError)) and exc.args:
-#                 #     msg = exc.args[0]
-#                 else:
-#                     logger.exception(smart_text(u"Invalid subscription submitted."),
-#                                      extra=dict(actor=request.user.username))
-#                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
-# 
-#         return Response({"error": _("No pool_id provided, or SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD are not set.")}, 
-#                         status=status.HTTP_400_BAD_REQUEST)
 
 
 class ApiV2ConfigView(APIView):
