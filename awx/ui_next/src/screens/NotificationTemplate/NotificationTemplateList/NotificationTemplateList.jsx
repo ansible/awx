@@ -166,6 +166,7 @@ function NotificationTemplatesList({ i18n }) {
             renderItem={template => (
               <NotificationTemplateListItem
                 key={template.id}
+                fetchTemplates={fetchTemplates}
                 template={template}
                 detailUrl={`${match.url}/${template.id}`}
                 isSelected={selected.some(row => row.id === template.id)}
