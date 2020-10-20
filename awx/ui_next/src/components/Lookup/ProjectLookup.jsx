@@ -6,7 +6,7 @@ import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ProjectsAPI } from '../../api';
 import { Project } from '../../types';
-import { FieldTooltip } from '../FormField';
+import Popover from '../Popover';
 import OptionsList from '../OptionsList';
 import useAutoPopulateLookup from '../../util/useAutoPopulateLookup';
 import useRequest from '../../util/useRequest';
@@ -80,7 +80,7 @@ function ProjectLookup({
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Project`)}
-      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
+      labelIcon={tooltip && <Popover content={tooltip} />}
     >
       <Lookup
         id="project"

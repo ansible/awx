@@ -6,7 +6,8 @@ import { useField } from 'formik';
 import { FormGroup, Alert } from '@patternfly/react-core';
 import { required } from '../../../../util/validators';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
-import FormField, { FieldTooltip } from '../../../../components/FormField';
+import FormField from '../../../../components/FormField';
+import Popover from '../../../../components/Popover';
 import { BrandName } from '../../../../variables';
 
 // Setting BrandName to a variable here is necessary to get the jest tests
@@ -84,7 +85,7 @@ const ManualSubForm = ({
         validated={!pathMeta.touched || !pathMeta.error ? 'default' : 'error'}
         label={i18n._(t`Playbook Directory`)}
         labelIcon={
-          <FieldTooltip
+          <Popover
             content={i18n._(t`Select from the list of directories found in
           the Project Base Path. Together the base path and the playbook
           directory provide the full path used to locate playbooks.`)}

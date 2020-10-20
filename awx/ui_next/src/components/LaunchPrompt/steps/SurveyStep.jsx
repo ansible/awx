@@ -9,8 +9,9 @@ import {
   SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
-import FormField, { FieldTooltip } from '../../FormField';
+import FormField from '../../FormField';
 import AnsibleSelect from '../../AnsibleSelect';
+import Popover from '../../Popover';
 import {
   required,
   minMaxValue,
@@ -99,7 +100,7 @@ function MultipleChoiceField({ question }) {
       isRequired={question.required}
       validated={isValid ? 'default' : 'error'}
       label={question.question_name}
-      labelIcon={<FieldTooltip content={question.question_description} />}
+      labelIcon={<Popover content={question.question_description} />}
     >
       <AnsibleSelect
         id={id}
@@ -134,7 +135,7 @@ function MultiSelectField({ question, i18n }) {
       isRequired={question.required}
       validated={isValid ? 'default' : 'error'}
       label={question.question_name}
-      labelIcon={<FieldTooltip content={question.question_description} />}
+      labelIcon={<Popover content={question.question_description} />}
     >
       <Select
         variant={SelectVariant.typeaheadMulti}

@@ -20,7 +20,6 @@ import useRequest from '../../../util/useRequest';
 import FormActionGroup from '../../../components/FormActionGroup';
 import FormField, {
   CheckboxField,
-  FieldTooltip,
   FormSubmitError,
 } from '../../../components/FormField';
 import FieldWithPrompt from '../../../components/FieldWithPrompt';
@@ -39,6 +38,7 @@ import {
   ProjectLookup,
   MultiCredentialsLookup,
 } from '../../../components/Lookup';
+import Popover from '../../../components/Popover';
 import { JobTemplatesAPI } from '../../../api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
@@ -274,7 +274,8 @@ function JobTemplateForm({
             promptId="template-ask-scm-branch-on-launch"
             promptName="ask_scm_branch_on_launch"
             tooltip={i18n._(
-              t`Select a branch for the job template. This branch is applied to all job template nodes that prompt for a branch.`
+              t`Select a branch for the job template. This branch is applied to
+              all job template nodes that prompt for a branch.`
             )}
           >
             <TextInput
@@ -295,7 +296,7 @@ function JobTemplateForm({
           isRequired
           label={i18n._(t`Playbook`)}
           labelIcon={
-            <FieldTooltip
+            <Popover
               content={i18n._(
                 t`Select the playbook to be executed by this job.`
               )}
@@ -333,7 +334,7 @@ function JobTemplateForm({
           <FormGroup
             label={i18n._(t`Labels`)}
             labelIcon={
-              <FieldTooltip
+              <Popover
                 content={i18n._(t`Optional labels that describe this job template,
                       such as 'dev' or 'test'. Labels can be used to group and filter
                       job templates and completed jobs.`)}
@@ -354,7 +355,10 @@ function JobTemplateForm({
             label={i18n._(t`Variables`)}
             promptId="template-ask-variables-on-launch"
             tooltip={i18n._(
-              t`Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.`
+              t`Pass extra command line variables to the playbook. This is the
+              -e or --extra-vars command line parameter for ansible-playbook.
+              Provide key/value pairs using either YAML or JSON. Refer to the
+              Ansible Tower documentation for example syntax.`
             )}
           />
           <FormColumnLayout>
@@ -439,7 +443,7 @@ function JobTemplateForm({
               promptName="ask_diff_mode_on_launch"
               tooltip={i18n._(t`If enabled, show the changes made by
                 Ansible tasks, where supported. This is equivalent
-                to Ansible&#x2019s --diff mode.`)}
+                to Ansible's --diff mode.`)}
             >
               <Switch
                 id="template-show-changes"
@@ -505,7 +509,7 @@ function JobTemplateForm({
                       <span>
                         {i18n._(t`Provisioning Callbacks`)}
                         &nbsp;
-                        <FieldTooltip
+                        <Popover
                           content={i18n._(t`Enables creation of a provisioning
                               callback URL. Using the URL a host can contact BRAND_NAME
                               and request a configuration update using this job
@@ -525,7 +529,7 @@ function JobTemplateForm({
                       <span>
                         {i18n._(t`Enable Webhook`)}
                         &nbsp;
-                        <FieldTooltip
+                        <Popover
                           content={i18n._(t`Enable webhook for this template.`)}
                         />
                       </span>
@@ -548,7 +552,9 @@ function JobTemplateForm({
                     name="use_fact_cache"
                     label={i18n._(t`Enable Fact Storage`)}
                     tooltip={i18n._(
-                      t`If enabled, this will store gathered facts so they can be viewed at the host level. Facts are persisted and injected into the fact cache at runtime.`
+                      t`If enabled, this will store gathered facts so they can
+                      be viewed at the host level. Facts are persisted and
+                      injected into the fact cache at runtime.`
                     )}
                   />
                 </FormCheckboxLayout>

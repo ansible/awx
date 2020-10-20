@@ -4,7 +4,7 @@ import { node, number, oneOfType, shape, string, arrayOf } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '../DetailList';
 import MultiButtonToggle from '../MultiButtonToggle';
-import DetailPopover from '../DetailPopover';
+import Popover from '../Popover';
 import {
   yamlToJson,
   jsonToYaml,
@@ -69,7 +69,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
                 {label}
               </span>
               {helpText && (
-                <DetailPopover header={label} content={helpText} id={dataCy} />
+                <Popover header={label} content={helpText} id={dataCy} />
               )}
             </div>
           </SplitItem>
@@ -122,9 +122,13 @@ VariablesDetail.propTypes = {
   value: oneOfType([shape({}), arrayOf(string), string]).isRequired,
   label: node.isRequired,
   rows: number,
+  dataCy: string,
+  helpText: string,
 };
 VariablesDetail.defaultProps = {
   rows: null,
+  dataCy: '',
+  helpText: '',
 };
 
 export default VariablesDetail;

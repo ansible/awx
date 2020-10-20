@@ -6,14 +6,12 @@ import { FormGroup } from '@patternfly/react-core';
 import { minMaxValue, regExp } from '../../../../util/validators';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
 import { VariablesField } from '../../../../components/CodeMirrorInput';
-import FormField, {
-  CheckboxField,
-  FieldTooltip,
-} from '../../../../components/FormField';
+import FormField, { CheckboxField } from '../../../../components/FormField';
 import {
   FormFullWidthLayout,
   FormCheckboxLayout,
 } from '../../../../components/FormLayout';
+import Popover from '../../../../components/Popover';
 
 export const SourceVarsField = withI18n()(({ i18n }) => (
   <FormFullWidthLayout>
@@ -39,7 +37,7 @@ export const VerbosityField = withI18n()(({ i18n }) => {
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Verbosity`)}
       labelIcon={
-        <FieldTooltip
+        <Popover
           content={i18n._(t`Control the level of output Ansible
         will produce for inventory source update jobs.`)}
         />
