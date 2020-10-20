@@ -97,6 +97,21 @@
         that:
           - "result is changed"
 
+    - name: Test Inventory Source Update for All Sources (using inventory_source as alias for name)
+      tower_inventory_source_update:
+        inventory_source: "{{ item.name }}"
+        inventory: "{{ inv_name }}"
+        organization: Default
+        wait: true
+      loop: "{{ query('awx.awx.tower_api', 'inventory_sources', query_params={ 'inventory': created_inventory.id }, expect_objects=True, return_objects=True) }}"
+      loop_control:
+        label: "{{ item.name }}"
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
   always:
     - name: Delete Inventory
       tower_inventory:

@@ -90,7 +90,7 @@ from ..module_utils.tower_api import TowerAPIModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(required=True),
+        name=dict(required=True, aliases=['inventory_source']),
         inventory=dict(required=True),
         organization=dict(),
         wait=dict(default=False, type='bool'),
