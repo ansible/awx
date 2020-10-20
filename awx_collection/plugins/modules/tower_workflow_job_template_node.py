@@ -316,6 +316,7 @@ def main():
         workflow_job_template_node = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
         workflow_job_template_node_id = workflow_job_template_node['id']
         module.json_output['workflow_node_id'] = workflow_job_template_node_id
+        existing_item = None
         # Due to not able to lookup workflow_approval_templates, find the existing item in another place
         if workflow_job_template_node['related'].get('unified_job_template') is not None:
             existing_item = module.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
