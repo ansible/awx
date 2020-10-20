@@ -137,6 +137,16 @@ EXAMPLES = '''
     target_team: "My Team"
     role: member
     state: present
+
+- name: Add Joe to multiple job templates and a workflow
+  tower_role:
+    user: joe
+    role: execute
+    workflow: test-role-workflow
+    job_templates:
+      - jt1
+      - jt2
+    state: present
 '''
 
 from ..module_utils.tower_api import TowerAPIModule
