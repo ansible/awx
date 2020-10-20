@@ -59,7 +59,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
         <FormFullWidthLayout>
           <FormGroup
             fieldId="module_name"
-            aria-label={i18n._(t`Module`)}
+            aria-label={i18n._(t`select module`)}
             label={i18n._(t`Module`)}
             isRequired
             helperTextInvalid={moduleNameMeta.error}
@@ -136,7 +136,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
           />
           <FormGroup
             fieldId="verbosity"
-            aria-label={i18n._(t`Verbosity`)}
+            aria-label={i18n._(t`select verbosity`)}
             label={i18n._(t`Verbosity`)}
             isRequired
             validated={

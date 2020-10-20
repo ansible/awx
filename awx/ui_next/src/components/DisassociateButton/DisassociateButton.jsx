@@ -79,11 +79,12 @@ function DisassociateButton({
       {isKebabified ? (
         <DropdownItem
           key="add"
+          aria-label={i18n._(t`disassociate`)}
           isDisabled={isDisabled}
           component="button"
           onClick={() => setIsOpen(true)}
         >
-          {i18n._(t`Delete`)}
+          {i18n._(t`Disassociate`)}
         </DropdownItem>
       ) : (
         <Tooltip content={renderTooltip()} position="top">
