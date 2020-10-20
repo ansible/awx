@@ -231,7 +231,7 @@ function InventoryHostList({ i18n }) {
           onClose={() => setIsAdHocCommandsOpen(false)}
           credentialTypeId={credentialTypeId}
           moduleOptions={moduleOptions}
-          itemId={id}
+          itemId={parseInt(id, 10)}
         />
       )}
       {deletionError && (

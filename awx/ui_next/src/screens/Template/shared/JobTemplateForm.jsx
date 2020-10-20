@@ -239,6 +239,7 @@ function JobTemplateForm({
           isRequired={!askInventoryOnLaunchField.value}
         >
           <InventoryLookup
+            fieldId="template-inventory"
             value={inventory}
             promptId="template-ask-inventory-on-launch"
             promptName="ask_inventory_on_launch"
