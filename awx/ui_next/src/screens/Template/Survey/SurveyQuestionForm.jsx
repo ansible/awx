@@ -18,6 +18,8 @@ import {
   noWhiteSpace,
   combine,
   maxLength,
+  integer,
+  number as numberValidator,
 } from '../../../util/validators';
 
 function AnswerTypeField({ i18n }) {
@@ -177,7 +179,15 @@ function SurveyQuestionForm({
               <FormField
                 id="question-default"
                 name="default"
-                validate={maxLength(formik.values.max, i18n)}
+                validate={
+                  {
+                    text: maxLength(formik.values.max, i18n),
+                    integer: integer(i18n),
+                    float: numberValidator(i18n),
+                  }[formik.values.type]
+                }
+                min={formik.values.min}
+                max={formik.values.max}
                 type={formik.values.type === 'text' ? 'text' : 'number'}
                 label={i18n._(t`Default answer`)}
               />
