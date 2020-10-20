@@ -438,8 +438,8 @@ class TowerAPIModule(TowerModule):
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
 
-            # 200 is response from approval node creation
-            if response['status_code'] == 201:
+            # 200 is response from approval node creation on tower 3.7.3 or awx 15.0.0 or earlier.
+            if response['status_code'] in [200, 201]:
                 self.json_output['name'] = 'unknown'
                 for key in ('name', 'username', 'identifier', 'hostname'):
                     if key in response['json']:
