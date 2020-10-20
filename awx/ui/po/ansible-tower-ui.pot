@@ -5070,7 +5070,7 @@ msgid "Provide environment variables to pass to the custom inventory script."
 msgstr ""
 
 #: client/src/license/license.partial.html:128
-msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS > SYSTEM."
+msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS &gt; SYSTEM."
 msgstr ""
 
 #: client/src/templates/job_templates/job-template.form.js:374

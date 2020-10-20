@@ -5102,8 +5102,8 @@ msgid "Provide environment variables to pass to the custom inventory script."
 msgstr "カスタムインベントリースクリプトに渡す環境変数を指定します。"
 
 #: client/src/license/license.partial.html:128
-msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS > SYSTEM."
-msgstr "Red Hat の顧客認証情報を指定して、利用可能なライセンス一覧から選択してください。使用した認証情報は、今後、ライセンスの更新や延長情報を取得する時に利用できるように保存されます。設定 > システムでこの情報は更新または削除できます。"
+msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS &gt; SYSTEM."
+msgstr "Red Hat の顧客認証情報を指定して、利用可能なライセンス一覧から選択してください。使用した認証情報は、今後、ライセンスの更新や延長情報を取得する時に利用できるように保存されます。設定 &gt; システムでこの情報は更新または削除できます。"
 
 #: client/src/templates/job_templates/job-template.form.js:374
 #: client/src/templates/job_templates/job-template.form.js:382
