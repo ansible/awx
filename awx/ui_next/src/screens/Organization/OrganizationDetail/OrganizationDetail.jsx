@@ -12,6 +12,7 @@ import {
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import AlertModal from '../../../components/AlertModal';
 import ChipGroup from '../../../components/ChipGroup';
+import CredentialChip from '../../../components/CredentialChip';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import DeleteButton from '../../../components/DeleteButton';
@@ -30,6 +31,7 @@ function OrganizationDetail({ i18n, organization }) {
     created,
     modified,
     summary_fields,
+    galaxy_credentials,
   } = organization;
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -108,6 +110,23 @@ function OrganizationDetail({ i18n, organization }) {
                   <Chip key={ig.id} isReadOnly>
                     {ig.name}
                   </Chip>
+                ))}
+              </ChipGroup>
+            }
+          />
+        )}
+        {galaxy_credentials && galaxy_credentials.length > 0 && (
+          <Detail
+            fullWidth
+            label={i18n._(t`Galaxy Credentials`)}
+            value={
+              <ChipGroup numChips={5} totalChips={galaxy_credentials.length}>
+                {galaxy_credentials.map(credential => (
+                  <CredentialChip
+                    credential={credential}
+                    key={credential.id}
+                    isReadOnly
+                  />
                 ))}
               </ChipGroup>
             }

@@ -24,6 +24,12 @@ class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
     return this.http.options(`${this.baseUrl}${id}/teams/`);
   }
 
+  readGalaxyCredentials(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/galaxy_credentials/`, {
+      params,
+    });
+  }
+
   createUser(id, data) {
     return this.http.post(`${this.baseUrl}${id}/users/`, data);
   }
@@ -47,6 +53,19 @@ class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
       `${this.baseUrl}${resourceId}/notification_templates_approvals/`,
       { id: notificationId, disassociate: true }
     );
+  }
+
+  associateGalaxyCredential(resourceId, credentialId) {
+    return this.http.post(`${this.baseUrl}${resourceId}/galaxy_credentials/`, {
+      id: credentialId,
+    });
+  }
+
+  disassociateGalaxyCredential(resourceId, credentialId) {
+    return this.http.post(`${this.baseUrl}${resourceId}/galaxy_credentials/`, {
+      id: credentialId,
+      disassociate: true,
+    });
   }
 }
 
