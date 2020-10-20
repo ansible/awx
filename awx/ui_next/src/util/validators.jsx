@@ -79,7 +79,11 @@ export function integer(i18n) {
 export function number(i18n) {
   return value => {
     const str = String(value);
-    if (/^[0-9]*(\.[0-9]*)?$/.test(str)) {
+    if (/^-?[0-9]*(\.[0-9]*)?$/.test(str)) {
+      return undefined;
+    }
+    // large number scientific notation (e.g. '1e+21')
+    if (/^-?[0-9]*e[+-][0-9]*$/.test(str)) {
       return undefined;
     }
     return i18n._(t`This field must be a number`);
