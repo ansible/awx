@@ -29,8 +29,8 @@ describe('<Dashboard />', () => {
     expect(pageWrapper.length).toBe(1);
   });
 
-  test('renders jobs list by default', () => {
-    expect(pageWrapper.find('JobList').length).toBe(1);
+  test('renders dashboard graph by default', () => {
+    expect(pageWrapper.find('LineChart').length).toBe(1);
   });
 
   test('renders template list when the active tab is changed', async () => {
