@@ -799,6 +799,9 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             for name in ('awx', 'tower'):
                 r['{}_project_revision'.format(name)] = self.project.scm_revision
                 r['{}_project_scm_branch'.format(name)] = self.project.scm_branch
+        if self.scm_branch:
+            for name in ('awx', 'tower'):
+                r['{}_job_scm_branch'.format(name)] = self.scm_branch
         if self.job_template:
             for name in ('awx', 'tower'):
                 r['{}_job_template_id'.format(name)] = self.job_template.pk
