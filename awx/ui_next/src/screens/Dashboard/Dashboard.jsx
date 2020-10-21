@@ -155,7 +155,7 @@ function Dashboard({ i18n }) {
       </PageSection>
       <MainPageSection>
         <div className="spacer">
-          <Card>
+          <Card id="dashboard-main-container">
             <Tabs
               aria-label={i18n._(t`Tabs`)}
               activeKey={activeTabId}

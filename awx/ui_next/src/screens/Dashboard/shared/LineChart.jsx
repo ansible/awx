@@ -57,14 +57,17 @@ function LineChart({ id, data, height, i18n, pageContext }) {
       .append('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
+      // .attr('id', 'foo')
       .attr('z', 100)
       .append('g')
+      .attr('id', 'chart-container')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
     // Tooltip
     const tooltip = new ChartTooltip({
       svg: `#${id}`,
       colors,
       label: i18n._(t`Jobs`),
+      i18n,
     });
     const parseTime = d3.timeParse('%Y-%m-%d');
 
@@ -216,6 +219,10 @@ function LineChart({ id, data, height, i18n, pageContext }) {
       .attr('stroke-width', 2)
       .attr('d', failLine)
       .call(transition);
+
+    const dateFormat = d3.timeFormat('%-m/%-d');
+
+    // create our successLine circles
     svg
       .selectAll('dot')
       .data(formattedData)
@@ -226,6 +233,7 @@ function LineChart({ id, data, height, i18n, pageContext }) {
       .style('fill', () => colors(1))
       .attr('cx', d => x(d.DATE))
       .attr('cy', d => y(d.RAN))
+      .attr('id', d => `success-dot-${dateFormat(d.DATE)}`)
       .on('mouseover', handleMouseOver)
       .on('mousemove', handleMouseMove)
       .on('mouseout', handleMouseOut);
@@ -240,6 +248,7 @@ function LineChart({ id, data, height, i18n, pageContext }) {
       .style('fill', () => colors(0))
       .attr('cx', d => x(d.DATE))
       .attr('cy', d => y(d.FAIL))
+      .attr('id', d => `success-dot-${dateFormat(d.DATE)}`)
       .on('mouseover', handleMouseOver)
       .on('mousemove', handleMouseMove)
       .on('mouseout', handleMouseOut);

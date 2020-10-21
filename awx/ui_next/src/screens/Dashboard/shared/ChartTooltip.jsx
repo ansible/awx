@@ -1,16 +1,18 @@
 import * as d3 from 'd3';
+import { t } from '@lingui/macro';
 
 class Tooltip {
   constructor(opts) {
     this.label = opts.label;
     this.svg = opts.svg;
     this.colors = opts.colors;
+    this.i18n = opts.i18n;
     this.draw();
   }
 
   draw() {
     this.toolTipBase = d3.select(`${this.svg} > svg`).append('g');
-    this.toolTipBase.attr('id', `svg-chart-Tooltip.base-${this.svg.slice(1)}`);
+    this.toolTipBase.attr('id', 'chart-tooltip');
     this.toolTipBase.attr('overflow', 'visible');
     this.toolTipBase.style('opacity', 0);
     this.toolTipBase.style('pointer-events', 'none');
@@ -54,14 +56,14 @@ class Tooltip {
       .attr('y', 4)
       .attr('font-size', 12)
       .attr('fill', 'white')
-      .text('Successful');
+      .text(this.i18n._(t`Successful`));
     this.failText = this.toolTipBase
       .append('text')
       .attr('x', 43)
       .attr('y', 28)
       .attr('font-size', 12)
       .attr('fill', 'white')
-      .text('Failed');
+      .text(this.i18n._(t`Failed`));
     this.icon = this.toolTipBase
       .append('text')
       .attr('fill', 'white')
@@ -77,13 +79,14 @@ class Tooltip {
       .attr('y', -21)
       .attr('font-size', 12)
       .attr('text-anchor', 'end')
-      .text('No Jobs');
+      .text(this.i18n._(t`No Jobs`));
     this.successful = this.toolTipBase
       .append('text')
       .attr('fill', 'white')
       .attr('font-size', 12)
       .attr('x', 122)
       .attr('y', 4)
+      .attr('id', 'successful-count')
       .text('0');
     this.failed = this.toolTipBase
       .append('text')
@@ -91,6 +94,7 @@ class Tooltip {
       .attr('font-size', 12)
       .attr('x', 122)
       .attr('y', 28)
+      .attr('id', 'failed-count')
       .text('0');
     this.date = this.toolTipBase
       .append('text')
@@ -99,7 +103,7 @@ class Tooltip {
       .attr('x', 20)
       .attr('y', -21)
       .attr('font-size', 12)
-      .text('Never');
+      .text(this.i18n._(t`Never`));
   }
 
   handleMouseOver = d => {
