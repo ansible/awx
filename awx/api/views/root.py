@@ -263,8 +263,8 @@ class ApiV2AttachView(APIView):
                                      extra=dict(actor=request.user.username))
                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
         for sub in validated:
-            print(sub['pool_id'], pool_id)
             if sub['pool_id'] == pool_id:
+                sub['valid_key'] = True
                 settings.LICENSE = sub
                 return Response(sub)
 

@@ -33,22 +33,6 @@ MAX_INSTANCES = 9999999
 logger = logging.getLogger(__name__)
 
 
-def str_to_datetime(string):
-    if not string:
-        return 0
-    t_parts = re.split('-| |:|\+', string) # noqa
-
-    year = int(t_parts[0])
-    month = int(t_parts[1])
-    day = int(t_parts[2])
-    hour = int(t_parts[3])
-    minute = int(t_parts[4])
-    second = int(t_parts[5])
-    microsecond = int(t_parts[7])
-
-    return datetime(year, month, day, hour, minute, second, microsecond)
-
-
 class Licenser(object):
     # warn when there is a month (30 days) left on the license
     LICENSE_TIMEOUT = 60 * 60 * 24 * 30
@@ -160,8 +144,6 @@ class Licenser(object):
                 logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
                 return
 
-        license_type = 'enterprise'
-
         # Parse output for subscription metadata to build config
         license = dict()
         license['sku'] = certinfo.order.sku
@@ -172,7 +154,8 @@ class Licenser(object):
         license['license_date'] = certinfo.end.strftime('%s')
         license['product_name'] = certinfo.order.name
         license['valid_key'] = True
-        license['license_type'] = license_type
+        license['license_type'] = 'enterprise'
+        license['satellite'] = False
 
         self._attrs.update(license)
         settings.LICENSE = self._attrs
@@ -240,7 +223,12 @@ class Licenser(object):
 
 
     def get_satellite_subs(self, host, user, pw):
-        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
+        from rhsm.config import get_config_parser
+        config = get_config_parser()
+        try:
+            verify = str(config.get("rhsm", "repo_ca_cert"))
+        except Exception as e:
+            raise OSError('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
         json = []
         try:
             orgs = requests.get(
@@ -264,9 +252,29 @@ class Licenser(object):
                 auth=(user, pw)
             )
             resp.raise_for_status()
-            if resp.json()['results'] != []:
-                json.extend(resp.json()['results'])
+            results = resp.json()['results']
+            if results != []:
+                for sub in results:
+                    # Parse output for subscription metadata to build config
+                    license = dict()
+                    license['productId'] = sub['product_id']
+                    license['quantity'] = int(sub['quantity'])
+                    license['support_level'] = sub['support_level']
+                    license['subscription_name'] = sub['name']
+                    license['id'] = sub['upstream_pool_id']
+                    license['endDate'] = sub['end_date']
+                    license['productName'] = "Red Hat Ansible Automation"
+                    license['valid_key'] = True
+                    license['license_type'] = 'enterprise'
+                    license['satellite'] = True
+                    json.append(license)
         return json
+
+
+    def is_appropriate_sat_sub(self, sub):
+        if 'Red Hat Ansible Automation' not in sub['subscription_name']:
+            return False
+        return True
 
 
     def is_appropriate_sub(self, sub):
@@ -281,21 +289,24 @@ class Licenser(object):
 
     def generate_license_options_from_entitlements(self, json):
         from dateutil.parser import parse
-        ValidSub = collections.namedtuple('ValidSub', 'sku name support_level end_date trial quantity pool_id')
+        ValidSub = collections.namedtuple('ValidSub', 'sku name support_level end_date trial quantity pool_id satellite')
         valid_subs = []
         for sub in json:
-            if self.is_appropriate_sub(sub):
+            satellite = sub['satellite']
+            if satellite:
+                is_valid = self.is_appropriate_sat_sub(sub)
+            else:
+                is_valid = self.is_appropriate_sub(sub)
+            if is_valid:
                 try:
                     end_date = parse(sub.get('endDate'))
                 except Exception:
                     continue
-
                 now = datetime.utcnow()
                 now = now.replace(tzinfo=end_date.tzinfo)
                 if end_date < now:
                     # If the sub has a past end date, skip it
                     continue
-
                 try:
                     quantity = int(sub['quantity'])
                     if quantity == -1:
@@ -308,12 +319,15 @@ class Licenser(object):
                 trial = sku.startswith('S')  # i.e.,, SER/SVC
                 support_level = ''
                 pool_id = sub['id']
-                for attr in sub.get('productAttributes', []):
-                    if attr.get('name') == 'support_level':
-                        support_level = attr.get('value')
+                if satellite:
+                    support_level = sub['support_level']
+                else:
+                    for attr in sub.get('productAttributes', []):
+                        if attr.get('name') == 'support_level':
+                            support_level = attr.get('value')
 
                 valid_subs.append(ValidSub(
-                    sku, sub['productName'], support_level, end_date, trial, quantity, pool_id
+                    sku, sub['productName'], support_level, end_date, trial, quantity, pool_id, satellite
                 ))
 
         if valid_subs:
@@ -338,6 +352,7 @@ class Licenser(object):
                     sub.name
                 )
                 license._attrs['subscription_name'] = subscription_name
+                license._attrs['satellite'] = satellite
                 license.update(
                     license_date=int(sub.end_date.strftime('%s'))
                 )
