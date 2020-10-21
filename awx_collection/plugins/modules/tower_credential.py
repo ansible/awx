@@ -272,7 +272,7 @@ EXAMPLES = '''
 from ..module_utils.tower_api import TowerModule
 
 KIND_CHOICES = {
-    'aws':'Amazon Web Services',
+    'aws': 'Amazon Web Services',
     'tower': 'Ansible Tower',
     'gce': 'Google Compute Engine',
     'azure_rm': 'Microsoft Azure Resource Manager',
