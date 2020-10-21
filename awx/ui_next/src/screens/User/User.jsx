@@ -21,7 +21,7 @@ import UserEdit from './UserEdit';
 import UserOrganizations from './UserOrganizations';
 import UserTeams from './UserTeams';
 import UserTokens from './UserTokens';
-import UserAccessList from './UserAccess/UserAccessList';
+import UserRolesList from './UserRoles/UserRolesList';
 
 function User({ i18n, setBreadcrumb, me }) {
   const location = useLocation();
@@ -68,7 +68,7 @@ function User({ i18n, setBreadcrumb, me }) {
       id: 1,
     },
     { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 },
-    { name: i18n._(t`Access`), link: `${match.url}/access`, id: 3 },
+    { name: i18n._(t`Roles`), link: `${match.url}/roles`, id: 3 },
   ];
 
   if (me?.id === Number(match.params.id)) {
@@ -128,8 +128,8 @@ function User({ i18n, setBreadcrumb, me }) {
               <UserTeams userId={Number(match.params.id)} />
             </Route>
             {user && (
-              <Route path="/users/:id/access">
-                <UserAccessList user={user} />
+              <Route path="/users/:id/roles">
+                <UserRolesList user={user} />
               </Route>
             )}
             <Route path="/users/:id/tokens">
