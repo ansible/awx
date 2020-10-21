@@ -220,7 +220,7 @@ function LineChart({ id, data, height, i18n, pageContext }) {
       .attr('d', failLine)
       .call(transition);
 
-    const dateFormat = d3.timeFormat('%-m/%-d');
+    const dateFormat = d3.timeFormat('%-m-%-d');
 
     // create our successLine circles
     svg
