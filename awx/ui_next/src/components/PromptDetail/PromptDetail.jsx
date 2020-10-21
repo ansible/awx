@@ -67,10 +67,11 @@ function hasPromptData(launchData) {
   );
 }
 
-function omitOverrides(resource, overrides) {
+function omitOverrides(resource, overrides, defaultConfig) {
   const clonedResource = {
     ...resource,
     summary_fields: { ...resource.summary_fields },
+    ...defaultConfig
   };
   Object.keys(overrides).forEach(keyToOmit => {
     delete clonedResource[keyToOmit];
@@ -88,7 +89,8 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
     4: i18n._(t`4 (Connection Debug)`),
   };
 
-  const details = omitOverrides(resource, overrides);
+  const details = omitOverrides(resource, overrides, launchConfig.defaults);
+  details.type = overrides?.nodeType || details.type
   const hasOverrides = Object.keys(overrides).length > 0;
 
   return (
@@ -137,13 +139,13 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
           <Divider css="margin-top: var(--pf-global--spacer--lg)" />
           <PromptHeader>{i18n._(t`Prompted Values`)}</PromptHeader>
           <DetailList aria-label="Prompt Overrides">
-            {overrides?.job_type && (
+            {launchConfig.ask_job_type_on_launch &&  (
               <Detail
                 label={i18n._(t`Job Type`)}
                 value={toTitleCase(overrides.job_type)}
               />
             )}
-            {overrides?.credentials?.length > 0 && (
+            {launchConfig.ask_credential_on_launch && (
               <Detail
                 fullWidth
                 label={i18n._(t`Credentials`)}
@@ -164,28 +166,28 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                 }
               />
             )}
-            {overrides?.inventory && (
+            {launchConfig.ask_inventory_on_launch && (
               <Detail
                 label={i18n._(t`Inventory`)}
                 value={overrides.inventory?.name}
               />
             )}
-            {overrides?.scm_branch && (
+            {launchConfig.ask_scm_branch_on_launch && (
               <Detail
                 label={i18n._(t`Source Control Branch`)}
                 value={overrides.scm_branch}
               />
             )}
-            {overrides?.limit && (
+            {launchConfig.ask_limit_on_launch && (
               <Detail label={i18n._(t`Limit`)} value={overrides.limit} />
             )}
-            {overrides?.verbosity && (
+            {overrides?.verbosity && launchConfig.ask_verbosity_on_launch && (
               <Detail
                 label={i18n._(t`Verbosity`)}
                 value={VERBOSITY[overrides.verbosity]}
               />
             )}
-            {overrides?.job_tags && (
+            {launchConfig.ask_tags_on_launch && (
               <Detail
                 fullWidth
                 label={i18n._(t`Job Tags`)}
@@ -203,7 +205,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                 }
               />
             )}
-            {overrides?.skip_tags && (
+            {launchConfig.ask_skip_tags_on_launch && (
               <Detail
                 fullWidth
                 label={i18n._(t`Skip Tags`)}
@@ -221,7 +223,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                 }
               />
             )}
-            {overrides?.diff_mode && (
+            {launchConfig.ask_diff_mode_on_launch && (
               <Detail
                 label={i18n._(t`Show Changes`)}
                 value={
@@ -229,7 +231,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                 }
               />
             )}
-            {overrides?.extra_vars && (
+            {launchConfig.ask_variables_on_launch && (
               <VariablesDetail
                 label={i18n._(t`Variables`)}
                 rows={4}

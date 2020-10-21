@@ -20,7 +20,6 @@ function NodeAddModal({ i18n }) {
         values?.credentials
       );
 
-      values.inventory = values?.inventory?.id;
       values.addedCredentials = added;
       values.removedCredentials = removed;
     }

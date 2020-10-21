@@ -25,7 +25,7 @@ export default function useWorkflowNodeSteps(
       i18n,
       visited,
       resource,
-      nodeToEdit?.originalNodeObject
+      nodeToEdit
     ),
     useCredentialsStep(config, i18n, resource, nodeToEdit?.originalNodeObject),
     useOtherPromptsStep(config, i18n, resource, nodeToEdit?.originalNodeObject),
@@ -48,7 +48,8 @@ export default function useWorkflowNodeSteps(
       resource,
       steps[surveyStepIndex]?.survey,
       hasErrors,
-      needsPreviewStep
+      needsPreviewStep,
+      nodeToEdit?.originalNodeObject
     )
   );
 
@@ -65,7 +66,7 @@ export default function useWorkflowNodeSteps(
       resetForm({
         values: {
           ...initialValues,
-          nodeResource: formikValues.nodeResource,
+          nodeResource: formikValues.nodeResource || initialValues.nodeResource,
           nodeType: formikValues.nodeType || initialValues.nodeType,
           linkType: formikValues.linkType || 'success',
           verbosity: initialValues?.verbosity?.toString(),

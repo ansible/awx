@@ -308,9 +308,10 @@ function Visualizer({ template, i18n }) {
             )
           );
         } else {
+          node.promptValues.inventory = node.promptValues?.inventory?.id
           nodeRequests.push(
             WorkflowJobTemplatesAPI.createNode(template.id, {
-              ...node.promptValues,
+             ...node.promptValues,
               unified_job_template: node.unifiedJobTemplate.id,
             }).then(({ data }) => {
               node.originalNodeObject = data;

@@ -10,10 +10,12 @@ export default function usePreviewStep(
   resource,
   survey,
   hasErrors,
-  needsPreviewStep
+  needsPreviewStep,
+  nodeToEdit
 ) {
   const showStep =
     needsPreviewStep && resource && Object.keys(config).length > 0;
+    const promptResource = nodeToEdit || resource
   return {
     step: showStep
       ? {
@@ -23,7 +25,7 @@ export default function usePreviewStep(
           component: (
             <PreviewStep
               config={config}
-              resource={resource}
+              resource={promptResource}
               survey={survey}
               formErrors={hasErrors}
             />

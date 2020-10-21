@@ -9,10 +9,10 @@ export default function useNodeTypeStep(i18n, nodeToEdit) {
   const [, meta] = useField('nodeType');
   const [approvalNameField] = useField('approvalName');
   const [nodeTypeField, ,] = useField('nodeType');
-  const [nodeResouceField] = useField('nodeResource');
+  const [nodeResourceField] = useField('nodeResource');
 
   return {
-    step: getStep(i18n, nodeTypeField, approvalNameField, nodeResouceField),
+    step: getStep(i18n, nodeTypeField, approvalNameField, nodeResourceField),
     initialValues: getInitialValues(nodeToEdit),
     isReady: true,
     contentError: null,
@@ -24,10 +24,10 @@ export default function useNodeTypeStep(i18n, nodeToEdit) {
     },
   };
 }
-function getStep(i18n, nodeTypeField, approvalNameField, nodeResouceField) {
+function getStep(i18n, nodeTypeField, approvalNameField, nodeResourceField) {
   const isEnabled = () => {
     if (
-      (nodeTypeField.value !== 'approval' && nodeResouceField.value === null) ||
+      (nodeTypeField.value !== 'approval' && nodeResourceField.value === null) ||
       (nodeTypeField.value === 'approval' &&
         approvalNameField.value === undefined)
     ) {
@@ -61,7 +61,8 @@ function getInitialValues(nodeToEdit) {
     typeOfNode = {
       nodeType: 'job_template',
       nodeResource:
-        nodeToEdit.originalNodeObject.summary_fields.unified_job_template,
+        nodeToEdit.originalNodeObject?.summary_fields?.unified_job_template
+        || nodeToEdit.unifiedJobTemplate,
     };
   if (unifiedType === 'project' || unifiedType === 'project_update') {
     typeOfNode = { nodeType: 'project_sync' };

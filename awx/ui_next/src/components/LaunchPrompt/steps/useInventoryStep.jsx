@@ -14,7 +14,7 @@ export default function useInventoryStep(
   nodeToEdit
 ) {
   const [, meta] = useField('inventory');
-  const resource = nodeToEdit || selectedResource;
+  const resource = nodeToEdit?.originalNodeObject || nodeToEdit?.promptValues || selectedResource;
   const formError =
     Object.keys(visitedSteps).includes(STEP_ID) && (!meta.value || meta.error);
 
@@ -50,6 +50,6 @@ function getInitialValues(config, resource) {
   }
 
   return {
-    inventory: resource?.summary_fields?.inventory,
+    inventory: resource?.summary_fields?.inventory || resource?.inventory || null,
   };
 }
