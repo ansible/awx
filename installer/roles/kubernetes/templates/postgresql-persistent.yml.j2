@@ -99,13 +99,15 @@ objects:
                 name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_MAX_CONNECTIONS
             value: ${POSTGRESQL_MAX_CONNECTIONS}
-          image: registry.access.redhat.com/rhscl/postgresql-10-rhel7
+          image: registry.redhat.io/rhel8/postgresql-10
           imagePullPolicy: IfNotPresent
           livenessProbe:
-            initialDelaySeconds: 30
-            tcpSocket:
-              port: 5432
-            timeoutSeconds: 1
+            exec:
+              command:
+              - /usr/libexec/check-container
+              - --live
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
           name: postgresql
           ports:
           - containerPort: 5432
@@ -113,11 +115,7 @@ objects:
           readinessProbe:
             exec:
               command:
-              - /bin/sh
-              - -i
-              - -c
-              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d template1
-                -c 'SELECT 1'
+              - /usr/libexec/check-container
             initialDelaySeconds: 5
             timeoutSeconds: 1
           resources:
