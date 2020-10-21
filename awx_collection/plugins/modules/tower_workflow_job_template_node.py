@@ -91,8 +91,28 @@ options:
       description:
         - Name of unified job template to run in the workflow.
         - Can be a job template, project, inventory source, etc.
-        - Omit if creating an approval node (not yet implemented).
+        - Omit if creating an approval node.
+        - This parameter is mutually exclusive with C(approval_node).
       type: str
+    approval_node:
+      description:
+        - A dictionary of Name, description, and timeout values for the approval node.
+        - This parameter is mutually exclusive with C(unified_job_template).
+      type: dict
+      suboptions:
+        name:
+          description:
+            - Name of this workflow approval template.
+          type: str
+          required: True
+        description:
+          description:
+            - Optional description of this workflow approval template.
+          type: str
+        timeout:
+          description:
+            - The amount of time (in seconds) before the approval node expires and fails.
+          type: int
     all_parents_must_converge:
       description:
         - If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node
@@ -176,6 +196,7 @@ def main():
         diff_mode=dict(type='bool'),
         verbosity=dict(choices=['0', '1', '2', '3', '4', '5']),
         unified_job_template=dict(),
+        approval_node=dict(type='dict'),
         all_parents_must_converge=dict(type='bool'),
         success_nodes=dict(type='list', elements='str'),
         always_nodes=dict(type='list', elements='str'),
@@ -183,14 +204,20 @@ def main():
         credentials=dict(type='list', elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
+    mutually_exclusive = [("unified_job_template", "approval_node")]
+    required_one_of = [["unified_job_template", "approval_node", "success_nodes", "always_nodes", "failure_nodes"]]
 
     # Create a module for ourselves
-    module = TowerAPIModule(argument_spec=argument_spec)
+    module = TowerAPIModule(
+        argument_spec=argument_spec,
+        mutually_exclusive=mutually_exclusive,
+        required_one_of=required_one_of,
+    )
 
     # Extract our parameters
     identifier = module.params.get('identifier')
     state = module.params.get('state')
-
+    approval_node = module.params.get('approval_node')
     new_fields = {}
     search_fields = {'identifier': identifier}
 
@@ -264,9 +291,42 @@ def main():
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
         existing_item, new_fields,
-        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node',
+        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=not approval_node,
         associations=association_fields
     )
+
+    # Create approval node unified template or update existing
+    if approval_node:
+        # Set Approval Fields
+        new_fields = {}
+
+        # Extract Parameters
+        if approval_node.get('name') is None:
+            module.fail_json(msg="Approval node name is required to create approval node.")
+        if approval_node.get('name') is not None:
+            new_fields['name'] = approval_node['name']
+        if approval_node.get('description') is not None:
+            new_fields['description'] = approval_node['description']
+        if approval_node.get('timeout') is not None:
+            new_fields['timeout'] = approval_node['timeout']
+
+        # Find created workflow node ID
+        search_fields = {'identifier': identifier}
+        search_fields['workflow_job_template'] = workflow_job_template_id
+        workflow_job_template_node = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+        workflow_job_template_node_id = workflow_job_template_node['id']
+        module.json_output['workflow_node_id'] = workflow_job_template_node_id
+        existing_item = None
+        # Due to not able to lookup workflow_approval_templates, find the existing item in another place
+        if workflow_job_template_node['related'].get('unified_job_template') is not None:
+            existing_item = module.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
+        approval_endpoint = 'workflow_job_template_nodes/{0}/create_approval_template/'.format(workflow_job_template_node_id)
+        module.create_or_update_if_needed(
+            existing_item, new_fields,
+            endpoint=approval_endpoint, item_type='workflow_job_template_approval_node',
+            associations=association_fields
+        )
+    module.exit_json(**module.json_output)
 
 
 if __name__ == '__main__':
