@@ -111,14 +111,14 @@ export default
             const raw = new FileReader();
 
             raw.onload = function() {
-                $scope.newLicense.entitlement_cert = raw.result;
+                $scope.newLicense.manifest = btoa(raw.result);
             };
 
             try {
-                raw.readAsText(event.target.files[0]);
+                raw.readAsBinaryString(event.target.files[0]);
             } catch(err) {
                 ProcessErrors($rootScope, null, null, null,
-                    {msg: i18n._('Invalid file format. Please upload a certificate/key pair')});
+                    {msg: i18n._('Invalid file format. Please upload a valid Red Hat Subscription Manifest.')});
             }
         };
 
@@ -135,7 +135,7 @@ export default
         };
 
         $scope.replacePassword = () => {
-            if ($scope.user_is_superuser && !$scope.newLicense.entitlement_cert) {
+            if ($scope.user_is_superuser && !$scope.newLicense.manifest) {
                 $scope.showPlaceholderPassword = false;
                 $scope.subscriptionCreds.password = "";
                 $timeout(() => {
@@ -190,8 +190,8 @@ export default
             Wait('start');
             let payload = {};
             let attach = false;
-            if ($scope.newLicense.entitlement_cert) {
-                payload.entitlement_cert = $scope.newLicense.entitlement_cert;
+            if ($scope.newLicense.manifest) {
+                payload.manifest = $scope.newLicense.manifest;
             } else if ($scope.selectedLicense.fullLicense) {
                 payload.pool_id = $scope.selectedLicense.fullLicense.pool_id;
                 payload.org = $scope.subscriptionCreds.organization_id;

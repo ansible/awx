@@ -52,7 +52,6 @@ idna==2.9                 # via hyperlink, idna-ssl, requests, twisted, yarl
 importlib-metadata==1.5.0  # via importlib-resources, irc, jsonschema
 importlib-resources==1.4.0  # via jaraco.text
 incremental==17.5.0       # via twisted
-iniparse==0.5             # via rhsm
 irc==18.0.0               # via -r /awx_devel/requirements/requirements.in
 isodate==0.6.0            # via msrest, python3-saml
 jaraco.classes==3.1.0     # via jaraco.collections

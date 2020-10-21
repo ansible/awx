@@ -9,25 +9,32 @@ The Licenser class can do the following:
  - Parse an Entitlement cert to generate license
 '''
 
-import os
+import base64
 import configparser
 from datetime import datetime
 import collections
 import copy
-import tempfile
+import io
+import json
 import logging
+import os
 import re
 import requests
 import time
+import zipfile
+
+from dateutil.parser import parse as parse_date
+
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography import x509
 
 # Django
 from django.conf import settings
 
 # AWX
 from awx.main.models import Host
-
-# RHSM
-from rhsm import certificate
 
 MAX_INSTANCES = 9999999
 
@@ -38,6 +45,26 @@ def rhsm_config():
     config = configparser.ConfigParser()
     config.read('/etc/rhsm/rhsm.conf')
     return config
+
+
+def validate_entitlement_manifest(data):
+    buff = io.BytesIO()
+    buff.write(base64.b64decode(data))
+    z = zipfile.ZipFile(buff)
+    buff = io.BytesIO()
+
+    export = z.open('consumer_export.zip').read()
+    sig = z.open('signature').read()
+    with open('/etc/tower/certs/candlepin-redhat-ca.crt', 'rb') as f:
+        cert = x509.load_pem_x509_certificate(f.read(), backend=default_backend())
+        key = cert.public_key()
+    key.verify(sig, export, padding=padding.PKCS1v15(), algorithm=hashes.SHA256())
+
+    buff.write(export)
+    z = zipfile.ZipFile(buff)
+    for f in z.filelist:
+        if f.filename.startswith('export/entitlements') and f.filename.endswith('.json'):
+            return json.loads(z.open(f).read())
 
 
 class Licenser(object):
@@ -108,32 +135,15 @@ class Licenser(object):
         settings.LICENSE = {}
 
 
-    def _generate_product_config(self):
-        raw_cert = getattr(settings, 'ENTITLEMENT_CERT', None)
-        # Fail early if no entitlement cert is available
-        if not raw_cert or raw_cert == '':
-            self._clear_license_setting()
-            return
-
-        # Read certificate
-        certinfo = certificate.create_from_pem(raw_cert)
-        if not certinfo.is_valid():
-            raise ValueError("Could not parse entitlement certificate")
-        if certinfo.is_expired():
-            raise ValueError("Certificate is expired")
-        if not any(map(lambda x: x.id == '480', certinfo.products)):
-            self._clear_license_setting()
-            raise ValueError("Certificate is for another product")
-
+    def license_from_manifest(self, manifest):
         # Parse output for subscription metadata to build config
         license = dict()
-        license['sku'] = certinfo.order.sku
-        license['instance_count'] = int(certinfo.order.quantity_used)
-        license['support_level'] = certinfo.order.service_level
-        license['subscription_name'] = certinfo.order.name
-        license['pool_id'] = certinfo.pool.id
-        license['license_date'] = certinfo.end.strftime('%s')
-        license['product_name'] = certinfo.order.name
+        license['sku'] = manifest['pool']['productId']
+        license['instance_count'] = manifest['pool']['quantity']
+        license['subscription_name'] = manifest['pool']['productName']
+        license['pool_id'] = manifest['pool']['id']
+        license['license_date'] = parse_date(manifest['endDate']).strftime('%s')
+        license['product_name'] = manifest['pool']['productName']
         license['valid_key'] = True
         license['license_type'] = 'enterprise'
         license['satellite'] = False
@@ -269,7 +279,7 @@ class Licenser(object):
         ValidSub = collections.namedtuple('ValidSub', 'sku name support_level end_date trial quantity pool_id satellite')
         valid_subs = []
         for sub in json:
-            satellite = sub['satellite']
+            satellite = sub.get('satellite')
             if satellite:
                 is_valid = self.is_appropriate_sat_sub(sub)
             else:
@@ -344,12 +354,7 @@ class Licenser(object):
         )
 
 
-    def validate(self, new_cert=False):
-
-        # Generate Config from Entitlement cert if it exists
-        if new_cert:
-            self._generate_product_config()
-
+    def validate(self):
         # Return license attributes with additional validation info.
         attrs = copy.deepcopy(self._attrs)
         type = attrs.get('license_type', 'none')
@@ -368,7 +373,7 @@ class Licenser(object):
         attrs['available_instances'] = available_instances
         attrs['free_instances'] = max(0, available_instances - current_instances)
 
-        license_date = int(attrs.get('license_date', None) or 0)
+        license_date = int(attrs.get('license_date', 0) or 0)
         current_date = int(time.time())
         time_remaining = license_date - current_date
         attrs['time_remaining'] = time_remaining

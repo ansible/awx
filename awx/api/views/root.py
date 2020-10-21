@@ -20,7 +20,6 @@ from rest_framework import status
 import requests
 
 from awx.api.generics import APIView
-from awx.api.parsers import ConfigJSONParser
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
@@ -30,6 +29,7 @@ from awx.main.utils import (
     get_custom_venv_choices,
     to_python_boolean,
 )
+from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import (
@@ -276,7 +276,6 @@ class ApiV2ConfigView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Configuration')
     swagger_topic = 'System Configuration'
-    parser_classes = (ConfigJSONParser,)
 
     def check_permissions(self, request):
         super(ApiV2ConfigView, self).check_permissions(request)
@@ -287,7 +286,7 @@ class ApiV2ConfigView(APIView):
         '''Return various sitewide configuration settings'''
 
         from awx.main.utils.common import get_licenser
-        license_data = get_licenser().validate(new_cert=False)
+        license_data = get_licenser().validate()
 
         if not license_data.get('valid_key', False):
             license_data = {}
@@ -350,22 +349,25 @@ class ApiV2ConfigView(APIView):
                         extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Save Entitlement Cert/Key
+        from awx.main.utils.common import get_licenser
         license_data = json.loads(data_actual)
-        if 'entitlement_cert' in license_data:
-            settings.ENTITLEMENT_CERT = license_data['entitlement_cert']
+        if 'manifest' in license_data:
+            try:
+                license_data = validate_entitlement_manifest(license_data['manifest'])
+            except Exception as e:
+                logger.exception('Invalid license submitted.')
+                return Response({"error": 'Invalid license submitted.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            # Validate entitlement cert and get subscription metadata
-            # validate() will clear the entitlement cert if not valid
-            from awx.main.utils.common import get_licenser
-            license_data_validated = get_licenser().validate(new_cert=True)
-        except Exception:
-            logger.warning(smart_text(u"Invalid license submitted."),
-                           extra=dict(actor=request.user.username))
-            # If License invalid, clear entitlment cert value
-            settings.ENTITLEMENT_CERT = ''
-            return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                # Validate entitlement cert and get subscription metadata
+                # validate() will clear the entitlement cert if not valid
+                license_data_validated = get_licenser().license_from_manifest(license_data)
+            except Exception:
+                logger.warning(smart_text(u"Invalid license submitted."),
+                               extra=dict(actor=request.user.username))
+                return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            license_data_validated = get_licenser().validate()
 
         # If the license is valid, write it to the database.
         if license_data_validated['valid_key']:
@@ -381,7 +383,6 @@ class ApiV2ConfigView(APIView):
         # Clear license and entitlement certificate
         try:
             settings.LICENSE = {}
-            settings.ENTITLEMENT_CERT = ''
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception:
             # FIX: Log

@@ -12,7 +12,6 @@ from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
-from awx.main.validators import validate_entitlement_cert
 
 
 logger = logging.getLogger('awx.main.conf')
@@ -355,21 +354,6 @@ register(
     category=_('Jobs'),
     category_slug='jobs',
 )
-
-register(
-    'ENTITLEMENT_CERT',
-    field_class=fields.CharField,
-    allow_blank=True,
-    default='',
-    required=False,
-    validators=[validate_entitlement_cert],  # TODO: may need to use/modify `validate_certificate` validator
-    label=_('RHSM Entitlement Public Certificate and Private Key'),
-    help_text=_('Obtain a key pair via subscription-manager, or https://access.redhat.com. Refer to Ansible Tower docs for formatting key pair.'),
-    category=_('SYSTEM'),
-    category_slug='system',
-    encrypted=True,
-)
-
 
 register(
     'AWX_RESOURCE_PROFILING_ENABLED',

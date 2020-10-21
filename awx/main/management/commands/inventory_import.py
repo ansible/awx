@@ -901,7 +901,7 @@ class Command(BaseCommand):
             ))
 
     def check_license(self):
-        license_info = get_licenser().validate(new_cert=False)
+        license_info = get_licenser().validate()
         local_license_type = license_info.get('license_type', 'UNLICENSED')
         if license_info.get('license_key', 'UNLICENSED') == 'UNLICENSED':
             logger.error(LICENSE_NON_EXISTANT_MESSAGE)
@@ -938,7 +938,7 @@ class Command(BaseCommand):
                 logger.warning(LICENSE_MESSAGE % d)
 
     def check_org_host_limit(self):
-        license_info = get_licenser().validate(new_cert=False)
+        license_info = get_licenser().validate()
         if license_info.get('license_type', 'UNLICENSED') == 'open':
             return
 
