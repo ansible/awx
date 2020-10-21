@@ -1,0 +1,181 @@
+{
+  "count": 3,
+  "results": [{
+      "id": 2,
+      "type": "group",
+      "url": "/api/v2/groups/2/",
+      "related": {
+        "created_by": "/api/v2/users/10/",
+        "modified_by": "/api/v2/users/14/",
+        "variable_data": "/api/v2/groups/2/variable_data/",
+        "hosts": "/api/v2/groups/2/hosts/",
+        "potential_children": "/api/v2/groups/2/potential_children/",
+        "children": "/api/v2/groups/2/children/",
+        "all_hosts": "/api/v2/groups/2/all_hosts/",
+        "job_events": "/api/v2/groups/2/job_events/",
+        "job_host_summaries": "/api/v2/groups/2/job_host_summaries/",
+        "activity_stream": "/api/v2/groups/2/activity_stream/",
+        "inventory_sources": "/api/v2/groups/2/inventory_sources/",
+        "ad_hoc_commands": "/api/v2/groups/2/ad_hoc_commands/",
+        "inventory": "/api/v2/inventories/1/"
+      },
+      "summary_fields": {
+        "inventory": {
+          "id": 1,
+          "name": " Inventory 1 Org 0",
+          "description": "",
+          "has_active_failures": false,
+          "total_hosts": 33,
+          "hosts_with_active_failures": 0,
+          "total_groups": 4,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": ""
+        },
+        "created_by": {
+          "id": 10,
+          "username": "user-4",
+          "first_name": "",
+          "last_name": ""
+        },
+        "modified_by": {
+          "id": 14,
+          "username": "user-8",
+          "first_name": "",
+          "last_name": ""
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true,
+          "copy": true
+        }
+      },
+      "created": "2020-09-23T14:30:55.263148Z",
+      "modified": "2020-09-23T14:30:55.263175Z",
+      "name": " Group 2 Inventory 0",
+      "description": "",
+      "inventory": 1,
+      "variables": ""
+    },
+    {
+      "id": 3,
+      "type": "group",
+      "url": "/api/v2/groups/3/",
+      "related": {
+        "created_by": "/api/v2/users/11/",
+        "modified_by": "/api/v2/users/15/",
+        "variable_data": "/api/v2/groups/3/variable_data/",
+        "hosts": "/api/v2/groups/3/hosts/",
+        "potential_children": "/api/v2/groups/3/potential_children/",
+        "children": "/api/v2/groups/3/children/",
+        "all_hosts": "/api/v2/groups/3/all_hosts/",
+        "job_events": "/api/v2/groups/3/job_events/",
+        "job_host_summaries": "/api/v2/groups/3/job_host_summaries/",
+        "activity_stream": "/api/v2/groups/3/activity_stream/",
+        "inventory_sources": "/api/v2/groups/3/inventory_sources/",
+        "ad_hoc_commands": "/api/v2/groups/3/ad_hoc_commands/",
+        "inventory": "/api/v2/inventories/1/"
+      },
+      "summary_fields": {
+        "inventory": {
+          "id": 1,
+          "name": " Inventory 1 Org 0",
+          "description": "",
+          "has_active_failures": false,
+          "total_hosts": 33,
+          "hosts_with_active_failures": 0,
+          "total_groups": 4,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": ""
+        },
+        "created_by": {
+          "id": 11,
+          "username": "user-5",
+          "first_name": "",
+          "last_name": ""
+        },
+        "modified_by": {
+          "id": 15,
+          "username": "user-9",
+          "first_name": "",
+          "last_name": ""
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true,
+          "copy": true
+        }
+      },
+      "created": "2020-09-23T14:30:55.281583Z",
+      "modified": "2020-09-23T14:30:55.281615Z",
+      "name": " Group 3 Inventory 0",
+      "description": "",
+      "inventory": 1,
+      "variables": ""
+    },
+    {
+      "id": 4,
+      "type": "group",
+      "url": "/api/v2/groups/4/",
+      "related": {
+        "created_by": "/api/v2/users/12/",
+        "modified_by": "/api/v2/users/16/",
+        "variable_data": "/api/v2/groups/4/variable_data/",
+        "hosts": "/api/v2/groups/4/hosts/",
+        "potential_children": "/api/v2/groups/4/potential_children/",
+        "children": "/api/v2/groups/4/children/",
+        "all_hosts": "/api/v2/groups/4/all_hosts/",
+        "job_events": "/api/v2/groups/4/job_events/",
+        "job_host_summaries": "/api/v2/groups/4/job_host_summaries/",
+        "activity_stream": "/api/v2/groups/4/activity_stream/",
+        "inventory_sources": "/api/v2/groups/4/inventory_sources/",
+        "ad_hoc_commands": "/api/v2/groups/4/ad_hoc_commands/",
+        "inventory": "/api/v2/inventories/1/"
+      },
+      "summary_fields": {
+        "inventory": {
+          "id": 1,
+          "name": " Inventory 1 Org 0",
+          "description": "",
+          "has_active_failures": false,
+          "total_hosts": 33,
+          "hosts_with_active_failures": 0,
+          "total_groups": 4,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": ""
+        },
+        "created_by": {
+          "id": 12,
+          "username": "user-6",
+          "first_name": "",
+          "last_name": ""
+        },
+        "modified_by": {
+          "id": 16,
+          "username": "user-10",
+          "first_name": "",
+          "last_name": ""
+        },
+        "user_capabilities": {
+          "edit": false,
+          "delete": true,
+          "copy": true
+        }
+      },
+      "created": "2020-09-23T14:30:55.293574Z",
+      "modified": "2020-09-23T14:30:55.293603Z",
+      "name": " Group 4 Inventory 0",
+      "description": "",
+      "inventory": 1,
+      "variables": ""
+    }
+  ]
+}

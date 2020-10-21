@@ -17,6 +17,7 @@ import ContentLoading from '../../../components/ContentLoading';
 import InventoryGroupEdit from '../InventoryGroupEdit/InventoryGroupEdit';
 import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
 import InventoryGroupHosts from '../InventoryGroupHosts';
+import InventoryGroupsRelatedGroup from '../InventoryRelatedGroups';
 
 import { GroupsAPI } from '../../../api';
 
@@ -128,6 +129,12 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
             path="/inventories/inventory/:id/groups/:groupId/nested_hosts"
           >
             <InventoryGroupHosts inventoryGroup={inventoryGroup} />
+          </Route>,
+          <Route
+            key="relatedGroups"
+            path="/inventories/inventory/:id/groups/:groupId/nested_groups"
+          >
+            <InventoryGroupsRelatedGroup />
           </Route>,
         ]}
         <Route key="not-found" path="*">

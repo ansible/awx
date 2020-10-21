@@ -59,7 +59,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
         <FormFullWidthLayout>
           <FormGroup
             fieldId="module_name"
-            aria-label={i18n._(t`Module`)}
+            aria-label={i18n._(t`select module`)}
             label={i18n._(t`Module`)}
             isRequired
             helperTextInvalid={moduleNameMeta.error}
@@ -110,7 +110,6 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             label={i18n._(t`Arguments`)}
             validated={isValid ? 'default' : 'error'}
             onBlur={() => argumentsHelpers.setTouched(true)}
-            placeholder={i18n._(t`Enter arguments`)}
             isRequired={
               moduleNameField.value === 'command' ||
               moduleNameField.value === 'shell'
@@ -137,7 +136,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
           />
           <FormGroup
             fieldId="verbosity"
-            aria-label={i18n._(t`Verbosity`)}
+            aria-label={i18n._(t`select verbosity`)}
             label={i18n._(t`Verbosity`)}
             isRequired
             validated={
@@ -317,8 +316,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
 }
 
 AdHocDetailsStep.propTypes = {
-  moduleOptions: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string))
-    .isRequired,
+  moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
   verbosityOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 

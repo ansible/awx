@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
+import { InventoriesAPI } from '../../../api';
 import {
   mountWithContexts,
   waitForElement,
@@ -27,17 +27,6 @@ describe('<SmartInventoryHostList />', () => {
     InventoriesAPI.readHosts.mockResolvedValue({
       data: mockHosts,
     });
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: { module_name: { choices: [['module']] } },
-          POST: {},
-        },
-      },
-    });
-    CredentialTypesAPI.read.mockResolvedValue({
-      data: { count: 1, results: [{ id: 1, name: 'cred' }] },
-    });
     await act(async () => {
       wrapper = mountWithContexts(
         <SmartInventoryHostList inventory={clonedInventory} />
@@ -58,15 +47,6 @@ describe('<SmartInventoryHostList />', () => {
   test('should fetch hosts from api and render them in the list', () => {
     expect(InventoriesAPI.readHosts).toHaveBeenCalled();
     expect(wrapper.find('SmartInventoryHostListItem').length).toBe(3);
-  });
-
-  test('should have run command button', () => {
-    wrapper.find('DataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(false);
-    });
-    const runCommandsButton = wrapper.find('button[aria-label="Run command"]');
-    expect(runCommandsButton.length).toBe(1);
-    expect(runCommandsButton.prop('disabled')).toBe(false);
   });
 
   test('should select and deselect all items', async () => {
@@ -96,25 +76,5 @@ describe('<SmartInventoryHostList />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-  });
-  test('should disable run commands button', async () => {
-    InventoriesAPI.readHosts.mockResolvedValue({
-      data: { results: [], count: 0 },
-    });
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: { module_name: { choices: [['module']] } },
-        },
-      },
-    });
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <SmartInventoryHostList inventory={clonedInventory} />
-      );
-    });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const runCommandsButton = wrapper.find('button[aria-label="Run command"]');
-    expect(runCommandsButton.prop('disabled')).toBe(true);
   });
 });

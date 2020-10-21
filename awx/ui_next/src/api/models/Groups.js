@@ -35,7 +35,7 @@ class Groups extends Base {
   }
 
   readChildren(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/children/`, params);
+    return this.http.get(`${this.baseUrl}${id}/children/`, { params });
   }
 }
 
