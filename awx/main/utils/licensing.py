@@ -10,6 +10,7 @@ The Licenser class can do the following:
 '''
 
 import os
+import configparser
 from datetime import datetime
 import collections
 import copy
@@ -33,6 +34,12 @@ MAX_INSTANCES = 9999999
 logger = logging.getLogger(__name__)
 
 
+def rhsm_config():
+    config = configparser.ConfigParser()
+    config.read('/etc/rhsm/rhsm.conf')
+    return config
+
+
 class Licenser(object):
     # warn when there is a month (30 days) left on the license
     LICENSE_TIMEOUT = 60 * 60 * 24 * 30
@@ -54,6 +61,7 @@ class Licenser(object):
             license_date=0,
             license_type='UNLICENSED',
         )
+        self.config = rhsm_config()
         if not kwargs:
             license_setting = getattr(settings, 'LICENSE', None)
             if license_setting is not None:
@@ -117,33 +125,6 @@ class Licenser(object):
             self._clear_license_setting()
             raise ValueError("Certificate is for another product")
 
-        # Verify the entitlment cert is authorized to access appropriate content
-        try:
-            from rhsm.config import get_config_parser
-            config = get_config_parser()
-            base_url = config.get("rhsm", "baseurl")
-        except ValueError:
-            content_url = getattr(settings, 'REDHAT_CONTENT_URL', None)
-            if content_url:
-                base_url = content_url
-        content_path = getattr(settings, 'REDHAT_CONTENT_PATH', None)
-        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
-        content_repo_url = '{0}{1}'.format(base_url, content_path)
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8') as f:
-            f.write(raw_cert)
-            # clear the buffer to ensure the complete cert has been written to the file
-            f.flush()
-            os.fsync(f)
-
-            request = requests.get(url=content_repo_url,
-                                   cert=f.name,
-                                   verify=verify,
-                                   # timeout=(5, 5)
-                                   )
-            if request.status_code != 200:
-                logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
-                return
-
         # Parse output for subscription metadata to build config
         license = dict()
         license['sku'] = certinfo.order.sku
@@ -172,9 +153,7 @@ class Licenser(object):
 
 
     def validate_rh(self, user, pw):
-        from rhsm.config import get_config_parser
-        config = get_config_parser()
-        host = 'https://' + str(config.get("server", "hostname"))
+        host = 'https://' + str(self.config.get("server", "hostname"))
         if not host:
             host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
         
@@ -223,10 +202,8 @@ class Licenser(object):
 
 
     def get_satellite_subs(self, host, user, pw):
-        from rhsm.config import get_config_parser
-        config = get_config_parser()
         try:
-            verify = str(config.get("rhsm", "repo_ca_cert"))
+            verify = str(self.config.get("rhsm", "repo_ca_cert"))
         except Exception as e:
             raise OSError('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
         json = []
