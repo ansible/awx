@@ -34,28 +34,3 @@ class JSONParser(parsers.JSONParser):
             return obj
         except ValueError as exc:
             raise ParseError(_('JSON parse error - %s\nPossible cause: trailing comma.' % str(exc)))
-
-
-class ConfigJSONParser(parsers.JSONParser):
-    """
-    Entitlement Certificates have newlines in them which require json.loads to
-    not use strict parsing.
-    """
-
-    def parse(self, stream, media_type=None, parser_context=None):
-        """
-        Parses the incoming bytestream as JSON and returns the resulting data.
-        """
-        parser_context = parser_context or {}
-        encoding = parser_context.get('encoding', settings.DEFAULT_CHARSET)
-
-        try:
-            data = smart_str(stream.read(), encoding=encoding)
-            if not data:
-                return {}
-            obj = json.loads(data, object_pairs_hook=OrderedDict, strict=False)
-            if not isinstance(obj, dict) and obj is not None:
-                raise ParseError(_('JSON parse error - not a JSON object'))
-            return obj
-        except ValueError as exc:
-            raise ParseError(_('JSON parse error - %s\nPossible cause: trailing comma.' % str(exc)))

@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         super(Command, self).__init__()
-        license = get_licenser().validate(new_cert=False)
+        license = get_licenser().validate()
         if options.get('data'):
             return json.dumps(license)
         return license.get('license_type', 'none')
