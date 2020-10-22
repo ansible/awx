@@ -56,10 +56,6 @@ export default {
 								subscriptionCreds.SUBSCRIPTIONS_PASSWORD = data.SUBSCRIPTIONS_PASSWORD;
 						}
 
-						if (data.ENTITLEMENT_CONSUMER && data.ENTITLEMENT_CONSUMER.org && data.ENTITLEMENT_CONSUMER.org !== "") {
-							subscriptionCreds.ORGANIZATION_ID = data.ENTITLEMENT_CONSUMER.org;
-						}
-						
 						return subscriptionCreds;
 					}).catch(() => {
 							return {};
