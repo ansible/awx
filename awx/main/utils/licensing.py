@@ -154,7 +154,8 @@ class Licenser(object):
         try:
             host = 'https://' + str(self.config.get("server", "hostname"))
         except:
-            raise OSError('Cannot access rhsm.conf, make sure subscription manager is installed and configured.')
+            logger.exception('Cannot access rhsm.conf, make sure subscription manager is installed and configured.')
+            host = None
         if not host:
             host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
         
