@@ -99,8 +99,6 @@ class Licenser(object):
             kwargs.pop('company_name')
         self._attrs.update(kwargs)
         if os.path.exists('/var/lib/awx/.tower_version'):
-            if 'license_key' in self._attrs:
-                self._unset_attrs()
             if 'valid_key' in self._attrs:
                 if not self._attrs['valid_key']:
                     self._unset_attrs()
