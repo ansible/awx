@@ -93,22 +93,10 @@ register(
 )
 
 
-def _load_default_license_from_file():
-    try:
-        license_file = os.environ.get('AWX_LICENSE_FILE', '/etc/tower/license')
-        if os.path.exists(license_file):
-            license_data = json.load(open(license_file))
-            logger.debug('Read license data from "%s".', license_file)
-            return license_data
-    except Exception:
-        logger.warning('Could not read license from "%s".', license_file, exc_info=True)
-    return {}
-
-
 register(
     'LICENSE',
     field_class=fields.DictField,
-    default=_load_default_license_from_file,
+    default=lambda: {},
     label=_('License'),
     help_text=_('The license controls which features and functionality are '
                 'enabled. Use /api/v2/config/ to update or change '
