@@ -197,8 +197,6 @@ data:
     AWX_CONTAINER_GROUP_DEFAULT_IMAGE = "{{ container_groups_image }}"
     REDHAT_CANDLEPIN_HOST = "{{ candlepin_host  | default(omit) }}"
     REDHAT_CANDLEPIN_VERIFY = "{{ candlepin_verify | default(omit) }}"
-    REDHAT_CONTENT_URL = "{{ redhat_content_url | default(omit) }}"
-    REDHAT_CONTENT_PATH = "{{ redhat_content_path | default(omit) }}"
     BROADCAST_WEBSOCKET_PORT = 8052
     BROADCAST_WEBSOCKET_PROTOCOL = 'http'
 
