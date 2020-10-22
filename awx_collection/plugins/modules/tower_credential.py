@@ -74,7 +74,8 @@ options:
         - Deprecated, please use credential_type
       required: False
       type: str
-      choices: ["ssh", "vault", "net", "scm", "aws", "vmware", "satellite6", "cloudforms", "gce", "azure_rm", "openstack", "rhv", "insights", "tower"]
+      choices: ["aws", "tower", "gce", "azure_rm", "openstack", "cloudforms", "satellite", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
+                "azure_kv", "insights", "kubernetes_bearer_token", "net", "scm", "ssh", "github_token", "gitlab_token", "vault"]
     host:
       description:
         - Host for this credential.
