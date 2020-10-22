@@ -316,6 +316,9 @@ class DashboardJobsGraphView(APIView):
         if period == 'month':
             end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
             interval = 'days'
+        elif period == 'two_weeks':
+            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=2)
+            interval = 'days'
         elif period == 'week':
             end_date = start_date - dateutil.relativedelta.relativedelta(weeks=1)
             interval = 'days'

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import useWebsocket from '../../../util/useWebsocket';
+import useWebsocket from './useWebsocket';
 
 export default function useWsTemplates(initialTemplates) {
   const [templates, setTemplates] = useState(initialTemplates);

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Route, withRouter, Switch } from 'react-router-dom';
+import { PageSection } from '@patternfly/react-core';
 
 import { Config } from '../../contexts/Config';
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
@@ -120,7 +121,9 @@ class Templates extends Component {
             )}
           />
           <Route path={`${match.path}`}>
-            <TemplateList />
+            <PageSection>
+              <TemplateList />
+            </PageSection>
           </Route>
         </Switch>
       </>

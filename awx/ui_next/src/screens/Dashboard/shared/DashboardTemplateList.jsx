@@ -19,18 +19,24 @@ import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useWsTemplates from '../../../util/useWsTemplates';
 import AddDropDownButton from '../../../components/AddDropDownButton';
-import TemplateListItem from './TemplateListItem';
 
-// The type value in const QS_CONFIG below does not have a space between job_template and
-// workflow_job_template so the params sent to the API match what the api expects.
-const QS_CONFIG = getQSConfig('template', {
-  page: 1,
-  page_size: 20,
-  order_by: 'name',
-  type: 'job_template,workflow_job_template',
-});
+import DashboardTemplateListItem from './DashboardTemplateListItem';
 
-function TemplateList({ i18n }) {
+const QS_CONFIG = getQSConfig(
+  'template',
+  {
+    page: 1,
+    page_size: 5,
+    order_by: 'name',
+    type: 'job_template,workflow_job_template',
+  },
+  ['id', 'page', 'page_size']
+);
+
+function DashboardTemplateList({ i18n }) {
+  // The type value in const QS_CONFIG below does not have a space between job_template and
+  // workflow_job_template so the params sent to the API match what the api expects.
+
   const location = useLocation();
 
   const [selected, setSelected] = useState([]);
@@ -243,7 +249,7 @@ function TemplateList({ i18n }) {
             />
           )}
           renderItem={template => (
-            <TemplateListItem
+            <DashboardTemplateListItem
               key={template.id}
               value={template.name}
               template={template}
@@ -270,4 +276,4 @@ function TemplateList({ i18n }) {
   );
 }
 
-export default withI18n()(TemplateList);
+export default withI18n()(DashboardTemplateList);
