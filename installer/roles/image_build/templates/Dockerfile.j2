@@ -99,7 +99,6 @@ RUN dnf -y install \
     libX11-xcb \
     libXScrnSaver \
     strace \
-    subscription-manager \
     vim \
     nmap-ncat \
     nodejs \
@@ -111,7 +110,6 @@ RUN dnf -y install \
     diffutils \
     unzip && \
     npm install -g n && n 10.15.0 && dnf remove -y nodejs
-RUN setfacl -m u:1000:r /etc/rhsm/rhsm.conf
 {% endif %}
 
 # Install runtime requirements
