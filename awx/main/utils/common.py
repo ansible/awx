@@ -55,8 +55,7 @@ __all__ = [
     'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
     'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',
     'get_custom_venv_choices', 'get_external_account', 'task_manager_bulk_reschedule',
-    'schedule_task_manager', 'classproperty', 'create_temporary_fifo', 'truncate_stdout',
-    'StubLicense'
+    'schedule_task_manager', 'classproperty', 'create_temporary_fifo', 'truncate_stdout'
 ]
 
 
@@ -190,7 +189,7 @@ def get_awx_version():
 
 
 def get_awx_http_client_headers():
-    license = get_license(show_key=False).get('license_type', 'UNLICENSED')
+    license = get_license().get('license_type', 'UNLICENSED')
     headers = {
         'Content-Type': 'application/json',
         'User-Agent': '{} {} ({})'.format(
@@ -202,34 +201,14 @@ def get_awx_http_client_headers():
     return headers
 
 
-class StubLicense(object):
-
-    features = {
-        'activity_streams': True,
-        'ha': True,
-        'ldap': True,
-        'multiple_organizations': True,
-        'surveys': True,
-        'system_tracking': True,
-        'rebranding': True,
-        'enterprise_auth': True,
-        'workflows': True,
-    }
-
-    def validate(self):
-        return dict(license_key='OPEN',
-                    valid_key=True,
-                    compliant=True,
-                    features=self.features,
-                    license_type='open')
-
-
+# Update all references of this function in the codebase to just import `from awx.main.utils.licensing import Licenser` directly
 def get_licenser(*args, **kwargs):
     try:
-        from tower_license import TowerLicense
-        return TowerLicense(*args, **kwargs)
-    except ImportError:
-        return StubLicense(*args, **kwargs)
+        # Get License Config from db?
+        from awx.main.utils.licensing import Licenser
+        return Licenser(*args, **kwargs)
+    except Exception as e:
+        raise ValueError(_('Error importing Tower License: %s') % e)
 
 
 def update_scm_url(scm_type, url, username=True, password=True,

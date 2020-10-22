@@ -147,3 +147,4 @@ use_dev_supervisor.txt
 .idea/*
 *.unison.tmp
 *.#
+/tools/docker-compose/overrides/

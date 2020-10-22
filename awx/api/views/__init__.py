@@ -153,6 +153,7 @@ from awx.api.views.root import ( # noqa
     ApiV2PingView,
     ApiV2ConfigView,
     ApiV2SubscriptionView,
+    ApiV2AttachView,
 )
 from awx.api.views.webhooks import ( # noqa
     WebhookKeyView,
