@@ -175,7 +175,7 @@ class Licenser(object):
 
 
     def get_rhsm_subs(self, host, user, pw):
-        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', False)
+        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', True)
         json = []
         try:
             subs = requests.get(
@@ -207,7 +207,8 @@ class Licenser(object):
         try:
             verify = str(self.config.get("rhsm", "repo_ca_cert"))
         except Exception as e:
-            raise OSError('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
+            logger.exception('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
+            verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', True)
         json = []
         try:
             orgs = requests.get(
