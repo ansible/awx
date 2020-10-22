@@ -42,8 +42,9 @@ logger = logging.getLogger(__name__)
 
 
 def rhsm_config():
+    path = '/etc/rhsm/rhsm.conf'
     config = configparser.ConfigParser()
-    config.read('/etc/rhsm/rhsm.conf')
+    config.read(path)
     return config
 
 
@@ -150,7 +151,10 @@ class Licenser(object):
 
 
     def validate_rh(self, user, pw):
-        host = 'https://' + str(self.config.get("server", "hostname"))
+        try:
+            host = 'https://' + str(self.config.get("server", "hostname"))
+        except:
+            raise OSError('Cannot access rhsm.conf, make sure subscription manager is installed and configured.')
         if not host:
             host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
         
