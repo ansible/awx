@@ -1,9 +1,9 @@
 # Copyright (c) 2018 Ansible, Inc.
 # All Rights Reserved.
 
+import json
 import logging
 import operator
-import json
 from collections import OrderedDict
 
 from django.conf import settings
@@ -20,6 +20,7 @@ from rest_framework import status
 import requests
 
 from awx.api.generics import APIView
+from awx.api.parsers import ConfigJSONParser
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
@@ -30,7 +31,6 @@ from awx.main.utils import (
     to_python_boolean,
 )
 from awx.api.versioning import reverse, drf_reverse
-from awx.conf.license import get_license
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import (
     Project,
@@ -178,7 +178,7 @@ class ApiV2PingView(APIView):
 class ApiV2SubscriptionView(APIView):
 
     permission_classes = (IsAuthenticated,)
-    name = _('Configuration')
+    name = _('Subscriptions')
     swagger_topic = 'System Configuration'
 
     def check_permissions(self, request):
@@ -189,16 +189,16 @@ class ApiV2SubscriptionView(APIView):
     def post(self, request):
         from awx.main.utils.common import get_licenser
         data = request.data.copy()
-        if data.get('rh_password') == '$encrypted$':
-            data['rh_password'] = settings.REDHAT_PASSWORD
+        if data.get('subscriptions_password') == '$encrypted$':
+            data['subscriptions_password'] = settings.SUBSCRIPTIONS_PASSWORD
         try:
-            user, pw = data.get('rh_username'), data.get('rh_password')
+            user, pw = data.get('subscriptions_username'), data.get('subscriptions_password')
             with set_environ(**settings.AWX_TASK_ENV):
                 validated = get_licenser().validate_rh(user, pw)
             if user:
-                settings.REDHAT_USERNAME = data['rh_username']
+                settings.SUBSCRIPTIONS_USERNAME = data['subscriptions_username']
             if pw:
-                settings.REDHAT_PASSWORD = data['rh_password']
+                settings.SUBSCRIPTIONS_PASSWORD = data['subscriptions_password']
         except Exception as exc:
             msg = _("Invalid License")
             if (
@@ -220,11 +220,63 @@ class ApiV2SubscriptionView(APIView):
         return Response(validated)
 
 
+class ApiV2AttachView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    name = _('Attach Subscription')
+    swagger_topic = 'System Configuration'
+
+    def check_permissions(self, request):
+        super(ApiV2AttachView, self).check_permissions(request)
+        if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
+            self.permission_denied(request)  # Raises PermissionDenied exception.
+
+    def post(self, request):
+        data = request.data.copy()
+        pool_id = data.get('pool_id', None)
+        # org = data.get('org', None)  # if we want allow to user to specify the org, we will need to pass this
+        if not pool_id:
+            return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
+        user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
+        pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
+        if pool_id and user and pw:
+            from awx.main.utils.common import get_licenser
+            data = request.data.copy()
+            try:
+                with set_environ(**settings.AWX_TASK_ENV):
+                    validated = get_licenser().validate_rh(user, pw)
+            except Exception as exc:
+                msg = _("Invalid License")
+                if (
+                    isinstance(exc, requests.exceptions.HTTPError) and
+                    getattr(getattr(exc, 'response', None), 'status_code', None) == 401
+                ):
+                    msg = _("The provided credentials are invalid (HTTP 401).")
+                elif isinstance(exc, requests.exceptions.ProxyError):
+                    msg = _("Unable to connect to proxy server.")
+                elif isinstance(exc, requests.exceptions.ConnectionError):
+                    msg = _("Could not connect to subscription service.")
+                elif isinstance(exc, (ValueError, OSError)) and exc.args:
+                    msg = exc.args[0]
+                else:
+                    logger.exception(smart_text(u"Invalid license submitted."),
+                                     extra=dict(actor=request.user.username))
+                return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
+        for sub in validated:
+            if sub['pool_id'] == pool_id:
+                sub['valid_key'] = True
+                settings.LICENSE = sub
+                return Response(sub)
+
+        return Response({"error": _("Error processing subscription metadata.")}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ApiV2ConfigView(APIView):
 
     permission_classes = (IsAuthenticated,)
     name = _('Configuration')
     swagger_topic = 'System Configuration'
+    parser_classes = (ConfigJSONParser,)
 
     def check_permissions(self, request):
         super(ApiV2ConfigView, self).check_permissions(request)
@@ -234,15 +286,11 @@ class ApiV2ConfigView(APIView):
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
 
-        if request.user.is_superuser or request.user.is_system_auditor:
-            license_data = get_license(show_key=True)
-        else:
-            license_data = get_license(show_key=False)
+        from awx.main.utils.common import get_licenser
+        license_data = get_licenser().validate(new_cert=False)
+
         if not license_data.get('valid_key', False):
             license_data = {}
-        if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
-            # FIXME: Make the final setting value dependent on the feature?
-            license_data['features']['activity_streams'] &= settings.ACTIVITY_STREAM_ENABLED
 
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
@@ -281,6 +329,7 @@ class ApiV2ConfigView(APIView):
 
         return Response(data)
 
+
     def post(self, request):
         if not isinstance(request.data, dict):
             return Response({"error": _("Invalid license data")}, status=status.HTTP_400_BAD_REQUEST)
@@ -300,18 +349,26 @@ class ApiV2ConfigView(APIView):
             logger.info(smart_text(u"Invalid JSON submitted for license."),
                         extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Save Entitlement Cert/Key
+        license_data = json.loads(data_actual)
+        if 'entitlement_cert' in license_data:
+            settings.ENTITLEMENT_CERT = license_data['entitlement_cert']
+
         try:
+            # Validate entitlement cert and get subscription metadata
+            # validate() will clear the entitlement cert if not valid
             from awx.main.utils.common import get_licenser
-            license_data = json.loads(data_actual)
-            license_data_validated = get_licenser(**license_data).validate()
+            license_data_validated = get_licenser().validate(new_cert=True)
         except Exception:
             logger.warning(smart_text(u"Invalid license submitted."),
                            extra=dict(actor=request.user.username))
+            # If License invalid, clear entitlment cert value
+            settings.ENTITLEMENT_CERT = ''
             return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
 
         # If the license is valid, write it to the database.
         if license_data_validated['valid_key']:
-            settings.LICENSE = license_data
             if not settings_registry.is_setting_read_only('TOWER_URL_BASE'):
                 settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
@@ -321,9 +378,12 @@ class ApiV2ConfigView(APIView):
         return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
+        # Clear license and entitlement certificate
         try:
             settings.LICENSE = {}
+            settings.ENTITLEMENT_CERT = ''
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception:
             # FIX: Log
             return Response({"error": _("Failed to remove license.")}, status=status.HTTP_400_BAD_REQUEST)
+        

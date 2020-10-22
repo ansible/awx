@@ -267,6 +267,7 @@ class Resources(object):
     _workflow_job_templates = 'workflow_job_templates/'
     _workflow_job_workflow_nodes = r'workflow_jobs/\d+/workflow_nodes/'
     _subscriptions = 'config/subscriptions/'
+    _subscriptions_attach = 'config/attach/'
     _workflow_jobs = 'workflow_jobs/'
     api = '/api/'
     common = api + r'v\d+/'

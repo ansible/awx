@@ -12,6 +12,8 @@ from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
+from awx.main.validators import validate_entitlement_cert
+
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -138,6 +140,32 @@ register(
     read_only=False,
     label=_('Red Hat customer password'),
     help_text=_('This password is used to retrieve license information and to send Automation Analytics'),  # noqa
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'SUBSCRIPTIONS_USERNAME',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=False,
+    read_only=False,
+    label=_('Red Hat or Satellite username'),
+    help_text=_('This username is used to retrieve subscription and content information'),  # noqa
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'SUBSCRIPTIONS_PASSWORD',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    read_only=False,
+    label=_('Red Hat or Satellite password'),
+    help_text=_('This password is used to retrieve subscription and content information'),  # noqa
     category=_('System'),
     category_slug='system',
 )
@@ -327,6 +355,21 @@ register(
     category=_('Jobs'),
     category_slug='jobs',
 )
+
+register(
+    'ENTITLEMENT_CERT',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    required=False,
+    validators=[validate_entitlement_cert],  # TODO: may need to use/modify `validate_certificate` validator
+    label=_('RHSM Entitlement Public Certificate and Private Key'),
+    help_text=_('Obtain a key pair via subscription-manager, or https://access.redhat.com. Refer to Ansible Tower docs for formatting key pair.'),
+    category=_('SYSTEM'),
+    category_slug='system',
+    encrypted=True,
+)
+
 
 register(
     'AWX_RESOURCE_PROFILING_ENABLED',

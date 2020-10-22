@@ -15,14 +15,26 @@ export default
 					return config.license_info;
 				},
 
-				post: function(payload, eula){
-					var defaultUrl = GetBasePath('config');
+				post: function(payload, eula, attach){
+					var defaultUrl = GetBasePath('config') + (attach ? 'attach/' : '');
 					Rest.setUrl(defaultUrl);
 					var data = payload;
-					data.eula_accepted = eula;
+					
+					if (!attach) {
+						data.eula_accepted = eula;
+					}
 
 					return Rest.post(JSON.stringify(data))
 						.then((response) =>{
+							if (attach) {
+								var configPayload = {};
+								configPayload.eula_accepted = eula;
+								Rest.setUrl(GetBasePath('config'));
+								return Rest.post(configPayload)
+									.then((configResponse) => {
+										return configResponse.data;
+									});
+							}
 							return response.data;
 						})
 						.catch(({data}) => {

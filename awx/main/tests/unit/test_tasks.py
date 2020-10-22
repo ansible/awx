@@ -39,6 +39,8 @@ from awx.main import tasks
 from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
 
+from awx.main.utils.licensing import Licenser
+
 
 class TestJobExecution(object):
     EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
@@ -1830,7 +1832,10 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
 
         task = RunProjectUpdate()
         env = task.build_env(project_update, private_data_dir)
-        task.build_extra_vars_file(project_update, private_data_dir)
+
+        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+            task.build_extra_vars_file(project_update, private_data_dir)
+
         assert task.__vars__['roles_enabled'] is False
         assert task.__vars__['collections_enabled'] is False
         for k in env:
@@ -1850,7 +1855,10 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
         project_update.project.organization.galaxy_credentials.add(public_galaxy)
         task = RunProjectUpdate()
         env = task.build_env(project_update, private_data_dir)
-        task.build_extra_vars_file(project_update, private_data_dir)
+
+        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+            task.build_extra_vars_file(project_update, private_data_dir)
+
         assert task.__vars__['roles_enabled'] is True
         assert task.__vars__['collections_enabled'] is True
         assert sorted([
@@ -1935,7 +1943,9 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert settings.PROJECTS_ROOT in process_isolation['process_isolation_show_paths']
 
         task._write_extra_vars_file = mock.Mock()
-        task.build_extra_vars_file(project_update, private_data_dir)
+
+        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+            task.build_extra_vars_file(project_update, private_data_dir)
 
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
         _, extra_vars = call_args
