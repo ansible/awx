@@ -14,7 +14,6 @@ class Config(base.Base):
     @property
     def is_valid_license(self):
         return self.license_info.get('valid_key', False) and \
-            'license_key' in self.license_info and \
             'instance_count' in self.license_info
 
     @property
