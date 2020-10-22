@@ -313,7 +313,7 @@ def delete_project_files(project_path):
 
 @task(queue='tower_broadcast_all')
 def profile_sql(threshold=1, minutes=1):
-    if threshold == 0:
+    if threshold <= 0:
         cache.delete('awx-profile-sql-threshold')
         logger.error('SQL PROFILING DISABLED')
     else:
