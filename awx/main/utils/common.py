@@ -201,7 +201,6 @@ def get_awx_http_client_headers():
     return headers
 
 
-# Update all references of this function in the codebase to just import `from awx.main.utils.licensing import Licenser` directly
 def get_licenser(*args, **kwargs):
     try:
         # Get License Config from db?

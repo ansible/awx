@@ -97,7 +97,7 @@ class Licenser(object):
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
         self._attrs.update(kwargs)
-        if self._check_product_cert():
+        if os.path.exists('/var/lib/awx/.tower_version'):
             if 'license_key' in self._attrs:
                 self._unset_attrs()
             if 'valid_key' in self._attrs:
@@ -107,14 +107,6 @@ class Licenser(object):
                 self._unset_attrs()
         else:
             self._generate_open_config()
-
-
-    def _check_product_cert(self):
-        # Product Cert Name: ansible-tower-3.7-rhel-7.x86_64.pem
-        # Maybe check validity of Product Cert somehow?
-        if os.path.exists('/etc/tower/certs') and os.path.exists('/var/lib/awx/.tower_version'):
-            return True
-        return False
 
 
     def _generate_open_config(self):
@@ -128,11 +120,6 @@ class Licenser(object):
 
     def _unset_attrs(self):
         self._attrs = self.UNLICENSED_DATA.copy()
-
-
-    def _clear_license_setting(self):
-        self.unset_attrs()
-        settings.LICENSE = {}
 
 
     def license_from_manifest(self, manifest):
