@@ -650,7 +650,7 @@ awx/projects:
 docker-compose-isolated: awx/projects
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
-COMPOSE_UP_OPTS ?= ""
+COMPOSE_UP_OPTS ?=
 
 # Docker Compose Development environment
 docker-compose: docker-auth awx/projects
