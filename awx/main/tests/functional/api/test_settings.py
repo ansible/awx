@@ -4,7 +4,6 @@
 
 # Python
 import pytest
-import os
 
 from django.conf import settings
 
