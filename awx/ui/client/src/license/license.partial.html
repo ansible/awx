@@ -140,10 +140,6 @@
 									<input id="rh-password" class="form-control Form-textInput" type="password" ng-model="subscriptionCreds.password" ng-disabled="!user_is_superuser || newLicense.file" />
 								</div>
 							</div>
-							<div class="License-rhCredField">
-								<label class="License-label d-block" translate>(OPTIONAL) ORGANIZATION LABEL</label>
-								<input class="form-control Form-textInput" type="text" ng-model="subscriptionCreds.organization_id" ng-disabled="!user_is_superuser || newLicense.file" />
-							</div>
 							<div class="License-getLicensesButton">
 								<span ng-click="lookupLicenses()" class="btn btn-primary" ng-disabled="!subscriptionCreds.username || !subscriptionCreds.password" translate>GET LICENSES</button>
 							</div>

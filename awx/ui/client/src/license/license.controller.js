@@ -72,11 +72,6 @@ export default
                 $scope.subscriptionCreds.password = subscriptionCreds.SUBSCRIPTIONS_PASSWORD;
                 $scope.showPlaceholderPassword = true;
             }
-
-            if (subscriptionCreds.ORGANIZATION_ID && subscriptionCreds.ORGANIZATION_ID !== "") {
-                $scope.subscriptionCreds.organization_id = subscriptionCreds.ORGANIZATION_ID;
-                $scope.showPlaceholderPassword = true;
-            }
         };
 
         const updateSubscriptionCreds = (config) => {
@@ -92,10 +87,6 @@ export default
                     if (data.SUBSCRIPTIONS_PASSWORD && data.SUBSCRIPTIONS_PASSWORD !== "") {
                         $scope.subscriptionCreds.password = data.SUBSCRIPTIONS_PASSWORD;
                         $scope.showPlaceholderPassword = true;
-                    }
-
-                    if (data.ENTITLEMENT_CONSUMER && data.ENTITLEMENT_CONSUMER.org && data.ENTITLEMENT_CONSUMER.org !== "") {
-                        $scope.subscriptionCreds.organization_id = data.ENTITLEMENT_CONSUMER.org;
                     }
                 }).catch(() => {
                     initVars(config);
@@ -194,7 +185,6 @@ export default
                 payload.manifest = $scope.newLicense.manifest;
             } else if ($scope.selectedLicense.fullLicense) {
                 payload.pool_id = $scope.selectedLicense.fullLicense.pool_id;
-                payload.org = $scope.subscriptionCreds.organization_id;
                 attach = true;
             }
             

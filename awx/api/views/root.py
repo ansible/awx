@@ -234,7 +234,6 @@ class ApiV2AttachView(APIView):
     def post(self, request):
         data = request.data.copy()
         pool_id = data.get('pool_id', None)
-        # org = data.get('org', None)  # if we want allow to user to specify the org, we will need to pass this
         if not pool_id:
             return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
         user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
