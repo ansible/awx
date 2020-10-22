@@ -74,7 +74,7 @@ options:
         - Deprecated, please use credential_type
       required: False
       type: str
-      choices: ["aws", "tower", "gce", "azure_rm", "openstack", "cloudforms", "satellite", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
+      choices: ["aws", "tower", "gce", "azure_rm", "openstack", "cloudforms", "satellite6", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
                 "azure_kv", "insights", "kubernetes_bearer_token", "net", "scm", "ssh", "github_token", "gitlab_token", "vault"]
     host:
       description:
@@ -285,7 +285,7 @@ KIND_CHOICES = {
     'azure_rm': 'Microsoft Azure Resource Manager',
     'openstack': 'OpenStack',
     'cloudforms': 'Red Hat CloudForms',
-    'satellite': 'Red Hat Satellite 6',
+    'satellite6': 'Red Hat Satellite 6',
     'rhv': 'Red Hat Virtualization',
     'vmware': 'VMware vCenter',
     'aim': 'CyberArk AIM Central Credential Provider Lookup',
