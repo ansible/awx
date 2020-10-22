@@ -71,7 +71,6 @@ RUN cd /tmp && make requirements_collections
 {% if build_dev|bool %}
 ADD requirements/requirements_dev.txt /tmp/requirements
 RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev
-RUN setfacl -m u:awx:r /etc/rhsm/rhsm.conf
 {% endif %}
 {% if not build_dev|bool %}
 COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
@@ -100,6 +99,7 @@ RUN dnf -y install \
     libX11-xcb \
     libXScrnSaver \
     strace \
+    subscription-manager \
     vim \
     nmap-ncat \
     nodejs \
@@ -111,6 +111,7 @@ RUN dnf -y install \
     diffutils \
     unzip && \
     npm install -g n && n 10.15.0 && dnf remove -y nodejs
+RUN setfacl -m u:1000:r /etc/rhsm/rhsm.conf
 {% endif %}
 
 # Install runtime requirements
