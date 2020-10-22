@@ -358,8 +358,6 @@ class ApiV2ConfigView(APIView):
                 return Response({"error": 'Invalid license submitted.'}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
-                # Validate entitlement cert and get subscription metadata
-                # validate() will clear the entitlement cert if not valid
                 license_data_validated = get_licenser().license_from_manifest(license_data)
             except Exception:
                 logger.warning(smart_text(u"Invalid license submitted."),
@@ -379,11 +377,9 @@ class ApiV2ConfigView(APIView):
         return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
-        # Clear license and entitlement certificate
         try:
             settings.LICENSE = {}
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception:
             # FIX: Log
             return Response({"error": _("Failed to remove license.")}, status=status.HTTP_400_BAD_REQUEST)
-        
