@@ -56,7 +56,7 @@ def validate_entitlement_manifest(data):
 
     export = z.open('consumer_export.zip').read()
     sig = z.open('signature').read()
-    with open('/etc/tower/certs/candlepin-redhat-ca.crt', 'rb') as f:
+    with open('/etc/tower/candlepin-redhat-ca.crt', 'rb') as f:
         cert = x509.load_pem_x509_certificate(f.read(), backend=default_backend())
         key = cert.public_key()
     key.verify(sig, export, padding=padding.PKCS1v15(), algorithm=hashes.SHA256())
