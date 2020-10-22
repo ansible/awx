@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from django.conf import settings
 
 logger = logging.getLogger('awx.conf.settings')
 

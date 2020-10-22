@@ -153,7 +153,7 @@ class Licenser(object):
     def validate_rh(self, user, pw):
         try:
             host = 'https://' + str(self.config.get("server", "hostname"))
-        except:
+        except Exception:
             logger.exception('Cannot access rhsm.conf, make sure subscription manager is installed and configured.')
             host = None
         if not host:
