@@ -1,8 +1,8 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import UserAccessListItem from './UserAccessListItem';
+import UserRolesListItem from './UserRolesListItem';
 
-describe('<UserAccessListItem/>', () => {
+describe('<UserRolesListItem/>', () => {
   let wrapper;
   const role = {
     id: 1,
@@ -19,7 +19,7 @@ describe('<UserAccessListItem/>', () => {
   };
   test('should mount properly', () => {
     wrapper = mountWithContexts(
-      <UserAccessListItem
+      <UserRolesListItem
         role={role}
         detailUrl="/templates/job_template/15/details"
       />
@@ -29,7 +29,7 @@ describe('<UserAccessListItem/>', () => {
 
   test('should render proper list item data', () => {
     wrapper = mountWithContexts(
-      <UserAccessListItem
+      <UserRolesListItem
         role={role}
         detailUrl="/templates/job_template/15/details"
       />
@@ -46,7 +46,7 @@ describe('<UserAccessListItem/>', () => {
   });
   test('should render deletable chip', () => {
     wrapper = mountWithContexts(
-      <UserAccessListItem
+      <UserRolesListItem
         role={role}
         detailUrl="/templates/job_template/15/details"
       />
@@ -56,7 +56,7 @@ describe('<UserAccessListItem/>', () => {
   test('should render read only chip', () => {
     role.summary_fields.user_capabilities.unattach = false;
     wrapper = mountWithContexts(
-      <UserAccessListItem
+      <UserRolesListItem
         role={role}
         detailUrl="/templates/job_template/15/details"
       />
