@@ -204,7 +204,6 @@ def get_awx_http_client_headers():
 def get_licenser(*args, **kwargs):
     from awx.main.utils.licensing import Licenser, OpenLicense
     try:
-        # Get License Config from db?
         if os.path.exists('/var/lib/awx/.tower_version'):
             return Licenser(*args, **kwargs)
         else:
