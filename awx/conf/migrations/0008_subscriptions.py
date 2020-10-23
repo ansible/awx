@@ -4,9 +4,13 @@ import logging
 
 from django.db import migrations
 
-from awx.conf.migrations import _subscriptions as subscriptions
+from awx.conf.migrations._subscriptions import clear_old_license, prefill_rh_credentials
 
 logger = logging.getLogger('awx.conf.migrations')
+
+
+def _noop(apps, schema_editor):
+    pass
 
 
 class Migration(migrations.Migration):
@@ -15,6 +19,8 @@ class Migration(migrations.Migration):
         ('conf', '0007_v380_rename_more_settings'),
     ]
 
+
     operations = [
-        migrations.RunPython(subscriptions.clear_old_license),
+        migrations.RunPython(clear_old_license, _noop),
+        migrations.RunPython(prefill_rh_credentials, _noop)
     ]
