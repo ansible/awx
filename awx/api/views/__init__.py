@@ -11,6 +11,7 @@ import requests
 import socket
 import sys
 import time
+import datetime
 from base64 import b64encode
 from collections import OrderedDict
 
@@ -89,6 +90,7 @@ from awx.main.utils import (
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.insights import filter_insights_api_response
+from awx.main.utils.pipeline import PipelineJob
 from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission, TaskPermission, ProjectUpdatePermission,
@@ -2393,6 +2395,7 @@ class JobTemplateLaunch(RetrieveAPIView):
 
 
     def post(self, request, *args, **kwargs):
+        timestamp_start = datetime.datetime.now()
         obj = self.get_object()
 
         try:
@@ -2428,6 +2431,8 @@ class JobTemplateLaunch(RetrieveAPIView):
                 data['ignored_fields'] = self.sanitize_for_response(serializer._ignored_fields)
                 data.update(serializers.JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             headers = {'Location': new_job.get_absolute_url(request)}
+            PipelineJob.start('api.job_create', new_job.id, timestamp_start)
+            connection.on_commit(lambda: PipelineJob.end('api.job_create', new_job.id))
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 

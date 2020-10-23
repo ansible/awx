@@ -79,6 +79,7 @@ from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
+from awx.main.utils.pipeline import PipelineJob
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -1334,6 +1335,8 @@ class BaseTask(object):
         '''
         Run the job/task and capture its output.
         '''
+        PipelineJob.end('dispatcher.apply_async', pk)
+        PipelineJob.start('run_job.run_before', pk)
         self.instance = self.model.objects.get(pk=pk)
         containerized = self.instance.is_containerized
         pod_manager = None
@@ -1498,7 +1501,11 @@ class BaseTask(object):
                                                            ident=str(self.instance.pk))
                 self.finished_callback(None)
             else:
+                PipelineJob.end('run_job.run_before', pk)
+                PipelineJob.start('run_job.run_during', pk)
                 res = ansible_runner.interface.run(**params)
+                PipelineJob.end('run_job.run_during', pk)
+                PipelineJob.start('run_job.run_after', pk)
                 status = res.status
                 rc = res.rc
 
@@ -1540,6 +1547,8 @@ class BaseTask(object):
                 raise AwxTaskError.TaskCancel(self.instance, rc)
             else:
                 raise AwxTaskError.TaskError(self.instance, rc)
+
+        PipelineJob.end('run_job.run_after', pk)
 
 
     def deploy_container_group_pod(self, task):

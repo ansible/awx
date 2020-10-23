@@ -37,6 +37,7 @@ from awx.main.utils import get_type_for_model, task_manager_bulk_reschedule, sch
 from awx.main.signals import disable_activity_stream
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.utils import decrypt_field
+from awx.main.utils.pipeline import PipelineJob
 
 
 logger = logging.getLogger('awx.main.scheduler')
@@ -196,6 +197,7 @@ class TaskManager():
         return result
 
     def start_task(self, task, rampart_group, dependent_tasks=None, instance=None):
+        PipelineJob.start('task_manager.start_task', task.id)
         self.start_task_limit -= 1
         if self.start_task_limit == 0:
             # schedule another run immediately after this task manager
@@ -288,6 +290,7 @@ class TaskManager():
         def post_commit():
             if task.status != 'failed' and type(task) is not WorkflowJob:
                 task_cls = task._get_task_class()
+                PipelineJob.start('dispatcher.apply_async', task.id)
                 task_cls.apply_async(
                     [task.pk],
                     opts,
@@ -306,6 +309,7 @@ class TaskManager():
 
         task.websocket_emit_status(task.status)  # adds to on_commit
         connection.on_commit(post_commit)
+        connection.on_commit(lambda: PipelineJob.end('task_manager.start_task',task.id))
 
     def process_running_tasks(self, running_tasks):
         for task in running_tasks:
