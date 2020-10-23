@@ -17,7 +17,6 @@ import copy
 import io
 import json
 import logging
-import os
 import re
 import requests
 import time
@@ -68,6 +67,16 @@ def validate_entitlement_manifest(data):
             return json.loads(z.open(f).read())
 
 
+class OpenLicense(object):
+    def validate(self):
+        return dict(
+            license_type='open',
+            valid_key=True,
+            subscription_name='OPEN',
+            product_name="AWX",
+        )
+
+
 class Licenser(object):
     # warn when there is a month (30 days) left on the license
     LICENSE_TIMEOUT = 60 * 60 * 24 * 30
@@ -98,23 +107,11 @@ class Licenser(object):
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
         self._attrs.update(kwargs)
-        if os.path.exists('/var/lib/awx/.tower_version'):
-            if 'valid_key' in self._attrs:
-                if not self._attrs['valid_key']:
-                    self._unset_attrs()
-            else:
+        if 'valid_key' in self._attrs:
+            if not self._attrs['valid_key']:
                 self._unset_attrs()
         else:
-            self._generate_open_config()
-
-
-    def _generate_open_config(self):
-        self._attrs.update(dict(license_type='open',
-                                valid_key=True,
-                                subscription_name='OPEN',
-                                product_name="AWX",
-                                ))
-        settings.LICENSE = self._attrs
+            self._unset_attrs()
 
 
     def _unset_attrs(self):
