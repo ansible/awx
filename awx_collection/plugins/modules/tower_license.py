@@ -39,10 +39,11 @@ RETURN = ''' # '''
 EXAMPLES = '''
 - name: Set the license using a file
   license:
-    data: "{{ lookup('file', '/tmp/my_tower.license') }}"
+    manifest: "/tmp/my_tower.license"
     eula_accepted: True
 '''
 
+import base64
 from ..module_utils.tower_api import TowerAPIModule
 
 
@@ -50,29 +51,31 @@ def main():
 
     module = TowerAPIModule(
         argument_spec=dict(
-            data=dict(type='dict', required=True),
+            manifest=dict(type='str', required=True),
             eula_accepted=dict(type='bool', required=True),
         ),
     )
 
-    json_output = {'changed': False}
+    json_output = {'changed': True}
 
     if not module.params.get('eula_accepted'):
         module.fail_json(msg='You must accept the EULA by passing in the param eula_accepted as True')
 
-    json_output['old_license'] = module.get_endpoint('settings/system/')['json']['LICENSE']
-    new_license = module.params.get('data')
+    try:
+        manifest = base64.b64encode(
+            open(module.params.get('manifest'), 'rb').read()
+        )
+    except OSError as e:
+        module.fail_json(msg=str(e))
 
-    if json_output['old_license'] != new_license:
-        json_output['changed'] = True
+    # Deal with check mode
+    if module.check_mode:
+        module.exit_json(**json_output)
 
-        # Deal with check mode
-        if module.check_mode:
-            module.exit_json(**json_output)
-
-        # We need to add in the EULA
-        new_license['eula_accepted'] = True
-        module.post_endpoint('config', data=new_license)
+    module.post_endpoint('config', data={
+        'eula_accepted': True,
+        'manifest': manifest.decode()
+    })
 
     module.exit_json(**json_output)
 
