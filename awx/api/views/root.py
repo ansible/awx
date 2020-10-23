@@ -200,7 +200,7 @@ class ApiV2SubscriptionView(APIView):
             if pw:
                 settings.SUBSCRIPTIONS_PASSWORD = data['subscriptions_password']
         except Exception as exc:
-            msg = _("Invalid License")
+            msg = _("Invalid Subscription")
             if (
                 isinstance(exc, requests.exceptions.HTTPError) and
                 getattr(getattr(exc, 'response', None), 'status_code', None) == 401
@@ -213,7 +213,7 @@ class ApiV2SubscriptionView(APIView):
             elif isinstance(exc, (ValueError, OSError)) and exc.args:
                 msg = exc.args[0]
             else:
-                logger.exception(smart_text(u"Invalid license submitted."),
+                logger.exception(smart_text(u"Invalid subscription submitted."),
                                  extra=dict(actor=request.user.username))
             return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -245,7 +245,7 @@ class ApiV2AttachView(APIView):
                 with set_environ(**settings.AWX_TASK_ENV):
                     validated = get_licenser().validate_rh(user, pw)
             except Exception as exc:
-                msg = _("Invalid License")
+                msg = _("Invalid Subscription")
                 if (
                     isinstance(exc, requests.exceptions.HTTPError) and
                     getattr(getattr(exc, 'response', None), 'status_code', None) == 401
@@ -258,7 +258,7 @@ class ApiV2AttachView(APIView):
                 elif isinstance(exc, (ValueError, OSError)) and exc.args:
                     msg = exc.args[0]
                 else:
-                    logger.exception(smart_text(u"Invalid license submitted."),
+                    logger.exception(smart_text(u"Invalid subscription submitted."),
                                      extra=dict(actor=request.user.username))
                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
         for sub in validated:
@@ -330,7 +330,7 @@ class ApiV2ConfigView(APIView):
 
     def post(self, request):
         if not isinstance(request.data, dict):
-            return Response({"error": _("Invalid license data")}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _("Invalid subscription data")}, status=status.HTTP_400_BAD_REQUEST)
         if "eula_accepted" not in request.data:
             return Response({"error": _("Missing 'eula_accepted' property")}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -350,17 +350,21 @@ class ApiV2ConfigView(APIView):
 
         from awx.main.utils.common import get_licenser
         license_data = json.loads(data_actual)
+        if 'license_key' in license_data:
+            return Response({"error": _('Legacy license submitted. A subscription manifest is now required.')}, status=status.HTTP_400_BAD_REQUEST)
         if 'manifest' in license_data:
             try:
                 license_data = validate_entitlement_manifest(license_data['manifest'])
+            except ValueError as e:
+                return Response({"error": e}, status=status.HTTP_400_BAD_REQUEST)
             except Exception:
-                logger.exception('Invalid license submitted. {}')
-                return Response({"error": 'Invalid license submitted.'}, status=status.HTTP_400_BAD_REQUEST)
+                logger.exception('Invalid manifest submitted. {}')
+                return Response({"error": _('Invalid manifest submitted.')}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 license_data_validated = get_licenser().license_from_manifest(license_data)
             except Exception:
-                logger.warning(smart_text(u"Invalid license submitted."),
+                logger.warning(smart_text(u"Invalid subscription submitted."),
                                extra=dict(actor=request.user.username))
                 return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -372,9 +376,9 @@ class ApiV2ConfigView(APIView):
                 settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
 
-        logger.warning(smart_text(u"Invalid license submitted."),
+        logger.warning(smart_text(u"Invalid subscription submitted."),
                        extra=dict(actor=request.user.username))
-        return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": _("Invalid subscription")}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
         try:

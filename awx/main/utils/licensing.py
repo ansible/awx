@@ -24,6 +24,7 @@ import zipfile
 
 from dateutil.parser import parse as parse_date
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -31,6 +32,7 @@ from cryptography import x509
 
 # Django
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.main.models import Host
@@ -50,22 +52,31 @@ def rhsm_config():
 def validate_entitlement_manifest(data):
     buff = io.BytesIO()
     buff.write(base64.b64decode(data))
-    z = zipfile.ZipFile(buff)
+    try:
+        z = zipfile.ZipFile(buff)
+    except zipfile.BadZipFile as e:
+        raise ValueError(_("Invalid manifest: a subscription manifest zip file is required.")) from e
     buff = io.BytesIO()
 
+    files = z.namelist()
+    if 'consumer_export.zip' not in files or 'signature' not in files:
+        raise ValueError(_("Invalid manifest: missing required files."))
     export = z.open('consumer_export.zip').read()
     sig = z.open('signature').read()
     with open('/etc/tower/candlepin-redhat-ca.crt', 'rb') as f:
         cert = x509.load_pem_x509_certificate(f.read(), backend=default_backend())
         key = cert.public_key()
-    key.verify(sig, export, padding=padding.PKCS1v15(), algorithm=hashes.SHA256())
+    try:
+        key.verify(sig, export, padding=padding.PKCS1v15(), algorithm=hashes.SHA256())
+    except InvalidSignature as e:
+        raise ValueError(_("Invalid manifest: signature verification failed.")) from e
 
     buff.write(export)
     z = zipfile.ZipFile(buff)
     for f in z.filelist:
         if f.filename.startswith('export/entitlements') and f.filename.endswith('.json'):
             return json.loads(z.open(f).read())
-
+    raise ValueError(_("Invalid manifest: manifest contains no subscriptions."))
 
 class OpenLicense(object):
     def validate(self):
@@ -88,7 +99,7 @@ class Licenser(object):
         instance_count=0,
         license_date=0,
         license_type="UNLICENSED",
-        product_name="Red Hat Ansible Tower",
+        product_name="Red Hat Ansible Automation Platform",
         valid_key=False
     )
 
@@ -308,7 +319,7 @@ class Licenser(object):
         if valid_subs:
             licenses = []
             for sub in valid_subs:
-                license = self.__class__(subscription_name='Ansible Tower by Red Hat')
+                license = self.__class__(subscription_name='Red Hat Ansible Automation Platform')
                 license._attrs['instance_count'] = int(sub.quantity)
                 license._attrs['sku'] = sub.sku
                 license._attrs['support_level'] = sub.support_level
