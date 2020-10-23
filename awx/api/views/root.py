@@ -1,6 +1,7 @@
 # Copyright (c) 2018 Ansible, Inc.
 # All Rights Reserved.
 
+import base64
 import json
 import logging
 import operator
@@ -353,6 +354,15 @@ class ApiV2ConfigView(APIView):
         if 'license_key' in license_data:
             return Response({"error": _('Legacy license submitted. A subscription manifest is now required.')}, status=status.HTTP_400_BAD_REQUEST)
         if 'manifest' in license_data:
+            try:
+                json_actual = json.loads(base64.b64decode(license_data['manifest']))
+                if 'license_key' in json_actual:
+                    return Response(
+                        {"error": _('Legacy license submitted. A subscription manifest is now required.')},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            except Exception:
+                pass
             try:
                 license_data = validate_entitlement_manifest(license_data['manifest'])
             except ValueError as e:
