@@ -5,8 +5,8 @@ __all__ = ['get_license']
 
 
 def _get_validated_license_data():
-    from awx.main.utils.licensing import Licenser
-    return Licenser().validate()
+    from awx.main.utils import get_licenser
+    return get_licenser().validate()
 
 
 def get_license():
