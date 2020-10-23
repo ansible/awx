@@ -18,6 +18,7 @@ import ContentLoading from '../../../components/ContentLoading';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import { useConfig } from '../../../contexts/Config';
 
 function OrganizationDetail({ i18n, organization }) {
   const {
@@ -37,6 +38,7 @@ function OrganizationDetail({ i18n, organization }) {
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [instanceGroups, setInstanceGroups] = useState([]);
   const history = useHistory();
+  const { license_info = {} } = useConfig();
 
   useEffect(() => {
     (async () => {
@@ -85,7 +87,9 @@ function OrganizationDetail({ i18n, organization }) {
           dataCy="organization-detail-name"
         />
         <Detail label={i18n._(t`Description`)} value={description} />
-        <Detail label={i18n._(t`Max Hosts`)} value={`${max_hosts}`} />
+        {license_info?.license_type !== 'open' && (
+          <Detail label={i18n._(t`Max Hosts`)} value={`${max_hosts}`} />
+        )}
         <Detail
           label={i18n._(t`Ansible Environment`)}
           value={custom_virtualenv}

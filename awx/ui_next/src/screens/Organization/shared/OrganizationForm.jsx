@@ -6,7 +6,7 @@ import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '../../../api';
-import { ConfigContext } from '../../../contexts/Config';
+import { ConfigContext, useConfig } from '../../../contexts/Config';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
@@ -18,14 +18,10 @@ import { required, minMaxValue } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 
-function OrganizationFormFields({
-  i18n,
-  me,
-  instanceGroups,
-  setInstanceGroups,
-}) {
+function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
   const { setFieldValue } = useFormikContext();
   const [venvField] = useField('custom_virtualenv');
+  const { license_info = {}, me = {} } = useConfig();
 
   const [
     galaxyCredentialsField,
@@ -63,20 +59,23 @@ function OrganizationFormFields({
         type="text"
         label={i18n._(t`Description`)}
       />
-      <FormField
-        id="org-max_hosts"
-        name="max_hosts"
-        type="number"
-        label={i18n._(t`Max Hosts`)}
-        tooltip={i18n._(
-          t`The maximum number of hosts allowed to be managed by this organization.
-                    Value defaults to 0 which means no limit. Refer to the Ansible
-                    documentation for more details.`
-        )}
-        validate={minMaxValue(0, Number.MAX_SAFE_INTEGER, i18n)}
-        me={me || {}}
-        isDisabled={!me.is_superuser}
-      />
+      {license_info?.license_type !== 'open' && (
+        <FormField
+          id="org-max_hosts"
+          name="max_hosts"
+          type="number"
+          label={i18n._(t`Max Hosts`)}
+          tooltip={i18n._(
+            t`The maximum number of hosts allowed to be managed by this organization.
+            Value defaults to 0 which means no limit. Refer to the Ansible
+            documentation for more details.`
+          )}
+          validate={minMaxValue(0, Number.MAX_SAFE_INTEGER, i18n)}
+          me={me}
+          isDisabled={!me.is_superuser}
+        />
+      )}
+
       {custom_virtualenvs && custom_virtualenvs.length > 1 && (
         <FormGroup
           fieldId="org-custom-virtualenv"
