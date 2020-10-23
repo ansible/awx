@@ -23,7 +23,7 @@ description:
 options:
     data:
       description:
-        - The contents of the license file
+        - file path to a Red Hat subscription manifest (a .zip file)
       required: True
       type: dict
     eula_accepted:
@@ -39,7 +39,7 @@ RETURN = ''' # '''
 EXAMPLES = '''
 - name: Set the license using a file
   license:
-    manifest: "/tmp/my_tower.license"
+    manifest: "/tmp/my_manifest.zip"
     eula_accepted: True
 '''
 
