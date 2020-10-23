@@ -78,6 +78,7 @@ def validate_entitlement_manifest(data):
             return json.loads(z.open(f).read())
     raise ValueError(_("Invalid manifest: manifest contains no subscriptions."))
 
+
 class OpenLicense(object):
     def validate(self):
         return dict(
