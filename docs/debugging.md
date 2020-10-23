@@ -98,3 +98,29 @@ sdb-listen
 
 This will open a Python process that listens for new debugger sessions and
 automatically connects to them for you.
+
+Graph Jobs
+----------
+The `awx-manage graph_jobs` can be used to visualize how Jobs progress from
+pending to waiting to running.
+
+```
+awx-manage graph_jobs --help
+usage: awx-manage graph_jobs [-h] [--refresh REFRESH] [--width WIDTH]
+                             [--height HEIGHT] [--version] [-v {0,1,2,3}]
+                             [--settings SETTINGS] [--pythonpath PYTHONPATH]
+                             [--traceback] [--no-color] [--force-color]
+
+Plot pending, waiting, running jobs over time on the terminal
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --refresh REFRESH     Time between refreshes of the graph and data in
+                        seconds (defaults to 1.0)
+  --width WIDTH         Width of the graph (defaults to 100)
+  --height HEIGHT       Height of the graph (defaults to 30)
+```
+
+Below is an example run with 200 Jobs flowing through the system.
+
+[![asciicast](https://asciinema.org/a/xnfzMQ30xWPdhwORiISz0wcEw.svg)](https://asciinema.org/a/xnfzMQ30xWPdhwORiISz0wcEw)
