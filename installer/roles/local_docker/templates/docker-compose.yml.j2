@@ -31,6 +31,17 @@ services:
     {% elif awx_web_container_labels is defined %}
     labels:
       - {{ awx_web_container_labels }}
+    {% if (awx_web_container_networks is defined) and (',' in awx_web_container_networks) %}
+    {% set awx_web_container_networks_list = awx_web_container_networks.split(',') %}
+    networks:
+    {% for awx_web_container_network in awx_web_container_networks_list %}
+      - {{ awx_web_container_network }}
+    {% endfor %}
+      - default
+    {% elif awx_web_container_networks is defined %}
+    networks:
+      - {{ awx_web_container_networks }}
+      - default
     {% endif %}
     volumes:
       - supervisor-socket:/var/run/supervisor
