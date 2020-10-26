@@ -187,8 +187,8 @@ class APIView(views.APIView):
         '''
         Log warning for 400 requests.  Add header with elapsed time.
         '''
-        from awx.conf.license import get_license
-
+        from awx.main.utils import get_licenser
+        from awx.main.utils.licensing import OpenLicense
         #
         # If the URL was rewritten, and we get a 404, we should entirely
         # replace the view in the request context with an ApiErrorView()
@@ -224,7 +224,7 @@ class APIView(views.APIView):
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
         response['X-API-Product-Version'] = get_awx_version()
-        response['X-API-Product-Name'] = 'AWX' if get_license().get('license_type') == 'open' else 'Red Hat Ansible Tower'
+        response['X-API-Product-Name'] = 'AWX' if isinstance(get_licenser(), OpenLicense) else 'Red Hat Ansible Tower'
         
         response['X-API-Node'] = settings.CLUSTER_HOST_ID
         if time_started:
