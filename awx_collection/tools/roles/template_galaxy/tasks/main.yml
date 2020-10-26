@@ -34,6 +34,19 @@
         regexp: "^    NAME = 'awx.awx.tower'  # REPLACE$"
         replace: "    NAME = '{{ collection_namespace }}.{{ collection_package }}.tower'  # REPLACE"
 
+    - name: get list of test files
+      find:
+        paths: "{{ collection_path }}/tests/integration/targets/"
+        recurse: true
+      register: test_files
+
+    - name: Change lookup plugin fqcn usage in tests
+      replace:
+        path: "{{ item.path }}"
+        regexp: 'awx.awx'
+        replace: '{{ collection_namespace }}.{{ collection_package }}'
+      loop: "{{ test_files.files }}"
+
     - name: Get sanity tests to work with non-default name
       lineinfile:
         path: "{{ collection_path }}/tests/sanity/ignore-2.10.txt"
