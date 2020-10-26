@@ -21,7 +21,7 @@ description:
     - Get or Set Ansible Tower license. See
       U(https://www.ansible.com/tower) for an overview.
 options:
-    data:
+    manifest:
       description:
         - file path to a Red Hat subscription manifest (a .zip file)
       required: True
