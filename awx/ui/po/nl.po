@@ -5183,8 +5183,8 @@ msgid "Provide the named URL encoded name or id of the remote Tower inventory to
 msgstr "Voer de URL, versleutelde naam of ID of de externe inventaris in die geïmporteerd moet worden."
 
 #: client/src/license/license.partial.html:128
-msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS > SYSTEM."
-msgstr "Geef uw Red Hat-klantengegevens door en u kunt kiezen uit een lijst met beschikbare licenties.  De toegangsgegevens die u gebruikt, worden opgeslagen voor toekomstig gebruik bij het ophalen van verlengingen of uitbreidingen van licenties. U kunt deze updaten of verwijderen in INSTELLINGEN > SYSTEEM."
+msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS &gt; SYSTEM."
+msgstr "Geef uw Red Hat-klantengegevens door en u kunt kiezen uit een lijst met beschikbare licenties.  De toegangsgegevens die u gebruikt, worden opgeslagen voor toekomstig gebruik bij het ophalen van verlengingen of uitbreidingen van licenties. U kunt deze updaten of verwijderen in INSTELLINGEN &gt; SYSTEEM."
 
 #: client/src/templates/job_templates/job-template.form.js:374
 #: client/src/templates/job_templates/job-template.form.js:382

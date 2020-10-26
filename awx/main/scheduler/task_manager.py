@@ -14,6 +14,7 @@ from django.db import transaction, connection
 from django.utils.translation import ugettext_lazy as _, gettext_noop
 from django.utils.timezone import now as tz_now
 from django.conf import settings
+from django.db.models import Q
 
 # AWX
 from awx.main.dispatch.reaper import reap_job
@@ -67,7 +68,7 @@ class TaskManager():
         '''
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
         '''
-        instances = Instance.objects.filter(capacity__gt=0, enabled=True)
+        instances = Instance.objects.filter(~Q(hostname=None), capacity__gt=0, enabled=True)
         self.real_instances = {i.hostname: i for i in instances}
 
         instances_partial = [SimpleNamespace(obj=instance,
@@ -284,7 +285,7 @@ class TaskManager():
                 for group in InstanceGroup.objects.all():
                     if group.is_containerized or group.controller_id:
                         continue
-                    match = group.fit_task_to_most_remaining_capacity_instance(task)
+                    match = group.fit_task_to_most_remaining_capacity_instance(task, group.instances.all())
                     if match:
                         break
                 task.instance_group = rampart_group
@@ -528,7 +529,8 @@ class TaskManager():
                         logger.debug("Starting {} in group {} instance {} (remaining_capacity={})".format(
                                      task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity))
 
-                    execution_instance = self.real_instances[execution_instance.hostname]
+                    if execution_instance:
+                        execution_instance = self.real_instances[execution_instance.hostname]
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), execution_instance)
                     found_acceptable_queue = True
