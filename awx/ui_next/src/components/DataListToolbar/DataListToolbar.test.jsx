@@ -1,6 +1,8 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import DataListToolbar from './DataListToolbar';
+import AddDropDownButton from '../AddDropDownButton/AddDropDownButton';
 
 describe('<DataListToolbar />', () => {
   let toolbar;
@@ -312,5 +314,45 @@ describe('<DataListToolbar />', () => {
     expect(
       search.prop('columns').filter(col => col.key === 'advanced').length
     ).toBe(1);
+  });
+
+  test('should properly render toolbar buttons when in advanced search mode', async () => {
+    const searchColumns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const sortColumns = [{ name: 'Name', key: 'name' }];
+
+    const newToolbar = mountWithContexts(
+      <DataListToolbar
+        qsConfig={QS_CONFIG}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
+        onSearch={onSearch}
+        onReplaceSearch={onReplaceSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        additionalControls={[
+          <AddDropDownButton
+            dropdownItems={[
+              <div key="add container" aria-label="add container">
+                Add Contaner
+              </div>,
+              <div key="add instance group" aria-label="add instance group">
+                Add Instance Group
+              </div>,
+            ]}
+          />,
+        ]}
+      />
+    );
+    await act(() =>
+      newToolbar.find('Search').prop('onShowAdvancedSearch')(true)
+    );
+    newToolbar.update();
+    expect(newToolbar.find('KebabToggle').length).toBe(1);
+    await act(() => newToolbar.find('KebabToggle').prop('onToggle')(true));
+    newToolbar.update();
+    expect(newToolbar.find('div[aria-label="add container"]').length).toBe(1);
+    expect(newToolbar.find('div[aria-label="add instance group"]').length).toBe(
+      1
+    );
   });
 });

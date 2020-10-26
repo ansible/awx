@@ -97,7 +97,7 @@ describe('<InventoryGroupHostList />', () => {
   });
 
   test('should show add dropdown button according to permissions', async () => {
-    expect(wrapper.find('AddDropdown').length).toBe(1);
+    expect(wrapper.find('AddDropDownButton').length).toBe(1);
     InventoriesAPI.readHostsOptions.mockResolvedValueOnce({
       data: {
         actions: {
@@ -109,7 +109,7 @@ describe('<InventoryGroupHostList />', () => {
       wrapper = mountWithContexts(<InventoryGroupHostList />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    expect(wrapper.find('AddDropdown').length).toBe(0);
+    expect(wrapper.find('AddDropDownButton').length).toBe(0);
   });
 
   test('expected api calls are made for multi-delete', async () => {
@@ -156,9 +156,10 @@ describe('<InventoryGroupHostList />', () => {
 
   test('should show associate host modal when adding an existing host', () => {
     const dropdownToggle = wrapper.find(
-      'DropdownToggle button[aria-label="add"]'
+      'ToolbarAddButton button[aria-label="Add"]'
     );
     dropdownToggle.simulate('click');
+
     wrapper
       .find('DropdownItem[aria-label="Add existing host"]')
       .simulate('click');
@@ -175,7 +176,7 @@ describe('<InventoryGroupHostList />', () => {
         results: [{ id: 123, name: 'foo', url: '/api/v2/hosts/123/' }],
       },
     });
-    wrapper.find('DropdownToggle button[aria-label="add"]').simulate('click');
+    wrapper.find('ToolbarAddButton button[aria-label="Add"]').simulate('click');
     await act(async () => {
       wrapper
         .find('DropdownItem[aria-label="Add existing host"]')
@@ -205,7 +206,7 @@ describe('<InventoryGroupHostList />', () => {
         results: [{ id: 123, name: 'foo', url: '/api/v2/hosts/123/' }],
       },
     });
-    wrapper.find('DropdownToggle button[aria-label="add"]').simulate('click');
+    wrapper.find('ToolbarAddButton[aria-label="Add"]').simulate('click');
     await act(async () => {
       wrapper
         .find('DropdownItem[aria-label="Add existing host"]')
@@ -240,7 +241,9 @@ describe('<InventoryGroupHostList />', () => {
         },
       },
     });
-    const history = createMemoryHistory();
+    const history = createMemoryHistory({
+      initialEntries: ['/inventories/inventory/1/groups/2/nested_hosts/add'],
+    });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryGroupHostList />, {
         context: {
@@ -250,10 +253,11 @@ describe('<InventoryGroupHostList />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const dropdownToggle = wrapper.find(
-      'DropdownToggle button[aria-label="add"]'
+      'ToolbarAddButton button[aria-label="Add"]'
     );
     dropdownToggle.simulate('click');
     wrapper.find('DropdownItem[aria-label="Add new host"]').simulate('click');
+    wrapper.update();
     expect(history.location.pathname).toEqual(
       '/inventories/inventory/1/groups/2/nested_hosts/add'
     );

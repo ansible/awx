@@ -1,14 +1,15 @@
 import React, { Fragment, useEffect, useState, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card } from '@patternfly/react-core';
+import { Card, DropdownItem } from '@patternfly/react-core';
 
 import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
 } from '../../../api';
+import { toTitleCase } from '../../../util/strings';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -140,24 +141,31 @@ function DashboardTemplateList({ i18n }) {
     jtActions && Object.prototype.hasOwnProperty.call(jtActions, 'POST');
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
-  const addButtonOptions = [];
 
-  if (canAddJT) {
-    addButtonOptions.push({
-      label: i18n._(t`Job Template`),
-      url: `/templates/job_template/add/`,
-    });
-  }
-
-  if (canAddWFJT) {
-    addButtonOptions.push({
-      label: i18n._(t`Workflow Template`),
-      url: `/templates/workflow_job_template/add/`,
-    });
-  }
-
+  const addTempate = toTitleCase(i18n._(t`Add Job Template`));
+  const addWFTemplate = toTitleCase(i18n._(t`Add Workflow Template`));
   const addButton = (
-    <AddDropDownButton key="add" dropdownItems={addButtonOptions} />
+    <AddDropDownButton
+      key="add"
+      dropdownItems={[
+        <DropdownItem
+          key={addTempate}
+          component={Link}
+          to="/templates/job_template/add/"
+          aria-label={addTempate}
+        >
+          {addTempate}
+        </DropdownItem>,
+        <DropdownItem
+          component={Link}
+          to="/templates/workflow_job_template/add/"
+          key={addWFTemplate}
+          aria-label={addWFTemplate}
+        >
+          {addWFTemplate}
+        </DropdownItem>,
+      ]}
+    />
   );
 
   return (

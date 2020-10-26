@@ -1,7 +1,8 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { DropdownItem } from '@patternfly/react-core';
 import { getQSConfig, mergeParams, parseQueryString } from '../../../util/qs';
 import { GroupsAPI, InventoriesAPI } from '../../../api';
 
@@ -18,7 +19,8 @@ import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
-import AddDropdown from '../shared/AddDropdown';
+import AddDropDownButton from '../../../components/AddDropDownButton';
+import { toTitleCase } from '../../../util/strings';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -30,7 +32,6 @@ function InventoryGroupHostList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { id: inventoryId, groupId } = useParams();
   const location = useLocation();
-  const history = useHistory();
 
   const {
     result: {
@@ -143,26 +144,31 @@ function InventoryGroupHostList({ i18n }) {
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_hosts/add`;
-  const addButtonOptions = [];
+  const addExistingHost = toTitleCase(i18n._(t`Add Existing Host`));
+  const addNewHost = toTitleCase(i18n._(t`Add New Host`));
 
-  if (canAdd) {
-    addButtonOptions.push(
-      {
-        onAdd: () => setIsModalOpen(true),
-        title: i18n._(t`Add existing host`),
-        label: i18n._(t`host`),
-        key: 'existing',
-      },
-      {
-        onAdd: () => history.push(addFormUrl),
-        title: i18n._(t`Add new host`),
-        label: i18n._(t`host`),
-        key: 'new',
-      }
-    );
-  }
-
-  const addButton = <AddDropdown key="add" dropdownItems={addButtonOptions} />;
+  const addButton = (
+    <AddDropDownButton
+      key="add"
+      dropdownItems={[
+        <DropdownItem
+          onClick={() => setIsModalOpen(true)}
+          key={addExistingHost}
+          aria-label={addExistingHost}
+        >
+          {addExistingHost}
+        </DropdownItem>,
+        <DropdownItem
+          component={Link}
+          to={`${addFormUrl}`}
+          key={addNewHost}
+          aria-label={addNewHost}
+        >
+          {addNewHost}
+        </DropdownItem>,
+      ]}
+    />
+  );
   return (
     <>
       <PaginatedDataList

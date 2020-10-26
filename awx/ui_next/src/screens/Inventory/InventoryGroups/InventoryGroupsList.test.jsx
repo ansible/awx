@@ -10,7 +10,12 @@ import { InventoriesAPI, GroupsAPI } from '../../../api';
 import InventoryGroupsList from './InventoryGroupsList';
 
 jest.mock('../../../api');
-
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({
+    id: 1,
+  }),
+}));
 const mockGroups = [
   {
     id: 1,
