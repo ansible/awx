@@ -967,7 +967,6 @@ class Command(BaseCommand):
 
         begin = time.time()
         with advisory_lock('inventory_{}_update'.format(self.inventory.id)):
-            self.load_inventory_from_database()
 
             try:
                 self.check_license()
