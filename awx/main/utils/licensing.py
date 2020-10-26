@@ -340,6 +340,7 @@ class Licenser(object):
                 )
                 license._attrs['subscription_name'] = subscription_name
                 license._attrs['satellite'] = satellite
+                license._attrs['valid_key'] = True
                 license.update(
                     license_date=int(sub.end_date.strftime('%s'))
                 )
@@ -371,7 +372,8 @@ class Licenser(object):
         available_instances = int(attrs.get('instance_count', None) or 0)
         attrs['current_instances'] = current_instances
         attrs['available_instances'] = available_instances
-        attrs['free_instances'] = max(0, available_instances - current_instances)
+        free_instances = (available_instances - current_instances)
+        attrs['free_instances'] = max(0, free_instances)
 
         license_date = int(attrs.get('license_date', 0) or 0)
         current_date = int(time.time())
@@ -381,7 +383,7 @@ class Licenser(object):
             attrs['grace_period_remaining'] = time_remaining
         else:
             attrs['grace_period_remaining'] = (license_date + 2592000) - current_date
-        attrs['compliant'] = bool(time_remaining > 0 and attrs['free_instances'] >= 0)
+        attrs['compliant'] = bool(time_remaining > 0 and free_instances >= 0)
         attrs['date_warning'] = bool(time_remaining < self.LICENSE_TIMEOUT)
         attrs['date_expired'] = bool(time_remaining <= 0)
         return attrs
