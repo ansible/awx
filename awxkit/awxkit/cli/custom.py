@@ -246,6 +246,7 @@ class AssociationMixin(object):
                         'success_notification': 'notification_templates',
                         'failure_notification': 'notification_templates',
                         'credential': 'credentials',
+                        'galaxy_credential': 'credentials',
                     }[resource]
 
                 def get(self, **kwargs):
@@ -367,9 +368,11 @@ class OrganizationNotificationDisAssociation(NotificationAssociateMixin, CustomA
 
 OrganizationNotificationAssociation.targets.update({
     'approval_notification': ['notification_templates_approvals', 'notification_template'],
+    'galaxy_credential': ['galaxy_credentials', 'credential'],
 })
 OrganizationNotificationDisAssociation.targets.update({
     'approval_notification': ['notification_templates_approvals', 'notification_template'],
+    'galaxy_credential': ['galaxy_credentials', 'credential'],
 })
 
 
