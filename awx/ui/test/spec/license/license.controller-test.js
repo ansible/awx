@@ -7,7 +7,7 @@ describe('Controller: LicenseController', () => {
         ConfigService,
         ProcessErrors,
         config,
-        rhCreds;
+        subscriptionCreds;
 
     beforeEach(angular.mock.module('awApp'));
     beforeEach(angular.mock.module('license', ($provide) => {
@@ -23,7 +23,7 @@ describe('Controller: LicenseController', () => {
             version: '3.1.0-devel'
         };
 
-        rhCreds = {
+        subscriptionCreds = {
             password: '$encrypted$',
             username: 'foo',
         }
@@ -33,21 +33,21 @@ describe('Controller: LicenseController', () => {
         $provide.value('ConfigService', ConfigService);
         $provide.value('ProcessErrors', ProcessErrors);
         $provide.value('config', config);
-        $provide.value('rhCreds', rhCreds);
+        $provide.value('subscriptionCreds', subscriptionCreds);
     }));
 
-    beforeEach(angular.mock.inject( ($rootScope, $controller, _ConfigService_, _ProcessErrors_, _config_, _rhCreds_) => {
+    beforeEach(angular.mock.inject( ($rootScope, $controller, _ConfigService_, _ProcessErrors_, _config_, _subscriptionCreds_) => {
         scope = $rootScope.$new();
         ConfigService = _ConfigService_;
         ProcessErrors = _ProcessErrors_;
         config = _config_;
-        rhCreds = _rhCreds_;
+        subscriptionCreds = _subscriptionCreds_;
         LicenseController = $controller('licenseController', {
             $scope: scope,
             ConfigService: ConfigService,
             ProcessErrors: ProcessErrors,
             config: config,
-            rhCreds: rhCreds
+            subscriptionCreds: subscriptionCreds
         });
     }));
 
