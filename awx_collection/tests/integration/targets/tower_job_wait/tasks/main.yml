@@ -135,3 +135,49 @@
     name: "{{ proj_name }}"
     organization: Default
     state: absent
+
+# tower workflow wait test
+- name: Generate a random string for test
+  set_fact:
+    test_id1: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id1 is not defined
+
+- name: Generate names
+  set_fact:
+    wfjt_name2: "AWX-Collection-tests-tower_workflow_launch--wfjt1-{{ test_id1 }}"
+
+- name: Create our workflow
+  tower_workflow_job_template:
+    name: "{{ wfjt_name2 }}"
+    state: present
+
+- name: Add a node
+  tower_workflow_job_template_node:
+    workflow_job_template: "{{ wfjt_name2 }}"
+    unified_job_template: "Demo Job Template"
+    identifier: leaf
+  register: new_node
+
+- name: Kick off a workflow
+  tower_workflow_launch:
+    workflow_template: "{{ wfjt_name2 }}"
+  ignore_errors: true
+  register: workflow
+
+- name: Wait for the Workflow Job to finish
+  tower_job_wait:
+    job_id: "{{ workflow.job_info.id }}"
+    job_type: "workflow_jobs"
+  register: wait_workflow_results
+
+# Make sure it worked and that we have some data in our results
+- assert:
+    that:
+      - wait_workflow_results is successful
+      - "'elapsed' in wait_workflow_results"
+      - "'id' in wait_workflow_results"
+
+- name: Clean up test workflow
+  tower_workflow_job_template:
+    name: "{{ wfjt_name2 }}"
+    state: absent
