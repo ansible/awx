@@ -58,7 +58,13 @@
 					{{license.license_info.current_instances}}
 					</div>
 				</div>
-				<div class="License-field License-greenText" ng-show='license.license_info.available_instances < 9999999'>
+				<div class="License-field License-greenText" ng-show='license.license_info.available_instances < 9999999 && compliant'>
+					<div class="License-field--label" translate>Hosts Remaining</div>
+					<div class="License-field--content">
+					{{license.license_info.free_instances}}
+					</div>
+				</div>
+				<div class="License-field License-redText" ng-show='license.license_info.free_instances < 1 && !compliant'>
 					<div class="License-field--label" translate>Hosts Remaining</div>
 					<div class="License-field--content">
 					{{license.license_info.free_instances}}
