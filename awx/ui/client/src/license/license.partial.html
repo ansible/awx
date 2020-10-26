@@ -71,44 +71,48 @@
 					</div>
 				</div>
 			</div>
-			<div class="License-upgradeText" translate>If you are ready to upgrade, please contact us by clicking the button below</div>
-			<a href="https://www.ansible.com/renew" target="_blank"><button class="btn btn-primary" translate>Upgrade</button></a>
+			<div class="License-upgradeText" translate>If you are ready to upgrade or renew, please contact us by clicking the button below.</div>
+			<a href="https://www.redhat.com/contact" target="_blank"><button class="btn btn-primary" translate>Contact Us</button></a>
 		</div>
 	</div>
 	<div class="License-management" ng-class="{'License-management--missingLicense' : licenseMissing}">
 		<div class="card at-Panel">
 			<div class="List-titleText">{{title}}</div>
 			<div class="License-body">
-				<div class="License-helperText License-introText" ng-if="licenseMissing" translate>Welcome to Ansible Tower! Please complete the steps below to acquire a subscription.</div>
+				<div class="License-helperText License-introText" ng-if="licenseMissing" translate>Welcome to Red Hat Ansible Automation Platform! Please complete the steps below to activate your subscription.</div>
+				<div class="AddPermissions-directions" ng-if="licenseMissing">
+					<span class="AddPermissions-directionNumber">
+						1
+					</span>
+					<span class="License-helperText">
+						<translate>If you do not have a subscription, you can visit Red Hat to obtain a trial subscription.</translate>
+					</span>
+				</div>
+				<button class="License-downloadLicenseButton btn btn-primary" ng-if="licenseMissing" ng-click="downloadLicense()">
+					<translate>Request Subscription</translate>
+				</button>
+				<div class="License-file-container">
+					<div class="AddPermissions-directions" ng-if="licenseMissing">
+						<span class="AddPermissions-directionNumber" ng-if="licenseMissing">
+							2
+						</span>
+						<span class="License-helperText">
+							<translate>Select your Ansible Automation Platform subscription to use.</translate>
+						</span>
+					</div>
+				</div>
 				<div class="input-group License-file--container">
 					<div class="License-file--left">
 						<div class="d-block w-100">
-							<div class="AddPermissions-directions" ng-if="licenseMissing">
-								<span class="AddPermissions-directionNumber">
-									1
-								</span>
-								<span class="License-helperText">
-									<translate>Please click the button below to visit Ansible's website to get a Tower subscription.</translate>
-								</span>
-							</div>
-			
-								<button class="License-downloadLicenseButton btn btn-primary" ng-if="licenseMissing" ng-click="downloadLicense()">
-									<translate>Request Subscription</translate>
-								</button>
-			
 							<div class="AddPermissions-directions">
-								<span class="AddPermissions-directionNumber" ng-if="licenseMissing">
-									2
-								</span>
 								<span class="License-helperText">
-									<translate>Choose your Red Hat Subscription Manifest, agree to the End User License Agreement, and click submit.</translate>
+									<translate>Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <a href="https://access.redhat.com/management/subscription_allocations" target="_blank">https://access.redhat.com/management/subscription_allocations</a>.</translate>
 								</span>
 							</div>
 							<div class="License-subTitleText">
 								<span class="Form-requiredAsterisk">*</span>
 								<translate>Red Hat Subscription Manifest</translate>
 							</div>
-							<div class="License-helperText License-licenseStepHelp" translate>Upload a Red Hat Subscription Manifest</div>
 							<div class="License-filePicker">
 								<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser || (subscriptionCreds.username && subscriptionCreds.username.length > 0) || (subscriptionCreds.password && subscriptionCreds.password.length > 0)" translate>Browse</span>
 								<span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
@@ -125,7 +129,7 @@
 						<div class="d-block w-100">
 							<div class="AddPermissions-directions">
 								<span class="License-helperText">
-									<translate>Provide your Red Hat or Satellite credentials below and you can choose from a list of your available subscriptions.    The credentials you use will be stored for future use in retrieving renewal or expanded subscriptions.</translate>
+									<translate>Provide your Red Hat or Red Hat Satellite credentials below and you can choose from a list of your available subscriptions.    The credentials you use will be stored for future use in retrieving renewal or expanded subscriptions.</translate>
 								</span>
 							</div>
 							<div class="License-rhCredField">
@@ -157,6 +161,14 @@
 							</div>
 						</div>
 					</div>
+				</div>
+				<div class="License-helperText">
+				   <span class="AddPermissions-directionNumber" ng-if="licenseMissing">
+					   3
+				   </span>
+				   <span class="License-helperText">
+				       <translate>Agree to the End User License Agreement, and click submit.</translate>
+				   </span>
 				</div>
 				<div class="License-subTitleText">
 					<span class="Form-requiredAsterisk">*</span>
