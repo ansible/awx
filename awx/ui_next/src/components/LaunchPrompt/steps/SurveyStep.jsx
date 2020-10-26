@@ -123,7 +123,7 @@ function MultiSelectField({ question, i18n }) {
     validate: question.isrequired ? required(null, i18n) : null,
   });
   const id = `survey-question-${question.variable}`;
-  const hasActualValue = !question.required || meta.value.length > 0;
+  const hasActualValue = !question.required || meta.value?.length > 0;
   const isValid = !meta.touched || (!meta.error && hasActualValue);
 
   return (
