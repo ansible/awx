@@ -137,7 +137,7 @@ function Dashboard({ i18n }) {
           <Count
             failed
             link="/inventories?inventory.inventory_sources_with_failures__gt=0"
-            data={countData?.inventories?.failed}
+            data={countData?.inventories?.inventory_failed}
             label={i18n._(t`Inventory sync failures`)}
           />
           <Count
