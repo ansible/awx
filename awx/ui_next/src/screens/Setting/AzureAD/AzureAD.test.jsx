@@ -2,12 +2,25 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { SettingsProvider } from '../../../contexts/Settings';
 import { SettingsAPI } from '../../../api';
+import mockAllOptions from '../shared/data.allSettingOptions.json';
 import AzureAD from './AzureAD';
 
 jest.mock('../../../api/models/Settings');
 SettingsAPI.readCategory.mockResolvedValue({
-  data: {},
+  data: {
+    SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL:
+      'https://towerhost/sso/complete/azuread-oauth2/',
+    SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: 'mock key',
+    SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET: '$encrypted$',
+    SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: {},
+    SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP: {
+      'My Team': {
+        users: [],
+      },
+    },
+  },
 });
 
 describe('<AzureAD />', () => {
@@ -23,9 +36,14 @@ describe('<AzureAD />', () => {
       initialEntries: ['/settings/azure/details'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<AzureAD />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <SettingsProvider value={mockAllOptions.actions}>
+          <AzureAD />
+        </SettingsProvider>,
+        {
+          context: { router: { history } },
+        }
+      );
     });
     expect(wrapper.find('AzureADDetail').length).toBe(1);
   });

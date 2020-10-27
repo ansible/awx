@@ -1,7 +1,10 @@
 export function sortNestedDetails(obj = {}) {
-  const nestedTypes = ['nested object', 'list'];
+  const nestedTypes = ['nested object', 'list', 'boolean'];
   const notNested = Object.entries(obj).filter(
     ([, value]) => !nestedTypes.includes(value.type)
+  );
+  const booleanList = Object.entries(obj).filter(
+    ([, value]) => value.type === 'boolean'
   );
   const nestedList = Object.entries(obj).filter(
     ([, value]) => value.type === 'list'
@@ -9,7 +12,7 @@ export function sortNestedDetails(obj = {}) {
   const nestedObject = Object.entries(obj).filter(
     ([, value]) => value.type === 'nested object'
   );
-  return [...notNested, ...nestedList, ...nestedObject];
+  return [...notNested, ...booleanList, ...nestedList, ...nestedObject];
 }
 
 export function pluck(sourceObject, ...keys) {

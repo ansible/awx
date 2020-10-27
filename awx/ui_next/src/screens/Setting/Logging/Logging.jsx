@@ -4,11 +4,14 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
+import { useConfig } from '../../../contexts/Config';
 import LoggingDetail from './LoggingDetail';
 import LoggingEdit from './LoggingEdit';
 
 function Logging({ i18n }) {
   const baseURL = '/settings/logging';
+  const { me } = useConfig();
+
   return (
     <PageSection>
       <Card>
@@ -18,11 +21,17 @@ function Logging({ i18n }) {
             <LoggingDetail />
           </Route>
           <Route path={`${baseURL}/edit`}>
-            <LoggingEdit />
+            {me?.is_superuser ? (
+              <LoggingEdit />
+            ) : (
+              <Redirect to={`${baseURL}/details`} />
+            )}
           </Route>
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>
-              <Link to={`${baseURL}`}>{i18n._(t`View Logging settings`)}</Link>
+              <Link to={`${baseURL}/details`}>
+                {i18n._(t`View Logging settings`)}
+              </Link>
             </ContentError>
           </Route>
         </Switch>

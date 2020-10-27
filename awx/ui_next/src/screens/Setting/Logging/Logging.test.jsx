@@ -10,7 +10,29 @@ import Logging from './Logging';
 
 jest.mock('../../../api/models/Settings');
 SettingsAPI.readCategory.mockResolvedValue({
-  data: {},
+  data: {
+    LOG_AGGREGATOR_HOST: null,
+    LOG_AGGREGATOR_PORT: null,
+    LOG_AGGREGATOR_TYPE: null,
+    LOG_AGGREGATOR_USERNAME: '',
+    LOG_AGGREGATOR_PASSWORD: '',
+    LOG_AGGREGATOR_LOGGERS: [
+      'awx',
+      'activity_stream',
+      'job_events',
+      'system_tracking',
+    ],
+    LOG_AGGREGATOR_INDIVIDUAL_FACTS: false,
+    LOG_AGGREGATOR_ENABLED: false,
+    LOG_AGGREGATOR_TOWER_UUID: '',
+    LOG_AGGREGATOR_PROTOCOL: 'https',
+    LOG_AGGREGATOR_TCP_TIMEOUT: 5,
+    LOG_AGGREGATOR_VERIFY_CERT: true,
+    LOG_AGGREGATOR_LEVEL: 'INFO',
+    LOG_AGGREGATOR_MAX_DISK_USAGE_GB: 1,
+    LOG_AGGREGATOR_MAX_DISK_USAGE_PATH: '/var/lib/awx',
+    LOG_AGGREGATOR_RSYSLOGD_DEBUG: false,
+  },
 });
 
 describe('<Logging />', () => {

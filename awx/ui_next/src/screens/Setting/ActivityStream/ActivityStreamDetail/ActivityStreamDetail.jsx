@@ -13,7 +13,7 @@ import useRequest from '../../../../util/useRequest';
 import { useConfig } from '../../../../contexts/Config';
 import { useSettings } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
-import SettingDetail from '../../shared';
+import { SettingDetail } from '../../shared';
 
 function ActivityStreamDetail({ i18n }) {
   const { me } = useConfig();
