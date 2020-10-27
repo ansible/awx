@@ -133,32 +133,36 @@ function TemplateList({ i18n }) {
     jtActions && Object.prototype.hasOwnProperty.call(jtActions, 'POST');
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
-  // spreading Set() returns only unique keys
 
   const addTempate = toTitleCase(i18n._(t`Add Job Template`));
   const addWFTemplate = toTitleCase(i18n._(t`Add Workflow Template`));
+  const addDropDownButton = [];
+  if (canAddJT) {
+    addDropDownButton.push(
+      <DropdownItem
+        key={addTempate}
+        component={Link}
+        to="/templates/job_template/add/"
+        aria-label={addTempate}
+      >
+        {addTempate}
+      </DropdownItem>
+    );
+  }
+  if (canAddWFJT) {
+    addDropDownButton.push(
+      <DropdownItem
+        component={Link}
+        to="/templates/workflow_job_template/add/"
+        key={addWFTemplate}
+        aria-label={addWFTemplate}
+      >
+        {addWFTemplate}
+      </DropdownItem>
+    );
+  }
   const addButton = (
-    <AddDropDownButton
-      key="add"
-      dropdownItems={[
-        <DropdownItem
-          key={addTempate}
-          component={Link}
-          to="/templates/job_template/add/"
-          aria-label={addTempate}
-        >
-          {addTempate}
-        </DropdownItem>,
-        <DropdownItem
-          component={Link}
-          to="/templates/workflow_job_template/add/"
-          key={addWFTemplate}
-          aria-label={addWFTemplate}
-        >
-          {addWFTemplate}
-        </DropdownItem>,
-      ]}
-    />
+    <AddDropDownButton key="add" dropdownItems={addDropDownButton} />
   );
 
   return (
