@@ -1333,6 +1333,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             scm_type = attrs.get('scm_type', u'') or u''
         if self.instance and not scm_type:
             valid_local_paths.append(self.instance.local_path)
+        if scm_type and "local_path" in attrs and self.instance.local_path != attrs['local_path']:
+            errors['local_path'] = _(f'Cannot change local_path for {scm_type}-based projects')
         if scm_type:
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
