@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { useParams, useLocation, useHistory } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 
+import { DropdownItem } from '@patternfly/react-core';
 import { GroupsAPI, InventoriesAPI } from '../../../api';
 import useRequest from '../../../util/useRequest';
 import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
@@ -11,10 +12,11 @@ import useSelected from '../../../util/useSelected';
 import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedDataList from '../../../components/PaginatedDataList';
 import InventoryGroupRelatedGroupListItem from './InventoryRelatedGroupListItem';
-import AddDropdown from '../shared/AddDropdown';
+import AddDropDownButton from '../../../components/AddDropDownButton';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
+import { toTitleCase } from '../../../util/strings';
 
 const QS_CONFIG = getQSConfig('group', {
   page: 1,
@@ -25,7 +27,7 @@ function InventoryRelatedGroupList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { id: inventoryId, groupId } = useParams();
   const location = useLocation();
-  const history = useHistory();
+
   const {
     request: fetchRelated,
     result: {
@@ -85,26 +87,31 @@ function InventoryRelatedGroupList({ i18n }) {
   );
 
   const addFormUrl = `/home`;
-  const addButtonOptions = [];
 
-  if (canAdd) {
-    addButtonOptions.push(
-      {
-        onAdd: () => setIsModalOpen(true),
-        title: i18n._(t`Add existing group`),
-        label: i18n._(t`group`),
-        key: 'existing',
-      },
-      {
-        onAdd: () => history.push(addFormUrl),
-        title: i18n._(t`Add new group`),
-        label: i18n._(t`group`),
-        key: 'new',
-      }
-    );
-  }
-
-  const addButton = <AddDropdown key="add" dropdownItems={addButtonOptions} />;
+  const addExistingGroup = toTitleCase(i18n._(t`Add Existing Group`));
+  const addNewGroup = toTitleCase(i18n._(t`Add New Group`));
+  const addButton = (
+    <AddDropDownButton
+      key="add"
+      dropdownItems={[
+        <DropdownItem
+          key={addExistingGroup}
+          onClick={() => setIsModalOpen(true)}
+          aria-label={addExistingGroup}
+        >
+          {addExistingGroup}
+        </DropdownItem>,
+        <DropdownItem
+          component={Link}
+          to={`${addFormUrl}`}
+          key={addNewGroup}
+          aria-label={addNewGroup}
+        >
+          {addNewGroup}
+        </DropdownItem>,
+      ]}
+    />
+  );
 
   return (
     <>
@@ -173,17 +180,7 @@ function InventoryRelatedGroupList({ i18n }) {
             onSelect={() => handleSelect(o)}
           />
         )}
-        emptyStateControls={
-          canAdd && (
-            <AddDropdown
-              onAddExisting={() => setIsModalOpen(true)}
-              onAddNew={() => history.push(addFormUrl)}
-              newTitle={i18n._(t`Add new group`)}
-              existingTitle={i18n._(t`Add existing group`)}
-              label={i18n._(t`group`)}
-            />
-          )
-        }
+        emptyStateControls={canAdd && addButton}
       />
       {isModalOpen && (
         <AssociateModal

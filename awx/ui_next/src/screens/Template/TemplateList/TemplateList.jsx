@@ -1,9 +1,8 @@
 import React, { Fragment, useEffect, useState, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card } from '@patternfly/react-core';
-
+import { Card, DropdownItem } from '@patternfly/react-core';
 import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
@@ -17,6 +16,7 @@ import PaginatedDataList, {
 } from '../../../components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
+import { toTitleCase } from '../../../util/strings';
 import useWsTemplates from '../../../util/useWsTemplates';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
@@ -32,7 +32,6 @@ const QS_CONFIG = getQSConfig('template', {
 
 function TemplateList({ i18n }) {
   const location = useLocation();
-
   const [selected, setSelected] = useState([]);
 
   const {
@@ -134,24 +133,36 @@ function TemplateList({ i18n }) {
     jtActions && Object.prototype.hasOwnProperty.call(jtActions, 'POST');
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
-  const addButtonOptions = [];
 
+  const addTempate = toTitleCase(i18n._(t`Add Job Template`));
+  const addWFTemplate = toTitleCase(i18n._(t`Add Workflow Template`));
+  const addDropDownButton = [];
   if (canAddJT) {
-    addButtonOptions.push({
-      label: i18n._(t`Job Template`),
-      url: `/templates/job_template/add/`,
-    });
+    addDropDownButton.push(
+      <DropdownItem
+        key={addTempate}
+        component={Link}
+        to="/templates/job_template/add/"
+        aria-label={addTempate}
+      >
+        {addTempate}
+      </DropdownItem>
+    );
   }
-
   if (canAddWFJT) {
-    addButtonOptions.push({
-      label: i18n._(t`Workflow Template`),
-      url: `/templates/workflow_job_template/add/`,
-    });
+    addDropDownButton.push(
+      <DropdownItem
+        component={Link}
+        to="/templates/workflow_job_template/add/"
+        key={addWFTemplate}
+        aria-label={addWFTemplate}
+      >
+        {addWFTemplate}
+      </DropdownItem>
+    );
   }
-
   const addButton = (
-    <AddDropDownButton key="add" dropdownItems={addButtonOptions} />
+    <AddDropDownButton key="add" dropdownItems={addDropDownButton} />
   );
 
   return (
