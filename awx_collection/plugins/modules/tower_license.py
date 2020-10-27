@@ -25,7 +25,7 @@ options:
       description:
         - file path to a Red Hat subscription manifest (a .zip file)
       required: True
-      type: dict
+      type: str
     eula_accepted:
       description:
         - Whether or not the EULA is accepted.
