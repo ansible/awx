@@ -24,7 +24,7 @@ fi
 
 if [ ! -z "$AWX_ADMIN_USER" ]&&[ ! -z "$AWX_ADMIN_PASSWORD" ]; then
     echo "from django.contrib.auth.models import User; User.objects.create_superuser('$AWX_ADMIN_USER', 'root@localhost', '$AWX_ADMIN_PASSWORD')" | awx-manage shell
-    {% if create_preload_data %}
+    {% if create_preload_data | bool %}
     awx-manage create_preload_data
     {% endif %}
 fi
