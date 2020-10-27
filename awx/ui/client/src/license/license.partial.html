@@ -106,12 +106,15 @@
 						<div class="d-block w-100">
 							<div class="AddPermissions-directions">
 								<span class="License-helperText">
-									<translate>Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <a href="https://access.redhat.com/management/subscription_allocations" target="_blank">https://access.redhat.com/management/subscription_allocations</a>.</translate>
+									<translate>Upload a Red Hat Subscription Manifest containing your subscription.</translate>
 								</span>
 							</div>
 							<div class="License-subTitleText">
 								<span class="Form-requiredAsterisk">*</span>
 								<translate>Red Hat Subscription Manifest</translate>
+								<a aria-label="{{'Show help text' | translate}}" id="subscription-manifest-popover" href="" aw-pop-over="A subscription manifest is an export of a Red Hat Subscription. To generate a subscription manifest, go to <a href=https://access.redhat.com/management/subscription_allocations target=_blank>access.redhat.com</a>.<br>For more information, see the <a href=https://docs.ansible.com/ansible-tower/latest/html/userguide/import_license.html>User Guide</a>.</translate>" data-placement="top" data-container="body" over-title="Subscription Manifest" class="help-link">
+									<i class="fa fa-question-circle"></i>
+								</a>
 							</div>
 							<div class="License-filePicker">
 								<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser || (subscriptionCreds.username && subscriptionCreds.username.length > 0) || (subscriptionCreds.password && subscriptionCreds.password.length > 0)" translate>Browse</span>
