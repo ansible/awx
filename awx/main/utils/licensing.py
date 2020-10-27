@@ -90,8 +90,8 @@ class OpenLicense(object):
 
 
 class Licenser(object):
-    # warn when there is a month (30 days) left on the license
-    LICENSE_TIMEOUT = 60 * 60 * 24 * 30
+    # warn when there is a month (30 days) left on the subscription
+    SUBSCRIPTION_TIMEOUT = 60 * 60 * 24 * 30
 
     UNLICENSED_DATA = dict(
         subscription_name=None,
@@ -327,6 +327,7 @@ class Licenser(object):
                 license._attrs['license_type'] = 'enterprise'
                 if sub.trial:
                     license._attrs['trial'] = True
+                    license._attrs['license_type'] = 'trial'
                 license._attrs['instance_count'] = min(
                     MAX_INSTANCES, license._attrs['instance_count']
                 )
@@ -384,6 +385,6 @@ class Licenser(object):
         else:
             attrs['grace_period_remaining'] = (license_date + 2592000) - current_date
         attrs['compliant'] = bool(time_remaining > 0 and free_instances >= 0)
-        attrs['date_warning'] = bool(time_remaining < self.LICENSE_TIMEOUT)
+        attrs['date_warning'] = bool(time_remaining < self.SUBSCRIPTION_TIMEOUT)
         attrs['date_expired'] = bool(time_remaining <= 0)
         return attrs
