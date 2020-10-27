@@ -124,3 +124,102 @@ optional arguments:
 Below is an example run with 200 Jobs flowing through the system.
 
 [![asciicast](https://asciinema.org/a/xnfzMQ30xWPdhwORiISz0wcEw.svg)](https://asciinema.org/a/xnfzMQ30xWPdhwORiISz0wcEw)
+=======
+Code Instrumentation Profiling
+------------------------------
+Decorate a function to generate profiling data that will tell you the percentage
+of time spent in branches of a code path. This comes at an absolute performance
+cost. However, the relative numbers are still very helpful.
+
+Requirements for `dot_enabled=True`
+**Note:** The profiling code will run as if `dot_enabled=False` when `gprof2dot`
+package is not found
+```
+/var/lib/awx/venv/awx/bin/pip3 install gprof2dot
+```
+
+Below is the signature of the `@profile` decorator.
+```
+@profile(name, dest='/var/log/tower/profile', dot_enabled=True)
+```
+
+```
+from awx.main.utils.profiling import profile
+
+@profile(name="task_manager_profile")
+def task_manager():
+    ...
+```
+
+Now, invoke the function being profiled. Each run of the profiled function
+will result in a file output to `dest` containing the profile data summary as
+well as a dot graph if enabled. The profile data summary can be viewed in a
+text editor. The dot graph can be viewed using `xdot`.
+
+```
+bash-4.4$ ls -aln /var/log/tower/profile/
+total 24
+drwxr-xr-x 2 awx  root 4096 Oct 15 13:23 .
+drwxrwxr-x 1 root root 4096 Oct 15 13:23 ..
+-rw-r--r-- 1 awx  root  635 Oct 15 13:23 2.001s-task_manager_profile-2303-272858af-3bda-45ec-af9e-7067aa86e4f3.dot
+-rw-r--r-- 1 awx  root  587 Oct 15 13:23 2.001s-task_manager_profile-2303-272858af-3bda-45ec-af9e-7067aa86e4f3.pstats
+-rw-r--r-- 1 awx  root  632 Oct 15 13:23 2.002s-task_manager_profile-2303-4cdf4660-3ef4-4238-8164-33611822d9e3.dot
+-rw-r--r-- 1 awx  root  587 Oct 15 13:23 2.002s-task_manager_profile-2303-4cdf4660-3ef4-4238-8164-33611822d9e3.pstats
+```
+
+```
+xdot /var/log/tower/profile/2.001s-task_manager_profile-2303-272858af-3bda-45ec-af9e-7067aa86e4f3.dot
+```
+
+
+Code Instrumentation Timing
+---------------------------
+Similar to the profiling decorator, there is a timing decorator. This is useful
+when you do not want to incur the overhead of profiling and want to know the
+accurate absolute timing of a code path.
+
+Below is the signature of the `@timing` decorator.
+```
+@timing(name, dest='/var/log/tower/timing')
+```
+
+```
+from awx.main.utils.profiling import timing
+
+@timing(name="my_task_manager_timing")
+def task_manager():
+    ...
+```
+
+Now, invoke the function being timed. Each run of the timed function will result
+in a file output to `dest`. The timing data will be in the file name.
+
+```
+bash-4.4# ls -aln
+total 16
+drwxr-xr-x 2 0 0 4096 Oct 20 12:43 .
+drwxrwxr-x 1 0 0 4096 Oct 20 12:43 ..
+-rw-r--r-- 1 0 0   61 Oct 20 12:43 2.002178-seconds-my_task_manager-ab720a2f-4624-47d0-b897-8549fe7e8c99.time
+-rw-r--r-- 1 0 0   60 Oct 20 12:43 2.00228-seconds-my_task_manager-e8a901be-9cdb-4ffc-a34a-a6bcb4266e7c.time
+```
+
+The class behind the decorator can also be used for profiling.
+
+```
+from awx.main.utils.profiling import AWXProfiler
+
+prof = AWXProfiler("hello_world")
+prof.start()
+'''
+code to profile here
+'''
+prof.stop()
+
+
+# Note that start() and stop() can be reused. An new profile file will be output.
+prof.start()
+'''
+more code to profile
+'''
+prof.stop()
+```
