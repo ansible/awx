@@ -72,7 +72,7 @@ const QS_CONFIG = getQSConfig(
 const buildSearchColumns = i18n => [
   {
     name: i18n._(t`Name`),
-    key: 'name',
+    key: 'name__icontains',
     isDefault: true,
   },
   {
@@ -81,7 +81,7 @@ const buildSearchColumns = i18n => [
   },
   {
     name: i18n._(t`Group`),
-    key: 'groups__name',
+    key: 'groups__name__icontains',
   },
   {
     name: i18n._(t`Inventory ID`),
