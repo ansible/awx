@@ -366,7 +366,7 @@ class ApiV2ConfigView(APIView):
             try:
                 license_data = validate_entitlement_manifest(license_data['manifest'])
             except ValueError as e:
-                return Response({"error": e}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
             except Exception:
                 logger.exception('Invalid manifest submitted. {}')
                 return Response({"error": _('Invalid manifest submitted.')}, status=status.HTTP_400_BAD_REQUEST)
