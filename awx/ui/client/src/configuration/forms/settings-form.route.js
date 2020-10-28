@@ -59,12 +59,12 @@ export default {
             return Rest.get()
                 .then(({data}) => {
                     const subscriptionCreds = {};
-                    if (data.REDHAT_USERNAME && data.REDHAT_USERNAME !== "") {
-                        subscriptionCreds.REDHAT_USERNAME = data.REDHAT_USERNAME;
+                    if (data.SUBSCRIPTIONS_USERNAME && data.SUBSCRIPTIONS_USERNAME !== "") {
+                        subscriptionCreds.SUBSCRIPTIONS_USERNAME = data.SUBSCRIPTIONS_USERNAME;
                     }
 
-                    if (data.REDHAT_PASSWORD && data.REDHAT_PASSWORD !== "") {
-                        subscriptionCreds.REDHAT_PASSWORD = data.REDHAT_PASSWORD;
+                    if (data.SUBSCRIPTIONS_PASSWORD && data.SUBSCRIPTIONS_PASSWORD !== "") {
+                        subscriptionCreds.SUBSCRIPTIONS_PASSWORD = data.SUBSCRIPTIONS_PASSWORD;
                     }
                     
                     return subscriptionCreds;
