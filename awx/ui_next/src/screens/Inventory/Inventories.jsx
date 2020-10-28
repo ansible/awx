@@ -69,6 +69,12 @@ function Inventories({ i18n }) {
         [`${inventoryGroupsPath}/${nested?.id}/nested_hosts/add`]: i18n._(
           t`Create new host`
         ),
+        [`${inventoryGroupsPath}/${nested?.id}/nested_groups`]: i18n._(
+          t`Groups`
+        ),
+        [`${inventoryGroupsPath}/${nested?.id}/nested_groups/add`]: i18n._(
+          t`Create new group`
+        ),
 
         [`${inventorySourcesPath}`]: i18n._(t`Sources`),
         [`${inventorySourcesPath}/add`]: i18n._(t`Create new source`),

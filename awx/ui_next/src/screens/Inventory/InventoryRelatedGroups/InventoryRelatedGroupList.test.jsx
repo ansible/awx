@@ -21,6 +21,48 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+const mockGroups = [
+  {
+    id: 1,
+    type: 'group',
+    name: 'foo',
+    inventory: 1,
+    url: '/api/v2/groups/1',
+    summary_fields: {
+      user_capabilities: {
+        delete: true,
+        edit: true,
+      },
+    },
+  },
+  {
+    id: 2,
+    type: 'group',
+    name: 'bar',
+    inventory: 1,
+    url: '/api/v2/groups/2',
+    summary_fields: {
+      user_capabilities: {
+        delete: true,
+        edit: true,
+      },
+    },
+  },
+  {
+    id: 3,
+    type: 'group',
+    name: 'baz',
+    inventory: 1,
+    url: '/api/v2/groups/3',
+    summary_fields: {
+      user_capabilities: {
+        delete: false,
+        edit: false,
+      },
+    },
+  },
+];
+
 describe('<InventoryRelatedGroupList />', () => {
   let wrapper;
 
@@ -144,5 +186,32 @@ describe('<InventoryRelatedGroupList />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('AddDropdown').length).toBe(0);
+  });
+
+  test('should associate existing group', async () => {
+    InventoriesAPI.readGroups.mockResolvedValue({
+      data: { count: mockGroups.length, results: mockGroups },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryRelatedGroupList />);
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+
+    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
+    wrapper.update();
+    await act(async () =>
+      wrapper
+        .find('DropdownItem[aria-label="Add existing group"]')
+        .prop('onClick')()
+    );
+    wrapper.update();
+    act(() =>
+      wrapper.find('CheckboxListItem[name="foo"]').prop('onSelect')({ id: 1 })
+    );
+    wrapper.update();
+    await act(() =>
+      wrapper.find('button[aria-label="Save"]').prop('onClick')()
+    );
+    expect(GroupsAPI.associateChildGroup).toBeCalledTimes(1);
   });
 });
