@@ -205,13 +205,17 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
     )
     mutually_exclusive = [("unified_job_template", "approval_node")]
-    required_one_of = [["unified_job_template", "approval_node", "success_nodes", "always_nodes", "failure_nodes"]]
+    required_if=[
+      ['state', 'absent', ['identifier']],
+      ['state', 'present', ['identifier']],
+      ['state', 'present', ['unified_job_template', 'approval_node', 'success_nodes', 'always_nodes', 'failure_nodes'], 'true'],
+    ]
 
     # Create a module for ourselves
     module = TowerAPIModule(
         argument_spec=argument_spec,
         mutually_exclusive=mutually_exclusive,
-        required_one_of=required_one_of,
+        required_if=required_if,
     )
 
     # Extract our parameters

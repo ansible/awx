@@ -159,6 +159,30 @@
     that:
       - "no_name_results.msg == 'Approval node name is required to create approval node.'"
 
+- name: Fail if absent and no identifier set
+  tower_workflow_job_template_node:
+    approval_node:
+      description: "{{ approval_node_name }}"
+    workflow: "{{ wfjt_name }}"
+    state: absent
+  register: no_identifier_results
+  ignore_errors: true
+
+- assert:
+    that:
+      - "no_identifier_results.msg == 'missing required arguments: identifier'"
+
+- name: Fail if present and no unified job template set
+  tower_workflow_job_template_node:
+    identifier: approval_test
+    workflow: "{{ wfjt_name }}"
+  register: no_unified_results
+  ignore_errors: true
+
+- assert:
+    that:
+      - "no_unified_results.msg == 'state is present but any of the following are missing: unified_job_template, approval_node, success_nodes, always_nodes, failure_nodes'"
+
 - name: Create approval node
   tower_workflow_job_template_node:
     identifier: approval_test
