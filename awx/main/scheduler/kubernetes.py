@@ -14,10 +14,12 @@ logger = logging.getLogger('awx.main.scheduler')
 
 def deepmerge(a, b):
     """
-    >>> a = { 'first' : { 'all_rows' : { 'pass' : 'dog', 'number' : '1' } } }
-    >>> b = { 'first' : { 'all_rows' : { 'fail' : 'cat', 'number' : '5' } } }
-    >>> deepmerge(b, a) == { 'first' : { 'all_rows' : { 'pass' : 'dog', 'fail' : 'cat', 'number' : '5' } } }
-    True
+    Merge dict structures and return the result.
+
+    >>> a = {'first': {'all_rows': {'pass': 'dog', 'number': '1'}}}
+    >>> b = {'first': {'all_rows': {'fail': 'cat', 'number': '5'}}}
+    >>> import pprint; pprint.pprint(deepmerge(a, b))
+    {'first': {'all_rows': {'fail': 'cat', 'number': '5', 'pass': 'dog'}}}
     """
     if isinstance(a, dict) and isinstance(b, dict):
         return dict([(k, deepmerge(a.get(k), b.get(k)))
