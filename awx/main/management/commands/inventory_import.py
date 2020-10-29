@@ -863,68 +863,69 @@ class Command(BaseCommand):
         self.inventory_update.save(update_fields=['org_host_limit_error'])
 
     def handle(self, *args, **options):
-        # Load inventory and related objects from database.
-        inventory_name = options.get('inventory_name', None)
-        inventory_id = options.get('inventory_id', None)
-        if inventory_name and inventory_id:
-            raise CommandError('--inventory-name and --inventory-id are mutually exclusive')
-        elif not inventory_name and not inventory_id:
-            raise CommandError('--inventory-name or --inventory-id is required')
+        with advisory_lock('inventory_{}_import'.format(self.inventory.id)):
+            # Load inventory and related objects from database.
+            inventory_name = options.get('inventory_name', None)
+            inventory_id = options.get('inventory_id', None)
+            if inventory_name and inventory_id:
+                raise CommandError('--inventory-name and --inventory-id are mutually exclusive')
+            elif not inventory_name and not inventory_id:
+                raise CommandError('--inventory-name or --inventory-id is required')
 
-        # Obtain rest of the options needed to run update
-        raw_source = options.get('source', None)
-        if not raw_source:
-            raise CommandError('--source is required')
-        verbosity = int(options.get('verbosity', 1))
-        self.set_logging_level(verbosity)
-        venv_path = options.get('venv', None)
+            # Obtain rest of the options needed to run update
+            raw_source = options.get('source', None)
+            if not raw_source:
+                raise CommandError('--source is required')
+            verbosity = int(options.get('verbosity', 1))
+            self.set_logging_level(verbosity)
+            venv_path = options.get('venv', None)
 
-        # Load inventory object based on name or ID.
-        if inventory_id:
-            q = dict(id=inventory_id)
-        else:
-            q = dict(name=inventory_name)
-        try:
-            inventory = Inventory.objects.get(**q)
-        except Inventory.DoesNotExist:
-            raise CommandError('Inventory with %s = %s cannot be found' % list(q.items())[0])
-        except Inventory.MultipleObjectsReturned:
-            raise CommandError('Inventory with %s = %s returned multiple results' % list(q.items())[0])
-        logger.info('Updating inventory %d: %s' % (inventory.pk, inventory.name))
+            # Load inventory object based on name or ID.
+            if inventory_id:
+                q = dict(id=inventory_id)
+            else:
+                q = dict(name=inventory_name)
+            try:
+                inventory = Inventory.objects.get(**q)
+            except Inventory.DoesNotExist:
+                raise CommandError('Inventory with %s = %s cannot be found' % list(q.items())[0])
+            except Inventory.MultipleObjectsReturned:
+                raise CommandError('Inventory with %s = %s returned multiple results' % list(q.items())[0])
+            logger.info('Updating inventory %d: %s' % (inventory.pk, inventory.name))
 
 
-        # Create ad-hoc inventory source and inventory update objects
-        with ignore_inventory_computed_fields():
-            source = Command.get_source_absolute_path(raw_source)
+            # Create ad-hoc inventory source and inventory update objects
+            with ignore_inventory_computed_fields():
+                source = Command.get_source_absolute_path(raw_source)
 
-            inventory_source, created = InventorySource.objects.get_or_create(
-                inventory=inventory,
-                source='file',
-                source_path=os.path.abspath(source),
-                overwrite=bool(options.get('overwrite', False)),
-                overwrite_vars=bool(options.get('overwrite_vars', False)),
-            )
-            inventory_update = inventory_source.create_inventory_update(
-                _eager_fields=dict(
-                    job_args=json.dumps(sys.argv),
-                    job_env=dict(os.environ.items()),
-                    job_cwd=os.getcwd())
-            )
+                inventory_source, created = InventorySource.objects.get_or_create(
+                    inventory=inventory,
+                    source='file',
+                    source_path=os.path.abspath(source),
+                    overwrite=bool(options.get('overwrite', False)),
+                    overwrite_vars=bool(options.get('overwrite_vars', False)),
+                )
+                inventory_update = inventory_source.create_inventory_update(
+                    _eager_fields=dict(
+                        job_args=json.dumps(sys.argv),
+                        job_env=dict(os.environ.items()),
+                        job_cwd=os.getcwd())
+                )
 
-        data = AnsibleInventoryLoader(
-            source=source, venv_path=venv_path, verbosity=verbosity
-        ).load()
+            data = AnsibleInventoryLoader(
+                source=source, venv_path=venv_path, verbosity=verbosity
+            ).load()
 
-        logger.debug('Finished loading from source: %s', source)
-        status, tb, exc = self.perform_update(options, data, inventory_update)
+            logger.debug('Finished loading from source: %s', source)
+            status, tb, exc = self.perform_update(options, data, inventory_update)
 
-        with ignore_inventory_computed_fields():
-            inventory_update = InventoryUpdate.objects.get(pk=inventory_update.pk)
-            inventory_update.result_traceback = tb
-            inventory_update.status = status
-            inventory_update.save(update_fields=['status', 'result_traceback'])
-            inventory_source.status = status
-            inventory_source.save(update_fields=['status'])
+            with ignore_inventory_computed_fields():
+                inventory_update = InventoryUpdate.objects.get(pk=inventory_update.pk)
+                inventory_update.result_traceback = tb
+                inventory_update.status = status
+                inventory_update.save(update_fields=['status', 'result_traceback'])
+                inventory_source.status = status
+                inventory_source.save(update_fields=['status'])
 
         if exc:
             logger.error(str(exc))
@@ -966,7 +967,12 @@ class Command(BaseCommand):
             raise CommandError('invalid regular expression for --host-filter')
 
         begin = time.time()
-        with advisory_lock('inventory_{}_update'.format(self.inventory.id)):
+
+        # Since perform_update can be invoked either through the awx-manage CLI
+        # or from the task system, we need to create a new lock at this level
+        # (even though inventory_import.Command.handle -- which calls
+        # perform_update -- has its own lock, inventory_ID_import)
+        with advisory_lock('inventory_{}_perform_update'.format(self.inventory.id)):
 
             try:
                 self.check_license()
