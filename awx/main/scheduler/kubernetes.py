@@ -12,6 +12,22 @@ from awx.main.utils.common import parse_yaml_or_json
 logger = logging.getLogger('awx.main.scheduler')
 
 
+def deepmerge(a, b):
+    """
+    >>> a = { 'first' : { 'all_rows' : { 'pass' : 'dog', 'number' : '1' } } }
+    >>> b = { 'first' : { 'all_rows' : { 'fail' : 'cat', 'number' : '5' } } }
+    >>> deepmerge(b, a) == { 'first' : { 'all_rows' : { 'pass' : 'dog', 'fail' : 'cat', 'number' : '5' } } }
+    True
+    """
+    if isinstance(a, dict) and isinstance(b, dict):
+        return dict([(k, deepmerge(a.get(k), b.get(k)))
+                      for k in set(a.keys()).union(b.keys())])
+    elif b is None:
+        return a
+    else:
+        return b
+
+
 class PodManager(object):
 
     def __init__(self, task=None):
@@ -128,11 +144,13 @@ class PodManager(object):
         pod_spec = {**default_pod_spec, **pod_spec_override}
 
         if self.task:
-            pod_spec['metadata']['name'] = self.pod_name
-            pod_spec['metadata']['labels'] = {
-                'ansible-awx': settings.INSTALL_UUID,
-                'ansible-awx-job-id': str(self.task.id)
-            }
+            pod_spec['metadata'] = deepmerge(
+                pod_spec.get('metadata', {}),
+                dict(name=self.pod_name,
+                     labels={
+                         'ansible-awx': settings.INSTALL_UUID,
+                         'ansible-awx-job-id': str(self.task.id)
+                         }))
             pod_spec['spec']['containers'][0]['name'] = self.pod_name
 
         return pod_spec
