@@ -21,7 +21,7 @@ def deepmerge(a, b):
     """
     if isinstance(a, dict) and isinstance(b, dict):
         return dict([(k, deepmerge(a.get(k), b.get(k)))
-                      for k in set(a.keys()).union(b.keys())])
+                     for k in set(a.keys()).union(b.keys())])
     elif b is None:
         return a
     else:
@@ -150,7 +150,7 @@ class PodManager(object):
                      labels={
                          'ansible-awx': settings.INSTALL_UUID,
                          'ansible-awx-job-id': str(self.task.id)
-                         }))
+                     }))
             pod_spec['spec']['containers'][0]['name'] = self.pod_name
 
         return pod_spec
