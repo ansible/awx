@@ -111,7 +111,7 @@ register(
     encrypted=False,
     read_only=False,
     label=_('Red Hat customer username'),
-    help_text=_('This username is used to retrieve license information and to send Automation Analytics'),  # noqa
+    help_text=_('This username is used to send data to Automation Analytics'),
     category=_('System'),
     category_slug='system',
 )
@@ -124,7 +124,7 @@ register(
     encrypted=True,
     read_only=False,
     label=_('Red Hat customer password'),
-    help_text=_('This password is used to retrieve license information and to send Automation Analytics'),  # noqa
+    help_text=_('This password is used to send data to Automation Analytics'),
     category=_('System'),
     category_slug='system',
 )
