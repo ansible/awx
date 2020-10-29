@@ -174,9 +174,11 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 parseTypeName: 'envParseType',
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
-                awPopOver: "<p>" + i18n._("Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables ") +
-                    "<a href=\"https://github.com/ansible-collections/community.aws/blob/main/scripts/inventory/ec2.ini\" target=\"_blank\">" +
-                    i18n._("view ec2.ini in the community.aws repo.") + "</a></p>" +
+                awPopOver: "<p>" + i18n._("Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see ") +
+                    "<a href=\"http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins\" target=\"blank\">" +
+                    i18n._("Inventory Plugins") + "</a> " + i18n._("in the documentation and the ") +
+                    "<a href=\"https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html\" target=\"blank\">aws_ec2</a> " +
+                    i18n._("plugin configuration guide.") + "</p>" +
                     "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     i18n._("JSON:") + "<br />\n" +
                     "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
@@ -198,9 +200,11 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 parseTypeName: 'envParseType',
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
-                awPopOver: "<p>" + i18n._("Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables ") +
-                    "<a href=\"https://github.com/ansible-collections/vmware/blob/main/scripts/inventory/vmware_inventory.ini\" target=\"_blank\">" +
-                    i18n._("view vmware_inventory.ini in the vmware community repo.") + "</a></p>" +
+                awPopOver: "<p>" + i18n._("Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see ") +
+                    "<a href=\"http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins\" target=\"blank\">" +
+                    i18n._("Inventory Plugins") + "</a> " + i18n._("in the documentation and the ") +
+                    "<a href=\"https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vm_inventory_inventory.html\" target=\"blank\">vmware_vm_inventory</a> " +
+                    i18n._("plugin configuration guide.") + "</p>" +
                     "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     i18n._("JSON:") + "<br />\n" +
                     "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
@@ -222,9 +226,18 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 parseTypeName: 'envParseType',
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
-                awPopOver: i18n._("Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration") +
-                    '<a href=\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\" target=\"_blank\">' +
-                    i18n._("view openstack.yml in the Openstack github repo.") + "</a>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."),
+                awPopOver: "<p>" + i18n._("Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see ") +
+                    "<a href=\"http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins\" target=\"blank\">" +
+                    i18n._("Inventory Plugins") + "</a> " + i18n._("in the documentation and the ") +
+                    "<a href=\"https://docs.ansible.com/ansible/latest/collections/openstack/cloud/openstack_inventory.html\" target=\"blank\">openstack</a> " +
+                    i18n._("plugin configuration guide.") + "</p>" +
+                    "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
+                    i18n._("JSON:") + "<br />\n" +
+                    "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    i18n._("YAML:") + "<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                    "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                    "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                 dataContainer: 'body',
                 subForm: 'sourceSubForm'
             },
@@ -256,9 +269,18 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 parseTypeName: 'envParseType',
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
-                awPopOver: i18n._("Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration") + 
-                    '<a href=\"https://github.com/ansible-collections/community.general/blob/main/scripts/inventory/foreman.ini\" target=\"_blank\">' + 
-                    i18n._("view foreman.ini in the Ansible Collections github repo.") + "</a>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."),
+                awPopOver: "<p>" + i18n._("Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see ") +
+                    "<a href=\"http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins\" target=\"blank\">" +
+                    i18n._("Inventory Plugins") + "</a> " + i18n._("in the documentation and the ") +
+                    "<a href=\"https://docs.ansible.com/ansible/latest/collections/theforeman/foreman/foreman_inventory.html\" target=\"blank\">foreman</a> " +
+                    i18n._("plugin configuration guide.") + "</p>" +
+                    "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
+                    i18n._("JSON:") + "<br />\n" +
+                    "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    i18n._("YAML:") + "<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                    "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                    "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                 dataContainer: 'body',
                 subForm: 'sourceSubForm'
             },
@@ -273,9 +295,89 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 parseTypeName: 'envParseType',
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
-                awPopOver: "<p>" + i18n._("Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables ") +
-                    "<a href=\"https://github.com/ansible-collections/community.general/blob/main/scripts/inventory/azure_rm.ini\" target=\"_blank\">" +
-                    i18n._("view azure_rm.ini in the Ansible community.general github repo.") + "</a></p>" +
+                awPopOver: "<p>" + i18n._("Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see ") +
+                    "<a href=\"http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins\" target=\"blank\">" +
+                    i18n._("Inventory Plugins") + "</a> " + i18n._("in the documentation and the ") +
+                    "<a href=\"https://docs.ansible.com/ansible/latest/collections/azure/azcollection/azure_rm_inventory.html\" target=\"blank\">azure_rm</a> " +
+                    i18n._("plugin configuration guide.") + "</p>" +
+                    "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
+                    i18n._("JSON:") + "<br />\n" +
+                    "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    i18n._("YAML:") + "<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                    "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                    "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+                dataContainer: 'body',
+                subForm: 'sourceSubForm'
+            },
+            gce_variables: {
+                id: 'gce_variables',
+                label: i18n._('Source Variables'), //"{{vars_label}}" ,
+                ngShow: "source && source.value == 'gce'",
+                type: 'textarea',
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                rows: 6,
+                'default': '---',
+                parseTypeName: 'envParseType',
+                dataTitle: i18n._("Source Variables"),
+                dataPlacement: 'right',
+                awPopOver: "<p>" + i18n._("Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see ") +
+                    "<a href=\"http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins\" target=\"blank\">" +
+                    i18n._("Inventory Plugins") + "</a> " + i18n._("in the documentation and the ") +
+                    "<a href=\"https://docs.ansible.com/ansible/latest/collections/google/cloud/gcp_compute_inventory.html\" target=\"blank\">gcp_compute</a> " +
+                    i18n._("plugin configuration guide.") + "</p>" +
+                    "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
+                    i18n._("JSON:") + "<br />\n" +
+                    "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    i18n._("YAML:") + "<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                    "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                    "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+                dataContainer: 'body',
+                subForm: 'sourceSubForm'
+            },
+            tower_variables: {
+                id: 'tower_variables',
+                label: i18n._('Source Variables'), //"{{vars_label}}" ,
+                ngShow: "source && source.value == 'tower'",
+                type: 'textarea',
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                rows: 6,
+                'default': '---',
+                parseTypeName: 'envParseType',
+                dataTitle: i18n._("Source Variables"),
+                dataPlacement: 'right',
+                awPopOver: "<p>" + i18n._("Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see ") +
+                    "<a href=\"http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins\" target=\"blank\">" +
+                    i18n._("Inventory Plugins") + "</a> " + i18n._("in the documentation and the ") +
+                    "<a href=\"https://docs.ansible.com/ansible/latest/collections/awx/awx/tower_inventory.html\" target=\"blank\">tower</a> " +
+                    i18n._("plugin configuration guide.") + "</p>" +
+                    "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
+                    i18n._("JSON:") + "<br />\n" +
+                    "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    i18n._("YAML:") + "<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                    "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                    "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+                dataContainer: 'body',
+                subForm: 'sourceSubForm'
+            },
+            rhv_variables: {
+                id: 'rhv_variables',
+                label: i18n._('Source Variables'), //"{{vars_label}}" ,
+                ngShow: "source && source.value == 'rhv'",
+                type: 'textarea',
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                rows: 6,
+                'default': '---',
+                parseTypeName: 'envParseType',
+                dataTitle: i18n._("Source Variables"),
+                dataPlacement: 'right',
+                awPopOver: "<p>" + i18n._("Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see ") +
+                    "<a href=\"http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins\" target=\"blank\">" +
+                    i18n._("Inventory Plugins") + "</a> " + i18n._("in the documentation and the ") +
+                    "<a href=\"https://docs.ansible.com/ansible/latest/collections/ovirt/ovirt/ovirt_inventory.html\" target=\"blank\">ovirt</a> " +
+                    i18n._("plugin configuration guide.") + "</p>" +
                     "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     i18n._("JSON:") + "<br />\n" +
                     "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
