@@ -46,7 +46,7 @@ describe('<Settings />', () => {
     expect(wrapper.find('SettingList').length).toBe(0);
   });
 
-  test('should render Settings for users with permissions system admin or auditor permissions', async () => {
+  test('should render Settings for users with system admin or auditor permissions', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/settings'],
     });

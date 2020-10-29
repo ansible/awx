@@ -18,7 +18,7 @@ describe('RevertButton', () => {
           test_input: 'foo',
         }}
       >
-        {() => <RevertButton id="test_input" defaultValue="" />}
+        <RevertButton id="test_input" defaultValue="" />
       </Formik>
     );
     expect(wrapper.find('button').text()).toEqual('Revert');
@@ -34,7 +34,7 @@ describe('RevertButton', () => {
           test_input: 'bar',
         }}
       >
-        {() => <RevertButton id="test_input" defaultValue="bar" />}
+        <RevertButton id="test_input" defaultValue="bar" />
       </Formik>
     );
     expect(wrapper.find('button').text()).toEqual('Revert');
@@ -47,7 +47,7 @@ describe('RevertButton', () => {
           test_input: 'foo',
         }}
       >
-        {() => <RevertButton id="test_input" defaultValue="bar" />}
+        <RevertButton id="test_input" defaultValue="bar" />
       </Formik>
     );
     expect(wrapper.find('button').text()).toEqual('Revert');
@@ -68,7 +68,7 @@ describe('RevertButton', () => {
           test_input: 'bar',
         }}
       >
-        {() => <RevertButton id="test_input" defaultValue="bar" />}
+        <RevertButton id="test_input" defaultValue="bar" />
       </Formik>
     );
     expect(wrapper.find('button').text()).toEqual('Revert');

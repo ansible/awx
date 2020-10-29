@@ -22,7 +22,7 @@ class Settings extends Base {
     return this.http.options(`${this.baseUrl}${category}/`);
   }
 
-  test(category, data) {
+  createTest(category, data) {
     return this.http.post(`${this.baseUrl}${category}/test/`, data);
   }
 }

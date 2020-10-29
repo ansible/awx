@@ -30,8 +30,8 @@ function RevertAllAlert({ i18n, onClose, onRevertAll }) {
         </Button>,
       ]}
     >
-      {i18n._(t`This will revert all configuration values to their
-      factory defaults. Are you sure you want to proceed?`)}
+      {i18n._(t`This will revert all configuration values on this page to
+      their factory defaults. Are you sure you want to proceed?`)}
     </AlertModal>
   );
 }

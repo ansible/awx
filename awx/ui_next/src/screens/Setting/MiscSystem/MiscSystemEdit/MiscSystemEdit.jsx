@@ -107,15 +107,14 @@ function MiscSystemEdit({ i18n }) {
     fetchSystem();
   }, [fetchSystem]);
 
-  const {
-    error: submitError,
-    request: submitForm,
-    result: submitResult,
-  } = useRequest(
-    useCallback(async values => {
-      const result = await SettingsAPI.updateAll(values);
-      return result;
-    }, []),
+  const { error: submitError, request: submitForm } = useRequest(
+    useCallback(
+      async values => {
+        await SettingsAPI.updateAll(values);
+        history.push('/settings/miscellaneous_system/details');
+      },
+      [history]
+    ),
     null
   );
 
@@ -137,12 +136,6 @@ function MiscSystemEdit({ i18n }) {
       },
     });
   };
-
-  useEffect(() => {
-    if (submitResult) {
-      history.push('/settings/miscellaneous_system/details');
-    }
-  }, [submitResult, history]);
 
   const handleRevertAll = async () => {
     const {

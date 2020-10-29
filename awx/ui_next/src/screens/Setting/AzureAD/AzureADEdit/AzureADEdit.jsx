@@ -43,23 +43,16 @@ function AzureADEdit() {
     fetchAzureAD();
   }, [fetchAzureAD]);
 
-  const {
-    error: submitError,
-    request: submitForm,
-    result: submitResult,
-  } = useRequest(
-    useCallback(async values => {
-      const result = await SettingsAPI.updateAll(values);
-      return result;
-    }, []),
+  const { error: submitError, request: submitForm } = useRequest(
+    useCallback(
+      async values => {
+        await SettingsAPI.updateAll(values);
+        history.push('/settings/azure/details');
+      },
+      [history]
+    ),
     null
   );
-
-  useEffect(() => {
-    if (submitResult) {
-      history.push('/settings/azure/details');
-    }
-  }, [submitResult, history]);
 
   const handleSubmit = async form => {
     await submitForm({
@@ -90,7 +83,10 @@ function AzureADEdit() {
   const initialValues = fields =>
     Object.keys(fields).reduce((acc, key) => {
       if (fields[key].type === 'list' || fields[key].type === 'nested object') {
-        acc[key] = JSON.stringify(fields[key].value, null, 2);
+        const emptyDefault = fields[key].type === 'list' ? '[]' : '{}';
+        acc[key] = fields[key].value
+          ? JSON.stringify(fields[key].value, null, 2)
+          : emptyDefault;
       } else {
         acc[key] = fields[key].value ?? '';
       }

@@ -15,7 +15,13 @@ import CodeMirrorInput from '../../../components/CodeMirrorInput';
 import { PasswordInput } from '../../../components/FormField';
 import { FormFullWidthLayout } from '../../../components/FormLayout';
 import Popover from '../../../components/Popover';
-import { combine, required, url, minMaxValue } from '../../../util/validators';
+import {
+  combine,
+  required,
+  url,
+  integer,
+  minMaxValue,
+} from '../../../util/validators';
 import RevertButton from './RevertButton';
 
 const FormGroup = styled(PFFormGroup)`
@@ -176,9 +182,11 @@ const InputField = withI18n()(
       max_value = Number.MAX_SAFE_INTEGER,
     } = config;
     const validators = [
-      isRequired ? required(null, i18n) : null,
-      type === 'url' ? url(i18n) : null,
-      type === 'number' ? minMaxValue(min_value, max_value, i18n) : null,
+      ...(isRequired ? [required(null, i18n)] : []),
+      ...(type === 'url' ? [url(i18n)] : []),
+      ...(type === 'number'
+        ? [integer(i18n), minMaxValue(min_value, max_value, i18n)]
+        : []),
     ];
     const [field, meta] = useField({ name, validate: combine(validators) });
     const isValid = !(meta.touched && meta.error);
@@ -197,7 +205,6 @@ const InputField = withI18n()(
           id={name}
           isRequired={isRequired}
           placeholder={config.placeholder}
-          type={type}
           validated={isValid ? 'default' : 'error'}
           value={field.value}
           onBlur={field.onBlur}

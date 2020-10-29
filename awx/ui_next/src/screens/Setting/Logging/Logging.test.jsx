@@ -80,4 +80,27 @@ describe('<Logging />', () => {
     });
     expect(wrapper.find('ContentError').length).toBe(1);
   });
+
+  test('should redirect to details for users without system admin permissions', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/settings/logging/edit'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<Logging />, {
+        context: {
+          router: {
+            history,
+          },
+          config: {
+            me: {
+              is_superuser: false,
+            },
+          },
+        },
+      });
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('LoggingDetail').length).toBe(1);
+    expect(wrapper.find('LoggingEdit').length).toBe(0);
+  });
 });

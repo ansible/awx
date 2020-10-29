@@ -17,11 +17,20 @@ describe('useModal hook', () => {
   let isModalOpen;
   let toggleModal;
 
-  test('should return expected initial values', () => {
+  test('isModalOpen should return expected default value', () => {
     testHook(() => {
       ({ isModalOpen, toggleModal, closeModal } = useModal());
     });
     expect(isModalOpen).toEqual(false);
+    expect(toggleModal).toBeInstanceOf(Function);
+    expect(closeModal).toBeInstanceOf(Function);
+  });
+
+  test('isModalOpen should return expected initialized value', () => {
+    testHook(() => {
+      ({ isModalOpen, toggleModal, closeModal } = useModal(true));
+    });
+    expect(isModalOpen).toEqual(true);
     expect(toggleModal).toBeInstanceOf(Function);
     expect(closeModal).toBeInstanceOf(Function);
   });

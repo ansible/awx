@@ -212,15 +212,15 @@ describe('<LoggingEdit />', () => {
   });
 
   test('should display successful toast when test button is clicked', async () => {
-    SettingsAPI.test.mockResolvedValue({});
-    expect(SettingsAPI.test).toHaveBeenCalledTimes(0);
+    SettingsAPI.createTest.mockResolvedValue({});
+    expect(SettingsAPI.createTest).toHaveBeenCalledTimes(0);
     expect(wrapper.find('LoggingTestAlert')).toHaveLength(0);
     await act(async () => {
       wrapper.find('button[aria-label="Test logging"]').invoke('onClick')();
     });
     wrapper.update();
     await waitForElement(wrapper, 'LoggingTestAlert');
-    expect(SettingsAPI.test).toHaveBeenCalledTimes(1);
+    expect(SettingsAPI.createTest).toHaveBeenCalledTimes(1);
     await act(async () => {
       wrapper.find('AlertActionCloseButton button').invoke('onClick')();
     });

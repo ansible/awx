@@ -51,23 +51,16 @@ function ActivityStreamEdit() {
     request();
   }, [request]);
 
-  const {
-    error: submitError,
-    request: submitForm,
-    result: submitResult,
-  } = useRequest(
-    useCallback(async values => {
-      const result = await SettingsAPI.updateAll(values);
-      return result;
-    }, []),
+  const { error: submitError, request: submitForm } = useRequest(
+    useCallback(
+      async values => {
+        await SettingsAPI.updateAll(values);
+        history.push('/settings/activity_stream/details');
+      },
+      [history]
+    ),
     null
   );
-
-  useEffect(() => {
-    if (submitResult) {
-      history.push('/settings/activity_stream/details');
-    }
-  }, [submitResult, history]);
 
   const handleSubmit = async form => {
     await submitForm(form);

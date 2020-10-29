@@ -51,23 +51,16 @@ function LoggingEdit({ i18n }) {
     fetchLogging();
   }, [fetchLogging]);
 
-  const {
-    error: submitError,
-    request: submitForm,
-    result: submitResult,
-  } = useRequest(
-    useCallback(async values => {
-      const result = await SettingsAPI.updateAll(values);
-      return result;
-    }, []),
+  const { error: submitError, request: submitForm } = useRequest(
+    useCallback(
+      async values => {
+        await SettingsAPI.updateAll(values);
+        history.push('/settings/logging/details');
+      },
+      [history]
+    ),
     null
   );
-
-  useEffect(() => {
-    if (submitResult) {
-      history.push('/settings/logging/details');
-    }
-  }, [submitResult, history]);
 
   const handleSubmit = async form => {
     await submitForm({
@@ -95,7 +88,7 @@ function LoggingEdit({ i18n }) {
     setValue: setTestLogging,
   } = useRequest(
     useCallback(async () => {
-      const result = await SettingsAPI.test('logging', {});
+      const result = await SettingsAPI.createTest('logging', {});
       return result;
     }, []),
     null
