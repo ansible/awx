@@ -18,7 +18,7 @@ import ScheduleListItem from './ScheduleListItem';
 const QS_CONFIG = getQSConfig('schedule', {
   page: 1,
   page_size: 20,
-  order_by: 'unified_job_template__polymorphic_ctype__model',
+  order_by: 'name',
 });
 
 function ScheduleList({
@@ -161,10 +161,6 @@ function ScheduleList({
           {
             name: i18n._(t`Next Run`),
             key: 'next_run',
-          },
-          {
-            name: i18n._(t`Type`),
-            key: 'unified_job_template__polymorphic_ctype__model',
           },
         ]}
         toolbarSearchableKeys={searchableKeys}
