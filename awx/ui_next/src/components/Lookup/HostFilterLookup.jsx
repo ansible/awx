@@ -124,7 +124,7 @@ function HostFilterLookup({
   const searchColumns = buildSearchColumns(i18n);
 
   const {
-    result: { count, hosts },
+    result: { count, hosts, relatedSearchableKeys, searchableKeys },
     error: contentError,
     request: fetchHosts,
     isLoading,
@@ -135,9 +135,16 @@ function HostFilterLookup({
         const { data } = await HostsAPI.read(
           mergeParams(params, { inventory__organization: orgId })
         );
+        const { data: actions } = await HostsAPI.readOptions();
         return {
           count: data.count,
           hosts: data.results,
+          relatedSearchableKeys: (
+            actions?.related_search_fields || []
+          ).map(val => val.slice(0, -8)),
+          searchableKeys: Object.keys(actions?.actions.GET || {}).filter(
+            key => actions.actions?.GET[key].filterable
+          ),
         };
       },
       [location.search]
@@ -145,6 +152,8 @@ function HostFilterLookup({
     {
       count: 0,
       hosts: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -316,6 +325,8 @@ function HostFilterLookup({
                 key: 'modified',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
           />
         </ModalList>
       </Modal>
