@@ -122,7 +122,7 @@ spec:
 {% if custom_venvs is defined %}
 {% set trusted_hosts = "" %}
       initContainers:
-        - image: 'centos:7'
+        - image: 'centos:8'
           name: init-custom-venvs
 {% if http_proxy is defined or https_proxy is defined %}
 {% set trusted_hosts = "--trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org" %}
@@ -143,10 +143,10 @@ spec:
           command:
             - sh
             - '-c'
-            - >-
-              yum install -y ansible curl python-setuptools epel-release \
-                openssl openssl-devel gcc python-devel &&
-              yum install -y python-virtualenv python36 python36-devel &&
+            - >
+              yum install -y centos-release-ansible29 curl python3-setuptools
+              epel-release openssl openssl-devel gcc platform-python-devel &&
+              yum install -y python3-virtualenv python38 python38-devel &&
               mkdir -p {{ custom_venvs_path }} &&
 {% for custom_venv in custom_venvs %}
               virtualenv -p {{ custom_venv.python | default(custom_venvs_python) }} \
