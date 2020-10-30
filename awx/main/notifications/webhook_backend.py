@@ -57,6 +57,7 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
     def send_messages(self, messages):
         sent_messages = 0
+        self.headers['Content-Type'] = 'application/json'
         if 'User-Agent' not in self.headers:
             self.headers['User-Agent'] = "Tower {}".format(get_awx_version())
         if self.http_method.lower() not in ['put','post']:
