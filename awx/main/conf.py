@@ -1,7 +1,5 @@
 # Python
-import json
 import logging
-import os
 
 # Django
 from django.utils.translation import ugettext_lazy as _
@@ -12,6 +10,7 @@ from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
+
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -92,22 +91,10 @@ register(
 )
 
 
-def _load_default_license_from_file():
-    try:
-        license_file = os.environ.get('AWX_LICENSE_FILE', '/etc/tower/license')
-        if os.path.exists(license_file):
-            license_data = json.load(open(license_file))
-            logger.debug('Read license data from "%s".', license_file)
-            return license_data
-    except Exception:
-        logger.warning('Could not read license from "%s".', license_file, exc_info=True)
-    return {}
-
-
 register(
     'LICENSE',
     field_class=fields.DictField,
-    default=_load_default_license_from_file,
+    default=lambda: {},
     label=_('License'),
     help_text=_('The license controls which features and functionality are '
                 'enabled. Use /api/v2/config/ to update or change '
@@ -124,7 +111,7 @@ register(
     encrypted=False,
     read_only=False,
     label=_('Red Hat customer username'),
-    help_text=_('This username is used to retrieve license information and to send Automation Analytics'),  # noqa
+    help_text=_('This username is used to send data to Automation Analytics'),
     category=_('System'),
     category_slug='system',
 )
@@ -137,7 +124,33 @@ register(
     encrypted=True,
     read_only=False,
     label=_('Red Hat customer password'),
-    help_text=_('This password is used to retrieve license information and to send Automation Analytics'),  # noqa
+    help_text=_('This password is used to send data to Automation Analytics'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'SUBSCRIPTIONS_USERNAME',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=False,
+    read_only=False,
+    label=_('Red Hat or Satellite username'),
+    help_text=_('This username is used to retrieve subscription and content information'),  # noqa
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'SUBSCRIPTIONS_PASSWORD',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    read_only=False,
+    label=_('Red Hat or Satellite password'),
+    help_text=_('This password is used to retrieve subscription and content information'),  # noqa
     category=_('System'),
     category_slug='system',
 )

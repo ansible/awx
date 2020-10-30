@@ -15,7 +15,7 @@ export default {
 	controller: 'licenseController',
 	data: {},
 	ncyBreadcrumb: {
-		label: N_('LICENSE')
+		label: N_('SUBSCRIPTION')
 	},
 	onEnter: ['$state', 'ConfigService', (state, configService) => {
 		return configService.getConfig()
@@ -43,20 +43,20 @@ export default {
 				});
 			}
 		],
-		rhCreds: ['Rest', 'GetBasePath', function(Rest, GetBasePath) {
+		subscriptionCreds: ['Rest', 'GetBasePath', function(Rest, GetBasePath) {
 			Rest.setUrl(`${GetBasePath('settings')}system/`);
 			return Rest.get()
 					.then(({data}) => {
-						const rhCreds = {};
-						if (data.REDHAT_USERNAME && data.REDHAT_USERNAME !== "") {
-								rhCreds.REDHAT_USERNAME = data.REDHAT_USERNAME;
+						const subscriptionCreds = {};
+						if (data.SUBSCRIPTIONS_USERNAME && data.SUBSCRIPTIONS_USERNAME !== "") {
+								subscriptionCreds.SUBSCRIPTIONS_USERNAME = data.SUBSCRIPTIONS_USERNAME;
 						}
 
-						if (data.REDHAT_PASSWORD && data.REDHAT_PASSWORD !== "") {
-								rhCreds.REDHAT_PASSWORD = data.REDHAT_PASSWORD;
+						if (data.SUBSCRIPTIONS_PASSWORD && data.SUBSCRIPTIONS_PASSWORD !== "") {
+								subscriptionCreds.SUBSCRIPTIONS_PASSWORD = data.SUBSCRIPTIONS_PASSWORD;
 						}
-						
-						return rhCreds;
+
+						return subscriptionCreds;
 					}).catch(() => {
 							return {};
 					});

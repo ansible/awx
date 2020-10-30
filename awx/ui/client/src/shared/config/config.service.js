@@ -62,7 +62,7 @@ export default
 
             getSubscriptions: function(username, password) {
                 Rest.setUrl(`${GetBasePath('config')}subscriptions`);
-                return Rest.post({ rh_username: username, rh_password: password} );
+                return Rest.post({ subscriptions_username: username, subscriptions_password: password} );
             }
         };
    }
