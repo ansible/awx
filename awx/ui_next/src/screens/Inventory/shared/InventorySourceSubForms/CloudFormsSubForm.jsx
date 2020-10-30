@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import {
   OptionsField,
@@ -27,6 +27,9 @@ const CloudFormsSubForm = ({ i18n }) => {
     [setFieldValue]
   );
 
+  const configLink =
+    'https://github.com/ansible-collections/community.general/blob/main/scripts/inventory/cloudforms.ini';
+
   return (
     <>
       <CredentialLookup
@@ -44,7 +47,21 @@ const CloudFormsSubForm = ({ i18n }) => {
       <EnabledVarField />
       <EnabledValueField />
       <OptionsField />
-      <SourceVarsField />
+      <SourceVarsField
+        popoverContent={
+          <>
+            <Trans>
+              Override variables found in cloudforms.ini and used by the
+              inventory update script. For an example variable configuration{' '}
+              <a href={configLink} target="_blank" rel="noopener noreferrer">
+                view cloudforms.ini in the Ansible Collections github repo.
+              </a>
+            </Trans>
+            <br />
+            <br />
+          </>
+        }
+      />
     </>
   );
 };
