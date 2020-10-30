@@ -132,10 +132,12 @@ function HostFilterLookup({
     useCallback(
       async orgId => {
         const params = parseQueryString(QS_CONFIG, location.search);
-        const { data } = await HostsAPI.read(
-          mergeParams(params, { inventory__organization: orgId })
-        );
-        const { data: actions } = await HostsAPI.readOptions();
+        const [{ data }, { data: actions }] = await Promise.all([
+          HostsAPI.read(
+            mergeParams(params, { inventory__organization: orgId })
+          ),
+          HostsAPI.readOptions(),
+        ]);
         return {
           count: data.count,
           hosts: data.results,
