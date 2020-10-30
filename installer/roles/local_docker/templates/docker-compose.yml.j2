@@ -1,5 +1,5 @@
 #jinja2: lstrip_blocks: True
-version: '2'
+version: '3'
 services:
 
   web:
@@ -163,6 +163,9 @@ services:
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
     command: ["/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -s /var/run/redis/redis.sock ping"]
+      interval: 10s
     volumes:
       - "{{ docker_compose_dir }}/redis.conf:/usr/local/etc/redis/redis.conf:ro"
       - "{{ docker_compose_dir }}/redis_socket:/var/run/redis/:rw"
@@ -176,6 +179,9 @@ services:
     image: {{ postgresql_image }}
     container_name: awx_postgres
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ pg_username }}"]
+      interval: 10s
     volumes:
       - "{{ postgres_data_dir }}/10/data/:/var/lib/postgresql/data:Z"
     environment:
