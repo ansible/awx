@@ -349,7 +349,7 @@ def test_months_with_31_days(post, admin_user):
     ('MINUTELY', 1, 60),
     ('MINUTELY', 15, 15 * 60),
     ('HOURLY', 1, 3600),
-    ('HOURLY', 4, 3600 * 4),
+    ('HOURLY', 2, 3600 * 2),
 ))
 def test_really_old_dtstart(post, admin_user, freq, delta, total_seconds):
     url = reverse('api:schedule_rrule')
