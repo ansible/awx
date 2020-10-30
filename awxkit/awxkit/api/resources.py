@@ -16,6 +16,7 @@ class Resources(object):
     _auth = 'auth/'
     _authtoken = 'authtoken/'
     _config = 'config/'
+    _config_attach = 'config/attach/'
     _credential = r'credentials/\d+/'
     _credential_access_list = r'credentials/\d+/access_list/'
     _credential_copy = r'credentials/\d+/copy/'

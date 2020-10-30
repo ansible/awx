@@ -18,7 +18,5 @@ class Command(BaseCommand):
         super(Command, self).__init__()
         license = get_licenser().validate()
         if options.get('data'):
-            if license.get('license_key', '') != 'UNLICENSED':
-                license['license_key'] = '********'
             return json.dumps(license)
         return license.get('license_type', 'none')

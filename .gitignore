@@ -34,8 +34,6 @@ awx/ui_next/coverage/
 awx/ui_next/build
 awx/ui_next/.env.local
 rsyslog.pid
-/tower-license
-/tower-license/**
 tools/prometheus/data
 tools/docker-compose/Dockerfile
 
@@ -147,3 +145,4 @@ use_dev_supervisor.txt
 .idea/*
 *.unison.tmp
 *.#
+/tools/docker-compose/overrides/
