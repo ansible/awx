@@ -31,7 +31,11 @@ from awx.main.utils.safe_yaml import sanitize_jinja
 
 # other AWX imports
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
+# TODO: remove proot utils once we move to running inv. updates in containers
 from awx.main.utils import (
+    check_proot_installed,
+    wrap_args_with_proot,
+    build_proot_temp_dir,
     ignore_inventory_computed_fields,
     get_licenser
 )
@@ -134,15 +138,50 @@ class AnsibleInventoryLoader(object):
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 
+    # TODO: Remove this once we move to running ansible-inventory in containers
+    # and don't need proot for process isolation anymore
+    def get_proot_args(self, cmd, env):
+        cwd = os.getcwd()
+        if not check_proot_installed():
+            raise RuntimeError("proot is not installed but is configured for use")
+
+        kwargs = {}
+        # we cannot safely store tmp data in source dir or trust script contents
+        if env['AWX_PRIVATE_DATA_DIR']:
+            # If this is non-blank, file credentials are being used and we need access
+            private_data_dir = functioning_dir(env['AWX_PRIVATE_DATA_DIR'])
+            logger.debug("Using private credential data in '{}'.".format(private_data_dir))
+            kwargs['private_data_dir'] = private_data_dir
+        self.tmp_private_dir = build_proot_temp_dir()
+        logger.debug("Using fresh temporary directory '{}' for isolation.".format(self.tmp_private_dir))
+        kwargs['proot_temp_dir'] = self.tmp_private_dir
+        kwargs['proot_show_paths'] = [functioning_dir(self.source), settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
+        logger.debug("Running from `{}` working directory.".format(cwd))
+
+        if self.venv_path != settings.ANSIBLE_VENV_PATH:
+            kwargs['proot_custom_virtualenv'] = self.venv_path
+
+        return wrap_args_with_proot(cmd, cwd, **kwargs)
+
+
     def command_to_json(self, cmd):
         data = {}
         stdout, stderr = '', ''
         env = self.build_env()
 
+        # TODO: remove proot args once inv. updates run in containers
+        if (('AWX_PRIVATE_DATA_DIR' in env) and
+                                getattr(settings, 'AWX_PROOT_ENABLED', False)):
+            cmd = self.get_proot_args(cmd, env)
+
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
         stdout, stderr = proc.communicate()
         stdout = smart_text(stdout)
         stderr = smart_text(stderr)
+
+        # TODO: can be removed when proot is removed
+        if self.tmp_private_dir:
+            shutil.rmtree(self.tmp_private_dir, True)
 
         if proc.returncode != 0:
             raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % (
