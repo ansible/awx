@@ -203,8 +203,9 @@ def get_awx_http_client_headers():
 
 def get_licenser(*args, **kwargs):
     from awx.main.utils.licensing import Licenser, OpenLicense
+    from django.conf import settings
     try:
-        if os.path.exists('/var/lib/awx/.tower_version'):
+        if getattr(settings, 'REDHAT_CANDLEPIN_HOST', None):
             return Licenser(*args, **kwargs)
         else:
             return OpenLicense()
