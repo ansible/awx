@@ -74,7 +74,7 @@ RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev
 {% endif %}
 {% if not build_dev|bool %}
 COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
-RUN mkdir -p -m 755 /var/lib/awx && echo "{{ awx_version }}" > /var/lib/awx/.tower_version && \
+RUN mkdir -p -m 755 /var/lib/awx && \
     OFFICIAL=yes /var/lib/awx/venv/awx/bin/pip install /tmp/{{ awx_sdist_file }}
 {% endif %}
 
