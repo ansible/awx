@@ -1,317 +1,265 @@
-import React, { Component } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
+import {
+  Switch,
+  Route,
+  Redirect,
+  Link,
+  useLocation,
+  useParams,
+  useRouteMatch,
+} from 'react-router-dom';
+import RoutedTabs from '../../components/RoutedTabs';
+import useRequest from '../../util/useRequest';
 import AppendBody from '../../components/AppendBody';
 import ContentError from '../../components/ContentError';
 import FullPage from '../../components/FullPage';
 import JobList from '../../components/JobList';
-import RoutedTabs from '../../components/RoutedTabs';
-import { Schedules } from '../../components/Schedule';
-import ContentLoading from '../../components/ContentLoading';
-import { ResourceAccessList } from '../../components/ResourceAccessList';
 import NotificationList from '../../components/NotificationList';
-import {
-  WorkflowJobTemplatesAPI,
-  CredentialsAPI,
-  OrganizationsAPI,
-} from '../../api';
+import { Schedules } from '../../components/Schedule';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
-import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
-import { Visualizer } from './WorkflowJobTemplateVisualizer';
+import WorkflowJobTemplateEdit from './JobTemplateEdit';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../api';
 import TemplateSurvey from './TemplateSurvey';
+import { Visualizer } from './WorkflowJobTemplateVisualizer';
 
-class WorkflowJobTemplate extends Component {
-  constructor(props) {
-    super(props);
+function WorkflowJobTemplate({ i18n, me, setBreadcrumb }) {
+  const location = useLocation();
+  const { id: templateId } = useParams();
+  const match = useRouteMatch();
 
-    this.state = {
-      contentError: null,
-      hasContentLoading: true,
-      template: null,
-      isNotifAdmin: false,
-    };
-    this.createSchedule = this.createSchedule.bind(this);
-    this.loadTemplate = this.loadTemplate.bind(this);
-    this.loadSchedules = this.loadSchedules.bind(this);
-    this.loadScheduleOptions = this.loadScheduleOptions.bind(this);
-  }
-
-  async componentDidMount() {
-    await this.loadTemplate();
-  }
-
-  async componentDidUpdate(prevProps) {
-    const { location } = this.props;
-    if (location !== prevProps.location) {
-      await this.loadTemplate();
-    }
-  }
-
-  async loadTemplate() {
-    const { setBreadcrumb, match } = this.props;
-    const { id } = match.params;
-
-    this.setState({ contentError: null });
-    try {
-      const [
-        { data },
-        {
-          data: { actions },
-        },
-      ] = await Promise.all([
-        WorkflowJobTemplatesAPI.readDetail(id),
-        WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions(id),
+  const {
+    result: { isNotifAdmin, template },
+    isLoading: hasRolesandTemplateLoading,
+    error: rolesAndTemplateError,
+    request: loadTemplateAndRoles,
+  } = useRequest(
+    useCallback(async () => {
+      const [{ data }, actions, notifAdminRes] = await Promise.all([
+        WorkflowJobTemplatesAPI.readDetail(templateId),
+        WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions(templateId),
+        OrganizationsAPI.read({
+          page_size: 1,
+          role_level: 'notification_admin_role',
+        }),
       ]);
-      let webhookKey;
-      if (actions.PUT) {
-        if (data?.webhook_service && data?.related?.webhook_key) {
-          webhookKey = await WorkflowJobTemplatesAPI.readWebhookKey(id);
+
+      if (actions.data.actions.PUT) {
+        if (data.webhook_service && data?.related?.webhook_key) {
+          const {
+            data: { webhook_key },
+          } = await WorkflowJobTemplatesAPI.readWebhookKey(templateId);
+
+          data.webhook_key = webhook_key;
         }
       }
-      if (data?.summary_fields?.webhook_credential) {
-        const {
-          data: {
-            summary_fields: {
-              credential_type: { name },
-            },
-          },
-        } = await CredentialsAPI.readDetail(
-          data.summary_fields.webhook_credential.id
-        );
-        data.summary_fields.webhook_credential.kind = name;
-      }
-      const notifAdminRes = await OrganizationsAPI.read({
-        page_size: 1,
-        role_level: 'notification_admin_role',
-      });
       setBreadcrumb(data);
-      this.setState({
-        template: { ...data, webhook_key: webhookKey?.data.webhook_key },
+
+      return {
+        template: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
-      });
-    } catch (err) {
-      this.setState({ contentError: err });
-    } finally {
-      this.setState({ hasContentLoading: false });
-    }
-  }
+      };
+    }, [setBreadcrumb, templateId]),
+    { isNotifAdmin: false, template: null }
+  );
+  useEffect(() => {
+    loadTemplateAndRoles();
+  }, [loadTemplateAndRoles, location.pathname]);
 
-  createSchedule(data) {
-    const { template } = this.state;
-    return WorkflowJobTemplatesAPI.createSchedule(template.id, data);
-  }
+  const createSchedule = data => {
+    return WorkflowJobTemplatesAPI.createSchedule(templateId, data);
+  };
 
-  loadScheduleOptions() {
-    const { template } = this.state;
-    return WorkflowJobTemplatesAPI.readScheduleOptions(template.id);
-  }
+  const loadScheduleOptions = () => {
+    return WorkflowJobTemplatesAPI.readScheduleOptions(templateId);
+  };
 
-  loadSchedules(params) {
-    const { template } = this.state;
-    return WorkflowJobTemplatesAPI.readSchedules(template.id, params);
-  }
+  const loadSchedules = params => {
+    return WorkflowJobTemplatesAPI.readSchedules(templateId, params);
+  };
 
-  render() {
-    const { i18n, me, location, match, setBreadcrumb } = this.props;
-    const {
-      contentError,
-      hasContentLoading,
-      template,
-      isNotifAdmin,
-    } = this.state;
+  const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
+  const canAddAndEditSurvey =
+    template?.summary_fields?.user_capabilities.edit ||
+    template?.summary_fields?.user_capabilities.delete;
 
-    const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
-    const canToggleNotifications = isNotifAdmin;
-    const canAddAndEditSurvey =
-      template?.summary_fields?.user_capabilities.edit ||
-      template?.summary_fields?.user_capabilities.delete;
+  const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Templates`)}
+        </>
+      ),
+      link: `/templates`,
+      id: 99,
+    },
+    { name: i18n._(t`Details`), link: `${match.url}/details` },
+    { name: i18n._(t`Access`), link: `${match.url}/access` },
+  ];
 
-    const tabsArray = [
-      {
-        name: (
-          <>
-            <CaretLeftIcon />
-            {i18n._(t`Back to Templates`)}
-          </>
-        ),
-        link: `/templates`,
-        id: 99,
-      },
-      { name: i18n._(t`Details`), link: `${match.url}/details` },
-      { name: i18n._(t`Access`), link: `${match.url}/access` },
-    ];
-
-    if (canSeeNotificationsTab) {
-      tabsArray.push({
-        name: i18n._(t`Notifications`),
-        link: `${match.url}/notifications`,
-      });
-    }
-
-    if (template) {
-      tabsArray.push({
-        name: i18n._(t`Schedules`),
-        link: `${match.url}/schedules`,
-      });
-    }
-
+  if (canSeeNotificationsTab) {
     tabsArray.push({
+      name: i18n._(t`Notifications`),
+      link: `${match.url}/notifications`,
+    });
+  }
+
+  if (template) {
+    tabsArray.push({
+      name: i18n._(t`Schedules`),
+      link: `${match.url}/schedules`,
+    });
+  }
+
+  tabsArray.push(
+    {
       name: i18n._(t`Visualizer`),
       link: `${match.url}/visualizer`,
-    });
-    tabsArray.push({
+    },
+    {
       name: i18n._(t`Completed Jobs`),
       link: `${match.url}/completed_jobs`,
-    });
-    tabsArray.push({
+    },
+    {
       name: canAddAndEditSurvey ? i18n._(t`Survey`) : i18n._(t`View Survey`),
       link: `${match.url}/survey`,
-    });
-
-    tabsArray.forEach((tab, n) => {
-      tab.id = n;
-    });
-
-    if (hasContentLoading) {
-      return (
-        <PageSection>
-          <Card>
-            <ContentLoading />
-          </Card>
-        </PageSection>
-      );
     }
+  );
 
-    if (contentError) {
-      return (
-        <PageSection>
-          <Card>
-            <ContentError error={contentError}>
-              {contentError.response.status === 404 && (
-                <span>
-                  {i18n._(t`Template not found.`)}{' '}
-                  <Link to="/templates">{i18n._(t`View all Templates.`)}</Link>
-                </span>
-              )}
-            </ContentError>
-          </Card>
-        </PageSection>
-      );
-    }
+  tabsArray.forEach((tab, n) => {
+    tab.id = n;
+  });
 
-    let showCardHeader = true;
+  let showCardHeader = true;
 
-    if (
-      location.pathname.endsWith('edit') ||
-      location.pathname.includes('schedules/')
-    ) {
-      showCardHeader = false;
-    }
+  if (
+    location.pathname.endsWith('edit') ||
+    location.pathname.includes('schedules/')
+  ) {
+    showCardHeader = false;
+  }
 
+  const contentError = rolesAndTemplateError;
+  if (!hasRolesandTemplateLoading && contentError) {
     return (
       <PageSection>
         <Card>
-          {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
-          <Switch>
-            <Redirect
-              from="/templates/workflow_job_template/:id"
-              to="/templates/workflow_job_template/:id/details"
-              exact
-            />
-            {template && (
-              <Route
-                key="wfjt-details"
-                path="/templates/workflow_job_template/:id/details"
-              >
-                <WorkflowJobTemplateDetail template={template} />
-              </Route>
+          <ContentError error={contentError}>
+            {contentError.response.status === 404 && (
+              <span>
+                {i18n._(t`Template not found.`)}{' '}
+                <Link to="/templates">{i18n._(t`View all Templates.`)}</Link>
+              </span>
             )}
-            {template && (
-              <Route path="/templates/workflow_job_template/:id/access">
-                <ResourceAccessList
-                  resource={template}
-                  apiModel={WorkflowJobTemplatesAPI}
-                />
-              </Route>
-            )}
-            {canSeeNotificationsTab && (
-              <Route path="/templates/workflow_job_template/:id/notifications">
-                <NotificationList
-                  id={Number(match.params.id)}
-                  canToggleNotifications={canToggleNotifications}
-                  apiModel={WorkflowJobTemplatesAPI}
-                  showApprovalsToggle
-                />
-              </Route>
-            )}
-            {template && (
-              <Route
-                key="wfjt-edit"
-                path="/templates/workflow_job_template/:id/edit"
-              >
-                <WorkflowJobTemplateEdit template={template} />
-              </Route>
-            )}
-            {template && (
-              <Route
-                key="wfjt-visualizer"
-                path="/templates/workflow_job_template/:id/visualizer"
-              >
-                <AppendBody>
-                  <FullPage>
-                    <Visualizer template={template} />
-                  </FullPage>
-                </AppendBody>
-              </Route>
-            )}
-            {template?.id && (
-              <Route path="/templates/workflow_job_template/:id/completed_jobs">
-                <JobList
-                  defaultParams={{
-                    workflow_job__workflow_job_template: template.id,
-                  }}
-                />
-              </Route>
-            )}
-            {template?.id && (
-              <Route path="/templates/workflow_job_template/:id/schedules">
-                <Schedules
-                  setBreadcrumb={setBreadcrumb}
-                  unifiedJobTemplate={template}
-                  createSchedule={this.createSchedule}
-                  loadSchedules={this.loadSchedules}
-                  loadScheduleOptions={this.loadScheduleOptions}
-                />
-              </Route>
-            )}
-            {template && (
-              <Route path="/templates/:templateType/:id/survey">
-                <TemplateSurvey
-                  template={template}
-                  canEdit={canAddAndEditSurvey}
-                />
-              </Route>
-            )}
+          </ContentError>
+        </Card>
+      </PageSection>
+    );
+  }
+
+  return (
+    <PageSection>
+      <Card>
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
+        <Switch>
+          <Redirect
+            from="/templates/:templateType/:id"
+            to="/templates/:templateType/:id/details"
+            exact
+          />
+          {template && (
+            <Route key="details" path="/templates/:templateType/:id/details">
+              <WorkflowJobTemplateDetail template={template} />
+            </Route>
+          )}
+          {template && (
+            <Route key="edit" path="/templates/:templateType/:id/edit">
+              <WorkflowJobTemplateEdit template={template} />
+            </Route>
+          )}
+          {template && (
+            <Route key="access" path="/templates/:templateType/:id/access">
+              <ResourceAccessList
+                resource={template}
+                apiModel={WorkflowJobTemplatesAPI}
+              />
+            </Route>
+          )}
+          {template && (
+            <Route
+              key="schedules"
+              path="/templates/:templateType/:id/schedules"
+            >
+              <Schedules
+                createSchedule={createSchedule}
+                setBreadcrumb={setBreadcrumb}
+                unifiedJobTemplate={template}
+                loadSchedules={loadSchedules}
+                loadScheduleOptions={loadScheduleOptions}
+              />
+            </Route>
+          )}
+          {canSeeNotificationsTab && (
+            <Route path="/templates/:templateType/:id/notifications">
+              <NotificationList
+                id={Number(templateId)}
+                canToggleNotifications={isNotifAdmin}
+                apiModel={WorkflowJobTemplatesAPI}
+              />
+            </Route>
+          )}
+          {template && (
+            <Route
+              key="wfjt-visualizer"
+              path="/templates/workflow_job_template/:id/visualizer"
+            >
+              <AppendBody>
+                <FullPage>
+                  <Visualizer template={template} />
+                </FullPage>
+              </AppendBody>
+            </Route>
+          )}
+          {template?.id && (
+            <Route path="/templates/:templateType/:id/completed_jobs">
+              <JobList
+                defaultParams={{
+                  workflow_job__workflow_job_template: template.id,
+                }}
+              />
+            </Route>
+          )}
+          {template && (
+            <Route path="/templates/:templateType/:id/survey">
+              <TemplateSurvey
+                template={template}
+                canEdit={canAddAndEditSurvey}
+              />
+            </Route>
+          )}
+          {!hasRolesandTemplateLoading && (
             <Route key="not-found" path="*">
               <ContentError isNotFound>
                 {match.params.id && (
                   <Link
-                    to={`/templates/workflow_job_template/${match.params.id}/details`}
+                    to={`/templates/${match.params.templateType}/${match.params.id}/details`}
                   >
                     {i18n._(t`View Template Details`)}
                   </Link>
                 )}
               </ContentError>
             </Route>
-          </Switch>
-        </Card>
-      </PageSection>
-    );
-  }
+          )}
+        </Switch>
+      </Card>
+    </PageSection>
+  );
 }
 
 export { WorkflowJobTemplate as _WorkflowJobTemplate };
-export default withI18n()(withRouter(WorkflowJobTemplate));
+export default withI18n()(WorkflowJobTemplate);
