@@ -643,6 +643,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
     # As a base serializer, the capabilities prefetch is not used directly, 
     # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
     capabilities_prefetch = []
+
     class Meta:
         model = UnifiedJobTemplate
         fields = ('*', 'last_job_run', 'last_job_failed',
