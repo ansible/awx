@@ -196,7 +196,7 @@ function HostFilterLookup({
 
   function buildChips(filter = {}) {
     const inputGroupChips = Object.keys(filter).reduce((obj, param) => {
-      const parsedKey = param.replace('__icontains', '').replace('or__', '');
+      const parsedKey = param.replace('or__', '');
       const chipsArray = [];
 
       if (Array.isArray(filter[param])) {
