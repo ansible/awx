@@ -14,7 +14,6 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
-import { GroupsAPI, InventoriesAPI } from '../../../api';
 
 function InventoryGroupDetail({ i18n, inventoryGroup }) {
   const {
@@ -26,26 +25,8 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
     variables,
   } = inventoryGroup;
   const [error, setError] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const history = useHistory();
   const params = useParams();
-
-  const handleDelete = async option => {
-    const inventoryId = parseInt(params.id, 10);
-    const groupId = parseInt(params.groupId, 10);
-    setIsDeleteModalOpen(false);
-
-    try {
-      if (option === 'delete') {
-        await GroupsAPI.destroy(groupId);
-      } else {
-        await InventoriesAPI.promoteGroup(inventoryId, groupId);
-      }
-      history.push(`/inventories/inventory/${inventoryId}/groups`);
-    } catch (err) {
-      setError(err);
-    }
-  };
 
   return (
     <CardBody>
@@ -84,22 +65,14 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
         >
           {i18n._(t`Edit`)}
         </Button>
-        <Button
-          variant="secondary"
-          aria-label={i18n._(t`Delete`)}
-          onClick={() => setIsDeleteModalOpen(true)}
-        >
-          {i18n._(t`Delete`)}
-        </Button>
-      </CardActionsRow>
-      {isDeleteModalOpen && (
         <InventoryGroupsDeleteModal
           groups={[inventoryGroup]}
-          onClose={() => setIsDeleteModalOpen(false)}
-          isModalOpen={isDeleteModalOpen}
-          onDelete={handleDelete}
+          isDisabled={false}
+          onAfterDelete={() =>
+            history.push(`/inventories/inventory/${params.id}/groups`)
+          }
         />
-      )}
+      </CardActionsRow>
       {error && (
         <AlertModal
           variant="error"

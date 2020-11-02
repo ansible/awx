@@ -218,7 +218,7 @@ describe('<UserRolesList />', () => {
     });
     wrapper.update();
     await act(async () =>
-      wrapper.find('Button[aria-label="Add resource roles"]').prop('onClick')()
+      wrapper.find('Button[aria-label="Add"]').prop('onClick')()
     );
     wrapper.update();
     expect(wrapper.find('PFWizard').length).toBe(1);

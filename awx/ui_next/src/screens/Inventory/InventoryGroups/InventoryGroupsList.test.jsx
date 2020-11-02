@@ -230,7 +230,7 @@ describe('<InventoryGroupsList/> error handling', () => {
     wrapper.update();
     await act(async () => {
       wrapper
-        .find('ModalBoxFooter Button[aria-label="Delete"]')
+        .find('ModalBoxFooter Button[aria-label="Confirm Delete"]')
         .invoke('onClick')();
     });
     await waitForElement(

@@ -28,7 +28,7 @@ function ToolbarAddButton({
       <DropdownItem
         key="add"
         isDisabled={isDisabled}
-        component={linkTo ? Link : Button}
+        component={linkTo ? Link : 'button'}
         to={linkTo}
         onClick={!onClick ? undefined : onClick}
       >
