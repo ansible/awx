@@ -2461,6 +2461,12 @@ class RunInventoryUpdate(BaseTask):
     event_model = InventoryUpdateEvent
     event_data_key = 'inventory_update_id'
 
+    def should_use_proot(self, inventory_update):
+        '''
+        Return whether this task should use proot.
+        '''
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
+
     @property
     def proot_show_paths(self):
         return [settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
