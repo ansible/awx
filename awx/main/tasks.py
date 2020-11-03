@@ -2784,6 +2784,12 @@ class RunInventoryUpdate(BaseTask):
         from awx.main.management.commands.inventory_import import Command as InventoryImportCommand
         cmd = InventoryImportCommand()
         try:
+            # note that we are only using the management command to
+            # save the inventory data to the database.
+            # we are not asking it to actually fetch hosts / groups.
+            # that work was taken care of earlier, when
+            # BaseTask.run called ansible-inventory (by way of ansible-runner)
+            # for us.
             save_status, tb, exc = cmd.perform_update(options, data, inventory_update)
         except Exception as raw_exc:
             # Ignore license errors specifically
