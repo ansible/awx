@@ -2461,12 +2461,14 @@ class RunInventoryUpdate(BaseTask):
     event_model = InventoryUpdateEvent
     event_data_key = 'inventory_update_id'
 
+    # TODO: remove once inv updates run in containers
     def should_use_proot(self, inventory_update):
         '''
         Return whether this task should use proot.
         '''
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
+    # TODO: remove once inv updates run in containers
     @property
     def proot_show_paths(self):
         return [settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
@@ -2503,6 +2505,7 @@ class RunInventoryUpdate(BaseTask):
                                                         private_data_files=private_data_files)
         if private_data_files is None:
             private_data_files = {}
+        # TODO: remove once containers replace custom venvs
         self.add_ansible_venv(inventory_update.ansible_virtualenv_path, env, isolated=isolated)
 
         # Legacy environment variables, were used as signal to awx-manage command
