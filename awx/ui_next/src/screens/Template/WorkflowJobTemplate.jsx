@@ -22,7 +22,7 @@ import NotificationList from '../../components/NotificationList';
 import { Schedules } from '../../components/Schedule';
 import { ResourceAccessList } from '../../components/ResourceAccessList';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
-import WorkflowJobTemplateEdit from './JobTemplateEdit';
+import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../api';
 import TemplateSurvey from './TemplateSurvey';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
