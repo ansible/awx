@@ -2503,7 +2503,7 @@ class RunInventoryUpdate(BaseTask):
                                                         private_data_files=private_data_files)
         if private_data_files is None:
             private_data_files = {}
-        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
+        self.add_ansible_venv(inventory_update.ansible_virtualenv_path, env, isolated=isolated)
 
         # Legacy environment variables, were used as signal to awx-manage command
         # now they are provided in case some scripts may be relying on them
