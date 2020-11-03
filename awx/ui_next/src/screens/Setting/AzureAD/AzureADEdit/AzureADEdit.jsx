@@ -14,6 +14,7 @@ import {
   InputField,
   ObjectField,
 } from '../../shared/SharedFields';
+import { formatJson } from '../../shared/settingUtils';
 import useModal from '../../../../util/useModal';
 import useRequest from '../../../../util/useRequest';
 import { SettingsAPI } from '../../../../api';
@@ -57,10 +58,10 @@ function AzureADEdit() {
   const handleSubmit = async form => {
     await submitForm({
       ...form,
-      SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP: JSON.parse(
+      SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP: formatJson(
         form.SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP
       ),
-      SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: JSON.parse(
+      SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: formatJson(
         form.SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP
       ),
     });

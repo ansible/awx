@@ -68,12 +68,24 @@ describe('<ActivityStreamEdit />', () => {
 
   test('should successfully send request to api on form submission', async () => {
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    expect(
+      wrapper.find('Switch#ACTIVITY_STREAM_ENABLED').prop('isChecked')
+    ).toEqual(false);
+
+    await act(async () => {
+      wrapper.find('Switch#ACTIVITY_STREAM_ENABLED').invoke('onChange')(true);
+    });
+    wrapper.update();
+    expect(
+      wrapper.find('Switch#ACTIVITY_STREAM_ENABLED').prop('isChecked')
+    ).toEqual(true);
+
     await act(async () => {
       wrapper.find('Form').invoke('onSubmit')();
     });
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
     expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      ACTIVITY_STREAM_ENABLED: false,
+      ACTIVITY_STREAM_ENABLED: true,
       ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: true,
     });
   });

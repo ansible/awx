@@ -44,39 +44,36 @@ const SettingGroup = withI18n()(
     label,
     popoverContent,
     validated,
-  }) => {
-    return (
-      <FormGroup
-        fieldId={fieldId}
-        helperTextInvalid={helperTextInvalid}
-        isRequired={isRequired}
-        label={label}
-        validated={validated}
-        labelIcon={
-          <>
-            <Popover
-              content={popoverContent}
-              ariaLabel={`${i18n._(t`More information for`)} ${label}`}
-            />
-            <RevertButton
-              id={fieldId}
-              defaultValue={defaultValue}
-              isDisabled={isDisabled}
-            />
-          </>
-        }
-      >
-        {children}
-      </FormGroup>
-    );
-  }
+  }) => (
+    <FormGroup
+      fieldId={fieldId}
+      helperTextInvalid={helperTextInvalid}
+      isRequired={isRequired}
+      label={label}
+      validated={validated}
+      labelIcon={
+        <>
+          <Popover
+            content={popoverContent}
+            ariaLabel={`${i18n._(t`More information for`)} ${label}`}
+          />
+          <RevertButton
+            id={fieldId}
+            defaultValue={defaultValue}
+            isDisabled={isDisabled}
+          />
+        </>
+      }
+    >
+      {children}
+    </FormGroup>
+  )
 );
 
 const BooleanField = withI18n()(
   ({ i18n, ariaLabel = '', name, config, disabled = false }) => {
     const [field, meta, helpers] = useField(name);
-
-    return (
+    return config ? (
       <SettingGroup
         defaultValue={config.default ?? false}
         fieldId={name}
@@ -95,7 +92,7 @@ const BooleanField = withI18n()(
           aria-label={ariaLabel || config.label}
         />
       </SettingGroup>
-    );
+    ) : null;
   }
 );
 BooleanField.propTypes = {
@@ -110,7 +107,7 @@ const ChoiceField = withI18n()(({ i18n, name, config, isRequired = false }) => {
   const [field, meta] = useField({ name, validate });
   const isValid = !meta.error || !meta.touched;
 
-  return (
+  return config ? (
     <SettingGroup
       defaultValue={config.default ?? ''}
       fieldId={name}
@@ -132,7 +129,7 @@ const ChoiceField = withI18n()(({ i18n, name, config, isRequired = false }) => {
         ]}
       />
     </SettingGroup>
-  );
+  ) : null;
 });
 ChoiceField.propTypes = {
   name: string.isRequired,
@@ -146,7 +143,7 @@ const EncryptedField = withI18n()(
     const [, meta] = useField({ name, validate });
     const isValid = !(meta.touched && meta.error);
 
-    return (
+    return config ? (
       <SettingGroup
         defaultValue={config.default ?? ''}
         fieldId={name}
@@ -166,7 +163,7 @@ const EncryptedField = withI18n()(
           />
         </InputGroup>
       </SettingGroup>
-    );
+    ) : null;
   }
 );
 EncryptedField.propTypes = {
@@ -177,10 +174,8 @@ EncryptedField.propTypes = {
 
 const InputField = withI18n()(
   ({ i18n, name, config, type = 'text', isRequired = false }) => {
-    const {
-      min_value = Number.MIN_SAFE_INTEGER,
-      max_value = Number.MAX_SAFE_INTEGER,
-    } = config;
+    const min_value = config?.min_value ?? Number.MIN_SAFE_INTEGER;
+    const max_value = config?.max_value ?? Number.MAX_SAFE_INTEGER;
     const validators = [
       ...(isRequired ? [required(null, i18n)] : []),
       ...(type === 'url' ? [url(i18n)] : []),
@@ -191,7 +186,7 @@ const InputField = withI18n()(
     const [field, meta] = useField({ name, validate: combine(validators) });
     const isValid = !(meta.touched && meta.error);
 
-    return (
+    return config ? (
       <SettingGroup
         defaultValue={config.default || ''}
         fieldId={name}
@@ -213,7 +208,7 @@ const InputField = withI18n()(
           }}
         />
       </SettingGroup>
-    );
+    ) : null;
   }
 );
 InputField.propTypes = {
@@ -228,12 +223,12 @@ const ObjectField = withI18n()(({ i18n, name, config, isRequired = false }) => {
   const [field, meta, helpers] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
 
-  const emptyDefault = config.type === 'list' ? '[]' : '{}';
-  const defaultRevertValue = config.default
+  const emptyDefault = config?.type === 'list' ? '[]' : '{}';
+  const defaultRevertValue = config?.default
     ? JSON.stringify(config.default, null, 2)
     : emptyDefault;
 
-  return (
+  return config ? (
     <FormFullWidthLayout>
       <SettingGroup
         defaultValue={defaultRevertValue}
@@ -254,7 +249,7 @@ const ObjectField = withI18n()(({ i18n, name, config, isRequired = false }) => {
         />
       </SettingGroup>
     </FormFullWidthLayout>
-  );
+  ) : null;
 });
 ObjectField.propTypes = {
   name: string.isRequired,

@@ -21,7 +21,7 @@ import {
 import useModal from '../../../../util/useModal';
 import useRequest from '../../../../util/useRequest';
 import { SettingsAPI } from '../../../../api';
-import { pluck } from '../../shared/settingUtils';
+import { pluck, formatJson } from '../../shared/settingUtils';
 
 function MiscSystemEdit({ i18n }) {
   const history = useHistory();
@@ -95,6 +95,9 @@ function MiscSystemEdit({ i18n }) {
 
       const mergedData = {};
       Object.keys(systemData).forEach(key => {
+        if (!systemOptions[key]) {
+          return;
+        }
         mergedData[key] = systemOptions[key];
         mergedData[key].value = systemData[key];
       });
@@ -127,8 +130,8 @@ function MiscSystemEdit({ i18n }) {
     } = form;
     await submitForm({
       ...formData,
-      CUSTOM_VENV_PATHS: JSON.parse(formData.CUSTOM_VENV_PATHS),
-      REMOTE_HOST_HEADERS: JSON.parse(formData.REMOTE_HOST_HEADERS),
+      CUSTOM_VENV_PATHS: formatJson(formData.CUSTOM_VENV_PATHS),
+      REMOTE_HOST_HEADERS: formatJson(formData.REMOTE_HOST_HEADERS),
       OAUTH2_PROVIDER: {
         ACCESS_TOKEN_EXPIRE_SECONDS,
         REFRESH_TOKEN_EXPIRE_SECONDS,
@@ -181,10 +184,7 @@ function MiscSystemEdit({ i18n }) {
       {isLoading && <ContentLoading />}
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && system && (
-        <Formik
-          initialValues={{ ...initialValues(system) }}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialValues(system)} onSubmit={handleSubmit}>
           {formik => {
             return (
               <Form autoComplete="off" onSubmit={formik.handleSubmit}>

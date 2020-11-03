@@ -22,6 +22,7 @@ import {
 } from '../../shared';
 import useModal from '../../../../util/useModal';
 import useRequest, { useDismissableError } from '../../../../util/useRequest';
+import { formatJson } from '../../shared/settingUtils';
 import { SettingsAPI } from '../../../../api';
 
 function LoggingEdit({ i18n }) {
@@ -39,6 +40,9 @@ function LoggingEdit({ i18n }) {
       const { data } = await SettingsAPI.readCategory('logging');
       const mergedData = {};
       Object.keys(data).forEach(key => {
+        if (!options[key]) {
+          return;
+        }
         mergedData[key] = options[key];
         mergedData[key].value = data[key];
       });
@@ -65,7 +69,7 @@ function LoggingEdit({ i18n }) {
   const handleSubmit = async form => {
     await submitForm({
       ...form,
-      LOG_AGGREGATOR_LOGGERS: JSON.parse(form.LOG_AGGREGATOR_LOGGERS),
+      LOG_AGGREGATOR_LOGGERS: formatJson(form.LOG_AGGREGATOR_LOGGERS),
       LOG_AGGREGATOR_HOST: form.LOG_AGGREGATOR_HOST || null,
       LOG_AGGREGATOR_TYPE: form.LOG_AGGREGATOR_TYPE || null,
     });
@@ -127,10 +131,7 @@ function LoggingEdit({ i18n }) {
       {isLoading && <ContentLoading />}
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && logging && (
-        <Formik
-          initialValues={{ ...initialValues(logging) }}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialValues(logging)} onSubmit={handleSubmit}>
           {formik => {
             return (
               <Form autoComplete="off" onSubmit={formik.handleSubmit}>
