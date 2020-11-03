@@ -171,7 +171,7 @@ class AnsibleInventoryLoader(object):
 
         # TODO: remove proot args once inv. updates run in containers
         if (('AWX_PRIVATE_DATA_DIR' in env) and
-                                getattr(settings, 'AWX_PROOT_ENABLED', False)):
+                getattr(settings, 'AWX_PROOT_ENABLED', False)):
             cmd = self.get_proot_args(cmd, env)
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
