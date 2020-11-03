@@ -52,7 +52,7 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
           helpers.setValue(option);
           setIsOpen(false);
         }}
-        isExpanded={isOpen}
+        isOpen={isOpen}
         selections={becomeMethodField.value}
         isCreatable
         onCreateOption={option => {
