@@ -4257,7 +4257,9 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if obj.notifications.filter(status='pending').exists():
+
+        hours_old = now() - dateutil.relativedelta.relativedelta(hours=8)
+        if obj.notifications.filter(status='pending', created__gt=hours_old).exists():
             return Response({"error": _("Delete not allowed while there are pending notifications")},
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super(NotificationTemplateDetail, self).delete(request, *args, **kwargs)
