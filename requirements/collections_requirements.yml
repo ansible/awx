@@ -1,12 +1,22 @@
 ---
 collections:
   - name: awx.awx
+    version: 15.0.1  # almost all versions should work
   - name: azure.azcollection
+    version: 1.2.0
   - name: amazon.aws
+    version: 1.2.1
   - name: theforeman.foreman
+    version: 1.4.0
   - name: google.cloud
+    version: 1.0.1
   - name: openstack.cloud
+    version: 1.2.0
   - name: community.vmware
+    version: 1.3.0
   - name: ovirt.ovirt
+    version: 1.2.1  # see: https://github.com/ansible/tower/issues/4561
   - name: community.kubernetes  # required for isolated management playbooks
+    version: 1.1.1
   - name: ansible.posix  # required for isolated management playbooks
+    version: 1.1.1
