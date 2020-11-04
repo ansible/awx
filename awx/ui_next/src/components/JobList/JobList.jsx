@@ -122,7 +122,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(({ type, id }) => {
           switch (type) {

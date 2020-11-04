@@ -87,11 +87,16 @@ function InventoryHostList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      await Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
+    useCallback(() => {
+      return Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
     }, [selected]),
     { qsConfig: QS_CONFIG, fetchItems: fetchData }
   );
+
+  const handleDeleteHosts = async () => {
+    await deleteHosts();
+    setSelected([]);
+  };
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
@@ -150,7 +155,7 @@ function InventoryHostList({ i18n }) {
               />,
               <ToolbarDeleteButton
                 key="delete"
-                onDelete={deleteHosts}
+                onDelete={handleDeleteHosts}
                 itemsToDelete={selected}
                 pluralizedItemName={i18n._(t`Hosts`)}
               />,

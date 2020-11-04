@@ -79,7 +79,7 @@ function UserList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(selected.map(user => UsersAPI.destroy(user.id)));
     }, [selected]),
     {

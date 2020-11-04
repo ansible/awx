@@ -91,7 +91,7 @@ function HostGroupsList({ i18n, host }) {
     deleteItems: disassociateHosts,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(group => HostsAPI.disassociateGroup(hostId, group))
       );

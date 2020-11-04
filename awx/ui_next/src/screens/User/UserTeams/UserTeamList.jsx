@@ -110,7 +110,7 @@ function UserTeamList({ i18n }) {
     deleteItems: disassociateTeams,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(selected.flatMap(team => disassociateUserRoles(team)));
       /* eslint-disable-next-line react-hooks/exhaustive-deps */
     }, [selected]),

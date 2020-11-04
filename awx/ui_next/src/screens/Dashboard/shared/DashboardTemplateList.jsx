@@ -100,7 +100,7 @@ function DashboardTemplateList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(({ type, id }) => {
           if (type === 'job_template') {
