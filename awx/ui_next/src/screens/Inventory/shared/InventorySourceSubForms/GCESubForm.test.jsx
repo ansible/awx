@@ -56,6 +56,9 @@ describe('<GCESubForm />', () => {
     expect(
       wrapper.find('FormGroup[label="Cache timeout (seconds)"]')
     ).toHaveLength(1);
+    expect(
+      wrapper.find('VariablesField[label="Source variables"]')
+    ).toHaveLength(1);
   });
 
   test('should make expected api calls', () => {
