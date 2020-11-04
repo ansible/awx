@@ -38,7 +38,7 @@ EXAMPLES = '''
 - name: Export all assets
   tower_export:
     all: True
-  registeR: export_output
+  register: export_output
 
 - name: Import all tower assets from our export
   tower_import:
@@ -51,7 +51,7 @@ EXAMPLES = '''
 
 from ..module_utils.tower_awxkit import TowerAWXKitModule
 
-# These two lines are not needed if awxkit changes to do progamatic notifications on issues
+# These two lines are not needed if awxkit changes to do programatic notifications on issues
 from ansible.module_utils.six.moves import StringIO
 import logging
 
@@ -76,13 +76,15 @@ def main():
         module.fail_json(msg="Your version of awxkit does not appear to have import/export")
 
     # Currently the import process does not return anything on error
-    # It simply just logs to pythons logger
-    # Setup a log gobbler to get error messages from import_assets
+    # It simply just logs to Python's logger
+    # Set up a log gobbler to get error messages from import_assets
     logger = logging.getLogger('awxkit.api.pages.api')
-    logger.setLevel(logging.WARNING)
+    logger.setLevel(logging.ERROR)
+
     log_capture_string = StringIO()
     ch = logging.StreamHandler(log_capture_string)
-    ch.setLevel(logging.WARNING)
+    ch.setLevel(logging.ERROR)
+
     logger.addHandler(ch)
     log_contents = ''
 
@@ -92,7 +94,7 @@ def main():
     except Exception as e:
         module.fail_json(msg="Failed to import assets {0}".format(e))
     finally:
-        # Finally consume the logs incase there were any errors and die if there were
+        # Finally, consume the logs in case there were any errors and die if there were
         log_contents = log_capture_string.getvalue()
         log_capture_string.close()
         if log_contents != '':
