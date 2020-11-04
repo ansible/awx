@@ -1,0 +1,95 @@
+{
+  "id": 15,
+  "type": "workflow_job_template",
+  "url": "/api/v2/workflow_job_templates/15/",
+  "related": {
+    "named_url": "/api/v2/workflow_job_templates/A workflow++/",
+    "created_by": "/api/v2/users/1/",
+    "modified_by": "/api/v2/users/1/",
+    "workflow_jobs": "/api/v2/workflow_job_templates/15/workflow_jobs/",
+    "schedules": "/api/v2/workflow_job_templates/15/schedules/",
+    "launch": "/api/v2/workflow_job_templates/15/launch/",
+    "webhook_key": "/api/v2/workflow_job_templates/15/webhook_key/",
+    "webhook_receiver": "/api/v2/workflow_job_templates/15/github/",
+    "workflow_nodes": "/api/v2/workflow_job_templates/15/workflow_nodes/",
+    "labels": "/api/v2/workflow_job_templates/15/labels/",
+    "activity_stream": "/api/v2/workflow_job_templates/15/activity_stream/",
+    "notification_templates_started": "/api/v2/workflow_job_templates/15/notification_templates_started/",
+    "notification_templates_success": "/api/v2/workflow_job_templates/15/notification_templates_success/",
+    "notification_templates_error": "/api/v2/workflow_job_templates/15/notification_templates_error/",
+    "notification_templates_approvals": "/api/v2/workflow_job_templates/15/notification_templates_approvals/",
+    "access_list": "/api/v2/workflow_job_templates/15/access_list/",
+    "object_roles": "/api/v2/workflow_job_templates/15/object_roles/",
+    "survey_spec": "/api/v2/workflow_job_templates/15/survey_spec/",
+    "copy": "/api/v2/workflow_job_templates/15/copy/"
+  },
+  "summary_fields": {
+    "created_by": {
+      "id": 1,
+      "username": "admin",
+      "first_name": "",
+      "last_name": ""
+    },
+    "modified_by": {
+      "id": 1,
+      "username": "admin",
+      "first_name": "",
+      "last_name": ""
+    },
+    "object_roles": {
+      "admin_role": {
+        "description": "Can manage all aspects of the workflow job template",
+        "name": "Admin",
+        "id": 68
+      },
+      "execute_role": {
+        "description": "May run the workflow job template",
+        "name": "Execute",
+        "id": 69
+      },
+      "read_role": {
+        "description": "May view settings for the workflow job template",
+        "name": "Read",
+        "id": 70
+      },
+      "approval_role": {
+        "description": "Can approve or deny a workflow approval node",
+        "name": "Approve",
+        "id": 71
+      }
+    },
+    "user_capabilities": {
+      "edit": true,
+      "delete": true,
+      "start": true,
+      "schedule": true,
+      "copy": true
+    },
+    "labels": {
+      "count": 0,
+      "results": []
+    },
+    "recent_jobs": []
+  },
+  "created": "2020-10-30T14:29:59.728159Z",
+  "modified": "2020-11-03T14:48:50.519450Z",
+  "name": "A workflow",
+  "description": "",
+  "last_job_run": null,
+  "last_job_failed": false,
+  "next_job_run": null,
+  "status": "never updated",
+  "extra_vars": "",
+  "organization": null,
+  "survey_enabled": false,
+  "allow_simultaneous": false,
+  "ask_variables_on_launch": false,
+  "inventory": null,
+  "limit": "",
+  "scm_branch": "",
+  "ask_inventory_on_launch": false,
+  "ask_scm_branch_on_launch": false,
+  "ask_limit_on_launch": false,
+  "webhook_service": "github",
+  "webhook_credential": null
+}
