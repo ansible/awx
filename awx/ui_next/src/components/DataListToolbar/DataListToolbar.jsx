@@ -62,6 +62,7 @@ function DataListToolbar({
       id={`${qsConfig.namespace}-list-toolbar`}
       clearAllFilters={clearAllFilters}
       collapseListedFiltersBreakpoint="lg"
+      clearFiltersButtonText={i18n._(t`Clear all filters`)}
     >
       <ToolbarContent>
         {showSelectAll && (
