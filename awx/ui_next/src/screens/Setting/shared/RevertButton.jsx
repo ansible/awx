@@ -45,7 +45,7 @@ function RevertButton({ i18n, id, defaultValue, isDisabled = false }) {
       <ButtonWrapper>
         <Button
           aria-label={isRevertable ? i18n._(t`Revert`) : i18n._(t`Undo`)}
-          data-cy={`${id}-revert`}
+          ouiaId={`${id}-revert`}
           isInline
           isSmall
           onClick={handleConfirm}
