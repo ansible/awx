@@ -1224,6 +1224,20 @@ class BaseTask(object):
         Ansible runner puts a parent_uuid on each event, no matter what the type.
         AWX only saves the parent_uuid if the event is for a Job.
         '''
+        # cache end_line locally for RunInventoryUpdate tasks
+        # which generate job events from two 'streams':
+        # ansible-inventory and the awx.main.commands.inventory_import
+        # logger
+        if isinstance(self, RunInventoryUpdate):
+            if not getattr(self, 'end_line', None):
+                # this is the very first event
+                # note the end_line
+                self.end_line = event_data['end_line']
+            else:
+                num_lines = event_data['end_line'] - event_data['start_line']
+                event_data['start_line'] = self.end_line + 1
+                self.end_line = event_data['end_line'] = event_data['start_line'] + num_lines
+
         if event_data.get(self.event_data_key, None):
             if self.event_data_key != 'job_id':
                 event_data.pop('parent_uuid', None)
@@ -2758,7 +2772,7 @@ class RunInventoryUpdate(BaseTask):
 
                 self.counter += 1
                 msg = self.format(record)
-                n_lines = msg.count('\n')
+                n_lines = msg.strip().count('\n')  # don't count new-lines at boundry of text
                 dispatch_data = dict(
                     created=now().isoformat(),
                     event='verbose',
