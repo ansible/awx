@@ -48,6 +48,12 @@ class Groups extends Base {
       id: childId,
     });
   }
+
+  readPotentialGroups(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/potential_children/`, {
+      params,
+    });
+  }
 }
 
 export default Groups;

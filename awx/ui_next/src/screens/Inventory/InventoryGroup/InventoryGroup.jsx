@@ -48,7 +48,7 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
     {
       name: (
         <>
-          <CaretLeftIcon />
+          <CaretLeftIcon aria-label={i18n._(t`Back to Groups`)} />
           {i18n._(t`Back to Groups`)}
         </>
       ),

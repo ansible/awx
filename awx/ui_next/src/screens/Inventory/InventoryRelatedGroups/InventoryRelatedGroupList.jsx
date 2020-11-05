@@ -73,13 +73,14 @@ function InventoryRelatedGroupList({ i18n }) {
 
   const fetchGroupsToAssociate = useCallback(
     params => {
-      return InventoriesAPI.readGroups(
-        inventoryId,
-        mergeParams(params, { not__id: inventoryId, not__parents: inventoryId })
+      return GroupsAPI.readPotentialGroups(
+        groupId,
+        mergeParams(params, { not__id: groupId, not__parents: groupId })
       );
     },
-    [inventoryId]
+    [groupId]
   );
+
   const associateGroup = useCallback(
     async selectedGroups => {
       try {

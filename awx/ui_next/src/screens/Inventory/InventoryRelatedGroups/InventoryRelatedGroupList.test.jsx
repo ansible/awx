@@ -189,7 +189,7 @@ describe('<InventoryRelatedGroupList />', () => {
   });
 
   test('should associate existing group', async () => {
-    InventoriesAPI.readGroups.mockResolvedValue({
+    GroupsAPI.readPotentialGroups.mockResolvedValue({
       data: { count: mockGroups.length, results: mockGroups },
     });
     await act(async () => {
@@ -204,6 +204,13 @@ describe('<InventoryRelatedGroupList />', () => {
         .find('DropdownItem[aria-label="Add existing group"]')
         .prop('onClick')()
     );
+    expect(GroupsAPI.readPotentialGroups).toBeCalledWith(2, {
+      not__id: 2,
+      not__parents: 2,
+      order_by: 'name',
+      page: 1,
+      page_size: 5,
+    });
     wrapper.update();
     act(() =>
       wrapper.find('CheckboxListItem[name="foo"]').prop('onSelect')({ id: 1 })
