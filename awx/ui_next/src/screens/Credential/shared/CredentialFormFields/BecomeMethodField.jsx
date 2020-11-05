@@ -53,6 +53,7 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
           setIsOpen(false);
         }}
         isOpen={isOpen}
+        id="privilege-escalation-methods"
         selections={becomeMethodField.value}
         isCreatable
         onCreateOption={option => {
