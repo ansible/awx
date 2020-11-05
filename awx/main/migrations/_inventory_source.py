@@ -5,6 +5,7 @@ from uuid import uuid4
 from django.utils.encoding import smart_text
 from django.utils.timezone import now
 
+from awx.main.utils.common import set_current_apps
 from awx.main.utils.common import parse_yaml_or_json
 
 logger = logging.getLogger('awx.main.migrations')
@@ -89,3 +90,16 @@ def back_out_new_instance_id(apps, source, new_id):
         logger.info('Reverse migrated instance ID for {} hosts imported by {} source'.format(
             modified_ct, source
         ))
+
+
+def delete_cloudforms_inv_source(apps, schema_editor):
+    set_current_apps(apps)
+    InventorySource = apps.get_model('main', 'InventorySource')
+    InventoryUpdate = apps.get_model('main', 'InventoryUpdate')
+    CredentialType = apps.get_model('main', 'CredentialType')
+    InventoryUpdate.objects.filter(inventory_source__source='cloudforms').delete()
+    InventorySource.objects.filter(source='cloudforms').delete()
+    ct = CredentialType.objects.filter(namespace='cloudforms').first()
+    if ct:
+        ct.credentials.all().delete()
+        ct.delete()
