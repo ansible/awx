@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { CardBody } from '../../../components/Card';
 import { OrganizationsAPI } from '../../../api';
-import { Config } from '../../../contexts/Config';
 import { getAddedAndRemoved } from '../../../util/lists';
 import OrganizationForm from '../shared/OrganizationForm';
 
@@ -64,17 +63,12 @@ function OrganizationEdit({ organization }) {
 
   return (
     <CardBody>
-      <Config>
-        {({ me }) => (
-          <OrganizationForm
-            organization={organization}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            me={me || {}}
-            submitError={formError}
-          />
-        )}
-      </Config>
+      <OrganizationForm
+        organization={organization}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        submitError={formError}
+      />
     </CardBody>
   );
 }

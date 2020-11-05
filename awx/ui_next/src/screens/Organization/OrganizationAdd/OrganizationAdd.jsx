@@ -4,7 +4,6 @@ import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '../../../api';
-import { Config } from '../../../contexts/Config';
 import { CardBody } from '../../../components/Card';
 import OrganizationForm from '../shared/OrganizationForm';
 
@@ -38,16 +37,11 @@ function OrganizationAdd() {
     <PageSection>
       <Card>
         <CardBody>
-          <Config>
-            {({ me }) => (
-              <OrganizationForm
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-                me={me || {}}
-                submitError={formError}
-              />
-            )}
-          </Config>
+          <OrganizationForm
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            submitError={formError}
+          />
         </CardBody>
       </Card>
     </PageSection>
