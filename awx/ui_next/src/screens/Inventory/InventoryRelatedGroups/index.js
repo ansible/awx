@@ -1,1 +1,1 @@
-export { default } from './InventoryRelatedGroupList';
+export { default } from './InventoryRelatedGroups';

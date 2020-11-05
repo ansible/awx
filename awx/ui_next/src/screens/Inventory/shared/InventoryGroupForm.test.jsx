@@ -30,4 +30,15 @@ describe('<InventoryGroupForm />', () => {
     expect(wrapper.find("FormGroup[label='Description']").length).toBe(1);
     expect(wrapper.find("VariablesField[label='Variables']").length).toBe(1);
   });
+  test('should throw error properly', () => {
+    const newWrapper = mountWithContexts(
+      <InventoryGroupForm
+        handleSubmit={jest.fn()}
+        handleCancel={jest.fn()}
+        group={group}
+        error
+      />
+    );
+    expect(newWrapper.find('FormSubmitError').length).toBe(1);
+  });
 });

@@ -17,7 +17,7 @@ import ContentLoading from '../../../components/ContentLoading';
 import InventoryGroupEdit from '../InventoryGroupEdit/InventoryGroupEdit';
 import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
 import InventoryGroupHosts from '../InventoryGroupHosts';
-import InventoryGroupsRelatedGroup from '../InventoryRelatedGroups';
+import InventoryRelatedGroups from '../InventoryRelatedGroups';
 
 import { GroupsAPI } from '../../../api';
 
@@ -48,7 +48,7 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
     {
       name: (
         <>
-          <CaretLeftIcon />
+          <CaretLeftIcon aria-label={i18n._(t`Back to Groups`)} />
           {i18n._(t`Back to Groups`)}
         </>
       ),
@@ -134,7 +134,7 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
             key="relatedGroups"
             path="/inventories/inventory/:id/groups/:groupId/nested_groups"
           >
-            <InventoryGroupsRelatedGroup />
+            <InventoryRelatedGroups />
           </Route>,
         ]}
         <Route key="not-found" path="*">

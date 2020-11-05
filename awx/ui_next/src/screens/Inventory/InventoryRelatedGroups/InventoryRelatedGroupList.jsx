@@ -5,7 +5,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 
 import { DropdownItem } from '@patternfly/react-core';
 import { GroupsAPI, InventoriesAPI } from '../../../api';
-import useRequest from '../../../util/useRequest';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
 import useSelected from '../../../util/useSelected';
 
@@ -14,6 +14,8 @@ import PaginatedDataList from '../../../components/PaginatedDataList';
 import InventoryGroupRelatedGroupListItem from './InventoryRelatedGroupListItem';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
+import AlertModal from '../../../components/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
 import { toTitleCase } from '../../../util/strings';
@@ -25,6 +27,8 @@ const QS_CONFIG = getQSConfig('group', {
 });
 function InventoryRelatedGroupList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [associateError, setAssociateError] = useState(null);
+  const [disassociateError, setDisassociateError] = useState(null);
   const { id: inventoryId, groupId } = useParams();
   const location = useLocation();
 
@@ -69,24 +73,58 @@ function InventoryRelatedGroupList({ i18n }) {
 
   const fetchGroupsToAssociate = useCallback(
     params => {
-      return InventoriesAPI.readGroups(
-        inventoryId,
-        mergeParams(params, { not__id: inventoryId, not__parents: inventoryId })
+      return GroupsAPI.readPotentialGroups(
+        groupId,
+        mergeParams(params, { not__id: groupId, not__parents: groupId })
       );
     },
-    [inventoryId]
+    [groupId]
   );
 
-  const fetchGroupsOptions = useCallback(
-    () => InventoriesAPI.readGroupsOptions(inventoryId),
-    [inventoryId]
+  const associateGroup = useCallback(
+    async selectedGroups => {
+      try {
+        await Promise.all(
+          selectedGroups.map(selected =>
+            GroupsAPI.associateChildGroup(groupId, selected.id)
+          )
+        );
+      } catch (err) {
+        setAssociateError(err);
+      }
+      fetchRelated();
+    },
+    [groupId, fetchRelated]
   );
 
   const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
     groups
   );
 
-  const addFormUrl = `/home`;
+  const disassociateGroups = useCallback(async () => {
+    try {
+      await Promise.all(
+        selected.map(({ id: childId }) =>
+          GroupsAPI.disassociateChildGroup(parseInt(groupId, 10), childId)
+        )
+      );
+    } catch (err) {
+      setDisassociateError(err);
+    }
+    fetchRelated();
+    setSelected([]);
+  }, [groupId, selected, setSelected, fetchRelated]);
+
+  const fetchGroupsOptions = useCallback(
+    () => InventoriesAPI.readGroupsOptions(inventoryId),
+    [inventoryId]
+  );
+
+  const { error, dismissError } = useDismissableError(
+    associateError || disassociateError
+  );
+
+  const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_groups/add`;
 
   const addExistingGroup = toTitleCase(i18n._(t`Add Existing Group`));
   const addNewGroup = toTitleCase(i18n._(t`Add New Group`));
@@ -163,7 +201,7 @@ function InventoryRelatedGroupList({ i18n }) {
               />,
               <DisassociateButton
                 key="disassociate"
-                onDisassociate={() => {}}
+                onDisassociate={disassociateGroups}
                 itemsToDisassociate={selected}
                 modalTitle={i18n._(t`Disassociate related group(s)?`)}
               />,
@@ -188,10 +226,23 @@ function InventoryRelatedGroupList({ i18n }) {
           fetchRequest={fetchGroupsToAssociate}
           optionsRequest={fetchGroupsOptions}
           isModalOpen={isModalOpen}
-          onAssociate={() => {}}
+          onAssociate={associateGroup}
           onClose={() => setIsModalOpen(false)}
           title={i18n._(t`Select Groups`)}
         />
+      )}
+      {error && (
+        <AlertModal
+          isOpen={error}
+          onClose={dismissError}
+          title={i18n._(t`Error!`)}
+          variant="error"
+        >
+          {associateError
+            ? i18n._(t`Failed to associate.`)
+            : i18n._(t`Failed to disassociate one or more groups.`)}
+          <ErrorDetail error={error} />
+        </AlertModal>
       )}
     </>
   );
