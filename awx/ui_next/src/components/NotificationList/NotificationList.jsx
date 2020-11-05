@@ -219,7 +219,7 @@ function NotificationList({
           <NotificationListItem
             key={notification.id}
             notification={notification}
-            detailUrl={`/notifications/${notification.id}`}
+            detailUrl={`/notification_templates/${notification.id}/details`}
             canToggleNotifications={
               canToggleNotifications &&
               !loadingToggleIds.includes(notification.id)
