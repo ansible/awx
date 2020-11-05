@@ -39,6 +39,10 @@ const ListGroup = styled.div`
   display: inline-block;
 `;
 
+const OrgLabel = styled.b`
+  margin-right: 20px;
+`;
+
 function InventoryListItem({
   inventory,
   isSelected,
@@ -114,6 +118,7 @@ function InventoryListItem({
                 : i18n._(t`Inventory`)}
             </DataListCell>,
             <DataListCell key="organization">
+              <OrgLabel>{i18n._(t`Organization`)}</OrgLabel>
               <Link
                 to={`/organizations/${inventory.summary_fields.organization.id}/details`}
               >

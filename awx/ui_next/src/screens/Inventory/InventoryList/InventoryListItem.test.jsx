@@ -68,7 +68,7 @@ describe('<InventoryListItem />', () => {
         .find('DataListCell')
         .at(3)
         .text()
-    ).toBe('Default');
+    ).toBe('OrganizationDefault');
     expect(
       wrapper
         .find('DataListCell')
