@@ -6,6 +6,7 @@ import os.path
 import tempfile
 import shutil
 import requests
+import time
 
 from django.conf import settings
 from django.utils.timezone import now, timedelta
@@ -24,7 +25,7 @@ logger = logging.getLogger('awx.main.analytics')
 
 def _valid_license():
     try:
-        if get_license().get('license_type', 'UNLICENSED') == 'open':
+        if get_license().get('license_type', 'UNLICENSED') == 'open': 
             return False
         access_registry[Job](None).check_license()
     except PermissionDenied:
@@ -90,6 +91,8 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
     :param module: the module to search for registered analytic collector
                     functions; defaults to awx.main.analytics.collectors
     """
+    logger.info("Start gather")
+    start_gather = time.perf_counter()
     def _write_manifest(destdir, manifest):
         path = os.path.join(destdir, 'manifest.json')
         with open(path, 'w', encoding='utf-8') as f:
@@ -220,13 +223,17 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
         logger.exception("Failed to write analytics archive file")
     finally:
         shutil.rmtree(dest, ignore_errors = True)
+    stop_gather = time.perf_counter()
+    logger.info(f"Stop gather - duration: {stop_gather - start_gather}")
     return tarfiles
 
 
-def ship(path):
+def ship(path, skip_cleanup=False):
     """
     Ship gathered metrics to the Insights API
     """
+    logger.info("Start ship")
+    start_ship = time.perf_counter()
     if not path:
         logger.error('Automation Analytics TAR not found')
         return
@@ -264,6 +271,9 @@ def ship(path):
                 return logger.exception('Upload failed with status {}, {}'.format(response.status_code,
                                                                                   response.text))
     finally:
-        # cleanup tar.gz
-        if os.path.exists(path):
-            os.remove(path)
+        if not skip_cleanup:
+            # cleanup tar.gz
+            if os.path.exists(path):
+                os.remove(path)
+    stop_ship = time.perf_counter()
+    logger.info(f"Stop ship - duration: {stop_ship - start_ship}")

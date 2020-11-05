@@ -18,6 +18,8 @@ class Command(BaseCommand):
                             help='Gather analytics without shipping. Works even if analytics are disabled in settings.')
         parser.add_argument('--ship', dest='ship', action='store_true',
                             help='Enable to ship metrics to the Red Hat Cloud')
+        parser.add_argument('--skip-cleanup', dest='skip-cleanup', action='store_true',
+                            help='Do not delete metrics tarball after it was shipped to Red Hat Cloud')
         parser.add_argument('--since', dest='since', action='store',
                             help='Start date for collection')
         parser.add_argument('--until', dest='until', action='store',
@@ -34,6 +36,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.init_logging()
         opt_ship = options.get('ship')
+        opt_skip_cleanup = options.get('skip-cleanup')
         opt_dry_run = options.get('dry-run')
         opt_since = options.get('since') or None
         opt_until = options.get('until') or None
@@ -59,4 +62,4 @@ class Command(BaseCommand):
         if opt_ship:
             if tgzfiles:
                 for tgz in tgzfiles:
-                    ship(tgz)
+                    ship(tgz, opt_skip_cleanup)
