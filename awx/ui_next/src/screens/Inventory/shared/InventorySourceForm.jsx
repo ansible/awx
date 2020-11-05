@@ -22,7 +22,6 @@ import Popover from '../../../components/Popover';
 
 import {
   AzureSubForm,
-  CloudFormsSubForm,
   EC2SubForm,
   GCESubForm,
   OpenStackSubForm,
@@ -178,7 +177,6 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
                     sourceOptions={sourceOptions}
                   />
                 ),
-                cloudforms: <CloudFormsSubForm />,
                 ec2: <EC2SubForm sourceOptions={sourceOptions} />,
                 gce: (
                   <GCESubForm
