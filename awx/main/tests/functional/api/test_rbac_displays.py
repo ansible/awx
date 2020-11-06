@@ -282,10 +282,6 @@ def test_prefetch_ujt_project_capabilities(alice, project, job_template, mocker)
     list_serializer.child.to_representation(project)
     assert 'capability_map' not in list_serializer.child.context
 
-    # Models for which the prefetch is valid for do
-    list_serializer.child.to_representation(job_template)
-    assert set(list_serializer.child.context['capability_map'][job_template.id].keys()) == set(('copy', 'edit', 'start'))
-
 
 @pytest.mark.django_db
 def test_prefetch_group_capabilities(group, rando):

@@ -5,6 +5,7 @@ from uuid import uuid4
 from django.utils.encoding import smart_text
 from django.utils.timezone import now
 
+from awx.main.utils.common import set_current_apps
 from awx.main.utils.common import parse_yaml_or_json
 
 logger = logging.getLogger('awx.main.migrations')
@@ -91,43 +92,14 @@ def back_out_new_instance_id(apps, source, new_id):
         ))
 
 
-def create_scm_script_substitute(apps, source):
-    """Only applies for cloudforms in practice, but written generally.
-    Given a source type, this will replace all inventory sources of that type
-    with SCM inventory sources that source the script from Ansible core
-    """
-    # the revision in the Ansible 2.9 stable branch this project will start out as
-    # it can still be updated manually later (but staying within 2.9 branch), if desired
-    ansible_rev = '6f83b9aff42331e15c55a171de0a8b001208c18c'
+def delete_cloudforms_inv_source(apps, schema_editor):
+    set_current_apps(apps)
     InventorySource = apps.get_model('main', 'InventorySource')
-    ContentType = apps.get_model('contenttypes', 'ContentType')
-    Project = apps.get_model('main', 'Project')
-    if not InventorySource.objects.filter(source=source).exists():
-        logger.debug('No sources of type {} to migrate'.format(source))
-        return
-    proj_name = 'Replacement project for {} type sources - {}'.format(source, uuid4())
-    right_now = now()
-    project = Project.objects.create(
-        name=proj_name,
-        created=right_now,
-        modified=right_now,
-        description='Created by migration',
-        polymorphic_ctype=ContentType.objects.get(model='project'),
-        # project-specific fields
-        scm_type='git',
-        scm_url='https://github.com/ansible/ansible.git',
-        scm_branch='stable-2.9',
-        scm_revision=ansible_rev
-    )
-    ct = 0
-    for inv_src in InventorySource.objects.filter(source=source).iterator():
-        inv_src.source = 'scm'
-        inv_src.source_project = project
-        inv_src.source_path = 'contrib/inventory/{}.py'.format(source)
-        inv_src.scm_last_revision = ansible_rev
-        inv_src.save(update_fields=['source', 'source_project', 'source_path', 'scm_last_revision'])
-        logger.debug('Changed inventory source {} to scm type'.format(inv_src.pk))
-        ct += 1
+    InventoryUpdate = apps.get_model('main', 'InventoryUpdate')
+    CredentialType = apps.get_model('main', 'CredentialType')
+    InventoryUpdate.objects.filter(inventory_source__source='cloudforms').delete()
+    InventorySource.objects.filter(source='cloudforms').delete()
+    ct = CredentialType.objects.filter(namespace='cloudforms').first()
     if ct:
-        logger.info('Changed total of {} inventory sources from {} type to scm'.format(ct, source))
-
+        ct.credentials.all().delete()
+        ct.delete()
