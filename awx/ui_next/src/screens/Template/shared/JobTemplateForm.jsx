@@ -589,6 +589,7 @@ function JobTemplateForm({
                           validate={
                             allowCallbacks ? required(null, i18n) : null
                           }
+                          isRequired={allowCallbacks}
                         />
                       </FormColumnLayout>
                     </>
