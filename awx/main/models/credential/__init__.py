@@ -882,33 +882,6 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
-    namespace='cloudforms',
-    kind='cloud',
-    name=ugettext_noop('Red Hat CloudForms'),
-    managed_by_tower=True,
-    inputs={
-        'fields': [{
-            'id': 'host',
-            'label': ugettext_noop('CloudForms URL'),
-            'type': 'string',
-            'help_text': ugettext_noop('Enter the URL for the virtual machine that '
-                                       'corresponds to your CloudForms instance. '
-                                       'For example, https://cloudforms.example.org')
-        }, {
-            'id': 'username',
-            'label': ugettext_noop('Username'),
-            'type': 'string'
-        }, {
-            'id': 'password',
-            'label': ugettext_noop('Password'),
-            'type': 'string',
-            'secret': True,
-        }],
-        'required': ['host', 'username', 'password'],
-    }
-)
-
-ManagedCredentialType(
     namespace='gce',
     kind='cloud',
     name=ugettext_noop('Google Compute Engine'),
