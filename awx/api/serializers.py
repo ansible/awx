@@ -453,7 +453,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                 if 'capability_map' not in self.context:
                     if hasattr(self, 'polymorphic_base'):
                         model = self.polymorphic_base.Meta.model
-                        prefetch_list = self.polymorphic_base._capabilities_prefetch
+                        prefetch_list = self.polymorphic_base.capabilities_prefetch
                     else:
                         model = self.Meta.model
                         prefetch_list = self.capabilities_prefetch
@@ -640,12 +640,9 @@ class EmptySerializer(serializers.Serializer):
 
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
-    # As a base serializer, the capabilities prefetch is not used directly
-    _capabilities_prefetch = [
-        'admin', 'execute',
-        {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use',
-                  'organization.workflow_admin']}
-    ]
+    # As a base serializer, the capabilities prefetch is not used directly, 
+    # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
+    capabilities_prefetch = []
 
     class Meta:
         model = UnifiedJobTemplate
@@ -695,7 +692,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer.polymorphic_base = self
                 # capabilities prefetch is only valid for these models
                 if isinstance(obj, (JobTemplate, WorkflowJobTemplate)):
-                    serializer.capabilities_prefetch = self._capabilities_prefetch
+                    serializer.capabilities_prefetch = serializer_class.capabilities_prefetch
                 else:
                     serializer.capabilities_prefetch = None
             return serializer.to_representation(obj)
