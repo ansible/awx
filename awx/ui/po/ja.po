@@ -31,7 +31,7 @@ msgstr "(最初の 10 件に制限)"
 msgid "(defaults to %s)"
 msgstr "(%s にデフォルト設定)"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:488
 msgid "(seconds)"
 msgstr "(秒)"
 
@@ -47,15 +47,15 @@ msgstr "20"
 msgid "50"
 msgstr "50"
 
-#: client/src/license/license.partial.html:193
+#: client/src/license/license.partial.html:208
 msgid "<b>Automation analytics</b>: This data is used to enhance future releases of the Tower Software and to provide Automation Analytics to Tower subscribers."
 msgstr "<b>自動化アナリティクス</b>: このデータを使用して、Tower ソフトウェアの今後のリリースを強化し、Tower をサブスクライブする方に自動化アナリティクスを提供します。"
 
-#: client/src/license/license.partial.html:171
+#: client/src/license/license.partial.html:186
 msgid "<b>I agree to the End User License Agreement</b>"
 msgstr "使用許諾契約書に同意します"
 
-#: client/src/license/license.partial.html:187
+#: client/src/license/license.partial.html:202
 msgid "<b>User analytics</b>: This data is used to enhance future releases of the Tower Software and help streamline customer experience and success."
 msgstr "ユーザーの解析: このデータは、Tower ソフトウェアの今後のリリースを強化し、顧客へのサービスを効率化し、成功に導くサポートをします。"
 
@@ -444,9 +444,13 @@ msgstr "管理"
 msgid "Admins"
 msgstr "管理者"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:376
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:478
 msgid "After every project update where the SCM revision changes, refresh the inventory from the selected source before executing job tasks. This is intended for static content, like the Ansible inventory .ini file format."
 msgstr "SCM リビジョンが変更されるプロジェクトの毎回の更新後に、選択されたソースのインベントリーを更新してからジョブのタスクを実行します。これは、Ansible インベントリーの .ini ファイル形式のような静的コンテンツが対象であることが意図されています。"
+
+#: client/src/license/license.partial.html:173
+msgid "Agree to the End User License Agreement, and click submit."
+msgstr "使用許諾契約書に同意して、送信をクリックします。"
 
 #: client/features/templates/templates.strings.js:160
 #: client/lib/components/components.strings.js:105
@@ -707,11 +711,11 @@ msgstr "チェックアウトするブランチです。ブランチ以外に、
 msgid "Branch to use in job run. Project default used if blank."
 msgstr "ジョブ実行で使用するブランチ。空白の場合はプロジェクトのデフォルト値が使用されます。"
 
-#: client/src/license/license.partial.html:113
+#: client/src/license/license.partial.html:120
 msgid "Browse"
 msgstr "参照"
 
-#: client/src/license/license.partial.html:180
+#: client/src/license/license.partial.html:195
 msgid "By default, Tower collects and transmits analytics data on Tower usage to Red Hat.  There are two categories of data collected by Tower. For more information, see <a target=\"_blank\" href=\"http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0\">this Tower documentation page</a>. Uncheck the following boxes to disable this feature."
 msgstr "デフォルトでは、Tower は Tower の使用状況に関する解析データを収集して、Red Hat に送信します。Tower が収集するデータにはカテゴリーが 2 種類あります。詳細情報は、 <a target=\"_blank\" href=\"http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0\">この Tower ドキュメントページ</a> を参照してください。この機能を無効にするには、以下のボックスのチェックを解除します。"
 
@@ -726,7 +730,7 @@ msgstr "デフォルトでは、Tower は Tower の使用状況に関する解�
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal.partial.html:16
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:16
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:16
-#: client/src/license/license.partial.html:259
+#: client/src/license/license.partial.html:274
 #: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:17
 #: client/src/partials/survey-maker-modal.html:17
 #: client/src/partials/survey-maker-modal.html:82
@@ -894,8 +898,8 @@ msgstr "認証情報"
 msgid "CREDENTIALS PERMISSIONS"
 msgstr "認証情報のパーミッション"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:398
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:488
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:500
 #: client/src/projects/projects.form.js:231
 msgid "Cache Timeout"
 msgstr "キャッシュタイムアウト"
@@ -1058,10 +1062,6 @@ msgstr "インベントリーファイルの選択"
 msgid "Choose file"
 msgstr "ファイルの選択"
 
-#: client/src/license/license.partial.html:104
-msgid "Choose your license file, agree to the End User License Agreement, and click submit."
-msgstr "ライセンスファイルを選択し、使用許諾契約書に同意した後に「送信」をクリックします。"
-
 #: client/src/projects/projects.form.js:176
 msgid "Clean"
 msgstr "クリーニング"
@@ -1189,6 +1189,10 @@ msgstr "簡略表示"
 msgid "Completed Jobs"
 msgstr "完了したジョブ"
 
+#: client/src/license/license.partial.html:10
+msgid "Compliant"
+msgstr "準拠"
+
 #: client/src/management-jobs/card/card.partial.html:34
 #: client/src/management-jobs/card/card.partial.html:37
 msgid "Configure Notifications"
@@ -1209,6 +1213,10 @@ msgstr "出荷時の設定へのリセットの確認"
 #: client/src/inventories-hosts/inventories/related/hosts/related-groups-labels/relatedGroupsLabelsList.directive.js:82
 msgid "Confirm the removal of the"
 msgstr "以下の削除を確認:"
+
+#: client/src/license/license.partial.html:75
+msgid "Contact Us"
+msgstr "お問い合わせ"
 
 #: client/src/teams/teams.form.js:24
 #: client/src/users/users.form.js:25
@@ -1237,7 +1245,7 @@ msgstr "ワークフロージョブを続行しますか?"
 msgid "Control the level of output ansible will produce as the playbook executes."
 msgstr "Playbook の実行時に Ansible が生成する出力のレベルを制御します。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:296
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:398
 msgid "Control the level of output ansible will produce for inventory source update jobs."
 msgstr "インベントリーソースの更新ジョブ用に Ansible が生成する出力のレベルを制御します。"
 
@@ -1292,9 +1300,10 @@ msgstr "{{resourceType}} のコピー"
 
 #: client/src/about/about.partial.html:31
 msgid ""
-"Copyright &copy; 2019 Red Hat, Inc. <br>\n"
+"Copyright &copy; {{ currentYear }} Red Hat, Inc. <br>\n"
 "                          Visit <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> for more information.<br>"
-msgstr "Copyright &copy; 2019 Red Hat, Inc. <br>                          詳細は、 <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> をご覧ください。<br>"
+msgstr "Copyright &copy; {{ currentYear }} Red Hat, Inc. <br>\n"
+"                          詳細は、<a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> をご覧ください。<br>"
 
 #: client/lib/components/components.strings.js:90
 msgid "Copyright © 2019 Red Hat, Inc."
@@ -1917,7 +1926,7 @@ msgstr "期限切れ"
 msgid "EXTRA VARIABLES"
 msgstr "追加の変数"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:365
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:467
 msgid "Each time a job runs using this inventory, refresh the inventory from the selected source before executing job tasks."
 msgstr "このインベントリーでジョブを実行する際は常に、選択されたソースのインベントリーを更新してからジョブのタスクを実行します。"
 
@@ -2107,13 +2116,13 @@ msgstr "このジョブテンプレートの Webhook を有効にします。"
 msgid "Enable webhook for this workflow job template."
 msgstr "このワークフローのジョブテンプレートの Webhook を有効にします。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:426
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:428
 msgid "Enabled Value"
 msgstr "有効な値"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:314
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:316
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:416
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:418
 msgid "Enabled Variable"
 msgstr "有効な変数"
 
@@ -2139,7 +2148,7 @@ msgstr "終了日"
 msgid "End Time"
 msgstr "終了時間"
 
-#: client/src/license/license.partial.html:163
+#: client/src/license/license.partial.html:178
 msgid "End User License Agreement"
 msgstr "使用許諾契約書"
 
@@ -2150,9 +2159,7 @@ msgstr "使用許諾契約書"
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して 2 つの間の切り替えを行います。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:227
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:244
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:261
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:74
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
 msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用してこれらの間で切り替えを行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
@@ -2196,10 +2203,26 @@ msgstr "VMware vCenter に対応するホスト名または IP アドレスを�
 msgid "Enter the number associated with the \"Messaging Service\" in Twilio in the format +18005550199."
 msgstr "Twilio の \"メッセージングサービス\" に関連付けられた番号を入力します (形式: +18005550199)。 "
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:177
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:203
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:229
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:272
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:298
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:350
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:376
+msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see"
+msgstr "変数を入力して、インベントリソースを構成します。このプラグインの構成方法の詳細については、次を参照してください: "
+
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:156
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:180
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:204
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:279
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:182
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:208
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:234
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:277
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:303
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:329
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:381
 msgid "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "JSON または YAML 構文のいずれかを使用して変数を入力します。ラジオボタンを使用してこれら 2 つの間の切り替えを行います。"
 
@@ -2212,7 +2235,7 @@ msgstr "環境"
 msgid "Environment Variables"
 msgstr "環境変数"
 
-#: client/src/license/license.controller.js:232
+#: client/src/license/license.controller.js:228
 msgid "Error Applying License"
 msgstr "ライセンスの適用エラー"
 
@@ -2220,7 +2243,7 @@ msgstr "ライセンスの適用エラー"
 msgid "Error Details"
 msgstr "エラーの詳細"
 
-#: client/src/license/license.controller.js:166
+#: client/src/license/license.controller.js:161
 msgid "Error Fetching Licenses"
 msgstr "ライセンスの取得エラー"
 
@@ -2365,7 +2388,7 @@ msgstr "出力の展開"
 msgid "Expanded"
 msgstr "詳細表示"
 
-#: client/src/license/license.partial.html:246
+#: client/src/license/license.partial.html:261
 msgid "Expires"
 msgstr "有効期限"
 
@@ -2377,7 +2400,7 @@ msgstr "有効期限 (昇順)"
 msgid "Expires (Descending)"
 msgstr "有効期限 (降順)"
 
-#: client/src/license/license.partial.html:39
+#: client/src/license/license.partial.html:33
 msgid "Expires On"
 msgstr "有効期限"
 
@@ -2713,9 +2736,9 @@ msgstr "頻度の詳細"
 msgid "Fri"
 msgstr "金"
 
-#: client/src/license/license.partial.html:150
-msgid "GET LICENSES"
-msgstr "ライセンスの取得"
+#: client/src/license/license.partial.html:157
+msgid "GET SUBSCRIPTIONS"
+msgstr "サブスクリプションの取得"
 
 #: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
 msgid "GO TO <a ui-sref=\"notifications.add\" translate=\"\">NOTIFICATIONS</a> TO"
@@ -2914,8 +2937,8 @@ msgstr "ホスト設定キー"
 msgid "Host Enabled"
 msgstr "有効なホスト"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:304
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:306
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:406
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:408
 msgid "Host Filter"
 msgstr "ホストフィルター"
 
@@ -2967,16 +2990,17 @@ msgstr "このジョブのホストのステータス情報は利用できませ
 msgid "Hosts"
 msgstr "ホスト"
 
+#: client/src/license/license.partial.html:46
 #: client/src/license/license.partial.html:52
-#: client/src/license/license.partial.html:58
 msgid "Hosts Available"
 msgstr "利用可能なホスト"
 
+#: client/src/license/license.partial.html:62
 #: client/src/license/license.partial.html:68
 msgid "Hosts Remaining"
 msgstr "残りのホスト"
 
-#: client/src/license/license.partial.html:62
+#: client/src/license/license.partial.html:56
 msgid "Hosts Used"
 msgstr "使用されたホスト"
 
@@ -3074,11 +3098,11 @@ msgstr "アイコン URL"
 msgid "Idle Session"
 msgstr "アイドル状態のセッション"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:456
 msgid "If checked, all variables for child groups and hosts will be removed and replaced by those found on the external source."
 msgstr "チェックが付けられている場合、子グループおよびホストのすべての変数が削除され、外部ソースにあるものによって置き換えられます。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:343
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:445
 msgid "If checked, any hosts and groups that were previously present on the external source but are now removed will be removed from the Tower inventory. Hosts and groups that were not managed by the inventory source will be promoted to the next manually created group or if there is no manually created group to promote them into, they will be left in the \"all\" default group for the inventory."
 msgstr "チェックが付けられている場合、以前は外部ソースにあり、現在は削除されているホストおよびグループが Tower インベントリーから削除されます。インベントリーソースで管理されていなかったホストおよびグループは次に手動で作成されるグループにプロモートされるか、またはプロモート先となる手動で作成されたグループがない場合は、それらはインベントリーの「すべて」のデフォルトグループに残ります。"
 
@@ -3112,8 +3136,12 @@ msgid "If no organization is given, the credential can only be used by the user 
 msgstr "組織が指定されない場合、認証情報はそれを作成するユーザーのみに使用されます。組織管理者およびシステム管理者は組織を割り当て、認証情報のロールを組織内のユーザーおよびチームに割り当てられるようにします。"
 
 #: client/src/license/license.partial.html:74
-msgid "If you are ready to upgrade, please contact us by clicking the button below"
-msgstr "アップグレードの準備ができましたら、以下のボタンをクリックしてお問い合わせください。"
+msgid "If you are ready to upgrade or renew, please contact us by clicking the button below."
+msgstr "アップグレードまたは更新の準備ができましたら、以下のボタンをクリックしてお問い合わせください。"
+
+#: client/src/license/license.partial.html:88
+msgid "If you do not have a subscription, you can visit Red Hat to obtain a trial subscription."
+msgstr "サブスクリプションをお持ちでない場合は、Red Hat にアクセスしてトライアルサブスクリプションを取得できます。"
 
 #: client/src/inventories-hosts/hosts/host.form.js:34
 #: client/src/inventories-hosts/hosts/host.list.js:35
@@ -3187,14 +3215,9 @@ msgstr "十分な権限がありません"
 msgid "Integer"
 msgstr "整数"
 
-#: client/src/license/license.partial.html:11
-msgid "Invalid License"
-msgstr "無効なライセンス"
-
-#: client/src/license/license.controller.js:109
-#: client/src/license/license.controller.js:117
-msgid "Invalid file format. Please upload valid JSON."
-msgstr "無効なファイル形式です。有効な JSON をアップロードしてください。"
+#: client/src/license/license.controller.js:112
+msgid "Invalid file format. Please upload a valid Red Hat Subscription Manifest."
+msgstr "ファイル形式が無効です。有効な Red Hat サブスクリプションマニフェストをアップロードしてください。"
 
 #: client/lib/components/components.strings.js:16
 msgid "Invalid input for this type."
@@ -3255,6 +3278,17 @@ msgstr "インベントリーファイル"
 #: client/src/workflow-results/workflow-results.controller.js:79
 msgid "Inventory Limit"
 msgstr "インベントリーの制限"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:231
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:300
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:352
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
+msgid "Inventory Plugins"
+msgstr "インベントリープラグイン"
 
 #: client/lib/components/components.strings.js:82
 #: client/lib/models/models.strings.js:20
@@ -3331,9 +3365,14 @@ msgid "JSON"
 msgstr "JSON"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:157
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:181
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:183
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:209
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:235
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:278
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:304
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:330
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:356
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:382
 msgid "JSON:"
 msgstr "JSON:"
 
@@ -3460,10 +3499,6 @@ msgstr "LDAP 5 (オプション)"
 msgid "LDAP Server"
 msgstr "LDAP サーバー"
 
-#: client/src/license/license.route.js:18
-msgid "LICENSE"
-msgstr "ライセンス"
-
 #: client/features/output/output.strings.js:76
 #: client/src/templates/job_templates/job-template.form.js:240
 #: client/src/templates/job_templates/job-template.form.js:244
@@ -3563,27 +3598,12 @@ msgstr "レガシー状態の設定は存在しません。"
 
 #: client/lib/components/components.strings.js:98
 #: client/src/configuration/settings.partial.html:14
-#: client/src/license/license.controller.js:47
-#: client/src/license/license.partial.html:109
-#: client/src/license/license.partial.html:8
 msgid "License"
 msgstr "ライセンス"
 
 #: client/features/output/output.strings.js:78
 msgid "License Error"
 msgstr "ライセンスエラー"
-
-#: client/src/license/license.partial.html:33
-msgid "License Key"
-msgstr "ライセンスキー"
-
-#: client/src/license/license.controller.js:49
-msgid "License Management"
-msgstr "ライセンス管理"
-
-#: client/src/license/license.partial.html:21
-msgid "License Type"
-msgstr "ライセンスタイプ"
 
 #: client/features/output/output.strings.js:79
 #: client/features/templates/templates.strings.js:56
@@ -3692,7 +3712,7 @@ msgstr "マシン"
 msgid "Machine Credential"
 msgstr "マシンの認証情報"
 
-#: client/src/license/license.partial.html:240
+#: client/src/license/license.partial.html:255
 msgid "Managed Nodes"
 msgstr "管理ノード"
 
@@ -4020,7 +4040,7 @@ msgstr "このタイプに一致する認証情報が作成されていません
 msgid "No JSON data returned by the module"
 msgstr "JSON データがモジュールによって返されていません"
 
-#: client/src/license/license.controller.js:158
+#: client/src/license/license.controller.js:153
 msgid "No Licenses Found"
 msgstr "ライセンスが見つかりません"
 
@@ -4241,7 +4261,7 @@ msgstr "オン"
 msgid "OPTIONS"
 msgstr "オプション"
 
-#: client/src/license/license.partial.html:121
+#: client/src/license/license.partial.html:128
 msgid "OR"
 msgstr "または"
 
@@ -4370,38 +4390,22 @@ msgstr "他のプロンプト"
 msgid "Others (Cloud Providers)"
 msgstr "その他 (クラウドプロバイダー)"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:276
-msgid "Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "azure_rm.ini にあり、インベントリー更新スクリプトで使用される変数を上書きします。これらの変数の詳細な説明については、次を参照してください。"
+#: client/src/license/license.partial.html:11
+msgid "Out of Compliance"
+msgstr "コンプライアンス違反"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:242
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:255
 msgid "Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration"
 msgstr "cloudforms.ini にあり、インベントリー更新スクリプトが使用する変数を上書きします。変数の設定例については次を参照してください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:177
-msgid "Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "ec2.ini にあり、インベントリー更新スクリプトで使用される変数を上書きします。これらの変数の詳細な説明については、次を参照してください。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:259
-msgid "Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration"
-msgstr "foreman.ini にあり、インベントリー更新スクリプトが使用する変数を上書きします。変数の設定例については次を参照してください。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:225
-msgid "Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration"
-msgstr "openstack.yml にあり、インベントリー更新スクリプトが使用する変数を上書きします。変数の設定例については次を参照してください。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
-msgid "Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "vmware.ini にあり、インベントリー更新スクリプトで使用される変数を上書きします。これらの変数の詳細な説明については、次を参照してください。"
-
 #: client/features/output/output.strings.js:83
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:340
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:345
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:442
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:447
 msgid "Overwrite"
 msgstr "上書き"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:351
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:356
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:453
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:458
 msgid "Overwrite Variables"
 msgstr "変数の上書き"
 
@@ -4413,7 +4417,7 @@ msgstr "変数の上書き"
 msgid "Owners"
 msgstr "所有者"
 
-#: client/src/license/license.partial.html:136
+#: client/src/license/license.partial.html:143
 #: client/src/login/loginModal/loginModal.partial.html:80
 msgid "PASSWORD"
 msgstr "パスワード"
@@ -4633,10 +4637,6 @@ msgstr "サーバーを確認し、ディレクトリーが存在し、ファイ
 #: client/features/templates/templates.strings.js:144
 msgid "Please click on an available node to form a new link."
 msgstr "使用できるノードをクリックして新しいリンクを作成してください。"
-
-#: client/src/license/license.partial.html:91
-msgid "Please click the button below to visit Ansible's website to get a Tower license key."
-msgstr "以下のボタンをクリックし、Ansible の web サイトに移動して Tower ライセンスキーを取得します。"
 
 #: client/src/inventories-hosts/inventory-hosts.strings.js:40
 msgid "Please click the icon to edit the host filter."
@@ -5101,9 +5101,9 @@ msgstr "Google Compute Engine JSON 認証情報ファイルを使用してアカ
 msgid "Provide environment variables to pass to the custom inventory script."
 msgstr "カスタムインベントリースクリプトに渡す環境変数を指定します。"
 
-#: client/src/license/license.partial.html:128
-msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS &gt; SYSTEM."
-msgstr "Red Hat の顧客認証情報を指定して、利用可能なライセンス一覧から選択してください。使用した認証情報は、今後、ライセンスの更新や延長情報を取得する時に利用できるように保存されます。設定 &gt; システムでこの情報は更新または削除できます。"
+#: client/src/license/license.partial.html:135
+msgid "Provide your Red Hat or Red Hat Satellite credentials below and you can choose from a list of your available subscriptions.    The credentials you use will be stored for future use in retrieving renewal or expanded subscriptions."
+msgstr "以下に Red Hat または Red Hat Satellite の認証情報を指定して、利用可能なライセンス一覧から選択してください。使用する認証情報は、更新または延長サブスクリプションの取得で将来使用するために保存されます。"
 
 #: client/src/templates/job_templates/job-template.form.js:374
 #: client/src/templates/job_templates/job-template.form.js:382
@@ -5272,6 +5272,10 @@ msgstr "受信者リスト"
 msgid "Red"
 msgstr "赤"
 
+#: client/src/license/license.partial.html:114
+msgid "Red Hat Subscription Manifest"
+msgstr "Red Hat Subscription Manifest"
+
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:47
 msgid "Refer to the Ansible Tower documentation for further syntax and examples."
 msgstr "追加の構文およびサンプルについては、Ansible Tower ドキュメントを参照してください。"
@@ -5311,7 +5315,7 @@ msgstr "ページの更新"
 msgid "Refspec"
 msgstr "Refspec"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:308
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:410
 msgid "Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied."
 msgstr "一致するホスト名のみがインポートされる正規表現。このフィルターは、インベントリープラグインフィルターが適用された後、後処理ステップとして適用されます。"
 
@@ -5376,9 +5380,9 @@ msgstr "パスワードの置き換え"
 msgid "Replace secret"
 msgstr "シークレットの置き換え"
 
-#: client/src/license/license.partial.html:96
-msgid "Request License"
-msgstr "ライセンスの要求"
+#: client/src/license/license.partial.html:92
+msgid "Request Subscription"
+msgstr "サブスクリプションの要求"
 
 #: client/src/templates/survey-maker/shared/question-definition.form.js:291
 msgid "Required"
@@ -5397,7 +5401,7 @@ msgstr "リソース"
 msgid "Resources are missing from this template."
 msgstr "リソースがこのテンプレートにありません。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:318
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:420
 msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
 msgstr "ホスト変数の指定された辞書から有効な状態を取得します。有効な変数は、ドット表記を使用して指定できます (例: 「foo.bar」)。"
 
@@ -5590,7 +5594,7 @@ msgstr "検索"
 
 #: client/features/templates/templates.strings.js:132
 #: client/lib/services/base-string.service.js:64
-#: client/src/license/license.partial.html:260
+#: client/src/license/license.partial.html:275
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:137
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:186
 #: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:75
@@ -5708,6 +5712,10 @@ msgstr "ステータス"
 msgid "STS Token"
 msgstr "STS トークン"
 
+#: client/src/license/license.route.js:18
+msgid "SUBSCRIPTION"
+msgstr "サブスクリプション"
+
 #: client/features/output/output.strings.js:140
 #: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:56
 msgid "SUCCESSFUL"
@@ -5755,7 +5763,7 @@ msgstr "ログ集計機能をテストする前に、ログ集計を保存して
 msgid "Save changes"
 msgstr "変更の保存"
 
-#: client/src/license/license.partial.html:200
+#: client/src/license/license.partial.html:215
 msgid "Save successful!"
 msgstr "正常に保存が実行されました!"
 
@@ -5795,7 +5803,7 @@ msgstr "スケジュール名"
 
 #: client/lib/components/components.strings.js:72
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:424
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:526
 #: client/src/projects/projects.form.js:321
 #: client/src/templates/job_templates/job-template.form.js:578
 #: client/src/templates/workflows.form.js:333
@@ -5856,7 +5864,7 @@ msgstr "認証情報の選択"
 msgid "Select a frequency for snapshot retention"
 msgstr "スナップショットの保持頻度を選択"
 
-#: client/src/license/license.partial.html:214
+#: client/src/license/license.partial.html:229
 msgid "Select a license"
 msgstr "ライセンスの選択"
 
@@ -5978,7 +5986,11 @@ msgstr "このジョブで実行する Playbook が含まれるプロジェク�
 msgid "Select types"
 msgstr "タイプの選択"
 
-#: client/src/license/license.partial.html:153
+#: client/src/license/license.partial.html:100
+msgid "Select your Ansible Automation Platform subscription to use."
+msgstr "使用する Ansible Automation Platform サブスクリプションを選択します。"
+
+#: client/src/license/license.partial.html:160
 msgid "Selected"
 msgstr "選択済み"
 
@@ -6046,6 +6058,7 @@ msgstr "詳細を表示"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts-disassociate.partial.html:8
 #: client/src/inventories-hosts/inventories/related/hosts/related/nested-groups/host-nested-groups-disassociate.partial.html:8
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:8
+#: client/src/license/license.partial.html:115
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:104
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:125
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:136
@@ -6156,16 +6169,22 @@ msgstr "ソースプロジェクト"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:168
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:175
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:192
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:199
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:216
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:223
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:233
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:240
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:250
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:267
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:194
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:220
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:227
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:246
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:253
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:263
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:270
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:289
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:296
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:315
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:322
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:341
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:348
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:367
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:374
 msgid "Source Variables"
 msgstr "ソース変数"
 
@@ -6270,7 +6289,7 @@ msgstr "開始 "
 msgid "Status"
 msgstr "ステータス"
 
-#: client/src/license/license.partial.html:203
+#: client/src/license/license.partial.html:218
 msgid "Submit"
 msgstr "送信"
 
@@ -6278,7 +6297,9 @@ msgstr "送信"
 msgid "Submit search"
 msgstr "検索内容の送信"
 
+#: client/src/license/license.controller.js:47
 #: client/src/license/license.partial.html:27
+#: client/src/license/license.partial.html:8
 msgid "Subscription"
 msgstr "サブスクリプション"
 
@@ -6290,6 +6311,14 @@ msgstr "サブスクリプション ID"
 #: client/src/credentials/credentials.form.js:161
 msgid "Subscription ID is an Azure construct, which is mapped to a username."
 msgstr "サブスクリプション ID は、ユーザー名にマップされる Azure コンストラクトです。"
+
+#: client/src/license/license.controller.js:49
+msgid "Subscription Management"
+msgstr "Subscription Management"
+
+#: client/src/license/license.partial.html:21
+msgid "Subscription Type"
+msgstr "サブスクリプションタイプ"
 
 #: client/src/notifications/notifications.list.js:65
 msgid "Success"
@@ -6800,7 +6829,7 @@ msgstr "この認証情報タイプは現在 1 つ以上の認証情報で使用
 msgid "This feature is currently in tech preview and is subject to change in a future release.  Click here for documentation."
 msgstr "この機能は現在テクノロジープレビュー機能となっており、今後のリリースで変更される可能性があります。こちらをクリックしてドキュメントを確認してください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:328
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:430
 msgid "This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import."
 msgstr "有効な変数が設定されていない限り、このフィールドは無視されます。有効な変数がこの値と一致すると、インポート時にこのホストが有効になります。"
 
@@ -6882,7 +6911,7 @@ msgstr "木"
 msgid "Time"
 msgstr "時間"
 
-#: client/src/license/license.partial.html:45
+#: client/src/license/license.partial.html:39
 msgid "Time Remaining"
 msgstr "残りの時間"
 
@@ -6890,7 +6919,7 @@ msgstr "残りの時間"
 msgid "Time in seconds to consider a project to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, and a new project update will be performed."
 msgstr "プロジェクトが最新であることを判別するための時間 (秒単位) です。ジョブ実行およびコールバック時に、タスクシステムは最新のプロジェクト更新のタイムスタンプを評価します。これがキャッシュタイムアウトよりも古い場合には、最新とは見なされず、新規のプロジェクト更新が実行されます。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:395
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:497
 msgid "Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, and a new inventory sync will be performed."
 msgstr "インベントリーの同期が最新の状態であることを判別するために使用される時間 (秒単位) です。ジョブの実行およびコールバック時に、タスクシステムは最新の同期のタイムスタンプを評価します。これがキャッシュタイムアウトよりも古い場合は最新とは見なされず、インベントリーの同期が新たに実行されます。"
 
@@ -6942,11 +6971,11 @@ msgstr "ノードの合計"
 msgid "Traceback"
 msgstr "トレースバック"
 
-#: client/src/license/license.partial.html:176
+#: client/src/license/license.partial.html:191
 msgid "Tracking and Analytics"
 msgstr "追跡およびアナリティクス"
 
-#: client/src/license/license.partial.html:233
+#: client/src/license/license.partial.html:248
 msgid "Trial"
 msgstr "トライアル"
 
@@ -6985,7 +7014,7 @@ msgstr "リンクの削除"
 msgid "URL popover text"
 msgstr "URL ポップオーバーテキスト"
 
-#: client/src/license/license.partial.html:132
+#: client/src/license/license.partial.html:139
 #: client/src/login/loginModal/loginModal.partial.html:61
 msgid "USERNAME"
 msgstr "ユーザー名"
@@ -7083,7 +7112,7 @@ msgstr "予期しないエラー"
 msgid "Unexpected server error. View the console for more information"
 msgstr "予期しないサーバーエラーが発生しました。コンソールで詳細情報を表示してください。"
 
-#: client/src/license/license.partial.html:59
+#: client/src/license/license.partial.html:53
 msgid "Unlimited"
 msgstr "制限なし"
 
@@ -7100,7 +7129,7 @@ msgstr "サポートされない入力タイプ"
 msgid "Update Not Found"
 msgstr "更新が見つかりません"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:334
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:436
 msgid "Update Options"
 msgstr "オプションの更新"
 
@@ -7127,13 +7156,13 @@ msgstr "更新が進行中です"
 msgid "Update missing. Click for details"
 msgstr "更新がありません。クリックして詳細を確認してください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:362
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:367
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:464
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:469
 msgid "Update on Launch"
 msgstr "起動時の更新"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:373
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:379
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:475
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:481
 msgid "Update on Project Update"
 msgstr "プロジェクト更新時の更新"
 
@@ -7156,13 +7185,9 @@ msgstr "Tower 内のジョブを含む設定の更新"
 msgid "Update succeeded. Click for details"
 msgstr "更新が正常に実行されました。クリックして詳細を確認してください。"
 
-#: client/src/license/license.partial.html:75
-msgid "Upgrade"
-msgstr "アップグレード"
-
-#: client/src/license/license.partial.html:111
-msgid "Upload a license file"
-msgstr "ライセンスファイルのアップロード"
+#: client/src/license/license.partial.html:109
+msgid "Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <a href=\"https://access.redhat.com/management/subscription_allocations\" target=\"_blank\">subscription allocations</a> on the Red Hat Customer Portal."
+msgstr "サブスクリプションを含む Red Hat Subscription Manifest をアップロードします。サブスクリプションマニフェストを生成するには、Red Hat カスタマーポータルの <a href=\"https://access.redhat.com/management/subscription_allocations\" target=\"_blank\">サブスクリプション割り当て</a> にアクセスします。"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:62
 #: client/src/organizations/organizations.form.js:48
@@ -7283,10 +7308,6 @@ msgstr "詳細を表示"
 msgid "VIEW PER PAGE"
 msgstr "ページ別のビュー"
 
-#: client/src/license/license.partial.html:10
-msgid "Valid License"
-msgstr "有効なライセンス"
-
 #: client/src/inventories-hosts/hosts/host.form.js:67
 #: client/src/inventories-hosts/inventories/related/groups/groups.form.js:46
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-groups/group-nested-groups.form.js:47
@@ -7311,8 +7332,8 @@ msgstr "Vault パスワード"
 #: client/features/templates/templates.strings.js:60
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:82
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:91
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:290
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:297
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:392
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:399
 #: client/src/templates/job_templates/job-template.form.js:189
 #: client/src/templates/job_templates/job-template.form.js:196
 msgid "Verbosity"
@@ -7354,9 +7375,14 @@ msgid "View Insights Data"
 msgstr "Insights データの表示"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:161
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:185
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:209
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:284
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:187
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:213
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:239
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:308
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:334
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:360
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
 msgid "View JSON examples at"
 msgstr "JSON サンプルの表示: "
 
@@ -7391,9 +7417,14 @@ msgid "View Survey"
 msgstr "Survey の表示"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:162
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:186
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:210
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:285
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:188
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:214
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:240
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:283
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:309
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:335
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:361
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:387
 msgid "View YAML examples at"
 msgstr "YAML サンプルの表示: "
 
@@ -7554,7 +7585,7 @@ msgstr "警告"
 msgid "Warning: Unsaved Changes"
 msgstr "警告: 変更が保存されていません"
 
-#: client/src/license/license.controller.js:159
+#: client/src/license/license.controller.js:154
 msgid "We were unable to locate licenses associated with this account"
 msgstr "このアカウントに関連するライセンスを見つけることができませんでした"
 
@@ -7608,19 +7639,19 @@ msgstr "Webhook サービスは、これを共有のシークレットとして�
 msgid "Wed"
 msgstr "水"
 
-#: client/src/license/license.partial.html:82
-msgid "Welcome to Ansible Tower! Please complete the steps below to acquire a license."
-msgstr "Ansible Tower へようこそ! ライセンスを取得するために以下のステップを完了してください。"
-
 #: client/src/login/loginModal/loginModal.partial.html:23
 msgid "Welcome to Ansible {{BRAND_NAME}}! &nbsp;Please sign in."
 msgstr "Ansible {{BRAND_NAME}} へようこそ! &nbsp;サインインしてください。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
+#: client/src/license/license.partial.html:82
+msgid "Welcome to Red Hat Ansible Automation Platform! Please complete the steps below to activate your subscription."
+msgstr "Red Hat Ansible Automation Platform へようこそ! サブスクリプションをアクティブにするには、以下の手順を実行してください。"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:457
 msgid "When not checked, a merge will be performed, combining local variables with those found on the external source."
 msgstr "チェックが付けられていない場合、ローカル変数と外部ソースにあるものを組み合わせるマージが実行されます。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:344
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:446
 msgid "When not checked, local child hosts and groups not found on the external source will remain untouched by the inventory update process."
 msgstr "チェックが付けられていない場合、外部ソースにないローカルの子ホストおよびグループは、インベントリーの更新プロセスによって処理されないままになります。"
 
@@ -7707,9 +7738,14 @@ msgid "YAML"
 msgstr "YAML"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:159
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:183
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:207
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:185
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:211
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:237
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:306
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:332
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:358
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:384
 msgid "YAML:"
 msgstr "YAML:"
 
@@ -7866,6 +7902,17 @@ msgstr[1] "ホスト"
 msgid "hosts with failures. Click for details."
 msgstr "障害のあるホストです。クリックして詳細を確認してください。"
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:231
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:300
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:352
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
+msgid "in the documentation and the"
+msgstr "ドキュメントと"
+
 #: client/src/templates/workflows/workflow-maker/forms/workflow-node-form.partial.html:146
 msgid "min"
 msgstr "分"
@@ -7918,6 +7965,17 @@ msgstr "保留"
 #: client/src/shared/form-generator.js:1044
 msgid "playbook"
 msgstr "Playbook"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:181
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:207
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:233
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:276
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:302
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:328
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:380
+msgid "plugin configuration guide."
+msgstr "プラグイン構成ガイド。"
 
 #: client/features/jobs/jobs.strings.js:25
 msgid "running"
@@ -7984,29 +8042,9 @@ msgstr "v3 デフォルト%s  - 「デフォルト」に設定"
 msgid "v3 multi-domain%s - your domain name"
 msgstr "v3 マルチドメイン%s - ドメイン名"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:278
-msgid "view azure_rm.ini in the Ansible community.general github repo."
-msgstr "Ansible community.general github リポジトリーの azure_rm.ini を表示します。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:244
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
 msgid "view cloudforms.ini in the Ansible Collections github repo."
 msgstr "Ansible Collections github リポジトリーのcloudforms.ini を表示します。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
-msgid "view ec2.ini in the community.aws repo."
-msgstr "community.aws リポジトリーの ec2.ini を表示します。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:261
-msgid "view foreman.ini in the Ansible Collections github repo."
-msgstr "Ansible Collections github リポジトリーの foreman.ini を表示します。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:227
-msgid "view openstack.yml in the Openstack github repo."
-msgstr "Openstack github リポジトリーの openstack.yml を表示します。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:203
-msgid "view vmware_inventory.ini in the vmware community repo."
-msgstr "vmware コミュニティーリポジトリーの vmware_inventory.ini を表示します。"
 
 #: client/features/jobs/jobs.strings.js:24
 msgid "waiting"

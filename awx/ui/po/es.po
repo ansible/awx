@@ -31,7 +31,7 @@ msgstr "(Limitado a los primeros 10)"
 msgid "(defaults to %s)"
 msgstr "(valores predeterminados a %s)"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:396
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:488
 msgid "(seconds)"
 msgstr "(segundos)"
 
@@ -47,15 +47,15 @@ msgstr "20"
 msgid "50"
 msgstr "50"
 
-#: client/src/license/license.partial.html:193
+#: client/src/license/license.partial.html:208
 msgid "<b>Automation analytics</b>: This data is used to enhance future releases of the Tower Software and to provide Automation Analytics to Tower subscribers."
 msgstr "<b>Automation Analytics</b>: estos datos se utilizan para mejorar futuras versiones del software de Tower y ofrecer Automation Analytics a los suscriptores de Tower."
 
-#: client/src/license/license.partial.html:171
+#: client/src/license/license.partial.html:186
 msgid "<b>I agree to the End User License Agreement</b>"
 msgstr "<b>Yo acepto el Acuerdo de licencia de usuario final</b>"
 
-#: client/src/license/license.partial.html:187
+#: client/src/license/license.partial.html:202
 msgid "<b>User analytics</b>: This data is used to enhance future releases of the Tower Software and help streamline customer experience and success."
 msgstr "<b>Análisis de usuarios</b>: estos datos se utilizan para mejorar futuras versiones del software de Tower y ayudar a optimizar el éxito y la experiencia del cliente."
 
@@ -218,26 +218,17 @@ msgstr "TODA LA ACTIVIDAD"
 msgid "ALL GROUPS"
 msgstr "TODOS LOS GRUPOS"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "ANY"
-msgstr "CUALQUIERA"
-
 #: client/src/credentials/credentials.form.js:198
 msgid "API Key"
 msgstr "Clave API"
 
-#: client/src/notifications/notificationTemplates.form.js:263
+#: client/src/notifications/notificationTemplates.form.js:247
 msgid "API Service/Integration Key"
 msgstr "Servicio API/Clave de integración"
 
 #: client/src/notifications/shared/type-change.service.js:66
 msgid "API Token"
 msgstr "Token API"
-
-#: client/src/notifications/notificationTemplates.form.js:348
-msgid "API URL"
-msgstr "URL DE API"
 
 #: client/features/users/tokens/tokens.strings.js:40
 msgid "APPLICATION"
@@ -295,11 +286,11 @@ msgstr "Clave de acceso"
 msgid "Access Token Expiration"
 msgstr "Expiración del token de acceso"
 
-#: client/src/notifications/notificationTemplates.form.js:241
+#: client/src/notifications/notificationTemplates.form.js:225
 msgid "Account SID"
 msgstr "Cuenta SID"
 
-#: client/src/notifications/notificationTemplates.form.js:200
+#: client/src/notifications/notificationTemplates.form.js:184
 msgid "Account Token"
 msgstr "Cuenta Token"
 
@@ -328,8 +319,8 @@ msgstr "Flujo de actividad"
 #: client/src/credentials/credentials.form.js:446
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:113
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:110
-#: client/src/organizations/organizations.form.js:108
-#: client/src/organizations/organizations.form.js:150
+#: client/src/organizations/organizations.form.js:117
+#: client/src/organizations/organizations.form.js:159
 #: client/src/projects/projects.form.js:285
 #: client/src/teams/teams.form.js:169
 #: client/src/teams/teams.form.js:85
@@ -382,7 +373,7 @@ msgstr "Añadir usuario"
 msgid "Add Users"
 msgstr "Añadir usuarios"
 
-#: client/src/organizations/organizations.form.js:109
+#: client/src/organizations/organizations.form.js:118
 msgid "Add Users to this organization."
 msgstr "Añadir usuarios a la organización."
 
@@ -426,7 +417,7 @@ msgstr "Agregar un nuevo token"
 #: client/src/credentials/credentials.form.js:447
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:115
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:112
-#: client/src/organizations/organizations.form.js:151
+#: client/src/organizations/organizations.form.js:160
 #: client/src/projects/projects.form.js:286
 #: client/src/templates/job_templates/job-template.form.js:541
 #: client/src/templates/workflows.form.js:296
@@ -453,9 +444,13 @@ msgstr "Administración"
 msgid "Admins"
 msgstr "Administradores"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:478
 msgid "After every project update where the SCM revision changes, refresh the inventory from the selected source before executing job tasks. This is intended for static content, like the Ansible inventory .ini file format."
 msgstr "Luego de cada actualización del proyecto en el que se modifique la revisión SCM, actualice el inventario del origen seleccionado antes de llevar a cabo tareas de trabajo. Esto está orientado a contenidos estáticos, como el formato de archivo .ini del inventario Ansible."
+
+#: client/src/license/license.partial.html:173
+msgid "Agree to the End User License Agreement, and click submit."
+msgstr "Acepte el Acuerdo de licencia de usuario final y haga clic en Enviar."
 
 #: client/features/templates/templates.strings.js:160
 #: client/lib/components/components.strings.js:105
@@ -463,7 +458,6 @@ msgstr "Luego de cada actualización del proyecto en el que se modifique la revi
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:49
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:72
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:80
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:138
 msgid "All"
 msgstr "Todos"
 
@@ -680,11 +674,6 @@ msgstr "Autorizar"
 msgid "Authorize Password"
 msgstr "Contraseña de autorización"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:241
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:253
-msgid "Availability Zone:"
-msgstr "Zona de disponibilidad:"
-
 #: client/src/configuration/forms/auth-form/configuration-auth.controller.js:91
 msgid "Azure AD"
 msgstr "Azure AD"
@@ -722,11 +711,11 @@ msgstr "Rama para comprobar.  Además de las ramas, puede introducir etiquetas, 
 msgid "Branch to use in job run. Project default used if blank."
 msgstr "Rama para usar en la ejecución del trabajo. Se utiliza el proyecto predeterminado si está en blanco."
 
-#: client/src/license/license.partial.html:113
+#: client/src/license/license.partial.html:120
 msgid "Browse"
 msgstr "Navegar"
 
-#: client/src/license/license.partial.html:180
+#: client/src/license/license.partial.html:195
 msgid "By default, Tower collects and transmits analytics data on Tower usage to Red Hat.  There are two categories of data collected by Tower. For more information, see <a target=\"_blank\" href=\"http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0\">this Tower documentation page</a>. Uncheck the following boxes to disable this feature."
 msgstr "De manera predeterminada, Tower recopila y transmite datos analíticos sobre el uso de Tower a Red Hat. Hay dos categorías de datos recopilados por Tower. Para obtener más información, consulte <a target=\"_blank\" href=\"http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0\">esta página de documentación de Tower</a>. Desmarque las siguientes casillas para deshabilitar esta función."
 
@@ -741,13 +730,14 @@ msgstr "De manera predeterminada, Tower recopila y transmite datos analíticos s
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal.partial.html:16
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:16
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:16
-#: client/src/license/license.partial.html:259
+#: client/src/license/license.partial.html:274
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:17
 #: client/src/partials/survey-maker-modal.html:17
 #: client/src/partials/survey-maker-modal.html:82
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:17
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:131
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:180
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:68
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:69
 #: client/src/templates/workflows/add-workflow/workflow-add.controller.js:149
 #: client/src/templates/workflows/edit-workflow/workflow-edit.controller.js:188
 msgid "CANCEL"
@@ -886,7 +876,7 @@ msgstr "CREDENCIAL"
 msgid "CREDENTIAL TYPE"
 msgstr "TIPO DE CREDENCIAL"
 
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:60
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:61
 msgid "CREDENTIAL TYPE:"
 msgstr "TIPO DE CREDENCIAL:"
 
@@ -908,8 +898,8 @@ msgstr "CREDENCIALES"
 msgid "CREDENTIALS PERMISSIONS"
 msgstr "PERMISOS DE CREDENCIAL"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:396
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:408
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:488
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:500
 #: client/src/projects/projects.form.js:231
 msgid "Cache Timeout"
 msgstr "Tiempo de espera de la caché"
@@ -1019,7 +1009,7 @@ msgstr "Cambie %s al implementar {{BRAND_NAME}} para cambiar esta ubicación."
 msgid "Changes"
 msgstr "Cambios"
 
-#: client/src/notifications/notificationTemplates.form.js:460
+#: client/src/notifications/notificationTemplates.form.js:432
 msgid "Channel"
 msgstr "Canal"
 
@@ -1060,7 +1050,7 @@ msgstr "Elegir un tipo de respuesta"
 msgid "Choose an answer type or format you want as the prompt for the user. Refer to the Ansible Tower Documentation for more additional information about each option."
 msgstr "Especifique el tipo de respuesta o el formato que desee como indicador para el usuario. Consulte la documentación de Ansible Tower para obtener más información sobre cada una de las opciones."
 
-#: client/src/notifications/notificationTemplates.form.js:560
+#: client/src/notifications/notificationTemplates.form.js:532
 msgid "Choose an email option"
 msgstr "Elegir una opción de correo electrónico"
 
@@ -1071,10 +1061,6 @@ msgstr "Escoja un archivo del inventario."
 #: client/src/shared/directives.js:92
 msgid "Choose file"
 msgstr "Escoger fichero"
-
-#: client/src/license/license.partial.html:104
-msgid "Choose your license file, agree to the End User License Agreement, and click submit."
-msgstr "Escoja su fichero de licencia, aceptando el Acuerdo de licencia de usuario final, y pulse sobre validar."
 
 #: client/src/projects/projects.form.js:176
 msgid "Clean"
@@ -1113,10 +1099,6 @@ msgstr "Haga clic en una fila para seleccionarla, y haga clic en Finalizado una 
 msgid "Click on a row to select it, and click Finished when done. Use the %s button to create a new job template."
 msgstr "Haga clic en una fila para seleccionarla, y haga clic en Finalizado una vez terminado. Haga clic en el botón %s para crear una nueva plantilla de trabajo."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:137
-msgid "Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose"
-msgstr "Haga clic en el campo de regiones para ver una lista de regiones para su proveedor de nube. Puede seleccionar varias regiones o elegir"
-
 #: client/src/organizations/linkout/controllers/organizations-projects.controller.js:277
 msgid "Click the"
 msgstr "Haga clic en"
@@ -1137,7 +1119,7 @@ msgstr "Haga clic para ver el enlace"
 msgid "Client ID"
 msgstr "ID del cliente"
 
-#: client/src/notifications/notificationTemplates.form.js:274
+#: client/src/notifications/notificationTemplates.form.js:258
 msgid "Client Identifier"
 msgstr "Identificador del cliente"
 
@@ -1149,6 +1131,7 @@ msgstr "Pregunta secreta del cliente"
 #: client/src/inventories-hosts/inventories/insights/insights.partial.html:92
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:618
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:7
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:8
 #: client/src/organizations/linkout/addUsers/addUsers.partial.html:11
 #: client/src/partials/survey-maker-modal.html:28
 #: client/src/partials/survey-maker-modal.html:7
@@ -1206,6 +1189,10 @@ msgstr "Compacto"
 msgid "Completed Jobs"
 msgstr "Tareas completadas"
 
+#: client/src/license/license.partial.html:10
+msgid "Compliant"
+msgstr "Compatible"
+
 #: client/src/management-jobs/card/card.partial.html:34
 #: client/src/management-jobs/card/card.partial.html:37
 msgid "Configure Notifications"
@@ -1227,6 +1214,10 @@ msgstr "Confirmar la reinicialización a valores de fábrica"
 msgid "Confirm the removal of the"
 msgstr "Confirmar la eliminación de"
 
+#: client/src/license/license.partial.html:75
+msgid "Contact Us"
+msgstr "Contáctenos"
+
 #: client/src/teams/teams.form.js:24
 #: client/src/users/users.form.js:25
 msgid "Contact your System Administrator to grant you the appropriate permissions to add and edit Users and Teams."
@@ -1241,6 +1232,10 @@ msgstr "Grupo de contenedores"
 msgid "Container Groups Help"
 msgstr "Ayuda de Grupos de contenedores"
 
+#: client/src/login/authenticationServices/timer.factory.js:136
+msgid "Continue"
+msgstr "Continuar"
+
 #: client/lib/components/components.strings.js:130
 msgid "Continue workflow job?"
 msgstr "¿Continuar con el trabajo del flujo de trabajo?"
@@ -1250,7 +1245,7 @@ msgstr "¿Continuar con el trabajo del flujo de trabajo?"
 msgid "Control the level of output ansible will produce as the playbook executes."
 msgstr "Controlar el nivel de salida que ansible producirá al ejecutar playbooks."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:336
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:398
 msgid "Control the level of output ansible will produce for inventory source update jobs."
 msgstr "Controle el nivel de salida que Ansible producirá para las tareas de actualización de fuentes de inventario."
 
@@ -1305,9 +1300,9 @@ msgstr "Copiar {{resourceType}}"
 
 #: client/src/about/about.partial.html:31
 msgid ""
-"Copyright &copy; 2019 Red Hat, Inc. <br>\n"
+"Copyright &copy; {{ currentYear }} Red Hat, Inc. <br>\n"
 "                          Visit <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> for more information.<br>"
-msgstr "Copyright &copy; 2019 Red Hat, Inc. <br>\n"
+msgstr "Copyright &copy; {{ currentYear }} Red Hat, Inc. <br>\n"
 "                          Visite <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> para obtener más información.<br>"
 
 #: client/lib/components/components.strings.js:90
@@ -1407,11 +1402,13 @@ msgstr "Creados (descendente)"
 #: client/src/projects/add/projects-add.controller.js:140
 #: client/src/projects/add/projects-add.controller.js:153
 #: client/src/projects/add/projects-add.controller.js:162
-#: client/src/projects/add/projects-add.controller.js:181
+#: client/src/projects/add/projects-add.controller.js:174
+#: client/src/projects/add/projects-add.controller.js:189
 #: client/src/projects/edit/projects-edit.controller.js:263
 #: client/src/projects/edit/projects-edit.controller.js:274
 #: client/src/projects/edit/projects-edit.controller.js:283
-#: client/src/projects/edit/projects-edit.controller.js:302
+#: client/src/projects/edit/projects-edit.controller.js:295
+#: client/src/projects/edit/projects-edit.controller.js:310
 msgid "Credential"
 msgstr "Credencial"
 
@@ -1461,7 +1458,7 @@ msgstr "Script personalizado"
 msgid "Currently following output as it arrives. Click to unfollow"
 msgstr "Actualmente siguiendo el resultado a medida que se descarga. Haga clic para dejar de seguir"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:170
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
 msgid "Custom Inventory Script"
 msgstr "Script de inventario personalizado"
 
@@ -1478,7 +1475,7 @@ msgstr "Script personalizado"
 msgid "Customize Pod Spec"
 msgstr "Personalizar especificaciones de pod"
 
-#: client/src/notifications/notificationTemplates.form.js:577
+#: client/src/notifications/notificationTemplates.form.js:549
 msgid "Customize messages…"
 msgstr "Personalizar mensajes."
 
@@ -1497,7 +1494,7 @@ msgstr "PANEL DE CONTROL"
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:24
 #: client/src/inventory-scripts/list/list.controller.js:130
 #: client/src/notifications/notification-templates-list/list.controller.js:235
-#: client/src/organizations/edit/organizations-edit.controller.js:164
+#: client/src/organizations/edit/organizations-edit.controller.js:180
 #: client/src/organizations/linkout/controllers/organizations-admins.controller.js:69
 #: client/src/organizations/linkout/controllers/organizations-users.controller.js:68
 #: client/src/organizations/list/organizations-list.controller.js:202
@@ -1592,7 +1589,7 @@ msgstr "Defina características y funciones a nivel del sistema"
 #: client/src/inventory-scripts/list/list.controller.js:126
 #: client/src/notifications/notification-templates-list/list.controller.js:231
 #: client/src/notifications/notificationTemplates.list.js:105
-#: client/src/organizations/edit/organizations-edit.controller.js:161
+#: client/src/organizations/edit/organizations-edit.controller.js:177
 #: client/src/organizations/linkout/controllers/organizations-admins.controller.js:66
 #: client/src/organizations/linkout/controllers/organizations-users.controller.js:65
 #: client/src/organizations/list/organizations-list.controller.js:198
@@ -1732,11 +1729,6 @@ msgstr "Al eliminar este {{ resourceType }}, los siguientes recursos dejarán de
 msgid "Depending on the size of the repository this may significantly increase the amount of time required to complete an update."
 msgstr "Según el tamaño del repositorio, esto podría incrementar significativamente el tiempo necesario para completar una actualización."
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:261
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:274
-msgid "Describe Instances documentation"
-msgstr "Documentación de descripción de las instancias"
-
 #: client/features/applications/add-applications.controller.js:36
 #: client/features/templates/templates.strings.js:17
 #: client/features/users/tokens/users-tokens-add.controller.js:26
@@ -1768,18 +1760,16 @@ msgstr "Descripción"
 
 #: client/src/notifications/notificationTemplates.form.js:156
 #: client/src/notifications/notificationTemplates.form.js:160
-#: client/src/notifications/notificationTemplates.form.js:172
-#: client/src/notifications/notificationTemplates.form.js:176
 msgid "Destination Channels"
 msgstr "Canales destinatarios"
 
-#: client/src/notifications/notificationTemplates.form.js:535
-#: client/src/notifications/notificationTemplates.form.js:539
+#: client/src/notifications/notificationTemplates.form.js:507
+#: client/src/notifications/notificationTemplates.form.js:511
 msgid "Destination Channels or Users"
 msgstr "Canales destinatarios o usuarios"
 
-#: client/src/notifications/notificationTemplates.form.js:225
-#: client/src/notifications/notificationTemplates.form.js:226
+#: client/src/notifications/notificationTemplates.form.js:209
+#: client/src/notifications/notificationTemplates.form.js:210
 msgid "Destination SMS Number"
 msgstr "Número SMS del destinatario"
 
@@ -1792,10 +1782,10 @@ msgstr "Número SMS del destinatario"
 msgid "Details"
 msgstr "Detalles"
 
-#: client/src/notifications/notificationTemplates.form.js:341
-#: client/src/notifications/notificationTemplates.form.js:403
-#: client/src/notifications/notificationTemplates.form.js:474
-#: client/src/notifications/notificationTemplates.form.js:506
+#: client/src/notifications/notificationTemplates.form.js:325
+#: client/src/notifications/notificationTemplates.form.js:375
+#: client/src/notifications/notificationTemplates.form.js:446
+#: client/src/notifications/notificationTemplates.form.js:478
 msgid "Disable SSL Verification"
 msgstr "Deshabilite la verificación de SSL"
 
@@ -1936,7 +1926,7 @@ msgstr "EXPIRA"
 msgid "EXTRA VARIABLES"
 msgstr "VARIABLES ADICIONALES"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:375
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:467
 msgid "Each time a job runs using this inventory, refresh the inventory from the selected source before executing job tasks."
 msgstr "Cada vez que se ejecuta un trabajo con este inventario, actualice el inventario de la fuente seleccionada antes de ejecutar tareas de trabajo."
 
@@ -2071,8 +2061,8 @@ msgstr "Tiempo transcurrido"
 msgid "Email"
 msgstr "Correo electrónico"
 
-#: client/src/notifications/notificationTemplates.form.js:558
-#: client/src/notifications/notificationTemplates.form.js:559
+#: client/src/notifications/notificationTemplates.form.js:530
+#: client/src/notifications/notificationTemplates.form.js:531
 msgid "Email Options"
 msgstr "Opciones de correo electrónico"
 
@@ -2126,6 +2116,16 @@ msgstr "Habilitar webhook para esta plantilla de trabajo."
 msgid "Enable webhook for this workflow job template."
 msgstr "Habilitar webhook para esta plantilla de trabajo del flujo de trabajo."
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:426
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:428
+msgid "Enabled Value"
+msgstr "Valor habilitado"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:416
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:418
+msgid "Enabled Variable"
+msgstr "Variable habilitada"
+
 #: client/src/templates/job_templates/job-template.form.js:335
 msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {{BRAND_NAME}} and request a configuration update using this job template."
 msgstr "Habilitar la creación de una URL para una devolución de llamadas de aprovisionamiento. Mediante la URL, un host puede contactar a {{BRAND_NAME}} y solicitar la actualización de la configuración utilizando esta plantilla de trabajo."
@@ -2148,7 +2148,7 @@ msgstr "Fecha de terminación"
 msgid "End Time"
 msgstr "Hora de terminación"
 
-#: client/src/license/license.partial.html:163
+#: client/src/license/license.partial.html:178
 msgid "End User License Agreement"
 msgstr "Acuerdo de licencia de usuario final"
 
@@ -2159,19 +2159,16 @@ msgstr "Acuerdo de licencia de usuario final"
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "Introduzca variables del inventario usando sintaxis JSON o YAML. Utilice el botón de selección para elegir entre los dos."
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:74
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
 msgstr "Ingrese variables de inventario por medio del uso de sintaxis JSON o YAML. Utilice el botón de selección para alternar entre los dos. Consulte la documentación de Ansible Tower para acceder a ejemplos de sintaxis."
 
-#: client/src/notifications/notificationTemplates.form.js:335
+#: client/src/notifications/notificationTemplates.form.js:319
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "Ingrese una etiqueta de anotación por línea sin comas."
 
-#: client/src/notifications/notificationTemplates.form.js:175
-msgid "Enter one HipChat channel per line. The pound symbol (#) is not required."
-msgstr "Ingrese un canal de HipChat por línea. El símbolo numeral (#) no es necesario."
-
-#: client/src/notifications/notificationTemplates.form.js:538
+#: client/src/notifications/notificationTemplates.form.js:510
 msgid "Enter one IRC channel or username per line. The pound symbol (#) for channels, and the at (@) symbol for users, are not required."
 msgstr "Ingrese un canal de IRC o nombre de usuario por línea. El símbolo numeral (#) para canales y el símbolo arroba (@) para usuarios no son necesarios."
 
@@ -2183,7 +2180,7 @@ msgstr "Ingrese un canal de Slack por línea. El símbolo numeral (#) es necesar
 msgid "Enter one email address per line to create a recipient list for this type of notification."
 msgstr "Ingrese una dirección de correo electrónico por línea para crear una lista de destinatarios para este tipo de notificación."
 
-#: client/src/notifications/notificationTemplates.form.js:229
+#: client/src/notifications/notificationTemplates.form.js:213
 msgid "Enter one phone number per line to specify where to route SMS messages."
 msgstr "Ingrese un número de teléfono por línea para especificar adónde enviar los mensajes de SMS."
 
@@ -2202,14 +2199,30 @@ msgstr "Ingrese la URL que corresponda a su servidor %sRed Hat Satellite 6. %sPo
 msgid "Enter the hostname or IP address which corresponds to your VMware vCenter."
 msgstr "Ingrese el nombre de host o dirección IP que corresponda a su VMWare vCenter."
 
-#: client/src/notifications/notificationTemplates.form.js:215
+#: client/src/notifications/notificationTemplates.form.js:199
 msgid "Enter the number associated with the \"Messaging Service\" in Twilio in the format +18005550199."
 msgstr "Ingrese el número asociado con el \"Servicio de mensajería\" en Twilio con el formato +18005550199."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:196
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:220
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:244
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:319
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:177
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:203
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:229
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:272
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:298
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:350
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:376
+msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see"
+msgstr "Introduzca las variables para configurar la fuente de inventario. Para obtener una descripción detallada de cómo configurar este complemento, consulte"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:156
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:182
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:208
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:234
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:277
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:303
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:329
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:381
 msgid "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "Ingrese variables con sintaxis JSON o YAML. Use el botón de selección para alternar entre los dos."
 
@@ -2217,12 +2230,12 @@ msgstr "Ingrese variables con sintaxis JSON o YAML. Use el botón de selección 
 msgid "Environment"
 msgstr "Entorno"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:186
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:193
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:146
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:153
 msgid "Environment Variables"
 msgstr "Variables del entorno"
 
-#: client/src/license/license.controller.js:232
+#: client/src/license/license.controller.js:228
 msgid "Error Applying License"
 msgstr "Error al aplicar la licencia"
 
@@ -2230,15 +2243,15 @@ msgstr "Error al aplicar la licencia"
 msgid "Error Details"
 msgstr "Detalles del error"
 
-#: client/src/license/license.controller.js:166
+#: client/src/license/license.controller.js:161
 msgid "Error Fetching Licenses"
 msgstr "Error al buscar licencias"
 
-#: client/src/notifications/notificationTemplates.form.js:643
+#: client/src/notifications/notificationTemplates.form.js:615
 msgid "Error Message"
 msgstr "Mensaje de error"
 
-#: client/src/notifications/notificationTemplates.form.js:654
+#: client/src/notifications/notificationTemplates.form.js:626
 msgid "Error Message Body"
 msgstr "Cuerpo del mensaje de error"
 
@@ -2266,13 +2279,13 @@ msgstr "Cuerpo del mensaje de error"
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:153
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:203
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:222
-#: client/src/login/loginModal/loginModal.controller.js:143
+#: client/src/login/loginModal/loginModal.controller.js:144
 #: client/src/management-jobs/card/card.controller.js:122
 #: client/src/management-jobs/card/card.controller.js:28
 #: client/src/management-jobs/card/card.controller.js:58
-#: client/src/organizations/main.js:111
-#: client/src/organizations/main.js:124
-#: client/src/organizations/main.js:139
+#: client/src/organizations/main.js:155
+#: client/src/organizations/main.js:168
+#: client/src/organizations/main.js:183
 #: client/src/projects/add/projects-add.controller.js:120
 #: client/src/projects/edit/projects-edit.controller.js:154
 #: client/src/projects/edit/projects-edit.controller.js:220
@@ -2335,6 +2348,11 @@ msgstr "Ejemplos de URLs para SCM GIT :"
 msgid "Example URLs for Mercurial SCM include:"
 msgstr "Ejemplos de URLs para SCM Mercurial :"
 
+#: client/src/projects/add/projects-add.controller.js:175
+#: client/src/projects/edit/projects-edit.controller.js:296
+msgid "Example URLs for Remote Archive SCM include:"
+msgstr "A continuación, se incluyen ejemplos de URL para SCM de archivo remoto:"
+
 #: client/src/projects/add/projects-add.controller.js:154
 #: client/src/projects/edit/projects-edit.controller.js:275
 msgid "Example URLs for Subversion SCM include:"
@@ -2370,7 +2388,7 @@ msgstr "Extender salida"
 msgid "Expanded"
 msgstr "Expandido"
 
-#: client/src/license/license.partial.html:246
+#: client/src/license/license.partial.html:261
 msgid "Expires"
 msgstr "Expira"
 
@@ -2382,7 +2400,7 @@ msgstr "Expira (ascendente)"
 msgid "Expires (Descending)"
 msgstr "Expira (descendente)"
 
-#: client/src/license/license.partial.html:39
+#: client/src/license/license.partial.html:33
 msgid "Expires On"
 msgstr "Fecha de expiración el"
 
@@ -2525,7 +2543,7 @@ msgstr "Error al obtener nuevas tareas para el panel de control:"
 msgid "Failed to get new templates for dashboard:"
 msgstr "Error al obtener nuevas plantillas para el panel de control:"
 
-#: client/src/organizations/main.js:140
+#: client/src/organizations/main.js:184
 msgid "Failed to get organizations for which this user is a notification admin. GET returned"
 msgstr "No se pudieron obtener las organizaciones para las cuales este usuario es un estado devuelto GET del administrador de notificaciones"
 
@@ -2565,7 +2583,7 @@ msgid "Failed to get workflow job template. GET returned status:"
 msgstr "No se pudo obtener la plantilla de trabajo del flujo de trabajo. Estado devuelto de GET:"
 
 #: client/src/app.js:229
-#: client/src/login/loginModal/loginModal.controller.js:144
+#: client/src/login/loginModal/loginModal.controller.js:145
 msgid "Failed to get workflow jobs pending approval. GET returned status:"
 msgstr "No se pudo obtener la aprobación pendiente de trabajos del flujo de trabajo. Estado devuelto de GET:"
 
@@ -2607,11 +2625,11 @@ msgstr "No se pudieron actualizar los resultados de búsqueda."
 msgid "Failed updating job %s with variables. POST returned: %d"
 msgstr "No se pudo actualizar el trabajo %s con variables. Estado devuelto de POST: %d"
 
-#: client/src/organizations/main.js:112
+#: client/src/organizations/main.js:156
 msgid "Failed while checking to see if user is a notification administrator of this organization. GET returned"
 msgstr "Error al verificar si el usuario es un administrador de notificaciones de esta organización. Estado devuelto de GET."
 
-#: client/src/organizations/main.js:125
+#: client/src/organizations/main.js:169
 msgid "Failed while checking to see if user is an administrator of this organization. GET returned"
 msgstr "Error al verificar si el usuario es un administrador del estado GET de esta organización"
 
@@ -2655,7 +2673,7 @@ msgstr "Nombre"
 msgid "First Run"
 msgstr "Primera ejecución"
 
-#: client/src/organizations/organizations.form.js:124
+#: client/src/organizations/organizations.form.js:133
 msgid "First name"
 msgstr "Nombre"
 
@@ -2718,9 +2736,9 @@ msgstr "Información sobre la frecuencia"
 msgid "Fri"
 msgstr "Vie"
 
-#: client/src/license/license.partial.html:150
-msgid "GET LICENSES"
-msgstr "OBTENER LICENCIAS"
+#: client/src/license/license.partial.html:157
+msgid "GET SUBSCRIPTIONS"
+msgstr "OBTENER SUSCRIPCIONES"
 
 #: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
 msgid "GO TO <a ui-sref=\"notifications.add\" translate=\"\">NOTIFICATIONS</a> TO"
@@ -2729,6 +2747,11 @@ msgstr "IR A <a ui-sref=\"notifications.add\" translate=\"\">NOTIFICACIONES</a> 
 #: client/src/inventories-hosts/hosts/related/groups/hosts-related-groups.route.js:45
 msgid "GROUPS"
 msgstr "GRUPOS"
+
+#: client/src/organizations/organizations.form.js:59
+#: client/src/organizations/organizations.form.js:62
+msgid "Galaxy Credentials"
+msgstr "Credenciales de Galaxy"
 
 #: client/src/shared/form-generator.js:801
 msgid "Generate field"
@@ -2804,11 +2827,11 @@ msgstr "Ir a la página anterior de la lista"
 msgid "Google OAuth2"
 msgstr "Google OAuth2"
 
-#: client/src/notifications/notificationTemplates.form.js:300
+#: client/src/notifications/notificationTemplates.form.js:284
 msgid "Grafana API Key"
 msgstr "Clave API de Grafana"
 
-#: client/src/notifications/notificationTemplates.form.js:285
+#: client/src/notifications/notificationTemplates.form.js:269
 msgid "Grafana URL"
 msgstr "URL de Grafana"
 
@@ -2867,13 +2890,13 @@ msgstr "SUGERENCIA: Arrastre y suelte el archivo privado en el siguiente campo."
 msgid "HOSTS"
 msgstr "SERVIDORES"
 
-#: client/src/notifications/notificationTemplates.form.js:410
-#: client/src/notifications/notificationTemplates.form.js:411
+#: client/src/notifications/notificationTemplates.form.js:382
+#: client/src/notifications/notificationTemplates.form.js:383
 msgid "HTTP Headers"
 msgstr "Cabeceras HTTP"
 
-#: client/src/notifications/notificationTemplates.form.js:427
-#: client/src/notifications/notificationTemplates.form.js:428
+#: client/src/notifications/notificationTemplates.form.js:399
+#: client/src/notifications/notificationTemplates.form.js:400
 msgid "HTTP Method"
 msgstr "Método HTTP"
 
@@ -2913,6 +2936,11 @@ msgstr "Clave de configuración del servidor"
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:39
 msgid "Host Enabled"
 msgstr "Servidor habilitado"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:406
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:408
+msgid "Host Filter"
+msgstr "Filtro de host"
 
 #: client/features/output/output.strings.js:66
 msgid "Host Limit Error"
@@ -2962,33 +2990,29 @@ msgstr "La información de estado del host para esta tarea no se encuentra dispo
 msgid "Hosts"
 msgstr "Servidores"
 
+#: client/src/license/license.partial.html:46
 #: client/src/license/license.partial.html:52
-#: client/src/license/license.partial.html:58
 msgid "Hosts Available"
 msgstr "Servidores disponibles"
 
+#: client/src/license/license.partial.html:62
 #: client/src/license/license.partial.html:68
 msgid "Hosts Remaining"
 msgstr "Servidores restantes"
 
-#: client/src/license/license.partial.html:62
+#: client/src/license/license.partial.html:56
 msgid "Hosts Used"
 msgstr "Servidores utilizados"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "Hosts are imported to"
-msgstr "Los hosts se importan a"
 
 #: client/features/output/output.strings.js:129
 msgid "ID"
 msgstr "ID"
 
-#: client/src/notifications/notificationTemplates.form.js:313
+#: client/src/notifications/notificationTemplates.form.js:297
 msgid "ID of the Dashboard (optional)"
 msgstr "ID de tablero (opcional)"
 
-#: client/src/notifications/notificationTemplates.form.js:321
+#: client/src/notifications/notificationTemplates.form.js:305
 msgid "ID of the Panel (optional)"
 msgstr "ID de panel (opcional)"
 
@@ -3037,11 +3061,11 @@ msgstr "SCRIPT DE INVENTARIO"
 msgid "INVENTORY SCRIPTS"
 msgstr "SCRIPTS DE INVENTARIO"
 
-#: client/src/notifications/notificationTemplates.form.js:524
+#: client/src/notifications/notificationTemplates.form.js:496
 msgid "IRC Nick"
 msgstr "Alias en IRC"
 
-#: client/src/notifications/notificationTemplates.form.js:513
+#: client/src/notifications/notificationTemplates.form.js:485
 msgid "IRC Server Address"
 msgstr "Dirección del servidor IRC"
 
@@ -3065,8 +3089,8 @@ msgstr "PROBLEMA: {{report.rule.description}}"
 msgid "ITEMS"
 msgstr "ELEMENTOS"
 
-#: client/src/notifications/notificationTemplates.form.js:467
-#: client/src/notifications/notificationTemplates.form.js:499
+#: client/src/notifications/notificationTemplates.form.js:439
+#: client/src/notifications/notificationTemplates.form.js:471
 msgid "Icon URL"
 msgstr "URL de icono"
 
@@ -3074,16 +3098,11 @@ msgstr "URL de icono"
 msgid "Idle Session"
 msgstr "Sesión inactiva"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:251
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:263
-msgid "If blank, all groups above are created except"
-msgstr "Si está en blanco, se crean todos los grupos de arriba, excepto"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:364
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:456
 msgid "If checked, all variables for child groups and hosts will be removed and replaced by those found on the external source."
 msgstr "Si las opciones están marcadas, todas las variables de los grupos de hijos y hosts se eliminarán y reemplazarán con aquellas que se hallen en la fuente externa."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:353
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:445
 msgid "If checked, any hosts and groups that were previously present on the external source but are now removed will be removed from the Tower inventory. Hosts and groups that were not managed by the inventory source will be promoted to the next manually created group or if there is no manually created group to promote them into, they will be left in the \"all\" default group for the inventory."
 msgstr "Si las opciones están marcadas, cualquier grupo o host que estuvo presente previamente en la fuente externa pero que ahora se eliminó, se eliminará del inventario de Tower. Los hosts y grupos que no fueron administrados por la fuente del inventario serán promovidos al siguiente grupo creado manualmente o, si no hay un grupo creado manualmente al que puedan ser promovidos, se los dejará en el grupo predeterminado \"Todo\" para el inventario."
 
@@ -3117,13 +3136,12 @@ msgid "If no organization is given, the credential can only be used by the user 
 msgstr "Si no se especifica ninguna organización, el credencial puede ser sólo utilizado por el usuario que ha creado dicho credencial. Administradores de organización y administradores de sistema pueden asignar una organización para que los roles puedan permitir que los credenciales puedan ser asignados a usuarios y equipos en esa organización"
 
 #: client/src/license/license.partial.html:74
-msgid "If you are ready to upgrade, please contact us by clicking the button below"
-msgstr "Si usted está listo para la actualización, por favor contáctenos pulsando el siguiente botón"
+msgid "If you are ready to upgrade or renew, please contact us by clicking the button below."
+msgstr "Si usted está listo para la actualización o la renovación, presione el siguiente botón para contactarnos."
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:242
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:254
-msgid "Image ID:"
-msgstr "ID de la imagen:"
+#: client/src/license/license.partial.html:88
+msgid "If you do not have a subscription, you can visit Red Hat to obtain a trial subscription."
+msgstr "Si no tiene una suscripción, puede visitar Red Hat para obtener una suscripción de prueba."
 
 #: client/src/inventories-hosts/hosts/host.form.js:34
 #: client/src/inventories-hosts/hosts/host.list.js:35
@@ -3159,11 +3177,6 @@ msgstr "Insights"
 msgid "Insights Credential"
 msgstr "Credencial de Insights"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:144
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:147
-msgid "Instance Filters"
-msgstr "Filtros de instancias"
-
 #: client/features/output/output.strings.js:67
 #: client/src/instance-groups/instance-groups.strings.js:43
 msgid "Instance Group"
@@ -3189,21 +3202,6 @@ msgstr "Grupos de instancias"
 msgid "Instance Groups Help"
 msgstr "Ayuda para grupos de instancias"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:251
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:263
-msgid "Instance ID"
-msgstr "ID de instancia"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:243
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:255
-msgid "Instance ID:"
-msgstr "ID de instancia:"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:244
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:256
-msgid "Instance Type:"
-msgstr "Tipo de instancia:"
-
 #: client/lib/components/components.strings.js:85
 #: client/src/instance-groups/instance-groups.strings.js:20
 msgid "Instances"
@@ -3217,14 +3215,9 @@ msgstr "Permisos insuficientes"
 msgid "Integer"
 msgstr "Entero"
 
-#: client/src/license/license.partial.html:11
-msgid "Invalid License"
-msgstr "Licencia no valida"
-
-#: client/src/license/license.controller.js:109
-#: client/src/license/license.controller.js:117
-msgid "Invalid file format. Please upload valid JSON."
-msgstr "Formato de fichero inválido. Por favor cargue un JSON válido."
+#: client/src/license/license.controller.js:112
+msgid "Invalid file format. Please upload a valid Red Hat Subscription Manifest."
+msgstr "Formato de archivo no válido. Cargue un manifiesto de suscripción de Red Hat válido."
 
 #: client/lib/components/components.strings.js:16
 msgid "Invalid input for this type."
@@ -3285,6 +3278,17 @@ msgstr "Archivo de inventario"
 #: client/src/workflow-results/workflow-results.controller.js:79
 msgid "Inventory Limit"
 msgstr "Límite de inventario"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:231
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:300
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:352
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
+msgid "Inventory Plugins"
+msgstr "Complementos de inventario"
 
 #: client/lib/components/components.strings.js:82
 #: client/lib/models/models.strings.js:20
@@ -3360,10 +3364,15 @@ msgstr "TRABAJOS"
 msgid "JSON"
 msgstr "JSON"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:197
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:221
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:245
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:320
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:157
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:183
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:209
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:235
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:278
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:304
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:330
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:356
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:382
 msgid "JSON:"
 msgstr "JSON:"
 
@@ -3442,11 +3451,6 @@ msgstr "CLAVE"
 msgid "Key"
 msgstr "Clave"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:245
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:257
-msgid "Key Name:"
-msgstr "Nombre de la clave:"
-
 #: client/src/credential-types/credential-types.list.js:31
 #: client/src/credentials/credentials.list.js:33
 msgid "Kind"
@@ -3494,10 +3498,6 @@ msgstr "LDAP 5 (Opcional)"
 #: client/src/configuration/forms/auth-form/configuration-auth.partial.html:18
 msgid "LDAP Server"
 msgstr "Servidor LDAP"
-
-#: client/src/license/license.route.js:18
-msgid "LICENSE"
-msgstr "LICENCIA"
 
 #: client/features/output/output.strings.js:76
 #: client/src/templates/job_templates/job-template.form.js:240
@@ -3552,7 +3552,7 @@ msgstr "Usada por última vez (descendente)"
 msgid "Last logged in:"
 msgstr "Última sesión:"
 
-#: client/src/organizations/organizations.form.js:128
+#: client/src/organizations/organizations.form.js:137
 msgid "Last name"
 msgstr "Apellido"
 
@@ -3598,27 +3598,12 @@ msgstr "No existe la configuración del estado heredado de"
 
 #: client/lib/components/components.strings.js:98
 #: client/src/configuration/settings.partial.html:14
-#: client/src/license/license.controller.js:47
-#: client/src/license/license.partial.html:109
-#: client/src/license/license.partial.html:8
 msgid "License"
 msgstr "Licencia"
 
 #: client/features/output/output.strings.js:78
 msgid "License Error"
 msgstr "Error de licencia"
-
-#: client/src/license/license.partial.html:33
-msgid "License Key"
-msgstr "Clave de licencia"
-
-#: client/src/license/license.controller.js:49
-msgid "License Management"
-msgstr "Gestión de licencia"
-
-#: client/src/license/license.partial.html:21
-msgid "License Type"
-msgstr "Tipo de licencia"
 
 #: client/features/output/output.strings.js:79
 #: client/features/templates/templates.strings.js:56
@@ -3630,21 +3615,6 @@ msgstr "Tipo de licencia"
 #: client/src/templates/workflows.form.js:97
 msgid "Limit"
 msgstr "Límite"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:255
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:268
-msgid "Limit to hosts having a tag:"
-msgstr "Se limita a hosts que tengan una etiqueta:"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:257
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:270
-msgid "Limit to hosts using either key pair:"
-msgstr "Se limita a hosts que utilicen un par de claves:"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:259
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:272
-msgid "Limit to hosts where the Name tag begins with"
-msgstr "Se limita a hosts en los que la etiqueta Nombre comience con"
 
 #: client/src/scheduler/scheduler.strings.js:51
 msgid "Limited to first 10"
@@ -3742,7 +3712,7 @@ msgstr "Máquina"
 msgid "Machine Credential"
 msgstr "Credenciales de máquina"
 
-#: client/src/license/license.partial.html:240
+#: client/src/license/license.partial.html:255
 msgid "Managed Nodes"
 msgstr "Nodos gestionados"
 
@@ -3761,8 +3731,8 @@ msgstr "Los proyectos manuales no necesitan una actualización del SCM"
 msgid "Max 512 characters per label."
 msgstr "Máx. 512 caracteres por etiqueta."
 
-#: client/src/organizations/organizations.form.js:59
-#: client/src/organizations/organizations.form.js:66
+#: client/src/organizations/organizations.form.js:68
+#: client/src/organizations/organizations.form.js:75
 msgid "Max Hosts"
 msgstr "Número máximo de hosts"
 
@@ -3948,7 +3918,7 @@ msgstr "NO SE SELECCIONÓ NINGUNO"
 msgid "NOTE: This field assumes the remote name is \"origin\"."
 msgstr "NOTA: Este campo asume que el nombre remoto es \"origen\"."
 
-#: client/src/login/loginModal/loginModal.partial.html:101
+#: client/src/login/loginModal/loginModal.partial.html:102
 msgid "NOTICE"
 msgstr "AVISO"
 
@@ -3963,7 +3933,7 @@ msgstr "PLANTILLAS DE NOTIFICACIÓN"
 
 #: client/lib/components/components.strings.js:131
 #: client/src/inventories-hosts/inventories/related/sources/edit/sources-notifications.route.js:9
-#: client/src/management-jobs/notifications/notification.route.js:46
+#: client/src/management-jobs/notifications/notification.route.js:59
 #: client/src/notifications/main.js:44
 #: client/src/notifications/main.js:95
 #: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
@@ -4070,7 +4040,7 @@ msgstr "No se crearon credenciales que coincidan con este tipo"
 msgid "No JSON data returned by the module"
 msgstr "El módulo no arrojó datos JSON"
 
-#: client/src/license/license.controller.js:158
+#: client/src/license/license.controller.js:153
 msgid "No Licenses Found"
 msgstr "No se encontraron licencias"
 
@@ -4240,10 +4210,10 @@ msgstr "No configurado para la sincronización de inventario."
 msgid "Note that only hosts directly in this group can be disassociated.  Hosts in sub-groups must be disassociated directly from the sub-group level that they belong."
 msgstr "Tenga en cuenta que solo se pueden desasociar los hosts asociados directamente a este grupo. Los hosts en subgrupos deben ser desasociados del nivel de subgrupo al que pertenecen."
 
-#: client/src/notifications/notificationTemplates.form.js:371
-#: client/src/notifications/notificationTemplates.form.js:372
-#: client/src/notifications/notificationTemplates.form.js:568
-#: client/src/notifications/notificationTemplates.form.js:569
+#: client/src/notifications/notificationTemplates.form.js:343
+#: client/src/notifications/notificationTemplates.form.js:344
+#: client/src/notifications/notificationTemplates.form.js:540
+#: client/src/notifications/notificationTemplates.form.js:541
 msgid "Notification Color"
 msgstr "Color de notificación"
 
@@ -4251,7 +4221,7 @@ msgstr "Color de notificación"
 msgid "Notification Failed."
 msgstr "Notificación fallida"
 
-#: client/src/notifications/notificationTemplates.form.js:360
+#: client/src/notifications/notificationTemplates.form.js:332
 msgid "Notification Label"
 msgstr "Etiqueta de Notificación"
 
@@ -4269,7 +4239,7 @@ msgstr "Caducó el tiempo de la notificación"
 msgid "Notifications"
 msgstr "Notificación"
 
-#: client/src/notifications/notificationTemplates.form.js:385
+#: client/src/notifications/notificationTemplates.form.js:357
 msgid "Notify Channel"
 msgstr "Notificar canal"
 
@@ -4291,7 +4261,7 @@ msgstr "ON"
 msgid "OPTIONS"
 msgstr "OPCIONES"
 
-#: client/src/license/license.partial.html:121
+#: client/src/license/license.partial.html:128
 msgid "OR"
 msgstr "O"
 
@@ -4305,7 +4275,7 @@ msgstr "ORGANIZACIÓN"
 
 #: client/src/activity-stream/get-target-title.factory.js:29
 #: client/src/organizations/list/organizations-list.partial.html:6
-#: client/src/organizations/main.js:51
+#: client/src/organizations/main.js:55
 msgid "ORGANIZATIONS"
 msgstr "ORGANIZACIONES"
 
@@ -4332,10 +4302,9 @@ msgstr "Con error"
 msgid "On Success"
 msgstr "Con éxito"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:156
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:161
-msgid "Only Group By"
-msgstr "Agrupar solo por"
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials.partial.html:3
+msgid "Open Galaxy credentials"
+msgstr "Credenciales abiertas de Galaxy"
 
 #: client/src/templates/job_templates/multi-credential/multi-credential.partial.html:4
 msgid "Open credential lookup"
@@ -4421,49 +4390,22 @@ msgstr "Otros avisos"
 msgid "Others (Cloud Providers)"
 msgstr "Otros (Proveedores Cloud)"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:316
-msgid "Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "Variables de invalidación halladas en azure_rm.ini y utilizadas por el script de actualización del inventario. Para ver una descripción detallada de estas variables"
+#: client/src/license/license.partial.html:11
+msgid "Out of Compliance"
+msgstr "Fuera de conformidad"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
-msgid ""
-"Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                    view cloudforms.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Variables de invalidación halladas en cloudforms.ini y usadas en el script de actualización del inventario. Para ver un ejemplo de configuración variable, \n"
-"                 <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                    vea cloudforms.ini en el repositorio github de Ansible Collections.</a> Ingrese variables de inventario con sintaxis de JSON o YAML. Use el botón de opción para alternar entre los dos. Consulte la documentación de Ansible Tower para ver ejemplos de sintaxis."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:217
-msgid "Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "Variables de invalidación halladas en ec2.ini y utilizadas en el script de actualización del inventario. Para ver una descripción detallada de estas variables"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:299
-msgid ""
-"Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
-"                    view foreman.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Variables de invalidación halladas en foreman.ini y usadas en el script de actualización del inventario. Para ver un ejemplo de configuración variable,                  <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">                    vea foreman.ini en el repositorio github de Ansible Collections.</a> Ingrese variables de inventario con sintaxis de JSON o YAML. Use el botón de opción para alternar entre los dos. Consulte la documentación de Ansible Tower para ver ejemplos de sintaxis."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:265
-msgid ""
-"Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
-"                    view openstack.yml in the Openstack github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Variables de invalidación halladas en openstack.yml y usadas en el script de actualización del inventario. Para ver un ejemplo de configuración de variable,                    <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">                    vea openstack.yml en el repositorio github de Openstack.</a> Ingrese variables de inventario con la sintaxis de JSON o YAML. Use el botón de opción para alternar entre los dos. Consulte la documentación de Ansible Tower para ver ejemplos de sintaxis."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:241
-msgid "Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "Variables de invalidación halladas en vmware.ini y utilizadas en el script de actualización del inventario. Para ver una descripción detallada de estas variables"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:255
+msgid "Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration"
+msgstr "Variables de anulación halladas en cloudforms.ini y utilizadas en el script de actualización del inventario. Para ver un ejemplo de configuración de variables"
 
 #: client/features/output/output.strings.js:83
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:350
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:442
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:447
 msgid "Overwrite"
 msgstr "Anular"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:361
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:366
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:453
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:458
 msgid "Overwrite Variables"
 msgstr "Anular variables"
 
@@ -4475,7 +4417,7 @@ msgstr "Sobrescribir variables"
 msgid "Owners"
 msgstr "Propietarios"
 
-#: client/src/license/license.partial.html:136
+#: client/src/license/license.partial.html:143
 #: client/src/login/loginModal/loginModal.partial.html:80
 msgid "PASSWORD"
 msgstr "CONTRASEÑA"
@@ -4544,7 +4486,7 @@ msgstr "COLOCAR"
 msgid "Page"
 msgstr "Página"
 
-#: client/src/notifications/notificationTemplates.form.js:252
+#: client/src/notifications/notificationTemplates.form.js:236
 msgid "Pagerduty subdomain"
 msgstr "Subdominio Pagerduty"
 
@@ -4639,7 +4581,7 @@ msgstr "Error de permiso"
 #: client/src/credentials/credentials.form.js:438
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:104
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:101
-#: client/src/organizations/organizations.form.js:143
+#: client/src/organizations/organizations.form.js:152
 #: client/src/projects/projects.form.js:278
 #: client/src/teams/teams.form.js:128
 #: client/src/templates/job_templates/job-template.form.js:532
@@ -4695,10 +4637,6 @@ msgstr "Verifique el servidor y asegúrese de que el directorio exista y que los
 #: client/features/templates/templates.strings.js:144
 msgid "Please click on an available node to form a new link."
 msgstr "Haga clic en un nodo disponible para formar un nuevo enlace."
-
-#: client/src/license/license.partial.html:91
-msgid "Please click the button below to visit Ansible's website to get a Tower license key."
-msgstr "Por favor pulse sobre el siguiente botón para visitar la página web de Ansible para obtener una clave de licencia Tower."
 
 #: client/src/inventories-hosts/inventory-hosts.strings.js:40
 msgid "Please click the icon to edit the host filter."
@@ -4885,14 +4823,14 @@ msgstr "Guarde antes de agregar una encuesta a este flujo de trabajo."
 msgid "Please save before adding notifications."
 msgstr "Guarde antes de agregar notificaciones."
 
-#: client/src/organizations/organizations.form.js:95
+#: client/src/organizations/organizations.form.js:104
 #: client/src/teams/teams.form.js:72
 msgid "Please save before adding users."
 msgstr "Guarde antes de agregar usuarios."
 
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:100
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:97
-#: client/src/organizations/organizations.form.js:135
+#: client/src/organizations/organizations.form.js:144
 #: client/src/projects/projects.form.js:270
 #: client/src/teams/teams.form.js:124
 #: client/src/templates/job_templates/job-template.form.js:525
@@ -5140,16 +5078,6 @@ msgstr "Aviso"
 msgid "Prompt on launch"
 msgstr "Preguntar al ejecutar"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:253
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:266
-msgid "Provide a comma-separated list of filter expressions."
-msgstr "Proporcione una lista de expresiones de filtrado separadas por coma."
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:269
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:284
-msgid "Provide a comma-separated list of filter expressions. Hosts are imported when all of the filters match. Refer to Ansible Tower documentation for more detail."
-msgstr "Proporcione una lista de expresiones de filtrado separadas por coma. Los hosts se importan cuando coinciden todos los filtros. Consulte la documentación de Ansible Tower para obtener más información detallada."
-
 #: client/src/inventories-hosts/hosts/host.form.js:49
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:48
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:50
@@ -5169,18 +5097,13 @@ msgstr "Proporcione un patrón de host para limitar aún más la lista de hosts 
 msgid "Provide account information using Google Compute Engine JSON credentials file."
 msgstr "Introduzca información de la cuenta usando el archivo de credenciales Google Compute Engine JSON."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:195
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:155
 msgid "Provide environment variables to pass to the custom inventory script."
 msgstr "Proporcione variables del entorno para trasladar al script del inventario personalizado."
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:272
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:287
-msgid "Provide the named URL encoded name or id of the remote Tower inventory to be imported."
-msgstr "Indique la URL, el nombre cifrado o id del inventario remoto de Tower para importarlos."
-
-#: client/src/license/license.partial.html:128
-msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS &gt; SYSTEM."
-msgstr "Proporcione sus credenciales de cliente de Red Hat y podrá elegir de una lista de sus licencias disponibles. Las credenciales que utilice se almacenarán para su uso futuro en la recuperación de las licencias de renovación o ampliadas. Puede actualizarlas o eliminarlas en CONFIGURACIÓN &gt; SISTEMA."
+#: client/src/license/license.partial.html:135
+msgid "Provide your Red Hat or Red Hat Satellite credentials below and you can choose from a list of your available subscriptions.    The credentials you use will be stored for future use in retrieving renewal or expanded subscriptions."
+msgstr "A continuación, proporcione sus credenciales de Red Hat o de Red Hat Satellite y podrá elegir de una lista de sus suscripciones disponibles. Las credenciales que utilice se almacenarán para su uso futuro en la recuperación de las suscripciones de renovación o ampliadas."
 
 #: client/src/templates/job_templates/job-template.form.js:374
 #: client/src/templates/job_templates/job-template.form.js:382
@@ -5267,7 +5190,7 @@ msgid "RESULTS"
 msgstr "RESULTADOS"
 
 #: client/features/templates/templates.strings.js:39
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:50
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:51
 msgid "REVERT"
 msgstr "REVERTIR"
 
@@ -5349,6 +5272,10 @@ msgstr "Lista de destinatarios"
 msgid "Red"
 msgstr "Rojo"
 
+#: client/src/license/license.partial.html:114
+msgid "Red Hat Subscription Manifest"
+msgstr "Manifiesto de suscripción de Red Hat"
+
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:47
 msgid "Refer to the Ansible Tower documentation for further syntax and examples."
 msgstr "Consulte la documentación de Ansible Tower para obtener más ejemplos sobre sintaxis."
@@ -5388,14 +5315,9 @@ msgstr "Actualizar la página"
 msgid "Refspec"
 msgstr "Refspec"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:246
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:258
-msgid "Region:"
-msgstr "Región:"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
-msgid "Regions"
-msgstr "Regiones"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:410
+msgid "Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied."
+msgstr "Expresión regular en la que solo se importarán los nombres de host que coincidan. El filtro se aplica como un paso posterior al procesamiento después de que se aplique cualquier filtro de complemento de inventario."
 
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:81
 msgid "Related Groups"
@@ -5458,9 +5380,9 @@ msgstr "Reemplazar contraseña"
 msgid "Replace secret"
 msgstr "Reemplazar secreto"
 
-#: client/src/license/license.partial.html:96
-msgid "Request License"
-msgstr "Solicitar una licencia"
+#: client/src/license/license.partial.html:92
+msgid "Request Subscription"
+msgstr "Solicitar subscripción"
 
 #: client/src/templates/survey-maker/shared/question-definition.form.js:291
 msgid "Required"
@@ -5478,6 +5400,10 @@ msgstr "Recursos"
 #: client/src/scheduler/schedules.list.js:25
 msgid "Resources are missing from this template."
 msgstr "Faltan recursos de esta plantilla."
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:420
+msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
+msgstr "Recuperar el estado habilitado a partir del dict dado de las variables de host. La variable habilitada se puede especificar mediante notación de puntos, por ejemplo: \"foo.bar\""
 
 #: client/lib/services/base-string.service.js:111
 msgid "Return"
@@ -5506,7 +5432,7 @@ msgstr "Revertir"
 #: client/src/configuration/forms/auth-form/sub-forms/auth-radius.form.js:34
 #: client/src/configuration/forms/auth-form/sub-forms/auth-saml.form.js:121
 #: client/src/configuration/forms/auth-form/sub-forms/auth-tacacs.form.js:47
-#: client/src/configuration/forms/jobs-form/configuration-jobs.form.js:129
+#: client/src/configuration/forms/jobs-form/configuration-jobs.form.js:110
 #: client/src/configuration/forms/system-form/sub-forms/system-activity-stream.form.js:26
 #: client/src/configuration/forms/system-form/sub-forms/system-logging.form.js:74
 #: client/src/configuration/forms/system-form/sub-forms/system-misc.form.js:95
@@ -5528,7 +5454,7 @@ msgstr "Revisión n°"
 #: client/src/credentials/credentials.form.js:461
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:130
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:127
-#: client/src/organizations/organizations.form.js:165
+#: client/src/organizations/organizations.form.js:174
 #: client/src/projects/projects.form.js:301
 #: client/src/teams/teams.form.js:109
 #: client/src/teams/teams.form.js:148
@@ -5562,6 +5488,7 @@ msgstr "SAML"
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal.partial.html:17
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:17
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:17
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:18
 #: client/src/partials/survey-maker-modal.html:84
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:18
 msgid "SAVE"
@@ -5667,10 +5594,10 @@ msgstr "BÚSQUEDA"
 
 #: client/features/templates/templates.strings.js:132
 #: client/lib/services/base-string.service.js:64
-#: client/src/license/license.partial.html:260
+#: client/src/license/license.partial.html:275
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:137
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:186
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:74
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:75
 #: client/src/templates/workflows/add-workflow/workflow-add.controller.js:155
 #: client/src/templates/workflows/edit-workflow/workflow-edit.controller.js:194
 msgid "SELECT"
@@ -5730,7 +5657,7 @@ msgstr "AJUSTES"
 msgid "SHOW"
 msgstr "MOSTRAR"
 
-#: client/src/login/loginModal/loginModal.partial.html:109
+#: client/src/login/loginModal/loginModal.partial.html:114
 msgid "SIGN IN"
 msgstr "CONECTARSE"
 
@@ -5768,7 +5695,7 @@ msgstr "Contraseña de SSH"
 msgid "SSH key description"
 msgstr "Descripción de la clave SSH"
 
-#: client/src/notifications/notificationTemplates.form.js:551
+#: client/src/notifications/notificationTemplates.form.js:523
 msgid "SSL Connection"
 msgstr "Conexión SSL"
 
@@ -5784,6 +5711,10 @@ msgstr "ESTADO"
 #: client/src/credentials/credentials.form.js:127
 msgid "STS Token"
 msgstr "Token STS"
+
+#: client/src/license/license.route.js:18
+msgid "SUBSCRIPTION"
+msgstr "SUSCRIPCIÓN"
 
 #: client/features/output/output.strings.js:140
 #: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:56
@@ -5832,7 +5763,7 @@ msgstr "Guarde y habilite la agregación de registros antes de probar el agregad
 msgid "Save changes"
 msgstr "Guardar los cambios"
 
-#: client/src/license/license.partial.html:200
+#: client/src/license/license.partial.html:215
 msgid "Save successful!"
 msgstr "Guardado correctamente"
 
@@ -5872,7 +5803,7 @@ msgstr "Nombre de programa"
 
 #: client/lib/components/components.strings.js:72
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:434
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:526
 #: client/src/projects/projects.form.js:321
 #: client/src/templates/job_templates/job-template.form.js:578
 #: client/src/templates/workflows.form.js:333
@@ -5892,11 +5823,6 @@ msgstr "Buscar"
 msgid "Secret Key"
 msgstr "Clave secreta"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:247
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:259
-msgid "Security Group:"
-msgstr "Grupo de seguridad:"
-
 #: client/src/credentials/credentials.form.js:124
 msgid "Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users."
 msgstr "El Security Token Service (STS) es un servicio web que habilita su solicitud temporalmente y con credenciales con privilegio limitado para usuarios de AWS Identity y Access Management (IAM)."
@@ -5906,6 +5832,14 @@ msgstr "El Security Token Service (STS) es un servicio web que habilita su solic
 #: client/src/shared/lookup/lookup-modal.partial.html:20
 msgid "Select"
 msgstr "Seleccionar"
+
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:5
+msgid "Select Galaxy Credentials"
+msgstr "Seleccionar las credenciales de Galaxy"
+
+#: client/src/organizations/organizations.form.js:61
+msgid "Select Galaxy credentials. The selection order sets the order in which Tower will download roles/collections using `ansible-galaxy`."
+msgstr "Seleccionar las credenciales de Galaxy. El orden de selección establece el orden en el que Tower descargará los roles/las colecciones mediante 'ansible-galaxy'."
 
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:5
 msgid "Select Instance Groups"
@@ -5930,7 +5864,7 @@ msgstr "Seleccionar una credencial"
 msgid "Select a frequency for snapshot retention"
 msgstr "Selecciona las frecuencia para la retención de instantáneas (snapshots)"
 
-#: client/src/license/license.partial.html:214
+#: client/src/license/license.partial.html:229
 msgid "Select a license"
 msgstr "Seleccione una licencia"
 
@@ -6052,12 +5986,11 @@ msgstr "Seleccionar el proyecto que contiene el playbook que desea ejecutar este
 msgid "Select types"
 msgstr "Seleccionar los tipos"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:239
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:251
-msgid "Select which groups to create automatically."
-msgstr "Seleccione los grupos que se crearán de manera automática."
+#: client/src/license/license.partial.html:100
+msgid "Select your Ansible Automation Platform subscription to use."
+msgstr "Seleccione su suscripción a Ansible Automation Platform para utilizarla."
 
-#: client/src/license/license.partial.html:153
+#: client/src/license/license.partial.html:160
 msgid "Selected"
 msgstr "Seleccionado"
 
@@ -6125,6 +6058,7 @@ msgstr "Mostrar más"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts-disassociate.partial.html:8
 #: client/src/inventories-hosts/inventories/related/hosts/related/nested-groups/host-nested-groups-disassociate.partial.html:8
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:8
+#: client/src/license/license.partial.html:115
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:104
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:125
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:136
@@ -6224,8 +6158,8 @@ msgstr "Credencial de origen"
 msgid "Source Details"
 msgstr "Detalles de la fuente"
 
-#: client/src/notifications/notificationTemplates.form.js:212
-#: client/src/notifications/notificationTemplates.form.js:213
+#: client/src/notifications/notificationTemplates.form.js:196
+#: client/src/notifications/notificationTemplates.form.js:197
 msgid "Source Phone Number"
 msgstr "Número de teléfono de la fuente"
 
@@ -6233,22 +6167,24 @@ msgstr "Número de teléfono de la fuente"
 msgid "Source Project"
 msgstr "Proyecto de origen"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:135
-msgid "Source Regions"
-msgstr "Regiones de fuente"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:208
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:215
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:232
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:239
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:256
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:168
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:175
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:194
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:220
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:227
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:246
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:253
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:263
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:273
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:290
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:297
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:307
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:314
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:270
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:289
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:296
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:315
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:322
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:341
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:348
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:367
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:374
 msgid "Source Variables"
 msgstr "Variables de fuente"
 
@@ -6266,7 +6202,7 @@ msgstr "Flujo de trabajo fuente"
 msgid "Sources"
 msgstr "Fuentes"
 
-#: client/src/notifications/notificationTemplates.form.js:420
+#: client/src/notifications/notificationTemplates.form.js:392
 msgid "Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax."
 msgstr "Especificar los encabezados HTTP en formato JSON. Consulte la documentación de Ansible Tower para obtener ejemplos de sintaxis."
 
@@ -6274,11 +6210,11 @@ msgstr "Especificar los encabezados HTTP en formato JSON. Consulte la documentac
 msgid "Specify a method for %s operations. This is equivalent to specifying the %s parameter, where %s could be %s"
 msgstr "Especificar un método para las operaciones %s. Esto es equivalente a especificar el parámetro %s, en el que %s puede ser %s."
 
-#: client/src/notifications/notificationTemplates.form.js:574
+#: client/src/notifications/notificationTemplates.form.js:546
 msgid "Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc) ."
 msgstr "Especificar un color de notificación. Los colores aceptables son el código de color hexadecimal (ejemplo: #3af o #789abc) ."
 
-#: client/src/notifications/notificationTemplates.form.js:375
+#: client/src/notifications/notificationTemplates.form.js:347
 msgid "Specify a notification color. Acceptable colors are: yellow, green, red purple, gray or random."
 msgstr "Especifique un color para la notificación. Se aceptan los siguientes colores: amarillo, verde, rojo, púrpura, gris o al azar."
 
@@ -6286,14 +6222,9 @@ msgstr "Especifique un color para la notificación. Se aceptan los siguientes co
 msgid "Specify a scope for the token's access"
 msgstr "Especifique un alcance para el acceso al token"
 
-#: client/src/notifications/notificationTemplates.form.js:432
+#: client/src/notifications/notificationTemplates.form.js:404
 msgid "Specify an HTTP method for the webhook. Acceptable choices are: POST or PUT"
 msgstr "Especificar un método HTTP para el webhook. Las opciones aceptables son: POST o PUT"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:268
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:283
-msgid "Specify which groups to create automatically. Group names will be created similar to the options selected. If blank, all groups above are created. Refer to Ansible Tower documentation for more detail."
-msgstr "Especifique los grupos que se crearán de manera automática. Los nombres de grupos creados serán similares a los de las opciones seleccionadas. Si la opción se deja en blanco, se crearán todos los grupos de arriba. Consulte la documentación de Ansible Tower para obtener información detallada."
 
 #: client/features/output/output.strings.js:135
 msgid "Standard Error"
@@ -6313,11 +6244,11 @@ msgstr "Iniciar"
 msgid "Start Date"
 msgstr "Fecha de inicio"
 
-#: client/src/notifications/notificationTemplates.form.js:597
+#: client/src/notifications/notificationTemplates.form.js:569
 msgid "Start Message"
 msgstr "Iniciar mensaje"
 
-#: client/src/notifications/notificationTemplates.form.js:608
+#: client/src/notifications/notificationTemplates.form.js:580
 msgid "Start Message Body"
 msgstr "Iniciar el cuerpo del mensaje"
 
@@ -6358,7 +6289,7 @@ msgstr "Iniciado"
 msgid "Status"
 msgstr "Estado"
 
-#: client/src/license/license.partial.html:203
+#: client/src/license/license.partial.html:218
 msgid "Submit"
 msgstr "Enviar"
 
@@ -6366,7 +6297,9 @@ msgstr "Enviar"
 msgid "Submit search"
 msgstr "Enviar búsqueda"
 
+#: client/src/license/license.controller.js:47
 #: client/src/license/license.partial.html:27
+#: client/src/license/license.partial.html:8
 msgid "Subscription"
 msgstr "Subscripción"
 
@@ -6379,15 +6312,23 @@ msgstr "ID de suscripción"
 msgid "Subscription ID is an Azure construct, which is mapped to a username."
 msgstr "El ID de subscripción es un elemento Azure, el cual está asociado al usuario."
 
+#: client/src/license/license.controller.js:49
+msgid "Subscription Management"
+msgstr "Administración de suscripciones"
+
+#: client/src/license/license.partial.html:21
+msgid "Subscription Type"
+msgstr "Tipo de suscripción"
+
 #: client/src/notifications/notifications.list.js:65
 msgid "Success"
 msgstr "Correcto"
 
-#: client/src/notifications/notificationTemplates.form.js:620
+#: client/src/notifications/notificationTemplates.form.js:592
 msgid "Success Message"
 msgstr "Mensaje de éxito"
 
-#: client/src/notifications/notificationTemplates.form.js:631
+#: client/src/notifications/notificationTemplates.form.js:603
 msgid "Success Message Body"
 msgstr "Cuerpo del mensaje de éxito"
 
@@ -6529,32 +6470,22 @@ msgstr "TOKENS"
 msgid "TOTAL NODES"
 msgstr "NODOS TOTALES"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:250
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:262
-msgid "Tag None:"
-msgstr "Ninguna etiqueta:"
-
 #: client/features/templates/templates.strings.js:55
 #: client/src/templates/job_templates/job-template.form.js:212
 msgid "Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags."
 msgstr "Las etiquetas resultan útiles cuando tiene un manual de gran tamaño y desea omitir partes específicas de la tarea o la reproducción. Utilice comas para separar las distintas etiquetas. Consulte la documentación de Ansible Tower para obtener información detallada sobre el uso de etiquetas."
 
-#: client/src/notifications/notificationTemplates.form.js:330
+#: client/src/notifications/notificationTemplates.form.js:314
 msgid "Tags for the Annotation"
 msgstr "Etiquetas para la anotación"
 
-#: client/src/notifications/notificationTemplates.form.js:329
+#: client/src/notifications/notificationTemplates.form.js:313
 msgid "Tags for the Annotation (optional)"
 msgstr "Etiquetas para la anotación (opcional)"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:248
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:260
-msgid "Tags:"
-msgstr "Etiquetas:"
-
-#: client/src/notifications/notificationTemplates.form.js:392
-#: client/src/notifications/notificationTemplates.form.js:442
-#: client/src/notifications/notificationTemplates.form.js:481
+#: client/src/notifications/notificationTemplates.form.js:364
+#: client/src/notifications/notificationTemplates.form.js:414
+#: client/src/notifications/notificationTemplates.form.js:453
 msgid "Target URL"
 msgstr "URL destino"
 
@@ -6566,7 +6497,7 @@ msgstr "Tareas"
 #: client/src/credentials/credentials.form.js:467
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:136
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:133
-#: client/src/organizations/organizations.form.js:171
+#: client/src/organizations/organizations.form.js:180
 #: client/src/projects/projects.form.js:307
 #: client/src/templates/workflows.form.js:317
 msgid "Team Roles"
@@ -6656,7 +6587,7 @@ msgstr "El ID del proyecto es la identificación asignada de GCE. Se construye c
 msgid "The Project selected has a status of"
 msgstr "El proyecto seleccionado tienen un estado de"
 
-#: client/src/projects/edit/projects-edit.controller.js:331
+#: client/src/projects/edit/projects-edit.controller.js:339
 msgid "The SCM update process is running."
 msgstr "El proceso de actualización SCM está en ejecución."
 
@@ -6684,7 +6615,7 @@ msgstr "La respuesta ya no tiene la longitud máxima. Reduzca la respuesta."
 msgid "The answer is shorter than the minimium length. Please make the answer longer."
 msgstr "La respuesta es más corta que la longitud mínima. Haga la respuesta más extensa."
 
-#: client/src/notifications/notificationTemplates.form.js:287
+#: client/src/notifications/notificationTemplates.form.js:271
 msgid "The base URL of the Grafana server - the /api/annotations endpoint will be added automatically to the base Grafana URL."
 msgstr "La URL base del servidor Grafana: el punto de acceso /api/annotations se añadirá automáticamente a la URL base de Grafana."
 
@@ -6763,7 +6694,7 @@ msgstr "La longitud máxima es muy baja. Ingrese un número más extenso que la 
 msgid "The maximum length you entered is not a valid number.  Please enter a whole number."
 msgstr "La longitud máxima que ingresó no es un número válido. Ingrese un número entero."
 
-#: client/src/organizations/organizations.form.js:69
+#: client/src/organizations/organizations.form.js:78
 msgid "The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details."
 msgstr "La cantidad máxima de hosts que puede administrar esta organización. El valor predeterminado es 0, que significa sin límite. Consulte la documentación de Ansible para obtener más detalles."
 
@@ -6898,6 +6829,10 @@ msgstr "Una o más credenciales están usando este tipo de credencial actualment
 msgid "This feature is currently in tech preview and is subject to change in a future release.  Click here for documentation."
 msgstr "Esta característica se encuentra actualmente en una versión preliminar de demostración y está sujeta a cambios en una versión futura. Haga clic aquí para ver la documentación."
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:430
+msgid "This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import."
+msgstr "Este campo se ignora a menos que se establezca una variable habilitada. Si la variable habilitada coincide con este valor, el host se habilitará en la importación."
+
 #: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:25
 msgid "This group contains at least one group or host"
 msgstr "Este grupo contiene al menos un grupo o host"
@@ -6976,7 +6911,7 @@ msgstr "Jue"
 msgid "Time"
 msgstr "Duración"
 
-#: client/src/license/license.partial.html:45
+#: client/src/license/license.partial.html:39
 msgid "Time Remaining"
 msgstr "Tiempo restante"
 
@@ -6984,7 +6919,7 @@ msgstr "Tiempo restante"
 msgid "Time in seconds to consider a project to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, and a new project update will be performed."
 msgstr "Tiempo en segundos a considerar que un proyecto es reciente. Durante la ejecución del trabajo y callbacks la tarea del sistema evaluará la fecha y hora de la última actualización del proyecto. Si es más antigua que el tiempo de expiración de caché, se considera que no es reciente y una nueva actualización del proyecto será llevada a cabo."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:405
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:497
 msgid "Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, and a new inventory sync will be performed."
 msgstr "Tiempo en segundos para que la sincronización del inventario esté actualizada. Durante la ejecución de trabajos y callbacks, el sistema de tareas evaluará la marca de tiempo de la última sincronización. Si es anterior al Tiempo de espera para la ejecución del caché, no se considera actualizada y se llevará a cabo una nueva sincronización del inventario."
 
@@ -7036,11 +6971,11 @@ msgstr "Nodos totales"
 msgid "Traceback"
 msgstr "Traceback"
 
-#: client/src/license/license.partial.html:176
+#: client/src/license/license.partial.html:191
 msgid "Tracking and Analytics"
 msgstr "Seguimiento y análitica"
 
-#: client/src/license/license.partial.html:233
+#: client/src/license/license.partial.html:248
 msgid "Trial"
 msgstr "Prueba"
 
@@ -7074,12 +7009,12 @@ msgstr "Detalles del tipo"
 msgid "UNLINK"
 msgstr "DESVINCULAR"
 
-#: client/src/projects/add/projects-add.controller.js:182
-#: client/src/projects/edit/projects-edit.controller.js:303
+#: client/src/projects/add/projects-add.controller.js:190
+#: client/src/projects/edit/projects-edit.controller.js:311
 msgid "URL popover text"
 msgstr "Texto 'popover' de la URL"
 
-#: client/src/license/license.partial.html:132
+#: client/src/license/license.partial.html:139
 #: client/src/login/loginModal/loginModal.partial.html:61
 msgid "USERNAME"
 msgstr "NOMBRE DE USUARIO"
@@ -7177,7 +7112,7 @@ msgstr "Error inesperado"
 msgid "Unexpected server error. View the console for more information"
 msgstr "Error inesperado del servidor. Consulte la consola para obtener más información."
 
-#: client/src/license/license.partial.html:59
+#: client/src/license/license.partial.html:53
 msgid "Unlimited"
 msgstr "Ilimitado"
 
@@ -7194,7 +7129,7 @@ msgstr "Tipo de entrada no compatible"
 msgid "Update Not Found"
 msgstr "Actualización no encontrada"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:344
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:436
 msgid "Update Options"
 msgstr "Actualizar opciones"
 
@@ -7212,7 +7147,7 @@ msgstr "Actualización cancelada. Haga clic para obtener más información."
 msgid "Update failed. Click for details"
 msgstr "Actualización fallida. Haga clic para obtener más información."
 
-#: client/src/projects/edit/projects-edit.controller.js:331
+#: client/src/projects/edit/projects-edit.controller.js:339
 msgid "Update in Progress"
 msgstr "Actualización en curso"
 
@@ -7221,13 +7156,13 @@ msgstr "Actualización en curso"
 msgid "Update missing. Click for details"
 msgstr "Actualización faltante. Haga clic para obtener más información."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:372
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:377
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:464
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:469
 msgid "Update on Launch"
 msgstr "Actualizar al ejecutar"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:383
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:389
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:475
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:481
 msgid "Update on Project Update"
 msgstr "Actualizar en la actualización del proyecto"
 
@@ -7250,13 +7185,9 @@ msgstr "Actualice las configuraciones correspondientes a Trabajos dentro de la T
 msgid "Update succeeded. Click for details"
 msgstr "Actualización exitosa. Haga clic para obtener más información."
 
-#: client/src/license/license.partial.html:75
-msgid "Upgrade"
-msgstr "Actualizar"
-
-#: client/src/license/license.partial.html:111
-msgid "Upload a license file"
-msgstr "Subir un archivo de licencia"
+#: client/src/license/license.partial.html:109
+msgid "Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <a href=\"https://access.redhat.com/management/subscription_allocations\" target=\"_blank\">subscription allocations</a> on the Red Hat Customer Portal."
+msgstr "Cargue un manifiesto de suscripción de Red Hat que contenga su suscripción. Para generar su manifiesto de suscripción, visite <a href=\"https://access.redhat.com/management/subscription_allocations\" target=\"_blank\">asignaciones de suscripción</a> en Red Hat Customer Portal."
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:62
 #: client/src/organizations/organizations.form.js:48
@@ -7275,7 +7206,7 @@ msgstr "Utilizar SSL"
 msgid "Use TLS"
 msgstr "Utilizar TLS"
 
-#: client/src/notifications/notificationTemplates.form.js:586
+#: client/src/notifications/notificationTemplates.form.js:558
 msgid "Use custom messages to change the content of notifications sent when a job starts, succeeds, or fails. Use curly braces to access information about the job: <code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>, or attributes of the job such as <code ng-non-bindable>{{ job.status }}</code>. You may apply a number of possible variables in the message. Refer to the <a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower documentation</a> for more details."
 msgstr "Utilice los mensajes personalizados para cambiar el contenido de las notificaciones que se envían cuando un trabajo comienza, tiene éxito o falla. Utilice llaves para acceder a la información sobre el trabajo: <code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>, o atributos del trabajo como <code ng-non-bindable>{{ job.status }}</code>. Puede aplicar una serie de posibles variables en el mensaje. Consulte la <a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\"> documentación Ansible Tower</a> para ver más detalles."
 
@@ -7292,8 +7223,8 @@ msgstr "Utilizado para verificar y sincronizar los repositorios playbook con sis
 #: client/src/credentials/credentials.form.js:456
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:125
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:122
-#: client/src/organizations/organizations.form.js:119
-#: client/src/organizations/organizations.form.js:160
+#: client/src/organizations/organizations.form.js:128
+#: client/src/organizations/organizations.form.js:169
 #: client/src/projects/projects.form.js:296
 #: client/src/teams/teams.form.js:96
 #: client/src/templates/workflows.form.js:306
@@ -7316,8 +7247,8 @@ msgstr "Tipo de usuario"
 #: client/src/credentials/factories/kind-change.factory.js:40
 #: client/src/credentials/factories/kind-change.factory.js:73
 #: client/src/credentials/factories/kind-change.factory.js:94
-#: client/src/notifications/notificationTemplates.form.js:453
-#: client/src/notifications/notificationTemplates.form.js:492
+#: client/src/notifications/notificationTemplates.form.js:425
+#: client/src/notifications/notificationTemplates.form.js:464
 #: client/src/notifications/notificationTemplates.form.js:64
 #: client/src/users/users.form.js:59
 #: client/src/users/users.list.js:29
@@ -7339,7 +7270,7 @@ msgstr "Nombres de usuarios, contraseñas y claves de acceso para la autenticaci
 #: client/lib/components/components.strings.js:80
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:35
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:38
-#: client/src/organizations/organizations.form.js:101
+#: client/src/organizations/organizations.form.js:110
 #: client/src/teams/teams.form.js:78
 msgid "Users"
 msgstr "Usuarios"
@@ -7377,15 +7308,6 @@ msgstr "VER MÁS"
 msgid "VIEW PER PAGE"
 msgstr "VISTA POR PÁGINA"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:249
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:261
-msgid "VPC ID:"
-msgstr "VPC ID:"
-
-#: client/src/license/license.partial.html:10
-msgid "Valid License"
-msgstr "Licencia válida"
-
 #: client/src/inventories-hosts/hosts/host.form.js:67
 #: client/src/inventories-hosts/inventories/related/groups/groups.form.js:46
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-groups/group-nested-groups.form.js:47
@@ -7410,8 +7332,8 @@ msgstr "Contraseña Vault"
 #: client/features/templates/templates.strings.js:60
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:82
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:91
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:330
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:337
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:392
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:399
 #: client/src/templates/job_templates/job-template.form.js:189
 #: client/src/templates/job_templates/job-template.form.js:196
 msgid "Verbosity"
@@ -7452,10 +7374,15 @@ msgstr "Ver Insights"
 msgid "View Insights Data"
 msgstr "Ver datos de Insights"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:225
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:249
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:161
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:187
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:213
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:239
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:308
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:334
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:360
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
 msgid "View JSON examples at"
 msgstr "Ver ejemplos de JSON en"
 
@@ -7489,10 +7416,15 @@ msgstr "Ver resultados de verificación del proyecto"
 msgid "View Survey"
 msgstr "Mostrar el cuestionario"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:202
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:226
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:250
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:325
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:162
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:188
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:214
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:240
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:283
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:309
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:335
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:361
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:387
 msgid "View YAML examples at"
 msgstr "Ver ejemplos de YAML en"
 
@@ -7567,11 +7499,6 @@ msgstr "Mostrar equipo"
 #: client/src/templates/templates.list.js:103
 msgid "View template"
 msgstr "Mostrar plantilla"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:261
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:274
-msgid "View the"
-msgstr "Ver"
 
 #: client/features/output/output.strings.js:22
 #: client/lib/components/components.strings.js:63
@@ -7658,7 +7585,7 @@ msgstr "Advertencia"
 msgid "Warning: Unsaved Changes"
 msgstr "Aviso: modificaciones no guardadas"
 
-#: client/src/license/license.controller.js:159
+#: client/src/license/license.controller.js:154
 msgid "We were unable to locate licenses associated with this account"
 msgstr "No pudimos localizar las licencias asociadas a esta cuenta"
 
@@ -7712,19 +7639,19 @@ msgstr "Los servicios de Webhook pueden usar esto como un secreto compartido."
 msgid "Wed"
 msgstr "Mié"
 
-#: client/src/license/license.partial.html:82
-msgid "Welcome to Ansible Tower! Please complete the steps below to acquire a license."
-msgstr "¡Bienvenido a Ansible Tower! Complete los siguientes pasos para adquirir una licencia."
-
 #: client/src/login/loginModal/loginModal.partial.html:23
 msgid "Welcome to Ansible {{BRAND_NAME}}! &nbsp;Please sign in."
 msgstr "¡Bienvenido a Ansible {{BRAND_NAME}}! &nbsp;Inicie sesión."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:365
+#: client/src/license/license.partial.html:82
+msgid "Welcome to Red Hat Ansible Automation Platform! Please complete the steps below to activate your subscription."
+msgstr "¡Bienvenido a Red Hat Ansible Automation Platform! Complete los pasos a continuación para activar su suscripción."
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:457
 msgid "When not checked, a merge will be performed, combining local variables with those found on the external source."
 msgstr "Cuando no esté comprobado, se llevará a cabo una fusión, y se combinarán las variables locales con las variables halladas en la fuente externa."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:446
 msgid "When not checked, local child hosts and groups not found on the external source will remain untouched by the inventory update process."
 msgstr "Si la opción no está marcada, los hosts hijos y los grupos locales que no se encuentren en la fuente externa no se modificarán a partir del proceso de actualización del inventario."
 
@@ -7741,19 +7668,19 @@ msgstr "Cuando este proyecto es usado por una Plantilla de tarea, no se puede ca
 msgid "Workflow"
 msgstr "Flujo de trabajo"
 
-#: client/src/notifications/notificationTemplates.form.js:666
+#: client/src/notifications/notificationTemplates.form.js:638
 msgid "Workflow Approved Message"
 msgstr "Mensaje aprobado por el flujo de trabajo"
 
-#: client/src/notifications/notificationTemplates.form.js:677
+#: client/src/notifications/notificationTemplates.form.js:649
 msgid "Workflow Approved Message Body"
 msgstr "Cuerpo del mensaje aprobado por el flujo de trabajo"
 
-#: client/src/notifications/notificationTemplates.form.js:689
+#: client/src/notifications/notificationTemplates.form.js:661
 msgid "Workflow Denied Message"
 msgstr "Mensaje de denegación del flujo de trabajo"
 
-#: client/src/notifications/notificationTemplates.form.js:700
+#: client/src/notifications/notificationTemplates.form.js:672
 msgid "Workflow Denied Message Body"
 msgstr "Cuerpo del mensaje denegado por el flujo de trabajo"
 
@@ -7769,11 +7696,11 @@ msgstr "Nodos de la plantilla de tareas de flujo de trabajo"
 msgid "Workflow Job Templates"
 msgstr "Plantillas de trabajos de flujo de trabajo"
 
-#: client/src/notifications/notificationTemplates.form.js:712
+#: client/src/notifications/notificationTemplates.form.js:684
 msgid "Workflow Pending Approval Message"
 msgstr "Mensaje de aprobación pendiente del flujo de trabajo"
 
-#: client/src/notifications/notificationTemplates.form.js:723
+#: client/src/notifications/notificationTemplates.form.js:695
 msgid "Workflow Pending Approval Message Body"
 msgstr "Cuerpo del mensaje de aprobación pendiente del flujo de trabajo"
 
@@ -7788,11 +7715,11 @@ msgstr "Plantilla de flujo de trabajo"
 msgid "Workflow Templates"
 msgstr "Plantillas de flujo de trabajo"
 
-#: client/src/notifications/notificationTemplates.form.js:735
+#: client/src/notifications/notificationTemplates.form.js:707
 msgid "Workflow Timed Out Message"
 msgstr "Mensaje de tiempo de espera agotado del flujo de trabajo"
 
-#: client/src/notifications/notificationTemplates.form.js:746
+#: client/src/notifications/notificationTemplates.form.js:718
 msgid "Workflow Timed Out Message Body"
 msgstr "Cuerpo del mensaje de tiempo de espera agotado del flujo de trabajo"
 
@@ -7810,10 +7737,15 @@ msgstr "Escribir"
 msgid "YAML"
 msgstr "YAML"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:199
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:223
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:247
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:322
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:159
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:185
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:211
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:237
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:306
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:332
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:358
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:384
 msgid "YAML:"
 msgstr "YAML:"
 
@@ -7944,11 +7876,6 @@ msgstr "error"
 msgid "failed"
 msgstr "falló"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:262
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:275
-msgid "for a complete list of supported filters."
-msgstr "para acceder a una lista completa de filtros compatibles."
-
 #: client/src/inventories-hosts/inventories/related/hosts/related-groups-labels/relatedGroupsLabelsList.directive.js:82
 msgid "from the"
 msgstr "del"
@@ -7975,6 +7902,17 @@ msgstr[1] "hosts"
 msgid "hosts with failures. Click for details."
 msgstr "hosts con fallos. Haga clic para obtener más información."
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:231
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:300
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:352
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
+msgid "in the documentation and the"
+msgstr "en la documentación y la"
+
 #: client/src/templates/workflows/workflow-maker/forms/workflow-node-form.partial.html:146
 msgid "min"
 msgstr "min"
@@ -7999,11 +7937,6 @@ msgstr "nuevo"
 #: client/src/shared/paginate/paginate.partial.html:45
 msgid "of"
 msgstr "de"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "of the filters match."
-msgstr "de la coincidencia con los filtros."
 
 #: client/src/scheduler/scheduler.strings.js:34
 msgid "on"
@@ -8032,6 +7965,17 @@ msgstr "pendiente"
 #: client/src/shared/form-generator.js:1044
 msgid "playbook"
 msgstr "playbook"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:181
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:207
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:233
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:276
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:302
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:328
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:380
+msgid "plugin configuration guide."
+msgstr "guía de configuración de complementos."
 
 #: client/features/jobs/jobs.strings.js:25
 msgid "running"
@@ -8064,11 +8008,6 @@ msgstr "fuentes con fallos en la sincronización. Haga clic para obtener más in
 msgid "successful"
 msgstr "correctos"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:259
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:272
-msgid "test"
-msgstr "prueba"
-
 #: client/src/activity-stream/factories/build-description.factory.js:136
 msgid "timed out"
 msgstr "agotado"
@@ -8078,10 +8017,6 @@ msgstr "agotado"
 #: client/src/templates/prompt/steps/survey/prompt-survey.partial.html:30
 msgid "to"
 msgstr "para"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:138
-msgid "to include all regions. Only Hosts associated with the selected regions will be updated."
-msgstr "para incluir todas las regiones. Solo se actualizarán los hosts asociados con las regiones seleccionadas."
 
 #: client/src/inventories-hosts/inventories/related/sources/factories/get-sync-status-msg.factory.js:17
 msgid "to start it now."
@@ -8107,31 +8042,13 @@ msgstr "v3 default%s - establecer en 'valor predeterminado'"
 msgid "v3 multi-domain%s - your domain name"
 msgstr "v3 multi-domain%s - su nombre de dominio"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:318
-msgid "view azure_rm.ini in the Ansible community.general github repo."
-msgstr "ver azure_rm.ini en el repositorio github community.general de Ansible."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:219
-msgid "view ec2.ini in the community.aws repo."
-msgstr "ver ec2.ini en el repositorio community.aws."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:243
-msgid "view vmware_inventory.ini in the vmware community repo."
-msgstr "ver vmware_inventory.ini en el repositorio community de VMware."
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
+msgid "view cloudforms.ini in the Ansible Collections github repo."
+msgstr "ver cloudforms.ini en el repositorio GitHub de Ansible Collections."
 
 #: client/features/jobs/jobs.strings.js:24
 msgid "waiting"
 msgstr "esperando"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "when"
-msgstr "cuando"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:240
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:252
-msgid "will create group names similar to the following examples based on the options selected:"
-msgstr "se crearán nombres de grupos similares a los de los siguientes ejemplos en función de las opciones seleccionadas:"
 
 #: client/index.template.ejs:158
 msgid "working..."
