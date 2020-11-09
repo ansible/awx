@@ -31,7 +31,7 @@ msgstr "（限制为前 10）"
 msgid "(defaults to %s)"
 msgstr "（默认为 %s）"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:396
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:488
 msgid "(seconds)"
 msgstr "（秒）"
 
@@ -47,15 +47,15 @@ msgstr "20"
 msgid "50"
 msgstr "50"
 
-#: client/src/license/license.partial.html:193
+#: client/src/license/license.partial.html:208
 msgid "<b>Automation analytics</b>: This data is used to enhance future releases of the Tower Software and to provide Automation Analytics to Tower subscribers."
 msgstr "<b>自动化分析</b>：这些数据用于增强将来的 Tower 软件发行版本，并为 Tower 订阅者提供 自动化分析。"
 
-#: client/src/license/license.partial.html:171
+#: client/src/license/license.partial.html:186
 msgid "<b>I agree to the End User License Agreement</b>"
 msgstr "<b>我同意最终用户许可证协议</b>"
 
-#: client/src/license/license.partial.html:187
+#: client/src/license/license.partial.html:202
 msgid "<b>User analytics</b>: This data is used to enhance future releases of the Tower Software and help streamline customer experience and success."
 msgstr "<b>用户分析</b>：这些数据用于增强未来的 Tower 软件发行版本，并帮助简化客户体验和成功。"
 
@@ -219,26 +219,17 @@ msgstr "所有活动"
 msgid "ALL GROUPS"
 msgstr "所有组"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "ANY"
-msgstr "任何"
-
 #: client/src/credentials/credentials.form.js:198
 msgid "API Key"
 msgstr "API 密钥"
 
-#: client/src/notifications/notificationTemplates.form.js:263
+#: client/src/notifications/notificationTemplates.form.js:247
 msgid "API Service/Integration Key"
 msgstr "API 服务/集成密钥"
 
 #: client/src/notifications/shared/type-change.service.js:66
 msgid "API Token"
 msgstr "API 令牌"
-
-#: client/src/notifications/notificationTemplates.form.js:348
-msgid "API URL"
-msgstr "API URL"
 
 #: client/features/users/tokens/tokens.strings.js:40
 msgid "APPLICATION"
@@ -296,11 +287,11 @@ msgstr "访问密钥"
 msgid "Access Token Expiration"
 msgstr "访问令牌过期"
 
-#: client/src/notifications/notificationTemplates.form.js:241
+#: client/src/notifications/notificationTemplates.form.js:225
 msgid "Account SID"
 msgstr "帐户 SID"
 
-#: client/src/notifications/notificationTemplates.form.js:200
+#: client/src/notifications/notificationTemplates.form.js:184
 msgid "Account Token"
 msgstr "帐户令牌"
 
@@ -329,8 +320,8 @@ msgstr "活动流"
 #: client/src/credentials/credentials.form.js:446
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:113
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:110
-#: client/src/organizations/organizations.form.js:108
-#: client/src/organizations/organizations.form.js:150
+#: client/src/organizations/organizations.form.js:117
+#: client/src/organizations/organizations.form.js:159
 #: client/src/projects/projects.form.js:285
 #: client/src/teams/teams.form.js:169
 #: client/src/teams/teams.form.js:85
@@ -383,7 +374,7 @@ msgstr "添加用户"
 msgid "Add Users"
 msgstr "添加用户"
 
-#: client/src/organizations/organizations.form.js:109
+#: client/src/organizations/organizations.form.js:118
 msgid "Add Users to this organization."
 msgstr "将用户添加到此机构。"
 
@@ -427,7 +418,7 @@ msgstr "添加新令牌"
 #: client/src/credentials/credentials.form.js:447
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:115
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:112
-#: client/src/organizations/organizations.form.js:151
+#: client/src/organizations/organizations.form.js:160
 #: client/src/projects/projects.form.js:286
 #: client/src/templates/job_templates/job-template.form.js:541
 #: client/src/templates/workflows.form.js:296
@@ -454,9 +445,13 @@ msgstr "管理"
 msgid "Admins"
 msgstr "管理员"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:478
 msgid "After every project update where the SCM revision changes, refresh the inventory from the selected source before executing job tasks. This is intended for static content, like the Ansible inventory .ini file format."
 msgstr "因 SCM 修订版本变更进行每次项目更新后，请在执行作业任务前从所选源刷新清单。这是面向静态内容，如 Ansible 清单 .ini 文件格式。"
+
+#: client/src/license/license.partial.html:173
+msgid "Agree to the End User License Agreement, and click submit."
+msgstr "同意最终用户许可证协议，点提交。"
 
 #: client/features/templates/templates.strings.js:160
 #: client/lib/components/components.strings.js:105
@@ -464,7 +459,6 @@ msgstr "因 SCM 修订版本变更进行每次项目更新后，请在执行作�
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:49
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:72
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:80
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:138
 msgid "All"
 msgstr "所有"
 
@@ -681,11 +675,6 @@ msgstr "授权"
 msgid "Authorize Password"
 msgstr "授权密码"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:241
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:253
-msgid "Availability Zone:"
-msgstr "可用性区域："
-
 #: client/src/configuration/forms/auth-form/configuration-auth.controller.js:91
 msgid "Azure AD"
 msgstr "Azure AD"
@@ -723,11 +712,11 @@ msgstr "要签出的分支。除了分支外，您可以输入标签、提交散
 msgid "Branch to use in job run. Project default used if blank."
 msgstr "要在作业运行中使用的分支。如果为空，则使用项目默认值。"
 
-#: client/src/license/license.partial.html:113
+#: client/src/license/license.partial.html:120
 msgid "Browse"
 msgstr "浏览"
 
-#: client/src/license/license.partial.html:180
+#: client/src/license/license.partial.html:195
 msgid "By default, Tower collects and transmits analytics data on Tower usage to Red Hat.  There are two categories of data collected by Tower. For more information, see <a target=\"_blank\" href=\"http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0\">this Tower documentation page</a>. Uncheck the following boxes to disable this feature."
 msgstr "默认情况下，Tower 会收集关于 Tower 使用情况的分析数据并将其传送到红帽。Tower 收集的数据分为两类。如需更多信息，请参阅<a target=\"_blank\" href=\"http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0\">这个 Tower 文档页面</a>。请取消选择以下复选框以禁用此功能。"
 
@@ -742,13 +731,14 @@ msgstr "默认情况下，Tower 会收集关于 Tower 使用情况的分析数�
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal.partial.html:16
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:16
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:16
-#: client/src/license/license.partial.html:259
+#: client/src/license/license.partial.html:274
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:17
 #: client/src/partials/survey-maker-modal.html:17
 #: client/src/partials/survey-maker-modal.html:82
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:17
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:131
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:180
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:68
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:69
 #: client/src/templates/workflows/add-workflow/workflow-add.controller.js:149
 #: client/src/templates/workflows/edit-workflow/workflow-edit.controller.js:188
 msgid "CANCEL"
@@ -887,7 +877,7 @@ msgstr "凭证"
 msgid "CREDENTIAL TYPE"
 msgstr "凭证类型"
 
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:60
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:61
 msgid "CREDENTIAL TYPE:"
 msgstr "凭证类型："
 
@@ -909,8 +899,8 @@ msgstr "凭证"
 msgid "CREDENTIALS PERMISSIONS"
 msgstr "凭证权限"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:396
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:408
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:488
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:500
 #: client/src/projects/projects.form.js:231
 msgid "Cache Timeout"
 msgstr "缓存超时"
@@ -1020,7 +1010,7 @@ msgstr "当部署 {{BRAND_NAME}} 到这个位置时修改 %s。"
 msgid "Changes"
 msgstr "更改"
 
-#: client/src/notifications/notificationTemplates.form.js:460
+#: client/src/notifications/notificationTemplates.form.js:432
 msgid "Channel"
 msgstr "频道"
 
@@ -1061,7 +1051,7 @@ msgstr "选择回答类型"
 msgid "Choose an answer type or format you want as the prompt for the user. Refer to the Ansible Tower Documentation for more additional information about each option."
 msgstr "选择您想要作为用户提示的回答类型或格式。请参阅 Ansible Tower 文档来了解每个选项的更多其他信息。"
 
-#: client/src/notifications/notificationTemplates.form.js:560
+#: client/src/notifications/notificationTemplates.form.js:532
 msgid "Choose an email option"
 msgstr "选择电子邮件选项"
 
@@ -1072,10 +1062,6 @@ msgstr "选择清单文件"
 #: client/src/shared/directives.js:92
 msgid "Choose file"
 msgstr "选择文件"
-
-#: client/src/license/license.partial.html:104
-msgid "Choose your license file, agree to the End User License Agreement, and click submit."
-msgstr "选择您的许可证文件，同意最终用户许可证协议，并点击“提交”。"
 
 #: client/src/projects/projects.form.js:176
 msgid "Clean"
@@ -1114,10 +1100,6 @@ msgstr "点击一行来选择它，然后在完成时点击“完成”。点击
 msgid "Click on a row to select it, and click Finished when done. Use the %s button to create a new job template."
 msgstr "点击一行来选择它，然后在完成时点击“完成”。点击 %s 按钮创建新作业模板。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:137
-msgid "Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose"
-msgstr "点击区域字段查看云提供商的区域列表。您可以选择多个区域，或者选择"
-
 #: client/src/organizations/linkout/controllers/organizations-projects.controller.js:277
 msgid "Click the"
 msgstr "点击"
@@ -1138,7 +1120,7 @@ msgstr "点击以查看链接"
 msgid "Client ID"
 msgstr "客户端 ID"
 
-#: client/src/notifications/notificationTemplates.form.js:274
+#: client/src/notifications/notificationTemplates.form.js:258
 msgid "Client Identifier"
 msgstr "客户端标识符"
 
@@ -1150,6 +1132,7 @@ msgstr "客户端机密"
 #: client/src/inventories-hosts/inventories/insights/insights.partial.html:92
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:618
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:7
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:8
 #: client/src/organizations/linkout/addUsers/addUsers.partial.html:11
 #: client/src/partials/survey-maker-modal.html:28
 #: client/src/partials/survey-maker-modal.html:7
@@ -1207,6 +1190,10 @@ msgstr "紧凑"
 msgid "Completed Jobs"
 msgstr "完成的作业"
 
+#: client/src/license/license.partial.html:10
+msgid "Compliant"
+msgstr "合规"
+
 #: client/src/management-jobs/card/card.partial.html:34
 #: client/src/management-jobs/card/card.partial.html:37
 msgid "Configure Notifications"
@@ -1228,6 +1215,10 @@ msgstr "确认工厂重置"
 msgid "Confirm the removal of the"
 msgstr "确认删除"
 
+#: client/src/license/license.partial.html:75
+msgid "Contact Us"
+msgstr "联系我们"
+
 #: client/src/teams/teams.form.js:24
 #: client/src/users/users.form.js:25
 msgid "Contact your System Administrator to grant you the appropriate permissions to add and edit Users and Teams."
@@ -1242,6 +1233,10 @@ msgstr "容器组"
 msgid "Container Groups Help"
 msgstr "容器组帮助"
 
+#: client/src/login/authenticationServices/timer.factory.js:136
+msgid "Continue"
+msgstr "继续"
+
 #: client/lib/components/components.strings.js:130
 msgid "Continue workflow job?"
 msgstr "是否继续工作流作业？"
@@ -1251,7 +1246,7 @@ msgstr "是否继续工作流作业？"
 msgid "Control the level of output ansible will produce as the playbook executes."
 msgstr "控制 ansible 在 playbook 执行时生成的输出级别。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:336
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:398
 msgid "Control the level of output ansible will produce for inventory source update jobs."
 msgstr "控制 ansible 为清单源更新作业生成的输出级别。"
 
@@ -1306,9 +1301,9 @@ msgstr "复制 {{resourceType}}"
 
 #: client/src/about/about.partial.html:31
 msgid ""
-"Copyright &copy; 2019 Red Hat, Inc. <br>\n"
+"Copyright &copy; {{ currentYear }} Red Hat, Inc. <br>\n"
 "                          Visit <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> for more information.<br>"
-msgstr "Copyright &copy; 2019 Red Hat, Inc. <br>\n"
+msgstr "Copyright &copy; {{ currentYear }} Red Hat, Inc. <br>\n"
 "                          Visit <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> for more information.<br>"
 
 #: client/lib/components/components.strings.js:90
@@ -1408,11 +1403,13 @@ msgstr "已创建（待定）"
 #: client/src/projects/add/projects-add.controller.js:140
 #: client/src/projects/add/projects-add.controller.js:153
 #: client/src/projects/add/projects-add.controller.js:162
-#: client/src/projects/add/projects-add.controller.js:181
+#: client/src/projects/add/projects-add.controller.js:174
+#: client/src/projects/add/projects-add.controller.js:189
 #: client/src/projects/edit/projects-edit.controller.js:263
 #: client/src/projects/edit/projects-edit.controller.js:274
 #: client/src/projects/edit/projects-edit.controller.js:283
-#: client/src/projects/edit/projects-edit.controller.js:302
+#: client/src/projects/edit/projects-edit.controller.js:295
+#: client/src/projects/edit/projects-edit.controller.js:310
 msgid "Credential"
 msgstr "凭证"
 
@@ -1462,7 +1459,7 @@ msgstr "当前镜像："
 msgid "Currently following output as it arrives. Click to unfollow"
 msgstr "当前在输出到达时跟随输出。点击以取消跟随"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:170
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
 msgid "Custom Inventory Script"
 msgstr "自定义清单脚本"
 
@@ -1479,7 +1476,7 @@ msgstr "自定义脚本"
 msgid "Customize Pod Spec"
 msgstr "自定义 Pod 规格"
 
-#: client/src/notifications/notificationTemplates.form.js:577
+#: client/src/notifications/notificationTemplates.form.js:549
 msgid "Customize messages…"
 msgstr "自定义消息…"
 
@@ -1498,7 +1495,7 @@ msgstr "仪表板"
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:24
 #: client/src/inventory-scripts/list/list.controller.js:130
 #: client/src/notifications/notification-templates-list/list.controller.js:235
-#: client/src/organizations/edit/organizations-edit.controller.js:164
+#: client/src/organizations/edit/organizations-edit.controller.js:180
 #: client/src/organizations/linkout/controllers/organizations-admins.controller.js:69
 #: client/src/organizations/linkout/controllers/organizations-users.controller.js:68
 #: client/src/organizations/list/organizations-list.controller.js:202
@@ -1593,7 +1590,7 @@ msgstr "定义系统级的特性和功能"
 #: client/src/inventory-scripts/list/list.controller.js:126
 #: client/src/notifications/notification-templates-list/list.controller.js:231
 #: client/src/notifications/notificationTemplates.list.js:105
-#: client/src/organizations/edit/organizations-edit.controller.js:161
+#: client/src/organizations/edit/organizations-edit.controller.js:177
 #: client/src/organizations/linkout/controllers/organizations-admins.controller.js:66
 #: client/src/organizations/linkout/controllers/organizations-users.controller.js:65
 #: client/src/organizations/list/organizations-list.controller.js:198
@@ -1733,11 +1730,6 @@ msgstr "删除此 {{ resourceType }} 会使以下资源不可用。"
 msgid "Depending on the size of the repository this may significantly increase the amount of time required to complete an update."
 msgstr "根据存储库的大小，这可能会显著增加完成更新所需的时间。"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:261
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:274
-msgid "Describe Instances documentation"
-msgstr "描述实例文档"
-
 #: client/features/applications/add-applications.controller.js:36
 #: client/features/templates/templates.strings.js:17
 #: client/features/users/tokens/users-tokens-add.controller.js:26
@@ -1769,18 +1761,16 @@ msgstr "描述"
 
 #: client/src/notifications/notificationTemplates.form.js:156
 #: client/src/notifications/notificationTemplates.form.js:160
-#: client/src/notifications/notificationTemplates.form.js:172
-#: client/src/notifications/notificationTemplates.form.js:176
 msgid "Destination Channels"
 msgstr "目标频道"
 
-#: client/src/notifications/notificationTemplates.form.js:535
-#: client/src/notifications/notificationTemplates.form.js:539
+#: client/src/notifications/notificationTemplates.form.js:507
+#: client/src/notifications/notificationTemplates.form.js:511
 msgid "Destination Channels or Users"
 msgstr "目标频道或用户"
 
-#: client/src/notifications/notificationTemplates.form.js:225
-#: client/src/notifications/notificationTemplates.form.js:226
+#: client/src/notifications/notificationTemplates.form.js:209
+#: client/src/notifications/notificationTemplates.form.js:210
 msgid "Destination SMS Number"
 msgstr "目标 SMS 号码"
 
@@ -1793,10 +1783,10 @@ msgstr "目标 SMS 号码"
 msgid "Details"
 msgstr "详情"
 
-#: client/src/notifications/notificationTemplates.form.js:341
-#: client/src/notifications/notificationTemplates.form.js:403
-#: client/src/notifications/notificationTemplates.form.js:474
-#: client/src/notifications/notificationTemplates.form.js:506
+#: client/src/notifications/notificationTemplates.form.js:325
+#: client/src/notifications/notificationTemplates.form.js:375
+#: client/src/notifications/notificationTemplates.form.js:446
+#: client/src/notifications/notificationTemplates.form.js:478
 msgid "Disable SSL Verification"
 msgstr "禁用 SSL 验证"
 
@@ -1937,7 +1927,7 @@ msgstr "过期"
 msgid "EXTRA VARIABLES"
 msgstr "额外变量"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:375
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:467
 msgid "Each time a job runs using this inventory, refresh the inventory from the selected source before executing job tasks."
 msgstr "每次使用此清单运行作业时，请在执行作业前从所选源中刷新清单。"
 
@@ -2072,8 +2062,8 @@ msgstr "已经过"
 msgid "Email"
 msgstr "电子邮件"
 
-#: client/src/notifications/notificationTemplates.form.js:558
-#: client/src/notifications/notificationTemplates.form.js:559
+#: client/src/notifications/notificationTemplates.form.js:530
+#: client/src/notifications/notificationTemplates.form.js:531
 msgid "Email Options"
 msgstr "电子邮件选项"
 
@@ -2127,6 +2117,16 @@ msgstr "为此作业模板启用 Webhook。"
 msgid "Enable webhook for this workflow job template."
 msgstr "为此工作流作业模板启用 Webhook。"
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:426
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:428
+msgid "Enabled Value"
+msgstr "已启用的值"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:416
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:418
+msgid "Enabled Variable"
+msgstr "已启用的变量"
+
 #: client/src/templates/job_templates/job-template.form.js:335
 msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {{BRAND_NAME}} and request a configuration update using this job template."
 msgstr "允许创建部署回调 URL。使用此 URL，主机可访问 {{BRAND_NAME}} 并使用此作业模板请求配置更新。"
@@ -2149,7 +2149,7 @@ msgstr "结束日期"
 msgid "End Time"
 msgstr "结束时间"
 
-#: client/src/license/license.partial.html:163
+#: client/src/license/license.partial.html:178
 msgid "End User License Agreement"
 msgstr "最终用户许可证协议"
 
@@ -2160,19 +2160,16 @@ msgstr "最终用户许可证协议"
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "使用 JSON 或 YAML 语法输入清单变量。使用单选按钮在两者之间切换。"
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:74
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
 msgstr "使用 JSON 或 YAML 语法输入清单变量。使用单选按钮在两者之间切换。示例语法请参阅 Ansible Tower 文档。"
 
-#: client/src/notifications/notificationTemplates.form.js:335
+#: client/src/notifications/notificationTemplates.form.js:319
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "每行输入一个注解标签，不带逗号。"
 
-#: client/src/notifications/notificationTemplates.form.js:175
-msgid "Enter one HipChat channel per line. The pound symbol (#) is not required."
-msgstr "每行输入一个 HipChat 频道。不需要输入 # 号。"
-
-#: client/src/notifications/notificationTemplates.form.js:538
+#: client/src/notifications/notificationTemplates.form.js:510
 msgid "Enter one IRC channel or username per line. The pound symbol (#) for channels, and the at (@) symbol for users, are not required."
 msgstr "每行输入一个 IRC 频道或用户名。频道不需要输入 # 号，用户不需要输入 @ 符号。"
 
@@ -2184,7 +2181,7 @@ msgstr "每行输入一个 Slack 频道。频道不需要输入 # 号。"
 msgid "Enter one email address per line to create a recipient list for this type of notification."
 msgstr "每行输入一封电子邮件地址，为这类通知创建一个接收者列表。"
 
-#: client/src/notifications/notificationTemplates.form.js:229
+#: client/src/notifications/notificationTemplates.form.js:213
 msgid "Enter one phone number per line to specify where to route SMS messages."
 msgstr "每行输入一个电话号码来指定 SMS 消息的传送目标。"
 
@@ -2203,14 +2200,30 @@ msgstr "输入与您的 Red Hat Satellite 6 服务器 %s 对应的 URL。%s 例�
 msgid "Enter the hostname or IP address which corresponds to your VMware vCenter."
 msgstr "输入与 VMware vCenter 对应的主机名或 IP 地址。"
 
-#: client/src/notifications/notificationTemplates.form.js:215
+#: client/src/notifications/notificationTemplates.form.js:199
 msgid "Enter the number associated with the \"Messaging Service\" in Twilio in the format +18005550199."
 msgstr "在 Twilio 中输入与“信息服务”关联的号码，格式为 +18005550199。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:196
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:220
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:244
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:319
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:177
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:203
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:229
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:272
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:298
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:350
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:376
+msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see"
+msgstr "输入变量来配置清单源。有关如何配置此插件的详细描述，请参阅"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:156
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:182
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:208
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:234
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:277
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:303
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:329
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:381
 msgid "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "使用 JSON 或 YAML 语法输入变量。使用单选按钮在两者之间切换。"
 
@@ -2218,12 +2231,12 @@ msgstr "使用 JSON 或 YAML 语法输入变量。使用单选按钮在两者之
 msgid "Environment"
 msgstr "环境"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:186
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:193
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:146
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:153
 msgid "Environment Variables"
 msgstr "环境变量"
 
-#: client/src/license/license.controller.js:232
+#: client/src/license/license.controller.js:228
 msgid "Error Applying License"
 msgstr "应用许可证时出错"
 
@@ -2231,15 +2244,15 @@ msgstr "应用许可证时出错"
 msgid "Error Details"
 msgstr "错误详情"
 
-#: client/src/license/license.controller.js:166
+#: client/src/license/license.controller.js:161
 msgid "Error Fetching Licenses"
 msgstr "获取许可证时出错"
 
-#: client/src/notifications/notificationTemplates.form.js:643
+#: client/src/notifications/notificationTemplates.form.js:615
 msgid "Error Message"
 msgstr "错误消息"
 
-#: client/src/notifications/notificationTemplates.form.js:654
+#: client/src/notifications/notificationTemplates.form.js:626
 msgid "Error Message Body"
 msgstr "错误消息正文"
 
@@ -2267,13 +2280,13 @@ msgstr "错误消息正文"
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:153
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:203
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:222
-#: client/src/login/loginModal/loginModal.controller.js:143
+#: client/src/login/loginModal/loginModal.controller.js:144
 #: client/src/management-jobs/card/card.controller.js:122
 #: client/src/management-jobs/card/card.controller.js:28
 #: client/src/management-jobs/card/card.controller.js:58
-#: client/src/organizations/main.js:111
-#: client/src/organizations/main.js:124
-#: client/src/organizations/main.js:139
+#: client/src/organizations/main.js:155
+#: client/src/organizations/main.js:168
+#: client/src/organizations/main.js:183
 #: client/src/projects/add/projects-add.controller.js:120
 #: client/src/projects/edit/projects-edit.controller.js:154
 #: client/src/projects/edit/projects-edit.controller.js:220
@@ -2336,6 +2349,11 @@ msgstr "GIT SCM 的 URL 示例包括："
 msgid "Example URLs for Mercurial SCM include:"
 msgstr "Mercurial SCM 的 URL 示例包括："
 
+#: client/src/projects/add/projects-add.controller.js:175
+#: client/src/projects/edit/projects-edit.controller.js:296
+msgid "Example URLs for Remote Archive SCM include:"
+msgstr "远程归档 SCM 的 URL 示例包括："
+
 #: client/src/projects/add/projects-add.controller.js:154
 #: client/src/projects/edit/projects-edit.controller.js:275
 msgid "Example URLs for Subversion SCM include:"
@@ -2371,7 +2389,7 @@ msgstr "展开输出"
 msgid "Expanded"
 msgstr "已展开"
 
-#: client/src/license/license.partial.html:246
+#: client/src/license/license.partial.html:261
 msgid "Expires"
 msgstr "过期"
 
@@ -2383,7 +2401,7 @@ msgstr "过期（升序）"
 msgid "Expires (Descending)"
 msgstr "过期（降序）"
 
-#: client/src/license/license.partial.html:39
+#: client/src/license/license.partial.html:33
 msgid "Expires On"
 msgstr "过期日"
 
@@ -2526,7 +2544,7 @@ msgstr "为仪表板获取新作业失败："
 msgid "Failed to get new templates for dashboard:"
 msgstr "为仪表板获取新模板失败："
 
-#: client/src/organizations/main.js:140
+#: client/src/organizations/main.js:184
 msgid "Failed to get organizations for which this user is a notification admin. GET returned"
 msgstr "获取此用户作为通知管理员的机构失败。GET 返回"
 
@@ -2566,7 +2584,7 @@ msgid "Failed to get workflow job template. GET returned status:"
 msgstr "获取工作流作业模板失败。GET 返回的状态："
 
 #: client/src/app.js:229
-#: client/src/login/loginModal/loginModal.controller.js:144
+#: client/src/login/loginModal/loginModal.controller.js:145
 msgid "Failed to get workflow jobs pending approval. GET returned status:"
 msgstr "获取等待批准的工作流作业失败。GET 返回的状态："
 
@@ -2608,11 +2626,11 @@ msgstr "更新搜索结果失败。"
 msgid "Failed updating job %s with variables. POST returned: %d"
 msgstr "通过变量更新作业 %s 失败。POST 返回：%d"
 
-#: client/src/organizations/main.js:112
+#: client/src/organizations/main.js:156
 msgid "Failed while checking to see if user is a notification administrator of this organization. GET returned"
 msgstr "在检查用户是否为该机构的通知管理员时失败。GET 返回"
 
-#: client/src/organizations/main.js:125
+#: client/src/organizations/main.js:169
 msgid "Failed while checking to see if user is an administrator of this organization. GET returned"
 msgstr "在检查用户是否为该机构的管理员时失败。 GET 返回"
 
@@ -2656,7 +2674,7 @@ msgstr "名字"
 msgid "First Run"
 msgstr "首次运行"
 
-#: client/src/organizations/organizations.form.js:124
+#: client/src/organizations/organizations.form.js:133
 msgid "First name"
 msgstr "名字"
 
@@ -2719,9 +2737,9 @@ msgstr "频率详情"
 msgid "Fri"
 msgstr "周五"
 
-#: client/src/license/license.partial.html:150
-msgid "GET LICENSES"
-msgstr "获取许可证"
+#: client/src/license/license.partial.html:157
+msgid "GET SUBSCRIPTIONS"
+msgstr "获取订阅"
 
 #: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
 msgid "GO TO <a ui-sref=\"notifications.add\" translate=\"\">NOTIFICATIONS</a> TO"
@@ -2730,6 +2748,11 @@ msgstr "Go TO <a ui-sref=\"notifications.add\" translate=\"\">NOTIFICATIONS</a> 
 #: client/src/inventories-hosts/hosts/related/groups/hosts-related-groups.route.js:45
 msgid "GROUPS"
 msgstr "组"
+
+#: client/src/organizations/organizations.form.js:59
+#: client/src/organizations/organizations.form.js:62
+msgid "Galaxy Credentials"
+msgstr "Galaxy 凭证"
 
 #: client/src/shared/form-generator.js:801
 msgid "Generate field"
@@ -2805,11 +2828,11 @@ msgstr "进入列表的上一个页"
 msgid "Google OAuth2"
 msgstr "Google OAuth2"
 
-#: client/src/notifications/notificationTemplates.form.js:300
+#: client/src/notifications/notificationTemplates.form.js:284
 msgid "Grafana API Key"
 msgstr "Grafana API 密钥"
 
-#: client/src/notifications/notificationTemplates.form.js:285
+#: client/src/notifications/notificationTemplates.form.js:269
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
@@ -2868,13 +2891,13 @@ msgstr "提示：在以下字段上拖放专用文件。"
 msgid "HOSTS"
 msgstr "主机"
 
-#: client/src/notifications/notificationTemplates.form.js:410
-#: client/src/notifications/notificationTemplates.form.js:411
+#: client/src/notifications/notificationTemplates.form.js:382
+#: client/src/notifications/notificationTemplates.form.js:383
 msgid "HTTP Headers"
 msgstr "HTTP 标头"
 
-#: client/src/notifications/notificationTemplates.form.js:427
-#: client/src/notifications/notificationTemplates.form.js:428
+#: client/src/notifications/notificationTemplates.form.js:399
+#: client/src/notifications/notificationTemplates.form.js:400
 msgid "HTTP Method"
 msgstr "HTTP 方法"
 
@@ -2914,6 +2937,11 @@ msgstr "主机配置密钥"
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:39
 msgid "Host Enabled"
 msgstr "主机已启用"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:406
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:408
+msgid "Host Filter"
+msgstr "主机过滤器"
 
 #: client/features/output/output.strings.js:66
 msgid "Host Limit Error"
@@ -2963,33 +2991,29 @@ msgstr "此作业的主机状态信息不可用。"
 msgid "Hosts"
 msgstr "主机"
 
+#: client/src/license/license.partial.html:46
 #: client/src/license/license.partial.html:52
-#: client/src/license/license.partial.html:58
 msgid "Hosts Available"
 msgstr "主机可用"
 
+#: client/src/license/license.partial.html:62
 #: client/src/license/license.partial.html:68
 msgid "Hosts Remaining"
 msgstr "剩余主机"
 
-#: client/src/license/license.partial.html:62
+#: client/src/license/license.partial.html:56
 msgid "Hosts Used"
 msgstr "已使用的主机"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "Hosts are imported to"
-msgstr "主机已导入到"
 
 #: client/features/output/output.strings.js:129
 msgid "ID"
 msgstr "ID"
 
-#: client/src/notifications/notificationTemplates.form.js:313
+#: client/src/notifications/notificationTemplates.form.js:297
 msgid "ID of the Dashboard (optional)"
 msgstr "仪表板 ID（可选）"
 
-#: client/src/notifications/notificationTemplates.form.js:321
+#: client/src/notifications/notificationTemplates.form.js:305
 msgid "ID of the Panel (optional)"
 msgstr "面板 ID（可选）"
 
@@ -3038,11 +3062,11 @@ msgstr "清单脚本"
 msgid "INVENTORY SCRIPTS"
 msgstr "清单脚本"
 
-#: client/src/notifications/notificationTemplates.form.js:524
+#: client/src/notifications/notificationTemplates.form.js:496
 msgid "IRC Nick"
 msgstr "IRC Nick"
 
-#: client/src/notifications/notificationTemplates.form.js:513
+#: client/src/notifications/notificationTemplates.form.js:485
 msgid "IRC Server Address"
 msgstr "IRC 服务器地址"
 
@@ -3066,8 +3090,8 @@ msgstr "问题： {{report.rule.description}}"
 msgid "ITEMS"
 msgstr "项"
 
-#: client/src/notifications/notificationTemplates.form.js:467
-#: client/src/notifications/notificationTemplates.form.js:499
+#: client/src/notifications/notificationTemplates.form.js:439
+#: client/src/notifications/notificationTemplates.form.js:471
 msgid "Icon URL"
 msgstr "图标 URL"
 
@@ -3075,16 +3099,11 @@ msgstr "图标 URL"
 msgid "Idle Session"
 msgstr "闲置会话"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:251
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:263
-msgid "If blank, all groups above are created except"
-msgstr "如果为空，会创建以上所有组，除了"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:364
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:456
 msgid "If checked, all variables for child groups and hosts will be removed and replaced by those found on the external source."
 msgstr "如果选中，子组和主机的所有变量都将被删除，并替换为外部源上的变量。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:353
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:445
 msgid "If checked, any hosts and groups that were previously present on the external source but are now removed will be removed from the Tower inventory. Hosts and groups that were not managed by the inventory source will be promoted to the next manually created group or if there is no manually created group to promote them into, they will be left in the \"all\" default group for the inventory."
 msgstr "如果选中，以前存在于外部源上的但现已被删除的任何主机和组都将从 Tower 清单中删除。不由清单源管理的主机和组将提升到下一个手动创建的组，如果没有手动创建组来提升它们，则它们将保留在清单的“all”默认组中。"
 
@@ -3118,13 +3137,12 @@ msgid "If no organization is given, the credential can only be used by the user 
 msgstr "如果没有提供机构，则凭证只能供创建凭证的用户使用。机构管理员和系统管理员可以分配一个机构，这样就可将凭证的角色分配给该机构中的用户和团队。"
 
 #: client/src/license/license.partial.html:74
-msgid "If you are ready to upgrade, please contact us by clicking the button below"
-msgstr "如果您准备升级，请点击下面的按钮联系我们。"
+msgid "If you are ready to upgrade or renew, please contact us by clicking the button below."
+msgstr "如果您准备进行升级或续订，请点击下面的按钮联系我们。"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:242
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:254
-msgid "Image ID:"
-msgstr "镜像 ID："
+#: client/src/license/license.partial.html:88
+msgid "If you do not have a subscription, you can visit Red Hat to obtain a trial subscription."
+msgstr "如果您还没有订阅，请联系红帽来获得一个试用订阅。"
 
 #: client/src/inventories-hosts/hosts/host.form.js:34
 #: client/src/inventories-hosts/hosts/host.list.js:35
@@ -3160,11 +3178,6 @@ msgstr "Insights"
 msgid "Insights Credential"
 msgstr "Insights 凭证"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:144
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:147
-msgid "Instance Filters"
-msgstr "实例过滤器"
-
 #: client/features/output/output.strings.js:67
 #: client/src/instance-groups/instance-groups.strings.js:43
 msgid "Instance Group"
@@ -3190,21 +3203,6 @@ msgstr "实例组"
 msgid "Instance Groups Help"
 msgstr "实例组帮助"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:251
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:263
-msgid "Instance ID"
-msgstr "实例 ID"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:243
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:255
-msgid "Instance ID:"
-msgstr "实例 ID："
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:244
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:256
-msgid "Instance Type:"
-msgstr "实例类型："
-
 #: client/lib/components/components.strings.js:85
 #: client/src/instance-groups/instance-groups.strings.js:20
 msgid "Instances"
@@ -3218,14 +3216,9 @@ msgstr "权限不足"
 msgid "Integer"
 msgstr "整数"
 
-#: client/src/license/license.partial.html:11
-msgid "Invalid License"
-msgstr "无效许可证"
-
-#: client/src/license/license.controller.js:109
-#: client/src/license/license.controller.js:117
-msgid "Invalid file format. Please upload valid JSON."
-msgstr "无效的文件格式。请上传有效的 JSON。"
+#: client/src/license/license.controller.js:112
+msgid "Invalid file format. Please upload a valid Red Hat Subscription Manifest."
+msgstr "无效的文件格式。请上传有效的红帽订阅清单。"
 
 #: client/lib/components/components.strings.js:16
 msgid "Invalid input for this type."
@@ -3286,6 +3279,17 @@ msgstr "清单文件"
 #: client/src/workflow-results/workflow-results.controller.js:79
 msgid "Inventory Limit"
 msgstr "清单限制"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:231
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:300
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:352
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
+msgid "Inventory Plugins"
+msgstr "清单插件"
 
 #: client/lib/components/components.strings.js:82
 #: client/lib/models/models.strings.js:20
@@ -3361,10 +3365,15 @@ msgstr "作业"
 msgid "JSON"
 msgstr "JSON"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:197
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:221
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:245
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:320
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:157
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:183
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:209
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:235
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:278
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:304
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:330
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:356
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:382
 msgid "JSON:"
 msgstr "JSON："
 
@@ -3443,11 +3452,6 @@ msgstr "密钥"
 msgid "Key"
 msgstr "密钥"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:245
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:257
-msgid "Key Name:"
-msgstr "密钥名称："
-
 #: client/src/credential-types/credential-types.list.js:31
 #: client/src/credentials/credentials.list.js:33
 msgid "Kind"
@@ -3495,10 +3499,6 @@ msgstr "LDAP 5（可选）"
 #: client/src/configuration/forms/auth-form/configuration-auth.partial.html:18
 msgid "LDAP Server"
 msgstr "LDAP 服务器"
-
-#: client/src/license/license.route.js:18
-msgid "LICENSE"
-msgstr "许可证"
 
 #: client/features/output/output.strings.js:76
 #: client/src/templates/job_templates/job-template.form.js:240
@@ -3553,7 +3553,7 @@ msgstr "最后使用（降序）"
 msgid "Last logged in:"
 msgstr "最后登录："
 
-#: client/src/organizations/organizations.form.js:128
+#: client/src/organizations/organizations.form.js:137
 msgid "Last name"
 msgstr "姓氏"
 
@@ -3599,27 +3599,12 @@ msgstr "旧状态配置不存在"
 
 #: client/lib/components/components.strings.js:98
 #: client/src/configuration/settings.partial.html:14
-#: client/src/license/license.controller.js:47
-#: client/src/license/license.partial.html:109
-#: client/src/license/license.partial.html:8
 msgid "License"
 msgstr "许可证"
 
 #: client/features/output/output.strings.js:78
 msgid "License Error"
 msgstr "许可证错误"
-
-#: client/src/license/license.partial.html:33
-msgid "License Key"
-msgstr "许可证密钥"
-
-#: client/src/license/license.controller.js:49
-msgid "License Management"
-msgstr "许可证管理"
-
-#: client/src/license/license.partial.html:21
-msgid "License Type"
-msgstr "许可证类型"
 
 #: client/features/output/output.strings.js:79
 #: client/features/templates/templates.strings.js:56
@@ -3631,21 +3616,6 @@ msgstr "许可证类型"
 #: client/src/templates/workflows.form.js:97
 msgid "Limit"
 msgstr "限制"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:255
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:268
-msgid "Limit to hosts having a tag:"
-msgstr "限制为具有标签的主机："
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:257
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:270
-msgid "Limit to hosts using either key pair:"
-msgstr "限制为使用任意密钥对主机："
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:259
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:272
-msgid "Limit to hosts where the Name tag begins with"
-msgstr "限制为特定的主机，其 Name 标签开头为"
 
 #: client/src/scheduler/scheduler.strings.js:51
 msgid "Limited to first 10"
@@ -3743,7 +3713,7 @@ msgstr "机器"
 msgid "Machine Credential"
 msgstr "机器凭证"
 
-#: client/src/license/license.partial.html:240
+#: client/src/license/license.partial.html:255
 msgid "Managed Nodes"
 msgstr "受管的节点"
 
@@ -3762,8 +3732,8 @@ msgstr "手动项目不需要 SCM 更新"
 msgid "Max 512 characters per label."
 msgstr "每个标签最多 512 个字符。"
 
-#: client/src/organizations/organizations.form.js:59
-#: client/src/organizations/organizations.form.js:66
+#: client/src/organizations/organizations.form.js:68
+#: client/src/organizations/organizations.form.js:75
 msgid "Max Hosts"
 msgstr "最大主机数"
 
@@ -3949,7 +3919,7 @@ msgstr "无选定项"
 msgid "NOTE: This field assumes the remote name is \"origin\"."
 msgstr "注意：该字段假设远程名称为“origin”。"
 
-#: client/src/login/loginModal/loginModal.partial.html:101
+#: client/src/login/loginModal/loginModal.partial.html:102
 msgid "NOTICE"
 msgstr "通知"
 
@@ -3964,7 +3934,7 @@ msgstr "通知模板"
 
 #: client/lib/components/components.strings.js:131
 #: client/src/inventories-hosts/inventories/related/sources/edit/sources-notifications.route.js:9
-#: client/src/management-jobs/notifications/notification.route.js:46
+#: client/src/management-jobs/notifications/notification.route.js:59
 #: client/src/notifications/main.js:44
 #: client/src/notifications/main.js:95
 #: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
@@ -4071,7 +4041,7 @@ msgstr "尚未创建与此类型匹配的凭证"
 msgid "No JSON data returned by the module"
 msgstr "没有此模块返回的 JSON 数据"
 
-#: client/src/license/license.controller.js:158
+#: client/src/license/license.controller.js:153
 msgid "No Licenses Found"
 msgstr "未找到许可证"
 
@@ -4241,10 +4211,10 @@ msgstr "没有为清单同步配置。"
 msgid "Note that only hosts directly in this group can be disassociated.  Hosts in sub-groups must be disassociated directly from the sub-group level that they belong."
 msgstr "请注意，只有直接属于此组的主机才能解除关联。子组中的主机必须与其所属的子组级别直接解除关联。"
 
-#: client/src/notifications/notificationTemplates.form.js:371
-#: client/src/notifications/notificationTemplates.form.js:372
-#: client/src/notifications/notificationTemplates.form.js:568
-#: client/src/notifications/notificationTemplates.form.js:569
+#: client/src/notifications/notificationTemplates.form.js:343
+#: client/src/notifications/notificationTemplates.form.js:344
+#: client/src/notifications/notificationTemplates.form.js:540
+#: client/src/notifications/notificationTemplates.form.js:541
 msgid "Notification Color"
 msgstr "通知颜色"
 
@@ -4252,7 +4222,7 @@ msgstr "通知颜色"
 msgid "Notification Failed."
 msgstr "通知失败。"
 
-#: client/src/notifications/notificationTemplates.form.js:360
+#: client/src/notifications/notificationTemplates.form.js:332
 msgid "Notification Label"
 msgstr "通知标签"
 
@@ -4270,7 +4240,7 @@ msgstr "通知超时。"
 msgid "Notifications"
 msgstr "通知"
 
-#: client/src/notifications/notificationTemplates.form.js:385
+#: client/src/notifications/notificationTemplates.form.js:357
 msgid "Notify Channel"
 msgstr "通知频道"
 
@@ -4292,7 +4262,7 @@ msgstr "开"
 msgid "OPTIONS"
 msgstr "选项"
 
-#: client/src/license/license.partial.html:121
+#: client/src/license/license.partial.html:128
 msgid "OR"
 msgstr "或者"
 
@@ -4306,7 +4276,7 @@ msgstr "机构"
 
 #: client/src/activity-stream/get-target-title.factory.js:29
 #: client/src/organizations/list/organizations-list.partial.html:6
-#: client/src/organizations/main.js:51
+#: client/src/organizations/main.js:55
 msgid "ORGANIZATIONS"
 msgstr "机构"
 
@@ -4333,10 +4303,9 @@ msgstr "失败时"
 msgid "On Success"
 msgstr "成功时"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:156
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:161
-msgid "Only Group By"
-msgstr "唯一分组标准"
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials.partial.html:3
+msgid "Open Galaxy credentials"
+msgstr "打开 Galaxy 凭证"
 
 #: client/src/templates/job_templates/multi-credential/multi-credential.partial.html:4
 msgid "Open credential lookup"
@@ -4422,52 +4391,22 @@ msgstr "其他提示"
 msgid "Others (Cloud Providers)"
 msgstr "其他（云提供商）"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:316
-msgid "Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "覆盖 azure_rm.ini 中由清单更新脚本使用的变量。有关这些变量的详细描述"
+#: client/src/license/license.partial.html:11
+msgid "Out of Compliance"
+msgstr "不合规"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
-msgid ""
-"Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                    view cloudforms.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "覆盖 cloudforms.ini 中由清单更新脚本使用的变量。一个变量配置示例包括在\n"
-"                    <a href=\\\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                    Ansible github repo 的 cloudforms.ini 中。</a> 使用 JSON 或 YAML 格式输入清单变量。通过单选按钮可以切换这两个格式。详情请参阅 Ansible Tower 的相关文档。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:217
-msgid "Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "覆写 ec2.ini 中由清单更新脚本使用的变量。有关这些变量的详细描述"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:299
-msgid ""
-"Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
-"                    view foreman.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "覆盖 foreman.ini 中由清单脚本使用的变量。一个变量配置示例包括在\n"
-"                    <a href=\\\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
-"                    Ansible github repo 的 foreman.ini 中。</a> 使用 JSON 或 YAML 格式输入清单变量。通过单选按旧可以切换这两个格式。详情请参阅 Ansible Tower 的相关文档。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:265
-msgid ""
-"Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
-"                    view openstack.yml in the Openstack github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "覆盖 openstack.yml 中由清单脚本使用的变量。一个变量配置示例包括在                    <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
-"                    Openstack github repo 的 openstack.yml 中。</a> 使用 JSON 或 YAML 格式输入清单变量。通过单选按旧可以切换这两个格式。详情请参阅 Ansible Tower 的相关文档。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:241
-msgid "Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "覆写 vmware.ini 中由清单更新脚本使用的变量。有关这些变量的详细描述"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:255
+msgid "Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration"
+msgstr "覆盖在 cloudforms.ini 中的由清单更新脚本使用的变量。一个变量配置示例"
 
 #: client/features/output/output.strings.js:83
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:350
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:442
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:447
 msgid "Overwrite"
 msgstr "覆盖"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:361
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:366
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:453
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:458
 msgid "Overwrite Variables"
 msgstr "覆盖变量"
 
@@ -4479,7 +4418,7 @@ msgstr "覆盖变量"
 msgid "Owners"
 msgstr "所有者"
 
-#: client/src/license/license.partial.html:136
+#: client/src/license/license.partial.html:143
 #: client/src/login/loginModal/loginModal.partial.html:80
 msgid "PASSWORD"
 msgstr "密码"
@@ -4548,7 +4487,7 @@ msgstr "PUT"
 msgid "Page"
 msgstr "页面"
 
-#: client/src/notifications/notificationTemplates.form.js:252
+#: client/src/notifications/notificationTemplates.form.js:236
 msgid "Pagerduty subdomain"
 msgstr "Pagerduty 子域"
 
@@ -4643,7 +4582,7 @@ msgstr "权限错误"
 #: client/src/credentials/credentials.form.js:438
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:104
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:101
-#: client/src/organizations/organizations.form.js:143
+#: client/src/organizations/organizations.form.js:152
 #: client/src/projects/projects.form.js:278
 #: client/src/teams/teams.form.js:128
 #: client/src/templates/job_templates/job-template.form.js:532
@@ -4699,10 +4638,6 @@ msgstr "请检查服务器并确保目录存在，并正确设置文件权限。
 #: client/features/templates/templates.strings.js:144
 msgid "Please click on an available node to form a new link."
 msgstr "请点击可用节点以形成新链接。"
-
-#: client/src/license/license.partial.html:91
-msgid "Please click the button below to visit Ansible's website to get a Tower license key."
-msgstr "请点击下面的按钮访问 Ansible 的网站以获取 Tower 许可证密钥。"
 
 #: client/src/inventories-hosts/inventory-hosts.strings.js:40
 msgid "Please click the icon to edit the host filter."
@@ -4889,14 +4824,14 @@ msgstr "请在向此工作流添加问卷调查前保存。"
 msgid "Please save before adding notifications."
 msgstr "请在添加通知前保存。"
 
-#: client/src/organizations/organizations.form.js:95
+#: client/src/organizations/organizations.form.js:104
 #: client/src/teams/teams.form.js:72
 msgid "Please save before adding users."
 msgstr "请在添加用户前保存。"
 
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:100
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:97
-#: client/src/organizations/organizations.form.js:135
+#: client/src/organizations/organizations.form.js:144
 #: client/src/projects/projects.form.js:270
 #: client/src/teams/teams.form.js:124
 #: client/src/templates/job_templates/job-template.form.js:525
@@ -5144,16 +5079,6 @@ msgstr "提示"
 msgid "Prompt on launch"
 msgstr "启动时提示"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:253
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:266
-msgid "Provide a comma-separated list of filter expressions."
-msgstr "提供以逗号分隔的过滤器表达式列表。"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:269
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:284
-msgid "Provide a comma-separated list of filter expressions. Hosts are imported when all of the filters match. Refer to Ansible Tower documentation for more detail."
-msgstr "提供以逗号分隔的过滤器表达式列表。所有过滤器匹配时，会导入主机。请参阅 Ansible Tower 文档了解更多详情。"
-
 #: client/src/inventories-hosts/hosts/host.form.js:49
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:48
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:50
@@ -5173,18 +5098,13 @@ msgstr "提供主机模式以进一步限制受工作流管理或影响的主机
 msgid "Provide account information using Google Compute Engine JSON credentials file."
 msgstr "使用 Google Compute Engine JSON 凭证文件提供帐户信息。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:195
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:155
 msgid "Provide environment variables to pass to the custom inventory script."
 msgstr "提供要传递给自定义清单脚本的环境变量。"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:272
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:287
-msgid "Provide the named URL encoded name or id of the remote Tower inventory to be imported."
-msgstr "提供要导入的远程 Tower 清单的命名 URL 编码名称或 ID。"
-
-#: client/src/license/license.partial.html:128
-msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS &gt; SYSTEM."
-msgstr "提供您的红帽客户凭证，您可以从可用许可证列表中进行选择。您使用的凭证将存储以供将来用于检索续订或扩展许可证。您可以在“设置”&gt;“系统”中更新或删除它们。"
+#: client/src/license/license.partial.html:135
+msgid "Provide your Red Hat or Red Hat Satellite credentials below and you can choose from a list of your available subscriptions.    The credentials you use will be stored for future use in retrieving renewal or expanded subscriptions."
+msgstr "提供您的 Red Hat 或 Red Hat Satellite 凭证，可从可用许可证列表中进行选择。您使用的凭证会被保存，以供将来用于续订或扩展订阅。"
 
 #: client/src/templates/job_templates/job-template.form.js:374
 #: client/src/templates/job_templates/job-template.form.js:382
@@ -5271,7 +5191,7 @@ msgid "RESULTS"
 msgstr "结果"
 
 #: client/features/templates/templates.strings.js:39
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:50
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:51
 msgid "REVERT"
 msgstr "恢复"
 
@@ -5353,6 +5273,10 @@ msgstr "接收者列表"
 msgid "Red"
 msgstr "红色"
 
+#: client/src/license/license.partial.html:114
+msgid "Red Hat Subscription Manifest"
+msgstr "Red Hat Subscription Manifest"
+
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:47
 msgid "Refer to the Ansible Tower documentation for further syntax and examples."
 msgstr "更多的语法和示例请参阅 Ansible Tower 文档。"
@@ -5392,14 +5316,9 @@ msgstr "刷新页面"
 msgid "Refspec"
 msgstr "Refspec"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:246
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:258
-msgid "Region:"
-msgstr "区域："
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
-msgid "Regions"
-msgstr "区域"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:410
+msgid "Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied."
+msgstr "仅导入主机名与这个正则表达式匹配的主机。该过滤器在应用任何清单插件过滤器后作为后步骤使用。"
 
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:81
 msgid "Related Groups"
@@ -5462,9 +5381,9 @@ msgstr "替换密码"
 msgid "Replace secret"
 msgstr "替换 secret"
 
-#: client/src/license/license.partial.html:96
-msgid "Request License"
-msgstr "请求许可证"
+#: client/src/license/license.partial.html:92
+msgid "Request Subscription"
+msgstr "请求订阅"
 
 #: client/src/templates/survey-maker/shared/question-definition.form.js:291
 msgid "Required"
@@ -5482,6 +5401,10 @@ msgstr "资源"
 #: client/src/scheduler/schedules.list.js:25
 msgid "Resources are missing from this template."
 msgstr "此模板中缺少资源。"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:420
+msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
+msgstr "从给定的主机变量字典中检索启用的状态。启用的变量可以使用点符号来指定，如 'foo.bar'"
 
 #: client/lib/services/base-string.service.js:111
 msgid "Return"
@@ -5510,7 +5433,7 @@ msgstr "恢复"
 #: client/src/configuration/forms/auth-form/sub-forms/auth-radius.form.js:34
 #: client/src/configuration/forms/auth-form/sub-forms/auth-saml.form.js:121
 #: client/src/configuration/forms/auth-form/sub-forms/auth-tacacs.form.js:47
-#: client/src/configuration/forms/jobs-form/configuration-jobs.form.js:129
+#: client/src/configuration/forms/jobs-form/configuration-jobs.form.js:110
 #: client/src/configuration/forms/system-form/sub-forms/system-activity-stream.form.js:26
 #: client/src/configuration/forms/system-form/sub-forms/system-logging.form.js:74
 #: client/src/configuration/forms/system-form/sub-forms/system-misc.form.js:95
@@ -5532,7 +5455,7 @@ msgstr "修订编号"
 #: client/src/credentials/credentials.form.js:461
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:130
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:127
-#: client/src/organizations/organizations.form.js:165
+#: client/src/organizations/organizations.form.js:174
 #: client/src/projects/projects.form.js:301
 #: client/src/teams/teams.form.js:109
 #: client/src/teams/teams.form.js:148
@@ -5566,6 +5489,7 @@ msgstr "SAML"
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal.partial.html:17
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:17
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:17
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:18
 #: client/src/partials/survey-maker-modal.html:84
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:18
 msgid "SAVE"
@@ -5671,10 +5595,10 @@ msgstr "搜索"
 
 #: client/features/templates/templates.strings.js:132
 #: client/lib/services/base-string.service.js:64
-#: client/src/license/license.partial.html:260
+#: client/src/license/license.partial.html:275
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:137
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:186
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:74
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:75
 #: client/src/templates/workflows/add-workflow/workflow-add.controller.js:155
 #: client/src/templates/workflows/edit-workflow/workflow-edit.controller.js:194
 msgid "SELECT"
@@ -5734,7 +5658,7 @@ msgstr "设置"
 msgid "SHOW"
 msgstr "显示"
 
-#: client/src/login/loginModal/loginModal.partial.html:109
+#: client/src/login/loginModal/loginModal.partial.html:114
 msgid "SIGN IN"
 msgstr "登录"
 
@@ -5772,7 +5696,7 @@ msgstr "SSH 密码"
 msgid "SSH key description"
 msgstr "SSH 密钥描述"
 
-#: client/src/notifications/notificationTemplates.form.js:551
+#: client/src/notifications/notificationTemplates.form.js:523
 msgid "SSL Connection"
 msgstr "SSL 连接"
 
@@ -5788,6 +5712,10 @@ msgstr "状态"
 #: client/src/credentials/credentials.form.js:127
 msgid "STS Token"
 msgstr "STS 令牌"
+
+#: client/src/license/license.route.js:18
+msgid "SUBSCRIPTION"
+msgstr "订阅"
 
 #: client/features/output/output.strings.js:140
 #: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:56
@@ -5836,7 +5764,7 @@ msgstr "在测试日志聚合器前保存并启用日志聚合。"
 msgid "Save changes"
 msgstr "保存更改"
 
-#: client/src/license/license.partial.html:200
+#: client/src/license/license.partial.html:215
 msgid "Save successful!"
 msgstr "保存成功！"
 
@@ -5876,7 +5804,7 @@ msgstr "计划名称"
 
 #: client/lib/components/components.strings.js:72
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:434
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:526
 #: client/src/projects/projects.form.js:321
 #: client/src/templates/job_templates/job-template.form.js:578
 #: client/src/templates/workflows.form.js:333
@@ -5896,11 +5824,6 @@ msgstr "搜索"
 msgid "Secret Key"
 msgstr "机密密钥"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:247
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:259
-msgid "Security Group:"
-msgstr "安全组："
-
 #: client/src/credentials/credentials.form.js:124
 msgid "Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users."
 msgstr "安全令牌服务 (STS) 是一个 Web 服务，让您可以为 AWS 身份和访问管理 (IAM) 用户请求临时的有限权限凭证。"
@@ -5910,6 +5833,14 @@ msgstr "安全令牌服务 (STS) 是一个 Web 服务，让您可以为 AWS 身�
 #: client/src/shared/lookup/lookup-modal.partial.html:20
 msgid "Select"
 msgstr "选择"
+
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:5
+msgid "Select Galaxy Credentials"
+msgstr "选择 Galaxy 凭证"
+
+#: client/src/organizations/organizations.form.js:61
+msgid "Select Galaxy credentials. The selection order sets the order in which Tower will download roles/collections using `ansible-galaxy`."
+msgstr "选择 Galaxy 凭证。选择顺序设定 Tower 使用 'ansible-galaxy' 下载角色/集合的顺序。"
 
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:5
 msgid "Select Instance Groups"
@@ -5934,7 +5865,7 @@ msgstr "选择凭证"
 msgid "Select a frequency for snapshot retention"
 msgstr "选择快照保留频率"
 
-#: client/src/license/license.partial.html:214
+#: client/src/license/license.partial.html:229
 msgid "Select a license"
 msgstr "选择许可证"
 
@@ -6056,12 +5987,11 @@ msgstr "选择包含此作业要执行的 playbook 的项目。"
 msgid "Select types"
 msgstr "选择类型"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:239
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:251
-msgid "Select which groups to create automatically."
-msgstr "选择要自动创建的组。"
+#: client/src/license/license.partial.html:100
+msgid "Select your Ansible Automation Platform subscription to use."
+msgstr "选择要使用的 Ansible Automation Platform 订阅。"
 
-#: client/src/license/license.partial.html:153
+#: client/src/license/license.partial.html:160
 msgid "Selected"
 msgstr "已选择"
 
@@ -6129,6 +6059,7 @@ msgstr "显示更多"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts-disassociate.partial.html:8
 #: client/src/inventories-hosts/inventories/related/hosts/related/nested-groups/host-nested-groups-disassociate.partial.html:8
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:8
+#: client/src/license/license.partial.html:115
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:104
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:125
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:136
@@ -6228,8 +6159,8 @@ msgstr "源凭证"
 msgid "Source Details"
 msgstr "源详情"
 
-#: client/src/notifications/notificationTemplates.form.js:212
-#: client/src/notifications/notificationTemplates.form.js:213
+#: client/src/notifications/notificationTemplates.form.js:196
+#: client/src/notifications/notificationTemplates.form.js:197
 msgid "Source Phone Number"
 msgstr "源电话号码"
 
@@ -6237,22 +6168,24 @@ msgstr "源电话号码"
 msgid "Source Project"
 msgstr "源项目"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:135
-msgid "Source Regions"
-msgstr "源区域"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:208
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:215
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:232
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:239
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:256
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:168
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:175
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:194
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:220
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:227
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:246
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:253
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:263
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:273
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:290
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:297
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:307
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:314
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:270
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:289
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:296
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:315
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:322
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:341
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:348
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:367
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:374
 msgid "Source Variables"
 msgstr "源变量"
 
@@ -6270,7 +6203,7 @@ msgstr "源工作流"
 msgid "Sources"
 msgstr "源"
 
-#: client/src/notifications/notificationTemplates.form.js:420
+#: client/src/notifications/notificationTemplates.form.js:392
 msgid "Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax."
 msgstr "以 JSON 格式指定 HTTP 标头。示例语法请参阅 Ansible Tower 文档。"
 
@@ -6278,11 +6211,11 @@ msgstr "以 JSON 格式指定 HTTP 标头。示例语法请参阅 Ansible Tower 
 msgid "Specify a method for %s operations. This is equivalent to specifying the %s parameter, where %s could be %s"
 msgstr "指定 %s 操作的方法。这等同于指定 %s 参数，其中 %s 可能为 %s"
 
-#: client/src/notifications/notificationTemplates.form.js:574
+#: client/src/notifications/notificationTemplates.form.js:546
 msgid "Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc) ."
 msgstr "指定通知颜色。可接受的颜色为十六进制颜色代码（示例：#3af 或者 #789abc）。"
 
-#: client/src/notifications/notificationTemplates.form.js:375
+#: client/src/notifications/notificationTemplates.form.js:347
 msgid "Specify a notification color. Acceptable colors are: yellow, green, red purple, gray or random."
 msgstr "指定通知颜色。可接受的颜色为：黄色、绿色、红色、紫色、灰色或随机色。"
 
@@ -6290,14 +6223,9 @@ msgstr "指定通知颜色。可接受的颜色为：黄色、绿色、红色、
 msgid "Specify a scope for the token's access"
 msgstr "指定令牌访问的范围"
 
-#: client/src/notifications/notificationTemplates.form.js:432
+#: client/src/notifications/notificationTemplates.form.js:404
 msgid "Specify an HTTP method for the webhook. Acceptable choices are: POST or PUT"
 msgstr "为 Webhook 指定 HTTP 方法。可接受的选择为：POST 或 PUT。"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:268
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:283
-msgid "Specify which groups to create automatically. Group names will be created similar to the options selected. If blank, all groups above are created. Refer to Ansible Tower documentation for more detail."
-msgstr "指定要自动创建的组。组名称将以类似于所选选项的方式创建。如果为空，会创建以上所有组。请参阅 Ansible Tower 文档了解更多详情。"
 
 #: client/features/output/output.strings.js:135
 msgid "Standard Error"
@@ -6317,11 +6245,11 @@ msgstr "开始"
 msgid "Start Date"
 msgstr "开始日期"
 
-#: client/src/notifications/notificationTemplates.form.js:597
+#: client/src/notifications/notificationTemplates.form.js:569
 msgid "Start Message"
 msgstr "开始消息"
 
-#: client/src/notifications/notificationTemplates.form.js:608
+#: client/src/notifications/notificationTemplates.form.js:580
 msgid "Start Message Body"
 msgstr "开始消息正文"
 
@@ -6362,7 +6290,7 @@ msgstr "已开始"
 msgid "Status"
 msgstr "状态"
 
-#: client/src/license/license.partial.html:203
+#: client/src/license/license.partial.html:218
 msgid "Submit"
 msgstr "提交"
 
@@ -6370,7 +6298,9 @@ msgstr "提交"
 msgid "Submit search"
 msgstr "提交搜索"
 
+#: client/src/license/license.controller.js:47
 #: client/src/license/license.partial.html:27
+#: client/src/license/license.partial.html:8
 msgid "Subscription"
 msgstr "订阅"
 
@@ -6383,15 +6313,23 @@ msgstr "订阅 ID"
 msgid "Subscription ID is an Azure construct, which is mapped to a username."
 msgstr "订阅 ID 是一个 Azure 构造函数，它映射到一个用户名。"
 
+#: client/src/license/license.controller.js:49
+msgid "Subscription Management"
+msgstr "Subscription Management"
+
+#: client/src/license/license.partial.html:21
+msgid "Subscription Type"
+msgstr "订阅类型"
+
 #: client/src/notifications/notifications.list.js:65
 msgid "Success"
 msgstr "成功"
 
-#: client/src/notifications/notificationTemplates.form.js:620
+#: client/src/notifications/notificationTemplates.form.js:592
 msgid "Success Message"
 msgstr "成功信息"
 
-#: client/src/notifications/notificationTemplates.form.js:631
+#: client/src/notifications/notificationTemplates.form.js:603
 msgid "Success Message Body"
 msgstr "成功消息正文"
 
@@ -6533,32 +6471,22 @@ msgstr "令牌"
 msgid "TOTAL NODES"
 msgstr "节点总数"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:250
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:262
-msgid "Tag None:"
-msgstr "标签 None："
-
 #: client/features/templates/templates.strings.js:55
 #: client/src/templates/job_templates/job-template.form.js:212
 msgid "Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags."
 msgstr "如果有大型一个 playbook，而您想要运行某个 play 或任务的特定部分，则标签很有用。使用逗号分隔多个标签。请参阅 Ansible Tower 文档了解使用标签的详情。"
 
-#: client/src/notifications/notificationTemplates.form.js:330
+#: client/src/notifications/notificationTemplates.form.js:314
 msgid "Tags for the Annotation"
 msgstr "注解的标签"
 
-#: client/src/notifications/notificationTemplates.form.js:329
+#: client/src/notifications/notificationTemplates.form.js:313
 msgid "Tags for the Annotation (optional)"
 msgstr "注解的标签（可选）"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:248
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:260
-msgid "Tags:"
-msgstr "标签："
-
-#: client/src/notifications/notificationTemplates.form.js:392
-#: client/src/notifications/notificationTemplates.form.js:442
-#: client/src/notifications/notificationTemplates.form.js:481
+#: client/src/notifications/notificationTemplates.form.js:364
+#: client/src/notifications/notificationTemplates.form.js:414
+#: client/src/notifications/notificationTemplates.form.js:453
 msgid "Target URL"
 msgstr "目标 URL"
 
@@ -6570,7 +6498,7 @@ msgstr "任务"
 #: client/src/credentials/credentials.form.js:467
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:136
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:133
-#: client/src/organizations/organizations.form.js:171
+#: client/src/organizations/organizations.form.js:180
 #: client/src/projects/projects.form.js:307
 #: client/src/templates/workflows.form.js:317
 msgid "Team Roles"
@@ -6660,7 +6588,7 @@ msgstr "项目 ID 是 GCE 分配的标识。它由两个单词构成，后跟三
 msgid "The Project selected has a status of"
 msgstr "所选项目的状态为"
 
-#: client/src/projects/edit/projects-edit.controller.js:331
+#: client/src/projects/edit/projects-edit.controller.js:339
 msgid "The SCM update process is running."
 msgstr "SCM 更新进程正在运行。"
 
@@ -6688,7 +6616,7 @@ msgstr "回答超过最大长度。请缩短回答。"
 msgid "The answer is shorter than the minimium length. Please make the answer longer."
 msgstr "回答不足最小长度。请增长回答。"
 
-#: client/src/notifications/notificationTemplates.form.js:287
+#: client/src/notifications/notificationTemplates.form.js:271
 msgid "The base URL of the Grafana server - the /api/annotations endpoint will be added automatically to the base Grafana URL."
 msgstr "Grafana 服务器的基本 URL - /api/annotations 端点将自动添加到基本 Grafana URL。"
 
@@ -6767,7 +6695,7 @@ msgstr "最大长度太小。请输入一个大于您设置的最小长度的数
 msgid "The maximum length you entered is not a valid number.  Please enter a whole number."
 msgstr "您输入的最大长度不是有效数字。请输入一个整数。"
 
-#: client/src/organizations/organizations.form.js:69
+#: client/src/organizations/organizations.form.js:78
 msgid "The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details."
 msgstr "允许由此机构管理的最大主机数。默认值为 0，表示无限制。请参阅 Ansible 文档以了解更多详情。"
 
@@ -6902,6 +6830,10 @@ msgstr "一个或多个凭证目前正在使用此凭证类型。必须先删除
 msgid "This feature is currently in tech preview and is subject to change in a future release.  Click here for documentation."
 msgstr "这个功能当前为技术预览功能，并可能会在以后的版本中有所变化。点击这里查看文档。"
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:430
+msgid "This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import."
+msgstr "除非设置了启用的变量，否则此字段会被忽略。如果启用的变量与这个值匹配，则会在导入时启用主机。"
+
 #: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:25
 msgid "This group contains at least one group or host"
 msgstr "这个组包含至少一个组或主机"
@@ -6980,7 +6912,7 @@ msgstr "周四"
 msgid "Time"
 msgstr "时间"
 
-#: client/src/license/license.partial.html:45
+#: client/src/license/license.partial.html:39
 msgid "Time Remaining"
 msgstr "剩余时间"
 
@@ -6988,7 +6920,7 @@ msgstr "剩余时间"
 msgid "Time in seconds to consider a project to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, and a new project update will be performed."
 msgstr "将项目视为最新的时间（以秒为单位）。在作业运行和回调期间，任务系统将评估最新项目更新的时间戳。如果它比缓存超时旧，则不被视为最新，并且会执行新的项目更新。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:405
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:497
 msgid "Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, and a new inventory sync will be performed."
 msgstr "将清单同步视为最新的时间（以秒为单位）。在作业运行和回调期间，任务系统将评估最新同步的时间戳。如果它比缓存超时旧，则不被视为最新，并且会执行新的清单同步。"
 
@@ -7040,11 +6972,11 @@ msgstr "节点总数"
 msgid "Traceback"
 msgstr "追溯"
 
-#: client/src/license/license.partial.html:176
+#: client/src/license/license.partial.html:191
 msgid "Tracking and Analytics"
 msgstr "跟踪和分析"
 
-#: client/src/license/license.partial.html:233
+#: client/src/license/license.partial.html:248
 msgid "Trial"
 msgstr "试用"
 
@@ -7078,12 +7010,12 @@ msgstr "类型详情"
 msgid "UNLINK"
 msgstr "取消链接"
 
-#: client/src/projects/add/projects-add.controller.js:182
-#: client/src/projects/edit/projects-edit.controller.js:303
+#: client/src/projects/add/projects-add.controller.js:190
+#: client/src/projects/edit/projects-edit.controller.js:311
 msgid "URL popover text"
 msgstr "URL 弹出文本"
 
-#: client/src/license/license.partial.html:132
+#: client/src/license/license.partial.html:139
 #: client/src/login/loginModal/loginModal.partial.html:61
 msgid "USERNAME"
 msgstr "用户名"
@@ -7181,7 +7113,7 @@ msgstr "意外错误"
 msgid "Unexpected server error. View the console for more information"
 msgstr "意外服务器错误。查看控制台以了解更多信息"
 
-#: client/src/license/license.partial.html:59
+#: client/src/license/license.partial.html:53
 msgid "Unlimited"
 msgstr "无限"
 
@@ -7198,7 +7130,7 @@ msgstr "不支持的输入类型"
 msgid "Update Not Found"
 msgstr "未找到更新"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:344
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:436
 msgid "Update Options"
 msgstr "更新选项"
 
@@ -7216,7 +7148,7 @@ msgstr "更新已取消。点击了解详情"
 msgid "Update failed. Click for details"
 msgstr "更新失败。点击了解详情"
 
-#: client/src/projects/edit/projects-edit.controller.js:331
+#: client/src/projects/edit/projects-edit.controller.js:339
 msgid "Update in Progress"
 msgstr "更新正在进行"
 
@@ -7225,13 +7157,13 @@ msgstr "更新正在进行"
 msgid "Update missing. Click for details"
 msgstr "更新缺失。点击了解详情"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:372
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:377
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:464
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:469
 msgid "Update on Launch"
 msgstr "启动时更新"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:383
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:389
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:475
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:481
 msgid "Update on Project Update"
 msgstr "更新项目更新"
 
@@ -7254,13 +7186,9 @@ msgstr "更新 Tower 中与作业相关的设置"
 msgid "Update succeeded. Click for details"
 msgstr "更新成功。点击了解详情"
 
-#: client/src/license/license.partial.html:75
-msgid "Upgrade"
-msgstr "升级"
-
-#: client/src/license/license.partial.html:111
-msgid "Upload a license file"
-msgstr "上传许可证文件"
+#: client/src/license/license.partial.html:109
+msgid "Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <a href=\"https://access.redhat.com/management/subscription_allocations\" target=\"_blank\">subscription allocations</a> on the Red Hat Customer Portal."
+msgstr "上传包含您的订阅的红帽订阅清单（Red Hat Subscription Manifest）。要生成订阅清单，请访问红帽客户门户网站 <a href=\"https://access.redhat.com/management/subscription_allocations\" target=\"_blank\">subscription allocations</a>。"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:62
 #: client/src/organizations/organizations.form.js:48
@@ -7279,7 +7207,7 @@ msgstr "使用 SSL"
 msgid "Use TLS"
 msgstr "使用 TLS"
 
-#: client/src/notifications/notificationTemplates.form.js:586
+#: client/src/notifications/notificationTemplates.form.js:558
 msgid "Use custom messages to change the content of notifications sent when a job starts, succeeds, or fails. Use curly braces to access information about the job: <code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>, or attributes of the job such as <code ng-non-bindable>{{ job.status }}</code>. You may apply a number of possible variables in the message. Refer to the <a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower documentation</a> for more details."
 msgstr "使用自定义信息来更改作业启动、成功或失败时发送的通知内容。使用大括号可以访问有关作业的信息：  <code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>, 或作业属性如 <code ng-non-bindable>{{ job.status }}</code>。您可以在信息中使用变量。详情请参阅 <a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower 文档</a>。"
 
@@ -7296,8 +7224,8 @@ msgstr "用于从远程源控制管理系统（如 Git、Subversion (svn) 或 Me
 #: client/src/credentials/credentials.form.js:456
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:125
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:122
-#: client/src/organizations/organizations.form.js:119
-#: client/src/organizations/organizations.form.js:160
+#: client/src/organizations/organizations.form.js:128
+#: client/src/organizations/organizations.form.js:169
 #: client/src/projects/projects.form.js:296
 #: client/src/teams/teams.form.js:96
 #: client/src/templates/workflows.form.js:306
@@ -7320,8 +7248,8 @@ msgstr "用户类型"
 #: client/src/credentials/factories/kind-change.factory.js:40
 #: client/src/credentials/factories/kind-change.factory.js:73
 #: client/src/credentials/factories/kind-change.factory.js:94
-#: client/src/notifications/notificationTemplates.form.js:453
-#: client/src/notifications/notificationTemplates.form.js:492
+#: client/src/notifications/notificationTemplates.form.js:425
+#: client/src/notifications/notificationTemplates.form.js:464
 #: client/src/notifications/notificationTemplates.form.js:64
 #: client/src/users/users.form.js:59
 #: client/src/users/users.list.js:29
@@ -7343,7 +7271,7 @@ msgstr "用于向指定云或基础架构提供商进行身份验证的用户名
 #: client/lib/components/components.strings.js:80
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:35
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:38
-#: client/src/organizations/organizations.form.js:101
+#: client/src/organizations/organizations.form.js:110
 #: client/src/teams/teams.form.js:78
 msgid "Users"
 msgstr "用户"
@@ -7381,15 +7309,6 @@ msgstr "查看更多"
 msgid "VIEW PER PAGE"
 msgstr "按页面查看"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:249
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:261
-msgid "VPC ID:"
-msgstr "VPC ID："
-
-#: client/src/license/license.partial.html:10
-msgid "Valid License"
-msgstr "有效许可证"
-
 #: client/src/inventories-hosts/hosts/host.form.js:67
 #: client/src/inventories-hosts/inventories/related/groups/groups.form.js:46
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-groups/group-nested-groups.form.js:47
@@ -7414,8 +7333,8 @@ msgstr "Vault 密码"
 #: client/features/templates/templates.strings.js:60
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:82
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:91
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:330
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:337
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:392
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:399
 #: client/src/templates/job_templates/job-template.form.js:189
 #: client/src/templates/job_templates/job-template.form.js:196
 msgid "Verbosity"
@@ -7456,10 +7375,15 @@ msgstr "查看 Insights"
 msgid "View Insights Data"
 msgstr "查看 Insights 数据"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:225
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:249
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:161
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:187
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:213
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:239
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:308
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:334
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:360
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
 msgid "View JSON examples at"
 msgstr "要查看 JSON 示例，请访问"
 
@@ -7493,10 +7417,15 @@ msgstr "查看项目签出结果"
 msgid "View Survey"
 msgstr "查看问卷调查"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:202
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:226
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:250
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:325
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:162
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:188
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:214
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:240
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:283
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:309
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:335
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:361
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:387
 msgid "View YAML examples at"
 msgstr "要查看 YAML 示例，请访问"
 
@@ -7571,11 +7500,6 @@ msgstr "查看团队"
 #: client/src/templates/templates.list.js:103
 msgid "View template"
 msgstr "查看模板"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:261
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:274
-msgid "View the"
-msgstr "查看"
 
 #: client/features/output/output.strings.js:22
 #: client/lib/components/components.strings.js:63
@@ -7662,7 +7586,7 @@ msgstr "警告"
 msgid "Warning: Unsaved Changes"
 msgstr "警告：未保存的更改"
 
-#: client/src/license/license.controller.js:159
+#: client/src/license/license.controller.js:154
 msgid "We were unable to locate licenses associated with this account"
 msgstr "我们无法找到与这个帐户关联的许可证"
 
@@ -7716,19 +7640,19 @@ msgstr "Webhook 服务可以将此用作共享机密。"
 msgid "Wed"
 msgstr "周三"
 
-#: client/src/license/license.partial.html:82
-msgid "Welcome to Ansible Tower! Please complete the steps below to acquire a license."
-msgstr "欢迎使用 Ansible Tower！请完成以下步骤以获取许可证。"
-
 #: client/src/login/loginModal/loginModal.partial.html:23
 msgid "Welcome to Ansible {{BRAND_NAME}}! &nbsp;Please sign in."
 msgstr "欢迎使用 {{BRAND_NAME}}! &nbsp;请登陆。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:365
+#: client/src/license/license.partial.html:82
+msgid "Welcome to Red Hat Ansible Automation Platform! Please complete the steps below to activate your subscription."
+msgstr "欢迎使用 Red Hat Ansible Automation Platform！请完成以下步骤以激活订阅。"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:457
 msgid "When not checked, a merge will be performed, combining local variables with those found on the external source."
 msgstr "如果没有选中，就会执行合并，将本地变量与外部源上的变量合并。"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:446
 msgid "When not checked, local child hosts and groups not found on the external source will remain untouched by the inventory update process."
 msgstr "如果没有选中，外部源上没有的本地子主机和组将在清单更新过程中保持不变。"
 
@@ -7745,19 +7669,19 @@ msgstr "当作业模板使用此项目时，不能更改机构。"
 msgid "Workflow"
 msgstr "工作流"
 
-#: client/src/notifications/notificationTemplates.form.js:666
+#: client/src/notifications/notificationTemplates.form.js:638
 msgid "Workflow Approved Message"
 msgstr "工作流已批准消息"
 
-#: client/src/notifications/notificationTemplates.form.js:677
+#: client/src/notifications/notificationTemplates.form.js:649
 msgid "Workflow Approved Message Body"
 msgstr "工作流已批准消息正文"
 
-#: client/src/notifications/notificationTemplates.form.js:689
+#: client/src/notifications/notificationTemplates.form.js:661
 msgid "Workflow Denied Message"
 msgstr "工作流已拒绝消息"
 
-#: client/src/notifications/notificationTemplates.form.js:700
+#: client/src/notifications/notificationTemplates.form.js:672
 msgid "Workflow Denied Message Body"
 msgstr "工作流已拒绝消息正文"
 
@@ -7773,11 +7697,11 @@ msgstr "工作流作业模板节点"
 msgid "Workflow Job Templates"
 msgstr "工作流作业模板"
 
-#: client/src/notifications/notificationTemplates.form.js:712
+#: client/src/notifications/notificationTemplates.form.js:684
 msgid "Workflow Pending Approval Message"
 msgstr "工作流待处理批准消息"
 
-#: client/src/notifications/notificationTemplates.form.js:723
+#: client/src/notifications/notificationTemplates.form.js:695
 msgid "Workflow Pending Approval Message Body"
 msgstr "工作流待处理批准信息的内容"
 
@@ -7792,11 +7716,11 @@ msgstr "工作流模板"
 msgid "Workflow Templates"
 msgstr "工作流模板"
 
-#: client/src/notifications/notificationTemplates.form.js:735
+#: client/src/notifications/notificationTemplates.form.js:707
 msgid "Workflow Timed Out Message"
 msgstr "工作流超时消息"
 
-#: client/src/notifications/notificationTemplates.form.js:746
+#: client/src/notifications/notificationTemplates.form.js:718
 msgid "Workflow Timed Out Message Body"
 msgstr "工作流超时消息正文"
 
@@ -7814,10 +7738,15 @@ msgstr "写入"
 msgid "YAML"
 msgstr "YAML"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:199
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:223
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:247
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:322
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:159
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:185
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:211
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:237
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:306
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:332
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:358
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:384
 msgid "YAML:"
 msgstr "YAML："
 
@@ -7948,11 +7877,6 @@ msgstr "错误"
 msgid "failed"
 msgstr "失败"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:262
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:275
-msgid "for a complete list of supported filters."
-msgstr "获取受支持过滤器的完整列表。"
-
 #: client/src/inventories-hosts/inventories/related/hosts/related-groups-labels/relatedGroupsLabelsList.directive.js:82
 msgid "from the"
 msgstr "从"
@@ -7979,6 +7903,17 @@ msgstr[1] "主机"
 msgid "hosts with failures. Click for details."
 msgstr "失败的主机。点击了解详情。"
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:231
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:300
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:352
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
+msgid "in the documentation and the"
+msgstr "文档和"
+
 #: client/src/templates/workflows/workflow-maker/forms/workflow-node-form.partial.html:146
 msgid "min"
 msgstr "分钟"
@@ -8003,11 +7938,6 @@ msgstr "新"
 #: client/src/shared/paginate/paginate.partial.html:45
 msgid "of"
 msgstr "的"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "of the filters match."
-msgstr "过滤器匹配。"
 
 #: client/src/scheduler/scheduler.strings.js:34
 msgid "on"
@@ -8036,6 +7966,17 @@ msgstr "待处理"
 #: client/src/shared/form-generator.js:1044
 msgid "playbook"
 msgstr "playbook"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:181
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:207
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:233
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:276
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:302
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:328
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:380
+msgid "plugin configuration guide."
+msgstr "插件配置指南。"
 
 #: client/features/jobs/jobs.strings.js:25
 msgid "running"
@@ -8068,11 +8009,6 @@ msgstr "同步失败的源。点击了解详情"
 msgid "successful"
 msgstr "成功"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:259
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:272
-msgid "test"
-msgstr "测试"
-
 #: client/src/activity-stream/factories/build-description.factory.js:136
 msgid "timed out"
 msgstr "超时"
@@ -8082,10 +8018,6 @@ msgstr "超时"
 #: client/src/templates/prompt/steps/survey/prompt-survey.partial.html:30
 msgid "to"
 msgstr "至"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:138
-msgid "to include all regions. Only Hosts associated with the selected regions will be updated."
-msgstr "以包括所有区域。只有与所选区域关联的主机才会更新。"
 
 #: client/src/inventories-hosts/inventories/related/sources/factories/get-sync-status-msg.factory.js:17
 msgid "to start it now."
@@ -8111,31 +8043,13 @@ msgstr "v3 默认 %s - 设为 'default'"
 msgid "v3 multi-domain%s - your domain name"
 msgstr "v3 多域 %s - 您的域名"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:318
-msgid "view azure_rm.ini in the Ansible community.general github repo."
-msgstr "查看 Ansible community.general github repo 中的 azure_rm.ini。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:219
-msgid "view ec2.ini in the community.aws repo."
-msgstr "查看 community.aws repo 中的 ec2.ini。"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:243
-msgid "view vmware_inventory.ini in the vmware community repo."
-msgstr "查看 vmware 社区 repo 中的 vmware_inventory.ini。"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
+msgid "view cloudforms.ini in the Ansible Collections github repo."
+msgstr "查看 Ansible Collections 仓库中的 cloudforms.ini。"
 
 #: client/features/jobs/jobs.strings.js:24
 msgid "waiting"
 msgstr "等待"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "when"
-msgstr "何时"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:240
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:252
-msgid "will create group names similar to the following examples based on the options selected:"
-msgstr "将根据选择的选项创建类似以下示例的组名称："
 
 #: client/index.template.ejs:158
 msgid "working..."
