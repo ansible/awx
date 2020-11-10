@@ -74,7 +74,7 @@ options:
         - Deprecated, please use credential_type
       required: False
       type: str
-      choices: ["ssh", "vault", "net", "scm", "aws", "vmware", "satellite6", "cloudforms", "gce", "azure_rm", "openstack", "rhv", "insights", "tower"]
+      choices: ["ssh", "vault", "net", "scm", "aws", "vmware", "satellite6", "gce", "azure_rm", "openstack", "rhv", "insights", "tower"]
     host:
       description:
         - Host for this credential.
@@ -285,7 +285,6 @@ KIND_CHOICES = {
     'aws': 'Amazon Web Services',
     'vmware': 'VMware vCenter',
     'satellite6': 'Red Hat Satellite 6',
-    'cloudforms': 'Red Hat CloudForms',
     'gce': 'Google Compute Engine',
     'azure_rm': 'Microsoft Azure Resource Manager',
     'openstack': 'OpenStack',
