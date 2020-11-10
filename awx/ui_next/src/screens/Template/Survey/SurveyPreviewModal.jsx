@@ -44,6 +44,7 @@ function SurveyPreviewModal({
                   <FormGroup
                     fieldId={`survey-preview-text-${q.variable}`}
                     label={q.question_name}
+                    isRequired={q.required}
                   >
                     <TextInput
                       id={`survey-preview-text-${q.variable}`}
@@ -57,6 +58,7 @@ function SurveyPreviewModal({
                   <FormGroup
                     fieldId={`survey-preview-textArea-${q.variable}`}
                     label={q.question_name}
+                    isRequired={q.required}
                   >
                     <TextArea
                       id={`survey-preview-textArea-${q.variable}`}
@@ -73,12 +75,14 @@ function SurveyPreviewModal({
                     label={q.question_name}
                     name={q.variable}
                     isDisabled
+                    isRequired={q.required}
                   />
                 )}
                 {['multiplechoice'].includes(q.type) && (
                   <FormGroup
                     fieldId={`survey-preview-multipleChoice-${q.variable}`}
                     label={q.question_name}
+                    isRequired={q.required}
                   >
                     <Select
                       id={`survey-preview-multipleChoice-${q.variable}`}
@@ -93,6 +97,7 @@ function SurveyPreviewModal({
                   <FormGroup
                     fieldId={`survey-preview-multiSelect-${q.variable}`}
                     label={q.question_name}
+                    isRequired={q.required}
                   >
                     <Select
                       isDisabled
