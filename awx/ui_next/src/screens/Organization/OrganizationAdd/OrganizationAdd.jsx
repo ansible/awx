@@ -4,7 +4,6 @@ import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '../../../api';
-import { Config } from '../../../contexts/Config';
 import { CardBody } from '../../../components/Card';
 import OrganizationForm from '../shared/OrganizationForm';
 
@@ -16,9 +15,13 @@ function OrganizationAdd() {
     try {
       const { data: response } = await OrganizationsAPI.create(values);
       await Promise.all(
-        groupsToAssociate.map(id =>
-          OrganizationsAPI.associateInstanceGroup(response.id, id)
-        )
+        groupsToAssociate
+          .map(id => OrganizationsAPI.associateInstanceGroup(response.id, id))
+          .concat(
+            values.galaxy_credentials.map(({ id: credId }) =>
+              OrganizationsAPI.associateGalaxyCredential(response.id, credId)
+            )
+          )
       );
       history.push(`/organizations/${response.id}`);
     } catch (error) {
@@ -34,16 +37,11 @@ function OrganizationAdd() {
     <PageSection>
       <Card>
         <CardBody>
-          <Config>
-            {({ me }) => (
-              <OrganizationForm
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-                me={me || {}}
-                submitError={formError}
-              />
-            )}
-          </Config>
+          <OrganizationForm
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            submitError={formError}
+          />
         </CardBody>
       </Card>
     </PageSection>

@@ -19,7 +19,9 @@ class Command(BaseCommand):
         profile_sql.delay(
             threshold=options['threshold'], minutes=options['minutes']
         )
-        print(f"Logging initiated with a threshold of {options['threshold']} second(s) and a duration of"
-              f" {options['minutes']} minute(s), any queries that meet criteria can"
-              f" be found in /var/log/tower/profile/."
-              )
+        if options['threshold'] > 0:
+            print(f"SQL profiling initiated with a threshold of {options['threshold']} second(s) and a"
+                  f" duration of {options['minutes']} minute(s), any queries that meet criteria can"
+                  f" be found in /var/log/tower/profile/.")
+        else:
+            print("SQL profiling disabled.")

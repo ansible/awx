@@ -5,7 +5,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import UserAccessList from './UserAccessList';
+import UserRolesList from './UserRolesList';
 
 jest.mock('../../../api/models/Users');
 jest.mock('../../../api/models/Roles');
@@ -101,7 +101,7 @@ const roles = {
   },
 };
 
-describe('<UserAccessList />', () => {
+describe('<UserRolesList />', () => {
   let wrapper;
   afterEach(() => {
     jest.clearAllMocks();
@@ -111,17 +111,17 @@ describe('<UserAccessList />', () => {
     UsersAPI.readRoles.mockResolvedValue(roles);
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList user={user} />);
+      wrapper = mountWithContexts(<UserRolesList user={user} />);
     });
 
-    expect(wrapper.find('UserAccessList').length).toBe(1);
+    expect(wrapper.find('UserRolesList').length).toBe(1);
   });
 
   test('should create proper detailUrl', async () => {
     UsersAPI.readRoles.mockResolvedValue(roles);
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList user={user} />);
+      wrapper = mountWithContexts(<UserRolesList user={user} />);
     });
 
     wrapper.update();
@@ -191,7 +191,7 @@ describe('<UserAccessList />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <UserAccessList
+        <UserRolesList
           user={{
             ...user,
             summary_fields: {
@@ -214,7 +214,7 @@ describe('<UserAccessList />', () => {
   test('should open and close wizard', async () => {
     UsersAPI.readRoles.mockResolvedValue(roles);
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList user={user} />);
+      wrapper = mountWithContexts(<UserRolesList user={user} />);
     });
     wrapper.update();
     await act(async () =>
@@ -232,7 +232,7 @@ describe('<UserAccessList />', () => {
     UsersAPI.readRoles.mockResolvedValue(roles);
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList user={user} />);
+      wrapper = mountWithContexts(<UserRolesList user={user} />);
     });
 
     wrapper.update();
@@ -283,7 +283,7 @@ describe('<UserAccessList />', () => {
     );
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList user={user} />);
+      wrapper = mountWithContexts(<UserRolesList user={user} />);
     });
 
     wrapper.update();
@@ -338,7 +338,7 @@ describe('<UserAccessList />', () => {
     });
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList user={user} />);
+      wrapper = mountWithContexts(<UserRolesList user={user} />);
     });
 
     waitForElement(

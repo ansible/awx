@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect } from 'react';
-import { bool, func, node, number, string, oneOfType } from 'prop-types';
+import {
+  arrayOf,
+  bool,
+  func,
+  node,
+  number,
+  string,
+  oneOfType,
+} from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -7,7 +15,7 @@ import { FormGroup } from '@patternfly/react-core';
 import { CredentialsAPI } from '../../api';
 import { Credential } from '../../types';
 import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
-import { FieldTooltip } from '../FormField';
+import Popover from '../Popover';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
 import useAutoPopulateLookup from '../../util/useAutoPopulateLookup';
@@ -36,6 +44,7 @@ function CredentialLookup({
   tooltip,
   isDisabled,
   autoPopulate,
+  multiple,
 }) {
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
   const {
@@ -108,7 +117,7 @@ function CredentialLookup({
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
       label={label}
-      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
+      labelIcon={tooltip && <Popover content={tooltip} />}
       helperTextInvalid={helperTextInvalid}
     >
       <Lookup
@@ -120,6 +129,7 @@ function CredentialLookup({
         required={required}
         qsConfig={QS_CONFIG}
         isDisabled={isDisabled}
+        multiple={multiple}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
             value={state.selectedItems}
@@ -154,6 +164,7 @@ function CredentialLookup({
             name="credential"
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+            multiple={multiple}
           />
         )}
       />
@@ -188,10 +199,11 @@ CredentialLookup.propTypes = {
   helperTextInvalid: node,
   isValid: bool,
   label: string.isRequired,
+  multiple: bool,
   onBlur: func,
   onChange: func.isRequired,
   required: bool,
-  value: Credential,
+  value: oneOfType([Credential, arrayOf(Credential)]),
   isDisabled: bool,
   autoPopulate: bool,
 };
@@ -201,6 +213,7 @@ CredentialLookup.defaultProps = {
   credentialTypeKind: '',
   helperTextInvalid: '',
   isValid: true,
+  multiple: false,
   onBlur: () => {},
   required: false,
   value: null,

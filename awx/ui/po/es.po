@@ -5179,8 +5179,8 @@ msgid "Provide the named URL encoded name or id of the remote Tower inventory to
 msgstr "Indique la URL, el nombre cifrado o id del inventario remoto de Tower para importarlos."
 
 #: client/src/license/license.partial.html:128
-msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS > SYSTEM."
-msgstr "Proporcione sus credenciales de cliente de Red Hat y podrá elegir de una lista de sus licencias disponibles. Las credenciales que utilice se almacenarán para su uso futuro en la recuperación de las licencias de renovación o ampliadas. Puede actualizarlas o eliminarlas en CONFIGURACIÓN > SISTEMA."
+msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS &gt; SYSTEM."
+msgstr "Proporcione sus credenciales de cliente de Red Hat y podrá elegir de una lista de sus licencias disponibles. Las credenciales que utilice se almacenarán para su uso futuro en la recuperación de las licencias de renovación o ampliadas. Puede actualizarlas o eliminarlas en CONFIGURACIÓN &gt; SISTEMA."
 
 #: client/src/templates/job_templates/job-template.form.js:374
 #: client/src/templates/job_templates/job-template.form.js:382

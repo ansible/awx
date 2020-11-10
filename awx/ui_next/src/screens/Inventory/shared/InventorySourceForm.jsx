@@ -13,18 +13,15 @@ import AnsibleSelect from '../../../components/AnsibleSelect';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import FormField, {
-  FieldTooltip,
-  FormSubmitError,
-} from '../../../components/FormField';
+import FormField, { FormSubmitError } from '../../../components/FormField';
 import {
   FormColumnLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
+import Popover from '../../../components/Popover';
 
 import {
   AzureSubForm,
-  CloudFormsSubForm,
   EC2SubForm,
   GCESubForm,
   OpenStackSubForm,
@@ -145,7 +142,7 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
           fieldId="custom-virtualenv"
           label={i18n._(t`Ansible Environment`)}
           labelIcon={
-            <FieldTooltip
+            <Popover
               content={i18n._(t`Select the custom
             Python virtual environment for this
             inventory source sync to run on.`)}
@@ -180,7 +177,6 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
                     sourceOptions={sourceOptions}
                   />
                 ),
-                cloudforms: <CloudFormsSubForm />,
                 ec2: <EC2SubForm sourceOptions={sourceOptions} />,
                 gce: (
                   <GCESubForm

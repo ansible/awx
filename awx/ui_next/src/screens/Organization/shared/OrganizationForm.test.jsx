@@ -163,6 +163,7 @@ describe('<OrganizationForm />', () => {
     expect(onSubmit.mock.calls[0][0]).toEqual({
       name: 'new foo',
       description: 'new bar',
+      galaxy_credentials: [],
       custom_virtualenv: 'Fizz',
       max_hosts: 134,
     });
@@ -211,6 +212,7 @@ describe('<OrganizationForm />', () => {
     const mockDataForm = {
       name: 'Foo',
       description: 'Bar',
+      galaxy_credentials: [],
       max_hosts: 1,
       custom_virtualenv: 'Fizz',
     };
@@ -315,6 +317,7 @@ describe('<OrganizationForm />', () => {
       {
         name: 'Foo',
         description: 'Bar',
+        galaxy_credentials: [],
         max_hosts: 0,
         custom_virtualenv: 'Fizz',
       },

@@ -3,7 +3,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Button, Label } from '@patternfly/react-core';
+import { Button, Label, Split, SplitItem } from '@patternfly/react-core';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -39,17 +39,29 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
 
-  const verifyIsIsolated = item => {
+  const verifyInstanceGroup = item => {
     if (item.is_isolated) {
       return (
-        <>
-          {item.name}
-          <span css="margin-left: 12px">
+        <Split hasGutter>
+          <SplitItem>{item.name}</SplitItem>
+          <SplitItem>
             <Label aria-label={i18n._(t`isolated instance`)}>
               {i18n._(t`Isolated`)}
             </Label>
-          </span>
-        </>
+          </SplitItem>
+        </Split>
+      );
+    }
+    if (item.is_controller) {
+      return (
+        <Split hasGutter>
+          <SplitItem>{item.name}</SplitItem>
+          <SplitItem>
+            <Label aria-label={i18n._(t`controller instance`)}>
+              {i18n._(t`Controller`)}
+            </Label>
+          </SplitItem>
+        </Split>
       );
     }
     return <>{item.name}</>;
@@ -60,7 +72,7 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
       <DetailList>
         <Detail
           label={i18n._(t`Name`)}
-          value={verifyIsIsolated(instanceGroup)}
+          value={verifyInstanceGroup(instanceGroup)}
           dataCy="instance-group-detail-name"
         />
         <Detail

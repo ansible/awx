@@ -48,7 +48,7 @@ class Organizations extends Component {
   };
 
   render() {
-    const { match, history, location } = this.props;
+    const { match } = this.props;
     const { breadcrumbConfig } = this.state;
 
     return (
@@ -62,8 +62,6 @@ class Organizations extends Component {
             <Config>
               {({ me }) => (
                 <Organization
-                  history={history}
-                  location={location}
                   setBreadcrumb={this.setBreadcrumbConfig}
                   me={me || {}}
                 />

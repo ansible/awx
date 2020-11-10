@@ -29,12 +29,14 @@ function Users({ i18n }) {
         [`/users/${user.id}`]: `${user.username}`,
         [`/users/${user.id}/edit`]: i18n._(t`Edit Details`),
         [`/users/${user.id}/details`]: i18n._(t`Details`),
-        [`/users/${user.id}/access`]: i18n._(t`Access`),
+        [`/users/${user.id}/roles`]: i18n._(t`Roles`),
         [`/users/${user.id}/teams`]: i18n._(t`Teams`),
         [`/users/${user.id}/organizations`]: i18n._(t`Organizations`),
         [`/users/${user.id}/tokens`]: i18n._(t`Tokens`),
         [`/users/${user.id}/tokens/add`]: i18n._(t`Create user token`),
-        [`/users/${user.id}/tokens/${token && token.id}`]: `Application Name`,
+        [`/users/${user.id}/tokens/${token && token.id}`]: i18n._(
+          t`Application Name`
+        ),
         [`/users/${user.id}/tokens/${token && token.id}/details`]: i18n._(
           t`Details`
         ),

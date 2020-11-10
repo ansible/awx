@@ -2,7 +2,7 @@ import React from 'react';
 import { node, bool, string } from 'prop-types';
 import { TextListItem, TextListItemVariants } from '@patternfly/react-core';
 import styled from 'styled-components';
-import DetailPopover from '../DetailPopover';
+import Popover from '../Popover';
 
 const DetailName = styled(({ fullWidth, ...props }) => (
   <TextListItem {...props} />
@@ -61,9 +61,7 @@ const Detail = ({
         id={dataCy}
       >
         {label}
-        {helpText && (
-          <DetailPopover header={label} content={helpText} id={dataCy} />
-        )}
+        {helpText && <Popover header={label} content={helpText} id={dataCy} />}
       </DetailName>
       <DetailValue
         className={className}

@@ -12,11 +12,13 @@ import {
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import AlertModal from '../../../components/AlertModal';
 import ChipGroup from '../../../components/ChipGroup';
+import CredentialChip from '../../../components/CredentialChip';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import { useConfig } from '../../../contexts/Config';
 
 function OrganizationDetail({ i18n, organization }) {
   const {
@@ -30,11 +32,13 @@ function OrganizationDetail({ i18n, organization }) {
     created,
     modified,
     summary_fields,
+    galaxy_credentials,
   } = organization;
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [instanceGroups, setInstanceGroups] = useState([]);
   const history = useHistory();
+  const { license_info = {} } = useConfig();
 
   useEffect(() => {
     (async () => {
@@ -83,7 +87,9 @@ function OrganizationDetail({ i18n, organization }) {
           dataCy="organization-detail-name"
         />
         <Detail label={i18n._(t`Description`)} value={description} />
-        <Detail label={i18n._(t`Max Hosts`)} value={`${max_hosts}`} />
+        {license_info?.license_type !== 'open' && (
+          <Detail label={i18n._(t`Max Hosts`)} value={`${max_hosts}`} />
+        )}
         <Detail
           label={i18n._(t`Ansible Environment`)}
           value={custom_virtualenv}
@@ -108,6 +114,23 @@ function OrganizationDetail({ i18n, organization }) {
                   <Chip key={ig.id} isReadOnly>
                     {ig.name}
                   </Chip>
+                ))}
+              </ChipGroup>
+            }
+          />
+        )}
+        {galaxy_credentials && galaxy_credentials.length > 0 && (
+          <Detail
+            fullWidth
+            label={i18n._(t`Galaxy Credentials`)}
+            value={
+              <ChipGroup numChips={5} totalChips={galaxy_credentials.length}>
+                {galaxy_credentials.map(credential => (
+                  <CredentialChip
+                    credential={credential}
+                    key={credential.id}
+                    isReadOnly
+                  />
                 ))}
               </ChipGroup>
             }

@@ -3,6 +3,7 @@ aiohttp==3.6.2            # via -r /awx_devel/requirements/requirements.in
 aioredis==1.3.1           # via channels-redis
 ansible-runner==1.4.6     # via -r /awx_devel/requirements/requirements.in
 ansiconv==1.0.0           # via -r /awx_devel/requirements/requirements.in
+asciichartpy==1.5.25      # via -r /awx_devel/requirements/requirements.in
 asgiref==3.2.5            # via channels, channels-redis, daphne
 async-timeout==3.0.1      # via aiohttp, aioredis
 attrs==19.3.0             # via aiohttp, automat, jsonschema, service-identity, twisted
@@ -130,4 +131,4 @@ zope.interface==5.0.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==19.3.1               # via -r /awx_devel/requirements/requirements.in
-setuptools==41.6.0        # via -r /awx_devel/requirements/requirements.in, google-auth, jsonschema, kubernetes, markdown, python-daemon, zope.interface
+setuptools==41.6.0        # via -r /awx_devel/requirements/requirements.in, asciichartpy, google-auth, jsonschema, kubernetes, markdown, python-daemon, zope.interface

@@ -102,6 +102,7 @@ except IOError:
     else:
         raise
 
+# The below runs AFTER all of the custom settings are imported.
 
 CELERYBEAT_SCHEDULE.update({  # noqa
     'isolated_heartbeat': {
@@ -110,3 +111,5 @@ CELERYBEAT_SCHEDULE.update({  # noqa
         'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},  # noqa
     }
 })
+
+DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63]) # noqa

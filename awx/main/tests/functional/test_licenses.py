@@ -30,8 +30,7 @@ def test_python_and_js_licenses():
                 # Check variations of '-' and '_' in filenames due to python
                 for fname in [name, name.replace('-','_')]:
                     if entry.startswith(fname) and entry.endswith('.tar.gz'):
-                        entry = entry[:-7]
-                        (n, v) = entry.rsplit('-',1)
+                        v = entry.split(name + '-')[1].split('.tar.gz')[0]
                         return v
             return None
 

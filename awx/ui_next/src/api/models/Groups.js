@@ -35,7 +35,24 @@ class Groups extends Base {
   }
 
   readChildren(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/children/`, params);
+    return this.http.get(`${this.baseUrl}${id}/children/`, { params });
+  }
+
+  associateChildGroup(id, childId) {
+    return this.http.post(`${this.baseUrl}${id}/children/`, { id: childId });
+  }
+
+  disassociateChildGroup(id, childId) {
+    return this.http.post(`${this.baseUrl}${id}/children/`, {
+      disassociate: id,
+      id: childId,
+    });
+  }
+
+  readPotentialGroups(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/potential_children/`, {
+      params,
+    });
   }
 }
 

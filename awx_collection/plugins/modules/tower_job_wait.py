@@ -30,7 +30,7 @@ options:
     interval:
       description:
         - The interval in sections, to request an update from Tower.
-        - For backwards compatability if unset this will be set to the average of min and max intervals
+        - For backwards compatibility if unset this will be set to the average of min and max intervals
       required: False
       default: 1
       type: float
@@ -48,6 +48,12 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish.
       type: int
+    job_type:
+      description:
+        - Job type to wait for
+      choices: ['project_updates', 'jobs', 'inventory_updates', 'workflow_jobs']
+      default: 'jobs'
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -99,6 +105,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         job_id=dict(type='int', required=True),
+        job_type=dict(choices=['project_updates', 'jobs', 'inventory_updates', 'workflow_jobs'], default='jobs'),
         timeout=dict(type='int'),
         min_interval=dict(type='float'),
         max_interval=dict(type='float'),
@@ -110,6 +117,7 @@ def main():
 
     # Extract our parameters
     job_id = module.params.get('job_id')
+    job_type = module.params.get('job_type')
     timeout = module.params.get('timeout')
     min_interval = module.params.get('min_interval')
     max_interval = module.params.get('max_interval')
@@ -130,14 +138,14 @@ def main():
         )
 
     # Attempt to look up job based on the provided id
-    job = module.get_one('jobs', **{
+    job = module.get_one(job_type, **{
         'data': {
             'id': job_id,
         }
     })
 
     if job is None:
-        module.fail_json(msg='Unable to wait on job {0}; that ID does not exist in Tower.'.format(job_id))
+        module.fail_json(msg='Unable to wait on ' + job_type.rstrip("s") + ' {0}; that ID does not exist in Tower.'.format(job_id))
 
     # Invoke wait function
     result = module.wait_on_url(

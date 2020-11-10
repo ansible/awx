@@ -10,10 +10,7 @@ import AnsibleSelect from '../../../components/AnsibleSelect';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import FormField, {
-  FieldTooltip,
-  FormSubmitError,
-} from '../../../components/FormField';
+import FormField, { FormSubmitError } from '../../../components/FormField';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import { CredentialTypesAPI, ProjectsAPI } from '../../../api';
 import { required } from '../../../util/validators';
@@ -21,6 +18,7 @@ import {
   FormColumnLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
+import Popover from '../../../components/Popover';
 import {
   GitSubForm,
   HgSubForm,
@@ -283,7 +281,7 @@ function ProjectFormFields({
               fieldId="project-custom-virtualenv"
               label={i18n._(t`Ansible Environment`)}
               labelIcon={
-                <FieldTooltip
+                <Popover
                   content={i18n._(t`Select the playbook to be executed by
                 this job.`)}
                 />

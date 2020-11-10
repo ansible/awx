@@ -2,10 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useField } from 'formik';
 import { FormGroup, InputGroup } from '@patternfly/react-core';
+import Popover from '../Popover';
 import PasswordInput from './PasswordInput';
 
 function PasswordField(props) {
-  const { id, name, label, validate, isRequired } = props;
+  const { id, name, label, validate, isRequired, helperText } = props;
   const [, meta] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
 
@@ -16,6 +17,7 @@ function PasswordField(props) {
       isRequired={isRequired}
       validated={isValid ? 'default' : 'error'}
       label={label}
+      labelIcon={helperText && <Popover content={helperText} />}
     >
       <InputGroup>
         <PasswordInput {...props} />

@@ -56,6 +56,7 @@ describe('<JobTemplateForm />', () => {
     webhook_key: 'webhook key',
     webhook_service: 'github',
     webhook_credential: 7,
+    host_config_key: '',
   };
   const mockInstanceGroups = [
     {

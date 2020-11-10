@@ -153,6 +153,8 @@ class InventoryModule(BaseInventoryPlugin):
                     self.inventory.add_host(host_name, group_name)
                 # Then add the parent-children group relationships.
                 for child_group_name in group_content.get('children', []):
+                    # add the child group to groups, if its already there it will just throw a warning
+                    self.inventory.add_group(child_group_name)
                     self.inventory.add_child(group_name, child_group_name)
             # Set the group vars. Note we should set group var for 'all', but not '_meta'.
             if group_name != '_meta':

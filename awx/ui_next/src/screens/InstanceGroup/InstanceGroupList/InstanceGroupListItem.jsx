@@ -81,6 +81,28 @@ function InstanceGroupListItem({
     return null;
   }
 
+  const verifyInstanceGroup = item => {
+    if (item.is_isolated) {
+      return (
+        <span css="margin-left: 12px">
+          <Label aria-label={i18n._(t`isolated instance`)}>
+            {i18n._(t`Isolated`)}
+          </Label>
+        </span>
+      );
+    }
+    if (item.is_controller) {
+      return (
+        <span css="margin-left: 12px">
+          <Label aria-label={i18n._(t`controller instance`)}>
+            {i18n._(t`Controller`)}
+          </Label>
+        </span>
+      );
+    }
+    return null;
+  };
+
   return (
     <DataListItem
       key={instanceGroup.id}
@@ -106,13 +128,7 @@ function InstanceGroupListItem({
                   <b>{instanceGroup.name}</b>
                 </Link>
               </span>
-              {instanceGroup.is_isolated ? (
-                <span css="margin-left: 12px">
-                  <Label aria-label={i18n._(t`isolated instance`)}>
-                    {i18n._(t`Isolated`)}
-                  </Label>
-                </span>
-              ) : null}
+              {verifyInstanceGroup(instanceGroup)}
             </DataListCell>,
 
             <DataListCell

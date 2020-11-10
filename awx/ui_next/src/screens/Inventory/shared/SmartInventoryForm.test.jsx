@@ -26,7 +26,7 @@ const mockFormValues = {
   description: '',
   organization: { id: 1, name: 'mock organization' },
   host_filter:
-    'name__icontains=mock and name__icontains=foo and groups__name=mock group',
+    'name__icontains=mock and name__icontains=foo and groups__name__icontains=mock group',
   instance_groups: [{ id: 123 }],
   variables: '---',
 };

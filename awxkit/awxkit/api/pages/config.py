@@ -12,14 +12,8 @@ class Config(base.Base):
             'instance-id' in self.license_info
 
     @property
-    def is_demo_license(self):
-        return self.license_info.get('demo', False) or \
-            self.license_info.get('key_present', False)
-
-    @property
     def is_valid_license(self):
         return self.license_info.get('valid_key', False) and \
-            'license_key' in self.license_info and \
             'instance_count' in self.license_info
 
     @property
@@ -32,16 +26,6 @@ class Config(base.Base):
         return self.license_info.get('license_type', None) == 'open'
 
     @property
-    def is_legacy_license(self):
-        return self.is_valid_license and \
-            self.license_info.get('license_type', None) == 'legacy'
-
-    @property
-    def is_basic_license(self):
-        return self.is_valid_license and \
-            self.license_info.get('license_type', None) == 'basic'
-
-    @property
     def is_enterprise_license(self):
         return self.is_valid_license and \
             self.license_info.get('license_type', None) == 'enterprise'
@@ -52,4 +36,11 @@ class Config(base.Base):
         return [k for k, v in self.license_info.get('features', {}).items() if v]
 
 
+class ConfigAttach(page.Page):
+
+    def attach(self, **kwargs):
+        return self.post(json=kwargs).json
+
+
 page.register_page(resources.config, Config)
+page.register_page(resources.config_attach, ConfigAttach)

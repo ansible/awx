@@ -72,7 +72,7 @@ const QS_CONFIG = getQSConfig(
 const buildSearchColumns = i18n => [
   {
     name: i18n._(t`Name`),
-    key: 'name',
+    key: 'name__icontains',
     isDefault: true,
   },
   {
@@ -81,7 +81,7 @@ const buildSearchColumns = i18n => [
   },
   {
     name: i18n._(t`Group`),
-    key: 'groups__name',
+    key: 'groups__name__icontains',
   },
   {
     name: i18n._(t`Inventory ID`),
@@ -124,7 +124,7 @@ function HostFilterLookup({
   const searchColumns = buildSearchColumns(i18n);
 
   const {
-    result: { count, hosts },
+    result: { count, hosts, relatedSearchableKeys, searchableKeys },
     error: contentError,
     request: fetchHosts,
     isLoading,
@@ -132,12 +132,21 @@ function HostFilterLookup({
     useCallback(
       async orgId => {
         const params = parseQueryString(QS_CONFIG, location.search);
-        const { data } = await HostsAPI.read(
-          mergeParams(params, { inventory__organization: orgId })
-        );
+        const [{ data }, { data: actions }] = await Promise.all([
+          HostsAPI.read(
+            mergeParams(params, { inventory__organization: orgId })
+          ),
+          HostsAPI.readOptions(),
+        ]);
         return {
           count: data.count,
           hosts: data.results,
+          relatedSearchableKeys: (
+            actions?.related_search_fields || []
+          ).map(val => val.slice(0, -8)),
+          searchableKeys: Object.keys(actions?.actions.GET || {}).filter(
+            key => actions.actions?.GET[key].filterable
+          ),
         };
       },
       [location.search]
@@ -145,6 +154,8 @@ function HostFilterLookup({
     {
       count: 0,
       hosts: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -185,7 +196,7 @@ function HostFilterLookup({
 
   function buildChips(filter = {}) {
     const inputGroupChips = Object.keys(filter).reduce((obj, param) => {
-      const parsedKey = param.replace('__icontains', '').replace('or__', '');
+      const parsedKey = param.replace('or__', '');
       const chipsArray = [];
 
       if (Array.isArray(filter[param])) {
@@ -316,6 +327,8 @@ function HostFilterLookup({
                 key: 'modified',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
           />
         </ModalList>
       </Modal>

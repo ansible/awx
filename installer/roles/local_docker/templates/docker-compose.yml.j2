@@ -22,6 +22,16 @@ services:
     hostname: {{ awx_web_hostname }}
     user: root
     restart: unless-stopped
+    {% if (awx_web_container_labels is defined) and (',' in awx_web_container_labels) %}
+    {% set awx_web_container_labels_list = awx_web_container_labels.split(',') %}
+    labels:
+      {% for awx_web_container_label in awx_web_container_labels_list %}
+      - {{ awx_web_container_label }}
+      {% endfor %}
+    {% elif awx_web_container_labels is defined %}
+    labels:
+      - {{ awx_web_container_labels }}
+    {% endif %}
     volumes:
       - supervisor-socket:/var/run/supervisor
       - rsyslog-socket:/var/run/awx-rsyslog/

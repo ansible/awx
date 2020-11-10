@@ -24,7 +24,7 @@ logger = logging.getLogger('awx.main.analytics')
 
 def _valid_license():
     try:
-        if get_license(show_key=False).get('license_type', 'UNLICENSED') == 'open':
+        if get_license().get('license_type', 'UNLICENSED') == 'open':
             return False
         access_registry[Job](None).check_license()
     except PermissionDenied:

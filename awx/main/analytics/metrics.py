@@ -54,7 +54,7 @@ LICENSE_INSTANCE_FREE = Gauge('awx_license_instance_free', 'Number of remaining 
 
 
 def metrics():
-    license_info = get_license(show_key=False)
+    license_info = get_license()
     SYSTEM_INFO.info({
         'install_uuid': settings.INSTALL_UUID,
         'insights_analytics': str(settings.INSIGHTS_TRACKING_STATE),

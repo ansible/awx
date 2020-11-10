@@ -78,6 +78,8 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [docker](https://pypi.org/project/docker/) Python module
     + This is incompatible with `docker-py`. If you have previously installed `docker-py`, please uninstall it.
     + We use this module instead of `docker-py` because it is what the `docker-compose` Python module requires.
+- [community.general.docker_image collection](https://docs.ansible.com/ansible/latest/collections/community/general/docker_image_module.html)
+    + This is only required if you are using Ansible >= 2.10
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/) Requires Version 1.8.4+
 - Python 3.6+

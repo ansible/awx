@@ -68,11 +68,9 @@ function UserFormFields({ user, i18n }) {
         name="username"
         type="text"
         validate={
-          !ldapUser && externalAccount === null
-            ? required(null, i18n)
-            : () => undefined
+          !ldapUser && !externalAccount ? required(null, i18n) : () => undefined
         }
-        isRequired={!ldapUser && externalAccount === null}
+        isRequired={!ldapUser && !externalAccount}
       />
       <FormField
         id="user-email"

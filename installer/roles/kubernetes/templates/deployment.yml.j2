@@ -85,6 +85,12 @@ kind: Deployment
 metadata:
   name: {{ kubernetes_deployment_name }}
   namespace: {{ kubernetes_namespace }}
+{% if kubernetes_deployment_annotations is defined %}
+  annotations:
+{% for key, value in kubernetes_deployment_annotations.items() %}
+    {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
 {% if openshift_host is defined %}
   labels:
     app: {{ kubernetes_deployment_name }}
@@ -98,6 +104,12 @@ spec:
 {% endif %}
   template:
     metadata:
+{% if kubernetes_pod_annotations is defined %}
+      annotations:
+{% for key, value in kubernetes_pod_annotations.items() %}
+        {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
       labels:
         name: {{ kubernetes_deployment_name }}-web-deploy
         service: django
