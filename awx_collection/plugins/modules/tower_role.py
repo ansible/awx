@@ -196,7 +196,7 @@ def main():
         'target_teams': 'target_team',
         'workflows': 'workflow'
     }
-    # Remove Project after testing
+    # Singular parameters
     resource_param_keys = (
         'user', 'team', 'lookup_organization'
     )
