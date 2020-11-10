@@ -104,7 +104,7 @@ options:
     lookup_organization:
       description:
         - Organization the inventories, job templates, projects, or workflows the items exists in.
-        - Used to help lookup the object, for organizaiton roles see organization.
+        - Used to help lookup the object, for organization roles see organization.
         - If not provided, will lookup by name only, which does not work with duplicates.
       type: str
     project:
