@@ -263,7 +263,6 @@ def main():
                 endpoint = '/roles/{0}/{1}/'.format(role_data['id'], module.param_to_endpoint(actor_type))
                 associations.setdefault(endpoint, [])
                 associations[endpoint].append(actor['id'])
-    # Stopped improvements
 
     # perform associations
     for association_endpoint, new_association_list in associations.items():
