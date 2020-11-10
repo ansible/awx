@@ -31,7 +31,7 @@ msgstr "(Beperkt tot de eerste 10)"
 msgid "(defaults to %s)"
 msgstr "(wordt standaard %s)"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:396
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:488
 msgid "(seconds)"
 msgstr "(seconden)"
 
@@ -47,15 +47,15 @@ msgstr "20"
 msgid "50"
 msgstr "50"
 
-#: client/src/license/license.partial.html:193
+#: client/src/license/license.partial.html:208
 msgid "<b>Automation analytics</b>: This data is used to enhance future releases of the Tower Software and to provide Automation Analytics to Tower subscribers."
 msgstr "<b>Automatiseringsanalyse</b>: deze gegevens worden gebruikt om toekomstige versies van de Tower-software te verbeteren en automatiseringsanalyses te bieden aan Tower-abonnees."
 
-#: client/src/license/license.partial.html:171
+#: client/src/license/license.partial.html:186
 msgid "<b>I agree to the End User License Agreement</b>"
 msgstr "<b>Ik ga akkoord met de licentie-overeenkomst voor eindgebruikers</b>"
 
-#: client/src/license/license.partial.html:187
+#: client/src/license/license.partial.html:202
 msgid "<b>User analytics</b>: This data is used to enhance future releases of the Tower Software and help streamline customer experience and success."
 msgstr "<b>Gebruikersanalyse</b>: deze gegevens worden gebruikt om toekomstige versies van de Tower-software en de ervaring en uitkomst voor klanten te verbeteren."
 
@@ -218,26 +218,17 @@ msgstr "ALLE ACTIVITEIT"
 msgid "ALL GROUPS"
 msgstr "ALLE GROEPEN"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "ANY"
-msgstr "IEDERE"
-
 #: client/src/credentials/credentials.form.js:198
 msgid "API Key"
 msgstr "API-sleutel"
 
-#: client/src/notifications/notificationTemplates.form.js:263
+#: client/src/notifications/notificationTemplates.form.js:247
 msgid "API Service/Integration Key"
 msgstr "Service-/integratiesleutel API"
 
 #: client/src/notifications/shared/type-change.service.js:66
 msgid "API Token"
 msgstr "API-token"
-
-#: client/src/notifications/notificationTemplates.form.js:348
-msgid "API URL"
-msgstr "API URL"
 
 #: client/features/users/tokens/tokens.strings.js:40
 msgid "APPLICATION"
@@ -295,11 +286,11 @@ msgstr "Toegangssleutel"
 msgid "Access Token Expiration"
 msgstr "Toegangstoken vervallen"
 
-#: client/src/notifications/notificationTemplates.form.js:241
+#: client/src/notifications/notificationTemplates.form.js:225
 msgid "Account SID"
 msgstr "SID account"
 
-#: client/src/notifications/notificationTemplates.form.js:200
+#: client/src/notifications/notificationTemplates.form.js:184
 msgid "Account Token"
 msgstr "Accounttoken"
 
@@ -328,8 +319,8 @@ msgstr "Activiteitenlogboek"
 #: client/src/credentials/credentials.form.js:446
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:113
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:110
-#: client/src/organizations/organizations.form.js:108
-#: client/src/organizations/organizations.form.js:150
+#: client/src/organizations/organizations.form.js:117
+#: client/src/organizations/organizations.form.js:159
 #: client/src/projects/projects.form.js:285
 #: client/src/teams/teams.form.js:169
 #: client/src/teams/teams.form.js:85
@@ -382,7 +373,7 @@ msgstr "Gebruiker toevoegen"
 msgid "Add Users"
 msgstr "Gebruikers toevoegen"
 
-#: client/src/organizations/organizations.form.js:109
+#: client/src/organizations/organizations.form.js:118
 msgid "Add Users to this organization."
 msgstr "Gebruikers toevoegen aan deze organisatie."
 
@@ -426,7 +417,7 @@ msgstr "Een nieuwe token toevoegen"
 #: client/src/credentials/credentials.form.js:447
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:115
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:112
-#: client/src/organizations/organizations.form.js:151
+#: client/src/organizations/organizations.form.js:160
 #: client/src/projects/projects.form.js:286
 #: client/src/templates/job_templates/job-template.form.js:541
 #: client/src/templates/workflows.form.js:296
@@ -453,9 +444,13 @@ msgstr "Beheer"
 msgid "Admins"
 msgstr "Beheerders"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:478
 msgid "After every project update where the SCM revision changes, refresh the inventory from the selected source before executing job tasks. This is intended for static content, like the Ansible inventory .ini file format."
 msgstr "Na iedere projectupdate waarbij de SCM-revisie verandert, dient het inventaris vernieuwd te worden vanuit de geselecteerde bron voordat de opdrachten die bij de taak horen uitgevoerd worden. Dit is bedoeld voor statische content, zoals .ini, het inventarisbestandsformaat van Ansible."
+
+#: client/src/license/license.partial.html:173
+msgid "Agree to the End User License Agreement, and click submit."
+msgstr "Ga akkoord met de licentie-overeenkomst voor eindgebruikers en klik op indienen"
 
 #: client/features/templates/templates.strings.js:160
 #: client/lib/components/components.strings.js:105
@@ -463,7 +458,6 @@ msgstr "Na iedere projectupdate waarbij de SCM-revisie verandert, dient het inve
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:49
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:72
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:80
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:138
 msgid "All"
 msgstr "Alle"
 
@@ -680,11 +674,6 @@ msgstr "Autoriseren"
 msgid "Authorize Password"
 msgstr "Wachtwoord autoriseren"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:241
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:253
-msgid "Availability Zone:"
-msgstr "Beschikbaarheidsgebied:"
-
 #: client/src/configuration/forms/auth-form/configuration-auth.controller.js:91
 msgid "Azure AD"
 msgstr "Azure AD"
@@ -722,11 +711,11 @@ msgstr "Vertakking naar de kassa. Naast vertakkingen kunt u ook tags, commit has
 msgid "Branch to use in job run. Project default used if blank."
 msgstr "Vertakking om te gebruiken bij het uitvoeren van een taak. Standaardproject wordt gebruikt indien leeg."
 
-#: client/src/license/license.partial.html:113
+#: client/src/license/license.partial.html:120
 msgid "Browse"
 msgstr "Bladeren"
 
-#: client/src/license/license.partial.html:180
+#: client/src/license/license.partial.html:195
 msgid "By default, Tower collects and transmits analytics data on Tower usage to Red Hat.  There are two categories of data collected by Tower. For more information, see <a target=\"_blank\" href=\"http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0\">this Tower documentation page</a>. Uncheck the following boxes to disable this feature."
 msgstr "Tower verzamelt en verzendt gegevens over Tower-gebruik automatisch naar Red Hat. We zijn twee categorieën gegevens die verzameld worden door Tower. Ga voor meer informatie naar <a target=\"_blank\" href=\"http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0\"> deze pagina over Tower</a>. Vink de volgende vakjes uit om de deze functie uit te schakelen."
 
@@ -741,13 +730,14 @@ msgstr "Tower verzamelt en verzendt gegevens over Tower-gebruik automatisch naar
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal.partial.html:16
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:16
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:16
-#: client/src/license/license.partial.html:259
+#: client/src/license/license.partial.html:274
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:17
 #: client/src/partials/survey-maker-modal.html:17
 #: client/src/partials/survey-maker-modal.html:82
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:17
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:131
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:180
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:68
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:69
 #: client/src/templates/workflows/add-workflow/workflow-add.controller.js:149
 #: client/src/templates/workflows/edit-workflow/workflow-edit.controller.js:188
 msgid "CANCEL"
@@ -886,7 +876,7 @@ msgstr "TOEGANGSGEGEVEN"
 msgid "CREDENTIAL TYPE"
 msgstr "SOORT TOEGANGSGEGEVENS"
 
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:60
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:61
 msgid "CREDENTIAL TYPE:"
 msgstr "SOORT TOEGANGSGEGEVENS:"
 
@@ -908,8 +898,8 @@ msgstr "TOEGANGSGEGEVENS"
 msgid "CREDENTIALS PERMISSIONS"
 msgstr "MACHTIGINGEN TOEGANGSGEGEVENS"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:396
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:408
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:488
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:500
 #: client/src/projects/projects.form.js:231
 msgid "Cache Timeout"
 msgstr "Cache time-out"
@@ -1019,7 +1009,7 @@ msgstr "Wijzig %s bij het uitrollen van {{BRAND_NAME}} om deze locatie te wijzig
 msgid "Changes"
 msgstr "Wijzigingen"
 
-#: client/src/notifications/notificationTemplates.form.js:460
+#: client/src/notifications/notificationTemplates.form.js:432
 msgid "Channel"
 msgstr "Kanaal"
 
@@ -1060,7 +1050,7 @@ msgstr "Kies een antwoordtype"
 msgid "Choose an answer type or format you want as the prompt for the user. Refer to the Ansible Tower Documentation for more additional information about each option."
 msgstr "Kies een antwoordtype of -formaat dat u als melding voor de gebruiker wilt. Raadpleeg de documentatie van Ansible Tower voor meer informatie over iedere optie."
 
-#: client/src/notifications/notificationTemplates.form.js:560
+#: client/src/notifications/notificationTemplates.form.js:532
 msgid "Choose an email option"
 msgstr "Kies een e-mailoptie"
 
@@ -1071,10 +1061,6 @@ msgstr "Kies een inventarisbestand"
 #: client/src/shared/directives.js:92
 msgid "Choose file"
 msgstr "Bestand kiezen"
-
-#: client/src/license/license.partial.html:104
-msgid "Choose your license file, agree to the End User License Agreement, and click submit."
-msgstr "Kies uw licentiebestand, ga akkoord met de Licentie-overeenkomst voor eindgebruikers en klik op indienen."
 
 #: client/src/projects/projects.form.js:176
 msgid "Clean"
@@ -1113,10 +1099,6 @@ msgstr "Klik op een rij om deze te selecteren en klik op Klaar wanneer u klaar b
 msgid "Click on a row to select it, and click Finished when done. Use the %s button to create a new job template."
 msgstr "Klik op een rij om deze te selecteren en klik op Klaar wanneer u klaar bent. Klik op de knop %s om een nieuw taaksjabloon aan te maken."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:137
-msgid "Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose"
-msgstr "Klik op de regiovelden om een lijst van regio's voor uw cloudprovider in te zien. U kunt meerdere regio's selecteren, of kiezen"
-
 #: client/src/organizations/linkout/controllers/organizations-projects.controller.js:277
 msgid "Click the"
 msgstr "Klik op"
@@ -1137,7 +1119,7 @@ msgstr "Klik om de link te bekijken"
 msgid "Client ID"
 msgstr "Klant-ID"
 
-#: client/src/notifications/notificationTemplates.form.js:274
+#: client/src/notifications/notificationTemplates.form.js:258
 msgid "Client Identifier"
 msgstr "Klant-identificeerder"
 
@@ -1149,6 +1131,7 @@ msgstr "Klant-geheim"
 #: client/src/inventories-hosts/inventories/insights/insights.partial.html:92
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:618
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:7
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:8
 #: client/src/organizations/linkout/addUsers/addUsers.partial.html:11
 #: client/src/partials/survey-maker-modal.html:28
 #: client/src/partials/survey-maker-modal.html:7
@@ -1206,6 +1189,10 @@ msgstr "Compact"
 msgid "Completed Jobs"
 msgstr "Voltooide taken"
 
+#: client/src/license/license.partial.html:10
+msgid "Compliant"
+msgstr "Compliant"
+
 #: client/src/management-jobs/card/card.partial.html:34
 #: client/src/management-jobs/card/card.partial.html:37
 msgid "Configure Notifications"
@@ -1227,6 +1214,10 @@ msgstr "Reset naar fabrieksinstellingen bevestigen"
 msgid "Confirm the removal of the"
 msgstr "Bevestig het verwijderen van de"
 
+#: client/src/license/license.partial.html:75
+msgid "Contact Us"
+msgstr "Contact"
+
 #: client/src/teams/teams.form.js:24
 #: client/src/users/users.form.js:25
 msgid "Contact your System Administrator to grant you the appropriate permissions to add and edit Users and Teams."
@@ -1241,6 +1232,10 @@ msgstr "Containergroep"
 msgid "Container Groups Help"
 msgstr "Hulp containergroepen"
 
+#: client/src/login/authenticationServices/timer.factory.js:136
+msgid "Continue"
+msgstr "Doorgaan"
+
 #: client/lib/components/components.strings.js:130
 msgid "Continue workflow job?"
 msgstr "Doorgaan met de workflowtaak?"
@@ -1250,7 +1245,7 @@ msgstr "Doorgaan met de workflowtaak?"
 msgid "Control the level of output ansible will produce as the playbook executes."
 msgstr "Stel in hoeveel output Ansible produceert bij het uitvoeren van het draaiboek."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:336
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:398
 msgid "Control the level of output ansible will produce for inventory source update jobs."
 msgstr "Stel in hoeveel output Ansible produceert bij taken die de inventarisbron updaten."
 
@@ -1305,9 +1300,9 @@ msgstr "{{resourceType}} kopiëren"
 
 #: client/src/about/about.partial.html:31
 msgid ""
-"Copyright &copy; 2019 Red Hat, Inc. <br>\n"
+"Copyright &copy; {{ currentYear }} Red Hat, Inc. <br>\n"
 "                          Visit <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> for more information.<br>"
-msgstr "Auteursrechten &copy; 2019 Red Hat, Inc. <br>\n"
+msgstr "Auteursrechten &copy; {{ currentYear }} Red Hat, Inc. <br>\n"
 "                          Ga voor meer informatie naar <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a>.<br>"
 
 #: client/lib/components/components.strings.js:90
@@ -1407,11 +1402,13 @@ msgstr "Aangemaakt (Aflopend)"
 #: client/src/projects/add/projects-add.controller.js:140
 #: client/src/projects/add/projects-add.controller.js:153
 #: client/src/projects/add/projects-add.controller.js:162
-#: client/src/projects/add/projects-add.controller.js:181
+#: client/src/projects/add/projects-add.controller.js:174
+#: client/src/projects/add/projects-add.controller.js:189
 #: client/src/projects/edit/projects-edit.controller.js:263
 #: client/src/projects/edit/projects-edit.controller.js:274
 #: client/src/projects/edit/projects-edit.controller.js:283
-#: client/src/projects/edit/projects-edit.controller.js:302
+#: client/src/projects/edit/projects-edit.controller.js:295
+#: client/src/projects/edit/projects-edit.controller.js:310
 msgid "Credential"
 msgstr "Toegangsgegeven"
 
@@ -1461,7 +1458,7 @@ msgstr "Huidige afbeelding:"
 msgid "Currently following output as it arrives. Click to unfollow"
 msgstr "Output wordt op dit moment gevolgd wanneer het binnenkomt. Klik om te stoppen met volgen."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:170
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
 msgid "Custom Inventory Script"
 msgstr "Aangepast inventarisscript"
 
@@ -1478,7 +1475,7 @@ msgstr "Aangepast script"
 msgid "Customize Pod Spec"
 msgstr "Podspec aanpassen"
 
-#: client/src/notifications/notificationTemplates.form.js:577
+#: client/src/notifications/notificationTemplates.form.js:549
 msgid "Customize messages…"
 msgstr "Berichten aanpassen..."
 
@@ -1497,7 +1494,7 @@ msgstr "DASHBOARD"
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:24
 #: client/src/inventory-scripts/list/list.controller.js:130
 #: client/src/notifications/notification-templates-list/list.controller.js:235
-#: client/src/organizations/edit/organizations-edit.controller.js:164
+#: client/src/organizations/edit/organizations-edit.controller.js:180
 #: client/src/organizations/linkout/controllers/organizations-admins.controller.js:69
 #: client/src/organizations/linkout/controllers/organizations-users.controller.js:68
 #: client/src/organizations/list/organizations-list.controller.js:202
@@ -1592,7 +1589,7 @@ msgstr "Kenmerken en functies op systeemniveau definiëren"
 #: client/src/inventory-scripts/list/list.controller.js:126
 #: client/src/notifications/notification-templates-list/list.controller.js:231
 #: client/src/notifications/notificationTemplates.list.js:105
-#: client/src/organizations/edit/organizations-edit.controller.js:161
+#: client/src/organizations/edit/organizations-edit.controller.js:177
 #: client/src/organizations/linkout/controllers/organizations-admins.controller.js:66
 #: client/src/organizations/linkout/controllers/organizations-users.controller.js:65
 #: client/src/organizations/list/organizations-list.controller.js:198
@@ -1732,11 +1729,6 @@ msgstr "Als u deze {{ resourceType }} verwijdert, zijn de volgende hulpbronnen n
 msgid "Depending on the size of the repository this may significantly increase the amount of time required to complete an update."
 msgstr "Afhankelijk van het formaat van de opslagplaats kan de tijd die nodig is om een update uit te voeren hierdoor sterk verlengd worden."
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:261
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:274
-msgid "Describe Instances documentation"
-msgstr "Documentatie Instances beschrijven"
-
 #: client/features/applications/add-applications.controller.js:36
 #: client/features/templates/templates.strings.js:17
 #: client/features/users/tokens/users-tokens-add.controller.js:26
@@ -1768,18 +1760,16 @@ msgstr "Omschrijving"
 
 #: client/src/notifications/notificationTemplates.form.js:156
 #: client/src/notifications/notificationTemplates.form.js:160
-#: client/src/notifications/notificationTemplates.form.js:172
-#: client/src/notifications/notificationTemplates.form.js:176
 msgid "Destination Channels"
 msgstr "Bestemmingskanalen"
 
-#: client/src/notifications/notificationTemplates.form.js:535
-#: client/src/notifications/notificationTemplates.form.js:539
+#: client/src/notifications/notificationTemplates.form.js:507
+#: client/src/notifications/notificationTemplates.form.js:511
 msgid "Destination Channels or Users"
 msgstr "Bestemmingskanalen of -gebruikers"
 
-#: client/src/notifications/notificationTemplates.form.js:225
-#: client/src/notifications/notificationTemplates.form.js:226
+#: client/src/notifications/notificationTemplates.form.js:209
+#: client/src/notifications/notificationTemplates.form.js:210
 msgid "Destination SMS Number"
 msgstr "Sms-nummer bestemming"
 
@@ -1792,10 +1782,10 @@ msgstr "Sms-nummer bestemming"
 msgid "Details"
 msgstr "Meer informatie"
 
-#: client/src/notifications/notificationTemplates.form.js:341
-#: client/src/notifications/notificationTemplates.form.js:403
-#: client/src/notifications/notificationTemplates.form.js:474
-#: client/src/notifications/notificationTemplates.form.js:506
+#: client/src/notifications/notificationTemplates.form.js:325
+#: client/src/notifications/notificationTemplates.form.js:375
+#: client/src/notifications/notificationTemplates.form.js:446
+#: client/src/notifications/notificationTemplates.form.js:478
 msgid "Disable SSL Verification"
 msgstr "SSL-verificatie uitschakelen"
 
@@ -1936,7 +1926,7 @@ msgstr "VERLOOPT OP"
 msgid "EXTRA VARIABLES"
 msgstr "EXTRA VARIABELEN"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:375
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:467
 msgid "Each time a job runs using this inventory, refresh the inventory from the selected source before executing job tasks."
 msgstr "Elke keer dat een taak uitgevoerd wordt met dit inventaris, dient het inventaris vernieuwd te worden vanuit de geselecteerde bron voordat de opdrachten van de taak uitgevoerd worden."
 
@@ -2071,8 +2061,8 @@ msgstr "Verlopen"
 msgid "Email"
 msgstr "E-mail"
 
-#: client/src/notifications/notificationTemplates.form.js:558
-#: client/src/notifications/notificationTemplates.form.js:559
+#: client/src/notifications/notificationTemplates.form.js:530
+#: client/src/notifications/notificationTemplates.form.js:531
 msgid "Email Options"
 msgstr "E-mailopties"
 
@@ -2126,6 +2116,16 @@ msgstr "Webhook inschakelen voor dit taaksjabloon."
 msgid "Enable webhook for this workflow job template."
 msgstr "Webhook inschakelen voor dit workflowtaaksjabloon."
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:426
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:428
+msgid "Enabled Value"
+msgstr "Ingeschakelde waarde"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:416
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:418
+msgid "Enabled Variable"
+msgstr "Ingeschakelde variabele"
+
 #: client/src/templates/job_templates/job-template.form.js:335
 msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {{BRAND_NAME}} and request a configuration update using this job template."
 msgstr "Maakt het mogelijk een provisioning terugkoppelings-URL aan te maken. Met deze URL kan een host contact opnemen met {{BRAND_NAME}} en een verzoek indienen voor een configuratie-update met behulp van dit taaksjabloon."
@@ -2148,7 +2148,7 @@ msgstr "Einddatum"
 msgid "End Time"
 msgstr "Eindtijd"
 
-#: client/src/license/license.partial.html:163
+#: client/src/license/license.partial.html:178
 msgid "End User License Agreement"
 msgstr "Licentie-overeenkomst voor eindgebruikers"
 
@@ -2159,19 +2159,16 @@ msgstr "Licentie-overeenkomst voor eindgebruikers"
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "Voer variabelen van de inventaris in met JSON- of YAML-syntaxis. Gebruik de radioknop om tussen de twee te wisselen."
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:74
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
 msgstr "Voer de variabelen van het inventaris in met JSON- of YAML-syntaxis. Gebruik de radio-knop om tussen de twee te wisselen. Raadpleeg de documentatie van Ansible Tower voor voorbeeldsyntaxis."
 
-#: client/src/notifications/notificationTemplates.form.js:335
+#: client/src/notifications/notificationTemplates.form.js:319
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr "Voer een opmerkingstas in per regel, zonder komma's."
 
-#: client/src/notifications/notificationTemplates.form.js:175
-msgid "Enter one HipChat channel per line. The pound symbol (#) is not required."
-msgstr "Voer één HipChat-kanaal per regel in. Het hekje (#) is hierbij niet vereist."
-
-#: client/src/notifications/notificationTemplates.form.js:538
+#: client/src/notifications/notificationTemplates.form.js:510
 msgid "Enter one IRC channel or username per line. The pound symbol (#) for channels, and the at (@) symbol for users, are not required."
 msgstr "Voer één IRC-kanaal of gebruikersnaam per regel in. Het hekje (#) voor kanalen en het apenstaartje (@) voor gebruikers zijn hierbij niet vereist."
 
@@ -2183,7 +2180,7 @@ msgstr "Voer één Slack-kanaal per regel in. Het hekje (#) is hierbij vereist."
 msgid "Enter one email address per line to create a recipient list for this type of notification."
 msgstr "Voer één e-mailadres per regel in om een lijst met ontvangers te maken voor dit type bericht."
 
-#: client/src/notifications/notificationTemplates.form.js:229
+#: client/src/notifications/notificationTemplates.form.js:213
 msgid "Enter one phone number per line to specify where to route SMS messages."
 msgstr "Voer één telefoonnummer per regel in om aan te geven waar sms-berichten naartoe gestuurd moeten worden."
 
@@ -2202,14 +2199,30 @@ msgstr "Voer de URL in die overeenkomt met uw %sRed Hat Satellite 6-server. %sBi
 msgid "Enter the hostname or IP address which corresponds to your VMware vCenter."
 msgstr "Voer de hostnaam of het IP-adres in dat overeenkomt met uw VMware vCenter."
 
-#: client/src/notifications/notificationTemplates.form.js:215
+#: client/src/notifications/notificationTemplates.form.js:199
 msgid "Enter the number associated with the \"Messaging Service\" in Twilio in the format +18005550199."
 msgstr "Voer het telefoonnummer in dat hoort bij de 'Berichtenservice' in Twilio in de indeling +18005550199."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:196
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:220
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:244
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:319
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:177
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:203
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:229
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:272
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:298
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:350
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:376
+msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see"
+msgstr "Voer de variabelen in om de inventarisbron te configureren. Voor een uitgebreide uitleg over het configureren van deze plugin, zie"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:156
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:182
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:208
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:234
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:277
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:303
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:329
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:381
 msgid "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "Voer variabelen in met JSON- of YAML-syntaxis. Gebruik de radioknop om tussen de twee te wisselen."
 
@@ -2217,12 +2230,12 @@ msgstr "Voer variabelen in met JSON- of YAML-syntaxis. Gebruik de radioknop om t
 msgid "Environment"
 msgstr "Omgeving"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:186
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:193
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:146
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:153
 msgid "Environment Variables"
 msgstr "Omgevingsvariabelen"
 
-#: client/src/license/license.controller.js:232
+#: client/src/license/license.controller.js:228
 msgid "Error Applying License"
 msgstr "Fout bij het toepassen van de licentie"
 
@@ -2230,15 +2243,15 @@ msgstr "Fout bij het toepassen van de licentie"
 msgid "Error Details"
 msgstr "Foutinformatie"
 
-#: client/src/license/license.controller.js:166
+#: client/src/license/license.controller.js:161
 msgid "Error Fetching Licenses"
 msgstr "Fout bij het ophalen van licenties"
 
-#: client/src/notifications/notificationTemplates.form.js:643
+#: client/src/notifications/notificationTemplates.form.js:615
 msgid "Error Message"
 msgstr "Foutbericht"
 
-#: client/src/notifications/notificationTemplates.form.js:654
+#: client/src/notifications/notificationTemplates.form.js:626
 msgid "Error Message Body"
 msgstr "Foutbericht body"
 
@@ -2266,13 +2279,13 @@ msgstr "Foutbericht body"
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:153
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:203
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:222
-#: client/src/login/loginModal/loginModal.controller.js:143
+#: client/src/login/loginModal/loginModal.controller.js:144
 #: client/src/management-jobs/card/card.controller.js:122
 #: client/src/management-jobs/card/card.controller.js:28
 #: client/src/management-jobs/card/card.controller.js:58
-#: client/src/organizations/main.js:111
-#: client/src/organizations/main.js:124
-#: client/src/organizations/main.js:139
+#: client/src/organizations/main.js:155
+#: client/src/organizations/main.js:168
+#: client/src/organizations/main.js:183
 #: client/src/projects/add/projects-add.controller.js:120
 #: client/src/projects/edit/projects-edit.controller.js:154
 #: client/src/projects/edit/projects-edit.controller.js:220
@@ -2335,6 +2348,11 @@ msgstr "Voorbeelden van URL's voor GIT SCM zijn onder andere:"
 msgid "Example URLs for Mercurial SCM include:"
 msgstr "Voorbeelden van URL's voor Mercurial SCM zijn onder andere:"
 
+#: client/src/projects/add/projects-add.controller.js:175
+#: client/src/projects/edit/projects-edit.controller.js:296
+msgid "Example URLs for Remote Archive SCM include:"
+msgstr "Voorbeelden van URL's voor Remote Archive SCM zijn onder andere:"
+
 #: client/src/projects/add/projects-add.controller.js:154
 #: client/src/projects/edit/projects-edit.controller.js:275
 msgid "Example URLs for Subversion SCM include:"
@@ -2370,7 +2388,7 @@ msgstr "Output uitklappen"
 msgid "Expanded"
 msgstr "Uitgeklapt"
 
-#: client/src/license/license.partial.html:246
+#: client/src/license/license.partial.html:261
 msgid "Expires"
 msgstr "Verloopt"
 
@@ -2382,7 +2400,7 @@ msgstr "Vervalt (Oplopend)"
 msgid "Expires (Descending)"
 msgstr "Vervalt (Aflopend)"
 
-#: client/src/license/license.partial.html:39
+#: client/src/license/license.partial.html:33
 msgid "Expires On"
 msgstr "Verloopt op"
 
@@ -2525,7 +2543,7 @@ msgstr "Nieuwe taken voor het dashboard konden niet opgehaald worden:"
 msgid "Failed to get new templates for dashboard:"
 msgstr "Nieuwe sjablonen voor het dashboard konden niet opgehaald worden:"
 
-#: client/src/organizations/main.js:140
+#: client/src/organizations/main.js:184
 msgid "Failed to get organizations for which this user is a notification admin. GET returned"
 msgstr "Kon organisaties niet ophalen waarvoor deze gebruiker een meldingsbeheerder is. Geretourneerd OPHALEN"
 
@@ -2565,7 +2583,7 @@ msgid "Failed to get workflow job template. GET returned status:"
 msgstr "Kon sjabloon workflowtaak niet ophalen. GET geretourneerde status:"
 
 #: client/src/app.js:229
-#: client/src/login/loginModal/loginModal.controller.js:144
+#: client/src/login/loginModal/loginModal.controller.js:145
 msgid "Failed to get workflow jobs pending approval. GET returned status:"
 msgstr "Kon workflowtaken in afwachting van goedkeuring niet ophalen. GET geretourneerde status:"
 
@@ -2607,11 +2625,11 @@ msgstr "Zoekresultaten bijwerken mislukt."
 msgid "Failed updating job %s with variables. POST returned: %d"
 msgstr "Taak %s met variabelen bijwerken mislukt. Geretourneerde POST: %d"
 
-#: client/src/organizations/main.js:112
+#: client/src/organizations/main.js:156
 msgid "Failed while checking to see if user is a notification administrator of this organization. GET returned"
 msgstr "Fout bij controleren of een gebruiker een meldingsbeheerder is voor deze organisatie. Geretourneerd GET"
 
-#: client/src/organizations/main.js:125
+#: client/src/organizations/main.js:169
 msgid "Failed while checking to see if user is an administrator of this organization. GET returned"
 msgstr "Fout bij controleren of een gebruiker een beheerder is voor deze organisatie. Geretourneerd GET"
 
@@ -2655,7 +2673,7 @@ msgstr "Voornaam"
 msgid "First Run"
 msgstr "Eerste uitvoering"
 
-#: client/src/organizations/organizations.form.js:124
+#: client/src/organizations/organizations.form.js:133
 msgid "First name"
 msgstr "Voornaam"
 
@@ -2718,9 +2736,9 @@ msgstr "Frequentie-informatie"
 msgid "Fri"
 msgstr "Vrij"
 
-#: client/src/license/license.partial.html:150
-msgid "GET LICENSES"
-msgstr "LICENTIES OPHALEN"
+#: client/src/license/license.partial.html:157
+msgid "GET SUBSCRIPTIONS"
+msgstr "ABONNEMENTEN OPHALEN"
 
 #: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
 msgid "GO TO <a ui-sref=\"notifications.add\" translate=\"\">NOTIFICATIONS</a> TO"
@@ -2729,6 +2747,11 @@ msgstr "GA NAAR <a ui-sref=\"notifications.add\" translate=\"\">MELDINGEN</a> OM
 #: client/src/inventories-hosts/hosts/related/groups/hosts-related-groups.route.js:45
 msgid "GROUPS"
 msgstr "GROEPEN"
+
+#: client/src/organizations/organizations.form.js:59
+#: client/src/organizations/organizations.form.js:62
+msgid "Galaxy Credentials"
+msgstr "Galaxy-toegangsgegevens"
 
 #: client/src/shared/form-generator.js:801
 msgid "Generate field"
@@ -2804,11 +2827,11 @@ msgstr "Ga naar de vorige pagina van de lijst"
 msgid "Google OAuth2"
 msgstr "Google OAuth2"
 
-#: client/src/notifications/notificationTemplates.form.js:300
+#: client/src/notifications/notificationTemplates.form.js:284
 msgid "Grafana API Key"
 msgstr "Grafana API-sleutel"
 
-#: client/src/notifications/notificationTemplates.form.js:285
+#: client/src/notifications/notificationTemplates.form.js:269
 msgid "Grafana URL"
 msgstr "Grafana URL"
 
@@ -2867,13 +2890,13 @@ msgstr "TIP: sleep een privé bestand naar het onderstaande veld."
 msgid "HOSTS"
 msgstr "HOSTS"
 
-#: client/src/notifications/notificationTemplates.form.js:410
-#: client/src/notifications/notificationTemplates.form.js:411
+#: client/src/notifications/notificationTemplates.form.js:382
+#: client/src/notifications/notificationTemplates.form.js:383
 msgid "HTTP Headers"
 msgstr "HTTP-koppen"
 
-#: client/src/notifications/notificationTemplates.form.js:427
-#: client/src/notifications/notificationTemplates.form.js:428
+#: client/src/notifications/notificationTemplates.form.js:399
+#: client/src/notifications/notificationTemplates.form.js:400
 msgid "HTTP Method"
 msgstr "HTTP-methode"
 
@@ -2913,6 +2936,11 @@ msgstr "Configuratiesleutel host"
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:39
 msgid "Host Enabled"
 msgstr "Host ingeschakeld"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:406
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:408
+msgid "Host Filter"
+msgstr "Hostfilter"
 
 #: client/features/output/output.strings.js:66
 msgid "Host Limit Error"
@@ -2962,33 +2990,29 @@ msgstr "Statusinformatie van de host is niet beschikbaar voor deze taak."
 msgid "Hosts"
 msgstr "Hosts"
 
+#: client/src/license/license.partial.html:46
 #: client/src/license/license.partial.html:52
-#: client/src/license/license.partial.html:58
 msgid "Hosts Available"
 msgstr "Beschikbare hosts"
 
+#: client/src/license/license.partial.html:62
 #: client/src/license/license.partial.html:68
 msgid "Hosts Remaining"
 msgstr "Overgebleven hosts"
 
-#: client/src/license/license.partial.html:62
+#: client/src/license/license.partial.html:56
 msgid "Hosts Used"
 msgstr "Gebruikte hosts"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "Hosts are imported to"
-msgstr "Hosts worden geïmporteerd naar"
 
 #: client/features/output/output.strings.js:129
 msgid "ID"
 msgstr "ID"
 
-#: client/src/notifications/notificationTemplates.form.js:313
+#: client/src/notifications/notificationTemplates.form.js:297
 msgid "ID of the Dashboard (optional)"
 msgstr "ID van het dashboard (optioneel)"
 
-#: client/src/notifications/notificationTemplates.form.js:321
+#: client/src/notifications/notificationTemplates.form.js:305
 msgid "ID of the Panel (optional)"
 msgstr "ID van het paneel (optioneel)"
 
@@ -3037,11 +3061,11 @@ msgstr "INVENTARISSCRIPT"
 msgid "INVENTORY SCRIPTS"
 msgstr "INVENTARISSCRIPTS"
 
-#: client/src/notifications/notificationTemplates.form.js:524
+#: client/src/notifications/notificationTemplates.form.js:496
 msgid "IRC Nick"
 msgstr "IRC-bijnaam"
 
-#: client/src/notifications/notificationTemplates.form.js:513
+#: client/src/notifications/notificationTemplates.form.js:485
 msgid "IRC Server Address"
 msgstr "IRC-serveradres"
 
@@ -3065,8 +3089,8 @@ msgstr "PROBLEEM: {{report.rule.description}}"
 msgid "ITEMS"
 msgstr "ITEMS"
 
-#: client/src/notifications/notificationTemplates.form.js:467
-#: client/src/notifications/notificationTemplates.form.js:499
+#: client/src/notifications/notificationTemplates.form.js:439
+#: client/src/notifications/notificationTemplates.form.js:471
 msgid "Icon URL"
 msgstr "Icoon-URL"
 
@@ -3074,16 +3098,11 @@ msgstr "Icoon-URL"
 msgid "Idle Session"
 msgstr "Inactieve sessie"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:251
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:263
-msgid "If blank, all groups above are created except"
-msgstr "Als dit vakje leeg wordt gelaten, worden alle bovenstaande groepen aangemaakt, behalve"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:364
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:456
 msgid "If checked, all variables for child groups and hosts will be removed and replaced by those found on the external source."
 msgstr "Als dit vakje aangevinkt is, worden alle variabelen voor onderliggende groepen en hosts verwijderd en worden ze vervangen door de variabelen die aangetroffen worden in de externe bron."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:353
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:445
 msgid "If checked, any hosts and groups that were previously present on the external source but are now removed will be removed from the Tower inventory. Hosts and groups that were not managed by the inventory source will be promoted to the next manually created group or if there is no manually created group to promote them into, they will be left in the \"all\" default group for the inventory."
 msgstr "Als dit vakje aangevinkt is, worden alle groepen en hosts die eerder aanwezig waren in de externe bron, maar die nu verwijderd zijn, verwijderd uit de inventaris. Hosts en groepen die niet beheerd werden door de inventarisbron, worden omhoog verplaatst naar de volgende handmatig gemaakte groep. Als er geen handmatig gemaakte groep is waar ze naartoe kunnen worden verplaatst, blijven ze staan in de standaard inventarisgroep 'Alle'."
 
@@ -3117,13 +3136,12 @@ msgid "If no organization is given, the credential can only be used by the user 
 msgstr "Als er geen organisatie opgegeven is, kunnen de toegangsgegevens alleen gebruikt worden door de gebruiker die de toegangsgegevens aangemaakt heeft. Beheerders van organisaties en systeembeheerders kunnen een organisatie toewijzen zodat rollen voor de toegangsgegevens toegewezen kunnen worden aan gebruikers en teams binnen die organisatie."
 
 #: client/src/license/license.partial.html:74
-msgid "If you are ready to upgrade, please contact us by clicking the button below"
-msgstr "Neem zodra u klaar bent om te updaten contact met ons op door op de onderstaande knop te klikken"
+msgid "If you are ready to upgrade or renew, please contact us by clicking the button below."
+msgstr "Neem zodra u klaar bent om te updaten of te verlengen contact met ons op door op de onderstaande knop te klikken"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:242
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:254
-msgid "Image ID:"
-msgstr "Afbeelding-ID:"
+#: client/src/license/license.partial.html:88
+msgid "If you do not have a subscription, you can visit Red Hat to obtain a trial subscription."
+msgstr "Als u geen abonnement heeft, kunt u bij Red Hat terecht voor een proefabonnement."
 
 #: client/src/inventories-hosts/hosts/host.form.js:34
 #: client/src/inventories-hosts/hosts/host.list.js:35
@@ -3159,11 +3177,6 @@ msgstr "Inzichten"
 msgid "Insights Credential"
 msgstr "Inzichten toegangsgegevens"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:144
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:147
-msgid "Instance Filters"
-msgstr "Instantiefilters"
-
 #: client/features/output/output.strings.js:67
 #: client/src/instance-groups/instance-groups.strings.js:43
 msgid "Instance Group"
@@ -3189,21 +3202,6 @@ msgstr "Instantiegroepen"
 msgid "Instance Groups Help"
 msgstr "Instantiegroepen, Help"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:251
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:263
-msgid "Instance ID"
-msgstr "Instantie-id"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:243
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:255
-msgid "Instance ID:"
-msgstr "Instantie-ID:"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:244
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:256
-msgid "Instance Type:"
-msgstr "Instantietype:"
-
 #: client/lib/components/components.strings.js:85
 #: client/src/instance-groups/instance-groups.strings.js:20
 msgid "Instances"
@@ -3217,14 +3215,9 @@ msgstr "Onvoldoende machtigingen"
 msgid "Integer"
 msgstr "Geheel getal"
 
-#: client/src/license/license.partial.html:11
-msgid "Invalid License"
-msgstr "Ongeldige licentie"
-
-#: client/src/license/license.controller.js:109
-#: client/src/license/license.controller.js:117
-msgid "Invalid file format. Please upload valid JSON."
-msgstr "Ongeldige bestandsindeling. Upload een geldige JSON."
+#: client/src/license/license.controller.js:112
+msgid "Invalid file format. Please upload a valid Red Hat Subscription Manifest."
+msgstr "Ongeldige bestandsindeling. Upload een geldig Red Hat-abonnementsmanifest."
 
 #: client/lib/components/components.strings.js:16
 msgid "Invalid input for this type."
@@ -3285,6 +3278,17 @@ msgstr "Inventarisbestand"
 #: client/src/workflow-results/workflow-results.controller.js:79
 msgid "Inventory Limit"
 msgstr "Inventarisgrens"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:231
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:300
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:352
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
+msgid "Inventory Plugins"
+msgstr "Inventarisplugins"
 
 #: client/lib/components/components.strings.js:82
 #: client/lib/models/models.strings.js:20
@@ -3360,10 +3364,15 @@ msgstr "TAKEN"
 msgid "JSON"
 msgstr "JSON"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:197
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:221
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:245
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:320
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:157
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:183
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:209
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:235
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:278
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:304
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:330
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:356
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:382
 msgid "JSON:"
 msgstr "JSON:"
 
@@ -3442,11 +3451,6 @@ msgstr "SLEUTEL"
 msgid "Key"
 msgstr "Sleutel"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:245
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:257
-msgid "Key Name:"
-msgstr "Naam sleutel:"
-
 #: client/src/credential-types/credential-types.list.js:31
 #: client/src/credentials/credentials.list.js:33
 msgid "Kind"
@@ -3494,10 +3498,6 @@ msgstr "LDAP 5 (optioneel)"
 #: client/src/configuration/forms/auth-form/configuration-auth.partial.html:18
 msgid "LDAP Server"
 msgstr "LDAP-server"
-
-#: client/src/license/license.route.js:18
-msgid "LICENSE"
-msgstr "LICENTIE"
 
 #: client/features/output/output.strings.js:76
 #: client/src/templates/job_templates/job-template.form.js:240
@@ -3552,7 +3552,7 @@ msgstr "Laatst gebruikt (Aflopend)"
 msgid "Last logged in:"
 msgstr "Laatst ingelogd:"
 
-#: client/src/organizations/organizations.form.js:128
+#: client/src/organizations/organizations.form.js:137
 msgid "Last name"
 msgstr "Achternaam"
 
@@ -3598,27 +3598,12 @@ msgstr "Er bestaat geen oude staat van configuratie voor"
 
 #: client/lib/components/components.strings.js:98
 #: client/src/configuration/settings.partial.html:14
-#: client/src/license/license.controller.js:47
-#: client/src/license/license.partial.html:109
-#: client/src/license/license.partial.html:8
 msgid "License"
 msgstr "Licentie"
 
 #: client/features/output/output.strings.js:78
 msgid "License Error"
 msgstr "Licentiefout"
-
-#: client/src/license/license.partial.html:33
-msgid "License Key"
-msgstr "Licentiesleutel"
-
-#: client/src/license/license.controller.js:49
-msgid "License Management"
-msgstr "Licentiebeheer"
-
-#: client/src/license/license.partial.html:21
-msgid "License Type"
-msgstr "Licentiesoort"
 
 #: client/features/output/output.strings.js:79
 #: client/features/templates/templates.strings.js:56
@@ -3630,21 +3615,6 @@ msgstr "Licentiesoort"
 #: client/src/templates/workflows.form.js:97
 msgid "Limit"
 msgstr "Limiet"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:255
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:268
-msgid "Limit to hosts having a tag:"
-msgstr "Beperken tot hosts met een tag:"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:257
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:270
-msgid "Limit to hosts using either key pair:"
-msgstr "Beperken tot hosts die één van de sleutelparen gebruiken:"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:259
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:272
-msgid "Limit to hosts where the Name tag begins with"
-msgstr "Beperken tot hosts waarvan de naam begint met"
 
 #: client/src/scheduler/scheduler.strings.js:51
 msgid "Limited to first 10"
@@ -3742,7 +3712,7 @@ msgstr "Machine"
 msgid "Machine Credential"
 msgstr "Toegangsgegevens machine"
 
-#: client/src/license/license.partial.html:240
+#: client/src/license/license.partial.html:255
 msgid "Managed Nodes"
 msgstr "Beheerde knooppunten"
 
@@ -3761,8 +3731,8 @@ msgstr "Voor handmatige projecten is geen SCM-update nodig"
 msgid "Max 512 characters per label."
 msgstr "Max. 512 tekens per label."
 
-#: client/src/organizations/organizations.form.js:59
-#: client/src/organizations/organizations.form.js:66
+#: client/src/organizations/organizations.form.js:68
+#: client/src/organizations/organizations.form.js:75
 msgid "Max Hosts"
 msgstr "Max. hosts"
 
@@ -3948,7 +3918,7 @@ msgstr "GEEN GESELECTEERD"
 msgid "NOTE: This field assumes the remote name is \"origin\"."
 msgstr "OPMERKING: dit veld gaat ervan uit dat de naam op afstand \"oorsprong\" is."
 
-#: client/src/login/loginModal/loginModal.partial.html:101
+#: client/src/login/loginModal/loginModal.partial.html:102
 msgid "NOTICE"
 msgstr "MEDEDELING"
 
@@ -3963,7 +3933,7 @@ msgstr "BERICHTSJABLONEN"
 
 #: client/lib/components/components.strings.js:131
 #: client/src/inventories-hosts/inventories/related/sources/edit/sources-notifications.route.js:9
-#: client/src/management-jobs/notifications/notification.route.js:46
+#: client/src/management-jobs/notifications/notification.route.js:59
 #: client/src/notifications/main.js:44
 #: client/src/notifications/main.js:95
 #: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
@@ -4070,7 +4040,7 @@ msgstr "Nog geen toegangsgegevens die overeenkomen met deze soort aangemaakt"
 msgid "No JSON data returned by the module"
 msgstr "Module heeft geen JSON-gegevens geretourneerd"
 
-#: client/src/license/license.controller.js:158
+#: client/src/license/license.controller.js:153
 msgid "No Licenses Found"
 msgstr "Geen licenties gevonden"
 
@@ -4240,10 +4210,10 @@ msgstr "Niet geconfigureerd voor inventarissynchronisatie."
 msgid "Note that only hosts directly in this group can be disassociated.  Hosts in sub-groups must be disassociated directly from the sub-group level that they belong."
 msgstr "Let op: Alleen hosts die zich direct in deze groep bevinden, kunnen worden losgekoppeld. Hosts in subgroepen moeten rechtstreeks worden losgekoppeld van het subgroepniveau waar ze bij horen."
 
-#: client/src/notifications/notificationTemplates.form.js:371
-#: client/src/notifications/notificationTemplates.form.js:372
-#: client/src/notifications/notificationTemplates.form.js:568
-#: client/src/notifications/notificationTemplates.form.js:569
+#: client/src/notifications/notificationTemplates.form.js:343
+#: client/src/notifications/notificationTemplates.form.js:344
+#: client/src/notifications/notificationTemplates.form.js:540
+#: client/src/notifications/notificationTemplates.form.js:541
 msgid "Notification Color"
 msgstr "Berichtkleur"
 
@@ -4251,7 +4221,7 @@ msgstr "Berichtkleur"
 msgid "Notification Failed."
 msgstr "Bericht mislukt"
 
-#: client/src/notifications/notificationTemplates.form.js:360
+#: client/src/notifications/notificationTemplates.form.js:332
 msgid "Notification Label"
 msgstr "Berichtlabel"
 
@@ -4269,7 +4239,7 @@ msgstr "Time-out voor melding."
 msgid "Notifications"
 msgstr "Berichten"
 
-#: client/src/notifications/notificationTemplates.form.js:385
+#: client/src/notifications/notificationTemplates.form.js:357
 msgid "Notify Channel"
 msgstr "Bericht naar kanaal sturen"
 
@@ -4291,7 +4261,7 @@ msgstr "AAN"
 msgid "OPTIONS"
 msgstr "OPTIES"
 
-#: client/src/license/license.partial.html:121
+#: client/src/license/license.partial.html:128
 msgid "OR"
 msgstr "OF"
 
@@ -4305,7 +4275,7 @@ msgstr "ORGANISATIE"
 
 #: client/src/activity-stream/get-target-title.factory.js:29
 #: client/src/organizations/list/organizations-list.partial.html:6
-#: client/src/organizations/main.js:51
+#: client/src/organizations/main.js:55
 msgid "ORGANIZATIONS"
 msgstr "ORGANISATIES"
 
@@ -4332,10 +4302,9 @@ msgstr "Bij mislukken"
 msgid "On Success"
 msgstr "Bij slagen"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:156
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:161
-msgid "Only Group By"
-msgstr "Alleen ordenen op"
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials.partial.html:3
+msgid "Open Galaxy credentials"
+msgstr "Galaxy-toegangsgegevens openen"
 
 #: client/src/templates/job_templates/multi-credential/multi-credential.partial.html:4
 msgid "Open credential lookup"
@@ -4421,53 +4390,22 @@ msgstr "Overige meldingen"
 msgid "Others (Cloud Providers)"
 msgstr "Overigen (cloudproviders)"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:316
-msgid "Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "Variabelen overschrijven die aangetroffen zijn in azure_rm.ini en die gebruikt worden in het script van de inventarisupdate. Voor een gedetailleerde beschrijving van deze variabelen"
+#: client/src/license/license.partial.html:11
+msgid "Out of Compliance"
+msgstr "Niet compliant"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
-msgid ""
-"Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                    view cloudforms.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Variabelen overschrijven die zijn aangetroffen in cloudforms.ini en die gebruikt worden door het script van de inventarisupdate. Zie voor een voorbeeld van de configuratie van de variabele \n"
-"                a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                cloudfroms.ini in de Ansible Collections github repo.</a>Voer de variabelen van de inventaris in met JSON- of YAML-syntaxis. Gebruik de radio-knop om tussen de twee de wisselen. Raadpleeg de documentatie van Ansible Tower voor voorbeeldsyntaxis."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:217
-msgid "Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "Variabelen overschrijven die aangetroffen zijn in ec2.ini en die gebruikt worden door het script van de inventarisupdate. Voor een gedetailleerde beschrijving van deze variabelen"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:299
-msgid ""
-"Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
-"                    view foreman.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Variabelen overschrijven die aangetroffen zijn in foreman.ini en die gebruikt worden door het script van de inventarisupdate. Zie voor een voorbeeld van de configuratie van de variabelen\n"
-"                <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
-"                foreman.ini in de Ansible Collections github repo.</a>Voer de variabelen van de inventaris in met JSON- of YAML-syntaxis. Gebruik de radioknop om tussen de twee te wisselen. Raadpleeg de documentatie van Ansible Tower voor voorbeeldsyntaxis."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:265
-msgid ""
-"Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
-"                    view openstack.yml in the Openstack github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Variabelen overschrijven die aangetroffen zijn in openstack.yml en die gebruikt worden door het script van de inventarisupdate. Zie voor een voorbeeld van de configuratie van de variabelen\n"
-"                <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
-"                openstack.yml in de Openstack github repo.</a>Voer de variabelen van de inventaris in met JSON- of YAML-syntaxis. Gebruik de radioknop om tussen de twee te wisselen. Raadpleeg de documentatie van Ansible Tower voor voorbeeldsyntaxis."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:241
-msgid "Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables"
-msgstr "Variabelen overschrijven die aangetroffen zijn in vmware.ini en die gebruikt worden in het script van de inventarisupdate. Voor een gedetailleerde beschrijving van deze variabelen"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:255
+msgid "Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration"
+msgstr "Variabelen overschrijven die aangetroffen zijn in cloudforms.ini en die gebruikt worden door het script van de inventarisupdate. Voor een voorbeeldconfiguratie van deze variabelen"
 
 #: client/features/output/output.strings.js:83
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:350
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:355
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:442
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:447
 msgid "Overwrite"
 msgstr "Overschrijven"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:361
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:366
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:453
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:458
 msgid "Overwrite Variables"
 msgstr "Variabelen overschrijven"
 
@@ -4479,7 +4417,7 @@ msgstr "Variabelen overschrijven"
 msgid "Owners"
 msgstr "Eigenaren"
 
-#: client/src/license/license.partial.html:136
+#: client/src/license/license.partial.html:143
 #: client/src/login/loginModal/loginModal.partial.html:80
 msgid "PASSWORD"
 msgstr "WACHTWOORD"
@@ -4548,7 +4486,7 @@ msgstr "PUT"
 msgid "Page"
 msgstr "Pagina"
 
-#: client/src/notifications/notificationTemplates.form.js:252
+#: client/src/notifications/notificationTemplates.form.js:236
 msgid "Pagerduty subdomain"
 msgstr "Subdomein Pagerduty"
 
@@ -4643,7 +4581,7 @@ msgstr "Machtigingsfout"
 #: client/src/credentials/credentials.form.js:438
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:104
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:101
-#: client/src/organizations/organizations.form.js:143
+#: client/src/organizations/organizations.form.js:152
 #: client/src/projects/projects.form.js:278
 #: client/src/teams/teams.form.js:128
 #: client/src/templates/job_templates/job-template.form.js:532
@@ -4699,10 +4637,6 @@ msgstr "Controleer de server om er zeker van te zijn dat de map bestaat en de be
 #: client/features/templates/templates.strings.js:144
 msgid "Please click on an available node to form a new link."
 msgstr "Klik op een beschikbaar knooppunt om een nieuwe link te vormen."
-
-#: client/src/license/license.partial.html:91
-msgid "Please click the button below to visit Ansible's website to get a Tower license key."
-msgstr "Klik op onderstaande knop om de website van Ansible te bezoeken en een licentiesleutel voor Tower te bemachtigen."
 
 #: client/src/inventories-hosts/inventory-hosts.strings.js:40
 msgid "Please click the icon to edit the host filter."
@@ -4889,14 +4823,14 @@ msgstr "Sla op voordat u een vragenlijst toevoegt aan deze workflow."
 msgid "Please save before adding notifications."
 msgstr "Sla op voordat u berichten toevoegt."
 
-#: client/src/organizations/organizations.form.js:95
+#: client/src/organizations/organizations.form.js:104
 #: client/src/teams/teams.form.js:72
 msgid "Please save before adding users."
 msgstr "Sla op voordat u gebruikers toevoegt."
 
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:100
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:97
-#: client/src/organizations/organizations.form.js:135
+#: client/src/organizations/organizations.form.js:144
 #: client/src/projects/projects.form.js:270
 #: client/src/teams/teams.form.js:124
 #: client/src/templates/job_templates/job-template.form.js:525
@@ -5144,16 +5078,6 @@ msgstr "Melding"
 msgid "Prompt on launch"
 msgstr "Melding bij opstarten"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:253
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:266
-msgid "Provide a comma-separated list of filter expressions."
-msgstr "Voer een lijst van filteruitdrukkingen in, gescheiden door komma's."
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:269
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:284
-msgid "Provide a comma-separated list of filter expressions. Hosts are imported when all of the filters match. Refer to Ansible Tower documentation for more detail."
-msgstr "Voer een lijst van filteruitdrukkingen in, gescheiden door komma's. Hosts worden geïmporteerd wanneer alle filters overeenkomen. Raadpleeg de documentatie van Ansible Tower voor meer informatie."
-
 #: client/src/inventories-hosts/hosts/host.form.js:49
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:48
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:50
@@ -5173,18 +5097,13 @@ msgstr "Geef een hostpatroon op om de lijst van hosts die beheerd of beïnvloed 
 msgid "Provide account information using Google Compute Engine JSON credentials file."
 msgstr "Geef accountgegevens met het JSON-toegangsgegevensbestand van Google Compute Engine."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:195
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:155
 msgid "Provide environment variables to pass to the custom inventory script."
 msgstr "Geef omgevingsvariabelen op om door te geven aan het aangepaste inventarisscript."
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:272
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:287
-msgid "Provide the named URL encoded name or id of the remote Tower inventory to be imported."
-msgstr "Voer de URL, versleutelde naam of ID of de externe inventaris in die geïmporteerd moet worden."
-
-#: client/src/license/license.partial.html:128
-msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS &gt; SYSTEM."
-msgstr "Geef uw Red Hat-klantengegevens door en u kunt kiezen uit een lijst met beschikbare licenties.  De toegangsgegevens die u gebruikt, worden opgeslagen voor toekomstig gebruik bij het ophalen van verlengingen of uitbreidingen van licenties. U kunt deze updaten of verwijderen in INSTELLINGEN &gt; SYSTEEM."
+#: client/src/license/license.partial.html:135
+msgid "Provide your Red Hat or Red Hat Satellite credentials below and you can choose from a list of your available subscriptions.    The credentials you use will be stored for future use in retrieving renewal or expanded subscriptions."
+msgstr "Geef uw Red Hat- of Red Hat Satellite-gegevens hieronder door en u kunt kiezen uit een lijst met beschikbare abonnementen.  De toegangsgegevens die u gebruikt, worden opgeslagen voor toekomstig gebruik bij het ophalen van verlengingen of uitbreidingen van abonnementen."
 
 #: client/src/templates/job_templates/job-template.form.js:374
 #: client/src/templates/job_templates/job-template.form.js:382
@@ -5271,7 +5190,7 @@ msgid "RESULTS"
 msgstr "RESULTATEN"
 
 #: client/features/templates/templates.strings.js:39
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:50
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:51
 msgid "REVERT"
 msgstr "TERUGZETTEN"
 
@@ -5353,6 +5272,10 @@ msgstr "Lijst van ontvangers"
 msgid "Red"
 msgstr "Rood"
 
+#: client/src/license/license.partial.html:114
+msgid "Red Hat Subscription Manifest"
+msgstr "Red Hat-abonnementsmanifest"
+
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:47
 msgid "Refer to the Ansible Tower documentation for further syntax and examples."
 msgstr "Raadpleeg de documentatie van Ansible Tower voor meer syntaxis en voorbeelden."
@@ -5392,14 +5315,9 @@ msgstr "Pagina vernieuwen"
 msgid "Refspec"
 msgstr "Refspec"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:246
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:258
-msgid "Region:"
-msgstr "Regio:"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
-msgid "Regions"
-msgstr "Regio's"
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:410
+msgid "Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied."
+msgstr "Reguliere expressie waarbij alleen overeenkomende hostnamen worden geïmporteerd. Het filter wordt toegepast als een nabewerkingsstap nadat eventuele filters voor inventarisplugins zijn toegepast."
 
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:81
 msgid "Related Groups"
@@ -5462,9 +5380,9 @@ msgstr "Wachtwoord vervangen"
 msgid "Replace secret"
 msgstr "Geheim vervangen"
 
-#: client/src/license/license.partial.html:96
-msgid "Request License"
-msgstr "Licentie opvragen"
+#: client/src/license/license.partial.html:92
+msgid "Request Subscription"
+msgstr "Abonnement aanvragen"
 
 #: client/src/templates/survey-maker/shared/question-definition.form.js:291
 msgid "Required"
@@ -5482,6 +5400,10 @@ msgstr "Hulpbronnen"
 #: client/src/scheduler/schedules.list.js:25
 msgid "Resources are missing from this template."
 msgstr "Er ontbreken hulpbronnen uit dit sjabloon."
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:420
+msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
+msgstr "Haal de ingeschakelde status op uit het gegeven dictaat van de hostvariabelen. De ingeschakelde variabele kan worden gespecificeerd met behulp van puntnotatie, bijvoorbeeld: 'foo.bar'"
 
 #: client/lib/services/base-string.service.js:111
 msgid "Return"
@@ -5510,7 +5432,7 @@ msgstr "Terugzetten"
 #: client/src/configuration/forms/auth-form/sub-forms/auth-radius.form.js:34
 #: client/src/configuration/forms/auth-form/sub-forms/auth-saml.form.js:121
 #: client/src/configuration/forms/auth-form/sub-forms/auth-tacacs.form.js:47
-#: client/src/configuration/forms/jobs-form/configuration-jobs.form.js:129
+#: client/src/configuration/forms/jobs-form/configuration-jobs.form.js:110
 #: client/src/configuration/forms/system-form/sub-forms/system-activity-stream.form.js:26
 #: client/src/configuration/forms/system-form/sub-forms/system-logging.form.js:74
 #: client/src/configuration/forms/system-form/sub-forms/system-misc.form.js:95
@@ -5532,7 +5454,7 @@ msgstr "Herziening #"
 #: client/src/credentials/credentials.form.js:461
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:130
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:127
-#: client/src/organizations/organizations.form.js:165
+#: client/src/organizations/organizations.form.js:174
 #: client/src/projects/projects.form.js:301
 #: client/src/teams/teams.form.js:109
 #: client/src/teams/teams.form.js:148
@@ -5566,6 +5488,7 @@ msgstr "SAML"
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal.partial.html:17
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:17
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:17
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:18
 #: client/src/partials/survey-maker-modal.html:84
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:18
 msgid "SAVE"
@@ -5671,10 +5594,10 @@ msgstr "ZOEKEN"
 
 #: client/features/templates/templates.strings.js:132
 #: client/lib/services/base-string.service.js:64
-#: client/src/license/license.partial.html:260
+#: client/src/license/license.partial.html:275
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:137
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:186
-#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:74
+#: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:75
 #: client/src/templates/workflows/add-workflow/workflow-add.controller.js:155
 #: client/src/templates/workflows/edit-workflow/workflow-edit.controller.js:194
 msgid "SELECT"
@@ -5734,7 +5657,7 @@ msgstr "INSTELLINGEN"
 msgid "SHOW"
 msgstr "TONEN"
 
-#: client/src/login/loginModal/loginModal.partial.html:109
+#: client/src/login/loginModal/loginModal.partial.html:114
 msgid "SIGN IN"
 msgstr "AANMELDEN"
 
@@ -5772,7 +5695,7 @@ msgstr "SSH-wachtwoord"
 msgid "SSH key description"
 msgstr "Beschrijving SSH-sleutel"
 
-#: client/src/notifications/notificationTemplates.form.js:551
+#: client/src/notifications/notificationTemplates.form.js:523
 msgid "SSL Connection"
 msgstr "SSL-verbinding"
 
@@ -5788,6 +5711,10 @@ msgstr "STATUS"
 #: client/src/credentials/credentials.form.js:127
 msgid "STS Token"
 msgstr "STS-token"
+
+#: client/src/license/license.route.js:18
+msgid "SUBSCRIPTION"
+msgstr "ABONNEMENT"
 
 #: client/features/output/output.strings.js:140
 #: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:56
@@ -5836,7 +5763,7 @@ msgstr "Sla logboekaggregatie op en schakel deze in voordat u de logboekaggregat
 msgid "Save changes"
 msgstr "Wijzigingen opslaan"
 
-#: client/src/license/license.partial.html:200
+#: client/src/license/license.partial.html:215
 msgid "Save successful!"
 msgstr "Opslaan gelukt!"
 
@@ -5876,7 +5803,7 @@ msgstr "Schemanaam"
 
 #: client/lib/components/components.strings.js:72
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:434
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:526
 #: client/src/projects/projects.form.js:321
 #: client/src/templates/job_templates/job-template.form.js:578
 #: client/src/templates/workflows.form.js:333
@@ -5896,11 +5823,6 @@ msgstr "Zoeken"
 msgid "Secret Key"
 msgstr "Geheime sleutel"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:247
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:259
-msgid "Security Group:"
-msgstr "Veiligheidsgroep:"
-
 #: client/src/credentials/credentials.form.js:124
 msgid "Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users."
 msgstr "Security Token Service (STS) is een webdienst waarmee u tijdelijke toegangsgegevens met beperkte rechten aan kunt vragen voor gebruikers van AWS Identity en Access Management (IAM)"
@@ -5910,6 +5832,14 @@ msgstr "Security Token Service (STS) is een webdienst waarmee u tijdelijke toega
 #: client/src/shared/lookup/lookup-modal.partial.html:20
 msgid "Select"
 msgstr "Selecteren"
+
+#: client/src/organizations/galaxy-credentials-multiselect/galaxy-credentials-modal/galaxy-credentials-modal.partial.html:5
+msgid "Select Galaxy Credentials"
+msgstr "Galaxy-toegangsgegevens selecteren"
+
+#: client/src/organizations/organizations.form.js:61
+msgid "Select Galaxy credentials. The selection order sets the order in which Tower will download roles/collections using `ansible-galaxy`."
+msgstr "Selecteer de Galaxy-toegangsgegevens. De volgorde waarin geselecteerd wordt, bepaalt de volgorde waarin de Tower rollen/collecties zal downloaden met behulp van `ansible-galaxy`."
 
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:5
 msgid "Select Instance Groups"
@@ -5934,7 +5864,7 @@ msgstr "Toegangsgegevens selecteren"
 msgid "Select a frequency for snapshot retention"
 msgstr "Een frequentie selecteren voor het behoud van momentopnames"
 
-#: client/src/license/license.partial.html:214
+#: client/src/license/license.partial.html:229
 msgid "Select a license"
 msgstr "Een licentie selecteren"
 
@@ -6056,12 +5986,11 @@ msgstr "Selecteer het project dat het draaiboek bevat waarvan u wilt dat deze ta
 msgid "Select types"
 msgstr "Selecteer soorten"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:239
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:251
-msgid "Select which groups to create automatically."
-msgstr "Selecteer welke groepen automatisch aangemaakt moeten worden."
+#: client/src/license/license.partial.html:100
+msgid "Select your Ansible Automation Platform subscription to use."
+msgstr "Selecteer het Ansible Automation Platform-abonnement dat u wilt gebruiken"
 
-#: client/src/license/license.partial.html:153
+#: client/src/license/license.partial.html:160
 msgid "Selected"
 msgstr "Geselecteerd"
 
@@ -6129,6 +6058,7 @@ msgstr "Meer weergeven"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts-disassociate.partial.html:8
 #: client/src/inventories-hosts/inventories/related/hosts/related/nested-groups/host-nested-groups-disassociate.partial.html:8
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:8
+#: client/src/license/license.partial.html:115
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:104
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:125
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:136
@@ -6228,8 +6158,8 @@ msgstr "Toegangsgegevens bron"
 msgid "Source Details"
 msgstr "Broninformatie"
 
-#: client/src/notifications/notificationTemplates.form.js:212
-#: client/src/notifications/notificationTemplates.form.js:213
+#: client/src/notifications/notificationTemplates.form.js:196
+#: client/src/notifications/notificationTemplates.form.js:197
 msgid "Source Phone Number"
 msgstr "Brontelefoonnummer"
 
@@ -6237,22 +6167,24 @@ msgstr "Brontelefoonnummer"
 msgid "Source Project"
 msgstr "Bronproject"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:135
-msgid "Source Regions"
-msgstr "Bronregio's"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:208
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:215
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:232
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:239
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:256
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:168
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:175
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:194
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:220
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:227
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:246
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:253
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:263
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:273
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:290
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:297
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:307
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:314
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:270
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:289
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:296
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:315
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:322
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:341
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:348
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:367
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:374
 msgid "Source Variables"
 msgstr "Bronvariabelen"
 
@@ -6270,7 +6202,7 @@ msgstr "Bronworkflow"
 msgid "Sources"
 msgstr "Bronnen"
 
-#: client/src/notifications/notificationTemplates.form.js:420
+#: client/src/notifications/notificationTemplates.form.js:392
 msgid "Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax."
 msgstr "Specificeer HTTP-koppen in JSON-formaat. Raadpleeg de documentatie van Ansible Tower voor voorbeeldsyntaxis."
 
@@ -6278,11 +6210,11 @@ msgstr "Specificeer HTTP-koppen in JSON-formaat. Raadpleeg de documentatie van A
 msgid "Specify a method for %s operations. This is equivalent to specifying the %s parameter, where %s could be %s"
 msgstr "Specificeer een methode voor %s-operaties. Dit staat gelijk aan het specificeren van de %s-parameter, waar %s %s kan zijn"
 
-#: client/src/notifications/notificationTemplates.form.js:574
+#: client/src/notifications/notificationTemplates.form.js:546
 msgid "Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc) ."
 msgstr "Kies een berichtkleur. Mogelijke kleuren zijn kleuren uit de hexidecimale kleurencode (bijvoorbeeld: #3af of #789abc)."
 
-#: client/src/notifications/notificationTemplates.form.js:375
+#: client/src/notifications/notificationTemplates.form.js:347
 msgid "Specify a notification color. Acceptable colors are: yellow, green, red purple, gray or random."
 msgstr "Kies een berichtkleur. Mogelijke kleuren zijn: geel, groen, rood, paars, grijs of willekeurig."
 
@@ -6290,14 +6222,9 @@ msgstr "Kies een berichtkleur. Mogelijke kleuren zijn: geel, groen, rood, paars,
 msgid "Specify a scope for the token's access"
 msgstr "Geef een bereik op voor de toegang van de token"
 
-#: client/src/notifications/notificationTemplates.form.js:432
+#: client/src/notifications/notificationTemplates.form.js:404
 msgid "Specify an HTTP method for the webhook. Acceptable choices are: POST or PUT"
 msgstr "Geef een HTTP-methode op voor de webhook. Mogelijke keuzes zijn: POST of PUT"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:268
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:283
-msgid "Specify which groups to create automatically. Group names will be created similar to the options selected. If blank, all groups above are created. Refer to Ansible Tower documentation for more detail."
-msgstr "Specificeer welke groepen automatisch aangemaakt moeten worden. De namen van de groepen zullen vergelijkbaar zijn met de geselecteerde opties. Indien dit leeg gelaten wordt, zullen alle bovenstaande groepen aangemaakt worden. Raadpleeg de documentatie van Ansible Tower voor meer informatie."
 
 #: client/features/output/output.strings.js:135
 msgid "Standard Error"
@@ -6317,11 +6244,11 @@ msgstr "Starten"
 msgid "Start Date"
 msgstr "Startdatum"
 
-#: client/src/notifications/notificationTemplates.form.js:597
+#: client/src/notifications/notificationTemplates.form.js:569
 msgid "Start Message"
 msgstr "Startbericht"
 
-#: client/src/notifications/notificationTemplates.form.js:608
+#: client/src/notifications/notificationTemplates.form.js:580
 msgid "Start Message Body"
 msgstr "Body startbericht"
 
@@ -6362,7 +6289,7 @@ msgstr "Gestart"
 msgid "Status"
 msgstr "Status"
 
-#: client/src/license/license.partial.html:203
+#: client/src/license/license.partial.html:218
 msgid "Submit"
 msgstr "Indienen"
 
@@ -6370,7 +6297,9 @@ msgstr "Indienen"
 msgid "Submit search"
 msgstr "Zoekopdracht indienen"
 
+#: client/src/license/license.controller.js:47
 #: client/src/license/license.partial.html:27
+#: client/src/license/license.partial.html:8
 msgid "Subscription"
 msgstr "Abonnement"
 
@@ -6383,15 +6312,23 @@ msgstr "Abonnement-ID"
 msgid "Subscription ID is an Azure construct, which is mapped to a username."
 msgstr "Abonnement-ID is een concept van Azure en is gelinkt aan een gebruikersnaam."
 
+#: client/src/license/license.controller.js:49
+msgid "Subscription Management"
+msgstr "Abonnementenbeheer"
+
+#: client/src/license/license.partial.html:21
+msgid "Subscription Type"
+msgstr "Soort abonnement"
+
 #: client/src/notifications/notifications.list.js:65
 msgid "Success"
 msgstr "Geslaagd"
 
-#: client/src/notifications/notificationTemplates.form.js:620
+#: client/src/notifications/notificationTemplates.form.js:592
 msgid "Success Message"
 msgstr "Succesbericht"
 
-#: client/src/notifications/notificationTemplates.form.js:631
+#: client/src/notifications/notificationTemplates.form.js:603
 msgid "Success Message Body"
 msgstr "Body succesbericht"
 
@@ -6533,32 +6470,22 @@ msgstr "TOKENS"
 msgid "TOTAL NODES"
 msgstr "TOTAAL KNOOPPUNTEN"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:250
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:262
-msgid "Tag None:"
-msgstr "Tag geen:"
-
 #: client/features/templates/templates.strings.js:55
 #: client/src/templates/job_templates/job-template.form.js:212
 msgid "Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags."
 msgstr "Tags zijn nuttig wanneer u een groot draaiboek heeft en specifieke delen van het draaiboek of een taak wilt uitvoeren. Gebruik een komma om meerdere tags van elkaar te scheiden. Raadpleeg de documentatie van Ansible Tower voor meer informatie over het gebruik van tags."
 
-#: client/src/notifications/notificationTemplates.form.js:330
+#: client/src/notifications/notificationTemplates.form.js:314
 msgid "Tags for the Annotation"
 msgstr "Tags voor de melding"
 
-#: client/src/notifications/notificationTemplates.form.js:329
+#: client/src/notifications/notificationTemplates.form.js:313
 msgid "Tags for the Annotation (optional)"
 msgstr "Tags voor de melding (optioneel)"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:248
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:260
-msgid "Tags:"
-msgstr "Tags:"
-
-#: client/src/notifications/notificationTemplates.form.js:392
-#: client/src/notifications/notificationTemplates.form.js:442
-#: client/src/notifications/notificationTemplates.form.js:481
+#: client/src/notifications/notificationTemplates.form.js:364
+#: client/src/notifications/notificationTemplates.form.js:414
+#: client/src/notifications/notificationTemplates.form.js:453
 msgid "Target URL"
 msgstr "Doel-URL"
 
@@ -6570,7 +6497,7 @@ msgstr "Taken"
 #: client/src/credentials/credentials.form.js:467
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:136
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:133
-#: client/src/organizations/organizations.form.js:171
+#: client/src/organizations/organizations.form.js:180
 #: client/src/projects/projects.form.js:307
 #: client/src/templates/workflows.form.js:317
 msgid "Team Roles"
@@ -6660,7 +6587,7 @@ msgstr "Het project-ID is de toegewezen GCE-identificatie. Dit bestaat uit twee 
 msgid "The Project selected has a status of"
 msgstr "Het geselecteerde project heeft de status"
 
-#: client/src/projects/edit/projects-edit.controller.js:331
+#: client/src/projects/edit/projects-edit.controller.js:339
 msgid "The SCM update process is running."
 msgstr "Het SCM-updateproces is nu in uitvoering."
 
@@ -6688,7 +6615,7 @@ msgstr "Het antwoord is langer dan de maximumlengte. Maak het antwoord korter."
 msgid "The answer is shorter than the minimium length. Please make the answer longer."
 msgstr "Het antwoord is korter dan de minimumlengte. Maak het antwoord langer."
 
-#: client/src/notifications/notificationTemplates.form.js:287
+#: client/src/notifications/notificationTemplates.form.js:271
 msgid "The base URL of the Grafana server - the /api/annotations endpoint will be added automatically to the base Grafana URL."
 msgstr "De basis-URL van de Grafana-server - het /api/annotations-eindpunt wordt automatisch toegevoegd aan de basis-URL voor Grafana."
 
@@ -6767,7 +6694,7 @@ msgstr "De maximumlengte is te kort. Voer een getal in dat groter is dan de inge
 msgid "The maximum length you entered is not a valid number.  Please enter a whole number."
 msgstr "De ingevoerde maximumlengte is geen geldig getal. Voer een geheel getal in."
 
-#: client/src/organizations/organizations.form.js:69
+#: client/src/organizations/organizations.form.js:78
 msgid "The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details."
 msgstr "Maximumaantal hosts dat beheerd mag worden door deze organisatie. De standaardwaarde is 0, wat betekent dat er geen limiet is. Raadpleeg de Ansible-documentatie voor meer informatie."
 
@@ -6902,6 +6829,10 @@ msgstr "Deze soort toegangsgegevens wordt op dit moment door één of meerdere t
 msgid "This feature is currently in tech preview and is subject to change in a future release.  Click here for documentation."
 msgstr "Deze functie is momenteel in tech-voorvertoning en kan in een toekomstige release worden gewijzigd.  Klik hier voor documentatie."
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:430
+msgid "This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import."
+msgstr "Dit veld wordt genegeerd, tenzij er een Ingeschakelde variabele is ingesteld. Als de ingeschakelde variabele overeenkomt met deze waarde, wordt de host bij het importeren ingeschakeld."
+
 #: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:25
 msgid "This group contains at least one group or host"
 msgstr "Deze groep bevat ten minste één groep of host"
@@ -6980,7 +6911,7 @@ msgstr "Do"
 msgid "Time"
 msgstr "Tijd"
 
-#: client/src/license/license.partial.html:45
+#: client/src/license/license.partial.html:39
 msgid "Time Remaining"
 msgstr "Tijd over"
 
@@ -6988,7 +6919,7 @@ msgstr "Tijd over"
 msgid "Time in seconds to consider a project to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, and a new project update will be performed."
 msgstr "Tijd in seconden waarmee een project actueel genoemd kan worden. Tijdens taken in uitvoering en terugkoppelingen wil het taaksysteem de tijdstempel van de meest recente projectupdate bekijken. Indien dit ouder is dan de Cache-timeout wordt het project niet gezien als actueel en moet er een nieuwe projectupdate uitgevoerd worden."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:405
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:497
 msgid "Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, and a new inventory sync will be performed."
 msgstr "Tijd in seconden waarmee een inventarissynchronisatie actueel genoemd kan worden. Tijdens taken in uitvoering en terugkoppelingen zal het taaksysteem de tijdstempel van de meest recente synchronisatie bekijken. Indien dit ouder is dan de Cache-timeout wordt het project niet gezien als actueel en moet er een nieuwe inventarissynchronisatie uitgevoerd worden."
 
@@ -7040,11 +6971,11 @@ msgstr "Totaalaantal knooppunten"
 msgid "Traceback"
 msgstr "Traceback"
 
-#: client/src/license/license.partial.html:176
+#: client/src/license/license.partial.html:191
 msgid "Tracking and Analytics"
 msgstr "Tracking en analyse"
 
-#: client/src/license/license.partial.html:233
+#: client/src/license/license.partial.html:248
 msgid "Trial"
 msgstr "Proefperiode"
 
@@ -7078,12 +7009,12 @@ msgstr "Soortdetails"
 msgid "UNLINK"
 msgstr "LINK VERWIJDEREN"
 
-#: client/src/projects/add/projects-add.controller.js:182
-#: client/src/projects/edit/projects-edit.controller.js:303
+#: client/src/projects/add/projects-add.controller.js:190
+#: client/src/projects/edit/projects-edit.controller.js:311
 msgid "URL popover text"
 msgstr "URL-popovertekst"
 
-#: client/src/license/license.partial.html:132
+#: client/src/license/license.partial.html:139
 #: client/src/login/loginModal/loginModal.partial.html:61
 msgid "USERNAME"
 msgstr "GEBRUIKERSNAAM"
@@ -7181,7 +7112,7 @@ msgstr "Onverwachte fout"
 msgid "Unexpected server error. View the console for more information"
 msgstr "Onverwachte serverfout. Bekijk de console voor meer informatie"
 
-#: client/src/license/license.partial.html:59
+#: client/src/license/license.partial.html:53
 msgid "Unlimited"
 msgstr "Onbeperkt"
 
@@ -7198,7 +7129,7 @@ msgstr "Soort input niet ondersteund"
 msgid "Update Not Found"
 msgstr "Update niet gevonden"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:344
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:436
 msgid "Update Options"
 msgstr "Update-opties"
 
@@ -7216,7 +7147,7 @@ msgstr "Update geannuleerd. Klik voor meer informatie"
 msgid "Update failed. Click for details"
 msgstr "Update mislukt. Klik voor meer informatie"
 
-#: client/src/projects/edit/projects-edit.controller.js:331
+#: client/src/projects/edit/projects-edit.controller.js:339
 msgid "Update in Progress"
 msgstr "Update in uitvoering"
 
@@ -7225,13 +7156,13 @@ msgstr "Update in uitvoering"
 msgid "Update missing. Click for details"
 msgstr "Update ontbreekt. Klik voor meer informatie"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:372
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:377
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:464
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:469
 msgid "Update on Launch"
 msgstr "Update bij opstarten"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:383
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:389
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:475
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:481
 msgid "Update on Project Update"
 msgstr "Update voor projectupdate"
 
@@ -7254,13 +7185,9 @@ msgstr "Werk de instellingen bij die betrekking hebben tot taken binnen Tower"
 msgid "Update succeeded. Click for details"
 msgstr "Update gelukt. Klik voor meer informatie"
 
-#: client/src/license/license.partial.html:75
-msgid "Upgrade"
-msgstr "Upgrade"
-
-#: client/src/license/license.partial.html:111
-msgid "Upload a license file"
-msgstr "Een licentiebestand uploaden"
+#: client/src/license/license.partial.html:109
+msgid "Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <a href=\"https://access.redhat.com/management/subscription_allocations\" target=\"_blank\">subscription allocations</a> on the Red Hat Customer Portal."
+msgstr "Upload een Red Hat-abonnementsmanifest met uw abonnement. Ga naar <a href=\"https://access.redhat.com/management/subscription_allocations\" target=\"_blank\">subscription allocations</a> op het Red Hat-klantenportaal om uw abonnementsmanifest te genereren."
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:62
 #: client/src/organizations/organizations.form.js:48
@@ -7279,7 +7206,7 @@ msgstr "SSL gebruiken"
 msgid "Use TLS"
 msgstr "TLS gebruiken"
 
-#: client/src/notifications/notificationTemplates.form.js:586
+#: client/src/notifications/notificationTemplates.form.js:558
 msgid "Use custom messages to change the content of notifications sent when a job starts, succeeds, or fails. Use curly braces to access information about the job: <code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>, or attributes of the job such as <code ng-non-bindable>{{ job.status }}</code>. You may apply a number of possible variables in the message. Refer to the <a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower documentation</a> for more details."
 msgstr "Gebruik aangepaste berichten om de inhoud van meldingen te wijzigen die worden verzonden wanneer een taak begint, slaagt of mislukt. Gebruik accolades om toegang te krijgen tot informatie over de taak: <code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>, of attributen van de taak zoals <code ng-non-bindable>{{ job.status }}</code>. U kunt een aantal mogelijke variabelen in het bericht toepassen. Raadpleeg de <a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower documentatie</a> voor meer details."
 
@@ -7296,8 +7223,8 @@ msgstr "Wordt gebruikt om draaiboekopslagplaatsen te bekijken en te synchroniser
 #: client/src/credentials/credentials.form.js:456
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:125
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:122
-#: client/src/organizations/organizations.form.js:119
-#: client/src/organizations/organizations.form.js:160
+#: client/src/organizations/organizations.form.js:128
+#: client/src/organizations/organizations.form.js:169
 #: client/src/projects/projects.form.js:296
 #: client/src/teams/teams.form.js:96
 #: client/src/templates/workflows.form.js:306
@@ -7320,8 +7247,8 @@ msgstr "Soort gebruiker"
 #: client/src/credentials/factories/kind-change.factory.js:40
 #: client/src/credentials/factories/kind-change.factory.js:73
 #: client/src/credentials/factories/kind-change.factory.js:94
-#: client/src/notifications/notificationTemplates.form.js:453
-#: client/src/notifications/notificationTemplates.form.js:492
+#: client/src/notifications/notificationTemplates.form.js:425
+#: client/src/notifications/notificationTemplates.form.js:464
 #: client/src/notifications/notificationTemplates.form.js:64
 #: client/src/users/users.form.js:59
 #: client/src/users/users.list.js:29
@@ -7343,7 +7270,7 @@ msgstr "Gebruikersnamen, wachtwoorden en toegangssleutels voor authenticatie bij
 #: client/lib/components/components.strings.js:80
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:35
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:38
-#: client/src/organizations/organizations.form.js:101
+#: client/src/organizations/organizations.form.js:110
 #: client/src/teams/teams.form.js:78
 msgid "Users"
 msgstr "Gebruikers"
@@ -7381,15 +7308,6 @@ msgstr "MEER WEERGEVEN"
 msgid "VIEW PER PAGE"
 msgstr "WEERGEVEN PER PAGINA"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:249
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:261
-msgid "VPC ID:"
-msgstr "VPC-ID:"
-
-#: client/src/license/license.partial.html:10
-msgid "Valid License"
-msgstr "Geldige licentie"
-
 #: client/src/inventories-hosts/hosts/host.form.js:67
 #: client/src/inventories-hosts/inventories/related/groups/groups.form.js:46
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-groups/group-nested-groups.form.js:47
@@ -7414,8 +7332,8 @@ msgstr "Wachtwoord kluis"
 #: client/features/templates/templates.strings.js:60
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:82
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:91
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:330
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:337
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:392
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:399
 #: client/src/templates/job_templates/job-template.form.js:189
 #: client/src/templates/job_templates/job-template.form.js:196
 msgid "Verbosity"
@@ -7456,10 +7374,15 @@ msgstr "Insights weergeven"
 msgid "View Insights Data"
 msgstr "Insights-gegevens weergeven"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:201
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:225
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:249
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:324
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:161
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:187
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:213
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:239
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:308
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:334
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:360
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:386
 msgid "View JSON examples at"
 msgstr "Bekijk JSON-voorbeelden op"
 
@@ -7493,10 +7416,15 @@ msgstr "Resultaten project-checkout weergeven"
 msgid "View Survey"
 msgstr "Vragenlijst weergeven"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:202
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:226
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:250
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:325
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:162
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:188
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:214
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:240
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:283
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:309
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:335
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:361
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:387
 msgid "View YAML examples at"
 msgstr "Bekijk YAML-voorbeelden op"
 
@@ -7571,11 +7499,6 @@ msgstr "Team weergeven"
 #: client/src/templates/templates.list.js:103
 msgid "View template"
 msgstr "Sjabloon weergeven"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:261
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:274
-msgid "View the"
-msgstr "Bekijk de"
 
 #: client/features/output/output.strings.js:22
 #: client/lib/components/components.strings.js:63
@@ -7662,7 +7585,7 @@ msgstr "Waarschuwing"
 msgid "Warning: Unsaved Changes"
 msgstr "Waarschuwing: niet-opgeslagen wijzigingen"
 
-#: client/src/license/license.controller.js:159
+#: client/src/license/license.controller.js:154
 msgid "We were unable to locate licenses associated with this account"
 msgstr "We waren niet in staat om de aan deze account gekoppelde licenties te lokaliseren"
 
@@ -7716,19 +7639,19 @@ msgstr "Webhook-diensten kunnen dit gebruiken als een gedeeld geheim."
 msgid "Wed"
 msgstr "Woe"
 
-#: client/src/license/license.partial.html:82
-msgid "Welcome to Ansible Tower! Please complete the steps below to acquire a license."
-msgstr "Welkom bij Ansible Tower! Volg de onderstaande stappen op om een licentie te verkrijgen."
-
 #: client/src/login/loginModal/loginModal.partial.html:23
 msgid "Welcome to Ansible {{BRAND_NAME}}! &nbsp;Please sign in."
 msgstr "Welkom bij Ansible {{BRAND_NAME}}! Meld u eerst aan."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:365
+#: client/src/license/license.partial.html:82
+msgid "Welcome to Red Hat Ansible Automation Platform! Please complete the steps below to activate your subscription."
+msgstr "Welkom bij Red Hat Ansible Automation Platform! Volg de onderstaande stappen om uw abonnement te activeren."
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:457
 msgid "When not checked, a merge will be performed, combining local variables with those found on the external source."
 msgstr "Als dit vakje niet aangevinkt is, worden lokale variabelen samengevoegd met de variabelen die aangetroffen zijn in de externe bron."
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:446
 msgid "When not checked, local child hosts and groups not found on the external source will remain untouched by the inventory update process."
 msgstr "Als dit vakje niet aangevinkt is, worden lokale onderliggende hosts en groepen die niet aangetroffen zijn in de externe bron niet behandeld in het synchronisatieproces van de inventaris."
 
@@ -7745,19 +7668,19 @@ msgstr "Wanneer dit project wordt gebruikt door een taaksjabloon, kan organisati
 msgid "Workflow"
 msgstr "Workflow"
 
-#: client/src/notifications/notificationTemplates.form.js:666
+#: client/src/notifications/notificationTemplates.form.js:638
 msgid "Workflow Approved Message"
 msgstr "Workflow Goedgekeurd bericht"
 
-#: client/src/notifications/notificationTemplates.form.js:677
+#: client/src/notifications/notificationTemplates.form.js:649
 msgid "Workflow Approved Message Body"
 msgstr "Workflow Goedgekeurde berichtbody"
 
-#: client/src/notifications/notificationTemplates.form.js:689
+#: client/src/notifications/notificationTemplates.form.js:661
 msgid "Workflow Denied Message"
 msgstr "Workflow Geweigerd bericht"
 
-#: client/src/notifications/notificationTemplates.form.js:700
+#: client/src/notifications/notificationTemplates.form.js:672
 msgid "Workflow Denied Message Body"
 msgstr "Workflow Geweigerde berichtenbody"
 
@@ -7773,11 +7696,11 @@ msgstr "Sjabloonknooppunten workflowtaak"
 msgid "Workflow Job Templates"
 msgstr "Workflowtaaksjablonen"
 
-#: client/src/notifications/notificationTemplates.form.js:712
+#: client/src/notifications/notificationTemplates.form.js:684
 msgid "Workflow Pending Approval Message"
 msgstr "Workflow in afwachting van goedkeuring bericht"
 
-#: client/src/notifications/notificationTemplates.form.js:723
+#: client/src/notifications/notificationTemplates.form.js:695
 msgid "Workflow Pending Approval Message Body"
 msgstr "Workflow in afwachting van goedkeuring bericht"
 
@@ -7792,11 +7715,11 @@ msgstr "Workflowsjabloon"
 msgid "Workflow Templates"
 msgstr "Workflowsjablonen"
 
-#: client/src/notifications/notificationTemplates.form.js:735
+#: client/src/notifications/notificationTemplates.form.js:707
 msgid "Workflow Timed Out Message"
 msgstr "Workflow Verlopen bericht"
 
-#: client/src/notifications/notificationTemplates.form.js:746
+#: client/src/notifications/notificationTemplates.form.js:718
 msgid "Workflow Timed Out Message Body"
 msgstr "Workflow Verlopen berichtbody"
 
@@ -7814,10 +7737,15 @@ msgstr "Schrijven"
 msgid "YAML"
 msgstr "YAML"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:199
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:223
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:247
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:322
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:159
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:185
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:211
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:237
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:280
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:306
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:332
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:358
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:384
 msgid "YAML:"
 msgstr "YAML:"
 
@@ -7948,11 +7876,6 @@ msgstr "fout"
 msgid "failed"
 msgstr "mislukt"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:262
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:275
-msgid "for a complete list of supported filters."
-msgstr "voor een volledige lijst van ondersteunde filters."
-
 #: client/src/inventories-hosts/inventories/related/hosts/related-groups-labels/relatedGroupsLabelsList.directive.js:82
 msgid "from the"
 msgstr "van de"
@@ -7979,6 +7902,17 @@ msgstr[1] "hosts"
 msgid "hosts with failures. Click for details."
 msgstr "hosts met mislukkingen. Klik voor meer informatie."
 
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:179
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:205
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:231
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:274
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:300
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:352
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
+msgid "in the documentation and the"
+msgstr "in de documentatie en de"
+
 #: client/src/templates/workflows/workflow-maker/forms/workflow-node-form.partial.html:146
 msgid "min"
 msgstr "min"
@@ -8003,11 +7937,6 @@ msgstr "nieuw"
 #: client/src/shared/paginate/paginate.partial.html:45
 msgid "of"
 msgstr "van"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "of the filters match."
-msgstr "van de filters komen overeen."
 
 #: client/src/scheduler/scheduler.strings.js:34
 msgid "on"
@@ -8036,6 +7965,17 @@ msgstr "in afwachting"
 #: client/src/shared/form-generator.js:1044
 msgid "playbook"
 msgstr "draaiboek"
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:181
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:207
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:233
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:276
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:302
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:328
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:354
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:380
+msgid "plugin configuration guide."
+msgstr "handleiding voor pluginconfiguratie."
 
 #: client/features/jobs/jobs.strings.js:25
 msgid "running"
@@ -8068,11 +8008,6 @@ msgstr "bronnen met synchronisatiefouten. Klik voor meer informatie"
 msgid "successful"
 msgstr "geslaagd"
 
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:259
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:272
-msgid "test"
-msgstr "test"
-
 #: client/src/activity-stream/factories/build-description.factory.js:136
 msgid "timed out"
 msgstr "time-out"
@@ -8082,10 +8017,6 @@ msgstr "time-out"
 #: client/src/templates/prompt/steps/survey/prompt-survey.partial.html:30
 msgid "to"
 msgstr "om"
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:138
-msgid "to include all regions. Only Hosts associated with the selected regions will be updated."
-msgstr "om alle regio's te omvatten. Alleen hosts die bij de gekozen regio's horen worden geüpdatet."
 
 #: client/src/inventories-hosts/inventories/related/sources/factories/get-sync-status-msg.factory.js:17
 msgid "to start it now."
@@ -8111,31 +8042,13 @@ msgstr "v3 standaard%s - instellen op 'standaard'"
 msgid "v3 multi-domain%s - your domain name"
 msgstr "v3 multi-domein%s - uw domeinnaam"
 
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:318
-msgid "view azure_rm.ini in the Ansible community.general github repo."
-msgstr "bekijk azure_rm.ini in de Ansible community.general github repo."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:219
-msgid "view ec2.ini in the community.aws repo."
-msgstr "bekijk ec2.ini in de community.aws repo."
-
-#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:243
-msgid "view vmware_inventory.ini in the vmware community repo."
-msgstr "bekijk vmware_inventory.ini in de vmware community repo."
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:257
+msgid "view cloudforms.ini in the Ansible Collections github repo."
+msgstr "bekijk cloudforms.ini in de Ansible Collections github repo."
 
 #: client/features/jobs/jobs.strings.js:24
 msgid "waiting"
 msgstr "wachten"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:254
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:267
-msgid "when"
-msgstr "wanneer"
-
-#: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:240
-#: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:252
-msgid "will create group names similar to the following examples based on the options selected:"
-msgstr "zullen groepsnamen aangemaakt worden die vergelijkbaar zijn met de volgende voorbeelden op basis van de geselecteerde opties:"
 
 #: client/index.template.ejs:158
 msgid "working..."
