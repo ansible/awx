@@ -17,7 +17,6 @@
     aws_cred_name1: "AWX-Collection-tests-tower_credential-aws-cred1-{{ test_id }}"
     vmware_cred_name1: "AWX-Collection-tests-tower_credential-vmware-cred1-{{ test_id }}"
     sat6_cred_name1: "AWX-Collection-tests-tower_credential-sat6-cred1-{{ test_id }}"
-    cf_cred_name1: "AWX-Collection-tests-tower_credential-cf-cred1-{{ test_id }}"
     gce_cred_name1: "AWX-Collection-tests-tower_credential-gce-cred1-{{ test_id }}"
     azurerm_cred_name1: "AWX-Collection-tests-tower_credential-azurerm-cred1-{{ test_id }}"
     openstack_cred_name1: "AWX-Collection-tests-tower_credential-openstack-cred1-{{ test_id }}"
@@ -528,33 +527,6 @@
     organization: Default
     state: absent
     kind: satellite6
-  register: result
-
-- assert:
-    that:
-      - "result is changed"
-
-- name: Create a valid CloudForms credential
-  tower_credential:
-    name: "{{ cf_cred_name1 }}"
-    organization: Default
-    state: present
-    kind: cloudforms
-    host: https://example.org
-    username: joe
-    password: secret
-  register: result
-
-- assert:
-    that:
-      - "result is changed"
-
-- name: Delete a CloudForms credential
-  tower_credential:
-    name: "{{ cf_cred_name1 }}"
-    organization: Default
-    state: absent
-    kind: cloudforms
   register: result
 
 - assert:
