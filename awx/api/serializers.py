@@ -2991,7 +2991,8 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
                     'name': cred.name,
                     'description': cred.description,
                     'kind': cred.kind,
-                    'cloud': cred.credential_type.kind == 'cloud'
+                    'cloud': cred.credential_type.kind == 'cloud',
+                    'inputs': cred.display_inputs(),
                 }
                 all_creds.append(summarized_cred)
         summary_fields['credentials'] = all_creds
