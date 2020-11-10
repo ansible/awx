@@ -1,21 +1,16 @@
 import React, { useCallback, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { useField, useFormikContext } from 'formik';
-import styled from 'styled-components';
-import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
-import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
+import { Form, FormGroup } from '@patternfly/react-core';
 import { CredentialTypesAPI } from '../../../../../api';
 import AnsibleSelect from '../../../../../components/AnsibleSelect';
 import ContentError from '../../../../../components/ContentError';
 import ContentLoading from '../../../../../components/ContentLoading';
 import FormField from '../../../../../components/FormField';
 import { FormFullWidthLayout } from '../../../../../components/FormLayout';
+import Popover from '../../../../../components/Popover';
 import useRequest from '../../../../../util/useRequest';
 import { required } from '../../../../../util/validators';
-
-const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
-  margin-left: 10px;
-`;
 
 function MetadataStep({ i18n }) {
   const form = useFormikContext();
@@ -82,12 +77,10 @@ function MetadataStep({ i18n }) {
                       fieldId={`credential-${field.id}`}
                       label={field.label}
                       isRequired={field.required}
+                      labelIcon={
+                        field.help_text && <Popover content={field.help_text} />
+                      }
                     >
-                      {field.help_text && (
-                        <Tooltip content={field.help_text} position="right">
-                          <QuestionCircleIcon />
-                        </Tooltip>
-                      )}
                       <AnsibleSelect
                         name={`inputs.${field.id}`}
                         value={form.values.inputs[field.id]}

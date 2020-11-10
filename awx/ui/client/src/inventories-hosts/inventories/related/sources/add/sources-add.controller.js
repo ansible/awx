@@ -139,7 +139,7 @@ export default ['$state', 'ConfigData', '$scope', 'SourcesFormDefinition', 'Pars
             else{
                 $scope.credentialBasePath = (source === 'ec2') ? GetBasePath('credentials') + '?credential_type__namespace=aws' : GetBasePath('credentials') + (source === '' ? '' : '?credential_type__namespace=' + (source));
             }
-            if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack' || source === 'scm' || source === 'cloudforms' || source === "satellite6" || source === "azure_rm") {
+            if (true) {
                 $scope.envParseType = 'yaml';
 
                 var varName;

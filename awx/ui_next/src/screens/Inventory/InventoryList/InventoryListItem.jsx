@@ -39,6 +39,10 @@ const ListGroup = styled.div`
   display: inline-block;
 `;
 
+const OrgLabel = styled.b`
+  margin-right: 20px;
+`;
+
 function InventoryListItem({
   inventory,
   isSelected,
@@ -79,6 +83,7 @@ function InventoryListItem({
     syncStatus =
       inventory.inventory_sources_with_failures > 0 ? 'error' : 'success';
   }
+
   return (
     <DataListItem
       key={inventory.id}
@@ -111,6 +116,14 @@ function InventoryListItem({
               {inventory.kind === 'smart'
                 ? i18n._(t`Smart Inventory`)
                 : i18n._(t`Inventory`)}
+            </DataListCell>,
+            <DataListCell key="organization">
+              <OrgLabel>{i18n._(t`Organization`)}</OrgLabel>
+              <Link
+                to={`/organizations/${inventory.summary_fields.organization.id}/details`}
+              >
+                {inventory.summary_fields.organization.name}
+              </Link>
             </DataListCell>,
             <DataListCell key="groups-hosts-sources-counts">
               <ListGroup>

@@ -313,7 +313,7 @@ def delete_project_files(project_path):
 
 @task(queue='tower_broadcast_all')
 def profile_sql(threshold=1, minutes=1):
-    if threshold == 0:
+    if threshold <= 0:
         cache.delete('awx-profile-sql-threshold')
         logger.error('SQL PROFILING DISABLED')
     else:
@@ -2160,7 +2160,7 @@ class RunProjectUpdate(BaseTask):
             'local_path': os.path.basename(project_update.project.local_path),
             'project_path': project_update.get_project_path(check_if_exists=False),  # deprecated
             'insights_url': settings.INSIGHTS_URL_BASE,
-            'awx_license_type': get_license(show_key=False).get('license_type', 'UNLICENSED'),
+            'awx_license_type': get_license().get('license_type', 'UNLICENSED'),
             'awx_version': get_awx_version(),
             'scm_url': scm_url,
             'scm_branch': scm_branch,

@@ -18,7 +18,7 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 
 import DatalistToolbar from '../../../components/DataListToolbar';
-import UserAccessListItem from './UserAccessListItem';
+import UserRolesListItem from './UserRolesListItem';
 import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('roles', {
@@ -29,7 +29,7 @@ const QS_CONFIG = getQSConfig('roles', {
 // TODO Figure out how to best conduct a search of this list.
 // Since we only have a role ID in the top level of each role object
 // we can't really search using the normal search parameters.
-function UserAccessList({ i18n, user }) {
+function UserRolesList({ i18n, user }) {
   const { search } = useLocation();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [roleToDisassociate, setRoleToDisassociate] = useState(null);
@@ -164,7 +164,7 @@ function UserAccessList({ i18n, user }) {
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderItem={role => {
           return (
-            <UserAccessListItem
+            <UserRolesListItem
               key={role.id}
               value={role.name}
               role={role}
@@ -256,4 +256,4 @@ function UserAccessList({ i18n, user }) {
     </>
   );
 }
-export default withI18n()(UserAccessList);
+export default withI18n()(UserRolesList);

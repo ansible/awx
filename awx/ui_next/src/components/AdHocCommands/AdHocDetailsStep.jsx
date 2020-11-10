@@ -9,13 +9,14 @@ import styled from 'styled-components';
 
 import { BrandName } from '../../variables';
 import AnsibleSelect from '../AnsibleSelect';
-import FormField, { FieldTooltip } from '../FormField';
+import FormField from '../FormField';
 import { VariablesField } from '../CodeMirrorInput';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
 } from '../FormLayout';
+import Popover from '../Popover';
 import { required } from '../../util/validators';
 
 const TooltipWrapper = styled.div`
@@ -58,7 +59,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
         <FormFullWidthLayout>
           <FormGroup
             fieldId="module_name"
-            aria-label={i18n._(t`Module`)}
+            aria-label={i18n._(t`select module`)}
             label={i18n._(t`Module`)}
             isRequired
             helperTextInvalid={moduleNameMeta.error}
@@ -68,7 +69,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
                 : 'error'
             }
             labelIcon={
-              <FieldTooltip
+              <Popover
                 content={i18n._(
                   t`These are the modules that ${brandName} supports running commands against.`
                 )}
@@ -109,7 +110,6 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             label={i18n._(t`Arguments`)}
             validated={isValid ? 'default' : 'error'}
             onBlur={() => argumentsHelpers.setTouched(true)}
-            placeholder={i18n._(t`Enter arguments`)}
             isRequired={
               moduleNameField.value === 'command' ||
               moduleNameField.value === 'shell'
@@ -136,7 +136,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
           />
           <FormGroup
             fieldId="verbosity"
-            aria-label={i18n._(t`Verbosity`)}
+            aria-label={i18n._(t`select verbosity`)}
             label={i18n._(t`Verbosity`)}
             isRequired
             validated={
@@ -146,7 +146,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
             }
             helperTextInvalid={verbosityMeta.error}
             labelIcon={
-              <FieldTooltip
+              <Popover
                 content={i18n._(
                   t`These are the verbosity levels for standard out of the command run that are supported.`
                 )}
@@ -211,7 +211,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
               label={i18n._(t`Show changes`)}
               aria-label={i18n._(t`Show changes`)}
               labelIcon={
-                <FieldTooltip
+                <Popover
                   content={i18n._(
                     t`If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode.`
                   )}
@@ -238,7 +238,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
                     <span>
                       {i18n._(t`Enable privilege escalation`)}
                       &nbsp;
-                      <FieldTooltip
+                      <Popover
                         content={
                           <p>
                             {i18n._(t`Enables creation of a provisioning
@@ -316,7 +316,7 @@ function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
 }
 
 AdHocDetailsStep.propTypes = {
-  moduleOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
+  moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
   verbosityOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 

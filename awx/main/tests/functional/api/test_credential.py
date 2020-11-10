@@ -676,33 +676,6 @@ def test_net_create_ok(post, organization, admin):
 
 
 #
-# Cloudforms Credentials
-#
-@pytest.mark.django_db
-def test_cloudforms_create_ok(post, organization, admin):
-    params = {
-        'credential_type': 1,
-        'name': 'Best credential ever',
-        'inputs': {
-            'host': 'some_host',
-            'username': 'some_username',
-            'password': 'some_password',
-        }
-    }
-    cloudforms = CredentialType.defaults['cloudforms']()
-    cloudforms.save()
-    params['organization'] = organization.id
-    response = post(reverse('api:credential_list'), params, admin)
-    assert response.status_code == 201
-
-    assert Credential.objects.count() == 1
-    cred = Credential.objects.all()[:1].get()
-    assert cred.inputs['host'] == 'some_host'
-    assert cred.inputs['username'] == 'some_username'
-    assert decrypt_field(cred, 'password') == 'some_password'
-
-
-#
 # GCE Credentials
 #
 @pytest.mark.django_db

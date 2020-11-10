@@ -1,10 +1,7 @@
-import cProfile
 import json
 import logging
 import os
-import pstats
 import signal
-import tempfile
 import time
 import traceback
 
@@ -23,6 +20,7 @@ from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
                              Job)
 from awx.main.tasks import handle_success_and_failure_notifications
 from awx.main.models.events import emit_event_detail
+from awx.main.utils.profiling import AWXProfiler
 
 from .base import BaseWorker
 
@@ -48,6 +46,7 @@ class CallbackBrokerWorker(BaseWorker):
         self.buff = {}
         self.pid = os.getpid()
         self.redis = redis.Redis.from_url(settings.BROKER_URL)
+        self.prof = AWXProfiler("CallbackBrokerWorker")
         for key in self.redis.keys('awx_callback_receiver_statistics_*'):
             self.redis.delete(key)
 
@@ -87,19 +86,12 @@ class CallbackBrokerWorker(BaseWorker):
         )
 
     def toggle_profiling(self, *args):
-        if self.prof:
-            self.prof.disable()
-            filename = f'callback-{self.pid}.pstats'
-            filepath = os.path.join(tempfile.gettempdir(), filename)
-            with open(filepath, 'w') as f:
-                pstats.Stats(self.prof, stream=f).sort_stats('cumulative').print_stats()
-            pstats.Stats(self.prof).dump_stats(filepath + '.raw')
-            self.prof = False
-            logger.error(f'profiling is disabled, wrote {filepath}')
-        else:
-            self.prof = cProfile.Profile()
-            self.prof.enable()
+        if not self.prof.is_started():
+            self.prof.start()
             logger.error('profiling is enabled')
+        else:
+            filepath = self.prof.stop()
+            logger.error(f'profiling is disabled, wrote {filepath}')
 
     def work_loop(self, *args, **kw):
         if settings.AWX_CALLBACK_PROFILE:

@@ -4,7 +4,7 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import WorkflowJobTemplateNode, WorkflowJobTemplate, JobTemplate
+from awx.main.models import WorkflowJobTemplateNode, WorkflowJobTemplate, JobTemplate, UnifiedJobTemplate
 
 
 @pytest.fixture
@@ -53,27 +53,26 @@ def test_create_workflow_job_template_node(run_module, admin_user, wfjt, job_tem
 
 
 @pytest.mark.django_db
-def test_create_workflow_job_template_node_no_template(run_module, admin_user, wfjt, job_template):
-    """This is a part of the API contract for creating approval nodes
-    and at some point in the future, tha feature will be supported by the collection
-    """
+def test_create_workflow_job_template_node_approval_node(run_module, admin_user, wfjt, job_template):
+    """This is a part of the API contract for creating approval nodes"""
     this_identifier = '42🐉'
     result = run_module('tower_workflow_job_template_node', {
         'identifier': this_identifier,
         'workflow_job_template': wfjt.name,
         'organization': wfjt.organization.name,
+        'approval_node': {'name': 'foo-jt-approval'}
     }, admin_user)
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed', False), result
 
-    node = WorkflowJobTemplateNode.objects.get(pk=result['id'])
-    # node = WorkflowJobTemplateNode.objects.first()
+    node = WorkflowJobTemplateNode.objects.get(identifier=this_identifier)
+    approval_node = UnifiedJobTemplate.objects.get(name='foo-jt-approval')
 
-    assert result['id'] == node.id
+    assert result['id'] == approval_node.id
 
     assert node.identifier == this_identifier
     assert node.workflow_job_template_id == wfjt.id
-    assert node.unified_job_template_id is None
+    assert node.unified_job_template_id is approval_node.id
 
 
 @pytest.mark.django_db

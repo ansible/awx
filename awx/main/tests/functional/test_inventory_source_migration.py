@@ -5,7 +5,7 @@ from awx.main.migrations import _inventory_source as invsrc
 
 from django.apps import apps
 
-from awx.main.models import InventorySource
+from awx.main.models import InventorySource, InventoryUpdate, ManagedCredentialType, CredentialType, Credential
 
 
 @pytest.mark.parametrize('vars,id_var,result', [
@@ -42,16 +42,40 @@ def test_apply_new_instance_id(inventory_source):
 
 
 @pytest.mark.django_db
-def test_replacement_scm_sources(inventory):
-    inv_source = InventorySource.objects.create(
-        name='test',
-        inventory=inventory,
-        organization=inventory.organization,
-        source='ec2'
+def test_cloudforms_inventory_removal(inventory):
+    ManagedCredentialType(
+        name='Red Hat CloudForms',
+        namespace='cloudforms',
+        kind='cloud',
+        managed_by_tower=True,
+        inputs={},
     )
-    invsrc.create_scm_script_substitute(apps, 'ec2')
-    inv_source.refresh_from_db()
-    assert inv_source.source == 'scm'
-    assert inv_source.source_project
-    project = inv_source.source_project
-    assert 'Replacement project for' in project.name
+    CredentialType.defaults['cloudforms']().save()
+    cloudforms = CredentialType.objects.get(namespace='cloudforms')
+    Credential.objects.create(
+        name='test',
+        credential_type=cloudforms,
+    )
+
+    for source in ('ec2', 'cloudforms'):
+        i = InventorySource.objects.create(
+            name='test',
+            inventory=inventory,
+            organization=inventory.organization,
+            source=source,
+        )
+        InventoryUpdate.objects.create(
+            name='test update',
+            inventory_source=i,
+            source=source,
+        )
+    assert Credential.objects.count() == 1
+    assert InventorySource.objects.count() == 2  # ec2 + cf
+    assert InventoryUpdate.objects.count() == 2  # ec2 + cf
+    invsrc.delete_cloudforms_inv_source(apps, None)
+    assert InventorySource.objects.count() == 1  # ec2
+    assert InventoryUpdate.objects.count() == 1  # ec2
+    assert InventorySource.objects.first().source == 'ec2'
+    assert InventoryUpdate.objects.first().source == 'ec2'
+    assert Credential.objects.count() == 0
+    assert CredentialType.objects.filter(namespace='cloudforms').exists() is False

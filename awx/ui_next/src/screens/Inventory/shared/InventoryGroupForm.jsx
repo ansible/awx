@@ -5,7 +5,7 @@ import { Form, Card } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 
 import { CardBody } from '../../../components/Card';
-import FormField from '../../../components/FormField';
+import FormField, { FormSubmitError } from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import { VariablesField } from '../../../components/CodeMirrorInput';
 import { required } from '../../../util/validators';
@@ -59,7 +59,7 @@ function InventoryGroupForm({
                   onCancel={handleCancel}
                   onSubmit={formik.handleSubmit}
                 />
-                {error ? <div>error</div> : null}
+                {error && <FormSubmitError error={error} />}
               </FormColumnLayout>
             </Form>
           )}

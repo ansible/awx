@@ -68,11 +68,7 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
                 multiple: false
             });
 
-            if (source === 'ec2' || source === 'custom' ||
-                source === 'vmware' || source === 'openstack' ||
-                source === 'scm' || source === 'cloudforms'  ||
-                source === 'satellite6' || source === 'azure_rm') {
-
+            if (true) {
                 var varName;
                 if (source === 'scm') {
                     varName = 'custom_variables';

@@ -1,22 +1,15 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  Tooltip,
-  DropdownItem,
-  ToolbarItem,
-} from '@patternfly/react-core';
 import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedDataList from '../../../components/PaginatedDataList';
 import SmartInventoryHostListItem from './SmartInventoryHostListItem';
 import useRequest from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
+import { InventoriesAPI } from '../../../api';
 import { Inventory } from '../../../types';
-import { Kebabified } from '../../../contexts/Kebabified';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 
 const QS_CONFIG = getQSConfig('host', {
@@ -27,35 +20,27 @@ const QS_CONFIG = getQSConfig('host', {
 
 function SmartInventoryHostList({ i18n, inventory }) {
   const location = useLocation();
-  const [isAdHocCommandsOpen, setIsAdHocCommandsOpen] = useState(false);
 
   const {
-    result: { hosts, count, moduleOptions, credentialTypeId, isAdHocDisabled },
+    result: { hosts, count },
     error: contentError,
     isLoading,
     request: fetchHosts,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const [hostResponse, adHocOptions, cred] = await Promise.all([
-        InventoriesAPI.readHosts(inventory.id, params),
-        InventoriesAPI.readAdHocOptions(inventory.id),
-        CredentialTypesAPI.read({ namespace: 'ssh' }),
-      ]);
+      const {
+        data: { results, count: hostCount },
+      } = await InventoriesAPI.readHosts(inventory.id, params);
 
       return {
-        hosts: hostResponse.data.results,
-        count: hostResponse.data.count,
-        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
-        credentialTypeId: cred.data.results[0].id,
-        isAdHocDisabled: !adHocOptions.data.actions.POST,
+        hosts: results,
+        count: hostCount,
       };
     }, [location.search, inventory.id]),
     {
       hosts: [],
       count: 0,
-      moduleOptions: [],
-      isAdHocDisabled: true,
     }
   );
 
@@ -110,38 +95,10 @@ function SmartInventoryHostList({ i18n, inventory }) {
             additionalControls={
               inventory?.summary_fields?.user_capabilities?.adhoc
                 ? [
-                    <Kebabified>
-                      {({ isKebabified }) =>
-                        isKebabified ? (
-                          <DropdownItem
-                            aria-label={i18n._(t`Run command`)}
-                            onClick={() => setIsAdHocCommandsOpen(true)}
-                            isDisabled={count === 0 || isAdHocDisabled}
-                          >
-                            {i18n._(t`Run command`)}
-                          </DropdownItem>
-                        ) : (
-                          <ToolbarItem>
-                            <Tooltip
-                              content={i18n._(
-                                t`Select an inventory source by clicking the check box beside it. The inventory source can be a single host or a selection of multiple hosts.`
-                              )}
-                              position="top"
-                              key="adhoc"
-                            >
-                              <Button
-                                variant="secondary"
-                                aria-label={i18n._(t`Run command`)}
-                                onClick={() => setIsAdHocCommandsOpen(true)}
-                                isDisabled={count === 0 || isAdHocDisabled}
-                              >
-                                {i18n._(t`Run command`)}
-                              </Button>
-                            </Tooltip>
-                          </ToolbarItem>
-                        )
-                      }
-                    </Kebabified>,
+                    <AdHocCommands
+                      adHocItems={selected}
+                      hasListItems={count > 0}
+                    />,
                   ]
                 : []
             }
@@ -157,16 +114,6 @@ function SmartInventoryHostList({ i18n, inventory }) {
           />
         )}
       />
-      {isAdHocCommandsOpen && (
-        <AdHocCommands
-          css="margin-right: 20px"
-          adHocItems={selected}
-          itemId={parseInt(inventory.id, 10)}
-          onClose={() => setIsAdHocCommandsOpen(false)}
-          credentialTypeId={credentialTypeId}
-          moduleOptions={moduleOptions}
-        />
-      )}
     </>
   );
 }

@@ -10,8 +10,9 @@ import {
   InputGroup,
   TextInput,
 } from '@patternfly/react-core';
-import { FieldTooltip, PasswordInput } from '../../../../components/FormField';
+import { PasswordInput } from '../../../../components/FormField';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
+import Popover from '../../../../components/Popover';
 import { CredentialType } from '../../../../types';
 import { required } from '../../../../util/validators';
 import { CredentialPluginField } from '../CredentialPlugins';
@@ -140,9 +141,7 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
         helperTextInvalid={meta.error}
         label={fieldOptions.label}
         labelIcon={
-          fieldOptions.help_text && (
-            <FieldTooltip content={fieldOptions.help_text} />
-          )
+          fieldOptions.help_text && <Popover content={fieldOptions.help_text} />
         }
         isRequired={isRequired}
         validated={isValid ? 'default' : 'error'}

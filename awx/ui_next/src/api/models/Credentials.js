@@ -20,10 +20,38 @@ class Credentials extends Base {
     return this.http.options(`${this.baseUrl}${id}/access_list/`);
   }
 
-  readInputSources(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/input_sources/`, {
-      params,
-    });
+  readInputSources(id) {
+    const maxRequests = 5;
+    let requestCounter = 0;
+    const fetchInputSources = async (pageNo = 1, inputSources = []) => {
+      try {
+        requestCounter++;
+        const { data } = await this.http.get(
+          `${this.baseUrl}${id}/input_sources/`,
+          {
+            params: {
+              page: pageNo,
+              page_size: 200,
+            },
+          }
+        );
+        if (data?.next && requestCounter <= maxRequests) {
+          return fetchInputSources(
+            pageNo + 1,
+            inputSources.concat(data.results)
+          );
+        }
+        return Promise.resolve({
+          data: {
+            results: inputSources.concat(data.results),
+          },
+        });
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    };
+
+    return fetchInputSources();
   }
 
   test(id, data) {

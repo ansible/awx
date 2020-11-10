@@ -12,6 +12,11 @@ const itemB = {
   name: 'Foo',
   summary_fields: { user_capabilities: { delete: false } },
 };
+const itemC = {
+  id: 1,
+  username: 'Foo',
+  summary_fields: { user_capabilities: { delete: false } },
+};
 
 describe('<ToolbarDeleteButton />', () => {
   test('should render button', () => {
@@ -60,5 +65,15 @@ describe('<ToolbarDeleteButton />', () => {
     );
     expect(wrapper.find('Tooltip')).toHaveLength(1);
     expect(wrapper.find('Tooltip').prop('content')).toEqual('Delete');
+  });
+
+  test('should render tooltip for username', () => {
+    const wrapper = mountWithContexts(
+      <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[itemC]} />
+    );
+    expect(wrapper.find('Tooltip')).toHaveLength(1);
+    expect(wrapper.find('Tooltip').prop('content').props.children).toEqual(
+      'You do not have permission to delete Items: Foo'
+    );
   });
 });

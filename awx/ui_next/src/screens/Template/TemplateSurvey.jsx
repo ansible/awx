@@ -68,11 +68,17 @@ function TemplateSurvey({ template, canEdit, i18n }) {
 
   const { request: toggleSurvey, error: toggleError } = useRequest(
     useCallback(async () => {
-      await JobTemplatesAPI.update(template.id, {
-        survey_enabled: !surveyEnabled,
-      });
+      if (templateType === 'workflow_job_template') {
+        await WorkflowJobTemplatesAPI.update(template.id, {
+          survey_enabled: !surveyEnabled,
+        });
+      } else {
+        await JobTemplatesAPI.update(template.id, {
+          survey_enabled: !surveyEnabled,
+        });
+      }
       setSurveyEnabled(!surveyEnabled);
-    }, [template.id, surveyEnabled])
+    }, [template.id, templateType, surveyEnabled])
   );
 
   const { error, dismissError } = useDismissableError(

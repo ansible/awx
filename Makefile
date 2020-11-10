@@ -214,7 +214,11 @@ requirements_awx_dev:
 
 requirements_collections:
 	mkdir -p $(COLLECTION_BASE)
-	ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE)
+	n=0; \
+	until [ "$$n" -ge 5 ]; do \
+	    ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE) && break; \
+	    n=$$((n+1)); \
+	done
 
 requirements: requirements_ansible requirements_awx requirements_collections
 
@@ -646,9 +650,11 @@ awx/projects:
 docker-compose-isolated: awx/projects
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
+COMPOSE_UP_OPTS ?=
+
 # Docker Compose Development environment
 docker-compose: docker-auth awx/projects
-	CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml up --no-recreate awx
+	CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml $(COMPOSE_UP_OPTS) up --no-recreate awx
 
 docker-compose-cluster: docker-auth awx/projects
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml up

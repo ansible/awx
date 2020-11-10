@@ -5183,8 +5183,8 @@ msgid "Provide the named URL encoded name or id of the remote Tower inventory to
 msgstr "提供要导入的远程 Tower 清单的命名 URL 编码名称或 ID。"
 
 #: client/src/license/license.partial.html:128
-msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS > SYSTEM."
-msgstr "提供您的红帽客户凭证，您可以从可用许可证列表中进行选择。您使用的凭证将存储以供将来用于检索续订或扩展许可证。您可以在“设置”>“系统”中更新或删除它们。"
+msgid "Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS &gt; SYSTEM."
+msgstr "提供您的红帽客户凭证，您可以从可用许可证列表中进行选择。您使用的凭证将存储以供将来用于检索续订或扩展许可证。您可以在“设置”&gt;“系统”中更新或删除它们。"
 
 #: client/src/templates/job_templates/job-template.form.js:374
 #: client/src/templates/job_templates/job-template.form.js:382

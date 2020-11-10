@@ -8,9 +8,9 @@ import useRequest from '../../../../util/useRequest';
 import { required } from '../../../../util/validators';
 
 import AnsibleSelect from '../../../../components/AnsibleSelect';
-import { FieldTooltip } from '../../../../components/FormField';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
+import Popover from '../../../../components/Popover';
 import {
   OptionsField,
   SourceVarsField,
@@ -99,7 +99,7 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
         isRequired
         label={i18n._(t`Inventory file`)}
         labelIcon={
-          <FieldTooltip
+          <Popover
             content={i18n._(t`Select the inventory file
           to be synced by this source. You can select from
           the dropdown or enter a file within the input.`)}

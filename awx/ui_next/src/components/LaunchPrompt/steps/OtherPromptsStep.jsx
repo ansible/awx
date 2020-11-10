@@ -4,10 +4,11 @@ import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Form, FormGroup, Switch } from '@patternfly/react-core';
 import styled from 'styled-components';
-import FormField, { FieldTooltip } from '../../FormField';
+import FormField from '../../FormField';
 import { TagMultiSelect } from '../../MultiSelect';
 import AnsibleSelect from '../../AnsibleSelect';
 import { VariablesField } from '../../CodeMirrorInput';
+import Popover from '../../Popover';
 
 const FieldHeader = styled.div`
   display: flex;
@@ -104,7 +105,7 @@ function JobTypeField({ i18n }) {
       fieldId="propmt-job-type"
       label={i18n._(t`Job Type`)}
       labelIcon={
-        <FieldTooltip
+        <Popover
           content={i18n._(t`For job templates, select run to execute the playbook.
       Select check to only check playbook syntax, test environment setup,
       and report problems without executing the playbook.`)}
@@ -141,7 +142,7 @@ function VerbosityField({ i18n }) {
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Verbosity`)}
       labelIcon={
-        <FieldTooltip
+        <Popover
           content={i18n._(t`Control the level of output ansible
           will produce as the playbook executes.`)}
         />
@@ -166,7 +167,7 @@ function ShowChangesToggle({ i18n }) {
         <label className="pf-c-form__label" htmlFor="prompt-show-changes">
           <span className="pf-c-form__label-text">
             {i18n._(t`Show Changes`)}
-            <FieldTooltip
+            <Popover
               content={i18n._(t`If enabled, show the changes made
               by Ansible tasks, where supported. This is equivalent to Ansible’s
               --diff mode.`)}
@@ -192,7 +193,7 @@ function TagField({ id, name, label, tooltip }) {
     <FormGroup
       fieldId={id}
       label={label}
-      labelIcon={<FieldTooltip content={tooltip} />}
+      labelIcon={<Popover content={tooltip} />}
     >
       <TagMultiSelect value={field.value} onChange={helpers.setValue} />
     </FormGroup>

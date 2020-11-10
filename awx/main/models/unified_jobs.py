@@ -873,7 +873,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         # If status changed, update the parent instance.
         if self.status != status_before:
-            self._update_parent_instance()
+            # Update parent outside of the transaction for Job w/ allow_simultaneous=True
+            # This dodges lock contention at the expense of the foreign key not being
+            # completely correct.
+            if getattr(self, 'allow_simultaneous', False):
+                connection.on_commit(self._update_parent_instance)
+            else:
+                self._update_parent_instance()
 
         # Done.
         return result

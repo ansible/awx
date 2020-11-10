@@ -3,7 +3,8 @@ import { bool, node, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { CheckboxField, FieldTooltip } from '../FormField';
+import { CheckboxField } from '../FormField';
+import Popover from '../Popover';
 
 const FieldHeader = styled.div`
   display: flex;
@@ -38,7 +39,7 @@ function FieldWithPrompt({
               </span>
             )}
           </label>
-          {tooltip && <FieldTooltip content={tooltip} />}
+          {tooltip && <Popover content={tooltip} id={fieldId} />}
         </div>
         <StyledCheckboxField
           isDisabled={isDisabled}

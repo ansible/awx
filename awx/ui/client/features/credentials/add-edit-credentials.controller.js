@@ -29,6 +29,7 @@ function AddEditCredentialsController (
     const isExternal = credentialType.get('kind') === 'external';
     const mode = $state.current.name.startsWith('credentials.add') ? 'add' : 'edit';
 
+    vm.isEditable = credential.get('summary_fields.user_capabilities.edit');
     vm.mode = mode;
     vm.strings = strings;
 
@@ -52,6 +53,7 @@ function AddEditCredentialsController (
             vm.form = credential.createFormSchema({ omit });
             vm.form.disabled = !isEditable;
         }
+        vm.form.disabled = !vm.isEditable;
 
         vm.form._organization._disabled = !isOrgEditableByUser;
         // Only exists for permissions compatibility

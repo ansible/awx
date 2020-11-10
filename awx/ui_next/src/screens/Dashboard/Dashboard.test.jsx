@@ -1,18 +1,24 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
+import { DashboardAPI } from '../../api';
 import Dashboard from './Dashboard';
+
+jest.mock('../../api');
 
 describe('<Dashboard />', () => {
   let pageWrapper;
-  let pageSections;
-  let title;
+  let graphRequest;
 
-  beforeEach(() => {
-    pageWrapper = mountWithContexts(<Dashboard />);
-    pageSections = pageWrapper.find('PageSection');
-    title = pageWrapper.find('Title');
+  beforeEach(async () => {
+    await act(async () => {
+      DashboardAPI.read.mockResolvedValue({});
+      graphRequest = DashboardAPI.readJobGraph;
+      graphRequest.mockResolvedValue({});
+      pageWrapper = mountWithContexts(<Dashboard />);
+    });
   });
 
   afterEach(() => {
@@ -21,9 +27,24 @@ describe('<Dashboard />', () => {
 
   test('initially renders without crashing', () => {
     expect(pageWrapper.length).toBe(1);
-    expect(pageSections.length).toBe(2);
-    expect(title.length).toBe(1);
-    expect(title.props().size).toBe('2xl');
-    expect(pageSections.first().props().variant).toBe('light');
+  });
+
+  test('renders dashboard graph by default', () => {
+    expect(pageWrapper.find('LineChart').length).toBe(1);
+  });
+
+  test('renders template list when the active tab is changed', async () => {
+    expect(pageWrapper.find('DashboardTemplateList').length).toBe(0);
+    pageWrapper
+      .find('button[aria-label="Recent Templates list tab"]')
+      .simulate('click');
+    expect(pageWrapper.find('DashboardTemplateList').length).toBe(1);
+  });
+
+  test('renders month-based/all job type chart by default', () => {
+    expect(graphRequest).toHaveBeenCalledWith({
+      job_type: 'all',
+      period: 'month',
+    });
   });
 });

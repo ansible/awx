@@ -1,6 +1,7 @@
 aiohttp
 ansible-runner>=1.4.6
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
+asciichartpy
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212

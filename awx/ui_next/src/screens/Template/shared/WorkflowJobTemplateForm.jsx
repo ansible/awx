@@ -14,10 +14,7 @@ import {
 import { required } from '../../../util/validators';
 
 import FieldWithPrompt from '../../../components/FieldWithPrompt';
-import FormField, {
-  FieldTooltip,
-  FormSubmitError,
-} from '../../../components/FormField';
+import FormField, { FormSubmitError } from '../../../components/FormField';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
@@ -30,6 +27,7 @@ import { VariablesField } from '../../../components/CodeMirrorInput';
 import FormActionGroup from '../../../components/FormActionGroup';
 import ContentError from '../../../components/ContentError';
 import CheckboxField from '../../../components/FormField/CheckboxField';
+import Popover from '../../../components/Popover';
 import LabelSelect from './LabelSelect';
 import WebhookSubForm from './WebhookSubForm';
 import { WorkFlowJobTemplate } from '../../../types';
@@ -186,7 +184,7 @@ function WorkflowJobTemplateForm({
         <FormGroup
           label={i18n._(t`Labels`)}
           labelIcon={
-            <FieldTooltip
+            <Popover
               content={i18n._(t`Optional labels that describe this job template,
                     such as 'dev' or 'test'. Labels can be used to group and filter
                     job templates and completed jobs.`)}
@@ -221,7 +219,7 @@ function WorkflowJobTemplateForm({
               <span>
                 {i18n._(t`Enable Webhook`)}
                 &nbsp;
-                <FieldTooltip
+                <Popover
                   content={i18n._(
                     t`Enable Webhook for this workflow job template.`
                   )}

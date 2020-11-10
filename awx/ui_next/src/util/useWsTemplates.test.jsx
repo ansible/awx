@@ -1,14 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import WS from 'jest-websocket-mock';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../testUtils/enzymeHelpers';
 import useWsTemplates from './useWsTemplates';
 
 /*
   Jest mock timers don’t play well with jest-websocket-mock,
   so we'll stub out throttling to resolve immediately
 */
-jest.mock('../../../util/useThrottle', () => ({
+jest.mock('./useThrottle', () => ({
   __esModule: true,
   default: jest.fn(val => val),
 }));
