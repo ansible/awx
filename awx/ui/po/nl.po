@@ -150,6 +150,10 @@ msgstr "Een refspec om op te halen (doorgegeven aan de Ansible git module).  Dez
 msgid "A schedule name is required."
 msgstr "Een naam voor het schema is vereist."
 
+#: client/src/license/license.partial.html:115
+msgid "A subscription manifest is an export of a Red Hat Subscription. To generate a subscription manifest, go to <a href=https://access.redhat.com/management/subscription_allocations target=_blank>access.redhat.com</a>.<br>For more information, see the <a href=https://docs.ansible.com/ansible-tower/latest/html/userguide/import_license.html>User Guide</a>."
+msgstr "Een abonnementsmanifest is een export van een Red Hat-abonnement. Om een abonnementenmanifest te genereren, ga naar <a href=https://access.redhat.com/management/subscription_allocations target=_blank>access.redhat.com</a>.<br>Voor meer informatie, zie de <a href=https://docs.ansible.com/ansible-tower/latest/html/userguide/import_license.html>Gebruikershandleiding</a>."
+
 #: client/src/users/add/users-add.controller.js:104
 msgid "A value is required"
 msgstr "Een waarde is vereist"
