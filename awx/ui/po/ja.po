@@ -150,6 +150,10 @@ msgstr "取得する refspec (Ansible git モジュールに渡します)。こ�
 msgid "A schedule name is required."
 msgstr "スケジュール名が必要です。"
 
+#: client/src/license/license.partial.html:115
+msgid "A subscription manifest is an export of a Red Hat Subscription. To generate a subscription manifest, go to <a href=https://access.redhat.com/management/subscription_allocations target=_blank>access.redhat.com</a>.<br>For more information, see the <a href=https://docs.ansible.com/ansible-tower/latest/html/userguide/import_license.html>User Guide</a>."
+msgstr "サブスクリプションマニフェストは、Red Hat サブスクリプションのエクスポートです。サブスクリプションマニフェストを生成するには、<a href=https://access.redhat.com/management/subscription_allocations target=_blank>access.redhat.com</a> にアクセスします。<br>詳細については、『<a href=https://docs.ansible.com/ansible-tower/latest/html/userguide/import_license.html>ユーザーガイド</a>』を参照してください。"
+
 #: client/src/users/add/users-add.controller.js:104
 msgid "A value is required"
 msgstr "値が必要です"
