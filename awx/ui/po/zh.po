@@ -149,7 +149,11 @@ msgstr "要获取的 refspec（传递至 Ansible git 模块）。此参数允许
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:33
 #: client/src/scheduler/scheduler.strings.js:22
 msgid "A schedule name is required."
-msgstr "需要一个计划名称。"
+msgstr "需要一个调度名称。"
+
+#: client/src/license/license.partial.html:115
+msgid "A subscription manifest is an export of a Red Hat Subscription. To generate a subscription manifest, go to <a href=https://access.redhat.com/management/subscription_allocations target=_blank>access.redhat.com</a>.<br>For more information, see the <a href=https://docs.ansible.com/ansible-tower/latest/html/userguide/import_license.html>User Guide</a>."
+msgstr "订阅清单（manifest）是一个红帽订阅的导出。 要生成订阅清单，请访问 <a href=https://access.redhat.com/management/subscription_allocations target=_blank>access.redhat.com</a>。<br> 有关更多信息，请参阅 < href=https://docs.ansible.com/ansible-tower/latest/html/userguide/import_license.html>用户指南</a>。"
 
 #: client/src/users/add/users-add.controller.js:104
 msgid "A value is required"
