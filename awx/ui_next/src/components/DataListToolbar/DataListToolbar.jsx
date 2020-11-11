@@ -110,7 +110,7 @@ function DataListToolbar({
             </>
           </ToolbarGroup>
         )}
-        {isAdvancedSearchShown && (
+        {isAdvancedSearchShown && additionalControls.length > 0 && (
           <ToolbarItem>
             <KebabifiedProvider
               value={{

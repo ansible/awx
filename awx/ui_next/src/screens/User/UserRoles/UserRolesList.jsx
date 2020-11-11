@@ -31,7 +31,6 @@ const QS_CONFIG = getQSConfig('roles', {
 // we can't really search using the normal search parameters.
 function UserRolesList({ i18n, user }) {
   const { search } = useLocation();
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [roleToDisassociate, setRoleToDisassociate] = useState(null);
 
   const {
@@ -101,11 +100,6 @@ function UserRolesList({ i18n, user }) {
   const canAdd =
     user?.summary_fields?.user_capabilities?.edit ||
     (actions && Object.prototype.hasOwnProperty.call(actions, 'POST'));
-
-  const saveRoles = () => {
-    setIsWizardOpen(false);
-    fetchRoles();
-  };
 
   const detailUrl = role => {
     const { resource_id, resource_type } = role.summary_fields;
@@ -183,30 +177,17 @@ function UserRolesList({ i18n, user }) {
             additionalControls={[
               ...(canAdd
                 ? [
-                    <Button
-                      key="add"
-                      aria-label={i18n._(t`Add resource roles`)}
-                      onClick={() => {
-                        setIsWizardOpen(true);
-                      }}
-                    >
-                      {i18n._(t`Add`)}
-                    </Button>,
+                    <UserAndTeamAccessAdd
+                      apiModel={UsersAPI}
+                      onFetchData={fetchRoles}
+                      title={i18n._(t`Add user permissions`)}
+                    />,
                   ]
                 : []),
             ]}
           />
         )}
       />
-      {isWizardOpen && (
-        <UserAndTeamAccessAdd
-          apiModel={UsersAPI}
-          isOpen={isWizardOpen}
-          onSave={saveRoles}
-          onClose={() => setIsWizardOpen(false)}
-          title={i18n._(t`Add user permissions`)}
-        />
-      )}
       {roleToDisassociate && (
         <AlertModal
           aria-label={i18n._(t`Disassociate role`)}

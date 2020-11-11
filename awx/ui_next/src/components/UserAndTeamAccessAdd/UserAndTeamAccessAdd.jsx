@@ -1,8 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { Button, DropdownItem } from '@patternfly/react-core';
+import { KebabifiedContext } from '../../contexts/Kebabified';
 import useRequest, { useDismissableError } from '../../util/useRequest';
 import SelectableCard from '../SelectableCard';
 import AlertModal from '../AlertModal';
@@ -20,21 +22,21 @@ const Grid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 `;
 
-function UserAndTeamAccessAdd({
-  i18n,
-  isOpen,
-  title,
-  onSave,
-  apiModel,
-  onClose,
-}) {
+function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
   const [selectedResourceType, setSelectedResourceType] = useState(null);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [stepIdReached, setStepIdReached] = useState(1);
   const { id: userId } = useParams();
+  const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
   const {
     selected: resourcesSelected,
     handleSelect: handleResourceSelect,
   } = useSelected([]);
+  useEffect(() => {
+    if (isKebabified) {
+      onKebabModalChange(isWizardOpen);
+    }
+  }, [isKebabified, isWizardOpen, onKebabModalChange]);
 
   const {
     selected: rolesSelected,
@@ -57,8 +59,9 @@ function UserAndTeamAccessAdd({
       );
 
       await Promise.all(roleRequests);
-      onSave();
-    }, [onSave, rolesSelected, apiModel, userId, resourcesSelected]),
+      onFetchData();
+      setIsWizardOpen(false);
+    }, [onFetchData, rolesSelected, apiModel, userId, resourcesSelected]),
     {}
   );
 
@@ -141,16 +144,39 @@ function UserAndTeamAccessAdd({
   }
 
   return (
-    <Wizard
-      isOpen={isOpen}
-      title={title}
-      steps={steps}
-      onClose={onClose}
-      onNext={({ id }) =>
-        setStepIdReached(stepIdReached < id ? id : stepIdReached)
-      }
-      onSave={handleWizardSave}
-    />
+    <>
+      {isKebabified ? (
+        <DropdownItem
+          key="add"
+          component="button"
+          aria-label={i18n._(t`Add`)}
+          onClick={() => setIsWizardOpen(true)}
+        >
+          {i18n._(t`Add`)}
+        </DropdownItem>
+      ) : (
+        <Button
+          variant="primary"
+          aria-label={i18n._(t`Add`)}
+          onClick={() => setIsWizardOpen(true)}
+          key="add"
+        >
+          {i18n._(t`Add`)}
+        </Button>
+      )}
+      {isWizardOpen && (
+        <Wizard
+          isOpen={isWizardOpen}
+          title={title}
+          steps={steps}
+          onClose={() => setIsWizardOpen(false)}
+          onNext={({ id }) =>
+            setStepIdReached(stepIdReached < id ? id : stepIdReached)
+          }
+          onSave={handleWizardSave}
+        />
+      )}
+    </>
   );
 }
 
