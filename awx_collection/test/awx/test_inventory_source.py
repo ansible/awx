@@ -182,18 +182,18 @@ def test_falsy_value(run_module, admin_user, base_inventory):
 # We want to let the API return issues with "this doesn't support that", etc.
 #
 # GUI OPTIONS:
-# - - - - - - - manual:	file:	scm:	ec2:	gce	azure_rm	vmware	sat	cloudforms	openstack	rhv	tower	custom
-# credential		?	?	o	o	r	r		r	r	r		r		r	r	o
-# source_project	?	?	r	-	-	-		-	-	-		-		-	-	-
-# source_path		?	?	r	-	-	-		-	-	-		-		-	-	-
-# verbosity			?	?	o	o	o	o		o	o	o		o		o	o	o
-# overwrite			?	?	o	o	o	o		o	o	o		o		o	o	o
-# overwrite_vars	?	?	o	o	o	o		o	o	o		o		o	o	o
-# update_on_launch	?	?	o	o	o	o		o	o	o		o		o	o	o
-# UoPL          	?	?	o	-	-	-		-	-	-		-		-	-	-
-# source_vars*		?	?	-	o	-	o		o	o	o		o		-	-	-
-# environmet vars*	?	?	o	-	-	-		-	-	-		-		-	-	o
-# source_script		?	?	-	-	-	-		-	-	-		-		-	-	r
+# - - - - - - - manual:	file:	scm:	ec2:	gce	azure_rm	vmware	sat	openstack	rhv	tower	custom
+# credential		?	?	o	o	r	r		r	r		r		r	r	o
+# source_project	?	?	r	-	-	-		-	-		-		-	-	-
+# source_path		?	?	r	-	-	-		-	-		-		-	-	-
+# verbosity			?	?	o	o	o	o		o	o		o		o	o	o
+# overwrite			?	?	o	o	o	o		o	o		o		o	o	o
+# overwrite_vars	?	?	o	o	o	o		o	o		o		o	o	o
+# update_on_launch	?	?	o	o	o	o		o	o		o		o	o	o
+# UoPL          	?	?	o	-	-	-		-	-		-		-	-	-
+# source_vars*		?	?	-	o	-	o		o	o		o		-	-	-
+# environmet vars*	?	?	o	-	-	-		-	-		-		-	-	o
+# source_script		?	?	-	-	-	-		-	-		-		-	-	r
 #
 # UoPL - update_on_project_launch
 # * - source_vars are labeled environment_vars on project and custom sources
