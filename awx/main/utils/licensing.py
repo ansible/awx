@@ -134,7 +134,10 @@ class Licenser(object):
         # Parse output for subscription metadata to build config
         license = dict()
         license['sku'] = manifest['pool']['productId']
-        license['instance_count'] = manifest['pool']['quantity']
+        try:
+            license['instance_count'] = manifest['pool']['exported']
+        except KeyError:
+            license['instance_count'] = manifest['pool']['quantity']
         license['subscription_name'] = manifest['pool']['productName']
         license['pool_id'] = manifest['pool']['id']
         license['license_date'] = parse_date(manifest['endDate']).strftime('%s')
