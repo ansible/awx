@@ -14,6 +14,7 @@ services:
       SDB_HOST: 0.0.0.0
       SDB_PORT: 7899
       AWX_GROUP_QUEUES: tower
+      PYTHONBREAKPOINT: remote_pdb.set_trace
     ports:
       - "2222:2222"
       - "8888:8888"
@@ -25,7 +26,6 @@ services:
     links:
       - postgres
       - redis
-      - ee
     #   - sync
     # volumes_from:
     #   - sync
@@ -37,6 +37,8 @@ services:
       - "./redis/redis_socket_standalone:/var/run/redis/"
       - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
       - "/sys/fs/cgroup:/sys/fs/cgroup"
+      - "./docker-compose/receptor.conf:/etc/receptor/receptor.conf"
+      - "~/.kube/config:/var/lib/awx/.kube/config"
     privileged: true
     tty: true
   # A useful container that simply passes through log messages to the console
@@ -45,16 +47,6 @@ services:
   #   build:
   #     context: ./docker-compose
   #     dockerfile: Dockerfile-logstash
-  ee:
-    image: quay.io/awx/ee
-    user: ${CURRENT_UID}
-    volumes:
-      - "./docker-compose/receptor.cfg:/receptor.cfg"
-      - "receptor:/var/run/receptor/"
-    command:
-      - receptor
-      - --config
-      - /receptor.cfg
   postgres:
     image: postgres:10
     container_name: tools_postgres_1

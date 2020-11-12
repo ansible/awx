@@ -668,6 +668,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default='',
         editable=False,
     )
+    receptor_work_id = models.CharField(
+        max_length=32,
+        blank=True,
+        default='',
+        editable=False,
+    )
     job_env = prevent_search(JSONField(
         blank=True,
         default=dict,
