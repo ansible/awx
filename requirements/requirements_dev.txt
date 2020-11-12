@@ -20,5 +20,6 @@ matplotlib
 backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirectory
 mockldap
 sdb
+remote-pdb
 gprof2dot
 atomicwrites==1.1.5
