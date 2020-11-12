@@ -73,8 +73,10 @@ function AssociateModal({
 
   const clearQSParams = () => {
     const parts = history.location.search.replace(/^\?/, '').split('&');
-    const ns = QS_CONFIG.namespace;
-    const otherParts = parts.filter(param => !param.startsWith(`${ns}.`));
+    const { namespace } = QS_CONFIG(displayKey);
+    const otherParts = parts.filter(
+      param => !param.startsWith(`${namespace}.`)
+    );
     history.replace(`${history.location.pathname}?${otherParts.join('&')}`);
   };
 
