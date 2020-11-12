@@ -4,6 +4,7 @@ import logging
 import sys
 import threading
 import time
+import os
 
 # Django
 from django.conf import LazySettings
@@ -247,6 +248,7 @@ class SettingsWrapper(UserSettingsHolder):
         # These values have to be stored via self.__dict__ in this way to get
         # around the magic __setattr__ method on this class (which is used to
         # store API-assigned settings in the database).
+        self.__dict__['__forks__'] = {}
         self.__dict__['default_settings'] = default_settings
         self.__dict__['_awx_conf_settings'] = self
         self.__dict__['_awx_conf_preload_expires'] = None
@@ -254,6 +256,26 @@ class SettingsWrapper(UserSettingsHolder):
         self.__dict__['_awx_conf_init_readonly'] = False
         self.__dict__['cache'] = EncryptedCacheProxy(cache, registry)
         self.__dict__['registry'] = registry
+
+        # record the current pid so we compare it post-fork for
+        # processes like the dispatcher and callback receiver
+        self.__dict__['pid'] = os.getpid()
+
+    def __clean_on_fork__(self):
+        pid = os.getpid()
+        # if the current pid does *not* match the value on self, it means
+        # that value was copied on fork, and we're now in a *forked* process;
+        # the *first* time we enter this code path (on setting access),
+        # forcibly close DB/cache sockets and set a marker so we don't run
+        # this code again _in this process_
+        #
+        if pid != self.__dict__['pid'] and pid not in self.__dict__['__forks__']:
+            self.__dict__['__forks__'][pid] = True
+            # It's important to close these post-fork, because we
+            # don't want the forked processes to inherit the open sockets
+            # for the DB and cache connections (that way lies race conditions)
+            connection.close()
+            django_cache.close()
 
     @cached_property
     def all_supported_settings(self):
@@ -330,6 +352,7 @@ class SettingsWrapper(UserSettingsHolder):
         self.cache.set_many(settings_to_cache, timeout=SETTING_CACHE_TIMEOUT)
 
     def _get_local(self, name, validate=True):
+        self.__clean_on_fork__()
         self._preload_cache()
         cache_key = Setting.get_cache_key(name)
         try:
