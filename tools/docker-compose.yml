@@ -25,7 +25,6 @@ services:
     links:
       - postgres
       - redis
-      - ee
     #   - sync
     # volumes_from:
     #   - sync
@@ -37,6 +36,8 @@ services:
       - "./redis/redis_socket_standalone:/var/run/redis/"
       - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
       - "/sys/fs/cgroup:/sys/fs/cgroup"
+      - "./docker-compose/receptor.conf:/etc/receptor/receptor.conf"
+      - "~/.kube/config:/var/lib/awx/.kube/config"
     privileged: true
     tty: true
   # A useful container that simply passes through log messages to the console
@@ -45,16 +46,6 @@ services:
   #   build:
   #     context: ./docker-compose
   #     dockerfile: Dockerfile-logstash
-  ee:
-    image: quay.io/ansible/awx-ee
-    user: ${CURRENT_UID}
-    volumes:
-      - "./docker-compose/receptor.cfg:/receptor.cfg"
-      - "receptor:/var/run/receptor/"
-    command:
-      - receptor
-      - --config
-      - /receptor.cfg
   postgres:
     image: postgres:12
     container_name: tools_postgres_1
