@@ -81,6 +81,9 @@ const SmartInventoryFormFields = withI18n()(({ i18n, inventory }) => {
         onChange={value => {
           instanceGroupsHelpers.setValue(value);
         }}
+        tooltip={i18n._(
+          t`Select the Instance Groups for this Inventory to run on.`
+        )}
       />
       <FormFullWidthLayout>
         <VariablesField

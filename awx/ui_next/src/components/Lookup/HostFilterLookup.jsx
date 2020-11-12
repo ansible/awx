@@ -14,9 +14,11 @@ import {
   Modal,
 } from '@patternfly/react-core';
 import ChipGroup from '../ChipGroup';
+import Popover from '../Popover';
 import DataListToolbar from '../DataListToolbar';
 import LookupErrorMessage from './shared/LookupErrorMessage';
-import PaginatedDataList, { PaginatedDataListItem } from '../PaginatedDataList';
+import PaginatedDataList from '../PaginatedDataList';
+import HostListItem from './HostListItem';
 import { HostsAPI } from '../../api';
 import { getQSConfig, mergeParams, parseQueryString } from '../../util/qs';
 import useRequest, { useDismissableError } from '../../util/useRequest';
@@ -246,12 +248,22 @@ function HostFilterLookup({
       fieldId="host-filter"
       helperTextInvalid={helperTextInvalid}
       isRequired
-      label={i18n._(t`Host filter`)}
+      label={i18n._(t`Smart host filter`)}
       validated={isValid ? 'default' : 'error'}
+      labelIcon={
+        <Popover
+          content={i18n._(
+            t`Populate the hosts for this inventory by using a search
+              filter. Example: ansible_facts.ansible_distribution:"RedHat".
+              Refer to the Ansible Tower documentation for further syntax and
+              examples.`
+          )}
+        />
+      }
     >
       <InputGroup onBlur={onBlur}>
         <Button
-          aria-label="Search"
+          aria-label={i18n._(t`Search`)}
           id="host-filter"
           isDisabled={isDisabled}
           onClick={handleOpenModal}
@@ -306,7 +318,7 @@ function HostFilterLookup({
             pluralizedItemName={i18n._(t`hosts`)}
             qsConfig={QS_CONFIG}
             renderItem={item => (
-              <PaginatedDataListItem
+              <HostListItem
                 key={item.id}
                 item={{ ...item, url: `/hosts/${item.id}/details` }}
               />
