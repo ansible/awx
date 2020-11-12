@@ -206,6 +206,10 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
         It will make assertions that the contents are correct
         If MAKE_INVENTORY_REFERENCE_FILES is set, it will produce reference files
         """
+        if _kw.get('streamer') != 'transmit':
+            Res = namedtuple('Result', ['status', 'rc'])
+            return Res('successful', 0)
+
         private_data_dir = envvars.pop('AWX_PRIVATE_DATA_DIR')
         assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == 'auto'
         set_files = bool(os.getenv("MAKE_INVENTORY_REFERENCE_FILES", 'false').lower()[0] not in ['f', '0'])
