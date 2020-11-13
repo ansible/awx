@@ -171,7 +171,7 @@ function WorkflowApprovalsList({ i18n }) {
             toolbarSearchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
             ]}
