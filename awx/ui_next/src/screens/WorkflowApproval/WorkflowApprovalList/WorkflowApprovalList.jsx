@@ -130,11 +130,6 @@ function WorkflowApprovalsList({ i18n }) {
   };
 
   const {
-    error: approveError,
-    dismissError: dismissApproveError,
-  } = useDismissableError(approveApprovalError);
-
-  const {
     error: denyApprovalError,
     isLoading: isDenyLoading,
     request: denyWorkflowApprovals,
@@ -153,9 +148,9 @@ function WorkflowApprovalsList({ i18n }) {
   };
 
   const {
-    error: denyError,
-    dismissError: dismissDenyError,
-  } = useDismissableError(denyApprovalError);
+    error: actionError,
+    dismissError: dismissActionError,
+  } = useDismissableError(approveApprovalError || denyApprovalError);
 
   return (
     <>
@@ -248,26 +243,17 @@ function WorkflowApprovalsList({ i18n }) {
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
-      {approveError && (
+      {actionError && (
         <AlertModal
-          isOpen={approveError}
+          isOpen={actionError}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={dismissApproveError}
+          onClose={dismissActionError}
         >
-          {i18n._(t`Failed to approve one or more workflow approval.`)}
-          <ErrorDetail error={approveError} />
-        </AlertModal>
-      )}
-      {denyError && (
-        <AlertModal
-          isOpen={denyError}
-          variant="error"
-          title={i18n._(t`Error!`)}
-          onClose={dismissDenyError}
-        >
-          {i18n._(t`Failed to deny one or more workflow approval.`)}
-          <ErrorDetail error={denyError} />
+          {approveApprovalError
+            ? i18n._(t`Failed to approve one or more workflow approval.`)
+            : i18n._(t`Failed to deny one or more workflow approval.`)}
+          <ErrorDetail error={actionError} />
         </AlertModal>
       )}
     </>
