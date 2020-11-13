@@ -66,7 +66,6 @@ function WorkflowApprovalsList({ i18n }) {
     fetchWorkflowApprovals();
   }, [fetchWorkflowApprovals]);
 
-  // TODO: update QS_CONFIG to be safe for deps array
   const fetchWorkflowApprovalsById = useCallback(
     async ids => {
       const params = { ...parseQueryString(QS_CONFIG, location.search) };
