@@ -90,6 +90,7 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
         <Detail
           label={i18n._(t`Description`)}
           value={workflowApproval.description}
+          dataCy="wa-detail-description"
         />
         {workflowApproval.status === 'pending' && (
           <Detail
@@ -99,6 +100,7 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
                 ? formatDateString(workflowApproval.approval_expiration)
                 : i18n._(t`Never`)
             }
+            dataCy="wa-detail-expires"
           />
         )}
         {workflowApproval.status !== 'pending' && (
@@ -107,6 +109,7 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
             value={
               <WorkflowApprovalStatus workflowApproval={workflowApproval} />
             }
+            dataCy="wa-detail-status"
           />
         )}
         {workflowApproval.summary_fields.approved_or_denied_by && (
@@ -119,11 +122,13 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
                 {workflowApproval.summary_fields.approved_or_denied_by.username}
               </Link>
             }
+            dataCy="wa-detail-actor"
           />
         )}
         <Detail
           label={i18n._(t`Explanation`)}
           value={workflowApproval.job_explanation}
+          dataCy="wa-detail-explanation"
         />
         <Detail
           label={i18n._(t`Workflow Job`)}
@@ -136,6 +141,7 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
               i18n._(t`Deleted`)
             )
           }
+          dataCy="wa-detail-source-job"
         />
         <Detail
           label={i18n._(t`Workflow Job Template`)}
@@ -148,27 +154,33 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
               </Link>
             )
           }
+          dataCy="wa-detail-source-workflow"
         />
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={workflowApproval.created}
           user={workflowApproval.summary_fields.created_by}
+          dataCy="wa-detail-created-by"
         />
         <Detail
           label={i18n._(t`Last Modified`)}
           value={formatDateString(workflowApproval.modified)}
+          dataCy="wa-detail-last-modified"
         />
         <Detail
           label={i18n._(t`Finished`)}
           value={formatDateString(workflowApproval.finished)}
+          dataCy="wa-detail-finished"
         />
         <Detail
           label={i18n._(t`Canceled`)}
           value={formatDateString(workflowApproval.canceled_on)}
+          dataCy="wa-detail-canceled"
         />
         <Detail
           label={i18n._(t`Elapsed`)}
           value={secondsToHHMMSS(workflowApproval.elapsed)}
+          dataCy="wa-detail-elapsed"
         />
       </DetailList>
       <CardActionsRow>
