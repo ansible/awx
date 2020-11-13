@@ -165,6 +165,8 @@ describe('<InventorySourceList />', () => {
       wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
     );
     expect(InventorySourcesAPI.destroy).toHaveBeenCalledWith(1);
+    expect(InventorySourcesAPI.destroyHosts).toHaveBeenCalledWith(1);
+    expect(InventorySourcesAPI.destroyGroups).toHaveBeenCalledWith(1);
   });
 
   test('should throw error after deletion failure', async () => {
