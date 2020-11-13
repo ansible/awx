@@ -57,18 +57,15 @@ describe('<InventoryRelatedGroupAdd/>', () => {
   });
 
   test('should throw error on creation of group', async () => {
-    GroupsAPI.create.mockRejectedValue(
-      new Error({
-        response: {
-          config: {
-            method: 'post',
-            url: '/api/v2/groups/',
-          },
-          data: 'An error occurred',
-          status: 403,
+    GroupsAPI.create.mockRejectedValue({
+      response: {
+        config: {
+          method: 'post',
+          url: '/api/v2/groups/',
         },
-      })
-    );
+        data: { detail: 'An error occurred' },
+      },
+    });
     await act(() =>
       wrapper.find('InventoryGroupForm').prop('handleSubmit')({
         name: 'foo',
@@ -81,18 +78,15 @@ describe('<InventoryRelatedGroupAdd/>', () => {
 
   test('should throw error on association of group', async () => {
     GroupsAPI.create.mockResolvedValue({ data: { id: 3 } });
-    GroupsAPI.associateChildGroup.mockRejectedValue(
-      new Error({
-        response: {
-          config: {
-            method: 'post',
-            url: '/api/v2/groups/',
-          },
-          data: 'An error occurred',
-          status: 403,
+    GroupsAPI.associateChildGroup.mockRejectedValue({
+      response: {
+        config: {
+          method: 'post',
+          url: '/api/v2/groups/',
         },
-      })
-    );
+        data: { detail: 'An error occurred' },
+      },
+    });
     await act(() =>
       wrapper.find('InventoryGroupForm').prop('handleSubmit')({
         name: 'foo',

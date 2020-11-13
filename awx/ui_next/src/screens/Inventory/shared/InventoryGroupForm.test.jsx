@@ -36,7 +36,15 @@ describe('<InventoryGroupForm />', () => {
         handleSubmit={jest.fn()}
         handleCancel={jest.fn()}
         group={group}
-        error
+        error={{
+          response: {
+            config: {
+              method: 'post',
+              url: '/api/v2/groups/',
+            },
+            data: { detail: 'An error occurred' },
+          },
+        }}
       />
     );
     expect(newWrapper.find('FormSubmitError').length).toBe(1);
