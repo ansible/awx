@@ -904,15 +904,15 @@ class Command(BaseCommand):
         self.inventory_update.save(update_fields=['org_host_limit_error'])
 
     def handle(self, *args, **options):
-        with advisory_lock('inventory_{}_import'.format(self.inventory.id)):
-            # Load inventory and related objects from database.
-            inventory_name = options.get('inventory_name', None)
-            inventory_id = options.get('inventory_id', None)
-            if inventory_name and inventory_id:
-                raise CommandError('--inventory-name and --inventory-id are mutually exclusive')
-            elif not inventory_name and not inventory_id:
-                raise CommandError('--inventory-name or --inventory-id is required')
+        # Load inventory and related objects from database.
+        inventory_name = options.get('inventory_name', None)
+        inventory_id = options.get('inventory_id', None)
+        if inventory_name and inventory_id:
+            raise CommandError('--inventory-name and --inventory-id are mutually exclusive')
+        elif not inventory_name and not inventory_id:
+            raise CommandError('--inventory-name or --inventory-id is required')
 
+        with advisory_lock('inventory_{}_import'.format(inventory_id)):
             # Obtain rest of the options needed to run update
             raw_source = options.get('source', None)
             if not raw_source:
