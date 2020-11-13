@@ -128,10 +128,12 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
         <Detail
           label={i18n._(t`Workflow Job`)}
           value={
-            sourceWorkflowJob && (
+            sourceWorkflowJob && sourceWorkflowJob?.id ? (
               <Link to={`/jobs/workflow/${sourceWorkflowJob?.id}`}>
                 {`${sourceWorkflowJob?.id} - ${sourceWorkflowJob?.name}`}
               </Link>
+            ) : (
+              i18n._(t`Deleted`)
             )
           }
         />

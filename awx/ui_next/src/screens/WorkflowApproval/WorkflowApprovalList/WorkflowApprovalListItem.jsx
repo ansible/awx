@@ -82,14 +82,16 @@ function WorkflowApprovalListItem({
               </Link>
             </DataListCell>,
             <DataListCell key="job" id={labelId}>
-              {workflowJob && (
-                <>
-                  <JobLabel>{i18n._(t`Job`)}</JobLabel>
+              <>
+                <JobLabel>{i18n._(t`Job`)}</JobLabel>
+                {workflowJob && workflowJob?.id ? (
                   <Link to={`/jobs/workflow/${workflowJob?.id}`}>
                     {`${workflowJob?.id} - ${workflowJob?.name}`}
                   </Link>
-                </>
-              )}
+                ) : (
+                  i18n._(t`Deleted`)
+                )}
+              </>
             </DataListCell>,
             <StatusCell key="status">{getStatus()}</StatusCell>,
           ]}
