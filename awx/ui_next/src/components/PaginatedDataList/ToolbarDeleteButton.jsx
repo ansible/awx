@@ -61,10 +61,6 @@ const ItemToDelete = shape({
   }).isRequired,
 });
 
-function cannotDelete(item) {
-  return !item.summary_fields.user_capabilities.delete;
-}
-
 function ToolbarDeleteButton({
   itemsToDelete,
   pluralizedItemName,
@@ -72,6 +68,7 @@ function ToolbarDeleteButton({
   onDelete,
   warningMessage,
   i18n,
+  cannotDelete,
 }) {
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -100,7 +97,7 @@ function ToolbarDeleteButton({
       return (
         <div>
           {errorMessage.length > 0
-            ? errorMessage
+            ? `${errorMessage}: ${itemsUnableToDelete}`
             : i18n._(
                 t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}`
               )}
@@ -193,12 +190,14 @@ ToolbarDeleteButton.propTypes = {
   pluralizedItemName: string,
   errorMessage: string,
   warningMessage: node,
+  cannotDelete: func,
 };
 
 ToolbarDeleteButton.defaultProps = {
   pluralizedItemName: 'Items',
   errorMessage: '',
   warningMessage: null,
+  cannotDelete: item => !item.summary_fields.user_capabilities.delete,
 };
 
 export default withI18n()(ToolbarDeleteButton);

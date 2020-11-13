@@ -212,6 +212,13 @@ function WorkflowApprovalsList({ i18n }) {
                     onDelete={handleDelete}
                     itemsToDelete={selected}
                     pluralizedItemName={i18n._(t`Workflow Approvals`)}
+                    cannotDelete={item =>
+                      item.status === 'pending' ||
+                      !item.summary_fields.user_capabilities.delete
+                    }
+                    errorMessage={i18n._(
+                      t`These approvals cannot be deleted due to insufficient permissions or a pending job status`
+                    )}
                   />,
                 ]}
               />
