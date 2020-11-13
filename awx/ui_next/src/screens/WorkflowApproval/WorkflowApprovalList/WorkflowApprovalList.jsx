@@ -174,6 +174,10 @@ function WorkflowApprovalsList({ i18n }) {
                 key: 'name__icontains',
                 isDefault: true,
               },
+              {
+                name: i18n._(t`Description`),
+                key: 'description__icontains',
+              },
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
