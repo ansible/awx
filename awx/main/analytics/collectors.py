@@ -65,6 +65,7 @@ def config(since, **kwargs):
     }
 
 
+@register('counts', '1.0', description=_('Counts of objects such as organizations, inventories, and projects'))
 def counts(since, **kwargs):
     counts = {}
     for cls in (models.Organization, models.Team, models.User,
@@ -96,6 +97,68 @@ def counts(since, **kwargs):
     counts['active_anonymous_sessions'] = active_anonymous_sessions
     counts['running_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('running', 'waiting',)).count()
     counts['pending_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('pending',)).count()
+    return counts
+
+    
+@register('org_counts', '1.0', description=_('Counts of users and teams by organization'))
+def org_counts(since, **kwargs):
+    counts = {}
+    for org in models.Organization.objects.annotate(num_users=Count('member_role__members', distinct=True), 
+                                                    num_teams=Count('teams', distinct=True)).values('name', 'id', 'num_users', 'num_teams'):
+        counts[org['id']] = {'name': org['name'],
+                             'users': org['num_users'],
+                             'teams': org['num_teams']
+                             }
+    return counts
+    
+    
+@register('cred_type_counts', '1.0', description=_('Counts of credentials by credential type'))
+def cred_type_counts(since, **kwargs):
+    counts = {}
+    for cred_type in models.CredentialType.objects.annotate(num_credentials=Count(
+                                                            'credentials', distinct=True)).values('name', 'id', 'managed_by_tower', 'num_credentials'):  
+        counts[cred_type['id']] = {'name': cred_type['name'],
+                                   'credential_count': cred_type['num_credentials'],
+                                   'managed_by_tower': cred_type['managed_by_tower']
+                                   }
+    return counts
+    
+    
+@register('inventory_counts', '1.2', description=_('Inventories, their inventory sources, and host counts'))
+def inventory_counts(since, **kwargs):
+    counts = {}
+    for inv in models.Inventory.objects.filter(kind='').annotate(num_sources=Count('inventory_sources', distinct=True), 
+                                                                 num_hosts=Count('hosts', distinct=True)).only('id', 'name', 'kind'):
+        source_list = []
+        for source in inv.inventory_sources.filter().annotate(num_hosts=Count('hosts', distinct=True)).values('name','source', 'num_hosts'):
+            source_list.append(source)
+        counts[inv.id] = {'name': inv.name,
+                          'kind': inv.kind,
+                          'hosts': inv.num_hosts,
+                          'sources': inv.num_sources,
+                          'source_list': source_list
+                          }
+
+    for smart_inv in models.Inventory.objects.filter(kind='smart'):
+        counts[smart_inv.id] = {'name': smart_inv.name,
+                                'kind': smart_inv.kind,
+                                'hosts': smart_inv.hosts.count(),
+                                'sources': 0,
+                                'source_list': []
+                                }
+    return counts
+
+
+@register('projects_by_scm_type', '1.0', description=_('Counts of projects by source control type'))
+def projects_by_scm_type(since, **kwargs):
+    counts = dict(
+        (t[0] or 'manual', 0)
+        for t in models.Project.SCM_TYPE_CHOICES
+    )
+    for result in models.Project.objects.values('scm_type').annotate(
+        count=Count('scm_type')
+    ).order_by('scm_type'):
+        counts[result['scm_type'] or 'manual'] = result['count']
     return counts
 
 

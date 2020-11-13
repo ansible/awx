@@ -67,3 +67,57 @@ def test_database_counts(
         "custom_inventory_script",
     ):
         assert counts[key] == 1
+
+
+@pytest.mark.django_db
+def test_inventory_counts(organization_factory, inventory_factory):
+    (inv1, inv2, inv3) = [inventory_factory(f"inv-{i}") for i in range(3)]
+
+    s1 = inv1.inventory_sources.create(name="src1", source="ec2")
+    s2 = inv1.inventory_sources.create(name="src2", source="file")
+    s3 = inv1.inventory_sources.create(name="src3", source="gce")
+
+    s1.hosts.create(name="host1", inventory=inv1)
+    s1.hosts.create(name="host2", inventory=inv1)
+    s1.hosts.create(name="host3", inventory=inv1)
+
+    s2.hosts.create(name="host4", inventory=inv1)
+    s2.hosts.create(name="host5", inventory=inv1)
+
+    s3.hosts.create(name="host6", inventory=inv1)
+
+    s1 = inv2.inventory_sources.create(name="src1", source="ec2")
+
+    s1.hosts.create(name="host1", inventory=inv2)
+    s1.hosts.create(name="host2", inventory=inv2)
+    s1.hosts.create(name="host3", inventory=inv2)
+
+    inv_counts = collectors.inventory_counts(None)
+
+    assert {
+        inv1.id: {
+            "name": "inv-0",
+            "kind": "",
+            "hosts": 6,
+            "sources": 3,
+            "source_list": [
+                {"name": "src1", "source": "ec2", "num_hosts": 3},
+                {"name": "src2", "source": "file", "num_hosts": 2},
+                {"name": "src3", "source": "gce", "num_hosts": 1},
+            ],
+        },
+        inv2.id: {
+            "name": "inv-1",
+            "kind": "",
+            "hosts": 3,
+            "sources": 1,
+            "source_list": [{"name": "src1", "source": "ec2", "num_hosts": 3}],
+        },
+        inv3.id: {
+            "name": "inv-2",
+            "kind": "",
+            "hosts": 0,
+            "sources": 0,
+            "source_list": [],
+        },
+    } == inv_counts
