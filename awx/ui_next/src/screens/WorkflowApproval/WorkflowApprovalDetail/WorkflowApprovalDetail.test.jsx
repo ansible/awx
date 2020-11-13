@@ -7,7 +7,9 @@ import {
 import { WorkflowApprovalsAPI } from '../../../api';
 import { formatDateString } from '../../../util/dates';
 import WorkflowApprovalDetail from './WorkflowApprovalDetail';
-import workflowApproval from '../data.workflowApproval.json';
+import mockWorkflowApprovals from '../data.workflowApprovals.json';
+
+const workflowApproval = mockWorkflowApprovals.results[0];
 
 jest.mock('../../../api');
 

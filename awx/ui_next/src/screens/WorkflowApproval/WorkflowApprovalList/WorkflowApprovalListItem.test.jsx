@@ -1,7 +1,9 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowApprovalListItem from './WorkflowApprovalListItem';
-import workflowApproval from '../data.workflowApproval.json';
+import mockWorkflowApprovals from '../data.workflowApprovals.json';
+
+const workflowApproval = mockWorkflowApprovals.results[0];
 
 jest.mock('../../../api/models/WorkflowApprovals');
 

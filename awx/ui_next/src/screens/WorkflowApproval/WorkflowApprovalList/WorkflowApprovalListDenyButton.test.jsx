@@ -6,6 +6,7 @@ const workflowApproval = {
   id: 1,
   name: 'Foo',
   can_approve_or_deny: true,
+  url: '/api/v2/workflow_approvals/218/',
 };
 
 describe('<WorkflowApprovalListDenyButton />', () => {

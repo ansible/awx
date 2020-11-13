@@ -6,7 +6,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import mockDetails from './data.workflowApproval.json';
+import mockWorkflowApprovals from './data.workflowApprovals.json';
 import WorkflowApproval from './WorkflowApproval';
 
 jest.mock('../../api');
@@ -18,7 +18,9 @@ const mockMe = {
 
 describe('<WorkflowApproval />', () => {
   test('initially renders succesfully', async () => {
-    WorkflowApprovalsAPI.readDetail.mockResolvedValue({ data: mockDetails });
+    WorkflowApprovalsAPI.readDetail.mockResolvedValue({
+      data: mockWorkflowApprovals.results[0],
+    });
     await act(async () => {
       mountWithContexts(
         <WorkflowApproval setBreadcrumb={() => {}} me={mockMe} />

@@ -2,7 +2,9 @@ import React from 'react';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { formatDateString } from '../../../util/dates';
 import WorkflowApprovalStatus from './WorkflowApprovalStatus';
-import workflowApproval from '../data.workflowApproval.json';
+import mockWorkflowApprovals from '../data.workflowApprovals.json';
+
+const workflowApproval = mockWorkflowApprovals.results[0];
 
 describe('<WorkflowApprovalStatus />', () => {
   let wrapper;
