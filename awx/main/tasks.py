@@ -2797,6 +2797,7 @@ class RunInventoryUpdate(BaseTask):
 
         from awx.main.management.commands.inventory_import import Command as InventoryImportCommand
         cmd = InventoryImportCommand()
+        exc = None
         try:
             # note that we are only using the management command to
             # save the inventory data to the database.
@@ -2806,6 +2807,8 @@ class RunInventoryUpdate(BaseTask):
             # for us.
             save_status, tb, exc = cmd.perform_update(options, data, inventory_update)
         except Exception as raw_exc:
+            if exc is None:
+                exc = raw_exc
             # Ignore license errors specifically
             if 'Host limit for organization' not in str(exc) and 'License' not in str(exc):
                 raise raw_exc
