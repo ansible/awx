@@ -239,12 +239,12 @@ describe('<SurveyQuestionForm />', () => {
     });
     await selectType(wrapper, 'multiselect');
     await act(async () =>
-      wrapper.find('TextArea#question-options').prop('onChange')('a \n b', {
+      wrapper.find('textarea#question-options').simulate('change', {
         target: { value: 'a \n b', name: 'choices' },
       })
     );
     await act(async () =>
-      wrapper.find('TextArea#question-default').prop('onChange')('b \n a', {
+      wrapper.find('textarea#question-options').simulate('change', {
         target: { value: 'b \n a', name: 'default' },
       })
     );
@@ -271,12 +271,12 @@ describe('<SurveyQuestionForm />', () => {
     });
     await selectType(wrapper, 'multiselect');
     await act(async () =>
-      wrapper.find('TextArea#question-options').prop('onChange')('a \n b', {
+      wrapper.find('textarea#question-options').simulate('change', {
         target: { value: 'a \n b', name: 'choices' },
       })
     );
     await act(async () =>
-      wrapper.find('TextArea#question-default').prop('onChange')('c', {
+      wrapper.find('textarea#question-default').simulate('change', {
         target: { value: 'c', name: 'default' },
       })
     );

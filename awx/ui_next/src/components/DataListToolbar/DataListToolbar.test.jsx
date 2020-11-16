@@ -343,12 +343,10 @@ describe('<DataListToolbar />', () => {
         ]}
       />
     );
-    await act(() =>
-      newToolbar.find('Search').prop('onShowAdvancedSearch')(true)
-    );
+    act(() => newToolbar.find('Search').prop('onShowAdvancedSearch')(true));
     newToolbar.update();
     expect(newToolbar.find('KebabToggle').length).toBe(1);
-    await act(() => newToolbar.find('KebabToggle').prop('onToggle')(true));
+    act(() => newToolbar.find('KebabToggle').prop('onToggle')(true));
     newToolbar.update();
     expect(newToolbar.find('div[aria-label="add container"]').length).toBe(1);
     expect(newToolbar.find('div[aria-label="add instance group"]').length).toBe(

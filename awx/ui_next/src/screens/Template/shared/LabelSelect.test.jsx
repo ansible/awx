@@ -27,7 +27,7 @@ describe('<LabelSelect />', () => {
       );
     });
     expect(LabelsAPI.read).toHaveBeenCalledTimes(1);
-    wrapper.find('input').simulate('focus');
+    wrapper.find('SelectToggle').simulate('click');
     const selectOptions = wrapper.find('SelectOption');
     expect(selectOptions).toHaveLength(2);
     expect(selectOptions.at(0).prop('value')).toEqual(options[0]);
@@ -58,7 +58,7 @@ describe('<LabelSelect />', () => {
     wrapper.update();
 
     expect(LabelsAPI.read).toHaveBeenCalledTimes(2);
-    wrapper.find('input').simulate('focus');
+    wrapper.find('SelectToggle').simulate('click');
     const selectOptions = wrapper.find('SelectOption');
     expect(selectOptions).toHaveLength(4);
   });

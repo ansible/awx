@@ -43,6 +43,7 @@ describe('<InventoryGroupAdd />', () => {
     );
   });
   test('handleSubmit should call api', async () => {
+    GroupsAPI.create.mockResolvedValue({ data: {} });
     await act(async () => {
       wrapper.find('InventoryGroupForm').prop('handleSubmit')({
         name: 'Bar',
