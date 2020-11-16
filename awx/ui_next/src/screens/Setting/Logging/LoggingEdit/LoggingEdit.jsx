@@ -138,7 +138,26 @@ function LoggingEdit({ i18n }) {
                 <FormColumnLayout>
                   <BooleanField
                     name="LOG_AGGREGATOR_ENABLED"
-                    config={logging.LOG_AGGREGATOR_ENABLED}
+                    config={{
+                      ...logging.LOG_AGGREGATOR_ENABLED,
+                      help_text: (
+                        <>
+                          {logging.LOG_AGGREGATOR_ENABLED.help_text}
+                          {!formik.values.LOG_AGGREGATOR_ENABLED &&
+                            (!formik.values.LOG_AGGREGATOR_HOST ||
+                              !formik.values.LOG_AGGREGATOR_TYPE) && (
+                              <>
+                                <br />
+                                <br />
+                                {i18n._(
+                                  t`Cannot enable log aggregator without providing
+                                  logging aggregator host and logging aggregator type.`
+                                )}
+                              </>
+                            )}
+                        </>
+                      ),
+                    }}
                     ariaLabel={i18n._(t`Enable external logging`)}
                     disabled={
                       !formik.values.LOG_AGGREGATOR_ENABLED &&
