@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('taggit', '0003_taggeditem_add_unique_index'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0121_delete_toweranalyticsstate'),
+        ('main', '0122_really_remove_cloudforms_inventory'),
     ]
 
     operations = [
