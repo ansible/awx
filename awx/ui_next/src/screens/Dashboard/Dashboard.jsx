@@ -8,18 +8,17 @@ import {
   CardActions,
   CardBody,
   PageSection,
-  PageSectionVariants,
   Select,
   SelectVariant,
   SelectOption,
   Tabs,
   Tab,
   TabTitleText,
-  Title,
 } from '@patternfly/react-core';
 
 import useRequest from '../../util/useRequest';
 import { DashboardAPI } from '../../api';
+import Breadcrumbs from '../../components/Breadcrumbs';
 import JobList from '../../components/JobList';
 
 import LineChart from './shared/LineChart';
@@ -56,8 +55,6 @@ const GraphCardActions = styled(CardActions)`
 `;
 
 function Dashboard({ i18n }) {
-  const { light } = PageSectionVariants;
-
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isJobTypeDropdownOpen, setIsJobTypeDropdownOpen] = useState(false);
   const [periodSelection, setPeriodSelection] = useState('month');
@@ -111,11 +108,7 @@ function Dashboard({ i18n }) {
 
   return (
     <Fragment>
-      <PageSection variant={light} className="pf-m-condensed">
-        <Title size="2xl" headingLevel="h2">
-          {i18n._(t`Dashboard`)}
-        </Title>
-      </PageSection>
+      <Breadcrumbs breadcrumbConfig={{ '/home': i18n._(t`Dashboard`) }} />
       <PageSection>
         <Counts>
           <Count
