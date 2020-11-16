@@ -146,6 +146,10 @@ RUN dnf -y update && \
 RUN curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.17.8/bin/linux/{{ kubectl_architecture | default('amd64') }}/kubectl && \
     chmod a+x /usr/bin/kubectl
 
+RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && \
+    chmod 700 get_helm.sh && \
+    ./get_helm.sh
+
 # Install tini
 RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \
     chmod +x /usr/bin/tini
