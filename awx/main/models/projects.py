@@ -259,6 +259,15 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         app_label = 'main'
         ordering = ('id',)
 
+    default_environment = models.ForeignKey(
+        'ExecutionEnvironment',
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text=_('The default execution environment for jobs run using this project.'),
+    )
     scm_update_on_launch = models.BooleanField(
         default=False,
         help_text=_('Update the project when a job is launched that uses the project.'),
