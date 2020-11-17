@@ -576,9 +576,7 @@ ui-zuul-lint-and-test:
 awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next install
 
-ui-release-next:
-	mkdir -p awx/ui_next/build/static
-	touch awx/ui_next/build/static/.placeholder
+ui-release-next: ui-devel-next
 
 ui-devel-next: awx/ui_next/node_modules
 	$(NPM_BIN) --prefix awx/ui_next run extract-strings
