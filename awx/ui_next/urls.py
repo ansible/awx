@@ -10,5 +10,6 @@ class IndexView(TemplateView):
 app_name = 'ui_next'
 
 urlpatterns = [
-    url(r'^next/*', IndexView.as_view(), name='ui_next')
+    url(r'^$', IndexView.as_view(), name='index'),
+    #url(r'^migrations_notran/$', migrations_notran, name='migrations_notran'),
 ]

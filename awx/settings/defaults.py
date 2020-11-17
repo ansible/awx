@@ -91,7 +91,6 @@ USE_L10N = True
 USE_TZ = True
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'ui', 'static'),
     os.path.join(BASE_DIR, 'ui_next', 'build', 'static'),
     os.path.join(BASE_DIR, 'static'),
 )
@@ -249,8 +248,6 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-                'awx.ui.context_processors.settings',
-                'awx.ui.context_processors.version',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
