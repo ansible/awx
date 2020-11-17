@@ -95,6 +95,9 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     job_template_admin_role = ImplicitRoleField(
         parent_role='admin_role',
     )
+    execution_environment_admin_role = ImplicitRoleField(
+        parent_role='admin_role',
+    )
     auditor_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
     )
