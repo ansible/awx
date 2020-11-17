@@ -53,7 +53,7 @@ from gitdb.exc import BadName as BadGitName
 import ansible_runner
 
 # Receptor
-from receptorctl.socket_interface import ReceptorControl
+# from receptorctl.socket_interface import ReceptorControl
 
 # AWX
 from awx import __version__ as awx_application_version
