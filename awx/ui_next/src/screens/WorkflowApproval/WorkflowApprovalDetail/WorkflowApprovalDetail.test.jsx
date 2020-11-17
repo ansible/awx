@@ -52,7 +52,6 @@ describe('<WorkflowApprovalDetail />', () => {
     assertDetail('Elapsed', '00:00:22');
     expect(wrapper.find('Button[aria-label="Approve"]').length).toBe(1);
     expect(wrapper.find('Button[aria-label="Deny"]').length).toBe(1);
-    expect(wrapper.find('DeleteButton').length).toBe(1);
   });
 
   test('should show expiration date/time', () => {
@@ -227,10 +226,33 @@ describe('<WorkflowApprovalDetail />', () => {
       <WorkflowApprovalDetail
         workflowApproval={{
           ...workflowApproval,
+          status: 'successful',
           summary_fields: {
             ...workflowApproval.summary_fields,
             user_capabilities: {
               delete: false,
+              start: false,
+            },
+            approved_or_denied_by: {
+              id: 1,
+              username: 'Foobar',
+            },
+          },
+        }}
+      />
+    );
+    expect(wrapper.find('DeleteButton').length).toBe(0);
+  });
+
+  test('delete button should be hidden when job is pending', () => {
+    const wrapper = mountWithContexts(
+      <WorkflowApprovalDetail
+        workflowApproval={{
+          ...workflowApproval,
+          summary_fields: {
+            ...workflowApproval.summary_fields,
+            user_capabilities: {
+              delete: true,
               start: false,
             },
           },
@@ -245,7 +267,19 @@ describe('<WorkflowApprovalDetail />', () => {
       Promise.reject(new Error())
     );
     const wrapper = mountWithContexts(
-      <WorkflowApprovalDetail workflowApproval={workflowApproval} />
+      <WorkflowApprovalDetail
+        workflowApproval={{
+          ...workflowApproval,
+          status: 'successful',
+          summary_fields: {
+            ...workflowApproval.summary_fields,
+            approved_or_denied_by: {
+              id: 1,
+              username: 'Foobar',
+            },
+          },
+        }}
+      />
     );
     await waitForElement(
       wrapper,

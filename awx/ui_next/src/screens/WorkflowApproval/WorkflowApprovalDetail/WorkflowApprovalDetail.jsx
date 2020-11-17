@@ -204,7 +204,8 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
             </Button>
           </>
         )}
-        {workflowApproval.summary_fields.user_capabilities &&
+        {workflowApproval.status !== 'pending' &&
+          workflowApproval.summary_fields.user_capabilities &&
           workflowApproval.summary_fields.user_capabilities.delete && (
             <DeleteButton
               name={workflowApproval.name}
