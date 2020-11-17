@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 class ExecutionEnvironment(HasCreate, base.Base):
 
     dependencies = [Organization, Credential]
-    NATURAL_KEY = ('organization', 'image')
+    NATURAL_KEY = ('name',)
 
     # fields are image, organization, managed_by_tower, credential
     def create(self, image='quay.io/ansible/ansible-runner:devel', credential=None, **kwargs):
