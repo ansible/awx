@@ -1133,7 +1133,6 @@ ManagedCredentialType(
     },
 )
 
-
 ManagedCredentialType(
     namespace='kubernetes_bearer_token',
     kind='kubernetes',
@@ -1162,6 +1161,37 @@ ManagedCredentialType(
             'multiline': True,
         }],
         'required': ['host', 'bearer_token'],
+    }
+)
+
+ManagedCredentialType(
+    namespace='registry',
+    kind='registry',
+    name=ugettext_noop('Container Registry'),
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('Authentication URL'),
+            'type': 'string',
+            'help_text': ugettext_noop('Authentication endpoint for the container registry.'),
+        }, {
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string',
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'token',
+            'label': ugettext_noop('Access Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': ugettext_noop('A token to use to authenticate with. '
+                                       'This should not be set if username/password are being used.'),
+        }],
+        'required': ['host'],
     }
 )
 
