@@ -38,6 +38,7 @@ kubernetes_redis_config_mount_path: "/usr/local/etc/redis/redis.conf"
 
 openshift_pg_emptydir: false
 openshift_pg_pvc_name: postgresql
+openshift_pg_docker_image: registry.redhat.io/rhel8/postgresql-10
 
 kubernetes_deployment_name: awx
 kubernetes_serviceaccount_name: awx

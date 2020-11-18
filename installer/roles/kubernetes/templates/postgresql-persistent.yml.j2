@@ -62,6 +62,18 @@ objects:
     type: ClusterIP
   status:
     loadBalancer: {}
+{% if not (openshift_pg_emptydir | bool) %}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: ${DATABASE_SERVICE_NAME}
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${VOLUME_CAPACITY}
+{% endif %}
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -99,7 +111,7 @@ objects:
                 name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_MAX_CONNECTIONS
             value: ${POSTGRESQL_MAX_CONNECTIONS}
-          image: registry.redhat.io/rhel8/postgresql-10
+          image: ${POSTGRESQL_DOCKER_IMAGE}
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
@@ -174,3 +186,18 @@ parameters:
   name: POSTGRESQL_DATABASE
   required: true
   value: sampledb
+- description: PostgreSQL database max connections.
+  displayName: PostgreSQL Database Max Connections
+  name: POSTGRESQL_MAX_CONNECTIONS
+  required: true
+  value: '1024'
+- description: Volume space available for data, e.g. 512Mi, 2Gi.
+  displayName: Volume Capacity
+  name: VOLUME_CAPACITY
+  required: true
+  value: 1Gi
+- description: Name of the PostgreSQL database accessed.
+  displayName: PostgreSQL Database Name
+  name: POSTGRESQL_DOCKER_IMAGE
+  required: true
+  value: registry.redhat.io/rhel8/postgresql-10
