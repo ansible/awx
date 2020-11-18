@@ -4,6 +4,7 @@ import os
 import signal
 import time
 import traceback
+import datetime
 
 from django.conf import settings
 from django.utils.timezone import now as tz_now
@@ -13,6 +14,8 @@ from django.db.utils import InterfaceError, InternalError
 import psutil
 
 import redis
+
+import statsd
 
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
@@ -43,6 +46,7 @@ class CallbackBrokerWorker(BaseWorker):
     prof = None
 
     def __init__(self):
+        self.statsd = statsd.StatsClient('localhost', 8125)
         self.buff = {}
         self.pid = os.getpid()
         self.redis = redis.Redis.from_url(settings.BROKER_URL)
@@ -52,11 +56,19 @@ class CallbackBrokerWorker(BaseWorker):
 
     def read(self, queue):
         try:
+            start = datetime.datetime.utcnow()
             res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=settings.JOB_EVENT_BUFFER_SECONDS)
             if res is None:
                 return {'event': 'FLUSH'}
             self.total += 1
-            return json.loads(res[1])
+            ret = json.loads(res[1])
+
+            end = datetime.datetime.utcnow()
+            pipe = self.statsd.pipeline()
+            pipe.incr('awx.callback_receiver.queue.read.total')
+            pipe.timing('awx.callback_receiver.queue.read.duration', end-start)
+            pipe.send()
+            return ret
         except redis.exceptions.RedisError:
             logger.exception("encountered an error communicating with redis")
             time.sleep(1)

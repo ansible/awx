@@ -114,6 +114,7 @@ smmap==3.0.1              # via gitdb
 social-auth-app-django==3.1.0  # via -r /awx_devel/requirements/requirements.in
 social-auth-core==3.3.1   # via -r /awx_devel/requirements/requirements.in, social-auth-app-django
 sqlparse==0.3.1           # via django
+statsd==3.3.0             # via -r /awx_devel/requirements/requirements.in
 tacacs_plus==1.0          # via -r /awx_devel/requirements/requirements.in
 tempora==2.1.0            # via irc, jaraco.logging
 twilio==6.37.0            # via -r /awx_devel/requirements/requirements.in
