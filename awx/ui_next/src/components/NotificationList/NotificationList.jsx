@@ -183,8 +183,12 @@ function NotificationList({
             isDefault: true,
           },
           {
+            name: i18n._(t`Description`),
+            key: 'description__icontains',
+          },
+          {
             name: i18n._(t`Type`),
-            key: 'or__type',
+            key: 'or__notification_type',
             options: [
               ['email', i18n._(t`Email`)],
               ['grafana', i18n._(t`Grafana`)],
@@ -211,6 +215,10 @@ function NotificationList({
           {
             name: i18n._(t`Name`),
             key: 'name',
+          },
+          {
+            name: i18n._(t`Type`),
+            key: 'notification_type',
           },
         ]}
         toolbarSearchableKeys={searchableKeys}
