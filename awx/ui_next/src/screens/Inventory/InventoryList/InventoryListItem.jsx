@@ -101,7 +101,9 @@ function InventoryListItem({
         <DataListItemCells
           dataListCells={[
             <DataListCell key="sync-status" isIcon>
-              <SyncStatusIndicator status={syncStatus} />
+              {inventory.kind !== 'smart' && (
+                <SyncStatusIndicator status={syncStatus} />
+              )}
             </DataListCell>,
             <DataListCell key="name">
               {inventory.pending_deletion ? (
