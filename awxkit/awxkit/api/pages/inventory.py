@@ -231,7 +231,7 @@ class InventoryScript(HasCopy, HasCreate, base.Base):
             'inventory["{0}"]["vars"] = dict(ansible_host="127.0.0.1", ansible_connection="local")',
             'print(json.dumps(inventory))'
         ])
-        group_name = re.sub(r"[\']", "", "group-{}".format(random_utf8()))
+        group_name = re.sub(r"[\']", "", "group_{}".format(random_title(non_ascii=False)))
         host_names = [
             re.sub(
                 r"[\':]",
