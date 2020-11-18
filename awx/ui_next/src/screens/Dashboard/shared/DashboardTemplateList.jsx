@@ -9,7 +9,6 @@ import {
   UnifiedJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
 } from '../../../api';
-import { toTitleCase } from '../../../util/strings';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -142,19 +141,19 @@ function DashboardTemplateList({ i18n }) {
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
 
-  const addTempate = toTitleCase(i18n._(t`Add Job Template`));
-  const addWFTemplate = toTitleCase(i18n._(t`Add Workflow Template`));
+  const addTemplate = i18n._(t`Add job template`);
+  const addWFTemplate = i18n._(t`Add workflow template`);
   const addButton = (
     <AddDropDownButton
       key="add"
       dropdownItems={[
         <DropdownItem
-          key={addTempate}
+          key={addTemplate}
           component={Link}
           to="/templates/job_template/add/"
-          aria-label={addTempate}
+          aria-label={addTemplate}
         >
-          {addTempate}
+          {addTemplate}
         </DropdownItem>,
         <DropdownItem
           component={Link}

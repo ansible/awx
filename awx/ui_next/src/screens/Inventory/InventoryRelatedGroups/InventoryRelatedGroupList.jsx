@@ -18,7 +18,6 @@ import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
-import { toTitleCase } from '../../../util/strings';
 
 const QS_CONFIG = getQSConfig('group', {
   page: 1,
@@ -126,8 +125,8 @@ function InventoryRelatedGroupList({ i18n }) {
 
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_groups/add`;
 
-  const addExistingGroup = toTitleCase(i18n._(t`Add Existing Group`));
-  const addNewGroup = toTitleCase(i18n._(t`Add New Group`));
+  const addExistingGroup = i18n._(t`Add existing group`);
+  const addNewGroup = i18n._(t`Add new group`);
   const addButton = (
     <AddDropDownButton
       key="add"

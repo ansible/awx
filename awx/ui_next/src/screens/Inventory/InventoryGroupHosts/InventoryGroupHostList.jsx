@@ -20,7 +20,6 @@ import DisassociateButton from '../../../components/DisassociateButton';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
 import AddDropDownButton from '../../../components/AddDropDownButton';
-import { toTitleCase } from '../../../util/strings';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -144,8 +143,8 @@ function InventoryGroupHostList({ i18n }) {
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_hosts/add`;
-  const addExistingHost = toTitleCase(i18n._(t`Add Existing Host`));
-  const addNewHost = toTitleCase(i18n._(t`Add New Host`));
+  const addExistingHost = i18n._(t`Add existing host`);
+  const addNewHost = i18n._(t`Add new host`);
 
   const addButton = (
     <AddDropDownButton

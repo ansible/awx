@@ -16,7 +16,6 @@ import PaginatedDataList, {
 } from '../../../components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { toTitleCase } from '../../../util/strings';
 import useWsTemplates from '../../../util/useWsTemplates';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
@@ -134,18 +133,18 @@ function TemplateList({ i18n }) {
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
 
-  const addTempate = toTitleCase(i18n._(t`Add Job Template`));
-  const addWFTemplate = toTitleCase(i18n._(t`Add Workflow Template`));
+  const addTemplate = i18n._(t`Add job template`);
+  const addWFTemplate = i18n._(t`Add workflow template`);
   const addDropDownButton = [];
   if (canAddJT) {
     addDropDownButton.push(
       <DropdownItem
-        key={addTempate}
+        key={addTemplate}
         component={Link}
         to="/templates/job_template/add/"
-        aria-label={addTempate}
+        aria-label={addTemplate}
       >
-        {addTempate}
+        {addTemplate}
       </DropdownItem>
     );
   }
