@@ -1,12 +1,17 @@
-import React, { Component } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { Formik } from 'formik';
 import styled from 'styled-components';
 import { LoginForm, LoginPage as PFLoginPage } from '@patternfly/react-core';
+import useRequest, { useDismissableError } from '../../util/useRequest';
 import { RootAPI } from '../../api';
+import { BrandName } from '../../variables';
+import AlertModal from '../../components/AlertModal';
+import ErrorDetail from '../../components/ErrorDetail';
 
-const loginLogoSrc = '/static/media/logo-login.svg';
+import brandLogo from './brand-logo.svg';
 
 const LoginPage = styled(PFLoginPage)`
   & .pf-c-brand {
@@ -14,149 +19,131 @@ const LoginPage = styled(PFLoginPage)`
   }
 `;
 
-class AWXLogin extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      username: '',
-      password: '',
-      hasAuthError: false,
-      hasValidationError: false,
-      isAuthenticating: false,
-      isLoading: true,
-      logo: null,
-      loginInfo: null,
-      brandName: null,
-    };
-
-    this.handleChangeUsername = this.handleChangeUsername.bind(this);
-    this.handleChangePassword = this.handleChangePassword.bind(this);
-    this.handleLoginButtonClick = this.handleLoginButtonClick.bind(this);
-    this.loadCustomLoginInfo = this.loadCustomLoginInfo.bind(this);
-  }
-
-  async componentDidMount() {
-    await this.loadCustomLoginInfo();
-  }
-
-  async loadCustomLoginInfo() {
-    this.setState({ isLoading: true });
-    try {
-      const [
-        {
-          data: { custom_logo, custom_login_info },
-        },
-        {
-          data: { BRAND_NAME },
-        },
-      ] = await Promise.all([RootAPI.read(), RootAPI.readAssetVariables()]);
-      const logo = custom_logo
+function AWXLogin({ alt, i18n, isAuthenticated }) {
+  const {
+    isLoading: isCustomLoginInfoLoading,
+    error: customLoginInfoError,
+    request: fetchCustomLoginInfo,
+    result: { logo, loginInfo },
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        data: { custom_logo, custom_login_info },
+      } = await RootAPI.read();
+      const logoSrc = custom_logo
         ? `data:image/jpeg;${custom_logo}`
-        : loginLogoSrc;
-      this.setState({
-        brandName: BRAND_NAME,
-        logo,
+        : brandLogo;
+      return {
+        logo: logoSrc,
         loginInfo: custom_login_info,
-      });
-    } catch (err) {
-      this.setState({ brandName: 'AWX', logo: loginLogoSrc });
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  }
+      };
+    }, []),
+    { logo: brandLogo, loginInfo: null }
+  );
 
-  async handleLoginButtonClick(event) {
-    const { username, password, isAuthenticating } = this.state;
+  const {
+    error: loginInfoError,
+    dismissError: dismissLoginInfoError,
+  } = useDismissableError(customLoginInfoError);
 
-    event.preventDefault();
+  useEffect(() => {
+    fetchCustomLoginInfo();
+  }, [fetchCustomLoginInfo]);
 
-    if (isAuthenticating) {
-      return;
-    }
-
-    this.setState({ hasAuthError: false, isAuthenticating: true });
-    try {
-      // note: if authentication is successful, the appropriate cookie will be set automatically
-      // and isAuthenticated() (the source of truth) will start returning true.
+  const {
+    isLoading: isAuthenticating,
+    error: authenticationError,
+    request: authenticate,
+  } = useRequest(
+    useCallback(async ({ username, password }) => {
       await RootAPI.login(username, password);
-    } catch (err) {
-      if (err && err.response && err.response.status === 401) {
-        this.setState({ hasValidationError: true });
-      } else {
-        this.setState({ hasAuthError: true });
-      }
-    } finally {
-      this.setState({ isAuthenticating: false });
-    }
+    }, [])
+  );
+
+  const {
+    error: authError,
+    dismissError: dismissAuthError,
+  } = useDismissableError(authenticationError);
+
+  const handleSubmit = async values => {
+    dismissAuthError();
+    await authenticate(values);
+  };
+
+  const brandName = BrandName;
+
+  if (isCustomLoginInfoLoading) {
+    return null;
   }
 
-  handleChangeUsername(value) {
-    this.setState({ username: value, hasValidationError: false });
+  if (isAuthenticated(document.cookie)) {
+    return <Redirect to="/" />;
   }
 
-  handleChangePassword(value) {
-    this.setState({ password: value, hasValidationError: false });
+  let helperText;
+  if (authError?.response?.status === 401) {
+    helperText = i18n._(t`Invalid username or password. Please try again.`);
+  } else {
+    helperText = i18n._(t`There was a problem signing in. Please try again.`);
   }
 
-  render() {
-    const {
-      brandName,
-      hasAuthError,
-      hasValidationError,
-      username,
-      password,
-      isLoading,
-      logo,
-      loginInfo,
-    } = this.state;
-    const { alt, i18n, isAuthenticated } = this.props;
-
-    if (isLoading) {
-      return null;
-    }
-
-    if (isAuthenticated(document.cookie)) {
-      return <Redirect to="/" />;
-    }
-
-    let helperText;
-    if (hasValidationError) {
-      helperText = i18n._(t`Invalid username or password. Please try again.`);
-    } else {
-      helperText = i18n._(t`There was a problem signing in. Please try again.`);
-    }
-
-    return (
-      <LoginPage
-        brandImgSrc={logo}
-        brandImgAlt={alt || brandName}
-        loginTitle={
-          brandName
-            ? i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)
-            : ''
-        }
-        textContent={loginInfo}
+  return (
+    <LoginPage
+      brandImgSrc={logo}
+      brandImgAlt={alt || brandName}
+      loginTitle={i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)}
+      textContent={loginInfo}
+    >
+      <Formik
+        initialValues={{
+          password: '',
+          username: '',
+        }}
+        onSubmit={handleSubmit}
       >
-        <LoginForm
-          className={hasAuthError || hasValidationError ? 'pf-m-error' : ''}
-          helperText={helperText}
-          isValidPassword={!hasValidationError}
-          isValidUsername={!hasValidationError}
-          loginButtonLabel={i18n._(t`Log In`)}
-          onChangePassword={this.handleChangePassword}
-          onChangeUsername={this.handleChangeUsername}
-          onLoginButtonClick={this.handleLoginButtonClick}
-          passwordLabel={i18n._(t`Password`)}
-          passwordValue={password}
-          showHelperText={hasAuthError || hasValidationError}
-          usernameLabel={i18n._(t`Username`)}
-          usernameValue={username}
-        />
-      </LoginPage>
-    );
-  }
+        {formik => (
+          <>
+            <LoginForm
+              className={authError ? 'pf-m-error' : ''}
+              helperText={helperText}
+              isLoginButtonDisabled={isAuthenticating}
+              isValidPassword={!authError}
+              isValidUsername={!authError}
+              loginButtonLabel={i18n._(t`Log In`)}
+              onChangePassword={val => {
+                formik.setFieldValue('password', val);
+                dismissAuthError();
+              }}
+              onChangeUsername={val => {
+                formik.setFieldValue('username', val);
+                dismissAuthError();
+              }}
+              onLoginButtonClick={formik.handleSubmit}
+              passwordLabel={i18n._(t`Password`)}
+              passwordValue={formik.values.password}
+              showHelperText={authError}
+              usernameLabel={i18n._(t`Username`)}
+              usernameValue={formik.values.username}
+            />
+          </>
+        )}
+      </Formik>
+      {loginInfoError && (
+        <AlertModal
+          isOpen={loginInfoError}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissLoginInfoError}
+        >
+          {i18n._(
+            t`Failed to fetch custom login configuration settings.  System defaults will be shown instead.`
+          )}
+          <ErrorDetail error={loginInfoError} />
+        </AlertModal>
+      )}
+    </LoginPage>
+  );
 }
 
-export { AWXLogin as _AWXLogin };
 export default withI18n()(withRouter(AWXLogin));
+export { AWXLogin as _AWXLogin };
