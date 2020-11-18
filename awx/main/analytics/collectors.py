@@ -284,6 +284,7 @@ def _copy_table(table, query, path):
 def events_table(since, full_path, until, **kwargs):
     events_query = '''COPY (SELECT main_jobevent.id, 
                               main_jobevent.created,
+                              main_jobevent.modified,
                               main_jobevent.uuid,
                               main_jobevent.parent_uuid,
                               main_jobevent.event, 
