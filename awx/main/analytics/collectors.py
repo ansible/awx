@@ -289,7 +289,7 @@ def events_table(since, full_path, until, **kwargs):
                               main_jobevent.parent_uuid,
                               main_jobevent.event, 
                               main_jobevent.event_data::json->'task_action' AS task_action,
-                              (CASE WHEN event = 'playbook_on_stats' THEN event_data END),
+                              (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
                               main_jobevent.failed, 
                               main_jobevent.changed, 
                               main_jobevent.playbook, 
