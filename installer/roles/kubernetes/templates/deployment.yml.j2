@@ -575,6 +575,9 @@ metadata:
   name: {{ kubernetes_deployment_name }}-web-svc
   namespace: {{ kubernetes_namespace }}
 spec:
+{% if kubernetes_ingress_hostname is defined %}
+  host: {{ kubernetes_ingress_hostname }}
+{% endif %}
   port:
     targetPort: http
   tls:
