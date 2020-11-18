@@ -288,6 +288,7 @@ def events_table(since, full_path, until, **kwargs):
                               main_jobevent.parent_uuid,
                               main_jobevent.event, 
                               main_jobevent.event_data::json->'task_action' AS task_action,
+                              (CASE WHEN event = 'playbook_on_stats' THEN event_data END),
                               main_jobevent.failed, 
                               main_jobevent.changed, 
                               main_jobevent.playbook, 
@@ -307,25 +308,6 @@ def events_table(since, full_path, until, **kwargs):
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER
                    '''.format(since.isoformat(),until.isoformat())
     return _copy_table(table='events', query=events_query, path=full_path)
-
-
-@register('events_table_playbook_stats', '1.1', format='csv', description=_('playbook on stats records'), expensive=True)
-def events_table_playbook_stats(since, full_path, until, **kwargs):
-    events_query = '''COPY (SELECT main_jobevent.id, 
-                              main_jobevent.created,
-                              main_jobevent.uuid,
-                              main_jobevent.parent_uuid,
-                              main_jobevent.event, 
-                              main_jobevent.failed, 
-                              main_jobevent.changed, 
-                              main_jobevent.playbook, 
-                              main_jobevent.job_id, 
-                              main_jobevent.event_data
-                              FROM main_jobevent 
-                              WHERE (main_jobevent.created > '{}' AND main_jobevent.created <= '{}' AND event='playbook_on_stats')
-                              ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER
-                   '''.format(since.isoformat(),until.isoformat())
-    return _copy_table(table='events_playbook_stats', query=events_query, path=full_path)
 
 
 @register('unified_jobs_table', '1.1', format='csv', description=_('Data on jobs run'), expensive=True)
