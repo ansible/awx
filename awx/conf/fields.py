@@ -14,7 +14,7 @@ from rest_framework.fields import (  # noqa
     BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField,
     IntegerField, ListField, NullBooleanField
 )
-from rest_framework.serializers import PrimaryKeyRelatedField
+from rest_framework.serializers import PrimaryKeyRelatedField  # noqa
 
 logger = logging.getLogger('awx.conf.fields')
 
