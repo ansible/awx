@@ -37,7 +37,7 @@ function ProjectSyncButton({ i18n, children, projectId }) {
           title={i18n._(t`Error!`)}
           onClose={dismissError}
         >
-          {i18n._(t`Failed to sync job.`)}
+          {i18n._(t`Failed to sync project.`)}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
