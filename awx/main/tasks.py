@@ -1563,9 +1563,11 @@ class BaseTask(object):
 
                 res = list(first_future.done)[0].result()
                 if res.status == 'canceled':
+                    receptor_ctl.simple_command(f"work cancel {result['unitid']}")
                     resultsock.shutdown(socket.SHUT_RDWR)
                     resultfile.close()
 
+            receptor_ctl.simple_command(f"work release {result['unitid']}")
             status = res.status
             rc = res.rc
 
