@@ -60,10 +60,6 @@ options:
       description:
         - Path to the playbook to use for the job template within the project provided.
       type: str
-    execution_environment:
-      description:
-        - Execution Environment to use for the JT.
-      type: str
     credential:
       description:
         - Name of the credential to use for the job template.
@@ -78,6 +74,10 @@ options:
       description:
         - Name of the vault credential to use for the job template.
         - Deprecated, use 'credentials'.
+      type: str
+    execution_environment:
+      description:
+        - Execution Environment to use for the JT.
       type: str
     forks:
       description:
@@ -354,6 +354,7 @@ def main():
         vault_credential=dict(default=''),
         custom_virtualenv=dict(),
         credentials=dict(type='list', elements='str'),
+        execution_environment=dict(),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
@@ -420,7 +421,11 @@ def main():
     organization = module.params.get('organization')
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
-        search_fields['organization'] = new_fields['organization'] = organization_id
+        search_fields['organization'] = new_fields['organization'] = organization_id        
+
+    ee = module.params.get('execution_environment')
+    if ee:
+        new_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('job_templates', name_or_id=name, **{'data': search_fields})
