@@ -9,6 +9,9 @@ import os
 # Django
 from django.core.management.base import CommandError
 
+# for license errors
+from rest_framework.exceptions import PermissionDenied
+
 # AWX
 from awx.main.management.commands import inventory_import
 from awx.main.models import Inventory, Host, Group, InventorySource
@@ -322,6 +325,6 @@ def test_tower_version_compare():
             "version": "2.0.1-1068-g09684e2c41"
         }
     }
-    with pytest.raises(CommandError):
+    with pytest.raises(PermissionDenied):
         cmd.remote_tower_license_compare('very_supported')
     cmd.remote_tower_license_compare('open')

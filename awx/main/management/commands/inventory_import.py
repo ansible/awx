@@ -19,6 +19,9 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
 from django.utils.encoding import smart_text
 
+# DRF error class to distinguish license exceptions
+from rest_framework.exceptions import PermissionDenied
+
 # AWX inventory imports
 from awx.main.models.inventory import (
     Inventory,
@@ -839,9 +842,9 @@ class Command(BaseCommand):
         source_vars = self.all_group.variables
         remote_license_type = source_vars.get('tower_metadata', {}).get('license_type', None)
         if remote_license_type is None:
-            raise CommandError('Unexpected Error: Tower inventory plugin missing needed metadata!')
+            raise PermissionDenied('Unexpected Error: Tower inventory plugin missing needed metadata!')
         if local_license_type != remote_license_type:
-            raise CommandError('Tower server licenses must match: source: {} local: {}'.format(
+            raise PermissionDenied('Tower server licenses must match: source: {} local: {}'.format(
                 remote_license_type, local_license_type
             ))
 
@@ -850,7 +853,7 @@ class Command(BaseCommand):
         local_license_type = license_info.get('license_type', 'UNLICENSED')
         if local_license_type == 'UNLICENSED':
             logger.error(LICENSE_NON_EXISTANT_MESSAGE)
-            raise CommandError('No license found!')
+            raise PermissionDenied('No license found!')
         elif local_license_type == 'open':
             return
         available_instances = license_info.get('available_instances', 0)
@@ -861,7 +864,7 @@ class Command(BaseCommand):
         if time_remaining <= 0:
             if hard_error:
                 logger.error(LICENSE_EXPIRED_MESSAGE)
-                raise CommandError("License has expired!")
+                raise PermissionDenied("License has expired!")
             else:
                 logger.warning(LICENSE_EXPIRED_MESSAGE)
         # special check for tower-type inventory sources
@@ -878,7 +881,7 @@ class Command(BaseCommand):
             }
             if hard_error:
                 logger.error(LICENSE_MESSAGE % d)
-                raise CommandError('License count exceeded!')
+                raise PermissionDenied('License count exceeded!')
             else:
                 logger.warning(LICENSE_MESSAGE % d)
 
@@ -893,7 +896,7 @@ class Command(BaseCommand):
 
         active_count = Host.objects.org_active_count(org.id)
         if active_count > org.max_hosts:
-            raise CommandError('Host limit for organization exceeded!')
+            raise PermissionDenied('Host limit for organization exceeded!')
 
     def mark_license_failure(self, save=True):
         self.inventory_update.license_error = True
@@ -958,7 +961,17 @@ class Command(BaseCommand):
             ).load()
 
             logger.debug('Finished loading from source: %s', source)
-            status, tb, exc = self.perform_update(options, data, inventory_update)
+
+            status, tb, exc = 'error', '', None
+            try:
+                self.perform_update(options, data, inventory_update)
+                status = 'successful'
+            except Exception as e:
+                exc = e
+                if isinstance(e, KeyboardInterrupt):
+                    status = 'canceled'
+                else:
+                    tb = traceback.format_exc()
 
             with ignore_inventory_computed_fields():
                 inventory_update = InventoryUpdate.objects.get(pk=inventory_update.pk)
@@ -1017,119 +1030,106 @@ class Command(BaseCommand):
 
             try:
                 self.check_license()
-            except CommandError as e:
+            except PermissionDenied as e:
                 self.mark_license_failure(save=True)
                 raise e
 
             try:
                 # Check the per-org host limits
                 self.check_org_host_limit()
-            except CommandError as e:
+            except PermissionDenied as e:
                 self.mark_org_limits_failure(save=True)
                 raise e
 
-            status, tb, exc = 'error', '', None
-            try:
-                if settings.SQL_DEBUG:
-                    queries_before = len(connection.queries)
+            if settings.SQL_DEBUG:
+                queries_before = len(connection.queries)
 
-                # Update inventory update for this command line invocation.
-                with ignore_inventory_computed_fields():
-                    iu = self.inventory_update
-                    if iu.status != 'running':
-                        with transaction.atomic():
-                            self.inventory_update.status = 'running'
-                            self.inventory_update.save()
+            # Update inventory update for this command line invocation.
+            with ignore_inventory_computed_fields():
+                # TODO: move this to before perform_update
+                iu = self.inventory_update
+                if iu.status != 'running':
+                    with transaction.atomic():
+                        self.inventory_update.status = 'running'
+                        self.inventory_update.save()
 
-                logger.info('Processing JSON output...')
-                inventory = MemInventory(
-                    group_filter_re=self.group_filter_re, host_filter_re=self.host_filter_re)
-                inventory = dict_to_mem_data(data, inventory=inventory)
+            logger.info('Processing JSON output...')
+            inventory = MemInventory(
+                group_filter_re=self.group_filter_re, host_filter_re=self.host_filter_re)
+            inventory = dict_to_mem_data(data, inventory=inventory)
 
-                logger.info('Loaded %d groups, %d hosts', len(inventory.all_group.all_groups),
-                            len(inventory.all_group.all_hosts))
+            logger.info('Loaded %d groups, %d hosts', len(inventory.all_group.all_groups),
+                        len(inventory.all_group.all_hosts))
 
-                if self.exclude_empty_groups:
-                    inventory.delete_empty_groups()
+            if self.exclude_empty_groups:
+                inventory.delete_empty_groups()
 
-                self.all_group = inventory.all_group
+            self.all_group = inventory.all_group
 
-                if settings.DEBUG:
-                    # depending on inventory source, this output can be
-                    # *exceedingly* verbose - crawling a deeply nested
-                    # inventory/group data structure and printing metadata about
-                    # each host and its memberships
-                    #
-                    # it's easy for this scale of data to overwhelm pexpect,
-                    # (and it's likely only useful for purposes of debugging the
-                    # actual inventory import code), so only print it if we have to:
-                    # https://github.com/ansible/ansible-tower/issues/7414#issuecomment-321615104
-                    self.all_group.debug_tree()
+            if settings.DEBUG:
+                # depending on inventory source, this output can be
+                # *exceedingly* verbose - crawling a deeply nested
+                # inventory/group data structure and printing metadata about
+                # each host and its memberships
+                #
+                # it's easy for this scale of data to overwhelm pexpect,
+                # (and it's likely only useful for purposes of debugging the
+                # actual inventory import code), so only print it if we have to:
+                # https://github.com/ansible/ansible-tower/issues/7414#issuecomment-321615104
+                self.all_group.debug_tree()
 
-                with batch_role_ancestor_rebuilding():
-                    # If using with transaction.atomic() with try ... catch,
-                    # with transaction.atomic() must be inside the try section of the code as per Django docs
-                    try:
-                        # Ensure that this is managed as an atomic SQL transaction,
-                        # and thus properly rolled back if there is an issue.
-                        with transaction.atomic():
-                            # Merge/overwrite inventory into database.
-                            if settings.SQL_DEBUG:
-                                logger.warning('loading into database...')
-                            with ignore_inventory_computed_fields():
-                                if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
+            with batch_role_ancestor_rebuilding():
+                # If using with transaction.atomic() with try ... catch,
+                # with transaction.atomic() must be inside the try section of the code as per Django docs
+                try:
+                    # Ensure that this is managed as an atomic SQL transaction,
+                    # and thus properly rolled back if there is an issue.
+                    with transaction.atomic():
+                        # Merge/overwrite inventory into database.
+                        if settings.SQL_DEBUG:
+                            logger.warning('loading into database...')
+                        with ignore_inventory_computed_fields():
+                            if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
+                                self.load_into_database()
+                            else:
+                                with disable_activity_stream():
                                     self.load_into_database()
-                                else:
-                                    with disable_activity_stream():
-                                        self.load_into_database()
-                                if settings.SQL_DEBUG:
-                                    queries_before2 = len(connection.queries)
-                                self.inventory.update_computed_fields()
                             if settings.SQL_DEBUG:
-                                logger.warning('update computed fields took %d queries',
-                                               len(connection.queries) - queries_before2)
+                                queries_before2 = len(connection.queries)
+                            self.inventory.update_computed_fields()
+                        if settings.SQL_DEBUG:
+                            logger.warning('update computed fields took %d queries',
+                                           len(connection.queries) - queries_before2)
 
-                            # Check if the license is valid.
-                            # If the license is not valid, a CommandError will be thrown,
-                            # and inventory update will be marked as invalid.
-                            # with transaction.atomic() will roll back the changes.
-                            license_fail = True
-                            self.check_license()
+                        # Check if the license is valid.
+                        # If the license is not valid, a CommandError will be thrown,
+                        # and inventory update will be marked as invalid.
+                        # with transaction.atomic() will roll back the changes.
+                        license_fail = True
+                        self.check_license()
 
-                            # Check the per-org host limits
-                            license_fail = False
-                            self.check_org_host_limit()
-                    except CommandError as e:
-                        if license_fail:
-                            self.mark_license_failure(save=True)
-                        else:
-                            self.mark_org_limits_failure(save=True)
-                        raise e
-
-                    if settings.SQL_DEBUG:
-                        logger.warning('Inventory import completed for %s in %0.1fs',
-                                       self.inventory_source.name, time.time() - begin)
+                        # Check the per-org host limits
+                        license_fail = False
+                        self.check_org_host_limit()
+                except PermissionDenied as e:
+                    if license_fail:
+                        self.mark_license_failure(save=True)
                     else:
-                        logger.info('Inventory import completed for %s in %0.1fs',
-                                    self.inventory_source.name, time.time() - begin)
-                    status = 'successful'
+                        self.mark_org_limits_failure(save=True)
+                    raise e
 
-                # If we're in debug mode, then log the queries and time
-                # used to do the operation.
                 if settings.SQL_DEBUG:
-                    queries_this_import = connection.queries[queries_before:]
-                    sqltime = sum(float(x['time']) for x in queries_this_import)
-                    logger.warning('Inventory import required %d queries '
-                                   'taking %0.3fs', len(queries_this_import),
-                                   sqltime)
-            except Exception as e:
-                if isinstance(e, KeyboardInterrupt):
-                    status = 'canceled'
-                    exc = e
-                elif isinstance(e, CommandError):
-                    exc = e
+                    logger.warning('Inventory import completed for %s in %0.1fs',
+                                   self.inventory_source.name, time.time() - begin)
                 else:
-                    tb = traceback.format_exc()
-                    exc = e
+                    logger.info('Inventory import completed for %s in %0.1fs',
+                                self.inventory_source.name, time.time() - begin)
 
-        return status, tb, exc
+            # If we're in debug mode, then log the queries and time
+            # used to do the operation.
+            if settings.SQL_DEBUG:
+                queries_this_import = connection.queries[queries_before:]
+                sqltime = sum(float(x['time']) for x in queries_this_import)
+                logger.warning('Inventory import required %d queries '
+                               'taking %0.3fs', len(queries_this_import),
+                               sqltime)

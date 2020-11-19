@@ -63,7 +63,7 @@ from awx.main.models import (
     build_safe_env, enforce_bigint_pk_migration
 )
 from awx.main.constants import ACTIVE_STATES
-from awx.main.exceptions import AwxTaskError
+from awx.main.exceptions import AwxTaskError, PostRunError
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.isolated import manager as isolated_manager
 from awx.main.dispatch.publish import task
@@ -1229,14 +1229,7 @@ class BaseTask(object):
         # ansible-inventory and the awx.main.commands.inventory_import
         # logger
         if isinstance(self, RunInventoryUpdate):
-            if not getattr(self, 'end_line', None):
-                # this is the very first event
-                # note the end_line
-                self.end_line = event_data['end_line']
-            else:
-                num_lines = event_data['end_line'] - event_data['start_line']
-                event_data['start_line'] = self.end_line + 1
-                self.end_line = event_data['end_line'] = event_data['start_line'] + num_lines
+            self.end_line = event_data['end_line']
 
         if event_data.get(self.event_data_key, None):
             if self.event_data_key != 'job_id':
@@ -1534,6 +1527,12 @@ class BaseTask(object):
 
         try:
             self.post_run_hook(self.instance, status)
+        except PostRunError as exc:
+            if status == 'successful':
+                status = exc.status
+                extra_update_fields['job_explanation'] = exc.args[0]
+                if exc.tb:
+                    extra_update_fields['result_traceback'] = exc.tb
         except Exception:
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
@@ -2744,27 +2743,28 @@ class RunInventoryUpdate(BaseTask):
         # Mock ansible-runner events
         class CallbackHandler(logging.Handler):
             def __init__(self, event_handler, cancel_callback, job_timeout, verbosity,
-                         counter=0, **kwargs):
+                         start_time=None, counter=0, initial_line=0, **kwargs):
                 self.event_handler = event_handler
                 self.cancel_callback = cancel_callback
                 self.job_timeout = job_timeout
-                self.job_start = time.time()
+                if start_time is None:
+                    self.job_start = now()
+                else:
+                    self.job_start = start_time
                 self.last_check = self.job_start
-                # TODO: we do not have events from the ansible-inventory process
-                # so there is no way to know initial counter of start line
                 self.counter = counter
                 self.skip_level = [logging.WARNING, logging.INFO, logging.DEBUG, 0][verbosity]
-                self._start_line = 0
+                self._start_line = initial_line
                 super(CallbackHandler, self).__init__(**kwargs)
 
             def emit(self, record):
-                this_time = time.time()
-                if this_time - self.last_check > 0.5:
+                this_time = now()
+                if (this_time - self.last_check).total_seconds() > 0.5:
                     self.last_check = this_time
                     if self.cancel_callback():
-                        raise RuntimeError('Inventory update has been canceled')
-                if self.job_timeout and ((this_time - self.job_start) > self.job_timeout):
-                    raise RuntimeError('Inventory update has timed out')
+                        raise PostRunError('Inventory update has been canceled', status='canceled')
+                if self.job_timeout and ((this_time - self.job_start).total_seconds() > self.job_timeout):
+                    raise PostRunError('Inventory update has timed out', status='canceled')
 
                 # skip logging for low severity logs
                 if record.levelno < self.skip_level:
@@ -2772,16 +2772,16 @@ class RunInventoryUpdate(BaseTask):
 
                 self.counter += 1
                 msg = self.format(record)
-                n_lines = msg.strip().count('\n')  # don't count new-lines at boundry of text
+                n_lines = len(msg.strip().split('\n'))  # don't count new-lines at boundry of text
                 dispatch_data = dict(
                     created=now().isoformat(),
                     event='verbose',
                     counter=self.counter,
-                    stdout=msg + '\n',
+                    stdout=msg,
                     start_line=self._start_line,
                     end_line=self._start_line + n_lines
                 )
-                self._start_line += n_lines + 1
+                self._start_line += n_lines
 
                 self.event_handler(dispatch_data)
 
@@ -2789,7 +2789,8 @@ class RunInventoryUpdate(BaseTask):
             self.event_handler, self.cancel_callback,
             verbosity=inventory_update.verbosity,
             job_timeout=self.get_instance_timeout(self.instance),
-            counter=self.event_ct
+            start_time=inventory_update.started,
+            counter=self.event_ct, initial_line=self.end_line
         )
         inv_logger = logging.getLogger('awx.main.commands.inventory_import')
         handler.formatter = inv_logger.handlers[0].formatter
@@ -2797,36 +2798,19 @@ class RunInventoryUpdate(BaseTask):
 
         from awx.main.management.commands.inventory_import import Command as InventoryImportCommand
         cmd = InventoryImportCommand()
-        exc = None
         try:
-            # note that we are only using the management command to
-            # save the inventory data to the database.
-            # we are not asking it to actually fetch hosts / groups.
-            # that work was taken care of earlier, when
-            # BaseTask.run called ansible-inventory (by way of ansible-runner)
-            # for us.
-            save_status, tb, exc = cmd.perform_update(options, data, inventory_update)
-        except Exception as raw_exc:
-            if exc is None:
-                exc = raw_exc
-            # Ignore license errors specifically
-            if 'Host limit for organization' not in str(exc) and 'License' not in str(exc):
-                raise raw_exc
-
-        model_updates = {}
-        if save_status != status:
-            model_updates['status'] = save_status
-        if tb:
-            model_updates['result_traceback'] = tb
-
-        if model_updates:
-            logger.info('{} had problems saving to database with {}'.format(
-                inventory_update.log_format, ', '.join(list(model_updates.keys()))
-            ))
-            model_updates['job_explanation'] = 'Update failed to save all changes to database properly.'
-            if exc:
-                model_updates['job_explanation'] += ' {}'.format(exc)
-            self.update_model(inventory_update.pk, **model_updates)
+            # save the inventory data to database.
+            # canceling exceptions will be handled in the global post_run_hook
+            cmd.perform_update(options, data, inventory_update)
+        except PermissionDenied as exc:
+            logger.exception('License error saving {} content'.format(inventory_update.log_format))
+            raise PostRunError(str(exc), status='error')
+        except Exception:
+            logger.exception('Exception saving {} content, rolling back changes.'.format(
+                inventory_update.log_format))
+            raise PostRunError(
+                'Error occured while saving inventory data, see traceback or server logs',
+                status='error', tb=traceback.format_exc())
 
 
 @task(queue=get_local_queuename)
