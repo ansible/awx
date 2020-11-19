@@ -175,6 +175,7 @@ def main():
         description=dict(),
         extra_vars=dict(type='dict'),
         organization=dict(),
+        execution_environment=dict(),
         survey_spec=dict(type='dict', aliases=['survey']),
         survey_enabled=dict(type='bool'),
         allow_simultaneous=dict(type='bool'),
@@ -211,6 +212,10 @@ def main():
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
         search_fields['organization'] = new_fields['organization'] = organization_id
+
+    ee = module.params.get('execution_environment')
+    if ee:
+        new_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})

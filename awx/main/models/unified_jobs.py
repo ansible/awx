@@ -353,7 +353,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             if self.inventory.organization.default_environment is not None:
                 return self.inventory.organization.default_environment
         if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
-           return settings.DEFAULT_EXECUTION_ENVIRONMENT
+            return settings.DEFAULT_EXECUTION_ENVIRONMENT
         return ExecutionEnvironment.objects.filter(organization=None, managed_by_tower=True).first()
 
     def create_unified_job(self, **kwargs):
