@@ -7,6 +7,10 @@ import ProjectLookup from './ProjectLookup';
 jest.mock('../../api');
 
 describe('<ProjectLookup />', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('should auto-select project when only one available and autoPopulate prop is true', async () => {
     ProjectsAPI.read.mockReturnValue({
       data: {
@@ -47,5 +51,47 @@ describe('<ProjectLookup />', () => {
       mountWithContexts(<ProjectLookup autoPopulate onChange={onChange} />);
     });
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  test('project lookup should be enabled', async () => {
+    let wrapper;
+
+    ProjectsAPI.readOptions.mockReturnValue({
+      data: {
+        actions: {
+          GET: {},
+        },
+        related_search_fields: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectLookup isOverrideDisabled onChange={() => {}} />
+      );
+    });
+    wrapper.update();
+    expect(ProjectsAPI.read).toHaveBeenCalledTimes(1);
+    expect(wrapper.find('ProjectLookup')).toHaveLength(1);
+    expect(wrapper.find('Lookup').prop('isDisabled')).toBe(false);
+  });
+
+  test('project lookup should be disabled', async () => {
+    let wrapper;
+
+    ProjectsAPI.readOptions.mockReturnValue({
+      data: {
+        actions: {
+          GET: {},
+        },
+        related_search_fields: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectLookup onChange={() => {}} />);
+    });
+    wrapper.update();
+    expect(ProjectsAPI.read).toHaveBeenCalledTimes(1);
+    expect(wrapper.find('ProjectLookup')).toHaveLength(1);
+    expect(wrapper.find('Lookup').prop('isDisabled')).toBe(true);
   });
 });
