@@ -40,7 +40,6 @@ from awx.main.dispatch import get_local_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
-from awx.main.models.execution_environments import ExecutionEnvironment
 from awx.main.utils import (
     camelcase_to_underscore, get_model_for_type,
     encrypt_dict, decrypt_field, _inventory_updates,
@@ -338,23 +337,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         # NOTE: Derived classes should implement
         from awx.main.models.notifications import NotificationTemplate
         return NotificationTemplate.objects.none()
-
-    def resolve_execution_environment(self):
-        """
-        Return the execution environment that should be used when creating a new job.
-        """
-        if self.execution_environment is not None:
-            return self.execution_environment
-        if getattr(self, 'project_id', None) and self.project.default_environment is not None:
-            return self.project.default_environment
-        if getattr(self, 'organization', None) and self.organization.default_environment is not None:
-            return self.organization.default_environment
-        if getattr(self, 'inventory', None) and self.inventory.organization is not None:
-            if self.inventory.organization.default_environment is not None:
-                return self.inventory.organization.default_environment
-        if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
-            return settings.DEFAULT_EXECUTION_ENVIRONMENT
-        return ExecutionEnvironment.objects.filter(organization=None, managed_by_tower=True).first()
 
     def create_unified_job(self, **kwargs):
         '''
