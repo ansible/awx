@@ -3,16 +3,18 @@ import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
+import { Thead, Tr, Th } from '@patternfly/react-table';
 
 import { OrganizationsAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import PaginatedTable from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import OrganizationListItem from './OrganizationListItem';
 
@@ -117,7 +119,7 @@ function OrganizationsList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={organizations}
@@ -152,12 +154,27 @@ function OrganizationsList({ i18n }) {
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            headerRow={
+              <Thead>
+                <Tr>
+                  <Th
+                    select={{
+                      onSelect: handleSelectAll,
+                      isSelected: isAllSelected,
+                    }}
+                  />
+                  <Th>{i18n._(t`Name`)}</Th>
+                  <Th>{i18n._(t`Members`)}</Th>
+                  <Th>{i18n._(t`Teams`)}</Th>
+                </Tr>
+              </Thead>
+            }
             renderToolbar={props => (
               <DataListToolbar
                 {...props}
-                showSelectAll
-                isAllSelected={isAllSelected}
-                onSelectAll={handleSelectAll}
+                // showSelectAll
+                // isAllSelected={isAllSelected}
+                // onSelectAll={handleSelectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd
@@ -172,10 +189,11 @@ function OrganizationsList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={o => (
+            renderRow={(o, index) => (
               <OrganizationListItem
                 key={o.id}
                 organization={o}
+                rowIndex={index}
                 detailUrl={`${match.url}/${o.id}`}
                 isSelected={selected.some(row => row.id === o.id)}
                 onSelect={() => handleSelect(o)}
