@@ -9,9 +9,19 @@ import styled from 'styled-components';
 const PopoverButton = styled.button`
   padding: var(--pf-global--spacer--xs);
   margin: -(var(--pf-global--spacer--xs));
+  font-size: var(--pf-global--FontSize--sm);
 `;
 
-function Popover({ i18n, ariaLabel, content, header, id, maxWidth, ...rest }) {
+function Popover({
+  i18n,
+  i18nHash,
+  ariaLabel,
+  content,
+  header,
+  id,
+  maxWidth,
+  ...rest
+}) {
   if (!content) {
     return null;
   }

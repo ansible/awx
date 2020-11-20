@@ -4,11 +4,14 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
+import { useConfig } from '../../../contexts/Config';
 import MiscSystemDetail from './MiscSystemDetail';
 import MiscSystemEdit from './MiscSystemEdit';
 
 function MiscSystem({ i18n }) {
   const baseURL = '/settings/miscellaneous_system';
+  const { me } = useConfig();
+
   return (
     <PageSection>
       <Card>
@@ -18,7 +21,11 @@ function MiscSystem({ i18n }) {
             <MiscSystemDetail />
           </Route>
           <Route path={`${baseURL}/edit`}>
-            <MiscSystemEdit />
+            {me?.is_superuser ? (
+              <MiscSystemEdit />
+            ) : (
+              <Redirect to={`${baseURL}/details`} />
+            )}
           </Route>
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>

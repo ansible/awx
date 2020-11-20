@@ -13,7 +13,7 @@ import useRequest from '../../../../util/useRequest';
 import { DetailList } from '../../../../components/DetailList';
 import { useConfig } from '../../../../contexts/Config';
 import { useSettings } from '../../../../contexts/Settings';
-import SettingDetail from '../../shared';
+import { SettingDetail } from '../../shared';
 
 function GoogleOAuth2Detail({ i18n }) {
   const { me } = useConfig();

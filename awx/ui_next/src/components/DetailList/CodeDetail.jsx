@@ -1,6 +1,14 @@
 import 'styled-components/macro';
 import React from 'react';
-import { shape, node, number, oneOf, string } from 'prop-types';
+import {
+  arrayOf,
+  oneOf,
+  oneOfType,
+  node,
+  number,
+  shape,
+  string,
+} from 'prop-types';
 import { TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from './Detail';
 import CodeMirrorInput from '../CodeMirrorInput';
@@ -57,12 +65,12 @@ function CodeDetail({
   );
 }
 CodeDetail.propTypes = {
-  value: shape.isRequired,
+  value: oneOfType([shape({}), arrayOf(string), string]).isRequired,
   label: node.isRequired,
   dataCy: string,
   helpText: string,
   rows: number,
-  mode: oneOf(['json', 'yaml', 'jinja2']).isRequired,
+  mode: oneOf(['javascript', 'yaml', 'jinja2']).isRequired,
 };
 CodeDetail.defaultProps = {
   rows: null,

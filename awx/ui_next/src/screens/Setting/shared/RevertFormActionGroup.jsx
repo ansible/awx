@@ -3,9 +3,15 @@ import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { ActionGroup, Button } from '@patternfly/react-core';
-import { FormFullWidthLayout } from '../FormLayout';
+import { FormFullWidthLayout } from '../../../components/FormLayout';
 
-const FormActionGroup = ({ onCancel, onSubmit, submitDisabled, i18n }) => {
+const RevertFormActionGroup = ({
+  children,
+  onCancel,
+  onRevert,
+  onSubmit,
+  i18n,
+}) => {
   return (
     <FormFullWidthLayout>
       <ActionGroup>
@@ -14,10 +20,18 @@ const FormActionGroup = ({ onCancel, onSubmit, submitDisabled, i18n }) => {
           variant="primary"
           type="button"
           onClick={onSubmit}
-          isDisabled={submitDisabled}
         >
           {i18n._(t`Save`)}
         </Button>
+        <Button
+          aria-label={i18n._(t`Revert all to default`)}
+          variant="secondary"
+          type="button"
+          onClick={onRevert}
+        >
+          {i18n._(t`Revert all to default`)}
+        </Button>
+        {children}
         <Button
           aria-label={i18n._(t`Cancel`)}
           variant="secondary"
@@ -31,14 +45,10 @@ const FormActionGroup = ({ onCancel, onSubmit, submitDisabled, i18n }) => {
   );
 };
 
-FormActionGroup.propTypes = {
+RevertFormActionGroup.propTypes = {
   onCancel: PropTypes.func.isRequired,
+  onRevert: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  submitDisabled: PropTypes.bool,
 };
 
-FormActionGroup.defaultProps = {
-  submitDisabled: false,
-};
-
-export default withI18n()(FormActionGroup);
+export default withI18n()(RevertFormActionGroup);
