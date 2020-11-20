@@ -885,14 +885,7 @@ class BaseTask(object):
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
     def build_execution_environment_params(self, instance):
-        if getattr(instance, 'execution_environment', None):
-            # TODO: process heirarchy, JT-project-org, maybe here
-            # or maybe in create_unified_job
-            logger.info('using custom image {}'.format(instance.execution_environment.image))
-            image = instance.execution_environment.image
-        else:
-            logger.info('using default image')
-            image = settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE
+        image = instance.execution_environment.image
         params = {
             "container_image": image,
             "process_isolation": True
