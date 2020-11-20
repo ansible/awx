@@ -198,8 +198,8 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     def copy(self):
         data = {}
         for field in ('job_type', 'inventory_id', 'limit', 'credential_id',
-                      'module_name', 'module_args', 'forks', 'verbosity',
-                      'extra_vars', 'become_enabled', 'diff_mode'):
+                      'execution_environment_id', 'module_name', 'module_args',
+                      'forks', 'verbosity', 'extra_vars', 'become_enabled', 'diff_mode'):
             data[field] = getattr(self, field)
         return AdHocCommand.objects.create(**data)
 
