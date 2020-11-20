@@ -58,12 +58,15 @@ DATABASES = {
     }
 }
 
+# TODO: remove this setting in favor of a default execution environment
 AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE = 'quay.io/shanemcd/ee'
 
 AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
 AWX_CONTAINER_GROUP_POD_LAUNCH_RETRIES = 100
 AWX_CONTAINER_GROUP_POD_LAUNCH_RETRY_DELAY = 5
 AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = 'default'
+
+# TODO: remove this setting in favor of a default execution environment
 AWX_CONTAINER_GROUP_DEFAULT_IMAGE = AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE
 
 # Internationalization
