@@ -60,7 +60,9 @@ describe('<SmartInventoryForm />', () => {
       expect(wrapper.find('FormGroup[label="Name"]')).toHaveLength(1);
       expect(wrapper.find('FormGroup[label="Description"]')).toHaveLength(1);
       expect(wrapper.find('FormGroup[label="Organization"]')).toHaveLength(1);
-      expect(wrapper.find('FormGroup[label="Host filter"]')).toHaveLength(1);
+      expect(wrapper.find('FormGroup[label="Smart host filter"]')).toHaveLength(
+        1
+      );
       expect(wrapper.find('FormGroup[label="Instance Groups"]')).toHaveLength(
         1
       );
