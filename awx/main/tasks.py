@@ -885,6 +885,9 @@ class BaseTask(object):
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
     def build_execution_environment_params(self, instance):
+        if instance.execution_environment_id is None:
+            self.update_model(instance.pk, execution_environment=instance.resolve_execution_environment())
+
         image = instance.execution_environment.image
         params = {
             "container_image": image,
