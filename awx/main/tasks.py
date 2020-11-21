@@ -1523,10 +1523,12 @@ class BaseTask(object):
             receptor_ctl = ReceptorControl('/var/run/receptor/receptor.sock')
             result = receptor_ctl.submit_work(worktype=worktype,
                                               payload=sockout.makefile('rb'))
+            unit_id = result['unitid']
+
             sockin.close()
             sockout.close()
 
-            resultsock, resultfile = receptor_ctl.get_work_results(result['unitid'],
+            resultsock, resultfile = receptor_ctl.get_work_results(unit_id,
                                                                    return_socket=True,
                                                                    return_sockfile=True)
 
@@ -1541,7 +1543,7 @@ class BaseTask(object):
             def cancel_watcher(processor_future):
                 while True:
                     if processor_future.done():
-                        return
+                        return processor_future.result()
 
                     if self.cancel_callback():
                         result = namedtuple('result', ['status', 'rc'])
@@ -1563,11 +1565,15 @@ class BaseTask(object):
 
                 res = list(first_future.done)[0].result()
                 if res.status == 'canceled':
-                    receptor_ctl.simple_command(f"work cancel {result['unitid']}")
+                    receptor_ctl.simple_command(f"work cancel {unit_id}")
                     resultsock.shutdown(socket.SHUT_RDWR)
                     resultfile.close()
+                elif res.status == 'error':
+                    # TODO: There should be a more efficient way of getting this information
+                    receptor_work_list = receptor_ctl.simple_command("work list")
+                    raise RuntimeError(receptor_work_list[unit_id]['Detail'])
 
-            receptor_ctl.simple_command(f"work release {result['unitid']}")
+            receptor_ctl.simple_command(f"work release {unit_id}")
             status = res.status
             rc = res.rc
 
