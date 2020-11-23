@@ -240,7 +240,6 @@ function JobDetail({ job, i18n }) {
           )}
         {credential && (
           <Detail
-            fullWidth
             label={i18n._(t`Machine Credential`)}
             value={
               <ChipGroup numChips={5} totalChips={1}>
