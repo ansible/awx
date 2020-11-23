@@ -76,8 +76,8 @@ function ApplicationTokenList({ i18n }) {
     deleteItems: handleDeleteApplications,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      await Promise.all(
+    useCallback(() => {
+      return Promise.all(
         selected.map(({ id: tokenId }) => TokensAPI.destroy(tokenId))
       );
     }, [selected]),

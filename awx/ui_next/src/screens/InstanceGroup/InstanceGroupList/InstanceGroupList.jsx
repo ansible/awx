@@ -102,8 +102,8 @@ function InstanceGroupList({ i18n }) {
     deleteItems: deleteInstanceGroups,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      await Promise.all(
+    useCallback(() => {
+      return Promise.all(
         selected.map(({ id }) => InstanceGroupsAPI.destroy(id))
       );
     }, [selected]),

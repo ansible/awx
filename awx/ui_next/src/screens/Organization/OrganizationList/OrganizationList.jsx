@@ -81,7 +81,7 @@ function OrganizationsList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(({ id }) => OrganizationsAPI.destroy(id))
       );

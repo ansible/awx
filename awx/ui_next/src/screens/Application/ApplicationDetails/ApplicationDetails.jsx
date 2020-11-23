@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 
-import { useDeleteItems } from '../../../util/useRequest';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import { Detail, DetailList } from '../../../components/DetailList';
@@ -21,15 +21,16 @@ function ApplicationDetails({
   const history = useHistory();
   const {
     isLoading: deleteLoading,
-    deletionError,
-    deleteItems: handleDeleteApplications,
-    clearDeletionError,
-  } = useDeleteItems(
+    error: deletionError,
+    request: deleteApplications,
+  } = useRequest(
     useCallback(async () => {
       await ApplicationsAPI.destroy(application.id);
       history.push('/applications');
     }, [application.id, history])
   );
+
+  const { error, dismissError } = useDismissableError(deletionError);
 
   const getAuthorizationGrantType = type => {
     let value;
@@ -104,22 +105,22 @@ function ApplicationDetails({
             <DeleteButton
               name={application.name}
               modalTitle={i18n._(t`Delete application`)}
-              onConfirm={handleDeleteApplications}
+              onConfirm={deleteApplications}
               isDisabled={deleteLoading}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>
           )}
       </CardActionsRow>
-      {deletionError && (
+      {error && (
         <AlertModal
-          isOpen={deletionError}
+          isOpen={error}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={clearDeletionError}
+          onClose={dismissError}
         >
           {i18n._(t`Failed to delete application.`)}
-          <ErrorDetail error={deletionError} />
+          <ErrorDetail error={error} />
         </AlertModal>
       )}
     </CardBody>
