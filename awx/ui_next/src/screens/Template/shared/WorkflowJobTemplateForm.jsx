@@ -126,7 +126,6 @@ function WorkflowJobTemplateForm({
             onChange={value => {
               inventoryHelpers.setValue(value);
             }}
-            required={!askInventoryOnLaunchField.value}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
           />
