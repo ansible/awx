@@ -55,6 +55,11 @@ describe('<Login />', () => {
         custom_logo: 'images/foo.jpg',
       },
     });
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
   });
 
   afterEach(() => {

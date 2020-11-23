@@ -5,7 +5,6 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { LoginForm, LoginPage as PFLoginPage } from '@patternfly/react-core';
 import { RootAPI } from '../../api';
-import { BrandName } from '../../variables';
 
 const loginLogoSrc = '/static/media/logo-login.svg';
 
@@ -28,6 +27,7 @@ class AWXLogin extends Component {
       isLoading: true,
       logo: null,
       loginInfo: null,
+      brandName: null,
     };
 
     this.handleChangeUsername = this.handleChangeUsername.bind(this);
@@ -43,16 +43,24 @@ class AWXLogin extends Component {
   async loadCustomLoginInfo() {
     this.setState({ isLoading: true });
     try {
-      const {
-        data: { custom_logo, custom_login_info },
-      } = await RootAPI.read();
+      const [
+        {
+          data: { custom_logo, custom_login_info },
+        },
+        {
+          data: { BRAND_NAME },
+        },
+      ] = await Promise.all([RootAPI.read(), RootAPI.readAssetVariables()]);
       const logo = custom_logo
         ? `data:image/jpeg;${custom_logo}`
         : loginLogoSrc;
-
-      this.setState({ logo, loginInfo: custom_login_info });
+      this.setState({
+        brandName: BRAND_NAME,
+        logo,
+        loginInfo: custom_login_info,
+      });
     } catch (err) {
-      this.setState({ logo: loginLogoSrc });
+      this.setState({ brandName: 'AWX', logo: loginLogoSrc });
     } finally {
       this.setState({ isLoading: false });
     }
@@ -93,6 +101,7 @@ class AWXLogin extends Component {
 
   render() {
     const {
+      brandName,
       hasAuthError,
       hasValidationError,
       username,
@@ -102,10 +111,6 @@ class AWXLogin extends Component {
       loginInfo,
     } = this.state;
     const { alt, i18n, isAuthenticated } = this.props;
-    // Setting BrandName to a variable here is necessary to get the jest tests
-    // passing.  Attempting to use BrandName in the template literal results
-    // in failing tests.
-    const brandName = BrandName;
 
     if (isLoading) {
       return null;
@@ -126,7 +131,11 @@ class AWXLogin extends Component {
       <LoginPage
         brandImgSrc={logo}
         brandImgAlt={alt || brandName}
-        loginTitle={i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)}
+        loginTitle={
+          brandName
+            ? i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)
+            : ''
+        }
         textContent={loginInfo}
       >
         <LoginForm
