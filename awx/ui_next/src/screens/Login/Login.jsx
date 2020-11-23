@@ -7,7 +7,7 @@ import { LoginForm, LoginPage as PFLoginPage } from '@patternfly/react-core';
 import { RootAPI } from '../../api';
 import { BrandName } from '../../variables';
 
-import brandLogo from './brand-logo.svg';
+const loginLogoSrc = '/static/media/logo-login.svg';
 
 const LoginPage = styled(PFLoginPage)`
   & .pf-c-brand {
@@ -46,11 +46,13 @@ class AWXLogin extends Component {
       const {
         data: { custom_logo, custom_login_info },
       } = await RootAPI.read();
-      const logo = custom_logo ? `data:image/jpeg;${custom_logo}` : brandLogo;
+      const logo = custom_logo
+        ? `data:image/jpeg;${custom_logo}`
+        : loginLogoSrc;
 
       this.setState({ logo, loginInfo: custom_login_info });
     } catch (err) {
-      this.setState({ logo: brandLogo });
+      this.setState({ logo: loginLogoSrc });
     } finally {
       this.setState({ isLoading: false });
     }

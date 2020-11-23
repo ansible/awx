@@ -98,7 +98,8 @@ describe('<Login />', () => {
     );
     const { loginHeaderLogo } = await findChildren(loginWrapper);
     const { alt, src } = loginHeaderLogo.props();
-    expect([alt, src]).toEqual(['AWX', 'brand-logo.svg']);
+    expect(alt).toEqual('AWX');
+    expect(src).toContain('logo-login.svg');
     done();
   });
 
@@ -109,7 +110,8 @@ describe('<Login />', () => {
     );
     const { loginHeaderLogo } = await findChildren(loginWrapper);
     const { alt, src } = loginHeaderLogo.props();
-    expect([alt, src]).toEqual(['AWX', 'brand-logo.svg']);
+    expect(alt).toEqual('AWX');
+    expect(src).toContain('logo-login.svg');
     done();
   });
 
