@@ -2150,10 +2150,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             return cred
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
-        inventory_update.source_vars = {
-            'include_powerstate': 'yes',
-            'group_by_resource_group': 'no'
-        }
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
@@ -2187,11 +2183,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             return cred
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
-        inventory_update.source_vars = {
-            'include_powerstate': 'yes',
-            'group_by_resource_group': 'no',
-            'group_by_security_group': 'no'
-        }
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
@@ -2306,21 +2297,14 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        inventory_update.source_vars = {
-            'satellite6_group_patterns': '[a,b,c]',
-            'satellite6_group_prefix': 'hey_',
-            'satellite6_want_hostcollections': True,
-            'satellite6_want_ansible_ssh_host': True,
-            'satellite6_rich_params': True,
-            'satellite6_want_facts': False
-        }
-
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        safe_env = build_safe_env(env)
 
-        env["FOREMAN_SERVER"] == "https://example.org",
-        env["FOREMAN_USER"] == "bob",
-        env["FOREMAN_PASSWORD"] == "secret",
+        assert env["FOREMAN_SERVER"] == "https://example.org"
+        assert env["FOREMAN_USER"] == "bob"
+        assert env["FOREMAN_PASSWORD"] == "secret"
+        assert safe_env["FOREMAN_PASSWORD"] == tasks.HIDDEN_PASSWORD
 
     @pytest.mark.parametrize('verify', [True, False])
     def test_tower_source(self, verify, inventory_update, private_data_dir, mocker):
