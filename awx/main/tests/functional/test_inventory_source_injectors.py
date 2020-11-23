@@ -200,15 +200,13 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
     inventory_update = inventory_source.create_unified_job()
     task = RunInventoryUpdate()
 
-    def substitute_run(envvars=None, **_kw):
+    def substitute_run(awx_receptor_job):
         """This method will replace run_pexpect
         instead of running, it will read the private data directory contents
         It will make assertions that the contents are correct
         If MAKE_INVENTORY_REFERENCE_FILES is set, it will produce reference files
         """
-        if _kw.get('streamer') != 'transmit':
-            Res = namedtuple('Result', ['status', 'rc'])
-            return Res('successful', 0)
+        envvars = awx_receptor_job.runner_params['envvars']
 
         private_data_dir = envvars.pop('AWX_PRIVATE_DATA_DIR')
         assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == 'auto'
@@ -260,6 +258,6 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
         # Also do not send websocket status updates
         with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
             # The point of this test is that we replace run with assertions
-            with mock.patch('awx.main.tasks.ansible_runner.interface.run', substitute_run):
+            with mock.patch('awx.main.tasks.AWXReceptorJob.run', substitute_run):
                 # so this sets up everything for a run and then yields control over to substitute_run
                 task.run(inventory_update.pk)
