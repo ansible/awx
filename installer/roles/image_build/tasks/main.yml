@@ -14,8 +14,8 @@
 
 - name: Copy logos for inclusion in sdist
   copy:
-    src: "../../awx-logos/awx/ui/client/assets"
-    dest: "../awx/ui/client/"
+    src: "../../awx-logos/awx/ui/client/assets/"
+    dest: "../awx/ui_next/public/static/media/"
   delegate_to: localhost
   when: awx_official|default(false)|bool
 
