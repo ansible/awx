@@ -1988,7 +1988,7 @@ class RunJob(BaseTask):
             return
         if job.use_fact_cache:
             job.finish_job_fact_cache(
-                os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
+                os.path.join(private_data_dir, 'artifacts', 'fact_cache'),
                 fact_modification_times,
             )
         if isolated_manager_instance and not job.is_containerized:
@@ -3195,7 +3195,8 @@ class AWXReceptorJob:
                                             _input=resultfile,
                                             event_handler=self.task.event_handler,
                                             finished_callback=self.task.finished_callback,
-                                            status_handler=self.task.status_handler)
+                                            status_handler=self.task.status_handler,
+                                            **self.runner_params)
 
     def cancel_watcher(self, processor_future):
         while True:
