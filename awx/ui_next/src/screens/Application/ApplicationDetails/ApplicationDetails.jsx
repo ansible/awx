@@ -80,6 +80,7 @@ function ApplicationDetails({
             application.authorization_grant_type
           )}
         />
+        <Detail label={i18n._(t`Client ID`)} value={application.client_id} />
         <Detail
           label={i18n._(t`Redirect uris`)}
           value={application.redirect_uris}
