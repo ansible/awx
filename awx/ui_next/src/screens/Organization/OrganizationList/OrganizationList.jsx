@@ -14,7 +14,10 @@ import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
-import PaginatedTable from '../../../components/PaginatedTable';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import OrganizationListItem from './OrganizationListItem';
 
@@ -115,6 +118,10 @@ function OrganizationsList({ i18n }) {
     }
   };
 
+  const onSort = (e, index, direction) => {
+    console.log(index, direction);
+  };
+
   return (
     <>
       <PageSection>
@@ -125,7 +132,7 @@ function OrganizationsList({ i18n }) {
             items={organizations}
             itemCount={organizationCount}
             pluralizedItemName={i18n._(t`Organizations`)}
-            qsConfig={QS_CONFIG}
+            qsConfig={QS_CONFIG} // TODO: still used?
             onRowClick={handleSelect}
             toolbarSearchColumns={[
               {
@@ -155,6 +162,20 @@ function OrganizationsList({ i18n }) {
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
+              // TODO: move selectAll logic into HeaderRow?
+              <HeaderRow
+                handleSelectAll={handleSelectAll}
+                isAllSelected={isAllSelected}
+                defaultSortKey="name"
+                qsConfig={QS_CONFIG}
+              >
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Members`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Teams`)}</HeaderCell>
+              </HeaderRow>
+            }
+            _headerRow={
+              // TODO: move sorting into <PaginatedTableHeader> w/ friendly API
               <Thead>
                 <Tr>
                   <Th
@@ -163,9 +184,42 @@ function OrganizationsList({ i18n }) {
                       isSelected: isAllSelected,
                     }}
                   />
-                  <Th>{i18n._(t`Name`)}</Th>
-                  <Th>{i18n._(t`Members`)}</Th>
-                  <Th>{i18n._(t`Teams`)}</Th>
+                  <Th
+                    sort={{
+                      onSort,
+                      sortBy: {
+                        index: 'name',
+                        direction: 'asc',
+                      },
+                      columnIndex: 'name',
+                    }}
+                  >
+                    {i18n._(t`Name`)}
+                  </Th>
+                  <Th
+                    sort={{
+                      onSort,
+                      sortBy: {
+                        index: 'name',
+                        direction: 'asc',
+                      },
+                      columnIndex: 'members',
+                    }}
+                  >
+                    {i18n._(t`Members`)}
+                  </Th>
+                  <Th
+                    sort={{
+                      onSort,
+                      sortBy: {
+                        index: 'name',
+                        direction: 'asc',
+                      },
+                      columnIndex: 'teams',
+                    }}
+                  >
+                    {i18n._(t`Teams`)}
+                  </Th>
                 </Tr>
               </Thead>
             }
