@@ -2417,9 +2417,10 @@ class RunProjectUpdate(BaseTask):
                 shutil.rmtree(stage_path)  # cannot trust content update produced
 
             if self.job_private_data_dir:
-                # copy project folder before resetting to default branch
-                # because some git-tree-specific resources (like submodules) might matter
-                self.make_local_copy(instance, self.job_private_data_dir)
+                if status == 'successful':
+                    # copy project folder before resetting to default branch
+                    # because some git-tree-specific resources (like submodules) might matter
+                    self.make_local_copy(instance, self.job_private_data_dir)
                 if self.original_branch:
                     # for git project syncs, non-default branches can be problems
                     # restore to branch the repo was on before this run
