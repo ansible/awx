@@ -460,13 +460,17 @@ else
 endif
 
 
-# UI NEXT TASKS
+# UI TASKS
 # --------------------------------------
 awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next install
 
-ui-release: ui-devel
+clean-ui:
+	rm -rf node_modules
+	rm -rf awx/ui_next/node_modules
+	rm -rf awx/ui_next/build
 
+ui-release: ui-devel
 ui-devel: awx/ui_next/node_modules
 	$(NPM_BIN) --prefix awx/ui_next run extract-strings
 	$(NPM_BIN) --prefix awx/ui_next run compile-strings
@@ -478,17 +482,12 @@ ui-devel: awx/ui_next/node_modules
 	cp -r awx/ui_next/build/static/js/* awx/public/static/js
 	cp -r awx/ui_next/build/static/media/* awx/public/static/media
 
-clean-ui:
-	rm -rf node_modules
-	rm -rf awx/ui_next/node_modules
-	rm -rf awx/ui_next/build
-
-ui-zuul-lint-and-test: ui-next-zuul-lint-and-test
-ui-next-zuul-lint-and-test:
+ui-zuul-lint-and-test:
 	$(NPM_BIN) --prefix awx/ui_next install
 	$(NPM_BIN) run --prefix awx/ui_next lint
 	$(NPM_BIN) run --prefix awx/ui_next prettier-check
 	$(NPM_BIN) run --prefix awx/ui_next test
+
 
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
@@ -501,7 +500,7 @@ release_build:
 dist/$(SDIST_TAR_FILE): ui-release VERSION
 	$(PYTHON) setup.py $(SDIST_COMMAND)
 
-dist/$(WHEEL_FILE): ui-release-next
+dist/$(WHEEL_FILE): ui-release
 	$(PYTHON) setup.py $(WHEEL_COMMAND)
 
 sdist: dist/$(SDIST_TAR_FILE)
