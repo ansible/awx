@@ -133,6 +133,35 @@ describe('Setting form fields', () => {
     expect(wrapper.find('TextInputBase').prop('value')).toEqual('foo');
   });
 
+  test('InputField should revert to expected default value', async () => {
+    const wrapper = mountWithContexts(
+      <Formik
+        initialValues={{
+          number: 5,
+        }}
+      >
+        {() => (
+          <InputField
+            name="number"
+            type="number"
+            config={{
+              label: 'test number input',
+              min_value: -10,
+              default: 0,
+            }}
+          />
+        )}
+      </Formik>
+    );
+    expect(wrapper.find('TextInputBase')).toHaveLength(1);
+    expect(wrapper.find('TextInputBase').prop('value')).toEqual(5);
+    await act(async () => {
+      wrapper.find('button[aria-label="Revert"]').invoke('onClick')();
+    });
+    wrapper.update();
+    expect(wrapper.find('TextInputBase').prop('value')).toEqual(0);
+  });
+
   test('TextAreaField renders the expected content', async () => {
     const wrapper = mountWithContexts(
       <Formik
