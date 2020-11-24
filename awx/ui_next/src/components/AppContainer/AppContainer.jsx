@@ -27,10 +27,6 @@ const PageHeader = styled(PFPageHeader)`
     &:hover {
       color: inherit;
     }
-
-    & svg {
-      height: 76px;
-    }
   }
 `;
 

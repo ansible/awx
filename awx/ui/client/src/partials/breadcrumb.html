@@ -1,8 +1,0 @@
-<ol class="BreadCrumb-list">
-    <li class="BreadCrumb-item" ng-repeat="step in steps | limitTo:(steps.length-1)" aw-truncate-breadcrumb breadcrumb-step="step">
-        <a href="{{step.ncyBreadcrumbLink}}">{{step.ncyBreadcrumbLabel|translate}}</a>
-    </li>
-    <li class="BreadCrumb-item" ng-repeat="step in steps | limitTo:-1" class="active" aw-truncate-breadcrumb breadcrumb-step="step">
-        <span>{{step.ncyBreadcrumbLabel|translate}}</span>
-    </li>
-</ol>

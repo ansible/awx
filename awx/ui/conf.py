@@ -71,3 +71,4 @@ register(
     category=_('UI'),
     category_slug='ui',
 )
+

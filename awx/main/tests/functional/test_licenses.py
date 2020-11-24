@@ -1,6 +1,5 @@
 
 import glob
-import json
 import os
 
 from django.conf import settings
@@ -65,28 +64,6 @@ def test_python_and_js_licenses():
                 ret[name] = { 'name': name, 'version': version}
         return ret
 
-
-    def read_ui_requirements(path):
-        def json_deps(jsondata):
-            ret = {}
-            deps = jsondata.get('dependencies',{})
-            for key in deps.keys():
-                key = key.lower()
-                devonly = deps[key].get('dev',False)
-                if not devonly:
-                    if key not in ret.keys():
-                        depname = key.replace('/','-')
-                        ret[depname] = {
-                            'name': depname,
-                            'version': deps[key]['version']
-                        }
-                        ret.update(json_deps(deps[key]))
-            return ret
-
-        with open('%s/package-lock.json' % path) as f:
-            jsondata = json.load(f)
-            return json_deps(jsondata)
-
     def remediate_licenses_and_requirements(licenses, requirements):
         errors = []
         items = list(licenses.keys())
@@ -113,12 +90,9 @@ def test_python_and_js_licenses():
 
     base_dir = settings.BASE_DIR
     api_licenses = index_licenses('%s/../docs/licenses' % base_dir)
-    ui_licenses = index_licenses('%s/../docs/licenses/ui' % base_dir)
     api_requirements = read_api_requirements('%s/../requirements' % base_dir)
-    ui_requirements = read_ui_requirements('%s/ui' % base_dir)
 
     errors = []
-    errors += remediate_licenses_and_requirements(ui_licenses, ui_requirements)
     errors += remediate_licenses_and_requirements(api_licenses, api_requirements)
     if errors:
         raise Exception('Included licenses not consistent with requirements:\n%s' %
