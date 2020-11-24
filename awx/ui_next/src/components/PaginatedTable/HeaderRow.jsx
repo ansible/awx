@@ -23,7 +23,7 @@ export default function HeaderRow({
   const onSort = (key, order) => {
     console.log({ key, order });
     const newParams = replaceParams(params, {
-      order_by: order === 'desc' ? key : `-${key}`,
+      order_by: order === 'asc' ? key : `-${key}`,
       page: null,
     });
     const encodedParams = encodeNonDefaultQueryString(qsConfig, newParams);
@@ -37,7 +37,7 @@ export default function HeaderRow({
   const sortKey = params.order_by?.replace('-', '');
   const sortBy = {
     index: sortKey || defaultSortKey,
-    direction: params.order_by?.startsWith('-') ? 'asc' : 'desc',
+    direction: params.order_by?.startsWith('-') ? 'desc' : 'asc',
   };
 
   return (

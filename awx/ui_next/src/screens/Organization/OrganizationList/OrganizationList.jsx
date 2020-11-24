@@ -3,7 +3,6 @@ import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
-import { Thead, Tr, Th } from '@patternfly/react-table';
 
 import { OrganizationsAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
@@ -118,10 +117,6 @@ function OrganizationsList({ i18n }) {
     }
   };
 
-  const onSort = (e, index, direction) => {
-    console.log(index, direction);
-  };
-
   return (
     <>
       <PageSection>
@@ -173,55 +168,6 @@ function OrganizationsList({ i18n }) {
                 <HeaderCell>{i18n._(t`Members`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Teams`)}</HeaderCell>
               </HeaderRow>
-            }
-            _headerRow={
-              // TODO: move sorting into <PaginatedTableHeader> w/ friendly API
-              <Thead>
-                <Tr>
-                  <Th
-                    select={{
-                      onSelect: handleSelectAll,
-                      isSelected: isAllSelected,
-                    }}
-                  />
-                  <Th
-                    sort={{
-                      onSort,
-                      sortBy: {
-                        index: 'name',
-                        direction: 'asc',
-                      },
-                      columnIndex: 'name',
-                    }}
-                  >
-                    {i18n._(t`Name`)}
-                  </Th>
-                  <Th
-                    sort={{
-                      onSort,
-                      sortBy: {
-                        index: 'name',
-                        direction: 'asc',
-                      },
-                      columnIndex: 'members',
-                    }}
-                  >
-                    {i18n._(t`Members`)}
-                  </Th>
-                  <Th
-                    sort={{
-                      onSort,
-                      sortBy: {
-                        index: 'name',
-                        direction: 'asc',
-                      },
-                      columnIndex: 'teams',
-                    }}
-                  >
-                    {i18n._(t`Teams`)}
-                  </Th>
-                </Tr>
-              </Thead>
             }
             renderToolbar={props => (
               <DataListToolbar
