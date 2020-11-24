@@ -102,7 +102,10 @@ function InventoryListItem({
           dataListCells={[
             <DataListCell key="sync-status" isIcon>
               {inventory.kind !== 'smart' && (
-                <SyncStatusIndicator status={syncStatus} />
+                <SyncStatusIndicator
+                  inventory={inventory}
+                  status={syncStatus}
+                />
               )}
             </DataListCell>,
             <DataListCell key="name">
