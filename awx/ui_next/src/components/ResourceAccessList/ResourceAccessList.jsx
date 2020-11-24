@@ -78,7 +78,33 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
       fetchItems: fetchAccessRecords,
     }
   );
+  const toolbarSearchColumns = [
+    {
+      name: i18n._(t`Username`),
+      key: 'username__icontains',
+      isDefault: true,
+    },
+    {
+      name: i18n._(t`First Name`),
+      key: 'first_name__icontains',
+    },
+    {
+      name: i18n._(t`Last Name`),
+      key: 'last_name__icontains',
+    },
+  ];
 
+  if (location.pathname.includes('/organizations')) {
+    const roles = Object.values(
+      resource.summary_fields.object_roles
+    ).map(opt => [opt.id.toString(), opt.name]);
+
+    toolbarSearchColumns.push({
+      name: i18n._(t`Roles`),
+      key: `or__roles__in`,
+      options: roles,
+    });
+  }
   return (
     <>
       <PaginatedDataList
@@ -88,21 +114,7 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
         itemCount={itemCount}
         pluralizedItemName={i18n._(t`Roles`)}
         qsConfig={QS_CONFIG}
-        toolbarSearchColumns={[
-          {
-            name: i18n._(t`Username`),
-            key: 'username__icontains',
-            isDefault: true,
-          },
-          {
-            name: i18n._(t`First Name`),
-            key: 'first_name__icontains',
-          },
-          {
-            name: i18n._(t`Last Name`),
-            key: 'last_name__icontains',
-          },
-        ]}
+        toolbarSearchColumns={toolbarSearchColumns}
         toolbarSortColumns={[
           {
             name: i18n._(t`Username`),
