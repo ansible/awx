@@ -214,10 +214,14 @@ function InventorySourceDetail({ inventorySource, i18n }) {
             }
           />
         )}
-        <Detail
-          label={i18n._(t`Inventory file`)}
-          value={source_path === '' ? i18n._(t`/ (project root)`) : source_path}
-        />
+        {source === 'scm' ? (
+          <Detail
+            label={i18n._(t`Inventory file`)}
+            value={
+              source_path === '' ? i18n._(t`/ (project root)`) : source_path
+            }
+          />
+        ) : null}
         <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[verbosity]} />
         <Detail
           label={i18n._(t`Cache timeout`)}
