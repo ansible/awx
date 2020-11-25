@@ -14,11 +14,19 @@ import {
 } from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
 import { TokensAPI } from '../../../api';
+import { formatDateString } from '../../../util/dates';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { toTitleCase } from '../../../util/strings';
 
 function UserTokenDetail({ token, canEditOrDelete, i18n }) {
-  const { scope, description, created, modified, summary_fields } = token;
+  const {
+    scope,
+    description,
+    created,
+    modified,
+    expires,
+    summary_fields,
+  } = token;
   const history = useHistory();
   const { id, tokenId } = useParams();
   const { request: deleteToken, isLoading, error: deleteError } = useRequest(
@@ -39,6 +47,7 @@ function UserTokenDetail({ token, canEditOrDelete, i18n }) {
         />
         <Detail label={i18n._(t`Description`)} value={description} />
         <Detail label={i18n._(t`Scope`)} value={toTitleCase(scope)} />
+        <Detail label={i18n._(t`Expires`)} value={formatDateString(expires)} />
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={created}
