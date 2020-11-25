@@ -1,17 +1,38 @@
 import 'styled-components/macro';
 import React from 'react';
-import { shape, node, number, oneOf } from 'prop-types';
+import {
+  arrayOf,
+  oneOf,
+  oneOfType,
+  node,
+  number,
+  shape,
+  string,
+} from 'prop-types';
 import { TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from './Detail';
 import CodeMirrorInput from '../CodeMirrorInput';
+import Popover from '../Popover';
 
-function CodeDetail({ value, label, mode, rows, fullHeight }) {
+function CodeDetail({
+  value,
+  label,
+  mode,
+  rows,
+  fullHeight,
+  helpText,
+  dataCy,
+}) {
+  const labelCy = dataCy ? `${dataCy}-label` : null;
+  const valueCy = dataCy ? `${dataCy}-value` : null;
+
   return (
     <>
       <DetailName
         component={TextListItemVariants.dt}
         fullWidth
         css="grid-column: 1 / -1"
+        data-cy={labelCy}
       >
         <div className="pf-c-form__label">
           <span
@@ -20,12 +41,16 @@ function CodeDetail({ value, label, mode, rows, fullHeight }) {
           >
             {label}
           </span>
+          {helpText && (
+            <Popover header={label} content={helpText} id={dataCy} />
+          )}
         </div>
       </DetailName>
       <DetailValue
         component={TextListItemVariants.dd}
         fullWidth
         css="grid-column: 1 / -1; margin-top: -20px"
+        data-cy={valueCy}
       >
         <CodeMirrorInput
           mode={mode}
@@ -40,13 +65,17 @@ function CodeDetail({ value, label, mode, rows, fullHeight }) {
   );
 }
 CodeDetail.propTypes = {
-  value: shape.isRequired,
+  value: oneOfType([shape({}), arrayOf(string), string]).isRequired,
   label: node.isRequired,
+  dataCy: string,
+  helpText: string,
   rows: number,
-  mode: oneOf(['json', 'yaml', 'jinja2']).isRequired,
+  mode: oneOf(['javascript', 'yaml', 'jinja2']).isRequired,
 };
 CodeDetail.defaultProps = {
   rows: null,
+  helpText: '',
+  dataCy: '',
 };
 
 export default CodeDetail;

@@ -10,7 +10,7 @@ describe('FieldWithPrompt', () => {
     wrapper.unmount();
   });
 
-  test('Required asterisk and Tooltip hidden when not required and tooltip not provided', () => {
+  test('Required asterisk and Popover hidden when not required and tooltip not provided', () => {
     wrapper = mountWithContexts(
       <Formik
         initialValues={{
@@ -33,10 +33,10 @@ describe('FieldWithPrompt', () => {
       </Formik>
     );
     expect(wrapper.find('.pf-c-form__label-required')).toHaveLength(0);
-    expect(wrapper.find('Tooltip')).toHaveLength(0);
+    expect(wrapper.find('Popover')).toHaveLength(0);
   });
 
-  test('Required asterisk and Tooltip shown when required and tooltip provided', () => {
+  test('Required asterisk and Popover shown when required and tooltip provided', () => {
     wrapper = mountWithContexts(
       <Formik
         initialValues={{
@@ -61,6 +61,8 @@ describe('FieldWithPrompt', () => {
       </Formik>
     );
     expect(wrapper.find('.pf-c-form__label-required')).toHaveLength(1);
-    expect(wrapper.find('Popover')).toHaveLength(1);
+    expect(wrapper.find('Popover[data-cy="job-template-limit"]').length).toBe(
+      1
+    );
   });
 });

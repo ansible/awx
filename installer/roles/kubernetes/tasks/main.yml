@@ -145,7 +145,7 @@
       block:
         - name: Set new pg image
           shell: |
-            IMAGE=registry.access.redhat.com/rhscl/postgresql-10-rhel7
+            IMAGE=registry.redhat.io/rhel-8/postgresql-10
             {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set image dc/postgresql postgresql=$IMAGE
 
         - name: Wait for change to take affect

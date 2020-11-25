@@ -29,7 +29,6 @@ const QS_CONFIG = getQSConfig('roles', {
 });
 
 function TeamRolesList({ i18n, me, team }) {
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const { search } = useLocation();
   const [roleToDisassociate, setRoleToDisassociate] = useState(null);
 
@@ -85,10 +84,6 @@ function TeamRolesList({ i18n, me, team }) {
     fetchRoles();
   }, [fetchRoles]);
 
-  const saveRoles = () => {
-    setIsWizardOpen(false);
-    fetchRoles();
-  };
   const {
     isLoading: isDisassociateLoading,
     deleteItems: disassociateRole,
@@ -170,15 +165,11 @@ function TeamRolesList({ i18n, me, team }) {
             additionalControls={[
               ...(canAdd
                 ? [
-                    <Button
-                      key="add"
-                      aria-label={i18n._(t`Add resource roles`)}
-                      onClick={() => {
-                        setIsWizardOpen(true);
-                      }}
-                    >
-                      {i18n._(t`Add`)}
-                    </Button>,
+                    <UserAndTeamAccessAdd
+                      apiModel={TeamsAPI}
+                      onFetchData={fetchRoles}
+                      title={i18n._(t`Add team permissions`)}
+                    />,
                   ]
                 : []),
             ]}
@@ -195,15 +186,6 @@ function TeamRolesList({ i18n, me, team }) {
           />
         )}
       />
-      {isWizardOpen && (
-        <UserAndTeamAccessAdd
-          apiModel={TeamsAPI}
-          isOpen={isWizardOpen}
-          onSave={saveRoles}
-          onClose={() => setIsWizardOpen(false)}
-          title={i18n._(t`Add team permissions`)}
-        />
-      )}
 
       {roleToDisassociate && (
         <AlertModal

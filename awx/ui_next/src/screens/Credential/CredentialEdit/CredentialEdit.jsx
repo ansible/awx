@@ -151,7 +151,7 @@ function CredentialEdit({ credential, me }) {
   };
 
   if (error) {
-    return <ContentError />;
+    return <ContentError error={error} />;
   }
 
   if (isLoading) {

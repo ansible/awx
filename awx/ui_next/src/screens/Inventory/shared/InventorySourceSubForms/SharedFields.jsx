@@ -1,29 +1,78 @@
 import React, { useEffect } from 'react';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import { useField } from 'formik';
 import { FormGroup } from '@patternfly/react-core';
 import { minMaxValue, regExp } from '../../../../util/validators';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
 import { VariablesField } from '../../../../components/CodeMirrorInput';
-import FormField, {
-  CheckboxField,
-  FieldTooltip,
-} from '../../../../components/FormField';
+import FormField, { CheckboxField } from '../../../../components/FormField';
 import {
   FormFullWidthLayout,
   FormCheckboxLayout,
 } from '../../../../components/FormLayout';
+import Popover from '../../../../components/Popover';
 
-export const SourceVarsField = withI18n()(({ i18n }) => (
-  <FormFullWidthLayout>
-    <VariablesField
-      id="source_vars"
-      name="source_vars"
-      label={i18n._(t`Source variables`)}
-    />
-  </FormFullWidthLayout>
-));
+export const SourceVarsField = withI18n()(({ i18n, popoverContent }) => {
+  const jsonExample = `
+  {
+    "somevar": "somevalue"
+    "somepassword": "Magic"
+  }
+`;
+  const yamlExample = `
+  ---
+  somevar: somevalue
+  somepassword: magic
+`;
+  return (
+    <FormFullWidthLayout>
+      <VariablesField
+        id="source_vars"
+        name="source_vars"
+        label={i18n._(t`Source variables`)}
+        tooltip={
+          <div>
+            {popoverContent}
+            <Trans>
+              Enter variables using either JSON or YAML syntax. Use the radio
+              button to toggle between the two.
+            </Trans>
+            <br />
+            <br />
+            <Trans>JSON:</Trans>
+            <pre>{jsonExample}</pre>
+            <br />
+            <Trans>YAML:</Trans>
+            <pre>{yamlExample}</pre>
+            <br />
+            <Trans>
+              View JSON examples at{' '}
+              <a
+                href="http://www.json.org"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                www.json.org
+              </a>
+            </Trans>
+            <br />
+            <Trans>
+              View YAML examples at{' '}
+              <a
+                href="http://docs.ansible.com/YAMLSyntax.html"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                docs.ansible.com
+              </a>
+            </Trans>
+          </div>
+        }
+      />
+    </FormFullWidthLayout>
+  );
+});
 
 export const VerbosityField = withI18n()(({ i18n }) => {
   const [field, meta, helpers] = useField('verbosity');
@@ -39,7 +88,7 @@ export const VerbosityField = withI18n()(({ i18n }) => {
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Verbosity`)}
       labelIcon={
-        <FieldTooltip
+        <Popover
           content={i18n._(t`Control the level of output Ansible
         will produce for inventory source update jobs.`)}
         />

@@ -6,7 +6,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { HostsAPI, InventoriesAPI, CredentialTypesAPI } from '../../../api';
+import { HostsAPI, InventoriesAPI } from '../../../api';
 import InventoryHostGroupsList from './InventoryHostGroupsList';
 
 jest.mock('../../../api');
@@ -79,17 +79,6 @@ describe('<InventoryHostGroupsList />', () => {
           POST: {},
         },
       },
-    });
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: { module_name: { choices: [['module']] } },
-          POST: {},
-        },
-      },
-    });
-    CredentialTypesAPI.read.mockResolvedValue({
-      data: { count: 1, results: [{ id: 1, name: 'cred' }] },
     });
     const history = createMemoryHistory({
       initialEntries: ['/inventories/inventory/1/hosts/3/groups'],
@@ -282,12 +271,5 @@ describe('<InventoryHostGroupsList />', () => {
     });
     wrapper.update();
     expect(wrapper.find('AlertModal ErrorDetail').length).toBe(1);
-  });
-  test('should render enabled ad hoc commands button', async () => {
-    await waitForElement(
-      wrapper,
-      'button[aria-label="Run command"]',
-      el => el.prop('disabled') === false
-    );
   });
 });

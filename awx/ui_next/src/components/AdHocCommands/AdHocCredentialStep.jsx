@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { useField } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { CredentialsAPI } from '../../api';
-import { FieldTooltip } from '../FormField';
+import Popover from '../Popover';
 
 import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
 import useRequest from '../../util/useRequest';
@@ -72,7 +72,7 @@ function AdHocCredentialStep({ i18n, credentialTypeId, onEnableLaunch }) {
         }
         helperTextInvalid={credentialMeta.error}
         labelIcon={
-          <FieldTooltip
+          <Popover
             content={i18n._(
               t`Select the credential you want to use when accessing the remote hosts to run the command. Choose the credential containing the username and SSH key or password that Ansible will need to log into the remote hosts.`
             )}

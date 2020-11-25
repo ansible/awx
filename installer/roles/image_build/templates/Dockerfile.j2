@@ -74,7 +74,7 @@ RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev
 {% endif %}
 {% if not build_dev|bool %}
 COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
-RUN mkdir -p -m 755 /var/lib/awx && echo "{{ awx_version }}" > /var/lib/awx/.tower_version && \
+RUN mkdir -p -m 755 /var/lib/awx && \
     OFFICIAL=yes /var/lib/awx/venv/awx/bin/pip install /tmp/{{ awx_sdist_file }}
 {% endif %}
 
@@ -145,6 +145,10 @@ RUN dnf -y update && \
 # Install kubectl
 RUN curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.17.8/bin/linux/{{ kubectl_architecture | default('amd64') }}/kubectl && \
     chmod a+x /usr/bin/kubectl
+
+RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && \
+    chmod 700 get_helm.sh && \
+    ./get_helm.sh
 
 # Install tini
 RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \

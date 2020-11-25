@@ -7,9 +7,9 @@
   },
   "dependencies": {
     "@lingui/react": "^2.9.1",
-    "@patternfly/patternfly": "^4.23.3",
-    "@patternfly/react-core": "^4.32.1",
-    "@patternfly/react-icons": "^4.5.0",
+    "@patternfly/patternfly": "4.59.1",
+    "@patternfly/react-core": "4.75.2",
+    "@patternfly/react-icons": "4.7.16",
     "ansi-to-html": "^0.6.11",
     "axios": "^0.18.1",
     "codemirror": "^5.47.0",
@@ -49,7 +49,7 @@
     "jest-websocket-mock": "^2.0.2",
     "mock-socket": "^9.0.3",
     "prettier": "^1.18.2",
-    "react-scripts": "^3.4.3"
+    "react-scripts": "^3.4.4"
   },
   "scripts": {
     "start": "PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",

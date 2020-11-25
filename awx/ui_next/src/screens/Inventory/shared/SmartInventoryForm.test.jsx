@@ -26,7 +26,7 @@ const mockFormValues = {
   description: '',
   organization: { id: 1, name: 'mock organization' },
   host_filter:
-    'name__icontains=mock and name__icontains=foo and groups__name=mock group',
+    'name__icontains=mock and name__icontains=foo and groups__name__icontains=mock group',
   instance_groups: [{ id: 123 }],
   variables: '---',
 };
@@ -60,7 +60,9 @@ describe('<SmartInventoryForm />', () => {
       expect(wrapper.find('FormGroup[label="Name"]')).toHaveLength(1);
       expect(wrapper.find('FormGroup[label="Description"]')).toHaveLength(1);
       expect(wrapper.find('FormGroup[label="Organization"]')).toHaveLength(1);
-      expect(wrapper.find('FormGroup[label="Host filter"]')).toHaveLength(1);
+      expect(wrapper.find('FormGroup[label="Smart host filter"]')).toHaveLength(
+        1
+      );
       expect(wrapper.find('FormGroup[label="Instance Groups"]')).toHaveLength(
         1
       );

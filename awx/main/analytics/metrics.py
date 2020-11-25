@@ -12,7 +12,7 @@ from prometheus_client import (
 from awx.conf.license import get_license
 from awx.main.utils import (get_awx_version, get_ansible_version)
 from awx.main.analytics.collectors import (
-    counts, 
+    counts,
     instance_info,
     job_instance_counts,
     job_counts,
@@ -54,7 +54,7 @@ LICENSE_INSTANCE_FREE = Gauge('awx_license_instance_free', 'Number of remaining 
 
 
 def metrics():
-    license_info = get_license(show_key=False)
+    license_info = get_license()
     SYSTEM_INFO.info({
         'install_uuid': settings.INSTALL_UUID,
         'insights_analytics': str(settings.INSIGHTS_TRACKING_STATE),

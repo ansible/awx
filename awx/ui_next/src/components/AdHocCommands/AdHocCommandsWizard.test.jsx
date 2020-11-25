@@ -17,6 +17,10 @@ const verbosityOptions = [
   { value: '3', key: '3', label: '3 (Debug)' },
   { value: '4', key: '4', label: '4 (Connection Debug)' },
 ];
+const moduleOptions = [
+  ['command', 'command'],
+  ['shell', 'shell'],
+];
 const adHocItems = [
   { name: 'Inventory 1' },
   { name: 'Inventory 2' },
@@ -31,7 +35,7 @@ describe('<AdHocCommandsWizard/>', () => {
         <AdHocCommandsWizard
           adHocItems={adHocItems}
           onLaunch={onLaunch}
-          moduleOptions={[]}
+          moduleOptions={moduleOptions}
           verbosityOptions={verbosityOptions}
           onCloseWizard={() => {}}
           credentialTypeId={1}

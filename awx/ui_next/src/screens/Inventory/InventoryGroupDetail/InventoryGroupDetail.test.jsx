@@ -59,10 +59,12 @@ describe('<InventoryGroupDetail />', () => {
   });
   afterEach(() => {
     wrapper.unmount();
+    jest.clearAllMocks();
   });
   test('InventoryGroupDetail renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });
+
   test('should open delete modal and then call api to delete the group', async () => {
     await act(async () => {
       wrapper.find('button[aria-label="Delete"]').simulate('click');
@@ -73,19 +75,22 @@ describe('<InventoryGroupDetail />', () => {
       wrapper.find('Radio[id="radio-delete"]').invoke('onChange')();
     });
     wrapper.update();
-    await act(async () => {
-      wrapper
-        .find('ModalBoxFooter Button[aria-label="Delete"]')
-        .invoke('onClick')();
-    });
+    expect(
+      wrapper.find('Button[aria-label="Confirm Delete"]').prop('isDisabled')
+    ).toBe(false);
+    await act(() =>
+      wrapper.find('Button[aria-label="Confirm Delete"]').prop('onClick')()
+    );
     expect(GroupsAPI.destroy).toBeCalledWith(1);
   });
+
   test('should navigate user to edit form on edit button click', async () => {
     wrapper.find('button[aria-label="Edit"]').simulate('click');
     expect(history.location.pathname).toEqual(
       '/inventories/inventory/1/groups/1/edit'
     );
   });
+
   test('details should render with the proper values', () => {
     expect(wrapper.find('Detail[label="Name"]').prop('value')).toBe('Foo');
     expect(wrapper.find('Detail[label="Description"]').prop('value')).toBe(

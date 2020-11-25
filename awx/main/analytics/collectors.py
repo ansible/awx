@@ -33,9 +33,9 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 '''
 
 
-@register('config', '1.1', description=_('General platform configuration.'))
+@register('config', '1.2', description=_('General platform configuration.'))
 def config(since, **kwargs):
-    license_info = get_license(show_key=False)
+    license_info = get_license()
     install_type = 'traditional'
     if os.environ.get('container') == 'oci':
         install_type = 'openshift'
@@ -194,7 +194,6 @@ def instance_info(since, include_hostnames=False, **kwargs):
     return info
 
 
-@register('job_counts', '1.0', description=_('Counts of jobs by status'))
 def job_counts(since, **kwargs):
     counts = {}
     counts['total_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()
@@ -204,7 +203,6 @@ def job_counts(since, **kwargs):
     return counts
     
     
-@register('job_instance_counts', '1.0', description=_('Counts of jobs by execution node'))
 def job_instance_counts(since, **kwargs):
     counts = {}
     job_types = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(

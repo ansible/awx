@@ -5,11 +5,9 @@ import { Formik, useField } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import FormField, {
-  FormSubmitError,
-  FieldTooltip,
-} from '../../../components/FormField';
+import FormField, { FormSubmitError } from '../../../components/FormField';
 import ApplicationLookup from '../../../components/Lookup/ApplicationLookup';
+import Popover from '../../../components/Popover';
 import { required } from '../../../util/validators';
 
 import { FormColumnLayout } from '../../../components/FormLayout';
@@ -44,7 +42,7 @@ function UserTokenFormFields({ i18n }) {
           label={
             <span>
               {i18n._(t`Application`)}
-              <FieldTooltip
+              <Popover
                 content={i18n._(
                   t`Select the application that this token will belong to.`
                 )}
@@ -69,7 +67,7 @@ function UserTokenFormFields({ i18n }) {
         validated={!scopeMeta.touched || !scopeMeta.error ? 'default' : 'error'}
         label={i18n._(t`Scope`)}
         labelIcon={
-          <FieldTooltip
+          <Popover
             content={i18n._(t`Specify a scope for the token's access`)}
           />
         }

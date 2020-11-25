@@ -32,7 +32,6 @@ describe('<InventorySourceForm />', () => {
               ['azure_rm', 'Microsoft Azure Resource Manager'],
               ['vmware', 'VMware vCenter'],
               ['satellite6', 'Red Hat Satellite 6'],
-              ['cloudforms', 'Red Hat CloudForms'],
               ['openstack', 'OpenStack'],
               ['rhv', 'Red Hat Virtualization'],
               ['tower', 'Ansible Tower'],

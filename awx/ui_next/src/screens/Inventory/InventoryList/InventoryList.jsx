@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 import { InventoriesAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
@@ -95,7 +95,7 @@ function InventoryList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(selected.map(team => InventoriesAPI.destroy(team.id)));
     }, [selected]),
     {
@@ -124,19 +124,28 @@ function InventoryList({ i18n }) {
       }
     }
   };
-
+  const addInventory = i18n._(t`Add inventory`);
+  const addSmartInventory = i18n._(t`Add smart inventory`);
   const addButton = (
     <AddDropDownButton
       key="add"
       dropdownItems={[
-        {
-          label: i18n._(t`Inventory`),
-          url: `${match.url}/inventory/add/`,
-        },
-        {
-          label: i18n._(t`Smart Inventory`),
-          url: `${match.url}/smart_inventory/add/`,
-        },
+        <DropdownItem
+          to={`${match.url}/inventory/add/`}
+          component={Link}
+          key={addInventory}
+          aria-label={addInventory}
+        >
+          {addInventory}
+        </DropdownItem>,
+        <DropdownItem
+          to={`${match.url}/smart_inventory/add/`}
+          component={Link}
+          key={addSmartInventory}
+          aria-label={addSmartInventory}
+        >
+          {addSmartInventory}
+        </DropdownItem>,
       ]}
     />
   );

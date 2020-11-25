@@ -18,6 +18,7 @@ import ContentError from '../../components/ContentError';
 import { NotificationTemplatesAPI } from '../../api';
 import NotificationTemplateDetail from './NotificationTemplateDetail';
 import NotificationTemplateEdit from './NotificationTemplateEdit';
+import ContentLoading from '../../components/ContentLoading';
 
 function NotificationTemplate({ setBreadcrumb, i18n }) {
   const { id: templateId } = useParams();
@@ -94,20 +95,19 @@ function NotificationTemplate({ setBreadcrumb, i18n }) {
             to="/notification_templates/:id/details"
             exact
           />
+          {isLoading && <ContentLoading />}
           {template && (
             <>
               <Route path="/notification_templates/:id/edit">
                 <NotificationTemplateEdit
                   template={template}
                   defaultMessages={defaultMessages}
-                  isLoading={isLoading}
                 />
               </Route>
               <Route path="/notification_templates/:id/details">
                 <NotificationTemplateDetail
                   template={template}
                   defaultMessages={defaultMessages}
-                  isLoading={isLoading}
                 />
               </Route>
             </>

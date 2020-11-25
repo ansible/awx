@@ -107,7 +107,7 @@ function Search({
     } else if (currentSearchColumn?.booleanLabels) {
       label = currentSearchColumn.booleanLabels[value];
     }
-    return label.toString();
+    return (label || colKey).toString();
   };
 
   const getChipsByKey = () => {

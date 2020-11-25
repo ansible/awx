@@ -56,11 +56,6 @@ WHEEL_COMMAND ?= bdist_wheel
 SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
 WHEEL_FILE ?= $(WHEEL_NAME)-py2-none-any.whl
 
-# UI flag files
-UI_DEPS_FLAG_FILE = awx/ui/.deps_built
-UI_RELEASE_DEPS_FLAG_FILE = awx/ui/.release_deps_built
-UI_RELEASE_FLAG_FILE = awx/ui/.release_built
-
 I18N_FLAG_FILE = .i18n_built
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
@@ -69,22 +64,6 @@ I18N_FLAG_FILE = .i18n_built
 	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci VERSION
-
-# remove ui build artifacts
-clean-ui: clean-languages
-	rm -rf awx/ui/static/
-	rm -rf awx/ui/node_modules/
-	rm -rf awx/ui/test/unit/reports/
-	rm -rf awx/ui/test/spec/reports/
-	rm -rf awx/ui/test/e2e/reports/
-	rm -rf awx/ui/client/languages/
-	rm -rf awx/ui_next/node_modules/
-	rm -rf node_modules
-	rm -rf awx/ui_next/coverage/
-	rm -rf awx/ui_next/build/locales/_build/
-	rm -f $(UI_DEPS_FLAG_FILE)
-	rm -f $(UI_RELEASE_DEPS_FLAG_FILE)
-	rm -f $(UI_RELEASE_FLAG_FILE)
 
 clean-tmp:
 	rm -rf tmp/
@@ -214,7 +193,11 @@ requirements_awx_dev:
 
 requirements_collections:
 	mkdir -p $(COLLECTION_BASE)
-	ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE)
+	n=0; \
+	until [ "$$n" -ge 5 ]; do \
+	    ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE) && break; \
+	    n=$$((n+1)); \
+	done
 
 requirements: requirements_ansible requirements_awx requirements_collections
 
@@ -476,110 +459,23 @@ else
 	@echo No PO files
 endif
 
-# generate UI .pot
-pot: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run pot
-
-# generate django .pot .po
-LANG = "en-us"
-messages:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
-
-# generate l10n .json .mo
-languages: $(I18N_FLAG_FILE)
-
-$(I18N_FLAG_FILE): $(UI_RELEASE_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run languages
-	$(PYTHON) tools/scripts/compilemessages.py
-	touch $(I18N_FLAG_FILE)
-
-# End l10n TASKS
-# --------------------------------------
-
-# UI RELEASE TASKS
-# --------------------------------------
-ui-release: $(UI_RELEASE_FLAG_FILE)
-
-$(UI_RELEASE_FLAG_FILE): $(I18N_FLAG_FILE) $(UI_RELEASE_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-release
-	touch $(UI_RELEASE_FLAG_FILE)
-
-$(UI_RELEASE_DEPS_FLAG_FILE):
-	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 $(NPM_BIN) --unsafe-perm --prefix awx/ui ci --no-save awx/ui
-	touch $(UI_RELEASE_DEPS_FLAG_FILE)
-
-# END UI RELEASE TASKS
-# --------------------------------------
 
 # UI TASKS
 # --------------------------------------
-ui-deps: $(UI_DEPS_FLAG_FILE)
-
-$(UI_DEPS_FLAG_FILE):
-	@if [ -f ${UI_RELEASE_DEPS_FLAG_FILE} ]; then \
-		rm -rf awx/ui/node_modules; \
-		rm -f ${UI_RELEASE_DEPS_FLAG_FILE}; \
-	fi; \
-	$(NPM_BIN) --unsafe-perm --prefix awx/ui ci --no-save awx/ui
-	touch $(UI_DEPS_FLAG_FILE)
-
-ui-docker-machine: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run ui-docker-machine -- $(MAKEFLAGS)
-
-# Native docker. Builds UI and raises BrowserSync & filesystem polling.
-ui-docker: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run ui-docker -- $(MAKEFLAGS)
-
-# Builds UI with development UI without raising browser-sync or filesystem polling.
-ui-devel: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-devel -- $(MAKEFLAGS)
-
-ui-test: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run test
-
-ui-lint: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) run --prefix awx/ui jshint
-	$(NPM_BIN) run --prefix awx/ui lint
-
-# A standard go-to target for API developers to use building the frontend
-ui: clean-ui ui-devel
-
-ui-test-ci: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run test:ci
-	$(NPM_BIN) --prefix awx/ui run unit
-
-jshint: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) run --prefix awx/ui jshint
-	$(NPM_BIN) run --prefix awx/ui lint
-
-ui-zuul-lint-and-test:
-	CHROMIUM_BIN=$(CHROMIUM_BIN) ./awx/ui/build/zuul_download_chromium.sh
-	CHROMIUM_BIN=$(CHROMIUM_BIN) PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 $(NPM_BIN) --unsafe-perm --prefix awx/ui ci --no-save awx/ui
-	CHROMIUM_BIN=$(CHROMIUM_BIN) $(NPM_BIN) run --prefix awx/ui jshint
-	CHROMIUM_BIN=$(CHROMIUM_BIN) $(NPM_BIN) run --prefix awx/ui lint
-	CHROME_BIN=$(CHROMIUM_BIN) $(NPM_BIN) --prefix awx/ui run test:ci
-	CHROME_BIN=$(CHROMIUM_BIN) $(NPM_BIN) --prefix awx/ui run unit
-
-# END UI TASKS
-# --------------------------------------
-
-# UI NEXT TASKS
-# --------------------------------------
-
 awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next install
 
-ui-release-next:
-	mkdir -p awx/ui_next/build/static
-	touch awx/ui_next/build/static/.placeholder
+clean-ui:
+	rm -rf node_modules
+	rm -rf awx/ui_next/node_modules
+	rm -rf awx/ui_next/build
 
-ui-devel-next: awx/ui_next/node_modules
+ui-release: ui-devel
+ui-devel: awx/ui_next/node_modules
 	$(NPM_BIN) --prefix awx/ui_next run extract-strings
 	$(NPM_BIN) --prefix awx/ui_next run compile-strings
 	$(NPM_BIN) --prefix awx/ui_next run build
+	git checkout awx/ui_next/src/locales
 	mkdir -p awx/public/static/css
 	mkdir -p awx/public/static/js
 	mkdir -p awx/public/static/media
@@ -587,19 +483,12 @@ ui-devel-next: awx/ui_next/node_modules
 	cp -r awx/ui_next/build/static/js/* awx/public/static/js
 	cp -r awx/ui_next/build/static/media/* awx/public/static/media
 
-clean-ui-next:
-	rm -rf node_modules
-	rm -rf awx/ui_next/node_modules
-	rm -rf awx/ui_next/build
-
-ui-next-zuul-lint-and-test:
+ui-zuul-lint-and-test:
 	$(NPM_BIN) --prefix awx/ui_next install
 	$(NPM_BIN) run --prefix awx/ui_next lint
 	$(NPM_BIN) run --prefix awx/ui_next prettier-check
 	$(NPM_BIN) run --prefix awx/ui_next test
 
-# END UI NEXT TASKS
-# --------------------------------------
 
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
@@ -609,10 +498,10 @@ dev_build:
 release_build:
 	$(PYTHON) setup.py release_build
 
-dist/$(SDIST_TAR_FILE): ui-release ui-release-next VERSION
+dist/$(SDIST_TAR_FILE): ui-release VERSION
 	$(PYTHON) setup.py $(SDIST_COMMAND)
 
-dist/$(WHEEL_FILE): ui-release ui-release-next
+dist/$(WHEEL_FILE): ui-release
 	$(PYTHON) setup.py $(WHEEL_COMMAND)
 
 sdist: dist/$(SDIST_TAR_FILE)
@@ -646,9 +535,11 @@ awx/projects:
 docker-compose-isolated: awx/projects
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
+COMPOSE_UP_OPTS ?=
+
 # Docker Compose Development environment
 docker-compose: docker-auth awx/projects
-	CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml up --no-recreate awx
+	CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml $(COMPOSE_UP_OPTS) up --no-recreate awx
 
 docker-compose-cluster: docker-auth awx/projects
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml up

@@ -78,7 +78,7 @@ function UserTokenList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(({ id: tokenId }) => TokensAPI.destroy(tokenId))
       );

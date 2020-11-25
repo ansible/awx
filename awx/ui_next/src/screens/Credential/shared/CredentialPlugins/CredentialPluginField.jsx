@@ -11,8 +11,8 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { KeyIcon } from '@patternfly/react-icons';
-import { FieldTooltip } from '../../../../components/FormField';
 import FieldWithPrompt from '../../../../components/FieldWithPrompt';
+import Popover from '../../../../components/Popover';
 import { CredentialPluginPrompt } from './CredentialPluginPrompt';
 import CredentialPluginSelected from './CredentialPluginSelected';
 
@@ -130,7 +130,7 @@ function CredentialPluginField(props) {
           label={fieldOptions.label}
           labelIcon={
             fieldOptions.help_text && (
-              <FieldTooltip content={fieldOptions.help_text} />
+              <Popover content={fieldOptions.help_text} />
             )
           }
         >

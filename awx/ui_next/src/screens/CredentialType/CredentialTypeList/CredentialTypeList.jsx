@@ -83,8 +83,8 @@ function CredentialTypeList({ i18n }) {
     deleteItems: deleteCredentialTypes,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      await Promise.all(
+    useCallback(() => {
+      return Promise.all(
         selected.map(({ id }) => CredentialTypesAPI.destroy(id))
       );
     }, [selected]),

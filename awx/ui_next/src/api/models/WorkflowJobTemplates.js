@@ -77,21 +77,28 @@ class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
   readNotificationTemplatesApprovals(id, params) {
     return this.http.get(
       `${this.baseUrl}${id}/notification_templates_approvals/`,
-      { params }
+      {
+        params,
+      }
     );
   }
 
   associateNotificationTemplatesApprovals(resourceId, notificationId) {
     return this.http.post(
       `${this.baseUrl}${resourceId}/notification_templates_approvals/`,
-      { id: notificationId }
+      {
+        id: notificationId,
+      }
     );
   }
 
   disassociateNotificationTemplatesApprovals(resourceId, notificationId) {
     return this.http.post(
       `${this.baseUrl}${resourceId}/notification_templates_approvals/`,
-      { id: notificationId, disassociate: true }
+      {
+        id: notificationId,
+        disassociate: true,
+      }
     );
   }
 }

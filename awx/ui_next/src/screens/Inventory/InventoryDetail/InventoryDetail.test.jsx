@@ -85,7 +85,6 @@ describe('<InventoryDetail />', () => {
     });
     wrapper.update();
     expectDetailToMatch(wrapper, 'Name', mockInventory.name);
-    expectDetailToMatch(wrapper, 'Activity', 'Coming soon');
     expectDetailToMatch(wrapper, 'Description', mockInventory.description);
     expectDetailToMatch(wrapper, 'Type', 'Inventory');
     const org = wrapper.find('Detail[label="Organization"]');

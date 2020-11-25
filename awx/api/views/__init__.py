@@ -153,6 +153,7 @@ from awx.api.views.root import ( # noqa
     ApiV2PingView,
     ApiV2ConfigView,
     ApiV2SubscriptionView,
+    ApiV2AttachView,
 )
 from awx.api.views.webhooks import ( # noqa
     WebhookKeyView,
@@ -315,6 +316,9 @@ class DashboardJobsGraphView(APIView):
         start_date = now()
         if period == 'month':
             end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
+            interval = 'days'
+        elif period == 'two_weeks':
+            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=2)
             interval = 'days'
         elif period == 'week':
             end_date = start_date - dateutil.relativedelta.relativedelta(weeks=1)
@@ -3043,7 +3047,7 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
             approval_template,
             context=self.get_serializer_context()
         ).data
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_201_CREATED)
 
     def check_permissions(self, request):
         obj = self.get_object().workflow_job_template
@@ -4253,7 +4257,9 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if obj.notifications.filter(status='pending').exists():
+
+        hours_old = now() - dateutil.relativedelta.relativedelta(hours=8)
+        if obj.notifications.filter(status='pending', created__gt=hours_old).exists():
             return Response({"error": _("Delete not allowed while there are pending notifications")},
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super(NotificationTemplateDetail, self).delete(request, *args, **kwargs)

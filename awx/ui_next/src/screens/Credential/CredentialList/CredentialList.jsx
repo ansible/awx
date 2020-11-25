@@ -62,7 +62,7 @@ function CredentialList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(selected.map(({ id }) => CredentialsAPI.destroy(id)));
     }, [selected]),
     {

@@ -21,6 +21,10 @@ class Settings extends Base {
   readCategoryOptions(category) {
     return this.http.options(`${this.baseUrl}${category}/`);
   }
+
+  createTest(category, data) {
+    return this.http.post(`${this.baseUrl}${category}/test/`, data);
+  }
 }
 
 export default Settings;

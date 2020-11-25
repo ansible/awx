@@ -2,14 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  Tooltip,
-  DropdownItem,
-  ToolbarItem,
-} from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { InventoriesAPI, HostsAPI, CredentialTypesAPI } from '../../../api';
+import { InventoriesAPI, HostsAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
@@ -18,7 +12,6 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
-import { Kebabified } from '../../../contexts/Kebabified';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryHostItem from './InventoryHostItem';
 
@@ -29,7 +22,6 @@ const QS_CONFIG = getQSConfig('host', {
 });
 
 function InventoryHostList({ i18n }) {
-  const [isAdHocCommandsOpen, setIsAdHocCommandsOpen] = useState(false);
   const [selected, setSelected] = useState([]);
   const { id } = useParams();
   const { search } = useLocation();
@@ -41,9 +33,6 @@ function InventoryHostList({ i18n }) {
       actions,
       relatedSearchableKeys,
       searchableKeys,
-      moduleOptions,
-      credentialTypeId,
-      isAdHocDisabled,
     },
     error: contentError,
     isLoading,
@@ -51,11 +40,9 @@ function InventoryHostList({ i18n }) {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, search);
-      const [response, hostOptions, adHocOptions, cred] = await Promise.all([
+      const [response, hostOptions] = await Promise.all([
         InventoriesAPI.readHosts(id, params),
         InventoriesAPI.readHostsOptions(id),
-        InventoriesAPI.readAdHocOptions(id),
-        CredentialTypesAPI.read({ namespace: 'ssh' }),
       ]);
 
       return {
@@ -68,9 +55,6 @@ function InventoryHostList({ i18n }) {
         searchableKeys: Object.keys(hostOptions.data.actions?.GET || {}).filter(
           key => hostOptions.data.actions?.GET[key].filterable
         ),
-        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
-        credentialTypeId: cred.data.results[0].id,
-        isAdHocDisabled: !adHocOptions.data.actions.POST,
       };
     }, [id, search]),
     {
@@ -79,8 +63,6 @@ function InventoryHostList({ i18n }) {
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
-      moduleOptions: [],
-      isAdHocDisabled: true,
     }
   );
 
@@ -105,11 +87,16 @@ function InventoryHostList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      await Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
+    useCallback(() => {
+      return Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
     }, [selected]),
     { qsConfig: QS_CONFIG, fetchItems: fetchData }
   );
+
+  const handleDeleteHosts = async () => {
+    await deleteHosts();
+    setSelected([]);
+  };
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
@@ -162,43 +149,13 @@ function InventoryHostList({ i18n }) {
                     />,
                   ]
                 : []),
-              <Kebabified>
-                {({ isKebabified }) =>
-                  isKebabified ? (
-                    <DropdownItem
-                      key="run command"
-                      onClick={() => setIsAdHocCommandsOpen(true)}
-                      isDisabled={hostCount === 0 || isAdHocDisabled}
-                      aria-label={i18n._(t`Run command`)}
-                    >
-                      {i18n._(t`Run command`)}
-                    </DropdownItem>
-                  ) : (
-                    <ToolbarItem>
-                      <Tooltip
-                        content={i18n._(
-                          t`Select an inventory source by clicking the check box beside it. The inventory source can be a single host or a selection of multiple hosts.`
-                        )}
-                        position="top"
-                        key="adhoc"
-                      >
-                        <Button
-                          variant="secondary"
-                          key="run command"
-                          aria-label={i18n._(t`Run command`)}
-                          onClick={() => setIsAdHocCommandsOpen(true)}
-                          isDisabled={hostCount === 0 || isAdHocDisabled}
-                        >
-                          {i18n._(t`Run command`)}
-                        </Button>
-                      </Tooltip>
-                    </ToolbarItem>
-                  )
-                }
-              </Kebabified>,
+              <AdHocCommands
+                adHocItems={selected}
+                hasListItems={hostCount > 0}
+              />,
               <ToolbarDeleteButton
                 key="delete"
-                onDelete={deleteHosts}
+                onDelete={handleDeleteHosts}
                 itemsToDelete={selected}
                 pluralizedItemName={i18n._(t`Hosts`)}
               />,
@@ -224,16 +181,6 @@ function InventoryHostList({ i18n }) {
           )
         }
       />
-      {isAdHocCommandsOpen && (
-        <AdHocCommands
-          css="margin-right: 20px"
-          adHocItems={selected}
-          onClose={() => setIsAdHocCommandsOpen(false)}
-          credentialTypeId={credentialTypeId}
-          moduleOptions={moduleOptions}
-          itemId={id}
-        />
-      )}
       {deletionError && (
         <AlertModal
           isOpen={deletionError}

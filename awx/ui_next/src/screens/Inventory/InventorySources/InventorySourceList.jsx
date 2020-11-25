@@ -89,7 +89,7 @@ function InventorySourceList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(({ id: sourceId }) =>
           InventorySourcesAPI.destroy(sourceId)
@@ -105,8 +105,37 @@ function InventorySourceList({ i18n }) {
   );
   const { error: syncError, dismissError } = useDismissableError(syncAllError);
 
+  const deleteRelatedInventoryResources = resourceId => {
+    return [
+      InventorySourcesAPI.destroyHosts(resourceId),
+      InventorySourcesAPI.destroyGroups(resourceId),
+    ];
+  };
+
+  const {
+    isLoading: deleteRelatedResourcesLoading,
+    deletionError: deleteRelatedResourcesError,
+    deleteItems: handleDeleteRelatedResources,
+  } = useDeleteItems(
+    useCallback(async () => {
+      return (
+        Promise.all(
+          selected
+            .map(({ id: resourceId }) =>
+              deleteRelatedInventoryResources(resourceId)
+            )
+            .flat()
+        ),
+        []
+      );
+    }, [selected])
+  );
+
   const handleDelete = async () => {
-    await handleDeleteSources();
+    await handleDeleteRelatedResources();
+    if (!deleteRelatedResourcesError) {
+      await handleDeleteSources();
+    }
     setSelected([]);
   };
   const canAdd =
@@ -117,7 +146,12 @@ function InventorySourceList({ i18n }) {
     <>
       <PaginatedDataList
         contentError={fetchError}
-        hasContentLoading={isLoading || isDeleteLoading || isSyncAllLoading}
+        hasContentLoading={
+          isLoading ||
+          isDeleteLoading ||
+          isSyncAllLoading ||
+          deleteRelatedResourcesLoading
+        }
         items={sources}
         itemCount={sourceCount}
         pluralizedItemName={i18n._(t`Inventory Sources`)}
@@ -193,16 +227,16 @@ function InventorySourceList({ i18n }) {
         </AlertModal>
       )}
 
-      {deletionError && (
+      {(deletionError || deleteRelatedResourcesError) && (
         <AlertModal
           aria-label={i18n._(t`Delete error`)}
-          isOpen={deletionError}
+          isOpen={deletionError || deleteRelatedResourcesError}
           variant="error"
           title={i18n._(t`Error!`)}
           onClose={clearDeletionError}
         >
           {i18n._(t`Failed to delete one or more inventory sources.`)}
-          <ErrorDetail error={deletionError} />
+          <ErrorDetail error={deletionError || deleteRelatedResourcesError} />
         </AlertModal>
       )}
     </>

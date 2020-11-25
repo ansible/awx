@@ -4,6 +4,7 @@ import {
   maxLength,
   noWhiteSpace,
   integer,
+  number,
   url,
   combine,
   regExp,
@@ -109,6 +110,33 @@ describe('validators', () => {
   test('integer should reject string containing alphanum', () => {
     expect(integer(i18n)('15a')).toEqual({
       id: 'This field must be an integer',
+    });
+  });
+
+  test('number should accept number (number)', () => {
+    expect(number(i18n)(13)).toBeUndefined();
+  });
+
+  test('number should accept number (string)', () => {
+    expect(number(i18n)('13')).toBeUndefined();
+  });
+
+  test('number should accept negative number', () => {
+    expect(number(i18n)(-14)).toBeUndefined();
+  });
+
+  test('number should accept decimal/float', () => {
+    expect(number(i18n)(13.1)).toBeUndefined();
+  });
+
+  test('number should accept large number', () => {
+    expect(number(i18n)(999999999999999999999.9)).toBeUndefined();
+    expect(number(i18n)(-999999999999999999999.9)).toBeUndefined();
+  });
+
+  test('number should reject string containing alphanum', () => {
+    expect(number(i18n)('15a')).toEqual({
+      id: 'This field must be a number',
     });
   });
 

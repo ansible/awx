@@ -12,7 +12,7 @@ import {
 import { useField } from 'formik';
 import { FormGroup } from '@patternfly/react-core';
 import CodeMirrorInput from './CodeMirrorInput';
-import { FieldTooltip } from '../FormField';
+import Popover from '../Popover';
 
 function CodeMirrorField({
   id,
@@ -37,7 +37,7 @@ function CodeMirrorField({
       isRequired={isRequired}
       validated={isValid ? 'default' : 'error'}
       label={label}
-      labelIcon={<FieldTooltip content={tooltip} />}
+      labelIcon={<Popover content={tooltip} />}
     >
       <CodeMirrorInput
         id={id}

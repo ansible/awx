@@ -16,11 +16,12 @@ describe('<OrganizationAdd />', () => {
       name: 'new name',
       description: 'new description',
       custom_virtualenv: 'Buzz',
+      galaxy_credentials: [],
     };
     OrganizationsAPI.create.mockResolvedValueOnce({ data: {} });
     await act(async () => {
       const wrapper = mountWithContexts(<OrganizationAdd />);
-      wrapper.find('OrganizationForm').prop('onSubmit')(updatedOrgData, [], []);
+      wrapper.find('OrganizationForm').prop('onSubmit')(updatedOrgData, []);
     });
     expect(OrganizationsAPI.create).toHaveBeenCalledWith(updatedOrgData);
   });
@@ -46,6 +47,7 @@ describe('<OrganizationAdd />', () => {
       name: 'new name',
       description: 'new description',
       custom_virtualenv: 'Buzz',
+      galaxy_credentials: [],
     };
     OrganizationsAPI.create.mockResolvedValueOnce({
       data: {
@@ -62,7 +64,7 @@ describe('<OrganizationAdd />', () => {
         context: { router: { history } },
       });
       await waitForElement(wrapper, 'button[aria-label="Save"]');
-      await wrapper.find('OrganizationForm').prop('onSubmit')(orgData, [3], []);
+      await wrapper.find('OrganizationForm').prop('onSubmit')(orgData, [3]);
     });
     expect(history.location.pathname).toEqual('/organizations/5');
   });
@@ -72,6 +74,7 @@ describe('<OrganizationAdd />', () => {
       name: 'new name',
       description: 'new description',
       custom_virtualenv: 'Buzz',
+      galaxy_credentials: [],
     };
     OrganizationsAPI.create.mockResolvedValueOnce({
       data: {
@@ -87,8 +90,40 @@ describe('<OrganizationAdd />', () => {
       wrapper = mountWithContexts(<OrganizationAdd />);
     });
     await waitForElement(wrapper, 'button[aria-label="Save"]');
-    await wrapper.find('OrganizationForm').prop('onSubmit')(orgData, [3], []);
+    await wrapper.find('OrganizationForm').prop('onSubmit')(orgData, [3]);
     expect(OrganizationsAPI.associateInstanceGroup).toHaveBeenCalledWith(5, 3);
+  });
+
+  test('onSubmit should post galaxy credentials', async () => {
+    const orgData = {
+      name: 'new name',
+      description: 'new description',
+      custom_virtualenv: 'Buzz',
+      galaxy_credentials: [
+        {
+          id: 9000,
+        },
+      ],
+    };
+    OrganizationsAPI.create.mockResolvedValueOnce({
+      data: {
+        id: 5,
+        related: {
+          instance_groups: '/api/v2/organizations/5/instance_groups',
+        },
+        ...orgData,
+      },
+    });
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<OrganizationAdd />);
+    });
+    await waitForElement(wrapper, 'button[aria-label="Save"]');
+    await wrapper.find('OrganizationForm').prop('onSubmit')(orgData, [3]);
+    expect(OrganizationsAPI.associateGalaxyCredential).toHaveBeenCalledWith(
+      5,
+      9000
+    );
   });
 
   test('AnsibleSelect component renders if there are virtual environments', async () => {

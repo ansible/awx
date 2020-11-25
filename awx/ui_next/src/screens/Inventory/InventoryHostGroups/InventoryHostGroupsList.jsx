@@ -2,19 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  Tooltip,
-  DropdownItem,
-  ToolbarItem,
-} from '@patternfly/react-core';
 import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
 import useRequest, {
   useDismissableError,
   useDeleteItems,
 } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
-import { HostsAPI, InventoriesAPI, CredentialTypesAPI } from '../../../api';
+import { HostsAPI, InventoriesAPI } from '../../../api';
 import DataListToolbar from '../../../components/DataListToolbar';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -23,7 +17,6 @@ import PaginatedDataList, {
 } from '../../../components/PaginatedDataList';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
-import { Kebabified } from '../../../contexts/Kebabified';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryHostGroupItem from './InventoryHostGroupItem';
 
@@ -35,7 +28,6 @@ const QS_CONFIG = getQSConfig('group', {
 
 function InventoryHostGroupsList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAdHocCommandsOpen, setIsAdHocCommandsOpen] = useState(false);
   const { hostId, id: invId } = useParams();
   const { search } = useLocation();
 
@@ -46,9 +38,6 @@ function InventoryHostGroupsList({ i18n }) {
       actions,
       relatedSearchableKeys,
       searchableKeys,
-      moduleOptions,
-      isAdHocDisabled,
-      credentialTypeId,
     },
     error: contentError,
     isLoading,
@@ -62,13 +51,9 @@ function InventoryHostGroupsList({ i18n }) {
           data: { count, results },
         },
         hostGroupOptions,
-        adHocOptions,
-        cred,
       ] = await Promise.all([
         HostsAPI.readAllGroups(hostId, params),
         HostsAPI.readGroupsOptions(hostId),
-        InventoriesAPI.readAdHocOptions(invId),
-        CredentialTypesAPI.read({ namespace: 'ssh' }),
       ]);
 
       return {
@@ -81,9 +66,6 @@ function InventoryHostGroupsList({ i18n }) {
         searchableKeys: Object.keys(
           hostGroupOptions.data.actions?.GET || {}
         ).filter(key => hostGroupOptions.data.actions?.GET[key].filterable),
-        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
-        credentialTypeId: cred.data.results[0].id,
-        isAdHocDisabled: !adHocOptions.data.actions.POST,
       };
     }, [hostId, search]), // eslint-disable-line react-hooks/exhaustive-deps
     {
@@ -92,8 +74,6 @@ function InventoryHostGroupsList({ i18n }) {
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
-      moduleOptions: [],
-      isAdHocDisabled: true,
     }
   );
 
@@ -110,7 +90,7 @@ function InventoryHostGroupsList({ i18n }) {
     deleteItems: disassociateHosts,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(group => HostsAPI.disassociateGroup(hostId, group))
       );
@@ -222,40 +202,10 @@ function InventoryHostGroupsList({ i18n }) {
                     />,
                   ]
                 : []),
-              <Kebabified>
-                {({ isKebabified }) =>
-                  isKebabified ? (
-                    <DropdownItem
-                      key="run command"
-                      aria-label={i18n._(t`Run command`)}
-                      onClick={() => setIsAdHocCommandsOpen(true)}
-                      isDisabled={itemCount === 0 || isAdHocDisabled}
-                    >
-                      {i18n._(t`Run command`)}
-                    </DropdownItem>
-                  ) : (
-                    <ToolbarItem>
-                      <Tooltip
-                        content={i18n._(
-                          t`Select an inventory source by clicking the check box beside it. The inventory source can be a single group or host, a selection of multiple hosts, or a selection of multiple groups.`
-                        )}
-                        position="top"
-                        key="adhoc"
-                      >
-                        <Button
-                          key="run command"
-                          variant="secondary"
-                          aria-label={i18n._(t`Run command`)}
-                          onClick={() => setIsAdHocCommandsOpen(true)}
-                          isDisabled={itemCount === 0 || isAdHocDisabled}
-                        >
-                          {i18n._(t`Run command`)}
-                        </Button>
-                      </Tooltip>
-                    </ToolbarItem>
-                  )
-                }
-              </Kebabified>,
+              <AdHocCommands
+                adHocItems={selected}
+                hasListItems={itemCount > 0}
+              />,
               <DisassociateButton
                 key="disassociate"
                 onDisassociate={handleDisassociate}
@@ -286,16 +236,6 @@ function InventoryHostGroupsList({ i18n }) {
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}
           title={i18n._(t`Select Groups`)}
-        />
-      )}
-      {isAdHocCommandsOpen && (
-        <AdHocCommands
-          css="margin-right: 20px"
-          adHocItems={selected}
-          itemId={parseInt(invId, 10)}
-          onClose={() => setIsAdHocCommandsOpen(false)}
-          credentialTypeId={credentialTypeId}
-          moduleOptions={moduleOptions}
         />
       )}
       {error && (

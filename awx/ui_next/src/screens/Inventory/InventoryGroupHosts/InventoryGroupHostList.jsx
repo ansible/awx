@@ -1,15 +1,10 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  Tooltip,
-  DropdownItem,
-  ToolbarItem,
-} from '@patternfly/react-core';
+import { DropdownItem } from '@patternfly/react-core';
 import { getQSConfig, mergeParams, parseQueryString } from '../../../util/qs';
-import { GroupsAPI, InventoriesAPI, CredentialTypesAPI } from '../../../api';
+import { GroupsAPI, InventoriesAPI } from '../../../api';
 
 import useRequest, {
   useDeleteItems,
@@ -22,10 +17,9 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList from '../../../components/PaginatedDataList';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
-import { Kebabified } from '../../../contexts/Kebabified';
 import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
-import AddHostDropdown from './AddHostDropdown';
+import AddDropDownButton from '../../../components/AddDropDownButton';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -35,10 +29,8 @@ const QS_CONFIG = getQSConfig('host', {
 
 function InventoryGroupHostList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAdHocCommandsOpen, setIsAdHocCommandsOpen] = useState(false);
   const { id: inventoryId, groupId } = useParams();
   const location = useLocation();
-  const history = useHistory();
 
   const {
     result: {
@@ -47,9 +39,6 @@ function InventoryGroupHostList({ i18n }) {
       actions,
       relatedSearchableKeys,
       searchableKeys,
-      moduleOptions,
-      credentialTypeId,
-      isAdHocDisabled,
     },
     error: contentError,
     isLoading,
@@ -57,16 +46,9 @@ function InventoryGroupHostList({ i18n }) {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const [
-        response,
-        actionsResponse,
-        adHocOptions,
-        cred,
-      ] = await Promise.all([
+      const [response, actionsResponse] = await Promise.all([
         GroupsAPI.readAllHosts(groupId, params),
         InventoriesAPI.readHostsOptions(inventoryId),
-        InventoriesAPI.readAdHocOptions(inventoryId),
-        CredentialTypesAPI.read({ namespace: 'ssh' }),
       ]);
 
       return {
@@ -79,9 +61,6 @@ function InventoryGroupHostList({ i18n }) {
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
-        moduleOptions: adHocOptions.data.actions.GET.module_name.choices,
-        credentialTypeId: cred.data.results[0].id,
-        isAdHocDisabled: !adHocOptions.data.actions.POST,
       };
     }, [groupId, inventoryId, location.search]),
     {
@@ -90,8 +69,6 @@ function InventoryGroupHostList({ i18n }) {
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
-      moduleOptions: [],
-      isAdHocDisabled: true,
     }
   );
 
@@ -108,7 +85,7 @@ function InventoryGroupHostList({ i18n }) {
     deleteItems: disassociateHosts,
     deletionError: disassociateErr,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(host => GroupsAPI.disassociateHost(groupId, host))
       );
@@ -166,7 +143,31 @@ function InventoryGroupHostList({ i18n }) {
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_hosts/add`;
+  const addExistingHost = i18n._(t`Add existing host`);
+  const addNewHost = i18n._(t`Add new host`);
 
+  const addButton = (
+    <AddDropDownButton
+      key="add"
+      dropdownItems={[
+        <DropdownItem
+          onClick={() => setIsModalOpen(true)}
+          key={addExistingHost}
+          aria-label={addExistingHost}
+        >
+          {addExistingHost}
+        </DropdownItem>,
+        <DropdownItem
+          component={Link}
+          to={`${addFormUrl}`}
+          key={addNewHost}
+          aria-label={addNewHost}
+        >
+          {addNewHost}
+        </DropdownItem>,
+      ]}
+    />
+  );
   return (
     <>
       <PaginatedDataList
@@ -210,49 +211,11 @@ function InventoryGroupHostList({ i18n }) {
             }
             qsConfig={QS_CONFIG}
             additionalControls={[
-              ...(canAdd
-                ? [
-                    <AddHostDropdown
-                      key="associate"
-                      onAddExisting={() => setIsModalOpen(true)}
-                      onAddNew={() => history.push(addFormUrl)}
-                    />,
-                  ]
-                : []),
-              <Kebabified>
-                {({ isKebabified }) =>
-                  isKebabified ? (
-                    <DropdownItem
-                      variant="secondary"
-                      aria-label={i18n._(t`Run command`)}
-                      onClick={() => setIsAdHocCommandsOpen(true)}
-                      isDisabled={hostCount === 0 || isAdHocDisabled}
-                    >
-                      {i18n._(t`Run command`)}
-                    </DropdownItem>
-                  ) : (
-                    <ToolbarItem>
-                      <Tooltip
-                        content={i18n._(
-                          t`Select an inventory source by clicking the check box beside it.
-                          The inventory source can be a single host or a selection of multiple hosts.`
-                        )}
-                        position="top"
-                        key="adhoc"
-                      >
-                        <Button
-                          variant="secondary"
-                          aria-label={i18n._(t`Run command`)}
-                          onClick={() => setIsAdHocCommandsOpen(true)}
-                          isDisabled={hostCount === 0 || isAdHocDisabled}
-                        >
-                          {i18n._(t`Run command`)}
-                        </Button>
-                      </Tooltip>
-                    </ToolbarItem>
-                  )
-                }
-              </Kebabified>,
+              ...(canAdd ? [addButton] : []),
+              <AdHocCommands
+                adHocItems={selected}
+                hasListItems={hostCount > 0}
+              />,
               <DisassociateButton
                 key="disassociate"
                 onDisassociate={handleDisassociate}
@@ -277,15 +240,7 @@ function InventoryGroupHostList({ i18n }) {
             onSelect={() => handleSelect(o)}
           />
         )}
-        emptyStateControls={
-          canAdd && (
-            <AddHostDropdown
-              key="associate"
-              onAddExisting={() => setIsModalOpen(true)}
-              onAddNew={() => history.push(addFormUrl)}
-            />
-          )
-        }
+        emptyStateControls={canAdd && addButton}
       />
       {isModalOpen && (
         <AssociateModal
@@ -296,16 +251,6 @@ function InventoryGroupHostList({ i18n }) {
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}
           title={i18n._(t`Select Hosts`)}
-        />
-      )}
-      {isAdHocCommandsOpen && (
-        <AdHocCommands
-          css="margin-right: 20px"
-          adHocItems={selected}
-          itemId={parseInt(inventoryId, 10)}
-          onClose={() => setIsAdHocCommandsOpen(false)}
-          credentialTypeId={credentialTypeId}
-          moduleOptions={moduleOptions}
         />
       )}
       {associateError && (

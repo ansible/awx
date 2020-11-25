@@ -903,7 +903,7 @@ class Command(BaseCommand):
     def check_license(self):
         license_info = get_licenser().validate()
         local_license_type = license_info.get('license_type', 'UNLICENSED')
-        if license_info.get('license_key', 'UNLICENSED') == 'UNLICENSED':
+        if local_license_type == 'UNLICENSED':
             logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise CommandError('No license found!')
         elif local_license_type == 'open':

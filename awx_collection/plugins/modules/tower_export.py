@@ -82,9 +82,11 @@ EXAMPLES = '''
 - name: Export all tower assets
   tower_export:
     all: True
+
 - name: Export all inventories
   tower_export:
     inventory: 'all'
+
 - name: Export a job template named "My Template" and all Credentials
   tower_export:
     job_template: "My Template"
@@ -135,27 +137,27 @@ def main():
             # Otherwise we take either the string or None (if the parameter was not passed) to get one or no items
             export_args[resource] = module.params.get(resource)
 
-    # Currently the import process does not return anything on error
-    # It simply just logs to pythons logger
-    # Setup a log gobbler to get error messages from import_assets
+    # Currently the export process does not return anything on error
+    # It simply just logs to Python's logger
+    # Set up a log gobbler to get error messages from export_assets
     log_capture_string = StringIO()
     ch = logging.StreamHandler(log_capture_string)
     for logger_name in ['awxkit.api.pages.api', 'awxkit.api.pages.page']:
         logger = logging.getLogger(logger_name)
-        logger.setLevel(logging.WARNING)
-        ch.setLevel(logging.WARNING)
+        logger.setLevel(logging.ERROR)
+        ch.setLevel(logging.ERROR)
 
     logger.addHandler(ch)
     log_contents = ''
 
-    # Run the import process
+    # Run the export process
     try:
         module.json_output['assets'] = module.get_api_v2_object().export_assets(**export_args)
         module.exit_json(**module.json_output)
     except Exception as e:
         module.fail_json(msg="Failed to export assets {0}".format(e))
     finally:
-        # Finally consume the logs incase there were any errors and die if there were
+        # Finally, consume the logs in case there were any errors and die if there were
         log_contents = log_capture_string.getvalue()
         log_capture_string.close()
         if log_contents != '':

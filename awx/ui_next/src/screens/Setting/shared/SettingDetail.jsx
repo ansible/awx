@@ -2,8 +2,7 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Detail } from '../../../components/DetailList';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
-// import DetailPopover from '../../../components/DetailList/DetailPopover';
+import CodeDetail from '../../../components/DetailList/CodeDetail';
 
 export default withI18n()(
   ({ i18n, helpText, id, label, type, unit = '', value }) => {
@@ -13,10 +12,11 @@ export default withI18n()(
     switch (dataType) {
       case 'nested object':
         detail = (
-          <VariablesDetail
+          <CodeDetail
             dataCy={id}
-            label={label}
             helpText={helpText}
+            label={label}
+            mode="javascript"
             rows={4}
             value={JSON.stringify(value || {}, undefined, 2)}
           />
@@ -24,12 +24,13 @@ export default withI18n()(
         break;
       case 'list':
         detail = (
-          <VariablesDetail
+          <CodeDetail
             dataCy={id}
             helpText={helpText}
-            rows={4}
             label={label}
-            value={value}
+            mode="javascript"
+            rows={4}
+            value={JSON.stringify(value || [], undefined, 2)}
           />
         );
         break;

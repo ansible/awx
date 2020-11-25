@@ -74,7 +74,8 @@ options:
         - Deprecated, please use credential_type
       required: False
       type: str
-      choices: ["ssh", "vault", "net", "scm", "aws", "vmware", "satellite6", "cloudforms", "gce", "azure_rm", "openstack", "rhv", "insights", "tower"]
+      choices: ["aws", "tower", "gce", "azure_rm", "openstack", "satellite6", "rhv", "vmware", "aim", "conjur", "hashivault_kv", "hashivault_ssh",
+                "azure_kv", "insights", "kubernetes_bearer_token", "net", "scm", "ssh", "github_token", "gitlab_token", "vault"]
     host:
       description:
         - Host for this credential.
@@ -278,20 +279,27 @@ EXAMPLES = '''
 from ..module_utils.tower_api import TowerAPIModule
 
 KIND_CHOICES = {
-    'ssh': 'Machine',
-    'vault': 'Vault',
-    'net': 'Network',
-    'scm': 'Source Control',
     'aws': 'Amazon Web Services',
-    'vmware': 'VMware vCenter',
-    'satellite6': 'Red Hat Satellite 6',
-    'cloudforms': 'Red Hat CloudForms',
+    'tower': 'Ansible Tower',
     'gce': 'Google Compute Engine',
     'azure_rm': 'Microsoft Azure Resource Manager',
     'openstack': 'OpenStack',
+    'satellite6': 'Red Hat Satellite 6',
     'rhv': 'Red Hat Virtualization',
+    'vmware': 'VMware vCenter',
+    'aim': 'CyberArk AIM Central Credential Provider Lookup',
+    'conjur': 'CyberArk Conjur Secret Lookup',
+    'hashivault_kv': 'HashiCorp Vault Secret Lookup',
+    'hashivault_ssh': 'HashiCorp Vault Signed SSH',
+    'azure_kv': 'Microsoft Azure Key Vault',
     'insights': 'Insights',
-    'tower': 'Ansible Tower',
+    'kubernetes_bearer_token': 'OpenShift or Kubernetes API Bearer Token',
+    'net': 'Network',
+    'scm': 'Source Control',
+    'ssh': 'Machine',
+    'github_token': 'GitHub Personal Access Token',
+    'gitlab_token': 'GitLab Personal Access Token',
+    'vault': 'Vault',
 }
 
 
