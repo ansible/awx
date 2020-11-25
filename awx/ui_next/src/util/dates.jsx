@@ -6,10 +6,16 @@ import { getLanguage } from './language';
 const prependZeros = value => value.toString().padStart(2, 0);
 
 export function formatDateString(dateString, lang = getLanguage(navigator)) {
+  if (dateString === null) {
+    return null;
+  }
   return new Date(dateString).toLocaleString(lang);
 }
 
 export function formatDateStringUTC(dateString, lang = getLanguage(navigator)) {
+  if (dateString === null) {
+    return null;
+  }
   return new Date(dateString).toLocaleString(lang, { timeZone: 'UTC' });
 }
 

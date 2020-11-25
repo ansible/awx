@@ -138,7 +138,7 @@ function NotificationTemplatesList({ i18n }) {
                     key="delete"
                     onDelete={handleDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName="Organizations"
+                    pluralizedItemName={i18n._(t`Notification Templates`)}
                   />,
                 ]}
               />
@@ -164,7 +164,7 @@ function NotificationTemplatesList({ i18n }) {
         title={i18n._(t`Error!`)}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more organizations.`)}
+        {i18n._(t`Failed to delete one or more notification template.`)}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </>
