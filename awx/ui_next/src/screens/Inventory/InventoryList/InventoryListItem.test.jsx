@@ -36,6 +36,7 @@ describe('<InventoryListItem />', () => {
         inventory={{
           id: 1,
           name: 'Inventory',
+          kind: '',
           summary_fields: {
             organization: {
               id: 1,
@@ -51,6 +52,7 @@ describe('<InventoryListItem />', () => {
         onSelect={() => {}}
       />
     );
+    expect(wrapper.find('SyncStatusIndicator').length).toBe(1);
     expect(
       wrapper
         .find('DataListCell')
