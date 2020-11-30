@@ -57,11 +57,11 @@ No license.
 See http://www.ansible.com/renew for license information.'''
 
 LICENSE_MESSAGE = '''\
-Number of licensed instances exceeded, would bring available instances to %(new_count)d, system is licensed for %(available_instances)d.
+Number of licensed instances exceeded, would bring available instances to %(new_count)d, system is licensed for %(instance_count)d.
 See http://www.ansible.com/renew for license extension information.'''
 
 DEMO_LICENSE_MESSAGE = '''\
-Demo mode free license count exceeded, would bring available instances to %(new_count)d, demo mode allows %(available_instances)d.
+Demo mode free license count exceeded, would bring available instances to %(new_count)d, demo mode allows %(instance_count)d.
 See http://www.ansible.com/renew for licensing information.'''
 
 
@@ -856,7 +856,7 @@ class Command(BaseCommand):
             raise PermissionDenied('No license found!')
         elif local_license_type == 'open':
             return
-        available_instances = license_info.get('available_instances', 0)
+        instance_count = license_info.get('instance_count', 0)
         free_instances = license_info.get('free_instances', 0)
         time_remaining = license_info.get('time_remaining', 0)
         hard_error = license_info.get('trial', False) is True or license_info['instance_count'] == 10
@@ -877,7 +877,7 @@ class Command(BaseCommand):
         if free_instances < 0:
             d = {
                 'new_count': new_count,
-                'available_instances': available_instances,
+                'instance_count': instance_count,
             }
             if hard_error:
                 logger.error(LICENSE_MESSAGE % d)

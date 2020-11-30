@@ -419,10 +419,9 @@ class Licenser(object):
             current_instances = Host.objects.active_count()
         else:
             current_instances = 0
-        available_instances = int(attrs.get('instance_count', None) or 0)
+        instance_count = int(attrs.get('instance_count', 0))
         attrs['current_instances'] = current_instances
-        attrs['available_instances'] = available_instances
-        free_instances = (available_instances - current_instances)
+        free_instances = (instance_count - current_instances)
         attrs['free_instances'] = max(0, free_instances)
 
         license_date = int(attrs.get('license_date', 0) or 0)
