@@ -2,6 +2,7 @@ import json
 
 from django.utils.translation import ugettext_lazy as _
 
+from django.utils.encoding import iri_to_uri
 
 FrozenInjectors = dict()
 
