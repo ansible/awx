@@ -2061,8 +2061,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                     credential, env, {}, [], private_data_dir
                 )
 
-        assert '--custom' in ' '.join(args)
-        script = args[args.index('--source') + 1]
+        assert '-i' in ' '.join(args)
+        script = args[args.index('-i') + 1]
         with open(script, 'r') as f:
             assert f.read() == inventory_update.source_script.script
         assert env['FOO'] == 'BAR'
