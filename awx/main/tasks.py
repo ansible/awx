@@ -2763,6 +2763,9 @@ class RunInventoryUpdate(BaseTask):
         except PermissionDenied as exc:
             logger.exception('License error saving {} content'.format(inventory_update.log_format))
             raise PostRunError(str(exc), status='error')
+        except PostRunError:
+            logger.exception('Error saving {} content, rolling back changes'.format(inventory_update.log_format))
+            raise
         except Exception:
             logger.exception('Exception saving {} content, rolling back changes.'.format(
                 inventory_update.log_format))
