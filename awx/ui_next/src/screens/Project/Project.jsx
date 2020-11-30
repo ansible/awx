@@ -57,7 +57,7 @@ function Project({ i18n, setBreadcrumb }) {
 
   useEffect(() => {
     fetchProjectAndRoles();
-  }, [fetchProjectAndRoles]);
+  }, [fetchProjectAndRoles, location.pathname]);
 
   useEffect(() => {
     if (project) {
