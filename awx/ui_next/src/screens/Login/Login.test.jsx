@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { RootAPI } from '../../api';
+import { AuthAPI, RootAPI } from '../../api';
 import {
   mountWithContexts,
   waitForElement,
@@ -14,6 +14,10 @@ RootAPI.readAssetVariables.mockResolvedValue({
   data: {
     BRAND_NAME: 'AWX',
   },
+});
+
+AuthAPI.read.mockResolvedValue({
+  data: {},
 });
 
 describe('<Login />', () => {
@@ -266,6 +270,113 @@ describe('<Login />', () => {
     });
     await waitForElement(wrapper, 'Redirect', el => el.length === 1);
     await waitForElement(wrapper, 'Redirect', el => el.props().to === '/');
+    done();
+  });
+
+  test('GitHub auth buttons shown', async done => {
+    AuthAPI.read.mockResolvedValue({
+      data: {
+        github: {
+          login_url: '/sso/login/github/',
+          complete_url: 'https://localhost:8043/sso/complete/github/',
+        },
+        'github-org': {
+          login_url: '/sso/login/github-org/',
+          complete_url: 'https://localhost:8043/sso/complete/github-org/',
+        },
+        'github-team': {
+          login_url: '/sso/login/github-team/',
+          complete_url: 'https://localhost:8043/sso/complete/github-team/',
+        },
+      },
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
+    });
+    wrapper.update();
+    expect(wrapper.find('GithubIcon').length).toBe(3);
+    expect(wrapper.find('AzureIcon').length).toBe(0);
+    expect(wrapper.find('GoogleIcon').length).toBe(0);
+    expect(wrapper.find('UserCircleIcon').length).toBe(0);
+    done();
+  });
+
+  test('Google auth button shown', async done => {
+    AuthAPI.read.mockResolvedValue({
+      data: {
+        'google-oauth2': {
+          login_url: '/sso/login/google-oauth2/',
+          complete_url: 'https://localhost:8043/sso/complete/google-oauth2/',
+        },
+      },
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
+    });
+    wrapper.update();
+    expect(wrapper.find('GithubIcon').length).toBe(0);
+    expect(wrapper.find('AzureIcon').length).toBe(0);
+    expect(wrapper.find('GoogleIcon').length).toBe(1);
+    expect(wrapper.find('UserCircleIcon').length).toBe(0);
+    done();
+  });
+
+  test('Azure AD auth button shown', async done => {
+    AuthAPI.read.mockResolvedValue({
+      data: {
+        'azuread-oauth2': {
+          login_url: '/sso/login/azuread-oauth2/',
+          complete_url: 'https://localhost:8043/sso/complete/azuread-oauth2/',
+        },
+      },
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
+    });
+    wrapper.update();
+    expect(wrapper.find('GithubIcon').length).toBe(0);
+    expect(wrapper.find('AzureIcon').length).toBe(1);
+    expect(wrapper.find('GoogleIcon').length).toBe(0);
+    expect(wrapper.find('UserCircleIcon').length).toBe(0);
+    done();
+  });
+
+  test('SAML auth buttons shown', async done => {
+    AuthAPI.read.mockResolvedValue({
+      data: {
+        saml: {
+          login_url: '/sso/login/saml/',
+          complete_url: 'https://localhost:8043/sso/complete/saml/',
+          metadata_url: '/sso/metadata/saml/',
+        },
+        'saml:onelogin': {
+          login_url: '/sso/login/saml/?idp=onelogin',
+          complete_url: 'https://localhost:8043/sso/complete/saml/',
+          metadata_url: '/sso/metadata/saml/',
+        },
+        'saml:someotheridp': {
+          login_url: '/sso/login/saml/?idp=someotheridp',
+          complete_url: 'https://localhost:8043/sso/complete/saml/',
+          metadata_url: '/sso/metadata/saml/',
+        },
+      },
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
+    });
+    wrapper.update();
+    expect(wrapper.find('GithubIcon').length).toBe(0);
+    expect(wrapper.find('AzureIcon').length).toBe(0);
+    expect(wrapper.find('GoogleIcon').length).toBe(0);
+    expect(wrapper.find('UserCircleIcon').length).toBe(3);
     done();
   });
 });
