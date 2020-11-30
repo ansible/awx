@@ -375,7 +375,6 @@ class Licenser(object):
             current_instances = 0
         available_instances = int(attrs.get('instance_count', None) or 0)
         attrs['current_instances'] = current_instances
-        attrs['available_instances'] = available_instances
         free_instances = (available_instances - current_instances)
         attrs['free_instances'] = max(0, free_instances)
 
