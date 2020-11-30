@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Route, withRouter, Switch } from 'react-router-dom';
+import { Route, withRouter, Switch, useRouteMatch } from 'react-router-dom';
 import { PageSection } from '@patternfly/react-core';
 
 import { Config } from '../../contexts/Config';
@@ -12,28 +12,21 @@ import WorkflowJobTemplate from './WorkflowJobTemplate';
 import JobTemplateAdd from './JobTemplateAdd';
 import WorkflowJobTemplateAdd from './WorkflowJobTemplateAdd';
 
-class Templates extends Component {
-  constructor(props) {
-    super(props);
-    const { i18n } = this.props;
+function Templates({ i18n }) {
+  const match = useRouteMatch();
+  const [breadcrumbConfig, setBreadcrumbs] = useState({
+    '/templates': i18n._(t`Templates`),
+    '/templates/job_template/add': i18n._(t`Create New Job Template`),
+    '/templates/workflow_job_template/add': i18n._(
+      t`Create New Workflow Template`
+    ),
+  });
 
-    this.state = {
-      breadcrumbConfig: {
-        '/templates': i18n._(t`Templates`),
-        '/templates/job_template/add': i18n._(t`Create New Job Template`),
-        '/templates/workflow_job_template/add': i18n._(
-          t`Create New Workflow Template`
-        ),
-      },
-    };
-  }
-
-  setBreadCrumbConfig = (template, schedule) => {
-    const { i18n } = this.props;
+  const setBreadCrumbConfig = (template, schedule) => {
     if (!template) {
       return;
     }
-    const breadcrumbConfig = {
+    const breadcrumb = {
       '/templates': i18n._(t`Templates`),
       '/templates/job_template/add': i18n._(t`Create New Job Template`),
       '/templates/workflow_job_template/add': i18n._(
@@ -73,62 +66,55 @@ class Templates extends Component {
       [`/templates/${template.type}/${template.id}/schedules/${schedule &&
         schedule.id}/edit`]: i18n._(t`Edit Details`),
     };
-    this.setState({ breadcrumbConfig });
+    setBreadcrumbs(breadcrumb);
   };
 
-  render() {
-    const { match, history, location } = this.props;
-    const { breadcrumbConfig } = this.state;
-    return (
-      <>
-        <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
-        <Switch>
-          <Route path={`${match.path}/job_template/add`}>
-            <JobTemplateAdd />
-          </Route>
-          <Route path={`${match.path}/workflow_job_template/add`}>
-            <WorkflowJobTemplateAdd />
-          </Route>
-          <Route
-            path={`${match.path}/job_template/:id`}
-            render={({ match: newRouteMatch }) => (
-              <Config>
-                {({ me }) => (
-                  <Template
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadCrumbConfig}
-                    me={me || {}}
-                    match={newRouteMatch}
-                  />
-                )}
-              </Config>
-            )}
-          />
-          <Route
-            path={`${match.path}/workflow_job_template/:id`}
-            render={({ match: newRouteMatch }) => (
-              <Config>
-                {({ me }) => (
-                  <WorkflowJobTemplate
-                    location={location}
-                    setBreadcrumb={this.setBreadCrumbConfig}
-                    me={me || {}}
-                    match={newRouteMatch}
-                  />
-                )}
-              </Config>
-            )}
-          />
-          <Route path={`${match.path}`}>
-            <PageSection>
-              <TemplateList />
-            </PageSection>
-          </Route>
-        </Switch>
-      </>
-    );
-  }
+  return (
+    <>
+      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <Switch>
+        <Route path={`${match.path}/job_template/add`}>
+          <JobTemplateAdd />
+        </Route>
+        <Route path={`${match.path}/workflow_job_template/add`}>
+          <WorkflowJobTemplateAdd />
+        </Route>
+        <Route
+          path={`${match.path}/job_template/:id`}
+          render={({ match: newRouteMatch }) => (
+            <Config>
+              {({ me }) => (
+                <Template
+                  setBreadcrumb={setBreadCrumbConfig}
+                  me={me || {}}
+                  match={newRouteMatch}
+                />
+              )}
+            </Config>
+          )}
+        />
+        <Route
+          path={`${match.path}/workflow_job_template/:id`}
+          render={({ match: newRouteMatch }) => (
+            <Config>
+              {({ me }) => (
+                <WorkflowJobTemplate
+                  setBreadcrumb={setBreadCrumbConfig}
+                  me={me || {}}
+                  match={newRouteMatch}
+                />
+              )}
+            </Config>
+          )}
+        />
+        <Route path={`${match.path}`}>
+          <PageSection>
+            <TemplateList />
+          </PageSection>
+        </Route>
+      </Switch>
+    </>
+  );
 }
 
 export { Templates as _Templates };

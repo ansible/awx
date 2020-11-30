@@ -12,8 +12,8 @@ import {
 import { BrandName } from '../../variables';
 import brandLogoImg from './brand-logo.svg';
 
-class About extends React.Component {
-  static createSpeechBubble(version) {
+function About({ ansible_version, version, isOpen, onClose, i18n }) {
+  const createSpeechBubble = () => {
     let text = `${BrandName} ${version}`;
     let top = '';
     let bottom = '';
@@ -28,31 +28,22 @@ class About extends React.Component {
     bottom = ` --${bottom}-- `;
 
     return top + text + bottom;
-  }
+  };
 
-  constructor(props) {
-    super(props);
+  const speechBubble = createSpeechBubble();
 
-    this.createSpeechBubble = this.constructor.createSpeechBubble.bind(this);
-  }
-
-  render() {
-    const { ansible_version, version, isOpen, onClose, i18n } = this.props;
-
-    const speechBubble = this.createSpeechBubble(version);
-
-    return (
-      <AboutModal
-        isOpen={isOpen}
-        onClose={onClose}
-        productName={`Ansible ${BrandName}`}
-        trademark={i18n._(t`Copyright 2019 Red Hat, Inc.`)}
-        brandImageSrc={brandLogoImg}
-        brandImageAlt={i18n._(t`Brand Image`)}
-      >
-        <pre>
-          {speechBubble}
-          {`
+  return (
+    <AboutModal
+      isOpen={isOpen}
+      onClose={onClose}
+      productName={`Ansible ${BrandName}`}
+      trademark={i18n._(t`Copyright 2019 Red Hat, Inc.`)}
+      brandImageSrc={brandLogoImg}
+      brandImageAlt={i18n._(t`Brand Image`)}
+    >
+      <pre>
+        {speechBubble}
+        {`
           \\
           \\   ^__^
               (oo)\\_______
@@ -60,18 +51,17 @@ class About extends React.Component {
                   ||----w |
                   ||     ||
                     `}
-        </pre>
-        <TextContent>
-          <TextList component="dl">
-            <TextListItem component="dt">
-              {i18n._(t`Ansible Version`)}
-            </TextListItem>
-            <TextListItem component="dd">{ansible_version}</TextListItem>
-          </TextList>
-        </TextContent>
-      </AboutModal>
-    );
-  }
+      </pre>
+      <TextContent>
+        <TextList component="dl">
+          <TextListItem component="dt">
+            {i18n._(t`Ansible Version`)}
+          </TextListItem>
+          <TextListItem component="dd">{ansible_version}</TextListItem>
+        </TextList>
+      </TextContent>
+    </AboutModal>
+  );
 }
 
 About.propTypes = {
