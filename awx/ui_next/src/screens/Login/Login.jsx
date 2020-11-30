@@ -7,11 +7,10 @@ import styled from 'styled-components';
 import { LoginForm, LoginPage as PFLoginPage } from '@patternfly/react-core';
 import useRequest, { useDismissableError } from '../../util/useRequest';
 import { RootAPI } from '../../api';
-import { BrandName } from '../../variables';
 import AlertModal from '../../components/AlertModal';
 import ErrorDetail from '../../components/ErrorDetail';
 
-import brandLogo from './brand-logo.svg';
+const loginLogoSrc = '/static/media/logo-login.svg';
 
 const LoginPage = styled(PFLoginPage)`
   & .pf-c-brand {
@@ -24,21 +23,27 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
     isLoading: isCustomLoginInfoLoading,
     error: customLoginInfoError,
     request: fetchCustomLoginInfo,
-    result: { logo, loginInfo },
+    result: { brandName, logo, loginInfo },
   } = useRequest(
     useCallback(async () => {
-      const {
-        data: { custom_logo, custom_login_info },
-      } = await RootAPI.read();
+      const [
+        {
+          data: { custom_logo, custom_login_info },
+        },
+        {
+          data: { BRAND_NAME },
+        },
+      ] = await Promise.all([RootAPI.read(), RootAPI.readAssetVariables()]);
       const logoSrc = custom_logo
         ? `data:image/jpeg;${custom_logo}`
-        : brandLogo;
+        : loginLogoSrc;
       return {
+        brandName: BRAND_NAME,
         logo: logoSrc,
         loginInfo: custom_login_info,
       };
     }, []),
-    { logo: brandLogo, loginInfo: null }
+    { brandName: null, logo: loginLogoSrc, loginInfo: null }
   );
 
   const {
@@ -70,8 +75,6 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
     await authenticate(values);
   };
 
-  const brandName = BrandName;
-
   if (isCustomLoginInfoLoading) {
     return null;
   }
@@ -91,7 +94,11 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
     <LoginPage
       brandImgSrc={logo}
       brandImgAlt={alt || brandName}
-      loginTitle={i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)}
+      loginTitle={
+        brandName
+          ? i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)
+          : ''
+      }
       textContent={loginInfo}
     >
       <Formik

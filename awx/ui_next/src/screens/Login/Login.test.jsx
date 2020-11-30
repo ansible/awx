@@ -10,6 +10,12 @@ import AWXLogin from './Login';
 
 jest.mock('../../api');
 
+RootAPI.readAssetVariables.mockResolvedValue({
+  data: {
+    BRAND_NAME: 'AWX',
+  },
+});
+
 describe('<Login />', () => {
   async function findChildren(wrapper) {
     const [
@@ -100,7 +106,7 @@ describe('<Login />', () => {
     });
     const { loginHeaderLogo } = await findChildren(wrapper);
     const { alt, src } = loginHeaderLogo.props();
-    expect([alt, src]).toEqual(['AWX', 'brand-logo.svg']);
+    expect([alt, src]).toEqual(['AWX', '/static/media/logo-login.svg']);
     done();
   });
 
@@ -123,7 +129,7 @@ describe('<Login />', () => {
     });
     const { loginHeaderLogo } = await findChildren(wrapper);
     const { alt, src } = loginHeaderLogo.props();
-    expect([alt, src]).toEqual(['AWX', 'brand-logo.svg']);
+    expect([alt, src]).toEqual([null, '/static/media/logo-login.svg']);
     expect(wrapper.find('AlertModal').length).toBe(1);
     done();
   });
