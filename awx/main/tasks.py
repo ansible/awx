@@ -78,6 +78,7 @@ from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
+from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -2740,52 +2741,7 @@ class RunInventoryUpdate(BaseTask):
         if inventory_update.verbosity:
             options['verbosity'] = inventory_update.verbosity
 
-        # Mock ansible-runner events
-        class CallbackHandler(logging.Handler):
-            def __init__(self, event_handler, cancel_callback, job_timeout, verbosity,
-                         start_time=None, counter=0, initial_line=0, **kwargs):
-                self.event_handler = event_handler
-                self.cancel_callback = cancel_callback
-                self.job_timeout = job_timeout
-                if start_time is None:
-                    self.job_start = now()
-                else:
-                    self.job_start = start_time
-                self.last_check = self.job_start
-                self.counter = counter
-                self.skip_level = [logging.WARNING, logging.INFO, logging.DEBUG, 0][verbosity]
-                self._start_line = initial_line
-                super(CallbackHandler, self).__init__(**kwargs)
-
-            def emit(self, record):
-                this_time = now()
-                if (this_time - self.last_check).total_seconds() > 0.5:
-                    self.last_check = this_time
-                    if self.cancel_callback():
-                        raise PostRunError('Inventory update has been canceled', status='canceled')
-                if self.job_timeout and ((this_time - self.job_start).total_seconds() > self.job_timeout):
-                    raise PostRunError('Inventory update has timed out', status='canceled')
-
-                # skip logging for low severity logs
-                if record.levelno < self.skip_level:
-                    return
-
-                self.counter += 1
-                msg = self.format(record)
-                n_lines = len(msg.strip().split('\n'))  # don't count new-lines at boundry of text
-                dispatch_data = dict(
-                    created=now().isoformat(),
-                    event='verbose',
-                    counter=self.counter,
-                    stdout=msg,
-                    start_line=self._start_line,
-                    end_line=self._start_line + n_lines
-                )
-                self._start_line += n_lines
-
-                self.event_handler(dispatch_data)
-
-        handler = CallbackHandler(
+        handler = SpecialInventoryHandler(
             self.event_handler, self.cancel_callback,
             verbosity=inventory_update.verbosity,
             job_timeout=self.get_instance_timeout(self.instance),
@@ -2793,7 +2749,9 @@ class RunInventoryUpdate(BaseTask):
             counter=self.event_ct, initial_line=self.end_line
         )
         inv_logger = logging.getLogger('awx.main.commands.inventory_import')
-        handler.formatter = inv_logger.handlers[0].formatter
+        formatter = inv_logger.handlers[0].formatter
+        formatter.job_start = inventory_update.started
+        handler.formatter = formatter
         inv_logger.handlers[0] = handler
 
         from awx.main.management.commands.inventory_import import Command as InventoryImportCommand
