@@ -133,13 +133,15 @@ function JobDetail({ job, i18n }) {
   return (
     <CardBody>
       <DetailList>
-        {/* TODO: hookup status to websockets */}
         <Detail
+          fullWidth={Boolean(job.job_explanation)}
           label={i18n._(t`Status`)}
           value={
             <StatusDetailValue>
               {job.status && <StatusIcon status={job.status} />}
-              {toTitleCase(job.status)}
+              {job.job_explanation
+                ? job.job_explanation
+                : toTitleCase(job.status)}
             </StatusDetailValue>
           }
         />
