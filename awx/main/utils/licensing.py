@@ -260,11 +260,15 @@ class Licenser(object):
 
 
     def get_satellite_subs(self, host, user, pw):
+        port = None
         try:
             verify = str(self.config.get("rhsm", "repo_ca_cert"))
+            port = str(self.config.get("server", "port"))
         except Exception as e:
             logger.exception('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
             verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', True)
+        if port:
+            host = ':'.join([host, port])
         json = []
         try:
             orgs = requests.get(
