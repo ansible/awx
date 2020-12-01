@@ -36,7 +36,7 @@ function OrganizationListItem({
       </Td>
       <Td>{organization.summary_fields.related_field_counts.users}</Td>
       <Td>{organization.summary_fields.related_field_counts.teams}</Td>
-      <ActionsTd numActions={2}>
+      <ActionsTd numActions={1}>
         {organization.summary_fields.user_capabilities.edit ? (
           <Tooltip content={i18n._(t`Edit Organization`)} position="top">
             <Button

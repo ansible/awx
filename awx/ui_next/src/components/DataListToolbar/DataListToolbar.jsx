@@ -93,9 +93,11 @@ function DataListToolbar({
               onRemove={onRemove}
             />
           </ToolbarItem>
-          <ToolbarItem>
-            <Sort qsConfig={qsConfig} columns={sortColumns} onSort={onSort} />
-          </ToolbarItem>
+          {sortColumns && (
+            <ToolbarItem>
+              <Sort qsConfig={qsConfig} columns={sortColumns} onSort={onSort} />
+            </ToolbarItem>
+          )}
         </ToolbarToggleGroup>
         {showExpandCollapse && (
           <ToolbarGroup>

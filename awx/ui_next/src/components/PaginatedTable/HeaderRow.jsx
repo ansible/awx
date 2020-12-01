@@ -7,21 +7,13 @@ import {
   replaceParams,
 } from '../../util/qs';
 
-export default function HeaderRow({
-  handleSelectAll,
-  isAllSelected,
-  qsConfig,
-  defaultSortKey,
-  children,
-}) {
+export default function HeaderRow({ qsConfig, defaultSortKey, children }) {
   const location = useLocation();
   const history = useHistory();
 
   const params = parseQueryString(qsConfig, location.search);
 
-  // TODO: asc vs desc -- correct for both alpha & numeric sorting?
   const onSort = (key, order) => {
-    console.log({ key, order });
     const newParams = replaceParams(params, {
       order_by: order === 'asc' ? key : `-${key}`,
       page: null,
@@ -43,12 +35,7 @@ export default function HeaderRow({
   return (
     <Thead>
       <Tr>
-        <Th
-          select={{
-            onSelect: handleSelectAll,
-            isSelected: isAllSelected,
-          }}
-        />
+        <Th />
         {React.Children.map(children, child =>
           React.cloneElement(child, {
             onSort,

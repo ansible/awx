@@ -18,7 +18,7 @@ import {
   replaceParams,
 } from '../../util/qs';
 import PaginatedTableRow from './PaginatedTableRow';
-import { QSConfig, SearchColumns, SortColumns } from '../../types';
+import { QSConfig, SearchColumns } from '../../types';
 
 function PaginatedTable({
   contentError,
@@ -32,7 +32,6 @@ function PaginatedTable({
   toolbarSearchColumns,
   toolbarSearchableKeys,
   toolbarRelatedSearchableKeys,
-  toolbarSortColumns,
   pluralizedItemName,
   showPageSizeOptions,
   i18n,
@@ -71,14 +70,6 @@ function PaginatedTable({
           isDefault: true,
         },
       ];
-  const sortColumns = toolbarSortColumns.length
-    ? toolbarSortColumns
-    : [
-        {
-          name: i18n._(t`Name`),
-          key: 'name',
-        },
-      ];
   const queryParams = parseQueryString(qsConfig, history.location.search);
 
   const dataListLabel = i18n._(t`${pluralizedItemName} List`);
@@ -98,10 +89,7 @@ function PaginatedTable({
     );
   } else {
     Content = (
-      <TableComposable
-        aria-label={dataListLabel}
-        // onSelectDataListItem={handleListItemSelect}
-      >
+      <TableComposable aria-label={dataListLabel}>
         {headerRow}
         <Tbody>{items.map(renderRow)}</Tbody>
       </TableComposable>
@@ -137,7 +125,6 @@ function PaginatedTable({
         renderToolbar={renderToolbar}
         emptyStateControls={emptyStateControls}
         searchColumns={searchColumns}
-        sortColumns={sortColumns}
         searchableKeys={toolbarSearchableKeys}
         relatedSearchableKeys={toolbarRelatedSearchableKeys}
         qsConfig={qsConfig}
@@ -183,7 +170,6 @@ PaginatedTable.propTypes = {
   toolbarSearchColumns: SearchColumns,
   toolbarSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   toolbarRelatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
-  toolbarSortColumns: SortColumns,
   showPageSizeOptions: PropTypes.bool,
   renderToolbar: PropTypes.func,
   hasContentLoading: PropTypes.bool,
@@ -197,7 +183,6 @@ PaginatedTable.defaultProps = {
   toolbarSearchColumns: [],
   toolbarSearchableKeys: [],
   toolbarRelatedSearchableKeys: [],
-  toolbarSortColumns: [],
   pluralizedItemName: 'Items',
   showPageSizeOptions: true,
   renderRow: item => <PaginatedTableRow key={item.id} item={item} />,

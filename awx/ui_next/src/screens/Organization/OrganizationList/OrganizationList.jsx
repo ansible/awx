@@ -122,12 +122,13 @@ function OrganizationsList({ i18n }) {
       <PageSection>
         <Card>
           <PaginatedTable
+            // TODO: audit if any of these props are no longer in use
             contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={organizations}
             itemCount={organizationCount}
             pluralizedItemName={i18n._(t`Organizations`)}
-            qsConfig={QS_CONFIG} // TODO: still used?
+            qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
             toolbarSearchColumns={[
               {
@@ -148,22 +149,10 @@ function OrganizationsList({ i18n }) {
                 key: 'modified_by__username__icontains',
               },
             ]}
-            toolbarSortColumns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-              },
-            ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
-              // TODO: move selectAll logic into HeaderRow?
-              <HeaderRow
-                handleSelectAll={handleSelectAll}
-                isAllSelected={isAllSelected}
-                defaultSortKey="name"
-                qsConfig={QS_CONFIG}
-              >
+              <HeaderRow defaultSortKey="name" qsConfig={QS_CONFIG}>
                 <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Members`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Teams`)}</HeaderCell>
@@ -172,9 +161,9 @@ function OrganizationsList({ i18n }) {
             renderToolbar={props => (
               <DataListToolbar
                 {...props}
-                // showSelectAll
-                // isAllSelected={isAllSelected}
-                // onSelectAll={handleSelectAll}
+                showSelectAll
+                isAllSelected={isAllSelected}
+                onSelectAll={handleSelectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd
