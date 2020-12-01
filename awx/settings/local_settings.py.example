@@ -38,7 +38,7 @@ if is_testing(sys.argv):
             },
         }
     }
-    
+
 # AMQP configuration.
 BROKER_URL = 'amqp://guest:guest@localhost:5672'
 
@@ -145,13 +145,6 @@ TEST_GIT_KEY_DATA = TEST_SSH_KEY_DATA
 TEST_GIT_PUBLIC_HTTPS = 'https://github.com/ansible/ansible.github.com.git'
 TEST_GIT_PRIVATE_HTTPS = 'https://github.com/ansible/product-docs.git'
 TEST_GIT_PRIVATE_SSH = 'git@github.com:ansible/product-docs.git'
-
-TEST_HG_USERNAME = ''
-TEST_HG_PASSWORD = ''
-TEST_HG_KEY_DATA = TEST_SSH_KEY_DATA
-TEST_HG_PUBLIC_HTTPS = 'https://bitbucket.org/cchurch/django-hotrunner'
-TEST_HG_PRIVATE_HTTPS = ''
-TEST_HG_PRIVATE_SSH = ''
 
 TEST_SVN_USERNAME = ''
 TEST_SVN_PASSWORD = ''

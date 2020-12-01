@@ -2,6 +2,9 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 16.0.0 (TBD)
+- Removed support for Mercurial-based project updates - https://github.com/ansible/tower/issues/4727
+
 ## 15.0.1 (October 20, 2020)
 - Added several optimizations to improve performance for a variety of high-load simultaneous job launch use cases https://github.com/ansible/awx/pull/8403
 - Added the ability to source roles and collections from requirements.yaml files (not just requirements.yml) - https://github.com/ansible/awx/issues/4540
@@ -88,7 +91,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Fixed a bug that caused rsyslogd's configuration file to have world-readable file permissions, potentially leaking secrets (CVE-2020-10782)
 
 ## 12.0.0 (Jun 9, 2020)
-- Removed memcached as a dependency of AWX (https://github.com/ansible/awx/pull/7240) 
+- Removed memcached as a dependency of AWX (https://github.com/ansible/awx/pull/7240)
 - Moved to a single container image build instead of separate awx_web and awx_task images. The container image is just `awx` (https://github.com/ansible/awx/pull/7228)
 - Official AWX container image builds now use a two-stage container build process that notably reduces the size of our published images (https://github.com/ansible/awx/pull/7017)
 - Removed support for HipChat notifications ([EoL announcement](https://www.atlassian.com/partnerships/slack/faq#faq-98b17ca3-247f-423b-9a78-70a91681eff0)); all previously-created HipChat notification templates will be deleted due to this removal.

@@ -45,7 +45,6 @@ describe('<ProjectForm />', () => {
             choices: [
               ['', 'Manual'],
               ['git', 'Git'],
-              ['hg', 'Mercurial'],
               ['svn', 'Subversion'],
               ['archive', 'Remote Archive'],
               ['insights', 'Red Hat Insights'],
@@ -295,10 +294,6 @@ describe('<ProjectForm />', () => {
     const scmTypeSelect = wrapper.find(
       'FormGroup[label="Source Control Credential Type"] FormSelect'
     );
-    await act(async () => {
-      scmTypeSelect.invoke('onChange')('hg', { target: { name: 'Mercurial' } });
-    });
-    wrapper.update();
     await act(async () => {
       wrapper
         .find('FormGroup[label="Source Control URL"] input')

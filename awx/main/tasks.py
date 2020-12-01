@@ -1260,7 +1260,7 @@ class BaseTask(object):
             # so it *should* have a negligible performance impact
             task = event_data.get('event_data', {}).get('task_action')
             try:
-                if task in ('git', 'hg', 'svn'):
+                if task in ('git', 'svn'):
                     event_data_json = json.dumps(event_data)
                     event_data_json = UriCleaner.remove_sensitive(event_data_json)
                     event_data = json.loads(event_data_json)
@@ -2154,7 +2154,7 @@ class RunProjectUpdate(BaseTask):
             elif not scm_branch:
                 raise RuntimeError('Could not determine a revision to run from project.')
         elif not scm_branch:
-            scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
+            scm_branch = 'HEAD'
 
         galaxy_creds_are_defined = (
             project_update.project.organization and

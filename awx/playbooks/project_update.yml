@@ -49,12 +49,6 @@
         - update_git
 
     - block:
-        - name: include hg tasks
-          include_tasks: project_update_hg_tasks.yml
-      tags:
-        - update_hg
-
-    - block:
         - name: update project using svn
           subversion:
             dest: "{{project_path|quote}}"
@@ -150,7 +144,6 @@
         msg: "Repository Version {{ scm_version }}"
       tags:
         - update_git
-        - update_hg
         - update_svn
         - update_insights
         - update_archive

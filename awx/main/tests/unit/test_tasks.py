@@ -1909,19 +1909,16 @@ class TestProjectUpdateCredentials(TestJobExecution):
     parametrize = {
         'test_username_and_password_auth': [
             dict(scm_type='git'),
-            dict(scm_type='hg'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
         ],
         'test_ssh_key_auth': [
             dict(scm_type='git'),
-            dict(scm_type='hg'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
         ],
         'test_awx_task_env': [
             dict(scm_type='git'),
-            dict(scm_type='hg'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
         ]
