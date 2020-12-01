@@ -153,7 +153,7 @@ export const Project = shape({
   created: string,
   name: string.isRequired,
   description: string,
-  scm_type: oneOf(['', 'git', 'hg', 'svn', 'archive', 'insights']),
+  scm_type: oneOf(['', 'git', 'svn', 'archive', 'insights']),
   scm_url: string,
   scm_branch: string,
   scm_refspec: string,

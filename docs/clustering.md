@@ -304,7 +304,7 @@ When verifying acceptance, we should ensure that the following statements are tr
   - Break the link between instances such that it forms two or more groups where Group A and Group B can't communicate but all instances can communicate with the database.
 * Crucially, when network partitioning is resolved, all instances should recover into a consistent state.
 * Upgrade Testing - verify behavior before and after are the same for the end user.
-* Project Updates should be thoroughly tested for all SCM types (`git`, `svn`, `hg`) and for manual projects.
+* Project Updates should be thoroughly tested for all SCM types (`git`, `svn`, `archive`) and for manual projects.
 * Setting up instance groups in two scenarios:
   a) instances are shared between groups
   b) instances are isolated to particular groups
