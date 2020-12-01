@@ -110,7 +110,27 @@ function NotificationTemplatesList({ i18n }) {
               },
               {
                 name: i18n._(t`Type`),
-                key: 'notification_type',
+                key: 'or__notification_type',
+                options: [
+                  ['email', i18n._(t`Email`)],
+                  ['grafana', i18n._(t`Grafana`)],
+                  ['hipchat', i18n._(t`Hipchat`)],
+                  ['irc', i18n._(t`IRC`)],
+                  ['mattermost', i18n._(t`Mattermost`)],
+                  ['pagerduty', i18n._(t`Pagerduty`)],
+                  ['rocketchat', i18n._(t`Rocket.Chat`)],
+                  ['slack', i18n._(t`Slack`)],
+                  ['twilio', i18n._(t`Twilio`)],
+                  ['webhook', i18n._(t`Webhook`)],
+                ],
+              },
+              {
+                name: i18n._(t`Created By (Username)`),
+                key: 'created_by__username__icontains',
+              },
+              {
+                name: i18n._(t`Modified By (Username)`),
+                key: 'modified_by__username__icontains',
               },
             ]}
             toolbarSortColumns={[
