@@ -295,7 +295,9 @@ describe('<ProjectForm />', () => {
       'FormGroup[label="Source Control Credential Type"] FormSelect'
     );
     await act(async () => {
-      scmTypeSelect.invoke('onChange')('svn', { target: { name: 'Subversion' } });
+      scmTypeSelect.invoke('onChange')('svn', {
+        target: { name: 'Subversion' },
+      });
     });
     wrapper.update();
     await act(async () => {
