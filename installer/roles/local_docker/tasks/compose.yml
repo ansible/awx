@@ -49,4 +49,10 @@
     - name: Update CA trust in awx_task container
       command: docker exec awx_task '/usr/bin/update-ca-trust'
       when: awx_compose_config.changed or awx_compose_start.changed
+
+    - name: Create Preload data
+      command: docker exec awx_task bash -c "/usr/bin/awx-manage create_preload_data"
+      when: create_preload_data|bool
+      register: cdo
+      changed_when: "'added' in cdo.stdout"
   when: compose_start_containers|bool
