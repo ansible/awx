@@ -2533,9 +2533,6 @@ class RunInventoryUpdate(BaseTask):
             injector = InventorySource.injectors[inventory_update.source]()
             return injector.build_private_data(inventory_update, private_data_dir)
 
-    def build_execution_environment_params(self, inventory_update):
-        return {}  # TODO: containerize inventory updates
-
     def build_env(self, inventory_update, private_data_dir, isolated, private_data_files=None):
         """Build environment dictionary for ansible-inventory.
 
@@ -2625,7 +2622,7 @@ class RunInventoryUpdate(BaseTask):
         args.append(source_location)
 
         args.append('--output')
-        args.append(os.path.join(private_data_dir, 'artifacts', 'output.json'))
+        args.append(os.path.join('/runner', 'artifacts', 'output.json'))
 
         if os.path.isdir(source_location):
             playbook_dir = source_location
@@ -2661,8 +2658,10 @@ class RunInventoryUpdate(BaseTask):
             with open(inventory_path, 'w') as f:
                 f.write(content)
             os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
+            inventory_path = os.path.join('/runner', injector.filename)
         elif src == 'scm':
-            inventory_path = os.path.join(private_data_dir, 'project', inventory_update.source_path)
+            inventory_path = os.path.join('/runner', 'project', inventory_update.source_path)
         elif src == 'custom':
             handle, inventory_path = tempfile.mkstemp(dir=private_data_dir)
             f = os.fdopen(handle, 'w')
