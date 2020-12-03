@@ -561,7 +561,6 @@ spec:
           serviceName: {{ kubernetes_deployment_name }}-web-svc
           servicePort: 80
 {% else %}
-spec:
   backend:
     serviceName: {{ kubernetes_deployment_name }}-web-svc
     servicePort: 80
