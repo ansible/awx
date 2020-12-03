@@ -1441,7 +1441,6 @@ class PluginFileInjector(object):
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
         env = self._get_shared_env(inventory_update, private_data_dir, private_data_files)
-        env['ANSIBLE_COLLECTIONS_PATHS'] = settings.AWX_ANSIBLE_COLLECTIONS_PATHS
         return env
 
     def build_private_data(self, inventory_update, private_data_dir):
