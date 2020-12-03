@@ -63,11 +63,6 @@ const associatedInstanceGroups = [
     name: 'Foo',
   },
 ];
-InventoriesAPI.readInstanceGroups.mockResolvedValue({
-  data: {
-    results: associatedInstanceGroups,
-  },
-});
 
 function expectDetailToMatch(wrapper, label, value) {
   const detail = wrapper.find(`Detail[label="${label}"]`);
@@ -77,6 +72,12 @@ function expectDetailToMatch(wrapper, label, value) {
 
 describe('<InventoryDetail />', () => {
   test('should render details', async () => {
+    InventoriesAPI.readInstanceGroups.mockResolvedValue({
+      data: {
+        results: associatedInstanceGroups,
+      },
+    });
+
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
@@ -105,6 +106,12 @@ describe('<InventoryDetail />', () => {
   });
 
   test('should load instance groups', async () => {
+    InventoriesAPI.readInstanceGroups.mockResolvedValue({
+      data: {
+        results: associatedInstanceGroups,
+      },
+    });
+
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
@@ -118,5 +125,25 @@ describe('<InventoryDetail />', () => {
     const chip = wrapper.find('Chip').at(0);
     expect(chip.prop('isReadOnly')).toEqual(true);
     expect(chip.prop('children')).toEqual('Foo');
+  });
+
+  test('should not load instance groups', async () => {
+    InventoriesAPI.readInstanceGroups.mockResolvedValue({
+      data: {
+        results: [],
+      },
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventoryDetail inventory={mockInventory} />
+      );
+    });
+    wrapper.update();
+    expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledWith(
+      mockInventory.id
+    );
+    expect(wrapper.find(`Detail[label="Instance Groups"]`)).toHaveLength(0);
   });
 });
