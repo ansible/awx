@@ -518,6 +518,12 @@ metadata:
   namespace: {{ kubernetes_namespace }}
   labels:
     name: {{ kubernetes_deployment_name }}-web-svc
+{% if kubernetes_service_annotations is defined %}
+  annotations:
+{% for key, value in kubernetes_service_annotations.items() %}
+    {{ key }}: {{ value | quote }}
+{% endfor %}
+{% endif %}
 spec:
   type: {{ kubernetes_web_svc_type }}
   ports:
