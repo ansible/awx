@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
-import { Button, Label, Tooltip } from '@patternfly/react-core';
+import { Button, Label } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { t } from '@lingui/macro';
@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { timeOfDay } from '../../../util/dates';
 import { InventoriesAPI } from '../../../api';
 import { Inventory } from '../../../types';
-import { ActionsTd } from '../../../components/PaginatedTable';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import CopyButton from '../../../components/CopyButton';
 import SyncStatusIndicator from '../../../components/SyncStatusIndicator';
 
@@ -98,25 +98,27 @@ function InventoryListItem({
           <Label color="red">{i18n._(t`Pending delete`)}</Label>
         </Td>
       ) : (
-        <ActionsTd numActions={2}>
-          {inventory.summary_fields.user_capabilities.edit ? (
-            <Tooltip content={i18n._(t`Edit Inventory`)} position="top">
-              <Button
-                isDisabled={isDisabled}
-                aria-label={i18n._(t`Edit Inventory`)}
-                variant="plain"
-                component={Link}
-                to={`/inventories/${
-                  inventory.kind === 'smart' ? 'smart_inventory' : 'inventory'
-                }/${inventory.id}/edit`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          ) : (
-            <div />
-          )}
-          {inventory.summary_fields.user_capabilities.copy && (
+        <ActionsTd>
+          <ActionItem
+            visible={inventory.summary_fields.user_capabilities.edit}
+            tooltip={i18n._(t`Edit Inventory`)}
+          >
+            <Button
+              isDisabled={isDisabled}
+              aria-label={i18n._(t`Edit Inventory`)}
+              variant="plain"
+              component={Link}
+              to={`/inventories/${
+                inventory.kind === 'smart' ? 'smart_inventory' : 'inventory'
+              }/${inventory.id}/edit`}
+            >
+              <PencilAltIcon />
+            </Button>
+          </ActionItem>
+          <ActionItem
+            visible={inventory.summary_fields.user_capabilities.copy}
+            tooltip={i18n._(t`Copy Inventory`)}
+          >
             <CopyButton
               copyItem={copyInventory}
               isDisabled={isDisabled}
@@ -127,7 +129,7 @@ function InventoryListItem({
                 errorMessage: i18n._(t`Failed to copy inventory.`),
               }}
             />
-          )}
+          </ActionItem>
         </ActionsTd>
       )}
     </Tr>

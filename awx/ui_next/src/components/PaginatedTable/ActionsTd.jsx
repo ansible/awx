@@ -3,8 +3,6 @@ import React from 'react';
 import { Td } from '@patternfly/react-table';
 import styled, { css } from 'styled-components';
 
-// table cells will automatically grow beyond specified width to accomodate
-// multiple action buttons
 const ActionsGrid = styled.div`
   display: grid;
   grid-gap: 16px;
@@ -18,7 +16,8 @@ const ActionsGrid = styled.div`
   }}
 `;
 
-export default function ActionsTd({ numActions = 1, children }) {
+export default function ActionsTd({ children }) {
+  const numActions = children.length;
   const width = numActions * 40;
   return (
     <Td
@@ -27,7 +26,13 @@ export default function ActionsTd({ numActions = 1, children }) {
         --pf-c-table--cell--Width: ${width}px;
       `}
     >
-      <ActionsGrid numActions={numActions}>{children}</ActionsGrid>
+      <ActionsGrid numActions={numActions}>
+        {React.Children.map(children, (child, i) =>
+          React.cloneElement(child, {
+            column: i + 1,
+          })
+        )}
+      </ActionsGrid>
     </Td>
   );
 }
