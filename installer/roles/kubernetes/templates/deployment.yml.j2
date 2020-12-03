@@ -4,10 +4,10 @@ kind: ServiceAccount
 metadata:
   name: {{ kubernetes_serviceaccount_name }}
   namespace: {{ kubernetes_namespace }}
-{% if kubernetes_service_account_annotations is defined %}
+{% if kubernetes_service_account_is defined %}
   annotations:
 {% for key, value in kubernetes_service_account_annotations.items() %}
-    {{ key }}: {{ value }}
+    {{ key }}: {{ value | quote }}
 {% endfor %}
 {% endif %}
 {% if kubernetes_image_pull_secrets is defined %}
@@ -88,7 +88,7 @@ metadata:
 {% if kubernetes_deployment_annotations is defined %}
   annotations:
 {% for key, value in kubernetes_deployment_annotations.items() %}
-    {{ key }}: {{ value }}
+    {{ key }}: {{ value | quote }}
 {% endfor %}
 {% endif %}
 {% if openshift_host is defined %}
@@ -107,7 +107,7 @@ spec:
 {% if kubernetes_pod_annotations is defined %}
       annotations:
 {% for key, value in kubernetes_pod_annotations.items() %}
-        {{ key }}: {{ value }}
+        {{ key }}: {{ value | quote }}
 {% endfor %}
 {% endif %}
       labels:
@@ -540,7 +540,7 @@ metadata:
 {% if kubernetes_ingress_annotations is defined %}
   annotations:
 {% for key, value in kubernetes_ingress_annotations.items() %}
-    {{ key }}: {{ value }}
+    {{ key }}: {{ value | quote }}
 {% endfor %}
 {% endif %}
 
