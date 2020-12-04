@@ -474,7 +474,7 @@ ui-release: ui-devel
 ui-devel: awx/ui_next/node_modules
 	$(NPM_BIN) --prefix awx/ui_next run extract-strings
 	$(NPM_BIN) --prefix awx/ui_next run compile-strings
-	$(NPM_BIN) --prefix awx/ui_next run build
+	INLINE_RUNTIME_CHUNK=false $(NPM_BIN) --prefix awx/ui_next run build
 	git checkout awx/ui_next/src/locales
 	mkdir -p awx/public/static/css
 	mkdir -p awx/public/static/js

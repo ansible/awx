@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import './nonce';
 import '@patternfly/react-core/dist/styles/base.css';
 import App from './App';
 import { BrandName } from './variables';
