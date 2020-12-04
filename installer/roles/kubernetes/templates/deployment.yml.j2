@@ -546,12 +546,6 @@ metadata:
 
 spec:
 {% if kubernetes_ingress_hostname is defined %}
-{% if kubernetes_ingress_tls_secret is defined %}
-  tls:
-  - hosts:
-    - {{ kubernetes_ingress_hostname }}
-    secretName: {{ kubernetes_ingress_tls_secret }}
-{% endif %}
   rules:
   - host: {{ kubernetes_ingress_hostname }}
     http:
@@ -565,6 +559,12 @@ spec:
   backend:
     serviceName: {{ kubernetes_deployment_name }}-web-svc
     servicePort: 80
+{% endif %}
+{% if kubernetes_ingress_tls_secret is defined %}
+  tls:
+  - hosts:
+    - {{ kubernetes_ingress_hostname }}
+    secretName: {{ kubernetes_ingress_tls_secret }}
 {% endif %}
 {% endif %}
 {% if openshift_host is defined %}
