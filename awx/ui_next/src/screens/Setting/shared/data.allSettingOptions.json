@@ -2745,6 +2745,29 @@
               "category_slug": "system",
               "default": true
           },
+          "PENDO_TRACKING_STATE": {
+            "default": "off",
+            "type": "choice",
+            "required": true,
+            "label": "User Analytics Tracking State",
+            "help_text": "Enable or Disable User Analytics Tracking.",
+            "category": "UI",
+            "category_slug": "ui",
+            "choices": [
+                [
+                    "off",
+                    "Off"
+                ],
+                [
+                    "anonymous",
+                    "Anonymous"
+                ],
+                [
+                    "detailed",
+                    "Detailed"
+                ]
+            ]
+        },
           "MANAGE_ORGANIZATION_AUTH": {
               "type": "boolean",
               "required": true,

@@ -7,9 +7,11 @@ import {
   FileUpload,
   FormGroup as PFFormGroup,
   InputGroup,
-  TextInput,
   Switch,
+  TextArea,
+  TextInput,
 } from '@patternfly/react-core';
+import FileUploadIcon from '@patternfly/react-icons/dist/js/icons/file-upload-icon';
 import styled from 'styled-components';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import CodeMirrorInput from '../../../components/CodeMirrorInput';
@@ -223,6 +225,44 @@ InputField.propTypes = {
   isRequired: bool,
 };
 
+const TextAreaField = withI18n()(
+  ({ i18n, name, config, isRequired = false }) => {
+    const validate = isRequired ? required(null, i18n) : null;
+    const [field, meta] = useField({ name, validate });
+    const isValid = !(meta.touched && meta.error);
+
+    return config ? (
+      <SettingGroup
+        defaultValue={config.default || ''}
+        fieldId={name}
+        helperTextInvalid={meta.error}
+        isRequired={isRequired}
+        label={config.label}
+        popoverContent={config.help_text}
+        validated={isValid ? 'default' : 'error'}
+      >
+        <TextArea
+          id={name}
+          isRequired={isRequired}
+          placeholder={config.placeholder}
+          validated={isValid ? 'default' : 'error'}
+          value={field.value}
+          onBlur={field.onBlur}
+          onChange={(value, event) => {
+            field.onChange(event);
+          }}
+          resizeOrientation="vertical"
+        />
+      </SettingGroup>
+    ) : null;
+  }
+);
+TextAreaField.propTypes = {
+  name: string.isRequired,
+  config: shape({}).isRequired,
+  isRequired: bool,
+};
+
 const ObjectField = withI18n()(({ i18n, name, config, isRequired = false }) => {
   const validate = isRequired ? required(null, i18n) : null;
   const [field, meta, helpers] = useField({ name, validate });
@@ -264,8 +304,11 @@ ObjectField.propTypes = {
   isRequired: bool,
 };
 
+const FileUploadIconWrapper = styled.div`
+  margin: var(--pf-global--spacer--md);
+`;
 const FileUploadField = withI18n()(
-  ({ i18n, name, config, isRequired = false }) => {
+  ({ i18n, name, config, type = 'text', isRequired = false }) => {
     const validate = isRequired ? required(null, i18n) : null;
     const [filename, setFilename] = useState('');
     const [fileIsUploading, setFileIsUploading] = useState(false);
@@ -287,7 +330,7 @@ const FileUploadField = withI18n()(
           <FileUpload
             {...field}
             id={name}
-            type="text"
+            type={type}
             filename={filename}
             onChange={(value, title) => {
               helpers.setValue(value);
@@ -298,12 +341,33 @@ const FileUploadField = withI18n()(
             isLoading={fileIsUploading}
             allowEditingUploadedText
             validated={isValid ? 'default' : 'error'}
-          />
+            hideDefaultPreview={type === 'dataURL'}
+          >
+            {type === 'dataURL' && (
+              <FileUploadIconWrapper>
+                {field.value ? (
+                  <img
+                    src={field.value}
+                    alt={filename}
+                    height="200px"
+                    width="200px"
+                  />
+                ) : (
+                  <FileUploadIcon size="lg" />
+                )}
+              </FileUploadIconWrapper>
+            )}
+          </FileUpload>
         </SettingGroup>
       </FormFullWidthLayout>
     ) : null;
   }
 );
+FileUploadField.propTypes = {
+  name: string.isRequired,
+  config: shape({}).isRequired,
+  isRequired: bool,
+};
 
 export {
   BooleanField,
@@ -312,4 +376,5 @@ export {
   FileUploadField,
   InputField,
   ObjectField,
+  TextAreaField,
 };

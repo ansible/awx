@@ -11,6 +11,7 @@ import {
   FileUploadField,
   InputField,
   ObjectField,
+  TextAreaField,
 } from './SharedFields';
 
 describe('Setting form fields', () => {
@@ -130,6 +131,38 @@ describe('Setting form fields', () => {
     });
     wrapper.update();
     expect(wrapper.find('TextInputBase').prop('value')).toEqual('foo');
+  });
+
+  test('TextAreaField renders the expected content', async () => {
+    const wrapper = mountWithContexts(
+      <Formik
+        initialValues={{
+          mock_textarea: '',
+        }}
+      >
+        {() => (
+          <TextAreaField
+            name="mock_textarea"
+            config={{
+              label: 'mock textarea',
+              help_text: 'help text',
+              default: '',
+            }}
+          />
+        )}
+      </Formik>
+    );
+    expect(wrapper.find('textarea')).toHaveLength(1);
+    expect(wrapper.find('textarea#mock_textarea').prop('value')).toEqual('');
+    await act(async () => {
+      wrapper.find('textarea#mock_textarea').simulate('change', {
+        target: { value: 'new textarea value', name: 'mock_textarea' },
+      });
+    });
+    wrapper.update();
+    expect(wrapper.find('textarea').prop('value')).toEqual(
+      'new textarea value'
+    );
   });
 
   test('ObjectField renders the expected content', async () => {
