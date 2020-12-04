@@ -68,7 +68,7 @@ def metrics():
         'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', 'None')
     })
 
-    LICENSE_INSTANCE_TOTAL.set(str(license_info.get('available_instances', 0)))
+    LICENSE_INSTANCE_TOTAL.set(str(license_info.get('instance_count', 0)))
     LICENSE_INSTANCE_FREE.set(str(license_info.get('free_instances', 0)))
 
     current_counts = counts(None)
