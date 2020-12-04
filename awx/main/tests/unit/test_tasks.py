@@ -2090,7 +2090,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         assert '-i' in ' '.join(args)
         script = args[args.index('-i') + 1]
-        with open(script, 'r') as f:
+        host_script = script.replace('/runner', private_data_dir)
+        with open(host_script, 'r') as f:
             assert f.read() == inventory_update.source_script.script
         assert env['FOO'] == 'BAR'
         if with_credential:

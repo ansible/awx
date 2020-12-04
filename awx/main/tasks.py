@@ -2540,13 +2540,9 @@ class RunInventoryUpdate(BaseTask):
         are accomplished by the inventory source injectors (in this method)
         or custom credential type injectors (in main run method).
         """
-        base_env = super(RunInventoryUpdate, self).build_env(
+        env = super(RunInventoryUpdate, self).build_env(
             inventory_update, private_data_dir, isolated,
             private_data_files=private_data_files)
-        # TODO: this is able to run by turning off isolation
-        # the goal is to run it a container instead
-        env = dict(os.environ.items())
-        env.update(base_env)
 
         if private_data_files is None:
             private_data_files = {}
@@ -2617,17 +2613,20 @@ class RunInventoryUpdate(BaseTask):
         args = ['ansible-inventory', '--list', '--export']
 
         # Add arguments for the source inventory file/script/thing
-        source_location = self.pseudo_build_inventory(inventory_update, private_data_dir)
+        rel_path = self.pseudo_build_inventory(inventory_update, private_data_dir)
+        container_location = os.path.join('/runner', rel_path)  # TODO: make container paths elegant
+        source_location = os.path.join(private_data_dir, rel_path)
+
         args.append('-i')
-        args.append(source_location)
+        args.append(container_location)
 
         args.append('--output')
         args.append(os.path.join('/runner', 'artifacts', 'output.json'))
 
         if os.path.isdir(source_location):
-            playbook_dir = source_location
+            playbook_dir = container_location
         else:
-            playbook_dir = os.path.dirname(source_location)
+            playbook_dir = os.path.dirname(container_location)
         args.extend(['--playbook-dir', playbook_dir])
 
         if inventory_update.verbosity:
@@ -2659,9 +2658,9 @@ class RunInventoryUpdate(BaseTask):
                 f.write(content)
             os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
-            inventory_path = os.path.join('/runner', injector.filename)
+            rel_path = injector.filename
         elif src == 'scm':
-            inventory_path = os.path.join('/runner', 'project', inventory_update.source_path)
+            rel_path = os.path.join('project', inventory_update.source_path)
         elif src == 'custom':
             handle, inventory_path = tempfile.mkstemp(dir=private_data_dir)
             f = os.fdopen(handle, 'w')
@@ -2670,7 +2669,9 @@ class RunInventoryUpdate(BaseTask):
             f.write(inventory_update.source_script.script)
             f.close()
             os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-        return inventory_path
+
+            rel_path = os.path.split(inventory_path)[-1]
+        return rel_path
 
     def build_cwd(self, inventory_update, private_data_dir):
         '''
@@ -2679,9 +2680,10 @@ class RunInventoryUpdate(BaseTask):
          - SCM, where source needs to live in the project folder
         '''
         src = inventory_update.source
+        container_dir = '/runner'  # TODO: make container paths elegant
         if src == 'scm' and inventory_update.source_project_update:
-            return os.path.join(private_data_dir, 'project')
-        return private_data_dir
+            return os.path.join(container_dir, 'project')
+        return container_dir
 
     def build_playbook_path_relative_to_cwd(self, inventory_update, private_data_dir):
         return None
