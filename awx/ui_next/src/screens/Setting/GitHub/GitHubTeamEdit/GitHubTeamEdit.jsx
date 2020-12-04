@@ -19,14 +19,14 @@ import useModal from '../../../../util/useModal';
 import useRequest from '../../../../util/useRequest';
 import { SettingsAPI } from '../../../../api';
 
-function GitHubEdit() {
+function GitHubTeamEdit() {
   const history = useHistory();
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
 
   const { isLoading, error, request: fetchGithub, result: github } = useRequest(
     useCallback(async () => {
-      const { data } = await SettingsAPI.readCategory('github');
+      const { data } = await SettingsAPI.readCategory('github-team');
       const mergedData = {};
       Object.keys(data).forEach(key => {
         if (!options[key]) {
@@ -48,7 +48,7 @@ function GitHubEdit() {
     useCallback(
       async values => {
         await SettingsAPI.updateAll(values);
-        history.push('/settings/github/details');
+        history.push('/settings/github/team/details');
       },
       [history]
     ),
@@ -58,10 +58,12 @@ function GitHubEdit() {
   const handleSubmit = async form => {
     await submitForm({
       ...form,
-      SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: formatJson(
-        form.SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP
+      SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP: formatJson(
+        form.SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP
       ),
-      SOCIAL_AUTH_GITHUB_TEAM_MAP: formatJson(form.SOCIAL_AUTH_GITHUB_TEAM_MAP),
+      SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP: formatJson(
+        form.SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP
+      ),
     });
   };
 
@@ -76,7 +78,7 @@ function GitHubEdit() {
   };
 
   const handleCancel = () => {
-    history.push('/settings/github/details');
+    history.push('/settings/github/team/details');
   };
 
   const initialValues = fields =>
@@ -102,20 +104,24 @@ function GitHubEdit() {
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <InputField
-                  name="SOCIAL_AUTH_GITHUB_KEY"
-                  config={github.SOCIAL_AUTH_GITHUB_KEY}
+                  name="SOCIAL_AUTH_GITHUB_TEAM_KEY"
+                  config={github.SOCIAL_AUTH_GITHUB_TEAM_KEY}
                 />
                 <EncryptedField
-                  name="SOCIAL_AUTH_GITHUB_SECRET"
-                  config={github.SOCIAL_AUTH_GITHUB_SECRET}
+                  name="SOCIAL_AUTH_GITHUB_TEAM_SECRET"
+                  config={github.SOCIAL_AUTH_GITHUB_TEAM_SECRET}
+                />
+                <InputField
+                  name="SOCIAL_AUTH_GITHUB_TEAM_ID"
+                  config={github.SOCIAL_AUTH_GITHUB_TEAM_ID}
                 />
                 <ObjectField
-                  name="SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP"
-                  config={github.SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP}
+                  name="SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP"
+                  config={github.SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP}
                 />
                 <ObjectField
-                  name="SOCIAL_AUTH_GITHUB_TEAM_MAP"
-                  config={github.SOCIAL_AUTH_GITHUB_TEAM_MAP}
+                  name="SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP"
+                  config={github.SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP}
                 />
                 {submitError && <FormSubmitError error={submitError} />}
               </FormColumnLayout>
@@ -138,4 +144,4 @@ function GitHubEdit() {
   );
 }
 
-export default GitHubEdit;
+export default GitHubTeamEdit;

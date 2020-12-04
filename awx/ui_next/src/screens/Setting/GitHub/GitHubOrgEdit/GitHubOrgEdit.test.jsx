@@ -8,25 +8,23 @@ import {
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
-import GitHubEdit from './GitHubEdit';
+import GitHubOrgEdit from './GitHubOrgEdit';
 
 jest.mock('../../../../api/models/Settings');
 SettingsAPI.updateAll.mockResolvedValue({});
 SettingsAPI.readCategory.mockResolvedValue({
   data: {
-    SOCIAL_AUTH_GITHUB_CALLBACK_URL: 'https://foo/complete/github/',
-    SOCIAL_AUTH_GITHUB_KEY: 'mock github key',
-    SOCIAL_AUTH_GITHUB_SECRET: '$encrypted$',
-    SOCIAL_AUTH_GITHUB_TEAM_MAP: {},
-    SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: {
-      Default: {
-        users: true,
-      },
-    },
+    SOCIAL_AUTH_GITHUB_ORG_CALLBACK_URL:
+      'https://towerhost/sso/complete/github-org/',
+    SOCIAL_AUTH_GITHUB_ORG_KEY: '',
+    SOCIAL_AUTH_GITHUB_ORG_SECRET: '$encrypted$',
+    SOCIAL_AUTH_GITHUB_ORG_NAME: '',
+    SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP: null,
+    SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP: null,
   },
 });
 
-describe('<GitHubEdit />', () => {
+describe('<GitHubOrgEdit />', () => {
   let wrapper;
   let history;
 
@@ -37,12 +35,12 @@ describe('<GitHubEdit />', () => {
 
   beforeEach(async () => {
     history = createMemoryHistory({
-      initialEntries: ['/settings/github/edit'],
+      initialEntries: ['/settings/github/organization/edit'],
     });
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <GitHubEdit />
+          <GitHubOrgEdit />
         </SettingsProvider>,
         {
           context: { router: { history } },
@@ -53,19 +51,28 @@ describe('<GitHubEdit />', () => {
   });
 
   test('initially renders without crashing', () => {
-    expect(wrapper.find('GitHubEdit').length).toBe(1);
+    expect(wrapper.find('GitHubOrgEdit').length).toBe(1);
   });
 
   test('should display expected form fields', async () => {
-    expect(wrapper.find('FormGroup[label="GitHub OAuth2 Key"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="GitHub OAuth2 Secret"]').length).toBe(
-      1
-    );
     expect(
-      wrapper.find('FormGroup[label="GitHub OAuth2 Organization Map"]').length
+      wrapper.find('FormGroup[label="GitHub Organization OAuth2 Key"]').length
     ).toBe(1);
     expect(
-      wrapper.find('FormGroup[label="GitHub OAuth2 Team Map"]').length
+      wrapper.find('FormGroup[label="GitHub Organization OAuth2 Secret"]')
+        .length
+    ).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="GitHub Organization Name"]').length
+    ).toBe(1);
+    expect(
+      wrapper.find(
+        'FormGroup[label="GitHub Organization OAuth2 Organization Map"]'
+      ).length
+    ).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="GitHub Organization OAuth2 Team Map"]')
+        .length
     ).toBe(1);
   });
 
@@ -87,10 +94,11 @@ describe('<GitHubEdit />', () => {
     wrapper.update();
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
     expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      SOCIAL_AUTH_GITHUB_KEY: '',
-      SOCIAL_AUTH_GITHUB_SECRET: '',
-      SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: null,
-      SOCIAL_AUTH_GITHUB_TEAM_MAP: null,
+      SOCIAL_AUTH_GITHUB_ORG_KEY: '',
+      SOCIAL_AUTH_GITHUB_ORG_SECRET: '',
+      SOCIAL_AUTH_GITHUB_ORG_NAME: '',
+      SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP: null,
+      SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP: null,
     });
   });
 
@@ -98,14 +106,14 @@ describe('<GitHubEdit />', () => {
     act(() => {
       wrapper
         .find(
-          'FormGroup[fieldId="SOCIAL_AUTH_GITHUB_SECRET"] button[aria-label="Revert"]'
+          'FormGroup[fieldId="SOCIAL_AUTH_GITHUB_ORG_SECRET"] button[aria-label="Revert"]'
         )
         .invoke('onClick')();
-      wrapper.find('input#SOCIAL_AUTH_GITHUB_KEY').simulate('change', {
-        target: { value: 'new key', name: 'SOCIAL_AUTH_GITHUB_KEY' },
+      wrapper.find('input#SOCIAL_AUTH_GITHUB_ORG_NAME').simulate('change', {
+        target: { value: 'new org', name: 'SOCIAL_AUTH_GITHUB_ORG_NAME' },
       });
       wrapper
-        .find('CodeMirrorInput#SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP')
+        .find('CodeMirrorInput#SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP')
         .invoke('onChange')('{\n"Default":{\n"users":\nfalse\n}\n}');
     });
     wrapper.update();
@@ -114,10 +122,11 @@ describe('<GitHubEdit />', () => {
     });
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
     expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      SOCIAL_AUTH_GITHUB_KEY: 'new key',
-      SOCIAL_AUTH_GITHUB_SECRET: '',
-      SOCIAL_AUTH_GITHUB_TEAM_MAP: {},
-      SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: {
+      SOCIAL_AUTH_GITHUB_ORG_KEY: '',
+      SOCIAL_AUTH_GITHUB_ORG_SECRET: '',
+      SOCIAL_AUTH_GITHUB_ORG_NAME: 'new org',
+      SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP: {},
+      SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP: {
         Default: {
           users: false,
         },
@@ -125,18 +134,22 @@ describe('<GitHubEdit />', () => {
     });
   });
 
-  test('should navigate to github default detail on successful submission', async () => {
+  test('should navigate to github organization detail on successful submission', async () => {
     await act(async () => {
       wrapper.find('Form').invoke('onSubmit')();
     });
-    expect(history.location.pathname).toEqual('/settings/github/details');
+    expect(history.location.pathname).toEqual(
+      '/settings/github/organization/details'
+    );
   });
 
-  test('should navigate to github default detail when cancel is clicked', async () => {
+  test('should navigate to github organization detail when cancel is clicked', async () => {
     await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });
-    expect(history.location.pathname).toEqual('/settings/github/details');
+    expect(history.location.pathname).toEqual(
+      '/settings/github/organization/details'
+    );
   });
 
   test('should display error message on unsuccessful submission', async () => {
@@ -163,7 +176,7 @@ describe('<GitHubEdit />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <GitHubEdit />
+          <GitHubOrgEdit />
         </SettingsProvider>
       );
     });
