@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { bool, oneOf, shape, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
+  FileUpload,
   FormGroup as PFFormGroup,
   InputGroup,
   TextInput,
@@ -42,6 +43,7 @@ const SettingGroup = withI18n()(
     isDisabled,
     isRequired,
     label,
+    onRevertCallback,
     popoverContent,
     validated,
   }) => (
@@ -62,6 +64,7 @@ const SettingGroup = withI18n()(
             id={fieldId}
             defaultValue={defaultValue}
             isDisabled={isDisabled}
+            onRevertCallback={onRevertCallback}
           />
         </>
       }
@@ -261,4 +264,52 @@ ObjectField.propTypes = {
   isRequired: bool,
 };
 
-export { BooleanField, ChoiceField, EncryptedField, InputField, ObjectField };
+const FileUploadField = withI18n()(
+  ({ i18n, name, config, isRequired = false }) => {
+    const validate = isRequired ? required(null, i18n) : null;
+    const [filename, setFilename] = useState('');
+    const [fileIsUploading, setFileIsUploading] = useState(false);
+    const [field, meta, helpers] = useField({ name, validate });
+    const isValid = !(meta.touched && meta.error);
+
+    return config ? (
+      <FormFullWidthLayout>
+        <SettingGroup
+          defaultValue={config.default ?? ''}
+          fieldId={name}
+          helperTextInvalid={meta.error}
+          isRequired={isRequired}
+          label={config.label}
+          popoverContent={config.help_text}
+          validated={isValid ? 'default' : 'error'}
+          onRevertCallback={() => setFilename('')}
+        >
+          <FileUpload
+            {...field}
+            id={name}
+            type="text"
+            filename={filename}
+            onChange={(value, title) => {
+              helpers.setValue(value);
+              setFilename(title);
+            }}
+            onReadStarted={() => setFileIsUploading(true)}
+            onReadFinished={() => setFileIsUploading(false)}
+            isLoading={fileIsUploading}
+            allowEditingUploadedText
+            validated={isValid ? 'default' : 'error'}
+          />
+        </SettingGroup>
+      </FormFullWidthLayout>
+    ) : null;
+  }
+);
+
+export {
+  BooleanField,
+  ChoiceField,
+  EncryptedField,
+  FileUploadField,
+  InputField,
+  ObjectField,
+};

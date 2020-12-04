@@ -32,6 +32,7 @@ SettingsAPI.readCategory.mockResolvedValue({
     SOCIAL_AUTH_SAML_TEAM_MAP: {},
     SOCIAL_AUTH_SAML_ORGANIZATION_ATTR: {},
     SOCIAL_AUTH_SAML_TEAM_ATTR: {},
+    SAML_AUTO_CREATE_OBJECTS: false,
   },
 });
 
@@ -59,6 +60,11 @@ describe('<SAMLDetail />', () => {
   });
 
   test('should render expected details', () => {
+    assertDetail(
+      wrapper,
+      'Automatically Create Organizations and Teams on SAML Login',
+      'Off'
+    );
     assertDetail(
       wrapper,
       'SAML Assertion Consumer Service (ACS) URL',
