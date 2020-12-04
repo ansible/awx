@@ -4,7 +4,7 @@ kind: ServiceAccount
 metadata:
   name: {{ kubernetes_serviceaccount_name }}
   namespace: {{ kubernetes_namespace }}
-{% if kubernetes_service_account_is defined %}
+{% if kubernetes_service_account_annotations is defined %}
   annotations:
 {% for key, value in kubernetes_service_account_annotations.items() %}
     {{ key }}: {{ value | quote }}
