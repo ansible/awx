@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { useState } from 'react';
+import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 import styled from 'styled-components';
@@ -28,13 +28,16 @@ const TimeoutLabel = styled.p`
 `;
 
 function NodeTypeStep({ i18n }) {
-  const [timeoutMinutes, setTimeoutMinutes] = useState(0);
-  const [timeoutSeconds, setTimeoutSeconds] = useState(0);
   const [nodeTypeField, , nodeTypeHelpers] = useField('nodeType');
   const [nodeResourceField, , nodeResourceHelpers] = useField('nodeResource');
   const [, approvalNameMeta, approvalNameHelpers] = useField('approvalName');
   const [, , approvalDescriptionHelpers] = useField('approvalDescription');
-  const [, , timeoutHelpers] = useField('timeout');
+  const [timeoutMinutesField, , timeoutMinutesHelpers] = useField(
+    'timeoutMinutes'
+  );
+  const [timeoutSecondsField, , timeoutSecondsHelpers] = useField(
+    'timeoutSeconds'
+  );
 
   const isValid = !approvalNameMeta.touched || !approvalNameMeta.error;
   return (
@@ -47,14 +50,14 @@ function NodeTypeStep({ i18n }) {
             label={i18n._(t`Select a Node Type`)}
             data={[
               {
-                key: 'approval',
-                value: 'approval',
+                key: 'workflow_approval_template',
+                value: 'workflow_approval_template',
                 label: i18n._(t`Approval`),
                 isDisabled: false,
               },
               {
-                key: 'inventory_source_sync',
-                value: 'inventory_source_sync',
+                key: 'inventory_source',
+                value: 'inventory_source',
                 label: i18n._(t`Inventory Source Sync`),
                 isDisabled: false,
               },
@@ -65,8 +68,8 @@ function NodeTypeStep({ i18n }) {
                 isDisabled: false,
               },
               {
-                key: 'project_sync',
-                value: 'project_sync',
+                key: 'project',
+                value: 'project',
                 label: i18n._(t`Project Sync`),
                 isDisabled: false,
               },
@@ -83,7 +86,8 @@ function NodeTypeStep({ i18n }) {
               nodeResourceHelpers.setValue(null);
               approvalNameHelpers.setValue('');
               approvalDescriptionHelpers.setValue('');
-              timeoutHelpers.setValue(0);
+              timeoutMinutesHelpers.setValue(0);
+              timeoutSecondsHelpers.setValue(0);
             }}
           />
         </div>
@@ -94,13 +98,13 @@ function NodeTypeStep({ i18n }) {
           onUpdateNodeResource={nodeResourceHelpers.setValue}
         />
       )}
-      {nodeTypeField.value === 'project_sync' && (
+      {nodeTypeField.value === 'project' && (
         <ProjectsList
           nodeResource={nodeResourceField.value}
           onUpdateNodeResource={nodeResourceHelpers.setValue}
         />
       )}
-      {nodeTypeField.value === 'inventory_source_sync' && (
+      {nodeTypeField.value === 'inventory_source' && (
         <InventorySourcesList
           nodeResource={nodeResourceField.value}
           onUpdateNodeResource={nodeResourceHelpers.setValue}
@@ -112,12 +116,11 @@ function NodeTypeStep({ i18n }) {
           onUpdateNodeResource={nodeResourceHelpers.setValue}
         />
       )}
-      {nodeTypeField.value === 'approval' && (
+      {nodeTypeField.value === 'workflow_approval_template' && (
         <Form css="margin-top: 20px;">
           <FormFullWidthLayout>
             <FormField
               name="approvalName"
-              fieldId="approval-name"
               id="approval-name"
               isRequired
               validate={required(null, i18n)}
@@ -126,7 +129,6 @@ function NodeTypeStep({ i18n }) {
             />
             <FormField
               name="approvalDescription"
-              fieldId="approval-description"
               id="approval-description"
               label={i18n._(t`Description`)}
             />
@@ -137,44 +139,29 @@ function NodeTypeStep({ i18n }) {
             >
               <div css="display: flex;align-items: center;">
                 <TimeoutInput
-                  aria-label={i18n._(t`timeout-minutes`)}
-                  name="timeoutMinutes"
+                  {...timeoutMinutesField}
+                  aria-label={i18n._(t`Timeout minutes`)}
                   id="approval-timeout-minutes"
-                  type="number"
                   min="0"
-                  step="1"
-                  value={timeoutMinutes}
-                  onChange={(value, evt) => {
-                    if (!evt.target.value || evt.target.value === '') {
-                      evt.target.value = 0;
-                    }
-                    setTimeoutMinutes(evt.target.value);
-                    timeoutHelpers.setValue(
-                      Number(evt.target.value) * 60 + Number(timeoutSeconds)
-                    );
+                  onChange={(value, event) => {
+                    timeoutMinutesField.onChange(event);
                   }}
+                  step="1"
+                  type="number"
                 />
                 <TimeoutLabel>
                   <Trans>min</Trans>
                 </TimeoutLabel>
                 <TimeoutInput
-                  name="timeoutSeconds"
+                  {...timeoutSecondsField}
+                  aria-label={i18n._(t`Timeout seconds`)}
                   id="approval-timeout-seconds"
-                  type="number"
-                  aria-label={i18n._(t`timeout-seconds`)}
                   min="0"
-                  step="1"
-                  value={timeoutSeconds}
-                  onChange={(value, evt) => {
-                    if (!evt.target.value || evt.target.value === '') {
-                      evt.target.value = 0;
-                    }
-                    setTimeoutSeconds(evt.target.value);
-
-                    timeoutHelpers.setValue(
-                      Number(evt.target.value) + Number(timeoutMinutes) * 60
-                    );
+                  onChange={(value, event) => {
+                    timeoutSecondsField.onChange(event);
                   }}
+                  step="1"
+                  type="number"
                 />
                 <TimeoutLabel>
                   <Trans>sec</Trans>

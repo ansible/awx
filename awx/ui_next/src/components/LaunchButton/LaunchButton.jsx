@@ -44,6 +44,7 @@ class LaunchButton extends React.Component {
       showLaunchPrompt: false,
       launchConfig: null,
       launchError: false,
+      surveyConfig: null,
     };
 
     this.handleLaunch = this.handleLaunch.bind(this);
@@ -67,8 +68,20 @@ class LaunchButton extends React.Component {
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.readLaunch(resource.id)
         : JobTemplatesAPI.readLaunch(resource.id);
+    const readSurvey =
+      resource.type === 'workflow_job_template'
+        ? WorkflowJobTemplatesAPI.readSurvey(resource.id)
+        : JobTemplatesAPI.readSurvey(resource.id);
     try {
       const { data: launchConfig } = await readLaunch;
+
+      let surveyConfig = null;
+
+      if (launchConfig.survey_enabled) {
+        const { data } = await readSurvey;
+
+        surveyConfig = data;
+      }
 
       if (canLaunchWithoutPrompt(launchConfig)) {
         this.launchWithParams({});
@@ -76,6 +89,7 @@ class LaunchButton extends React.Component {
         this.setState({
           showLaunchPrompt: true,
           launchConfig,
+          surveyConfig,
         });
       }
     } catch (err) {
@@ -151,7 +165,12 @@ class LaunchButton extends React.Component {
   }
 
   render() {
-    const { launchError, showLaunchPrompt, launchConfig } = this.state;
+    const {
+      launchError,
+      showLaunchPrompt,
+      launchConfig,
+      surveyConfig,
+    } = this.state;
     const { resource, i18n, children } = this.props;
     return (
       <Fragment>
@@ -172,7 +191,8 @@ class LaunchButton extends React.Component {
         )}
         {showLaunchPrompt && (
           <LaunchPrompt
-            config={launchConfig}
+            launchConfig={launchConfig}
+            surveyConfig={surveyConfig}
             resource={resource}
             onLaunch={this.launchWithParams}
             onCancel={() => this.setState({ showLaunchPrompt: false })}

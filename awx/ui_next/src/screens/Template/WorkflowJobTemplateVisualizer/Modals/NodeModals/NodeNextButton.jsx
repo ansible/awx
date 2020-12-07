@@ -8,6 +8,7 @@ function NodeNextButton({
   onClick,
   onNext,
   triggerNext,
+  isDisabled,
 }) {
   useEffect(() => {
     if (!triggerNext) {
@@ -22,7 +23,7 @@ function NodeNextButton({
       variant="primary"
       type="submit"
       onClick={() => onClick(activeStep)}
-      isDisabled={!activeStep.enableNext}
+      isDisabled={isDisabled || !activeStep.enableNext}
     >
       {buttonText}
     </Button>

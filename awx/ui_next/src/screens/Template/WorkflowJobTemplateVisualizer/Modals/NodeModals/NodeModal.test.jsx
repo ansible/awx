@@ -16,6 +16,8 @@ import {
 } from '../../../../../api';
 import NodeModal from './NodeModal';
 
+jest.mock('../../../../../api/models/Credentials');
+jest.mock('../../../../../api/models/Inventories');
 jest.mock('../../../../../api/models/InventorySources');
 jest.mock('../../../../../api/models/JobTemplates');
 jest.mock('../../../../../api/models/Projects');
@@ -25,23 +27,81 @@ let wrapper;
 const dispatch = jest.fn();
 const onSave = jest.fn();
 
+const jtLaunchConfig = {
+  can_start_without_user_input: false,
+  passwords_needed_to_start: [],
+  ask_scm_branch_on_launch: false,
+  ask_variables_on_launch: true,
+  ask_tags_on_launch: true,
+  ask_diff_mode_on_launch: true,
+  ask_skip_tags_on_launch: true,
+  ask_job_type_on_launch: true,
+  ask_limit_on_launch: false,
+  ask_verbosity_on_launch: true,
+  ask_inventory_on_launch: true,
+  ask_credential_on_launch: true,
+  survey_enabled: true,
+  variables_needed_to_start: ['a'],
+  credential_needed_to_start: false,
+  inventory_needed_to_start: false,
+  job_template_data: {
+    name: 'A User-2 has admin permission',
+    id: 25,
+    description: '',
+  },
+  defaults: {
+    extra_vars: '---',
+    diff_mode: false,
+    limit: '',
+    job_tags: '',
+    skip_tags: '',
+    job_type: 'run',
+    verbosity: 0,
+    inventory: {
+      name: ' Inventory 1 Org 0',
+      id: 1,
+    },
+    credentials: [
+      {
+        id: 2,
+        name: ' Credential 2 User 1',
+        credential_type: 1,
+        passwords_needed: [],
+      },
+      {
+        id: 8,
+        name: 'vault cred',
+        credential_type: 3,
+        passwords_needed: [],
+        vault_id: '',
+      },
+    ],
+    scm_branch: '',
+  },
+};
+
+const mockJobTemplate = {
+  id: 1,
+  name: 'Test Job Template',
+  type: 'job_template',
+  url: '/api/v2/job_templates/1',
+  summary_fields: {
+    inventory: {
+      name: 'Foo Inv',
+      id: 1,
+    },
+    recent_jobs: [],
+  },
+  related: { webhook_receiver: '' },
+  inventory: 1,
+};
+
 describe('NodeModal', () => {
   beforeAll(() => {
     JobTemplatesAPI.read.mockResolvedValue({
       data: {
         count: 1,
-        results: [
-          {
-            id: 1,
-            name: 'Test Job Template',
-            type: 'job_template',
-            url: '/api/v2/job_templates/1',
-            summary_fields: {
-              recent_jobs: [],
-            },
-            related: { webhook_receiver: '' },
-          },
-        ],
+        results: [mockJobTemplate],
       },
     });
     JobTemplatesAPI.readOptions.mockResolvedValue({
@@ -53,60 +113,7 @@ describe('NodeModal', () => {
         related_search_fields: [],
       },
     });
-    JobTemplatesAPI.readLaunch.mockResolvedValue({
-      data: {
-        can_start_without_user_input: false,
-        passwords_needed_to_start: [],
-        ask_scm_branch_on_launch: false,
-        ask_variables_on_launch: true,
-        ask_tags_on_launch: true,
-        ask_diff_mode_on_launch: true,
-        ask_skip_tags_on_launch: true,
-        ask_job_type_on_launch: true,
-        ask_limit_on_launch: false,
-        ask_verbosity_on_launch: true,
-        ask_inventory_on_launch: true,
-        ask_credential_on_launch: true,
-        survey_enabled: true,
-        variables_needed_to_start: ['a'],
-        credential_needed_to_start: false,
-        inventory_needed_to_start: false,
-        job_template_data: {
-          name: 'A User-2 has admin permission',
-          id: 25,
-          description: '',
-        },
-        defaults: {
-          extra_vars: '---',
-          diff_mode: false,
-          limit: '',
-          job_tags: '',
-          skip_tags: '',
-          job_type: 'run',
-          verbosity: 0,
-          inventory: {
-            name: ' Inventory 1 Org 0',
-            id: 1,
-          },
-          credentials: [
-            {
-              id: 2,
-              name: ' Credential 2 User 1',
-              credential_type: 1,
-              passwords_needed: [],
-            },
-            {
-              id: 8,
-              name: 'vault cred',
-              credential_type: 3,
-              passwords_needed: [],
-              vault_id: '',
-            },
-          ],
-          scm_branch: '',
-        },
-      },
-    });
+    JobTemplatesAPI.readLaunch.mockResolvedValue({ data: jtLaunchConfig });
     JobTemplatesAPI.readSurvey.mockResolvedValue({
       data: {
         name: '',
@@ -241,6 +248,7 @@ describe('NodeModal', () => {
 
     afterEach(() => {
       wrapper.unmount();
+      onSave.mockClear();
     });
 
     test('Can successfully create a new job template node', async () => {
@@ -251,7 +259,10 @@ describe('NodeModal', () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
       wrapper.update();
-      wrapper.find('Radio').simulate('click');
+      await act(async () => {
+        wrapper.find('Radio').simulate('click');
+      });
+      wrapper.update();
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
@@ -265,8 +276,22 @@ describe('NodeModal', () => {
       act(() => {
         wrapper
           .find('WizardNavItem[content="Preview"]')
-          .find('a')
+          .find('button')
           .prop('onClick')();
+      });
+      wrapper.update();
+      await act(async () => {
+        wrapper.find('button#next-node-modal').simulate('click');
+      });
+
+      wrapper.update();
+
+      expect(JobTemplatesAPI.readLaunch).toBeCalledWith(1);
+      expect(JobTemplatesAPI.readSurvey).toBeCalledWith(25);
+      wrapper.update();
+      expect(wrapper.find('NodeNextButton').prop('buttonText')).toBe('Save');
+      act(() => {
+        wrapper.find('NodeNextButton').prop('onClick')();
       });
       wrapper.update();
 
@@ -276,19 +301,20 @@ describe('NodeModal', () => {
       expect(onSave).toBeCalledWith(
         {
           linkType: 'always',
-          nodeResource: {
-            id: 1,
-            name: 'Test Job Template',
-            related: { webhook_receiver: '' },
-            summary_fields: { recent_jobs: [] },
-            type: 'job_template',
-            url: '/api/v2/job_templates/1',
-          },
           nodeType: 'job_template',
-          verbosity: undefined,
+          inventory: { name: 'Foo Inv', id: 1 },
+          credentials: [],
+          job_type: '',
+          verbosity: '0',
+          job_tags: '',
+          skip_tags: '',
+          extra_vars: '---',
+          diff_mode: false,
+          survey_bar: 'answer',
+          nodeResource: mockJobTemplate,
+          extra_data: { bar: 'answer' },
         },
-        'always',
-        {}
+        jtLaunchConfig
       );
     });
 
@@ -301,10 +327,12 @@ describe('NodeModal', () => {
       });
       wrapper.update();
       await act(async () => {
-        wrapper.find('AnsibleSelect').prop('onChange')(null, 'project_sync');
+        wrapper.find('AnsibleSelect').prop('onChange')(null, 'project');
       });
       wrapper.update();
-      wrapper.find('Radio').simulate('click');
+      await act(async () => {
+        wrapper.find('Radio').simulate('click');
+      });
       wrapper.update();
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
@@ -318,10 +346,9 @@ describe('NodeModal', () => {
             type: 'project',
             url: '/api/v2/projects/1',
           },
-          nodeType: 'project_sync',
+          nodeType: 'project',
           verbosity: undefined,
         },
-        'failure',
         {}
       );
     });
@@ -337,11 +364,13 @@ describe('NodeModal', () => {
       await act(async () => {
         wrapper.find('AnsibleSelect').prop('onChange')(
           null,
-          'inventory_source_sync'
+          'inventory_source'
         );
       });
       wrapper.update();
-      wrapper.find('Radio').simulate('click');
+      await act(async () => {
+        wrapper.find('Radio').simulate('click');
+      });
       wrapper.update();
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
@@ -355,10 +384,9 @@ describe('NodeModal', () => {
             type: 'inventory_source',
             url: '/api/v2/inventory_sources/1',
           },
-          nodeType: 'inventory_source_sync',
+          nodeType: 'inventory_source',
           verbosity: undefined,
         },
-        'failure',
         {}
       );
     });
@@ -398,7 +426,6 @@ describe('NodeModal', () => {
           nodeType: 'workflow_job_template',
           verbosity: undefined,
         },
-        'success',
         {
           ask_inventory_on_launch: false,
           ask_limit_on_launch: false,
@@ -429,7 +456,10 @@ describe('NodeModal', () => {
       });
       wrapper.update();
       await act(async () => {
-        wrapper.find('AnsibleSelect').prop('onChange')(null, 'approval');
+        wrapper.find('AnsibleSelect').prop('onChange')(
+          null,
+          'workflow_approval_template'
+        );
       });
       wrapper.update();
 
@@ -446,12 +476,6 @@ describe('NodeModal', () => {
         wrapper.find('input#approval-timeout-minutes').simulate('change', {
           target: { value: 5, name: 'timeoutMinutes' },
         });
-      });
-
-      // Updating the minutes and seconds is split to avoid a race condition.
-      // They both update the same state variable in the parent so triggering
-      // them syncronously creates flakey test results.
-      await act(async () => {
         wrapper.find('input#approval-timeout-seconds').simulate('change', {
           target: { value: 30, name: 'timeoutSeconds' },
         });
@@ -480,11 +504,10 @@ describe('NodeModal', () => {
           approvalName: 'Test Approval',
           linkType: 'always',
           nodeResource: null,
-          nodeType: 'approval',
-          timeout: 330,
-          verbosity: undefined,
+          nodeType: 'workflow_approval_template',
+          timeoutMinutes: 5,
+          timeoutSeconds: 30,
         },
-        'always',
         {}
       );
     });
@@ -511,10 +534,10 @@ describe('NodeModal', () => {
               value={{
                 nodeToEdit: {
                   id: 2,
-                  unifiedJobTemplate: {
+                  fullUnifiedJobTemplate: {
                     id: 1,
                     name: 'Test Project',
-                    unified_job_type: 'project_update',
+                    type: 'project',
                   },
                 },
               }}
@@ -530,11 +553,12 @@ describe('NodeModal', () => {
       });
       await waitForElement(newWrapper, 'PFWizard');
       newWrapper.update();
-      expect(newWrapper.find('AnsibleSelect').prop('value')).toBe(
-        'project_sync'
-      );
+      expect(newWrapper.find('AnsibleSelect').prop('value')).toBe('project');
       await act(async () => {
-        newWrapper.find('AnsibleSelect').prop('onChange')(null, 'approval');
+        newWrapper.find('AnsibleSelect').prop('onChange')(
+          null,
+          'workflow_approval_template'
+        );
       });
       newWrapper.update();
       await act(async () => {
@@ -550,12 +574,6 @@ describe('NodeModal', () => {
         newWrapper.find('input#approval-timeout-minutes').simulate('change', {
           target: { value: 5, name: 'timeoutMinutes' },
         });
-      });
-
-      // Updating the minutes and seconds is split to avoid a race condition.
-      // They both update the same state variable in the parent so triggering
-      // them syncronously creates flakey test results.
-      await act(async () => {
         newWrapper.find('input#approval-timeout-seconds').simulate('change', {
           target: { value: 30, name: 'timeoutSeconds' },
         });
@@ -584,11 +602,10 @@ describe('NodeModal', () => {
           approvalName: 'Test Approval',
           linkType: 'success',
           nodeResource: null,
-          nodeType: 'approval',
-          timeout: 330,
-          verbosity: undefined,
+          nodeType: 'workflow_approval_template',
+          timeoutMinutes: 5,
+          timeoutSeconds: 30,
         },
-        null,
         {}
       );
     });
@@ -601,11 +618,11 @@ describe('NodeModal', () => {
               value={{
                 nodeToEdit: {
                   id: 2,
-                  unifiedJobTemplate: {
+                  fullUnifiedJobTemplate: {
                     id: 1,
                     name: 'Test Approval',
                     description: 'Test Approval Description',
-                    unified_job_type: 'workflow_approval',
+                    type: 'workflow_approval_template',
                     timeout: 0,
                   },
                 },
@@ -621,7 +638,9 @@ describe('NodeModal', () => {
         );
       });
       await waitForElement(newWrapper, 'PFWizard');
-      expect(newWrapper.find('AnsibleSelect').prop('value')).toBe('approval');
+      expect(newWrapper.find('AnsibleSelect').prop('value')).toBe(
+        'workflow_approval_template'
+      );
       await act(async () => {
         newWrapper.find('AnsibleSelect').prop('onChange')(
           null,
@@ -649,9 +668,7 @@ describe('NodeModal', () => {
             url: '/api/v2/workflow_job_templates/1',
           },
           nodeType: 'workflow_job_template',
-          verbosity: undefined,
         },
-        null,
         {
           ask_inventory_on_launch: false,
           ask_limit_on_launch: false,

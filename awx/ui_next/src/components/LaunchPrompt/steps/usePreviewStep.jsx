@@ -5,28 +5,23 @@ import PreviewStep from './PreviewStep';
 const STEP_ID = 'preview';
 
 export default function usePreviewStep(
-  config,
+  launchConfig,
   i18n,
   resource,
-  survey,
+  surveyConfig,
   hasErrors,
-  needsPreviewStep,
-  nodeToEdit
+  showStep
 ) {
-  const showStep =
-    needsPreviewStep && resource && Object.keys(config).length > 0;
-    const promptResource = nodeToEdit || resource
   return {
     step: showStep
       ? {
           id: STEP_ID,
-          key: 7,
           name: i18n._(t`Preview`),
           component: (
             <PreviewStep
-              config={config}
-              resource={promptResource}
-              survey={survey}
+              launchConfig={launchConfig}
+              resource={resource}
+              surveyConfig={surveyConfig}
               formErrors={hasErrors}
             />
           ),

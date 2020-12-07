@@ -71,11 +71,11 @@ function omitOverrides(resource, overrides, defaultConfig) {
   const clonedResource = {
     ...resource,
     summary_fields: { ...resource.summary_fields },
-    ...defaultConfig
+    ...defaultConfig,
   };
   Object.keys(overrides).forEach(keyToOmit => {
     delete clonedResource[keyToOmit];
-    delete clonedResource.summary_fields[keyToOmit];
+    delete clonedResource?.summary_fields[keyToOmit];
   });
   return clonedResource;
 }
@@ -90,7 +90,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
   };
 
   const details = omitOverrides(resource, overrides, launchConfig.defaults);
-  details.type = overrides?.nodeType || details.type
+  details.type = overrides?.nodeType || details.type;
   const hasOverrides = Object.keys(overrides).length > 0;
 
   return (
@@ -139,7 +139,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
           <Divider css="margin-top: var(--pf-global--spacer--lg)" />
           <PromptHeader>{i18n._(t`Prompted Values`)}</PromptHeader>
           <DetailList aria-label="Prompt Overrides">
-            {launchConfig.ask_job_type_on_launch &&  (
+            {launchConfig.ask_job_type_on_launch && (
               <Detail
                 label={i18n._(t`Job Type`)}
                 value={toTitleCase(overrides.job_type)}
@@ -181,12 +181,13 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
             {launchConfig.ask_limit_on_launch && (
               <Detail label={i18n._(t`Limit`)} value={overrides.limit} />
             )}
-            {overrides?.verbosity && launchConfig.ask_verbosity_on_launch && (
+            {Object.prototype.hasOwnProperty.call(overrides, 'verbosity') &&
+            launchConfig.ask_verbosity_on_launch ? (
               <Detail
                 label={i18n._(t`Verbosity`)}
                 value={VERBOSITY[overrides.verbosity]}
               />
-            )}
+            ) : null}
             {launchConfig.ask_tags_on_launch && (
               <Detail
                 fullWidth
@@ -194,13 +195,18 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                 value={
                   <ChipGroup
                     numChips={5}
-                    totalChips={overrides.job_tags.split(',').length}
+                    totalChips={
+                      !overrides.job_tags || overrides.job_tags === ''
+                        ? 0
+                        : overrides.job_tags.split(',').length
+                    }
                   >
-                    {overrides.job_tags.split(',').map(jobTag => (
-                      <Chip key={jobTag} isReadOnly>
-                        {jobTag}
-                      </Chip>
-                    ))}
+                    {overrides.job_tags.length > 0 &&
+                      overrides.job_tags.split(',').map(jobTag => (
+                        <Chip key={jobTag} isReadOnly>
+                          {jobTag}
+                        </Chip>
+                      ))}
                   </ChipGroup>
                 }
               />
@@ -212,13 +218,18 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                 value={
                   <ChipGroup
                     numChips={5}
-                    totalChips={overrides.skip_tags.split(',').length}
+                    totalChips={
+                      !overrides.skip_tags || overrides.skip_tags === ''
+                        ? 0
+                        : overrides.skip_tags.split(',').length
+                    }
                   >
-                    {overrides.skip_tags.split(',').map(skipTag => (
-                      <Chip key={skipTag} isReadOnly>
-                        {skipTag}
-                      </Chip>
-                    ))}
+                    {overrides.skip_tags.length > 0 &&
+                      overrides.skip_tags.split(',').map(skipTag => (
+                        <Chip key={skipTag} isReadOnly>
+                          {skipTag}
+                        </Chip>
+                      ))}
                   </ChipGroup>
                 }
               />
@@ -231,7 +242,8 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                 }
               />
             )}
-            {launchConfig.ask_variables_on_launch && (
+            {(launchConfig.survey_enabled ||
+              launchConfig.ask_variables_on_launch) && (
               <VariablesDetail
                 label={i18n._(t`Variables`)}
                 rows={4}

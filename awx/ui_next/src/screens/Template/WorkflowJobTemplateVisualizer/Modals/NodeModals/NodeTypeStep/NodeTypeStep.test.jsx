@@ -123,31 +123,31 @@ describe('NodeTypeStep', () => {
     expect(wrapper.find('AnsibleSelect').prop('value')).toBe('job_template');
     expect(wrapper.find('JobTemplatesList').length).toBe(1);
   });
-  test('It shows the project list when node type is project sync', async () => {
+  test('It shows the project list when node type is project', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <Formik initialValues={{ nodeType: 'project_sync' }}>
+        <Formik initialValues={{ nodeType: 'project' }}>
           <NodeTypeStep />
         </Formik>
       );
     });
     wrapper.update();
-    expect(wrapper.find('AnsibleSelect').prop('value')).toBe('project_sync');
+    expect(wrapper.find('AnsibleSelect').prop('value')).toBe('project');
     expect(wrapper.find('ProjectsList').length).toBe(1);
   });
-  test('It shows the inventory source list when node type is inventory source sync', async () => {
+  test('It shows the inventory source list when node type is inventory source', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <Formik initialValues={{ nodeType: 'inventory_source_sync' }}>
+        <Formik initialValues={{ nodeType: 'inventory_source' }}>
           <NodeTypeStep />
         </Formik>
       );
     });
     wrapper.update();
     expect(wrapper.find('AnsibleSelect').prop('value')).toBe(
-      'inventory_source_sync'
+      'inventory_source'
     );
     expect(wrapper.find('InventorySourcesList').length).toBe(1);
   });
@@ -172,10 +172,11 @@ describe('NodeTypeStep', () => {
       wrapper = mountWithContexts(
         <Formik
           initialValues={{
-            nodeType: 'approval',
+            nodeType: 'workflow_approval_template',
             approvalName: '',
             approvalDescription: '',
-            timeout: '',
+            timeoutMinutes: 0,
+            timeoutSeconds: 0,
           }}
         >
           <NodeTypeStep />
@@ -183,7 +184,9 @@ describe('NodeTypeStep', () => {
       );
     });
     wrapper.update();
-    expect(wrapper.find('AnsibleSelect').prop('value')).toBe('approval');
+    expect(wrapper.find('AnsibleSelect').prop('value')).toBe(
+      'workflow_approval_template'
+    );
     expect(wrapper.find('FormField[label="Name"]').length).toBe(1);
     expect(wrapper.find('FormField[label="Description"]').length).toBe(1);
     expect(wrapper.find('input[name="timeoutMinutes"]').length).toBe(1);

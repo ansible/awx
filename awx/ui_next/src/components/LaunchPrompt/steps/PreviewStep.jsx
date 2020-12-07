@@ -24,18 +24,25 @@ const ErrorMessageWrapper = styled.div`
   margin-bottom: 10px;
 `;
 
-function PreviewStep({ resource, config, survey, formErrors, i18n }) {
+function PreviewStep({
+  resource,
+  launchConfig,
+  surveyConfig,
+  formErrors,
+  i18n,
+}) {
   const { values } = useFormikContext();
   const surveyValues = getSurveyValues(values);
 
   const overrides = {
     ...values,
   };
-  if (config.ask_variables_on_launch || config.survey_enabled) {
+
+  if (launchConfig.ask_variables_on_launch || launchConfig.survey_enabled) {
     const initialExtraVars =
-      config.ask_variables_on_launch && (overrides.extra_vars || '---');
-    if (survey && survey.spec) {
-      const passwordFields = survey.spec
+      launchConfig.ask_variables_on_launch && (overrides.extra_vars || '---');
+    if (surveyConfig?.spec) {
+      const passwordFields = surveyConfig.spec
         .filter(q => q.type === 'password')
         .map(q => q.variable);
       const masked = maskPasswords(surveyValues, passwordFields);
@@ -46,11 +53,10 @@ function PreviewStep({ resource, config, survey, formErrors, i18n }) {
       overrides.extra_vars = initialExtraVars;
     }
   }
-  // Api expects extra vars to be merged with the survey data.
-  // We put the extra_data key/value pair on the values object here
-  // so that we don't have to do this loop again inside of the NodeAddModal.jsx
+
   values.extra_data =
     overrides.extra_vars && parseVariableField(overrides?.extra_vars);
+
   return (
     <Fragment>
       {formErrors && (
@@ -67,7 +73,7 @@ function PreviewStep({ resource, config, survey, formErrors, i18n }) {
       )}
       <PromptDetail
         resource={resource}
-        launchConfig={config}
+        launchConfig={launchConfig}
         overrides={overrides}
       />
     </Fragment>

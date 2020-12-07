@@ -5,7 +5,7 @@ import NodeTypeStep from './NodeTypeStep';
 
 const STEP_ID = 'nodeType';
 
-export default function useNodeTypeStep(i18n, nodeToEdit) {
+export default function useNodeTypeStep(i18n) {
   const [, meta] = useField('nodeType');
   const [approvalNameField] = useField('approvalName');
   const [nodeTypeField, ,] = useField('nodeType');
@@ -13,7 +13,7 @@ export default function useNodeTypeStep(i18n, nodeToEdit) {
 
   return {
     step: getStep(i18n, nodeTypeField, approvalNameField, nodeResourceField),
-    initialValues: getInitialValues(nodeToEdit),
+    initialValues: getInitialValues(),
     isReady: true,
     contentError: null,
     formError: meta.error,
@@ -27,8 +27,9 @@ export default function useNodeTypeStep(i18n, nodeToEdit) {
 function getStep(i18n, nodeTypeField, approvalNameField, nodeResourceField) {
   const isEnabled = () => {
     if (
-      (nodeTypeField.value !== 'approval' && nodeResourceField.value === null) ||
-      (nodeTypeField.value === 'approval' &&
+      (nodeTypeField.value !== 'workflow_approval_template' &&
+        nodeResourceField.value === null) ||
+      (nodeTypeField.value === 'workflow_approval_template' &&
         approvalNameField.value === undefined)
     ) {
       return false;
@@ -37,57 +38,18 @@ function getStep(i18n, nodeTypeField, approvalNameField, nodeResourceField) {
   };
   return {
     id: STEP_ID,
-    key: 3,
     name: i18n._(t`Node Type`),
     component: <NodeTypeStep i18n={i18n} />,
     enableNext: isEnabled(),
   };
 }
 
-function getInitialValues(nodeToEdit) {
-  let typeOfNode;
-  if (
-    !nodeToEdit?.unifiedJobTemplate?.type &&
-    !nodeToEdit?.unifiedJobTemplate?.unified_job_type
-  ) {
-    return { nodeType: 'job_template' };
-  }
-  const {
-    unifiedJobTemplate: { type, unified_job_type },
-  } = nodeToEdit;
-  const unifiedType = type || unified_job_type;
-
-  if (unifiedType === 'job' || unifiedType === 'job_template')
-    typeOfNode = {
-      nodeType: 'job_template',
-      nodeResource:
-        nodeToEdit.originalNodeObject?.summary_fields?.unified_job_template
-        || nodeToEdit.unifiedJobTemplate,
-    };
-  if (unifiedType === 'project' || unifiedType === 'project_update') {
-    typeOfNode = { nodeType: 'project_sync' };
-  }
-  if (
-    unifiedType === 'inventory_source' ||
-    unifiedType === 'inventory_update'
-  ) {
-    typeOfNode = { nodeType: 'inventory_source_sync' };
-  }
-  if (
-    unifiedType === 'workflow_job' ||
-    unifiedType === 'workflow_job_template'
-  ) {
-    typeOfNode = {
-      nodeType: 'workflow_job_template',
-    };
-  }
-  if (
-    unifiedType === 'workflow_approval_template' ||
-    unifiedType === 'workflow_approval'
-  ) {
-    typeOfNode = {
-      nodeType: 'approval',
-    };
-  }
-  return typeOfNode;
+function getInitialValues() {
+  return {
+    approvalName: '',
+    approvalDescription: '',
+    timeoutMinutes: 0,
+    timeoutSeconds: 0,
+    nodeType: 'job_template',
+  };
 }

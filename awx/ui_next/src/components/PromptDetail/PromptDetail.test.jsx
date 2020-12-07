@@ -18,7 +18,7 @@ const mockPromptLaunch = {
   defaults: {
     extra_vars: '---foo: bar',
     diff_mode: false,
-    limit: 3,
+    limit: 'localhost',
     job_tags: 'T_100,T_200',
     skip_tags: 'S_100,S_200',
     job_type: 'run',
@@ -74,7 +74,7 @@ describe('PromptDetail', () => {
       assertDetail('Job Type', 'Run');
       assertDetail('Inventory', 'Demo Inventory');
       assertDetail('Source Control Branch', 'Foo branch');
-      assertDetail('Limit', 'alpha:beta');
+      assertDetail('Limit', 'localhost');
       assertDetail('Verbosity', '3 (Debug)');
       assertDetail('Show Changes', 'Off');
       expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
@@ -151,6 +151,14 @@ describe('PromptDetail', () => {
       inventory: {
         name: 'Override inventory',
       },
+      credentials: mockPromptLaunch.defaults.credentials,
+      job_tags: 'foo,bar',
+      skip_tags: 'baz,boo',
+      limit: 'otherlimit',
+      verbosity: 0,
+      job_type: 'check',
+      scm_branch: 'Bar branch',
+      diff_mode: true,
     };
 
     beforeAll(() => {
@@ -180,12 +188,12 @@ describe('PromptDetail', () => {
       assertDetail('Name', 'Mock JT');
       assertDetail('Description', 'Mock JT Description');
       assertDetail('Type', 'Job Template');
-      assertDetail('Job Type', 'Run');
+      assertDetail('Job Type', 'Check');
       assertDetail('Inventory', 'Override inventory');
-      assertDetail('Source Control Branch', 'Foo branch');
-      assertDetail('Limit', 'alpha:beta');
-      assertDetail('Verbosity', '3 (Debug)');
-      assertDetail('Show Changes', 'Off');
+      assertDetail('Source Control Branch', 'Bar branch');
+      assertDetail('Limit', 'otherlimit');
+      assertDetail('Verbosity', '0 (Normal)');
+      assertDetail('Show Changes', 'On');
       expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
         '---one: two\nbar: baz'
       );
@@ -204,12 +212,12 @@ describe('PromptDetail', () => {
       expect(
         wrapper
           .find('Detail[label="Job Tags"]')
-          .containsAnyMatchingElements([<span>T_100</span>, <span>T_200</span>])
+          .containsAnyMatchingElements([<span>foo</span>, <span>bar</span>])
       ).toEqual(true);
       expect(
         wrapper
           .find('Detail[label="Skip Tags"]')
-          .containsAllMatchingElements([<span>S_100</span>, <span>S_200</span>])
+          .containsAllMatchingElements([<span>baz</span>, <span>boo</span>])
       ).toEqual(true);
     });
   });

@@ -40,7 +40,10 @@ describe('NodeAddModal', () => {
       el => el.length === 0
     );
     await act(async () => {
-      wrapper.find('NodeModal').prop('onSave')({ nodeResource }, 'success', {});
+      wrapper.find('NodeModal').prop('onSave')(
+        { linkType: 'success', nodeResource },
+        {}
+      );
     });
 
     expect(dispatch).toHaveBeenCalledWith({

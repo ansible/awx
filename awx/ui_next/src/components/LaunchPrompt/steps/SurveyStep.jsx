@@ -22,7 +22,7 @@ import {
 } from '../../../util/validators';
 import { Survey } from '../../../types';
 
-function SurveyStep({ survey, i18n }) {
+function SurveyStep({ surveyConfig, i18n }) {
   const fieldTypes = {
     text: TextField,
     textarea: TextField,
@@ -34,7 +34,7 @@ function SurveyStep({ survey, i18n }) {
   };
   return (
     <Form>
-      {survey.spec.map(question => {
+      {surveyConfig.spec.map(question => {
         const Field = fieldTypes[question.type];
         return (
           <Field key={question.variable} question={question} i18n={i18n} />
@@ -44,7 +44,7 @@ function SurveyStep({ survey, i18n }) {
   );
 }
 SurveyStep.propTypes = {
-  survey: Survey.isRequired,
+  surveyConfig: Survey.isRequired,
 };
 
 function TextField({ question, i18n }) {

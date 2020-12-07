@@ -29,26 +29,18 @@ import AlertModal from '../../../../../components/AlertModal';
 
 import NodeNextButton from './NodeNextButton';
 
-function canLaunchWithoutPrompt(nodeType, launchData) {
-  if (nodeType !== 'workflow_job_template' && nodeType !== 'job_template') {
-    return true;
-  }
-  return (
-    launchData.can_start_without_user_input &&
-    !launchData.ask_inventory_on_launch &&
-    !launchData.ask_variables_on_launch &&
-    !launchData.ask_limit_on_launch &&
-    !launchData.ask_scm_branch_on_launch &&
-    !launchData.survey_enabled &&
-    (!launchData.variables_needed_to_start ||
-      launchData.variables_needed_to_start.length === 0)
-  );
-}
-
-function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
+function NodeModalForm({
+  askLinkType,
+  i18n,
+  onSave,
+  title,
+  credentialError,
+  launchConfig,
+  surveyConfig,
+  isLaunchLoading,
+}) {
   const history = useHistory();
   const dispatch = useContext(WorkflowDispatchContext);
-  const { nodeToEdit } = useContext(WorkflowStateContext);
   const { values, setTouched, validateForm } = useFormikContext();
 
   const [triggerNext, setTriggerNext] = useState(0);
@@ -64,66 +56,27 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
   };
 
   const {
-    request: readLaunchConfig,
-    error: launchConfigError,
-    result: launchConfig,
-    isLoading,
-  } = useRequest(
-    useCallback(async () => {
-      const readLaunch = (type, id) =>
-        type === 'workflow_job_template'
-          ? WorkflowJobTemplatesAPI.readLaunch(id)
-          : JobTemplatesAPI.readLaunch(id);
-      if (
-        (values?.nodeType === 'workflow_job_template' &&
-          values.nodeResource?.unified_job_type === 'job') ||
-        (values?.nodeType === 'job_template' &&
-          values.nodeResource?.unified_job_type === 'workflow_job')
-      ) {
-        return {};
-      }
-      if (
-        values.nodeType === 'workflow_job_template' ||
-        values.nodeType === 'job_template'
-      ) {
-        if (values.nodeResource) {
-          const { data } = await readLaunch(
-            values.nodeType,
-            values?.nodeResource?.id
-          );
-
-          return data;
-        }
-      }
-
-      return {};
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [values.nodeResource, values.nodeType]),
-    {}
-  );
-
-  useEffect(() => {
-    readLaunchConfig();
-  }, [readLaunchConfig, values.nodeResource, values.nodeType]);
-
-  const {
     steps: promptSteps,
-    isReady,
     visitStep,
     visitAllSteps,
     contentError,
   } = useWorkflowNodeSteps(
     launchConfig,
+    surveyConfig,
     i18n,
     values.nodeResource,
-    askLinkType,
-    !canLaunchWithoutPrompt(values.nodeType, launchConfig),
-    nodeToEdit
+    askLinkType
   );
 
   const handleSaveNode = () => {
     clearQueryParams();
-    onSave(values, askLinkType ? values.linkType : null, launchConfig);
+    if (values.nodeType !== 'workflow_approval_template') {
+      delete values.approvalName;
+      delete values.approvalDescription;
+      delete values.timeoutMinutes;
+      delete values.timeoutSeconds;
+    }
+    onSave(values, launchConfig);
   };
 
   const handleCancel = () => {
@@ -132,30 +85,22 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
   };
 
   const { error, dismissError } = useDismissableError(
-    launchConfigError || contentError || credentialError
+    contentError || credentialError
   );
 
-  const steps = [
-    ...(isReady
-      ? [...promptSteps]
-      : [
-          {
-            name: i18n._(t`Content Loading`),
-            component: <ContentLoading />,
-          },
-        ]),
-  ];
   const nextButtonText = activeStep =>
-    activeStep.id === steps[steps?.length - 1]?.id ||
+    activeStep.id === promptSteps[promptSteps?.length - 1]?.id ||
     activeStep.name === 'Preview'
       ? i18n._(t`Save`)
       : i18n._(t`Next`);
+
   const CustomFooter = (
     <WizardFooter>
       <WizardContextConsumer>
         {({ activeStep, onNext, onBack }) => (
           <>
             <NodeNextButton
+              isDisabled={isLaunchLoading}
               triggerNext={triggerNext}
               activeStep={activeStep}
               aria-label={nextButtonText(activeStep)}
@@ -163,7 +108,7 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
               onClick={() => setTriggerNext(triggerNext + 1)}
               buttonText={nextButtonText(activeStep)}
             />
-            {activeStep && activeStep.id !== steps[0]?.id && (
+            {activeStep && activeStep.id !== promptSteps[0]?.id && (
               <Button
                 id="back-node-modal"
                 variant="secondary"
@@ -187,11 +132,22 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
     </WizardFooter>
   );
 
-  const wizardTitle = values.nodeResource
-    ? `${title} | ${values.nodeResource.name}`
-    : title;
+  if (error) {
+    return (
+      <AlertModal
+        isOpen={error}
+        variant="error"
+        title={i18n._(t`Error!`)}
+        onClose={() => {
+          dismissError();
+        }}
+      >
+        <ContentError error={error} />
+      </AlertModal>
+    );
+  }
 
-  if (error && !isLoading) {
+  if (error && !isLaunchLoading) {
     return (
       <AlertModal
         isOpen={error}
@@ -208,7 +164,7 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
   return (
     <Wizard
       footer={CustomFooter}
-      isOpen={!error || !contentError}
+      isOpen={!error}
       onClose={handleCancel}
       onSave={() => {
         handleSaveNode();
@@ -221,9 +177,9 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
         }
         await validateForm();
       }}
-      steps={steps}
+      steps={promptSteps}
       css="overflow: scroll"
-      title={wizardTitle}
+      title={title}
       onNext={async (nextStep, prevStep) => {
         if (nextStep.id === 'preview') {
           visitAllSteps(setTouched);
@@ -236,24 +192,135 @@ function NodeModalForm({ askLinkType, i18n, onSave, title, credentialError }) {
   );
 }
 
+const NodeModalInner = ({ i18n, title, ...rest }) => {
+  const { values } = useFormikContext();
+
+  const wizardTitle = values.nodeResource
+    ? `${title} | ${values.nodeResource.name}`
+    : title;
+
+  const {
+    request: readLaunchConfigs,
+    error: launchConfigError,
+    result: { launchConfig, surveyConfig },
+    isLoading,
+  } = useRequest(
+    useCallback(async () => {
+      const readLaunch = (type, id) =>
+        type === 'workflow_job_template'
+          ? WorkflowJobTemplatesAPI.readLaunch(id)
+          : JobTemplatesAPI.readLaunch(id);
+      if (
+        !values.nodeResource ||
+        !['job_template', 'workflow_job_template'].includes(values?.nodeType) ||
+        !['job_template', 'workflow_job_template'].includes(
+          values.nodeResource?.type
+        )
+      ) {
+        return {
+          launchConfig: {},
+          surveyConfig: {},
+        };
+      }
+
+      const { data: launch } = await readLaunch(
+        values.nodeType,
+        values?.nodeResource?.id
+      );
+
+      let survey = {};
+
+      if (launch.survey_enabled) {
+        const { data } = launch?.workflow_job_template_data
+          ? await WorkflowJobTemplatesAPI.readSurvey(
+              launch?.workflow_job_template_data?.id
+            )
+          : await JobTemplatesAPI.readSurvey(launch?.job_template_data?.id);
+
+        survey = data;
+      }
+
+      return {
+        launchConfig: launch,
+        surveyConfig: survey,
+      };
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [values.nodeResource, values.nodeType]),
+    {}
+  );
+
+  useEffect(() => {
+    readLaunchConfigs();
+  }, [readLaunchConfigs, values.nodeResource]);
+
+  const { error, dismissError } = useDismissableError(launchConfigError);
+
+  if (error) {
+    return (
+      <AlertModal
+        isOpen={error}
+        variant="error"
+        title={i18n._(t`Error!`)}
+        onClose={() => {
+          dismissError();
+        }}
+      >
+        <ContentError error={error} />
+      </AlertModal>
+    );
+  }
+
+  if (!launchConfig || !surveyConfig) {
+    return (
+      <Wizard
+        isOpen
+        steps={[
+          {
+            name: i18n._(t`Loading`),
+            component: <ContentLoading />,
+          },
+        ]}
+        title={wizardTitle}
+        footer={<></>}
+      />
+    );
+  }
+
+  return (
+    <NodeModalForm
+      {...rest}
+      launchConfig={launchConfig}
+      surveyConfig={surveyConfig}
+      isLaunchLoading={isLoading}
+      title={wizardTitle}
+      i18n={i18n}
+    />
+  );
+};
+
 const NodeModal = ({ onSave, i18n, askLinkType, title }) => {
   const { nodeToEdit } = useContext(WorkflowStateContext);
-  const onSaveForm = (values, linkType, config) => {
-    onSave(values, linkType, config);
+  const onSaveForm = (values, config) => {
+    onSave(values, config);
   };
 
   return (
     <Formik
       initialValues={{
-        nodeResource:
-          nodeToEdit?.originalNodeObject?.summary_fields
-            ?.unified_job_template || null,
+        approvalName: '',
+        approvalDescription: '',
+        timeoutMinutes: 0,
+        timeoutSeconds: 0,
+        linkType: 'success',
+        nodeResource: nodeToEdit?.fullUnifiedJobTemplate || null,
+        nodeType: nodeToEdit?.fullUnifiedJobTemplate?.type || 'job_template',
       }}
       onSave={() => onSaveForm}
     >
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-          <NodeModalForm
+          <NodeModalInner
             onSave={onSaveForm}
             i18n={i18n}
             title={title}

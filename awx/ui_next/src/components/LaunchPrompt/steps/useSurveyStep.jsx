@@ -1,45 +1,25 @@
-import React, { useEffect, useCallback } from 'react';
+import React from 'react';
 import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
-import useRequest from '../../../util/useRequest';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
 import SurveyStep from './SurveyStep';
 import StepName from './StepName';
 
 const STEP_ID = 'survey';
 
 export default function useSurveyStep(
-  config,
-  i18n,
-  visitedSteps,
+  launchConfig,
+  surveyConfig,
   resource,
-  nodeToEdit
+  i18n,
+  visitedSteps
 ) {
   const { values } = useFormikContext();
-  const { result: survey, request: fetchSurvey, isLoading, error } = useRequest(
-    useCallback(async () => {
-      if (!config.survey_enabled) {
-        return {};
-      }
-      const { data } = config?.workflow_job_template_data
-        ? await WorkflowJobTemplatesAPI.readSurvey(
-            config?.workflow_job_template_data?.id
-          )
-        : await JobTemplatesAPI.readSurvey(config?.job_template_data?.id);
-      return data;
-    }, [config])
-  );
-
-  useEffect(() => {
-    fetchSurvey();
-  }, [fetchSurvey]);
-
   const errors = {};
   const validate = () => {
-    if (!config.survey_enabled || !survey || !survey.spec) {
+    if (!launchConfig.survey_enabled || !surveyConfig?.spec) {
       return {};
     }
-    survey.spec.forEach(question => {
+    surveyConfig.spec.forEach(question => {
       const errMessage = validateField(
         question,
         values[`survey_${question.variable}`],
@@ -53,19 +33,19 @@ export default function useSurveyStep(
   };
   const formError = Object.keys(validate()).length > 0;
   return {
-    step: getStep(config, survey, validate, i18n, visitedSteps),
-    initialValues: getInitialValues(config, survey, nodeToEdit),
+    step: getStep(launchConfig, surveyConfig, validate, i18n, visitedSteps),
+    initialValues: getInitialValues(launchConfig, surveyConfig, resource),
     validate,
-    survey,
-    isReady: !isLoading && !!survey,
-    contentError: error,
+    surveyConfig,
+    isReady: true,
+    contentError: null,
     formError,
     setTouched: setFieldsTouched => {
-      if (!survey || !survey.spec) {
+      if (!surveyConfig?.spec) {
         return;
       }
       const fields = {};
-      survey.spec.forEach(question => {
+      surveyConfig.spec.forEach(question => {
         fields[`survey_${question.variable}`] = true;
       });
       setFieldsTouched(fields);
@@ -96,14 +76,13 @@ function validateField(question, value, i18n) {
   }
   return null;
 }
-function getStep(config, survey, validate, i18n, visitedSteps) {
-  if (!config.survey_enabled) {
+function getStep(launchConfig, surveyConfig, validate, i18n, visitedSteps) {
+  if (!launchConfig.survey_enabled) {
     return null;
   }
 
   return {
     id: STEP_ID,
-    key: 6,
     name: (
       <StepName
         hasErrors={
@@ -114,26 +93,26 @@ function getStep(config, survey, validate, i18n, visitedSteps) {
         {i18n._(t`Survey`)}
       </StepName>
     ),
-    component: <SurveyStep survey={survey} i18n={i18n} />,
+    component: <SurveyStep surveyConfig={surveyConfig} i18n={i18n} />,
     enableNext: true,
   };
 }
 
-function getInitialValues(config, survey, nodeToEdit) {
-  if (!config.survey_enabled || !survey) {
+function getInitialValues(launchConfig, surveyConfig, resource) {
+  if (!launchConfig.survey_enabled || !surveyConfig) {
     return {};
   }
 
   const values = {};
-  if (survey && survey.spec) {
-    survey.spec.forEach(question => {
+  if (surveyConfig?.spec) {
+    surveyConfig.spec.forEach(question => {
       if (question.type === 'multiselect') {
         values[`survey_${question.variable}`] = question.default.split('\n');
       } else {
         values[`survey_${question.variable}`] = question.default;
       }
-      if (nodeToEdit?.extra_data) {
-        Object.entries(nodeToEdit?.extra_data).forEach(([key, value]) => {
+      if (resource?.extra_data) {
+        Object.entries(resource.extra_data).forEach(([key, value]) => {
           if (key === question.variable) {
             if (question.type === 'multiselect') {
               values[`survey_${question.variable}`] = value;

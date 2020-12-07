@@ -1,64 +1,17 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { t } from '@lingui/macro';
-import useRequest from '../../../util/useRequest';
-import {
-  WorkflowJobTemplateNodesAPI,
-  JobTemplatesAPI,
-  WorkflowJobTemplatesAPI,
-} from '../../../api';
 
 import CredentialsStep from './CredentialsStep';
 
 const STEP_ID = 'credentials';
 
-export default function useCredentialsStep(
-  config,
-  i18n,
-  selectedResource,
-  nodeToEdit
-) {
-  const resource = nodeToEdit || selectedResource;
-  const { request: fetchCredentials, result, error, isLoading } = useRequest(
-    useCallback(async () => {
-      let credentials;
-      if (!nodeToEdit?.related?.credentials) {
-        return {};
-      }
-      const {
-        data: { results },
-      } = await WorkflowJobTemplateNodesAPI.readCredentials(nodeToEdit.id);
-      credentials = results;
-      if (results.length === 0 && config?.defaults?.credentials) {
-        const fetchCreds = config.job_template_data
-          ? JobTemplatesAPI.readDetail(config.job_template_data.id)
-          : WorkflowJobTemplatesAPI.readDetail(
-              config.workflow_job_template_data.id
-            );
-
-        const {
-          data: {
-            summary_fields: { credentials: defaultCreds },
-          },
-        } = await fetchCreds;
-        credentials = defaultCreds;
-      }
-      return credentials;
-    }, [nodeToEdit, config])
-  );
-  useEffect(() => {
-    fetchCredentials();
-  }, [fetchCredentials, nodeToEdit]);
-
-  const validate = () => {
-    return {};
-  };
-
+export default function useCredentialsStep(launchConfig, resource, i18n) {
   return {
-    step: getStep(config, i18n),
-    initialValues: getInitialValues(config, resource, result),
-    validate,
-    isReady: !isLoading && !!result,
-    contentError: error,
+    step: getStep(launchConfig, i18n),
+    initialValues: getInitialValues(launchConfig, resource),
+    validate: () => ({}),
+    isReady: true,
+    contentError: null,
     formError: null,
     setTouched: setFieldsTouched => {
       setFieldsTouched({
@@ -68,8 +21,8 @@ export default function useCredentialsStep(
   };
 }
 
-function getStep(config, i18n) {
-  if (!config.ask_credential_on_launch) {
+function getStep(launchConfig, i18n) {
+  if (!launchConfig.ask_credential_on_launch) {
     return null;
   }
   return {
@@ -81,11 +34,12 @@ function getStep(config, i18n) {
   };
 }
 
-function getInitialValues(config, resource, result) {
-  if (!config.ask_credential_on_launch) {
+function getInitialValues(launchConfig, resource) {
+  if (!launchConfig.ask_credential_on_launch) {
     return {};
   }
+
   return {
-    credentials: resource?.summary_fields?.credentials || result || [],
+    credentials: resource?.summary_fields?.credentials || [],
   };
 }

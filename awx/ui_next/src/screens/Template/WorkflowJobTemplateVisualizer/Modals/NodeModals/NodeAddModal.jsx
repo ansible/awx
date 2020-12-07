@@ -12,8 +12,15 @@ function NodeAddModal({ i18n }) {
   const dispatch = useContext(WorkflowDispatchContext);
   const { addNodeSource } = useContext(WorkflowStateContext);
 
-  const addNode = (values, linkType, config) => {
-    const { approvalName, approvalDescription, approvalTimeout } = values;
+  const addNode = (values, config) => {
+    const {
+      approvalName,
+      approvalDescription,
+      timeoutMinutes,
+      timeoutSeconds,
+      linkType,
+    } = values;
+
     if (values) {
       const { added, removed } = getAddedAndRemoved(
         config?.defaults?.credentials,
@@ -24,21 +31,21 @@ function NodeAddModal({ i18n }) {
       values.removedCredentials = removed;
     }
 
-    let node;
-    if (values.nodeType === 'approval') {
-      node = {
-        nodeResource: {
-          description: approvalDescription,
-          name: approvalName,
-          timeout: approvalTimeout,
-          type: 'workflow_approval_template',
-        },
+    const node = {
+      linkType,
+    };
+
+    delete values.linkType;
+
+    if (values.nodeType === 'workflow_approval_template') {
+      node.nodeResource = {
+        description: approvalDescription,
+        name: approvalName,
+        timeout: Number(timeoutMinutes) * 60 + Number(timeoutSeconds),
+        type: 'workflow_approval_template',
       };
     } else {
-      node = {
-        linkType,
-        nodeResource: values.nodeResource,
-      };
+      node.nodeResource = values.nodeResource;
       if (
         values?.nodeType === 'job_template' ||
         values?.nodeType === 'workflow_job_template'

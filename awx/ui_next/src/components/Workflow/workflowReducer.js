@@ -180,7 +180,7 @@ function createNode(state, node) {
 
   newNodes.push({
     id: nextNodeId,
-    unifiedJobTemplate: node.nodeResource,
+    fullUnifiedJobTemplate: node.nodeResource,
     isInvalidLinkTarget: false,
     promptValues: node.promptValues,
   });
@@ -407,7 +407,7 @@ function generateNodes(workflowNodes, i18n) {
   const arrayOfNodesForChart = [
     {
       id: 1,
-      unifiedJobTemplate: {
+      fullUnifiedJobTemplate: {
         name: i18n._(t`START`),
       },
     },
@@ -420,8 +420,14 @@ function generateNodes(workflowNodes, i18n) {
       originalNodeObject: node,
     };
 
-    if (node.summary_fields.unified_job_template) {
-      nodeObj.unifiedJobTemplate = node.summary_fields.unified_job_template;
+    if (
+      node.summary_fields?.unified_job_template?.unified_job_type ===
+      'workflow_approval'
+    ) {
+      nodeObj.fullUnifiedJobTemplate = {
+        ...node.summary_fields.unified_job_template,
+        type: 'workflow_approval_template',
+      };
     }
 
     arrayOfNodesForChart.push(nodeObj);
@@ -651,12 +657,19 @@ function updateLink(state, linkType) {
 
 function updateNode(state, editedNode) {
   const { nodeToEdit, nodes } = state;
+  const { nodeResource, launchConfig, promptValues } = editedNode;
   const newNodes = [...nodes];
 
   const matchingNode = newNodes.find(node => node.id === nodeToEdit.id);
-  matchingNode.unifiedJobTemplate = editedNode.nodeResource;
+  matchingNode.fullUnifiedJobTemplate = nodeResource;
   matchingNode.isEdited = true;
-  matchingNode.promptValues = editedNode.promptValues;
+  matchingNode.launchConfig = launchConfig;
+
+  if (promptValues) {
+    matchingNode.promptValues = promptValues;
+  } else {
+    delete matchingNode.promptValues;
+  }
 
   return {
     ...state,
@@ -671,7 +684,15 @@ function refreshNode(state, refreshedNode) {
   const newNodes = [...nodes];
 
   const matchingNode = newNodes.find(node => node.id === nodeToView.id);
-  matchingNode.unifiedJobTemplate = refreshedNode.nodeResource;
+
+  if (refreshedNode.fullUnifiedJobTemplate) {
+    matchingNode.fullUnifiedJobTemplate = refreshedNode.fullUnifiedJobTemplate;
+  }
+
+  if (refreshedNode.originalNodeCredentials) {
+    matchingNode.originalNodeCredentials =
+      refreshedNode.originalNodeCredentials;
+  }
 
   return {
     ...state,

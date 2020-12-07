@@ -76,7 +76,7 @@ describe('LaunchPrompt', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <LaunchPrompt
-          config={{
+          launchConfig={{
             ...config,
             ask_inventory_on_launch: true,
             ask_credential_on_launch: true,
@@ -86,6 +86,24 @@ describe('LaunchPrompt', () => {
           resource={resource}
           onLaunch={noop}
           onCancel={noop}
+          surveyConfig={{
+            name: '',
+            description: '',
+            spec: [
+              {
+                choices: '',
+                default: '',
+                max: 1024,
+                min: 0,
+                new_question: false,
+                question_description: '',
+                question_name: 'foo',
+                required: true,
+                type: 'text',
+                variable: 'foo',
+              },
+            ],
+          }}
         />
       );
     });
@@ -105,7 +123,7 @@ describe('LaunchPrompt', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <LaunchPrompt
-          config={{
+          launchConfig={{
             ...config,
             ask_inventory_on_launch: true,
           }}
@@ -129,7 +147,7 @@ describe('LaunchPrompt', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <LaunchPrompt
-          config={{
+          launchConfig={{
             ...config,
             ask_credential_on_launch: true,
           }}
@@ -153,7 +171,7 @@ describe('LaunchPrompt', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <LaunchPrompt
-          config={{
+          launchConfig={{
             ...config,
             ask_verbosity_on_launch: true,
           }}

@@ -28,7 +28,6 @@ function getStep(askLinkType, meta, i18n) {
   }
   return {
     id: STEP_ID,
-    key: 1,
     name: i18n._(t`Run Type`),
     component: <RunStep />,
     enableNext: meta.value !== '',

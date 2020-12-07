@@ -11,7 +11,14 @@ import useLaunchSteps from './useLaunchSteps';
 import AlertModal from '../AlertModal';
 import getSurveyValues from './getSurveyValues';
 
-function PromptModalForm({ onSubmit, onCancel, i18n, config, resource }) {
+function PromptModalForm({
+  launchConfig,
+  i18n,
+  onCancel,
+  onSubmit,
+  resource,
+  surveyConfig,
+}) {
   const { values, setTouched, validateForm } = useFormikContext();
 
   const {
@@ -20,7 +27,7 @@ function PromptModalForm({ onSubmit, onCancel, i18n, config, resource }) {
     visitStep,
     visitAllSteps,
     contentError,
-  } = useLaunchSteps(config, resource, i18n);
+  } = useLaunchSteps(launchConfig, surveyConfig, resource, i18n);
 
   const handleSave = () => {
     const postValues = {};
@@ -39,7 +46,7 @@ function PromptModalForm({ onSubmit, onCancel, i18n, config, resource }) {
     setValue('limit', values.limit);
     setValue('job_tags', values.job_tags);
     setValue('skip_tags', values.skip_tags);
-    const extraVars = config.ask_variables_on_launch
+    const extraVars = launchConfig.ask_variables_on_launch
       ? values.extra_vars || '---'
       : resource.extra_vars;
     setValue('extra_vars', mergeExtraVars(extraVars, surveyValues));
@@ -103,33 +110,22 @@ function PromptModalForm({ onSubmit, onCancel, i18n, config, resource }) {
   );
 }
 
-function LaunchPrompt({ config, resource = {}, onLaunch, onCancel, i18n }) {
+function LaunchPrompt({
+  launchConfig,
+  i18n,
+  onCancel,
+  onLaunch,
+  resource = {},
+  surveyConfig,
+}) {
   return (
-    <Formik
-      initialValues={{
-        verbosity: resource.verbosity || 0,
-        inventory:
-          resource.summary_fields?.inventory || null,
-        credentials:
-          resource.summary_fields?.credentials || [],
-        diff_mode:
-          config.ask_diff_mode_on_launch && (resource.diff_mode || false),
-        extra_vars:
-          resource.extra_vars || '---',
-        job_type:  resource.job_type || 'run',
-        job_tags: resource.job_tags || '',
-        skip_tags:  resource.skip_tags || '',
-        scm_branch:
-           resource.scm_branch || '',
-        limit:  resource.limit || '',
-      }}
-      onSubmit={values => onLaunch(values)}
-    >
+    <Formik initialValues={{}} onSubmit={values => onLaunch(values)}>
       <PromptModalForm
         onSubmit={values => onLaunch(values)}
         onCancel={onCancel}
         i18n={i18n}
-        config={config}
+        launchConfig={launchConfig}
+        surveyConfig={surveyConfig}
         resource={resource}
       />
     </Formik>
