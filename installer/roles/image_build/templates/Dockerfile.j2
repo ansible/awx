@@ -24,9 +24,10 @@ USER root
 
 # Install build dependencies
 RUN dnf -y update && \
+    dnf -y install dnf-plugins-core && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
     dnf module -y enable 'postgresql:10' && \
-    dnf config-manager --set-enabled powertools && \
+    dnf config-manager --set-enabled PowerTools && \
     dnf -y install ansible \
     gcc \
     gcc-c++ \
