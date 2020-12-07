@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -10,6 +10,9 @@ import {
   InfiniteLoader,
   List,
 } from 'react-virtualized';
+import Ansi from 'ansi-to-html';
+import hasAnsi from 'has-ansi';
+import { AllHtmlEntities } from 'html-entities';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody } from '../../../components/Card';
@@ -31,6 +34,106 @@ import {
   InventoriesAPI,
   AdHocCommandsAPI,
 } from '../../../api';
+
+const EVENT_START_TASK = 'playbook_on_task_start';
+const EVENT_START_PLAY = 'playbook_on_play_start';
+const EVENT_STATS_PLAY = 'playbook_on_stats';
+const TIME_EVENTS = [EVENT_START_TASK, EVENT_START_PLAY, EVENT_STATS_PLAY];
+
+const ansi = new Ansi({
+  stream: true,
+  colors: {
+    0: '#000',
+    1: '#A30000',
+    2: '#486B00',
+    3: '#795600',
+    4: '#00A',
+    5: '#A0A',
+    6: '#004368',
+    7: '#AAA',
+    8: '#555',
+    9: '#F55',
+    10: '#5F5',
+    11: '#FF5',
+    12: '#55F',
+    13: '#F5F',
+    14: '#5FF',
+    15: '#FFF',
+  },
+});
+const entities = new AllHtmlEntities();
+
+function getTimestamp({ created }) {
+  const date = new Date(created);
+
+  const dateHours = date.getHours();
+  const dateMinutes = date.getMinutes();
+  const dateSeconds = date.getSeconds();
+
+  const stampHours = dateHours < 10 ? `0${dateHours}` : dateHours;
+  const stampMinutes = dateMinutes < 10 ? `0${dateMinutes}` : dateMinutes;
+  const stampSeconds = dateSeconds < 10 ? `0${dateSeconds}` : dateSeconds;
+
+  return `${stampHours}:${stampMinutes}:${stampSeconds}`;
+}
+
+const styleAttrPattern = new RegExp('style="[^"]*"', 'g');
+
+function createStyleAttrHash(styleAttr) {
+  let hash = 0;
+  for (let i = 0; i < styleAttr.length; i++) {
+    hash = (hash << 5) - hash; // eslint-disable-line no-bitwise
+    hash += styleAttr.charCodeAt(i);
+    hash &= hash; // eslint-disable-line no-bitwise
+  }
+  return `${hash}`;
+}
+
+function replaceStyleAttrs(html) {
+  const allStyleAttrs = [...new Set(html.match(styleAttrPattern))];
+  const cssMap = {};
+  let result = html;
+  for (let i = 0; i < allStyleAttrs.length; i++) {
+    const styleAttr = allStyleAttrs[i];
+    const cssClassName = `output-${createStyleAttrHash(styleAttr)}`;
+
+    cssMap[cssClassName] = styleAttr.replace('style="', '').slice(0, -1);
+    result = result.split(styleAttr).join(`class="${cssClassName}"`);
+  }
+  return { cssMap, result };
+}
+
+function getLineTextHtml({ created, event, start_line, stdout }) {
+  const sanitized = entities.encode(stdout);
+  let lineCssMap = {};
+  const lineTextHtml = [];
+
+  sanitized.split('\r\n').forEach((lineText, index) => {
+    let html;
+    if (hasAnsi(lineText)) {
+      const { cssMap, result } = replaceStyleAttrs(ansi.toHtml(lineText));
+      html = result;
+      lineCssMap = { ...lineCssMap, ...cssMap };
+    } else {
+      html = lineText;
+    }
+
+    if (index === 1 && TIME_EVENTS.includes(event)) {
+      const time = getTimestamp({ created });
+      html += `<span class="time">${time}</span>`;
+    }
+
+    lineTextHtml.push({
+      lineNumber: start_line + index,
+      html,
+    });
+  });
+
+  return {
+    lineCssMap,
+    lineTextHtml,
+  };
+}
 
 const HeaderTitle = styled.div`
   display: inline-flex;
@@ -54,6 +157,8 @@ const OutputWrapper = styled.div`
   font-size: 15px;
   height: calc(100vh - 350px);
   outline: 1px solid #d7d7d7;
+  ${({ cssMap }) =>
+    Object.keys(cssMap).map(className => `.${className}{${cssMap[className]}}`)}
 `;
 
 const OutputFooter = styled.div`
@@ -122,6 +227,7 @@ class JobOutput extends Component {
       remoteRowCount: 0,
       isHostModalOpen: false,
       hostEvent: {},
+      cssMap: {},
     };
 
     this.cache = new CellMeasurerCache({
@@ -164,7 +270,7 @@ class JobOutput extends Component {
   componentDidUpdate(prevProps, prevState) {
     // recompute row heights for any job events that have transitioned
     // from loading to loaded
-    const { currentlyLoading } = this.state;
+    const { currentlyLoading, cssMap } = this.state;
     let shouldRecomputeRowHeights = false;
     prevState.currentlyLoading
       .filter(n => !currentlyLoading.includes(n))
@@ -172,6 +278,9 @@ class JobOutput extends Component {
         shouldRecomputeRowHeights = true;
         this.cache.clear(n);
       });
+    if (Object.keys(cssMap).length !== Object.keys(prevState.cssMap).length) {
+      shouldRecomputeRowHeights = true;
+    }
     if (shouldRecomputeRowHeights) {
       if (this.listRef.recomputeRowHeights) {
         this.listRef.recomputeRowHeights();
@@ -300,6 +409,13 @@ class JobOutput extends Component {
       return isHost;
     };
 
+    let actualLineTextHtml = [];
+    if (results[index]) {
+      const { lineTextHtml, lineCssMap } = getLineTextHtml(results[index]);
+      this.setState(({ cssMap }) => ({ cssMap: { ...cssMap, ...lineCssMap } }));
+      actualLineTextHtml = lineTextHtml;
+    }
+
     return (
       <CellMeasurer
         key={key}
@@ -314,6 +430,7 @@ class JobOutput extends Component {
             onJobEventClick={() => this.handleHostEventClick(results[index])}
             className="row"
             style={style}
+            lineTextHtml={actualLineTextHtml}
             {...results[index]}
           />
         ) : (
@@ -389,7 +506,9 @@ class JobOutput extends Component {
   handleResize({ width }) {
     if (width !== this._previousWidth) {
       this.cache.clearAll();
-      this.listRef.recomputeRowHeights();
+      if (this.listRef) {
+        this.listRef.recomputeRowHeights();
+      }
     }
     this._previousWidth = width;
   }
@@ -404,6 +523,7 @@ class JobOutput extends Component {
       hostEvent,
       isHostModalOpen,
       remoteRowCount,
+      cssMap,
     } = this.state;
 
     if (hasContentLoading) {
@@ -415,60 +535,62 @@ class JobOutput extends Component {
     }
 
     return (
-      <CardBody>
-        {isHostModalOpen && (
-          <HostEventModal
-            onClose={this.handleHostModalClose}
-            isOpen={isHostModalOpen}
-            hostEvent={hostEvent}
+      <Fragment>
+        <CardBody>
+          {isHostModalOpen && (
+            <HostEventModal
+              onClose={this.handleHostModalClose}
+              isOpen={isHostModalOpen}
+              hostEvent={hostEvent}
+            />
+          )}
+          <OutputHeader>
+            <HeaderTitle>
+              <StatusIcon status={job.status} />
+              <h1>{job.name}</h1>
+            </HeaderTitle>
+            <OutputToolbar job={job} onDelete={this.handleDeleteJob} />
+          </OutputHeader>
+          <HostStatusBar counts={job.host_status_counts} />
+          <PageControls
+            onScrollFirst={this.handleScrollFirst}
+            onScrollLast={this.handleScrollLast}
+            onScrollNext={this.handleScrollNext}
+            onScrollPrevious={this.handleScrollPrevious}
           />
-        )}
-        <OutputHeader>
-          <HeaderTitle>
-            <StatusIcon status={job.status} />
-            <h1>{job.name}</h1>
-          </HeaderTitle>
-          <OutputToolbar job={job} onDelete={this.handleDeleteJob} />
-        </OutputHeader>
-        <HostStatusBar counts={job.host_status_counts} />
-        <PageControls
-          onScrollFirst={this.handleScrollFirst}
-          onScrollLast={this.handleScrollLast}
-          onScrollNext={this.handleScrollNext}
-          onScrollPrevious={this.handleScrollPrevious}
-        />
-        <OutputWrapper>
-          <InfiniteLoader
-            isRowLoaded={this.isRowLoaded}
-            loadMoreRows={this.loadMoreRows}
-            rowCount={remoteRowCount}
-          >
-            {({ onRowsRendered, registerChild }) => (
-              <AutoSizer onResize={this.handleResize}>
-                {({ width, height }) => {
-                  return (
-                    <List
-                      ref={ref => {
-                        this.listRef = ref;
-                        registerChild(ref);
-                      }}
-                      deferredMeasurementCache={this.cache}
-                      height={height || 1}
-                      onRowsRendered={onRowsRendered}
-                      rowCount={remoteRowCount}
-                      rowHeight={this.cache.rowHeight}
-                      rowRenderer={this.rowRenderer}
-                      scrollToAlignment="start"
-                      width={width || 1}
-                      overscanRowCount={20}
-                    />
-                  );
-                }}
-              </AutoSizer>
-            )}
-          </InfiniteLoader>
-          <OutputFooter />
-        </OutputWrapper>
+          <OutputWrapper cssMap={cssMap}>
+            <InfiniteLoader
+              isRowLoaded={this.isRowLoaded}
+              loadMoreRows={this.loadMoreRows}
+              rowCount={remoteRowCount}
+            >
+              {({ onRowsRendered, registerChild }) => (
+                <AutoSizer nonce={window.NONCE_ID} onResize={this.handleResize}>
+                  {({ width, height }) => {
+                    return (
+                      <List
+                        ref={ref => {
+                          this.listRef = ref;
+                          registerChild(ref);
+                        }}
+                        deferredMeasurementCache={this.cache}
+                        height={height || 1}
+                        onRowsRendered={onRowsRendered}
+                        rowCount={remoteRowCount}
+                        rowHeight={this.cache.rowHeight}
+                        rowRenderer={this.rowRenderer}
+                        scrollToAlignment="start"
+                        width={width || 1}
+                        overscanRowCount={20}
+                      />
+                    );
+                  }}
+                </AutoSizer>
+              )}
+            </InfiniteLoader>
+            <OutputFooter />
+          </OutputWrapper>
+        </CardBody>
         {deletionError && (
           <AlertModal
             isOpen={deletionError}
@@ -480,7 +602,7 @@ class JobOutput extends Component {
             <ErrorDetail error={deletionError} />
           </AlertModal>
         )}
-      </CardBody>
+      </Fragment>
     );
   }
 }
