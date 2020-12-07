@@ -11,7 +11,7 @@ import { InventoriesAPI } from '../../../api';
 import { Inventory } from '../../../types';
 import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import CopyButton from '../../../components/CopyButton';
-import SyncStatusIndicator from '../../../components/SyncStatusIndicator';
+import StatusLabel from '../../../components/StatusLabel';
 
 function InventoryListItem({
   inventory,
@@ -74,9 +74,7 @@ function InventoryListItem({
         )}
       </Td>
       <Td>
-        {inventory.kind !== 'smart' && (
-          <SyncStatusIndicator status={syncStatus} />
-        )}
+        {inventory.kind !== 'smart' && <StatusLabel status={syncStatus} />}
       </Td>
       <Td>
         {inventory.kind === 'smart'

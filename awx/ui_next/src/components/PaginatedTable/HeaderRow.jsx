@@ -1,11 +1,16 @@
 import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { Thead, Tr, Th } from '@patternfly/react-table';
+import { Thead, Tr, Th as PFTh } from '@patternfly/react-table';
+import styled from 'styled-components';
 import {
   encodeNonDefaultQueryString,
   parseQueryString,
   replaceParams,
 } from '../../util/qs';
+
+const Th = styled(PFTh)`
+  --pf-c-table--cell--Overflow: initial;
+`;
 
 export default function HeaderRow({ qsConfig, defaultSortKey, children }) {
   const location = useLocation();

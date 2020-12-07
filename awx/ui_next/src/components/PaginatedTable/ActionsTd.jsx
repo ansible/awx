@@ -17,7 +17,7 @@ const ActionsGrid = styled.div`
 `;
 
 export default function ActionsTd({ children }) {
-  const numActions = children.length;
+  const numActions = children.length || 1;
   const width = numActions * 40;
   return (
     <Td

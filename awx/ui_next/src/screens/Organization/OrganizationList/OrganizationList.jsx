@@ -156,6 +156,7 @@ function OrganizationsList({ i18n }) {
                 <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Members`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Teams`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
               </HeaderRow>
             }
             renderToolbar={props => (
