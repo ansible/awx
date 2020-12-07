@@ -29,27 +29,41 @@ function NotificationTemplatesList({ i18n }) {
   const addUrl = `${match.url}/add`;
 
   const {
-    result: { templates, count, actions },
+    result: {
+      templates,
+      count,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading: isTemplatesLoading,
     request: fetchTemplates,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const responses = await Promise.all([
+      const [response, actionsResponse] = await Promise.all([
         NotificationTemplatesAPI.read(params),
         NotificationTemplatesAPI.readOptions(),
       ]);
       return {
-        templates: responses[0].data.results,
-        count: responses[0].data.count,
-        actions: responses[1].data.actions,
+        templates: response.data.results,
+        count: response.data.count,
+        actions: actionsResponse.data.actions,
+        relatedSearchableKeys: (
+          actionsResponse.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
       templates: [],
       count: 0,
       actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -133,6 +147,8 @@ function NotificationTemplatesList({ i18n }) {
                 key: 'modified_by__username__icontains',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             toolbarSortColumns={[
               {
                 name: i18n._(t`Name`),
