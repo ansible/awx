@@ -1,4 +1,4 @@
-PYTHON ?= python3
+PYTHON ?= python3.8
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 OFFICIAL ?= no
@@ -125,7 +125,7 @@ virtualenv_awx:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
-			virtualenv -p $(PYTHON) $(VENV_BASE)/awx; \
+			$(PYTHON) -m venv $(VENV_BASE)/awx; \
 			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
 		fi; \
 	fi
@@ -164,7 +164,7 @@ version_file:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	python -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
+	$(PYTHON) -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
 
 # Do any one-time init tasks.
 comma := ,
@@ -292,7 +292,7 @@ swagger: reports
 check: black
 
 awx-link:
-	[ -d "/awx_devel/awx.egg-info" ] || python3 /awx_devel/setup.py egg_info_dev
+	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/setup.py egg_info_dev
 	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
