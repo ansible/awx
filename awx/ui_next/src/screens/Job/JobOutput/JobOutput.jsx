@@ -506,7 +506,7 @@ class JobOutput extends Component {
   handleResize({ width }) {
     if (width !== this._previousWidth) {
       this.cache.clearAll();
-      if (this.listRef) {
+      if (this.listRef?.recomputeRowHeights) {
         this.listRef.recomputeRowHeights();
       }
     }
