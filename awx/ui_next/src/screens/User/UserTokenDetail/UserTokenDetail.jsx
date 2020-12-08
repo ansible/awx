@@ -44,18 +44,32 @@ function UserTokenDetail({ token, i18n }) {
           value={summary_fields?.application?.name}
           dataCy="application-token-detail-name"
         />
-        <Detail label={i18n._(t`Description`)} value={description} />
-        <Detail label={i18n._(t`Scope`)} value={toTitleCase(scope)} />
-        <Detail label={i18n._(t`Expires`)} value={formatDateString(expires)} />
+        <Detail
+          label={i18n._(t`Description`)}
+          value={description}
+          dataCy="application-token-detail-description"
+        />
+        <Detail
+          label={i18n._(t`Scope`)}
+          value={toTitleCase(scope)}
+          dataCy="application-token-detail-scope"
+        />
+        <Detail
+          label={i18n._(t`Expires`)}
+          value={formatDateString(expires)}
+          dataCy="application-token-detail-expires"
+        />
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={created}
           user={summary_fields.user}
+          dataCy="application-token-detail-created"
         />
         <UserDateDetail
           label={i18n._(t`Last Modified`)}
           date={modified}
           user={summary_fields.user}
+          dataCy="application-token-detail-last-modified"
         />
       </DetailList>
       <CardActionsRow>
