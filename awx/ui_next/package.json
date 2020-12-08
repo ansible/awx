@@ -53,7 +53,7 @@
   },
   "scripts": {
     "start": "PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",
-    "build": "react-scripts build",
+    "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
     "test": "TZ='UTC' react-scripts test --coverage --watchAll=false",
     "test-watch": "TZ='UTC' react-scripts test",
     "eject": "react-scripts eject",
