@@ -183,10 +183,7 @@ class Licenser(object):
             currentEndDate = datetime.fromtimestamp(int(currentEndDateStr), timezone.utc)
             if endDate < currentEndDate:
                 license['license_date'] = endDate.strftime('%s')
-            try:
-                instances = sub['pool']['exported']
-            except KeyError:
-                instances = sub['pool']['quantity']
+            instances = sub['quantity']
             license['instance_count'] = license.get('instance_count', 0) + instances
             license['subscription_name'] = re.sub(r'[\d]* Managed Nodes', '%d Managed Nodes' % license['instance_count'], license['subscription_name'])
 
