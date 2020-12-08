@@ -1312,7 +1312,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
     """
     I can see an execution environment when:
      - I'm a superuser
-     - I'm a member of the organization
+     - I'm a member of the same organization
      - it is a global ExecutionEnvironment
     I can create/change an execution environment when:
      - I'm a superuser
@@ -1321,32 +1321,32 @@ class ExecutionEnvironmentAccess(BaseAccess):
 
     model = ExecutionEnvironment
     select_related = ('organization',)
-    prefetch_related = ('organization__admin_role',)
+    prefetch_related = ('organization__admin_role', 'organization__execution_environment_admin_role')
 
     def filtered_queryset(self):
         return ExecutionEnvironment.objects.filter(
-            Q(organization__in=Organization.accessible_pk_qs(self.user, 'admin_role')) |
+            Q(organization__in=Organization.accessible_pk_qs(self.user, 'execution_environment_admin_role')) |
             Q(organization__isnull=True)
         ).distinct()
 
     @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
-            return Organization.accessible_objects(self.user, 'admin_role').exists()
+            return Organization.accessible_objects(self.user, 'execution_environment_admin_role').exists()
         return self.check_related('organization', Organization, data)
 
     @check_superuser
     def can_change(self, obj, data):
         if obj and obj.organization_id is None:
             raise PermissionDenied
-        if self.user not in obj.organization.admin_role:
+        if self.user not in obj.organization.execution_environment_admin_role:
             raise PermissionDenied
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and obj.organization_id != org_pk:
             # Prevent moving an EE to a different organization, unless a superuser or admin on both orgs.
             if obj.organization_id is None or org_pk is None:
                 raise PermissionDenied
-            if self.user not in Organization.objects.get(id=org_pk).admin_role:
+            if self.user not in Organization.objects.get(id=org_pk).execution_environment_admin_role:
                 raise PermissionDenied
 
         return True
