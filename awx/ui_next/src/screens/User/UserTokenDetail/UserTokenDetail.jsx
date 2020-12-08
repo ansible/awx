@@ -1,8 +1,7 @@
 import React, { useCallback } from 'react';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button } from '@patternfly/react-core';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -18,7 +17,7 @@ import { formatDateString } from '../../../util/dates';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { toTitleCase } from '../../../util/strings';
 
-function UserTokenDetail({ token, canEditOrDelete, i18n }) {
+function UserTokenDetail({ token, i18n }) {
   const {
     scope,
     description,
@@ -60,25 +59,14 @@ function UserTokenDetail({ token, canEditOrDelete, i18n }) {
         />
       </DetailList>
       <CardActionsRow>
-        {canEditOrDelete && (
-          <>
-            <Button
-              aria-label={i18n._(t`Edit`)}
-              component={Link}
-              to={`/users/${id}/tokens/${tokenId}/details`}
-            >
-              {i18n._(t`Edit`)}
-            </Button>
-            <DeleteButton
-              name={summary_fields?.application?.name}
-              modalTitle={i18n._(t`Delete User Token`)}
-              onConfirm={deleteToken}
-              isDisabled={isLoading}
-            >
-              {i18n._(t`Delete`)}
-            </DeleteButton>
-          </>
-        )}
+        <DeleteButton
+          name={summary_fields?.application?.name}
+          modalTitle={i18n._(t`Delete User Token`)}
+          onConfirm={deleteToken}
+          isDisabled={isLoading}
+        >
+          {i18n._(t`Delete`)}
+        </DeleteButton>
       </CardActionsRow>
       {error && (
         <AlertModal
