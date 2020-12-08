@@ -116,8 +116,6 @@ spec:
         app: {{ kubernetes_deployment_name }}
     spec:
       serviceAccountName: {{ kubernetes_serviceaccount_name }}
-      securityContext:
-        fsGroup: 0
       terminationGracePeriodSeconds: 10
 {% if custom_venvs is defined %}
 {% set trusted_hosts = "" %}
