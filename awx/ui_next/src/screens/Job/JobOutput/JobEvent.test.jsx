@@ -1,6 +1,5 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-
 import JobEvent from './JobEvent';
 
 const mockOnPlayStartEvent = {
@@ -24,23 +23,64 @@ const selectors = {
   lineText: 'JobEventLineText',
 };
 
+const singleDigitTimestampEvent = {
+  ...mockOnPlayStartEvent,
+  created: '2019-07-11T08:01:02.906001Z',
+};
+
+const mockSingleDigitTimestampEventLineTextHtml = [
+  { lineNumber: 0, html: '' },
+  {
+    lineNumber: 1,
+    html:
+      'PLAY [add hosts to inventory] **************************************************<span class="time">08:01:02</span>',
+  },
+];
+
+const mockAnsiLineTextHtml = [
+  {
+    lineNumber: 4,
+    html: '<span class="output--1977390340">ok: [localhost]</span>',
+  },
+];
+
+const mockOnPlayStartLineTextHtml = [
+  { lineNumber: 0, html: '' },
+  {
+    lineNumber: 1,
+    html:
+      'PLAY [add hosts to inventory] **************************************************<span class="time">18:11:22</span>',
+  },
+];
+
 describe('<JobEvent />', () => {
   test('initially renders successfully', () => {
-    mountWithContexts(<JobEvent {...mockOnPlayStartEvent} />);
+    mountWithContexts(
+      <JobEvent
+        lineTextHtml={mockOnPlayStartLineTextHtml}
+        {...mockOnPlayStartEvent}
+      />
+    );
   });
 
   test('playbook event timestamps are rendered', () => {
-    let wrapper = mountWithContexts(<JobEvent {...mockOnPlayStartEvent} />);
+    let wrapper = mountWithContexts(
+      <JobEvent
+        lineTextHtml={mockOnPlayStartLineTextHtml}
+        {...mockOnPlayStartEvent}
+      />
+    );
     let lineText = wrapper.find(selectors.lineText);
     expect(
       lineText.filterWhere(e => e.text().includes('18:11:22'))
     ).toHaveLength(1);
 
-    const singleDigitTimestampEvent = {
-      ...mockOnPlayStartEvent,
-      created: '2019-07-11T08:01:02.906001Z',
-    };
-    wrapper = mountWithContexts(<JobEvent {...singleDigitTimestampEvent} />);
+    wrapper = mountWithContexts(
+      <JobEvent
+        lineTextHtml={mockSingleDigitTimestampEventLineTextHtml}
+        {...singleDigitTimestampEvent}
+      />
+    );
     lineText = wrapper.find(selectors.lineText);
     expect(
       lineText.filterWhere(e => e.text().includes('08:01:02'))
@@ -48,12 +88,14 @@ describe('<JobEvent />', () => {
   });
 
   test('ansi stdout colors are rendered as html', () => {
-    const wrapper = mountWithContexts(<JobEvent {...mockRunnerOnOkEvent} />);
+    const wrapper = mountWithContexts(
+      <JobEvent lineTextHtml={mockAnsiLineTextHtml} {...mockRunnerOnOkEvent} />
+    );
     const lineText = wrapper.find(selectors.lineText);
     expect(
       lineText
         .html()
-        .includes('<span style="color:#486B00">ok: [localhost]</span>')
+        .includes('<span class="output--1977390340">ok: [localhost]</span>')
     ).toBe(true);
   });
 
