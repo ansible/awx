@@ -107,9 +107,11 @@ function getInitialValues(launchConfig, surveyConfig, resource) {
   if (surveyConfig?.spec) {
     surveyConfig.spec.forEach(question => {
       if (question.type === 'multiselect') {
-        values[`survey_${question.variable}`] = question.default.split('\n');
+        values[`survey_${question.variable}`] = question.default
+          ? question.default.split('\n')
+          : [];
       } else {
-        values[`survey_${question.variable}`] = question.default;
+        values[`survey_${question.variable}`] = question.default || null;
       }
       if (resource?.extra_data) {
         Object.entries(resource.extra_data).forEach(([key, value]) => {
