@@ -57,7 +57,6 @@ describe('<UserTokenDetail/>', () => {
     expect(
       wrapper.find('UserDateDetail[label="Last Modified"]').prop('date')
     ).toBe('2020-06-23T19:56:38.441353Z');
-    expect(wrapper.find('Button[aria-label="Edit"]').length).toBe(1);
     expect(wrapper.find('Button[aria-label="Delete"]').length).toBe(1);
   });
   test('should delete token properly', async () => {
