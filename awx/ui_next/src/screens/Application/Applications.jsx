@@ -1,8 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import {
+  Alert,
   ClipboardCopy,
   ClipboardCopyVariant,
   Modal,
@@ -12,6 +14,10 @@ import ApplicationAdd from './ApplicationAdd';
 import Application from './Application';
 import Breadcrumbs from '../../components/Breadcrumbs';
 import { Detail, DetailList } from '../../components/DetailList';
+
+const ApplicationAlert = styled(Alert)`
+  margin-bottom: 20px;
+`;
 
 function Applications({ i18n }) {
   const [applicationModalSource, setApplicationModalSource] = useState(null);
@@ -61,6 +67,15 @@ function Applications({ i18n }) {
           title={i18n._(t`Application information`)}
           onClose={() => setApplicationModalSource(null)}
         >
+          {applicationModalSource.client_secret && (
+            <ApplicationAlert
+              variant="info"
+              isInline
+              title={i18n._(
+                t`This is the only time the client secret will be shown.`
+              )}
+            />
+          )}
           <DetailList stacked>
             <Detail
               label={i18n._(t`Name`)}
