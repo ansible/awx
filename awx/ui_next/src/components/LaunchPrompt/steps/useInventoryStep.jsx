@@ -35,7 +35,11 @@ function getStep(launchConfig, i18n, formError) {
   }
   return {
     id: STEP_ID,
-    name: <StepName hasErrors={formError}>{i18n._(t`Inventory`)}</StepName>,
+    name: (
+      <StepName hasErrors={formError} id="inventory-step">
+        {i18n._(t`Inventory`)}
+      </StepName>
+    ),
     component: <InventoryStep i18n={i18n} />,
     enableNext: true,
   };

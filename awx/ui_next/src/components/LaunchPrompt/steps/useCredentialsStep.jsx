@@ -1,7 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
-
 import CredentialsStep from './CredentialsStep';
+import StepName from './StepName';
 
 const STEP_ID = 'credentials';
 
@@ -28,7 +28,11 @@ function getStep(launchConfig, i18n) {
   return {
     id: STEP_ID,
     key: 4,
-    name: i18n._(t`Credentials`),
+    name: (
+      <StepName hasErrors={false} id="credentials-step">
+        {i18n._(t`Credentials`)}
+      </StepName>
+    ),
     component: <CredentialsStep i18n={i18n} />,
     enableNext: true,
   };

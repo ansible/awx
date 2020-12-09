@@ -1,6 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import PreviewStep from './PreviewStep';
+import StepName from './StepName';
 
 const STEP_ID = 'preview';
 
@@ -16,7 +17,11 @@ export default function usePreviewStep(
     step: showStep
       ? {
           id: STEP_ID,
-          name: i18n._(t`Preview`),
+          name: (
+            <StepName hasErrors={false} id="preview-step">
+              {i18n._(t`Preview`)}
+            </StepName>
+          ),
           component: (
             <PreviewStep
               launchConfig={launchConfig}

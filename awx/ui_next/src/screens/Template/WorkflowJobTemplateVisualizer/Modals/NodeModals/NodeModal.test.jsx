@@ -274,10 +274,7 @@ describe('NodeModal', () => {
       wrapper.update();
       expect(wrapper.find('NodeNextButton').prop('buttonText')).toBe('Next');
       act(() => {
-        wrapper
-          .find('WizardNavItem[content="Preview"]')
-          .find('button')
-          .prop('onClick')();
+        wrapper.find('StepName#preview-step').simulate('click');
       });
       wrapper.update();
       await act(async () => {

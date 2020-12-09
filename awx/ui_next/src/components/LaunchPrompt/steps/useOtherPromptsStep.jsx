@@ -2,6 +2,7 @@ import React from 'react';
 import { t } from '@lingui/macro';
 import { jsonToYaml, parseVariableField } from '../../../util/yaml';
 import OtherPromptsStep from './OtherPromptsStep';
+import StepName from './StepName';
 
 const STEP_ID = 'other';
 
@@ -43,7 +44,11 @@ function getStep(launchConfig, i18n) {
   return {
     id: STEP_ID,
     key: 5,
-    name: i18n._(t`Other Prompts`),
+    name: (
+      <StepName hasErrors={false} id="other-prompts-step">
+        {i18n._(t`Other prompts`)}
+      </StepName>
+    ),
     component: <OtherPromptsStep launchConfig={launchConfig} i18n={i18n} />,
     enableNext: true,
   };

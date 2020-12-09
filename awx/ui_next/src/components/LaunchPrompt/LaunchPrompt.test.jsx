@@ -112,10 +112,10 @@ describe('LaunchPrompt', () => {
 
     expect(steps).toHaveLength(5);
     expect(steps[0].name.props.children).toEqual('Inventory');
-    expect(steps[1].name).toEqual('Credentials');
-    expect(steps[2].name).toEqual('Other Prompts');
+    expect(steps[1].name.props.children).toEqual('Credentials');
+    expect(steps[2].name.props.children).toEqual('Other prompts');
     expect(steps[3].name.props.children).toEqual('Survey');
-    expect(steps[4].name).toEqual('Preview');
+    expect(steps[4].name.props.children).toEqual('Preview');
   });
 
   test('should add inventory step', async () => {
@@ -161,7 +161,7 @@ describe('LaunchPrompt', () => {
     const steps = wizard.prop('steps');
 
     expect(steps).toHaveLength(2);
-    expect(steps[0].name).toEqual('Credentials');
+    expect(steps[0].name.props.children).toEqual('Credentials');
     expect(isElementOfType(steps[0].component, CredentialsStep)).toEqual(true);
     expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
   });
@@ -185,7 +185,7 @@ describe('LaunchPrompt', () => {
     const steps = wizard.prop('steps');
 
     expect(steps).toHaveLength(2);
-    expect(steps[0].name).toEqual('Other Prompts');
+    expect(steps[0].name.props.children).toEqual('Other prompts');
     expect(isElementOfType(steps[0].component, OtherPromptsStep)).toEqual(true);
     expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
   });

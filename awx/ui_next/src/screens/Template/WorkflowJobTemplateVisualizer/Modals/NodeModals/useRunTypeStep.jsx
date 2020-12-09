@@ -1,8 +1,8 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-
 import RunStep from './RunStep';
+import StepName from '../../../../../components/LaunchPrompt/steps/StepName';
 
 const STEP_ID = 'runType';
 
@@ -28,7 +28,11 @@ function getStep(askLinkType, meta, i18n) {
   }
   return {
     id: STEP_ID,
-    name: i18n._(t`Run Type`),
+    name: (
+      <StepName hasErrors={false} id="run-type-step">
+        {i18n._(t`Run type`)}
+      </StepName>
+    ),
     component: <RunStep />,
     enableNext: meta.value !== '',
   };

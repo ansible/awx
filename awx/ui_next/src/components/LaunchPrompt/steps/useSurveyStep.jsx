@@ -89,6 +89,7 @@ function getStep(launchConfig, surveyConfig, validate, i18n, visitedSteps) {
           Object.keys(visitedSteps).includes(STEP_ID) &&
           Object.keys(validate()).length
         }
+        id="survey-step"
       >
         {i18n._(t`Survey`)}
       </StepName>
