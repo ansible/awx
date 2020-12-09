@@ -6,7 +6,7 @@ import re
 from collections import namedtuple
 
 from awx.main.tasks import RunInventoryUpdate
-from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob
+from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob, ExecutionEnvironment
 from awx.main.constants import CLOUD_PROVIDERS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.tests import data
 
@@ -183,6 +183,8 @@ def create_reference_data(source_dir, env, content):
 @pytest.mark.django_db
 @pytest.mark.parametrize('this_kind', CLOUD_PROVIDERS)
 def test_inventory_update_injected_content(this_kind, inventory, fake_credential_factory):
+    ExecutionEnvironment.objects.create(name='test EE', managed_by_tower=True)
+
     injector = InventorySource.injectors[this_kind]
     if injector.plugin_name is None:
         pytest.skip('Use of inventory plugin is not enabled for this source')
