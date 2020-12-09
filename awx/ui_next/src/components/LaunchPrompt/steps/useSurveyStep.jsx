@@ -111,8 +111,11 @@ function getInitialValues(launchConfig, surveyConfig, resource) {
         values[`survey_${question.variable}`] = question.default
           ? question.default.split('\n')
           : [];
+      } else if (question.type === 'multiplechoice') {
+        values[`survey_${question.variable}`] =
+          question.default || question.choices.split('\n')[0];
       } else {
-        values[`survey_${question.variable}`] = question.default || null;
+        values[`survey_${question.variable}`] = question.default || '';
       }
       if (resource?.extra_data) {
         Object.entries(resource.extra_data).forEach(([key, value]) => {
