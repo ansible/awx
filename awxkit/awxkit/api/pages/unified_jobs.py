@@ -135,6 +135,28 @@ class UnifiedJob(HasStatus, base.Base):
                     raise
         return args
 
+    @property
+    def controller_dir(self):
+        """Returns the path to the private_data_dir on the controller node for the job
+        This can be used if trying to shell in and inspect the files used by the job
+        Cannot use job_cwd, because that is path inside EE container
+        """
+        self.get()
+        job_args = self.job_args
+        expected_prefix = '/tmp/awx_{}'.format(self.id)
+        for arg1, arg2 in zip(job_args[:-1], job_args[1:]):
+            if arg1 == '-v':
+                if ':' in arg2:
+                    host_loc = arg2.split(':')[0]
+                    if host_loc.startswith(expected_prefix):
+                        return host_loc
+        raise RuntimeError(
+            'Could not find a controller private_data_dir for this job. '
+            'Searched for volume mount to {} inside of args {}'.format(
+                expected_prefix, job_args
+            )
+        )
+
 
 class UnifiedJobs(page.PageList, UnifiedJob):
 
