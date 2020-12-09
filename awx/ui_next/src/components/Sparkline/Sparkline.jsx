@@ -16,6 +16,7 @@ const Link = styled(props => <_Link {...props} />)`
 
 const Wrapper = styled.div`
   display: inline-flex;
+  flex-wrap: wrap;
 `;
 /* eslint-enable react/jsx-pascal-case */
 
