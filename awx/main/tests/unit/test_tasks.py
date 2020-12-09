@@ -18,6 +18,7 @@ from awx.main.models import (
     AdHocCommand,
     Credential,
     CredentialType,
+    ExecutionEnvironment,
     Inventory,
     InventorySource,
     InventoryUpdate,
@@ -657,9 +658,12 @@ class TestGenericRun():
         assert env['FOO'] == 'BAR'
 
 
+@pytest.mark.django_db
 class TestAdhocRun(TestJobExecution):
 
     def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper):
+        ExecutionEnvironment.objects.create(name='test EE', managed_by_tower=True)
+
         adhoc_job.module_args = '{{ ansible_ssh_pass }}'
         adhoc_job.websocket_emit_status = mock.Mock()
         adhoc_job.send_notification_templates = mock.Mock()
