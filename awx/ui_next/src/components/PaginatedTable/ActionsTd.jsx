@@ -16,7 +16,7 @@ const ActionsGrid = styled.div`
   }}
 `;
 
-export default function ActionsTd({ children }) {
+export default function ActionsTd({ children, ...props }) {
   const numActions = children.length || 1;
   const width = numActions * 40;
   return (
@@ -25,6 +25,7 @@ export default function ActionsTd({ children }) {
         text-align: right;
         --pf-c-table--cell--Width: ${width}px;
       `}
+      {...props}
     >
       <ActionsGrid numActions={numActions}>
         {React.Children.map(children, (child, i) =>

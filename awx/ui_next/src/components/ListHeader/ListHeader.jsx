@@ -147,13 +147,14 @@ ListHeader.propTypes = {
   searchColumns: SearchColumns.isRequired,
   searchableKeys: PropTypes.arrayOf(PropTypes.string),
   relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
-  sortColumns: SortColumns.isRequired,
+  sortColumns: SortColumns,
   renderToolbar: PropTypes.func,
 };
 
 ListHeader.defaultProps = {
   renderToolbar: props => <DataListToolbar {...props} />,
   searchableKeys: [],
+  sortColumns: null,
   relatedSearchableKeys: [],
 };
 

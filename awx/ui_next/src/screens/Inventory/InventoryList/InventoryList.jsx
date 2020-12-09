@@ -162,7 +162,6 @@ function InventoryList({ i18n }) {
           itemCount={itemCount}
           pluralizedItemName={i18n._(t`Inventories`)}
           qsConfig={QS_CONFIG}
-          onRowClick={handleSelect}
           toolbarSearchColumns={[
             {
               name: i18n._(t`Name`),

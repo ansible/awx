@@ -36,14 +36,8 @@ function PaginatedTable({
   showPageSizeOptions,
   i18n,
   renderToolbar,
-  // onRowClick,
 }) {
   const history = useHistory();
-
-  // const handleListItemSelect = (id = 0) => {
-  //   const match = items.find(item => item.id === Number(id));
-  //   onRowClick(match);
-  // };
 
   const pushHistoryState = params => {
     const { pathname } = history.location;
@@ -174,7 +168,6 @@ PaginatedTable.propTypes = {
   renderToolbar: PropTypes.func,
   hasContentLoading: PropTypes.bool,
   contentError: PropTypes.shape(),
-  // onRowClick: PropTypes.func,
 };
 
 PaginatedTable.defaultProps = {
@@ -187,7 +180,6 @@ PaginatedTable.defaultProps = {
   showPageSizeOptions: true,
   renderRow: item => <PaginatedTableRow key={item.id} item={item} />,
   renderToolbar: props => <DataListToolbar {...props} />,
-  // onRowClick: () => null,
 };
 
 export { PaginatedTable as _PaginatedTable };

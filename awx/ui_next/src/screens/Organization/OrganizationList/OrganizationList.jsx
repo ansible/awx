@@ -122,14 +122,12 @@ function OrganizationsList({ i18n }) {
       <PageSection>
         <Card>
           <PaginatedTable
-            // TODO: audit if any of these props are no longer in use
             contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={organizations}
             itemCount={organizationCount}
             pluralizedItemName={i18n._(t`Organizations`)}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
             toolbarSearchColumns={[
               {
                 name: i18n._(t`Name`),

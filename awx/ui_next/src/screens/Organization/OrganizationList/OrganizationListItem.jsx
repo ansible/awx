@@ -20,7 +20,7 @@ function OrganizationListItem({
 }) {
   const labelId = `check-action-${organization.id}`;
   return (
-    <Tr id={`${organization.id}`}>
+    <Tr id={`org-row-${organization.id}`}>
       <Td
         select={{
           rowIndex,

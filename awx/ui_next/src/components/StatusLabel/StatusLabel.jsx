@@ -8,6 +8,7 @@ import {
   SyncAltIcon,
   ExclamationTriangleIcon,
   ClockIcon,
+  MinusCircleIcon,
 } from '@patternfly/react-icons';
 import styled, { keyframes } from 'styled-components';
 
@@ -32,6 +33,7 @@ const colors = {
   running: 'blue',
   pending: 'blue',
   waiting: 'grey',
+  disabled: 'grey',
   canceled: 'orange',
 };
 const icons = {
@@ -42,6 +44,7 @@ const icons = {
   running: RunningIcon,
   pending: ClockIcon,
   waiting: ClockIcon,
+  disabled: MinusCircleIcon,
   canceled: ExclamationTriangleIcon,
 };
 
@@ -66,6 +69,7 @@ StatusLabel.propTypes = {
     'running',
     'pending',
     'waiting',
+    'disabled',
     'canceled',
   ]).isRequired,
 };

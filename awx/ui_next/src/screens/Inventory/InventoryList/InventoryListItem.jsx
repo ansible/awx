@@ -56,15 +56,16 @@ function InventoryListItem({
   }
 
   return (
-    <Tr id={inventory.id}>
+    <Tr id={inventory.id} aria-labelledby={labelId}>
       <Td
         select={{
           rowIndex,
           isSelected,
           onSelect,
         }}
+        dataLabel={i18n._(t`Selected`)}
       />
-      <Td id={labelId}>
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
         {inventory.pending_deletion ? (
           <b>{inventory.name}</b>
         ) : (
@@ -73,30 +74,32 @@ function InventoryListItem({
           </Link>
         )}
       </Td>
-      <Td>
+      <Td dataLabel={i18n._(t`Status`)}>
         {inventory.kind !== 'smart' && <StatusLabel status={syncStatus} />}
       </Td>
-      <Td>
+      <Td dataLabel={i18n._(t`Type`)}>
         {inventory.kind === 'smart'
           ? i18n._(t`Smart Inventory`)
           : i18n._(t`Inventory`)}
       </Td>
-      <Td key="organization">
+      <Td key="organization" dataLabel={i18n._(t`Organization`)}>
         <Link
           to={`/organizations/${inventory.summary_fields.organization.id}/details`}
         >
           {inventory.summary_fields.organization.name}
         </Link>
       </Td>
-      <Td>{inventory.total_groups}</Td>
-      <Td>{inventory.total_hosts}</Td>
-      <Td>{inventory.total_inventory_sources}</Td>
+      <Td dataLabel={i18n._(t`Groups`)}>{inventory.total_groups}</Td>
+      <Td dataLabel={i18n._(t`Hosts`)}>{inventory.total_hosts}</Td>
+      <Td dataLabel={i18n._(t`Sources`)}>
+        {inventory.total_inventory_sources}
+      </Td>
       {inventory.pending_deletion ? (
-        <Td>
+        <Td dataLabel={i18n._(t`Groups`)}>
           <Label color="red">{i18n._(t`Pending delete`)}</Label>
         </Td>
       ) : (
-        <ActionsTd>
+        <ActionsTd dataLabel={i18n._(t`Actions`)}>
           <ActionItem
             visible={inventory.summary_fields.user_capabilities.edit}
             tooltip={i18n._(t`Edit Inventory`)}
