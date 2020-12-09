@@ -554,10 +554,12 @@ spec:
   - host: {{ kubernetes_ingress_hostname }}
     http:
       paths:
-      - path: /
-        backend:
+      - backend:
           serviceName: {{ kubernetes_deployment_name }}-web-svc
           servicePort: 80
+{% if kubernetes_web_svc_type != "ClusterIP" %}
+        path: /
+{% endif %}
 {% else %}
   backend:
     serviceName: {{ kubernetes_deployment_name }}-web-svc
