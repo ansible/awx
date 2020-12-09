@@ -1135,7 +1135,7 @@ class BaseTask(object):
         fn = os.path.join(path, 'hosts')
         with open(fn, 'w') as f:
             os.chmod(fn, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
-            f.write('#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json_data)
+            f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json_data)
         return fn
 
     def build_args(self, instance, private_data_dir, passwords):
