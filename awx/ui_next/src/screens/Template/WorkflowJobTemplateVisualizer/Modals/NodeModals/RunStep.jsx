@@ -21,7 +21,7 @@ function RunStep({ i18n }) {
   return (
     <>
       <Title headingLevel="h1" size="xl">
-        {i18n._(t`Don't Run`)}
+        {i18n._(t`Run`)}
       </Title>
       <p>
         {i18n._(
