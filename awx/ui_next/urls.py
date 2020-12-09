@@ -7,9 +7,14 @@ class IndexView(TemplateView):
     template_name = 'index.html'
 
 
+class MigrationsNotran(TemplateView):
+
+    template_name = 'installing.html'
+
+
 app_name = 'ui_next'
 
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
-    #url(r'^migrations_notran/$', migrations_notran, name='migrations_notran'),
+    url(r'^migrations_notran/$', MigrationsNotran.as_view(), name='migrations_notran'),
 ]
