@@ -169,7 +169,8 @@ class IsolatedManager(object):
         extravars = {
             'src': self.private_data_dir,
             'dest': settings.AWX_PROOT_BASE_PATH,
-            'ident': self.ident
+            'ident': self.ident,
+            'job_id': self.instance.id,
         }
         if playbook:
             extravars['playbook'] = playbook
@@ -205,7 +206,10 @@ class IsolatedManager(object):
         :param interval: an interval (in seconds) to wait between status polls
         """
         interval = interval if interval is not None else settings.AWX_ISOLATED_CHECK_INTERVAL
-        extravars = {'src': self.private_data_dir}
+        extravars = {
+            'src': self.private_data_dir,
+            'job_id': self.instance.id
+        }
         status = 'failed'
         rc = None
         last_check = time.time()
