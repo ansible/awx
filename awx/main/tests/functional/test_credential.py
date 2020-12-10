@@ -90,6 +90,7 @@ def test_default_cred_types():
         'kubernetes_bearer_token',
         'net',
         'openstack',
+        'registry',
         'rhv',
         'satellite6',
         'scm',

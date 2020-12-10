@@ -376,6 +376,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             for fd, val in eager_fields.items():
                 setattr(unified_job, fd, val)
 
+        unified_job.execution_environment = self.resolve_execution_environment()
+
         # NOTE: slice workflow jobs _get_parent_field_name method
         # is not correct until this is set
         if not parent_field_name:

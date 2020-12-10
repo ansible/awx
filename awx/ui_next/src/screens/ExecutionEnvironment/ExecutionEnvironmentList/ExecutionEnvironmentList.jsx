@@ -21,7 +21,6 @@ import ExecutionEnvironmentsListItem from './ExecutionEnvironmentListItem';
 const QS_CONFIG = getQSConfig('execution_environments', {
   page: 1,
   page_size: 20,
-  managed_by_tower: false,
   order_by: 'image',
 });
 
