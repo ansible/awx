@@ -7,6 +7,7 @@ import tempfile
 import time
 import logging
 import yaml
+import datetime
 
 from django.conf import settings
 import ansible_runner
@@ -225,9 +226,13 @@ class IsolatedManager(object):
                 logger.warning('Isolated job {} was manually canceled.'.format(self.instance.id))
 
             logger.debug('Checking on isolated job {} with `check_isolated.yml`.'.format(self.instance.id))
+            time_start = datetime.datetime.now()
             runner_obj = self.run_management_playbook('check_isolated.yml',
                                                       self.private_data_dir,
                                                       extravars=extravars)
+            time_end = datetime.datetime.now()
+            time_diff = time_end - time_start
+            logger.debug('Finished checking on isolated job {} with `check_isolated.yml` took {} seconds.'.format(self.instance.id, time_diff.total_seconds()))
             status, rc = runner_obj.status, runner_obj.rc
 
             if self.check_callback is not None and not self.captured_command_artifact:
