@@ -2163,7 +2163,7 @@ class RunProjectUpdate(BaseTask):
         if not galaxy_creds_are_defined and (
             settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED
         ):
-            logger.debug(
+            logger.warning(
                 'Galaxy role/collection syncing is enabled, but no '
                 f'credentials are configured for {project_update.project.organization}.'
             )
