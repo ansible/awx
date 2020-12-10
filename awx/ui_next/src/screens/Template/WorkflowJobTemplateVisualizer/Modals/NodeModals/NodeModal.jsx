@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
-
+import yaml from 'js-yaml';
 import { bool, node, func } from 'prop-types';
 import {
   Button,
@@ -18,6 +18,9 @@ import ContentLoading from '../../../../../components/ContentLoading';
 import useRequest, {
   useDismissableError,
 } from '../../../../../util/useRequest';
+import mergeExtraVars from '../../../../../util/prompt/mergeExtraVars';
+import getSurveyValues from '../../../../../util/prompt/getSurveyValues';
+import { parseVariableField } from '../../../../../util/yaml';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
@@ -76,6 +79,25 @@ function NodeModalForm({
       delete values.timeoutMinutes;
       delete values.timeoutSeconds;
     }
+
+    if (
+      ['job_template', 'workflow_job_template'].includes(values.nodeType) &&
+      (launchConfig.ask_variables_on_launch || launchConfig.survey_enabled)
+    ) {
+      let extraVars;
+      const surveyValues = getSurveyValues(values);
+      const initialExtraVars =
+        launchConfig.ask_variables_on_launch && (values.extra_vars || '---');
+      if (surveyConfig?.spec) {
+        extraVars = yaml.safeDump(
+          mergeExtraVars(initialExtraVars, surveyValues)
+        );
+      } else {
+        extraVars = initialExtraVars;
+      }
+      values.extra_data = extraVars && parseVariableField(extraVars);
+    }
+
     onSave(values, launchConfig);
   };
 

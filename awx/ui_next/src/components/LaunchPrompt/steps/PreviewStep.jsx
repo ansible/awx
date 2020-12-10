@@ -6,9 +6,10 @@ import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import yaml from 'js-yaml';
-import { parseVariableField } from '../../../util/yaml';
-import mergeExtraVars, { maskPasswords } from '../mergeExtraVars';
-import getSurveyValues from '../getSurveyValues';
+import mergeExtraVars, {
+  maskPasswords,
+} from '../../../util/prompt/mergeExtraVars';
+import getSurveyValues from '../../../util/prompt/getSurveyValues';
 import PromptDetail from '../../PromptDetail';
 
 const ExclamationCircleIcon = styled(PFExclamationCircleIcon)`
@@ -53,9 +54,6 @@ function PreviewStep({
       overrides.extra_vars = initialExtraVars;
     }
   }
-
-  values.extra_data =
-    overrides.extra_vars && parseVariableField(overrides?.extra_vars);
 
   return (
     <Fragment>

@@ -6,10 +6,10 @@ import { Formik, useFormikContext } from 'formik';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import { useDismissableError } from '../../util/useRequest';
-import mergeExtraVars from './mergeExtraVars';
+import mergeExtraVars from '../../util/prompt/mergeExtraVars';
+import getSurveyValues from '../../util/prompt/getSurveyValues';
 import useLaunchSteps from './useLaunchSteps';
 import AlertModal from '../AlertModal';
-import getSurveyValues from './getSurveyValues';
 
 function PromptModalForm({
   launchConfig,
