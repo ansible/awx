@@ -331,6 +331,7 @@ class CredentialType(CommonModelNameNotUnique):
         ('net', _('Network')),
         ('scm', _('Source Control')),
         ('cloud', _('Cloud')),
+        ('registry', _('Container Registry')),
         ('token', _('Personal Access Token')),
         ('insights', _('Insights')),
         ('external', _('External')),
