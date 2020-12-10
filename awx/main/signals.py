@@ -121,12 +121,14 @@ def sync_superuser_status_to_rbac(instance, **kwargs):
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
 
 
-def sync_rbac_to_superuser_status(instance, sender, **kwargs):
-    'When the is_superuser flag is false but a user has the System Admin role, update the database to reflect that'
-    if kwargs['action'] in ['pre_add', 'pre_remove']:
-        if hasattr(instance, 'content_type'):
-            if instance.content_type_id is None and instance.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR and kwargs['model'].is_superuser == False:
-                User.objects.filter(pk=kwargs['pk_set'].pop()).update(is_superuser = (kwargs['action'] == 'pre_add'))
+# def sync_rbac_to_superuser_status(instance, sender, **kwargs):
+#     'When the is_superuser flag is false but a user has the System Admin role, update the database to reflect that'
+#     if kwargs['action'] in ['pre_add', 'pre_remove']:
+#         if hasattr(instance, 'content_type'):
+#             import sdb;
+#             sdb.set_trace()
+#             if instance.content_type_id is None and instance.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR and kwargs['model'].is_superuser == False:
+#                 User.objects.filter(pk=kwargs['pk_set'].pop()).update(is_superuser = (kwargs['action'] == 'pre_add'))
 
 
 
@@ -206,7 +208,7 @@ m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
-m2m_changed.connect(sync_rbac_to_superuser_status, Role.members.through)
+#m2m_changed.connect(sync_rbac_to_superuser_status, Role.members.through)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobTemplate)
 
