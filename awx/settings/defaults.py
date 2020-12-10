@@ -824,6 +824,9 @@ LOGGING = {
         'dispatcher': {
             'format': '%(asctime)s %(levelname)-8s %(name)s PID:%(process)d %(message)s',
         },
+        'json': {
+            '()': 'json_log_formatter.JSONFormatter',
+        },
     },
     'handlers': {
         'console': {
@@ -932,6 +935,15 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'simple',
         },
+        'job_lifecycle': {
+            'level': 'INFO',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(LOG_ROOT, 'job_lifecycle.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter': 'json',
+        },
     },
     'loggers': {
         'django': {
@@ -1031,6 +1043,10 @@ LOGGING = {
         'rbac_migrations': {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'DEBUG',
+        },
+        'job_lifecycle': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
         },
     }
 }
