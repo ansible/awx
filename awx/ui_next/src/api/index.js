@@ -1,5 +1,6 @@
 import AdHocCommands from './models/AdHocCommands';
 import Applications from './models/Applications';
+import Auth from './models/Auth';
 import Config from './models/Config';
 import CredentialInputSources from './models/CredentialInputSources';
 import CredentialTypes from './models/CredentialTypes';
@@ -40,6 +41,7 @@ import WorkflowJobs from './models/WorkflowJobs';
 
 const AdHocCommandsAPI = new AdHocCommands();
 const ApplicationsAPI = new Applications();
+const AuthAPI = new Auth();
 const ConfigAPI = new Config();
 const CredentialInputSourcesAPI = new CredentialInputSources();
 const CredentialTypesAPI = new CredentialTypes();
@@ -81,6 +83,7 @@ const WorkflowJobsAPI = new WorkflowJobs();
 export {
   AdHocCommandsAPI,
   ApplicationsAPI,
+  AuthAPI,
   ConfigAPI,
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
