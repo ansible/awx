@@ -886,7 +886,8 @@ class BaseTask(object):
 
     def build_execution_environment_params(self, instance):
         if instance.execution_environment_id is None:
-            self.update_model(instance.pk, execution_environment=instance.resolve_execution_environment())
+            self.instance = instance = self.update_model(
+                instance.pk, execution_environment=instance.resolve_execution_environment())
 
         image = instance.execution_environment.image
         params = {
