@@ -123,6 +123,7 @@ class IsolatedManager(object):
             dir=private_data_dir
         )
         params = self.runner_params.copy()
+        params.get('envvars', dict())['ANSIBLE_CALLBACK_WHITELIST'] = 'profile_tasks'
         params['playbook'] = playbook
         params['private_data_dir'] = iso_dir
         if idle_timeout:
