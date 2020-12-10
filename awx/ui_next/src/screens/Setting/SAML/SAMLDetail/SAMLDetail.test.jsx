@@ -76,7 +76,7 @@ describe('<SAMLDetail />', () => {
       'https://towerhost/sso/metadata/saml/'
     );
     assertDetail(wrapper, 'SAML Service Provider Entity ID', 'mock_id');
-    assertDetail(
+    assertVariableDetail(
       wrapper,
       'SAML Service Provider Public Certificate',
       'mock_cert'

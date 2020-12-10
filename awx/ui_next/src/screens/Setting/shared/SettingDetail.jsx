@@ -34,6 +34,18 @@ export default withI18n()(
           />
         );
         break;
+      case 'certificate':
+        detail = (
+          <CodeDetail
+            dataCy={id}
+            helpText={helpText}
+            label={label}
+            mode="javascript"
+            rows={4}
+            value={value}
+          />
+        );
+        break;
       case 'image':
         detail = (
           <Detail

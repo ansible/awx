@@ -72,26 +72,29 @@ function UIEdit() {
     history.push('/settings/ui/details');
   };
 
-  const initialValues = fields =>
-    Object.keys(fields).reduce((acc, key) => {
-      acc[key] = fields[key].value ?? '';
-      return acc;
-    }, {});
-
   return (
     <CardBody>
       {isLoading && <ContentLoading />}
       {!isLoading && error && <ContentError error={error} />}
       {!isLoading && uiData && (
-        <Formik initialValues={initialValues(uiData)} onSubmit={handleSubmit}>
+        <Formik
+          initialValues={{
+            PENDO_TRACKING_STATE: uiData?.PENDO_TRACKING_STATE?.value ?? 'off',
+            CUSTOM_LOGIN_INFO: uiData?.CUSTOM_LOGIN_INFO?.value ?? '',
+            CUSTOM_LOGO: uiData?.CUSTOM_LOGO?.value ?? '',
+          }}
+          onSubmit={handleSubmit}
+        >
           {formik => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
-                <ChoiceField
-                  name="PENDO_TRACKING_STATE"
-                  config={uiData.PENDO_TRACKING_STATE}
-                  isRequired
-                />
+                {uiData?.PENDO_TRACKING_STATE?.value !== 'off' && (
+                  <ChoiceField
+                    name="PENDO_TRACKING_STATE"
+                    config={uiData.PENDO_TRACKING_STATE}
+                    isRequired
+                  />
+                )}
                 <TextAreaField
                   name="CUSTOM_LOGIN_INFO"
                   config={uiData.CUSTOM_LOGIN_INFO}
