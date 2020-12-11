@@ -209,6 +209,9 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
             self.name = Truncator(u': '.join(filter(None, (self.module_name, self.module_args)))).chars(512)
             if 'name' not in update_fields:
                 update_fields.append('name')
+        if not self.execution_environment_id:
+            self.execution_environment = self.resolve_execution_environment()
+            update_fields.append('execution_environment')
         super(AdHocCommand, self).save(*args, **kwargs)
 
     @property
