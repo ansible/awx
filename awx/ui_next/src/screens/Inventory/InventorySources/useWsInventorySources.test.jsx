@@ -43,7 +43,7 @@ describe('useWsInventorySources hook', () => {
 
   test('should establish websocket connection', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const sources = [{ id: 1 }];
     await act(async () => {
@@ -65,7 +65,7 @@ describe('useWsInventorySources hook', () => {
 
   test('should update last job status', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const sources = [
       {

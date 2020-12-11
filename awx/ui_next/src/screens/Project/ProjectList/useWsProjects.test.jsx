@@ -36,7 +36,7 @@ describe('useWsProjects', () => {
 
   test('should establish websocket connection', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const projects = [{ id: 1 }];
     await act(async () => {
@@ -58,7 +58,7 @@ describe('useWsProjects', () => {
 
   test('should update project status', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const projects = [
       {
