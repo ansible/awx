@@ -69,13 +69,16 @@ function Project({ i18n, setBreadcrumb }) {
     return ProjectsAPI.createSchedule(project.id, data);
   }
 
-  function loadScheduleOptions() {
+  const loadScheduleOptions = useCallback(() => {
     return ProjectsAPI.readScheduleOptions(project.id);
-  }
+  }, [project]);
 
-  function loadSchedules(params) {
-    return ProjectsAPI.readSchedules(project.id, params);
-  }
+  const loadSchedules = useCallback(
+    params => {
+      return ProjectsAPI.readSchedules(project.id, params);
+    },
+    [project]
+  );
 
   const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
   const canToggleNotifications = isNotifAdmin;

@@ -74,13 +74,16 @@ function WorkflowJobTemplate({ i18n, me, setBreadcrumb }) {
     return WorkflowJobTemplatesAPI.createSchedule(templateId, data);
   };
 
-  const loadScheduleOptions = () => {
+  const loadScheduleOptions = useCallback(() => {
     return WorkflowJobTemplatesAPI.readScheduleOptions(templateId);
-  };
+  }, [templateId]);
 
-  const loadSchedules = params => {
-    return WorkflowJobTemplatesAPI.readSchedules(templateId, params);
-  };
+  const loadSchedules = useCallback(
+    params => {
+      return WorkflowJobTemplatesAPI.readSchedules(templateId, params);
+    },
+    [templateId]
+  );
 
   const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
   const canAddAndEditSurvey =
