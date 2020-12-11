@@ -28,15 +28,20 @@ function OrganizationListItem({
           onSelect,
           disable: false,
         }}
+        dataLabel={i18n._(t`Selected`)}
       />
-      <Td id={labelId}>
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
         <Link to={`${detailUrl}`}>
           <b>{organization.name}</b>
         </Link>
       </Td>
-      <Td>{organization.summary_fields.related_field_counts.users}</Td>
-      <Td>{organization.summary_fields.related_field_counts.teams}</Td>
-      <ActionsTd>
+      <Td dataLabel={i18n._(t`Members`)}>
+        {organization.summary_fields.related_field_counts.users}
+      </Td>
+      <Td dataLabel={i18n._(t`Teams`)}>
+        {organization.summary_fields.related_field_counts.teams}
+      </Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)}>
         <ActionItem
           visible={organization.summary_fields.user_capabilities.edit}
           tooltip={i18n._(t`Edit Organization`)}

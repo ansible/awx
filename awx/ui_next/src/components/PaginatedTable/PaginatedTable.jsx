@@ -17,7 +17,6 @@ import {
   parseQueryString,
   replaceParams,
 } from '../../util/qs';
-import PaginatedTableRow from './PaginatedTableRow';
 import { QSConfig, SearchColumns } from '../../types';
 
 function PaginatedTable({
@@ -160,7 +159,7 @@ PaginatedTable.propTypes = {
   itemCount: PropTypes.number.isRequired,
   pluralizedItemName: PropTypes.string,
   qsConfig: QSConfig.isRequired,
-  renderRow: PropTypes.func,
+  renderRow: PropTypes.func.isRequired,
   toolbarSearchColumns: SearchColumns,
   toolbarSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   toolbarRelatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
@@ -178,7 +177,6 @@ PaginatedTable.defaultProps = {
   toolbarRelatedSearchableKeys: [],
   pluralizedItemName: 'Items',
   showPageSizeOptions: true,
-  renderRow: item => <PaginatedTableRow key={item.id} item={item} />,
   renderToolbar: props => <DataListToolbar {...props} />,
 };
 

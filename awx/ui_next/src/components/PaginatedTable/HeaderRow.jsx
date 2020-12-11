@@ -12,7 +12,7 @@ const Th = styled(PFTh)`
   --pf-c-table--cell--Overflow: initial;
 `;
 
-export default function HeaderRow({ qsConfig, defaultSortKey, children }) {
+export default function HeaderRow({ qsConfig, children }) {
   const location = useLocation();
   const history = useHistory();
 
@@ -33,10 +33,11 @@ export default function HeaderRow({ qsConfig, defaultSortKey, children }) {
 
   const sortKey = params.order_by?.replace('-', '');
   const sortBy = {
-    index: sortKey || defaultSortKey,
+    index: sortKey || qsConfig.defaultParams?.order_by,
     direction: params.order_by?.startsWith('-') ? 'desc' : 'asc',
   };
 
+  // empty first Th aligns with checkboxes in table rows
   return (
     <Thead>
       <Tr>

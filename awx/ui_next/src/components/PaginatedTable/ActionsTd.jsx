@@ -15,6 +15,7 @@ const ActionsGrid = styled.div`
     `;
   }}
 `;
+ActionsGrid.displayName = 'ActionsGrid';
 
 export default function ActionsTd({ children, ...props }) {
   const numActions = children.length || 1;

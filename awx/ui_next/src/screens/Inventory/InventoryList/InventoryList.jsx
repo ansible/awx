@@ -190,7 +190,7 @@ function InventoryList({ i18n }) {
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           headerRow={
-            <HeaderRow defaultSortKey="name" qsConfig={QS_CONFIG}>
+            <HeaderRow qsConfig={QS_CONFIG}>
               <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
