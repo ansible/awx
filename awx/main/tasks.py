@@ -886,8 +886,11 @@ class BaseTask(object):
 
     def build_execution_environment_params(self, instance):
         if instance.execution_environment_id is None:
-            self.instance = instance = self.update_model(
-                instance.pk, execution_environment=instance.resolve_execution_environment())
+            from awx.main.signals import disable_activity_stream
+
+            with disable_activity_stream():
+                self.instance = instance = self.update_model(
+                    instance.pk, execution_environment=instance.resolve_execution_environment())
 
         image = instance.execution_environment.image
         params = {
