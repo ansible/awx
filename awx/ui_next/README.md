@@ -1,7 +1,7 @@
 # AWX-PF
 
 ## Requirements
-- node 10.x LTS, npm 6.x LTS, make, git
+- node 14.x LTS, npm 6.x LTS, make, git
 
 ## Development
 The API development server will need to be running. See [CONTRIBUTING.md](../../CONTRIBUTING.md).
