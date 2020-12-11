@@ -159,7 +159,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Repeat Frequency"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Created"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Last Modified"]').length).toBe(1);
-    expect(wrapper.find('Title[children="Prompted Fields"]').length).toBe(0);
+    expect(wrapper.find('Title[children="Prompted Values"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Job Type"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Inventory"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Source Control Branch"]').length).toBe(
@@ -245,7 +245,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Repeat Frequency"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Created"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Last Modified"]').length).toBe(1);
-    expect(wrapper.find('Title[children="Prompted Fields"]').length).toBe(1);
+    expect(wrapper.find('Title[children="Prompted Values"]').length).toBe(1);
     expect(
       wrapper
         .find('Detail[label="Job Type"]')
