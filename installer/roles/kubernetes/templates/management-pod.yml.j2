@@ -5,9 +5,9 @@ metadata:
   name: ansible-tower-management
   namespace: {{ kubernetes_namespace }}
 {% if kubernetes_pod_annotations is defined %}
-    annotations:
+  annotations:
 {% for key, value in kubernetes_pod_annotations.items() %}
-      {{ key }}: {{ value | quote }}
+    {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
 spec:
