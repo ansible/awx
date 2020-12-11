@@ -8,7 +8,7 @@ import ApplicationForm from '../shared/ApplicationForm';
 import { ApplicationsAPI } from '../../../api';
 import { CardBody } from '../../../components/Card';
 
-function ApplicationAdd() {
+function ApplicationAdd({ onSuccessfulAdd }) {
   const history = useHistory();
   const [submitError, setSubmitError] = useState(null);
 
@@ -53,10 +53,9 @@ function ApplicationAdd() {
   const handleSubmit = async ({ ...values }) => {
     values.organization = values.organization.id;
     try {
-      const {
-        data: { id },
-      } = await ApplicationsAPI.create(values);
-      history.push(`/applications/${id}/details`);
+      const { data } = await ApplicationsAPI.create(values);
+      onSuccessfulAdd(data);
+      history.push(`/applications/${data.id}/details`);
     } catch (err) {
       setSubmitError(err);
     }
