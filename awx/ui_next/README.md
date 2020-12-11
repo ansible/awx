@@ -24,6 +24,18 @@ server:
 TARGET='https://awx.local:8043' npm --prefix awx/ui_next start
 ```
 
+### Build for the Development Containers
+If you just want to build a ui that you can use with the container-based awx
+development environment, you can use these make targets:
+
+```shell
+# The ui will be reachable at https://localhost:8043 or http://localhost:8013
+make ui-devel 
+
+# clean up 
+make clean-ui
+```
+
 ## Testing
 ```shell
 # run code formatting check
