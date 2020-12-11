@@ -21,6 +21,15 @@ import useModal from '../../../../util/useModal';
 import useRequest from '../../../../util/useRequest';
 import { SettingsAPI } from '../../../../api';
 
+function filterByPrefix(data, prefix) {
+  return Object.keys(data)
+    .filter(key => key.includes(prefix))
+    .reduce((obj, key) => {
+      obj[key] = data[key];
+      return obj;
+    }, {});
+}
+
 function LDAPEdit() {
   const history = useHistory();
   const { isModalOpen, toggleModal, closeModal } = useModal();
@@ -44,8 +53,26 @@ function LDAPEdit() {
         mergedData[key].value = data[key];
       });
 
-      return mergedData;
-    }, [options]),
+      const allCategories = {
+        AUTH_LDAP_1_: filterByPrefix(mergedData, 'AUTH_LDAP_1_'),
+        AUTH_LDAP_2_: filterByPrefix(mergedData, 'AUTH_LDAP_2_'),
+        AUTH_LDAP_3_: filterByPrefix(mergedData, 'AUTH_LDAP_3_'),
+        AUTH_LDAP_4_: filterByPrefix(mergedData, 'AUTH_LDAP_4_'),
+        AUTH_LDAP_5_: filterByPrefix(mergedData, 'AUTH_LDAP_5_'),
+        AUTH_LDAP_: Object.assign({}, mergedData),
+      };
+      Object.keys({
+        ...allCategories.AUTH_LDAP_1_,
+        ...allCategories.AUTH_LDAP_2_,
+        ...allCategories.AUTH_LDAP_3_,
+        ...allCategories.AUTH_LDAP_4_,
+        ...allCategories.AUTH_LDAP_5_,
+      }).forEach(keyToOmit => {
+        delete allCategories.AUTH_LDAP_[keyToOmit];
+      });
+
+      return allCategories[ldapCategory];
+    }, [options, ldapCategory]),
     null
   );
 

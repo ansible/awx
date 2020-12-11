@@ -8,7 +8,6 @@ import {
 } from '../../../../../testUtils/enzymeHelpers';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import mockLDAP from '../../shared/data.ldapSettings.json';
-import mockLDAPDefault from '../../shared/data.ldapDefaultSettings.json';
 import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import LDAPEdit from './LDAPEdit';
@@ -110,7 +109,30 @@ describe('<LDAPEdit />', () => {
     });
     wrapper.update();
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith(mockLDAPDefault);
+    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
+      AUTH_LDAP_BIND_DN: '',
+      AUTH_LDAP_BIND_PASSWORD: '',
+      AUTH_LDAP_CONNECTION_OPTIONS: {
+        OPT_NETWORK_TIMEOUT: 30,
+        OPT_REFERRALS: 0,
+      },
+      AUTH_LDAP_DENY_GROUP: null,
+      AUTH_LDAP_GROUP_SEARCH: [],
+      AUTH_LDAP_GROUP_TYPE: 'MemberDNGroupType',
+      AUTH_LDAP_GROUP_TYPE_PARAMS: {
+        member_attr: 'member',
+        name_attr: 'cn',
+      },
+      AUTH_LDAP_ORGANIZATION_MAP: {},
+      AUTH_LDAP_REQUIRE_GROUP: null,
+      AUTH_LDAP_SERVER_URI: '',
+      AUTH_LDAP_START_TLS: false,
+      AUTH_LDAP_TEAM_MAP: {},
+      AUTH_LDAP_USER_ATTR_MAP: {},
+      AUTH_LDAP_USER_DN_TEMPLATE: null,
+      AUTH_LDAP_USER_FLAGS_BY_GROUP: {},
+      AUTH_LDAP_USER_SEARCH: [],
+    });
   });
 
   test('should successfully send request to api on form submission', async () => {
@@ -162,6 +184,7 @@ describe('<LDAPEdit />', () => {
       },
     });
   });
+
   test('should navigate to ldap default detail on successful submission', async () => {
     await act(async () => {
       wrapper.find('Form').invoke('onSubmit')();
