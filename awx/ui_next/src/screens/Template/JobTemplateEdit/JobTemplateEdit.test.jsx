@@ -17,6 +17,17 @@ import {
 import JobTemplateEdit from './JobTemplateEdit';
 
 jest.mock('../../../api');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({
+    id: 1,
+    templateType: 'job_template',
+  }),
+  useHistory: () => ({
+    location: { pathname: '/templates/job_template/1/edit' },
+    push: () => {},
+  }),
+}));
 
 const mockJobTemplate = {
   allow_callbacks: false,
@@ -290,7 +301,9 @@ describe('<JobTemplateEdit />', () => {
   });
 
   test('should navigate to job template detail when cancel is clicked', async () => {
-    const history = createMemoryHistory({});
+    const history = createMemoryHistory({
+      initialEntries: [`/templates/job_template/1/details`],
+    });
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
@@ -306,6 +319,7 @@ describe('<JobTemplateEdit />', () => {
     await act(async () => {
       cancelButton.prop('onClick')();
     });
+    wrapper.update();
     expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );
