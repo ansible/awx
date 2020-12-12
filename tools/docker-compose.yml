@@ -46,7 +46,7 @@ services:
   #     context: ./docker-compose
   #     dockerfile: Dockerfile-logstash
   ee:
-    image: quay.io/awx/ee
+    image: quay.io/ansible/awx-ee
     user: ${CURRENT_UID}
     volumes:
       - "./docker-compose/receptor.cfg:/receptor.cfg"
