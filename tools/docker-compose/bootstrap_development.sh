@@ -31,6 +31,6 @@ mkdir -p /awx_devel/awx/ui/static
 mkdir -p /awx_devel/awx/ui_next/build/static
 
 echo "ee, created = ExecutionEnvironment.objects.get_or_create(name='Default EE', \
-                                                               defaults={'image': 'quay.io/awx/ee', \
+                                                               defaults={'image': 'quay.io/ansible/awx-ee', \
                                                                          'managed_by_tower': True}); \
       print('Already exists' if not created else 'Created')" | awx-manage shell_plus --quiet-load
