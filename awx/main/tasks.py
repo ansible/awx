@@ -1722,7 +1722,10 @@ class RunJob(BaseTask):
         cred_files = private_data_files.get('credentials', {})
         for cloud_cred in job.cloud_credentials:
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack':
-                env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
+                env['OS_CLIENT_CONFIG_FILE'] = os.path.join(
+                    '/runner',
+                    os.path.basename(cred_files.get(cloud_cred, ''))
+                )
 
         for network_cred in job.network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
