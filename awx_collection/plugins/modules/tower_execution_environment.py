@@ -58,7 +58,7 @@ EXAMPLES = '''
 - name: Add EE to Tower
   tower_execution_environment:
     name: "My EE"
-    image: quay.io/awx/ee
+    image: quay.io/ansible/awx-ee
 '''
 
 
