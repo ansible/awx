@@ -421,7 +421,7 @@ def main():
     organization = module.params.get('organization')
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
-        search_fields['organization'] = new_fields['organization'] = organization_id        
+        search_fields['organization'] = new_fields['organization'] = organization_id
 
     ee = module.params.get('execution_environment')
     if ee:
