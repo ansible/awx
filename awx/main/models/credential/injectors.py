@@ -105,7 +105,8 @@ def openstack(cred, env, private_data_dir):
     yaml.safe_dump(openstack_data, f, default_flow_style=False, allow_unicode=True)
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-    env['OS_CLIENT_CONFIG_FILE'] = path
+    # TODO: constant for container base path
+    env['OS_CLIENT_CONFIG_FILE'] = os.path.join('/runner', os.path.basename(path))
 
 
 def kubernetes_bearer_token(cred, env, private_data_dir):
