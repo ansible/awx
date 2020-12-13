@@ -9,3 +9,4 @@ clouds:
       username: fooo
     private: true
     verify: false
+    region_name: fooo
