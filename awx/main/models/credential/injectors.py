@@ -87,7 +87,7 @@ def _openstack_data(cred):
         'clouds': {
             'devstack': {
                 'auth': openstack_auth,
-                'verify': verify_state
+                'verify': verify_state,
             },
         },
     }
