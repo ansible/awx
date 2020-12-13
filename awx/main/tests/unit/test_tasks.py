@@ -292,6 +292,7 @@ def test_openstack_client_config_generation_with_project_region_name(mocker, sou
         }
     }
 
+
 @pytest.mark.parametrize("source,expected", [
     (False, False), (True, True)
 ])
