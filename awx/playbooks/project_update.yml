@@ -55,6 +55,8 @@
             force: "{{scm_clean}}"
             username: "{{scm_username|default(omit)}}"
             password: "{{scm_password|default(omit)}}"
+            # must be in_place because folder pre-existing, because it is mounted
+            in_place: true
           environment:
             LC_ALL: 'en_US.UTF-8'
           register: svn_result
