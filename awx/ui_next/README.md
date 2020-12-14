@@ -15,6 +15,19 @@ npm --prefix=awx/ui_next install
 npm --prefix=awx/ui_next start
 ```
 
+### Build for the Development Containers
+If you just want to build a ui for the container-based awx development
+environment, use these make targets:
+
+```shell
+# The ui will be reachable at https://localhost:8043 or
+# http://localhost:8013
+make ui-devel 
+
+# clean up 
+make clean-ui
+```
+
 ### Using an External Server
 If you normally run awx on an external host/server (in this example, `awx.local`),
 you'll need use the `TARGET` environment variable when starting the ui development
@@ -22,18 +35,6 @@ server:
 
 ```shell
 TARGET='https://awx.local:8043' npm --prefix awx/ui_next start
-```
-
-### Build for the Development Containers
-If you just want to build a ui that you can use with the container-based awx
-development environment, you can use these make targets:
-
-```shell
-# The ui will be reachable at https://localhost:8043 or http://localhost:8013
-make ui-devel 
-
-# clean up 
-make clean-ui
 ```
 
 ## Testing
