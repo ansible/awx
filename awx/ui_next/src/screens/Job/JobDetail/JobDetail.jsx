@@ -181,7 +181,7 @@ function JobDetail({ job, i18n }) {
             }
           />
         )}
-        <Detail label={i18n._(t`Job Type`)} value={toTitleCase(job.job_type)} />
+        <Detail label={i18n._(t`Job Type`)} value={toTitleCase(job.type)} />
         <Detail
           label={i18n._(t`Launched By`)}
           value={
