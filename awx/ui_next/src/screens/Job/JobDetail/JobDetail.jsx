@@ -92,6 +92,15 @@ function JobDetail({ job, i18n }) {
   const [errorMsg, setErrorMsg] = useState();
   const history = useHistory();
 
+  const jobTypes = {
+    project_update: i18n._(t`Source Control Update`),
+    inventory_update: i18n._(t`Inventory Sync`),
+    job: i18n._(t`Playbook Run`),
+    ad_hoc_command: i18n._(t`Command`),
+    management_job: i18n._(t`Management Job`),
+    workflow_job: i18n._(t`Workflow Job`),
+  };
+
   const { value: launchedByValue, link: launchedByLink } =
     getLaunchedByDetails(job) || {};
 
@@ -181,7 +190,7 @@ function JobDetail({ job, i18n }) {
             }
           />
         )}
-        <Detail label={i18n._(t`Job Type`)} value={toTitleCase(job.type)} />
+        <Detail label={i18n._(t`Job Type`)} value={jobTypes[job.type]} />
         <Detail
           label={i18n._(t`Launched By`)}
           value={
