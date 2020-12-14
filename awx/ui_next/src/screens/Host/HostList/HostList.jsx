@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Button, Card, PageSection, Tooltip } from '@patternfly/react-core';
 
 import { HostsAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
@@ -13,7 +13,11 @@ import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
+import {
+  encodeQueryString,
+  getQSConfig,
+  parseQueryString,
+} from '../../../util/qs';
 
 import HostListItem from './HostListItem';
 
@@ -24,9 +28,21 @@ const QS_CONFIG = getQSConfig('host', {
 });
 
 function HostList({ i18n }) {
+  const history = useHistory();
   const location = useLocation();
   const match = useRouteMatch();
   const [selected, setSelected] = useState([]);
+  const parsedQueryStrings = parseQueryString(QS_CONFIG, location.search);
+  const nonDefaultSearchParams = {};
+
+  Object.keys(parsedQueryStrings).forEach(key => {
+    if (!QS_CONFIG.defaultParams[key]) {
+      nonDefaultSearchParams[key] = parsedQueryStrings[key];
+    }
+  });
+
+  const hasNonDefaultSearchParams =
+    Object.keys(nonDefaultSearchParams).length > 0;
 
   const {
     result: { hosts, count, actions, relatedSearchableKeys, searchableKeys },
@@ -99,6 +115,14 @@ function HostList({ i18n }) {
     }
   };
 
+  const handleSmartInventoryClick = () => {
+    history.push(
+      `/inventories/smart_inventory/add?host_filter=${encodeURIComponent(
+        encodeQueryString(nonDefaultSearchParams)
+      )}`
+    );
+  };
+
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
@@ -157,6 +181,34 @@ function HostList({ i18n }) {
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Hosts`)}
                 />,
+                ...(canAdd
+                  ? [
+                      <Tooltip
+                        key="smartInventory"
+                        content={
+                          hasNonDefaultSearchParams
+                            ? i18n._(
+                                t`Create a new Smart Inventory with the applied filter`
+                              )
+                            : i18n._(
+                                t`Enter at least one search filter to create a new Smart Inventory`
+                              )
+                        }
+                        position="top"
+                      >
+                        <div>
+                          <Button
+                            onClick={() => handleSmartInventoryClick()}
+                            aria-label={i18n._(t`Smart Inventory`)}
+                            variant="secondary"
+                            isDisabled={!hasNonDefaultSearchParams}
+                          >
+                            {i18n._(t`Smart Inventory`)}
+                          </Button>
+                        </div>
+                      </Tooltip>,
+                    ]
+                  : []),
               ]}
             />
           )}
