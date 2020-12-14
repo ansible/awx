@@ -1288,7 +1288,11 @@ class TestJobCredentials(TestJobExecution):
             credential, env, {}, [], private_data_dir
         )
 
-        shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
+        # convert container path to host machine path
+        config_loc = os.path.join(
+            private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE'])
+        )
+        shade_config = open(config_loc, 'r').read()
         assert shade_config == '\n'.join([
             'clouds:',
             '  devstack:',
