@@ -280,6 +280,7 @@ class JobNotificationMixin(object):
                                                    {'unified_job_template': ['id', 'name', 'description', 'unified_job_type']},
                                                    {'instance_group': ['name', 'id']},
                                                    {'created_by': ['id', 'username', 'first_name', 'last_name']},
+                                                   {'schedule': ['id', 'name', 'description', 'next_run']},
                                                    {'labels': ['count', 'results']}]}]
 
     @classmethod
@@ -344,6 +345,10 @@ class JobNotificationMixin(object):
                                                           'name': 'Stub project',
                                                           'scm_type': 'git',
                                                           'status': 'successful'},
+                                              'schedule': {'description': 'Sample schedule',
+                                                           'id': 42,
+                                                           'name': 'Stub schedule',
+                                                           'next_run': '2038-01-01T00:00:00Z'},
                                               'unified_job_template': {'description': 'Sample unified job template description',
                                                                        'id': 39,
                                                                        'name': 'Stub Job Template',
