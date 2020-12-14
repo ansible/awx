@@ -210,6 +210,7 @@ function WorkflowJobTemplate({ i18n, me, setBreadcrumb }) {
                 id={Number(templateId)}
                 canToggleNotifications={isNotifAdmin}
                 apiModel={WorkflowJobTemplatesAPI}
+                showApprovalsToggle
               />
             </Route>
           )}

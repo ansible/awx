@@ -1,7 +1,11 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../api';
+import {
+  WorkflowJobTemplatesAPI,
+  OrganizationsAPI,
+  NotificationTemplatesAPI,
+} from '../../api';
 
 import {
   mountWithContexts,
@@ -12,6 +16,7 @@ import mockWorkflowJobTemplateData from './shared/data.workflow_job_template.jso
 
 jest.mock('../../api/models/WorkflowJobTemplates');
 jest.mock('../../api/models/Organizations');
+jest.mock('../../api/models/NotificationTemplates');
 
 const mockMe = {
   is_super_user: true,
@@ -192,5 +197,66 @@ describe('<WorkflowJobTemplate />', () => {
       );
     });
     expect(WorkflowJobTemplatesAPI.readWebhookKey).not.toHaveBeenCalled();
+  });
+
+  test('should render workflow notifications list view', async () => {
+    WorkflowJobTemplatesAPI.readNotificationTemplatesSuccess.mockReturnValue({
+      data: { results: [{ id: 1 }] },
+    });
+    WorkflowJobTemplatesAPI.readNotificationTemplatesError.mockReturnValue({
+      data: { results: [{ id: 2 }] },
+    });
+    WorkflowJobTemplatesAPI.readNotificationTemplatesStarted.mockReturnValue({
+      data: { results: [{ id: 3 }] },
+    });
+    WorkflowJobTemplatesAPI.readNotificationTemplatesApprovals.mockReturnValue({
+      data: { results: [{ id: 4 }] },
+    });
+    NotificationTemplatesAPI.readOptions.mockReturnValue({
+      data: {
+        actions: {
+          GET: {
+            notification_type: {
+              choices: [['email', 'Email']],
+            },
+          },
+        },
+      },
+    });
+    NotificationTemplatesAPI.read.mockReturnValue({
+      data: {
+        count: 2,
+        results: [
+          {
+            id: 1,
+            name: 'Notification one',
+            url: '/api/v2/notification_templates/1/',
+            notification_type: 'email',
+          },
+        ],
+      },
+    });
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/workflow_job_template/1/notifications'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplate
+          setBreadcrumb={() => {}}
+          me={{
+            is_system_auditor: true,
+          }}
+        />,
+        {
+          context: { router: { history } },
+        }
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('NotificationListItem').length).toBe(1);
+    expect(wrapper.find('Switch[label="Approval"]')).toHaveLength(1);
+    expect(wrapper.find('Switch[label="Start"]')).toHaveLength(1);
+    expect(wrapper.find('Switch[label="Success"]')).toHaveLength(1);
+    expect(wrapper.find('Switch[label="Failure"]')).toHaveLength(1);
   });
 });
