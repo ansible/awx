@@ -21,6 +21,8 @@
   gather_facts: false
   connection: local
   name: Update source tree if necessary
+  vars:  # for raw archive, prevent error moving files between volumes
+    ansible_remote_tmp: "{{project_path}}/.ansible_awx/tmp"
   tasks:
 
     - name: delete project directory before update
