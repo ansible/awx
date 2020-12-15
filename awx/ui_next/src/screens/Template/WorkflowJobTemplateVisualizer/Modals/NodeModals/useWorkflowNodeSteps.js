@@ -134,26 +134,18 @@ const getNodeToEditDefaultValues = (launchConfig, surveyConfig, nodeToEdit) => {
     initialValues.diff_mode = sourceOfValues?.diff_mode || false;
   }
 
-  if (launchConfig.ask_variables_on_launch && launchConfig.survey_enabled) {
-    if (nodeToEdit?.promptValues?.extra_vars) {
-      initialValues.extra_vars = nodeToEdit.promptValues.extra_vars;
-    } else {
-      const newExtraData = { ...nodeToEdit.originalNodeObject.extra_data };
-      if (surveyConfig.spec) {
-        surveyConfig.spec.forEach(question => {
-          if (
-            Object.prototype.hasOwnProperty.call(
-              newExtraData,
-              question.variable
-            )
-          ) {
-            delete newExtraData[question.variable];
-          }
-        });
-      }
-
-      initialValues.extra_vars = jsonToYaml(JSON.stringify(newExtraData));
+  if (launchConfig.ask_variables_on_launch) {
+    const newExtraData = { ...sourceOfValues.extra_data };
+    if (launchConfig.survey_enabled && surveyConfig.spec) {
+      surveyConfig.spec.forEach(question => {
+        if (
+          Object.prototype.hasOwnProperty.call(newExtraData, question.variable)
+        ) {
+          delete newExtraData[question.variable];
+        }
+      });
     }
+    initialValues.extra_vars = jsonToYaml(JSON.stringify(newExtraData));
   }
 
   if (surveyConfig?.spec) {

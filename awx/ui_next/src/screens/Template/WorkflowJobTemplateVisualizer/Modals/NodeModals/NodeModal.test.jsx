@@ -305,7 +305,6 @@ describe('NodeModal', () => {
           verbosity: '0',
           job_tags: '',
           skip_tags: '',
-          extra_vars: '---',
           diff_mode: false,
           survey_bar: 'answer',
           nodeResource: mockJobTemplate,

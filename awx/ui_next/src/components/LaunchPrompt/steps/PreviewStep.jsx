@@ -51,7 +51,9 @@ function PreviewStep({
         mergeExtraVars(initialExtraVars, masked)
       );
     } else {
-      overrides.extra_vars = initialExtraVars;
+      overrides.extra_vars = yaml.safeDump(
+        mergeExtraVars(initialExtraVars, {})
+      );
     }
   }
 

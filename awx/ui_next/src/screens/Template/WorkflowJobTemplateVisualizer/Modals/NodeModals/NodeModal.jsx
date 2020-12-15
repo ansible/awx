@@ -93,9 +93,10 @@ function NodeModalForm({
           mergeExtraVars(initialExtraVars, surveyValues)
         );
       } else {
-        extraVars = initialExtraVars;
+        extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, {}));
       }
       values.extra_data = extraVars && parseVariableField(extraVars);
+      delete values.extra_vars;
     }
 
     onSave(values, launchConfig);

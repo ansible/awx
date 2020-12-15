@@ -126,7 +126,7 @@ describe('PreviewStep', () => {
     expect(detail).toHaveLength(1);
     expect(detail.prop('resource')).toEqual(resource);
     expect(detail.prop('overrides')).toEqual({
-      extra_vars: 'one: 1',
+      extra_vars: 'one: 1\n',
     });
   });
   test('should remove survey with empty array value', async () => {
@@ -152,7 +152,7 @@ describe('PreviewStep', () => {
     expect(detail).toHaveLength(1);
     expect(detail.prop('resource')).toEqual(resource);
     expect(detail.prop('overrides')).toEqual({
-      extra_vars: 'one: 1',
+      extra_vars: 'one: 1\n',
     });
   });
 });
