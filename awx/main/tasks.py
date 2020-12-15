@@ -2225,6 +2225,14 @@ class RunProjectUpdate(BaseTask):
         elif project_update.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
             extra_vars['scm_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
+
+        if project_update.scm_type == 'archive':
+            # for raw archive, prevent error moving files between volumes
+            extra_vars['ansible_remote_tmp'] = os.path.join(
+                project_update.get_project_path(check_if_exists=False),
+                '.ansible_awx', 'tmp'
+            )
+
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_cwd(self, project_update, private_data_dir):
