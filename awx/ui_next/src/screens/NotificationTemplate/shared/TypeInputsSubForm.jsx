@@ -487,7 +487,7 @@ function WebhookFields({ i18n }) {
         validated={
           !methodMeta.touched || !methodMeta.error ? 'default' : 'error'
         }
-        label={i18n._(t`E-mail options`)}
+        label={i18n._(t`HTTP Method`)}
       >
         <AnsibleSelect
           {...methodField}
