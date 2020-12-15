@@ -463,18 +463,20 @@ endif
 # UI TASKS
 # --------------------------------------
 awx/ui_next/node_modules:
-	$(NPM_BIN) --prefix awx/ui_next install
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
 
 clean-ui:
 	rm -rf node_modules
 	rm -rf awx/ui_next/node_modules
 	rm -rf awx/ui_next/build
+	rm -rf awx/ui_next/src/locales/_build
+	git checkout awx/ui_next/src/locales
 
 ui-release: ui-devel
 ui-devel: awx/ui_next/node_modules
-	$(NPM_BIN) --prefix awx/ui_next run extract-strings
-	$(NPM_BIN) --prefix awx/ui_next run compile-strings
-	$(NPM_BIN) --prefix awx/ui_next run build
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build
 	git checkout awx/ui_next/src/locales
 	mkdir -p awx/public/static/css
 	mkdir -p awx/public/static/js
