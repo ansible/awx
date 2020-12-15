@@ -7,9 +7,9 @@
   },
   "dependencies": {
     "@lingui/react": "^2.9.1",
-    "@patternfly/patternfly": "4.59.1",
-    "@patternfly/react-core": "4.75.2",
-    "@patternfly/react-icons": "4.7.16",
+    "@patternfly/patternfly": "4.70.2",
+    "@patternfly/react-core": "4.84.3",
+    "@patternfly/react-icons": "4.7.22",
     "ansi-to-html": "^0.6.11",
     "axios": "^0.18.1",
     "codemirror": "^5.47.0",

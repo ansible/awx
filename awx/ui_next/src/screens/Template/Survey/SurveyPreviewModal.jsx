@@ -65,7 +65,7 @@ function SurveyPreviewModal({
                       type={`survey-preview-textArea-${q.variable}`}
                       value={q.default}
                       aria-label={i18n._(t`Text Area`)}
-                      disabled
+                      isDisabled
                     />
                   </FormGroup>
                 )}
