@@ -158,6 +158,9 @@ function ScheduleDetail({ schedule, i18n }) {
     (ask_variables_on_launch || survey_enabled) &&
     ((typeof extra_data === 'string' && extra_data !== '') ||
       (typeof extra_data === 'object' && Object.keys(extra_data).length > 0));
+  const showTagsDetail = ask_tags_on_launch && job_tags && job_tags.length > 0;
+  const showSkipTagsDetail =
+    ask_skip_tags_on_launch && skip_tags && skip_tags.length > 0;
 
   const showPromptedFields =
     showCredentialsDetail ||
@@ -166,8 +169,8 @@ function ScheduleDetail({ schedule, i18n }) {
     ask_job_type_on_launch ||
     ask_limit_on_launch ||
     ask_scm_branch_on_launch ||
-    ask_skip_tags_on_launch ||
-    ask_tags_on_launch ||
+    showSkipTagsDetail ||
+    showTagsDetail ||
     ask_verbosity_on_launch ||
     showVariablesDetail;
 
@@ -266,7 +269,7 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            {ask_tags_on_launch && job_tags && job_tags.length > 0 && (
+            {showTagsDetail && (
               <Detail
                 fullWidth
                 label={i18n._(t`Job Tags`)}
@@ -284,7 +287,7 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            {ask_skip_tags_on_launch && skip_tags && skip_tags.length > 0 && (
+            {showSkipTagsDetail && (
               <Detail
                 fullWidth
                 label={i18n._(t`Skip Tags`)}
