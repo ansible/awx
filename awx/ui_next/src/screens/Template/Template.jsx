@@ -91,14 +91,14 @@ function Template({ i18n, setBreadcrumb }) {
   };
 
   const loadScheduleOptions = useCallback(() => {
-    return JobTemplatesAPI.readScheduleOptions(template.id);
-  }, [template]);
+    return JobTemplatesAPI.readScheduleOptions(templateId);
+  }, [templateId]);
 
   const loadSchedules = useCallback(
     params => {
-      return JobTemplatesAPI.readSchedules(template.id, params);
+      return JobTemplatesAPI.readSchedules(templateId, params);
     },
-    [template]
+    [templateId]
   );
 
   const canSeeNotificationsTab = me?.is_system_auditor || isNotifAdmin;

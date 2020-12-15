@@ -22,6 +22,7 @@ import {
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
 import PaginatedDataListItem from './PaginatedDataListItem';
+import LoadingSpinner from '../LoadingSpinner';
 
 function PaginatedDataList({
   items,
@@ -100,12 +101,15 @@ function PaginatedDataList({
     );
   } else {
     Content = (
-      <DataList
-        aria-label={dataListLabel}
-        onSelectDataListItem={id => handleListItemSelect(id)}
-      >
-        {items.map(renderItem)}
-      </DataList>
+      <>
+        {hasContentLoading && <LoadingSpinner />}
+        <DataList
+          aria-label={dataListLabel}
+          onSelectDataListItem={id => handleListItemSelect(id)}
+        >
+          {items.map(renderItem)}
+        </DataList>
+      </>
     );
   }
 

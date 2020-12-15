@@ -61,7 +61,6 @@ describe('<JobTemplateDetail />', () => {
   });
 
   test('should hide edit button for users without edit permission', async () => {
-    JobTemplatesAPI.readInstanceGroups.mockResolvedValue({ data: {} });
     await act(async () => {
       wrapper = mountWithContexts(
         <JobTemplateDetail
