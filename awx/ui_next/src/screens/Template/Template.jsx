@@ -71,13 +71,16 @@ function Template({ i18n, me, setBreadcrumb }) {
     return JobTemplatesAPI.createSchedule(templateId, data);
   };
 
-  const loadScheduleOptions = () => {
+  const loadScheduleOptions = useCallback(() => {
     return JobTemplatesAPI.readScheduleOptions(templateId);
-  };
+  }, [templateId]);
 
-  const loadSchedules = params => {
-    return JobTemplatesAPI.readSchedules(templateId, params);
-  };
+  const loadSchedules = useCallback(
+    params => {
+      return JobTemplatesAPI.readSchedules(templateId, params);
+    },
+    [templateId]
+  );
 
   const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
   const canAddAndEditSurvey =
