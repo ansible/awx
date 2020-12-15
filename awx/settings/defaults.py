@@ -662,7 +662,7 @@ INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
 # ----------------
 EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
-EC2_INSTANCE_ID_VAR = 'ec2_id'
+EC2_INSTANCE_ID_VAR = 'instance_id'
 EC2_EXCLUDE_EMPTY_GROUPS = True
 
 # ------------
