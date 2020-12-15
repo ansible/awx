@@ -19,7 +19,7 @@ import PromptJobTemplateDetail from './PromptJobTemplateDetail';
 import PromptWFJobTemplateDetail from './PromptWFJobTemplateDetail';
 
 const PromptTitle = styled(Title)`
-  margin-top: 40px;
+  margin-top: var(--pf-global--spacer--xl);
   --pf-c-title--m-md--FontWeight: 700;
   grid-column: 1 / -1;
 `;
@@ -30,7 +30,7 @@ const PromptDivider = styled(Divider)`
 `;
 
 const PromptDetailList = styled(DetailList)`
-  padding: 0px 20px;
+  padding: 0px var(--pf-global--spacer--lg);
 `;
 
 function formatTimeout(timeout) {
