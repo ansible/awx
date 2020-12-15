@@ -21,9 +21,10 @@ ENV LC_ALL en_US.UTF-8
 USER root
 
 # Install build dependencies
+RUN dnf -y module enable 'postgresql:12'
 RUN dnf -y update && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
-    dnf module -y enable 'postgresql:10' && \
+    dnf module -y enable 'postgresql:12' && \
     dnf config-manager --set-enabled powertools && \
     dnf -y install ansible \
     gcc \
@@ -38,7 +39,7 @@ RUN dnf -y update && \
     nss \
     openldap-devel \
     patch \
-    @postgresql:10 \
+    @postgresql:12 \
     postgresql-devel \
     python3-devel \
     python3-pip \
@@ -94,9 +95,10 @@ ENV LC_ALL en_US.UTF-8
 USER root
 
 # Install runtime requirements
+RUN dnf -y module enable 'postgresql:12'
 RUN dnf -y update && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
-    dnf module -y enable 'postgresql:10' && \
+    dnf module -y enable 'postgresql:12' && \
     dnf config-manager --set-enabled powertools && \
     dnf -y install acl \
     ansible \
@@ -107,7 +109,7 @@ RUN dnf -y update && \
     krb5-workstation \
     libcgroup-tools \
     nginx \
-    @postgresql:10 \
+    @postgresql:12 \
     python3-devel \
     python3-libselinux \
     python3-pip \
