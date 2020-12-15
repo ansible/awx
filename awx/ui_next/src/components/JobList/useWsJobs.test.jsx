@@ -44,7 +44,7 @@ describe('useWsJobs hook', () => {
 
   test('should establish websocket connection', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const jobs = [{ id: 1 }];
     await act(async () => {
@@ -67,7 +67,7 @@ describe('useWsJobs hook', () => {
 
   test('should update job status', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const jobs = [{ id: 1, status: 'running' }];
     await act(async () => {
@@ -105,7 +105,7 @@ describe('useWsJobs hook', () => {
 
   test('should fetch new job', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
     const jobs = [{ id: 1 }];
     const fetch = jest.fn(() => []);
     await act(async () => {

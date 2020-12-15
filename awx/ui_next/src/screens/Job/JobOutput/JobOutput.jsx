@@ -170,7 +170,11 @@ const OutputFooter = styled.div`
 
 let ws;
 function connectJobSocket({ type, id }, onMessage) {
-  ws = new WebSocket(`wss://${window.location.host}/websocket/`);
+  ws = new WebSocket(
+    `${window.location.protocol === 'http:' ? 'ws:' : 'wss:'}//${
+      window.location.host
+    }/websocket/`
+  );
 
   ws.onopen = () => {
     const xrftoken = `; ${document.cookie}`

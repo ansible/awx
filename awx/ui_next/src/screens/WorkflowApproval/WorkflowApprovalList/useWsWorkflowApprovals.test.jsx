@@ -53,7 +53,7 @@ describe('useWsWorkflowApprovals hook', () => {
 
   test('should establish websocket connection', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const workflowApprovals = [{ id: 1, status: 'successful' }];
     await act(async () => {
@@ -79,7 +79,7 @@ describe('useWsWorkflowApprovals hook', () => {
 
   test('should refetch after new approval job is created', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
     const workflowApprovals = [{ id: 1, status: 'successful' }];
     const fetchWorkflowApprovals = jest.fn(() => []);
     await act(async () => {
@@ -107,7 +107,7 @@ describe('useWsWorkflowApprovals hook', () => {
 
   test('should refetch after approval job in current list is updated', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
     const workflowApprovals = [{ id: 1, status: 'pending' }];
     const fetchWorkflowApprovals = jest.fn(() => []);
     await act(async () => {
@@ -135,7 +135,7 @@ describe('useWsWorkflowApprovals hook', () => {
 
   test('should not refetch when message is not workflow approval', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
     const workflowApprovals = [{ id: 1, status: 'successful' }];
     const fetchWorkflowApprovals = jest.fn(() => []);
     await act(async () => {

@@ -5,7 +5,11 @@ export default function useWebsocket(subscribeGroups) {
   const ws = useRef(null);
 
   useEffect(function setupSocket() {
-    ws.current = new WebSocket(`wss://${window.location.host}/websocket/`);
+    ws.current = new WebSocket(
+      `${window.location.protocol === 'http:' ? 'ws:' : 'wss:'}//${
+        window.location.host
+      }/websocket/`
+    );
 
     const connect = () => {
       const xrftoken = `; ${document.cookie}`
