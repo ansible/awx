@@ -187,7 +187,7 @@ function NotificationList({
             key: 'description__icontains',
           },
           {
-            name: i18n._(t`Type`),
+            name: i18n._(t`Notification type`),
             key: 'or__notification_type',
             options: [
               ['email', i18n._(t`Email`)],
