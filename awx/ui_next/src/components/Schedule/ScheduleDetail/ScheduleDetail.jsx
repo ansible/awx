@@ -63,11 +63,20 @@ function ScheduleDetail({ schedule, i18n }) {
     skip_tags,
     summary_fields,
     timezone,
+    verbosity,
   } = schedule;
 
   const history = useHistory();
   const { pathname } = useLocation();
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
+
+  const VERBOSITY = {
+    0: i18n._(t`0 (Normal)`),
+    1: i18n._(t`1 (Verbose)`),
+    2: i18n._(t`2 (More Verbose)`),
+    3: i18n._(t`3 (Debug)`),
+    4: i18n._(t`4 (Connection Debug)`),
+  };
 
   const {
     request: deleteSchedule,
@@ -161,10 +170,12 @@ function ScheduleDetail({ schedule, i18n }) {
   const showTagsDetail = ask_tags_on_launch && job_tags && job_tags.length > 0;
   const showSkipTagsDetail =
     ask_skip_tags_on_launch && skip_tags && skip_tags.length > 0;
+  const showDiffModeDetail =
+    ask_diff_mode_on_launch && typeof diff_mode === 'boolean';
 
   const showPromptedFields =
     showCredentialsDetail ||
-    ask_diff_mode_on_launch ||
+    showDiffModeDetail ||
     showInventoryDetail ||
     ask_job_type_on_launch ||
     ask_limit_on_launch ||
@@ -250,7 +261,13 @@ function ScheduleDetail({ schedule, i18n }) {
             {ask_limit_on_launch && (
               <Detail label={i18n._(t`Limit`)} value={limit} />
             )}
-            {ask_diff_mode_on_launch && typeof diff_mode === 'boolean' && (
+            {ask_verbosity_on_launch && (
+              <Detail
+                label={i18n._(t`Verbosity`)}
+                value={VERBOSITY[verbosity]}
+              />
+            )}
+            {showDiffModeDetail && (
               <Detail
                 label={i18n._(t`Show Changes`)}
                 value={diff_mode ? i18n._(t`On`) : i18n._(t`Off`)}
