@@ -133,7 +133,7 @@ function NotificationTemplateListItem({
               aria-label={i18n._(t`Test Notification`)}
               variant="plain"
               onClick={sendTestNotification}
-              disabled={isLoading}
+              isDisabled={isLoading || status === 'running'}
             >
               <BellIcon />
             </Button>
