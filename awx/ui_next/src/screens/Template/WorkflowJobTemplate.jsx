@@ -13,6 +13,7 @@ import {
   useRouteMatch,
 } from 'react-router-dom';
 import RoutedTabs from '../../components/RoutedTabs';
+import { useConfig } from '../../contexts/Config';
 import useRequest from '../../util/useRequest';
 import AppendBody from '../../components/AppendBody';
 import ContentError from '../../components/ContentError';
@@ -27,10 +28,11 @@ import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../api';
 import TemplateSurvey from './TemplateSurvey';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
 
-function WorkflowJobTemplate({ i18n, me, setBreadcrumb }) {
+function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
   const location = useLocation();
-  const { id: templateId } = useParams();
   const match = useRouteMatch();
+  const { id: templateId } = useParams();
+  const { me = {} } = useConfig();
 
   const {
     result: { isNotifAdmin, template },
