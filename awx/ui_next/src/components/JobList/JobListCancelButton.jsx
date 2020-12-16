@@ -53,7 +53,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
       return (
         <div>
           {cannotCancelPermissions.length > 0 && (
-            <>
+            <div>
               {i18n._(
                 '{numJobsUnableToCancel, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}',
                 {
@@ -61,10 +61,10 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
                 }
               )}
               {' '.concat(cannotCancelPermissions.join(', '))}
-            </>
+            </div>
           )}
           {cannotCancelNotRunning.length > 0 && (
-            <>
+            <div>
               {i18n._(
                 '{numJobsUnableToCancel, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}',
                 {
@@ -72,7 +72,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
                 }
               )}
               {' '.concat(cannotCancelNotRunning.join(', '))}
-            </>
+            </div>
           )}
         </div>
       );
