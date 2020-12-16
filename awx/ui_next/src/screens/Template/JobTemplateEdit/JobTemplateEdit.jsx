@@ -1,19 +1,21 @@
 /* eslint react/no-unused-state: 0 */
 import React, { useState } from 'react';
 import { withRouter, Redirect, useHistory } from 'react-router-dom';
-
 import { CardBody } from '../../../components/Card';
+
 import { JobTemplatesAPI } from '../../../api';
 import { JobTemplate } from '../../../types';
 import { getAddedAndRemoved } from '../../../util/lists';
 import JobTemplateForm from '../shared/JobTemplateForm';
 
+import ContentLoading from '../../../components/ContentLoading';
+
 function JobTemplateEdit({ template }) {
-  const { id, type } = template;
   const history = useHistory();
   const [formSubmitError, setFormSubmitError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const detailsUrl = `/templates/${type}/${id}/details`;
+  const detailsUrl = `/templates/${template.type}/${template.id}/details`;
 
   const handleSubmit = async values => {
     const {
@@ -28,6 +30,7 @@ function JobTemplateEdit({ template }) {
     } = values;
 
     setFormSubmitError(null);
+    setIsLoading(true);
     remainingValues.project = values.project.id;
     remainingValues.webhook_credential = webhook_credential?.id || null;
     try {
@@ -38,8 +41,10 @@ function JobTemplateEdit({ template }) {
         submitCredentials(credentials),
       ]);
       history.push(detailsUrl);
-    } catch (err) {
-      setFormSubmitError(err);
+    } catch (error) {
+      setFormSubmitError(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -94,12 +99,14 @@ function JobTemplateEdit({ template }) {
     history.push(detailsUrl);
   };
 
-  const canEdit = template.summary_fields.user_capabilities.edit;
+  const canEdit = template?.summary_fields?.user_capabilities?.edit;
 
   if (!canEdit) {
     return <Redirect to={detailsUrl} />;
   }
-
+  if (isLoading) {
+    return <ContentLoading />;
+  }
   return (
     <CardBody>
       <JobTemplateForm
@@ -112,7 +119,7 @@ function JobTemplateEdit({ template }) {
   );
 }
 
-JobTemplateForm.propTypes = {
+JobTemplateEdit.propTypes = {
   template: JobTemplate.isRequired,
 };
 

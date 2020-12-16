@@ -137,10 +137,10 @@ function Project({ i18n, setBreadcrumb }) {
     );
   }
 
-  let showCardHeader = true;
-  if (['edit', 'schedules/'].some(name => location.pathname.includes(name))) {
-    showCardHeader = false;
-  }
+  const showCardHeader = !(
+    location.pathname.endsWith('edit') ||
+    location.pathname.includes('schedules/')
+  );
 
   return (
     <PageSection>
