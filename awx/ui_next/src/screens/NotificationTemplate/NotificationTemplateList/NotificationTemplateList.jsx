@@ -123,7 +123,7 @@ function NotificationTemplatesList({ i18n }) {
                 key: 'description__icontains',
               },
               {
-                name: i18n._(t`Type`),
+                name: i18n._(t`Notification type`),
                 key: 'or__notification_type',
                 options: [
                   ['email', i18n._(t`Email`)],
@@ -139,11 +139,11 @@ function NotificationTemplatesList({ i18n }) {
                 ],
               },
               {
-                name: i18n._(t`Created By (Username)`),
+                name: i18n._(t`Created by (username)`),
                 key: 'created_by__username__icontains',
               },
               {
-                name: i18n._(t`Modified By (Username)`),
+                name: i18n._(t`Modified by (username)`),
                 key: 'modified_by__username__icontains',
               },
             ]}
