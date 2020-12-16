@@ -29,7 +29,6 @@ pas_inputs = {
         'label': _('Account Name'),
         'type': 'string',
         'help_text': _('Local system account or Domain account name enrolled in Centrify Vault. eg. (root or DOMAIN/Administrator)'),
-        'secret': True,
     },{
         'id': 'system-name',
         'label': _('System Name'),
@@ -69,7 +68,7 @@ def handle_auth(**kwargs):
 def get_ID(**kwargs):
     endpoint = urljoin(kwargs['url'],'/Redrock/query')
     name=" Name='{0}' and User='{1}'".format(kwargs['system_name'],kwargs['acc_name'])
-    query  = 'Select * from VaultAccount where {0}'.format(name)
+    query  = 'Select ID from VaultAccount where {0}'.format(name)
     post_data = json.dumps({'Script': query})
     post_headers = {
         "Authorization": "Bearer " + kwargs['access_token'], 
