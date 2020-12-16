@@ -64,7 +64,7 @@ const workflowContext = {
     },
     {
       id: 2,
-      unifiedJobTemplate: {
+      fullUnifiedJobTemplate: {
         name: 'Foo JT',
         type: 'job_template',
       },

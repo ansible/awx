@@ -1,6 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../../../testUtils/enzymeHelpers';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
@@ -9,10 +12,17 @@ import NodeEditModal from './NodeEditModal';
 
 const dispatch = jest.fn();
 
-const nodeResource = {
-  id: 448,
-  type: 'job_template',
-  name: 'Test JT',
+jest.mock('../../../../../api/models/InventorySources');
+jest.mock('../../../../../api/models/JobTemplates');
+jest.mock('../../../../../api/models/Projects');
+jest.mock('../../../../../api/models/WorkflowJobTemplates');
+const values = {
+  inventory: undefined,
+  nodeResource: {
+    id: 448,
+    name: 'Test JT',
+    type: 'job_template',
+  },
 };
 
 const workflowContext = {
@@ -22,27 +32,40 @@ const workflowContext = {
       id: 30,
       name: 'Foo JT',
       type: 'job_template',
+      unified_job_type: 'job',
+    },
+    originalNodeObject: {
+      summary_fields: { unified_job_template: { id: 1, name: 'Job Template' } },
     },
   },
 };
 
 describe('NodeEditModal', () => {
-  test('Node modal confirmation dispatches as expected', () => {
+  test('Node modal confirmation dispatches as expected', async () => {
     const wrapper = mountWithContexts(
       <WorkflowDispatchContext.Provider value={dispatch}>
         <WorkflowStateContext.Provider value={workflowContext}>
-          <NodeEditModal />
+          <NodeEditModal
+            onSave={() => {}}
+            askLinkType={false}
+            title="Edit Node"
+          />
         </WorkflowStateContext.Provider>
       </WorkflowDispatchContext.Provider>
     );
-    act(() => {
-      wrapper.find('NodeModal').prop('onSave')(nodeResource);
+    waitForElement(
+      wrapper,
+      'WizardNavItem[content="ContentLoading"]',
+      el => el.length === 0
+    );
+    await act(async () => {
+      wrapper.find('NodeModal').prop('onSave')(values, {});
     });
     expect(dispatch).toHaveBeenCalledWith({
-      type: 'UPDATE_NODE',
       node: {
-        nodeResource,
+        nodeResource: { id: 448, name: 'Test JT', type: 'job_template' },
       },
+      type: 'UPDATE_NODE',
     });
   });
 });
