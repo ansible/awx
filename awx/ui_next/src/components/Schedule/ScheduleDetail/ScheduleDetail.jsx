@@ -172,17 +172,21 @@ function ScheduleDetail({ schedule, i18n }) {
     ask_skip_tags_on_launch && skip_tags && skip_tags.length > 0;
   const showDiffModeDetail =
     ask_diff_mode_on_launch && typeof diff_mode === 'boolean';
+  const showLimitDetail = ask_limit_on_launch && limit;
+  const showJobTypeDetail = ask_job_type_on_launch && job_type;
+  const showSCMBranchDetail = ask_scm_branch_on_launch && scm_branch;
+  const showVerbosityDetail = ask_verbosity_on_launch && VERBOSITY[verbosity];
 
   const showPromptedFields =
     showCredentialsDetail ||
     showDiffModeDetail ||
     showInventoryDetail ||
-    ask_job_type_on_launch ||
-    ask_limit_on_launch ||
-    ask_scm_branch_on_launch ||
+    showJobTypeDetail ||
+    showLimitDetail ||
+    showSCMBranchDetail ||
     showSkipTagsDetail ||
     showTagsDetail ||
-    ask_verbosity_on_launch ||
+    showVerbosityDetail ||
     showVariablesDetail;
 
   if (isLoading) {
