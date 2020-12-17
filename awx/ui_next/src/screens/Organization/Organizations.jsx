@@ -1,4 +1,4 @@
-import React, { useState, Fragment } from 'react';
+import React, { useCallback, useState, Fragment } from 'react';
 import { Route, withRouter, Switch, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -17,25 +17,28 @@ function Organizations({ i18n }) {
     '/organizations/add': i18n._(t`Create New Organization`),
   });
 
-  const setBreadcrumb = organization => {
-    if (!organization) {
-      return;
-    }
+  const setBreadcrumb = useCallback(
+    organization => {
+      if (!organization) {
+        return;
+      }
 
-    const breadcrumb = {
-      '/organizations': i18n._(t`Organizations`),
-      '/organizations/add': i18n._(t`Create New Organization`),
-      [`/organizations/${organization.id}`]: `${organization.name}`,
-      [`/organizations/${organization.id}/edit`]: i18n._(t`Edit Details`),
-      [`/organizations/${organization.id}/details`]: i18n._(t`Details`),
-      [`/organizations/${organization.id}/access`]: i18n._(t`Access`),
-      [`/organizations/${organization.id}/teams`]: i18n._(t`Teams`),
-      [`/organizations/${organization.id}/notifications`]: i18n._(
-        t`Notifications`
-      ),
-    };
-    setBreadcrumbConfig(breadcrumb);
-  };
+      const breadcrumb = {
+        '/organizations': i18n._(t`Organizations`),
+        '/organizations/add': i18n._(t`Create New Organization`),
+        [`/organizations/${organization.id}`]: `${organization.name}`,
+        [`/organizations/${organization.id}/edit`]: i18n._(t`Edit Details`),
+        [`/organizations/${organization.id}/details`]: i18n._(t`Details`),
+        [`/organizations/${organization.id}/access`]: i18n._(t`Access`),
+        [`/organizations/${organization.id}/teams`]: i18n._(t`Teams`),
+        [`/organizations/${organization.id}/notifications`]: i18n._(
+          t`Notifications`
+        ),
+      };
+      setBreadcrumbConfig(breadcrumb);
+    },
+    [i18n]
+  );
 
   return (
     <Fragment>
