@@ -84,9 +84,9 @@ function InventoryListItem({
       </Td>
       <Td key="organization" dataLabel={i18n._(t`Organization`)}>
         <Link
-          to={`/organizations/${inventory.summary_fields.organization.id}/details`}
+          to={`/organizations/${inventory?.summary_fields?.organization?.id}/details`}
         >
-          {inventory.summary_fields.organization.name}
+          {inventory?.summary_fields?.organization?.name}
         </Link>
       </Td>
       <Td dataLabel={i18n._(t`Groups`)}>{inventory.total_groups}</Td>
