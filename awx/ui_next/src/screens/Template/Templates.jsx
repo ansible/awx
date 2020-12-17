@@ -35,7 +35,7 @@ function Templates({ i18n }) {
         [`${templatePath}/notifications`]: i18n._(t`Notifications`),
         [`${templatePath}/completed_jobs`]: i18n._(t`Completed Jobs`),
         [surveyPath]: i18n._(t`Survey`),
-        [`${surveyPath}add`]: i18n._(t`Add Question`),
+        [`${surveyPath}/add`]: i18n._(t`Add Question`),
         [`${surveyPath}/edit`]: i18n._(t`Edit Question`),
         [schedulesPath]: i18n._(t`Schedules`),
         [`${schedulesPath}/add`]: i18n._(t`Create New Schedule`),
