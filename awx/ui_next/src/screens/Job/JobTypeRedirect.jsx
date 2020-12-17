@@ -18,8 +18,11 @@ function JobTypeRedirect({ id, path, view, i18n }) {
     request: loadJob,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await UnifiedJobsAPI.read({ id });
-      return { job: data };
+      const {
+        data: { results },
+      } = await UnifiedJobsAPI.read({ id });
+      const [item] = results;
+      return { job: item };
     }, [id]),
     { job: {} }
   );
@@ -42,7 +45,7 @@ function JobTypeRedirect({ id, path, view, i18n }) {
       </PageSection>
     );
   }
-  if (isLoading) {
+  if (isLoading || !job?.id) {
     // TODO show loading state
     return <div>Loading...</div>;
   }
