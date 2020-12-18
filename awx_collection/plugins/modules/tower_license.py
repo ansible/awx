@@ -38,7 +38,7 @@ RETURN = ''' # '''
 
 EXAMPLES = '''
 - name: Set the license using a file
-  license:
+  tower_license:
     manifest: "/tmp/my_manifest.zip"
     eula_accepted: True
 '''
