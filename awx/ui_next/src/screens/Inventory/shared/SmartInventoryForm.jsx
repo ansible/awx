@@ -2,8 +2,9 @@ import React, { useEffect, useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { func, shape, object, arrayOf } from 'prop-types';
+import { func, shape, arrayOf } from 'prop-types';
 import { Form } from '@patternfly/react-core';
+import { InstanceGroup } from '../../../types';
 import { VariablesField } from '../../../components/CodeMirrorInput';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
@@ -168,7 +169,7 @@ function SmartInventoryForm({
 }
 
 SmartInventoryForm.propTypes = {
-  instanceGroups: arrayOf(object),
+  instanceGroups: arrayOf(InstanceGroup),
   inventory: shape({}),
   onCancel: func.isRequired,
   onSubmit: func.isRequired,
