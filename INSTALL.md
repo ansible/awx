@@ -83,7 +83,7 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/) Requires Version 1.8.4+
 - Python 3.6+
-- [Node 10.x LTS version](https://nodejs.org/en/download/)
+- [Node 14.x LTS version](https://nodejs.org/en/download/)
     + This is only required if you're [building your own container images](#official-vs-building-images) with `use_container_for_build=false`
 - [NPM 6.x LTS](https://docs.npmjs.com/)
     + This is only required if you're [building your own container images](#official-vs-building-images) with `use_container_for_build=false`

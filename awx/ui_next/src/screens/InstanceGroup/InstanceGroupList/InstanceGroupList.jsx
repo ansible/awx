@@ -8,7 +8,6 @@ import { InstanceGroupsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
-import { toTitleCase } from '../../../util/strings';
 import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
@@ -103,8 +102,8 @@ function InstanceGroupList({ i18n }) {
     deleteItems: deleteInstanceGroups,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      await Promise.all(
+    useCallback(() => {
+      return Promise.all(
         selected.map(({ id }) => InstanceGroupsAPI.destroy(id))
       );
     }, [selected]),
@@ -153,8 +152,8 @@ function InstanceGroupList({ i18n }) {
     );
   }
 
-  const addContainerGroup = toTitleCase(i18n._(t`Add Container Group`));
-  const addInstanceGroup = toTitleCase(i18n._(t`Add Instance Group`));
+  const addContainerGroup = i18n._(t`Add container group`);
+  const addInstanceGroup = i18n._(t`Add instance group`);
 
   const addButton = (
     <AddDropDownButton

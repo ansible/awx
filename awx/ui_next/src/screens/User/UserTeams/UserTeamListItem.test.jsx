@@ -22,7 +22,7 @@ describe('<UserTeamListItem />', () => {
               },
             }}
             detailUrl="/team/1"
-            isSelected
+            isSelected={false}
             onSelect={() => {}}
           />
         </MemoryRouter>

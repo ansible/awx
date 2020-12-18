@@ -1,7 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import ActivityStream from './ActivityStream';
 import { SettingsAPI } from '../../../api';
 
@@ -55,5 +58,28 @@ describe('<ActivityStream />', () => {
       });
     });
     expect(wrapper.find('ContentError').length).toBe(1);
+  });
+
+  test('should redirect to details for users without system admin permissions', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/settings/activity_stream/edit'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<ActivityStream />, {
+        context: {
+          router: {
+            history,
+          },
+          config: {
+            me: {
+              is_superuser: false,
+            },
+          },
+        },
+      });
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('ActivityStreamDetail').length).toBe(1);
+    expect(wrapper.find('ActivityStreamEdit').length).toBe(0);
   });
 });

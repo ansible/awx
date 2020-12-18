@@ -67,7 +67,7 @@ function NotificationTemplatesList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(({ id }) => NotificationTemplatesAPI.destroy(id))
       );
@@ -110,7 +110,27 @@ function NotificationTemplatesList({ i18n }) {
               },
               {
                 name: i18n._(t`Type`),
-                key: 'notification_type',
+                key: 'or__notification_type',
+                options: [
+                  ['email', i18n._(t`Email`)],
+                  ['grafana', i18n._(t`Grafana`)],
+                  ['hipchat', i18n._(t`Hipchat`)],
+                  ['irc', i18n._(t`IRC`)],
+                  ['mattermost', i18n._(t`Mattermost`)],
+                  ['pagerduty', i18n._(t`Pagerduty`)],
+                  ['rocketchat', i18n._(t`Rocket.Chat`)],
+                  ['slack', i18n._(t`Slack`)],
+                  ['twilio', i18n._(t`Twilio`)],
+                  ['webhook', i18n._(t`Webhook`)],
+                ],
+              },
+              {
+                name: i18n._(t`Created By (Username)`),
+                key: 'created_by__username__icontains',
+              },
+              {
+                name: i18n._(t`Modified By (Username)`),
+                key: 'modified_by__username__icontains',
               },
             ]}
             toolbarSortColumns={[
@@ -138,7 +158,7 @@ function NotificationTemplatesList({ i18n }) {
                     key="delete"
                     onDelete={handleDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName="Organizations"
+                    pluralizedItemName={i18n._(t`Notification Templates`)}
                   />,
                 ]}
               />
@@ -164,7 +184,7 @@ function NotificationTemplatesList({ i18n }) {
         title={i18n._(t`Error!`)}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more organizations.`)}
+        {i18n._(t`Failed to delete one or more notification template.`)}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </>

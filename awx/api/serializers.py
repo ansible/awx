@@ -640,7 +640,7 @@ class EmptySerializer(serializers.Serializer):
 
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
-    # As a base serializer, the capabilities prefetch is not used directly, 
+    # As a base serializer, the capabilities prefetch is not used directly,
     # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
     capabilities_prefetch = []
 
@@ -1748,7 +1748,7 @@ class HostSerializer(BaseSerializerWithVariables):
             attrs['variables'] = json.dumps(vars_dict)
         if Group.objects.filter(name=name, inventory=inventory).exists():
             raise serializers.ValidationError(_('A Group with that name already exists.'))
-            
+
         return super(HostSerializer, self).validate(attrs)
 
     def to_representation(self, obj):
@@ -3945,12 +3945,12 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
         return UriCleaner.remove_sensitive(obj.stdout)
 
     def get_event_data(self, obj):
-        # the project update playbook uses the git, hg, or svn modules
+        # the project update playbook uses the git or svn modules
         # to clone repositories, and those modules are prone to printing
         # raw SCM URLs in their stdout (which *could* contain passwords)
         # attempt to detect and filter HTTP basic auth passwords in the stdout
         # of these types of events
-        if obj.event_data.get('task_action') in ('git', 'hg', 'svn'):
+        if obj.event_data.get('task_action') in ('git', 'svn'):
             try:
                 return json.loads(
                     UriCleaner.remove_sensitive(

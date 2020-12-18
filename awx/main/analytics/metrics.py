@@ -12,7 +12,7 @@ from prometheus_client import (
 from awx.conf.license import get_license
 from awx.main.utils import (get_awx_version, get_ansible_version)
 from awx.main.analytics.collectors import (
-    counts, 
+    counts,
     instance_info,
     job_instance_counts,
     job_counts,
@@ -68,7 +68,7 @@ def metrics():
         'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', 'None')
     })
 
-    LICENSE_INSTANCE_TOTAL.set(str(license_info.get('available_instances', 0)))
+    LICENSE_INSTANCE_TOTAL.set(str(license_info.get('instance_count', 0)))
     LICENSE_INSTANCE_FREE.set(str(license_info.get('free_instances', 0)))
 
     current_counts = counts(None)

@@ -7,7 +7,7 @@ metadata:
 {% if kubernetes_service_account_annotations is defined %}
   annotations:
 {% for key, value in kubernetes_service_account_annotations.items() %}
-    {{ key }}: {{ value }}
+    {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
 {% if kubernetes_image_pull_secrets is defined %}
@@ -88,7 +88,7 @@ metadata:
 {% if kubernetes_deployment_annotations is defined %}
   annotations:
 {% for key, value in kubernetes_deployment_annotations.items() %}
-    {{ key }}: {{ value }}
+    {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
 {% if openshift_host is defined %}
@@ -107,7 +107,7 @@ spec:
 {% if kubernetes_pod_annotations is defined %}
       annotations:
 {% for key, value in kubernetes_pod_annotations.items() %}
-        {{ key }}: {{ value }}
+        {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
       labels:
@@ -116,8 +116,6 @@ spec:
         app: {{ kubernetes_deployment_name }}
     spec:
       serviceAccountName: {{ kubernetes_serviceaccount_name }}
-      securityContext:
-        fsGroup: 0
       terminationGracePeriodSeconds: 10
 {% if custom_venvs is defined %}
 {% set trusted_hosts = "" %}
@@ -518,6 +516,12 @@ metadata:
   namespace: {{ kubernetes_namespace }}
   labels:
     name: {{ kubernetes_deployment_name }}-web-svc
+{% if kubernetes_service_annotations is defined %}
+  annotations:
+{% for key, value in kubernetes_service_annotations.items() %}
+    {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
 spec:
   type: {{ kubernetes_web_svc_type }}
   ports:
@@ -540,18 +544,12 @@ metadata:
 {% if kubernetes_ingress_annotations is defined %}
   annotations:
 {% for key, value in kubernetes_ingress_annotations.items() %}
-    {{ key }}: {{ value }}
+    {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
 
 spec:
 {% if kubernetes_ingress_hostname is defined %}
-{% if kubernetes_ingress_tls_secret is defined %}
-  tls:
-  - hosts:
-    - {{ kubernetes_ingress_hostname }}
-    secretName: {{ kubernetes_ingress_tls_secret }}
-{% endif %}
   rules:
   - host: {{ kubernetes_ingress_hostname }}
     http:
@@ -561,10 +559,15 @@ spec:
           serviceName: {{ kubernetes_deployment_name }}-web-svc
           servicePort: 80
 {% else %}
-spec:
   backend:
     serviceName: {{ kubernetes_deployment_name }}-web-svc
     servicePort: 80
+{% endif %}
+{% if kubernetes_ingress_tls_secret is defined %}
+  tls:
+  - hosts:
+    - {{ kubernetes_ingress_hostname }}
+    secretName: {{ kubernetes_ingress_tls_secret }}
 {% endif %}
 {% endif %}
 {% if openshift_host is defined %}

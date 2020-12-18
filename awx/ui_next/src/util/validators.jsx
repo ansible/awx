@@ -69,7 +69,7 @@ export function noWhiteSpace(i18n) {
 export function integer(i18n) {
   return value => {
     const str = String(value);
-    if (/[^0-9]/.test(str)) {
+    if (!Number.isInteger(value) && /[^0-9]/.test(str)) {
       return i18n._(t`This field must be an integer`);
     }
     return undefined;

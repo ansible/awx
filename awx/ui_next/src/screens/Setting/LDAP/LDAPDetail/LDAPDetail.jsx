@@ -13,7 +13,7 @@ import { SettingsAPI } from '../../../../api';
 import useRequest from '../../../../util/useRequest';
 import { useConfig } from '../../../../contexts/Config';
 import { useSettings } from '../../../../contexts/Settings';
-import SettingDetail from '../../shared';
+import { SettingDetail } from '../../shared';
 import { sortNestedDetails } from '../../shared/settingUtils';
 
 function filterByPrefix(data, prefix) {

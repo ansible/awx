@@ -78,7 +78,7 @@ function TeamList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(selected.map(team => TeamsAPI.destroy(team.id)));
     }, [selected]),
     {

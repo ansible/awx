@@ -58,23 +58,26 @@ describe('<UserAndTeamAccessAdd/>', () => {
       wrapper = mountWithContexts(
         <UserAndTeamAccessAdd
           apiModel={UsersAPI}
-          isOpen
-          onSave={() => {}}
-          onClose={() => {}}
+          onFetchData={() => {}}
           title="Add user permissions"
         />
       );
     });
-    await waitForElement(wrapper, 'PFWizard');
+    await waitForElement(wrapper, 'Button[aria-label="Add"]');
   });
   afterEach(() => {
     wrapper.unmount();
     jest.clearAllMocks();
   });
   test('should mount properly', async () => {
+    expect(wrapper.find('Button[aria-label="Add"]').length).toBe(1);
+    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
+    wrapper.update();
     expect(wrapper.find('PFWizard').length).toBe(1);
   });
   test('should disable steps', async () => {
+    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
+    wrapper.update();
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
     expect(
       wrapper
@@ -122,7 +125,8 @@ describe('<UserAndTeamAccessAdd/>', () => {
     JobTemplatesAPI.read.mockResolvedValue(resources);
     JobTemplatesAPI.readOptions.mockResolvedValue(options);
     UsersAPI.associateRole.mockResolvedValue({});
-
+    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
+    wrapper.update();
     await act(async () =>
       wrapper.find('SelectableCard[label="Job templates"]').prop('onClick')({
         fetchItems: JobTemplatesAPI.read,
@@ -178,6 +182,14 @@ describe('<UserAndTeamAccessAdd/>', () => {
     await expect(UsersAPI.associateRole).toHaveBeenCalled();
   });
 
+  test('should close wizard', async () => {
+    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
+    wrapper.update();
+    act(() => wrapper.find('PFWizard').prop('onClose')());
+    wrapper.update();
+    expect(wrapper.find('PFWizard').length).toBe(0);
+  });
+
   test('should throw error', async () => {
     JobTemplatesAPI.read.mockResolvedValue(resources);
     JobTemplatesAPI.readOptions.mockResolvedValue(options);
@@ -200,6 +212,9 @@ describe('<UserAndTeamAccessAdd/>', () => {
         id: 'a',
       }),
     }));
+
+    act(() => wrapper.find('Button[aria-label="Add"]').prop('onClick')());
+    wrapper.update();
 
     await act(async () =>
       wrapper.find('SelectableCard[label="Job templates"]').prop('onClick')({

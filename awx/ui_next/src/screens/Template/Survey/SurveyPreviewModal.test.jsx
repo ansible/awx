@@ -94,7 +94,7 @@ describe('<SurveyPreviewModal />', () => {
     const question3 = wrapper
       .find('FormGroup[label="Text Area Question"]')
       .find('label');
-    const question3Value = wrapper.find('TextArea');
+    const question3Value = wrapper.find('textarea');
 
     const question4 = wrapper.find('FormGroup[label="Password Question"]');
     const question4Value = wrapper.find('TextInputBase[type="password"]');
@@ -106,24 +106,24 @@ describe('<SurveyPreviewModal />', () => {
       .find('Select[aria-label="Multi-Select"]')
       .find('Chip');
 
-    expect(question1.text()).toBe('Text Question ');
+    expect(question1.text()).toBe('Text Question * ');
     expect(question1Value.prop('value')).toBe('Text Question Value');
     expect(question1Value.prop('isDisabled')).toBe(true);
 
-    expect(question2.text()).toBe('Select Question');
+    expect(question2.text()).toBe('Select Question *');
     expect(question2Value.find('.pf-c-select__toggle-text').text()).toBe(
       'Select Question Value'
     );
     expect(question2Value.prop('isDisabled')).toBe(true);
 
-    expect(question3.text()).toBe('Text Area Question');
+    expect(question3.text()).toBe('Text Area Question *');
     expect(question3Value.prop('value')).toBe('Text Area Question Value');
     expect(question3Value.prop('disabled')).toBe(true);
-    expect(question4.text()).toBe('Password Question ');
+    expect(question4.text()).toBe('Password Question * ');
     expect(question4Value.prop('placeholder')).toBe('ENCRYPTED');
     expect(question4Value.prop('isDisabled')).toBe(true);
 
-    expect(question5.text()).toBe('Multiple select Question');
+    expect(question5.text()).toBe('Multiple select Question *');
     expect(question5Value.length).toBe(4);
     expect(
       wrapper.find('Select[aria-label="Multi-Select"]').prop('isDisabled')

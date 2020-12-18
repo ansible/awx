@@ -4,11 +4,14 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
+import { useConfig } from '../../../contexts/Config';
 import ActivityStreamDetail from './ActivityStreamDetail';
 import ActivityStreamEdit from './ActivityStreamEdit';
 
 function ActivityStream({ i18n }) {
   const baseURL = '/settings/activity_stream';
+  const { me } = useConfig();
+
   return (
     <PageSection>
       <Card>
@@ -18,7 +21,11 @@ function ActivityStream({ i18n }) {
             <ActivityStreamDetail />
           </Route>
           <Route path={`${baseURL}/edit`}>
-            <ActivityStreamEdit />
+            {me?.is_superuser ? (
+              <ActivityStreamEdit />
+            ) : (
+              <Redirect to={`${baseURL}/details`} />
+            )}
           </Route>
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>

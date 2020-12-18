@@ -46,9 +46,11 @@ class UnifiedJob(HasStatus, base.Base):
         Additionally, you may replace any ' ' with another character (including ''). This is applied after the newline
         replacement. Default behavior is to not replace spaces.
         """
+        self.wait_until_completed()
         stdout = self.result_stdout
         if replace_newlines is not None:
-            stdout = stdout.replace('\n', replace_newlines)
+            # make text into string with no line breaks, but watch out for trailing whitespace
+            stdout = replace_newlines.join([line.strip() for line in stdout.split('\n')])
         if replace_spaces is not None:
             stdout = stdout.replace(' ', replace_spaces)
         if expected_text not in stdout:

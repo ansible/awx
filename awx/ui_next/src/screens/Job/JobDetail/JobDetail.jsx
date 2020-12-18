@@ -80,6 +80,7 @@ const getLaunchedByDetails = ({ summary_fields = {}, related = {} }) => {
 
 function JobDetail({ job, i18n }) {
   const {
+    credential,
     credentials,
     instance_group: instanceGroup,
     inventory,
@@ -237,6 +238,20 @@ function JobDetail({ job, i18n }) {
               value={`${job.job_slice_number}/${job.job_slice_count}`}
             />
           )}
+        {credential && (
+          <Detail
+            label={i18n._(t`Machine Credential`)}
+            value={
+              <ChipGroup numChips={5} totalChips={1}>
+                <CredentialChip
+                  key={credential.id}
+                  credential={credential}
+                  isReadOnly
+                />
+              </ChipGroup>
+            }
+          />
+        )}
         {credentials && credentials.length > 0 && (
           <Detail
             fullWidth

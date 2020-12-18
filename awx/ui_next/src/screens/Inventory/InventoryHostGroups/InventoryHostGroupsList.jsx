@@ -90,7 +90,7 @@ function InventoryHostGroupsList({ i18n }) {
     deleteItems: disassociateHosts,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(group => HostsAPI.disassociateGroup(hostId, group))
       );

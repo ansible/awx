@@ -54,9 +54,6 @@ describe('<UserToken/>', () => {
       description: 'cdfsg',
       scope: 'read',
     });
-    TokensAPI.readOptions.mockResolvedValue({
-      data: { actions: { POST: true } },
-    });
     await act(async () => {
       wrapper = mountWithContexts(
         <UserToken setBreadcrumb={jest.fn()} user={user} />
@@ -87,15 +84,11 @@ describe('<UserToken/>', () => {
       description: 'cdfsg',
       scope: 'read',
     });
-    TokensAPI.readOptions.mockResolvedValue({
-      data: { actions: { POST: true } },
-    });
     await act(async () => {
       wrapper = mountWithContexts(
         <UserToken setBreadcrumb={jest.fn()} user={user} />
       );
     });
     expect(TokensAPI.readDetail).toBeCalledWith(2);
-    expect(TokensAPI.readOptions).toBeCalled();
   });
 });

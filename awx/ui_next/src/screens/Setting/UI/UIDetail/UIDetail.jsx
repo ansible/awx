@@ -14,7 +14,7 @@ import { DetailList } from '../../../../components/DetailList';
 import { useConfig } from '../../../../contexts/Config';
 import { useSettings } from '../../../../contexts/Settings';
 import { pluck } from '../../shared/settingUtils';
-import SettingDetail from '../../shared';
+import { SettingDetail } from '../../shared';
 
 function UIDetail({ i18n }) {
   const { me } = useConfig();

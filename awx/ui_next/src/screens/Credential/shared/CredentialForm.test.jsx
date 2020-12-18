@@ -4,6 +4,7 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import machineCredential from './data.machineCredential.json';
 import gceCredential from './data.gceCredential.json';
 import scmCredential from './data.scmCredential.json';
+import galaxyCredential from './data.galaxyCredential.json';
 import credentialTypesArr from './data.credentialTypes.json';
 import CredentialForm from './CredentialForm';
 
@@ -323,6 +324,26 @@ describe('<CredentialForm />', () => {
       });
 
       gceFieldExpects();
+    });
+
+    test('should display from fields for galaxy/automation hub credentials', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <CredentialForm
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            credential={galaxyCredential}
+            credentialTypes={credentialTypes}
+          />
+        );
+      });
+      expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
+      expect(
+        wrapper.find('FormGroup[label="Organization"]').prop('isRequired')
+      ).toBe(true);
+      expect(wrapper.find('FormGroup[label="Credential Type"]').length).toBe(1);
     });
   });
 });

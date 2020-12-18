@@ -11,7 +11,7 @@ The Licenser class can do the following:
 
 import base64
 import configparser
-from datetime import datetime
+from datetime import datetime, timezone
 import collections
 import copy
 import io
@@ -73,9 +73,12 @@ def validate_entitlement_manifest(data):
 
     buff.write(export)
     z = zipfile.ZipFile(buff)
+    subs = []
     for f in z.filelist:
         if f.filename.startswith('export/entitlements') and f.filename.endswith('.json'):
-            return json.loads(z.open(f).read())
+            subs.append(json.loads(z.open(f).read()))
+    if subs:
+        return subs
     raise ValueError(_("Invalid manifest: manifest contains no subscriptions."))
 
 
@@ -131,18 +134,61 @@ class Licenser(object):
 
 
     def license_from_manifest(self, manifest):
+        def is_appropriate_manifest_sub(sub):
+            if sub['pool']['activeSubscription'] is False:
+                return False
+            now = datetime.now(timezone.utc)
+            if parse_date(sub['startDate']) > now:
+                return False
+            if parse_date(sub['endDate']) < now:
+                return False
+            products = sub['pool']['providedProducts']
+            if any(product.get('productId') == '480' for product in products):
+                return True
+            return False
+
+        def _can_aggregate(sub, license):
+            # We aggregate multiple subs into a larger meta-sub, if they match
+            #
+            # No current sub in aggregate
+            if not license:
+                return True
+            # Same SKU type (SER vs MCT vs others)?
+            if license['sku'][0:3] != sub['pool']['productId'][0:3]:
+                return False
+            return True
+
         # Parse output for subscription metadata to build config
         license = dict()
-        license['sku'] = manifest['pool']['productId']
-        license['instance_count'] = manifest['pool']['quantity']
-        license['subscription_name'] = manifest['pool']['productName']
-        license['pool_id'] = manifest['pool']['id']
-        license['license_date'] = parse_date(manifest['endDate']).strftime('%s')
-        license['product_name'] = manifest['pool']['productName']
-        license['valid_key'] = True
-        license['license_type'] = 'enterprise'
-        license['satellite'] = False
+        for sub in manifest:
+            if not is_appropriate_manifest_sub(sub):
+                logger.warning("Subscription %s (%s) in manifest is not active or for another product" %
+                               (sub['pool']['productName'], sub['pool']['productId']))
+                continue
+            if not _can_aggregate(sub, license):
+                logger.warning("Subscription %s (%s) in manifest does not match other manifest subscriptions" %
+                               (sub['pool']['productName'], sub['pool']['productId']))
+                continue
 
+            license.setdefault('sku', sub['pool']['productId'])
+            license.setdefault('subscription_name', sub['pool']['productName'])
+            license.setdefault('pool_id', sub['pool']['id'])
+            license.setdefault('product_name', sub['pool']['productName'])
+            license.setdefault('valid_key', True)
+            license.setdefault('license_type', 'enterprise')
+            license.setdefault('satellite', False)
+            # Use the nearest end date
+            endDate = parse_date(sub['endDate'])
+            currentEndDateStr = license.get('license_date', '4102462800') # 2100-01-01
+            currentEndDate = datetime.fromtimestamp(int(currentEndDateStr), timezone.utc)
+            if endDate < currentEndDate:
+                license['license_date'] = endDate.strftime('%s')
+            instances = sub['quantity']
+            license['instance_count'] = license.get('instance_count', 0) + instances
+            license['subscription_name'] = re.sub(r'[\d]* Managed Nodes', '%d Managed Nodes' % license['instance_count'], license['subscription_name'])
+
+        if not license:
+            logger.error("No valid subscriptions found in manifest")
         self._attrs.update(license)
         settings.LICENSE = self._attrs
         return self._attrs
@@ -211,11 +257,15 @@ class Licenser(object):
 
 
     def get_satellite_subs(self, host, user, pw):
+        port = None
         try:
             verify = str(self.config.get("rhsm", "repo_ca_cert"))
+            port = str(self.config.get("server", "port"))
         except Exception as e:
             logger.exception('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
             verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', True)
+        if port:
+            host = ':'.join([host, port])
         json = []
         try:
             orgs = requests.get(
@@ -269,7 +319,7 @@ class Licenser(object):
             return False
         # Products that contain Ansible Tower
         products = sub.get('providedProducts', [])
-        if any(map(lambda product: product.get('productId', None) == "480", products)):
+        if any(product.get('productId') == '480' for product in products):
             return True
         return False
 
@@ -370,10 +420,9 @@ class Licenser(object):
             current_instances = Host.objects.active_count()
         else:
             current_instances = 0
-        available_instances = int(attrs.get('instance_count', None) or 0)
+        instance_count = int(attrs.get('instance_count', 0))
         attrs['current_instances'] = current_instances
-        attrs['available_instances'] = available_instances
-        free_instances = (available_instances - current_instances)
+        free_instances = (instance_count - current_instances)
         attrs['free_instances'] = max(0, free_instances)
 
         license_date = int(attrs.get('license_date', 0) or 0)

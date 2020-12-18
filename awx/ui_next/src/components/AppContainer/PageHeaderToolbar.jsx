@@ -118,8 +118,8 @@ class PageHeaderToolbar extends Component {
                     key="user"
                     href={
                       loggedInUser
-                        ? `/next/users/${loggedInUser.id}/details`
-                        : '/next/home'
+                        ? `/users/${loggedInUser.id}/details`
+                        : '/home'
                     }
                   >
                     {i18n._(t`User Details`)}

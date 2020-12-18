@@ -33,32 +33,6 @@ class TestInvalidOptions:
         assert 'inventory-id' in str(err.value)
         assert 'exclusive' in str(err.value)
 
-    def test_invalid_options_id_and_keep_vars(self):
-        # You can't overwrite and keep_vars at the same time, that wouldn't make sense
-        cmd = Command()
-        with pytest.raises(CommandError) as err:
-            cmd.handle(
-                inventory_id=42, overwrite=True, keep_vars=True
-            )
-        assert 'overwrite-vars' in str(err.value)
-        assert 'exclusive' in str(err.value)
-
-    def test_invalid_options_id_but_no_source(self):
-        # Need a source to import
-        cmd = Command()
-        with pytest.raises(CommandError) as err:
-            cmd.handle(
-                inventory_id=42, overwrite=True, keep_vars=True
-            )
-        assert 'overwrite-vars' in str(err.value)
-        assert 'exclusive' in str(err.value)
-        with pytest.raises(CommandError) as err:
-            cmd.handle(
-                inventory_id=42, overwrite_vars=True, keep_vars=True
-            )
-        assert 'overwrite-vars' in str(err.value)
-        assert 'exclusive' in str(err.value)
-
     def test_invalid_options_missing_source(self):
         cmd = Command()
         with pytest.raises(CommandError) as err:

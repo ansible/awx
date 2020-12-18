@@ -5,7 +5,6 @@ import { t } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 import { InventoriesAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import { toTitleCase } from '../../../util/strings';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -96,7 +95,7 @@ function InventoryList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(selected.map(team => InventoriesAPI.destroy(team.id)));
     }, [selected]),
     {
@@ -125,8 +124,8 @@ function InventoryList({ i18n }) {
       }
     }
   };
-  const addInventory = toTitleCase(i18n._(t`Add Inventory`));
-  const addSmartInventory = toTitleCase(i18n._(t`Add Smart Inventory`));
+  const addInventory = i18n._(t`Add inventory`);
+  const addSmartInventory = i18n._(t`Add smart inventory`);
   const addButton = (
     <AddDropDownButton
       key="add"

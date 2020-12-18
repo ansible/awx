@@ -82,7 +82,7 @@ function ProjectList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(selected.map(({ id }) => ProjectsAPI.destroy(id)));
     }, [selected]),
     {
@@ -140,7 +140,6 @@ function ProjectList({ i18n }) {
                 options: [
                   [``, i18n._(t`Manual`)],
                   [`git`, i18n._(t`Git`)],
-                  [`hg`, i18n._(t`Mercurial`)],
                   [`svn`, i18n._(t`Subversion`)],
                   [`archive`, i18n._(t`Remote Archive`)],
                   [`insights`, i18n._(t`Red Hat Insights`)],

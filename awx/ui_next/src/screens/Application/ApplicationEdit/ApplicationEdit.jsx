@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card } from '@patternfly/react-core';
 import ApplicationForm from '../shared/ApplicationForm';
 import { ApplicationsAPI } from '../../../api';
 import { CardBody } from '../../../components/Card';
@@ -29,22 +29,18 @@ function ApplicationEdit({
     history.push(`/applications/${id}/details`);
   };
   return (
-    <>
-      <PageSection>
-        <Card>
-          <CardBody>
-            <ApplicationForm
-              onSubmit={handleSubmit}
-              application={application}
-              onCancel={handleCancel}
-              authorizationOptions={authorizationOptions}
-              clientTypeOptions={clientTypeOptions}
-              submitError={submitError}
-            />
-          </CardBody>
-        </Card>
-      </PageSection>
-    </>
+    <Card>
+      <CardBody>
+        <ApplicationForm
+          onSubmit={handleSubmit}
+          application={application}
+          onCancel={handleCancel}
+          authorizationOptions={authorizationOptions}
+          clientTypeOptions={clientTypeOptions}
+          submitError={submitError}
+        />
+      </CardBody>
+    </Card>
   );
 }
 export default ApplicationEdit;

@@ -21,7 +21,6 @@ import {
 import Popover from '../../../components/Popover';
 import {
   GitSubForm,
-  HgSubForm,
   SvnSubForm,
   ArchiveSubForm,
   InsightsSubForm,
@@ -232,13 +231,6 @@ function ProjectFormFields({
                 ),
                 git: (
                   <GitSubForm
-                    credential={credentials.scm}
-                    onCredentialSelection={handleCredentialSelection}
-                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
-                  />
-                ),
-                hg: (
-                  <HgSubForm
                     credential={credentials.scm}
                     onCredentialSelection={handleCredentialSelection}
                     scmUpdateOnLaunch={formik.values.scm_update_on_launch}

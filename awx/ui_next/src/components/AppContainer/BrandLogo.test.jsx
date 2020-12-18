@@ -4,11 +4,11 @@ import BrandLogo from './BrandLogo';
 
 let logoWrapper;
 let brandLogoElem;
-let svgElem;
+let imgElem;
 
 const findChildren = () => {
   brandLogoElem = logoWrapper.find('BrandLogo');
-  svgElem = logoWrapper.find('svg');
+  imgElem = logoWrapper.find('img');
 };
 
 describe('<BrandLogo />', () => {
@@ -17,6 +17,6 @@ describe('<BrandLogo />', () => {
     findChildren();
     expect(logoWrapper.length).toBe(1);
     expect(brandLogoElem.length).toBe(1);
-    expect(svgElem.length).toBe(1);
+    expect(imgElem.length).toBe(1);
   });
 });

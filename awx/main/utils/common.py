@@ -222,9 +222,8 @@ def update_scm_url(scm_type, url, username=True, password=True,
     '''
     # Handle all of the URL formats supported by the SCM systems:
     # git: https://www.kernel.org/pub/software/scm/git/docs/git-clone.html#URLS
-    # hg: http://www.selenic.com/mercurial/hg.1.html#url-paths
     # svn: http://svnbook.red-bean.com/en/1.7/svn-book.html#svn.advanced.reposurls
-    if scm_type not in ('git', 'hg', 'svn', 'insights', 'archive'):
+    if scm_type not in ('git', 'svn', 'insights', 'archive'):
         raise ValueError(_('Unsupported SCM type "%s"') % str(scm_type))
     if not url.strip():
         return ''
@@ -256,8 +255,8 @@ def update_scm_url(scm_type, url, username=True, password=True,
             # SCP style before passed to git module.
             parts = urllib.parse.urlsplit('git+ssh://%s' % modified_url)
         # Handle local paths specified without file scheme (e.g. /path/to/foo).
-        # Only supported by git and hg.
-        elif scm_type in ('git', 'hg'):
+        # Only supported by git.
+        elif scm_type == 'git':
             if not url.startswith('/'):
                 parts = urllib.parse.urlsplit('file:///%s' % url)
             else:
@@ -268,7 +267,6 @@ def update_scm_url(scm_type, url, username=True, password=True,
     # Validate that scheme is valid for given scm_type.
     scm_type_schemes = {
         'git': ('ssh', 'git', 'git+ssh', 'http', 'https', 'ftp', 'ftps', 'file'),
-        'hg': ('http', 'https', 'ssh', 'file'),
         'svn': ('http', 'https', 'svn', 'svn+ssh', 'file'),
         'insights': ('http', 'https'),
         'archive': ('http', 'https'),
@@ -299,12 +297,6 @@ def update_scm_url(scm_type, url, username=True, password=True,
             raise ValueError(_('Username must be "git" for SSH access to %s.') % parts.hostname)
         if scm_type == 'git' and parts.scheme.endswith('ssh') and parts.hostname in special_git_hosts and netloc_password:
             #raise ValueError('Password not allowed for SSH access to %s.' % parts.hostname)
-            netloc_password = ''
-        special_hg_hosts = ('bitbucket.org', 'altssh.bitbucket.org')
-        if scm_type == 'hg' and parts.scheme == 'ssh' and parts.hostname in special_hg_hosts and netloc_username != 'hg':
-            raise ValueError(_('Username must be "hg" for SSH access to %s.') % parts.hostname)
-        if scm_type == 'hg' and parts.scheme == 'ssh' and netloc_password:
-            #raise ValueError('Password not supported for SSH with Mercurial.')
             netloc_password = ''
 
     if netloc_username and parts.scheme != 'file' and scm_type not in ("insights", "archive"):

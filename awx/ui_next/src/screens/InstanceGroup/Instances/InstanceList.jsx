@@ -86,7 +86,7 @@ function InstanceList({ i18n }) {
     deleteItems: disassociateInstances,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(instance =>
           InstanceGroupsAPI.disassociateInstance(instanceGroupId, instance.id)

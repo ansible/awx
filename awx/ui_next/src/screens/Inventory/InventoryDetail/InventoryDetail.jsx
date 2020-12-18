@@ -80,19 +80,21 @@ function InventoryDetail({ inventory, i18n }) {
             </Link>
           }
         />
-        <Detail
-          fullWidth
-          label={i18n._(t`Instance Groups`)}
-          value={
-            <ChipGroup numChips={5} totalChips={instanceGroups.length}>
-              {instanceGroups.map(ig => (
-                <Chip key={ig.id} isReadOnly>
-                  {ig.name}
-                </Chip>
-              ))}
-            </ChipGroup>
-          }
-        />
+        {instanceGroups && instanceGroups.length > 0 && (
+          <Detail
+            fullWidth
+            label={i18n._(t`Instance Groups`)}
+            value={
+              <ChipGroup numChips={5} totalChips={instanceGroups.length}>
+                {instanceGroups.map(ig => (
+                  <Chip key={ig.id} isReadOnly>
+                    {ig.name}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            }
+          />
+        )}
         <VariablesDetail
           label={i18n._(t`Variables`)}
           value={inventory.variables}

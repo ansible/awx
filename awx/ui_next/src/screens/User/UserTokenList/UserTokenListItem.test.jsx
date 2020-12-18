@@ -21,7 +21,7 @@ const token = {
     },
     application: {
       id: 1,
-      name: 'app',
+      name: 'Foobar app',
     },
   },
   created: '2020-06-23T15:06:43.188634Z',
@@ -44,22 +44,57 @@ describe('<UserTokenListItem />', () => {
     expect(wrapper.find('UserTokenListItem').length).toBe(1);
   });
 
-  test('should render proper data', async () => {
+  test('should render application access token row properly', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <UserTokenListItem isSelected={false} token={token} />
       );
     });
     expect(wrapper.find('DataListCheck').prop('checked')).toBe(false);
+    expect(wrapper.find('PFDataListCell[aria-label="Token type"]').text()).toBe(
+      'Application access token'
+    );
     expect(
-      wrapper.find('PFDataListCell[aria-label="application name"]').text()
-    ).toBe('Applicationapp');
-    expect(wrapper.find('PFDataListCell[aria-label="scope"]').text()).toBe(
-      'ScopeRead'
+      wrapper.find('PFDataListCell[aria-label="Application name"]').text()
+    ).toContain('Foobar app');
+    expect(wrapper.find('PFDataListCell[aria-label="Scope"]').text()).toContain(
+      'Read'
     );
-    expect(wrapper.find('PFDataListCell[aria-label="expiration"]').text()).toBe(
-      'Expires10/25/3019, 3:06:43 PM'
+    expect(
+      wrapper.find('PFDataListCell[aria-label="Expiration"]').text()
+    ).toContain('10/25/3019, 3:06:43 PM');
+  });
+
+  test('should render personal access token row properly', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <UserTokenListItem
+          isSelected={false}
+          token={{
+            ...token,
+            refresh_token: null,
+            application: null,
+            scope: 'write',
+            summary_fields: {
+              user: token.summary_fields.user,
+            },
+          }}
+        />
+      );
+    });
+    expect(wrapper.find('DataListCheck').prop('checked')).toBe(false);
+    expect(wrapper.find('PFDataListCell[aria-label="Token type"]').text()).toBe(
+      'Personal access token'
     );
+    expect(
+      wrapper.find('PFDataListCell[aria-label="Application name"]').text()
+    ).toBe('');
+    expect(wrapper.find('PFDataListCell[aria-label="Scope"]').text()).toContain(
+      'Write'
+    );
+    expect(
+      wrapper.find('PFDataListCell[aria-label="Expiration"]').text()
+    ).toContain('10/25/3019, 3:06:43 PM');
   });
 
   test('should be checked', async () => {

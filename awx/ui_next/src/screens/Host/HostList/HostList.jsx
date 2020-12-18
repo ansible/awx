@@ -72,7 +72,7 @@ function HostList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
     }, [selected]),
     {

@@ -11,9 +11,9 @@ RUN dnf -y update && dnf -y install epel-release && \
     python3-setuptools
 
 # Use the distro provided npm to bootstrap our required version of node
-RUN npm install -g n && n 10.15.0 && dnf remove -y nodejs
+RUN npm install -g n && n 14.15.1 && dnf remove -y nodejs
 
-ENV PATH=/usr/local/n/versions/node/10.15.0/bin:$PATH
+ENV PATH=/usr/local/n/versions/node/14.15.1/bin:$PATH
 
 WORKDIR "/awx"
 

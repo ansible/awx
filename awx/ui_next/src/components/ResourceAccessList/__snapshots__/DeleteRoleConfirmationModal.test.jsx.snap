@@ -86,122 +86,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               </Button>,
             ]
           }
-          appendTo={
-            <body
-              class="pf-c-backdrop__open"
-            >
-              <div>
-                <div
-                  class="pf-c-backdrop"
-                >
-                  <div
-                    class="pf-l-bullseye"
-                  >
-                    <div
-                      aria-describedby="pf-modal-part-2"
-                      aria-label="Alert modal"
-                      aria-labelledby="pf-modal-part-0 alert-modal-header-label pf-modal-part-1"
-                      aria-modal="true"
-                      class="pf-c-modal-box pf-m-sm"
-                      data-ouia-component-id="0"
-                      data-ouia-component-type="PF4/ModalContent"
-                      data-ouia-safe="true"
-                      id="pf-modal-part-0"
-                      role="dialog"
-                    >
-                      <button
-                        aria-disabled="false"
-                        aria-label="Close"
-                        class="pf-c-button pf-m-plain"
-                        data-ouia-component-id="1"
-                        data-ouia-component-type="PF4/Button"
-                        data-ouia-safe="true"
-                        type="button"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          height="1em"
-                          role="img"
-                          style="vertical-align: -0.125em;"
-                          viewBox="0 0 352 512"
-                          width="1em"
-                        >
-                          <path
-                            d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
-                            transform=""
-                          />
-                        </svg>
-                      </button>
-                      <header
-                        class="pf-c-modal-box__header"
-                      >
-                        <div
-                          class="AlertModal__Header-l9z1bu-0 hQFWHX"
-                        >
-                          <svg
-                            aria-hidden="true"
-                            class="AlertModal___StyledExclamationCircleIcon-l9z1bu-1 jOhcwt"
-                            fill="currentColor"
-                            height="2em"
-                            role="img"
-                            style="vertical-align: -0.25em;"
-                            viewBox="0 0 512 512"
-                            width="2em"
-                          >
-                            <path
-                              d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
-                              transform=""
-                            />
-                          </svg>
-                          <h2
-                            class="pf-c-title pf-m-2xl"
-                            id="alert-modal-header-label"
-                          >
-                            Remove Team Access
-                          </h2>
-                        </div>
-                      </header>
-                      <div
-                        class="pf-c-modal-box__body"
-                        id="pf-modal-part-2"
-                      >
-                        Are you sure you want to remove Member access from The Team?  Doing so affects all members of the team.
-                        <br />
-                        <br />
-                        If you only want to remove access for this particular user, please remove them from the team.
-                      </div>
-                      <footer
-                        class="pf-c-modal-box__footer"
-                      >
-                        <button
-                          aria-disabled="false"
-                          aria-label="Confirm delete"
-                          class="pf-c-button pf-m-danger"
-                          data-ouia-component-id="2"
-                          data-ouia-component-type="PF4/Button"
-                          data-ouia-safe="true"
-                          type="button"
-                        >
-                          Delete
-                        </button>
-                        <button
-                          aria-disabled="false"
-                          class="pf-c-button pf-m-secondary"
-                          data-ouia-component-id="3"
-                          data-ouia-component-type="PF4/Button"
-                          data-ouia-safe="true"
-                          type="button"
-                        >
-                          Cancel
-                        </button>
-                      </footer>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </body>
-          }
+          appendTo={[Function]}
           aria-describedby=""
           aria-label="Alert modal"
           aria-labelledby="alert-modal-header-label"
@@ -226,6 +111,8 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           ouiaSafe={true}
           showClose={true}
           title="Remove Team Access"
+          titleIconVariant={null}
+          titleLabel=""
           variant="small"
         >
           <Portal
@@ -243,7 +130,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       aria-labelledby="pf-modal-part-0 alert-modal-header-label pf-modal-part-1"
                       aria-modal="true"
                       class="pf-c-modal-box pf-m-sm"
-                      data-ouia-component-id="0"
+                      data-ouia-component-id="OUIA-Generated-Modal-small-1"
                       data-ouia-component-type="PF4/ModalContent"
                       data-ouia-safe="true"
                       id="pf-modal-part-0"
@@ -253,7 +140,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                         aria-disabled="false"
                         aria-label="Close"
                         class="pf-c-button pf-m-plain"
-                        data-ouia-component-id="1"
+                        data-ouia-component-id="OUIA-Generated-Button-plain-1"
                         data-ouia-component-type="PF4/Button"
                         data-ouia-safe="true"
                         type="button"
@@ -269,7 +156,6 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                         >
                           <path
                             d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
-                            transform=""
                           />
                         </svg>
                       </button>
@@ -291,7 +177,6 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           >
                             <path
                               d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
-                              transform=""
                             />
                           </svg>
                           <h2
@@ -318,7 +203,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           aria-disabled="false"
                           aria-label="Confirm delete"
                           class="pf-c-button pf-m-danger"
-                          data-ouia-component-id="2"
+                          data-ouia-component-id="OUIA-Generated-Button-danger-1"
                           data-ouia-component-type="PF4/Button"
                           data-ouia-safe="true"
                           type="button"
@@ -328,7 +213,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                         <button
                           aria-disabled="false"
                           class="pf-c-button pf-m-secondary"
-                          data-ouia-component-id="3"
+                          data-ouia-component-id="OUIA-Generated-Button-secondary-1"
                           data-ouia-component-type="PF4/Button"
                           data-ouia-safe="true"
                           type="button"
@@ -384,9 +269,12 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               isOpen={true}
               labelId="pf-modal-part-1"
               onClose={[Function]}
+              ouiaId="OUIA-Generated-Modal-small-1"
               ouiaSafe={true}
               showClose={true}
               title="Remove Team Access"
+              titleIconVariant={null}
+              titleLabel=""
               variant="small"
             >
               <Backdrop>
@@ -411,7 +299,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                         aria-label="Alert modal"
                         aria-labelledby="pf-modal-part-0 alert-modal-header-label pf-modal-part-1"
                         className=""
-                        data-ouia-component-id={0}
+                        data-ouia-component-id="OUIA-Generated-Modal-small-1"
                         data-ouia-component-type="PF4/ModalContent"
                         data-ouia-safe={true}
                         id="pf-modal-part-0"
@@ -424,7 +312,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           aria-labelledby="pf-modal-part-0 alert-modal-header-label pf-modal-part-1"
                           aria-modal="true"
                           className="pf-c-modal-box pf-m-sm"
-                          data-ouia-component-id={0}
+                          data-ouia-component-id="OUIA-Generated-Modal-small-1"
                           data-ouia-component-type="PF4/ModalContent"
                           data-ouia-safe={true}
                           id="pf-modal-part-0"
@@ -444,11 +332,12 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                 aria-disabled={false}
                                 aria-label="Close"
                                 className="pf-c-button pf-m-plain"
-                                data-ouia-component-id={1}
+                                data-ouia-component-id="OUIA-Generated-Button-plain-1"
                                 data-ouia-component-type="PF4/Button"
                                 data-ouia-safe={true}
                                 disabled={false}
                                 onClick={[Function]}
+                                role={null}
                                 type="button"
                               >
                                 <TimesIcon
@@ -472,14 +361,15 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                   >
                                     <path
                                       d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
-                                      transform=""
                                     />
                                   </svg>
                                 </TimesIcon>
                               </button>
                             </Button>
                           </ModalBoxCloseButton>
-                          <ModalBoxHeader>
+                          <ModalBoxHeader
+                            help={null}
+                          >
                             <header
                               className="pf-c-modal-box__header"
                             >
@@ -564,7 +454,6 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                           >
                                             <path
                                               d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
-                                              transform=""
                                             />
                                           </svg>
                                         </ExclamationCircleIcon>
@@ -614,11 +503,12 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                   aria-disabled={false}
                                   aria-label="Confirm delete"
                                   className="pf-c-button pf-m-danger"
-                                  data-ouia-component-id={2}
+                                  data-ouia-component-id="OUIA-Generated-Button-danger-1"
                                   data-ouia-component-type="PF4/Button"
                                   data-ouia-safe={true}
                                   disabled={false}
                                   onClick={[Function]}
+                                  role={null}
                                   type="button"
                                 >
                                   Delete
@@ -633,11 +523,12 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                   aria-disabled={false}
                                   aria-label={null}
                                   className="pf-c-button pf-m-secondary"
-                                  data-ouia-component-id={3}
+                                  data-ouia-component-id="OUIA-Generated-Button-secondary-1"
                                   data-ouia-component-type="PF4/Button"
                                   data-ouia-safe={true}
                                   disabled={false}
                                   onClick={[Function]}
+                                  role={null}
                                   type="button"
                                 >
                                   Cancel

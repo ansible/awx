@@ -14,7 +14,7 @@ import { useConfig } from '../../../../contexts/Config';
 import { useSettings } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import { sortNestedDetails } from '../../shared/settingUtils';
-import SettingDetail from '../../shared';
+import { SettingDetail } from '../../shared';
 
 function JobsDetail({ i18n }) {
   const { me } = useConfig();

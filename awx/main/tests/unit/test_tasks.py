@@ -1909,19 +1909,16 @@ class TestProjectUpdateCredentials(TestJobExecution):
     parametrize = {
         'test_username_and_password_auth': [
             dict(scm_type='git'),
-            dict(scm_type='hg'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
         ],
         'test_ssh_key_auth': [
             dict(scm_type='git'),
-            dict(scm_type='hg'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
         ],
         'test_awx_task_env': [
             dict(scm_type='git'),
-            dict(scm_type='hg'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
         ]
@@ -2061,8 +2058,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                     credential, env, {}, [], private_data_dir
                 )
 
-        assert '--custom' in ' '.join(args)
-        script = args[args.index('--source') + 1]
+        assert '-i' in ' '.join(args)
+        script = args[args.index('-i') + 1]
         with open(script, 'r') as f:
             assert f.read() == inventory_update.source_script.script
         assert env['FOO'] == 'BAR'
@@ -2150,10 +2147,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             return cred
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
-        inventory_update.source_vars = {
-            'include_powerstate': 'yes',
-            'group_by_resource_group': 'no'
-        }
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
@@ -2187,11 +2180,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             return cred
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
-        inventory_update.source_vars = {
-            'include_powerstate': 'yes',
-            'group_by_resource_group': 'no',
-            'group_by_security_group': 'no'
-        }
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
@@ -2306,21 +2294,14 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        inventory_update.source_vars = {
-            'satellite6_group_patterns': '[a,b,c]',
-            'satellite6_group_prefix': 'hey_',
-            'satellite6_want_hostcollections': True,
-            'satellite6_want_ansible_ssh_host': True,
-            'satellite6_rich_params': True,
-            'satellite6_want_facts': False
-        }
-
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        safe_env = build_safe_env(env)
 
-        env["FOREMAN_SERVER"] == "https://example.org",
-        env["FOREMAN_USER"] == "bob",
-        env["FOREMAN_PASSWORD"] == "secret",
+        assert env["FOREMAN_SERVER"] == "https://example.org"
+        assert env["FOREMAN_USER"] == "bob"
+        assert env["FOREMAN_PASSWORD"] == "secret"
+        assert safe_env["FOREMAN_PASSWORD"] == tasks.HIDDEN_PASSWORD
 
     @pytest.mark.parametrize('verify', [True, False])
     def test_tower_source(self, verify, inventory_update, private_data_dir, mocker):
