@@ -47,7 +47,13 @@ describe('<SmartInventoryEdit />', () => {
       data: { actions: { POST: true } },
     });
     InventoriesAPI.readInstanceGroups.mockResolvedValue({
-      data: { count: 0, results: [{ id: 10 }, { id: 20 }] },
+      data: {
+        count: 0,
+        results: [
+          { id: 10, name: 'instance-group-10' },
+          { id: 20, name: 'instance-group-20' },
+        ],
+      },
     });
     history = createMemoryHistory({
       initialEntries: [`/inventories/smart_inventory/${mockSmartInv.id}/edit`],
@@ -85,7 +91,10 @@ describe('<SmartInventoryEdit />', () => {
     await act(async () => {
       wrapper.find('SmartInventoryForm').invoke('onSubmit')({
         ...mockSmartInv,
-        instance_groups: [{ id: 10 }, { id: 30 }],
+        instance_groups: [
+          { id: 10, name: 'instance-group-10' },
+          { id: 30, name: 'instance-group-30' },
+        ],
       });
     });
     expect(InventoriesAPI.update).toHaveBeenCalledTimes(1);

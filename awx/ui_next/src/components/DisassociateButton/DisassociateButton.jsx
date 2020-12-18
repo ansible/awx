@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { arrayOf, func, object, string } from 'prop-types';
+import { arrayOf, func, shape, string, oneOfType, number } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Tooltip, DropdownItem } from '@patternfly/react-core';
@@ -149,7 +149,20 @@ DisassociateButton.defaultProps = {
 };
 
 DisassociateButton.propTypes = {
-  itemsToDisassociate: arrayOf(object),
+  itemsToDisassociate: oneOfType([
+    arrayOf(
+      shape({
+        id: number.isRequired,
+        name: string.isRequired,
+      })
+    ),
+    arrayOf(
+      shape({
+        id: number.isRequired,
+        hostname: string.isRequired,
+      })
+    ),
+  ]),
   modalNote: string,
   modalTitle: string,
   onDisassociate: func.isRequired,

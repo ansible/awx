@@ -1,13 +1,14 @@
 import 'styled-components/macro';
 import React, { useState, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { func, bool, arrayOf, object } from 'prop-types';
+import { func, bool, arrayOf } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Radio, DropdownItem } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { KebabifiedContext } from '../../../contexts/Kebabified';
 import { GroupsAPI, InventoriesAPI } from '../../../api';
+import { Group } from '../../../types';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 
@@ -158,7 +159,7 @@ const InventoryGroupsDeleteModal = ({
 
 InventoryGroupsDeleteModal.propTypes = {
   onAfterDelete: func.isRequired,
-  groups: arrayOf(object),
+  groups: arrayOf(Group),
   isDisabled: bool.isRequired,
 };
 

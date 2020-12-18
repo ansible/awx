@@ -8,9 +8,11 @@ import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
-  ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+import { ToolbarDeleteButton } from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useWsInventories from './useWsInventories';
 import AddDropDownButton from '../../../components/AddDropDownButton';
@@ -149,17 +151,17 @@ function InventoryList({ i18n }) {
       ]}
     />
   );
+
   return (
     <PageSection>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={hasContentLoading}
           items={inventories}
           itemCount={itemCount}
           pluralizedItemName={i18n._(t`Inventories`)}
           qsConfig={QS_CONFIG}
-          onRowClick={handleSelect}
           toolbarSearchColumns={[
             {
               name: i18n._(t`Name`),
@@ -187,6 +189,18 @@ function InventoryList({ i18n }) {
           ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
+          headerRow={
+            <HeaderRow qsConfig={QS_CONFIG}>
+              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Groups`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Hosts`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Sources`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+            </HeaderRow>
+          }
           renderToolbar={props => (
             <DatalistToolbar
               {...props}
@@ -209,11 +223,12 @@ function InventoryList({ i18n }) {
               ]}
             />
           )}
-          renderItem={inventory => (
+          renderRow={(inventory, index) => (
             <InventoryListItem
               key={inventory.id}
               value={inventory.name}
               inventory={inventory}
+              rowIndex={index}
               fetchInventories={fetchInventories}
               detailUrl={
                 inventory.kind === 'smart'
