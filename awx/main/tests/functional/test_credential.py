@@ -79,6 +79,7 @@ def test_default_cred_types():
         'aws',
         'azure_kv',
         'azure_rm',
+        'centrify_vault_kv',
         'conjur',
         'galaxy_api_token',
         'gce',
@@ -97,7 +98,6 @@ def test_default_cred_types():
         'tower',
         'vault',
         'vmware',
-        'centrify_vault_kv',
     ]
     for type_ in CredentialType.defaults.values():
         assert type_().managed_by_tower is True
