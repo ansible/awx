@@ -31,6 +31,7 @@ services:
     {% elif awx_web_container_labels is defined %}
     labels:
       - {{ awx_web_container_labels }}
+    {% endif %}
     {% if (awx_web_container_networks is defined) and (',' in awx_web_container_networks) %}
     {% set awx_web_container_networks_list = awx_web_container_networks.split(',') %}
     networks:
