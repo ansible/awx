@@ -148,3 +148,4 @@ use_dev_supervisor.txt
 *.#
 /tools/docker-compose/overrides/
 /awx/ui_next/.ui-built
+/Dockerfile

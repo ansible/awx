@@ -13,9 +13,10 @@ RUN dnf -y update && dnf -y install epel-release && \
 # Use the distro provided npm to bootstrap our required version of node
 RUN npm install -g n && n 14.15.1 && dnf remove -y nodejs
 
+RUN mkdir -p /.npm && chmod g+rwx /.npm
+
 ENV PATH=/usr/local/n/versions/node/14.15.1/bin:$PATH
 
 WORKDIR "/awx"
 
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["make sdist"]
+CMD ["make", "sdist"]
