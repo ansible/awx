@@ -462,21 +462,21 @@ endif
 
 # UI TASKS
 # --------------------------------------
+
+UI_BUILD_FLAG_FILE = awx/ui_next/.ui-built
+
 clean-ui:
 	rm -rf node_modules
 	rm -rf awx/ui_next/node_modules
 	rm -rf awx/ui_next/build
 	rm -rf awx/ui_next/src/locales/_build
-	rm -rf awx/ui_next/.ui-built
+	rm -rf $(UI_BUILD_FLAG_FILE)
 	git checkout awx/ui_next/src/locales
-
-ui-release: ui-devel
-ui-devel: awx/ui_next/node_modules awx/ui_next/.ui-built
 
 awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
 
-awx/ui_next/.ui-built:
+$(UI_BUILD_FLAG_FILE):
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build
@@ -488,6 +488,11 @@ awx/ui_next/.ui-built:
 	cp -r awx/ui_next/build/static/js/* awx/public/static/js
 	cp -r awx/ui_next/build/static/media/* awx/public/static/media
 	touch $@
+
+ui-release: awx/ui_next/node_modules $(UI_BUILD_FLAG_FILE)
+
+ui-devel: awx/ui_next/node_modules
+	@$(MAKE) -B $(UI_BUILD_FLAG_FILE)
 
 ui-zuul-lint-and-test:
 	$(NPM_BIN) --prefix awx/ui_next install
