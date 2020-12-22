@@ -462,18 +462,21 @@ endif
 
 # UI TASKS
 # --------------------------------------
-awx/ui_next/node_modules:
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
-
 clean-ui:
 	rm -rf node_modules
 	rm -rf awx/ui_next/node_modules
 	rm -rf awx/ui_next/build
 	rm -rf awx/ui_next/src/locales/_build
+	rm -rf awx/ui_next/.ui-built
 	git checkout awx/ui_next/src/locales
 
 ui-release: ui-devel
-ui-devel: awx/ui_next/node_modules
+ui-devel: awx/ui_next/node_modules awx/ui_next/.ui-built
+
+awx/ui_next/node_modules:
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
+
+awx/ui_next/.ui-built:
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build
@@ -484,6 +487,7 @@ ui-devel: awx/ui_next/node_modules
 	cp -r awx/ui_next/build/static/css/* awx/public/static/css
 	cp -r awx/ui_next/build/static/js/* awx/public/static/js
 	cp -r awx/ui_next/build/static/media/* awx/public/static/media
+	touch $@
 
 ui-zuul-lint-and-test:
 	$(NPM_BIN) --prefix awx/ui_next install

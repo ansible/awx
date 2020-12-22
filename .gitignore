@@ -147,3 +147,4 @@ use_dev_supervisor.txt
 *.unison.tmp
 *.#
 /tools/docker-compose/overrides/
+/awx/ui_next/.ui-built
