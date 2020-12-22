@@ -467,27 +467,36 @@ clean-ui:
 	rm -rf awx/ui_next/node_modules
 	rm -rf awx/ui_next/build
 	rm -rf awx/ui_next/src/locales/_build
-	rm -rf awx/ui_next/.ui-built
+	rm -rf awx/ui_next/.ui-deps-built
+	rm -rf awx/ui_next/.latest-src
+	rm -rf awx/ui_next/.latest-src-update
 	git checkout awx/ui_next/src/locales
+
+awx/ui_next/.ui-deps-built:
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
+	touch $@
 
 ui-release: ui-devel
-ui-devel: awx/ui_next/node_modules awx/ui_next/.ui-built
 
-awx/ui_next/node_modules:
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
-
-awx/ui_next/.ui-built:
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build
-	git checkout awx/ui_next/src/locales
-	mkdir -p awx/public/static/css
-	mkdir -p awx/public/static/js
-	mkdir -p awx/public/static/media
-	cp -r awx/ui_next/build/static/css/* awx/public/static/css
-	cp -r awx/ui_next/build/static/js/* awx/public/static/js
-	cp -r awx/ui_next/build/static/media/* awx/public/static/media
-	touch $@
+awx/ui_next/.latest-src-update:
+	touch awx/ui_next/.latest-src
+	find awx/ui_next/src -type f -exec md5sum {} \; > awx/ui_next/.latest-src-update;
+	
+ui-devel: awx/ui_next/.ui-deps-built awx/ui_next/.latest-src-update
+	@if [ ! -z "$(shell diff awx/ui_next/.latest-src awx/ui_next/.latest-src-update)" ]; then \
+		$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings; \
+		$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings; \
+		$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build; \
+		git checkout awx/ui_next/src/locales; \
+		mkdir -p awx/public/static/css; \
+		mkdir -p awx/public/static/js; \
+		mkdir -p awx/public/static/media; \
+		cp -r awx/ui_next/build/static/css/* awx/public/static/css; \
+		cp -r awx/ui_next/build/static/js/* awx/public/static/js; \
+		cp -r awx/ui_next/build/static/media/* awx/public/static/media; \
+		mv awx/ui_next/.latest-src-update awx/ui_next/.latest-src; \
+	fi;
+	rm -f awx/ui_next/.latest-src-update
 
 ui-zuul-lint-and-test:
 	$(NPM_BIN) --prefix awx/ui_next install
