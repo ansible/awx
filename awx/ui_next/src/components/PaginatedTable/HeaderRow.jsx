@@ -47,12 +47,15 @@ export default function HeaderRow({ qsConfig, children }) {
     <Thead>
       <Tr>
         <Th />
-        {React.Children.map(children, child =>
-          React.cloneElement(child, {
-            onSort,
-            sortBy,
-            columnIndex: child.props.sortKey,
-          })
+        {React.Children.map(
+          children,
+          child =>
+            child &&
+            React.cloneElement(child, {
+              onSort,
+              sortBy,
+              columnIndex: child.props.sortKey,
+            })
         )}
       </Tr>
     </Thead>

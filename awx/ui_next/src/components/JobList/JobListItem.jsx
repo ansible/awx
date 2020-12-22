@@ -2,33 +2,19 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemRow,
-  DataListItemCells,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { RocketIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
-import DataListCell from '../DataListCell';
+import { ActionsTd, ActionItem } from '../PaginatedTable';
 import LaunchButton from '../LaunchButton';
-import StatusIcon from '../StatusIcon';
+import StatusLabel from '../StatusLabel';
 import { formatDateString } from '../../util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
-
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: 40px;
-`;
 
 function JobListItem({
   i18n,
   job,
+  rowIndex,
   isSelected,
   onSelect,
   showTypeColumn = false,
@@ -45,66 +31,56 @@ function JobListItem({
   };
 
   return (
-    <DataListItem aria-labelledby={labelId} id={`${job.id}`}>
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-job-${job.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="status" isFilled={false}>
-              {job.status && <StatusIcon status={job.status} />}
-            </DataListCell>,
-            <DataListCell key="name">
-              <span>
-                <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
-                  <b>
-                    {job.id} &mdash; {job.name}
-                  </b>
-                </Link>
-              </span>
-            </DataListCell>,
-            ...(showTypeColumn
-              ? [
-                  <DataListCell key="type" aria-label="type">
-                    {jobTypes[job.type]}
-                  </DataListCell>,
-                ]
-              : []),
-            <DataListCell key="finished">
-              {job.finished ? formatDateString(job.finished) : ''}
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label="actions"
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={`job-row-${job.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+          disable: false,
+        }}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <span>
+          <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
+            <b>
+              {job.id} &mdash; {job.name}
+            </b>
+          </Link>
+        </span>
+      </Td>
+      <Td dataLabel={i18n._(t`Status`)}>
+        {job.status && <StatusLabel status={job.status} />}
+      </Td>
+      {showTypeColumn && (
+        <Td dataLabel={i18n._(t`Type`)}>{jobTypes[job.type]}</Td>
+      )}
+      <Td dataLabel={i18n._(t`Start Time`)}>{formatDateString(job.started)}</Td>
+      <Td dataLabel={i18n._(t`Finish Time`)}>
+        {job.finished ? formatDateString(job.finished) : ''}
+      </Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionItem
+          visible={
+            job.type !== 'system_job' &&
+            job.summary_fields?.user_capabilities?.start
+          }
+          tooltip={i18n._(t`Relaunch Job`)}
         >
-          {job.type !== 'system_job' &&
-          job.summary_fields?.user_capabilities?.start ? (
-            <Tooltip content={i18n._(t`Relaunch Job`)} position="top">
-              <LaunchButton resource={job}>
-                {({ handleRelaunch }) => (
-                  <Button
-                    variant="plain"
-                    onClick={handleRelaunch}
-                    aria-label={i18n._(t`Relaunch`)}
-                  >
-                    <RocketIcon />
-                  </Button>
-                )}
-              </LaunchButton>
-            </Tooltip>
-          ) : (
-            ''
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <LaunchButton resource={job}>
+            {({ handleRelaunch }) => (
+              <Button
+                variant="plain"
+                onClick={handleRelaunch}
+                aria-label={i18n._(t`Relaunch`)}
+              >
+                <RocketIcon />
+              </Button>
+            )}
+          </LaunchButton>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 
