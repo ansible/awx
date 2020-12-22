@@ -221,16 +221,6 @@ spec:
               mountPath: "/etc/tower/conf.d/"
               readOnly: true
 
-            - name: {{ kubernetes_deployment_name }}-launch-awx-web
-              mountPath: "/usr/bin/launch_awx.sh"
-              subPath: "launch_awx.sh"
-              readOnly: true
-
-            - name: {{ kubernetes_deployment_name }}-launch-awx-task
-              mountPath: "/usr/bin/launch_awx_task.sh"
-              subPath: "launch_awx_task.sh"
-              readOnly: true
-
             - name: {{ kubernetes_deployment_name }}-supervisor-web-config
               mountPath: "/etc/supervisord.conf"
               subPath: supervisor.conf
@@ -302,16 +292,6 @@ spec:
 
             - name: "{{ kubernetes_deployment_name }}-application-credentials"
               mountPath: "/etc/tower/conf.d/"
-              readOnly: true
-
-            - name: {{ kubernetes_deployment_name }}-launch-awx-web
-              mountPath: "/usr/bin/launch_awx.sh"
-              subPath: "launch_awx.sh"
-              readOnly: true
-
-            - name: {{ kubernetes_deployment_name }}-launch-awx-task
-              mountPath: "/usr/bin/launch_awx_task.sh"
-              subPath: "launch_awx_task.sh"
               readOnly: true
 
             - name: {{ kubernetes_deployment_name }}-supervisor-web-config
