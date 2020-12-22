@@ -1,12 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {
-  Route,
-  Switch,
-  useHistory,
-  useLocation,
-  useParams,
-  useRouteMatch,
-} from 'react-router-dom';
+import { Route, Switch, useParams, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection } from '@patternfly/react-core';
@@ -17,8 +10,6 @@ import JobList from '../../components/JobList';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 function Jobs({ i18n }) {
-  const history = useHistory();
-  const location = useLocation();
   const match = useRouteMatch();
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
     '/jobs': i18n._(t`Jobs`),
@@ -63,11 +54,7 @@ function Jobs({ i18n }) {
           <TypeRedirect view="output" />
         </Route>
         <Route path={`${match.path}/:type/:id`}>
-          <Job
-            history={history}
-            location={location}
-            setBreadcrumb={buildBreadcrumbConfig}
-          />
+          <Job setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path={`${match.path}/:id`}>
           <TypeRedirect />
