@@ -234,7 +234,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
             },
           ]}
           headerRow={
-            <HeaderRow qsConfig={qsConfig}>
+            <HeaderRow qsConfig={qsConfig} isExpandable>
               <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
               <HeaderCell sortKey="status">{i18n._(t`Status`)}</HeaderCell>
               {showTypeColumn && <HeaderCell>{i18n._(t`Type`)}</HeaderCell>}

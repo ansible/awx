@@ -12,7 +12,7 @@ const Th = styled(PFTh)`
   --pf-c-table--cell--Overflow: initial;
 `;
 
-export default function HeaderRow({ qsConfig, children }) {
+export default function HeaderRow({ qsConfig, isExpandable, children }) {
   const location = useLocation();
   const history = useHistory();
 
@@ -46,6 +46,7 @@ export default function HeaderRow({ qsConfig, children }) {
   return (
     <Thead>
       <Tr>
+        {isExpandable && <Th />}
         <Th />
         {React.Children.map(
           children,
