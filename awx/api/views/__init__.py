@@ -242,8 +242,6 @@ class DashboardView(APIView):
         git_failed_projects = git_projects.filter(last_job_failed=True)
         svn_projects = user_projects.filter(scm_type='svn')
         svn_failed_projects = svn_projects.filter(last_job_failed=True)
-        hg_projects = user_projects.filter(scm_type='hg')
-        hg_failed_projects = hg_projects.filter(last_job_failed=True)
         archive_projects = user_projects.filter(scm_type='archive')
         archive_failed_projects = archive_projects.filter(last_job_failed=True)
         data['scm_types'] = {}
@@ -257,11 +255,6 @@ class DashboardView(APIView):
                                     'failures_url': reverse('api:project_list', request=request) + "?scm_type=svn&last_job_failed=True",
                                     'total': svn_projects.count(),
                                     'failed': svn_failed_projects.count()}
-        data['scm_types']['hg'] = {'url': reverse('api:project_list', request=request) + "?scm_type=hg",
-                                   'label': 'Mercurial',
-                                   'failures_url': reverse('api:project_list', request=request) + "?scm_type=hg&last_job_failed=True",
-                                   'total': hg_projects.count(),
-                                   'failed': hg_failed_projects.count()}
         data['scm_types']['archive'] = {'url': reverse('api:project_list', request=request) + "?scm_type=archive",
                                         'label': 'Remote Archive',
                                         'failures_url': reverse('api:project_list', request=request) + "?scm_type=archive&last_job_failed=True",

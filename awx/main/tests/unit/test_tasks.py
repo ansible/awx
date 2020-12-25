@@ -1909,19 +1909,16 @@ class TestProjectUpdateCredentials(TestJobExecution):
     parametrize = {
         'test_username_and_password_auth': [
             dict(scm_type='git'),
-            dict(scm_type='hg'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
         ],
         'test_ssh_key_auth': [
             dict(scm_type='git'),
-            dict(scm_type='hg'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
         ],
         'test_awx_task_env': [
             dict(scm_type='git'),
-            dict(scm_type='hg'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
         ]
@@ -2061,8 +2058,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                     credential, env, {}, [], private_data_dir
                 )
 
-        assert '--custom' in ' '.join(args)
-        script = args[args.index('--source') + 1]
+        assert '-i' in ' '.join(args)
+        script = args[args.index('-i') + 1]
         with open(script, 'r') as f:
             assert f.read() == inventory_update.source_script.script
         assert env['FOO'] == 'BAR'

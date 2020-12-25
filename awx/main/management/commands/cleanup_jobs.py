@@ -21,7 +21,7 @@ from awx.main.signals import (
     disable_computed_fields
 )
 
-from awx.main.management.commands.deletion import AWXCollector, pre_delete
+from awx.main.utils.deletion import AWXCollector, pre_delete
 
 
 class Command(BaseCommand):

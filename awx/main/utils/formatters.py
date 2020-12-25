@@ -9,6 +9,7 @@ import socket
 from datetime import datetime
 
 from dateutil.tz import tzutc
+from django.utils.timezone import now
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 
@@ -17,8 +18,15 @@ class TimeFormatter(logging.Formatter):
     '''
     Custom log formatter used for inventory imports
     '''
+    def __init__(self, start_time=None, **kwargs):
+        if start_time is None:
+            self.job_start = now()
+        else:
+            self.job_start = start_time
+        super(TimeFormatter, self).__init__(**kwargs)
+
     def format(self, record):
-        record.relativeSeconds = record.relativeCreated / 1000.0
+        record.relativeSeconds = (now() - self.job_start).total_seconds()
         return logging.Formatter.format(self, record)
 
 

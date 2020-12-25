@@ -36,11 +36,11 @@ describe('PreviewStep', () => {
         <Formik initialValues={{ limit: '4', survey_foo: 'abc' }}>
           <PreviewStep
             resource={resource}
-            config={{
+            launchConfig={{
               ask_limit_on_launch: true,
               survey_enabled: true,
             }}
-            survey={survey}
+            surveyConfig={survey}
             formErrors={formErrors}
           />
         </Formik>
@@ -64,7 +64,7 @@ describe('PreviewStep', () => {
         <Formik initialValues={{ limit: '4' }}>
           <PreviewStep
             resource={resource}
-            config={{
+            launchConfig={{
               ask_limit_on_launch: true,
             }}
             formErrors={formErrors}
@@ -80,7 +80,32 @@ describe('PreviewStep', () => {
       limit: '4',
     });
   });
+  test('should handle extra vars with survey', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik initialValues={{ extra_vars: 'one: 1', survey_foo: 'abc' }}>
+          <PreviewStep
+            resource={resource}
+            launchConfig={{
+              ask_variables_on_launch: true,
+              survey_enabled: true,
+            }}
+            surveyConfig={survey}
+            formErrors={formErrors}
+          />
+        </Formik>
+      );
+    });
 
+    const detail = wrapper.find('PromptDetail');
+    expect(detail).toHaveLength(1);
+    expect(detail.prop('resource')).toEqual(resource);
+    expect(detail.prop('overrides')).toEqual({
+      extra_vars: 'one: 1\nfoo: abc\n',
+      survey_foo: 'abc',
+    });
+  });
   test('should handle extra vars without survey', async () => {
     let wrapper;
     await act(async () => {
@@ -88,7 +113,7 @@ describe('PreviewStep', () => {
         <Formik initialValues={{ extra_vars: 'one: 1' }}>
           <PreviewStep
             resource={resource}
-            config={{
+            launchConfig={{
               ask_variables_on_launch: true,
             }}
             formErrors={formErrors}
@@ -101,10 +126,9 @@ describe('PreviewStep', () => {
     expect(detail).toHaveLength(1);
     expect(detail.prop('resource')).toEqual(resource);
     expect(detail.prop('overrides')).toEqual({
-      extra_vars: 'one: 1',
+      extra_vars: 'one: 1\n',
     });
   });
-
   test('should remove survey with empty array value', async () => {
     let wrapper;
     await act(async () => {
@@ -115,7 +139,7 @@ describe('PreviewStep', () => {
         >
           <PreviewStep
             resource={resource}
-            config={{
+            launchConfig={{
               ask_variables_on_launch: true,
             }}
             formErrors={formErrors}
@@ -128,7 +152,7 @@ describe('PreviewStep', () => {
     expect(detail).toHaveLength(1);
     expect(detail.prop('resource')).toEqual(resource);
     expect(detail.prop('overrides')).toEqual({
-      extra_vars: 'one: 1',
+      extra_vars: 'one: 1\n',
     });
   });
 });

@@ -11,41 +11,27 @@ import ContentError from '../../../../../components/ContentError';
 import ContentLoading from '../../../../../components/ContentLoading';
 import PromptDetail from '../../../../../components/PromptDetail';
 import useRequest from '../../../../../util/useRequest';
-import {
-  InventorySourcesAPI,
-  JobTemplatesAPI,
-  ProjectsAPI,
-  WorkflowJobTemplatesAPI,
-} from '../../../../../api';
-
-function getNodeType(node) {
-  const ujtType = node.type || node.unified_job_type;
-  switch (ujtType) {
-    case 'job_template':
-    case 'job':
-      return ['job_template', JobTemplatesAPI];
-    case 'project':
-    case 'project_update':
-      return ['project_sync', ProjectsAPI];
-    case 'inventory_source':
-    case 'inventory_update':
-      return ['inventory_source_sync', InventorySourcesAPI];
-    case 'workflow_job_template':
-    case 'workflow_job':
-      return ['workflow_job_template', WorkflowJobTemplatesAPI];
-    case 'workflow_approval_template':
-    case 'workflow_approval':
-      return ['approval', null];
-    default:
-      return null;
-  }
-}
+import { jsonToYaml } from '../../../../../util/yaml';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../../../api';
+import getNodeType from '../../shared/WorkflowJobTemplateVisualizerUtils';
 
 function NodeViewModal({ i18n, readOnly }) {
   const dispatch = useContext(WorkflowDispatchContext);
   const { nodeToView } = useContext(WorkflowStateContext);
-  const { unifiedJobTemplate } = nodeToView;
-  const [nodeType, nodeAPI] = getNodeType(unifiedJobTemplate);
+  const {
+    fullUnifiedJobTemplate,
+    originalNodeCredentials,
+    originalNodeObject,
+    promptValues,
+  } = nodeToView;
+  const [nodeType, nodeAPI] = getNodeType(
+    fullUnifiedJobTemplate ||
+      originalNodeObject?.summary_fields?.unified_job_template
+  );
+
+  const id =
+    fullUnifiedJobTemplate?.id ||
+    originalNodeObject?.summary_fields?.unified_job_template.id;
 
   const {
     result: launchConfig,
@@ -56,39 +42,44 @@ function NodeViewModal({ i18n, readOnly }) {
     useCallback(async () => {
       const readLaunch =
         nodeType === 'workflow_job_template'
-          ? WorkflowJobTemplatesAPI.readLaunch(unifiedJobTemplate.id)
-          : JobTemplatesAPI.readLaunch(unifiedJobTemplate.id);
+          ? WorkflowJobTemplatesAPI.readLaunch(id)
+          : JobTemplatesAPI.readLaunch(id);
       const { data } = await readLaunch;
       return data;
-    }, [nodeType, unifiedJobTemplate.id]),
+    }, [nodeType, id]),
     {}
   );
 
   const {
-    result: nodeDetail,
-    isLoading: isNodeDetailLoading,
-    error: nodeDetailError,
-    request: fetchNodeDetail,
+    result: relatedData,
+    isLoading: isRelatedDataLoading,
+    error: relatedDataError,
+    request: fetchRelatedData,
   } = useRequest(
     useCallback(async () => {
-      let { data } = await nodeAPI?.readDetail(unifiedJobTemplate.id);
-
-      if (data?.type === 'job_template') {
+      const related = {};
+      if (
+        nodeType === 'job_template' &&
+        !fullUnifiedJobTemplate.instance_groups
+      ) {
         const {
           data: { results = [] },
-        } = await JobTemplatesAPI.readInstanceGroups(data.id);
-        data = Object.assign(data, { instance_groups: results });
+        } = await JobTemplatesAPI.readInstanceGroups(fullUnifiedJobTemplate.id);
+        related.instance_groups = results;
       }
 
-      if (data?.related?.webhook_receiver) {
+      if (
+        fullUnifiedJobTemplate?.related?.webhook_receiver &&
+        !fullUnifiedJobTemplate.webhook_key
+      ) {
         const {
           data: { webhook_key },
-        } = await nodeAPI?.readWebhookKey(data.id);
-        data = Object.assign(data, { webhook_key });
+        } = await nodeAPI?.readWebhookKey(fullUnifiedJobTemplate.id);
+        related.webhook_key = webhook_key;
       }
 
-      return data;
-    }, [nodeAPI, unifiedJobTemplate.id]),
+      return related;
+    }, [nodeAPI, fullUnifiedJobTemplate, nodeType]),
     null
   );
 
@@ -97,21 +88,27 @@ function NodeViewModal({ i18n, readOnly }) {
       fetchLaunchConfig();
     }
 
-    if (unifiedJobTemplate.unified_job_type && nodeType !== 'approval') {
-      fetchNodeDetail();
+    if (
+      fullUnifiedJobTemplate &&
+      ((nodeType === 'job_template' &&
+        !fullUnifiedJobTemplate.instance_groups) ||
+        (fullUnifiedJobTemplate?.related?.webhook_receiver &&
+          !fullUnifiedJobTemplate.webhook_key))
+    ) {
+      fetchRelatedData();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (nodeDetail) {
+    if (relatedData) {
       dispatch({
         type: 'REFRESH_NODE',
         node: {
-          nodeResource: nodeDetail,
+          fullUnifiedJobTemplate: { ...fullUnifiedJobTemplate, ...relatedData },
         },
       });
     }
-  }, [nodeDetail]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [relatedData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleEdit = () => {
     dispatch({ type: 'SET_NODE_TO_VIEW', value: null });
@@ -119,13 +116,74 @@ function NodeViewModal({ i18n, readOnly }) {
   };
 
   let Content;
-  if (isLaunchConfigLoading || isNodeDetailLoading) {
+  if (isLaunchConfigLoading || isRelatedDataLoading) {
     Content = <ContentLoading />;
-  } else if (launchConfigError || nodeDetailError) {
-    Content = <ContentError error={launchConfigError || nodeDetailError} />;
-  } else {
+  } else if (launchConfigError || relatedDataError) {
+    Content = <ContentError error={launchConfigError || relatedDataError} />;
+  } else if (!fullUnifiedJobTemplate) {
     Content = (
-      <PromptDetail launchConfig={launchConfig} resource={unifiedJobTemplate} />
+      <p>
+        {i18n._(t`The resource associated with this node has been deleted.`)}
+        &nbsp;&nbsp;
+        {!readOnly
+          ? i18n._(t`Click the Edit button below to reconfigure the node.`)
+          : ''}
+      </p>
+    );
+  } else {
+    let overrides = {};
+
+    if (promptValues) {
+      overrides = promptValues;
+
+      if (launchConfig.ask_variables_on_launch || launchConfig.survey_enabled) {
+        overrides.extra_vars = jsonToYaml(
+          JSON.stringify(promptValues.extra_data)
+        );
+      }
+    } else if (
+      fullUnifiedJobTemplate.id === originalNodeObject?.unified_job_template
+    ) {
+      if (launchConfig.ask_inventory_on_launch) {
+        overrides.inventory = originalNodeObject.summary_fields.inventory;
+      }
+      if (launchConfig.ask_scm_branch_on_launch) {
+        overrides.scm_branch = originalNodeObject.scm_branch;
+      }
+      if (launchConfig.ask_variables_on_launch || launchConfig.survey_enabled) {
+        overrides.extra_vars = jsonToYaml(
+          JSON.stringify(originalNodeObject.extra_data)
+        );
+      }
+      if (launchConfig.ask_tags_on_launch) {
+        overrides.job_tags = originalNodeObject.job_tags;
+      }
+      if (launchConfig.ask_diff_mode_on_launch) {
+        overrides.diff_mode = originalNodeObject.diff_mode;
+      }
+      if (launchConfig.ask_skip_tags_on_launch) {
+        overrides.skip_tags = originalNodeObject.skip_tags;
+      }
+      if (launchConfig.ask_job_type_on_launch) {
+        overrides.job_type = originalNodeObject.job_type;
+      }
+      if (launchConfig.ask_limit_on_launch) {
+        overrides.limit = originalNodeObject.limit;
+      }
+      if (launchConfig.ask_verbosity_on_launch) {
+        overrides.verbosity = originalNodeObject.verbosity.toString();
+      }
+      if (launchConfig.ask_credential_on_launch) {
+        overrides.credentials = originalNodeCredentials || [];
+      }
+    }
+
+    Content = (
+      <PromptDetail
+        launchConfig={launchConfig}
+        resource={fullUnifiedJobTemplate}
+        overrides={overrides}
+      />
     );
   }
 
@@ -133,7 +191,7 @@ function NodeViewModal({ i18n, readOnly }) {
     <Modal
       variant="large"
       isOpen
-      title={unifiedJobTemplate.name}
+      title={fullUnifiedJobTemplate?.name || i18n._(t`Resource deleted`)}
       aria-label={i18n._(t`Workflow node view modal`)}
       onClose={() => dispatch({ type: 'SET_NODE_TO_VIEW', value: null })}
       actions={

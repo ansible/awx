@@ -18,12 +18,16 @@ function UserRolesListItem({ role, i18n, detailUrl, onSelect }) {
       <DataListItemRow>
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="name" aria-label={i18n._(t`resource name`)}>
-              <Link to={`${detailUrl}`} id={labelId}>
-                <b>{role.summary_fields.resource_name}</b>
-              </Link>
+            <DataListCell key="name" aria-label={i18n._(t`Resource name`)}>
+              {role.summary_fields.resource_name ? (
+                <Link to={`${detailUrl}`} id={labelId}>
+                  <b>{role.summary_fields.resource_name}</b>
+                </Link>
+              ) : (
+                <b>{i18n._(t`System`)}</b>
+              )}
             </DataListCell>,
-            <DataListCell key="type" aria-label={i18n._(t`resource type`)}>
+            <DataListCell key="type" aria-label={i18n._(t`Resource type`)}>
               {role.summary_fields && (
                 <DetailList stacked>
                   <Detail
@@ -33,7 +37,7 @@ function UserRolesListItem({ role, i18n, detailUrl, onSelect }) {
                 </DetailList>
               )}
             </DataListCell>,
-            <DataListCell key="role" aria-label={i18n._(t`resource role`)}>
+            <DataListCell key="role" aria-label={i18n._(t`Resource role`)}>
               {role.name && (
                 <DetailList stacked>
                   <Detail

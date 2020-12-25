@@ -1,8 +1,7 @@
 import React, { useCallback } from 'react';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button } from '@patternfly/react-core';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -14,11 +13,19 @@ import {
 } from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
 import { TokensAPI } from '../../../api';
+import { formatDateString } from '../../../util/dates';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { toTitleCase } from '../../../util/strings';
 
-function UserTokenDetail({ token, canEditOrDelete, i18n }) {
-  const { scope, description, created, modified, summary_fields } = token;
+function UserTokenDetail({ token, i18n }) {
+  const {
+    scope,
+    description,
+    created,
+    modified,
+    expires,
+    summary_fields,
+  } = token;
   const history = useHistory();
   const { id, tokenId } = useParams();
   const { request: deleteToken, isLoading, error: deleteError } = useRequest(
@@ -37,39 +44,43 @@ function UserTokenDetail({ token, canEditOrDelete, i18n }) {
           value={summary_fields?.application?.name}
           dataCy="application-token-detail-name"
         />
-        <Detail label={i18n._(t`Description`)} value={description} />
-        <Detail label={i18n._(t`Scope`)} value={toTitleCase(scope)} />
+        <Detail
+          label={i18n._(t`Description`)}
+          value={description}
+          dataCy="application-token-detail-description"
+        />
+        <Detail
+          label={i18n._(t`Scope`)}
+          value={toTitleCase(scope)}
+          dataCy="application-token-detail-scope"
+        />
+        <Detail
+          label={i18n._(t`Expires`)}
+          value={formatDateString(expires)}
+          dataCy="application-token-detail-expires"
+        />
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={created}
           user={summary_fields.user}
+          dataCy="application-token-detail-created"
         />
         <UserDateDetail
           label={i18n._(t`Last Modified`)}
           date={modified}
           user={summary_fields.user}
+          dataCy="application-token-detail-last-modified"
         />
       </DetailList>
       <CardActionsRow>
-        {canEditOrDelete && (
-          <>
-            <Button
-              aria-label={i18n._(t`Edit`)}
-              component={Link}
-              to={`/users/${id}/tokens/${tokenId}/details`}
-            >
-              {i18n._(t`Edit`)}
-            </Button>
-            <DeleteButton
-              name={summary_fields?.application?.name}
-              modalTitle={i18n._(t`Delete User Token`)}
-              onConfirm={deleteToken}
-              isDisabled={isLoading}
-            >
-              {i18n._(t`Delete`)}
-            </DeleteButton>
-          </>
-        )}
+        <DeleteButton
+          name={summary_fields?.application?.name}
+          modalTitle={i18n._(t`Delete User Token`)}
+          onConfirm={deleteToken}
+          isDisabled={isLoading}
+        >
+          {i18n._(t`Delete`)}
+        </DeleteButton>
       </CardActionsRow>
       {error && (
         <AlertModal

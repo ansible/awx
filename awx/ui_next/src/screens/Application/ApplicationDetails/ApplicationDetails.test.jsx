@@ -120,6 +120,9 @@ describe('<ApplicationDetails/>', () => {
     expect(wrapper.find('Detail[label="Client type"]').prop('value')).toBe(
       'Confidential'
     );
+    expect(wrapper.find('Detail[label="Client ID"]').prop('value')).toBe(
+      'b1dmj8xzkbFm1ZQ27ygw2ZeE9I0AXqqeL74fiyk4'
+    );
     expect(wrapper.find('Button[aria-label="Edit"]').prop('to')).toBe(
       '/applications/10/edit'
     );

@@ -39,7 +39,7 @@ function JobListItem({
     project_update: i18n._(t`Source Control Update`),
     inventory_update: i18n._(t`Inventory Sync`),
     job: i18n._(t`Playbook Run`),
-    command: i18n._(t`Command`),
+    ad_hoc_command: i18n._(t`Command`),
     management_job: i18n._(t`Management Job`),
     workflow_job: i18n._(t`Workflow Job`),
   };

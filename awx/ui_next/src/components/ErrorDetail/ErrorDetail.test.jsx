@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import ErrorDetail from './ErrorDetail';
@@ -39,7 +40,7 @@ describe('ErrorDetail', () => {
         }
       />
     );
-    wrapper.find('ExpandableSection').prop('onToggle')();
+    act(() => wrapper.find('ExpandableSection').prop('onToggle')());
     wrapper.update();
   });
 });

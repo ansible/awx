@@ -108,7 +108,7 @@ function UserTokenList({ i18n }) {
         onRowClick={handleSelect}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: i18n._(t`Application name`),
             key: 'application__name__icontains',
             isDefault: true,
           },
@@ -119,7 +119,7 @@ function UserTokenList({ i18n }) {
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: i18n._(t`Application name`),
             key: 'application__name',
           },
           {

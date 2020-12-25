@@ -43,7 +43,7 @@ describe('useWsTemplates hook', () => {
 
   test('should establish websocket connection', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const templates = [{ id: 1 }];
     await act(async () => {
@@ -65,7 +65,7 @@ describe('useWsTemplates hook', () => {
 
   test('should update recent job status', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const templates = [
       {
@@ -125,7 +125,7 @@ describe('useWsTemplates hook', () => {
 
   test('should add new job status', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const templates = [
       {

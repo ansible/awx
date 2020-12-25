@@ -58,11 +58,12 @@ function ApplicationDetails({
         <Detail
           label={i18n._(t`Name`)}
           value={application.name}
-          dataCy="jt-detail-name"
+          dataCy="app-detail-name"
         />
         <Detail
           label={i18n._(t`Description`)}
           value={application.description}
+          dataCy="app-detail-description"
         />
         <Detail
           label={i18n._(t`Organization`)}
@@ -73,20 +74,29 @@ function ApplicationDetails({
               {application.summary_fields.organization.name}
             </Link>
           }
+          dataCy="app-detail-organization"
         />
         <Detail
           label={i18n._(t`Authorization grant type`)}
           value={getAuthorizationGrantType(
             application.authorization_grant_type
           )}
+          dataCy="app-detail-authorization-grant-type"
+        />
+        <Detail
+          label={i18n._(t`Client ID`)}
+          value={application.client_id}
+          dataCy="app-detail-client-id"
         />
         <Detail
           label={i18n._(t`Redirect uris`)}
           value={application.redirect_uris}
+          dataCy="app-detail-redirect-uris"
         />
         <Detail
           label={i18n._(t`Client type`)}
           value={getClientType(application.client_type)}
+          dataCy="app-detail-client-type"
         />
       </DetailList>
       <CardActionsRow>

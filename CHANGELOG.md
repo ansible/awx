@@ -2,6 +2,22 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 16.0.0 (December 10, 2020)
+- AWX now ships with a reimagined user interface.  **Please read this before upgrading:** https://groups.google.com/g/awx-project/c/KuT5Ao92HWo
+- Removed support for syncing inventory from Red Hat CloudForms - https://github.com/ansible/awx/commit/0b701b3b2
+- Removed support for Mercurial-based project updates - https://github.com/ansible/awx/issues/7932
+- Upgraded NodeJS to actively maintained LTS 14.15.1 - https://github.com/ansible/awx/pull/8766
+- Added Git-LFS to the default image build - https://github.com/ansible/awx/pull/8700
+- Added the ability to specify `metadata.labels` in the podspec for container groups - https://github.com/ansible/awx/issues/8486
+- Added support for Kubernetes pod annotations - https://github.com/ansible/awx/pull/8434
+- Added the ability to label the web container in local Docker installs - https://github.com/ansible/awx/pull/8449
+- Added additional metadata (as an extra var) to playbook runs to report the SCM branch name - https://github.com/ansible/awx/pull/8433
+- Fixed a bug that caused k8s installations to fail due to an incorrect Helm repo - https://github.com/ansible/awx/issues/8715
+- Fixed a bug that prevented certain Workflow Approval resources from being deleted - https://github.com/ansible/awx/pull/8612
+- Fixed a bug that prevented the deletion of inventories stuck in "pending deletion" state - https://github.com/ansible/awx/issues/8525
+- Fixed a display bug in webhook notifications with certain unicode characters - https://github.com/ansible/awx/issues/7400
+- Improved support for exporting dependent objects (Inventory Hosts and Groups) in the `awx export` CLI tool - https://github.com/ansible/awx/commit/607bc0788
+
 ## 15.0.1 (October 20, 2020)
 - Added several optimizations to improve performance for a variety of high-load simultaneous job launch use cases https://github.com/ansible/awx/pull/8403
 - Added the ability to source roles and collections from requirements.yaml files (not just requirements.yml) - https://github.com/ansible/awx/issues/4540
@@ -88,7 +104,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Fixed a bug that caused rsyslogd's configuration file to have world-readable file permissions, potentially leaking secrets (CVE-2020-10782)
 
 ## 12.0.0 (Jun 9, 2020)
-- Removed memcached as a dependency of AWX (https://github.com/ansible/awx/pull/7240) 
+- Removed memcached as a dependency of AWX (https://github.com/ansible/awx/pull/7240)
 - Moved to a single container image build instead of separate awx_web and awx_task images. The container image is just `awx` (https://github.com/ansible/awx/pull/7228)
 - Official AWX container image builds now use a two-stage container build process that notably reduces the size of our published images (https://github.com/ansible/awx/pull/7017)
 - Removed support for HipChat notifications ([EoL announcement](https://www.atlassian.com/partnerships/slack/faq#faq-98b17ca3-247f-423b-9a78-70a91681eff0)); all previously-created HipChat notification templates will be deleted due to this removal.

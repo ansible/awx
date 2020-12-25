@@ -65,7 +65,7 @@ function SurveyPreviewModal({
                       type={`survey-preview-textArea-${q.variable}`}
                       value={q.default}
                       aria-label={i18n._(t`Text Area`)}
-                      disabled
+                      isDisabled
                     />
                   </FormGroup>
                 )}
@@ -104,7 +104,9 @@ function SurveyPreviewModal({
                       isReadOnly
                       variant={SelectVariant.typeaheadMulti}
                       isOpen={false}
-                      selections={q.default.length > 0 && q.default.split('\n')}
+                      selections={
+                        q.default.length > 0 ? q.default.split('\n') : []
+                      }
                       onToggle={() => {}}
                       aria-label={i18n._(t`Multi-Select`)}
                       id={`survey-preview-multiSelect-${q.variable}`}

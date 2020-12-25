@@ -6,42 +6,48 @@ import useOtherPromptsStep from './steps/useOtherPromptsStep';
 import useSurveyStep from './steps/useSurveyStep';
 import usePreviewStep from './steps/usePreviewStep';
 
-export default function useLaunchSteps(config, resource, i18n) {
+export default function useLaunchSteps(
+  launchConfig,
+  surveyConfig,
+  resource,
+  i18n
+) {
   const [visited, setVisited] = useState({});
+  const [isReady, setIsReady] = useState(false);
   const steps = [
-    useInventoryStep(config, visited, i18n),
-    useCredentialsStep(config, i18n),
-    useOtherPromptsStep(config, i18n),
-    useSurveyStep(config, visited, i18n),
+    useInventoryStep(launchConfig, resource, i18n, visited),
+    useCredentialsStep(launchConfig, resource, i18n),
+    useOtherPromptsStep(launchConfig, resource, i18n),
+    useSurveyStep(launchConfig, surveyConfig, resource, i18n, visited),
   ];
-  const { resetForm, values: formikValues } = useFormikContext();
+  const { resetForm } = useFormikContext();
   const hasErrors = steps.some(step => step.formError);
 
-  const surveyStepIndex = steps.findIndex(step => step.survey);
   steps.push(
-    usePreviewStep(
-      config,
-      resource,
-      steps[surveyStepIndex]?.survey,
-      hasErrors,
-      i18n
-    )
+    usePreviewStep(launchConfig, i18n, resource, surveyConfig, hasErrors, true)
   );
 
   const pfSteps = steps.map(s => s.step).filter(s => s != null);
-  const isReady = !steps.some(s => !s.isReady);
+  const stepsAreReady = !steps.some(s => !s.isReady);
 
   useEffect(() => {
-    if (surveyStepIndex > -1 && isReady) {
+    if (stepsAreReady) {
+      const initialValues = steps.reduce((acc, cur) => {
+        return {
+          ...acc,
+          ...cur.initialValues,
+        };
+      }, {});
       resetForm({
         values: {
-          ...formikValues,
-          ...steps[surveyStepIndex].initialValues,
+          ...initialValues,
         },
       });
+
+      setIsReady(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady]);
+  }, [stepsAreReady]);
 
   const stepWithError = steps.find(s => s.contentError);
   const contentError = stepWithError ? stepWithError.contentError : null;

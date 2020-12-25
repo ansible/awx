@@ -34,7 +34,7 @@
   register: sdist
 
 - name: Clean distribution
-  shell: make clean
+  command: make clean
   args:
     chdir: ..
   ignore_errors: true
@@ -58,6 +58,10 @@
   delegate_to: localhost
   when: use_container_for_build|default(true)|bool
 
+- name: Get current uid
+  command: id -u
+  register: uid
+
 - name: Build AWX distribution using container
   docker_container:
     env:
@@ -67,6 +71,7 @@
     image: "awx_sdist_builder:{{ awx_version }}"
     name: awx_sdist_builder
     state: started
+    user: "{{ uid.stdout }}"
     detach: false
     volumes:
       - ../:/awx:Z
@@ -74,7 +79,7 @@
   when: use_container_for_build|default(true)|bool
 
 - name: Build AWX distribution locally
-  shell: make sdist
+  command: make sdist
   args:
     chdir: ..
   delegate_to: localhost
@@ -88,86 +93,15 @@
   set_fact:
     awx_image: "{{ awx_image|default('awx') }}"
 
-- name: Ensure directory exists
-  file:
-    path: "{{ docker_base_path }}"
-    state: directory
-  delegate_to: localhost
-
-- name: Stage sdist
-  copy:
-    src: "../dist/{{ awx_sdist_file }}"
-    dest: "{{ docker_base_path }}/{{ awx_sdist_file }}"
-  delegate_to: localhost
-
-- name: Template web Dockerfile
+- name: Render Dockerfile
   template:
     src: Dockerfile.j2
-    dest: "{{ docker_base_path }}/Dockerfile"
-  delegate_to: localhost
-
-- name: Stage launch_awx
-  copy:
-    src: launch_awx.sh
-    dest: "{{ docker_base_path }}/launch_awx.sh"
-    mode: '0755'
-  delegate_to: localhost
-
-- name: Stage launch_awx_task
-  template:
-    src: launch_awx_task.sh.j2
-    dest: "{{ docker_base_path }}/launch_awx_task.sh"
-    mode: '0755'
-  delegate_to: localhost
-
-- name: Stage rsyslog.conf
-  copy:
-    src: rsyslog.conf
-    dest: "{{ docker_base_path }}/rsyslog.conf"
-    mode: '0660'
-  delegate_to: localhost
-
-- name: Stage supervisor.conf
-  copy:
-    src: supervisor.conf
-    dest: "{{ docker_base_path }}/supervisor.conf"
-  delegate_to: localhost
-
-- name: Stage supervisor_task.conf
-  copy:
-    src: supervisor_task.conf
-    dest: "{{ docker_base_path }}/supervisor_task.conf"
-  delegate_to: localhost
-
-- name: Stage settings.py
-  copy:
-    src: settings.py
-    dest: "{{ docker_base_path }}/settings.py"
-  delegate_to: localhost
-
-- name: Stage requirements
-  copy:
-    src: ../requirements/
-    dest: "{{ docker_base_path }}/requirements"
-  delegate_to: localhost
-
-- name: Stage config watcher
-  copy:
-    src: ../tools/scripts/config-watcher
-    dest: "{{ docker_base_path }}/config-watcher"
-    mode: 0755
-  delegate_to: localhost
-
-- name: Stage Makefile
-  copy:
-    src: ../Makefile
-    dest: "{{ docker_base_path }}/Makefile"
-  delegate_to: localhost
+    dest: ../Dockerfile
 
 - name: Build base awx image
   docker_image:
     build:
-      path: "{{ docker_base_path }}"
+      path: ".."
       dockerfile: Dockerfile
       pull: false
       args:

@@ -1,8 +1,8 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
+import { useField } from 'formik';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { func, string } from 'prop-types';
 import { Title } from '@patternfly/react-core';
 import SelectableCard from '../../../../../components/SelectableCard';
 
@@ -16,7 +16,8 @@ const Grid = styled.div`
   width: 100%;
 `;
 
-function RunStep({ i18n, linkType, onUpdateLinkType }) {
+function RunStep({ i18n }) {
+  const [field, , helpers] = useField('linkType');
   return (
     <>
       <Title headingLevel="h1" size="xl">
@@ -30,39 +31,33 @@ function RunStep({ i18n, linkType, onUpdateLinkType }) {
       <Grid>
         <SelectableCard
           id="link-type-success"
-          isSelected={linkType === 'success'}
+          isSelected={field.value === 'success'}
           label={i18n._(t`On Success`)}
           description={i18n._(
             t`Execute when the parent node results in a successful state.`
           )}
-          onClick={() => onUpdateLinkType('success')}
+          onClick={() => helpers.setValue('success')}
         />
         <SelectableCard
           id="link-type-failure"
-          isSelected={linkType === 'failure'}
+          isSelected={field.value === 'failure'}
           label={i18n._(t`On Failure`)}
           description={i18n._(
             t`Execute when the parent node results in a failure state.`
           )}
-          onClick={() => onUpdateLinkType('failure')}
+          onClick={() => helpers.setValue('failure')}
         />
         <SelectableCard
           id="link-type-always"
-          isSelected={linkType === 'always'}
+          isSelected={field.value === 'always'}
           label={i18n._(t`Always`)}
           description={i18n._(
             t`Execute regardless of the parent node's final state.`
           )}
-          onClick={() => onUpdateLinkType('always')}
+          onClick={() => helpers.setValue('always')}
         />
       </Grid>
     </>
   );
 }
-
-RunStep.propTypes = {
-  linkType: string.isRequired,
-  onUpdateLinkType: func.isRequired,
-};
-
 export default withI18n()(RunStep);

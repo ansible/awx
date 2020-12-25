@@ -279,8 +279,8 @@ function HostFilterLookup({
               numChips={5}
               totalChips={chips[key]?.chips?.length || 0}
             >
-              {chips[key]?.chips?.map((chip, index) => (
-                <Chip key={index} isReadOnly>
+              {chips[key]?.chips?.map(chip => (
+                <Chip key={chip.key} isReadOnly>
                   {chip.node}
                 </Chip>
               ))}

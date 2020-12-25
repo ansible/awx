@@ -23,7 +23,6 @@ import fcntl
 from pathlib import Path
 from uuid import uuid4
 import urllib.parse as urlparse
-import shlex
 
 # Django
 from django.conf import settings
@@ -64,7 +63,7 @@ from awx.main.models import (
     build_safe_env, enforce_bigint_pk_migration
 )
 from awx.main.constants import ACTIVE_STATES
-from awx.main.exceptions import AwxTaskError
+from awx.main.exceptions import AwxTaskError, PostRunError
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.isolated import manager as isolated_manager
 from awx.main.dispatch.publish import task
@@ -79,6 +78,7 @@ from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
+from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -1225,6 +1225,13 @@ class BaseTask(object):
         Ansible runner puts a parent_uuid on each event, no matter what the type.
         AWX only saves the parent_uuid if the event is for a Job.
         '''
+        # cache end_line locally for RunInventoryUpdate tasks
+        # which generate job events from two 'streams':
+        # ansible-inventory and the awx.main.commands.inventory_import
+        # logger
+        if isinstance(self, RunInventoryUpdate):
+            self.end_line = event_data['end_line']
+
         if event_data.get(self.event_data_key, None):
             if self.event_data_key != 'job_id':
                 event_data.pop('parent_uuid', None)
@@ -1253,7 +1260,7 @@ class BaseTask(object):
             # so it *should* have a negligible performance impact
             task = event_data.get('event_data', {}).get('task_action')
             try:
-                if task in ('git', 'hg', 'svn'):
+                if task in ('git', 'svn'):
                     event_data_json = json.dumps(event_data)
                     event_data_json = UriCleaner.remove_sensitive(event_data_json)
                     event_data = json.loads(event_data_json)
@@ -1521,6 +1528,12 @@ class BaseTask(object):
 
         try:
             self.post_run_hook(self.instance, status)
+        except PostRunError as exc:
+            if status == 'successful':
+                status = exc.status
+                extra_update_fields['job_explanation'] = exc.args[0]
+                if exc.tb:
+                    extra_update_fields['result_traceback'] = exc.tb
         except Exception:
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
@@ -2141,7 +2154,7 @@ class RunProjectUpdate(BaseTask):
             elif not scm_branch:
                 raise RuntimeError('Could not determine a revision to run from project.')
         elif not scm_branch:
-            scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
+            scm_branch = 'HEAD'
 
         galaxy_creds_are_defined = (
             project_update.project.organization and
@@ -2150,7 +2163,7 @@ class RunProjectUpdate(BaseTask):
         if not galaxy_creds_are_defined and (
             settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED
         ):
-            logger.debug(
+            logger.warning(
                 'Galaxy role/collection syncing is enabled, but no '
                 f'credentials are configured for {project_update.project.organization}.'
             )
@@ -2417,9 +2430,10 @@ class RunProjectUpdate(BaseTask):
                 shutil.rmtree(stage_path)  # cannot trust content update produced
 
             if self.job_private_data_dir:
-                # copy project folder before resetting to default branch
-                # because some git-tree-specific resources (like submodules) might matter
-                self.make_local_copy(instance, self.job_private_data_dir)
+                if status == 'successful':
+                    # copy project folder before resetting to default branch
+                    # because some git-tree-specific resources (like submodules) might matter
+                    self.make_local_copy(instance, self.job_private_data_dir)
                 if self.original_branch:
                     # for git project syncs, non-default branches can be problems
                     # restore to branch the repo was on before this run
@@ -2461,6 +2475,14 @@ class RunInventoryUpdate(BaseTask):
     event_model = InventoryUpdateEvent
     event_data_key = 'inventory_update_id'
 
+    # TODO: remove once inv updates run in containers
+    def should_use_proot(self, inventory_update):
+        '''
+        Return whether this task should use proot.
+        '''
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
+
+    # TODO: remove once inv updates run in containers
     @property
     def proot_show_paths(self):
         return [settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
@@ -2485,15 +2507,11 @@ class RunInventoryUpdate(BaseTask):
             return injector.build_private_data(inventory_update, private_data_dir)
 
     def build_env(self, inventory_update, private_data_dir, isolated, private_data_files=None):
-        """Build environment dictionary for inventory import.
+        """Build environment dictionary for ansible-inventory.
 
-        This used to be the mechanism by which any data that needs to be passed
-        to the inventory update script is set up. In particular, this is how
-        inventory update is aware of its proper credentials.
-
-        Most environment injection is now accomplished by the credential
-        injectors. The primary purpose this still serves is to
-        still point to the inventory update INI or config file.
+        Most environment variables related to credentials or configuration
+        are accomplished by the inventory source injectors (in this method)
+        or custom credential type injectors (in main run method).
         """
         env = super(RunInventoryUpdate, self).build_env(inventory_update,
                                                         private_data_dir,
@@ -2501,8 +2519,11 @@ class RunInventoryUpdate(BaseTask):
                                                         private_data_files=private_data_files)
         if private_data_files is None:
             private_data_files = {}
-        self.add_awx_venv(env)
-        # Pass inventory source ID to inventory script.
+        # TODO: remove once containers replace custom venvs
+        self.add_ansible_venv(inventory_update.ansible_virtualenv_path, env, isolated=isolated)
+
+        # Legacy environment variables, were used as signal to awx-manage command
+        # now they are provided in case some scripts may be relying on them
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
         env.update(STANDARD_INVENTORY_UPDATE_ENV)
@@ -2565,47 +2586,25 @@ class RunInventoryUpdate(BaseTask):
         if inventory is None:
             raise RuntimeError('Inventory Source is not associated with an Inventory.')
 
-        # Piece together the initial command to run via. the shell.
-        args = ['awx-manage', 'inventory_import']
-        args.extend(['--inventory-id', str(inventory.pk)])
+        args = ['ansible-inventory', '--list', '--export']
 
-        # Add appropriate arguments for overwrite if the inventory_update
-        # object calls for it.
-        if inventory_update.overwrite:
-            args.append('--overwrite')
-        if inventory_update.overwrite_vars:
-            args.append('--overwrite-vars')
+        # Add arguments for the source inventory file/script/thing
+        source_location = self.pseudo_build_inventory(inventory_update, private_data_dir)
+        args.append('-i')
+        args.append(source_location)
 
-        # Declare the virtualenv the management command should activate
-        # as it calls ansible-inventory
-        args.extend(['--venv', inventory_update.ansible_virtualenv_path])
+        args.append('--output')
+        args.append(os.path.join(private_data_dir, 'artifacts', 'output.json'))
 
-        src = inventory_update.source
-        if inventory_update.enabled_var:
-            args.extend(['--enabled-var', shlex.quote(inventory_update.enabled_var)])
-            args.extend(['--enabled-value', shlex.quote(inventory_update.enabled_value)])
+        if os.path.isdir(source_location):
+            playbook_dir = source_location
         else:
-            if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
-                args.extend(['--enabled-var',
-                            getattr(settings, '%s_ENABLED_VAR' % src.upper())])
-            if getattr(settings, '%s_ENABLED_VALUE' % src.upper(), False):
-                args.extend(['--enabled-value',
-                            getattr(settings, '%s_ENABLED_VALUE' % src.upper())])
-        if inventory_update.host_filter:
-            args.extend(['--host-filter', shlex.quote(inventory_update.host_filter)])
-        if getattr(settings, '%s_EXCLUDE_EMPTY_GROUPS' % src.upper()):
-            args.append('--exclude-empty-groups')
-        if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):
-            args.extend(['--instance-id-var',
-                        "'{}'".format(getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper())),])
-        # Add arguments for the source inventory script
-        args.append('--source')
-        args.append(self.pseudo_build_inventory(inventory_update, private_data_dir))
-        if src == 'custom':
-            args.append("--custom")
-        args.append('-v%d' % inventory_update.verbosity)
-        if settings.DEBUG:
-            args.append('--traceback')
+            playbook_dir = os.path.dirname(source_location)
+        args.extend(['--playbook-dir', playbook_dir])
+
+        if inventory_update.verbosity:
+            args.append('-' + 'v' * min(5, inventory_update.verbosity * 2 + 1))
+
         return args
 
     def build_inventory(self, inventory_update, private_data_dir):
@@ -2645,11 +2644,9 @@ class RunInventoryUpdate(BaseTask):
 
     def build_cwd(self, inventory_update, private_data_dir):
         '''
-        There are two cases where the inventory "source" is in a different
+        There is one case where the inventory "source" is in a different
         location from the private data:
-         - deprecated vendored inventory scripts in awx/plugins/inventory
          - SCM, where source needs to live in the project folder
-        in these cases, the inventory does not exist in the standard tempdir
         '''
         src = inventory_update.source
         if src == 'scm' and inventory_update.source_project_update:
@@ -2706,6 +2703,75 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'scm' and inventory_update.launch_type == 'scm' and source_project:
             # This follows update, not sync, so make copy here
             RunProjectUpdate.make_local_copy(source_project, private_data_dir)
+
+    def post_run_hook(self, inventory_update, status):
+        if status != 'successful':
+            return # nothing to save, step out of the way to allow error reporting
+
+        private_data_dir = inventory_update.job_env['AWX_PRIVATE_DATA_DIR']
+        expected_output = os.path.join(private_data_dir, 'artifacts', 'output.json')
+        with open(expected_output) as f:
+            data = json.load(f)
+
+        # build inventory save options
+        options = dict(
+            overwrite=inventory_update.overwrite,
+            overwrite_vars=inventory_update.overwrite_vars,
+        )
+        src = inventory_update.source
+
+        if inventory_update.enabled_var:
+            options['enabled_var'] = inventory_update.enabled_var
+            options['enabled_value'] = inventory_update.enabled_value
+        else:
+            if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
+                options['enabled_var'] = getattr(settings, '%s_ENABLED_VAR' % src.upper())
+            if getattr(settings, '%s_ENABLED_VALUE' % src.upper(), False):
+                options['enabled_value'] = getattr(settings, '%s_ENABLED_VALUE' % src.upper())
+
+        if inventory_update.host_filter:
+            options['host_filter'] = inventory_update.host_filter
+
+        if getattr(settings, '%s_EXCLUDE_EMPTY_GROUPS' % src.upper()):
+            options['exclude_empty_groups'] = True
+        if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):
+            options['instance_id_var'] = getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper())
+
+        # Verbosity is applied to saving process, as well as ansible-inventory CLI option
+        if inventory_update.verbosity:
+            options['verbosity'] = inventory_update.verbosity
+
+        handler = SpecialInventoryHandler(
+            self.event_handler, self.cancel_callback,
+            verbosity=inventory_update.verbosity,
+            job_timeout=self.get_instance_timeout(self.instance),
+            start_time=inventory_update.started,
+            counter=self.event_ct, initial_line=self.end_line
+        )
+        inv_logger = logging.getLogger('awx.main.commands.inventory_import')
+        formatter = inv_logger.handlers[0].formatter
+        formatter.job_start = inventory_update.started
+        handler.formatter = formatter
+        inv_logger.handlers[0] = handler
+
+        from awx.main.management.commands.inventory_import import Command as InventoryImportCommand
+        cmd = InventoryImportCommand()
+        try:
+            # save the inventory data to database.
+            # canceling exceptions will be handled in the global post_run_hook
+            cmd.perform_update(options, data, inventory_update)
+        except PermissionDenied as exc:
+            logger.exception('License error saving {} content'.format(inventory_update.log_format))
+            raise PostRunError(str(exc), status='error')
+        except PostRunError:
+            logger.exception('Error saving {} content, rolling back changes'.format(inventory_update.log_format))
+            raise
+        except Exception:
+            logger.exception('Exception saving {} content, rolling back changes.'.format(
+                inventory_update.log_format))
+            raise PostRunError(
+                'Error occured while saving inventory data, see traceback or server logs',
+                status='error', tb=traceback.format_exc())
 
 
 @task(queue=get_local_queuename)

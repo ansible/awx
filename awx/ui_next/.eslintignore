@@ -7,3 +7,4 @@ build
 node_modules
 dist
 images
+instrumented

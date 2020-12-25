@@ -1,11 +1,22 @@
-import React, { Component } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
+import {
+  Switch,
+  Route,
+  withRouter,
+  Redirect,
+  Link,
+  useParams,
+  useLocation,
+} from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
+import { useConfig } from '../../contexts/Config';
+import useRequest from '../../util/useRequest';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
+import ContentLoading from '../../components/ContentLoading';
 import NotificationList from '../../components/NotificationList';
 import { ResourceAccessList } from '../../components/ResourceAccessList';
 import { Schedules } from '../../components/Schedule';
@@ -14,48 +25,18 @@ import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
 import { OrganizationsAPI, ProjectsAPI } from '../../api';
 
-class Project extends Component {
-  constructor(props) {
-    super(props);
+function Project({ i18n, setBreadcrumb }) {
+  const { me = {} } = useConfig();
+  const { id } = useParams();
+  const location = useLocation();
 
-    this.state = {
-      project: null,
-      hasContentLoading: true,
-      contentError: null,
-      isInitialized: false,
-      isNotifAdmin: false,
-    };
-    this.createSchedule = this.createSchedule.bind(this);
-    this.loadProject = this.loadProject.bind(this);
-    this.loadProjectAndRoles = this.loadProjectAndRoles.bind(this);
-    this.loadSchedules = this.loadSchedules.bind(this);
-    this.loadScheduleOptions = this.loadScheduleOptions.bind(this);
-  }
-
-  async componentDidMount() {
-    await this.loadProjectAndRoles();
-    this.setState({ isInitialized: true });
-  }
-
-  async componentDidUpdate(prevProps) {
-    const { location, match } = this.props;
-    const url = `/projects/${match.params.id}/`;
-
-    if (
-      prevProps.location.pathname.startsWith(url) &&
-      prevProps.location !== location &&
-      location.pathname === `${url}details`
-    ) {
-      await this.loadProject();
-    }
-  }
-
-  async loadProjectAndRoles() {
-    const { match, setBreadcrumb } = this.props;
-    const id = parseInt(match.params.id, 10);
-
-    this.setState({ contentError: null, hasContentLoading: true });
-    try {
+  const {
+    request: fetchProjectAndRoles,
+    result: { project, isNotifAdmin },
+    isLoading: hasContentLoading,
+    error: contentError,
+  } = useRequest(
+    useCallback(async () => {
       const [{ data }, notifAdminRes] = await Promise.all([
         ProjectsAPI.readDetail(id),
         OrganizationsAPI.read({
@@ -63,188 +44,158 @@ class Project extends Component {
           role_level: 'notification_admin_role',
         }),
       ]);
-      setBreadcrumb(data);
-      this.setState({
+      return {
         project: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
-      });
-    } catch (err) {
-      this.setState({ contentError: err });
-    } finally {
-      this.setState({ hasContentLoading: false });
+      };
+    }, [id]),
+    {
+      project: null,
+      notifAdminRes: null,
     }
-  }
+  );
 
-  async loadProject() {
-    const { match, setBreadcrumb } = this.props;
-    const id = parseInt(match.params.id, 10);
+  useEffect(() => {
+    fetchProjectAndRoles();
+  }, [fetchProjectAndRoles, location.pathname]);
 
-    this.setState({ contentError: null, hasContentLoading: true });
-    try {
-      const { data } = await ProjectsAPI.readDetail(id);
-      setBreadcrumb(data);
-      this.setState({ project: data });
-    } catch (err) {
-      this.setState({ contentError: err });
-    } finally {
-      this.setState({ hasContentLoading: false });
+  useEffect(() => {
+    if (project) {
+      setBreadcrumb(project);
     }
-  }
+  }, [project, setBreadcrumb]);
 
-  createSchedule(data) {
-    const { project } = this.state;
+  function createSchedule(data) {
     return ProjectsAPI.createSchedule(project.id, data);
   }
 
-  loadScheduleOptions() {
-    const { project } = this.state;
+  const loadScheduleOptions = useCallback(() => {
     return ProjectsAPI.readScheduleOptions(project.id);
-  }
+  }, [project]);
 
-  loadSchedules(params) {
-    const { project } = this.state;
-    return ProjectsAPI.readSchedules(project.id, params);
-  }
+  const loadSchedules = useCallback(
+    params => {
+      return ProjectsAPI.readSchedules(project.id, params);
+    },
+    [project]
+  );
 
-  render() {
-    const { location, match, me, i18n, setBreadcrumb } = this.props;
+  const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
+  const canToggleNotifications = isNotifAdmin;
+  const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Projects`)}
+        </>
+      ),
+      link: `/projects`,
+      id: 99,
+    },
+    { name: i18n._(t`Details`), link: `/projects/${id}/details` },
+    { name: i18n._(t`Access`), link: `/projects/${id}/access` },
+  ];
 
-    const {
-      project,
-      contentError,
-      hasContentLoading,
-      isInitialized,
-      isNotifAdmin,
-    } = this.state;
-    const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
-    const canToggleNotifications = isNotifAdmin;
-
-    const tabsArray = [
-      {
-        name: (
-          <>
-            <CaretLeftIcon />
-            {i18n._(t`Back to Projects`)}
-          </>
-        ),
-        link: `/projects`,
-        id: 99,
-      },
-      { name: i18n._(t`Details`), link: `${match.url}/details` },
-      { name: i18n._(t`Access`), link: `${match.url}/access` },
-    ];
-
-    if (canSeeNotificationsTab) {
-      tabsArray.push({
-        name: i18n._(t`Notifications`),
-        link: `${match.url}/notifications`,
-      });
-    }
-
+  if (canSeeNotificationsTab) {
     tabsArray.push({
-      name: i18n._(t`Job Templates`),
-      link: `${match.url}/job_templates`,
+      name: i18n._(t`Notifications`),
+      link: `/projects/${id}/notifications`,
     });
+  }
 
-    if (project?.scm_type) {
-      tabsArray.push({
-        name: i18n._(t`Schedules`),
-        link: `${match.url}/schedules`,
-      });
-    }
+  tabsArray.push({
+    name: i18n._(t`Job Templates`),
+    link: `/projects/${id}/job_templates`,
+  });
 
-    tabsArray.forEach((tab, n) => {
-      tab.id = n;
+  if (project?.scm_type) {
+    tabsArray.push({
+      name: i18n._(t`Schedules`),
+      link: `/projects/${id}/schedules`,
     });
+  }
 
-    let showCardHeader = true;
+  tabsArray.forEach((tab, n) => {
+    tab.id = n;
+  });
 
-    if (
-      !isInitialized ||
-      location.pathname.endsWith('edit') ||
-      location.pathname.includes('schedules/')
-    ) {
-      showCardHeader = false;
-    }
-
-    if (!hasContentLoading && contentError) {
-      return (
-        <PageSection>
-          <Card>
-            <ContentError error={contentError}>
-              {contentError.response.status === 404 && (
-                <span>
-                  {i18n._(t`Project not found.`)}{' '}
-                  <Link to="/projects">{i18n._(t`View all Projects.`)}</Link>
-                </span>
-              )}
-            </ContentError>
-          </Card>
-        </PageSection>
-      );
-    }
-
+  if (contentError) {
     return (
       <PageSection>
         <Card>
-          {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
+          <ContentError error={contentError}>
+            {contentError.response.status === 404 && (
+              <span>
+                {i18n._(t`Project not found.`)}{' '}
+                <Link to="/projects">{i18n._(t`View all Projects.`)}</Link>
+              </span>
+            )}
+          </ContentError>
+        </Card>
+      </PageSection>
+    );
+  }
+
+  const showCardHeader = !(
+    location.pathname.endsWith('edit') ||
+    location.pathname.includes('schedules/')
+  );
+
+  return (
+    <PageSection>
+      <Card>
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
+        {hasContentLoading && <ContentLoading />}
+        {!hasContentLoading && project && (
           <Switch>
             <Redirect from="/projects/:id" to="/projects/:id/details" exact />
-            {project && (
-              <Route path="/projects/:id/edit">
-                <ProjectEdit project={project} />
-              </Route>
-            )}
-            {project && (
-              <Route path="/projects/:id/details">
-                <ProjectDetail project={project} />
-              </Route>
-            )}
-            {project && (
-              <Route path="/projects/:id/access">
-                <ResourceAccessList resource={project} apiModel={ProjectsAPI} />
-              </Route>
-            )}
+            <Route path="/projects/:id/edit">
+              <ProjectEdit project={project} />
+            </Route>
+            <Route path="/projects/:id/details">
+              <ProjectDetail project={project} />
+            </Route>
+            <Route path="/projects/:id/access">
+              <ResourceAccessList resource={project} apiModel={ProjectsAPI} />
+            </Route>
             {canSeeNotificationsTab && (
               <Route path="/projects/:id/notifications">
                 <NotificationList
-                  id={Number(match.params.id)}
+                  id={Number(id)}
                   canToggleNotifications={canToggleNotifications}
                   apiModel={ProjectsAPI}
                 />
               </Route>
             )}
             <Route path="/projects/:id/job_templates">
-              <ProjectJobTemplatesList id={Number(match.params.id)} />
+              <ProjectJobTemplatesList />
             </Route>
             {project?.scm_type && project.scm_type !== '' && (
               <Route path="/projects/:id/schedules">
                 <Schedules
                   setBreadcrumb={setBreadcrumb}
                   unifiedJobTemplate={project}
-                  createSchedule={this.createSchedule}
-                  loadSchedules={this.loadSchedules}
-                  loadScheduleOptions={this.loadScheduleOptions}
+                  createSchedule={createSchedule}
+                  loadSchedules={loadSchedules}
+                  loadScheduleOptions={loadScheduleOptions}
                 />
               </Route>
             )}
             <Route key="not-found" path="*">
-              {!hasContentLoading && (
-                <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link to={`/projects/${match.params.id}/details`}>
-                      {i18n._(t`View Project Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )}
+              <ContentError isNotFound>
+                {id && (
+                  <Link to={`/projects/${id}/details`}>
+                    {i18n._(t`View Project Details`)}
+                  </Link>
+                )}
+              </ContentError>
             </Route>
-            ,
           </Switch>
-        </Card>
-      </PageSection>
-    );
-  }
+        )}
+      </Card>
+    </PageSection>
+  );
 }
 
 export default withI18n()(withRouter(Project));

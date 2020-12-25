@@ -26,7 +26,7 @@ USER root
 RUN dnf -y update && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
     dnf module -y enable 'postgresql:10' && \
-    dnf config-manager --set-enabled PowerTools && \
+    dnf config-manager --set-enabled powertools && \
     dnf -y install ansible \
     gcc \
     gcc-c++ \
@@ -73,7 +73,7 @@ ADD requirements/requirements_dev.txt /tmp/requirements
 RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev
 {% endif %}
 {% if not build_dev|bool %}
-COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
+COPY dist/{{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
 RUN mkdir -p -m 755 /var/lib/awx && \
     OFFICIAL=yes /var/lib/awx/venv/awx/bin/pip install /tmp/{{ awx_sdist_file }}
 {% endif %}
@@ -109,22 +109,22 @@ RUN dnf -y install \
     wget \
     diffutils \
     unzip && \
-    npm install -g n && n 10.15.0 && dnf remove -y nodejs
+    npm install -g n && n 14.15.1 && dnf remove -y nodejs
 {% endif %}
 
 # Install runtime requirements
 RUN dnf -y update && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
     dnf module -y enable 'postgresql:10' && \
-    dnf config-manager --set-enabled PowerTools && \
+    dnf config-manager --set-enabled powertools && \
     dnf -y install acl \
     ansible \
     bubblewrap \
     git-core \
+    git-lfs \
     glibc-langpack-en \
     krb5-workstation \
     libcgroup-tools \
-    mercurial \
     nginx \
     @postgresql:10 \
     python3-devel \
@@ -177,7 +177,7 @@ RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 {% endif %}
 
 # Create default awx rsyslog config
-ADD {% if build_dev|bool %}installer/roles/image_build/files/{% endif %}rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
+ADD installer/roles/image_build/files/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 
 ## File mappings
 {% if build_dev|bool %}
@@ -191,12 +191,12 @@ ADD tools/docker-compose/bootstrap_development.sh /usr/bin/bootstrap_development
 ADD tools/docker-compose/entrypoint.sh /entrypoint.sh
 ADD tools/scripts/awx-python /usr/bin/awx-python
 {% else %}
-ADD launch_awx.sh /usr/bin/launch_awx.sh
-ADD launch_awx_task.sh /usr/bin/launch_awx_task.sh
-ADD settings.py /etc/tower/settings.py
-ADD supervisor.conf /etc/supervisord.conf
-ADD supervisor_task.conf /etc/supervisord_task.conf
-ADD config-watcher /usr/bin/config-watcher
+ADD installer/roles/image_build/files/launch_awx.sh /usr/bin/launch_awx.sh
+ADD installer/roles/image_build/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
+ADD installer/roles/image_build/files/settings.py /etc/tower/settings.py
+ADD installer/roles/image_build/files/supervisor.conf /etc/supervisord.conf
+ADD installer/roles/image_build/files/supervisor_task.conf /etc/supervisord_task.conf
+ADD tools/scripts/config-watcher /usr/bin/config-watcher
 {% endif %}
 
 # Pre-create things we need to access

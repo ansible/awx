@@ -100,7 +100,7 @@ function TemplateSurvey({ template, canEdit, i18n }) {
           </Route>
         )}
         {canEdit && (
-          <Route path="/templates/:templateType/:id/survey/edit/:variable">
+          <Route path="/templates/:templateType/:id/survey/edit">
             <SurveyQuestionEdit
               survey={survey}
               updateSurvey={updateSurveySpec}

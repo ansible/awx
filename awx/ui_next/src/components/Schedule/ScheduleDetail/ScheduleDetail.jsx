@@ -201,15 +201,19 @@ function ScheduleDetail({ schedule, i18n }) {
               <Detail
                 label={i18n._(t`Inventory`)}
                 value={
-                  <Link
-                    to={`/inventories/${
-                      summary_fields.inventory.kind === 'smart'
-                        ? 'smart_inventory'
-                        : 'inventory'
-                    }/${summary_fields.inventory.id}/details`}
-                  >
-                    {summary_fields.inventory.name}
-                  </Link>
+                  summary_fields?.inventory ? (
+                    <Link
+                      to={`/inventories/${
+                        summary_fields?.inventory?.kind === 'smart'
+                          ? 'smart_inventory'
+                          : 'inventory'
+                      }/${summary_fields?.inventory?.id}/details`}
+                    >
+                      {summary_fields?.inventory?.name}
+                    </Link>
+                  ) : (
+                    ' '
+                  )
                 }
               />
             )}

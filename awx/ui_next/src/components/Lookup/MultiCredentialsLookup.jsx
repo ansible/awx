@@ -194,9 +194,10 @@ function MultiCredentialsLookup(props) {
                 const hasSameVaultID = val =>
                   val?.inputs?.vault_id !== undefined &&
                   val?.inputs?.vault_id === item?.inputs?.vault_id;
-                const hasSameKind = val => val.kind === item.kind;
+                const hasSameCredentialType = val =>
+                  val.credential_type === item.credential_type;
                 const selectedItems = state.selectedItems.filter(i =>
-                  isVault ? !hasSameVaultID(i) : !hasSameKind(i)
+                  isVault ? !hasSameVaultID(i) : !hasSameCredentialType(i)
                 );
                 selectedItems.push(item);
                 return dispatch({

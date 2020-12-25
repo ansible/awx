@@ -13,6 +13,7 @@ import {
   useRouteMatch,
 } from 'react-router-dom';
 import RoutedTabs from '../../components/RoutedTabs';
+import { useConfig } from '../../contexts/Config';
 import useRequest from '../../util/useRequest';
 import AppendBody from '../../components/AppendBody';
 import ContentError from '../../components/ContentError';
@@ -27,10 +28,11 @@ import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../api';
 import TemplateSurvey from './TemplateSurvey';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
 
-function WorkflowJobTemplate({ i18n, me, setBreadcrumb }) {
+function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
   const location = useLocation();
-  const { id: templateId } = useParams();
   const match = useRouteMatch();
+  const { id: templateId } = useParams();
+  const { me = {} } = useConfig();
 
   const {
     result: { isNotifAdmin, template },
@@ -74,13 +76,16 @@ function WorkflowJobTemplate({ i18n, me, setBreadcrumb }) {
     return WorkflowJobTemplatesAPI.createSchedule(templateId, data);
   };
 
-  const loadScheduleOptions = () => {
+  const loadScheduleOptions = useCallback(() => {
     return WorkflowJobTemplatesAPI.readScheduleOptions(templateId);
-  };
+  }, [templateId]);
 
-  const loadSchedules = params => {
-    return WorkflowJobTemplatesAPI.readSchedules(templateId, params);
-  };
+  const loadSchedules = useCallback(
+    params => {
+      return WorkflowJobTemplatesAPI.readSchedules(templateId, params);
+    },
+    [templateId]
+  );
 
   const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
   const canAddAndEditSurvey =
@@ -210,6 +215,7 @@ function WorkflowJobTemplate({ i18n, me, setBreadcrumb }) {
                 id={Number(templateId)}
                 canToggleNotifications={isNotifAdmin}
                 apiModel={WorkflowJobTemplatesAPI}
+                showApprovalsToggle
               />
             </Route>
           )}

@@ -248,6 +248,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'awx.ui.context_processors.csp',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
@@ -661,7 +662,7 @@ INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
 # ----------------
 EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
-EC2_INSTANCE_ID_VAR = 'ec2_id'
+EC2_INSTANCE_ID_VAR = 'instance_id'
 EC2_EXCLUDE_EMPTY_GROUPS = True
 
 # ------------

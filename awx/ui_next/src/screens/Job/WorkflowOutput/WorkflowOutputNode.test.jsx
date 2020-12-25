@@ -14,6 +14,9 @@ const nodeWithJT = {
         status: 'successful',
         type: 'job',
       },
+      unified_job_template: {
+        name: 'Automation JT',
+      },
     },
     unifiedJobTemplate: {
       id: 77,
@@ -33,6 +36,9 @@ const nodeWithoutJT = {
         name: 'Automation JT 2',
         status: 'successful',
         type: 'job',
+      },
+      unified_job_template: {
+        name: 'Automation JT 2',
       },
     },
   },
@@ -80,7 +86,7 @@ describe('WorkflowOutputNode', () => {
         </WorkflowStateContext.Provider>
       </svg>
     );
-    expect(wrapper.contains(<p>Automation JT</p>)).toEqual(true);
+    expect(wrapper.text('p')).toContain('Automation JT');
     expect(wrapper.find('WorkflowOutputNode Elapsed').text()).toBe('00:00:07');
   });
   test('node contents displayed correctly when Job Template deleted', () => {
@@ -95,7 +101,7 @@ describe('WorkflowOutputNode', () => {
         </WorkflowStateContext.Provider>
       </svg>
     );
-    expect(wrapper.contains(<p>Automation JT 2</p>)).toEqual(true);
+    expect(wrapper.contains(<p>Automation JT 2</p>)).toBe(true);
     expect(wrapper.find('WorkflowOutputNode Elapsed').text()).toBe('00:00:07');
   });
   test('node contents displayed correctly when Job deleted', () => {

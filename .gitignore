@@ -33,6 +33,7 @@ awx/ui_next/src/locales/
 awx/ui_next/coverage/
 awx/ui_next/build
 awx/ui_next/.env.local
+awx/ui_next/instrumented
 rsyslog.pid
 tools/prometheus/data
 tools/docker-compose/Dockerfile
@@ -146,3 +147,5 @@ use_dev_supervisor.txt
 *.unison.tmp
 *.#
 /tools/docker-compose/overrides/
+/awx/ui_next/.ui-built
+/Dockerfile

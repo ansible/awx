@@ -8,8 +8,8 @@
       "modules": true
     }
   },
-  "plugins": ["react-hooks"],
-  "extends": ["airbnb", "prettier", "prettier/react"],
+  "plugins": ["react-hooks", "jsx-a11y"],
+  "extends": ["airbnb", "prettier", "prettier/react", "plugin:jsx-a11y/strict"],
   "settings": {
     "react": {
       "version": "16.5.2"

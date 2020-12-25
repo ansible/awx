@@ -34,7 +34,7 @@ function CopyButton({
     <>
       <Tooltip content={helperText.tooltip} position="top">
         <Button
-          isDisabled={isDisabled}
+          isDisabled={isLoading || isDisabled}
           aria-label={i18n._(t`Copy`)}
           variant="plain"
           onClick={copyItemToAPI}
