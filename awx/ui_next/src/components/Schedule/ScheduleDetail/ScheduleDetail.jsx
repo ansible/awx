@@ -201,15 +201,19 @@ function ScheduleDetail({ schedule, i18n }) {
               <Detail
                 label={i18n._(t`Inventory`)}
                 value={
-                  <Link
-                    to={`/inventories/${
-                      summary_fields.inventory.kind === 'smart'
-                        ? 'smart_inventory'
-                        : 'inventory'
-                    }/${summary_fields.inventory.id}/details`}
-                  >
-                    {summary_fields.inventory.name}
-                  </Link>
+                  summary_fields?.inventory ? (
+                    <Link
+                      to={`/inventories/${
+                        summary_fields?.inventory?.kind === 'smart'
+                          ? 'smart_inventory'
+                          : 'inventory'
+                      }/${summary_fields?.inventory?.id}/details`}
+                    >
+                      {summary_fields?.inventory?.name}
+                    </Link>
+                  ) : (
+                    ' '
+                  )
                 }
               />
             )}
@@ -225,7 +229,7 @@ function ScheduleDetail({ schedule, i18n }) {
             {ask_diff_mode_on_launch && typeof diff_mode === 'boolean' && (
               <Detail
                 label={i18n._(t`Show Changes`)}
-                value={diff_mode ? 'On' : 'Off'}
+                value={diff_mode ? i18n._(t`On`) : i18n._(t`Off`)}
               />
             )}
             {ask_credential_on_launch && (

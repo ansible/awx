@@ -25,6 +25,14 @@ class Root extends Base {
   logout() {
     return this.http.get(`${this.baseUrl}logout/`);
   }
+
+  readAssetVariables() {
+    // TODO: There's better ways of doing this. Build tools, scripts,
+    // automation etc. should relocate this variable file to an importable
+    // location in src prior to building. That said, a raw http call
+    // works for now.
+    return this.http.get('/static/media/default.strings.json');
+  }
 }
 
 export default Root;

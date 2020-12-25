@@ -2,6 +2,58 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 16.0.0 (December 10, 2020)
+- AWX now ships with a reimagined user interface.  **Please read this before upgrading:** https://groups.google.com/g/awx-project/c/KuT5Ao92HWo
+- Removed support for syncing inventory from Red Hat CloudForms - https://github.com/ansible/awx/commit/0b701b3b2
+- Removed support for Mercurial-based project updates - https://github.com/ansible/awx/issues/7932
+- Upgraded NodeJS to actively maintained LTS 14.15.1 - https://github.com/ansible/awx/pull/8766
+- Added Git-LFS to the default image build - https://github.com/ansible/awx/pull/8700
+- Added the ability to specify `metadata.labels` in the podspec for container groups - https://github.com/ansible/awx/issues/8486
+- Added support for Kubernetes pod annotations - https://github.com/ansible/awx/pull/8434
+- Added the ability to label the web container in local Docker installs - https://github.com/ansible/awx/pull/8449
+- Added additional metadata (as an extra var) to playbook runs to report the SCM branch name - https://github.com/ansible/awx/pull/8433
+- Fixed a bug that caused k8s installations to fail due to an incorrect Helm repo - https://github.com/ansible/awx/issues/8715
+- Fixed a bug that prevented certain Workflow Approval resources from being deleted - https://github.com/ansible/awx/pull/8612
+- Fixed a bug that prevented the deletion of inventories stuck in "pending deletion" state - https://github.com/ansible/awx/issues/8525
+- Fixed a display bug in webhook notifications with certain unicode characters - https://github.com/ansible/awx/issues/7400
+- Improved support for exporting dependent objects (Inventory Hosts and Groups) in the `awx export` CLI tool - https://github.com/ansible/awx/commit/607bc0788
+
+## 15.0.1 (October 20, 2020)
+- Added several optimizations to improve performance for a variety of high-load simultaneous job launch use cases https://github.com/ansible/awx/pull/8403
+- Added the ability to source roles and collections from requirements.yaml files (not just requirements.yml) - https://github.com/ansible/awx/issues/4540
+- awx.awx collection modules now provide a clearer error message for incompatible versions of awxkit - https://github.com/ansible/awx/issues/8127
+- Fixed a bug in notification messages that contain certain unicode characters - https://github.com/ansible/awx/issues/7400
+- Fixed a bug that prevents the deletion of Workflow Approval records - https://github.com/ansible/awx/issues/8305
+- Fixed a bug that broke the selection of webhook credentials - https://github.com/ansible/awx/issues/7892
+- Fixed a bug which can cause confusing behavior for social auth logins across distinct browser tabs - https://github.com/ansible/awx/issues/8154
+- Fixed several bugs in the output of Workflow Job Templates using the `awx export` tool - https://github.com/ansible/awx/issues/7798 https://github.com/ansible/awx/pull/7847
+- Fixed a race condition that can lead to missing hosts when running parallel inventory syncs - https://github.com/ansible/awx/issues/5571
+- Fixed an HTTP 500 error when certain LDAP group parameters aren't properly set - https://github.com/ansible/awx/issues/7622
+- Updated a few dependencies in response to several CVEs:
+    * CVE-2020-7720
+    * CVE-2020-7743
+    * CVE-2020-7676
+
+## 15.0.0 (September 30, 2020)
+- Added improved support for fetching Ansible collections from private Galaxy content sources (such as https://github.com/ansible/galaxy_ng) - https://github.com/ansible/awx/issues/7813
+  **Note:** as part of this change, new Organizations created in the AWX API will _no longer_ automatically synchronize roles and collections from galaxy.ansible.com by default.  More details on this change can be found at:  https://github.com/ansible/awx/issues/8341#issuecomment-707310633
+- AWX now utilizes a version of certifi that auto-discovers certificates in the system certificate store - https://github.com/ansible/awx/pull/8242
+- Added support for arbitrary custom inventory plugin configuration: https://github.com/ansible/awx/issues/5150
+- Added an optional setting to disable the auto-creation of organizations and teams on successful SAML login. - https://github.com/ansible/awx/pull/8069
+- Added a number of optimizations to AWX's callback receiver to improve the speed of stdout processing for simultaneous playbooks runs - https://github.com/ansible/awx/pull/8193 https://github.com/ansible/awx/pull/8191
+- Added the ability to use `!include` and `!import` constructors when constructing YAML for use with the AWX CLI - https://github.com/ansible/awx/issues/8135
+- Fixed a bug that prevented certain users from being able to edit approval nodes in Workflows - https://github.com/ansible/awx/pull/8253
+- Fixed a bug that broke password prompting for credentials in certain cases - https://github.com/ansible/awx/issues/8202
+- Fixed a bug which can cause PostgreSQL deadlocks when running many parallel playbooks against large shared inventories - https://github.com/ansible/awx/issues/8145
+- Fixed a bug which can cause delays in AWX's task manager when large numbers of simultaneous jobs are scheduled - https://github.com/ansible/awx/issues/7655
+- Fixed a bug which can cause certain scheduled jobs - those that run every X minute(s) or hour(s) - to fail to run at the proper time - https://github.com/ansible/awx/issues/8071
+- Fixed a performance issue for playbooks that store large amounts of data using the `set_stats` module - https://github.com/ansible/awx/issues/8006
+- Fixed a bug related to AWX's handling of the auth_path argument for the HashiVault KeyValue credential plugin - https://github.com/ansible/awx/pull/7991
+- Fixed a bug that broke support for Remote Archive SCM Type project syncs on platforms that utilize Python2 - https://github.com/ansible/awx/pull/8057
+- Updated to the latest version of Django Rest Framework to address CVE-2020-25626
+- Updated to the latest version of Django to address CVE-2020-24583 and CVE-2020-24584
+- Updated to the latest verson of channels_redis to address a bug that slowly causes Daphne processes to leak memory over time - https://github.com/django/channels_redis/issues/212
+
 ## 14.1.0 (Aug 25, 2020)
 - AWX images can now be built on ARM64 - https://github.com/ansible/awx/pull/7607
 - Added the Remote Archive SCM Type to support using immutable artifacts and releases (such as tarballs and zip files) as projects - https://github.com/ansible/awx/issues/7954
@@ -52,7 +104,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Fixed a bug that caused rsyslogd's configuration file to have world-readable file permissions, potentially leaking secrets (CVE-2020-10782)
 
 ## 12.0.0 (Jun 9, 2020)
-- Removed memcached as a dependency of AWX (https://github.com/ansible/awx/pull/7240) 
+- Removed memcached as a dependency of AWX (https://github.com/ansible/awx/pull/7240)
 - Moved to a single container image build instead of separate awx_web and awx_task images. The container image is just `awx` (https://github.com/ansible/awx/pull/7228)
 - Official AWX container image builds now use a two-stage container build process that notably reduces the size of our published images (https://github.com/ansible/awx/pull/7017)
 - Removed support for HipChat notifications ([EoL announcement](https://www.atlassian.com/partnerships/slack/faq#faq-98b17ca3-247f-423b-9a78-70a91681eff0)); all previously-created HipChat notification templates will be deleted due to this removal.

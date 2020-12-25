@@ -4,6 +4,7 @@ set -ue
 requirements_in="$(readlink -f ./requirements.in)"
 requirements_ansible_in="$(readlink -f ./requirements_ansible.in)"
 requirements="$(readlink -f ./requirements.txt)"
+requirements_git="$(readlink -f ./requirements_git.txt)"
 requirements_ansible="$(readlink -f ./requirements_ansible.txt)"
 pip_compile="pip-compile --no-header --quiet -r --allow-unsafe"
 
@@ -31,7 +32,11 @@ generate_requirements_v3() {
 
   install_deps
 
-  ${pip_compile} --output-file requirements.txt "${requirements_in}"
+  ${pip_compile} --output-file requirements.txt "${requirements_in}" "${requirements_git}"
+  # consider the git requirements for purposes of resolving deps
+  # Then remove any git+ lines from requirements.txt
+  cp requirements.txt requirements_tmp.txt
+  grep -v "^git+" requirements_tmp.txt > requirements.txt && rm requirements_tmp.txt
   ${pip_compile} --output-file requirements_ansible_py3.txt "${requirements_ansible_in}"
 }
 

@@ -231,7 +231,7 @@ class InventoryScript(HasCopy, HasCreate, base.Base):
             'inventory["{0}"]["vars"] = dict(ansible_host="127.0.0.1", ansible_connection="local")',
             'print(json.dumps(inventory))'
         ])
-        group_name = re.sub(r"[\']", "", "group-{}".format(random_utf8()))
+        group_name = re.sub(r"[\']", "", "group_{}".format(random_title(non_ascii=False)))
         host_names = [
             re.sub(
                 r"[\':]",
@@ -259,6 +259,7 @@ class Group(HasCreate, HasVariables, base.Base):
 
     dependencies = [Inventory]
     optional_dependencies = [Credential, InventoryScript]
+    NATURAL_KEY = ('name', 'inventory')
 
     @property
     def is_root_group(self):
@@ -367,6 +368,7 @@ page.register_page([resources.groups,
 class Host(HasCreate, HasVariables, base.Base):
 
     dependencies = [Inventory]
+    NATURAL_KEY = ('name', 'inventory')
 
     def payload(self, inventory, **kwargs):
         payload = PseudoNamespace(

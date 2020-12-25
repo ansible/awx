@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Formik } from 'formik';
 import { mountWithContexts } from '../../../../../../../testUtils/enzymeHelpers';
 import {
   InventorySourcesAPI,
@@ -7,18 +8,13 @@ import {
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
 } from '../../../../../../api';
+
 import NodeTypeStep from './NodeTypeStep';
 
 jest.mock('../../../../../../api/models/InventorySources');
 jest.mock('../../../../../../api/models/JobTemplates');
 jest.mock('../../../../../../api/models/Projects');
 jest.mock('../../../../../../api/models/WorkflowJobTemplates');
-
-const onUpdateDescription = jest.fn();
-const onUpdateName = jest.fn();
-const onUpdateNodeResource = jest.fn();
-const onUpdateNodeType = jest.fn();
-const onUpdateTimeout = jest.fn();
 
 describe('NodeTypeStep', () => {
   beforeAll(() => {
@@ -118,90 +114,50 @@ describe('NodeTypeStep', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <NodeTypeStep
-          onUpdateDescription={onUpdateDescription}
-          onUpdateName={onUpdateName}
-          onUpdateNodeResource={onUpdateNodeResource}
-          onUpdateNodeType={onUpdateNodeType}
-          onUpdateTimeout={onUpdateTimeout}
-        />
+        <Formik initialValues={{ nodeType: 'job_template' }}>
+          <NodeTypeStep />
+        </Formik>
       );
     });
     wrapper.update();
     expect(wrapper.find('AnsibleSelect').prop('value')).toBe('job_template');
     expect(wrapper.find('JobTemplatesList').length).toBe(1);
-    wrapper.find('Radio').simulate('click');
-    expect(onUpdateNodeResource).toHaveBeenCalledWith({
-      id: 1,
-      name: 'Test Job Template',
-      type: 'job_template',
-      url: '/api/v2/job_templates/1',
-    });
   });
-  test('It shows the project list when node type is project sync', async () => {
+  test('It shows the project list when node type is project', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <NodeTypeStep
-          nodeType="project_sync"
-          onUpdateDescription={onUpdateDescription}
-          onUpdateName={onUpdateName}
-          onUpdateNodeResource={onUpdateNodeResource}
-          onUpdateNodeType={onUpdateNodeType}
-          onUpdateTimeout={onUpdateTimeout}
-        />
+        <Formik initialValues={{ nodeType: 'project' }}>
+          <NodeTypeStep />
+        </Formik>
       );
     });
     wrapper.update();
-    expect(wrapper.find('AnsibleSelect').prop('value')).toBe('project_sync');
+    expect(wrapper.find('AnsibleSelect').prop('value')).toBe('project');
     expect(wrapper.find('ProjectsList').length).toBe(1);
-    wrapper.find('Radio').simulate('click');
-    expect(onUpdateNodeResource).toHaveBeenCalledWith({
-      id: 1,
-      name: 'Test Project',
-      type: 'project',
-      url: '/api/v2/projects/1',
-    });
   });
-  test('It shows the inventory source list when node type is inventory source sync', async () => {
+  test('It shows the inventory source list when node type is inventory source', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <NodeTypeStep
-          nodeType="inventory_source_sync"
-          onUpdateDescription={onUpdateDescription}
-          onUpdateName={onUpdateName}
-          onUpdateNodeResource={onUpdateNodeResource}
-          onUpdateNodeType={onUpdateNodeType}
-          onUpdateTimeout={onUpdateTimeout}
-        />
+        <Formik initialValues={{ nodeType: 'inventory_source' }}>
+          <NodeTypeStep />
+        </Formik>
       );
     });
     wrapper.update();
     expect(wrapper.find('AnsibleSelect').prop('value')).toBe(
-      'inventory_source_sync'
+      'inventory_source'
     );
     expect(wrapper.find('InventorySourcesList').length).toBe(1);
-    wrapper.find('Radio').simulate('click');
-    expect(onUpdateNodeResource).toHaveBeenCalledWith({
-      id: 1,
-      name: 'Test Inventory Source',
-      type: 'inventory_source',
-      url: '/api/v2/inventory_sources/1',
-    });
   });
   test('It shows the workflow job template list when node type is workflow job template', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <NodeTypeStep
-          nodeType="workflow_job_template"
-          onUpdateDescription={onUpdateDescription}
-          onUpdateName={onUpdateName}
-          onUpdateNodeResource={onUpdateNodeResource}
-          onUpdateNodeType={onUpdateNodeType}
-          onUpdateTimeout={onUpdateTimeout}
-        />
+        <Formik initialValues={{ nodeType: 'workflow_job_template' }}>
+          <NodeTypeStep />
+        </Formik>
       );
     });
     wrapper.update();
@@ -209,67 +165,60 @@ describe('NodeTypeStep', () => {
       'workflow_job_template'
     );
     expect(wrapper.find('WorkflowJobTemplatesList').length).toBe(1);
-    wrapper.find('Radio').simulate('click');
-    expect(onUpdateNodeResource).toHaveBeenCalledWith({
-      id: 1,
-      name: 'Test Workflow Job Template',
-      type: 'workflow_job_template',
-      url: '/api/v2/workflow_job_templates/1',
-    });
   });
   test('It shows the approval form fields when node type is approval', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <NodeTypeStep
-          nodeType="approval"
-          onUpdateDescription={onUpdateDescription}
-          onUpdateName={onUpdateName}
-          onUpdateNodeResource={onUpdateNodeResource}
-          onUpdateNodeType={onUpdateNodeType}
-          onUpdateTimeout={onUpdateTimeout}
-        />
+        <Formik
+          initialValues={{
+            nodeType: 'workflow_approval_template',
+            approvalName: '',
+            approvalDescription: '',
+            timeoutMinutes: 0,
+            timeoutSeconds: 0,
+          }}
+        >
+          <NodeTypeStep />
+        </Formik>
       );
     });
     wrapper.update();
-    expect(wrapper.find('AnsibleSelect').prop('value')).toBe('approval');
-    expect(wrapper.find('input#approval-name').length).toBe(1);
-    expect(wrapper.find('input#approval-description').length).toBe(1);
-    expect(wrapper.find('input#approval-timeout-minutes').length).toBe(1);
-    expect(wrapper.find('input#approval-timeout-seconds').length).toBe(1);
+    expect(wrapper.find('AnsibleSelect').prop('value')).toBe(
+      'workflow_approval_template'
+    );
+    expect(wrapper.find('FormField[label="Name"]').length).toBe(1);
+    expect(wrapper.find('FormField[label="Description"]').length).toBe(1);
+    expect(wrapper.find('input[name="timeoutMinutes"]').length).toBe(1);
+    expect(wrapper.find('input[name="timeoutSeconds"]').length).toBe(1);
 
     await act(async () => {
       wrapper.find('input#approval-name').simulate('change', {
-        target: { value: 'Test Approval', name: 'name' },
+        target: { value: 'Test Approval', name: 'approvalName' },
       });
-    });
-
-    expect(onUpdateName).toHaveBeenCalledWith('Test Approval');
-
-    await act(async () => {
       wrapper.find('input#approval-description').simulate('change', {
-        target: { value: 'Test Approval Description', name: 'description' },
+        target: {
+          value: 'Test Approval Description',
+          name: 'approvalDescription',
+        },
       });
-    });
-
-    expect(onUpdateDescription).toHaveBeenCalledWith(
-      'Test Approval Description'
-    );
-
-    await act(async () => {
-      wrapper.find('input#approval-timeout-minutes').simulate('change', {
+      wrapper.find('input[name="timeoutMinutes"]').simulate('change', {
         target: { value: 5, name: 'timeoutMinutes' },
       });
-    });
-
-    expect(onUpdateTimeout).toHaveBeenCalledWith(300);
-
-    await act(async () => {
-      wrapper.find('input#approval-timeout-seconds').simulate('change', {
+      wrapper.find('input[name="timeoutSeconds"]').simulate('change', {
         target: { value: 30, name: 'timeoutSeconds' },
       });
     });
 
-    expect(onUpdateTimeout).toHaveBeenCalledWith(330);
+    wrapper.update();
+
+    expect(wrapper.find('input#approval-name').prop('value')).toBe(
+      'Test Approval'
+    );
+    expect(wrapper.find('input#approval-description').prop('value')).toBe(
+      'Test Approval Description'
+    );
+    expect(wrapper.find('input[name="timeoutMinutes"]').prop('value')).toBe(5);
+    expect(wrapper.find('input[name="timeoutSeconds"]').prop('value')).toBe(30);
   });
 });

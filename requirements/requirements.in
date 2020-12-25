@@ -1,6 +1,7 @@
 aiohttp
 ansible-runner>=1.4.6
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
+asciichartpy
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
@@ -20,7 +21,7 @@ django-redis
 django-solo
 django-split-settings
 django-taggit
-djangorestframework
+djangorestframework>=3.12.1
 djangorestframework-yaml
 GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc
@@ -33,7 +34,6 @@ prometheus_client
 psycopg2
 pygerduty
 pyparsing
-python-radius
 python3-saml
 python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
 pyyaml>=5.3.1  # minimum version to pull in new pyyaml for CVE-2017-18342

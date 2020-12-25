@@ -1,8 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 
 import { InstanceGroupsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
@@ -102,8 +102,8 @@ function InstanceGroupList({ i18n }) {
     deleteItems: deleteInstanceGroups,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      await Promise.all(
+    useCallback(() => {
+      return Promise.all(
         selected.map(({ id }) => InstanceGroupsAPI.destroy(id))
       );
     }, [selected]),
@@ -152,19 +152,31 @@ function InstanceGroupList({ i18n }) {
     );
   }
 
-  const addButtonOptions = [
-    {
-      label: i18n._(t`Instance group`),
-      url: '/instance_groups/add',
-    },
-    {
-      label: i18n._(t`Container group`),
-      url: '/instance_groups/container_group/add',
-    },
-  ];
+  const addContainerGroup = i18n._(t`Add container group`);
+  const addInstanceGroup = i18n._(t`Add instance group`);
 
   const addButton = (
-    <AddDropDownButton key="add" dropdownItems={addButtonOptions} />
+    <AddDropDownButton
+      key="add"
+      dropdownItems={[
+        <DropdownItem
+          to="/instance_groups/container_group/add"
+          component={Link}
+          key={addContainerGroup}
+          aria-label={addContainerGroup}
+        >
+          {addContainerGroup}
+        </DropdownItem>,
+        <DropdownItem
+          to="/instance_groups/add"
+          component={Link}
+          key={addInstanceGroup}
+          aria-label={addInstanceGroup}
+        >
+          {addInstanceGroup}
+        </DropdownItem>,
+      ]}
+    />
   );
 
   const getDetailUrl = item => {

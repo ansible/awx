@@ -8,7 +8,7 @@ The `period` of the data can be adjusted with:
 
     ?period=month
 
-Where `month` can be replaced with `week`, or `day`.  `month` is the default.
+Where `month` can be replaced with `week`, `two_weeks`, or `day`.  `month` is the default.
 
 The type of job can be filtered with:
 

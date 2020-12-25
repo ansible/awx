@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect } from 'react';
-import { arrayOf, string, func, object, bool } from 'prop-types';
+import { arrayOf, string, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { InstanceGroupsAPI } from '../../api';
+import { InstanceGroup } from '../../types';
 import { getQSConfig, parseQueryString } from '../../util/qs';
-import { FieldTooltip } from '../FormField';
+import Popover from '../Popover';
 import OptionsList from '../OptionsList';
 import useRequest from '../../util/useRequest';
 import Lookup from './Lookup';
@@ -68,7 +69,7 @@ function InstanceGroupsLookup(props) {
     <FormGroup
       className={className}
       label={i18n._(t`Instance Groups`)}
-      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
+      labelIcon={tooltip && <Popover content={tooltip} />}
       fieldId="org-instance-groups"
     >
       <Lookup
@@ -120,7 +121,7 @@ function InstanceGroupsLookup(props) {
 }
 
 InstanceGroupsLookup.propTypes = {
-  value: arrayOf(object).isRequired,
+  value: arrayOf(InstanceGroup).isRequired,
   tooltip: string,
   onChange: func.isRequired,
   className: string,

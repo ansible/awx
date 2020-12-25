@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { ApplicationsAPI } from '../../../api';
@@ -119,6 +120,9 @@ describe('<ApplicationDetails/>', () => {
     expect(wrapper.find('Detail[label="Client type"]').prop('value')).toBe(
       'Confidential'
     );
+    expect(wrapper.find('Detail[label="Client ID"]').prop('value')).toBe(
+      'b1dmj8xzkbFm1ZQ27ygw2ZeE9I0AXqqeL74fiyk4'
+    );
     expect(wrapper.find('Button[aria-label="Edit"]').prop('to')).toBe(
       '/applications/10/edit'
     );
@@ -126,21 +130,27 @@ describe('<ApplicationDetails/>', () => {
   });
 
   test('should delete properly', async () => {
-    ApplicationsAPI.destroy.mockResolvedValue({ data: {} });
+    const history = createMemoryHistory({
+      initialEntries: ['/applications/1/details'],
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <ApplicationDetails
           application={application}
           authorizationOptions={authorizationOptions}
           clientTypeOptions={clientTypeOptions}
-        />
+        />,
+        {
+          context: { router: { history } },
+        }
       );
     });
-    await act(async () =>
-      wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
-    );
-    wrapper.update();
-    await act(async () => wrapper.find('DeleteButton').prop('onConfirm')());
+    expect(history.location.pathname).toEqual('/applications/1/details');
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
+    expect(ApplicationsAPI.destroy).toHaveBeenCalledTimes(1);
+    expect(history.location.pathname).toBe('/applications');
     expect(ApplicationsAPI.destroy).toBeCalledWith(10);
   });
 

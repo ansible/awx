@@ -9,10 +9,14 @@ import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import OrganizationListItem from './OrganizationListItem';
 
@@ -81,7 +85,7 @@ function OrganizationsList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(({ id }) => OrganizationsAPI.destroy(id))
       );
@@ -117,19 +121,22 @@ function OrganizationsList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={organizations}
             itemCount={organizationCount}
             pluralizedItemName={i18n._(t`Organizations`)}
             qsConfig={QS_CONFIG}
-            onRowClick={handleSelect}
             toolbarSearchColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name__icontains',
                 isDefault: true,
+              },
+              {
+                name: i18n._(t`Description`),
+                key: 'description__icontains',
               },
               {
                 name: i18n._(t`Created By (Username)`),
@@ -140,14 +147,16 @@ function OrganizationsList({ i18n }) {
                 key: 'modified_by__username__icontains',
               },
             ]}
-            toolbarSortColumns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-              },
-            ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Members`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Teams`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              </HeaderRow>
+            }
             renderToolbar={props => (
               <DataListToolbar
                 {...props}
@@ -168,10 +177,11 @@ function OrganizationsList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={o => (
+            renderRow={(o, index) => (
               <OrganizationListItem
                 key={o.id}
                 organization={o}
+                rowIndex={index}
                 detailUrl={`${match.url}/${o.id}`}
                 isSelected={selected.some(row => row.id === o.id)}
                 onSelect={() => handleSelect(o)}

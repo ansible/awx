@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { func, shape } from 'prop-types';
-import { Formik, useField } from 'formik';
+import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
@@ -21,11 +21,21 @@ import {
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 import { VariablesField } from '../../../components/CodeMirrorInput';
 
-function ContainerGroupFormFields({ i18n }) {
-  const [credentialField, credentialMeta, credentialHelpers] = useField(
-    'credential'
-  );
+function ContainerGroupFormFields({ i18n, instanceGroup }) {
+  const { setFieldValue } = useFormikContext();
+  const [credentialField, credentialMeta, credentialHelpers] = useField({
+    name: 'credential',
+    validate: required(i18n._(t`Select a value for this field`), i18n),
+  });
+
   const [overrideField] = useField('override');
+
+  const onCredentialChange = useCallback(
+    value => {
+      setFieldValue('credential', value);
+    },
+    [setFieldValue]
+  );
 
   return (
     <>
@@ -43,14 +53,13 @@ function ContainerGroupFormFields({ i18n }) {
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}
         onBlur={() => credentialHelpers.setTouched()}
-        onChange={value => {
-          credentialHelpers.setValue(value);
-        }}
+        onChange={onCredentialChange}
         value={credentialField.value}
         required
         tooltip={i18n._(
           t`Credential to authenticate with Kubernetes or OpenShift.  Must be of type "Kubernetes/OpenShift API Bearer Token”.`
         )}
+        autoPopulate={!instanceGroup?.id}
       />
 
       <FormGroup
@@ -114,7 +123,7 @@ function ContainerGroupForm({
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
-            <ContainerGroupFormFields {...rest} />
+            <ContainerGroupFormFields instanceGroup={instanceGroup} {...rest} />
             {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
               onCancel={onCancel}

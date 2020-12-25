@@ -264,4 +264,8 @@ describe('<WorkflowJobTemplateForm/>', () => {
 
     expect(handleCancel).toBeCalled();
   });
+
+  test('should not show inventory field as required', () => {
+    expect(wrapper.find('InventoryLookup').prop('required')).toBe(false);
+  });
 });

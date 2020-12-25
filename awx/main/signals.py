@@ -121,6 +121,27 @@ def sync_superuser_status_to_rbac(instance, **kwargs):
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
 
 
+def sync_rbac_to_superuser_status(instance, sender, **kwargs):
+    'When the is_superuser flag is false but a user has the System Admin role, update the database to reflect that'
+    if kwargs['action'] in ['post_add', 'post_remove', 'post_clear']:
+        new_status_value = bool(kwargs['action'] == 'post_add')
+        if hasattr(instance, 'singleton_name'):  # duck typing, role.members.add() vs user.roles.add()
+            role = instance
+            if role.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR:
+                if kwargs['pk_set']:
+                    kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).update(is_superuser=new_status_value)
+                elif kwargs['action'] == 'post_clear':
+                    kwargs['model'].objects.all().update(is_superuser=False)
+        else:
+            user = instance
+            if kwargs['action'] == 'post_clear':
+                user.is_superuser = False
+                user.save(update_fields=['is_superuser'])
+            elif kwargs['model'].objects.filter(pk__in=kwargs['pk_set'], singleton_name=ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).exists():
+                user.is_superuser = new_status_value
+                user.save(update_fields=['is_superuser'])
+
+
 def rbac_activity_stream(instance, sender, **kwargs):
     # Only if we are associating/disassociating
     if kwargs['action'] in ['pre_add', 'pre_remove']:
@@ -197,6 +218,7 @@ m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
+m2m_changed.connect(sync_rbac_to_superuser_status, Role.members.through)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobTemplate)
 

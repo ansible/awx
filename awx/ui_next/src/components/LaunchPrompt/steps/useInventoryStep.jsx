@@ -1,38 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { t } from '@lingui/macro';
+import { useField } from 'formik';
 import InventoryStep from './InventoryStep';
 import StepName from './StepName';
 
 const STEP_ID = 'inventory';
 
-export default function useInventoryStep(config, resource, visitedSteps, i18n) {
-  const [stepErrors, setStepErrors] = useState({});
-
-  const validate = values => {
-    if (
-      !config.ask_inventory_on_launch ||
-      (['workflow_job', 'workflow_job_template'].includes(resource.type) &&
-        !resource.inventory)
-    ) {
-      return {};
-    }
-    const errors = {};
-    if (!values.inventory) {
-      errors.inventory = i18n._(t`An inventory must be selected`);
-    }
-    setStepErrors(errors);
-    return errors;
-  };
-
-  const hasErrors = visitedSteps[STEP_ID] && Object.keys(stepErrors).length > 0;
+export default function useInventoryStep(
+  launchConfig,
+  resource,
+  i18n,
+  visitedSteps
+) {
+  const [, meta] = useField('inventory');
+  const formError =
+    Object.keys(visitedSteps).includes(STEP_ID) && (!meta.value || meta.error);
 
   return {
-    step: getStep(config, hasErrors, i18n),
-    initialValues: getInitialValues(config, resource),
-    validate,
+    step: getStep(launchConfig, i18n, formError),
+    initialValues: getInitialValues(launchConfig, resource),
     isReady: true,
     contentError: null,
-    formError: stepErrors,
+    formError: launchConfig.ask_inventory_on_launch && formError,
     setTouched: setFieldsTouched => {
       setFieldsTouched({
         inventory: true,
@@ -40,22 +29,27 @@ export default function useInventoryStep(config, resource, visitedSteps, i18n) {
     },
   };
 }
-
-function getStep(config, hasErrors, i18n) {
-  if (!config.ask_inventory_on_launch) {
+function getStep(launchConfig, i18n, formError) {
+  if (!launchConfig.ask_inventory_on_launch) {
     return null;
   }
   return {
     id: STEP_ID,
-    name: <StepName hasErrors={hasErrors}>{i18n._(t`Inventory`)}</StepName>,
+    name: (
+      <StepName hasErrors={formError} id="inventory-step">
+        {i18n._(t`Inventory`)}
+      </StepName>
+    ),
     component: <InventoryStep i18n={i18n} />,
+    enableNext: true,
   };
 }
 
-function getInitialValues(config, resource) {
-  if (!config.ask_inventory_on_launch) {
+function getInitialValues(launchConfig, resource) {
+  if (!launchConfig.ask_inventory_on_launch) {
     return {};
   }
+
   return {
     inventory: resource?.summary_fields?.inventory || null,
   };

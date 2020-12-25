@@ -42,3 +42,4 @@ class CustomLogoField(fields.CharField):
         except (TypeError, binascii.Error):
             self.fail('invalid_data')
         return data
+

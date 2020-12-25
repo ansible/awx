@@ -10,14 +10,16 @@ import FormField, {
   CheckboxField,
   PasswordField,
   FormSubmitError,
-  FieldTooltip,
 } from '../../../components/FormField';
 import AnsibleSelect from '../../../components/AnsibleSelect';
+import Popover from '../../../components/Popover';
 import {
   required,
   noWhiteSpace,
   combine,
   maxLength,
+  integer,
+  number as numberValidator,
 } from '../../../util/validators';
 
 function AnswerTypeField({ i18n }) {
@@ -28,9 +30,9 @@ function AnswerTypeField({ i18n }) {
 
   return (
     <FormGroup
-      label={i18n._(t`Answer Type`)}
+      label={i18n._(t`Answer type`)}
       labelIcon={
-        <FieldTooltip
+        <Popover
           content={i18n._(
             t`Choose an answer type or format you want as the prompt for the user.
           Refer to the Ansible Tower Documentation for more additional
@@ -89,6 +91,7 @@ function SurveyQuestionForm({
 
   return (
     <Formik
+      enableReinitialize
       initialValues={{
         question_name: question?.question_name || '',
         question_description: question?.question_description || '',
@@ -124,7 +127,7 @@ function SurveyQuestionForm({
               id="question-variable"
               name="variable"
               type="text"
-              label={i18n._(t`Answer Variable Name`)}
+              label={i18n._(t`Answer variable name`)}
               validate={combine([noWhiteSpace(i18n), required(null, i18n)])}
               isRequired
               tooltip={i18n._(
@@ -177,7 +180,15 @@ function SurveyQuestionForm({
               <FormField
                 id="question-default"
                 name="default"
-                validate={maxLength(formik.values.max, i18n)}
+                validate={
+                  {
+                    text: maxLength(formik.values.max, i18n),
+                    integer: integer(i18n),
+                    float: numberValidator(i18n),
+                  }[formik.values.type]
+                }
+                min={formik.values.min}
+                max={formik.values.max}
                 type={formik.values.type === 'text' ? 'text' : 'number'}
                 label={i18n._(t`Default answer`)}
               />

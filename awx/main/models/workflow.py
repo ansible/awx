@@ -674,7 +674,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         return self.status == 'running'
 
 
-class WorkflowApprovalTemplate(UnifiedJobTemplate):
+class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
 
     FIELDS_TO_PRESERVE_AT_COPY = ['description', 'timeout',]
 
@@ -701,6 +701,12 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate):
     @property
     def workflow_job_template(self):
         return self.workflowjobtemplatenodes.first().workflow_job_template
+
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_related_jobs(self):
+        return UnifiedJob.objects.filter(unified_job_template=self)
 
 
 class WorkflowApproval(UnifiedJob, JobNotificationMixin):
@@ -775,6 +781,10 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.save(update_fields=['started'])
         self.send_approval_notification('running')
         return can_start
+
+    @property
+    def event_processing_finished(self):
+        return True
 
     def send_approval_notification(self, approval_status):
         from awx.main.tasks import send_notifications  # avoid circular import

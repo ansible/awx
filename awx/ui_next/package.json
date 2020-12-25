@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "10.x"
+    "node": "14.x"
   },
   "dependencies": {
     "@lingui/react": "^2.9.1",
-    "@patternfly/patternfly": "^4.23.3",
-    "@patternfly/react-core": "^4.32.1",
-    "@patternfly/react-icons": "^4.5.0",
+    "@patternfly/patternfly": "4.70.2",
+    "@patternfly/react-core": "4.84.3",
+    "@patternfly/react-icons": "4.7.22",
+    "@patternfly/react-table": "^4.19.15",
     "ansi-to-html": "^0.6.11",
     "axios": "^0.18.1",
     "codemirror": "^5.47.0",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@babel/polyfill": "^7.8.7",
+    "@cypress/instrument-cra": "^1.4.0",
     "@lingui/cli": "^2.9.2",
     "@lingui/macro": "^2.9.1",
     "@nteract/mockument": "^1.0.4",
@@ -42,18 +44,19 @@
     "eslint-config-prettier": "^5.0.0",
     "eslint-import-resolver-webpack": "0.11.1",
     "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.11.1",
     "eslint-plugin-react-hooks": "^2.2.0",
     "http-proxy-middleware": "^1.0.3",
     "jest-websocket-mock": "^2.0.2",
     "mock-socket": "^9.0.3",
     "prettier": "^1.18.2",
-    "react-scripts": "^3.4.3"
+    "react-scripts": "^3.4.4"
   },
   "scripts": {
     "start": "PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",
-    "build": "react-scripts build",
+    "start-instrumented": "DEBUG=instrument-cra PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts -r @cypress/instrument-cra start",
+    "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
     "test": "TZ='UTC' react-scripts test --coverage --watchAll=false",
     "test-watch": "TZ='UTC' react-scripts test",
     "eject": "react-scripts eject",

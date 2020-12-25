@@ -38,17 +38,16 @@ export default function useRequest(makeRequest, initialValue) {
     request: useCallback(
       async (...args) => {
         setIsLoading(true);
-        if (isMounted.current) {
-          setError(null);
-        }
         try {
           const response = await makeRequest(...args);
           if (isMounted.current) {
             setResult(response);
+            setError(null);
           }
         } catch (err) {
           if (isMounted.current) {
             setError(err);
+            setResult(initialValue);
           }
         } finally {
           if (isMounted.current) {
@@ -56,6 +55,7 @@ export default function useRequest(makeRequest, initialValue) {
           }
         }
       },
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
       [makeRequest]
     ),
     setValue: setResult,

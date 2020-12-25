@@ -1,25 +1,43 @@
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
+import ContentError from '../../../components/ContentError';
 import LDAPDetail from './LDAPDetail';
 import LDAPEdit from './LDAPEdit';
 
 function LDAP({ i18n }) {
-  const baseUrl = '/settings/ldap';
+  const baseURL = '/settings/ldap';
+  const baseRoute = useRouteMatch({ path: '/settings/ldap', exact: true });
+  const categoryRoute = useRouteMatch({
+    path: '/settings/ldap/:category',
+    exact: true,
+  });
 
   return (
     <PageSection>
       <Card>
-        {i18n._(t`LDAP settings`)}
         <Switch>
-          <Redirect from={baseUrl} to={`${baseUrl}/details`} exact />
-          <Route path={`${baseUrl}/details`}>
+          {baseRoute && <Redirect to={`${baseURL}/default/details`} exact />}
+          {categoryRoute && (
+            <Redirect
+              to={`${baseURL}/${categoryRoute.params.category}/details`}
+              exact
+            />
+          )}
+          <Route path={`${baseURL}/:category/details`}>
             <LDAPDetail />
           </Route>
-          <Route path={`${baseUrl}/edit`}>
+          <Route path={`${baseURL}/:category/edit`}>
             <LDAPEdit />
+          </Route>
+          <Route key="not-found" path={`${baseURL}/*`}>
+            <ContentError isNotFound>
+              <Link to={`${baseURL}/default/details`}>
+                {i18n._(t`View LDAP Settings`)}
+              </Link>
+            </ContentError>
           </Route>
         </Switch>
       </Card>

@@ -24,20 +24,16 @@ function UserToken({ i18n, setBreadcrumb, user }) {
     isLoading,
     error,
     request: fetchToken,
-    result: { token, actions },
+    result: { token },
   } = useRequest(
     useCallback(async () => {
-      const [response, actionsResponse] = await Promise.all([
-        TokensAPI.readDetail(tokenId),
-        TokensAPI.readOptions(),
-      ]);
+      const response = await TokensAPI.readDetail(tokenId);
       setBreadcrumb(user, response.data);
       return {
         token: response.data,
-        actions: actionsResponse.data.actions.POST,
       };
     }, [setBreadcrumb, user, tokenId]),
-    { token: null, actions: null }
+    { token: null }
   );
   useEffect(() => {
     fetchToken();
@@ -97,7 +93,7 @@ function UserToken({ i18n, setBreadcrumb, user }) {
         />
         {token && (
           <Route path="/users/:id/tokens/:tokenId/details">
-            <UserTokenDetail canEditOrDelete={actions} token={token} />
+            <UserTokenDetail token={token} />
           </Route>
         )}
         <Route key="not-found" path="*">

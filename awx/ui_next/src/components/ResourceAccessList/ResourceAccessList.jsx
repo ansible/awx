@@ -66,7 +66,7 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       if (typeof deletionRole.team_id !== 'undefined') {
         return TeamsAPI.disassociateRole(deletionRole.team_id, deletionRole.id);
       }

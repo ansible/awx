@@ -96,6 +96,37 @@ describe('useRequest hooks', () => {
       expect(wrapper.find('TestInner').prop('error')).toEqual(error);
     });
 
+    test('should reset error/result on each request', async () => {
+      const error = new Error('error');
+      const makeRequest = throwError => {
+        if (throwError) {
+          throw error;
+        }
+
+        return { data: 'foo' };
+      };
+      const wrapper = mount(<Test makeRequest={makeRequest} />);
+
+      await act(async () => {
+        wrapper.find('TestInner').invoke('request')(true);
+      });
+      wrapper.update();
+      expect(wrapper.find('TestInner').prop('result')).toEqual({});
+      expect(wrapper.find('TestInner').prop('error')).toEqual(error);
+      await act(async () => {
+        wrapper.find('TestInner').invoke('request')();
+      });
+      wrapper.update();
+      expect(wrapper.find('TestInner').prop('result')).toEqual({ data: 'foo' });
+      expect(wrapper.find('TestInner').prop('error')).toEqual(null);
+      await act(async () => {
+        wrapper.find('TestInner').invoke('request')(true);
+      });
+      wrapper.update();
+      expect(wrapper.find('TestInner').prop('result')).toEqual({});
+      expect(wrapper.find('TestInner').prop('error')).toEqual(error);
+    });
+
     test('should not update state after unmount', async () => {
       const makeRequest = jest.fn();
       let resolve;

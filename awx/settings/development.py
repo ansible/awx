@@ -184,3 +184,6 @@ else:
         pass
 
 AWX_CALLBACK_PROFILE = True
+
+if 'sqlite3' not in DATABASES['default']['ENGINE']: # noqa
+    DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63]) # noqa

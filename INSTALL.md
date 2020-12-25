@@ -60,7 +60,7 @@ Please note that deploying from `HEAD` (or the latest commit) is **not** stable,
 
 For more on how to clone the repo, view [git clone help](https://git-scm.com/docs/git-clone).
 
-Once you have a local copy, run commands within the root of the project tree.
+Once you have a local copy, run the commands in the following sections from the root of the project tree.
 
 ### AWX branding
 
@@ -78,10 +78,12 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [docker](https://pypi.org/project/docker/) Python module
     + This is incompatible with `docker-py`. If you have previously installed `docker-py`, please uninstall it.
     + We use this module instead of `docker-py` because it is what the `docker-compose` Python module requires.
+- [community.general.docker_image collection](https://docs.ansible.com/ansible/latest/collections/community/general/docker_image_module.html)
+    + This is only required if you are using Ansible >= 2.10
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/) Requires Version 1.8.4+
 - Python 3.6+
-- [Node 10.x LTS version](https://nodejs.org/en/download/)
+- [Node 14.x LTS version](https://nodejs.org/en/download/)
     + This is only required if you're [building your own container images](#official-vs-building-images) with `use_container_for_build=false`
 - [NPM 6.x LTS](https://docs.npmjs.com/)
     + This is only required if you're [building your own container images](#official-vs-building-images) with `use_container_for_build=false`
@@ -662,6 +664,7 @@ The preferred way to install the AWX CLI is through pip directly from PyPI:
 
 To build the docs, spin up a real AWX server, `pip3 install sphinx sphinxcontrib-autoprogram`, and run:
 
+    ~ cd awxkit/awxkit/cli/docs
     ~ TOWER_HOST=https://awx.example.org TOWER_USERNAME=example TOWER_PASSWORD=secret make clean html
     ~ cd build/html/ && python -m http.server
     Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ..

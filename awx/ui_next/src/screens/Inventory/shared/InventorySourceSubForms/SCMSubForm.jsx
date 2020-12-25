@@ -8,9 +8,9 @@ import useRequest from '../../../../util/useRequest';
 import { required } from '../../../../util/validators';
 
 import AnsibleSelect from '../../../../components/AnsibleSelect';
-import { FieldTooltip } from '../../../../components/FormField';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
+import Popover from '../../../../components/Popover';
 import {
   OptionsField,
   SourceVarsField,
@@ -21,7 +21,7 @@ import {
 } from './SharedFields';
 
 const SCMSubForm = ({ autoPopulateProject, i18n }) => {
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField] = useField('credential');
   const [projectField, projectMeta, projectHelpers] = useField({
     name: 'source_project',
@@ -47,16 +47,20 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
   useEffect(() => {
     if (projectMeta.initialValue) {
       fetchSourcePath(projectMeta.initialValue.id);
-    }
+      if (sourcePathField.value === '') {
+        sourcePathHelpers.setValue('/ (project root)');
+      }
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchSourcePath, projectMeta.initialValue]);
 
   const handleProjectUpdate = useCallback(
     value => {
-      setFieldValue('source_path', '');
       setFieldValue('source_project', value);
+      setFieldValue('source_path', '');
+      setFieldTouched('source_path', false);
       fetchSourcePath(value.id);
     },
-    [fetchSourcePath, setFieldValue]
+    [fetchSourcePath, setFieldValue, setFieldTouched]
   );
 
   const handleCredentialUpdate = useCallback(
@@ -95,7 +99,7 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
         isRequired
         label={i18n._(t`Inventory file`)}
         labelIcon={
-          <FieldTooltip
+          <Popover
             content={i18n._(t`Select the inventory file
           to be synced by this source. You can select from
           the dropdown or enter a file within the input.`)}

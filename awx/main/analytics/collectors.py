@@ -33,9 +33,9 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 '''
 
 
-@register('config', '1.1', description=_('General platform configuration.'))
+@register('config', '1.2', description=_('General platform configuration.'))
 def config(since, **kwargs):
-    license_info = get_license(show_key=False)
+    license_info = get_license()
     install_type = 'traditional'
     if os.environ.get('container') == 'oci':
         install_type = 'openshift'
@@ -194,7 +194,6 @@ def instance_info(since, include_hostnames=False, **kwargs):
     return info
 
 
-@register('job_counts', '1.0', description=_('Counts of jobs by status'))
 def job_counts(since, **kwargs):
     counts = {}
     counts['total_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()
@@ -204,7 +203,6 @@ def job_counts(since, **kwargs):
     return counts
     
     
-@register('job_instance_counts', '1.0', description=_('Counts of jobs by execution node'))
 def job_instance_counts(since, **kwargs):
     counts = {}
     job_types = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
@@ -282,14 +280,16 @@ def _copy_table(table, query, path):
     return file.file_list()
 
 
-@register('events_table', '1.1', format='csv', description=_('Automation task records'), expensive=True)
+@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=True)
 def events_table(since, full_path, until, **kwargs):
     events_query = '''COPY (SELECT main_jobevent.id, 
                               main_jobevent.created,
+                              main_jobevent.modified,
                               main_jobevent.uuid,
                               main_jobevent.parent_uuid,
                               main_jobevent.event, 
                               main_jobevent.event_data::json->'task_action' AS task_action,
+                              (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
                               main_jobevent.failed, 
                               main_jobevent.changed, 
                               main_jobevent.playbook, 

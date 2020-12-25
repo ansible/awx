@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
   Form,
@@ -8,8 +9,9 @@ import {
   SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
-import FormField, { FieldTooltip } from '../../FormField';
+import FormField from '../../FormField';
 import AnsibleSelect from '../../AnsibleSelect';
+import Popover from '../../Popover';
 import {
   required,
   minMaxValue,
@@ -20,7 +22,7 @@ import {
 } from '../../../util/validators';
 import { Survey } from '../../../types';
 
-function SurveyStep({ survey, i18n }) {
+function SurveyStep({ surveyConfig, i18n }) {
   const fieldTypes = {
     text: TextField,
     textarea: TextField,
@@ -32,7 +34,7 @@ function SurveyStep({ survey, i18n }) {
   };
   return (
     <Form>
-      {survey.spec.map(question => {
+      {surveyConfig.spec.map(question => {
         const Field = fieldTypes[question.type];
         return (
           <Field key={question.variable} question={question} i18n={i18n} />
@@ -42,7 +44,7 @@ function SurveyStep({ survey, i18n }) {
   );
 }
 SurveyStep.propTypes = {
-  survey: Survey.isRequired,
+  surveyConfig: Survey.isRequired,
 };
 
 function TextField({ question, i18n }) {
@@ -98,7 +100,7 @@ function MultipleChoiceField({ question }) {
       isRequired={question.required}
       validated={isValid ? 'default' : 'error'}
       label={question.question_name}
-      labelIcon={<FieldTooltip content={question.question_description} />}
+      labelIcon={<Popover content={question.question_description} />}
     >
       <AnsibleSelect
         id={id}
@@ -114,33 +116,46 @@ function MultipleChoiceField({ question }) {
   );
 }
 
-function MultiSelectField({ question }) {
+function MultiSelectField({ question, i18n }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [field, meta, helpers] = useField(`survey_${question.variable}`);
+  const [field, meta, helpers] = useField({
+    name: `survey_${question.variable}`,
+    validate: question.isrequired ? required(null, i18n) : null,
+  });
   const id = `survey-question-${question.variable}`;
-  const isValid = !(meta.touched && meta.error);
+  const hasActualValue = !question.required || meta.value?.length > 0;
+  const isValid = !meta.touched || (!meta.error && hasActualValue);
+
   return (
     <FormGroup
       fieldId={id}
-      helperTextInvalid={meta.error}
+      helperTextInvalid={
+        meta.error ||
+        i18n._(t`At least one value must be selected for this field.`)
+      }
       isRequired={question.required}
       validated={isValid ? 'default' : 'error'}
       label={question.question_name}
-      labelIcon={<FieldTooltip content={question.question_description} />}
+      labelIcon={<Popover content={question.question_description} />}
     >
       <Select
         variant={SelectVariant.typeaheadMulti}
         id={id}
         onToggle={setIsOpen}
         onSelect={(event, option) => {
-          if (field.value.includes(option)) {
+          if (field?.value?.includes(option)) {
             helpers.setValue(field.value.filter(o => o !== option));
           } else {
             helpers.setValue(field.value.concat(option));
           }
+          helpers.setTouched(true);
         }}
         isOpen={isOpen}
         selections={field.value}
+        onClear={() => {
+          helpers.setTouched(true);
+          helpers.setValue([]);
+        }}
       >
         {question.choices.split('\n').map(opt => (
           <SelectOption key={opt} value={opt} />

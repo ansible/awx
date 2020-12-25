@@ -34,9 +34,12 @@ const StyledExclamationTriangleIcon = styled(ExclamationTriangleIcon)`
 function WorkflowNodeHelp({ node, i18n }) {
   let nodeType;
   const job = node?.originalNodeObject?.summary_fields?.job;
-  if (node.unifiedJobTemplate || job) {
-    const type = node.unifiedJobTemplate
-      ? node.unifiedJobTemplate.unified_job_type || node.unifiedJobTemplate.type
+  const unifiedJobTemplate =
+    node?.fullUnifiedJobTemplate ||
+    node?.originalNodeObject?.summary_fields?.unified_job_template;
+  if (unifiedJobTemplate || job) {
+    const type = unifiedJobTemplate
+      ? unifiedJobTemplate.unified_job_type || unifiedJobTemplate.type
       : job.type;
     switch (type) {
       case 'job_template':
@@ -113,7 +116,7 @@ function WorkflowNodeHelp({ node, i18n }) {
 
   return (
     <>
-      {!node.unifiedJobTemplate && (!job || job.type !== 'workflow_approval') && (
+      {!unifiedJobTemplate && (!job || job.type !== 'workflow_approval') && (
         <>
           <ResourceDeleted job={job}>
             <StyledExclamationTriangleIcon />
@@ -149,12 +152,12 @@ function WorkflowNodeHelp({ node, i18n }) {
           )}
         </GridDL>
       )}
-      {node.unifiedJobTemplate && !job && (
+      {unifiedJobTemplate && !job && (
         <GridDL>
           <dt>
             <b>{i18n._(t`Name`)}</b>
           </dt>
-          <dd id="workflow-node-help-name">{node.unifiedJobTemplate.name}</dd>
+          <dd id="workflow-node-help-name">{unifiedJobTemplate.name}</dd>
           <dt>
             <b>{i18n._(t`Type`)}</b>
           </dt>

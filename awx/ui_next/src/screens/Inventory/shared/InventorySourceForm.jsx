@@ -13,18 +13,15 @@ import AnsibleSelect from '../../../components/AnsibleSelect';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import FormField, {
-  FieldTooltip,
-  FormSubmitError,
-} from '../../../components/FormField';
+import FormField, { FormSubmitError } from '../../../components/FormField';
 import {
   FormColumnLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
+import Popover from '../../../components/Popover';
 
 import {
   AzureSubForm,
-  CloudFormsSubForm,
   EC2SubForm,
   GCESubForm,
   OpenStackSubForm,
@@ -47,6 +44,7 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
     values,
     initialValues,
     resetForm,
+    setFieldTouched,
     setFieldValue,
   } = useFormikContext();
   const [sourceField, sourceMeta] = useField({
@@ -92,6 +90,7 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
       };
       Object.keys(defaults).forEach(label => {
         setFieldValue(label, defaults[label]);
+        setFieldTouched(label, false);
       });
     }
   };
@@ -143,7 +142,7 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
           fieldId="custom-virtualenv"
           label={i18n._(t`Ansible Environment`)}
           labelIcon={
-            <FieldTooltip
+            <Popover
               content={i18n._(t`Select the custom
             Python virtual environment for this
             inventory source sync to run on.`)}
@@ -178,7 +177,6 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
                     sourceOptions={sourceOptions}
                   />
                 ),
-                cloudforms: <CloudFormsSubForm />,
                 ec2: <EC2SubForm sourceOptions={sourceOptions} />,
                 gce: (
                   <GCESubForm
@@ -255,7 +253,7 @@ const InventorySourceForm = ({
     overwrite: source?.overwrite || false,
     overwrite_vars: source?.overwrite_vars || false,
     source: source?.source || '',
-    source_path: source?.source_path === '' ? '/ (project root)' : '',
+    source_path: source?.source_path || '',
     source_project: source?.summary_fields?.source_project || null,
     source_script: source?.summary_fields?.source_script || null,
     source_vars: source?.source_vars || '---\n',

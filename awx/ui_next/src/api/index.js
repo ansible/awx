@@ -1,9 +1,11 @@
 import AdHocCommands from './models/AdHocCommands';
 import Applications from './models/Applications';
+import Auth from './models/Auth';
 import Config from './models/Config';
 import CredentialInputSources from './models/CredentialInputSources';
 import CredentialTypes from './models/CredentialTypes';
 import Credentials from './models/Credentials';
+import Dashboard from './models/Dashboard';
 import Groups from './models/Groups';
 import Hosts from './models/Hosts';
 import InstanceGroups from './models/InstanceGroups';
@@ -24,12 +26,14 @@ import Projects from './models/Projects';
 import Roles from './models/Roles';
 import Root from './models/Root';
 import Schedules from './models/Schedules';
+import Settings from './models/Settings';
 import SystemJobs from './models/SystemJobs';
 import Teams from './models/Teams';
 import Tokens from './models/Tokens';
 import UnifiedJobTemplates from './models/UnifiedJobTemplates';
 import UnifiedJobs from './models/UnifiedJobs';
 import Users from './models/Users';
+import WorkflowApprovals from './models/WorkflowApprovals';
 import WorkflowApprovalTemplates from './models/WorkflowApprovalTemplates';
 import WorkflowJobTemplateNodes from './models/WorkflowJobTemplateNodes';
 import WorkflowJobTemplates from './models/WorkflowJobTemplates';
@@ -37,10 +41,12 @@ import WorkflowJobs from './models/WorkflowJobs';
 
 const AdHocCommandsAPI = new AdHocCommands();
 const ApplicationsAPI = new Applications();
+const AuthAPI = new Auth();
 const ConfigAPI = new Config();
 const CredentialInputSourcesAPI = new CredentialInputSources();
 const CredentialTypesAPI = new CredentialTypes();
 const CredentialsAPI = new Credentials();
+const DashboardAPI = new Dashboard();
 const GroupsAPI = new Groups();
 const HostsAPI = new Hosts();
 const InstanceGroupsAPI = new InstanceGroups();
@@ -61,12 +67,14 @@ const ProjectsAPI = new Projects();
 const RolesAPI = new Roles();
 const RootAPI = new Root();
 const SchedulesAPI = new Schedules();
+const SettingsAPI = new Settings();
 const SystemJobsAPI = new SystemJobs();
 const TeamsAPI = new Teams();
 const TokensAPI = new Tokens();
 const UnifiedJobTemplatesAPI = new UnifiedJobTemplates();
 const UnifiedJobsAPI = new UnifiedJobs();
 const UsersAPI = new Users();
+const WorkflowApprovalsAPI = new WorkflowApprovals();
 const WorkflowApprovalTemplatesAPI = new WorkflowApprovalTemplates();
 const WorkflowJobTemplateNodesAPI = new WorkflowJobTemplateNodes();
 const WorkflowJobTemplatesAPI = new WorkflowJobTemplates();
@@ -75,10 +83,12 @@ const WorkflowJobsAPI = new WorkflowJobs();
 export {
   AdHocCommandsAPI,
   ApplicationsAPI,
+  AuthAPI,
   ConfigAPI,
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
   CredentialsAPI,
+  DashboardAPI,
   GroupsAPI,
   HostsAPI,
   InstanceGroupsAPI,
@@ -99,12 +109,14 @@ export {
   RolesAPI,
   RootAPI,
   SchedulesAPI,
+  SettingsAPI,
   SystemJobsAPI,
   TeamsAPI,
   TokensAPI,
   UnifiedJobTemplatesAPI,
   UnifiedJobsAPI,
   UsersAPI,
+  WorkflowApprovalsAPI,
   WorkflowApprovalTemplatesAPI,
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,

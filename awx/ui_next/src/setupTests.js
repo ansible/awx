@@ -19,3 +19,8 @@ global.console = {
   ...console,
   debug: jest.fn(),
 };
+
+// This global variable is part of our Content Security Policy framework
+// and so this mock ensures that we don't encounter a reference error
+// when running the tests
+global.__webpack_nonce__ = null;

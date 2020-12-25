@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 
-import { useDeleteItems } from '../../../util/useRequest';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import { Detail, DetailList } from '../../../components/DetailList';
@@ -21,15 +21,16 @@ function ApplicationDetails({
   const history = useHistory();
   const {
     isLoading: deleteLoading,
-    deletionError,
-    deleteItems: handleDeleteApplications,
-    clearDeletionError,
-  } = useDeleteItems(
+    error: deletionError,
+    request: deleteApplications,
+  } = useRequest(
     useCallback(async () => {
       await ApplicationsAPI.destroy(application.id);
       history.push('/applications');
     }, [application.id, history])
   );
+
+  const { error, dismissError } = useDismissableError(deletionError);
 
   const getAuthorizationGrantType = type => {
     let value;
@@ -57,11 +58,12 @@ function ApplicationDetails({
         <Detail
           label={i18n._(t`Name`)}
           value={application.name}
-          dataCy="jt-detail-name"
+          dataCy="app-detail-name"
         />
         <Detail
           label={i18n._(t`Description`)}
           value={application.description}
+          dataCy="app-detail-description"
         />
         <Detail
           label={i18n._(t`Organization`)}
@@ -72,20 +74,29 @@ function ApplicationDetails({
               {application.summary_fields.organization.name}
             </Link>
           }
+          dataCy="app-detail-organization"
         />
         <Detail
           label={i18n._(t`Authorization grant type`)}
           value={getAuthorizationGrantType(
             application.authorization_grant_type
           )}
+          dataCy="app-detail-authorization-grant-type"
+        />
+        <Detail
+          label={i18n._(t`Client ID`)}
+          value={application.client_id}
+          dataCy="app-detail-client-id"
         />
         <Detail
           label={i18n._(t`Redirect uris`)}
           value={application.redirect_uris}
+          dataCy="app-detail-redirect-uris"
         />
         <Detail
           label={i18n._(t`Client type`)}
           value={getClientType(application.client_type)}
+          dataCy="app-detail-client-type"
         />
       </DetailList>
       <CardActionsRow>
@@ -104,22 +115,22 @@ function ApplicationDetails({
             <DeleteButton
               name={application.name}
               modalTitle={i18n._(t`Delete application`)}
-              onConfirm={handleDeleteApplications}
+              onConfirm={deleteApplications}
               isDisabled={deleteLoading}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>
           )}
       </CardActionsRow>
-      {deletionError && (
+      {error && (
         <AlertModal
-          isOpen={deletionError}
+          isOpen={error}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={clearDeletionError}
+          onClose={dismissError}
         >
           {i18n._(t`Failed to delete application.`)}
-          <ErrorDetail error={deletionError} />
+          <ErrorDetail error={error} />
         </AlertModal>
       )}
     </CardBody>

@@ -261,18 +261,20 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         app_label = 'main'
 
 
-    def fit_task_to_most_remaining_capacity_instance(self, task):
+    @staticmethod
+    def fit_task_to_most_remaining_capacity_instance(task, instances):
         instance_most_capacity = None
-        for i in self.instances.filter(capacity__gt=0, enabled=True).order_by('hostname'):
+        for i in instances:
             if i.remaining_capacity >= task.task_impact and \
                     (instance_most_capacity is None or
                      i.remaining_capacity > instance_most_capacity.remaining_capacity):
                 instance_most_capacity = i
         return instance_most_capacity
 
-    def find_largest_idle_instance(self):
+    @staticmethod
+    def find_largest_idle_instance(instances):
         largest_instance = None
-        for i in self.instances.filter(capacity__gt=0, enabled=True).order_by('hostname'):
+        for i in instances:
             if i.jobs_running == 0:
                 if largest_instance is None:
                     largest_instance = i

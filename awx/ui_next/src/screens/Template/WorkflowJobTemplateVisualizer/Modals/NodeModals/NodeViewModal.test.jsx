@@ -53,13 +53,16 @@ describe('NodeViewModal', () => {
     let wrapper;
     const workflowContext = {
       nodeToView: {
-        unifiedJobTemplate: {
+        fullUnifiedJobTemplate: {
           id: 1,
           name: 'Mock Node',
           description: '',
           unified_job_type: 'workflow_job',
           created: '2019-08-08T19:24:05.344276Z',
           modified: '2019-08-08T19:24:18.162949Z',
+          related: {
+            webhook_receiver: '/api/v2/workflow_job_templates/2/github/',
+          },
         },
       },
     };
@@ -88,7 +91,6 @@ describe('NodeViewModal', () => {
 
     test('should fetch workflow template launch data', () => {
       expect(JobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
-      expect(JobTemplatesAPI.readDetail).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readInstanceGroups).not.toHaveBeenCalled();
       expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
       expect(WorkflowJobTemplatesAPI.readWebhookKey).toHaveBeenCalledWith(1);
@@ -118,7 +120,7 @@ describe('NodeViewModal', () => {
   describe('Job template node', () => {
     const workflowContext = {
       nodeToView: {
-        unifiedJobTemplate: {
+        fullUnifiedJobTemplate: {
           id: 1,
           name: 'Mock Node',
           description: '',
@@ -145,7 +147,6 @@ describe('NodeViewModal', () => {
       expect(WorkflowJobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readWebhookKey).not.toHaveBeenCalledWith();
       expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
-      expect(JobTemplatesAPI.readDetail).toHaveBeenCalledWith(1);
       expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
       wrapper.unmount();
       jest.clearAllMocks();
@@ -207,13 +208,80 @@ describe('NodeViewModal', () => {
   describe('Project node', () => {
     const workflowContext = {
       nodeToView: {
-        unifiedJobTemplate: {
+        fullUnifiedJobTemplate: {
           id: 1,
           name: 'Mock Node',
           description: '',
           type: 'project_update',
           created: '2019-08-08T19:24:05.344276Z',
           modified: '2019-08-08T19:24:18.162949Z',
+        },
+      },
+    };
+
+    test('should not fetch launch data', async () => {
+      let wrapper;
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <WorkflowDispatchContext.Provider value={dispatch}>
+            <WorkflowStateContext.Provider value={workflowContext}>
+              <NodeViewModal />
+            </WorkflowStateContext.Provider>
+          </WorkflowDispatchContext.Provider>
+        );
+      });
+      waitForLoaded(wrapper);
+      expect(WorkflowJobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
+      expect(JobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
+      expect(JobTemplatesAPI.readInstanceGroups).not.toHaveBeenCalled();
+      wrapper.unmount();
+      jest.clearAllMocks();
+    });
+  });
+
+  describe('Inventory Source node', () => {
+    const workflowContext = {
+      nodeToView: {
+        fullUnifiedJobTemplate: {
+          id: 1,
+          name: 'Mock Node',
+          description: '',
+          type: 'inventory_source',
+          created: '2019-08-08T19:24:05.344276Z',
+          modified: '2019-08-08T19:24:18.162949Z',
+        },
+      },
+    };
+
+    test('should not fetch launch data', async () => {
+      let wrapper;
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <WorkflowDispatchContext.Provider value={dispatch}>
+            <WorkflowStateContext.Provider value={workflowContext}>
+              <NodeViewModal />
+            </WorkflowStateContext.Provider>
+          </WorkflowDispatchContext.Provider>
+        );
+      });
+      waitForLoaded(wrapper);
+      expect(WorkflowJobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
+      expect(JobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
+      expect(JobTemplatesAPI.readInstanceGroups).not.toHaveBeenCalled();
+      wrapper.unmount();
+      jest.clearAllMocks();
+    });
+  });
+
+  describe('Approval node', () => {
+    const workflowContext = {
+      nodeToView: {
+        fullUnifiedJobTemplate: {
+          id: 1,
+          name: 'Mock Node',
+          description: '',
+          type: 'workflow_approval_template',
+          timeout: 0,
         },
       },
     };

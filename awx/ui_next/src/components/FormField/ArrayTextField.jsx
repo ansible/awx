@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useField } from 'formik';
 import { FormGroup, TextArea } from '@patternfly/react-core';
-import FieldTooltip from './FieldTooltip';
+import Popover from '../Popover';
 
 function ArrayTextField(props) {
   const {
@@ -30,7 +30,7 @@ function ArrayTextField(props) {
       isRequired={isRequired}
       validated={isValid ? 'default' : 'error'}
       label={label}
-      labelIcon={<FieldTooltip content={tooltip} maxWidth={tooltipMaxWidth} />}
+      labelIcon={<Popover content={tooltip} maxWidth={tooltipMaxWidth} />}
     >
       <TextArea
         id={id}

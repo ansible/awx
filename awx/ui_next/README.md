@@ -1,7 +1,7 @@
 # AWX-PF
 
 ## Requirements
-- node 10.x LTS, npm 6.x LTS, make, git
+- node 14.x LTS, npm 6.x LTS, make, git
 
 ## Development
 The API development server will need to be running. See [CONTRIBUTING.md](../../CONTRIBUTING.md).
@@ -13,6 +13,19 @@ npm --prefix=awx/ui_next install
 # Start the ui development server. While running, the ui will be reachable
 # at https://127.0.0.1:3001 and updated automatically when code changes.
 npm --prefix=awx/ui_next start
+```
+
+### Build for the Development Containers
+If you just want to build a ui for the container-based awx development
+environment, use these make targets:
+
+```shell
+# The ui will be reachable at https://localhost:8043 or
+# http://localhost:8013
+make ui-devel 
+
+# clean up 
+make clean-ui
 ```
 
 ### Using an External Server

@@ -65,6 +65,10 @@ function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
   const history = useHistory();
   const { nodePositions } = useContext(WorkflowStateContext);
   const job = node?.originalNodeObject?.summary_fields?.job;
+  const jobName =
+    node?.originalNodeObject?.summary_fields?.unified_job_template?.name ||
+    node?.unifiedJobTemplate?.name;
+
   let borderColor = '#93969A';
 
   if (job) {
@@ -110,19 +114,15 @@ function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
           {job ? (
             <>
               <JobTopLine>
-                {job.status && <StatusIcon status={job.status} />}
-                <p>{job.name || node.unifiedJobTemplate.name}</p>
+                {job.status !== 'pending' && <StatusIcon status={job.status} />}
+                <p>{jobName}</p>
               </JobTopLine>
               {!!job?.elapsed && (
                 <Elapsed>{secondsToHHMMSS(job.elapsed)}</Elapsed>
               )}
             </>
           ) : (
-            <NodeDefaultLabel>
-              {node.unifiedJobTemplate
-                ? node.unifiedJobTemplate.name
-                : i18n._(t`DELETED`)}
-            </NodeDefaultLabel>
+            <NodeDefaultLabel>{jobName || i18n._(t`DELETED`)}</NodeDefaultLabel>
           )}
         </NodeContents>
       </foreignObject>

@@ -1,7 +1,8 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { DropdownItem } from '@patternfly/react-core';
 import { getQSConfig, mergeParams, parseQueryString } from '../../../util/qs';
 import { GroupsAPI, InventoriesAPI } from '../../../api';
 
@@ -16,8 +17,9 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList from '../../../components/PaginatedDataList';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
+import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
-import AddHostDropdown from './AddHostDropdown';
+import AddDropDownButton from '../../../components/AddDropDownButton';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -29,7 +31,6 @@ function InventoryGroupHostList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { id: inventoryId, groupId } = useParams();
   const location = useLocation();
-  const history = useHistory();
 
   const {
     result: {
@@ -84,7 +85,7 @@ function InventoryGroupHostList({ i18n }) {
     deleteItems: disassociateHosts,
     deletionError: disassociateErr,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(host => GroupsAPI.disassociateHost(groupId, host))
       );
@@ -142,7 +143,31 @@ function InventoryGroupHostList({ i18n }) {
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_hosts/add`;
+  const addExistingHost = i18n._(t`Add existing host`);
+  const addNewHost = i18n._(t`Add new host`);
 
+  const addButton = (
+    <AddDropDownButton
+      key="add"
+      dropdownItems={[
+        <DropdownItem
+          onClick={() => setIsModalOpen(true)}
+          key={addExistingHost}
+          aria-label={addExistingHost}
+        >
+          {addExistingHost}
+        </DropdownItem>,
+        <DropdownItem
+          component={Link}
+          to={`${addFormUrl}`}
+          key={addNewHost}
+          aria-label={addNewHost}
+        >
+          {addNewHost}
+        </DropdownItem>,
+      ]}
+    />
+  );
   return (
     <>
       <PaginatedDataList
@@ -186,15 +211,11 @@ function InventoryGroupHostList({ i18n }) {
             }
             qsConfig={QS_CONFIG}
             additionalControls={[
-              ...(canAdd
-                ? [
-                    <AddHostDropdown
-                      key="associate"
-                      onAddExisting={() => setIsModalOpen(true)}
-                      onAddNew={() => history.push(addFormUrl)}
-                    />,
-                  ]
-                : []),
+              ...(canAdd ? [addButton] : []),
+              <AdHocCommands
+                adHocItems={selected}
+                hasListItems={hostCount > 0}
+              />,
               <DisassociateButton
                 key="disassociate"
                 onDisassociate={handleDisassociate}
@@ -219,14 +240,7 @@ function InventoryGroupHostList({ i18n }) {
             onSelect={() => handleSelect(o)}
           />
         )}
-        emptyStateControls={
-          canAdd && (
-            <AddHostDropdown
-              onAddExisting={() => setIsModalOpen(true)}
-              onAddNew={() => history.push(addFormUrl)}
-            />
-          )
-        }
+        emptyStateControls={canAdd && addButton}
       />
       {isModalOpen && (
         <AssociateModal

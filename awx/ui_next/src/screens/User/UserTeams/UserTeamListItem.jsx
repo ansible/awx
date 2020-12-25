@@ -1,4 +1,5 @@
 import React from 'react';
+import { bool, func } from 'prop-types';
 import { Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -6,13 +7,27 @@ import {
   DataListItemCells,
   DataListItemRow,
   DataListItem,
+  DataListCheck,
+  Split,
+  SplitItem,
 } from '@patternfly/react-core';
 import DataListCell from '../../../components/DataListCell';
+import { Team } from '../../../types';
 
-function UserTeamListItem({ team, i18n }) {
+function UserTeamListItem({ team, isSelected, onSelect, i18n }) {
   return (
-    <DataListItem aria-labelledby={`team-${team.id}`}>
+    <DataListItem
+      key={team.id}
+      id={`${team.id}`}
+      aria-labelledby={`team-${team.id}`}
+    >
       <DataListItemRow>
+        <DataListCheck
+          aria-labelledby={`team-${team.id}`}
+          checked={isSelected}
+          id={`team-${team.id}`}
+          onChange={onSelect}
+        />
         <DataListItemCells
           dataListCells={[
             <DataListCell key="name">
@@ -22,14 +37,18 @@ function UserTeamListItem({ team, i18n }) {
             </DataListCell>,
             <DataListCell key="organization">
               {team.summary_fields.organization && (
-                <>
-                  <b>{i18n._(t`Organization`)}</b>{' '}
-                  <Link
-                    to={`/organizations/${team.summary_fields.organization.id}/details`}
-                  >
-                    <b>{team.summary_fields.organization.name}</b>
-                  </Link>
-                </>
+                <Split hasGutter>
+                  <SplitItem>
+                    <b>{i18n._(t`Organization`)}</b>{' '}
+                  </SplitItem>
+                  <SplitItem>
+                    <Link
+                      to={`/organizations/${team.summary_fields.organization.id}/details`}
+                    >
+                      <b>{team.summary_fields.organization.name}</b>
+                    </Link>
+                  </SplitItem>
+                </Split>
               )}
             </DataListCell>,
             <DataListCell key="description">{team.description}</DataListCell>,
@@ -39,5 +58,11 @@ function UserTeamListItem({ team, i18n }) {
     </DataListItem>
   );
 }
+
+UserTeamListItem.prototype = {
+  team: Team.isRequired,
+  isSelected: bool.isRequired,
+  onSelect: func.isRequired,
+};
 
 export default withI18n()(UserTeamListItem);

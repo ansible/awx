@@ -197,7 +197,7 @@ describe('Workflow reducer', () => {
           {
             id: 2,
             isInvalidLinkTarget: false,
-            unifiedJobTemplate: {
+            fullUnifiedJobTemplate: {
               id: 7000,
               name: 'Foo JT',
             },
@@ -281,7 +281,7 @@ describe('Workflow reducer', () => {
           {
             id: 3,
             isInvalidLinkTarget: false,
-            unifiedJobTemplate: {
+            fullUnifiedJobTemplate: {
               id: 7000,
               name: 'Foo JT',
             },
@@ -869,10 +869,6 @@ describe('Workflow reducer', () => {
                 },
                 workflowMakerNodeId: 2,
               },
-              unifiedJobTemplate: {
-                id: 1,
-                name: 'JT 1',
-              },
             },
             target: {
               id: 4,
@@ -889,10 +885,6 @@ describe('Workflow reducer', () => {
                 },
                 workflowMakerNodeId: 4,
               },
-              unifiedJobTemplate: {
-                id: 3,
-                name: 'JT 3',
-              },
             },
           },
           {
@@ -912,10 +904,6 @@ describe('Workflow reducer', () => {
                 },
                 workflowMakerNodeId: 2,
               },
-              unifiedJobTemplate: {
-                id: 1,
-                name: 'JT 1',
-              },
             },
             target: {
               id: 3,
@@ -931,10 +919,6 @@ describe('Workflow reducer', () => {
                   },
                 },
                 workflowMakerNodeId: 3,
-              },
-              unifiedJobTemplate: {
-                id: 2,
-                name: 'JT 2',
               },
             },
           },
@@ -955,10 +939,6 @@ describe('Workflow reducer', () => {
                 },
                 workflowMakerNodeId: 5,
               },
-              unifiedJobTemplate: {
-                id: 4,
-                name: 'JT 4',
-              },
             },
             target: {
               id: 3,
@@ -975,17 +955,13 @@ describe('Workflow reducer', () => {
                 },
                 workflowMakerNodeId: 3,
               },
-              unifiedJobTemplate: {
-                id: 2,
-                name: 'JT 2',
-              },
             },
           },
           {
             linkType: 'always',
             source: {
               id: 1,
-              unifiedJobTemplate: {
+              fullUnifiedJobTemplate: {
                 name: undefined,
               },
             },
@@ -1004,17 +980,13 @@ describe('Workflow reducer', () => {
                 },
                 workflowMakerNodeId: 2,
               },
-              unifiedJobTemplate: {
-                id: 1,
-                name: 'JT 1',
-              },
             },
           },
           {
             linkType: 'always',
             source: {
               id: 1,
-              unifiedJobTemplate: {
+              fullUnifiedJobTemplate: {
                 name: undefined,
               },
             },
@@ -1032,10 +1004,6 @@ describe('Workflow reducer', () => {
                   },
                 },
                 workflowMakerNodeId: 5,
-              },
-              unifiedJobTemplate: {
-                id: 4,
-                name: 'JT 4',
               },
             },
           },
@@ -1044,7 +1012,7 @@ describe('Workflow reducer', () => {
         nodes: [
           {
             id: 1,
-            unifiedJobTemplate: {
+            fullUnifiedJobTemplate: {
               name: undefined,
             },
           },
@@ -1063,10 +1031,6 @@ describe('Workflow reducer', () => {
               },
               workflowMakerNodeId: 2,
             },
-            unifiedJobTemplate: {
-              id: 1,
-              name: 'JT 1',
-            },
           },
           {
             id: 3,
@@ -1082,10 +1046,6 @@ describe('Workflow reducer', () => {
                 },
               },
               workflowMakerNodeId: 3,
-            },
-            unifiedJobTemplate: {
-              id: 2,
-              name: 'JT 2',
             },
           },
           {
@@ -1103,10 +1063,6 @@ describe('Workflow reducer', () => {
               },
               workflowMakerNodeId: 4,
             },
-            unifiedJobTemplate: {
-              id: 3,
-              name: 'JT 3',
-            },
           },
           {
             id: 5,
@@ -1122,10 +1078,6 @@ describe('Workflow reducer', () => {
                 },
               },
               workflowMakerNodeId: 5,
-            },
-            unifiedJobTemplate: {
-              id: 4,
-              name: 'JT 4',
             },
           },
         ],
@@ -1718,7 +1670,7 @@ describe('Workflow reducer', () => {
             id: 2,
             isEdited: false,
             isInvalidLinkTarget: false,
-            unifiedJobTemplate: {
+            fullUnifiedJobTemplate: {
               id: 703,
               name: 'Test JT',
               type: 'job_template',
@@ -1729,7 +1681,7 @@ describe('Workflow reducer', () => {
           id: 2,
           isEdited: false,
           isInvalidLinkTarget: false,
-          unifiedJobTemplate: {
+          fullUnifiedJobTemplate: {
             id: 703,
             name: 'Test JT',
             type: 'job_template',
@@ -1757,7 +1709,7 @@ describe('Workflow reducer', () => {
             id: 2,
             isEdited: true,
             isInvalidLinkTarget: false,
-            unifiedJobTemplate: {
+            fullUnifiedJobTemplate: {
               id: 704,
               name: 'Other JT',
               type: 'job_template',

@@ -8,17 +8,17 @@ describe('<TagMultiSelect />', () => {
       <TagMultiSelect value="foo,bar" onChange={jest.fn()} />
     );
     wrapper.find('input').simulate('focus');
-    const options = wrapper.find('SelectOption');
+    const options = wrapper.find('Chip');
     expect(options).toHaveLength(2);
-    expect(options.at(0).prop('value')).toEqual('foo');
-    expect(options.at(1).prop('value')).toEqual('bar');
+    expect(options.at(0).text()).toEqual('foo');
+    expect(options.at(1).text()).toEqual('bar');
   });
 
   it('should not treat empty string as an option', () => {
     const wrapper = mount(<TagMultiSelect value="" onChange={jest.fn()} />);
-    wrapper.find('input').simulate('focus');
+    wrapper.find('SelectToggle').simulate('click');
     expect(wrapper.find('Select').prop('isOpen')).toEqual(true);
-    expect(wrapper.find('SelectOption')).toHaveLength(0);
+    expect(wrapper.find('Chip')).toHaveLength(0);
   });
 
   it('should trigger onChange', () => {

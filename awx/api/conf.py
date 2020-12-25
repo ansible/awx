@@ -16,6 +16,7 @@ register(
     help_text=_('Number of seconds that a user is inactive before they will need to login again.'),
     category=_('Authentication'),
     category_slug='authentication',
+    unit=_('seconds'),
 )
 register(
     'SESSIONS_PER_USER',
@@ -49,6 +50,7 @@ register(
                 'in the number of seconds.'),
     category=_('Authentication'),
     category_slug='authentication',
+    unit=_('seconds'),
 )
 register(
     'ALLOW_OAUTH2_FOR_EXTERNAL_USERS',

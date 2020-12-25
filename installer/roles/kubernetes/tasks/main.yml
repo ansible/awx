@@ -101,7 +101,7 @@
 
     - name: Deploy and Activate Postgres (Kubernetes)
       shell: |
-        helm repo add stable https://kubernetes-charts.storage.googleapis.com
+        helm repo add stable https://charts.helm.sh/stable
         helm repo update
         helm upgrade {{ postgresql_service_name }} \
           --install \
@@ -145,7 +145,7 @@
       block:
         - name: Set new pg image
           shell: |
-            IMAGE=registry.access.redhat.com/rhscl/postgresql-10-rhel7
+            IMAGE=registry.redhat.io/rhel-8/postgresql-10
             {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set image dc/postgresql postgresql=$IMAGE
 
         - name: Wait for change to take affect
@@ -237,7 +237,6 @@
     - 'secret'
     - 'deployment'
     - 'supervisor'
-    - 'launch_awx'
   no_log: true
 
 - name: Apply Deployment
@@ -248,7 +247,6 @@
     - "{{ secret }}"
     - "{{ deployment }}"
     - "{{ supervisor }}"
-    - "{{ launch_awx }}"
   no_log: true
 
 - name: Delete any existing management pod

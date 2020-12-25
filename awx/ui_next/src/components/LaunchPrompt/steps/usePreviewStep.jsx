@@ -1,31 +1,39 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import PreviewStep from './PreviewStep';
+import StepName from './StepName';
 
 const STEP_ID = 'preview';
 
 export default function usePreviewStep(
-  config,
+  launchConfig,
+  i18n,
   resource,
-  survey,
-  formErrors,
-  i18n
+  surveyConfig,
+  hasErrors,
+  showStep
 ) {
   return {
-    step: {
-      id: STEP_ID,
-      name: i18n._(t`Preview`),
-      component: (
-        <PreviewStep
-          config={config}
-          resource={resource}
-          survey={survey}
-          formErrors={formErrors}
-        />
-      ),
-      enableNext: Object.keys(formErrors).length === 0,
-      nextButtonText: i18n._(t`Launch`),
-    },
+    step: showStep
+      ? {
+          id: STEP_ID,
+          name: (
+            <StepName hasErrors={false} id="preview-step">
+              {i18n._(t`Preview`)}
+            </StepName>
+          ),
+          component: (
+            <PreviewStep
+              launchConfig={launchConfig}
+              resource={resource}
+              surveyConfig={surveyConfig}
+              formErrors={hasErrors}
+            />
+          ),
+          enableNext: !hasErrors,
+          nextButtonText: i18n._(t`Launch`),
+        }
+      : null,
     initialValues: {},
     validate: () => ({}),
     isReady: true,

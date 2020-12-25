@@ -62,6 +62,7 @@ function DataListToolbar({
       id={`${qsConfig.namespace}-list-toolbar`}
       clearAllFilters={clearAllFilters}
       collapseListedFiltersBreakpoint="lg"
+      clearFiltersButtonText={i18n._(t`Clear all filters`)}
     >
       <ToolbarContent>
         {showSelectAll && (
@@ -92,9 +93,11 @@ function DataListToolbar({
               onRemove={onRemove}
             />
           </ToolbarItem>
-          <ToolbarItem>
-            <Sort qsConfig={qsConfig} columns={sortColumns} onSort={onSort} />
-          </ToolbarItem>
+          {sortColumns && (
+            <ToolbarItem>
+              <Sort qsConfig={qsConfig} columns={sortColumns} onSort={onSort} />
+            </ToolbarItem>
+          )}
         </ToolbarToggleGroup>
         {showExpandCollapse && (
           <ToolbarGroup>
@@ -109,7 +112,7 @@ function DataListToolbar({
             </>
           </ToolbarGroup>
         )}
-        {isAdvancedSearchShown && (
+        {isAdvancedSearchShown && additionalControls.length > 0 && (
           <ToolbarItem>
             <KebabifiedProvider
               value={{
@@ -156,7 +159,7 @@ DataListToolbar.propTypes = {
   searchColumns: SearchColumns.isRequired,
   searchableKeys: PropTypes.arrayOf(PropTypes.string),
   relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
-  sortColumns: SortColumns.isRequired,
+  sortColumns: SortColumns,
   showSelectAll: PropTypes.bool,
   isAllSelected: PropTypes.bool,
   isCompact: PropTypes.bool,
@@ -173,6 +176,7 @@ DataListToolbar.defaultProps = {
   itemCount: 0,
   searchableKeys: [],
   relatedSearchableKeys: [],
+  sortColumns: null,
   clearAllFilters: null,
   showSelectAll: false,
   isAllSelected: false,

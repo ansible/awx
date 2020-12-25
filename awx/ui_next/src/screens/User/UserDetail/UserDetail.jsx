@@ -3,7 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { Button } from '@patternfly/react-core';
+import { Button, Label } from '@patternfly/react-core';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import DeleteButton from '../../../components/DeleteButton';
@@ -46,6 +46,13 @@ function UserDetail({ user, i18n }) {
     user_type = i18n._(t`Normal User`);
   }
 
+  let userAuthType;
+  if (user.ldap_dn) {
+    userAuthType = i18n._(t`LDAP`);
+  } else if (user.auth.length > 0) {
+    userAuthType = i18n._(t`SOCIAL`);
+  }
+
   return (
     <CardBody>
       <DetailList>
@@ -58,6 +65,14 @@ function UserDetail({ user, i18n }) {
         <Detail label={i18n._(t`First Name`)} value={`${first_name}`} />
         <Detail label={i18n._(t`Last Name`)} value={`${last_name}`} />
         <Detail label={i18n._(t`User Type`)} value={`${user_type}`} />
+        {userAuthType && (
+          <Detail
+            label={i18n._(t`Type`)}
+            value={
+              <Label aria-label={i18n._(t`login type`)}>{userAuthType}</Label>
+            }
+          />
+        )}
         {last_login && (
           <Detail
             label={i18n._(t`Last Login`)}

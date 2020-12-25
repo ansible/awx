@@ -93,7 +93,7 @@ describe('<UserForm />', () => {
     });
   });
 
-  test('password fields are required on add', async () => {
+  test('fields required on add', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <UserForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
@@ -105,9 +105,81 @@ describe('<UserForm />', () => {
     expect(passwordFields.length).toBe(2);
     expect(passwordFields.at(0).prop('isRequired')).toBe(true);
     expect(passwordFields.at(1).prop('isRequired')).toBe(true);
+
+    expect(wrapper.find('FormField[label="Username"]').prop('isRequired')).toBe(
+      true
+    );
+  });
+
+  test('username field is required on edit', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <UserForm
+          user={{ ...mockData, external_account: '', auth: [] }}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      );
+    });
+
+    expect(wrapper.find('FormField[label="Username"]').prop('isRequired')).toBe(
+      true
+    );
   });
 
   test('password fields are not required on edit', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <UserForm
+          user={{ ...mockData, external_account: '', auth: [] }}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      );
+    });
+
+    const passwordFields = wrapper.find('PasswordField');
+
+    expect(passwordFields.length).toBe(2);
+    expect(passwordFields.at(0).prop('isRequired')).toBe(false);
+    expect(passwordFields.at(1).prop('isRequired')).toBe(false);
+  });
+
+  test('username should not be required for external accounts', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <UserForm
+          user={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      );
+    });
+    expect(wrapper.find('FormField[label="Username"]').prop('isRequired')).toBe(
+      false
+    );
+  });
+
+  test('username should not be required for ldap accounts', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <UserForm
+          user={{
+            ...mockData,
+            ldap_dn:
+              'uid=binduser,cn=users,cn=accounts,dc=lan,dc=example,dc=com',
+          }}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+        />
+      );
+    });
+    expect(wrapper.find('FormField[label="Username"]').prop('isRequired')).toBe(
+      false
+    );
+  });
+
+  test('password fields are not displayed for social/ldap login', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <UserForm
@@ -120,9 +192,7 @@ describe('<UserForm />', () => {
 
     const passwordFields = wrapper.find('PasswordField');
 
-    expect(passwordFields.length).toBe(2);
-    expect(passwordFields.at(0).prop('isRequired')).toBe(false);
-    expect(passwordFields.at(1).prop('isRequired')).toBe(false);
+    expect(passwordFields.length).toBe(0);
   });
 
   test('should call handleSubmit when Submit button is clicked', async () => {

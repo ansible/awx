@@ -149,7 +149,6 @@ class IsolatedManager(object):
             # don't rsync source control metadata (it can be huge!)
             '- /project/.git',
             '- /project/.svn',
-            '- /project/.hg',
             # don't rsync job events that are in the process of being written
             '- /artifacts/job_events/*-partial.json.tmp',
             # don't rsync the ssh_key FIFO

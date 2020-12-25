@@ -360,6 +360,71 @@ def test_job_launch_fails_with_missing_vault_password(machine_credential, vault_
 
 
 @pytest.mark.django_db
+def test_job_launch_with_added_cred_and_vault_password(credential, machine_credential, vault_credential,
+                                                       deploy_jobtemplate, post, admin):
+    # see: https://github.com/ansible/awx/issues/8202
+    vault_credential.inputs['vault_password'] = 'ASK'
+    vault_credential.save()
+    payload = {
+        'credentials': [vault_credential.id, machine_credential.id],
+        'credential_passwords': {'vault_password': 'vault-me'},
+    }
+
+    deploy_jobtemplate.ask_credential_on_launch = True
+    deploy_jobtemplate.credentials.remove(credential)
+    deploy_jobtemplate.credentials.add(vault_credential)
+    deploy_jobtemplate.save()
+
+    with mock.patch.object(Job, 'signal_start') as signal_start:
+        post(
+            reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk}),
+            payload,
+            admin,
+            expect=201,
+        )
+        signal_start.assert_called_with(**{
+            'vault_password': 'vault-me'
+        })
+
+
+@pytest.mark.django_db
+def test_job_launch_with_multiple_launch_time_passwords(credential, machine_credential, vault_credential,
+                                                        deploy_jobtemplate, post, admin):
+    # see: https://github.com/ansible/awx/issues/8202
+    deploy_jobtemplate.ask_credential_on_launch = True
+    deploy_jobtemplate.credentials.remove(credential)
+    deploy_jobtemplate.credentials.add(machine_credential)
+    deploy_jobtemplate.credentials.add(vault_credential)
+    deploy_jobtemplate.save()
+
+    second_machine_credential = Credential(
+        name='SSH #2',
+        credential_type=machine_credential.credential_type,
+        inputs={'password': 'ASK'}
+    )
+    second_machine_credential.save()
+
+    vault_credential.inputs['vault_password'] = 'ASK'
+    vault_credential.save()
+    payload = {
+        'credentials': [vault_credential.id, second_machine_credential.id],
+        'credential_passwords': {'ssh_password': 'ssh-me', 'vault_password': 'vault-me'},
+    }
+
+    with mock.patch.object(Job, 'signal_start') as signal_start:
+        post(
+            reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk}),
+            payload,
+            admin,
+            expect=201,
+        )
+        signal_start.assert_called_with(**{
+            'ssh_password': 'ssh-me',
+            'vault_password': 'vault-me',
+        })
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('launch_kwargs', [
     {'vault_password.abc': 'vault-me-1', 'vault_password.xyz': 'vault-me-2'},
     {'credential_passwords': {'vault_password.abc': 'vault-me-1', 'vault_password.xyz': 'vault-me-2'}}

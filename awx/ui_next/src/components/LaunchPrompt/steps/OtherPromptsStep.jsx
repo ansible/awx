@@ -4,10 +4,11 @@ import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Form, FormGroup, Switch } from '@patternfly/react-core';
 import styled from 'styled-components';
-import FormField, { FieldTooltip } from '../../FormField';
+import FormField from '../../FormField';
 import { TagMultiSelect } from '../../MultiSelect';
 import AnsibleSelect from '../../AnsibleSelect';
 import { VariablesField } from '../../CodeMirrorInput';
+import Popover from '../../Popover';
 
 const FieldHeader = styled.div`
   display: flex;
@@ -19,11 +20,11 @@ const FieldHeader = styled.div`
   }
 `;
 
-function OtherPromptsStep({ config, i18n }) {
+function OtherPromptsStep({ launchConfig, i18n }) {
   return (
     <Form>
-      {config.ask_job_type_on_launch && <JobTypeField i18n={i18n} />}
-      {config.ask_limit_on_launch && (
+      {launchConfig.ask_job_type_on_launch && <JobTypeField i18n={i18n} />}
+      {launchConfig.ask_limit_on_launch && (
         <FormField
           id="prompt-limit"
           name="limit"
@@ -34,7 +35,7 @@ function OtherPromptsStep({ config, i18n }) {
           information and examples on patterns.`)}
         />
       )}
-      {config.ask_scm_branch_on_launch && (
+      {launchConfig.ask_scm_branch_on_launch && (
         <FormField
           id="prompt-scm-branch"
           name="scm_branch"
@@ -44,31 +45,35 @@ function OtherPromptsStep({ config, i18n }) {
           )}
         />
       )}
-      {config.ask_verbosity_on_launch && <VerbosityField i18n={i18n} />}
-      {config.ask_diff_mode_on_launch && <ShowChangesToggle i18n={i18n} />}
-      {config.ask_tags_on_launch && (
+      {launchConfig.ask_verbosity_on_launch && <VerbosityField i18n={i18n} />}
+      {launchConfig.ask_diff_mode_on_launch && (
+        <ShowChangesToggle i18n={i18n} />
+      )}
+      {launchConfig.ask_tags_on_launch && (
         <TagField
           id="prompt-job-tags"
           name="job_tags"
           label={i18n._(t`Job Tags`)}
+          aria-label={i18n._(t`Job Tags`)}
           tooltip={i18n._(t`Tags are useful when you have a large
             playbook, and you want to run a specific part of a play or task.
             Use commas to separate multiple tags. Refer to Ansible Tower
             documentation for details on the usage of tags.`)}
         />
       )}
-      {config.ask_skip_tags_on_launch && (
+      {launchConfig.ask_skip_tags_on_launch && (
         <TagField
           id="prompt-skip-tags"
           name="skip_tags"
           label={i18n._(t`Skip Tags`)}
+          aria-label={i18n._(t`Skip Tags`)}
           tooltip={i18n._(t`Skip tags are useful when you have a large
             playbook, and you want to skip specific parts of a play or task.
             Use commas to separate multiple tags. Refer to Ansible Tower
             documentation for details on the usage of tags.`)}
         />
       )}
-      {config.ask_variables_on_launch && (
+      {launchConfig.ask_variables_on_launch && (
         <VariablesField
           id="prompt-variables"
           name="extra_vars"
@@ -102,12 +107,13 @@ function JobTypeField({ i18n }) {
       fieldId="propmt-job-type"
       label={i18n._(t`Job Type`)}
       labelIcon={
-        <FieldTooltip
+        <Popover
           content={i18n._(t`For job templates, select run to execute the playbook.
       Select check to only check playbook syntax, test environment setup,
       and report problems without executing the playbook.`)}
         />
       }
+      isRequired
       validated={isValid ? 'default' : 'error'}
     >
       <AnsibleSelect
@@ -129,6 +135,7 @@ function VerbosityField({ i18n }) {
     { value: '3', key: '3', label: i18n._(t`3 (Debug)`) },
     { value: '4', key: '4', label: i18n._(t`4 (Connection Debug)`) },
   ];
+
   const isValid = !(meta.touched && meta.error);
 
   return (
@@ -137,7 +144,7 @@ function VerbosityField({ i18n }) {
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Verbosity`)}
       labelIcon={
-        <FieldTooltip
+        <Popover
           content={i18n._(t`Control the level of output ansible
           will produce as the playbook executes.`)}
         />
@@ -162,7 +169,7 @@ function ShowChangesToggle({ i18n }) {
         <label className="pf-c-form__label" htmlFor="prompt-show-changes">
           <span className="pf-c-form__label-text">
             {i18n._(t`Show Changes`)}
-            <FieldTooltip
+            <Popover
               content={i18n._(t`If enabled, show the changes made
               by Ansible tasks, where supported. This is equivalent to Ansible’s
               --diff mode.`)}
@@ -171,6 +178,7 @@ function ShowChangesToggle({ i18n }) {
         </label>
       </FieldHeader>
       <Switch
+        aria-label={field.value ? i18n._(t`On`) : i18n._(t`Off`)}
         id="prompt-show-changes"
         label={i18n._(t`On`)}
         labelOff={i18n._(t`Off`)}
@@ -187,7 +195,7 @@ function TagField({ id, name, label, tooltip }) {
     <FormGroup
       fieldId={id}
       label={label}
-      labelIcon={<FieldTooltip content={tooltip} />}
+      labelIcon={<Popover content={tooltip} />}
     >
       <TagMultiSelect value={field.value} onChange={helpers.setValue} />
     </FormGroup>

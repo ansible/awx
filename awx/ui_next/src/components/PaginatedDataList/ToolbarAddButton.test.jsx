@@ -18,4 +18,13 @@ describe('<ToolbarAddButton />', () => {
     expect(link).toHaveLength(1);
     expect(link.prop('to')).toBe('/foo');
   });
+
+  test('should render link with toggle icon', () => {
+    const wrapper = mountWithContexts(
+      <ToolbarAddButton showToggleIndicator linkTo="/foo" />
+    );
+    const link = wrapper.find('Link');
+    expect(link).toHaveLength(1);
+    expect(link.prop('to')).toBe('/foo');
+  });
 });

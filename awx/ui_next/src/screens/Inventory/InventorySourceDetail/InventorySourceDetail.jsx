@@ -11,7 +11,6 @@ import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import CredentialChip from '../../../components/CredentialChip';
 import DeleteButton from '../../../components/DeleteButton';
-import { FieldTooltip } from '../../../components/FormField';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 import {
   DetailList,
@@ -19,6 +18,7 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
+import Popover from '../../../components/Popover';
 import useRequest from '../../../util/useRequest';
 import { InventorySourcesAPI } from '../../../api';
 
@@ -112,7 +112,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
         {overwrite && (
           <ListItem>
             {i18n._(t`Overwrite`)}
-            <FieldTooltip
+            <Popover
               content={
                 <>
                   {i18n._(t`If checked, any hosts and groups that were
@@ -135,7 +135,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
         {overwrite_vars && (
           <ListItem>
             {i18n._(t`Overwrite variables`)}
-            <FieldTooltip
+            <Popover
               content={
                 <>
                   {i18n._(t`If checked, all variables for child groups
@@ -154,7 +154,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
         {update_on_launch && (
           <ListItem>
             {i18n._(t`Update on launch`)}
-            <FieldTooltip
+            <Popover
               content={i18n._(t`Each time a job runs using this inventory,
         refresh the inventory from the selected source before
         executing job tasks.`)}
@@ -164,7 +164,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
         {update_on_project_update && (
           <ListItem>
             {i18n._(t`Update on project update`)}
-            <FieldTooltip
+            <Popover
               content={i18n._(t`After every project update where the SCM revision
         changes, refresh the inventory from the selected source
         before executing job tasks. This is intended for static content,
@@ -214,10 +214,14 @@ function InventorySourceDetail({ inventorySource, i18n }) {
             }
           />
         )}
-        <Detail
-          label={i18n._(t`Inventory file`)}
-          value={source_path === '' ? i18n._(t`/ (project root)`) : source_path}
-        />
+        {source === 'scm' ? (
+          <Detail
+            label={i18n._(t`Inventory file`)}
+            value={
+              source_path === '' ? i18n._(t`/ (project root)`) : source_path
+            }
+          />
+        ) : null}
         <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[verbosity]} />
         <Detail
           label={i18n._(t`Cache timeout`)}

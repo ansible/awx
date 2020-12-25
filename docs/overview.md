@@ -16,8 +16,8 @@ of the most notable ones are:
 ### Projects
 
 Projects represent a collection of Ansible playbooks.  Most AWX users create
-Projects that import periodically from source control systems (such as git,
-mercurial, or subversion repositories).  This import is accomplished via an
+Projects that import periodically from source control systems (such as git
+or subversion repositories).  This import is accomplished via an
 Ansible playbook included with AWX (which makes use of the various source
 control management modules in Ansible).
 

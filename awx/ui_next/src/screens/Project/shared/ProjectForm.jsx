@@ -10,10 +10,7 @@ import AnsibleSelect from '../../../components/AnsibleSelect';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import FormField, {
-  FieldTooltip,
-  FormSubmitError,
-} from '../../../components/FormField';
+import FormField, { FormSubmitError } from '../../../components/FormField';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import { CredentialTypesAPI, ProjectsAPI } from '../../../api';
 import { required } from '../../../util/validators';
@@ -21,9 +18,9 @@ import {
   FormColumnLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
+import Popover from '../../../components/Popover';
 import {
   GitSubForm,
-  HgSubForm,
   SvnSubForm,
   ArchiveSubForm,
   InsightsSubForm,
@@ -239,13 +236,6 @@ function ProjectFormFields({
                     scmUpdateOnLaunch={formik.values.scm_update_on_launch}
                   />
                 ),
-                hg: (
-                  <HgSubForm
-                    credential={credentials.scm}
-                    onCredentialSelection={handleCredentialSelection}
-                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
-                  />
-                ),
                 svn: (
                   <SvnSubForm
                     credential={credentials.scm}
@@ -283,7 +273,7 @@ function ProjectFormFields({
               fieldId="project-custom-virtualenv"
               label={i18n._(t`Ansible Environment`)}
               labelIcon={
-                <FieldTooltip
+                <Popover
                   content={i18n._(t`Select the playbook to be executed by
                 this job.`)}
                 />

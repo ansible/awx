@@ -1,20 +1,27 @@
-import React, { useState, Fragment, useCallback, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useCallback, useEffect, useState, useContext } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
+import { Button, DropdownItem } from '@patternfly/react-core';
 
 import useRequest, { useDismissableError } from '../../util/useRequest';
+import { InventoriesAPI, CredentialTypesAPI } from '../../api';
+
 import AlertModal from '../AlertModal';
-import { CredentialTypesAPI } from '../../api';
 import ErrorDetail from '../ErrorDetail';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
+import { KebabifiedContext } from '../../contexts/Kebabified';
 import ContentLoading from '../ContentLoading';
 import ContentError from '../ContentError';
 
-function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
+function AdHocCommands({ adHocItems, i18n, hasListItems }) {
   const history = useHistory();
+  const { id } = useParams();
+
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
+
   const verbosityOptions = [
     { value: '0', key: '0', label: i18n._(t`0 (Normal)`) },
     { value: '1', key: '1', label: i18n._(t`1 (Verbose)`) },
@@ -22,41 +29,33 @@ function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
     { value: '3', key: '3', label: i18n._(t`3 (Debug)`) },
     { value: '4', key: '4', label: i18n._(t`4 (Connection Debug)`) },
   ];
+  useEffect(() => {
+    if (isKebabified) {
+      onKebabModalChange(isWizardOpen);
+    }
+  }, [isKebabified, isWizardOpen, onKebabModalChange]);
+
   const {
+    result: { moduleOptions, credentialTypeId, isAdHocDisabled },
+    request: fetchData,
     error: fetchError,
-    request: fetchModuleOptions,
-    result: { moduleOptions, credentialTypeId },
   } = useRequest(
     useCallback(async () => {
-      const [choices, credId] = await Promise.all([
-        apiModule.readAdHocOptions(itemId),
+      const [options, cred] = await Promise.all([
+        InventoriesAPI.readAdHocOptions(id),
         CredentialTypesAPI.read({ namespace: 'ssh' }),
       ]);
-      const itemObject = (item, index) => {
-        return {
-          key: index,
-          value: item,
-          label: `${item}`,
-          isDisabled: false,
-        };
-      };
-
-      const options = choices.data.actions.GET.module_name.choices.map(
-        (choice, index) => itemObject(choice[0], index)
-      );
-
       return {
-        moduleOptions: [itemObject('', -1), ...options],
-        credentialTypeId: credId.data.results[0].id,
+        moduleOptions: options.data.actions.GET.module_name.choices,
+        credentialTypeId: cred.data.results[0].id,
+        isAdHocDisabled: !options.data.actions.POST,
       };
-    }, [itemId, apiModule]),
-    { moduleOptions: [] }
+    }, [id]),
+    { moduleOptions: [], isAdHocDisabled: true }
   );
-
   useEffect(() => {
-    fetchModuleOptions();
-  }, [fetchModuleOptions]);
-
+    fetchData();
+  }, [fetchData]);
   const {
     isloading: isLaunchLoading,
     error: launchError,
@@ -64,11 +63,11 @@ function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
   } = useRequest(
     useCallback(
       async values => {
-        const { data } = await apiModule.launchAdHocCommands(itemId, values);
+        const { data } = await InventoriesAPI.launchAdHocCommands(id, values);
         history.push(`/jobs/command/${data.id}/output`);
       },
 
-      [apiModule, itemId, history]
+      [id, history]
     )
   );
 
@@ -85,7 +84,6 @@ function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
       ...remainingValues,
     };
     await launchAdHocCommands(manipulatedValues);
-    setIsWizardOpen(false);
   };
 
   if (isLaunchLoading) {
@@ -115,10 +113,29 @@ function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
     );
   }
   return (
-    <Fragment>
-      {children({
-        openAdHocCommands: () => setIsWizardOpen(true),
-      })}
+    // render buttons for drop down and for toolbar
+    // if modal is open render the modal
+    <>
+      {isKebabified ? (
+        <DropdownItem
+          key="cancel-job"
+          isDisabled={isAdHocDisabled || !hasListItems}
+          component="button"
+          aria-label={i18n._(t`Run Command`)}
+          onClick={() => setIsWizardOpen(true)}
+        >
+          {i18n._(t`Run Command`)}
+        </DropdownItem>
+      ) : (
+        <Button
+          variant="secondary"
+          aria-label={i18n._(t`Run Command`)}
+          onClick={() => setIsWizardOpen(true)}
+          isDisabled={isAdHocDisabled || !hasListItems}
+        >
+          {i18n._(t`Run Command`)}
+        </Button>
+      )}
 
       {isWizardOpen && (
         <AdHocCommandsWizard
@@ -131,14 +148,13 @@ function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
           onDismissError={() => dismissError()}
         />
       )}
-    </Fragment>
+    </>
   );
 }
 
 AdHocCommands.propTypes = {
-  children: PropTypes.func.isRequired,
   adHocItems: PropTypes.arrayOf(PropTypes.object).isRequired,
-  itemId: PropTypes.number.isRequired,
+  hasListItems: PropTypes.bool.isRequired,
 };
 
 export default withI18n()(AdHocCommands);

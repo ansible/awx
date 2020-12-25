@@ -2,17 +2,23 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   func,
   bool,
+  node,
   number,
   string,
   arrayOf,
   shape,
   checkPropTypes,
 } from 'prop-types';
-import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
+import styled from 'styled-components';
+import { Alert, Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
 import { KebabifiedContext } from '../../contexts/Kebabified';
+
+const WarningMessage = styled(Alert)`
+  margin-top: 10px;
+`;
 
 const requireNameOrUsername = props => {
   const { name, username } = props;
@@ -55,16 +61,14 @@ const ItemToDelete = shape({
   }).isRequired,
 });
 
-function cannotDelete(item) {
-  return !item.summary_fields.user_capabilities.delete;
-}
-
 function ToolbarDeleteButton({
   itemsToDelete,
   pluralizedItemName,
   errorMessage,
   onDelete,
+  warningMessage,
   i18n,
+  cannotDelete,
 }) {
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -87,13 +91,13 @@ function ToolbarDeleteButton({
   const renderTooltip = () => {
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
-      .map(item => item.name)
+      .map(item => item.name || item.username)
       .join(', ');
     if (itemsToDelete.some(cannotDelete)) {
       return (
         <div>
           {errorMessage.length > 0
-            ? errorMessage
+            ? `${errorMessage}: ${itemsUnableToDelete}`
             : i18n._(
                 t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}`
               )}
@@ -171,6 +175,9 @@ function ToolbarDeleteButton({
               <br />
             </span>
           ))}
+          {warningMessage && (
+            <WarningMessage variant="warning" isInline title={warningMessage} />
+          )}
         </AlertModal>
       )}
     </>
@@ -182,11 +189,15 @@ ToolbarDeleteButton.propTypes = {
   itemsToDelete: arrayOf(ItemToDelete).isRequired,
   pluralizedItemName: string,
   errorMessage: string,
+  warningMessage: node,
+  cannotDelete: func,
 };
 
 ToolbarDeleteButton.defaultProps = {
   pluralizedItemName: 'Items',
   errorMessage: '',
+  warningMessage: null,
+  cannotDelete: item => !item.summary_fields.user_capabilities.delete,
 };
 
 export default withI18n()(ToolbarDeleteButton);

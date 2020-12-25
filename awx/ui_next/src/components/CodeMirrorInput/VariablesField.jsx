@@ -5,15 +5,17 @@ import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import styled from 'styled-components';
 import { Split, SplitItem } from '@patternfly/react-core';
-import { CheckboxField, FieldTooltip } from '../FormField';
+import { CheckboxField } from '../FormField';
 import MultiButtonToggle from '../MultiButtonToggle';
 import { yamlToJson, jsonToYaml, isJsonString } from '../../util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
+import Popover from '../Popover';
 import { JSON_MODE, YAML_MODE } from './constants';
 
 const FieldHeader = styled.div`
   display: flex;
   justify-content: space-between;
+  padding-bottom: var(--pf-c-form__group-label--PaddingBottom);
 `;
 
 const StyledCheckboxField = styled(CheckboxField)`
@@ -42,7 +44,7 @@ function VariablesField({
             <label htmlFor={id} className="pf-c-form__label">
               <span className="pf-c-form__label-text">{label}</span>
             </label>
-            {tooltip && <FieldTooltip content={tooltip} />}
+            {tooltip && <Popover content={tooltip} id={id} />}
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle

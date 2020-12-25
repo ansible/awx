@@ -1,25 +1,38 @@
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Link, Redirect, Route, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
+import ContentError from '../../../components/ContentError';
+import { useConfig } from '../../../contexts/Config';
 import MiscSystemDetail from './MiscSystemDetail';
 import MiscSystemEdit from './MiscSystemEdit';
 
 function MiscSystem({ i18n }) {
-  const baseUrl = '/settings/miscellaneous_system';
+  const baseURL = '/settings/miscellaneous_system';
+  const { me } = useConfig();
 
   return (
     <PageSection>
       <Card>
-        {i18n._(t`Miscellaneous system settings`)}
         <Switch>
-          <Redirect from={baseUrl} to={`${baseUrl}/details`} exact />
-          <Route path={`${baseUrl}/details`}>
+          <Redirect from={baseURL} to={`${baseURL}/details`} exact />
+          <Route path={`${baseURL}/details`}>
             <MiscSystemDetail />
           </Route>
-          <Route path={`${baseUrl}/edit`}>
-            <MiscSystemEdit />
+          <Route path={`${baseURL}/edit`}>
+            {me?.is_superuser ? (
+              <MiscSystemEdit />
+            ) : (
+              <Redirect to={`${baseURL}/details`} />
+            )}
+          </Route>
+          <Route key="not-found" path={`${baseURL}/*`}>
+            <ContentError isNotFound>
+              <Link to={`${baseURL}/details`}>
+                {i18n._(t`View Miscellaneous System settings`)}
+              </Link>
+            </ContentError>
           </Route>
         </Switch>
       </Card>

@@ -17,6 +17,7 @@ import PaginatedDataList, {
 } from '../../../components/PaginatedDataList';
 import AssociateModal from '../../../components/AssociateModal';
 import DisassociateButton from '../../../components/DisassociateButton';
+import AdHocCommands from '../../../components/AdHocCommands/AdHocCommands';
 import InventoryHostGroupItem from './InventoryHostGroupItem';
 
 const QS_CONFIG = getQSConfig('group', {
@@ -49,7 +50,7 @@ function InventoryHostGroupsList({ i18n }) {
         {
           data: { count, results },
         },
-        actionsResponse,
+        hostGroupOptions,
       ] = await Promise.all([
         HostsAPI.readAllGroups(hostId, params),
         HostsAPI.readGroupsOptions(hostId),
@@ -58,13 +59,13 @@ function InventoryHostGroupsList({ i18n }) {
       return {
         groups: results,
         itemCount: count,
-        actions: actionsResponse.data.actions,
+        actions: hostGroupOptions.data.actions,
         relatedSearchableKeys: (
-          actionsResponse?.data?.related_search_fields || []
+          hostGroupOptions?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
         searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+          hostGroupOptions.data.actions?.GET || {}
+        ).filter(key => hostGroupOptions.data.actions?.GET[key].filterable),
       };
     }, [hostId, search]), // eslint-disable-line react-hooks/exhaustive-deps
     {
@@ -89,7 +90,7 @@ function InventoryHostGroupsList({ i18n }) {
     deleteItems: disassociateHosts,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(
         selected.map(group => HostsAPI.disassociateGroup(hostId, group))
       );
@@ -201,6 +202,10 @@ function InventoryHostGroupsList({ i18n }) {
                     />,
                   ]
                 : []),
+              <AdHocCommands
+                adHocItems={selected}
+                hasListItems={itemCount > 0}
+              />,
               <DisassociateButton
                 key="disassociate"
                 onDisassociate={handleDisassociate}
@@ -208,8 +213,8 @@ function InventoryHostGroupsList({ i18n }) {
                 modalTitle={i18n._(t`Disassociate group from host?`)}
                 modalNote={i18n._(t`
                   Note that you may still see the group in the list after
-                  disassociating if the host is also a member of that group’s 
-                  children.  This list shows all groups the host is associated 
+                  disassociating if the host is also a member of that group’s
+                  children.  This list shows all groups the host is associated
                   with directly and indirectly.
                 `)}
               />,

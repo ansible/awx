@@ -72,7 +72,7 @@ function HostList({ i18n }) {
     deletionError,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
+    useCallback(() => {
       return Promise.all(selected.map(host => HostsAPI.destroy(host.id)));
     }, [selected]),
     {
@@ -118,6 +118,10 @@ function HostList({ i18n }) {
               name: i18n._(t`Name`),
               key: 'name__icontains',
               isDefault: true,
+            },
+            {
+              name: i18n._(t`Description`),
+              key: 'description__icontains',
             },
             {
               name: i18n._(t`Created By (Username)`),

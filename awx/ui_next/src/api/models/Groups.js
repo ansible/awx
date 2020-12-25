@@ -12,7 +12,9 @@ class Groups extends Base {
   }
 
   associateHost(id, hostId) {
-    return this.http.post(`${this.baseUrl}${id}/hosts/`, { id: hostId });
+    return this.http.post(`${this.baseUrl}${id}/hosts/`, {
+      id: hostId,
+    });
   }
 
   createHost(id, data) {
@@ -20,13 +22,36 @@ class Groups extends Base {
   }
 
   readAllHosts(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/all_hosts/`, { params });
+    return this.http.get(`${this.baseUrl}${id}/all_hosts/`, {
+      params,
+    });
   }
 
   disassociateHost(id, host) {
     return this.http.post(`${this.baseUrl}${id}/hosts/`, {
       id: host.id,
       disassociate: true,
+    });
+  }
+
+  readChildren(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/children/`, { params });
+  }
+
+  associateChildGroup(id, childId) {
+    return this.http.post(`${this.baseUrl}${id}/children/`, { id: childId });
+  }
+
+  disassociateChildGroup(id, childId) {
+    return this.http.post(`${this.baseUrl}${id}/children/`, {
+      disassociate: id,
+      id: childId,
+    });
+  }
+
+  readPotentialGroups(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/potential_children/`, {
+      params,
     });
   }
 }

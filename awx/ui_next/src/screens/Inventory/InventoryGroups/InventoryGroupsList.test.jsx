@@ -10,7 +10,12 @@ import { InventoriesAPI, GroupsAPI } from '../../../api';
 import InventoryGroupsList from './InventoryGroupsList';
 
 jest.mock('../../../api');
-
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({
+    id: 1,
+  }),
+}));
 const mockGroups = [
   {
     id: 1,
@@ -150,28 +155,7 @@ describe('<InventoryGroupsList />', () => {
 });
 describe('<InventoryGroupsList/> error handling', () => {
   let wrapper;
-  test('should show content error when api throws error on initial render', async () => {
-    InventoriesAPI.readGroupsOptions.mockImplementationOnce(() =>
-      Promise.reject(new Error())
-    );
-    await act(async () => {
-      wrapper = mountWithContexts(<InventoryGroupsList />);
-    });
-    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
-  });
-
-  test('should show content error if groups are not successfully fetched from api', async () => {
-    InventoriesAPI.readGroups.mockImplementation(() =>
-      Promise.reject(new Error())
-    );
-    await act(async () => {
-      wrapper = mountWithContexts(<InventoryGroupsList />);
-    });
-
-    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
-  });
-
-  test('should show error modal when group is not successfully deleted from api', async () => {
+  beforeEach(() => {
     InventoriesAPI.readGroups.mockResolvedValue({
       data: {
         count: mockGroups.length,
@@ -197,22 +181,34 @@ describe('<InventoryGroupsList/> error handling', () => {
         },
       })
     );
-
-    const history = createMemoryHistory({
-      initialEntries: ['/inventories/inventory/3/groups'],
-    });
-
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+    wrapper.unmount();
+  });
+  test('should show content error when api throws error on initial render', async () => {
+    InventoriesAPI.readGroupsOptions.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
     await act(async () => {
-      wrapper = mountWithContexts(
-        <Route path="/inventories/inventory/:id/groups">
-          <InventoryGroupsList />
-        </Route>,
-        {
-          context: {
-            router: { history, route: { location: history.location } },
-          },
-        }
-      );
+      wrapper = mountWithContexts(<InventoryGroupsList />);
+    });
+    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
+  });
+
+  test('should show content error if groups are not successfully fetched from api', async () => {
+    InventoriesAPI.readGroups.mockImplementation(() =>
+      Promise.reject(new Error())
+    );
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryGroupsList />);
+    });
+    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
+  });
+
+  test('should show error modal when group is not successfully deleted from api', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryGroupsList />);
     });
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
 
@@ -234,7 +230,7 @@ describe('<InventoryGroupsList/> error handling', () => {
     wrapper.update();
     await act(async () => {
       wrapper
-        .find('ModalBoxFooter Button[aria-label="Delete"]')
+        .find('ModalBoxFooter Button[aria-label="Confirm Delete"]')
         .invoke('onClick')();
     });
     await waitForElement(

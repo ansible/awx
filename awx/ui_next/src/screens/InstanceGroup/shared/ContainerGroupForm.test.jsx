@@ -28,12 +28,21 @@ const instanceGroup = {
   is_controller: false,
   is_isolated: false,
   is_containerized: false,
-  credential: null,
+  credential: 3,
   policy_instance_percentage: 46,
   policy_instance_minimum: 12,
   policy_instance_list: [],
   pod_spec_override: '',
   summary_fields: {
+    credential: {
+      id: 3,
+      name: 'test',
+      description: 'Simple one',
+      kind: 'kubernetes_bearer_token',
+      cloud: false,
+      kubernetes: true,
+      credential_type_id: 17,
+    },
     user_capabilities: {
       edit: true,
       delete: true,
@@ -101,7 +110,7 @@ describe('<ContainerGroupForm/>', () => {
         .find('Checkbox[aria-label="Customize pod specification"]')
         .prop('isChecked')
     ).toBeFalsy();
-    expect(wrapper.find('CredentialLookup').prop('value')).toBeFalsy();
+    expect(wrapper.find('CredentialLookup').prop('value').name).toBe('test');
   });
 
   test('should update form values', () => {

@@ -24,7 +24,7 @@ logger = logging.getLogger('awx.main.analytics')
 
 def _valid_license():
     try:
-        if get_license(show_key=False).get('license_type', 'UNLICENSED') == 'open':
+        if get_license().get('license_type', 'UNLICENSED') == 'open':
             return False
         access_registry[Job](None).check_license()
     except PermissionDenied:
@@ -68,7 +68,7 @@ def register(key, version, description=None, format='json', expensive=False):
 
     @register('projects_by_scm_type', 1)
     def projects_by_scm_type():
-        return {'git': 5, 'svn': 1, 'hg': 0}
+        return {'git': 5, 'svn': 1}
     """
 
     def decorate(f):
@@ -102,7 +102,7 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
 
     last_run = since or settings.AUTOMATION_ANALYTICS_LAST_GATHER or (now() - timedelta(weeks=4))
     logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
-    
+
     if _valid_license() is False:
         logger.exception("Invalid License provided, or No License Provided")
         return None

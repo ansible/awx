@@ -1,13 +1,9 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import uuid
 import logging
 import threading
 import time
-import cProfile
-import pstats
-import os
 import urllib.parse
 
 from django.conf import settings
@@ -22,6 +18,7 @@ from django.urls import reverse, resolve
 
 from awx.main.utils.named_url_graph import generate_graph, GraphNode
 from awx.conf import fields, register
+from awx.main.utils.profiling import AWXProfiler
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -32,11 +29,14 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
 
     dest = '/var/log/tower/profile'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prof = AWXProfiler("TimingMiddleware")
+
     def process_request(self, request):
         self.start_time = time.time()
         if settings.AWX_REQUEST_PROFILE:
-            self.prof = cProfile.Profile()
-            self.prof.enable()
+            self.prof.start()
 
     def process_response(self, request, response):
         if not hasattr(self, 'start_time'):  # some tools may not invoke process_request
@@ -44,32 +44,9 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
         total_time = time.time() - self.start_time
         response['X-API-Total-Time'] = '%0.3fs' % total_time
         if settings.AWX_REQUEST_PROFILE:
-            self.prof.disable()
-            cprofile_file = self.save_profile_file(request)
-            response['cprofile_file'] = cprofile_file
+            response['X-API-Profile-File'] = self.prof.stop()
         perf_logger.info('api response times', extra=dict(python_objects=dict(request=request, response=response)))
         return response
-
-    def save_profile_file(self, request):
-        if not os.path.isdir(self.dest):
-            os.makedirs(self.dest)
-        filename = '%.3fs-%s.pstats' % (pstats.Stats(self.prof).total_tt, uuid.uuid4())
-        filepath = os.path.join(self.dest, filename)
-        with open(filepath, 'w') as f:
-            f.write('%s %s\n' % (request.method, request.get_full_path()))
-            pstats.Stats(self.prof, stream=f).sort_stats('cumulative').print_stats()
-
-        if settings.AWX_REQUEST_PROFILE_WITH_DOT:
-            from gprof2dot import main as generate_dot
-            raw = os.path.join(self.dest, filename) + '.raw'
-            pstats.Stats(self.prof).dump_stats(raw)
-            generate_dot([
-                '-n', '2.5', '-f', 'pstats', '-o',
-                os.path.join( self.dest, filename).replace('.pstats', '.dot'),
-                raw
-            ])
-            os.remove(raw)
-        return filepath
 
 
 class SessionTimeoutMiddleware(MiddlewareMixin):
@@ -204,4 +181,4 @@ class MigrationRanCheckMiddleware(MiddlewareMixin):
         plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
         if bool(plan) and \
                 getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
-            return redirect(reverse("ui:migrations_notran"))
+            return redirect(reverse("ui_next:migrations_notran"))

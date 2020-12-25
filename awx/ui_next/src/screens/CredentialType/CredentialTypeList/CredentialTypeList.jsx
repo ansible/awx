@@ -83,8 +83,8 @@ function CredentialTypeList({ i18n }) {
     deleteItems: deleteCredentialTypes,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      await Promise.all(
+    useCallback(() => {
+      return Promise.all(
         selected.map(({ id }) => CredentialTypesAPI.destroy(id))
       );
     }, [selected]),
@@ -114,6 +114,25 @@ function CredentialTypeList({ i18n }) {
             pluralizedItemName={i18n._(t`Credential Types`)}
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
+            toolbarSearchColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name__icontains',
+                isDefault: true,
+              },
+              {
+                name: i18n._(t`Description`),
+                key: 'description__icontains',
+              },
+              {
+                name: i18n._(t`Created By (Username)`),
+                key: 'created_by__username__icontains',
+              },
+              {
+                name: i18n._(t`Modified By (Username)`),
+                key: 'modified_by__username__icontains',
+              },
+            ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             renderToolbar={props => (

@@ -91,7 +91,6 @@ USE_L10N = True
 USE_TZ = True
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'ui', 'static'),
     os.path.join(BASE_DIR, 'ui_next', 'build', 'static'),
     os.path.join(BASE_DIR, 'static'),
 )
@@ -197,6 +196,14 @@ LOCAL_STDOUT_EXPIRE_TIME = 2592000
 # events into the database
 JOB_EVENT_WORKERS = 4
 
+# The number of seconds (must be an integer) to buffer callback receiver bulk
+# writes in memory before flushing via JobEvent.objects.bulk_create()
+JOB_EVENT_BUFFER_SECONDS = 1
+
+# The interval at which callback receiver statistics should be
+# recorded
+JOB_EVENT_STATISTICS_INTERVAL = 5
+
 # The maximum size of the job event worker queue before requests are blocked
 JOB_EVENT_MAX_QUEUE_SIZE = 10000
 
@@ -241,8 +248,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-                'awx.ui.context_processors.settings',
-                'awx.ui.context_processors.version',
+                'awx.ui.context_processors.csp',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
@@ -656,7 +662,7 @@ INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
 # ----------------
 EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
-EC2_INSTANCE_ID_VAR = 'ec2_id'
+EC2_INSTANCE_ID_VAR = 'instance_id'
 EC2_EXCLUDE_EMPTY_GROUPS = True
 
 # ------------

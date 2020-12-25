@@ -333,14 +333,14 @@ class BaseAccess(object):
             report_violation(_("License has expired."))
 
         free_instances = validation_info.get('free_instances', 0)
-        available_instances = validation_info.get('available_instances', 0)
+        instance_count = validation_info.get('instance_count', 0)
 
         if add_host_name:
             host_exists = Host.objects.filter(name=add_host_name).exists()
             if not host_exists and free_instances == 0:
-                report_violation(_("License count of %s instances has been reached.") % available_instances)
+                report_violation(_("License count of %s instances has been reached.") % instance_count)
             elif not host_exists and free_instances < 0:
-                report_violation(_("License count of %s instances has been exceeded.") % available_instances)
+                report_violation(_("License count of %s instances has been exceeded.") % instance_count)
         elif not add_host_name and free_instances < 0:
             report_violation(_("Host count exceeds available instances."))
 
@@ -2749,6 +2749,9 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
             return False
         else:
             return (self.check_related('workflow_approval_template', UnifiedJobTemplate, role_field='admin_role'))
+
+    def can_change(self, obj, data):
+        return self.user.can_access(WorkflowJobTemplate, 'change', obj.workflow_job_template, data={})
 
     def can_start(self, obj, validate_license=False):
         # for copying WFJTs that contain approval nodes

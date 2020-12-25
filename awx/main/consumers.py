@@ -75,7 +75,7 @@ class WebsocketSecretAuthHelper:
         nonce_diff = now - nonce_parsed
         if abs(nonce_diff) > nonce_tolerance:
             logger.warn(f"Potential replay attack or machine(s) time out of sync by {nonce_diff} seconds.")
-            raise ValueError("Potential replay attack or machine(s) time out of sync by {nonce_diff} seconds.")
+            raise ValueError(f"Potential replay attack or machine(s) time out of sync by {nonce_diff} seconds.")
 
         return True
 

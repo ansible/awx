@@ -26,7 +26,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
 >
   <DataListItem
     aria-labelledby="items-list-item-9000"
+    className=""
     id="9000"
+    isExpanded={false}
     key="9000"
   >
     <li
@@ -283,7 +285,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   >
                     <label
                       className="pf-c-switch"
-                      data-ouia-component-id={0}
+                      data-ouia-component-id="OUIA-Generated-Switch-1"
                       data-ouia-component-type="PF4/Switch"
                       data-ouia-safe={true}
                       htmlFor="notification-9000-started-toggle"
@@ -328,7 +330,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   >
                     <label
                       className="pf-c-switch"
-                      data-ouia-component-id={1}
+                      data-ouia-component-id="OUIA-Generated-Switch-2"
                       data-ouia-component-type="PF4/Switch"
                       data-ouia-safe={true}
                       htmlFor="notification-9000-success-toggle"
@@ -373,7 +375,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   >
                     <label
                       className="pf-c-switch"
-                      data-ouia-component-id={2}
+                      data-ouia-component-id="OUIA-Generated-Switch-3"
                       data-ouia-component-type="PF4/Switch"
                       data-ouia-safe={true}
                       htmlFor="notification-9000-error-toggle"

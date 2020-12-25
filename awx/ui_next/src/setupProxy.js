@@ -4,7 +4,7 @@ const TARGET = process.env.TARGET || 'https://localhost:8043';
 
 module.exports = app => {
   app.use(
-    createProxyMiddleware(['/api', '/websocket'], {
+    createProxyMiddleware(['/api', '/websocket', '/sso'], {
       target: TARGET,
       secure: false,
       ws: true,

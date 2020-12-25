@@ -9,13 +9,14 @@ import styled from 'styled-components';
 
 import { BrandName } from '../../variables';
 import AnsibleSelect from '../AnsibleSelect';
-import FormField, { FieldTooltip } from '../FormField';
+import FormField from '../FormField';
 import { VariablesField } from '../CodeMirrorInput';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
 } from '../FormLayout';
+import Popover from '../Popover';
 import { required } from '../../util/validators';
 
 const TooltipWrapper = styled.div`
@@ -27,37 +28,48 @@ const TooltipWrapper = styled.div`
 // in failing tests.
 const brandName = BrandName;
 
-function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
-  const [module_nameField, module_nameMeta, module_nameHelpers] = useField({
+function AdHocDetailsStep({ i18n, verbosityOptions, moduleOptions }) {
+  const [moduleNameField, moduleNameMeta, moduleNameHelpers] = useField({
     name: 'module_name',
     validate: required(null, i18n),
   });
 
   const [variablesField] = useField('extra_vars');
-  const [diff_modeField, , diff_modeHelpers] = useField('diff_mode');
-  const [become_enabledField, , become_enabledHelpers] = useField(
+  const [diffModeField, , diffModeHelpers] = useField('diff_mode');
+  const [becomeEnabledField, , becomeEnabledHelpers] = useField(
     'become_enabled'
   );
   const [verbosityField, verbosityMeta, verbosityHelpers] = useField({
     name: 'verbosity',
     validate: required(null, i18n),
   });
+
+  const argumentsRequired =
+    moduleNameField.value === 'command' || moduleNameField.value === 'shell';
+  const [, argumentsMeta, argumentsHelpers] = useField({
+    name: 'module_args',
+    validate: argumentsRequired && required(null, i18n),
+  });
+
+  const isValid = !argumentsMeta.error || !argumentsMeta.touched;
+
   return (
     <Form>
       <FormColumnLayout>
         <FormFullWidthLayout>
           <FormGroup
             fieldId="module_name"
+            aria-label={i18n._(t`select module`)}
             label={i18n._(t`Module`)}
             isRequired
-            helperTextInvalid={module_nameMeta.error}
+            helperTextInvalid={moduleNameMeta.error}
             validated={
-              !module_nameMeta.touched || !module_nameMeta.error
+              !moduleNameMeta.touched || !moduleNameMeta.error
                 ? 'default'
                 : 'error'
             }
             labelIcon={
-              <FieldTooltip
+              <Popover
                 content={i18n._(
                   t`These are the modules that ${brandName} supports running commands against.`
                 )}
@@ -65,33 +77,51 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
             }
           >
             <AnsibleSelect
-              {...module_nameField}
-              isValid={!module_nameMeta.touched || !module_nameMeta.error}
+              {...moduleNameField}
+              placeHolder={i18n._(t`Select a module`)}
+              isValid={!moduleNameMeta.touched || !moduleNameMeta.error}
               id="module_name"
-              data={moduleOptions || []}
+              data={[
+                {
+                  value: '',
+                  key: '',
+                  label: i18n._(t`Choose a module`),
+                  isDisabled: true,
+                },
+                ...moduleOptions.map(value => ({
+                  value: value[0],
+                  label: value[0],
+                  key: value[0],
+                })),
+              ]}
               onChange={(event, value) => {
-                module_nameHelpers.setValue(value);
+                if (value !== 'command' && value !== 'shell') {
+                  argumentsHelpers.setTouched(false);
+                }
+                moduleNameHelpers.setValue(value);
               }}
             />
           </FormGroup>
           <FormField
             id="module_args"
             name="module_args"
+            aria-label={i18n._(t`Arguments`)}
             type="text"
             label={i18n._(t`Arguments`)}
-            validate={required(null, i18n)}
+            validated={isValid ? 'default' : 'error'}
+            onBlur={() => argumentsHelpers.setTouched(true)}
             isRequired={
-              module_nameField.value === 'command' ||
-              module_nameField.value === 'shell'
+              moduleNameField.value === 'command' ||
+              moduleNameField.value === 'shell'
             }
             tooltip={
-              module_nameField.value ? (
+              moduleNameField.value ? (
                 <>
                   {i18n._(
-                    t`These arguments are used with the specified module. You can find information about ${module_nameField.value} by clicking `
+                    t`These arguments are used with the specified module. You can find information about ${moduleNameField.value} by clicking `
                   )}
                   <a
-                    href={`https://docs.ansible.com/ansible/latest/modules/${module_nameField.value}_module.html`}
+                    href={`https://docs.ansible.com/ansible/latest/modules/${moduleNameField.value}_module.html`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -106,6 +136,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
           />
           <FormGroup
             fieldId="verbosity"
+            aria-label={i18n._(t`select verbosity`)}
             label={i18n._(t`Verbosity`)}
             isRequired
             validated={
@@ -115,7 +146,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
             }
             helperTextInvalid={verbosityMeta.error}
             labelIcon={
-              <FieldTooltip
+              <Popover
                 content={i18n._(
                   t`These are the verbosity levels for standard out of the command run that are supported.`
                 )}
@@ -137,6 +168,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
             name="limit"
             type="text"
             label={i18n._(t`Limit`)}
+            aria-label={i18n._(t`Limit`)}
             tooltip={
               <span>
                 {i18n._(
@@ -147,7 +179,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {i18n._(`here`)}
+                  {i18n._(t`here`)}
                 </a>
               </span>
             }
@@ -158,6 +190,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
             type="number"
             min="0"
             label={i18n._(t`Forks`)}
+            aria-label={i18n._(t`Forks`)}
             tooltip={
               <span>
                 {i18n._(
@@ -176,8 +209,9 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
           <FormColumnLayout>
             <FormGroup
               label={i18n._(t`Show changes`)}
+              aria-label={i18n._(t`Show changes`)}
               labelIcon={
-                <FieldTooltip
+                <Popover
                   content={i18n._(
                     t`If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode.`
                   )}
@@ -189,9 +223,9 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
                 id="diff_mode"
                 label={i18n._(t`On`)}
                 labelOff={i18n._(t`Off`)}
-                isChecked={diff_modeField.value}
+                isChecked={diffModeField.value}
                 onChange={() => {
-                  diff_modeHelpers.setValue(!diff_modeField.value);
+                  diffModeHelpers.setValue(!diffModeField.value);
                 }}
                 aria-label={i18n._(t`toggle changes`)}
               />
@@ -204,7 +238,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
                     <span>
                       {i18n._(t`Enable privilege escalation`)}
                       &nbsp;
-                      <FieldTooltip
+                      <Popover
                         content={
                           <p>
                             {i18n._(t`Enables creation of a provisioning
@@ -222,9 +256,9 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
                     </span>
                   }
                   id="become_enabled"
-                  isChecked={become_enabledField.value}
+                  isChecked={becomeEnabledField.value}
                   onChange={checked => {
-                    become_enabledHelpers.setValue(checked);
+                    becomeEnabledHelpers.setValue(checked);
                   }}
                 />
               </FormCheckboxLayout>
@@ -273,6 +307,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
               </TooltipWrapper>
             }
             label={i18n._(t`Extra variables`)}
+            aria-label={i18n._(t`Extra variables`)}
           />
         </FormFullWidthLayout>
       </FormColumnLayout>
@@ -280,9 +315,9 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
   );
 }
 
-CredentialStep.propTypes = {
-  moduleOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
+AdHocDetailsStep.propTypes = {
+  moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
   verbosityOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-export default withI18n()(CredentialStep);
+export default withI18n()(AdHocDetailsStep);

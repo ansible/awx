@@ -107,7 +107,7 @@ function Search({
     } else if (currentSearchColumn?.booleanLabels) {
       label = currentSearchColumn.booleanLabels[value];
     }
-    return label.toString();
+    return (label || colKey).toString();
   };
 
   const getChipsByKey = () => {
@@ -160,7 +160,7 @@ function Search({
   const searchOptions = columns
     .filter(({ key }) => key !== searchKey)
     .map(({ key, name }) => (
-      <SelectOption key={key} value={name}>
+      <SelectOption key={key} value={name} id={`select-option-${key}`}>
         {name}
       </SelectOption>
     ));
@@ -177,6 +177,7 @@ function Search({
             onSelect={handleDropdownSelect}
             selections={searchColumnName}
             isOpen={isSearchDropdownOpen}
+            ouiaId="simple-key-select"
           >
             {searchOptions}
           </Select>
@@ -217,9 +218,14 @@ function Search({
                   })}
                   isOpen={isFilterDropdownOpen}
                   placeholderText={`Filter By ${name}`}
+                  ouiaId={`filter-by-${key}`}
                 >
                   {options.map(([optionKey, optionLabel]) => (
-                    <SelectOption key={optionKey} value={optionKey}>
+                    <SelectOption
+                      key={optionKey}
+                      value={optionKey}
+                      inputId={`select-option-${optionKey}`}
+                    >
                       {optionLabel}
                     </SelectOption>
                   ))}
@@ -234,6 +240,7 @@ function Search({
                 selections={chipsByKey[key].chips[0]?.label}
                 isOpen={isFilterDropdownOpen}
                 placeholderText={`Filter By ${name}`}
+                ouiaId={`filter-by-${key}`}
               >
                 <SelectOption key="true" value="true">
                   {booleanLabels.true || i18n._(t`Yes`)}

@@ -48,15 +48,17 @@ function ContainerGroupDetails({ instanceGroup, i18n }) {
           value={i18n._(t`Container group`)}
           dataCy="container-group-type"
         />
-        <Detail
-          label={i18n._(t`Credential`)}
-          value={
-            <Label variant="outline" color="blue">
-              {instanceGroup.summary_fields.credential.name}
-            </Label>
-          }
-          dataCy="container-group-credential"
-        />
+        {instanceGroup.summary_fields.credential && (
+          <Detail
+            label={i18n._(t`Credential`)}
+            value={
+              <Label variant="outline" color="blue">
+                {instanceGroup.summary_fields.credential?.name}
+              </Label>
+            }
+            dataCy="container-group-credential"
+          />
+        )}
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={instanceGroup.created}

@@ -85,7 +85,7 @@ describe('<InventoryHostList />', () => {
         results: mockHosts,
       },
     });
-    InventoriesAPI.readOptions.mockResolvedValue({
+    InventoriesAPI.readHostsOptions.mockResolvedValue({
       data: {
         actions: {
           GET: {},
@@ -266,7 +266,7 @@ describe('<InventoryHostList />', () => {
   });
 
   test('should hide Add button for users without ability to POST', async () => {
-    InventoriesAPI.readOptions.mockResolvedValueOnce({
+    InventoriesAPI.readHostsOptions.mockResolvedValueOnce({
       data: {
         actions: {
           GET: {},
@@ -283,7 +283,7 @@ describe('<InventoryHostList />', () => {
   });
 
   test('should show content error when api throws error on initial render', async () => {
-    InventoriesAPI.readOptions.mockImplementation(() =>
+    InventoriesAPI.readHostsOptions.mockImplementation(() =>
       Promise.reject(new Error())
     );
     await act(async () => {

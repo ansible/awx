@@ -2,11 +2,13 @@
 
 exports[`<ToolbarDeleteButton /> should render button 1`] = `
 <ToolbarDeleteButton
+  cannotDelete={[Function]}
   errorMessage=""
   i18n={"/i18n/"}
   itemsToDelete={Array []}
   onDelete={[Function]}
   pluralizedItemName="Items"
+  warningMessage={null}
 >
   <Tooltip
     content="Select a row to delete"
@@ -98,11 +100,12 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
               aria-disabled={true}
               aria-label="Delete"
               className="pf-c-button pf-m-secondary pf-m-disabled"
-              data-ouia-component-id={0}
+              data-ouia-component-id="OUIA-Generated-Button-secondary-1"
               data-ouia-component-type="PF4/Button"
               data-ouia-safe={true}
               disabled={true}
               onClick={[Function]}
+              role={null}
               tabIndex={null}
               type="button"
             >

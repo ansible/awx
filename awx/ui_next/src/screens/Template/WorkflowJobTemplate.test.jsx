@@ -1,192 +1,262 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
+import {
+  WorkflowJobTemplatesAPI,
+  OrganizationsAPI,
+  NotificationTemplatesAPI,
+} from '../../api';
 
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplate from './WorkflowJobTemplate';
-import { sleep } from '../../../testUtils/testUtils';
-import {
-  WorkflowJobTemplatesAPI,
-  CredentialsAPI,
-  OrganizationsAPI,
-} from '../../api';
+import mockWorkflowJobTemplateData from './shared/data.workflow_job_template.json';
 
 jest.mock('../../api/models/WorkflowJobTemplates');
-jest.mock('../../api/models/Credentials');
 jest.mock('../../api/models/Organizations');
+jest.mock('../../api/models/NotificationTemplates');
 
-describe('<WorkflowJobTemplate/>', () => {
-  const mockMe = {
-    is_super_user: true,
-    is_system_auditor: false,
-  };
+const mockMe = {
+  is_super_user: true,
+  is_system_auditor: false,
+};
+describe('<WorkflowJobTemplate />', () => {
   let wrapper;
-  let history;
-  beforeAll(() => {
+  beforeEach(() => {
     WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
-      data: {
-        id: 1,
-        name: 'Foo',
-        description: 'Bar',
-        created: '2015-07-07T17:21:26.429745Z',
-        modified: '2019-08-11T19:47:37.980466Z',
-        extra_vars: '',
-        webhook_service: 'github',
-        summary_fields: {
-          webhook_credential: { id: 1234567, name: 'Foo Webhook Credential' },
-          created_by: { id: 1, username: 'Athena' },
-          modified_by: { id: 1, username: 'Apollo' },
-          recent_jobs: [
-            { id: 1, status: 'run' },
-            { id: 2, status: 'run' },
-            { id: 3, status: 'run' },
-          ],
-          labels: {
-            results: [
-              { name: 'Label 1', id: 1 },
-              { name: 'Label 2', id: 2 },
-              { name: 'Label 3', id: 3 },
-            ],
-          },
-          user_capabilities: {},
-        },
-        related: {
-          webhook_key: '/api/v2/workflow_job_templates/57/webhook_key/',
-        },
-      },
+      data: mockWorkflowJobTemplateData,
     });
-
-    WorkflowJobTemplatesAPI.readWebhookKey.mockResolvedValue({
-      data: { webhook_key: 'WebHook Key' },
-    });
-    CredentialsAPI.readDetail.mockResolvedValue({
+    WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions.mockResolvedValue({
       data: {
-        summary_fields: {
-          credential_type: { name: 'Github Personal Access Token', id: 1 },
-        },
+        actions: { PUT: true },
       },
     });
     OrganizationsAPI.read.mockResolvedValue({
-      data: { results: [{ id: 1, name: 'Org Foo' }] },
+      data: {
+        count: 1,
+        next: null,
+        previous: null,
+        results: [
+          {
+            id: 1,
+          },
+        ],
+      },
+    });
+    WorkflowJobTemplatesAPI.readWebhookKey.mockResolvedValue({
+      data: {
+        webhook_key: 'key',
+      },
     });
   });
   afterEach(() => {
     jest.clearAllMocks();
     wrapper.unmount();
   });
-  describe('User can PUT', () => {
-    beforeEach(async () => {
-      WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions.mockResolvedValue({
-        data: { actions: { PUT: {} } },
-      });
-      history = createMemoryHistory({
-        initialEntries: ['/templates/workflow_job_template/1/details'],
-      });
-      await act(async () => {
-        wrapper = mountWithContexts(
-          <Route
-            path="/templates/workflow_job_template/:id/details"
-            component={() => (
-              <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
-            )}
-          />,
-          {
-            context: {
-              router: {
-                history,
-              },
-            },
-          }
-        );
-      });
-    });
-    test('calls api to get workflow job template data', async () => {
-      expect(wrapper.find('WorkflowJobTemplate').length).toBe(1);
-      expect(WorkflowJobTemplatesAPI.readDetail).toBeCalledWith('1');
-      wrapper.update();
-      await sleep(0);
-      expect(WorkflowJobTemplatesAPI.readWebhookKey).toBeCalledWith('1');
-      expect(
-        WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions
-      ).toBeCalled();
-
-      expect(CredentialsAPI.readDetail).toBeCalledWith(1234567);
-      expect(OrganizationsAPI.read).toBeCalledWith({
-        page_size: 1,
-        role_level: 'notification_admin_role',
-      });
-    });
-
-    test('renders proper tabs', async () => {
-      const tabs = [
-        'Details',
-        'Access',
-        'Notifications',
-        'Schedules',
-        'Visualizer',
-        'Completed Jobs',
-        'Survey',
-      ];
-      waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-      wrapper.update();
-      wrapper.find('TabContainer').forEach(tc => {
-        tabs.forEach(t => expect(tc.prop(`aria-label=[${t}]`)));
-      });
-    });
-
-    test('Does not render Notifications tab', async () => {
-      OrganizationsAPI.read.mockResolvedValue({
-        data: { results: [] },
-      });
-      const tabs = [
-        'Details',
-        'Access',
-        'Schedules',
-        'Visualizer',
-        'Completed Jobs',
-        'Survey',
-      ];
-      waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-      wrapper.update();
-      wrapper.find('TabContainer').forEach(tc => {
-        tabs.forEach(t => expect(tc.prop(`aria-label=[${t}]`)));
-      });
+  test('initially renders succesfully', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
+      );
     });
   });
-  describe('User cannot PUT', () => {
-    beforeEach(async () => {
-      WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions.mockResolvedValueOnce(
-        {
-          data: { actions: {} },
-        }
+  test('When component mounts API is called and the response is put in state', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
       );
-      history = createMemoryHistory({
-        initialEntries: ['/templates/workflow_job_template/1/details'],
-      });
-      await act(async () => {
-        wrapper = mountWithContexts(
-          <Route
-            path="/templates/workflow_job_template/:id/details"
-            component={() => (
-              <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
-            )}
-          />,
-          {
-            context: {
-              router: {
-                history,
+    });
+    expect(WorkflowJobTemplatesAPI.readDetail).toBeCalled();
+    expect(OrganizationsAPI.read).toBeCalled();
+  });
+  test('notifications tab shown for admins', async done => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
+      );
+    });
+
+    const tabs = await waitForElement(
+      wrapper,
+      '.pf-c-tabs__item',
+      el => el.length === 8
+    );
+    expect(tabs.at(3).text()).toEqual('Notifications');
+    done();
+  });
+  test('notifications tab hidden with reduced permissions', async done => {
+    OrganizationsAPI.read.mockResolvedValue({
+      data: {
+        count: 0,
+        next: null,
+        previous: null,
+        results: [],
+      },
+    });
+
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
+      );
+    });
+    const tabs = await waitForElement(
+      wrapper,
+      '.pf-c-tabs__item',
+      el => el.length === 7
+    );
+    tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
+    done();
+  });
+
+  test('should show content error when user attempts to navigate to erroneous route', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/workflow_job_template/1/foobar'],
+    });
+
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: {
+                  params: { id: 1 },
+                  url: '/templates/workflow_job_template/1/foobar',
+                  path: '/templates/workflow_job_template/1/foobar',
+                },
               },
             },
-          }
-        );
-      });
+          },
+        }
+      );
     });
-    test('should not call for webhook key', async () => {
-      expect(WorkflowJobTemplatesAPI.readWebhookKey).not.toBeCalled();
+
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+  test('should call to get webhook key', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/workflow_job_template/1/foobar'],
     });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: {
+                  params: { id: 1 },
+                  url: '/templates/workflow_job_template/1/foobar',
+                  path: '/templates/workflow_job_template/1/foobar',
+                },
+              },
+            },
+          },
+        }
+      );
+    });
+    expect(WorkflowJobTemplatesAPI.readWebhookKey).toHaveBeenCalled();
+  });
+  test('should not call to get webhook key', async () => {
+    WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions.mockResolvedValueOnce(
+      {
+        data: {
+          actions: {},
+        },
+      }
+    );
+
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/workflow_job_template/1/foobar'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: {
+                  params: { id: 1 },
+                  url: '/templates/workflow_job_template/1/foobar',
+                  path: '/templates/workflow_job_template/1/foobar',
+                },
+              },
+            },
+          },
+        }
+      );
+    });
+    expect(WorkflowJobTemplatesAPI.readWebhookKey).not.toHaveBeenCalled();
+  });
+
+  test('should render workflow notifications list view', async () => {
+    WorkflowJobTemplatesAPI.readNotificationTemplatesSuccess.mockReturnValue({
+      data: { results: [{ id: 1 }] },
+    });
+    WorkflowJobTemplatesAPI.readNotificationTemplatesError.mockReturnValue({
+      data: { results: [{ id: 2 }] },
+    });
+    WorkflowJobTemplatesAPI.readNotificationTemplatesStarted.mockReturnValue({
+      data: { results: [{ id: 3 }] },
+    });
+    WorkflowJobTemplatesAPI.readNotificationTemplatesApprovals.mockReturnValue({
+      data: { results: [{ id: 4 }] },
+    });
+    NotificationTemplatesAPI.readOptions.mockReturnValue({
+      data: {
+        actions: {
+          GET: {
+            notification_type: {
+              choices: [['email', 'Email']],
+            },
+          },
+        },
+      },
+    });
+    NotificationTemplatesAPI.read.mockReturnValue({
+      data: {
+        count: 2,
+        results: [
+          {
+            id: 1,
+            name: 'Notification one',
+            url: '/api/v2/notification_templates/1/',
+            notification_type: 'email',
+          },
+        ],
+      },
+    });
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/workflow_job_template/1/notifications'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplate
+          setBreadcrumb={() => {}}
+          me={{
+            is_system_auditor: true,
+          }}
+        />,
+        {
+          context: { router: { history } },
+        }
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('NotificationListItem').length).toBe(1);
+    expect(wrapper.find('Switch[label="Approval"]')).toHaveLength(1);
+    expect(wrapper.find('Switch[label="Start"]')).toHaveLength(1);
+    expect(wrapper.find('Switch[label="Success"]')).toHaveLength(1);
+    expect(wrapper.find('Switch[label="Failure"]')).toHaveLength(1);
   });
 });

@@ -453,7 +453,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                 if 'capability_map' not in self.context:
                     if hasattr(self, 'polymorphic_base'):
                         model = self.polymorphic_base.Meta.model
-                        prefetch_list = self.polymorphic_base._capabilities_prefetch
+                        prefetch_list = self.polymorphic_base.capabilities_prefetch
                     else:
                         model = self.Meta.model
                         prefetch_list = self.capabilities_prefetch
@@ -640,12 +640,9 @@ class EmptySerializer(serializers.Serializer):
 
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
-    # As a base serializer, the capabilities prefetch is not used directly
-    _capabilities_prefetch = [
-        'admin', 'execute',
-        {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use',
-                  'organization.workflow_admin']}
-    ]
+    # As a base serializer, the capabilities prefetch is not used directly,
+    # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
+    capabilities_prefetch = []
 
     class Meta:
         model = UnifiedJobTemplate
@@ -695,7 +692,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer.polymorphic_base = self
                 # capabilities prefetch is only valid for these models
                 if isinstance(obj, (JobTemplate, WorkflowJobTemplate)):
-                    serializer.capabilities_prefetch = self._capabilities_prefetch
+                    serializer.capabilities_prefetch = serializer_class.capabilities_prefetch
                 else:
                     serializer.capabilities_prefetch = None
             return serializer.to_representation(obj)
@@ -1333,6 +1330,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             scm_type = attrs.get('scm_type', u'') or u''
         if self.instance and not scm_type:
             valid_local_paths.append(self.instance.local_path)
+        if self.instance and scm_type and "local_path" in attrs and self.instance.local_path != attrs['local_path']:
+            errors['local_path'] = _(f'Cannot change local_path for {scm_type}-based projects')
         if scm_type:
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
@@ -1749,7 +1748,7 @@ class HostSerializer(BaseSerializerWithVariables):
             attrs['variables'] = json.dumps(vars_dict)
         if Group.objects.filter(name=name, inventory=inventory).exists():
             raise serializers.ValidationError(_('A Group with that name already exists.'))
-            
+
         return super(HostSerializer, self).validate(attrs)
 
     def to_representation(self, obj):
@@ -3438,6 +3437,12 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization.pk})
         if obj.webhook_credential_id:
             res['webhook_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.webhook_credential_id})
+        if obj.inventory_id:
+            res['inventory'] = self.reverse(
+                'api:inventory_detail', kwargs={
+                    'pk': obj.inventory_id
+                }
+            )
         return res
 
     def validate_extra_vars(self, value):
@@ -3940,12 +3945,12 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
         return UriCleaner.remove_sensitive(obj.stdout)
 
     def get_event_data(self, obj):
-        # the project update playbook uses the git, hg, or svn modules
+        # the project update playbook uses the git or svn modules
         # to clone repositories, and those modules are prone to printing
         # raw SCM URLs in their stdout (which *could* contain passwords)
         # attempt to detect and filter HTTP basic auth passwords in the stdout
         # of these types of events
-        if obj.event_data.get('task_action') in ('git', 'hg', 'svn'):
+        if obj.event_data.get('task_action') in ('git', 'svn'):
             try:
                 return json.loads(
                     UriCleaner.remove_sensitive(
@@ -4157,7 +4162,10 @@ class JobLaunchSerializer(BaseSerializer):
         # verify that credentials (either provided or existing) don't
         # require launch-time passwords that have not been provided
         if 'credentials' in accepted:
-            launch_credentials = accepted['credentials']
+            launch_credentials = Credential.unique_dict(
+                list(template_credentials.all()) +
+                list(accepted['credentials'])
+            ).values()
         else:
             launch_credentials = template_credentials
         passwords = attrs.get('credential_passwords', {})  # get from original attrs

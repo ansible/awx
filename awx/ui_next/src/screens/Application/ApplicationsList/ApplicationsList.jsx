@@ -80,11 +80,11 @@ function ApplicationsList({ i18n }) {
   const {
     isLoading: deleteLoading,
     deletionError,
-    deleteItems: handleDeleteApplications,
+    deleteItems: deleteApplications,
     clearDeletionError,
   } = useDeleteItems(
-    useCallback(async () => {
-      await Promise.all(selected.map(({ id }) => ApplicationsAPI.destroy(id)));
+    useCallback(() => {
+      return Promise.all(selected.map(({ id }) => ApplicationsAPI.destroy(id)));
     }, [selected]),
     {
       qsConfig: QS_CONFIG,
@@ -93,8 +93,8 @@ function ApplicationsList({ i18n }) {
     }
   );
 
-  const handleDelete = async () => {
-    await handleDeleteApplications();
+  const handleDeleteApplications = async () => {
+    await deleteApplications();
     setSelected([]);
   };
 
@@ -163,7 +163,7 @@ function ApplicationsList({ i18n }) {
                     : []),
                   <ToolbarDeleteButton
                     key="delete"
-                    onDelete={handleDelete}
+                    onDelete={handleDeleteApplications}
                     itemsToDelete={selected}
                     pluralizedItemName={i18n._(t`Applications`)}
                   />,

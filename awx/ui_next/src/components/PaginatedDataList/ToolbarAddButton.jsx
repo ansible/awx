@@ -2,6 +2,7 @@ import React from 'react';
 import { string, func } from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
+import CaretDownIcon from '@patternfly/react-icons/dist/js/icons/caret-down-icon';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useKebabifiedMenu } from '../../contexts/Kebabified';
@@ -12,6 +13,7 @@ function ToolbarAddButton({
   i18n,
   isDisabled,
   defaultLabel = i18n._(t`Add`),
+  showToggleIndicator,
 }) {
   const { isKebabified } = useKebabifiedMenu();
 
@@ -26,7 +28,7 @@ function ToolbarAddButton({
       <DropdownItem
         key="add"
         isDisabled={isDisabled}
-        component={linkTo ? Link : Button}
+        component={linkTo ? Link : 'button'}
         to={linkTo}
         onClick={!onClick ? undefined : onClick}
       >
@@ -50,7 +52,13 @@ function ToolbarAddButton({
     );
   }
   return (
-    <Button variant="primary" aria-label={defaultLabel} onClick={onClick}>
+    <Button
+      icon={showToggleIndicator ? <CaretDownIcon /> : null}
+      iconPosition={showToggleIndicator ? 'right' : null}
+      variant="primary"
+      aria-label={defaultLabel}
+      onClick={onClick}
+    >
       {defaultLabel}
     </Button>
   );

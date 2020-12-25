@@ -8,8 +8,8 @@ describe('<CopyButton/>', () => {
   test('shold mount properly', () => {
     const wrapper = mountWithContexts(
       <CopyButton
-        onLoading={() => {}}
-        onDoneLoading={() => {}}
+        onCopyStart={() => {}}
+        onCopyFinish={() => {}}
         copyItem={() => {}}
         helperText={{
           tooltip: `Copy Template`,
@@ -22,8 +22,8 @@ describe('<CopyButton/>', () => {
   test('should render proper tooltip', () => {
     const wrapper = mountWithContexts(
       <CopyButton
-        onLoading={() => {}}
-        onDoneLoading={() => {}}
+        onCopyStart={() => {}}
+        onCopyFinish={() => {}}
         copyItem={() => {}}
         helperText={{
           tooltip: `Copy Template`,
