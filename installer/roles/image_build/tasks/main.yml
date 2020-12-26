@@ -7,7 +7,6 @@
 - name: Verify awx-logos directory exists for official install
   stat:
     path: "../../awx-logos"
-  delegate_to: localhost
   register: logosdir
   failed_when: logosdir.stat.isdir is not defined or not logosdir.stat.isdir
   when: awx_official|default(false)|bool
@@ -16,7 +15,6 @@
   copy:
     src: "../../awx-logos/awx/ui/client/assets/"
     dest: "../awx/ui_next/public/static/media/"
-  delegate_to: localhost
   when: awx_official|default(false)|bool
 
 - name: Set awx image name
@@ -27,16 +25,13 @@
   template:
     src: Dockerfile.j2
     dest: ../Dockerfile
-  delegate_to: localhost
 
 # Calling Docker directly because docker-py doesnt support BuildKit
 - name: Build AWX image
   command: docker build -t {{ awx_image }}:{{ awx_version }} ..
-  delegate_to: localhost
   when: use_container_for_build|default(true)|bool
 
 - name: Tag awx images as latest
   command: "docker tag {{ item }}:{{ awx_version }} {{ item }}:latest"
-  delegate_to: localhost
   with_items:
     - "{{ awx_image }}"
