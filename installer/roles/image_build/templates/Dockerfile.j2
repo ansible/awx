@@ -1,9 +1,11 @@
-{% if build_dev|bool %}
+{% if build_dev|default(False)|bool %}
 ### This file is generated from
 ### installer/roles/image_build/templates/Dockerfile.j2
 ###
 ### DO NOT EDIT
 ###
+{% else %}
+     {% set build_dev = False  %}
 {% endif %}
 
 # Locations - set globally to be used across stages

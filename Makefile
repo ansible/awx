@@ -622,3 +622,6 @@ psql-container:
 
 VERSION:
 	@echo "awx: $(VERSION)"
+
+Dockerfile: installer/roles/image_build/templates/Dockerfile.j2
+	ansible localhost -m template -a "src=installer/roles/image_build/templates/Dockerfile.j2 dest=Dockerfile"
