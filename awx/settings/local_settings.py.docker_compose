@@ -53,7 +53,7 @@ if "pytest" in sys.modules:
 PROJECTS_ROOT = '/var/lib/awx/projects/'
 
 # Location for cross-development of inventory plugins
-AWX_ANSIBLE_COLLECTIONS_PATHS = '/vendor/awx_ansible_collections'
+AWX_ANSIBLE_COLLECTIONS_PATHS = '/var/lib/awx/vendor/awx_ansible_collections'
 
 # Absolute filesystem path to the directory for job status stdout
 # This directory should not be web-accessible

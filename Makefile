@@ -19,7 +19,8 @@ PYCURL_SSL_LIBRARY ?= openssl
 COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
 
-VENV_BASE ?= /venv
+VENV_BASE ?= /var/lib/awx/venv/
+COLLECTION_BASE ?= /var/lib/awx/vendor/awx_ansible_collections
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 

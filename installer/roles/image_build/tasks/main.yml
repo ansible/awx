@@ -19,76 +19,6 @@
   delegate_to: localhost
   when: awx_official|default(false)|bool
 
-- name: Set sdist file name
-  set_fact:
-    awx_sdist_file: "awx-{{ awx_version }}.tar.gz"
-
-- name: AWX Distribution
-  debug:
-    msg: "{{ awx_sdist_file }}"
-
-- name: Stat distribution file
-  stat:
-    path: "../dist/{{ awx_sdist_file }}"
-  delegate_to: localhost
-  register: sdist
-
-- name: Clean distribution
-  command: make clean
-  args:
-    chdir: ..
-  ignore_errors: true
-  when: not sdist.stat.exists
-  delegate_to: localhost
-
-- name: Build sdist builder image
-  docker_image:
-    build:
-      path: "{{ role_path }}/files"
-      dockerfile: Dockerfile.sdist
-      pull: false
-      args:
-        http_proxy: "{{ http_proxy | default('') }}"
-        https_proxy: "{{ https_proxy | default('') }}"
-        no_proxy: "{{ no_proxy | default('') }}"
-    name: awx_sdist_builder
-    tag: "{{ awx_version }}"
-    source: 'build'
-    force_source: true
-  delegate_to: localhost
-  when: use_container_for_build|default(true)|bool
-
-- name: Get current uid
-  command: id -u
-  register: uid
-
-- name: Build AWX distribution using container
-  docker_container:
-    env:
-      http_proxy: "{{ http_proxy | default('') }}"
-      https_proxy: "{{ https_proxy | default('') }}"
-      no_proxy: "{{ no_proxy | default('') }}"
-    image: "awx_sdist_builder:{{ awx_version }}"
-    name: awx_sdist_builder
-    state: started
-    user: "{{ uid.stdout }}"
-    detach: false
-    volumes:
-      - ../:/awx:Z
-  delegate_to: localhost
-  when: use_container_for_build|default(true)|bool
-
-- name: Build AWX distribution locally
-  command: make sdist
-  args:
-    chdir: ..
-  delegate_to: localhost
-  when: not use_container_for_build|default(true)|bool
-
-- name: Set docker build base path
-  set_fact:
-    docker_base_path: "{{ awx_local_base_config_path|default('/tmp') }}/docker-image"
-
 - name: Set awx image name
   set_fact:
     awx_image: "{{ awx_image|default('awx') }}"
@@ -97,32 +27,16 @@
   template:
     src: Dockerfile.j2
     dest: ../Dockerfile
-
-- name: Build base awx image
-  docker_image:
-    build:
-      path: ".."
-      dockerfile: Dockerfile
-      pull: false
-      args:
-        http_proxy: "{{ http_proxy | default('') }}"
-        https_proxy: "{{ https_proxy | default('') }}"
-        no_proxy: "{{ no_proxy | default('') }}"
-    name: "{{ awx_image }}"
-    tag: "{{ awx_version }}"
-    source: 'build'
-    force_source: true
   delegate_to: localhost
+
+# Calling Docker directly because docker-py doesnt support BuildKit
+- name: Build AWX image
+  command: docker build -t {{ awx_image }}:{{ awx_version }} ..
+  delegate_to: localhost
+  when: use_container_for_build|default(true)|bool
 
 - name: Tag awx images as latest
   command: "docker tag {{ item }}:{{ awx_version }} {{ item }}:latest"
   delegate_to: localhost
   with_items:
     - "{{ awx_image }}"
-
-- name: Clean docker base directory
-  file:
-    path: "{{ docker_base_path }}"
-    state: absent
-  when: cleanup_docker_base|default(True)|bool
-  delegate_to: localhost
