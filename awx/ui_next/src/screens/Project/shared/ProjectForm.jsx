@@ -284,11 +284,11 @@ function ProjectFormFields({
                 data={[
                   {
                     label: i18n._(t`Use Default Ansible Environment`),
-                    value: '/venv/ansible/',
+                    value: '/var/lib/awx/venv/ansible/',
                     key: 'default',
                   },
                   ...custom_virtualenvs
-                    .filter(datum => datum !== '/venv/ansible/')
+                    .filter(datum => datum !== '/var/lib/awx/venv/ansible/')
                     .map(datum => ({
                       label: datum,
                       value: datum,

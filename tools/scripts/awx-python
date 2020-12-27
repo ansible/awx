@@ -9,7 +9,7 @@ for scl in rh-postgresql10; do
 done
 
 # Enable Tower virtualenv
-for venv_path in /var/lib/awx/venv/awx /venv/awx; do
+for venv_path in /var/lib/awx/venv/awx; do
   if [ -f $venv_path/bin/activate ]; then
     . $venv_path/bin/activate
   fi

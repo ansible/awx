@@ -133,10 +133,10 @@ def test_custom_venv_no_op(run_module, admin_user, base_inventory, mocker, proje
         inventory=base_inventory,
         source_project=project,
         source='scm',
-        custom_virtualenv='/venv/foobar/'
+        custom_virtualenv='/var/lib/awx/venv/foobar/'
     )
     # mock needed due to API behavior, not incorrect client behavior
-    with mocker.patch('awx.main.models.mixins.get_custom_venv_choices', return_value=['/venv/foobar/']):
+    with mocker.patch('awx.main.models.mixins.get_custom_venv_choices', return_value=['/var/lib/awx/venv/foobar/']):
         result = run_module('tower_inventory_source', dict(
             name='foo',
             description='this is the changed description',
@@ -148,7 +148,7 @@ def test_custom_venv_no_op(run_module, admin_user, base_inventory, mocker, proje
         ), admin_user)
     assert result.pop('changed', None), result
     inv_src.refresh_from_db()
-    assert inv_src.custom_virtualenv == '/venv/foobar/'
+    assert inv_src.custom_virtualenv == '/var/lib/awx/venv/foobar/'
     assert inv_src.description == 'this is the changed description'
 
 

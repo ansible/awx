@@ -6,12 +6,12 @@ const mockData = [
   {
     key: 'baz',
     label: 'Baz',
-    value: '/venv/baz/',
+    value: '/var/lib/awx/venv/baz/',
   },
   {
     key: 'default',
     label: 'Default',
-    value: '/venv/ansible/',
+    value: '/var/lib/awx/venv/ansible/',
   },
 ];
 

@@ -133,7 +133,7 @@ class AnsibleInventoryLoader(object):
         # NOTE: why do we add "python" to the start of these args?
         # the script that runs ansible-inventory specifies a python interpreter
         # that makes no sense in light of the fact that we put all the dependencies
-        # inside of /venv/ansible, so we override the specified interpreter
+        # inside of /var/lib/awx/venv/ansible, so we override the specified interpreter
         # https://github.com/ansible/ansible/issues/50714
         bargs = ['python', ansible_inventory_path, '-i', self.source]
         bargs.extend(['--playbook-dir', functioning_dir(self.source)])

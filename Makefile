@@ -271,7 +271,7 @@ uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-    uwsgi -b 32768 --socket 127.0.0.1:8050 --module=awx.wsgi:application --home=/venv/awx --chdir=/awx_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --lazy-apps --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" --hook-accepting1="exec:supervisorctl restart tower-processes:awx-dispatcher tower-processes:awx-receiver"
+    uwsgi -b 32768 --socket 127.0.0.1:8050 --module=awx.wsgi:application --home=/var/lib/awx/venv/awx --chdir=/awx_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --lazy-apps --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" --hook-accepting1="exec:supervisorctl restart tower-processes:awx-dispatcher tower-processes:awx-receiver"
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -341,7 +341,7 @@ check: flake8 pep8 # pyflakes pylint
 
 awx-link:
 	[ -d "/awx_devel/awx.egg-info" ] || python3 /awx_devel/setup.py egg_info_dev
-	cp -f /tmp/awx.egg-link /venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.egg-link
+	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 
