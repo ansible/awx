@@ -207,7 +207,7 @@
 - assert:
     that:
       - result is failed
-
+  
 - name: Delete a workflow job template
   awx.awx.tower_workflow_job_template:
     name: "{{ wfjt_name }}"

@@ -341,14 +341,14 @@ def create_schema_nodes(module, schema, workflow_id):
             response.append(
               module.create_or_update_if_needed(
                   existing_item, workflow_node_fields,
-                  endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', on_continue=True,
+                  endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
               )
             )
         else:
             # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
             response.append(
               module.delete_if_needed(
-                  existing_item, on_continue=True,
+                  existing_item, auto_exit=False,
               )
             )
 
@@ -408,7 +408,7 @@ def create_schema_nodes_association(module, schema, workflow_id):
                 response.append(
                   module.create_or_update_if_needed(
                       existing_item, workflow_node_fields,
-                      endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', on_continue=True,
+                      endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
                       associations=association_fields,
                   )
                 )
@@ -423,7 +423,7 @@ def destroy_schema_nodes(module, workflow_id):
         # Search for existing nodes.
         search_fields['workflow_job_template'] = workflow_id
         existing_items = module.get_all_endpoint('workflow_job_template_nodes', **{'data': search_fields})
-
+        module.fail_json(msg='test_data: {0}'.format(existing_items))
         # Loop through found fields
         for workflow_node in existing_items['json']['results']:
             search_fields = {}
@@ -434,7 +434,7 @@ def destroy_schema_nodes(module, workflow_id):
             existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
             response.append(
               module.delete_if_needed(
-                  existing_item, on_continue=True,
+                  existing_item, auto_exit=False,
               )
             )
 
