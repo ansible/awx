@@ -29,7 +29,6 @@
 # Calling Docker directly because docker-py doesnt support BuildKit
 - name: Build AWX image
   command: docker build -t {{ awx_image }}:{{ awx_version }} ..
-  when: use_container_for_build|default(true)|bool
 
 - name: Tag awx images as latest
   command: "docker tag {{ item }}:{{ awx_version }} {{ item }}:latest"
