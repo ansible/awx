@@ -124,7 +124,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
-    'inventory_source': ('source', 'last_updated', 'status'),
+    'inventory_source': ('id', 'name', 'source', 'last_updated', 'status'),
     'custom_inventory_script': DEFAULT_SUMMARY_FIELDS,
     'source_script': DEFAULT_SUMMARY_FIELDS,
     'role': ('id', 'role_field'),
