@@ -219,16 +219,6 @@ function JobTemplateDetail({ i18n, template }) {
           value={verbosityDetails[0].details}
         />
         <Detail label={i18n._(t`Timeout`)} value={timeout || '0'} />
-        <UserDateDetail
-          label={i18n._(t`Created`)}
-          date={created}
-          user={summary_fields.created_by}
-        />
-        <UserDateDetail
-          label={i18n._(t`Last Modified`)}
-          date={modified}
-          user={summary_fields.modified_by}
-        />
         <Detail
           label={i18n._(t`Show Changes`)}
           value={diff_mode ? i18n._(t`On`) : i18n._(t`Off`)}
@@ -278,6 +268,16 @@ function JobTemplateDetail({ i18n, template }) {
         {renderOptionsField && (
           <Detail label={i18n._(t`Options`)} value={renderOptions} />
         )}
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={created}
+          user={summary_fields.created_by}
+        />
+        <UserDateDetail
+          label={i18n._(t`Last Modified`)}
+          date={modified}
+          user={summary_fields.modified_by}
+        />
         {summary_fields.credentials && summary_fields.credentials.length > 0 && (
           <Detail
             fullWidth
