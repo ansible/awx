@@ -932,6 +932,14 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'simple',
         },
+        'isolated_manager': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_ROOT, 'isolated_manager.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
     },
     'loggers': {
         'django': {
@@ -980,6 +988,11 @@ LOGGING = {
         },
         'awx.main.wsbroadcast': {
             'handlers': ['wsbroadcast'],
+        },
+        'awx.isolated.manager': {
+            'level': 'WARNING',
+            'handlers': ['console', 'file', 'isolated_manager'],
+            'propagate': True
         },
         'awx.isolated.manager.playbooks': {
             'handlers': ['management_playbooks'],
