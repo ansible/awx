@@ -180,7 +180,7 @@ def test_openstack_client_config_generation(mocker, source, expected, private_da
         'source_vars_dict': {},
         'get_cloud_credential': mocker.Mock(return_value=credential),
         'get_extra_credentials': lambda x: [],
-        'ansible_virtualenv_path': '/venv/foo'
+        'ansible_virtualenv_path': '/var/lib/awx/venv/foo'
     })
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
     cloud_credential = yaml.safe_load(
@@ -224,7 +224,7 @@ def test_openstack_client_config_generation_with_project_domain_name(mocker, sou
         'source_vars_dict': {},
         'get_cloud_credential': mocker.Mock(return_value=credential),
         'get_extra_credentials': lambda x: [],
-        'ansible_virtualenv_path': '/venv/foo'
+        'ansible_virtualenv_path': '/var/lib/awx/venv/foo'
     })
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
     cloud_credential = yaml.safe_load(
@@ -267,7 +267,7 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
         'source_vars_dict': {'private': source},
         'get_cloud_credential': mocker.Mock(return_value=credential),
         'get_extra_credentials': lambda x: [],
-        'ansible_virtualenv_path': '/venv/foo'
+        'ansible_virtualenv_path': '/var/lib/awx/venv/foo'
     })
     cloud_config = update.build_private_data(inventory_update, private_data_dir)
     cloud_credential = yaml.load(
@@ -625,13 +625,13 @@ class TestGenericRun():
 
     def test_invalid_custom_virtualenv(self, patch_Job, private_data_dir):
         job = Job(project=Project(), inventory=Inventory())
-        job.project.custom_virtualenv = '/venv/missing'
+        job.project.custom_virtualenv = '/var/lib/awx/venv/missing'
         task = tasks.RunJob()
 
         with pytest.raises(tasks.InvalidVirtualenvError) as e:
             task.build_env(job, private_data_dir)
 
-        assert 'Invalid virtual environment selected: /venv/missing' == str(e.value)
+        assert 'Invalid virtual environment selected: /var/lib/awx/venv/missing' == str(e.value)
 
 
 class TestAdhocRun(TestJobExecution):

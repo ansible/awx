@@ -153,7 +153,7 @@ describe('<OrganizationAdd />', () => {
         .find('FormSelectOption')
         .first()
         .prop('value')
-    ).toEqual('/venv/ansible/');
+    ).toEqual('/var/lib/awx/venv/ansible/');
   });
 
   test('AnsibleSelect component does not render if there are 0 virtual environments', async () => {

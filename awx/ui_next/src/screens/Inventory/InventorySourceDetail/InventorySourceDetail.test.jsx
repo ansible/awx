@@ -58,7 +58,7 @@ describe('InventorySourceDetail', () => {
     assertDetail(wrapper, 'Description', 'mock description');
     assertDetail(wrapper, 'Source', 'Sourced from a Project');
     assertDetail(wrapper, 'Organization', 'Mock Org');
-    assertDetail(wrapper, 'Ansible environment', '/venv/custom');
+    assertDetail(wrapper, 'Ansible environment', '/var/lib/awx/venv/custom');
     assertDetail(wrapper, 'Project', 'Mock Project');
     assertDetail(wrapper, 'Inventory file', 'foo');
     assertDetail(wrapper, 'Verbosity', '2 (Debug)');
