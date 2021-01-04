@@ -108,7 +108,6 @@ RUN dnf -y update && \
     krb5-workstation \
     libcgroup-tools \
     nginx \
-    podman \
     @postgresql:12 \
     python3-devel \
     python3-libselinux \
@@ -158,6 +157,7 @@ RUN cd /usr/local/bin && \
 {% if (build_dev|bool) or (kube_dev|bool) %}
 # Install development/test requirements
 RUN dnf -y install \
+    crun \
     gdb \
     gtk3 \
     gettext \
@@ -171,6 +171,7 @@ RUN dnf -y install \
     nss \
     make \
     patch \
+    podman \
     socat \
     tmux \
     wget \
