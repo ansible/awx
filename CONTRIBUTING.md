@@ -85,7 +85,7 @@ If you're not using Docker for Mac, or Docker for Windows, you may need, or choo
 
 #### Frontend Development
 
-See [the ui development documentation](awx/ui/README.md).
+See [the ui development documentation](awx/ui_next/CONTRIBUTING.md).
 
 
 ### Build the environment
