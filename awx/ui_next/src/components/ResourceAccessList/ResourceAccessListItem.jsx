@@ -24,19 +24,13 @@ const DataListItemCells = styled(PFDataListItemCells)`
   align-items: start;
 `;
 
-class ResourceAccessListItem extends React.Component {
-  static propTypes = {
+function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
+  ResourceAccessListItem.propTypes = {
     accessRecord: AccessRecord.isRequired,
     onRoleDelete: func.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-    this.renderChip = this.renderChip.bind(this);
-  }
-
-  getRoleLists() {
-    const { accessRecord } = this.props;
+  const getRoleLists = () => {
     const teamRoles = [];
     const userRoles = [];
 
@@ -52,10 +46,9 @@ class ResourceAccessListItem extends React.Component {
     accessRecord.summary_fields.direct_access.map(sort);
     accessRecord.summary_fields.indirect_access.map(sort);
     return [teamRoles, userRoles];
-  }
+  };
 
-  renderChip(role) {
-    const { accessRecord, onRoleDelete } = this.props;
+  const renderChip = role => {
     return (
       <Chip
         key={role.id}
@@ -67,79 +60,76 @@ class ResourceAccessListItem extends React.Component {
         {role.name}
       </Chip>
     );
-  }
+  };
 
-  render() {
-    const { accessRecord, i18n } = this.props;
-    const [teamRoles, userRoles] = this.getRoleLists();
+  const [teamRoles, userRoles] = getRoleLists();
 
-    return (
-      <DataListItem
-        aria-labelledby="access-list-item"
-        key={accessRecord.id}
-        id={`${accessRecord.id}`}
-      >
-        <DataListItemRow>
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell key="name">
-                {accessRecord.username && (
-                  <TextContent>
-                    {accessRecord.id ? (
-                      <Text component={TextVariants.h6}>
-                        <Link
-                          to={{ pathname: `/users/${accessRecord.id}/details` }}
-                          css="font-weight: bold"
-                        >
-                          {accessRecord.username}
-                        </Link>
-                      </Text>
-                    ) : (
-                      <Text component={TextVariants.h6} css="font-weight: bold">
+  return (
+    <DataListItem
+      aria-labelledby="access-list-item"
+      key={accessRecord.id}
+      id={`${accessRecord.id}`}
+    >
+      <DataListItemRow>
+        <DataListItemCells
+          dataListCells={[
+            <DataListCell key="name">
+              {accessRecord.username && (
+                <TextContent>
+                  {accessRecord.id ? (
+                    <Text component={TextVariants.h6}>
+                      <Link
+                        to={{ pathname: `/users/${accessRecord.id}/details` }}
+                        css="font-weight: bold"
+                      >
                         {accessRecord.username}
-                      </Text>
-                    )}
-                  </TextContent>
-                )}
-                {accessRecord.first_name || accessRecord.last_name ? (
-                  <DetailList stacked>
-                    <Detail
-                      label={i18n._(t`Name`)}
-                      value={`${accessRecord.first_name} ${accessRecord.last_name}`}
-                    />
-                  </DetailList>
-                ) : null}
-              </DataListCell>,
-              <DataListCell key="roles">
+                      </Link>
+                    </Text>
+                  ) : (
+                    <Text component={TextVariants.h6} css="font-weight: bold">
+                      {accessRecord.username}
+                    </Text>
+                  )}
+                </TextContent>
+              )}
+              {accessRecord.first_name || accessRecord.last_name ? (
                 <DetailList stacked>
-                  {userRoles.length > 0 && (
-                    <Detail
-                      label={i18n._(t`User Roles`)}
-                      value={
-                        <ChipGroup numChips={5} totalChips={userRoles.length}>
-                          {userRoles.map(this.renderChip)}
-                        </ChipGroup>
-                      }
-                    />
-                  )}
-                  {teamRoles.length > 0 && (
-                    <Detail
-                      label={i18n._(t`Team Roles`)}
-                      value={
-                        <ChipGroup numChips={5} totalChips={teamRoles.length}>
-                          {teamRoles.map(this.renderChip)}
-                        </ChipGroup>
-                      }
-                    />
-                  )}
+                  <Detail
+                    label={i18n._(t`Name`)}
+                    value={`${accessRecord.first_name} ${accessRecord.last_name}`}
+                  />
                 </DetailList>
-              </DataListCell>,
-            ]}
-          />
-        </DataListItemRow>
-      </DataListItem>
-    );
-  }
+              ) : null}
+            </DataListCell>,
+            <DataListCell key="roles">
+              <DetailList stacked>
+                {userRoles.length > 0 && (
+                  <Detail
+                    label={i18n._(t`User Roles`)}
+                    value={
+                      <ChipGroup numChips={5} totalChips={userRoles.length}>
+                        {userRoles.map(renderChip)}
+                      </ChipGroup>
+                    }
+                  />
+                )}
+                {teamRoles.length > 0 && (
+                  <Detail
+                    label={i18n._(t`Team Roles`)}
+                    value={
+                      <ChipGroup numChips={5} totalChips={teamRoles.length}>
+                        {teamRoles.map(renderChip)}
+                      </ChipGroup>
+                    }
+                  />
+                )}
+              </DetailList>
+            </DataListCell>,
+          ]}
+        />
+      </DataListItemRow>
+    </DataListItem>
+  );
 }
 
 export default withI18n()(ResourceAccessListItem);

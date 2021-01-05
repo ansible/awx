@@ -1,5 +1,10 @@
 import React from 'react';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { act } from 'react-dom/test-utils';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
+
 import Sort from './Sort';
 
 describe('<Sort />', () => {
@@ -105,7 +110,7 @@ describe('<Sort />', () => {
     expect(onSort).toHaveBeenCalledWith('foo', 'ascending');
   });
 
-  test('Changing dropdown correctly passes back new sort key', () => {
+  test('Changing dropdown correctly passes back new sort key', async () => {
     const qsConfig = {
       namespace: 'item',
       defaultParams: { page: 1, page_size: 5, order_by: 'foo' },
@@ -131,42 +136,16 @@ describe('<Sort />', () => {
 
     const wrapper = mountWithContexts(
       <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
-    ).find('Sort');
-
-    wrapper.instance().handleDropdownSelect({ target: { innerText: 'Bar' } });
+    );
+    act(() => wrapper.find('Dropdown').invoke('onToggle')(true));
+    wrapper.update();
+    await waitForElement(wrapper, 'Dropdown', el => el.prop('isOpen') === true);
+    wrapper
+      .find('li')
+      .at(0)
+      .prop('onClick')({ target: { innerText: 'Bar' } });
+    wrapper.update();
     expect(onSort).toBeCalledWith('bar', 'ascending');
-  });
-
-  test('Opening dropdown correctly updates state', () => {
-    const qsConfig = {
-      namespace: 'item',
-      defaultParams: { page: 1, page_size: 5, order_by: 'foo' },
-      integerFields: ['page', 'page_size'],
-    };
-
-    const columns = [
-      {
-        name: 'Foo',
-        key: 'foo',
-      },
-      {
-        name: 'Bar',
-        key: 'bar',
-      },
-      {
-        name: 'Bakery',
-        key: 'bakery',
-      },
-    ];
-
-    const onSort = jest.fn();
-
-    const wrapper = mountWithContexts(
-      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
-    ).find('Sort');
-    expect(wrapper.state('isSortDropdownOpen')).toEqual(false);
-    wrapper.instance().handleDropdownToggle(true);
-    expect(wrapper.state('isSortDropdownOpen')).toEqual(true);
   });
 
   test('It displays correct sort icon', () => {
