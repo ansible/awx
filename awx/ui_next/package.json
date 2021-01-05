@@ -12,7 +12,7 @@
     "@patternfly/react-icons": "4.7.22",
     "@patternfly/react-table": "^4.19.15",
     "ansi-to-html": "^0.6.11",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "codemirror": "^5.47.0",
     "d3": "^5.12.0",
     "dagre": "^0.8.4",
