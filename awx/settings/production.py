@@ -54,6 +54,7 @@ LOGGING['handlers']['task_system']['filename'] = '/var/log/tower/task_system.log
 LOGGING['handlers']['management_playbooks']['filename'] = '/var/log/tower/management_playbooks.log'  # noqa
 LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'  # noqa
 LOGGING['handlers']['rbac_migrations']['filename'] = '/var/log/tower/tower_rbac_migrations.log'  # noqa
+LOGGING['handlers']['isolated_manager']['filename'] = '/var/log/tower/isolated_manager.log'  # noqa
 
 # Store a snapshot of default settings at this point before loading any
 # customizable config files.
