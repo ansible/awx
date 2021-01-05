@@ -21,7 +21,7 @@ _cleanup() {
 
 install_deps() {
   pip install pip --upgrade
-  pip install pip-tools
+  pip install "pip-tools==5.4.0"  # see https://github.com/jazzband/pip-tools/pull/1237
 }
 
 generate_requirements_v3() {
