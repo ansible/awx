@@ -21,11 +21,7 @@ class WorkflowJob(UnifiedJob):
         node_list = self.related.workflow_nodes.get().results
 
         for node in node_list:
-            msg += '\n{}:'.format(node.id)
-            if node.job:
-                msg += ' {}'.format(node.summary_fields.job)
-            else:
-                msg += ' None'
+            msg += '\n{}: {}'.format(node.id, node.summary_fields.get('job'))
             for rel in ('failure_nodes', 'always_nodes', 'success_nodes'):
                 val = getattr(node, rel, [])
                 if val:
