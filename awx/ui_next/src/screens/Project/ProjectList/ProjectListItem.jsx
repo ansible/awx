@@ -14,7 +14,7 @@ import {
 
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
+import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { formatDateString, timeOfDay } from '../../../util/dates';
 import { ProjectsAPI } from '../../../api';
@@ -153,23 +153,10 @@ function ProjectListItem({
           aria-labelledby={labelId}
           id={labelId}
         >
-          {project.summary_fields.user_capabilities.start ? (
+          {project.summary_fields.user_capabilities.start && (
             <Tooltip content={i18n._(t`Sync Project`)} position="top">
-              <ProjectSyncButton projectId={project.id}>
-                {handleSync => (
-                  <Button
-                    isDisabled={isDisabled}
-                    aria-label={i18n._(t`Sync Project`)}
-                    variant="plain"
-                    onClick={handleSync}
-                  >
-                    <SyncIcon />
-                  </Button>
-                )}
-              </ProjectSyncButton>
+              <ProjectSyncButton projectId={project.id} />
             </Tooltip>
-          ) : (
-            ''
           )}
           {project.summary_fields.user_capabilities.edit ? (
             <Tooltip content={i18n._(t`Edit Project`)} position="top">
