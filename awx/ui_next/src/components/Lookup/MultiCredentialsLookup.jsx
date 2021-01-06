@@ -71,6 +71,16 @@ function MultiCredentialsLookup(props) {
         loadCredentials(params, selectedType.id),
         CredentialsAPI.readOptions(),
       ]);
+
+      results.map(result => {
+        if (result.kind === 'vault' && result.inputs?.vault_id) {
+          result.label = `${result.name} | ${result.inputs.vault_id}`;
+          return result;
+        }
+        result.label = `${result.name}`;
+        return result;
+      });
+
       return {
         credentials: results,
         credentialsCount: count,
@@ -108,7 +118,6 @@ function MultiCredentialsLookup(props) {
       credential={item}
     />
   );
-
   const isVault = selectedType?.kind === 'vault';
 
   return (
@@ -187,6 +196,7 @@ function MultiCredentialsLookup(props) {
               relatedSearchableKeys={relatedSearchableKeys}
               multiple={isVault}
               header={i18n._(t`Credentials`)}
+              displayKey={isVault ? 'label' : 'name'}
               name="credentials"
               qsConfig={QS_CONFIG}
               readOnly={!canDelete}
