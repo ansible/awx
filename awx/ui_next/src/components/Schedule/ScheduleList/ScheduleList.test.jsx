@@ -59,44 +59,61 @@ describe('ScheduleList', () => {
 
     test('should check and uncheck the row item', async () => {
       expect(
-        wrapper.find('DataListCheck[id="select-schedule-1"]').props().checked
+        wrapper
+          .find('.pf-c-table__check')
+          .first()
+          .find('input')
+          .props().checked
       ).toBe(false);
       await act(async () => {
         wrapper
-          .find('DataListCheck[id="select-schedule-1"]')
+          .find('.pf-c-table__check')
+          .first()
+          .find('input')
           .invoke('onChange')(true);
       });
       wrapper.update();
       expect(
-        wrapper.find('DataListCheck[id="select-schedule-1"]').props().checked
+        wrapper
+          .find('.pf-c-table__check')
+          .first()
+          .find('input')
+          .props().checked
       ).toBe(true);
       await act(async () => {
         wrapper
-          .find('DataListCheck[id="select-schedule-1"]')
+          .find('.pf-c-table__check')
+          .first()
+          .find('input')
           .invoke('onChange')(false);
       });
       wrapper.update();
       expect(
-        wrapper.find('DataListCheck[id="select-schedule-1"]').props().checked
+        wrapper
+          .find('.pf-c-table__check')
+          .first()
+          .find('input')
+          .props().checked
       ).toBe(false);
     });
 
     test('should check all row items when select all is checked', async () => {
-      wrapper.find('DataListCheck').forEach(el => {
+      expect(wrapper.find('.pf-c-table__check input')).toHaveLength(5);
+      wrapper.find('.pf-c-table__check input').forEach(el => {
         expect(el.props().checked).toBe(false);
       });
       await act(async () => {
         wrapper.find('Checkbox#select-all').invoke('onChange')(true);
       });
       wrapper.update();
-      wrapper.find('DataListCheck').forEach(el => {
+      wrapper.find('.pf-c-table__check input').forEach(el => {
         expect(el.props().checked).toBe(true);
       });
       await act(async () => {
         wrapper.find('Checkbox#select-all').invoke('onChange')(false);
       });
       wrapper.update();
-      wrapper.find('DataListCheck').forEach(el => {
+      wrapper.find('.pf-c-table__check input').forEach(el => {
         expect(el.props().checked).toBe(false);
       });
     });
@@ -104,7 +121,8 @@ describe('ScheduleList', () => {
     test('should call api delete schedules for each selected schedule', async () => {
       await act(async () => {
         wrapper
-          .find('DataListCheck[id="select-schedule-3"]')
+          .find('.pf-c-table__check input')
+          .at(3)
           .invoke('onChange')();
       });
       wrapper.update();
@@ -122,7 +140,8 @@ describe('ScheduleList', () => {
       expect(wrapper.find('Modal').length).toBe(0);
       await act(async () => {
         wrapper
-          .find('DataListCheck[id="select-schedule-2"]')
+          .find('.pf-c-table__check input')
+          .at(2)
           .invoke('onChange')();
       });
       wrapper.update();

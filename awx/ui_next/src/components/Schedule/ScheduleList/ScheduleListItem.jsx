@@ -4,31 +4,16 @@ import { bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemRow,
-  DataListItemCells,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
-import DataListCell from '../../DataListCell';
 import { DetailList, Detail } from '../../DetailList';
+import { ActionsTd, ActionItem } from '../../PaginatedTable';
 import { ScheduleToggle } from '..';
 import { Schedule } from '../../../types';
 import { formatDateString } from '../../../util/dates';
 
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: 92px 40px;
-`;
-
-function ScheduleListItem({ i18n, isSelected, onSelect, schedule }) {
+function ScheduleListItem({ i18n, isSelected, onSelect, schedule, rowIndex }) {
   const labelId = `check-action-${schedule.id}`;
 
   const jobTypeLabels = {
@@ -62,69 +47,56 @@ function ScheduleListItem({ i18n, isSelected, onSelect, schedule }) {
   }
 
   return (
-    <DataListItem
-      key={schedule.id}
-      aria-labelledby={labelId}
-      id={`${schedule.id}`}
-    >
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-schedule-${schedule.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name">
-              <Link to={`${scheduleBaseUrl}/details`}>
-                <b>{schedule.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key="type">
-              {
-                jobTypeLabels[
-                  schedule.summary_fields.unified_job_template.unified_job_type
-                ]
-              }
-            </DataListCell>,
-            <DataListCell key="next_run">
-              {schedule.next_run && (
-                <DetailList stacked>
-                  <Detail
-                    label={i18n._(t`Next Run`)}
-                    value={formatDateString(schedule.next_run)}
-                  />
-                </DetailList>
-              )}
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={i18n._(t`actions`)}
-          aria-labelledby={labelId}
-          id={labelId}
-          key="actions"
+    <Tr id={`schedule-row-${schedule.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+          disable: false,
+        }}
+        dataLabel={i18n._(`Selected`)}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <Link to={`${scheduleBaseUrl}/details`}>
+          <b>{schedule.name}</b>
+        </Link>
+      </Td>
+      <Td dataLabel={i18n._(t`Type`)}>
+        {
+          jobTypeLabels[
+            schedule.summary_fields.unified_job_template.unified_job_type
+          ]
+        }
+      </Td>
+      <Td dataLabel={i18n._(t`Next Run`)}>
+        {schedule.next_run && (
+          <DetailList stacked>
+            <Detail
+              label={i18n._(t`Next Run`)}
+              value={formatDateString(schedule.next_run)}
+            />
+          </DetailList>
+        )}
+      </Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)} gridColumns="auto 40px">
+        <ScheduleToggle schedule={schedule} />
+        <ActionItem
+          visible={schedule.summary_fields.user_capabilities.edit}
+          tooltip={i18n._(t`Edit Schedule`)}
         >
-          <ScheduleToggle schedule={schedule} />
-          {schedule.summary_fields.user_capabilities.edit ? (
-            <Tooltip content={i18n._(t`Edit Schedule`)} position="top">
-              <Button
-                aria-label={i18n._(t`Edit Schedule`)}
-                css="grid-column: 2"
-                variant="plain"
-                component={Link}
-                to={`${scheduleBaseUrl}/edit`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          ) : (
-            ''
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <Button
+            aria-label={i18n._(t`Edit Schedule`)}
+            css="grid-column: 2"
+            variant="plain"
+            component={Link}
+            to={`${scheduleBaseUrl}/edit`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 

@@ -50,39 +50,47 @@ describe('ScheduleListItem', () => {
   describe('User has edit permissions', () => {
     beforeAll(() => {
       wrapper = mountWithContexts(
-        <ScheduleListItem
-          isSelected={false}
-          onSelect={onSelect}
-          schedule={mockSchedule}
-        />
+        <table>
+          <tbody>
+            <ScheduleListItem
+              isSelected={false}
+              onSelect={onSelect}
+              schedule={mockSchedule}
+            />
+          </tbody>
+        </table>
       );
     });
+
     afterAll(() => {
       wrapper.unmount();
     });
+
     test('Name correctly shown with correct link', () => {
       expect(
         wrapper
-          .find('DataListCell')
-          .first()
+          .find('Td')
+          .at(1)
           .text()
       ).toBe('Mock Schedule');
       expect(
         wrapper
-          .find('DataListCell')
-          .first()
+          .find('Td')
+          .at(1)
           .find('Link')
           .props().to
       ).toBe('/templates/job_template/12/schedules/6/details');
     });
+
     test('Type correctly shown', () => {
       expect(
         wrapper
-          .find('DataListCell')
-          .at(1)
+          .find('Td')
+          .at(2)
           .text()
       ).toBe('Playbook Run');
     });
+
     test('Edit button shown with correct link', () => {
       expect(wrapper.find('PencilAltIcon').length).toBe(1);
       expect(
@@ -92,6 +100,7 @@ describe('ScheduleListItem', () => {
           .props().to
       ).toBe('/templates/job_template/12/schedules/6/edit');
     });
+
     test('Toggle button enabled', () => {
       expect(
         wrapper
@@ -100,63 +109,74 @@ describe('ScheduleListItem', () => {
           .props().isDisabled
       ).toBe(false);
     });
-    test('Clicking checkbox makes expected callback', () => {
+
+    test('Clicking checkbox selects item', () => {
       wrapper
-        .find('DataListCheck')
+        .find('Td')
         .first()
         .find('input')
         .simulate('change');
       expect(onSelect).toHaveBeenCalledTimes(1);
     });
   });
+
   describe('User has read-only permissions', () => {
     beforeAll(() => {
       wrapper = mountWithContexts(
-        <ScheduleListItem
-          isSelected={false}
-          onSelect={onSelect}
-          schedule={{
-            ...mockSchedule,
-            summary_fields: {
-              ...mockSchedule.summary_fields,
-              user_capabilities: {
-                edit: false,
-                delete: false,
-              },
-            },
-          }}
-        />
+        <table>
+          <tbody>
+            <ScheduleListItem
+              isSelected={false}
+              onSelect={onSelect}
+              schedule={{
+                ...mockSchedule,
+                summary_fields: {
+                  ...mockSchedule.summary_fields,
+                  user_capabilities: {
+                    edit: false,
+                    delete: false,
+                  },
+                },
+              }}
+            />
+          </tbody>
+        </table>
       );
     });
+
     afterAll(() => {
       wrapper.unmount();
     });
+
     test('Name correctly shown with correct link', () => {
       expect(
         wrapper
-          .find('DataListCell')
-          .first()
+          .find('Td')
+          .at(1)
           .text()
       ).toBe('Mock Schedule');
       expect(
         wrapper
-          .find('DataListCell')
-          .first()
+          .find('Td')
+          .at(1)
           .find('Link')
           .props().to
       ).toBe('/templates/job_template/12/schedules/6/details');
     });
+
     test('Type correctly shown', () => {
       expect(
         wrapper
-          .find('DataListCell')
-          .at(1)
+          .find('Td')
+          .at(2)
           .text()
       ).toBe('Playbook Run');
     });
+
     test('Edit button hidden', () => {
       expect(wrapper.find('PencilAltIcon').length).toBe(0);
     });
+
     test('Toggle button disabled', () => {
       expect(
         wrapper
