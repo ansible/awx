@@ -25,6 +25,8 @@ function canLaunchWithoutPrompt(launchData) {
     !launchData.ask_limit_on_launch &&
     !launchData.ask_scm_branch_on_launch &&
     !launchData.survey_enabled &&
+    (!launchData.passwords_needed_to_start ||
+      launchData.passwords_needed_to_start.length === 0) &&
     (!launchData.variables_needed_to_start ||
       launchData.variables_needed_to_start.length === 0)
   );

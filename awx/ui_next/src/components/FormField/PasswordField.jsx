@@ -8,7 +8,7 @@ import PasswordInput from './PasswordInput';
 function PasswordField(props) {
   const { id, name, label, validate, isRequired, helperText } = props;
   const [, meta] = useField({ name, validate });
-  const isValid = !(meta.touched && meta.error);
+  const isValid = !meta.touched || (meta.value && meta.value !== '');
 
   return (
     <FormGroup

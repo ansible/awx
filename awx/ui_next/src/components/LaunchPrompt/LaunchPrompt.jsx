@@ -7,6 +7,7 @@ import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import { useDismissableError } from '../../util/useRequest';
 import mergeExtraVars from '../../util/prompt/mergeExtraVars';
+import getCredentialPasswords from '../../util/prompt/getCredentialPasswords';
 import getSurveyValues from '../../util/prompt/getSurveyValues';
 import useLaunchSteps from './useLaunchSteps';
 import AlertModal from '../AlertModal';
@@ -19,17 +20,18 @@ function PromptModalForm({
   resource,
   surveyConfig,
 }) {
-  const { values, setTouched, validateForm } = useFormikContext();
+  const { setFieldTouched, values } = useFormikContext();
 
   const {
     steps,
     isReady,
+    validateStep,
     visitStep,
     visitAllSteps,
     contentError,
   } = useLaunchSteps(launchConfig, surveyConfig, resource, i18n);
 
-  const handleSave = () => {
+  const handleSubmit = () => {
     const postValues = {};
     const setValue = (key, value) => {
       if (typeof value !== 'undefined' && value !== null) {
@@ -37,6 +39,8 @@ function PromptModalForm({
       }
     };
     const surveyValues = getSurveyValues(values);
+    const credentialPasswords = getCredentialPasswords(values);
+    setValue('credential_passwords', credentialPasswords);
     setValue('inventory_id', values.inventory?.id);
     setValue(
       'credentials',
@@ -75,22 +79,25 @@ function PromptModalForm({
     <Wizard
       isOpen
       onClose={onCancel}
-      onSave={handleSave}
+      onSave={handleSubmit}
+      onBack={async nextStep => {
+        validateStep(nextStep.id);
+      }}
       onNext={async (nextStep, prevStep) => {
         if (nextStep.id === 'preview') {
-          visitAllSteps(setTouched);
+          visitAllSteps(setFieldTouched);
         } else {
-          visitStep(prevStep.prevId);
+          visitStep(prevStep.prevId, setFieldTouched);
+          validateStep(nextStep.id);
         }
-        await validateForm();
       }}
       onGoToStep={async (nextStep, prevStep) => {
         if (nextStep.id === 'preview') {
-          visitAllSteps(setTouched);
+          visitAllSteps(setFieldTouched);
         } else {
-          visitStep(prevStep.prevId);
+          visitStep(prevStep.prevId, setFieldTouched);
+          validateStep(nextStep.id);
         }
-        await validateForm();
       }}
       title={i18n._(t`Prompts`)}
       steps={
