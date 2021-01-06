@@ -433,7 +433,7 @@ function JobTemplateForm({
               min="0"
               label={i18n._(t`Timeout`)}
               tooltip={i18n._(t`The amount of time (in seconds) to run
-                  before the task is canceled. Defaults to 0 for no job
+                  before the job is canceled. Defaults to 0 for no job
                   timeout.`)}
             />
             <FieldWithPrompt
