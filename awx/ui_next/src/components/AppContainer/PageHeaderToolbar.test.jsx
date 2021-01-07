@@ -25,6 +25,7 @@ describe('PageHeaderToolbar', () => {
       <PageHeaderToolbar
         onAboutClick={onAboutClick}
         onLogoutClick={onLogoutClick}
+        loggedInUser={{ id: 1 }}
       />
     );
     expect(wrapper.find('DropdownItem')).toHaveLength(0);
@@ -37,6 +38,10 @@ describe('PageHeaderToolbar', () => {
 
     expect(wrapper.find('DropdownItem')).toHaveLength(0);
     wrapper.find(pageUserDropdownSelector).simulate('click');
+    wrapper.update();
+    expect(
+      wrapper.find('DropdownItem[aria-label="User details"]').prop('href')
+    ).toBe('/#/users/1/details');
     expect(wrapper.find('DropdownItem')).toHaveLength(2);
 
     const logout = wrapper.find('DropdownItem li button');
