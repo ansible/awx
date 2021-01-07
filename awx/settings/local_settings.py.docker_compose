@@ -48,55 +48,11 @@ if "pytest" in sys.modules:
         }
     }
 
-# Absolute filesystem path to the directory to host projects (with playbooks).
-# This directory should NOT be web-accessible.
-PROJECTS_ROOT = '/var/lib/awx/projects/'
-
 # Location for cross-development of inventory plugins
 AWX_ANSIBLE_COLLECTIONS_PATHS = '/var/lib/awx/vendor/awx_ansible_collections'
 
-# Absolute filesystem path to the directory for job status stdout
-# This directory should not be web-accessible
-JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_status')
-
 # The UUID of the system, for HA.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
-
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# On Unix systems, a value of None will cause Django to use the same
-# timezone as the operating system.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
-USE_TZ = True
-TIME_ZONE = 'UTC'
-
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
-
-# SECURITY WARNING: keep the secret key used in production secret!
-# Hardcoded values can leak through source control. Consider loading
-# the secret key from an environment variable or a file instead.
-SECRET_KEY = 'p7z7g1ql4%6+(6nlebb6hdk7sd^&fnjpal308%n%+p^_e6vo1y'
-
-# HTTP headers and meta keys to search to determine remote host name or IP. Add
-# additional items to this list, such as "HTTP_X_FORWARDED_FOR", if behind a
-# reverse proxy.
-REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
-
-# If Tower is behind a reverse proxy/load balancer, use this setting to
-# whitelist the proxy IP addresses from which Tower should trust custom
-# REMOTE_HOST_HEADERS header values
-# REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
-# PROXY_IP_WHITELIST = ['10.0.1.100', '10.0.1.101']
-# If this setting is an empty list (the default), the headers specified by
-# REMOTE_HOST_HEADERS will be trusted unconditionally')
-PROXY_IP_WHITELIST = []
-
-# Define additional environment variables to be passed to ansible subprocesses
-#AWX_TASK_ENV['FOO'] = 'BAR'
 
 # If set, use -vvv for project updates instead of -v for more output.
 # PROJECT_UPDATE_VVV=True
@@ -107,40 +63,6 @@ PROXY_IP_WHITELIST = []
 
 # Enable logging to syslog. Setting level to ERROR captures 500 errors,
 # WARNING also logs 4xx responses.
-
-LOGGING['handlers']['syslog'] = {
-    'level': 'WARNING',
-    'filters': ['require_debug_false'],
-    'class': 'logging.NullHandler',
-    'formatter': 'simple',
-}
-
-LOGGING['loggers']['django.request']['handlers'] = ['console']
-LOGGING['loggers']['rest_framework.request']['handlers'] = ['console']
-LOGGING['loggers']['awx']['handlers'] = ['console', 'external_logger']
-LOGGING['loggers']['awx.main.commands.run_callback_receiver']['handlers'] = []  # propogates to awx
-LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console', 'external_logger']
-LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console', 'external_logger']
-LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
-LOGGING['loggers']['social']['handlers'] = ['console']
-LOGGING['loggers']['system_tracking_migrations']['handlers'] = ['console']
-LOGGING['loggers']['rbac_migrations']['handlers'] = ['console']
-LOGGING['loggers']['awx.isolated.manager.playbooks']['handlers'] = ['console']
-LOGGING['handlers']['callback_receiver'] = {'class': 'logging.NullHandler'}
-LOGGING['handlers']['fact_receiver'] = {'class': 'logging.NullHandler'}
-LOGGING['handlers']['task_system'] = {'class': 'logging.NullHandler'}
-LOGGING['handlers']['tower_warnings'] = {'class': 'logging.NullHandler'}
-LOGGING['handlers']['rbac_migrations'] = {'class': 'logging.NullHandler'}
-LOGGING['handlers']['system_tracking_migrations'] = {'class': 'logging.NullHandler'}
-LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
-
-
-# Enable the following lines to also log to a file.
-#LOGGING['handlers']['file'] = {
-#    'class': 'logging.FileHandler',
-#    'filename': os.path.join(BASE_DIR, 'awx.log'),
-#    'formatter': 'simple',
-#}
 
 # Enable the following lines to turn on lots of permissions-related logging.
 #LOGGING['loggers']['awx.main.access']['level'] = 'DEBUG'
@@ -153,74 +75,6 @@ LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
 # Enable the following lines to turn on LDAP auth logging.
 #LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
 #LOGGING['loggers']['django_auth_ldap']['level'] = 'DEBUG'
-
-###############################################################################
-# SCM TEST SETTINGS
-###############################################################################
-
-# Define these variables to enable more complete testing of project support for
-# SCM updates.  The test repositories listed do not have to contain any valid
-# playbooks.
-
-try:
-    path = os.path.expanduser(os.path.expandvars('~/.ssh/id_rsa'))
-    TEST_SSH_KEY_DATA = open(path, 'rb').read()
-except IOError:
-    TEST_SSH_KEY_DATA = ''
-
-TEST_GIT_USERNAME = ''
-TEST_GIT_PASSWORD = ''
-TEST_GIT_KEY_DATA = TEST_SSH_KEY_DATA
-TEST_GIT_PUBLIC_HTTPS = 'https://github.com/ansible/ansible.github.com.git'
-TEST_GIT_PRIVATE_HTTPS = 'https://github.com/ansible/product-docs.git'
-TEST_GIT_PRIVATE_SSH = 'git@github.com:ansible/product-docs.git'
-
-TEST_SVN_USERNAME = ''
-TEST_SVN_PASSWORD = ''
-TEST_SVN_PUBLIC_HTTPS = 'https://github.com/ansible/ansible.github.com'
-TEST_SVN_PRIVATE_HTTPS = 'https://github.com/ansible/product-docs'
-
-# To test repo access via SSH login to localhost.
-import getpass
-try:
-    TEST_SSH_LOOPBACK_USERNAME = getpass.getuser()
-except KeyError:
-    TEST_SSH_LOOPBACK_USERNAME = 'root'
-TEST_SSH_LOOPBACK_PASSWORD = ''
-
-###############################################################################
-# INVENTORY IMPORT TEST SETTINGS
-###############################################################################
-
-# Define these variables to enable more complete testing of inventory import
-# from cloud providers.
-
-# EC2 credentials
-TEST_AWS_ACCESS_KEY_ID = ''
-TEST_AWS_SECRET_ACCESS_KEY = ''
-TEST_AWS_REGIONS = 'all'
-# Check IAM STS credentials
-TEST_AWS_SECURITY_TOKEN = ''
-
-# Rackspace credentials
-TEST_RACKSPACE_USERNAME = ''
-TEST_RACKSPACE_API_KEY = ''
-TEST_RACKSPACE_REGIONS = 'all'
-
-# VMware credentials
-TEST_VMWARE_HOST = ''
-TEST_VMWARE_USER = ''
-TEST_VMWARE_PASSWORD = ''
-
-# OpenStack credentials
-TEST_OPENSTACK_HOST = ''
-TEST_OPENSTACK_USER = ''
-TEST_OPENSTACK_PASSWORD = ''
-TEST_OPENSTACK_PROJECT = ''
-
-# Azure credentials.
-TEST_AZURE_USERNAME = ''
-TEST_AZURE_KEY_DATA = ''
 
 BROADCAST_WEBSOCKET_SECRET = '🤖starscream🤖'
 BROADCAST_WEBSOCKET_PORT = 8013

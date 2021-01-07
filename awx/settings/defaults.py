@@ -116,7 +116,7 @@ LOGIN_URL = '/api/login/'
 
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should not be web-accessible.
-PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
+PROJECTS_ROOT = '/var/lib/awx/projects/'
 
 # Absolute filesystem path to the directory to host collections for
 # running inventory imports, isolated playbooks
@@ -125,10 +125,10 @@ AWX_ANSIBLE_COLLECTIONS_PATHS = os.path.join(BASE_DIR, 'vendor', 'awx_ansible_co
 # Absolute filesystem path to the directory for job status stdout (default for
 # development and tests, default for production defined in production.py). This
 # directory should not be web-accessible
-JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_output')
+JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 
 # Absolute filesystem path to the directory to store logs
-LOG_ROOT = os.path.join(BASE_DIR)
+LOG_ROOT = '/var/log/tower/'
 
 # The heartbeat file for the tower scheduler
 SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
