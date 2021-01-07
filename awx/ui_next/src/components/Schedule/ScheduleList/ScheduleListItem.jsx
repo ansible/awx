@@ -55,7 +55,7 @@ function ScheduleListItem({ i18n, isSelected, onSelect, schedule, rowIndex }) {
           onSelect,
           disable: false,
         }}
-        dataLabel={i18n._(`Selected`)}
+        dataLabel={i18n._(t`Selected`)}
       />
       <Td id={labelId} dataLabel={i18n._(t`Name`)}>
         <Link to={`${scheduleBaseUrl}/details`}>
