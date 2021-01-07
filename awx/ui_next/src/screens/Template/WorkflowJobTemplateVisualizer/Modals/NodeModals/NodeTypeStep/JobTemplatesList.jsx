@@ -10,7 +10,7 @@ import PaginatedDataList from '../../../../../../components/PaginatedDataList';
 import DataListToolbar from '../../../../../../components/DataListToolbar';
 import CheckboxListItem from '../../../../../../components/CheckboxListItem';
 
-const QS_CONFIG = getQSConfig('job_templates', {
+const QS_CONFIG = getQSConfig('job-templates', {
   page: 1,
   page_size: 5,
   order_by: 'name',
