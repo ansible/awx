@@ -1,13 +1,11 @@
 /* eslint react/no-unused-state: 0 */
 import React, { useState } from 'react';
-import { withRouter, Redirect, useHistory } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import { CardBody } from '../../../components/Card';
-
 import { JobTemplatesAPI } from '../../../api';
 import { JobTemplate } from '../../../types';
 import { getAddedAndRemoved } from '../../../util/lists';
 import JobTemplateForm from '../shared/JobTemplateForm';
-
 import ContentLoading from '../../../components/ContentLoading';
 
 function JobTemplateEdit({ template }) {
@@ -95,9 +93,7 @@ function JobTemplateEdit({ template }) {
     return Promise.all([disassociatePromise, associatePromise]);
   };
 
-  const handleCancel = () => {
-    history.push(detailsUrl);
-  };
+  const handleCancel = () => history.push(detailsUrl);
 
   const canEdit = template?.summary_fields?.user_capabilities?.edit;
 
@@ -122,5 +118,4 @@ function JobTemplateEdit({ template }) {
 JobTemplateEdit.propTypes = {
   template: JobTemplate.isRequired,
 };
-
-export default withRouter(JobTemplateEdit);
+export default JobTemplateEdit;

@@ -16,10 +16,17 @@ function CredentialChip({ credential, i18n, i18nHash, ...props }) {
     type = toTitleCase(credential.kind);
   }
 
+  const buildCredentialName = () => {
+    if (credential.kind === 'vault' && credential.inputs?.vault_id) {
+      return `${credential.name} | ${credential.inputs.vault_id}`;
+    }
+    return `${credential.name}`;
+  };
+
   return (
     <Chip {...props}>
       <strong>{type}: </strong>
-      {credential.name}
+      {buildCredentialName()}
     </Chip>
   );
 }

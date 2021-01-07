@@ -36,6 +36,10 @@ class Jobs extends RelaunchMixin(Base) {
     return this.http.post(`/api/v2${getBaseURL(type)}${id}/cancel/`);
   }
 
+  readCredentials(id, type) {
+    return this.http.get(`/api/v2${getBaseURL(type)}${id}/credentials/`);
+  }
+
   readDetail(id, type) {
     return this.http.get(`/api/v2${getBaseURL(type)}${id}/`);
   }
