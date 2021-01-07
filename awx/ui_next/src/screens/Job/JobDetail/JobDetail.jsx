@@ -93,6 +93,7 @@ function JobDetail({ job, i18n }) {
     workflow_job_template: workflowJobTemplate,
     labels,
     project,
+    source_workflow_job,
   } = job.summary_fields;
   const [errorMsg, setErrorMsg] = useState();
   const history = useHistory();
@@ -191,6 +192,16 @@ function JobDetail({ job, i18n }) {
                 to={`/templates/workflow_job_template/${workflowJobTemplate.id}`}
               >
                 {workflowJobTemplate.name}
+              </Link>
+            }
+          />
+        )}
+        {source_workflow_job && (
+          <Detail
+            label={i18n._(t`Source Workflow Job`)}
+            value={
+              <Link to={`/jobs/workflow/${source_workflow_job.id}`}>
+                {source_workflow_job.id} - {source_workflow_job.name}
               </Link>
             }
           />
