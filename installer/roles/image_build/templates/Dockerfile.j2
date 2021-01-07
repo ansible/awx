@@ -135,6 +135,13 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master
 RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \
     chmod +x /usr/bin/tini
 
+{% if aws_session_manager_enabled|bool %}
+# Install AWS Session Manager Plugin
+RUN curl -o /tmp/session-manager-plugin.rpm "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_{{ aws_session_manager_installers[aws_session_manager_architecture | default('64bit')] }}/session-manager-plugin.rpm" && \
+    yum install -y /tmp/session-manager-plugin.rpm && \
+    rm /tmp/session-manager-plugin.rpm
+{% endif %}
+
 RUN python3 -m ensurepip && pip3 install "virtualenv < 20" supervisor {% if build_dev|bool %}flake8{% endif %}
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*

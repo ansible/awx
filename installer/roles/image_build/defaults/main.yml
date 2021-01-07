@@ -2,6 +2,13 @@
 create_preload_data: true
 build_dev: false
 
+aws_session_manager_enabled: '{{ ["x86_64": "amd64", "arm64"] in ansible_facts.architecture }}'
+aws_session_manager_installers:
+  x86_64: "32bit"
+  amd64: "64bit"
+  arm64: "arm64"
+
 # Helper vars to construct the proper download URL for the current architecture
+aws_session_manager_architecture: '{{ { "x86_64": "amd64", "arm64" }[ansible_facts.architecture] }}'
 tini_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm" }[ansible_facts.architecture] }}'
 kubectl_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm" }[ansible_facts.architecture] }}'
