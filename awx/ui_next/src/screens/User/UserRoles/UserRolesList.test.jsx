@@ -12,7 +12,7 @@ jest.mock('../../../api/models/Roles');
 
 UsersAPI.readOptions.mockResolvedValue({
   data: {
-    actions: { GET: {} },
+    actions: { GET: {}, POST: {} },
     related_search_fields: [],
   },
 });
