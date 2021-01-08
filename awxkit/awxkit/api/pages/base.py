@@ -25,8 +25,10 @@ class Base(Page):
                 return self.delete()
         except (exc.NoContent, exc.NotFound, exc.Forbidden):
             pass
-        except exc.BadRequest as e:
+        except (exc.BadRequest, exc.Conflict) as e:
             if 'Job has not finished processing events' in e.msg:
+                pass
+            if 'Resource is being used' in e.msg:
                 pass
             else:
                 raise e
