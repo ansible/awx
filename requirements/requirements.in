@@ -6,6 +6,7 @@ autobahn>=20.12.3  # CVE-2020-35678
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
+cryptography<3.0.0
 daphne
 django==2.2.16  # see UPGRADE BLOCKERs
 django-auth-ldap
