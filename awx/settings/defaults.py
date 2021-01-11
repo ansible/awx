@@ -262,6 +262,7 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
             os.path.join(BASE_DIR, 'ui_next', 'build'),
+            os.path.join(BASE_DIR, 'ui_next', 'public')
         ],
     },
 ]
@@ -289,6 +290,7 @@ INSTALLED_APPS = [
     'awx.main',
     'awx.api',
     'awx.ui',
+    'awx.ui_next',
     'awx.sso',
     'solo'
 ]
