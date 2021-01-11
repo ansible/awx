@@ -19,7 +19,7 @@ channels-redis==3.1.0     # via -r /awx_devel/requirements/requirements.in
 channels==2.4.0           # via -r /awx_devel/requirements/requirements.in, channels-redis
 chardet==3.0.4            # via aiohttp, requests
 constantly==15.1.0        # via twisted
-cryptography==3.3.1       # via adal, autobahn, azure-keyvault, pyopenssl, service-identity, social-auth-core
+cryptography==2.9.2       # via adal, autobahn, azure-keyvault, pyopenssl, service-identity, social-auth-core
 daphne==2.4.1             # via -r /awx_devel/requirements/requirements.in, channels
 defusedxml==0.6.0         # via python3-openid, python3-saml, social-auth-core
 dictdiffer==0.8.1         # via openshift
