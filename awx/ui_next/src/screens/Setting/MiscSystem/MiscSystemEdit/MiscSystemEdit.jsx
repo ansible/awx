@@ -52,6 +52,7 @@ function MiscSystemEdit({ i18n }) {
         'ORG_ADMINS_CAN_SEE_ALL_USERS',
         'REDHAT_PASSWORD',
         'REDHAT_USERNAME',
+        'PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS',
         'REMOTE_HOST_HEADERS',
         'SESSIONS_PER_USER',
         'SESSION_COOKIE_AGE',
@@ -263,6 +264,12 @@ function MiscSystemEdit({ i18n }) {
                   <InputField
                     name="AUTOMATION_ANALYTICS_GATHER_INTERVAL"
                     config={system.AUTOMATION_ANALYTICS_GATHER_INTERVAL}
+                    type="number"
+                    isRequired
+                  />
+                  <InputField
+                    name="PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS"
+                    config={system.PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS}
                     type="number"
                     isRequired
                   />

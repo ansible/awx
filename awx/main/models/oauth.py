@@ -1,6 +1,7 @@
 # Python
 import logging
 import re
+from datetime import timedelta
 
 # Django
 from django.core.validators import RegexValidator
@@ -13,6 +14,7 @@ from django.conf import settings
 from oauth2_provider.models import AbstractApplication, AbstractAccessToken
 from oauth2_provider.generators import generate_client_secret
 from oauthlib import oauth2
+from oauthlib.common import generate_token
 
 from awx.main.utils import get_external_account
 from awx.main.fields import OAuth2ClientSecretField
@@ -144,3 +146,15 @@ class OAuth2AccessToken(AbstractAccessToken):
         if not self.pk:
             self.validate_external_users()
         super(OAuth2AccessToken, self).save(*args, **kwargs)
+
+    @staticmethod
+    def create_token(data):
+        if 'token' not in data:
+            data['token'] = generate_token()
+        if 'expires' not in data:
+            data['expires'] = now() + timedelta(
+                seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
+            )
+        new_token = OAuth2AccessToken(**data)
+        new_token.save()
+        return new_token

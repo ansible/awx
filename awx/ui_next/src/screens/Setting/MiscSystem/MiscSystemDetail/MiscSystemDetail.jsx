@@ -45,6 +45,7 @@ function MiscSystemDetail({ i18n }) {
         'ORG_ADMINS_CAN_SEE_ALL_USERS',
         'REDHAT_PASSWORD',
         'REDHAT_USERNAME',
+        'PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS',
         'REMOTE_HOST_HEADERS',
         'SESSIONS_PER_USER',
         'SESSION_COOKIE_AGE',

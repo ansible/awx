@@ -1360,7 +1360,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = Project
-        fields = ('*', 'organization', 'scm_update_on_launch',
+        fields = ('*', 'organization', 'scm_update_on_launch', 'sync_assets',
                   'scm_update_cache_timeout', 'allow_override', 'custom_virtualenv',) + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
 

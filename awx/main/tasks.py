@@ -56,7 +56,7 @@ from awx.main.analytics import all_collectors, expensive_collectors
 from awx.main.redact import UriCleaner
 from awx.main.models import (
     Schedule, TowerScheduleState, Instance, InstanceGroup,
-    UnifiedJob, Notification,
+    UnifiedJob, Notification, OAuth2AccessToken,
     Inventory, InventorySource, SmartInventoryMembership,
     Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob,
     JobEvent, ProjectUpdateEvent, InventoryUpdateEvent, AdHocCommandEvent, SystemJobEvent,
@@ -1997,10 +1997,16 @@ class RunProjectUpdate(BaseTask):
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
     event_data_key = 'project_update_id'
+    sync_token = None
 
     @property
     def proot_show_paths(self):
-        return [settings.PROJECTS_ROOT]
+        show_paths = [settings.PROJECTS_ROOT]
+        if self.job_private_data_dir:
+            show_paths.append(self.job_private_data_dir)
+        # Add in the vendor collections for access to awx.awx
+        show_paths.append(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
+        return show_paths
 
     def __init__(self, *args, job_private_data_dir=None, **kwargs):
         super(RunProjectUpdate, self).__init__(*args, **kwargs)
@@ -2067,6 +2073,21 @@ class RunProjectUpdate(BaseTask):
         if settings.GALAXY_IGNORE_CERTS:
             env['ANSIBLE_GALAXY_IGNORE'] = True
 
+        # Set up the oauth token if we are project syncing
+        if project_update.project.sync_assets:
+            try:
+                self.sync_token = OAuth2AccessToken.create_token({
+                    'user': User.objects.get(id=project_update.created_by_id),
+                    'scope': 'write',
+                    'expires': now() + timedelta(seconds=settings.PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS),
+                    'description': 'project sync {0}'.format(project_update.id),
+                })
+                env['TOWER_OAUTH_TOKEN'] = self.sync_token.token
+            except Exception as e:
+                logger.exception("Failed to create oAuth token for project sync: {0}".format(e))
+                # Setting this to '' will trigger a when condition in the playbook to not run the import
+                env['TOWER_OAUTH_TOKEN'] = ''
+
         # build out env vars for Galaxy credentials (in order)
         galaxy_server_list = []
         if project_update.project.organization:
@@ -2084,6 +2105,9 @@ class RunProjectUpdate(BaseTask):
 
         if galaxy_server_list:
             env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join(galaxy_server_list)
+
+        # Add the vendored collections path
+        env['ANSIBLE_COLLECTIONS_PATHS'] = '{0}:~/.ansible/collections:/usr/share/ansible/collections'.format(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
 
         return env
 
@@ -2182,6 +2206,9 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project_update.scm_clean,
             'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
             'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
+            'awx_host': settings.TOWER_URL_BASE,
+            'awx_project': project_update.project.name,
+            'awx_organization': project_update.project.organization.name,
         })
         # apply custom refspec from user for PR refs and the like
         if project_update.scm_refspec:
@@ -2462,6 +2489,13 @@ class RunProjectUpdate(BaseTask):
         if len(dependent_inventory_sources) > 0:
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
+
+        # Clean up the oauth token if we are project syncing
+        if instance.project.sync_assets and self.sync_token:
+            try:
+                self.sync_token.delete()
+            except Exception as e:
+                logger.exception("Failed to release oAuth token {0} for prooject sync: {1}".format(self.sync_token.token, e))
 
     def should_use_proot(self, project_update):
         '''

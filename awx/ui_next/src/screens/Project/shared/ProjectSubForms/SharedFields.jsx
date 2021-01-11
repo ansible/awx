@@ -93,6 +93,15 @@ export const ScmTypeOptions = withI18n()(
                   revision of the project prior to starting the job.`
             )}
           />
+          <CheckboxField
+            id="option-sync_assets"
+            name="sync_assets"
+            label={i18n._(t`Sync Assets`)}
+            tooltip={i18n._(
+              t`When syncing the project,
+                  load Tower assets from the projects assets folder.`
+            )}
+          />
           {!hideAllowOverride && (
             <CheckboxField
               id="option-allow-override"

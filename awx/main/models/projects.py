@@ -263,6 +263,10 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         default=False,
         help_text=_('Update the project when a job is launched that uses the project.'),
     )
+    sync_assets = models.BooleanField(
+        default=False,
+        help_text=_('When syncing the assets, load Tower assets from the projects assets folder.'),
+    )
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
@@ -621,6 +625,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         added_update_fields = []
         if not self.job_tags:
             job_tags = ['update_{}'.format(self.scm_type), 'install_roles', 'install_collections']
+            if self.project.sync_assets and self.launch_type == 'manual':
+                job_tags.append('update_assets')
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
         if self.scm_delete_on_update and 'delete' not in self.job_tags and self.job_type == 'check':
