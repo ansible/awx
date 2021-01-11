@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch, Link } from 'react-router-dom';
+import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
@@ -17,6 +18,14 @@ import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useWsInventories from './useWsInventories';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
+
+const ResponsiveHeaderCell = styled(HeaderCell)`
+  @media (max-width: 992px) {
+    && {
+      display: none;
+    }
+  }
+`;
 
 const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
@@ -195,9 +204,9 @@ function InventoryList({ i18n }) {
               <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Groups`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Hosts`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Sources`)}</HeaderCell>
+              <ResponsiveHeaderCell>{i18n._(t`Groups`)}</ResponsiveHeaderCell>
+              <ResponsiveHeaderCell>{i18n._(t`Hosts`)}</ResponsiveHeaderCell>
+              <ResponsiveHeaderCell>{i18n._(t`Sources`)}</ResponsiveHeaderCell>
               <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
             </HeaderRow>
           }

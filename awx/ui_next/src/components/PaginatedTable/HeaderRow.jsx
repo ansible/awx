@@ -71,6 +71,7 @@ export function HeaderCell({
   sortBy,
   columnIndex,
   idPrefix,
+  className,
   children,
 }) {
   const sort = sortKey
@@ -81,7 +82,11 @@ export function HeaderCell({
       }
     : null;
   return (
-    <Th sort={sort} id={sortKey ? `${idPrefix}-${sortKey}` : null}>
+    <Th
+      id={sortKey ? `${idPrefix}-${sortKey}` : null}
+      className={className}
+      sort={sort}
+    >
       {children}
     </Th>
   );

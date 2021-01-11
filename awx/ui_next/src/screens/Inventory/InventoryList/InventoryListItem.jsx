@@ -6,12 +6,21 @@ import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 import { timeOfDay } from '../../../util/dates';
 import { InventoriesAPI } from '../../../api';
 import { Inventory } from '../../../types';
 import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import CopyButton from '../../../components/CopyButton';
 import StatusLabel from '../../../components/StatusLabel';
+
+const ResponsiveTd = styled(Td)`
+  @media (max-width: 992px) {
+    && {
+      display: none;
+    }
+  }
+`;
 
 function InventoryListItem({
   inventory,
@@ -89,11 +98,15 @@ function InventoryListItem({
           {inventory?.summary_fields?.organization?.name}
         </Link>
       </Td>
-      <Td dataLabel={i18n._(t`Groups`)}>{inventory.total_groups}</Td>
-      <Td dataLabel={i18n._(t`Hosts`)}>{inventory.total_hosts}</Td>
-      <Td dataLabel={i18n._(t`Sources`)}>
+      <ResponsiveTd dataLabel={i18n._(t`Groups`)}>
+        {inventory.total_groups}
+      </ResponsiveTd>
+      <ResponsiveTd dataLabel={i18n._(t`Hosts`)}>
+        {inventory.total_hosts}
+      </ResponsiveTd>
+      <ResponsiveTd dataLabel={i18n._(t`Sources`)}>
         {inventory.total_inventory_sources}
-      </Td>
+      </ResponsiveTd>
       {inventory.pending_deletion ? (
         <Td dataLabel={i18n._(t`Groups`)}>
           <Label color="red">{i18n._(t`Pending delete`)}</Label>
