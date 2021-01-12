@@ -378,6 +378,7 @@ def gather_analytics():
 
     from awx.conf.models import Setting
     from rest_framework.fields import DateTimeField
+    from awx.main.signals import disable_activity_stream
     if not settings.INSIGHTS_TRACKING_STATE:
         return
     if not (settings.AUTOMATION_ANALYTICS_URL and settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD):
@@ -414,7 +415,8 @@ def gather_analytics():
                     if not _gather_and_ship(incremental_collectors, since=start, until=until):
                         break
                     start = until
-                    settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
+                    with disable_activity_stream():
+                        settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
             if subset:
                 _gather_and_ship(subset, since=since, until=gather_time)
 
