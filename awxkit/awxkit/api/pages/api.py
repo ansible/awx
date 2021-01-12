@@ -83,9 +83,6 @@ class ApiV2(base.Base):
         if _page.json.get('managed_by_tower'):
             log.debug("%s is managed by Tower, skipping.", _page.endpoint)
             return None
-        # Drop any hosts, groups, or inventories that were pulled in programmatically by an inventory source.
-        if _page.json.get('has_inventory_sources'):
-            return None
         if post_fields is None:  # Deprecated endpoint or insufficient permissions
             log.error("Object export failed: %s", _page.endpoint)
             return None
