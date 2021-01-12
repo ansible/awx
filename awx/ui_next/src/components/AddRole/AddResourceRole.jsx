@@ -144,7 +144,7 @@ class AddResourceRole extends React.Component {
       currentStepId,
       maxEnabledStep,
     } = this.state;
-    const { onClose, roles, i18n } = this.props;
+    const { onClose, roles, i18n, resource } = this.props;
 
     // Object roles can be user only, so we remove them when
     // showing role choices for team access
@@ -235,18 +235,24 @@ class AddResourceRole extends React.Component {
                 t`Choose the type of resource that will be receiving new roles.  For example, if you'd like to add new roles to a set of users please choose Users and click Next.  You'll be able to select the specific resources in the next step.`
               )}
             </div>
+
             <SelectableCard
               isSelected={selectedResource === 'users'}
               label={i18n._(t`Users`)}
               dataCy="add-role-users"
+              ariaLabel={i18n._(t`Users`)}
               onClick={() => this.handleResourceSelect('users')}
             />
-            <SelectableCard
-              isSelected={selectedResource === 'teams'}
-              label={i18n._(t`Teams`)}
-              dataCy="add-role-teams"
-              onClick={() => this.handleResourceSelect('teams')}
-            />
+            {resource?.type === 'credential' &&
+            !resource?.organization ? null : (
+              <SelectableCard
+                isSelected={selectedResource === 'teams'}
+                label={i18n._(t`Teams`)}
+                dataCy="add-role-teams"
+                ariaLabel={i18n._(t`Teams`)}
+                onClick={() => this.handleResourceSelect('teams')}
+              />
+            )}
           </div>
         ),
         enableNext: selectedResource !== null,
@@ -329,10 +335,12 @@ AddResourceRole.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   roles: PropTypes.shape(),
+  resource: PropTypes.shape(),
 };
 
 AddResourceRole.defaultProps = {
   roles: {},
+  resource: {},
 };
 
 export { AddResourceRole as _AddResourceRole };
