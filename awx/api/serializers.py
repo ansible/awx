@@ -2841,12 +2841,25 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                 'ask_scm_branch_on_launch', self.instance.ask_scm_branch_on_launch if self.instance else None)
             if not project:
                 raise serializers.ValidationError({'project': _('This field is required.')})
+            playbooks = []
+            if project.scm_type:
+                if project.scm_revision == '':
+                    # This is an SCM project but has not been synced yet.
+                    # This could be a case where we are doing an initial sync of a project and the sync assets button is enabled
+                    # in this condition, when the job template assets attempt to get created git has synced the project to disk
+                    #    but the post sync process which sets playbook_files has not been run
+                    # Because of this we will just try to load the playbooks off disk and not use the cached playbook_files
+                    playbooks = project.playbooks
+                else:
+                    playbooks = playbook_files
+            else:
+                playbooks = project.playbooks
             playbook_not_found = bool(
                 (
                     project and project.scm_type and (not project.allow_override) and
-                    playbook and force_text(playbook) not in project.playbook_files
+                    playbook and force_text(playbook) not in playbooks
                 ) or
-                (project and not project.scm_type and playbook and force_text(playbook) not in project.playbooks)  # manual
+                (project and not project.scm_type and playbook and force_text(playbook) not in playbooks)  # manual
             )
             if playbook_not_found:
                 raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
