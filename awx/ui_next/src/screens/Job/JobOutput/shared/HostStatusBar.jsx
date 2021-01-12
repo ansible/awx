@@ -8,7 +8,7 @@ const BarWrapper = styled.div`
   background-color: #d7d7d7;
   display: flex;
   height: 5px;
-  margin: 24px 0;
+  margin-top: 16px;
   width: 100%;
 `;
 
