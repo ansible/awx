@@ -27,7 +27,7 @@ djangorestframework>=3.12.1
 djangorestframework-yaml
 GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc
-jinja2
+jinja2>=2.11.0  # required for ChainableUndefined
 jsonschema
 Markdown  # used for formatting API help
 openshift>=0.11.0  # minimum version to pull in new pyyaml for CVE-2017-18342
