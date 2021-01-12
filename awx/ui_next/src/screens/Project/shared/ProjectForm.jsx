@@ -85,6 +85,7 @@ function ProjectFormFields({
     scm_clean: false,
     scm_delete_on_update: false,
     scm_update_on_launch: false,
+    sync_assets: false,
     allow_override: false,
     scm_update_cache_timeout: 0,
   };
@@ -386,6 +387,7 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
                 : project.scm_type,
             scm_update_cache_timeout: project.scm_update_cache_timeout || 0,
             scm_update_on_launch: project.scm_update_on_launch || false,
+            sync_assets: project.sync_assets || false,
             scm_url: project.scm_url || '',
           }}
           onSubmit={handleSubmit}
