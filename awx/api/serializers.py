@@ -2851,7 +2851,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                     # Because of this we will just try to load the playbooks off disk and not use the cached playbook_files
                     playbooks = project.playbooks
                 else:
-                    playbooks = playbook_files
+                    playbooks = project.playbook_files
             else:
                 playbooks = project.playbooks
             playbook_not_found = bool(
