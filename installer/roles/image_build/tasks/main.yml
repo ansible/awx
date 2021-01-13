@@ -26,11 +26,21 @@
     src: Dockerfile.j2
     dest: ../Dockerfile
 
+- name: Setting build operation depending on build_tool
+  set_fact: 
+    build_tool_operation: "{{ item.operation }}"
+  loop: [ 
+      {tool: "docker", operation: "build"},  
+      {tool: "podman", operation: "build"},
+      {tool: "buildah", operation: "bud"},
+  ]
+  when: item.tool == build_tool
+
 # Calling Docker directly because docker-py doesnt support BuildKit
-- name: Build AWX image
-  command: docker build -t {{ awx_image }}:{{ awx_version }} ..
+- name: Build AWX image using {{ build_tool }}
+  command: "{{ build_tool  }} {{ build_tool_operation }} {{ build_tool_extra_parms | default('') }} -t {{ awx_image }}:{{ awx_version }} .."
 
 - name: Tag awx images as latest
-  command: "docker tag {{ item }}:{{ awx_version }} {{ item }}:latest"
+  command: "{{ build_tool }} tag {{ item }}:{{ awx_version }} {{ item }}:latest"
   with_items:
     - "{{ awx_image }}"
