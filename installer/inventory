@@ -22,7 +22,7 @@ dockerhub_base=ansible
 # kubernetes_namespace=awx
 # kubernetes_web_svc_type=NodePort
 # Optional Kubernetes Variables
-# pg_image_registry=docker.io
+# pg_image_registry=docker.io/bitnami
 # pg_serviceaccount=awx
 # pg_volume_capacity=5
 # pg_persistence_storageClass=StorageClassName
@@ -79,6 +79,16 @@ docker_compose_dir="~/.awx/awxcompose"
 # docker_registry_repository=awx
 # docker_registry_username=developer
 
+# Required when not building with docker
+# Set build_tool to either docker (default), podman or buildah
+# Set build_tool_tls_verify if using an insecure registry. Will be ignored in case of docker
+# Set build_extra_parms for additional parameters that need to be used while building
+# These variables will be used for build and push. For the push, make sure to set:
+# docker_registry, docker_registry_repository and docker_registry_username and submit the password with
+# -e docker_registry_password="PasswordGoesHere" if required.
+# build_tool=docker
+# build_tool_tls_verify=true
+# build_tool_extra_parms="-D"
 
 # Set pg_hostname if you have an external postgres server, otherwise
 # a new postgres service will be created

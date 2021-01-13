@@ -1,31 +1,38 @@
 ---
+
+- name: set tls verification options
+  set_fact:
+    tls_options: "--tls-verify={{ build_tool_tls_verify | default(true) }}"
+  when: build_tool != "docker"
+
 - name: Authenticate with Docker registry if registry password given
-  docker_login:
-    registry: "{{ docker_registry }}"
-    username: "{{ docker_registry_username }}"
-    password: "{{ docker_registry_password }}"
-    reauthorize: true
-  when: docker_registry is defined and docker_registry_password is defined
+  command: "{{ build_tool }} login {{  tls_options | default('') }} -u {{ docker_registry_username }} -p {{ docker_registry_password }} {{ docker_registry }}"
+  when: docker_registry is defined and docker_registry_password is defined and build_tool 
+  ignore_errors: yes
+  no_log: true
 
 - name: Remove local images to ensure proper push behavior
   block:
     - name: Remove awx image
-      docker_image:
-        name: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}"
-        tag: "{{ awx_version }}"
-        state: absent
+      command: "{{ build_tool }} rmi {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}:{{ awx_version }}"
+      ignore_errors: true
 
-- name: Tag and Push Container Images
+- name: Tag Container Images
   block:
-    - name: Tag and push awx image to registry
-      docker_image:
-        name: "{{ awx_image }}"
-        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}"
-        tag: "{{ item }}"
-        push: true
+    - name: Tag awx image to registry
+      command: "{{ build_tool }} tag {{ awx_image }} {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}:{{ item }}"
       with_items:
         - "latest"
         - "{{ awx_version }}"
+
+- name: Push Container Images
+  block:
+    - name: Push awx image to registry
+      command: "{{ build_tool }} push {{ tls_options | default('') }} {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}:{{ item }}"
+      with_items:
+        - "latest"
+        - "{{ awx_version }}"
+
 
 - name: Set full image path for Registry
   set_fact:

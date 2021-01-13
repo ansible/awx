@@ -196,7 +196,6 @@
     - name: Set awx image name
       set_fact:
         kubernetes_awx_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}"
-      when: kubernetes_awx_image is not defined
   when: docker_registry is defined
 
 - name: Determine Deployment api version
