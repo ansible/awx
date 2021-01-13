@@ -20,6 +20,7 @@ const RevertFormActionGroup = ({
           variant="primary"
           type="button"
           onClick={onSubmit}
+          ouiaId="save-button"
         >
           {i18n._(t`Save`)}
         </Button>
@@ -28,6 +29,7 @@ const RevertFormActionGroup = ({
           variant="secondary"
           type="button"
           onClick={onRevert}
+          ouiaId="revert-all-button"
         >
           {i18n._(t`Revert all to default`)}
         </Button>
@@ -37,6 +39,7 @@ const RevertFormActionGroup = ({
           variant="secondary"
           type="button"
           onClick={onCancel}
+          ouiaId="cancel-button"
         >
           {i18n._(t`Cancel`)}
         </Button>

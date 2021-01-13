@@ -8,25 +8,23 @@ import {
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
-import GitHubEdit from './GitHubEdit';
+import GitHubTeamEdit from './GitHubTeamEdit';
 
 jest.mock('../../../../api/models/Settings');
 SettingsAPI.updateAll.mockResolvedValue({});
 SettingsAPI.readCategory.mockResolvedValue({
   data: {
-    SOCIAL_AUTH_GITHUB_CALLBACK_URL: 'https://foo/complete/github/',
-    SOCIAL_AUTH_GITHUB_KEY: 'mock github key',
-    SOCIAL_AUTH_GITHUB_SECRET: '$encrypted$',
-    SOCIAL_AUTH_GITHUB_TEAM_MAP: {},
-    SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: {
-      Default: {
-        users: true,
-      },
-    },
+    SOCIAL_AUTH_GITHUB_TEAM_CALLBACK_URL:
+      'https://towerhost/sso/complete/github-team/',
+    SOCIAL_AUTH_GITHUB_TEAM_KEY: 'OAuth2 key (Client ID)',
+    SOCIAL_AUTH_GITHUB_TEAM_SECRET: '$encrypted$',
+    SOCIAL_AUTH_GITHUB_TEAM_ID: 'team_id',
+    SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP: {},
+    SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP: {},
   },
 });
 
-describe('<GitHubEdit />', () => {
+describe('<GitHubTeamEdit />', () => {
   let wrapper;
   let history;
 
@@ -37,12 +35,12 @@ describe('<GitHubEdit />', () => {
 
   beforeEach(async () => {
     history = createMemoryHistory({
-      initialEntries: ['/settings/github/edit'],
+      initialEntries: ['/settings/github/team/edit'],
     });
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <GitHubEdit />
+          <GitHubTeamEdit />
         </SettingsProvider>,
         {
           context: { router: { history } },
@@ -53,19 +51,23 @@ describe('<GitHubEdit />', () => {
   });
 
   test('initially renders without crashing', () => {
-    expect(wrapper.find('GitHubEdit').length).toBe(1);
+    expect(wrapper.find('GitHubTeamEdit').length).toBe(1);
   });
 
   test('should display expected form fields', async () => {
-    expect(wrapper.find('FormGroup[label="GitHub OAuth2 Key"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="GitHub OAuth2 Secret"]').length).toBe(
-      1
-    );
     expect(
-      wrapper.find('FormGroup[label="GitHub OAuth2 Organization Map"]').length
+      wrapper.find('FormGroup[label="GitHub Team OAuth2 Key"]').length
     ).toBe(1);
     expect(
-      wrapper.find('FormGroup[label="GitHub OAuth2 Team Map"]').length
+      wrapper.find('FormGroup[label="GitHub Team OAuth2 Secret"]').length
+    ).toBe(1);
+    expect(wrapper.find('FormGroup[label="GitHub Team ID"]').length).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="GitHub Team OAuth2 Organization Map"]')
+        .length
+    ).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="GitHub Team OAuth2 Team Map"]').length
     ).toBe(1);
   });
 
@@ -87,10 +89,11 @@ describe('<GitHubEdit />', () => {
     wrapper.update();
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
     expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      SOCIAL_AUTH_GITHUB_KEY: '',
-      SOCIAL_AUTH_GITHUB_SECRET: '',
-      SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: null,
-      SOCIAL_AUTH_GITHUB_TEAM_MAP: null,
+      SOCIAL_AUTH_GITHUB_TEAM_KEY: '',
+      SOCIAL_AUTH_GITHUB_TEAM_SECRET: '',
+      SOCIAL_AUTH_GITHUB_TEAM_ID: '',
+      SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP: null,
+      SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP: null,
     });
   });
 
@@ -98,15 +101,15 @@ describe('<GitHubEdit />', () => {
     act(() => {
       wrapper
         .find(
-          'FormGroup[fieldId="SOCIAL_AUTH_GITHUB_SECRET"] button[aria-label="Revert"]'
+          'FormGroup[fieldId="SOCIAL_AUTH_GITHUB_TEAM_SECRET"] button[aria-label="Revert"]'
         )
         .invoke('onClick')();
-      wrapper.find('input#SOCIAL_AUTH_GITHUB_KEY').simulate('change', {
-        target: { value: 'new key', name: 'SOCIAL_AUTH_GITHUB_KEY' },
+      wrapper.find('input#SOCIAL_AUTH_GITHUB_TEAM_ID').simulate('change', {
+        target: { value: '12345', name: 'SOCIAL_AUTH_GITHUB_TEAM_ID' },
       });
       wrapper
-        .find('CodeMirrorInput#SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP')
-        .invoke('onChange')('{\n"Default":{\n"users":\nfalse\n}\n}');
+        .find('CodeMirrorInput#SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP')
+        .invoke('onChange')('{\n"Default":{\n"users":\ntrue\n}\n}');
     });
     wrapper.update();
     await act(async () => {
@@ -114,29 +117,30 @@ describe('<GitHubEdit />', () => {
     });
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
     expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
-      SOCIAL_AUTH_GITHUB_KEY: 'new key',
-      SOCIAL_AUTH_GITHUB_SECRET: '',
-      SOCIAL_AUTH_GITHUB_TEAM_MAP: {},
-      SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: {
+      SOCIAL_AUTH_GITHUB_TEAM_KEY: 'OAuth2 key (Client ID)',
+      SOCIAL_AUTH_GITHUB_TEAM_SECRET: '',
+      SOCIAL_AUTH_GITHUB_TEAM_ID: '12345',
+      SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP: {},
+      SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP: {
         Default: {
-          users: false,
+          users: true,
         },
       },
     });
   });
 
-  test('should navigate to github default detail on successful submission', async () => {
+  test('should navigate to github team detail on successful submission', async () => {
     await act(async () => {
       wrapper.find('Form').invoke('onSubmit')();
     });
-    expect(history.location.pathname).toEqual('/settings/github/details');
+    expect(history.location.pathname).toEqual('/settings/github/team/details');
   });
 
-  test('should navigate to github default detail when cancel is clicked', async () => {
+  test('should navigate to github team detail when cancel is clicked', async () => {
     await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });
-    expect(history.location.pathname).toEqual('/settings/github/details');
+    expect(history.location.pathname).toEqual('/settings/github/team/details');
   });
 
   test('should display error message on unsuccessful submission', async () => {
@@ -163,7 +167,7 @@ describe('<GitHubEdit />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <GitHubEdit />
+          <GitHubTeamEdit />
         </SettingsProvider>
       );
     });

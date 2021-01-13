@@ -90,6 +90,7 @@ const BooleanField = withI18n()(
           labelOff={i18n._(t`Off`)}
           onChange={checked => helpers.setValue(checked)}
           aria-label={ariaLabel || config.label}
+          ouiaId={ariaLabel || config.label}
         />
       </SettingGroup>
     ) : null;
