@@ -149,6 +149,7 @@ services:
     {% endfor %}
     {% endif %}
     environment:
+      AWX_SKIP_MIGRATIONS: "1"
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
