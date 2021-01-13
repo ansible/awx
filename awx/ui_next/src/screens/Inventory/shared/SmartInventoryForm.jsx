@@ -3,7 +3,7 @@ import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useLocation } from 'react-router-dom';
-import { func, shape, object, arrayOf } from 'prop-types';
+import { func, shape, arrayOf } from 'prop-types';
 import { Form } from '@patternfly/react-core';
 import { InstanceGroup } from '../../../types';
 import { VariablesField } from '../../../components/CodeMirrorInput';
