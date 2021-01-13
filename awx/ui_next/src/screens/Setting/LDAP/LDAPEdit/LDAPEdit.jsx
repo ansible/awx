@@ -6,7 +6,10 @@ import { CardBody } from '../../../../components/Card';
 import ContentError from '../../../../components/ContentError';
 import ContentLoading from '../../../../components/ContentLoading';
 import { FormSubmitError } from '../../../../components/FormField';
-import { FormColumnLayout } from '../../../../components/FormLayout';
+import {
+  FormColumnLayout,
+  FormFullWidthLayout,
+} from '../../../../components/FormLayout';
 import { useSettings } from '../../../../contexts/Settings';
 import { RevertAllAlert, RevertFormActionGroup } from '../../shared';
 import {
@@ -165,25 +168,9 @@ function LDAPEdit() {
                   name={`${ldapCategory}SERVER_URI`}
                   config={ldap[`${ldapCategory}SERVER_URI`]}
                 />
-                <InputField
-                  name={`${ldapCategory}BIND_DN`}
-                  config={ldap[`${ldapCategory}BIND_DN`]}
-                />
                 <EncryptedField
                   name={`${ldapCategory}BIND_PASSWORD`}
                   config={ldap[`${ldapCategory}BIND_PASSWORD`]}
-                />
-                <InputField
-                  name={`${ldapCategory}USER_DN_TEMPLATE`}
-                  config={ldap[`${ldapCategory}USER_DN_TEMPLATE`]}
-                />
-                <InputField
-                  name={`${ldapCategory}REQUIRE_GROUP`}
-                  config={ldap[`${ldapCategory}REQUIRE_GROUP`]}
-                />
-                <InputField
-                  name={`${ldapCategory}DENY_GROUP`}
-                  config={ldap[`${ldapCategory}DENY_GROUP`]}
                 />
                 <ChoiceField
                   name={`${ldapCategory}GROUP_TYPE`}
@@ -193,6 +180,24 @@ function LDAPEdit() {
                   name={`${ldapCategory}START_TLS`}
                   config={ldap[`${ldapCategory}START_TLS`]}
                 />
+                <FormFullWidthLayout>
+                  <InputField
+                    name={`${ldapCategory}BIND_DN`}
+                    config={ldap[`${ldapCategory}BIND_DN`]}
+                  />
+                  <InputField
+                    name={`${ldapCategory}USER_DN_TEMPLATE`}
+                    config={ldap[`${ldapCategory}USER_DN_TEMPLATE`]}
+                  />
+                  <InputField
+                    name={`${ldapCategory}REQUIRE_GROUP`}
+                    config={ldap[`${ldapCategory}REQUIRE_GROUP`]}
+                  />
+                  <InputField
+                    name={`${ldapCategory}DENY_GROUP`}
+                    config={ldap[`${ldapCategory}DENY_GROUP`]}
+                  />
+                </FormFullWidthLayout>
                 <ObjectField
                   name={`${ldapCategory}USER_SEARCH`}
                   config={ldap[`${ldapCategory}USER_SEARCH`]}
