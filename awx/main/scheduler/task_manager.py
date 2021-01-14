@@ -283,12 +283,12 @@ class TaskManager():
                 task.controller_node = controller_node
                 logger.debug('Submitting isolated {} to queue {} controlled by {}.'.format(
                              task.log_format, task.execution_node, controller_node))
-            elif rampart_group.is_containerized:
+            elif rampart_group.is_container_group:
                 # find one real, non-containerized instance with capacity to
                 # act as the controller for k8s API interaction
                 match = None
                 for group in InstanceGroup.objects.all():
-                    if group.is_containerized or group.controller_id:
+                    if group.is_container_group or group.controller_id:
                         continue
                     match = group.fit_task_to_most_remaining_capacity_instance(task, group.instances.all())
                     if match:
@@ -521,14 +521,14 @@ class TaskManager():
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
             for rampart_group in preferred_instance_groups:
-                if task.can_run_containerized and rampart_group.is_containerized:
+                if task.can_run_containerized and rampart_group.is_container_group:
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
                     break
 
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name)
-                if not rampart_group.is_containerized and self.get_remaining_capacity(rampart_group.name) <= 0:
+                if not rampart_group.is_container_group and self.get_remaining_capacity(rampart_group.name) <= 0:
                     logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(
                                  rampart_group.name, remaining_capacity))
                     continue
@@ -536,8 +536,8 @@ class TaskManager():
                 execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(task, self.graph[rampart_group.name]['instances']) or \
                     InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'])
 
-                if execution_instance or rampart_group.is_containerized:
-                    if not rampart_group.is_containerized:
+                if execution_instance or rampart_group.is_container_group:
+                    if not rampart_group.is_container_group:
                         execution_instance.remaining_capacity = max(0, execution_instance.remaining_capacity - task.task_impact)
                         execution_instance.jobs_running += 1
                         logger.debug("Starting {} in group {} instance {} (remaining_capacity={})".format(

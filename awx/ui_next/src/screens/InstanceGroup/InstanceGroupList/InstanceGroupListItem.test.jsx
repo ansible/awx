@@ -17,7 +17,7 @@ describe('<InstanceGroupListItem/>', () => {
       policy_instance_minimum: 10,
       policy_instance_percentage: 50,
       percent_capacity_remaining: 60,
-      is_containerized: false,
+      is_container_group: false,
       summary_fields: {
         user_capabilities: {
           edit: true,
@@ -34,7 +34,7 @@ describe('<InstanceGroupListItem/>', () => {
       policy_instance_minimum: 0,
       policy_instance_percentage: 0,
       percent_capacity_remaining: 0,
-      is_containerized: true,
+      is_container_group: true,
       summary_fields: {
         user_capabilities: {
           edit: false,

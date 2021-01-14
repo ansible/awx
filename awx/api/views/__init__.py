@@ -397,7 +397,7 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     permission_classes = (InstanceGroupTowerPermission,)
 
     def update_raw_data(self, data):
-        if self.get_object().is_containerized:
+        if self.get_object().is_container_group:
             data.pop('policy_instance_percentage', None)
             data.pop('policy_instance_minimum', None)
             data.pop('policy_instance_list', None)
