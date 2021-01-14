@@ -52,6 +52,9 @@ const buildAnchor = (obj, resource, activity) => {
         if (activity.summary_fields.job_template) {
           const jt_id = activity.summary_fields.job_template[0].id;
           url = `/templates/job_template/${jt_id}/schedules/${obj.id}/`;
+        } else if (activity.summary_fields.workflow_job_template) {
+          const wfjt_id = activity.summary_fields.workflow_job_template[0].id;
+          url = `/templates/workflow_job_template/${wfjt_id}/schedules/${obj.id}/`;
         } else if (activity.summary_fields.project) {
           url = `/projects/${activity.summary_fields.project[0].id}/schedules/${obj.id}/`;
         } else if (activity.summary_fields.system_job_template) {
@@ -82,8 +85,8 @@ const buildAnchor = (obj, resource, activity) => {
         break;
       case 'workflow_job_template_node': {
         const {
-          wfjt_id,
-          wfjt_name,
+          id: wfjt_id,
+          name: wfjt_name,
         } = activity.summary_fields.workflow_job_template[0];
         url = `/templates/workflow_job_template/${wfjt_id}/`;
         name = wfjt_name;
