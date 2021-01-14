@@ -1867,7 +1867,7 @@ class RunJob(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        if job.is_containerized:
+        if job.is_container_group_task:
             return False
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
@@ -1997,7 +1997,7 @@ class RunJob(BaseTask):
                 os.path.join(private_data_dir, 'artifacts', 'fact_cache'),
                 fact_modification_times,
             )
-        if isolated_manager_instance and not job.is_containerized:
+        if isolated_manager_instance and not job.is_container_group_task:
             isolated_manager_instance.cleanup()
 
         try:
@@ -2994,7 +2994,7 @@ class RunAdHocCommand(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        if ad_hoc_command.is_containerized:
+        if ad_hoc_command.is_container_group_task:
             return False
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
