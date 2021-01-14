@@ -151,8 +151,8 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         return True
 
     @property
-    def is_containerized(self):
-        return bool(self.instance_group and self.instance_group.is_containerized)
+    def is_container_group_task(self):
+        return bool(self.instance_group and self.instance_group.is_container_group)
 
     @property
     def can_run_containerized(self):

@@ -261,7 +261,7 @@ def apply_cluster_membership_policies():
         # On a differential basis, apply instances to non-isolated groups
         with transaction.atomic():
             for g in actual_groups:
-                if g.obj.is_containerized:
+                if g.obj.is_container_group:
                     logger.debug('Skipping containerized group {} for policy calculation'.format(g.obj.name))
                     continue
                 instances_to_add = set(g.instances) - set(g.prior_instances)
@@ -506,7 +506,7 @@ def cluster_node_heartbeat():
 def awx_k8s_reaper():
     from awx.main.scheduler.kubernetes import PodManager # prevent circular import
     for group in InstanceGroup.objects.filter(credential__isnull=False).iterator():
-        if group.is_containerized:
+        if group.is_container_group:
             logger.debug("Checking for orphaned k8s pods for {}.".format(group))
             for job in UnifiedJob.objects.filter(
                 pk__in=list(PodManager.list_active_jobs(group))
