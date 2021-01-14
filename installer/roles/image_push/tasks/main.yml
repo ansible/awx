@@ -7,8 +7,8 @@
 
 - name: Authenticate with Docker registry if registry password given
   command: "{{ build_tool }} login {{  tls_options | default('') }} -u {{ docker_registry_username }} -p {{ docker_registry_password }} {{ docker_registry }}"
-  when: docker_registry is defined and docker_registry_password is defined and build_tool 
-  ignore_errors: yes
+  when: docker_registry is defined and docker_registry_password is defined and build_tool
+  ignore_errors: true
   no_log: true
 
 - name: Remove local images to ensure proper push behavior

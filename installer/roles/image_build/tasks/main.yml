@@ -27,12 +27,12 @@
     dest: ../Dockerfile
 
 - name: Setting build operation depending on build_tool
-  set_fact: 
+  set_fact:
     build_tool_operation: "{{ item.operation }}"
-  loop: [ 
-      {tool: "docker", operation: "build"},  
-      {tool: "podman", operation: "build"},
-      {tool: "buildah", operation: "bud"},
+  loop: [
+    {tool: "docker", operation: "build"},
+    {tool: "podman", operation: "build"},
+    {tool: "buildah", operation: "bud"},
   ]
   when: item.tool == build_tool
 

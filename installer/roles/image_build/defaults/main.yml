@@ -9,4 +9,3 @@ kubectl_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm
 # Values for building
 build_tool: "docker"
 build_tool_tls_verify: true
-
