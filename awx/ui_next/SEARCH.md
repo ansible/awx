@@ -86,7 +86,7 @@ Instances of orgs list include:
 
 **Instance Groups list**
   - Name - search is ?name=ig
-  - ? is_containerized boolean choice (doesn't work right now in API but will soon) - search is ?is_containerized=true
+  - ? is_container_group boolean choice (doesn't work right now in API but will soon) - search is ?is_container_group=true
   - ? credential name - search is ?credentials__name=kubey
 
 Instance of instance groups list include:
@@ -136,7 +136,7 @@ Instance of team lists include:
 
 **Credentials list**
   - Name
-  - ? Type (dropdown on right with different types) 
+  - ? Type (dropdown on right with different types)
   - ? Created by (username)
   - ? Modified by (username)
 
@@ -273,7 +273,7 @@ For the UI url params, we want to only encode those params that aren't defaults,
 
 #### mergeParams vs. replaceParams
 
-**mergeParams** is used to suppport putting values with the same key 
+**mergeParams** is used to suppport putting values with the same key
 
 From a UX perspective, we wanted to be able to support searching on the same key multiple times (i.e. searching for things like `?foo=bar&foo=baz`). We do this by creating an array of all values. i.e.:
 
@@ -361,7 +361,7 @@ Smart search will be able to craft the tag through various states.  Note that th
         "instance_groups__search"
     ],
   ```
-  
+
   PHASE 3: keys, give by object key names for data.actions.GET
     - type is given for each key which we could use to help craft the value
 

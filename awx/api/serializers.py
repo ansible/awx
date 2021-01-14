@@ -131,7 +131,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_script': DEFAULT_SUMMARY_FIELDS,
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
-    'instance_group': ('id', 'name', 'controller_id', 'is_containerized'),
+    'instance_group': ('id', 'name', 'controller_id', 'is_container_group'),
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
@@ -4768,7 +4768,7 @@ class InstanceGroupSerializer(BaseSerializer):
                     'Isolated groups have a designated controller group.'),
         read_only=True
     )
-    is_containerized = serializers.BooleanField(
+    is_container_group = serializers.BooleanField(
         help_text=_('Indicates whether instances in this group are containerized.'
                     'Containerized groups have a designated Openshift or Kubernetes cluster.'),
         read_only=True
@@ -4798,7 +4798,7 @@ class InstanceGroupSerializer(BaseSerializer):
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
                   "percent_capacity_remaining", "jobs_running", "jobs_total",
-                  "instances", "controller", "is_controller", "is_isolated", "is_containerized", "credential",
+                  "instances", "controller", "is_controller", "is_isolated", "is_container_group", "credential",
                   "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list",
                   "pod_spec_override", "summary_fields")
 
@@ -4823,17 +4823,17 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('Isolated instances may not be added or removed from instances groups via the API.'))
             if self.instance and self.instance.controller_id is not None:
                 raise serializers.ValidationError(_('Isolated instance group membership may not be managed via the API.'))
-        if value and self.instance and self.instance.is_containerized:
+        if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 
     def validate_policy_instance_percentage(self, value):
-        if value and self.instance and self.instance.is_containerized:
+        if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 
     def validate_policy_instance_minimum(self, value):
-        if value and self.instance and self.instance.is_containerized:
+        if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 
