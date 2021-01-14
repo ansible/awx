@@ -23,7 +23,12 @@ export default function HeaderRow({ qsConfig, children }) {
       order_by: order === 'asc' ? key : `-${key}`,
       page: null,
     });
-    const encodedParams = encodeNonDefaultQueryString(qsConfig, newParams);
+    const nonNamespacedParams = parseQueryString({}, history.location.search);
+    const encodedParams = encodeNonDefaultQueryString(
+      qsConfig,
+      newParams,
+      nonNamespacedParams
+    );
     history.push(
       encodedParams
         ? `${location.pathname}?${encodedParams}`

@@ -85,7 +85,12 @@ class ListHeader extends React.Component {
   pushHistoryState(params) {
     const { history, qsConfig } = this.props;
     const { pathname } = history.location;
-    const encodedParams = encodeNonDefaultQueryString(qsConfig, params);
+    const nonNamespacedParams = parseQueryString({}, history.location.search);
+    const encodedParams = encodeNonDefaultQueryString(
+      qsConfig,
+      params,
+      nonNamespacedParams
+    );
     history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
   }
 
