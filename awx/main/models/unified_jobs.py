@@ -864,7 +864,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             self.unified_job_template = self._get_parent_instance()
             if 'unified_job_template' not in update_fields:
                 update_fields.append('unified_job_template')
-        
+
         if self.cancel_flag and not self.canceled_on:
             # Record the 'canceled' time.
             self.canceled_on = now()
@@ -1484,5 +1484,5 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return bool(self.controller_node)
 
     @property
-    def is_containerized(self):
+    def is_container_group_task(self):
         return False
