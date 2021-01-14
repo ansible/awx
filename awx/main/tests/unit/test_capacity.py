@@ -11,7 +11,7 @@ class FakeObject(object):
 
 class Job(FakeObject):
     task_impact = 43
-    is_containerized = False
+    is_container_group_task = False
 
     def log_format(self):
         return 'job 382 (fake)'

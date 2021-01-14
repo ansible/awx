@@ -29,7 +29,7 @@ def containerized_job(default_instance_group, kube_credential, job_template_fact
 
 @pytest.mark.django_db
 def test_containerized_job(containerized_job):
-    assert containerized_job.is_containerized
+    assert containerized_job.is_container_group_task
     assert containerized_job.instance_group.is_container_group
     assert containerized_job.instance_group.credential.kubernetes
 
