@@ -55,7 +55,8 @@ __all__ = [
     'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
     'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',
     'get_custom_venv_choices', 'get_external_account', 'task_manager_bulk_reschedule',
-    'schedule_task_manager', 'classproperty', 'create_temporary_fifo', 'truncate_stdout'
+    'schedule_task_manager', 'classproperty', 'create_temporary_fifo', 'truncate_stdout',
+    'deepmerge'
 ]
 
 
@@ -1079,3 +1080,21 @@ def truncate_stdout(stdout, size):
             set_count += 1
 
     return stdout + u'\u001b[0m' * (set_count - reset_count)
+
+
+def deepmerge(a, b):
+    """
+    Merge dict structures and return the result.
+
+    >>> a = {'first': {'all_rows': {'pass': 'dog', 'number': '1'}}}
+    >>> b = {'first': {'all_rows': {'fail': 'cat', 'number': '5'}}}
+    >>> import pprint; pprint.pprint(deepmerge(a, b))
+    {'first': {'all_rows': {'fail': 'cat', 'number': '5', 'pass': 'dog'}}}
+    """
+    if isinstance(a, dict) and isinstance(b, dict):
+        return dict([(k, deepmerge(a.get(k), b.get(k)))
+                     for k in set(a.keys()).union(b.keys())])
+    elif b is None:
+        return a
+    else:
+        return b
