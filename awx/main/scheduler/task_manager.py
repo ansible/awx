@@ -594,7 +594,7 @@ class TaskManager():
         ).exclude(
             execution_node__in=Instance.objects.values_list('hostname', flat=True)
         ):
-            if j.execution_node and not j.is_containerized:
+            if j.execution_node and not j.is_container_group_task:
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')
 
