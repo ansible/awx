@@ -195,6 +195,10 @@ function ActivityStream({ i18n }) {
                 key: 'search',
                 isDefault: true,
               },
+              {
+                name: i18n._(t`Initiated by (username)`),
+                key: 'actor__username__icontains',
+              },
             ]}
             toolbarSortColumns={[
               {
