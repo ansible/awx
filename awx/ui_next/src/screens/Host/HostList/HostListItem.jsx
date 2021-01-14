@@ -64,7 +64,7 @@ function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
           ]}
         />
         <DataListAction
-          aria-label="actions"
+          aria-label={i18n._(t`actions`)}
           aria-labelledby={labelId}
           id={labelId}
         >

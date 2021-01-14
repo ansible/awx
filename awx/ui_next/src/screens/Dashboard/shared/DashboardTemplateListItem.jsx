@@ -111,7 +111,10 @@ function DashboardTemplateListItem({
             </DataListCell>,
           ]}
         />
-        <DataListAction aria-label="actions" aria-labelledby={labelId}>
+        <DataListAction
+          aria-label={i18n._(t`actions`)}
+          aria-labelledby={labelId}
+        >
           {template.type === 'workflow_job_template' && (
             <Tooltip content={i18n._(t`Visualizer`)} position="top">
               <Button

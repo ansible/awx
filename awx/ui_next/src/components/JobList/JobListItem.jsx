@@ -5,6 +5,7 @@ import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { RocketIcon } from '@patternfly/react-icons';
+import styled from 'styled-components';
 import { ActionsTd, ActionItem } from '../PaginatedTable';
 import LaunchButton from '../LaunchButton';
 import StatusLabel from '../StatusLabel';
@@ -14,6 +15,7 @@ import CredentialChip from '../CredentialChip';
 import { formatDateString } from '../../util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
+const Dash = styled.span``;
 function JobListItem({
   i18n,
   job,
@@ -58,7 +60,7 @@ function JobListItem({
           <span>
             <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
               <b>
-                {job.id} &mdash; {job.name}
+                {job.id} <Dash>&mdash;</Dash> {job.name}
               </b>
             </Link>
           </span>
