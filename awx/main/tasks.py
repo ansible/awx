@@ -26,6 +26,7 @@ import urllib.parse as urlparse
 import socket
 import threading
 import concurrent.futures
+from base64 import b64encode
 
 # Django
 from django.conf import settings
@@ -38,9 +39,6 @@ from django.utils.translation import ugettext_lazy as _, gettext_noop
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django_guid.middleware import GuidMiddleware
-
-# Kubernetes
-from kubernetes.client.rest import ApiException
 
 # Django-CRUM
 from crum import impersonate
@@ -79,7 +77,8 @@ from awx.main.utils import (update_scm_url,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version,
-                            deepmerge)
+                            deepmerge,
+                            parse_yaml_or_json)
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
