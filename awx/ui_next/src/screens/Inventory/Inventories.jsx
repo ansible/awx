@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
 import { Config } from '../../contexts/Config';
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 import { InventoryList } from './InventoryList';
 import Inventory from './Inventory';
 import SmartInventory from './SmartInventory';
@@ -95,7 +95,10 @@ function Inventories({ i18n }) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        streamType="inventory"
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/inventories/inventory/add">
           <InventoryAdd />

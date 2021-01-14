@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Config } from '../../contexts/Config';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader';
 import TeamList from './TeamList';
 import TeamAdd from './TeamAdd';
 import Team from './Team';
@@ -36,7 +36,7 @@ function Teams({ i18n }) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader streamType="team" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path="/teams/add">
           <TeamAdd />

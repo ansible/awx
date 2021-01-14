@@ -1,9 +1,15 @@
 import React from 'react';
-import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-import Breadcrumbs from './Breadcrumbs';
 
-describe('<Breadcrumb />', () => {
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+
+import ScreenHeader from './ScreenHeader';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+}));
+
+describe('<ScreenHeader />', () => {
   let breadcrumbWrapper;
   let breadcrumb;
   let breadcrumbItem;
@@ -17,15 +23,15 @@ describe('<Breadcrumb />', () => {
   };
 
   const findChildren = () => {
-    breadcrumb = breadcrumbWrapper.find('Breadcrumb');
+    breadcrumb = breadcrumbWrapper.find('ScreenHeader');
     breadcrumbItem = breadcrumbWrapper.find('BreadcrumbItem');
-    breadcrumbHeading = breadcrumbWrapper.find('BreadcrumbHeading');
+    breadcrumbHeading = breadcrumbWrapper.find('Title');
   };
 
   test('initially renders succesfully', () => {
-    breadcrumbWrapper = mount(
+    breadcrumbWrapper = mountWithContexts(
       <MemoryRouter initialEntries={['/foo/1/bar']} initialIndex={0}>
-        <Breadcrumbs breadcrumbConfig={config} />
+        <ScreenHeader streamType="all_activity" breadcrumbConfig={config} />
       </MemoryRouter>
     );
 
@@ -51,9 +57,9 @@ describe('<Breadcrumb />', () => {
     ];
 
     routes.forEach(([location, crumbLength]) => {
-      breadcrumbWrapper = mount(
+      breadcrumbWrapper = mountWithContexts(
         <MemoryRouter initialEntries={[location]}>
-          <Breadcrumbs breadcrumbConfig={config} />
+          <ScreenHeader streamType="all_activity" breadcrumbConfig={config} />
         </MemoryRouter>
       );
 

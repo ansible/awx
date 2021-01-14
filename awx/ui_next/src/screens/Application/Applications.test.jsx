@@ -5,6 +5,10 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import Applications from './Applications';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+}));
+
 describe('<Applications />', () => {
   let wrapper;
 

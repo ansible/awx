@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Config } from '../../contexts/Config';
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 
 import OrganizationsList from './OrganizationList/OrganizationList';
 import OrganizationAdd from './OrganizationAdd/OrganizationAdd';
@@ -42,7 +42,10 @@ function Organizations({ i18n }) {
 
   return (
     <Fragment>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        streamType="organization"
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path={`${match.path}/add`}>
           <OrganizationAdd />
