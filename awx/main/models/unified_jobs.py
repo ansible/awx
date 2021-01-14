@@ -1489,7 +1489,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return bool(self.controller_node)
 
     @property
-    def is_containerized(self):
+    def is_container_group_task(self):
         return False
 
     def log_lifecycle(self, state, blocked_by=None):
