@@ -547,44 +547,6 @@ class TestGenericRun():
                                              job_cwd='/foobar', job_env={'switch': 'blade', 'foot': 'ball', 'secret_key': 'redacted_value'})
 
 
-    def test_uses_process_isolation(self, settings):
-        job = Job(project=Project(), inventory=Inventory())
-        task = tasks.RunJob()
-        task.should_use_proot = lambda instance: True
-        task.instance = job
-
-        private_data_dir = '/foo'
-        cwd = '/bar'
-
-        settings.AWX_PROOT_HIDE_PATHS = ['/AWX_PROOT_HIDE_PATHS1', '/AWX_PROOT_HIDE_PATHS2']
-        settings.ANSIBLE_VENV_PATH = '/ANSIBLE_VENV_PATH'
-        settings.AWX_VENV_PATH = '/AWX_VENV_PATH'
-
-        process_isolation_params = task.build_params_process_isolation(job, private_data_dir, cwd)
-        assert True is process_isolation_params['process_isolation']
-        assert process_isolation_params['process_isolation_path'].startswith(settings.AWX_PROOT_BASE_PATH), \
-            "Directory where a temp directory will be created for the remapping to take place"
-        assert private_data_dir in process_isolation_params['process_isolation_show_paths'], \
-            "The per-job private data dir should be in the list of directories the user can see."
-        assert cwd in process_isolation_params['process_isolation_show_paths'], \
-            "The current working directory should be in the list of directories the user can see."
-
-        for p in [settings.AWX_PROOT_BASE_PATH,
-                  '/etc/tower',
-                  '/etc/ssh',
-                  '/var/lib/awx',
-                  '/var/log',
-                  settings.PROJECTS_ROOT,
-                  settings.JOBOUTPUT_ROOT,
-                  '/AWX_PROOT_HIDE_PATHS1',
-                  '/AWX_PROOT_HIDE_PATHS2']:
-            assert p in process_isolation_params['process_isolation_hide_paths']
-        assert 9 == len(process_isolation_params['process_isolation_hide_paths'])
-        assert '/ANSIBLE_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
-        assert '/AWX_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
-        assert 2 == len(process_isolation_params['process_isolation_ro_paths'])
-
-
     @mock.patch('os.makedirs')
     def test_build_params_resource_profiling(self, os_makedirs):
         job = Job(project=Project(), inventory=Inventory())
@@ -1961,29 +1923,6 @@ class TestProjectUpdateCredentials(TestJobExecution):
             dict(scm_type='archive'),
         ]
     }
-
-    def test_process_isolation_exposes_projects_root(self, private_data_dir, project_update):
-        task = tasks.RunProjectUpdate()
-        task.revision_path = 'foobar'
-        task.instance = project_update
-        ssh = CredentialType.defaults['ssh']()
-        project_update.scm_type = 'git'
-        project_update.credential = Credential(
-            pk=1,
-            credential_type=ssh,
-        )
-        process_isolation = task.build_params_process_isolation(job, private_data_dir, 'cwd')
-
-        assert process_isolation['process_isolation'] is True
-        assert settings.PROJECTS_ROOT in process_isolation['process_isolation_show_paths']
-
-        task._write_extra_vars_file = mock.Mock()
-
-        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
-            task.build_extra_vars_file(project_update, private_data_dir)
-
-        call_args, _ = task._write_extra_vars_file.call_args_list[0]
-        _, extra_vars = call_args
 
     def test_username_and_password_auth(self, project_update, scm_type):
         task = tasks.RunProjectUpdate()
