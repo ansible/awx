@@ -32,7 +32,7 @@ def set_pythonpath(venv_libdir, env):
 
 class IsolatedManager(object):
 
-    def __init__(self, event_handler, canceled_callback=None, check_callback=None, pod_manager=None):
+    def __init__(self, event_handler, canceled_callback=None, check_callback=None):
         """
         :param event_handler: a callable used to persist event data from isolated nodes
         :param canceled_callback:  a callable - which returns `True` or `False`
@@ -45,28 +45,12 @@ class IsolatedManager(object):
         self.started_at = None
         self.captured_command_artifact = False
         self.instance = None
-        self.pod_manager = pod_manager
 
     def build_inventory(self, hosts):
-        if self.instance and self.instance.is_container_group_task:
-            inventory = {'all': {'hosts': {}}}
-            fd, path = tempfile.mkstemp(
-                prefix='.kubeconfig', dir=self.private_data_dir
-            )
-            with open(path, 'wb') as temp:
-                temp.write(yaml.dump(self.pod_manager.kube_config).encode())
-                temp.flush()
-                os.chmod(temp.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-            for host in hosts:
-                inventory['all']['hosts'][host] = {
-                    "ansible_connection": "kubectl",
-                    "ansible_kubectl_config": path,
-                }
-        else:
-            inventory = '\n'.join([
-                '{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME)
-                for host in hosts
-            ])
+        inventory = '\n'.join([
+            '{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME)
+            for host in hosts
+        ])
 
         return inventory
 
