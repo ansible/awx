@@ -12,7 +12,7 @@ def test_create_workflow_job_template(run_module, admin_user, organization, surv
         'name': 'foo-workflow',
         'organization': organization.name,
         'extra_vars': {'foo': 'bar', 'another-foo': {'barz': 'bar2'}},
-        'survey': survey_spec,
+        'survey_spec': survey_spec,
         'survey_enabled': True,
         'state': 'present'
     }, admin_user)
@@ -72,7 +72,7 @@ def test_survey_spec_only_changed(run_module, admin_user, organization, survey_s
     result = run_module('tower_workflow_job_template', {
         'name': 'foo-workflow',
         'organization': organization.name,
-        'survey': survey_spec,
+        'survey_spec': survey_spec,
         'state': 'present'
     }, admin_user)
     assert not result.get('failed', False), result.get('msg', result)
