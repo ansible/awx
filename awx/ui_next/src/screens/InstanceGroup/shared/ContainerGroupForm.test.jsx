@@ -27,7 +27,7 @@ const instanceGroup = {
   controller: null,
   is_controller: false,
   is_isolated: false,
-  is_containerized: false,
+  is_container_group: false,
   credential: 3,
   policy_instance_percentage: 46,
   policy_instance_minimum: 12,

@@ -768,11 +768,11 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def can_run_containerized(self):
-        return any([ig for ig in self.preferred_instance_groups if ig.is_containerized])
+        return any([ig for ig in self.preferred_instance_groups if ig.is_container_group])
 
     @property
-    def is_containerized(self):
-        return bool(self.instance_group and self.instance_group.is_containerized)
+    def is_container_group_task(self):
+        return bool(self.instance_group and self.instance_group.is_container_group)
 
     @property
     def preferred_instance_groups(self):
