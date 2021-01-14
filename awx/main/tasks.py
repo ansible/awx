@@ -1003,46 +1003,6 @@ class BaseTask(object):
         Build ansible yaml file filled with extra vars to be passed via -e@file.yml
         '''
 
-    def build_params_process_isolation(self, instance, private_data_dir, cwd):
-        '''
-        Build ansible runner .run() parameters for process isolation.
-        '''
-        process_isolation_params = dict()
-        if self.should_use_proot(instance):
-            local_paths = [private_data_dir]
-            if cwd != private_data_dir and Path(private_data_dir) not in Path(cwd).parents:
-                local_paths.append(cwd)
-            show_paths = self.proot_show_paths + local_paths + \
-                settings.AWX_PROOT_SHOW_PATHS
-
-            pi_path = settings.AWX_PROOT_BASE_PATH
-            if not self.instance.is_isolated() and not self.instance.is_containerized:
-                pi_path = tempfile.mkdtemp(
-                    prefix='ansible_runner_pi_',
-                    dir=settings.AWX_PROOT_BASE_PATH
-                )
-                os.chmod(pi_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-                self.cleanup_paths.append(pi_path)
-
-            process_isolation_params = {
-                'process_isolation': True,
-                'process_isolation_path': pi_path,
-                'process_isolation_show_paths': show_paths,
-                'process_isolation_hide_paths': [
-                    settings.AWX_PROOT_BASE_PATH,
-                    '/etc/tower',
-                    '/etc/ssh',
-                    '/var/lib/awx',
-                    '/var/log',
-                    settings.PROJECTS_ROOT,
-                    settings.JOBOUTPUT_ROOT,
-                ] + getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [],
-                'process_isolation_ro_paths': [settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH],
-            }
-            if getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH) != settings.ANSIBLE_VENV_PATH:
-                process_isolation_params['process_isolation_ro_paths'].append(instance.ansible_virtualenv_path)
-        return process_isolation_params
-
     def build_params_resource_profiling(self, instance, private_data_dir):
         resource_profiling_params = {}
         if self.should_use_resource_profiling(instance):
