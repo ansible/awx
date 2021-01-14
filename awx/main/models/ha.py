@@ -247,7 +247,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         return bool(self.controller)
 
     @property
-    def is_containerized(self):
+    def is_container_group(self):
         return bool(self.credential and self.credential.kubernetes)
 
     '''
@@ -306,9 +306,9 @@ def schedule_policy_task():
 @receiver(post_save, sender=InstanceGroup)
 def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
     if created or instance.has_policy_changes():
-        if not instance.is_containerized:
+        if not instance.is_container_group:
             schedule_policy_task()
-    elif created or instance.is_containerized:
+    elif created or instance.is_container_group:
         instance.set_default_policy_fields()
 
 
@@ -320,7 +320,7 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
 
 @receiver(post_delete, sender=InstanceGroup)
 def on_instance_group_deleted(sender, instance, using, **kwargs):
-    if not instance.is_containerized:
+    if not instance.is_container_group:
         schedule_policy_task()
 
 
