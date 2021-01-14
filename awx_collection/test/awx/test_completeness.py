@@ -47,7 +47,7 @@ no_api_parameter_ok = {
     # Organization is how we are looking up job templates, Approval node is for workflow_approval_templates
     'tower_workflow_job_template_node': ['organization', 'approval_node'],
     # Survey is how we handle associations
-    'tower_workflow_job_template': ['survey'],
+    'tower_workflow_job_template': ['survey_spec'],
     # ad hoc commands support interval and timeout since its more like tower_job_launc
     'tower_ad_hoc_command': ['interval', 'timeout', 'wait'],
 }
