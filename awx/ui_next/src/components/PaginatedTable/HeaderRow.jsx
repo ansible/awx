@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { Thead, Tr, Th as PFTh } from '@patternfly/react-table';
@@ -54,7 +55,14 @@ export default function HeaderRow({ qsConfig, children }) {
   );
 }
 
-export function HeaderCell({ sortKey, onSort, sortBy, columnIndex, children }) {
+export function HeaderCell({
+  sortKey,
+  onSort,
+  sortBy,
+  columnIndex,
+  width,
+  children,
+}) {
   const sort = sortKey
     ? {
         onSort: (event, key, order) => onSort(sortKey, order),
@@ -62,5 +70,18 @@ export function HeaderCell({ sortKey, onSort, sortBy, columnIndex, children }) {
         columnIndex,
       }
     : null;
-  return <Th sort={sort}>{children}</Th>;
+  return (
+    <Th
+      sort={sort}
+      css={
+        width
+          ? `
+        --pf-c-table--cell--Width: ${width};
+      `
+          : null
+      }
+    >
+      {children}
+    </Th>
+  );
 }

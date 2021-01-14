@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -151,9 +152,11 @@ function OrganizationsList({ i18n }) {
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Members`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Teams`)}</HeaderCell>
+                <HeaderCell sortKey="name" width="50%">
+                  {i18n._(t`Name`)}
+                </HeaderCell>
+                <HeaderCell width="20%">{i18n._(t`Members`)}</HeaderCell>
+                <HeaderCell width="20%">{i18n._(t`Teams`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
               </HeaderRow>
             }
