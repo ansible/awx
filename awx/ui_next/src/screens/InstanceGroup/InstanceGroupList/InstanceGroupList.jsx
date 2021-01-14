@@ -180,7 +180,7 @@ function InstanceGroupList({ i18n }) {
   );
 
   const getDetailUrl = item => {
-    return item.is_containerized
+    return item.is_container_group
       ? `${match.url}/container_group/${item.id}/details`
       : `${match.url}/${item.id}/details`;
   };
