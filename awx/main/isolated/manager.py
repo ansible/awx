@@ -6,7 +6,6 @@ import stat
 import tempfile
 import time
 import logging
-import yaml
 import datetime
 
 from django.conf import settings
