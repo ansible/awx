@@ -61,7 +61,7 @@ function InstanceGroupListItem({
   const labelId = `check-action-${instanceGroup.id}`;
 
   const isContainerGroup = item => {
-    return item.is_containerized;
+    return item.is_container_group;
   };
 
   function usedCapacity(item) {
@@ -156,7 +156,7 @@ function InstanceGroupListItem({
                 <Badge isRead>{instanceGroup.jobs_total}</Badge>
               </ListGroup>
 
-              {!instanceGroup.is_containerized ? (
+              {!instanceGroup.is_container_group ? (
                 <ListGroup>
                   <b>{i18n._(t`Instances`)}</b>
                   <Badge isRead>{instanceGroup.instances}</Badge>
