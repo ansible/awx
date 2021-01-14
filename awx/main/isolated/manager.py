@@ -48,7 +48,7 @@ class IsolatedManager(object):
         self.pod_manager = pod_manager
 
     def build_inventory(self, hosts):
-        if self.instance and self.instance.is_containerized:
+        if self.instance and self.instance.is_container_group_task:
             inventory = {'all': {'hosts': {}}}
             fd, path = tempfile.mkstemp(
                 prefix='.kubeconfig', dir=self.private_data_dir
