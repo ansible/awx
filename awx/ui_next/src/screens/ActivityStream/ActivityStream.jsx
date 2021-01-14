@@ -162,7 +162,7 @@ function ActivityStream({ i18n }) {
           </SelectOption>
           <SelectOption
             key="templates"
-            value="job_template,workflow_job_template"
+            value="job_template,workflow_job_template,workflow_job_template_node"
           >
             {i18n._(t`Templates`)}
           </SelectOption>

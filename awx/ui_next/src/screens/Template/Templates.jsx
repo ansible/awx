@@ -52,7 +52,7 @@ function Templates({ i18n }) {
   return (
     <>
       <ScreenHeader
-        streamType="job_template,workflow_job_template"
+        streamType="job_template,workflow_job_template,workflow_job_template_node"
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
