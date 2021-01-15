@@ -191,10 +191,12 @@ function InventoryList({ i18n }) {
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           headerRow={
             <HeaderRow qsConfig={QS_CONFIG}>
-              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
+              <HeaderCell sortKey="name" width="30%">
+                {i18n._(t`Name`)}
+              </HeaderCell>
+              <HeaderCell width="10%">{i18n._(t`Status`)}</HeaderCell>
+              <HeaderCell width="10%">{i18n._(t`Type`)}</HeaderCell>
+              <HeaderCell width="20%">{i18n._(t`Organization`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Groups`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Hosts`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Sources`)}</HeaderCell>
