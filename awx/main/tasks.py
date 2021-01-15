@@ -3082,6 +3082,9 @@ class AWXReceptorJob:
     # Spawned in a thread so Receptor can start reading before we finish writing, we
     # write our payload to the left side of our socketpair.
     def transmit(self, _socket):
+        if self.work_type == 'local':
+            self.runner_params['only_transmit_kwargs'] = True
+
         ansible_runner.interface.run(streamer='transmit',
                                      _output=_socket.makefile('wb'),
                                      **self.runner_params)
@@ -3100,7 +3103,6 @@ class AWXReceptorJob:
 
     @property
     def receptor_params(self):
-        receptor_params = {}
         if self.task.instance.is_container_group_task:
             spec_yaml = yaml.dump(self.pod_definition, explicit_start=True)
             kubeconfig_yaml = yaml.dump(self.kube_config, explicit_start=True)
@@ -3108,6 +3110,11 @@ class AWXReceptorJob:
             receptor_params = {
                 "secret_kube_pod": spec_yaml,
                 "secret_kube_config": kubeconfig_yaml
+            }
+        else:
+            private_data_dir = self.runner_params['private_data_dir']
+            receptor_params = {
+                "params": f"--private-data-dir={private_data_dir}"
             }
 
         return receptor_params
