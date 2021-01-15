@@ -269,6 +269,7 @@ ENV HOME="/var/lib/awx"
 ENV PATH="/usr/pgsql-10/bin:${PATH}"
 
 {% if build_dev|bool %}
+ENV PATH="/var/lib/awx/venv/awx/bin/:${PATH}"
 
 EXPOSE 8043 8013 8080 22
 
