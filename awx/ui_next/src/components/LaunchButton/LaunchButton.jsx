@@ -135,6 +135,9 @@ class LaunchButton extends React.Component {
     } else if (resource.type === 'project_update') {
       // We'll need to handle the scenario where the project no longer exists
       readRelaunch = ProjectsAPI.readLaunchUpdate(resource.project);
+    } else if (resource.type === 'project_export') {
+      // We'll need to handle the scenario where the project no longer exists
+      readRelaunch = ProjectsAPI.readLaunchExport(resource.project);
     } else if (resource.type === 'workflow_job') {
       readRelaunch = WorkflowJobsAPI.readRelaunch(resource.id);
     } else if (resource.type === 'ad_hoc_command') {

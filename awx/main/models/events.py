@@ -24,7 +24,7 @@ analytics_logger = logging.getLogger('awx.analytics.job_events')
 logger = logging.getLogger('awx.main.models.events')
 
 
-__all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent',
+__all__ = ['JobEvent', 'ProjectUpdateEvent', 'ProjectExportEvent', 'AdHocCommandEvent',
            'InventoryUpdateEvent', 'SystemJobEvent']
 
 
@@ -76,6 +76,7 @@ def emit_event_detail(event):
         JobEvent: 'job_id',
         AdHocCommandEvent: 'ad_hoc_command_id',
         ProjectUpdateEvent: 'project_update_id',
+        ProjectExportEvent: 'project_export_id',
         InventoryUpdateEvent: 'inventory_update_id',
         SystemJobEvent: 'system_job_id',
     }[cls]
@@ -406,11 +407,11 @@ class BasePlaybookEvent(CreatedModifiedModel):
         # Proceed with caution!
         #
         pk = None
-        for key in ('job_id', 'project_update_id'):
+        for key in ('job_id', 'project_update_id', 'project_export_id'):
             if key in kwargs:
                 pk = key
         if pk is None:
-            # payload must contain either a job_id or a project_update_id
+            # payload must contain either a job_id, project_export_id or a project_update_id
             return
 
         # Convert the datetime for the job event's creation appropriately,
@@ -584,6 +585,39 @@ class ProjectUpdateEvent(BasePlaybookEvent):
         'ProjectUpdate',
         related_name='project_update_events',
         on_delete=models.CASCADE,
+        editable=False,
+    )
+
+    @property
+    def host_name(self):
+        return 'localhost'
+
+
+class ProjectExportEvent(BasePlaybookEvent):
+
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_export_id', 'workflow_job_id']
+
+    class Meta:
+        app_label = 'main'
+        ordering = ('pk',)
+        index_together = [
+            ('project_export', 'event'),
+            ('project_export', 'uuid'),
+            ('project_export', 'start_line'),
+            ('project_export', 'end_line'),
+            ('project_export', 'parent_uuid'),
+        ]
+
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
+    project_export = models.ForeignKey(
+        'ProjectExport',
+        related_name='project_export_events',
+        on_delete=models.CASCADE,
+        editable=False,
+    )
+    parent_uuid = models.CharField(
+        max_length=1024,
+        default='',
         editable=False,
     )
 

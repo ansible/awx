@@ -19,7 +19,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import PROJECT_UPDATE_JOB_TYPE_CHOICES, PERM_INVENTORY_DEPLOY
-from awx.main.models.events import ProjectUpdateEvent
+from awx.main.models.events import ProjectUpdateEvent, ProjectExportEvent
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
@@ -32,6 +32,7 @@ from awx.main.models.jobs import Job
 from awx.main.models.mixins import (
     ResourceMixin,
     TaskManagerProjectUpdateMixin,
+    TaskManagerProjectExportMixin,
     CustomVirtualEnvMixin,
     RelatedJobsMixin
 )
@@ -317,11 +318,16 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         parent_role='admin_role',
     )
 
+    export_role = ImplicitRoleField(
+        parent_role='admin_role',
+    )
+
     read_role = ImplicitRoleField(parent_role=[
         'organization.auditor_role',
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         'use_role',
         'update_role',
+        'export_role',
     ])
 
     @classmethod
@@ -406,6 +412,15 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
 
     def _can_update(self):
         return bool(self.scm_type)
+
+    def _can_export(self):
+        return bool(self.scm_type) and bool(self.scm_revision != '')
+
+    def _run_export(self, **kwargs):
+        unified_job = self.create_unified_job(_unified_job_class=ProjectExport, _parent_field_name=None)
+        unified_job.signal_start(**kwargs)
+        return unified_job
+
 
     def create_project_update(self, **kwargs):
         return self.create_unified_job(**kwargs)
@@ -640,3 +655,153 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         if 'update_fields' in kwargs:
             kwargs['update_fields'].extend(added_update_fields)
         return super(ProjectUpdate, self).save(*args, **kwargs)
+
+
+
+class ProjectExport(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectExportMixin):
+    '''
+    Internal job for tracking project exports to SCM.
+    '''
+
+    class Meta:
+        app_label = 'main'
+
+    project = models.ForeignKey(
+        'Project',
+        related_name='project_exports',
+        on_delete=models.CASCADE,
+        editable=False,
+    )
+
+    job_type = models.CharField(
+        max_length=64,
+        choices=PROJECT_UPDATE_JOB_TYPE_CHOICES,
+        default='check',
+    )
+    job_tags = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Parts of the project export playbook that will be run.'),
+    )
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The SCM Revision returned by this export for the given project and branch.'),
+    )
+
+    def _get_parent_field_name(self):
+        return 'project'
+
+    def _update_parent_instance(self):
+        if not self.project:
+            return  # no parent instance to update
+        return super(ProjectExport, self)._update_parent_instance()
+
+    @classmethod
+    def _get_task_class(cls):
+        from awx.main.tasks import RunProjectExport
+        return RunProjectExport
+
+    def _global_timeout_setting(self):
+        return 'DEFAULT_PROJECT_UPDATE_TIMEOUT'
+
+    def is_blocked_by(self, obj):
+        if type(obj) == ProjectExport:
+            if self.project == obj.project:
+                return True
+        if type(obj) == Job:
+            if self.project == obj.project:
+                return True
+        return False
+
+    def websocket_emit_data(self):
+        websocket_data = super(ProjectExport, self).websocket_emit_data()
+        websocket_data.update(dict(project_id=self.project.id))
+        return websocket_data
+
+    @property
+    def event_class(self):
+        return ProjectExportEvent
+
+    @property
+    def task_impact(self):
+        return 0 if self.job_type == 'run' else 1
+
+    @property
+    def result_stdout(self):
+        return self._result_stdout_raw(redact_sensitive=True, escape_ascii=True)
+
+    @property
+    def result_stdout_raw(self):
+        return self._result_stdout_raw(redact_sensitive=True)
+
+    @property
+    def branch_override(self):
+        """Whether a branch other than the project default is used."""
+        if not self.project:
+            return True
+        return bool(self.scm_branch and self.scm_branch != self.project.scm_branch)
+
+    @property
+    def cache_id(self):
+        if self.branch_override or self.job_type == 'check' or (not self.project):
+            return str(self.id)
+        return self.project.cache_id
+
+    def result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True):
+        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive=redact_sensitive)
+
+    def result_stdout_limited(self, start_line=0, end_line=None, redact_sensitive=True):
+        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive=redact_sensitive, escape_ascii=True)
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:project_export_detail', kwargs={'pk': self.pk}, request=request)
+
+    def get_ui_url(self):
+        return urlparse.urljoin(settings.TOWER_URL_BASE, "/#/jobs/project/{}".format(self.pk))
+
+    def cancel(self, job_explanation=None, is_chain=False):
+        res = super(ProjectExport, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
+        return res
+
+    '''
+    JobNotificationMixin
+    '''
+    def get_notification_templates(self):
+        return self.project.notification_templates
+
+    def get_notification_friendly_name(self):
+        return "Project Export"
+
+    @property
+    def preferred_instance_groups(self):
+        if self.organization is not None:
+            organization_groups = [x for x in self.organization.instance_groups.all()]
+        else:
+            organization_groups = []
+        template_groups = [x for x in super(ProjectExport, self).preferred_instance_groups]
+        selected_groups = template_groups + organization_groups
+        if not selected_groups:
+            return self.global_instance_groups
+        return selected_groups
+
+    def save(self, *args, **kwargs):
+        added_update_fields = []
+        if not self.job_tags:
+            job_tags = ['export_{}'.format(self.scm_type)]
+            self.job_tags = ','.join(job_tags)
+            added_update_fields.append('job_tags')
+        if 'update_fields' in kwargs:
+            kwargs['update_fields'].extend(added_update_fields)
+        return super(ProjectExport, self).save(*args, **kwargs)
+
+    @classmethod
+    def _get_unified_job_field_names(cls):
+        return set(f.name for f in ProjectOptions._meta.fields) | set(
+            ['name', 'description', 'organization']
+        )
+

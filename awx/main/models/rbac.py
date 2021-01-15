@@ -47,6 +47,7 @@ role_names = {
     'member_role': _('Member'),
     'read_role': _('Read'),
     'update_role': _('Update'),
+    'export_role': _('Export'),
     'use_role': _('Use'),
     'approval_role': _('Approve'),
 }
@@ -70,6 +71,7 @@ role_descriptions = {
     'member_role': _('User is a member of the %s'),
     'read_role': _('May view settings for the %s'),
     'update_role': _('May update the %s'),
+    'export_role': _('May export the %s'),
     'use_role': _('Can use the %s in a job template'),
     'approval_role': _('Can approve or deny a workflow approval node'),
 }

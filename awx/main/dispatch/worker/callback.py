@@ -15,7 +15,7 @@ import psutil
 import redis
 
 from awx.main.consumers import emit_channel_notification
-from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
+from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent, ProjectExportEvent,
                              InventoryUpdateEvent, SystemJobEvent, UnifiedJob,
                              Job)
 from awx.main.tasks import handle_success_and_failure_notifications
@@ -138,6 +138,7 @@ class CallbackBrokerWorker(BaseWorker):
                     'job_id': JobEvent,
                     'ad_hoc_command_id': AdHocCommandEvent,
                     'project_update_id': ProjectUpdateEvent,
+                    'project_export_id': ProjectExportEvent,
                     'inventory_update_id': InventoryUpdateEvent,
                     'system_job_id': SystemJobEvent,
                 }
@@ -147,6 +148,10 @@ class CallbackBrokerWorker(BaseWorker):
                     if key in body:
                         job_identifier = body[key]
                         break
+
+                logger.error('Job Identifier: {}'.format(job_identifier))
+                import json
+                logger.error(json.dumps(body, indent=4))
 
                 self.last_event = f'\n\t- {cls.__name__} for #{job_identifier} ({body.get("event", "")} {body.get("uuid", "")})'  # noqa
 

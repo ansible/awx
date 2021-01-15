@@ -2,6 +2,7 @@
 export const JOB_TYPE_URL_SEGMENTS = {
   job: 'playbook',
   project_update: 'project',
+  project_export: 'project_export',
   system_job: 'system',
   inventory_update: 'inventory',
   ad_hoc_command: 'command',

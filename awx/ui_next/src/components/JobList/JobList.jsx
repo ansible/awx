@@ -22,6 +22,7 @@ import {
   InventoryUpdatesAPI,
   JobsAPI,
   ProjectUpdatesAPI,
+  ProjectExportsAPI,
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
@@ -135,6 +136,8 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               return SystemJobsAPI.destroy(id);
             case 'project_update':
               return ProjectUpdatesAPI.destroy(id);
+            case 'project_export':
+              return ProjectExportsAPI.destroy(id);
             case 'inventory_update':
               return InventoryUpdatesAPI.destroy(id);
             case 'workflow_job':
@@ -203,6 +206,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               key: `or__type`,
               options: [
                 [`project_update`, i18n._(t`Source Control Update`)],
+                [`project_export`, i18n._(t`Source Control Export`)],
                 [`inventory_update`, i18n._(t`Inventory Sync`)],
                 [`job`, i18n._(t`Playbook Run`)],
                 [`ad_hoc_command`, i18n._(t`Command`)],

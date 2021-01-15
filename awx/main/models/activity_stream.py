@@ -61,6 +61,7 @@ class ActivityStream(models.Model):
     team = models.ManyToManyField("Team", blank=True)
     project = models.ManyToManyField("Project", blank=True)
     project_update = models.ManyToManyField("ProjectUpdate", blank=True)
+    project_export = models.ManyToManyField("ProjectExport", blank=True)
     job_template = models.ManyToManyField("JobTemplate", blank=True)
     job = models.ManyToManyField("Job", blank=True)
     workflow_job_template_node = models.ManyToManyField("WorkflowJobTemplateNode", blank=True)

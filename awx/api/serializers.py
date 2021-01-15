@@ -55,7 +55,7 @@ from awx.main.models import (
     InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
     JobNotificationMixin, JobTemplate, Label, Notification, NotificationTemplate,
     OAuth2AccessToken, OAuth2Application, Organization, Project,
-    ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
+    ProjectExport, ProjectExportEvent, ProjectUpdate, ProjectUpdateEvent, RefreshToken, Role, Schedule,
     SystemJob, SystemJobEvent, SystemJobTemplate, Team, UnifiedJob,
     UnifiedJobTemplate, WorkflowApproval, WorkflowApprovalTemplate, WorkflowJob,
     WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode, StdoutMaxBytesExceeded
@@ -740,6 +740,8 @@ class UnifiedJobSerializer(BaseSerializer):
             res['schedule'] = obj.schedule.get_absolute_url(request=self.context.get('request'))
         if isinstance(obj, ProjectUpdate):
             res['stdout'] = self.reverse('api:project_update_stdout', kwargs={'pk': obj.pk})
+        elif isinstance(obj, ProjectExport):
+            res['stdout'] = self.reverse('api:project_export_stdout', kwargs={'pk': obj.pk})
         elif isinstance(obj, InventoryUpdate):
             res['stdout'] = self.reverse('api:inventory_update_stdout', kwargs={'pk': obj.pk})
         elif isinstance(obj, Job):
@@ -771,6 +773,8 @@ class UnifiedJobSerializer(BaseSerializer):
         if type(self) is UnifiedJobSerializer:
             if isinstance(obj, ProjectUpdate):
                 serializer_class = ProjectUpdateSerializer
+            elif isinstance(obj, ProjectExport):
+                serializer_class = ProjectExportSerializer
             elif isinstance(obj, InventoryUpdate):
                 serializer_class = InventoryUpdateSerializer
             elif isinstance(obj, Job):
@@ -831,6 +835,8 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
         if type(self) is UnifiedJobListSerializer:
             if isinstance(obj, ProjectUpdate):
                 serializer_class = ProjectUpdateListSerializer
+            elif isinstance(obj, ProjectExport):
+                serializer_class = ProjectExportListSerializer
             elif isinstance(obj, InventoryUpdate):
                 serializer_class = InventoryUpdateListSerializer
             elif isinstance(obj, Job):
@@ -1372,6 +1378,8 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             inventory_files = self.reverse('api:project_inventories', kwargs={'pk': obj.pk}),
             update = self.reverse('api:project_update_view', kwargs={'pk': obj.pk}),
             project_updates = self.reverse('api:project_updates_list', kwargs={'pk': obj.pk}),
+            export = self.reverse('api:project_export_view', kwargs={'pk': obj.pk}),
+            project_exports = self.reverse('api:project_exports_list', kwargs={'pk': obj.pk}),
             scm_inventory_sources = self.reverse('api:project_scm_inventory_sources', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:project_schedules_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:project_activity_stream_list', kwargs={'pk': obj.pk}),
@@ -1531,6 +1539,81 @@ class ProjectUpdateListSerializer(ProjectUpdateSerializer, UnifiedJobListSeriali
 
 
 class ProjectUpdateCancelSerializer(ProjectUpdateSerializer):
+
+    can_cancel = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        fields = ('can_cancel',)
+
+
+class ProjectExportViewSerializer(ProjectSerializer):
+
+    can_export = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        fields = ('can_export',)
+
+
+class ProjectExportSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
+
+    class Meta:
+        model = ProjectExport
+        fields = ('*', 'project', 'job_type', 'job_tags', '-controller_node')
+
+    def get_related(self, obj):
+        res = super(ProjectExportSerializer, self).get_related(obj)
+        try:
+            res.update(dict(
+                project = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk}),
+            ))
+        except ObjectDoesNotExist:
+            pass
+        res.update(dict(
+            cancel = self.reverse('api:project_export_cancel', kwargs={'pk': obj.pk}),
+            notifications = self.reverse('api:project_export_notifications_list', kwargs={'pk': obj.pk}),
+            events = self.reverse('api:project_export_events_list', kwargs={'pk': obj.pk}),
+        ))
+        return res
+
+
+class ProjectExportDetailSerializer(ProjectExportSerializer):
+
+    host_status_counts = serializers.SerializerMethodField(
+        help_text=_('A count of hosts uniquely assigned to each status.'),
+    )
+    playbook_counts = serializers.SerializerMethodField(
+        help_text=_('A count of all plays and tasks for the job run.'),
+    )
+
+    class Meta:
+        model = ProjectExport
+        fields = ('*', 'host_status_counts', 'playbook_counts',)
+
+    def get_playbook_counts(self, obj):
+        task_count = obj.project_export_events.filter(event='playbook_on_task_start').count()
+        play_count = obj.project_export_events.filter(event='playbook_on_play_start').count()
+
+        data = {'play_count': play_count, 'task_count': task_count}
+
+        return data
+
+    def get_host_status_counts(self, obj):
+        try:
+            counts = obj.project_export_events.only('event_data').get(event='playbook_on_stats').get_host_status_counts()
+        except ProjectExportEvent.DoesNotExist:
+            counts = {}
+
+        return counts
+
+
+class ProjectExportListSerializer(ProjectExportSerializer, UnifiedJobListSerializer):
+
+    class Meta:
+        model = ProjectExport
+        fields = ('*', '-controller_node')  # field removal undone by UJ serializer
+
+
+class ProjectExportCancelSerializer(ProjectExportSerializer):
 
     can_cancel = serializers.BooleanField(read_only=True)
 
@@ -3951,6 +4034,45 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
         res = super(JobEventSerializer, self).get_related(obj)
         res['project_update'] = self.reverse(
             'api:project_update_detail', kwargs={'pk': obj.project_update_id}
+        )
+        return res
+
+    def get_stdout(self, obj):
+        return UriCleaner.remove_sensitive(obj.stdout)
+
+    def get_event_data(self, obj):
+        # the project update playbook uses the git or svn modules
+        # to clone repositories, and those modules are prone to printing
+        # raw SCM URLs in their stdout (which *could* contain passwords)
+        # attempt to detect and filter HTTP basic auth passwords in the stdout
+        # of these types of events
+        if obj.event_data.get('task_action') in ('git', 'svn'):
+            try:
+                return json.loads(
+                    UriCleaner.remove_sensitive(
+                        json.dumps(obj.event_data)
+                    )
+                )
+            except Exception:
+                logger.exception("Failed to sanitize event_data")
+                return {}
+        else:
+            return obj.event_data
+
+
+class ProjectExportEventSerializer(JobEventSerializer):
+    stdout = serializers.SerializerMethodField()
+    event_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProjectExportEvent
+        fields = ('*', '-name', '-description', '-job', '-job_id',
+                  '-parent_uuid', '-parent', '-host', 'project_export')
+
+    def get_related(self, obj):
+        res = super(JobEventSerializer, self).get_related(obj)
+        res['project_export'] = self.reverse(
+            'api:project_export_detail', kwargs={'pk': obj.project_export_id}
         )
         return res
 

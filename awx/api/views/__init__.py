@@ -91,7 +91,7 @@ from awx.main.utils.filters import SmartFilter
 from awx.main.utils.insights import filter_insights_api_response
 from awx.main.redact import UriCleaner
 from awx.api.permissions import (
-    JobTemplateCallbackPermission, TaskPermission, ProjectUpdatePermission,
+    JobTemplateCallbackPermission, TaskPermission, ProjectUpdatePermission, ProjectExportPermission,
     InventoryInventorySourcesUpdatePermission, UserPermission,
     InstanceGroupTowerPermission, VariableDataPermission,
     WorkflowApprovalPermission
@@ -846,6 +846,66 @@ class ProjectUpdateEventsList(SubListAPIView):
         return super(ProjectUpdateEventsList, self).finalize_response(request, response, *args, **kwargs)
 
 
+class ProjectExportsList(SubListAPIView):
+
+    model = models.ProjectExport
+    serializer_class = serializers.ProjectExportListSerializer
+    parent_model = models.Project
+    relationship = 'project_exports'
+
+
+class ProjectExportView(RetrieveAPIView):
+
+    model = models.Project
+    serializer_class = serializers.ProjectExportViewSerializer
+    permission_classes = (ProjectExportPermission,)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_export:
+            project_export = obj.export()
+            if not project_export:
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                data = OrderedDict()
+                data['project_export'] = project_export.id
+                data.update(
+                    serializers.ProjectExportSerializer(project_export, context=self.get_serializer_context()).to_representation(project_export)
+                )
+                headers = {'Location': project_export.get_absolute_url(request=request)}
+                return Response(data,
+                                headers=headers,
+                                status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+
+
+class ProjectExportList(ListAPIView):
+
+    model = models.ProjectExport
+    serializer_class = serializers.ProjectExportListSerializer
+
+
+class ProjectExportDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
+
+    model = models.ProjectExport
+    serializer_class = serializers.ProjectExportDetailSerializer
+
+
+class ProjectExportEventsList(SubListAPIView):
+
+    model = models.ProjectExportEvent
+    serializer_class = serializers.ProjectExportEventSerializer
+    parent_model = models.ProjectExport
+    relationship = 'project_export_events'
+    name = _('Project Export Events List')
+    search_fields = ('stdout',)
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
+        return super(ProjectExportEventsList, self).finalize_response(request, response, *args, **kwargs)
+
+
 class SystemJobEventsList(SubListAPIView):
 
     model = models.SystemJobEvent
@@ -892,6 +952,30 @@ class ProjectUpdateScmInventoryUpdates(SubListAPIView):
     parent_model = models.ProjectUpdate
     relationship = 'scm_inventory_updates'
     parent_key = 'source_project_update'
+
+
+class ProjectExportCancel(RetrieveAPIView):
+
+    model = models.ProjectExport
+    obj_permission_type = 'cancel'
+    serializer_class = serializers.ProjectExportCancelSerializer
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_cancel:
+            obj.cancel()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+
+
+class ProjectExportNotificationsList(SubListAPIView):
+
+    model = models.Notification
+    serializer_class = serializers.NotificationSerializer
+    parent_model = models.ProjectExport
+    relationship = 'notifications'
+    search_fields = ('subject', 'notification_type', 'body',)
 
 
 class ProjectAccessList(ResourceAccessList):
@@ -4218,6 +4302,11 @@ class UnifiedJobStdout(RetrieveAPIView):
 class ProjectUpdateStdout(UnifiedJobStdout):
 
     model = models.ProjectUpdate
+
+
+class ProjectExportStdout(UnifiedJobStdout):
+
+    model = models.ProjectExport
 
 
 class InventoryUpdateStdout(UnifiedJobStdout):

@@ -60,7 +60,8 @@ from awx.main.models import (
     Inventory, InventorySource, SmartInventoryMembership,
     Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob,
     JobEvent, ProjectUpdateEvent, InventoryUpdateEvent, AdHocCommandEvent, SystemJobEvent,
-    build_safe_env
+    build_safe_env,
+    ProjectExport, ProjectExportEvent
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError, PostRunError
@@ -87,7 +88,7 @@ from awx.conf.license import get_license
 from rest_framework.exceptions import PermissionDenied
 
 
-__all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
+__all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunProjectExport', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'handle_work_success', 'apply_cluster_membership_policies',
            'update_inventory_computed_fields', 'update_host_smart_inventory_memberships',
            'send_notifications', 'purge_old_stdout_files']
@@ -1251,7 +1252,7 @@ class BaseTask(object):
             if event_data.get('event') == 'playbook_on_stats':
                 event_data['host_map'] = self.host_map
 
-        if isinstance(self, RunProjectUpdate):
+        if isinstance(self, RunProjectUpdate) or isinstance(self, RunProjectExport):
             # it's common for Ansible's SCM modules to print
             # error messages on failure that contain the plaintext
             # basic auth credentials (username + password)
@@ -2498,6 +2499,464 @@ class RunProjectUpdate(BaseTask):
                 logger.exception("Failed to release oAuth token {0} for prooject sync: {1}".format(self.sync_token.token, e))
 
     def should_use_proot(self, project_update):
+        '''
+        Return whether this task should use proot.
+        '''
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
+
+
+
+
+@task(queue=get_local_queuename)
+class RunProjectExport(BaseTask):
+
+    model = ProjectExport
+    event_model = ProjectExportEvent
+    event_data_key = 'project_export_id'
+    sync_token = None
+
+    @property
+    def proot_show_paths(self):
+        show_paths = [settings.PROJECTS_ROOT]
+        if self.job_private_data_dir:
+            show_paths.append(self.job_private_data_dir)
+        # Add in the vendor collections for access to awx.awx
+        show_paths.append(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
+        return show_paths
+
+    def __init__(self, *args, job_private_data_dir=None, **kwargs):
+        super(RunProjectExport, self).__init__(*args, **kwargs)
+        self.playbook_new_revision = None
+        self.original_branch = None
+        self.job_private_data_dir = job_private_data_dir
+
+    def event_handler(self, event_data):
+        super(RunProjectExport, self).event_handler(event_data)
+        returned_data = event_data.get('event_data', {})
+        if returned_data.get('task_action', '') == 'set_fact':
+            returned_facts = returned_data.get('res', {}).get('ansible_facts', {})
+            if 'scm_version' in returned_facts:
+                self.playbook_new_revision = returned_facts['scm_version']
+
+    def build_private_data(self, project_export, private_data_dir):
+        '''
+        Return SSH private key data needed for this project export.
+
+        Returns a dict of the form
+        {
+            'credentials': {
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>
+            }
+        }
+        '''
+        private_data = {'credentials': {}}
+        if project_export.credential:
+            credential = project_export.credential
+            if credential.has_input('ssh_key_data'):
+                private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
+        return private_data
+
+    def build_passwords(self, project_export, runtime_passwords):
+        '''
+        Build a dictionary of passwords for SSH private key unlock and SCM
+        username/password.
+        '''
+        passwords = super(RunProjectExport, self).build_passwords(project_export, runtime_passwords)
+        if project_export.credential:
+            passwords['scm_key_unlock'] = project_export.credential.get_input('ssh_key_unlock', default='')
+            passwords['scm_username'] = project_export.credential.get_input('username', default='')
+            passwords['scm_password'] = project_export.credential.get_input('password', default='')
+        return passwords
+
+    def build_env(self, project_export, private_data_dir, isolated=False, private_data_files=None):
+        '''
+        Build environment dictionary for ansible-playbook.
+        '''
+        env = super(RunProjectExport, self).build_env(project_export, private_data_dir,
+                                                      isolated=isolated,
+                                                      private_data_files=private_data_files)
+        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
+        env['ANSIBLE_RETRY_FILES_ENABLED'] = str(False)
+        env['ANSIBLE_ASK_PASS'] = str(False)
+        env['ANSIBLE_BECOME_ASK_PASS'] = str(False)
+        env['DISPLAY'] = '' # Prevent stupid password popup when running tests.
+        # give ansible a hint about the intended tmpdir to work around issues
+        # like https://github.com/ansible/ansible/issues/30064
+        env['TMP'] = settings.AWX_PROOT_BASE_PATH
+        env['PROJECT_EXPORT_ID'] = str(project_export.pk)
+        if settings.GALAXY_IGNORE_CERTS:
+            env['ANSIBLE_GALAXY_IGNORE'] = True
+
+        # Set up the oauth token if we are project syncing
+        if project_export.project.sync_assets:
+            try:
+                self.sync_token = OAuth2AccessToken.create_token({
+                    'user': User.objects.get(id=project_export.created_by_id),
+                    'scope': 'write',
+                    'expires': now() + timedelta(seconds=settings.PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS),
+                    'description': 'project sync {0}'.format(project_export.id),
+                })
+                env['TOWER_OAUTH_TOKEN'] = self.sync_token.token
+            except Exception as e:
+                logger.exception("Failed to create oAuth token for project sync: {0}".format(e))
+                # Setting this to '' will trigger a when condition in the playbook to not run the import
+                env['TOWER_OAUTH_TOKEN'] = ''
+
+        # build out env vars for Galaxy credentials (in order)
+        galaxy_server_list = []
+        if project_export.project.organization:
+            for i, cred in enumerate(
+                project_export.project.organization.galaxy_credentials.all()
+            ):
+                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_URL'] = cred.get_input('url')
+                auth_url = cred.get_input('auth_url', default=None)
+                token = cred.get_input('token', default=None)
+                if token:
+                    env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_TOKEN'] = token
+                if auth_url:
+                    env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_AUTH_URL'] = auth_url
+                galaxy_server_list.append(f'server{i}')
+
+        if galaxy_server_list:
+            env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join(galaxy_server_list)
+
+        # Add the vendored collections path
+        env['ANSIBLE_COLLECTIONS_PATHS'] = '{0}:~/.ansible/collections:/usr/share/ansible/collections'.format(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
+
+        return env
+
+    def _build_scm_url_extra_vars(self, project_export):
+        '''
+        Helper method to build SCM url and extra vars with parameters needed
+        for authentication.
+        '''
+        extra_vars = {}
+        if project_export.credential:
+            scm_username = project_export.credential.get_input('username', default='')
+            scm_password = project_export.credential.get_input('password', default='')
+        else:
+            scm_username = ''
+            scm_password = ''
+        scm_type = project_export.scm_type
+        scm_url = update_scm_url(scm_type, project_export.scm_url,
+                                 check_special_cases=False)
+        scm_url_parts = urlparse.urlsplit(scm_url)
+        # Prefer the username/password in the URL, if provided.
+        scm_username = scm_url_parts.username or scm_username
+        scm_password = scm_url_parts.password or scm_password
+        if scm_username:
+            if scm_type == 'svn':
+                extra_vars['scm_username'] = scm_username
+                extra_vars['scm_password'] = scm_password
+                scm_password = False
+                if scm_url_parts.scheme != 'svn+ssh':
+                    scm_username = False
+            elif scm_url_parts.scheme.endswith('ssh'):
+                scm_password = False
+            elif scm_type in ('insights', 'archive'):
+                extra_vars['scm_username'] = scm_username
+                extra_vars['scm_password'] = scm_password
+            scm_url = update_scm_url(scm_type, scm_url, scm_username,
+                                     scm_password, scp_format=True)
+        else:
+            scm_url = update_scm_url(scm_type, scm_url, scp_format=True)
+
+        # Pass the extra accept_hostkey parameter to the git module.
+        if scm_type == 'git' and scm_url_parts.scheme.endswith('ssh'):
+            extra_vars['scm_accept_hostkey'] = 'true'
+
+        return scm_url, extra_vars
+
+    def build_inventory(self, instance, private_data_dir):
+        return 'localhost,'
+
+    def build_args(self, project_export, private_data_dir, passwords):
+        '''
+        Build command line argument list for running ansible-playbook,
+        optionally using ssh-agent for public/private key authentication.
+        '''
+        args = []
+        if getattr(settings, 'PROJECT_UPDATE_VVV', False):
+            args.append('-vvv')
+        if project_export.job_tags:
+            args.extend(['-t', project_export.job_tags])
+        return args
+
+    def build_extra_vars_file(self, project_export, private_data_dir):
+        extra_vars = {}
+        scm_url, extra_vars_new = self._build_scm_url_extra_vars(project_export)
+        extra_vars.update(extra_vars_new)
+
+        scm_branch = project_export.scm_branch
+        if project_export.job_type == 'run' and (not project_export.branch_override):
+            if project_export.project.scm_revision:
+                scm_branch = project_export.project.scm_revision
+            elif not scm_branch:
+                raise RuntimeError('Could not determine a revision to run from project.')
+        elif not scm_branch:
+            scm_branch = 'HEAD'
+
+        galaxy_creds_are_defined = (
+            project_export.project.organization and
+            project_export.project.organization.galaxy_credentials.exists()
+        )
+        if not galaxy_creds_are_defined and (
+            settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED
+        ):
+            logger.warning(
+                'Galaxy role/collection syncing is enabled, but no '
+                f'credentials are configured for {project_export.project.organization}.'
+            )
+
+        extra_vars.update({
+            'projects_root': settings.PROJECTS_ROOT.rstrip('/'),
+            'local_path': os.path.basename(project_export.project.local_path),
+            'project_path': project_export.get_project_path(check_if_exists=False),  # deprecated
+            'insights_url': settings.INSIGHTS_URL_BASE,
+            'awx_license_type': get_license().get('license_type', 'UNLICENSED'),
+            'awx_version': get_awx_version(),
+            'scm_url': scm_url,
+            'scm_branch': scm_branch,
+            'scm_clean': project_export.scm_clean,
+            'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
+            'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
+            'awx_host': settings.TOWER_URL_BASE,
+            'awx_project': project_export.project.name,
+            'awx_organization': project_export.project.organization.name,
+        })
+        # apply custom refspec from user for PR refs and the like
+        if project_export.scm_refspec:
+            extra_vars['scm_refspec'] = project_export.scm_refspec
+        elif project_export.project.allow_override:
+            # If branch is override-able, do extra fetch for all branches
+            extra_vars['scm_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
+        self._write_extra_vars_file(private_data_dir, extra_vars)
+
+    def build_cwd(self, project_export, private_data_dir):
+        return os.path.join(private_data_dir, 'project')
+
+    def build_playbook_path_relative_to_cwd(self, project_export, private_data_dir):
+        return os.path.join('project_export.yml')
+
+    def get_password_prompts(self, passwords={}):
+        d = super(RunProjectExport, self).get_password_prompts(passwords)
+        d[r'Username for.*:\s*?$'] = 'scm_username'
+        d[r'Password for.*:\s*?$'] = 'scm_password'
+        d['Password:\s*?$'] = 'scm_password' # noqa
+        d[r'\S+?@\S+?\'s\s+?password:\s*?$'] = 'scm_password'
+        d[r'Enter passphrase for .*:\s*?$'] = 'scm_key_unlock'
+        d[r'Bad passphrase, try again for .*:\s*?$'] = ''
+        # FIXME: Configure whether we should auto accept host keys?
+        d[r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$'] = 'yes'
+        return d
+
+    def release_lock(self, instance):
+        try:
+            fcntl.lockf(self.lock_fd, fcntl.LOCK_UN)
+        except IOError as e:
+            logger.error("I/O error({0}) while trying to release lock file [{1}]: {2}".format(e.errno, instance.get_lock_file(), e.strerror))
+            os.close(self.lock_fd)
+            raise
+
+        os.close(self.lock_fd)
+        self.lock_fd = None
+
+    '''
+    Note: We don't support blocking=False
+    '''
+    def acquire_lock(self, instance, blocking=True):
+        lock_path = instance.get_lock_file()
+        if lock_path is None:
+            # If from migration or someone blanked local_path for any other reason, recoverable by save
+            instance.save()
+            lock_path = instance.get_lock_file()
+            if lock_path is None:
+                raise RuntimeError(u'Invalid lock file path')
+
+        try:
+            self.lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT)
+        except OSError as e:
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+            raise
+
+        start_time = time.time()
+        while True:
+            try:
+                instance.refresh_from_db(fields=['cancel_flag'])
+                if instance.cancel_flag:
+                    logger.debug("ProjectExport({0}) was canceled".format(instance.pk))
+                    return
+                fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except IOError as e:
+                if e.errno not in (errno.EAGAIN, errno.EACCES):
+                    os.close(self.lock_fd)
+                    logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+                    raise
+                else:
+                    time.sleep(1.0)
+        waiting_time = time.time() - start_time
+
+        if waiting_time > 1.0:
+            logger.info(
+                '{} spent {} waiting to acquire lock for local source tree '
+                'for path {}.'.format(instance.log_format, waiting_time, lock_path))
+
+    def pre_run_hook(self, instance, private_data_dir):
+        # re-create root project folder if a natural disaster has destroyed it
+        if not os.path.exists(settings.PROJECTS_ROOT):
+            os.mkdir(settings.PROJECTS_ROOT)
+        self.acquire_lock(instance)
+        self.original_branch = None
+        if instance.scm_type == 'git' and instance.branch_override:
+            project_path = instance.project.get_project_path(check_if_exists=False)
+            if os.path.exists(project_path):
+                git_repo = git.Repo(project_path)
+                if git_repo.head.is_detached:
+                    self.original_branch = git_repo.head.commit
+                else:
+                    self.original_branch = git_repo.active_branch
+
+        stage_path = os.path.join(instance.get_cache_path(), 'stage')
+        if os.path.exists(stage_path):
+            logger.warning('{0} unexpectedly existed before export'.format(stage_path))
+            shutil.rmtree(stage_path)
+        os.makedirs(stage_path)  # presence of empty cache indicates lack of roles or collections
+
+        # the project export playbook is not in a git repo, but uses a vendoring directory
+        # to be consistent with the ansible-runner model,
+        # that is moved into the runner projecct folder here
+        awx_playbooks = self.get_path_to('..', 'playbooks')
+        copy_tree(awx_playbooks, os.path.join(private_data_dir, 'project'))
+
+    @staticmethod
+    def clear_project_cache(cache_dir, keep_value):
+        if os.path.isdir(cache_dir):
+            for entry in os.listdir(cache_dir):
+                old_path = os.path.join(cache_dir, entry)
+                if entry not in (keep_value, 'stage'):
+                    # invalidate, then delete
+                    new_path = os.path.join(cache_dir,'.~~delete~~' + entry)
+                    try:
+                        os.rename(old_path, new_path)
+                        shutil.rmtree(new_path)
+                    except OSError:
+                        logger.warning(f"Could not remove cache directory {old_path}")
+
+    @staticmethod
+    def make_local_copy(p, job_private_data_dir, scm_revision=None):
+        """Copy project content (roles and collections) to a job private_data_dir
+
+        :param object p: Either a project or a project export
+        :param str job_private_data_dir: The root of the target ansible-runner folder
+        :param str scm_revision: For branch_override cases, the git revision to copy
+        """
+        project_path = p.get_project_path(check_if_exists=False)
+        destination_folder = os.path.join(job_private_data_dir, 'project')
+        if not scm_revision:
+            scm_revision = p.scm_revision
+
+        if p.scm_type == 'git':
+            git_repo = git.Repo(project_path)
+            if not os.path.exists(destination_folder):
+                os.mkdir(destination_folder, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+            tmp_branch_name = 'awx_internal/{}'.format(uuid4())
+            # always clone based on specific job revision
+            if not p.scm_revision:
+                raise RuntimeError('Unexpectedly could not determine a revision to run from project.')
+            source_branch = git_repo.create_head(tmp_branch_name, p.scm_revision)
+            # git clone must take file:// syntax for source repo or else options like depth will be ignored
+            source_as_uri = Path(project_path).as_uri()
+            git.Repo.clone_from(
+                source_as_uri, destination_folder, branch=source_branch,
+                depth=1, single_branch=True,  # shallow, do not copy full history
+            )
+            # submodules copied in loop because shallow copies from local HEADs are ideal
+            # and no git clone submodule options are compatible with minimum requirements
+            for submodule in git_repo.submodules:
+                subrepo_path = os.path.abspath(os.path.join(project_path, submodule.path))
+                subrepo_destination_folder = os.path.abspath(os.path.join(destination_folder, submodule.path))
+                subrepo_uri = Path(subrepo_path).as_uri()
+                git.Repo.clone_from(subrepo_uri, subrepo_destination_folder, depth=1, single_branch=True)
+            # force option is necessary because remote refs are not counted, although no information is lost
+            git_repo.delete_head(tmp_branch_name, force=True)
+        else:
+            copy_tree(project_path, destination_folder, preserve_symlinks=1)
+
+        # copy over the roles and collection cache to job folder
+        cache_path = os.path.join(p.get_cache_path(), p.cache_id)
+        subfolders = []
+        if settings.AWX_COLLECTIONS_ENABLED:
+            subfolders.append('requirements_collections')
+        if settings.AWX_ROLES_ENABLED:
+            subfolders.append('requirements_roles')
+        for subfolder in subfolders:
+            cache_subpath = os.path.join(cache_path, subfolder)
+            if os.path.exists(cache_subpath):
+                dest_subpath = os.path.join(job_private_data_dir, subfolder)
+                copy_tree(cache_subpath, dest_subpath, preserve_symlinks=1)
+                logger.debug('{0} {1} prepared {2} from cache'.format(type(p).__name__, p.pk, dest_subpath))
+
+    def post_run_hook(self, instance, status):
+        # To avoid hangs, very important to release lock even if errors happen here
+        try:
+            if self.playbook_new_revision:
+                instance.scm_revision = self.playbook_new_revision
+                instance.save(update_fields=['scm_revision'])
+
+            # Roles and collection folders copy to durable cache
+            base_path = instance.get_cache_path()
+            stage_path = os.path.join(base_path, 'stage')
+            if status == 'successful' and 'install_' in instance.job_tags:
+                # Clear other caches before saving this one, and if branch is overridden
+                # do not clear cache for main branch, but do clear it for other branches
+                self.clear_project_cache(base_path, keep_value=instance.project.cache_id)
+                cache_path = os.path.join(base_path, instance.cache_id)
+                if os.path.exists(stage_path):
+                    if os.path.exists(cache_path):
+                        logger.warning('Rewriting cache at {0}, performance may suffer'.format(cache_path))
+                        shutil.rmtree(cache_path)
+                    os.rename(stage_path, cache_path)
+                    logger.debug('{0} wrote to cache at {1}'.format(instance.log_format, cache_path))
+            elif os.path.exists(stage_path):
+                shutil.rmtree(stage_path)  # cannot trust content export produced
+
+            if self.job_private_data_dir:
+                if status == 'successful':
+                    # copy project folder before resetting to default branch
+                    # because some git-tree-specific resources (like submodules) might matter
+                    self.make_local_copy(instance, self.job_private_data_dir)
+                if self.original_branch:
+                    # for git project syncs, non-default branches can be problems
+                    # restore to branch the repo was on before this run
+                    try:
+                        self.original_branch.checkout()
+                    except Exception:
+                        # this could have failed due to dirty tree, but difficult to predict all cases
+                        logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
+        finally:
+            self.release_lock(instance)
+        p = instance.project
+        if instance.job_type == 'check' and status not in ('failed', 'canceled',):
+            if self.playbook_new_revision:
+                p.scm_revision = self.playbook_new_revision
+            else:
+                if status == 'successful':
+                    logger.error("{} Could not find scm revision in check".format(instance.log_format))
+            p.playbook_files = p.playbooks
+            p.inventory_files = p.inventories
+            p.save(update_fields=['scm_revision', 'playbook_files', 'inventory_files'])
+
+        # Clean up the oauth token if we are project syncing
+        if instance.project.sync_assets and self.sync_token:
+            try:
+                self.sync_token.delete()
+            except Exception as e:
+                logger.exception("Failed to release oAuth token {0} for prooject sync: {1}".format(self.sync_token.token, e))
+
+    def should_use_proot(self, project_export):
         '''
         Return whether this task should use proot.
         '''

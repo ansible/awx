@@ -33,7 +33,7 @@ from awx.main.models import (
     Inventory, InventorySource, InventoryUpdate, InventoryUpdateEvent, Job, JobEvent,
     JobHostSummary, JobLaunchConfig, JobTemplate, Label, Notification,
     NotificationTemplate, Organization, Project, ProjectUpdate,
-    ProjectUpdateEvent, Role, Schedule, SystemJob, SystemJobEvent,
+    ProjectUpdateEvent, ProjectExport, ProjectExportEvent, Role, Schedule, SystemJob, SystemJobEvent,
     SystemJobTemplate, Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob,
     WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode,
     WorkflowApproval, WorkflowApprovalTemplate,
@@ -1391,6 +1391,43 @@ class ProjectUpdateAccess(BaseAccess):
         return obj and self.user in obj.project.admin_role
 
 
+class ProjectExport(BaseAccess):
+    '''
+    I can see project exports when I can see the project.
+    I can change when I can change the project.
+    I can delete when I can change/delete the project.
+    '''
+
+    model = ProjectExport
+    select_related = ('created_by', 'modified_by', 'project',)
+    prefetch_related = ('unified_job_template', 'instance_group',)
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            project__in=Project.accessible_pk_qs(self.user, 'read_role')
+        )
+
+    @check_superuser
+    def can_cancel(self, obj):
+        if self.user == obj.created_by:
+            return True
+        # Project exports cascade delete with project, admin role descends from org admin
+        return self.user in obj.project.admin_role
+
+    def can_start(self, obj, validate_license=True):
+        # for relaunching
+        try:
+            if obj and obj.project:
+                return self.user in obj.project.export_role
+        except ObjectDoesNotExist:
+            pass
+        return False
+
+    @check_superuser
+    def can_delete(self, obj):
+        return obj and self.user in obj.project.admin_role
+
+
 class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
     I can see job templates when:
@@ -1567,7 +1604,7 @@ class JobAccess(BaseAccess):
 
     model = Job
     select_related = ('created_by', 'modified_by', 'job_template', 'inventory',
-                      'project', 'project_update',)
+                      'project', 'project_update','project_export')
     prefetch_related = (
         'organization',
         'unified_job_template',
@@ -2223,6 +2260,27 @@ class ProjectUpdateEventAccess(BaseAccess):
     def filtered_queryset(self):
         return self.model.objects.filter(
             Q(project_update__project__in=Project.accessible_pk_qs(self.user, 'read_role')))
+
+    def can_add(self, data):
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
+
+
+class ProjectExportEventAccess(BaseAccess):
+    '''
+    I can see project export event records whenever I can access the project export
+    '''
+
+    model = ProjectExportEvent
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            Q(project_export__project__in=Project.accessible_pk_qs(self.user, 'read_role')))
 
     def can_add(self, data):
         return False

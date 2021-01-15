@@ -29,6 +29,7 @@ import { HostStatusBar, OutputToolbar } from './shared';
 import {
   JobsAPI,
   ProjectUpdatesAPI,
+  ProjectExportsAPI,
   SystemJobsAPI,
   WorkflowJobsAPI,
   InventoriesAPI,
@@ -351,6 +352,9 @@ class JobOutput extends Component {
         case 'project_update':
           await ProjectUpdatesAPI.destroy(job.id);
           break;
+        case 'project_export':
+          await ProjectExportsAPI.destroy(job.id);
+          break;
         case 'system_job':
           await SystemJobsAPI.destroy(job.id);
           break;
@@ -403,6 +407,12 @@ class JobOutput extends Component {
         isHost = true;
       } else if (
         type === 'project_update_event' &&
+        event !== 'runner_on_skipped' &&
+        event_data.host
+      ) {
+        isHost = true;
+      } else if (
+        type === 'project_export_event' &&
         event !== 'runner_on_skipped' &&
         event_data.host
       ) {

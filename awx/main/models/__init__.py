@@ -20,7 +20,7 @@ from awx.main.models.organization import (  # noqa
 from awx.main.models.credential import (  # noqa
     Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env
 )
-from awx.main.models.projects import Project, ProjectUpdate  # noqa
+from awx.main.models.projects import Project, ProjectUpdate, ProjectExport  # noqa
 from awx.main.models.inventory import (  # noqa
     CustomInventoryScript, Group, Host, Inventory, InventorySource,
     InventoryUpdate, SmartInventoryMembership
@@ -31,7 +31,7 @@ from awx.main.models.jobs import (  # noqa
 )
 from awx.main.models.events import (  # noqa
     AdHocCommandEvent, InventoryUpdateEvent, JobEvent, ProjectUpdateEvent,
-    SystemJobEvent,
+    ProjectExportEvent, SystemJobEvent,
 )
 from awx.main.models.ad_hoc_commands import AdHocCommand # noqa
 from awx.main.models.schedules import Schedule # noqa
@@ -47,7 +47,7 @@ from awx.main.models.rbac import (  # noqa
 from awx.main.models.mixins import (  # noqa
     CustomVirtualEnvMixin, ResourceMixin, SurveyJobMixin,
     SurveyJobTemplateMixin, TaskManagerInventoryUpdateMixin,
-    TaskManagerJobMixin, TaskManagerProjectUpdateMixin,
+    TaskManagerJobMixin, TaskManagerProjectUpdateMixin, TaskManagerProjectExportMixin,
     TaskManagerUnifiedJobMixin,
 )
 from awx.main.models.notifications import (  # noqa

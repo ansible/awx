@@ -27,6 +27,7 @@ function JobListItem({
 
   const jobTypes = {
     project_update: i18n._(t`Source Control Update`),
+    project_export: i18n._(t`Source Control Export`),
     inventory_update: i18n._(t`Inventory Sync`),
     job: i18n._(t`Playbook Run`),
     ad_hoc_command: i18n._(t`Command`),

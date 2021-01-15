@@ -16,7 +16,7 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission', 'VariableDataPermission',
-           'TaskPermission', 'ProjectUpdatePermission', 'InventoryInventorySourcesUpdatePermission',
+           'TaskPermission', 'ProjectUpdatePermission', 'ProjectExportPermission', 'InventoryInventorySourcesUpdatePermission',
            'UserPermission', 'IsSuperUser', 'InstanceGroupTowerPermission', 'WorkflowApprovalPermission']
 
 
@@ -210,6 +210,19 @@ class WorkflowApprovalPermission(ModelAccessPermission):
 class ProjectUpdatePermission(ModelAccessPermission):
     '''
     Permission check used by ProjectUpdateView to determine who can update projects
+    '''
+    def check_get_permissions(self, request, view, obj=None):
+        project = get_object_or_400(view.model, pk=view.kwargs['pk'])
+        return check_user_access(request.user, view.model, 'read', project)
+
+    def check_post_permissions(self, request, view, obj=None):
+        project = get_object_or_400(view.model, pk=view.kwargs['pk'])
+        return check_user_access(request.user, view.model, 'start', project)
+
+
+class ProjectExportPermission(ModelAccessPermission):
+    '''
+    Permission check used by ProjectExportView to determine who can update projects
     '''
     def check_get_permissions(self, request, view, obj=None):
         project = get_object_or_400(view.model, pk=view.kwargs['pk'])

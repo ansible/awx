@@ -27,6 +27,7 @@ from awx.main.models import (
     Job,
     Project,
     ProjectUpdate,
+    ProjectExport,
     SystemJob,
     UnifiedJob,
     WorkflowApproval,
@@ -108,10 +109,11 @@ class TaskManager():
         inventory_updates = [i for i in inventory_updates_qs]
         # Notice the job_type='check': we want to prevent implicit project updates from blocking our jobs.
         project_updates = [p for p in ProjectUpdate.objects.filter(status__in=status_list, job_type='check').prefetch_related('instance_group')]
+        project_exports = [p for p in ProjectExport.objects.filter(status__in=status_list, job_type='check').prefetch_related('instance_group')]
         system_jobs = [s for s in SystemJob.objects.filter(status__in=status_list).prefetch_related('instance_group')]
         ad_hoc_commands = [a for a in AdHocCommand.objects.filter(status__in=status_list).prefetch_related('instance_group')]
         workflow_jobs = [w for w in WorkflowJob.objects.filter(status__in=status_list)]
-        all_tasks = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands + workflow_jobs,
+        all_tasks = sorted(jobs + project_updates + project_exports + inventory_updates + system_jobs + ad_hoc_commands + workflow_jobs,
                            key=lambda task: task.created)
         return all_tasks
 
@@ -413,6 +415,12 @@ class TaskManager():
         if not latest_project_update.exists():
             return None
         return latest_project_update.first()
+
+    def get_latest_project_export(self, job):
+        latest_project_export = ProjectExport.objects.filter(project=job.project, job_type='check').order_by("-created")
+        if not latest_project_export.exists():
+            return None
+        return latest_project_export.first()
 
     def should_update_related_project(self, job, latest_project_update):
         now = tz_now()

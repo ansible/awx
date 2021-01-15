@@ -34,7 +34,7 @@ logger = logging.getLogger('awx.main.models.mixins')
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
            'TaskManagerUnifiedJobMixin', 'TaskManagerJobMixin', 'TaskManagerProjectUpdateMixin',
-           'TaskManagerInventoryUpdateMixin', 'CustomVirtualEnvMixin']
+           'TaskManagerProjectExportMixin', 'TaskManagerInventoryUpdateMixin', 'CustomVirtualEnvMixin']
 
 
 class ResourceMixin(models.Model):
@@ -432,6 +432,11 @@ class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):
 
 
 class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
+    class Meta:
+        abstract = True
+
+
+class TaskManagerProjectExportMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
 

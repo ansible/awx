@@ -9,6 +9,8 @@ const getBaseURL = type => {
     case 'project':
     case 'project_update':
       return '/project_updates/';
+    case 'project_export':
+      return '/project_exports/';
     case 'system':
     case 'system_job':
       return '/system_jobs/';

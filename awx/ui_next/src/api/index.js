@@ -23,6 +23,7 @@ import NotificationTemplates from './models/NotificationTemplates';
 import Notifications from './models/Notifications';
 import Organizations from './models/Organizations';
 import ProjectUpdates from './models/ProjectUpdates';
+import ProjectExports from './models/ProjectExports';
 import Projects from './models/Projects';
 import Roles from './models/Roles';
 import Root from './models/Root';
@@ -65,6 +66,7 @@ const NotificationTemplatesAPI = new NotificationTemplates();
 const NotificationsAPI = new Notifications();
 const OrganizationsAPI = new Organizations();
 const ProjectUpdatesAPI = new ProjectUpdates();
+const ProjectExportsAPI = new ProjectExports();
 const ProjectsAPI = new Projects();
 const RolesAPI = new Roles();
 const RootAPI = new Root();
@@ -108,6 +110,7 @@ export {
   NotificationsAPI,
   OrganizationsAPI,
   ProjectUpdatesAPI,
+  ProjectExportsAPI,
   ProjectsAPI,
   RolesAPI,
   RootAPI,

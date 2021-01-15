@@ -102,6 +102,7 @@ class ApiVersionRootView(APIView):
         data['users'] = reverse('api:user_list', request=request)
         data['projects'] = reverse('api:project_list', request=request)
         data['project_updates'] = reverse('api:project_update_list', request=request)
+        data['project_exports'] = reverse('api:project_export_list', request=request)
         data['teams'] = reverse('api:team_list', request=request)
         data['credentials'] = reverse('api:credential_list', request=request)
         data['credential_types'] = reverse('api:credential_type_list', request=request)

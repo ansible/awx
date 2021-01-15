@@ -322,6 +322,14 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             unified_job.signal_start(**kwargs)
             return unified_job
 
+    @property
+    def can_export(self):
+        return self._can_export()
+
+    def export(self, **kwargs):
+        if self.can_export:
+            return self._run_export(**kwargs)
+
     @classmethod
     def _get_unified_job_class(cls):
         '''
@@ -355,7 +363,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         parent_field_name = None
         if "_unified_job_class" in kwargs:
             # Special case where spawned job is different type than usual
-            # Only used for slice jobs
+            # Only used for slice jobs and export
             unified_job_class = kwargs.pop("_unified_job_class")
             fields = unified_job_class._get_unified_job_field_names() & fields
             parent_field_name = kwargs.pop('_parent_field_name')
@@ -992,6 +1000,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             'main_job': 'job_id',
             'main_adhoccommand': 'ad_hoc_command_id',
             'main_projectupdate': 'project_update_id',
+            'main_projectexport': 'project_export_id',
             'main_inventoryupdate': 'inventory_update_id',
             'main_systemjob': 'system_job_id',
         }[tablename]

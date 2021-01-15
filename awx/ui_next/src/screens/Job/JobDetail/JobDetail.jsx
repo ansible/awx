@@ -27,6 +27,7 @@ import { Job } from '../../../types';
 import {
   JobsAPI,
   ProjectUpdatesAPI,
+  ProjectExportsAPI,
   SystemJobsAPI,
   WorkflowJobsAPI,
   InventoriesAPI,
@@ -72,6 +73,7 @@ function JobDetail({ job, i18n }) {
 
   const jobTypes = {
     project_update: i18n._(t`Source Control Update`),
+    project_export: i18n._(t`Source Control Export`),
     inventory_update: i18n._(t`Inventory Sync`),
     job: i18n._(t`Playbook Run`),
     ad_hoc_command: i18n._(t`Command`),
@@ -84,6 +86,9 @@ function JobDetail({ job, i18n }) {
       switch (job.type) {
         case 'project_update':
           await ProjectUpdatesAPI.destroy(job.id);
+          break;
+        case 'project_export':
+          await ProjectExportsAPI.destroy(job.id);
           break;
         case 'system_job':
           await SystemJobsAPI.destroy(job.id);
