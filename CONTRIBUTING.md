@@ -88,6 +88,12 @@ If you're not using Docker for Mac, or Docker for Windows, you may need, or choo
 See [the ui development documentation](awx/ui_next/CONTRIBUTING.md).
 
 
+### Pre Build Steps
+
+AWX can be configured to use a development version of [ansible-runner](https://github.com/ansible/ansible-runner).
+To do this, place the source code in the folder `tools/ansible-runner`.
+The image builder step (make docker-compose-build) will replace the default version of ansible-runner with the version provided in this directory.
+
 ### Build the environment
 
 #### Fork and clone the AWX repo

@@ -67,6 +67,10 @@ ADD requirements/requirements_ansible.txt \
 RUN cd /tmp && make requirements_awx requirements_ansible_py3
 RUN cd /tmp && make requirements_collections
 
+COPY tools/ansible-runner /tmp/ansible-runner
+# This will simply do nothing if the Makefile is not in the directory
+RUN cd /tmp && make ANSIBLE_RUNNER_DIR=/tmp/ansible-runner requirements_runner
+
 {% if build_dev|bool %}
 ADD requirements/requirements_dev.txt /tmp/requirements
 RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev

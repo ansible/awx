@@ -24,6 +24,8 @@ COLLECTION_BASE ?= /var/lib/awx/vendor/awx_ansible_collections
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
+ANSIBLE_RUNNER_DIR ?= tools/ansible-runner
+
 DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
@@ -199,6 +201,11 @@ requirements_collections:
 	    ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE) && break; \
 	    n=$$((n+1)); \
 	done
+
+requirements_runner:
+	if [ -f "$(ANSIBLE_RUNNER_DIR)/Makefile" ]; then \
+	    $(VENV_BASE)/awx/bin/pip install "${ANSIBLE_RUNNER_DIR}"; \
+	fi
 
 requirements: requirements_ansible requirements_awx requirements_collections
 
