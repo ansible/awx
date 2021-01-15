@@ -205,13 +205,19 @@ function ActivityStream({ i18n }) {
                 name: i18n._(t`Time`),
                 key: 'timestamp',
               },
+              {
+                name: i18n._(t`Initiated by`),
+                key: 'actor__username',
+              },
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
                 <HeaderCell sortKey="timestamp">{i18n._(t`Time`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Initiated by`)}</HeaderCell>
+                <HeaderCell sortKey="actor__username">
+                  {i18n._(t`Initiated by`)}
+                </HeaderCell>
                 <HeaderCell>{i18n._(t`Event`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
               </HeaderRow>
