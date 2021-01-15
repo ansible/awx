@@ -48,10 +48,10 @@ const SettingGroup = withI18n()(
     <FormGroup
       fieldId={fieldId}
       helperTextInvalid={helperTextInvalid}
+      id={`${fieldId}-field`}
       isRequired={isRequired}
       label={label}
       validated={validated}
-      id={fieldId}
       labelIcon={
         <>
           <Popover
