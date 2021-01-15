@@ -60,9 +60,7 @@ function PaginatedDataList({
     pushHistoryState(replaceParams(oldParams, { page_size: pageSize, page }));
   };
 
-  const pushHistoryState = (params) => {
-    const { history, qsConfig } = this.props;
-    const { pathname } = history.location;
+  const pushHistoryState = params => {
     const nonNamespacedParams = parseQueryString({}, history.location.search);
     const encodedParams = encodeNonDefaultQueryString(
       qsConfig,
