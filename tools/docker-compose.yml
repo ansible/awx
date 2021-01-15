@@ -14,6 +14,7 @@ services:
       SDB_HOST: 0.0.0.0
       SDB_PORT: 7899
       AWX_GROUP_QUEUES: tower
+      RECEPTORCTL_SOCKET: /var/run/receptor/receptor.sock
     ports:
       - "2222:2222"
       - "8888:8888"
