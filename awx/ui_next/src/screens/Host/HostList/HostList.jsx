@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, Card, PageSection, Tooltip } from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import { HostsAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
@@ -20,6 +20,7 @@ import {
 } from '../../../util/qs';
 
 import HostListItem from './HostListItem';
+import SmartInventoryButton from './SmartInventoryButton';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -183,30 +184,10 @@ function HostList({ i18n }) {
                 />,
                 ...(canAdd
                   ? [
-                      <Tooltip
-                        key="smartInventory"
-                        content={
-                          hasNonDefaultSearchParams
-                            ? i18n._(
-                                t`Create a new Smart Inventory with the applied filter`
-                              )
-                            : i18n._(
-                                t`Enter at least one search filter to create a new Smart Inventory`
-                              )
-                        }
-                        position="top"
-                      >
-                        <div>
-                          <Button
-                            onClick={() => handleSmartInventoryClick()}
-                            aria-label={i18n._(t`Smart Inventory`)}
-                            variant="secondary"
-                            isDisabled={!hasNonDefaultSearchParams}
-                          >
-                            {i18n._(t`Smart Inventory`)}
-                          </Button>
-                        </div>
-                      </Tooltip>,
+                      <SmartInventoryButton
+                        isDisabled={!hasNonDefaultSearchParams}
+                        onClick={() => handleSmartInventoryClick()}
+                      />,
                     ]
                   : []),
               ]}
