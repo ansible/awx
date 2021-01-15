@@ -27,6 +27,7 @@ import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../api';
 import TemplateSurvey from './TemplateSurvey';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
+import ContentLoading from '../../components/ContentLoading';
 
 function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
   const location = useLocation();
@@ -150,6 +151,10 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
   }
 
   const contentError = rolesAndTemplateError;
+
+  if (hasRolesandTemplateLoading) {
+    return <ContentLoading />;
+  }
   if (!hasRolesandTemplateLoading && contentError) {
     return (
       <PageSection>

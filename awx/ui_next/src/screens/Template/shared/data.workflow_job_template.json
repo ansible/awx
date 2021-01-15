@@ -81,7 +81,7 @@
   "status": "never updated",
   "extra_vars": "",
   "organization": null,
-  "survey_enabled": false,
+  "survey_enabled": true,
   "allow_simultaneous": false,
   "ask_variables_on_launch": false,
   "inventory": null,

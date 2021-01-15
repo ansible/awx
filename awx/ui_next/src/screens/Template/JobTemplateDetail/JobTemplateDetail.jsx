@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { Fragment, useCallback, useEffect } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import {
@@ -59,32 +59,31 @@ function JobTemplateDetail({ i18n, template }) {
     related: { webhook_receiver },
     webhook_key,
   } = template;
-  const [contentError, setContentError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(false);
-  const [instanceGroups, setInstanceGroups] = useState([]);
   const { id: templateId } = useParams();
   const history = useHistory();
 
+  const {
+    isLoading: isLoadingInstanceGroups,
+    request: fetchInstanceGroups,
+    error: instanceGroupsError,
+    result: { instanceGroups },
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        data: { results },
+      } = await JobTemplatesAPI.readInstanceGroups(templateId);
+      return { instanceGroups: results };
+    }, [templateId]),
+    { instanceGroups: [] }
+  );
+
   useEffect(() => {
-    (async () => {
-      setContentError(null);
-      setHasContentLoading(true);
-      try {
-        const {
-          data: { results = [] },
-        } = await JobTemplatesAPI.readInstanceGroups(templateId);
-        setInstanceGroups(results);
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setHasContentLoading(false);
-      }
-    })();
-  }, [templateId]);
+    fetchInstanceGroups();
+  }, [fetchInstanceGroups]);
 
   const {
     request: deleteJobTemplate,
-    isLoading,
+    isLoading: isDeleteLoading,
     error: deleteError,
   } = useRequest(
     useCallback(async () => {
@@ -154,11 +153,11 @@ function JobTemplateDetail({ i18n, template }) {
     );
   };
 
-  if (contentError) {
-    return <ContentError error={contentError} />;
+  if (instanceGroupsError) {
+    return <ContentError error={instanceGroupsError} />;
   }
 
-  if (hasContentLoading) {
+  if (isLoadingInstanceGroups || isDeleteLoading) {
     return <ContentLoading />;
   }
 
@@ -389,7 +388,7 @@ function JobTemplateDetail({ i18n, template }) {
               name={name}
               modalTitle={i18n._(t`Delete Job Template`)}
               onConfirm={deleteJobTemplate}
-              isDisabled={isLoading}
+              isDisabled={isDeleteLoading}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>
