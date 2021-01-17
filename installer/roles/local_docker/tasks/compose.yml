@@ -4,6 +4,20 @@
     path: "{{ docker_compose_dir }}"
     state: directory
 
+- name: Create uuid
+  shell: "uuidgen > {{ docker_compose_dir }}/uuid"
+  args:
+    creates: "{{ docker_compose_dir }}/uuid"
+
+- name: Load uuid
+  shell: "cat {{ docker_compose_dir }}/uuid"
+  register: uuid_out
+
+- name: Set uuid
+  set_fact:
+    uuid: "{{ uuid_out.stdout_lines.0 }}"
+  when: uuid is not defined
+
 - name: Create Redis socket directory
   file:
     path: "{{ docker_compose_dir }}/redis_socket"
