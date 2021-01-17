@@ -7,6 +7,10 @@ root:x:0:0:root:/root:/bin/bash
 awx:x:`id -u`:`id -g`:,,,:/var/lib/awx:/bin/bash
 EOF
 
+cat <<EOF >> /etc/group
+awx:x:`id -u`:awx
+EOF
+
 cat <<EOF > /etc/subuid
 awx:100000:50001
 EOF

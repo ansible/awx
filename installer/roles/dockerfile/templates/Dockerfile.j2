@@ -234,6 +234,7 @@ RUN for dir in \
     for file in \
       /etc/subuid \
       /etc/subgid \
+      /etc/group \
       /etc/passwd ; \
     do touch $file ; chmod g+rw $file ; chgrp root $file ; done
 
