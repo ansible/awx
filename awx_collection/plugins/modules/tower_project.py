@@ -153,7 +153,7 @@ EXAMPLES = '''
     organization: "test"
     scm_update_on_launch: True
     scm_update_cache_timeout: 60
-    custom_virtualenv: "/var/lib/awx/venv/ansible-2.2"
+    custom_virtualenv: "/var/lib/awx/var/lib/awx/venv/ansible-2.2"
     state: present
     tower_config_file: "~/tower_cli.cfg"
 '''

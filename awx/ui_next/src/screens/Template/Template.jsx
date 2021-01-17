@@ -46,8 +46,21 @@ function Template({ i18n, setBreadcrumb }) {
           role_level: 'notification_admin_role',
         }),
       ]);
-      if (actions?.data?.actions?.PUT) {
-        if (data?.webhook_service && data?.related?.webhook_key) {
+      if (data.summary_fields.credentials) {
+        const params = {
+          page: 1,
+          page_size: 200,
+          order_by: 'name',
+        };
+        const {
+          data: { results },
+        } = await JobTemplatesAPI.readCredentials(data.id, params);
+
+        data.summary_fields.credentials = results;
+      }
+
+      if (actions.data.actions.PUT) {
+        if (data.webhook_service && data?.related?.webhook_key) {
           const {
             data: { webhook_key },
           } = await JobTemplatesAPI.readWebhookKey(templateId);
@@ -78,14 +91,14 @@ function Template({ i18n, setBreadcrumb }) {
   };
 
   const loadScheduleOptions = useCallback(() => {
-    return JobTemplatesAPI.readScheduleOptions(template.id);
-  }, [template]);
+    return JobTemplatesAPI.readScheduleOptions(templateId);
+  }, [templateId]);
 
   const loadSchedules = useCallback(
     params => {
-      return JobTemplatesAPI.readSchedules(template.id, params);
+      return JobTemplatesAPI.readSchedules(templateId, params);
     },
-    [template]
+    [templateId]
   );
 
   const canSeeNotificationsTab = me?.is_system_auditor || isNotifAdmin;
@@ -142,7 +155,7 @@ function Template({ i18n, setBreadcrumb }) {
       <PageSection>
         <Card>
           <ContentError error={contentError}>
-            {contentError.response.status === 404 && (
+            {contentError.response?.status === 404 && (
               <span>
                 {i18n._(t`Template not found.`)}{' '}
                 <Link to="/templates">{i18n._(t`View all Templates.`)}</Link>

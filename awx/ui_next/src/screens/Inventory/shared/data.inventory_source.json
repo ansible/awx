@@ -98,7 +98,7 @@
   "credential": 8,
   "overwrite":true,
   "overwrite_vars":true,
-  "custom_virtualenv":"/venv/custom",
+  "custom_virtualenv":"/var/lib/awx/venv/custom",
   "timeout":0,
   "verbosity":2,
   "last_job_run":null,

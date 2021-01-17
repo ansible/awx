@@ -11,6 +11,7 @@ import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
+import LoadingSpinner from '../LoadingSpinner';
 
 import {
   encodeNonDefaultQueryString,
@@ -82,10 +83,13 @@ function PaginatedTable({
     );
   } else {
     Content = (
-      <TableComposable aria-label={dataListLabel}>
-        {headerRow}
-        <Tbody>{items.map(renderRow)}</Tbody>
-      </TableComposable>
+      <>
+        {hasContentLoading && <LoadingSpinner />}
+        <TableComposable aria-label={dataListLabel}>
+          {headerRow}
+          <Tbody>{items.map(renderRow)}</Tbody>
+        </TableComposable>
+      </>
     );
   }
 

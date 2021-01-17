@@ -56,15 +56,12 @@ function Credential({ i18n, setBreadcrumb }) {
       id: 99,
     },
     { name: i18n._(t`Details`), link: `/credentials/${id}/details`, id: 0 },
-  ];
-
-  if (credential && credential.organization) {
-    tabsArray.push({
+    {
       name: i18n._(t`Access`),
       link: `/credentials/${id}/access`,
       id: 1,
-    });
-  }
+    },
+  ];
 
   let showCardHeader = true;
 
@@ -108,14 +105,12 @@ function Credential({ i18n, setBreadcrumb }) {
             <Route key="edit" path="/credentials/:id/edit">
               <CredentialEdit credential={credential} />
             </Route>,
-            credential.organization && (
-              <Route key="access" path="/credentials/:id/access">
-                <ResourceAccessList
-                  resource={credential}
-                  apiModel={CredentialsAPI}
-                />
-              </Route>
-            ),
+            <Route key="access" path="/credentials/:id/access">
+              <ResourceAccessList
+                resource={credential}
+                apiModel={CredentialsAPI}
+              />
+            </Route>,
             <Route key="not-found" path="*">
               {!hasContentLoading && (
                 <ContentError isNotFound>

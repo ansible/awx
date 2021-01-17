@@ -140,6 +140,7 @@ function MiscSystemDetail({ i18n }) {
             <Button
               aria-label={i18n._(t`Edit`)}
               component={Link}
+              ouiaId="edit-button"
               to="/settings/miscellaneous_system/edit"
             >
               {i18n._(t`Edit`)}

@@ -29,10 +29,18 @@ function Job({ i18n, setBreadcrumb }) {
   const { isLoading, error, request: fetchJob, result } = useRequest(
     useCallback(async () => {
       const { data } = await JobsAPI.readDetail(id, type);
+      if (
+        data?.summary_fields?.credentials?.find(cred => cred.kind === 'vault')
+      ) {
+        const {
+          data: { results },
+        } = await JobsAPI.readCredentials(data.id, type);
+
+        data.summary_fields.credentials = results;
+      }
       setBreadcrumb(data);
       return data;
-    }, [id, type, setBreadcrumb]),
-    null
+    }, [id, type, setBreadcrumb])
   );
 
   useEffect(() => {

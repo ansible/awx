@@ -148,9 +148,9 @@ include(optional('/etc/tower/settings.py'), scope=locals())
 include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
 # Installed differently in Dockerfile compared to production versions
-AWX_ANSIBLE_COLLECTIONS_PATHS = '/vendor/awx_ansible_collections'
+AWX_ANSIBLE_COLLECTIONS_PATHS = '/var/lib/awx/vendor/awx_ansible_collections'
 
-BASE_VENV_PATH = "/venv/"
+BASE_VENV_PATH = "/var/lib/awx/venv/"
 ANSIBLE_VENV_PATH = os.path.join(BASE_VENV_PATH, "ansible")
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 

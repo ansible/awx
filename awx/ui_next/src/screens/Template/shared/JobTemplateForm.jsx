@@ -53,6 +53,7 @@ function JobTemplateForm({
   setFieldValue,
   submitError,
   i18n,
+  isOverrideDisabledLookup,
 }) {
   const [contentError, setContentError] = useState(false);
   const [inventory, setInventory] = useState(
@@ -254,6 +255,7 @@ function JobTemplateForm({
             required={!askInventoryOnLaunchField.value}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
+            isOverrideDisabled={isOverrideDisabledLookup}
           />
         </FormGroup>
         <ProjectLookup
@@ -266,6 +268,7 @@ function JobTemplateForm({
           onChange={handleProjectUpdate}
           required
           autoPopulate={!template?.id}
+          isOverrideDisabled={isOverrideDisabledLookup}
         />
         {projectField.value?.allow_override && (
           <FieldWithPrompt
@@ -433,7 +436,7 @@ function JobTemplateForm({
               min="0"
               label={i18n._(t`Timeout`)}
               tooltip={i18n._(t`The amount of time (in seconds) to run
-                  before the task is canceled. Defaults to 0 for no job
+                  before the job is canceled. Defaults to 0 for no job
                   timeout.`)}
             />
             <FieldWithPrompt
@@ -623,7 +626,9 @@ JobTemplateForm.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   submitError: PropTypes.shape({}),
+  isOverrideDisabledLookup: PropTypes.bool,
 };
+
 JobTemplateForm.defaultProps = {
   template: {
     name: '',
@@ -641,6 +646,7 @@ JobTemplateForm.defaultProps = {
     isNew: true,
   },
   submitError: null,
+  isOverrideDisabledLookup: false,
 };
 
 const FormikApp = withFormik({

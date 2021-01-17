@@ -3294,6 +3294,16 @@ msgid ""
 "common scenarios."
 msgstr "Les domaines OpenStack définissent les limites administratives. Ils sont nécessaires uniquement pour les URL d’authentification Keystone v3. Voir la documentation Ansible Tower pour les scénarios courants."
 
+#: awx/main/models/credential/__init__.py:824
+msgid "Region Name"
+msgstr "Nom de la region"
+
+#: awx/main/models/credential/__init__.py:826
+msgid ""
+"For some cloud providers, like OVH, region must be specified."
+msgstr ""
+"Chez certains fournisseurs, comme OVH, vous devez spécifier le nom de la région"
+
 #: awx/main/models/credential/__init__.py:812
 #: awx/main/models/credential/__init__.py:1110
 #: awx/main/models/credential/__init__.py:1144

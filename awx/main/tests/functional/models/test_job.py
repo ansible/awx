@@ -16,7 +16,7 @@ def test_awx_virtualenv_from_settings(inventory, project, machine_credential):
     )
     jt.credentials.add(machine_credential)
     job = jt.create_unified_job()
-    assert job.ansible_virtualenv_path == '/venv/ansible'
+    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/ansible'
 
 
 @pytest.mark.django_db
@@ -43,28 +43,28 @@ def test_awx_custom_virtualenv(inventory, project, machine_credential, organizat
     jt.credentials.add(machine_credential)
     job = jt.create_unified_job()
 
-    job.organization.custom_virtualenv = '/venv/fancy-org'
+    job.organization.custom_virtualenv = '/var/lib/awx/venv/fancy-org'
     job.organization.save()
-    assert job.ansible_virtualenv_path == '/venv/fancy-org'
+    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/fancy-org'
 
-    job.project.custom_virtualenv = '/venv/fancy-proj'
+    job.project.custom_virtualenv = '/var/lib/awx/venv/fancy-proj'
     job.project.save()
-    assert job.ansible_virtualenv_path == '/venv/fancy-proj'
+    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/fancy-proj'
 
-    job.job_template.custom_virtualenv = '/venv/fancy-jt'
+    job.job_template.custom_virtualenv = '/var/lib/awx/venv/fancy-jt'
     job.job_template.save()
-    assert job.ansible_virtualenv_path == '/venv/fancy-jt'
+    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/fancy-jt'
 
 
 @pytest.mark.django_db
 def test_awx_custom_virtualenv_without_jt(project):
-    project.custom_virtualenv = '/venv/fancy-proj'
+    project.custom_virtualenv = '/var/lib/awx/venv/fancy-proj'
     project.save()
     job = Job(project=project)
     job.save()
 
     job = Job.objects.get(pk=job.id)
-    assert job.ansible_virtualenv_path == '/venv/fancy-proj'
+    assert job.ansible_virtualenv_path == '/var/lib/awx/venv/fancy-proj'
 
 
 @pytest.mark.django_db

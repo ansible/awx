@@ -31,7 +31,7 @@ function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
 
   const defaultVenv = {
     label: i18n._(t`Use Default Ansible Environment`),
-    value: '/venv/ansible/',
+    value: '/var/lib/awx/venv/ansible/',
     key: 'default',
   };
   const { custom_virtualenvs } = useContext(ConfigContext);

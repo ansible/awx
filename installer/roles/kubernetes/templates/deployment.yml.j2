@@ -448,22 +448,6 @@ spec:
               - key: environment_sh
                 path: 'environment.sh'
 
-        - name: {{ kubernetes_deployment_name }}-launch-awx-web
-          configMap:
-            name: {{ kubernetes_deployment_name }}-launch-awx
-            items:
-              - key: launch-awx-web
-                path: 'launch_awx.sh'
-            defaultMode: 0755
-
-        - name: {{ kubernetes_deployment_name }}-launch-awx-task
-          configMap:
-            name: {{ kubernetes_deployment_name }}-launch-awx
-            items:
-              - key: launch-awx-task
-                path: 'launch_awx_task.sh'
-            defaultMode: 0755
-
         - name: {{ kubernetes_deployment_name }}-supervisor-web-config
           configMap:
             name: {{ kubernetes_deployment_name }}-supervisor-config

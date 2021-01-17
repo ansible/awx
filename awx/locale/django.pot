@@ -3355,6 +3355,15 @@ msgid ""
 msgstr ""
 
 #: awx/main/models/credential/__init__.py:824
+msgid "Region Name"
+msgstr ""
+
+#: awx/main/models/credential/__init__.py:826
+msgid ""
+"For some cloud providers, like OVH, region must be specified."
+msgstr ""
+
+#: awx/main/models/credential/__init__.py:824
 #: awx/main/models/credential/__init__.py:1131
 #: awx/main/models/credential/__init__.py:1166
 msgid "Verify SSL"

@@ -87,6 +87,23 @@ describe('<MultiCredentialsLookup />', () => {
             name: 'Cred 5',
             url: 'www.google.com',
           },
+
+          {
+            id: 6,
+            credential_type: 5,
+            kind: 'vault',
+            name: 'Cred 6',
+            url: 'www.google.com',
+            inputs: { vault_id: 'vault ID' },
+          },
+          {
+            id: 7,
+            credential_type: 5,
+            kind: 'vault',
+            name: 'Cred 7',
+            url: 'www.google.com',
+            inputs: {},
+          },
         ],
         count: 3,
       },
@@ -196,7 +213,13 @@ describe('<MultiCredentialsLookup />', () => {
     wrapper.update();
     expect(CredentialsAPI.read).toHaveBeenCalledTimes(2);
     expect(wrapper.find('OptionsList').prop('options')).toEqual([
-      { id: 1, kind: 'cloud', name: 'New Cred', url: 'www.google.com' },
+      {
+        id: 1,
+        kind: 'cloud',
+        name: 'New Cred',
+        url: 'www.google.com',
+        label: 'New Cred',
+      },
     ]);
   });
 
@@ -266,6 +289,36 @@ describe('<MultiCredentialsLookup />', () => {
         url: 'www.google.com',
       },
     ]);
+  });
+
+  test('should properly render vault credential labels', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <MultiCredentialsLookup
+          value={credentials}
+          tooltip="This is credentials look up"
+          onChange={() => {}}
+          onError={() => {}}
+        />
+      );
+    });
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
+    await act(async () => {
+      searchButton.invoke('onClick')();
+    });
+    wrapper.update();
+    const typeSelect = wrapper.find('AnsibleSelect');
+    act(() => {
+      typeSelect.invoke('onChange')({}, 500);
+    });
+    wrapper.update();
+    const optionsList = wrapper.find('OptionsList');
+    expect(optionsList.prop('multiple')).toEqual(true);
+    expect(wrapper.find('CheckboxListItem[label="Cred 6 | vault ID"]'));
+    expect(wrapper.find('CheckboxListItem[label="Cred 7"]'));
   });
 
   test('should allow multiple vault credentials with no vault id', async () => {

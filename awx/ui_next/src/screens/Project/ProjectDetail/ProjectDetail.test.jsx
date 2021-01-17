@@ -9,7 +9,12 @@ import { ProjectsAPI } from '../../../api';
 import ProjectDetail from './ProjectDetail';
 
 jest.mock('../../../api');
-
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useRouteMatch: () => ({
+    url: '/projects/1/details',
+  }),
+}));
 describe('<ProjectDetail />', () => {
   const mockProject = {
     id: 1,
@@ -139,13 +144,19 @@ describe('<ProjectDetail />', () => {
     );
   });
 
-  test('should show edit button for users with edit permission', async () => {
+  test('should show edit and sync button for users with edit permission', async () => {
     const wrapper = mountWithContexts(<ProjectDetail project={mockProject} />);
     const editButton = await waitForElement(
       wrapper,
       'ProjectDetail Button[aria-label="edit"]'
     );
+
+    const syncButton = await waitForElement(
+      wrapper,
+      'ProjectDetail Button[aria-label="Sync Project"]'
+    );
     expect(editButton.text()).toEqual('Edit');
+    expect(syncButton.text()).toEqual('Sync');
     expect(editButton.prop('to')).toBe(`/projects/${mockProject.id}/edit`);
   });
 
@@ -166,6 +177,9 @@ describe('<ProjectDetail />', () => {
     expect(wrapper.find('ProjectDetail Button[aria-label="edit"]').length).toBe(
       0
     );
+    expect(wrapper.find('ProjectDetail Button[aria-label="sync"]').length).toBe(
+      0
+    );
   });
 
   test('edit button should navigate to project edit', () => {
@@ -178,6 +192,17 @@ describe('<ProjectDetail />', () => {
       .find('Button[aria-label="edit"] Link')
       .simulate('click', { button: 0 });
     expect(history.location.pathname).toEqual('/projects/1/edit');
+  });
+
+  test('sync button should call api to syn project', async () => {
+    ProjectsAPI.readSync.mockResolvedValue({ data: { can_update: true } });
+    const wrapper = mountWithContexts(<ProjectDetail project={mockProject} />);
+    await act(() =>
+      wrapper
+        .find('ProjectDetail Button[aria-label="Sync Project"]')
+        .prop('onClick')(1)
+    );
+    expect(ProjectsAPI.sync).toHaveBeenCalledTimes(1);
   });
 
   test('expected api calls are made for delete', async () => {
