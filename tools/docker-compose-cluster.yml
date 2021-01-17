@@ -96,5 +96,5 @@ services:
       - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
       - "./redis/redis_socket_ha_3:/var/run/redis/"
   postgres:
-    image: postgres:10
+    image: postgres:12
     container_name: tools_postgres_1

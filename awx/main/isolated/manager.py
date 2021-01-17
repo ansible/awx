@@ -7,6 +7,7 @@ import tempfile
 import time
 import logging
 import yaml
+import datetime
 
 from django.conf import settings
 import ansible_runner
@@ -123,6 +124,7 @@ class IsolatedManager(object):
             dir=private_data_dir
         )
         params = self.runner_params.copy()
+        params.get('envvars', dict())['ANSIBLE_CALLBACK_WHITELIST'] = 'profile_tasks'
         params['playbook'] = playbook
         params['private_data_dir'] = iso_dir
         if idle_timeout:
@@ -168,7 +170,8 @@ class IsolatedManager(object):
         extravars = {
             'src': self.private_data_dir,
             'dest': settings.AWX_PROOT_BASE_PATH,
-            'ident': self.ident
+            'ident': self.ident,
+            'job_id': self.instance.id,
         }
         if playbook:
             extravars['playbook'] = playbook
@@ -204,7 +207,10 @@ class IsolatedManager(object):
         :param interval: an interval (in seconds) to wait between status polls
         """
         interval = interval if interval is not None else settings.AWX_ISOLATED_CHECK_INTERVAL
-        extravars = {'src': self.private_data_dir}
+        extravars = {
+            'src': self.private_data_dir,
+            'job_id': self.instance.id
+        }
         status = 'failed'
         rc = None
         last_check = time.time()
@@ -220,9 +226,13 @@ class IsolatedManager(object):
                 logger.warning('Isolated job {} was manually canceled.'.format(self.instance.id))
 
             logger.debug('Checking on isolated job {} with `check_isolated.yml`.'.format(self.instance.id))
+            time_start = datetime.datetime.now()
             runner_obj = self.run_management_playbook('check_isolated.yml',
                                                       self.private_data_dir,
                                                       extravars=extravars)
+            time_end = datetime.datetime.now()
+            time_diff = time_end - time_start
+            logger.debug('Finished checking on isolated job {} with `check_isolated.yml` took {} seconds.'.format(self.instance.id, time_diff.total_seconds()))
             status, rc = runner_obj.status, runner_obj.rc
 
             if self.check_callback is not None and not self.captured_command_artifact:

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   arrayOf,
   bool,
@@ -8,7 +9,6 @@ import {
   string,
   oneOfType,
 } from 'prop-types';
-import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
@@ -39,13 +39,13 @@ function CredentialLookup({
   credentialTypeKind,
   credentialTypeNamespace,
   value,
-  history,
   i18n,
   tooltip,
   isDisabled,
   autoPopulate,
   multiple,
 }) {
+  const history = useHistory();
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
   const {
     result: { count, credentials, relatedSearchableKeys, searchableKeys },
@@ -72,11 +72,19 @@ function CredentialLookup({
             ...typeNamespaceParams,
           })
         ),
-        CredentialsAPI.readOptions,
+        CredentialsAPI.readOptions(),
       ]);
 
       if (autoPopulate) {
         autoPopulateLookup(data.results);
+      }
+
+      const searchKeys = Object.keys(
+        actionsResponse.data.actions?.GET || {}
+      ).filter(key => actionsResponse.data.actions?.GET[key].filterable);
+      const item = searchKeys.indexOf('type');
+      if (item) {
+        searchKeys[item] = 'credential_type__kind';
       }
 
       return {
@@ -85,9 +93,7 @@ function CredentialLookup({
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
-        searchableKeys: Object.keys(
-          actionsResponse.data?.actions?.GET || {}
-        ).filter(key => actionsResponse.data?.actions?.GET[key]?.filterable),
+        searchableKeys: searchKeys,
       };
     }, [
       autoPopulate,
@@ -222,4 +228,4 @@ CredentialLookup.defaultProps = {
 };
 
 export { CredentialLookup as _CredentialLookup };
-export default withI18n()(withRouter(CredentialLookup));
+export default withI18n()(CredentialLookup);

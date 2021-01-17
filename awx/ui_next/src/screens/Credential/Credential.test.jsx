@@ -31,7 +31,7 @@ describe('<Credential />', () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 2);
+    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 3);
   });
 
   test('initially renders org-based credential succesfully', async () => {

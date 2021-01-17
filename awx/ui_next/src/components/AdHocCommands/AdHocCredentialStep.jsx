@@ -58,7 +58,7 @@ function AdHocCredentialStep({ i18n, credentialTypeId, onEnableLaunch }) {
     return <ContentError error={error} />;
   }
   if (isLoading) {
-    return <ContentLoading error={error} />;
+    return <ContentLoading />;
   }
   return (
     <Form>

@@ -10,6 +10,7 @@ import {
   ArrayDetail,
   DetailList,
   DeletedDetail,
+  UserDateDetail,
 } from '../../../components/DetailList';
 import CodeDetail from '../../../components/DetailList/CodeDetail';
 import DeleteButton from '../../../components/DeleteButton';
@@ -23,6 +24,8 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
   const history = useHistory();
 
   const {
+    created,
+    modified,
     notification_configuration: configuration,
     summary_fields,
     messages,
@@ -324,6 +327,16 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
             />
           </>
         )}
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={created}
+          user={summary_fields?.created_by}
+        />
+        <UserDateDetail
+          label={i18n._(t`Last Modified`)}
+          date={modified}
+          user={summary_fields?.modified_by}
+        />
         {hasCustomMessages(messages, typeMessageDefaults) && (
           <CustomMessageDetails
             messages={messages}

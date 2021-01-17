@@ -18,7 +18,7 @@ import AddDropDownButton from '../../../components/AddDropDownButton';
 
 import InstanceGroupListItem from './InstanceGroupListItem';
 
-const QS_CONFIG = getQSConfig('instance_group', {
+const QS_CONFIG = getQSConfig('instance-group', {
   page: 1,
   page_size: 20,
 });

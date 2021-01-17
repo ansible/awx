@@ -10,11 +10,6 @@ jest.mock('../../../api');
 
 describe('ProjectSyncButton', () => {
   let wrapper;
-  ProjectsAPI.readSync.mockResolvedValue({
-    data: {
-      can_update: true,
-    },
-  });
 
   const children = handleSync => (
     <button type="submit" onClick={() => handleSync()} />
@@ -43,8 +38,7 @@ describe('ProjectSyncButton', () => {
     await act(async () => {
       button.prop('onClick')();
     });
-    expect(ProjectsAPI.readSync).toHaveBeenCalledWith(1);
-    await sleep(0);
+
     expect(ProjectsAPI.sync).toHaveBeenCalledWith(1);
   });
   test('displays error modal after unsuccessful sync', async () => {

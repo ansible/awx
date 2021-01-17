@@ -7,7 +7,7 @@ asciichartpy==1.5.25      # via -r /awx_devel/requirements/requirements.in
 asgiref==3.2.5            # via channels, channels-redis, daphne
 async-timeout==3.0.1      # via aiohttp, aioredis
 attrs==19.3.0             # via aiohttp, automat, jsonschema, service-identity, twisted
-autobahn==20.3.1          # via daphne
+autobahn==20.12.3         # via -r /awx_devel/requirements/requirements.in, daphne
 automat==20.2.0           # via twisted
 azure-common==1.1.25      # via azure-keyvault
 azure-keyvault==1.1.0     # via -r /awx_devel/requirements/requirements.in
@@ -19,7 +19,7 @@ channels-redis==3.1.0     # via -r /awx_devel/requirements/requirements.in
 channels==2.4.0           # via -r /awx_devel/requirements/requirements.in, channels-redis
 chardet==3.0.4            # via aiohttp, requests
 constantly==15.1.0        # via twisted
-cryptography==2.8         # via adal, autobahn, azure-keyvault, pyopenssl, service-identity, social-auth-core
+cryptography==2.9.2       # via adal, autobahn, azure-keyvault, pyopenssl, service-identity, social-auth-core
 daphne==2.4.1             # via -r /awx_devel/requirements/requirements.in, channels
 defusedxml==0.6.0         # via python3-openid, python3-saml, social-auth-core
 dictdiffer==0.8.1         # via openshift
@@ -46,7 +46,7 @@ gitdb==4.0.2              # via gitpython
 gitpython==3.1.7          # via -r /awx_devel/requirements/requirements.in
 google-auth==1.11.3       # via kubernetes
 hiredis==1.0.1            # via aioredis
-hyperlink==19.0.0         # via twisted
+hyperlink==20.0.1         # via autobahn, twisted
 idna-ssl==1.1.0           # via aiohttp
 idna==2.9                 # via hyperlink, idna-ssl, requests, twisted, yarl
 importlib-metadata==1.5.0  # via importlib-resources, irc, jsonschema
@@ -107,7 +107,7 @@ ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.10      # via openshift
 schedule==0.6.0           # via -r /awx_devel/requirements/requirements.in
 service-identity==18.1.0  # via twisted
-six==1.14.0               # via ansible-runner, automat, cryptography, django-extensions, django-pglocks, google-auth, isodate, jaraco.collections, jaraco.logging, jaraco.text, jsonschema, kubernetes, openshift, pygerduty, pyopenssl, pyrad, pyrsistent, python-dateutil, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, twilio, txaio, websocket-client
+six==1.14.0               # via ansible-runner, automat, cryptography, django-extensions, django-pglocks, google-auth, isodate, jaraco.collections, jaraco.logging, jaraco.text, jsonschema, kubernetes, openshift, pygerduty, pyopenssl, pyrad, pyrsistent, python-dateutil, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, twilio, websocket-client
 slackclient==1.1.2        # via -r /awx_devel/requirements/requirements.in
 smmap==3.0.1              # via gitdb
 social-auth-app-django==3.1.0  # via -r /awx_devel/requirements/requirements.in
@@ -117,7 +117,7 @@ tacacs_plus==1.0          # via -r /awx_devel/requirements/requirements.in
 tempora==2.1.0            # via irc, jaraco.logging
 twilio==6.37.0            # via -r /awx_devel/requirements/requirements.in
 twisted[tls]==20.3.0      # via -r /awx_devel/requirements/requirements.in, daphne
-txaio==20.1.1             # via autobahn
+txaio==20.12.1            # via autobahn
 typing-extensions==3.7.4.1  # via aiohttp
 urllib3==1.25.8           # via kubernetes, requests
 uwsgi==2.0.18             # via -r /awx_devel/requirements/requirements.in

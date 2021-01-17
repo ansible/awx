@@ -17,10 +17,10 @@ import { FormFullWidthLayout } from '../../../components/FormLayout';
 import Popover from '../../../components/Popover';
 import {
   combine,
-  required,
-  url,
   integer,
   minMaxValue,
+  required,
+  url,
 } from '../../../util/validators';
 import RevertButton from './RevertButton';
 
@@ -51,6 +51,7 @@ const SettingGroup = withI18n()(
       isRequired={isRequired}
       label={label}
       validated={validated}
+      id={fieldId}
       labelIcon={
         <>
           <Popover
@@ -84,6 +85,7 @@ const BooleanField = withI18n()(
       >
         <Switch
           id={name}
+          ouiaId={name}
           isChecked={field.value}
           isDisabled={disabled}
           label={i18n._(t`On`)}
@@ -241,11 +243,13 @@ const ObjectField = withI18n()(({ i18n, name, config, isRequired = false }) => {
       >
         <CodeMirrorInput
           {...field}
+          fullHeight
           id={name}
+          mode="javascript"
           onChange={value => {
             helpers.setValue(value);
           }}
-          mode="javascript"
+          placeholder={JSON.stringify(config?.placeholder, null, 2)}
         />
       </SettingGroup>
     </FormFullWidthLayout>

@@ -13,7 +13,7 @@ import useRequest from '../../util/useRequest';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
-const QS_CONFIG = getQSConfig('instance_groups', {
+const QS_CONFIG = getQSConfig('instance-groups', {
   page: 1,
   page_size: 5,
   order_by: 'name',

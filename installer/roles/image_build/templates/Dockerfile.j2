@@ -1,20 +1,18 @@
-{% if build_dev|bool %}
+{% if build_dev|default(False)|bool %}
 ### This file is generated from
 ### installer/roles/image_build/templates/Dockerfile.j2
 ###
 ### DO NOT EDIT
 ###
+{% else %}
+     {% set build_dev = False  %}
 {% endif %}
 
 # Locations - set globally to be used across stages
-ARG VENV_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/venv"
-ARG COLLECTION_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/vendor/awx_ansible_collections"
+ARG COLLECTION_BASE="/var/lib/awx/vendor/awx_ansible_collections"
 
 # Build container
 FROM centos:8 as builder
-
-ARG VENV_BASE
-ARG COLLECTION_BASE
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -23,9 +21,10 @@ ENV LC_ALL en_US.UTF-8
 USER root
 
 # Install build dependencies
+RUN dnf -y module enable 'postgresql:12'
 RUN dnf -y update && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
-    dnf module -y enable 'postgresql:10' && \
+    dnf module -y enable 'postgresql:12' && \
     dnf config-manager --set-enabled powertools && \
     dnf -y install ansible \
     gcc \
@@ -40,7 +39,7 @@ RUN dnf -y update && \
     nss \
     openldap-devel \
     patch \
-    @postgresql:10 \
+    @postgresql:12 \
     postgresql-devel \
     python3-devel \
     python3-pip \
@@ -72,16 +71,21 @@ RUN cd /tmp && make requirements_collections
 ADD requirements/requirements_dev.txt /tmp/requirements
 RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev
 {% endif %}
+
 {% if not build_dev|bool %}
-COPY dist/{{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
-RUN mkdir -p -m 755 /var/lib/awx && \
-    OFFICIAL=yes /var/lib/awx/venv/awx/bin/pip install /tmp/{{ awx_sdist_file }}
+# Use the distro provided npm to bootstrap our required version of node
+RUN npm install -g n && n 14.15.1 && dnf remove -y nodejs
+
+# Copy source into builder, build sdist, install it into awx venv
+COPY . /tmp/src/
+WORKDIR /tmp/src/
+RUN make sdist && \
+    /var/lib/awx/venv/awx/bin/pip install dist/awx-$(cat VERSION).tar.gz
 {% endif %}
 
 # Final container(s)
 FROM centos:8
 
-ARG VENV_BASE
 ARG COLLECTION_BASE
 
 ENV LANG en_US.UTF-8
@@ -90,32 +94,11 @@ ENV LC_ALL en_US.UTF-8
 
 USER root
 
-{% if build_dev|bool %}
-# Install development/test requirements
-RUN dnf -y install \
-    gtk3 \
-    gettext \
-    alsa-lib \
-    libX11-xcb \
-    libXScrnSaver \
-    strace \
-    vim \
-    nmap-ncat \
-    nodejs \
-    nss \
-    make \
-    patch \
-    tmux \
-    wget \
-    diffutils \
-    unzip && \
-    npm install -g n && n 14.15.1 && dnf remove -y nodejs
-{% endif %}
-
 # Install runtime requirements
+RUN dnf -y module enable 'postgresql:12'
 RUN dnf -y update && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
-    dnf module -y enable 'postgresql:10' && \
+    dnf module -y enable 'postgresql:12' && \
     dnf config-manager --set-enabled powertools && \
     dnf -y install acl \
     ansible \
@@ -126,7 +109,7 @@ RUN dnf -y update && \
     krb5-workstation \
     libcgroup-tools \
     nginx \
-    @postgresql:10 \
+    @postgresql:12 \
     python3-devel \
     python3-libselinux \
     python3-pip \
@@ -163,16 +146,40 @@ RUN cd /usr/local/bin && \
     curl -L https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz | \
     tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
 
+{% if build_dev|bool %}
+# Install development/test requirements
+RUN dnf --enablerepo=debuginfo -y install \
+    gdb \
+    gtk3 \
+    gettext \
+    alsa-lib \
+    libX11-xcb \
+    libXScrnSaver \
+    strace \
+    vim \
+    nmap-ncat \
+    nodejs \
+    nss \
+    make \
+    patch \
+    python3-debuginfo \
+    socat \
+    tmux \
+    wget \
+    diffutils \
+    unzip && \
+    npm install -g n && n 14.15.1 && dnf remove -y nodejs
+{% endif %}
+
 # Copy app from builder
+COPY --from=builder /var/lib/awx /var/lib/awx
+
 {%if build_dev|bool %}
-COPY --from=builder /venv /venv
-COPY --from=builder /vendor /vendor
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr \
         -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost" && \
     openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt && \
     chmod 640 /etc/nginx/nginx.{csr,key,crt}
 {% else %}
-COPY --from=builder /var/lib/awx /var/lib/awx
 RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 {% endif %}
 
@@ -221,17 +228,17 @@ RUN chmod u+s /usr/bin/bwrap ; \
 
 {% if build_dev|bool %}
 RUN for dir in \
-      /venv \
-      /venv/awx/lib/python3.6 \
+      /var/lib/awx/venv \
+      /var/lib/awx/venv/awx/lib/python3.6 \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \
       /.ansible \
-      /vendor ; \
+      /var/lib/awx/vendor ; \
     do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
     for file in \
       /var/run/nginx.pid \
-      /venv/awx/lib/python3.6/site-packages/awx.egg-link ; \
+      /var/lib/awx/venv/awx/lib/python3.6/site-packages/awx.egg-link ; \
     do touch $file ; chmod g+rw $file ; done
 {% endif %}
 

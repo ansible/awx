@@ -221,4 +221,22 @@ describe('<_AddResourceRole />', () => {
     expect(TeamsAPI.associateRole).toHaveBeenCalledTimes(2);
     expect(handleSave).toHaveBeenCalled();
   });
+
+  test('should not display team as a choice in case credential does not have organization', () => {
+    const spy = jest.spyOn(_AddResourceRole.prototype, 'handleResourceSelect');
+    const wrapper = mountWithContexts(
+      <AddResourceRole
+        onClose={() => {}}
+        onSave={() => {}}
+        roles={roles}
+        resource={{ type: 'credential', organization: null }}
+      />,
+      { context: { network: { handleHttpError: () => {} } } }
+    ).find('AddResourceRole');
+    const selectableCardWrapper = wrapper.find('SelectableCard');
+    expect(selectableCardWrapper.length).toBe(1);
+    selectableCardWrapper.first().simulate('click');
+    expect(spy).toHaveBeenCalledWith('users');
+    expect(wrapper.state('selectedResource')).toBe('users');
+  });
 });

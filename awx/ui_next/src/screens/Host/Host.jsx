@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -20,29 +20,22 @@ import HostDetail from './HostDetail';
 import HostEdit from './HostEdit';
 import HostGroups from './HostGroups';
 import { HostsAPI } from '../../api';
+import useRequest from '../../util/useRequest';
 
 function Host({ i18n, setBreadcrumb }) {
-  const [host, setHost] = useState(null);
-  const [contentError, setContentError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
-
   const location = useLocation();
   const match = useRouteMatch('/hosts/:id');
+  const { error, isLoading, result: host, request: fetchHost } = useRequest(
+    useCallback(async () => {
+      const { data } = await HostsAPI.readDetail(match.params.id);
+      setBreadcrumb(data);
+      return data;
+    }, [match.params.id, setBreadcrumb])
+  );
 
   useEffect(() => {
-    (async () => {
-      setContentError(null);
-      try {
-        const { data } = await HostsAPI.readDetail(match.params.id);
-        setHost(data);
-        setBreadcrumb(data);
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setHasContentLoading(false);
-      }
-    })();
-  }, [match.params.id, location, setBreadcrumb]);
+    fetchHost();
+  }, [fetchHost, location]);
 
   const tabsArray = [
     {
@@ -77,7 +70,7 @@ function Host({ i18n, setBreadcrumb }) {
     },
   ];
 
-  if (hasContentLoading) {
+  if (isLoading) {
     return (
       <PageSection>
         <Card>
@@ -87,12 +80,12 @@ function Host({ i18n, setBreadcrumb }) {
     );
   }
 
-  if (contentError) {
+  if (error) {
     return (
       <PageSection>
         <Card>
-          <ContentError error={contentError}>
-            {contentError?.response?.status === 404 && (
+          <ContentError error={error}>
+            {error?.response?.status === 404 && (
               <span>
                 {i18n._(t`Host not found.`)}{' '}
                 <Link to="/hosts">{i18n._(t`View all Hosts.`)}</Link>
