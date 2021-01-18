@@ -196,9 +196,9 @@ LOCAL_STDOUT_EXPIRE_TIME = 2592000
 # events into the database
 JOB_EVENT_WORKERS = 4
 
-# The number of seconds (must be an integer) to buffer callback receiver bulk
+# The number of seconds to buffer callback receiver bulk
 # writes in memory before flushing via JobEvent.objects.bulk_create()
-JOB_EVENT_BUFFER_SECONDS = 1
+JOB_EVENT_BUFFER_SECONDS = .1
 
 # The interval at which callback receiver statistics should be
 # recorded
