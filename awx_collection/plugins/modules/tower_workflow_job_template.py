@@ -163,7 +163,7 @@ def main():
         description=dict(),
         extra_vars=dict(type='dict'),
         organization=dict(),
-        survey_spec=dict(type='dict'),  # special handling
+        survey_spec=dict(type='dict', aliases=['survey']),
         survey_enabled=dict(type='bool'),
         allow_simultaneous=dict(type='bool'),
         ask_variables_on_launch=dict(type='bool'),
