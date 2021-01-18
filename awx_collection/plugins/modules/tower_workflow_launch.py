@@ -160,7 +160,7 @@ def main():
             param_errors.append("The field {0} was specified but the workflow job template does not allow for it to be overridden".format(variable_name))
     # Check if Either ask_variables_on_launch, or survey_enabled is enabled for use of extra vars.
     if module.params.get('extra_vars') and not (workflow_job_template['ask_variables_on_launch'] or workflow_job_template['survey_enabled']):
-            param_errors.append("The field extra_vars was specified but the workflow job template does not allow for it to be overridden")
+        param_errors.append("The field extra_vars was specified but the workflow job template does not allow for it to be overridden")
     if len(param_errors) > 0:
         module.fail_json(msg="Parameters specified which can not be passed into workflow job template, see errors for details", errors=param_errors)
 
