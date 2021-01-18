@@ -214,6 +214,7 @@ RUN for dir in \
       /var/run/awx-rsyslog \
       /var/log/tower \
       /var/log/nginx \
+      /var/lib/postgresql \
       /var/run/supervisor \
       /var/lib/nginx ; \
     do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
