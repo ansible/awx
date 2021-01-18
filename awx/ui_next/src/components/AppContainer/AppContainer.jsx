@@ -83,7 +83,12 @@ function useStorage(key) {
   return [storageVal, setValue];
 }
 
-function AppContainer({ i18n, navRouteConfig = [], children }) {
+function AppContainer({
+  i18n,
+  navRouteConfig = [],
+  handleSetIsReady,
+  children,
+}) {
   const history = useHistory();
   const { pathname } = useLocation();
   const [config, setConfig] = useState({});
@@ -105,7 +110,8 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
   const handleLogout = useCallback(async () => {
     await RootAPI.logout();
     setSessionTimeout(null);
-  }, [setSessionTimeout]);
+    handleSetIsReady();
+  }, [setSessionTimeout, handleSetIsReady]);
 
   const handleSessionContinue = () => {
     MeAPI.read();
@@ -203,6 +209,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
       <Page isManagedSidebar header={header} sidebar={sidebar}>
         {isReady && <ConfigProvider value={config}>{children}</ConfigProvider>}
       </Page>
+
       <About
         ansible_version={config?.ansible_version}
         version={config?.version}

@@ -29,7 +29,14 @@ const LoginPage = styled(PFLoginPage)`
   }
 `;
 
-function AWXLogin({ alt, i18n, isAuthenticated }) {
+function AWXLogin({
+  alt,
+  i18n,
+  isAuthenticated,
+  isUserDataReady,
+  userError,
+  fetchUserData,
+}) {
   const {
     isLoading: isCustomLoginInfoLoading,
     error: customLoginInfoError,
@@ -95,13 +102,16 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
   const handleSubmit = async values => {
     dismissAuthError();
     await authenticate(values);
+    if (isAuthenticated(document.cookie)) {
+      !isUserDataReady && fetchUserData();
+    }
   };
 
   if (isCustomLoginInfoLoading) {
     return null;
   }
 
-  if (isAuthenticated(document.cookie)) {
+  if (isAuthenticated(document.cookie) && isUserDataReady) {
     return <Redirect to="/" />;
   }
 
@@ -263,9 +273,9 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
           />
         )}
       </Formik>
-      {loginInfoError && (
+      {(loginInfoError || userError) && (
         <AlertModal
-          isOpen={loginInfoError}
+          isOpen={loginInfoError || userError}
           variant="error"
           title={i18n._(t`Error!`)}
           onClose={dismissLoginInfoError}
@@ -273,7 +283,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
           {i18n._(
             t`Failed to fetch custom login configuration settings.  System defaults will be shown instead.`
           )}
-          <ErrorDetail error={loginInfoError} />
+          <ErrorDetail error={loginInfoError || userError} />
         </AlertModal>
       )}
     </LoginPage>

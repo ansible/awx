@@ -266,7 +266,9 @@ describe('<Login />', () => {
   test('render Redirect to / when already authenticated', async done => {
     let wrapper;
     await act(async () => {
-      wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => true} />);
+      wrapper = mountWithContexts(
+        <AWXLogin isUserDataReady isAuthenticated={() => true} />
+      );
     });
     await waitForElement(wrapper, 'Redirect', el => el.length === 1);
     await waitForElement(wrapper, 'Redirect', el => el.props().to === '/');
