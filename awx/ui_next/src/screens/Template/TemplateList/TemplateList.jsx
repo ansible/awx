@@ -11,9 +11,11 @@ import {
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
-  ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+import { ToolbarDeleteButton } from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useWsTemplates from '../../../util/useWsTemplates';
@@ -167,7 +169,7 @@ function TemplateList({ i18n }) {
   return (
     <Fragment>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading}
           items={templates}
@@ -234,6 +236,15 @@ function TemplateList({ i18n }) {
           ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
+          headerRow={
+            <HeaderRow qsConfig={QS_CONFIG}>
+              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+              <HeaderCell sortKey="type">{i18n._(t`Type`)}</HeaderCell>
+              <HeaderCell sortKey="last_job_run">
+                {i18n._(t`Recent Jobs`)}
+              </HeaderCell>
+            </HeaderRow>
+          }
           renderToolbar={props => (
             <DatalistToolbar
               {...props}
@@ -252,7 +263,7 @@ function TemplateList({ i18n }) {
               ]}
             />
           )}
-          renderItem={template => (
+          renderRow={(template, index) => (
             <TemplateListItem
               key={template.id}
               value={template.name}
@@ -261,6 +272,7 @@ function TemplateList({ i18n }) {
               onSelect={() => handleSelect(template)}
               isSelected={selected.some(row => row.id === template.id)}
               fetchTemplates={fetchTemplates}
+              rowIndex={index}
             />
           )}
           emptyStateControls={(canAddJT || canAddWFJT) && addButton}
