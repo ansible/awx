@@ -3160,7 +3160,7 @@ class AWXReceptorJob:
         pod_spec_override = {}
         if self.task and self.task.instance.instance_group.pod_spec_override:
             pod_spec_override = parse_yaml_or_json(
-                self.task.instance_group.pod_spec_override)
+                self.task.instance.instance_group.pod_spec_override)
         pod_spec = {**default_pod_spec, **pod_spec_override}
 
         if self.task:
