@@ -116,7 +116,7 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
           label={
             credId === ''
               ? i18n._(t`Vault password`)
-              : i18n._(t`Vault password - ${credId}`)
+              : i18n._(t`Vault password | ${credId}`)
           }
           name={`credentialPasswordVault_${credId}`}
           isRequired
