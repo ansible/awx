@@ -18,7 +18,12 @@ import PaginatedTable, {
   HeaderCell,
 } from '../../components/PaginatedTable';
 import useRequest from '../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../util/qs';
+import {
+  getQSConfig,
+  parseQueryString,
+  replaceParams,
+  encodeNonDefaultQueryString,
+} from '../../util/qs';
 import { ActivityStreamAPI } from '../../api';
 
 import ActivityStreamListItem from './ActivityStreamListItem';
@@ -89,6 +94,19 @@ function ActivityStream({ i18n }) {
     fetchActivityStream();
   }, [fetchActivityStream]);
 
+  const pushHistoryState = urlParams => {
+    let searchParams = parseQueryString(QS_CONFIG, location.search);
+    searchParams = replaceParams(searchParams, { page: 1 });
+    const encodedParams = encodeNonDefaultQueryString(QS_CONFIG, searchParams, {
+      type: urlParams.get('type'),
+    });
+    history.push(
+      encodedParams
+        ? `${location.pathname}?${encodedParams}`
+        : location.pathname
+    );
+  };
+
   return (
     <Fragment>
       <PageSection
@@ -110,7 +128,7 @@ function ActivityStream({ i18n }) {
               urlParams.set('type', selection);
             }
             setIsTypeDropdownOpen(false);
-            history.push(`${location.pathname}?${urlParams.toString()}`);
+            pushHistoryState(urlParams);
           }}
           selections={activityStreamType}
           isOpen={isTypeDropdownOpen}
