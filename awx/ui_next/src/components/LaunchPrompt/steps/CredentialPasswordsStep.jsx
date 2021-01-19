@@ -89,7 +89,7 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
         <PasswordField
           id="launch-ssh-password"
           label={i18n._(t`SSH password`)}
-          name="credentialPasswordSsh"
+          name="credential_passwords.ssh_password"
           isRequired
         />
       )}
@@ -97,7 +97,7 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
         <PasswordField
           id="launch-private-key-passphrase"
           label={i18n._(t`Private key passphrase`)}
-          name="credentialPasswordPrivateKeyPassphrase"
+          name="credential_passwords.ssh_key_unlock"
           isRequired
         />
       )}
@@ -105,7 +105,7 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
         <PasswordField
           id="launch-privilege-escalation-password"
           label={i18n._(t`Privilege escalation password`)}
-          name="credentialPasswordPrivilegeEscalation"
+          name="credential_passwords.become_password"
           isRequired
         />
       )}
@@ -118,7 +118,9 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
               ? i18n._(t`Vault password`)
               : i18n._(t`Vault password | ${credId}`)
           }
-          name={`credentialPasswordVault_${credId}`}
+          name={`credential_passwords['vault_password${
+            credId !== '' ? `.${credId}` : ''
+          }']`}
           isRequired
         />
       ))}

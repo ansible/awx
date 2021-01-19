@@ -83,6 +83,27 @@ export default function useLaunchSteps(
 
       Object.keys(formikValues).forEach(formikValueKey => {
         if (
+          formikValueKey === 'credential_passwords' &&
+          Object.prototype.hasOwnProperty.call(
+            newFormValues,
+            'credential_passwords'
+          )
+        ) {
+          const formikCredentialPasswords = formikValues.credential_passwords;
+          Object.keys(formikCredentialPasswords).forEach(
+            credentialPasswordValueKey => {
+              if (
+                Object.prototype.hasOwnProperty.call(
+                  newFormValues.credential_passwords,
+                  credentialPasswordValueKey
+                )
+              ) {
+                newFormValues.credential_passwords[credentialPasswordValueKey] =
+                  formikCredentialPasswords[credentialPasswordValueKey];
+              }
+            }
+          );
+        } else if (
           Object.prototype.hasOwnProperty.call(newFormValues, formikValueKey)
         ) {
           newFormValues[formikValueKey] = formikValues[formikValueKey];

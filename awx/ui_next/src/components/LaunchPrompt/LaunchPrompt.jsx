@@ -7,7 +7,6 @@ import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import { useDismissableError } from '../../util/useRequest';
 import mergeExtraVars from '../../util/prompt/mergeExtraVars';
-import getCredentialPasswords from '../../util/prompt/getCredentialPasswords';
 import getSurveyValues from '../../util/prompt/getSurveyValues';
 import useLaunchSteps from './useLaunchSteps';
 import AlertModal from '../AlertModal';
@@ -39,8 +38,7 @@ function PromptModalForm({
       }
     };
     const surveyValues = getSurveyValues(values);
-    const credentialPasswords = getCredentialPasswords(values);
-    setValue('credential_passwords', credentialPasswords);
+    setValue('credential_passwords', values.credential_passwords);
     setValue('inventory_id', values.inventory?.id);
     setValue(
       'credentials',
