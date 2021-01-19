@@ -171,13 +171,11 @@ function TemplateListItem({
               <PencilAltIcon />
             </Button>
           </ActionItem>
-          <ActionItem
-            visible={template.summary_fields.user_capabilities.copy}
-            tooltip={i18n._(t`Copy Template`)}
-          >
+          <ActionItem visible={template.summary_fields.user_capabilities.copy}>
             <CopyButton
               helperText={{
                 errorMessage: i18n._(t`Failed to copy template.`),
+                tooltip: i18n._(t`Copy Template`),
               }}
               isDisabled={isDisabled}
               onCopyStart={handleCopyStart}
@@ -188,8 +186,8 @@ function TemplateListItem({
         </ActionsTd>
       </Tr>
       <Tr isExpanded={isExpanded}>
-        <Td colspan={2} />
-        <Td colspan={4}>
+        <Td colSpan={2} />
+        <Td colSpan={4}>
           <ExpandableRowContent>
             <DetailList>
               <Detail
