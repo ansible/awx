@@ -6,6 +6,7 @@ import { t } from '@lingui/macro';
 import useRequest from '../../util/useRequest';
 import { UnifiedJobsAPI } from '../../api';
 import ContentError from '../../components/ContentError';
+import ContentLoading from '../../components/ContentLoading';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 const NOT_FOUND = 'not found';
@@ -46,8 +47,13 @@ function JobTypeRedirect({ id, path, view, i18n }) {
     );
   }
   if (isLoading || !job?.id) {
-    // TODO show loading state
-    return <div>Loading...</div>;
+    return (
+      <PageSection>
+        <Card>
+          <ContentLoading />
+        </Card>
+      </PageSection>
+    );
   }
   const type = JOB_TYPE_URL_SEGMENTS[job.type];
   return <Redirect from={path} to={`/jobs/${type}/${job.id}/${view}`} />;
