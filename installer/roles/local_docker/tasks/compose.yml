@@ -36,6 +36,12 @@
   register: awx_secret_key
 
 - block:
+    - name: Remove AWX containers before migrating postgres so that the old postgres container does not get used
+      docker_compose:
+        project_src: "{{ docker_compose_dir }}"
+        state: absent
+      ignore_errors: true
+
     - name: Run migrations in task container
       shell: docker-compose run --rm --service-ports task awx-manage migrate --no-input
       args:

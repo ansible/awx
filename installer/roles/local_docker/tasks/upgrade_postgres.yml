@@ -1,27 +1,38 @@
 ---
 
+- name: Get full path of postgres data dir
+  shell: "echo {{ postgres_data_dir }}"
+  register: fq_postgres_data_dir
+
 - name: Register temporary docker container
   set_fact:
-    container_command: "docker run -v '{{ postgres_data_dir | realpath }}:/var/lib/postgresql' centos:8 bash "
+    container_command: "docker run --rm -v '{{ fq_postgres_data_dir.stdout }}:/var/lib/postgresql' centos:8 bash -c "
 
 - name: Check for existing Postgres data (run from inside the container for access to file)
   shell:
-    cmd: "{{ container_command }} [[ -f /var/lib/postgresql/10/data/PG_VERSION ]] && echo 'exists'"
+    cmd: |
+      {{ container_command }} "[[ -f /var/lib/postgresql/10/data/PG_VERSION ]] && echo 'exists'"
   register: pg_version_file
   ignore_errors: true
 
 - name: Record Postgres version
-  shell: "{{ container_command }} cat var/lib/postgresql/10/data/PG_VERSION"
+  shell: |
+    {{ container_command }} "cat /var/lib/postgresql/10/data/PG_VERSION"
   register: old_pg_version
-  when: pg_version_file.stdout == 'exists'
+  when: pg_version_file is defined and pg_version_file.stdout == 'exists'
 
 - name: Determine whether to upgrade postgres
   set_fact:
-    upgrade_postgres: "{{ old_pg_version is defined and old_pg_version.stdout == '10' | bool }}"
-  when: not old_pg_version.skipped | bool
+    upgrade_postgres: "{{ old_pg_version.stdout == '10' }}"
+  when: old_pg_version.changed
+
+- name: Set up new postgres paths pre-upgrade
+  shell: |
+    {{ container_command }} "mkdir -p /var/lib/postgresql/12/data/"
+  when: upgrade_postgres | bool
 
 - name: Stop AWX before upgrading postgres
-  docker_service:
+  docker_compose:
     project_src: "{{ docker_compose_dir }}"
     stopped: true
   when: upgrade_postgres | bool
@@ -29,15 +40,20 @@
 - name: Upgrade Postgres
   shell: |
     docker run --rm \
-      -v {{ postgres_data_dir | realpath }}:/var/lib/postgresql \
+      -v {{ postgres_data_dir }}/10/data:/var/lib/postgresql/10/data \
+      -v {{ postgres_data_dir }}/12/data:/var/lib/postgresql/12/data \
       -e PGUSER={{ pg_username }} -e POSTGRES_INITDB_ARGS="-U {{ pg_username }}" \
       tianon/postgres-upgrade:10-to-12 --username={{ pg_username }}
   when: upgrade_postgres | bool
 
 - name: Copy old pg_hba.conf
-  shell: "{{ container_command }} cp /var/lib/postgresql/10/data/pg_hba.conf /var/lib/postgresql/12/data/pg_hba.conf"
+  shell: |
+    {{ container_command }} "cp /var/lib/postgresql/10/data/pg_hba.conf /var/lib/postgresql/12/data/pg_hba.conf"
   when: upgrade_postgres | bool
 
 - name: Remove old data directory
-  shell: "{{ container_command }} rm -rf /var/lib/postgresql/10/data"
-  when: compose_start_containers|bool
+  shell: |
+    {{ container_command }} "rm -rf /var/lib/postgresql/10/data"
+  when:
+    - upgrade_postgres | bool
+    - compose_start_containers|bool
