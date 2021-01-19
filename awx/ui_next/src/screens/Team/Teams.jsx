@@ -29,6 +29,7 @@ function Teams({ i18n }) {
         [`/teams/${team.id}/details`]: i18n._(t`Details`),
         [`/teams/${team.id}/users`]: i18n._(t`Users`),
         [`/teams/${team.id}/access`]: i18n._(t`Access`),
+        [`/teams/${team.id}/roles`]: i18n._(t`Roles`),
       });
     },
     [i18n]

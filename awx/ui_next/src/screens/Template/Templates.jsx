@@ -22,8 +22,18 @@ function Templates({ i18n }) {
   const [breadcrumbConfig, setScreenHeader] = useState(
     initScreenHeader.current
   );
+
+  const [schedule, setSchedule] = useState();
+  const [template, setTemplate] = useState();
+
   const setBreadcrumbConfig = useCallback(
-    (template, schedule) => {
+    (passedTemplate, passedSchedule) => {
+      if (passedTemplate && passedTemplate.id !== template?.id) {
+        setTemplate(passedTemplate);
+      }
+      if (passedSchedule && passedSchedule.id !== schedule?.id) {
+        setSchedule(passedSchedule);
+      }
       if (!template) return;
       const templatePath = `/templates/${template.type}/${template.id}`;
       const schedulesPath = `${templatePath}/schedules`;
@@ -42,11 +52,13 @@ function Templates({ i18n }) {
         [schedulesPath]: i18n._(t`Schedules`),
         [`${schedulesPath}/add`]: i18n._(t`Create New Schedule`),
         [`${schedulesPath}/${schedule?.id}`]: `${schedule?.name}`,
-        [`${schedulesPath}/details`]: i18n._(t`Schedule Details`),
-        [`${schedulesPath}/edit`]: i18n._(t`Edit Details`),
+        [`${schedulesPath}/${schedule?.id}/details`]: i18n._(
+          t`Schedule Details`
+        ),
+        [`${schedulesPath}/${schedule?.id}/edit`]: i18n._(t`Edit Schedule`),
       });
     },
-    [i18n]
+    [i18n, template, schedule]
   );
 
   return (
