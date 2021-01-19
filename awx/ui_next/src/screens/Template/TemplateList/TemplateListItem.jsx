@@ -1,8 +1,8 @@
 import 'styled-components/macro';
 import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Tooltip } from '@patternfly/react-core';
-import { Tr, Td } from '@patternfly/react-table';
+import { Button, Tooltip, Chip } from '@patternfly/react-core';
+import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import {
@@ -12,6 +12,13 @@ import {
   RocketIcon,
 } from '@patternfly/react-icons';
 import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
+import {
+  DetailList,
+  Detail,
+  DeletedDetail,
+} from '../../../components/DetailList';
+import ChipGroup from '../../../components/ChipGroup';
+import CredentialChip from '../../../components/CredentialChip';
 import { timeOfDay } from '../../../util/dates';
 
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
@@ -29,6 +36,7 @@ function TemplateListItem({
   fetchTemplates,
   rowIndex,
 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const labelId = `check-action-${template.id}`;
 
@@ -53,102 +61,203 @@ function TemplateListItem({
     setIsDisabled(false);
   }, []);
 
+  const {
+    summary_fields: summaryFields,
+    ask_inventory_on_launch: askInventoryOnLaunch,
+  } = template;
+
   const missingResourceIcon =
     template.type === 'job_template' &&
-    (!template.summary_fields.project ||
-      (!template.summary_fields.inventory &&
-        !template.ask_inventory_on_launch));
-  return (
-    <Tr id={`template-row-${template.id}`}>
-      <Td
-        select={{
-          rowIndex,
-          isSelected,
-          onSelect,
-        }}
-        dataLabel={i18n._(t`Selected`)}
-      />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
-        <Link to={`${detailUrl}`}>
-          <b>{template.name}</b>
+    (!summaryFields.project ||
+      (!summaryFields.inventory && !askInventoryOnLaunch));
+
+  const inventoryValue = (kind, id) => {
+    const inventorykind = kind === 'smart' ? 'smart_inventory' : 'inventory';
+
+    return askInventoryOnLaunch ? (
+      <>
+        <Link to={`/inventories/${inventorykind}/${id}/details`}>
+          {summaryFields.inventory.name}
         </Link>
-        {missingResourceIcon && (
-          <span>
-            <Tooltip
-              content={i18n._(t`Resources are missing from this template.`)}
-              position="right"
-            >
-              <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
-            </Tooltip>
-          </span>
-        )}
-      </Td>
-      <Td dataLabel={i18n._(t`Type`)}>{toTitleCase(template.type)}</Td>
-      <Td dataLabel={i18n._(t`Recent Jobs`)}>
-        <Sparkline jobs={template.summary_fields.recent_jobs} />
-      </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)}>
-        <ActionItem
-          visible={template.type === 'workflow_job_template'}
-          tooltip={i18n._(t`Visualizer`)}
-        >
-          <Button
-            isDisabled={isDisabled}
-            aria-label={i18n._(t`Visualizer`)}
-            variant="plain"
-            component={Link}
-            to={`/templates/workflow_job_template/${template.id}/visualizer`}
-          >
-            <ProjectDiagramIcon />
-          </Button>
-        </ActionItem>
-        <ActionItem
-          visible={template.summary_fields.user_capabilities.start}
-          tooltip={i18n._(t`Launch Template`)}
-        >
-          <LaunchButton resource={template}>
-            {({ handleLaunch }) => (
-              <Button
-                isDisabled={isDisabled}
-                aria-label={i18n._(t`Launch template`)}
-                variant="plain"
-                onClick={handleLaunch}
+        <span> {i18n._(t`(Prompt on launch)`)}</span>
+      </>
+    ) : (
+      <Link to={`/inventories/${inventorykind}/${id}/details`}>
+        {summaryFields.inventory.name}
+      </Link>
+    );
+  };
+
+  return (
+    <>
+      <Tr id={`template-row-${template.id}`}>
+        <Td
+          expand={{
+            rowIndex,
+            isExpanded,
+            onToggle: () => setIsExpanded(!isExpanded),
+          }}
+        />
+        <Td
+          select={{
+            rowIndex,
+            isSelected,
+            onSelect,
+          }}
+          dataLabel={i18n._(t`Selected`)}
+        />
+        <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+          <Link to={`${detailUrl}`}>
+            <b>{template.name}</b>
+          </Link>
+          {missingResourceIcon && (
+            <span>
+              <Tooltip
+                content={i18n._(t`Resources are missing from this template.`)}
+                position="right"
               >
-                <RocketIcon />
-              </Button>
-            )}
-          </LaunchButton>
-        </ActionItem>
-        <ActionItem
-          visible={template.summary_fields.user_capabilities.edit}
-          tooltip={i18n._(t`Edit Template`)}
-        >
-          <Button
-            isDisabled={isDisabled}
-            aria-label={i18n._(t`Edit Template`)}
-            variant="plain"
-            component={Link}
-            to={`/templates/${template.type}/${template.id}/edit`}
+                <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
+              </Tooltip>
+            </span>
+          )}
+        </Td>
+        <Td dataLabel={i18n._(t`Type`)}>{toTitleCase(template.type)}</Td>
+        <Td dataLabel={i18n._(t`Recent Jobs`)}>
+          <Sparkline jobs={template.summary_fields.recent_jobs} />
+        </Td>
+        <ActionsTd dataLabel={i18n._(t`Actions`)}>
+          <ActionItem
+            visible={template.type === 'workflow_job_template'}
+            tooltip={i18n._(t`Visualizer`)}
           >
-            <PencilAltIcon />
-          </Button>
-        </ActionItem>
-        <ActionItem
-          visible={template.summary_fields.user_capabilities.copy}
-          tooltip={i18n._(t`Copy Template`)}
-        >
-          <CopyButton
-            helperText={{
-              errorMessage: i18n._(t`Failed to copy template.`),
-            }}
-            isDisabled={isDisabled}
-            onCopyStart={handleCopyStart}
-            onCopyFinish={handleCopyFinish}
-            copyItem={copyTemplate}
-          />
-        </ActionItem>
-      </ActionsTd>
-    </Tr>
+            <Button
+              isDisabled={isDisabled}
+              aria-label={i18n._(t`Visualizer`)}
+              variant="plain"
+              component={Link}
+              to={`/templates/workflow_job_template/${template.id}/visualizer`}
+            >
+              <ProjectDiagramIcon />
+            </Button>
+          </ActionItem>
+          <ActionItem
+            visible={template.summary_fields.user_capabilities.start}
+            tooltip={i18n._(t`Launch Template`)}
+          >
+            <LaunchButton resource={template}>
+              {({ handleLaunch }) => (
+                <Button
+                  isDisabled={isDisabled}
+                  aria-label={i18n._(t`Launch template`)}
+                  variant="plain"
+                  onClick={handleLaunch}
+                >
+                  <RocketIcon />
+                </Button>
+              )}
+            </LaunchButton>
+          </ActionItem>
+          <ActionItem
+            visible={template.summary_fields.user_capabilities.edit}
+            tooltip={i18n._(t`Edit Template`)}
+          >
+            <Button
+              isDisabled={isDisabled}
+              aria-label={i18n._(t`Edit Template`)}
+              variant="plain"
+              component={Link}
+              to={`/templates/${template.type}/${template.id}/edit`}
+            >
+              <PencilAltIcon />
+            </Button>
+          </ActionItem>
+          <ActionItem
+            visible={template.summary_fields.user_capabilities.copy}
+            tooltip={i18n._(t`Copy Template`)}
+          >
+            <CopyButton
+              helperText={{
+                errorMessage: i18n._(t`Failed to copy template.`),
+              }}
+              isDisabled={isDisabled}
+              onCopyStart={handleCopyStart}
+              onCopyFinish={handleCopyFinish}
+              copyItem={copyTemplate}
+            />
+          </ActionItem>
+        </ActionsTd>
+      </Tr>
+      <Tr isExpanded={isExpanded}>
+        <Td colspan={2} />
+        <Td colspan={4}>
+          <ExpandableRowContent>
+            <DetailList>
+              <Detail
+                label={i18n._(t`Activity`)}
+                value={<Sparkline jobs={summaryFields.recent_jobs} />}
+              />
+              {summaryFields.credentials && summaryFields.credentials.length && (
+                <Detail
+                  label={i18n._(t`Credentials`)}
+                  value={
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={summaryFields.credentials.length}
+                    >
+                      {summaryFields.credentials.map(c => (
+                        <CredentialChip key={c.id} credential={c} isReadOnly />
+                      ))}
+                    </ChipGroup>
+                  }
+                />
+              )}
+              {summaryFields.inventory ? (
+                <Detail
+                  label={i18n._(t`Inventory`)}
+                  value={inventoryValue(
+                    summaryFields.inventory.kind,
+                    summaryFields.inventory.id
+                  )}
+                />
+              ) : (
+                !askInventoryOnLaunch && (
+                  <DeletedDetail label={i18n._(t`Inventory`)} />
+                )
+              )}
+              {summaryFields.labels && summaryFields.labels.results.length > 0 && (
+                <Detail
+                  label={i18n._(t`Labels`)}
+                  value={
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={summaryFields.labels.results.length}
+                    >
+                      {summaryFields.labels.results.map(l => (
+                        <Chip key={l.id} isReadOnly>
+                          {l.name}
+                        </Chip>
+                      ))}
+                    </ChipGroup>
+                  }
+                />
+              )}
+              {summaryFields.project ? (
+                <Detail
+                  label={i18n._(t`Project`)}
+                  value={
+                    <Link to={`/projects/${summaryFields.project.id}/details`}>
+                      {summaryFields.project.name}
+                    </Link>
+                  }
+                />
+              ) : (
+                <DeletedDetail label={i18n._(t`Project`)} />
+              )}
+            </DetailList>
+          </ExpandableRowContent>
+        </Td>
+      </Tr>
+    </>
   );
 }
 

@@ -208,40 +208,14 @@ function TemplateList({ i18n }) {
               key: 'modified_by__username__icontains',
             },
           ]}
-          toolbarSortColumns={[
-            {
-              name: i18n._(t`Inventory`),
-              key: 'job_template__inventory__id',
-            },
-            {
-              name: i18n._(t`Last Job Run`),
-              key: 'last_job_run',
-            },
-            {
-              name: i18n._(t`Modified`),
-              key: 'modified',
-            },
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-            },
-            {
-              name: i18n._(t`Project`),
-              key: 'jobtemplate__project__id',
-            },
-            {
-              name: i18n._(t`Type`),
-              key: 'type',
-            },
-          ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           headerRow={
-            <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderRow qsConfig={QS_CONFIG} isExpandable>
               <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
               <HeaderCell sortKey="type">{i18n._(t`Type`)}</HeaderCell>
               <HeaderCell sortKey="last_job_run">
-                {i18n._(t`Recent Jobs`)}
+                {i18n._(t`Last Run`)}
               </HeaderCell>
             </HeaderRow>
           }
