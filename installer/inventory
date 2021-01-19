@@ -104,7 +104,7 @@ pg_port=5432
 # This will create or update a default admin (superuser) account in AWX, if not provided
 # then these default values are used
 admin_user=admin
-admin_password=password
+# admin_password=password
 
 # Whether or not to create preload data for demonstration purposes
 create_preload_data=True
