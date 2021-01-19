@@ -131,7 +131,7 @@ const buildAnchor = (obj, resource, activity) => {
 };
 
 const getPastTense = item => {
-  return /e$/.test(item) ? `${item}d ` : `${item}ed `;
+  return /e$/.test(item) ? `${item}d` : `${item}ed`;
 };
 
 const isGroupRelationship = item => {
@@ -232,7 +232,7 @@ export default (activity, i18n) => {
               );
               labeledLinks.push(
                 buildLabeledLink(
-                  `${activity.summary_fields.role[0].role_field} to `,
+                  `${activity.summary_fields.role[0].role_field} to`,
                   buildAnchor(
                     activity.summary_fields.group[0],
                     object1,
@@ -253,7 +253,7 @@ export default (activity, i18n) => {
               );
               labeledLinks.push(
                 buildLabeledLink(
-                  `${activity.summary_fields.role[0].role_field} to `,
+                  `${activity.summary_fields.role[0].role_field} to`,
                   buildAnchor(
                     activity.summary_fields[object1][0],
                     object1,
