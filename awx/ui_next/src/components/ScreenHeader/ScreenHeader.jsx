@@ -39,9 +39,15 @@ const ScreenHeader = ({ breadcrumbConfig, i18n, streamType }) => {
               </Route>
             </Breadcrumb>
           )}
-          <Route path="/:path">
-            <ActualTitle breadcrumbConfig={breadcrumbConfig} />
-          </Route>
+          <div
+            style={{
+              minHeight: '31px',
+            }}
+          >
+            <Route path="/:path">
+              <ActualTitle breadcrumbConfig={breadcrumbConfig} />
+            </Route>
+          </div>
         </div>
         {streamType !== 'none' && (
           <div>
