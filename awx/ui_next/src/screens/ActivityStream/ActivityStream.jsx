@@ -94,11 +94,11 @@ function ActivityStream({ i18n }) {
     fetchActivityStream();
   }, [fetchActivityStream]);
 
-  const pushHistoryState = urlParams => {
+  const pushHistoryState = urlParamsToAdd => {
     let searchParams = parseQueryString(QS_CONFIG, location.search);
     searchParams = replaceParams(searchParams, { page: 1 });
     const encodedParams = encodeNonDefaultQueryString(QS_CONFIG, searchParams, {
-      type: urlParams.get('type'),
+      type: urlParamsToAdd.get('type'),
     });
     history.push(
       encodedParams
