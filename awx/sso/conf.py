@@ -863,7 +863,7 @@ register(
 register(
     'SOCIAL_AUTH_GITHUB_ENTERPRISE_URL',
     field_class=fields.CharField,
-    allow_blank=False,
+    allow_blank=True,
     default='',
     label=_('GitHub Enterprise URL'),
     help_text=_('The URL for your Github Enteprise.'),
@@ -874,7 +874,7 @@ register(
 register(
     'SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL',
     field_class=fields.CharField,
-    allow_blank=False,
+    allow_blank=True,
     default='',
     label=_('GitHub Enterprise API URL'),
     help_text=_('The API URL for your GitHub Enterprise.'),
@@ -950,7 +950,7 @@ register(
 register(
     'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL',
     field_class=fields.CharField,
-    allow_blank=False,
+    allow_blank=True,
     default='',
     label=_('GitHub Enterprise Organization URL'),
     help_text=_('The URL for your Github Enteprise.'),
@@ -961,7 +961,7 @@ register(
 register(
     'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL',
     field_class=fields.CharField,
-    allow_blank=False,
+    allow_blank=True,
     default='',
     label=_('GitHub Enterprise Organization API URL'),
     help_text=_('The API URL for your GitHub Enterprise.'),
@@ -1050,7 +1050,7 @@ register(
 register(
     'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL',
     field_class=fields.CharField,
-    allow_blank=False,
+    allow_blank=True,
     default='',
     label=_('GitHub Enterprise Team URL'),
     help_text=_('The URL for your Github Enterprise.'),
@@ -1061,7 +1061,7 @@ register(
 register(
     'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL',
     field_class=fields.CharField,
-    allow_blank=False,
+    allow_blank=True,
     default='',
     label=_('GitHub Enterprise Team API URL'),
     help_text=_('The API URL for your GitHub Enterprise.'),
