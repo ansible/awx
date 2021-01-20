@@ -189,7 +189,7 @@ def get_awx_version():
 
 
 def get_awx_http_client_headers():
-    license = get_license().get('license_type', 'UNLICENSED')
+    license = get_license().get('subscription_type', 'UNLICENSED')
     headers = {
         'Content-Type': 'application/json',
         'User-Agent': '{} {} ({})'.format(
@@ -202,12 +202,12 @@ def get_awx_http_client_headers():
 
 
 def get_licenser(*args, **kwargs):
-    from awx.main.utils.licensing import Licenser, OpenLicense
+    from awx.main.utils.subscriptions import Subscriptions, OpenSubscription
     try:
         if os.path.exists('/var/lib/awx/.tower_version'):
-            return Licenser(*args, **kwargs)
+            return Subscriptions(*args, **kwargs)
         else:
-            return OpenLicense()
+            return OpenSubscription()
     except Exception as e:
         raise ValueError(_('Error importing Tower License: %s') % e)
 

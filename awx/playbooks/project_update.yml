@@ -15,7 +15,7 @@
 # roles_enabled: Value of the global setting to enable roles downloading
 # collections_enabled: Value of the global setting to enable collections downloading
 # awx_version: Current running version of the awx or tower as a string
-# awx_license_type: "open" for AWX; else presume Tower
+# awx_subscription_type: "open" for AWX; else presume Tower
 
 - hosts: localhost
   gather_facts: false
@@ -84,7 +84,7 @@
             username: "{{scm_username}}"
             password: "{{scm_password}}"
             project_path: "{{project_path}}"
-            awx_license_type: "{{awx_license_type}}"
+            awx_subscription_type: "{{awx_subscription_type}}"
             awx_version: "{{awx_version}}"
           register: results
 

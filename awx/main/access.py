@@ -308,7 +308,7 @@ class BaseAccess(object):
 
     def check_license(self, add_host_name=None, feature=None, check_expiration=True, quiet=False):
         validation_info = get_licenser().validate()
-        if validation_info.get('license_type', 'UNLICENSED') == 'open':
+        if validation_info.get('subscription_type', 'UNLICENSED') == 'open':
             return
 
         if ('test' in sys.argv or 'py.test' in sys.argv[0] or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
@@ -346,7 +346,7 @@ class BaseAccess(object):
 
     def check_org_host_limit(self, data, add_host_name=None):
         validation_info = get_licenser().validate()
-        if validation_info.get('license_type', 'UNLICENSED') == 'open':
+        if validation_info.get('subscription_type', 'UNLICENSED') == 'open':
             return
 
         inventory = get_object_from_data('inventory', Inventory, data)

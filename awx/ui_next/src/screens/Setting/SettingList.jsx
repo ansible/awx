@@ -159,7 +159,7 @@ function SettingList({ i18n }) {
   return (
     <SplitLayout>
       {settingRoutes.map(({ description, header, id, routes }) => {
-        if (id === 'license' && config?.license_info?.license_type === 'open') {
+        if (id === 'license' && config?.subscription_info?.subscription_type === 'open') {
           return null;
         }
         return (

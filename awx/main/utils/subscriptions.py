@@ -5,7 +5,7 @@
 This is intended to be a lightweight license class for verifying subscriptions, and parsing subscription data
 from entitlement certificates.
 
-The Licenser class can do the following:
+The Subscriptions class can do the following:
  - Parse an Entitlement cert to generate license
 '''
 
@@ -82,27 +82,27 @@ def validate_entitlement_manifest(data):
     raise ValueError(_("Invalid manifest: manifest contains no subscriptions."))
 
 
-class OpenLicense(object):
+class OpenSubscription(object):
     def validate(self):
         return dict(
-            license_type='open',
+            subscription_type='open',
             valid_key=True,
             subscription_name='OPEN',
             product_name="AWX",
         )
 
 
-class Licenser(object):
+class Subscriptions(object):
     # warn when there is a month (30 days) left on the subscription
     SUBSCRIPTION_TIMEOUT = 60 * 60 * 24 * 30
-
+''
     UNLICENSED_DATA = dict(
         subscription_name=None,
         sku=None,
         support_level=None,
         instance_count=0,
-        license_date=0,
-        license_type="UNLICENSED",
+        subscription_date=0,
+        subscription_type="UNLICENSED",
         product_name="Red Hat Ansible Automation Platform",
         valid_key=False
     )
@@ -110,14 +110,14 @@ class Licenser(object):
     def __init__(self, **kwargs):
         self._attrs = dict(
             instance_count=0,
-            license_date=0,
-            license_type='UNLICENSED',
+            subscription_date=0,
+            subscription_type='UNLICENSED',
         )
         self.config = rhsm_config()
         if not kwargs:
-            license_setting = getattr(settings, 'LICENSE', None)
-            if license_setting is not None:
-                kwargs = license_setting
+            sub_setting = getattr(settings, 'LICENSE', None)
+            if sub_setting is not None:
+                kwargs = sub_setting
 
         if 'company_name' in kwargs:
             kwargs.pop('company_name')
@@ -175,14 +175,14 @@ class Licenser(object):
             license.setdefault('pool_id', sub['pool']['id'])
             license.setdefault('product_name', sub['pool']['productName'])
             license.setdefault('valid_key', True)
-            license.setdefault('license_type', 'enterprise')
+            license.setdefault('subscription_type', 'enterprise')
             license.setdefault('satellite', False)
             # Use the nearest end date
             endDate = parse_date(sub['endDate'])
-            currentEndDateStr = license.get('license_date', '4102462800') # 2100-01-01
+            currentEndDateStr = license.get('subscription_date', '4102462800') # 2100-01-01
             currentEndDate = datetime.fromtimestamp(int(currentEndDateStr), timezone.utc)
             if endDate < currentEndDate:
-                license['license_date'] = endDate.strftime('%s')
+                license['subscription_date'] = endDate.strftime('%s')
             instances = sub['quantity']
             license['instance_count'] = license.get('instance_count', 0) + instances
             license['subscription_name'] = re.sub(r'[\d]* Managed Nodes', '%d Managed Nodes' % license['instance_count'], license['subscription_name'])
@@ -198,8 +198,8 @@ class Licenser(object):
         # Update attributes of the current license.
         if 'instance_count' in kwargs:
             kwargs['instance_count'] = int(kwargs['instance_count'])
-        if 'license_date' in kwargs:
-            kwargs['license_date'] = int(kwargs['license_date'])
+        if 'subscription_date' in kwargs:
+            kwargs['subscription_date'] = int(kwargs['subscription_date'])
         self._attrs.update(kwargs)
 
 
@@ -302,7 +302,7 @@ class Licenser(object):
                     license['endDate'] = sub['end_date']
                     license['productName'] = "Red Hat Ansible Automation"
                     license['valid_key'] = True
-                    license['license_type'] = 'enterprise'
+                    license['subscription_type'] = 'enterprise'
                     license['satellite'] = True
                     json.append(license)
         return json
@@ -374,10 +374,10 @@ class Licenser(object):
                 license._attrs['instance_count'] = int(sub.quantity)
                 license._attrs['sku'] = sub.sku
                 license._attrs['support_level'] = sub.support_level
-                license._attrs['license_type'] = 'enterprise'
+                license._attrs['subscription_type'] = 'enterprise'
                 if sub.trial:
                     license._attrs['trial'] = True
-                    license._attrs['license_type'] = 'trial'
+                    license._attrs['subscription_type'] = 'trial'
                 license._attrs['instance_count'] = min(
                     MAX_INSTANCES, license._attrs['instance_count']
                 )
@@ -393,7 +393,7 @@ class Licenser(object):
                 license._attrs['satellite'] = satellite
                 license._attrs['valid_key'] = True
                 license.update(
-                    license_date=int(sub.end_date.strftime('%s'))
+                    subscription_date=int(sub.end_date.strftime('%s'))
                 )
                 license.update(
                     pool_id=sub.pool_id
@@ -409,7 +409,7 @@ class Licenser(object):
     def validate(self):
         # Return license attributes with additional validation info.
         attrs = copy.deepcopy(self._attrs)
-        type = attrs.get('license_type', 'none')
+        type = attrs.get('subscription_type', 'none')
 
         if (type == 'UNLICENSED' or False):
             attrs.update(dict(valid_key=False, compliant=False))
@@ -425,14 +425,14 @@ class Licenser(object):
         free_instances = (instance_count - current_instances)
         attrs['free_instances'] = max(0, free_instances)
 
-        license_date = int(attrs.get('license_date', 0) or 0)
+        subscription_date = int(attrs.get('subscription_date', 0) or 0)
         current_date = int(time.time())
-        time_remaining = license_date - current_date
+        time_remaining = subscription_date - current_date
         attrs['time_remaining'] = time_remaining
         if attrs.setdefault('trial', False):
             attrs['grace_period_remaining'] = time_remaining
         else:
-            attrs['grace_period_remaining'] = (license_date + 2592000) - current_date
+            attrs['grace_period_remaining'] = (subscription_date + 2592000) - current_date
         attrs['compliant'] = bool(time_remaining > 0 and free_instances >= 0)
         attrs['date_warning'] = bool(time_remaining < self.SUBSCRIPTION_TIMEOUT)
         attrs['date_expired'] = bool(time_remaining <= 0)

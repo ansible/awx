@@ -20,7 +20,7 @@ class HostManager(models.Manager):
     """Custom manager class for Hosts model."""
 
     def active_count(self):
-        """Return count of active, unique hosts for licensing.
+        """Return count of active, unique hosts for subscription compliance.
         Construction of query involves:
          - remove any ordering specified in model's Meta
          - Exclude hosts sourced from another Tower
@@ -150,7 +150,7 @@ class InstanceManager(models.Manager):
             return (False, self.me())
 
     def active_count(self):
-        """Return count of active Tower nodes for licensing."""
+        """Return count of active Tower nodes for subscription compliance."""
         return self.all().count()
 
     def my_role(self):

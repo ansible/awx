@@ -38,7 +38,7 @@ function OrganizationDetail({ i18n, organization }) {
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [instanceGroups, setInstanceGroups] = useState([]);
   const history = useHistory();
-  const { license_info = {} } = useConfig();
+  const { subscription_info = {} } = useConfig();
 
   useEffect(() => {
     (async () => {
@@ -87,7 +87,7 @@ function OrganizationDetail({ i18n, organization }) {
           dataCy="organization-detail-name"
         />
         <Detail label={i18n._(t`Description`)} value={description} />
-        {license_info?.license_type !== 'open' && (
+        {subscription_info?.subscription_type !== 'open' && (
           <Detail label={i18n._(t`Max Hosts`)} value={`${max_hosts}`} />
         )}
         <Detail

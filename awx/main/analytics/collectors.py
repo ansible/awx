@@ -35,7 +35,7 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 
 @register('config', '1.2', description=_('General platform configuration.'))
 def config(since, **kwargs):
-    license_info = get_license()
+    subscription_info = get_license()
     install_type = 'traditional'
     if os.environ.get('container') == 'oci':
         install_type = 'openshift'
@@ -53,10 +53,10 @@ def config(since, **kwargs):
         'tower_url_base': settings.TOWER_URL_BASE,
         'tower_version': get_awx_version(),
         'ansible_version': get_ansible_version(),
-        'license_type': license_info.get('license_type', 'UNLICENSED'),
-        'free_instances': license_info.get('free_instances', 0),
-        'total_licensed_instances': license_info.get('instance_count', 0),
-        'license_expiry': license_info.get('time_remaining', 0),
+        'subscription_type': subscription_info.get('subscription_type', 'UNLICENSED'),
+        'free_instances': subscription_info.get('free_instances', 0),
+        'total_licensed_instances': subscription_info.get('instance_count', 0),
+        'subscription_expiry': subscription_info.get('time_remaining', 0),
         'pendo_tracking': settings.PENDO_TRACKING_STATE,
         'authentication_backends': settings.AUTHENTICATION_BACKENDS,
         'logging_aggregators': settings.LOG_AGGREGATOR_LOGGERS,

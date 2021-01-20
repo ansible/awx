@@ -167,7 +167,7 @@ class InventoryModule(BaseInventoryPlugin):
             config_data = module.get_endpoint('/api/v2/config/')['json']
 
             server_data = {}
-            server_data['license_type'] = config_data.get('license_info', {}).get('license_type', 'unknown')
+            server_data['subscription_type'] = config_data.get('subscription_info', {}).get('subscription_type', 'unknown')
             for key in ('version', 'ansible_version'):
                 server_data[key] = config_data.get(key, 'unknown')
             self.inventory.set_variable('all', 'tower_metadata', server_data)

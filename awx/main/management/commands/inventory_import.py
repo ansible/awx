@@ -837,29 +837,29 @@ class Command(BaseCommand):
         self._create_update_group_children()
         self._create_update_group_hosts()
 
-    def remote_tower_license_compare(self, local_license_type):
+    def remote_tower_license_compare(self, local_subscription_type):
         # this requires https://github.com/ansible/ansible/pull/52747
         source_vars = self.all_group.variables
-        remote_license_type = source_vars.get('tower_metadata', {}).get('license_type', None)
-        if remote_license_type is None:
+        remote_subscription_type = source_vars.get('tower_metadata', {}).get('subscription_type', None)
+        if remote_subscription_type is None:
             raise PermissionDenied('Unexpected Error: Tower inventory plugin missing needed metadata!')
-        if local_license_type != remote_license_type:
+        if local_subscription_type != remote_subscription_type:
             raise PermissionDenied('Tower server licenses must match: source: {} local: {}'.format(
-                remote_license_type, local_license_type
+                remote_subscription_type, local_subscription_type
             ))
 
     def check_license(self):
-        license_info = get_licenser().validate()
-        local_license_type = license_info.get('license_type', 'UNLICENSED')
-        if local_license_type == 'UNLICENSED':
+        subscription_info = get_licenser().validate()
+        local_subscription_type = subscription_info.get('subscription_type', 'UNLICENSED')
+        if local_subscription_type == 'UNLICENSED':
             logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise PermissionDenied('No license found!')
-        elif local_license_type == 'open':
+        elif local_subscription_type == 'open':
             return
-        instance_count = license_info.get('instance_count', 0)
-        free_instances = license_info.get('free_instances', 0)
-        time_remaining = license_info.get('time_remaining', 0)
-        hard_error = license_info.get('trial', False) is True or license_info['instance_count'] == 10
+        instance_count = subscription_info.get('instance_count', 0)
+        free_instances = subscription_info.get('free_instances', 0)
+        time_remaining = subscription_info.get('time_remaining', 0)
+        hard_error = subscription_info.get('trial', False) is True or subscription_info['instance_count'] == 10
         new_count = Host.objects.active_count()
         if time_remaining <= 0:
             if hard_error:
@@ -873,7 +873,7 @@ class Command(BaseCommand):
         if self.inventory_source.source == 'tower' and any(f in self.inventory_source.source_path for f in TOWER_SOURCE_FILES):
             # only if this is the 2nd call to license check, we cannot compare before running plugin
             if hasattr(self, 'all_group'):
-                self.remote_tower_license_compare(local_license_type)
+                self.remote_tower_license_compare(local_subscription_type)
         if free_instances < 0:
             d = {
                 'new_count': new_count,
@@ -886,8 +886,8 @@ class Command(BaseCommand):
                 logger.warning(LICENSE_MESSAGE % d)
 
     def check_org_host_limit(self):
-        license_info = get_licenser().validate()
-        if license_info.get('license_type', 'UNLICENSED') == 'open':
+        subscription_info = get_licenser().validate()
+        if subscription_info.get('subscription_type', 'UNLICENSED') == 'open':
             return
 
         org = self.inventory.organization

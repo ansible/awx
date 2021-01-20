@@ -19,4 +19,4 @@ class Command(BaseCommand):
         license = get_licenser().validate()
         if options.get('data'):
             return json.dumps(license)
-        return license.get('license_type', 'none')
+        return license.get('subscription_type', 'none')

@@ -39,7 +39,7 @@ from awx.main import tasks
 from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
 
-from awx.main.utils.licensing import Licenser
+from awx.main.utils.subscriptions import Subscriptions
 
 
 class TestJobExecution(object):
@@ -1880,7 +1880,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
         task = RunProjectUpdate()
         env = task.build_env(project_update, private_data_dir)
 
-        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+        with mock.patch.object(Subscriptions, 'validate', lambda *args, **kw: {}):
             task.build_extra_vars_file(project_update, private_data_dir)
 
         assert task.__vars__['roles_enabled'] is False
@@ -1903,7 +1903,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
         task = RunProjectUpdate()
         env = task.build_env(project_update, private_data_dir)
 
-        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+        with mock.patch.object(Subscriptions, 'validate', lambda *args, **kw: {}):
             task.build_extra_vars_file(project_update, private_data_dir)
 
         assert task.__vars__['roles_enabled'] is True
@@ -1988,7 +1988,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
 
         task._write_extra_vars_file = mock.Mock()
 
-        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+        with mock.patch.object(Subscriptions, 'validate', lambda *args, **kw: {}):
             task.build_extra_vars_file(project_update, private_data_dir)
 
         call_args, _ = task._write_extra_vars_file.call_args_list[0]

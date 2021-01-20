@@ -43,7 +43,7 @@ class ActionModule(ActionBase):
         username = self._task.args.get('username', None)
         password = self._task.args.get('password', None)
         proj_path = self._task.args.get('project_path', None)
-        license = self._task.args.get('awx_license_type', None)
+        license = self._task.args.get('awx_subscription_type', None)
         awx_version = self._task.args.get('awx_version', None)
 
         session = requests.Session()

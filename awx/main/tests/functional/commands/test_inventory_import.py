@@ -321,7 +321,7 @@ def test_tower_version_compare():
     cmd.all_group.variables = {
         'tower_metadata': {
             "ansible_version": "2.7.5",
-            "license_type": "open",
+            "subscription_type": "open",
             "version": "2.0.1-1068-g09684e2c41"
         }
     }

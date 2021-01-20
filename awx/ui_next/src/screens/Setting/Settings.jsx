@@ -26,7 +26,7 @@ import { SettingsAPI } from '../../api';
 import useRequest from '../../util/useRequest';
 
 function Settings({ i18n }) {
-  const { license_info = {}, me } = useConfig();
+  const { subscription_info = {}, me } = useConfig();
 
   const { request, result, isLoading, error } = useRequest(
     useCallback(async () => {
@@ -150,7 +150,7 @@ function Settings({ i18n }) {
           <LDAP />
         </Route>
         <Route path="/settings/license">
-          {license_info?.license_type === 'open' ? (
+          {subscription_info?.subscription_type === 'open' ? (
             <License />
           ) : (
             <Redirect to="/settings" />

@@ -600,10 +600,10 @@ class WebhookMixin(models.Model):
             logger.debug("Skipping webhook job status change: '{}'".format(status))
             return
         try:
-            license_type = get_licenser().validate().get('license_type')
+            subscription_type = get_licenser().validate().get('subscription_type')
             data = {
                 'state': statuses[status],
-                'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
+                'context': 'ansible/awx' if subscription_type == 'open' else 'ansible/tower',
                 'target_url': self.get_ui_url(),
             }
             k, v = service_header[self.webhook_service]

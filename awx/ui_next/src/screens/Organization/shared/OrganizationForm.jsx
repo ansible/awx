@@ -21,7 +21,7 @@ import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
   const { setFieldValue } = useFormikContext();
   const [venvField] = useField('custom_virtualenv');
-  const { license_info = {}, me = {} } = useConfig();
+  const { subscription_info = {}, me = {} } = useConfig();
 
   const [
     galaxyCredentialsField,
@@ -59,7 +59,7 @@ function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
         type="text"
         label={i18n._(t`Description`)}
       />
-      {license_info?.license_type !== 'open' && (
+      {subscription_info?.subscription_type !== 'open' && (
         <FormField
           id="org-max_hosts"
           name="max_hosts"
