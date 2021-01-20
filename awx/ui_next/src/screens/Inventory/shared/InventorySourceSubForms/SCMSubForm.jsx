@@ -1,13 +1,17 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { FormGroup } from '@patternfly/react-core';
+import {
+  FormGroup,
+  SelectVariant,
+  Select,
+  SelectOption,
+} from '@patternfly/react-core';
 import { ProjectsAPI } from '../../../../api';
 import useRequest from '../../../../util/useRequest';
 import { required } from '../../../../util/validators';
 
-import AnsibleSelect from '../../../../components/AnsibleSelect';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
 import Popover from '../../../../components/Popover';
@@ -21,6 +25,7 @@ import {
 } from './SharedFields';
 
 const SCMSubForm = ({ autoPopulateProject, i18n }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField] = useField('credential');
   const [projectField, projectMeta, projectHelpers] = useField({
@@ -106,26 +111,25 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
           />
         }
       >
-        <AnsibleSelect
-          {...sourcePathField}
+        <Select
+          variant={SelectVariant.typeahead}
+          onToggle={setIsOpen}
+          isOpen={isOpen}
+          selections={sourcePathField.value}
           id="source_path"
           isValid={
             (!sourcePathMeta.error || !sourcePathMeta.touched) &&
             !sourcePathError?.message
           }
-          data={[
-            {
-              value: '',
-              key: '',
-              label: i18n._(t`Choose an inventory file`),
-              isDisabled: true,
-            },
-            ...sourcePath.map(value => ({ value, label: value, key: value })),
-          ]}
-          onChange={(event, value) => {
+          onSelect={(event, value) => {
             sourcePathHelpers.setValue(value);
           }}
-        />
+          isCreateable={false}
+        >
+          {sourcePath.map(path => (
+            <SelectOption key={path} value={path} />
+          ))}
+        </Select>
       </FormGroup>
       <VerbosityField />
       <HostFilterField />

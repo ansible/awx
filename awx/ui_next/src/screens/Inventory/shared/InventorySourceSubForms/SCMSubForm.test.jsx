@@ -89,16 +89,16 @@ describe('<SCMSubForm />', () => {
   });
 
   test('changing source project should reset source path dropdown', async () => {
-    expect(wrapper.find('AnsibleSelect#source_path').prop('value')).toEqual('');
-
+    expect(wrapper.find('Select#source_path').prop('selections')).toEqual('');
     await act(async () => {
-      await wrapper.find('AnsibleSelect#source_path').prop('onChange')(
-        null,
-        'bar'
-      );
+      await wrapper.find('Select#source_path').prop('onToggle')();
     });
     wrapper.update();
-    expect(wrapper.find('AnsibleSelect#source_path').prop('value')).toEqual(
+    await act(async () => {
+      await wrapper.find('Select#source_path').prop('onSelect')(null, 'bar');
+    });
+    wrapper.update();
+    expect(wrapper.find('Select#source_path').prop('selections')).toEqual(
       'bar'
     );
 
@@ -109,6 +109,6 @@ describe('<SCMSubForm />', () => {
       });
     });
     wrapper.update();
-    expect(wrapper.find('AnsibleSelect#source_path').prop('value')).toEqual('');
+    expect(wrapper.find('Select#source_path').prop('selections')).toEqual('');
   });
 });

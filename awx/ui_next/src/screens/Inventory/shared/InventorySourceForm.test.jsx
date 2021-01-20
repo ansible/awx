@@ -93,7 +93,8 @@ describe('<InventorySourceForm />', () => {
           id: 2,
           name: 'mock proj',
         });
-        wrapper.find('AnsibleSelect#source_path').prop('onChange')(null, 'foo');
+        wrapper.find('Select#source_path').prop('onToggle')();
+        wrapper.find('Select#source_path').prop('onSelect')(null, 'foo');
         wrapper.find('AnsibleSelect#verbosity').prop('onChange')(null, '2');
         wrapper.find('button[aria-label="Save"]').simulate('click');
       });
