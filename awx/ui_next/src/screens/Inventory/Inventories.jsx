@@ -31,7 +31,10 @@ function Inventories({ i18n }) {
       if (passedInventory && passedInventory.name !== inventory?.name) {
         setInventory(passedInventory);
       }
-      if (passedNestedObject && passedNestedObject.name !== nestedObject?.name) {
+      if (
+        passedNestedObject &&
+        passedNestedObject.name !== nestedObject?.name
+      ) {
         setNestedGroup(passedNestedObject);
       }
       if (passedSchedule && passedSchedule.name !== schedule?.name) {

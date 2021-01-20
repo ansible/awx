@@ -9,7 +9,7 @@ import { formatDateString } from '../../util/dates';
 import { DetailList, Detail } from '../../components/DetailList';
 import { VariablesDetail } from '../../components/CodeMirrorInput';
 
-function StreamDetailButton({ i18n, streamItem, user, description }) {
+function ActivityStreamDetailButton({ i18n, streamItem, user, description }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const setting = streamItem?.summary_fields?.setting;
@@ -50,15 +50,17 @@ function StreamDetailButton({ i18n, streamItem, user, description }) {
             value={setting && setting[0]?.name}
           />
           <Detail fullWidth label={i18n._(t`Action`)} value={description} />
-          <VariablesDetail
-            label={i18n._(t`Changes`)}
-            rows={changeRows}
-            value={streamItem?.changes}
-          />
+          {streamItem?.changes && (
+            <VariablesDetail
+              label={i18n._(t`Changes`)}
+              rows={changeRows}
+              value={streamItem?.changes}
+            />
+          )}
         </DetailList>
       </Modal>
     </>
   );
 }
 
-export default withI18n()(StreamDetailButton);
+export default withI18n()(ActivityStreamDetailButton);

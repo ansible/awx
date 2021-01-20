@@ -8,8 +8,8 @@ import { Link } from 'react-router-dom';
 import { formatDateString } from '../../util/dates';
 import { ActionsTd, ActionItem } from '../../components/PaginatedTable';
 
-import StreamDetailButton from './StreamDetailButton';
-import buildDescription from './buildActivityDescription';
+import ActivityStreamDetailButton from './ActivityStreamDetailButton';
+import ActivityStreamDescription from './ActivityStreamDescription';
 
 function ActivityStreamListItem({ streamItem, i18n }) {
   ActivityStreamListItem.propTypes = {
@@ -34,7 +34,7 @@ function ActivityStreamListItem({ streamItem, i18n }) {
 
   const labelId = `check-action-${streamItem.id}`;
   const user = buildUser(streamItem);
-  const description = buildDescription(streamItem, i18n);
+  const description = <ActivityStreamDescription activity={streamItem} />;
 
   return (
     <Tr id={streamItem.id} aria-labelledby={labelId}>
@@ -48,7 +48,7 @@ function ActivityStreamListItem({ streamItem, i18n }) {
       </Td>
       <ActionsTd dataLabel={i18n._(t`Actions`)}>
         <ActionItem visible tooltip={i18n._(t`View event details`)}>
-          <StreamDetailButton
+          <ActivityStreamDetailButton
             streamItem={streamItem}
             user={user}
             description={description}

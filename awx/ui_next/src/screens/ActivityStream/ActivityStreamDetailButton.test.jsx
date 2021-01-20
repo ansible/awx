@@ -2,14 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import StreamDetailButton from './StreamDetailButton';
+import ActivityStreamDetailButton from './ActivityStreamDetailButton';
 
 jest.mock('../../api/models/ActivityStream');
 
-describe('<StreamDetailButton />', () => {
+describe('<ActivityStreamDetailButton />', () => {
   test('initially renders succesfully', () => {
     mountWithContexts(
-      <StreamDetailButton
+      <ActivityStreamDetailButton
         streamItem={{
           timestamp: '12:00:00',
         }}

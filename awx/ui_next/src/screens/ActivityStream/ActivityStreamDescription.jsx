@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
 
 const buildAnchor = (obj, resource, activity) => {
   let url;
@@ -150,7 +151,7 @@ const buildLabeledLink = (label, link) => {
   );
 };
 
-export default (activity, i18n) => {
+function ActivityStreamDescription({ i18n, activity }) {
   const labeledLinks = [];
   // Activity stream objects will outlive the resources they reference
   // in that case, summary_fields will not be available - show generic error text instead
@@ -578,4 +579,6 @@ export default (activity, i18n) => {
       )}
     </span>
   );
-};
+}
+
+export default withI18n()(ActivityStreamDescription);
