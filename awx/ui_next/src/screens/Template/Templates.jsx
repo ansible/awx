@@ -28,10 +28,10 @@ function Templates({ i18n }) {
 
   const setBreadcrumbConfig = useCallback(
     (passedTemplate, passedSchedule) => {
-      if (passedTemplate && passedTemplate.id !== template?.id) {
+      if (passedTemplate && passedTemplate.name !== template?.name) {
         setTemplate(passedTemplate);
       }
-      if (passedSchedule && passedSchedule.id !== schedule?.id) {
+      if (passedSchedule && passedSchedule.name !== schedule?.name) {
         setSchedule(passedSchedule);
       }
       if (!template) return;

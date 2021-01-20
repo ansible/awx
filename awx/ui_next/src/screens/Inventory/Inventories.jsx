@@ -28,13 +28,13 @@ function Inventories({ i18n }) {
 
   const setBreadcrumbConfig = useCallback(
     (passedInventory, passedNestedObject, passedSchedule) => {
-      if (passedInventory && passedInventory.id !== inventory?.id) {
+      if (passedInventory && passedInventory.name !== inventory?.name) {
         setInventory(passedInventory);
       }
-      if (passedNestedObject && passedNestedObject.id !== nestedObject?.id) {
+      if (passedNestedObject && passedNestedObject.name !== nestedObject?.name) {
         setNestedGroup(passedNestedObject);
       }
-      if (passedSchedule && passedSchedule.id !== schedule?.id) {
+      if (passedSchedule && passedSchedule.name !== schedule?.name) {
         setSchedule(passedSchedule);
       }
       if (!inventory) {
