@@ -22,18 +22,19 @@ export default function useOtherPromptsStep(launchConfig, resource, i18n) {
     initialValues: getInitialValues(launchConfig, resource),
     isReady: true,
     contentError: null,
-    formError: null,
-    setTouched: setFieldsTouched => {
-      setFieldsTouched({
-        job_type: true,
-        limit: true,
-        verbosity: true,
-        diff_mode: true,
-        job_tags: true,
-        skip_tags: true,
-        extra_vars: true,
-      });
+    hasError: false,
+    setTouched: setFieldTouched => {
+      [
+        'job_type',
+        'limit',
+        'verbosity',
+        'diff_mode',
+        'job_tags',
+        'skip_tags',
+        'extra_vars',
+      ].forEach(field => setFieldTouched(field, true, false));
     },
+    validate: () => {},
   };
 }
 

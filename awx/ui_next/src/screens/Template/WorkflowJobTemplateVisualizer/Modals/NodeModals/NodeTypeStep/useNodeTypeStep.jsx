@@ -17,12 +17,11 @@ export default function useNodeTypeStep(i18n) {
     initialValues: getInitialValues(),
     isReady: true,
     contentError: null,
-    formError: meta.error,
-    setTouched: setFieldsTouched => {
-      setFieldsTouched({
-        inventory: true,
-      });
+    hasError: !!meta.error,
+    setTouched: setFieldTouched => {
+      setFieldTouched('nodeType', true, false);
     },
+    validate: () => {},
   };
 }
 function getStep(i18n, nodeTypeField, approvalNameField, nodeResourceField) {

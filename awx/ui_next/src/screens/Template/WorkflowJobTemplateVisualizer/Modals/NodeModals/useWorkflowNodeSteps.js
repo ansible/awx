@@ -194,7 +194,8 @@ export default function useWorkflowNodeSteps(
     useSurveyStep(launchConfig, surveyConfig, resource, i18n, visited),
   ];
 
-  const hasErrors = steps.some(step => step.formError);
+  const hasErrors = steps.some(step => step.hasError);
+
   steps.push(
     usePreviewStep(
       launchConfig,
@@ -250,12 +251,17 @@ export default function useWorkflowNodeSteps(
 
   return {
     steps: pfSteps,
-    visitStep: stepId =>
+    validateStep: stepId => {
+      steps.find(s => s?.step?.id === stepId).validate();
+    },
+    visitStep: (prevStepId, setFieldTouched) => {
       setVisited({
         ...visited,
-        [stepId]: true,
-      }),
-    visitAllSteps: setFieldsTouched => {
+        [prevStepId]: true,
+      });
+      steps.find(s => s?.step?.id === prevStepId).setTouched(setFieldTouched);
+    },
+    visitAllSteps: setFieldTouched => {
       setVisited({
         inventory: true,
         credentials: true,
@@ -263,7 +269,7 @@ export default function useWorkflowNodeSteps(
         survey: true,
         preview: true,
       });
-      steps.forEach(s => s.setTouched(setFieldsTouched));
+      steps.forEach(s => s.setTouched(setFieldTouched));
     },
     contentError,
   };
