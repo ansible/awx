@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Route, withRouter, Switch } from 'react-router-dom';
 import { PageSection } from '@patternfly/react-core';
 
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 import { TemplateList } from './TemplateList';
 import Template from './Template';
 import WorkflowJobTemplate from './WorkflowJobTemplate';
@@ -12,22 +12,34 @@ import JobTemplateAdd from './JobTemplateAdd';
 import WorkflowJobTemplateAdd from './WorkflowJobTemplateAdd';
 
 function Templates({ i18n }) {
-  const initBreadcrumbs = useRef({
+  const initScreenHeader = useRef({
     '/templates': i18n._(t`Templates`),
     '/templates/job_template/add': i18n._(t`Create New Job Template`),
     '/templates/workflow_job_template/add': i18n._(
       t`Create New Workflow Template`
     ),
   });
-  const [breadcrumbConfig, setBreadcrumbs] = useState(initBreadcrumbs.current);
+  const [breadcrumbConfig, setScreenHeader] = useState(
+    initScreenHeader.current
+  );
+
+  const [schedule, setSchedule] = useState();
+  const [template, setTemplate] = useState();
+
   const setBreadcrumbConfig = useCallback(
-    (template, schedule) => {
+    (passedTemplate, passedSchedule) => {
+      if (passedTemplate && passedTemplate.name !== template?.name) {
+        setTemplate(passedTemplate);
+      }
+      if (passedSchedule && passedSchedule.name !== schedule?.name) {
+        setSchedule(passedSchedule);
+      }
       if (!template) return;
       const templatePath = `/templates/${template.type}/${template.id}`;
       const schedulesPath = `${templatePath}/schedules`;
       const surveyPath = `${templatePath}/survey`;
-      setBreadcrumbs({
-        ...initBreadcrumbs.current,
+      setScreenHeader({
+        ...initScreenHeader.current,
         [templatePath]: `${template.name}`,
         [`${templatePath}/details`]: i18n._(t`Details`),
         [`${templatePath}/edit`]: i18n._(t`Edit Details`),
@@ -40,16 +52,21 @@ function Templates({ i18n }) {
         [schedulesPath]: i18n._(t`Schedules`),
         [`${schedulesPath}/add`]: i18n._(t`Create New Schedule`),
         [`${schedulesPath}/${schedule?.id}`]: `${schedule?.name}`,
-        [`${schedulesPath}/details`]: i18n._(t`Schedule Details`),
-        [`${schedulesPath}/edit`]: i18n._(t`Edit Details`),
+        [`${schedulesPath}/${schedule?.id}/details`]: i18n._(
+          t`Schedule Details`
+        ),
+        [`${schedulesPath}/${schedule?.id}/edit`]: i18n._(t`Edit Schedule`),
       });
     },
-    [i18n]
+    [i18n, template, schedule]
   );
 
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        streamType="job_template,workflow_job_template,workflow_job_template_node"
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/templates/job_template/add">
           <JobTemplateAdd />

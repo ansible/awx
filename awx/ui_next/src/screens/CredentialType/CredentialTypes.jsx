@@ -6,7 +6,7 @@ import { Route, Switch } from 'react-router-dom';
 import CredentialTypeAdd from './CredentialTypeAdd';
 import CredentialTypeList from './CredentialTypeList';
 import CredentialType from './CredentialType';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader';
 
 function CredentialTypes({ i18n }) {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
@@ -33,7 +33,10 @@ function CredentialTypes({ i18n }) {
   );
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        streamType="credential_type"
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/credential_types/add">
           <CredentialTypeAdd />

@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader';
 import ActivityStream from './ActivityStream';
 import AzureAD from './AzureAD';
 import GitHub from './GitHub';
@@ -129,7 +129,7 @@ function Settings({ i18n }) {
 
   return (
     <SettingsProvider value={result}>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader streamType="setting" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path="/settings/activity_stream">
           <ActivityStream />

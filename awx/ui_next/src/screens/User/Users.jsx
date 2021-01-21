@@ -3,7 +3,7 @@ import { Route, useRouteMatch, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 import { Config } from '../../contexts/Config';
 
 import UsersList from './UserList/UserList';
@@ -46,7 +46,7 @@ function Users({ i18n }) {
   );
   return (
     <Fragment>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader streamType="user" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path={`${match.path}/add`}>
           <UserAdd />

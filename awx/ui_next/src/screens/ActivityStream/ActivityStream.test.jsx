@@ -1,17 +1,18 @@
 import React from 'react';
+
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
-import Templates from './Templates';
+import ActivityStream from './ActivityStream';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
 }));
 
-describe('<Templates />', () => {
+describe('<ActivityStream />', () => {
   let pageWrapper;
 
   beforeEach(() => {
-    pageWrapper = mountWithContexts(<Templates />);
+    pageWrapper = mountWithContexts(<ActivityStream />);
   });
 
   afterEach(() => {
