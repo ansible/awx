@@ -1286,6 +1286,8 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     @property
     def task_impact(self):
+        if settings.IS_K8S:
+            return 0
         return 5
 
     @property

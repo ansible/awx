@@ -563,6 +563,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     @property
     def task_impact(self):
+        if settings.IS_K8S:
+            return 0
         return 0 if self.job_type == 'run' else 1
 
     @property
