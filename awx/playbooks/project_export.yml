@@ -16,6 +16,8 @@
 # awx_oauthtoken: A token to get back into tower for the project sync
 # awx_project: The name of the project we are syncing
 # awx_organization: The name of the organization the project is in
+# commit_message: The commit message for this export
+# job_template_ids: The ids of the job tempaltes to export
 
 - hosts: localhost
   gather_facts: false
@@ -24,4 +26,9 @@
   tasks:
     - name: Print here
       debug:
-        msg: "here"
+        msg:
+          - "here"
+          - "{{ commit_message }}"
+          - "{{ job_template_ids }}"
+      tags:
+        - export_git

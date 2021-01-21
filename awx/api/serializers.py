@@ -1360,7 +1360,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     last_updated = serializers.DateTimeField(read_only=True)
     show_capabilities = ['start', 'schedule', 'edit', 'delete', 'copy']
     capabilities_prefetch = [
-        'admin', 'update',
+        'admin', 'update', 'export',
         {'copy': 'organization.project_admin'}
     ]
 
@@ -1549,16 +1549,20 @@ class ProjectUpdateCancelSerializer(ProjectUpdateSerializer):
 class ProjectExportViewSerializer(ProjectSerializer):
 
     can_export = serializers.BooleanField(read_only=True)
+    commit_message = serializers.CharField(required=True, write_only=True,
+                                     help_text=_('The commit message for this export.'))
+    job_template_ids = serializers.JSONField(required=True, write_only=True, initial=[],
+                                     help_text=_('List of job template IDs for this export.'))
 
     class Meta:
-        fields = ('can_export',)
+        fields = ('can_export','commit_message', 'job_template_ids')
 
 
 class ProjectExportSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = ProjectExport
-        fields = ('*', 'project', 'job_type', 'job_tags', '-controller_node')
+        fields = ('*', 'commit_message', 'job_template_ids', 'project', 'job_type', 'job_tags', '-controller_node')
 
     def get_related(self, obj):
         res = super(ProjectExportSerializer, self).get_related(obj)

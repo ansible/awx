@@ -863,7 +863,32 @@ class ProjectExportView(RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_export:
-            project_export = obj.export()
+            # Validate here that the job_template_ids are valid for this project
+            errors = []
+
+            commit_msg = request.data.get('commit_message', None)
+            if not commit_msg or commit_msg == '':
+                errors.append(_("You must give a commit message"))
+
+            job_template_ids = request.data.get('job_template_ids', None)
+            for template_id in job_template_ids:
+                try:
+                    jt = models.JobTemplate.objects.get(id=template_id)
+                    if jt.project != obj.project:
+                        errors.append(_("Job Template {} does not exist in the project selected for export".format(template_id)))
+                except models.JobTemplate.DoesNotExist:
+                    errors.append(_("Job Template {} does not exist".format(template_id)))
+
+            if len(job_template_ids) == 0:
+                errors.append(_("You must pass at least one job template to export"))
+
+            if errors:
+                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+            project_export = obj.export(**{
+                'commit_message': commit_msg,
+                'job_template_ids': job_template_ids,
+            })
             if not project_export:
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
             else:

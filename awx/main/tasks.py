@@ -2714,17 +2714,15 @@ class RunProjectExport(BaseTask):
             'projects_root': settings.PROJECTS_ROOT.rstrip('/'),
             'local_path': os.path.basename(project_export.project.local_path),
             'project_path': project_export.get_project_path(check_if_exists=False),  # deprecated
-            'insights_url': settings.INSIGHTS_URL_BASE,
             'awx_license_type': get_license().get('license_type', 'UNLICENSED'),
             'awx_version': get_awx_version(),
             'scm_url': scm_url,
             'scm_branch': scm_branch,
-            'scm_clean': project_export.scm_clean,
-            'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
-            'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
             'awx_host': settings.TOWER_URL_BASE,
             'awx_project': project_export.project.name,
             'awx_organization': project_export.project.organization.name,
+            'commit_message': project_export.commit_message,
+            'job_template_ids': project_export.job_template_ids,
         })
         # apply custom refspec from user for PR refs and the like
         if project_export.scm_refspec:

@@ -417,7 +417,14 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         return bool(self.scm_type) and bool(self.scm_revision != '')
 
     def _run_export(self, **kwargs):
-        unified_job = self.create_unified_job(_unified_job_class=ProjectExport, _parent_field_name=None)
+        unified_job = self.create_unified_job(
+            _unified_job_class=ProjectExport,
+            _parent_field_name=None,
+            _eager_fields={
+                'commit_message': kwargs['commit_message'],
+                'job_template_ids': kwargs['job_template_ids'],
+            }
+        )
         unified_job.signal_start(**kwargs)
         return unified_job
 
@@ -667,7 +674,7 @@ class ProjectExport(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         app_label = 'main'
 
     project = models.ForeignKey(
-        'Project',
+        'Project',    # Change this to Source Project
         related_name='project_exports',
         on_delete=models.CASCADE,
         editable=False,
@@ -691,6 +698,23 @@ class ProjectExport(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         editable=False,
         verbose_name=_('SCM Revision'),
         help_text=_('The SCM Revision returned by this export for the given project and branch.'),
+    )
+
+    commit_message = models.CharField(
+        max_length=1024,
+        blank=False,
+        default='',
+        editable=False,
+        verbose_name=_('Commit Message'),
+        help_text=_('The commit message for this project export.'),
+    )
+
+    job_template_ids = JSONField(
+        blank=False,
+        default=[],
+        editable=False,
+        verbose_name=_('Job Template IDs'),
+        help_text=_('List of job tempaltes ids to export'),
     )
 
     def _get_parent_field_name(self):
