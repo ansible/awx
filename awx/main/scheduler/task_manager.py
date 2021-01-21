@@ -70,7 +70,7 @@ class TaskManager():
         '''
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
         '''
-        instances = Instance.objects.filter(~Q(hostname=None), capacity__gt=0, enabled=True)
+        instances = Instance.objects.filter(~Q(hostname=None), enabled=True)
         self.real_instances = {i.hostname: i for i in instances}
 
         instances_partial = [SimpleNamespace(obj=instance,
@@ -86,7 +86,7 @@ class TaskManager():
                                                   capacity_total=rampart_group.capacity,
                                                   consumed_capacity=0,
                                                   instances=[])
-            for instance in rampart_group.instances.filter(capacity__gt=0, enabled=True).order_by('hostname'):
+            for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
                 if instance.hostname in instances_by_hostname:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
 
@@ -528,7 +528,10 @@ class TaskManager():
                     break
 
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name)
-                if not rampart_group.is_container_group and self.get_remaining_capacity(rampart_group.name) <= 0:
+                if (
+                        task.task_impact > 0 and  # project updates have a cost of zero
+                        not rampart_group.is_container_group and
+                        self.get_remaining_capacity(rampart_group.name) <= 0):
                     logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(
                                  rampart_group.name, remaining_capacity))
                     continue
