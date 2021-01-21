@@ -6,6 +6,7 @@ import {
   Card,
   PageSection,
   PageSectionVariants,
+  SelectGroup,
   Select,
   SelectVariant,
   SelectOption,
@@ -119,6 +120,7 @@ function ActivityStream({ i18n }) {
         </Title>
         <Select
           width="250px"
+          maxHeight="480px"
           variant={SelectVariant.single}
           aria-label={i18n._(t`Activity Stream type selector`)}
           className="activityTypeSelect"
@@ -132,70 +134,78 @@ function ActivityStream({ i18n }) {
           }}
           selections={activityStreamType}
           isOpen={isTypeDropdownOpen}
+          isGrouped
         >
-          <SelectOption key="all_activity" value="all">
-            {i18n._(t`All activity`)}
-          </SelectOption>
-          <SelectOption key="inventories" value="inventory">
-            {i18n._(t`Inventories`)}
-          </SelectOption>
-          <SelectOption
-            key="applications"
-            value="o_auth2_application,o_auth2_access_token"
-          >
-            {i18n._(t`Applications & Tokens`)}
-          </SelectOption>
-          <SelectOption key="credentials" value="credential">
-            {i18n._(t`Credentials`)}
-          </SelectOption>
-          <SelectOption key="hosts" value="host">
-            {i18n._(t`Hosts`)}
-          </SelectOption>
-          <SelectOption key="inventory_scripts" value="custom_inventory_script">
-            {i18n._(t`Inventory Scripts`)}
-          </SelectOption>
-          <SelectOption key="jobs" value="job">
-            {i18n._(t`Jobs`)}
-          </SelectOption>
-          <SelectOption
-            key="notification_templates"
-            value="notification_template"
-          >
-            {i18n._(t`Notification Templates`)}
-          </SelectOption>
-          <SelectOption key="organizations" value="organization">
-            {i18n._(t`Organizations`)}
-          </SelectOption>
-          <SelectOption key="projects" value="project">
-            {i18n._(t`Projects`)}
-          </SelectOption>
-          <SelectOption key="credential_types" value="credential_type">
-            {i18n._(t`Credential Types`)}
-          </SelectOption>
-          <SelectOption key="schedules" value="schedule">
-            {i18n._(t`Schedules`)}
-          </SelectOption>
-          <SelectOption key="teams" value="team">
-            {i18n._(t`Teams`)}
-          </SelectOption>
-          <SelectOption
-            key="templates"
-            value="job_template,workflow_job_template,workflow_job_template_node"
-          >
-            {i18n._(t`Templates`)}
-          </SelectOption>
-          <SelectOption key="users" value="user">
-            {i18n._(t`Users`)}
-          </SelectOption>
-          <SelectOption key="workflow_approvals" value="workflow_approval">
-            {i18n._(t`Workflow Approvals`)}
-          </SelectOption>
-          <SelectOption key="instance_groups" value="instance_group">
-            {i18n._(t`Instance Groups`)}
-          </SelectOption>
-          <SelectOption key="settings" value="setting">
-            {i18n._(t`Settings`)}
-          </SelectOption>
+          <SelectGroup label={i18n._(t`Views`)} key="views">
+            <SelectOption key="all_activity" value="all">
+              {i18n._(t`Dashboard (all activity)`)}
+            </SelectOption>
+            <SelectOption key="jobs" value="job">
+              {i18n._(t`Jobs`)}
+            </SelectOption>
+            <SelectOption key="schedules" value="schedule">
+              {i18n._(t`Schedules`)}
+            </SelectOption>
+            <SelectOption key="workflow_approvals" value="workflow_approval">
+              {i18n._(t`Workflow Approvals`)}
+            </SelectOption>
+          </SelectGroup>
+          <SelectGroup label={i18n._(t`Resources`)} key="resources">
+            <SelectOption
+              key="templates"
+              value="job_template,workflow_job_template,workflow_job_template_node"
+            >
+              {i18n._(t`Templates`)}
+            </SelectOption>
+            <SelectOption key="credentials" value="credential">
+              {i18n._(t`Credentials`)}
+            </SelectOption>
+            <SelectOption key="projects" value="project">
+              {i18n._(t`Projects`)}
+            </SelectOption>
+            <SelectOption key="inventories" value="inventory">
+              {i18n._(t`Inventories`)}
+            </SelectOption>
+            <SelectOption key="hosts" value="host">
+              {i18n._(t`Hosts`)}
+            </SelectOption>
+          </SelectGroup>
+          <SelectGroup label={i18n._(t`Access`)} key="access">
+            <SelectOption key="organizations" value="organization">
+              {i18n._(t`Organizations`)}
+            </SelectOption>
+            <SelectOption key="users" value="user">
+              {i18n._(t`Users`)}
+            </SelectOption>
+            <SelectOption key="teams" value="team">
+              {i18n._(t`Teams`)}
+            </SelectOption>
+          </SelectGroup>
+          <SelectGroup label={i18n._(t`Adminisration`)} key="administration">
+            <SelectOption key="credential_types" value="credential_type">
+              {i18n._(t`Credential Types`)}
+            </SelectOption>
+            <SelectOption
+              key="notification_templates"
+              value="notification_template"
+            >
+              {i18n._(t`Notification Templates`)}
+            </SelectOption>
+            <SelectOption key="instance_groups" value="instance_group">
+              {i18n._(t`Instance Groups`)}
+            </SelectOption>
+            <SelectOption
+              key="applications"
+              value="o_auth2_application,o_auth2_access_token"
+            >
+              {i18n._(t`Applications & Tokens`)}
+            </SelectOption>
+          </SelectGroup>
+          <SelectGroup label={i18n._(t`Settings`)} key="settings">
+            <SelectOption key="settings" value="setting">
+              {i18n._(t`Settings`)}
+            </SelectOption>
+          </SelectGroup>
         </Select>
       </PageSection>
       <PageSection>
