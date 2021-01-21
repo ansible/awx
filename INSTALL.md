@@ -481,7 +481,7 @@ Before starting the install process, review the [inventory](./installer/inventor
 
 *admin_password*
 
-> Provide a strong password to prevent malicious logins after the installation
+> Provide a strong password to prevent malicious logins after the installation.
 
 *postgres_data_dir*
 
