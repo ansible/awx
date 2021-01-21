@@ -1576,7 +1576,7 @@ class satellite6(PluginFileInjector):
     def inventory_as_dict(self, inventory_update, private_data_dir):
         ret = super(satellite6, self).inventory_as_dict(inventory_update, private_data_dir)
         # this inventory plugin requires the fully qualified inventory plugin name
-        ret['plugin'] = f'{cls.namespace}.{cls.collection}.{cls.plugin_name}'
+        ret['plugin'] = f'{self.namespace}.{self.collection}.{self.plugin_name}'
         return ret
 
 
