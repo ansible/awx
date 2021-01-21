@@ -149,10 +149,6 @@ class CallbackBrokerWorker(BaseWorker):
                         job_identifier = body[key]
                         break
 
-                logger.error('Job Identifier: {}'.format(job_identifier))
-                import json
-                logger.error(json.dumps(body, indent=4))
-
                 self.last_event = f'\n\t- {cls.__name__} for #{job_identifier} ({body.get("event", "")} {body.get("uuid", "")})'  # noqa
 
                 if body.get('event') == 'EOF':
