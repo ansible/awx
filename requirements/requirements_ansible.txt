@@ -1,3 +1,4 @@
+awxkit                    # Required for project import/export
 adal==1.2.2               # via msrestazure
 apache-libcloud==2.5.0    # via -r /awx_devel/requirements/requirements_ansible.in
 appdirs==1.4.3            # via openstacksdk
