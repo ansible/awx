@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
@@ -518,7 +518,7 @@ class JobOutput extends Component {
   }
 
   render() {
-    const { job, i18n } = this.props;
+    const { job } = this.props;
 
     const {
       contentError,
@@ -596,15 +596,21 @@ class JobOutput extends Component {
           </OutputWrapper>
         </CardBody>
         {deletionError && (
-          <AlertModal
-            isOpen={deletionError}
-            variant="danger"
-            onClose={() => this.setState({ deletionError: null })}
-            title={i18n._(t`Job Delete Error`)}
-            label={i18n._(t`Job Delete Error`)}
-          >
-            <ErrorDetail error={deletionError} />
-          </AlertModal>
+          <>
+            <I18n>
+              {({ i18n }) => (
+                <AlertModal
+                  isOpen={deletionError}
+                  variant="danger"
+                  onClose={() => this.setState({ deletionError: null })}
+                  title={i18n._(t`Job Delete Error`)}
+                  label={i18n._(t`Job Delete Error`)}
+                >
+                  <ErrorDetail error={deletionError} />
+                </AlertModal>
+              )}
+            </I18n>
+          </>
         )}
       </Fragment>
     );
@@ -612,4 +618,4 @@ class JobOutput extends Component {
 }
 
 export { JobOutput as _JobOutput };
-export default withI18n()(withRouter(JobOutput));
+export default withRouter(JobOutput);

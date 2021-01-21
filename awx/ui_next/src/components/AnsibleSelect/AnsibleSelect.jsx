@@ -12,52 +12,44 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormSelect, FormSelectOption } from '@patternfly/react-core';
 
-class AnsibleSelect extends React.Component {
-  constructor(props) {
-    super(props);
-    this.onSelectChange = this.onSelectChange.bind(this);
-  }
-
-  onSelectChange(val, event) {
-    const { onChange, name } = this.props;
+function AnsibleSelect({
+  id,
+  data,
+  i18n,
+  isValid,
+  onBlur,
+  value,
+  className,
+  isDisabled,
+  onChange,
+  name,
+}) {
+  const onSelectChange = (val, event) => {
     event.target.name = name;
     onChange(event, val);
-  }
+  };
 
-  render() {
-    const {
-      id,
-      data,
-      i18n,
-      isValid,
-      onBlur,
-      value,
-      className,
-      isDisabled,
-    } = this.props;
-
-    return (
-      <FormSelect
-        id={id}
-        value={value}
-        onChange={this.onSelectChange}
-        onBlur={onBlur}
-        aria-label={i18n._(t`Select Input`)}
-        validated={isValid ? 'default' : 'error'}
-        className={className}
-        isDisabled={isDisabled}
-      >
-        {data.map(option => (
-          <FormSelectOption
-            key={option.key}
-            value={option.value}
-            label={option.label}
-            isDisabled={option.isDisabled}
-          />
-        ))}
-      </FormSelect>
-    );
-  }
+  return (
+    <FormSelect
+      id={id}
+      value={value}
+      onChange={onSelectChange}
+      onBlur={onBlur}
+      aria-label={i18n._(t`Select Input`)}
+      validated={isValid ? 'default' : 'error'}
+      className={className}
+      isDisabled={isDisabled}
+    >
+      {data.map(option => (
+        <FormSelectOption
+          key={option.key}
+          value={option.value}
+          label={option.label}
+          isDisabled={option.isDisabled}
+        />
+      ))}
+    </FormSelect>
+  );
 }
 
 const Option = shape({
