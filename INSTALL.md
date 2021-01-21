@@ -479,6 +479,10 @@ If you choose to use the official images then the remote host will be the one to
 
 Before starting the install process, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section:
 
+*admin_password*
+
+> Provide a strong password to prevent malicious logins after the installation
+
 *postgres_data_dir*
 
 > If you're using the default PostgreSQL container (see [PostgreSQL](#postgresql-1) below), provide a path that can be mounted to the container, and where the database can be persisted.
