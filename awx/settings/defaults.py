@@ -58,6 +58,13 @@ DATABASES = {
     }
 }
 
+# Whether or not the deployment is a K8S-based deployment
+# In K8S-based deployments, instances have zero capacity - all playbook
+# automation is intended to flow through defined Container Groups that
+# interface with some (or some set of) K8S api (which may or may not include
+# the K8S cluster where awx itself is running)
+IS_K8S = False
+
 # TODO: remove this setting in favor of a default execution environment
 AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE = 'quay.io/ansible/awx-ee'
 
