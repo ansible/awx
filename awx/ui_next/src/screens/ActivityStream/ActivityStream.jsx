@@ -37,7 +37,7 @@ function ActivityStream({ i18n }) {
   const history = useHistory();
   const urlParams = new URLSearchParams(location.search);
 
-  const activityStreamType = urlParams.get('type');
+  const activityStreamType = urlParams.get('type') || 'all';
 
   let typeParams = {};
 
@@ -118,11 +118,14 @@ function ActivityStream({ i18n }) {
         <Title size="2xl" headingLevel="h2">
           {i18n._(t`Activity Stream`)}
         </Title>
+        <span id="grouped-type-select-id" hidden>
+          {i18n._(t`Activity Stream type selector`)}
+        </span>
         <Select
           width="250px"
           maxHeight="480px"
           variant={SelectVariant.single}
-          aria-label={i18n._(t`Activity Stream type selector`)}
+          aria-labelledby="grouped-type-select-id"
           className="activityTypeSelect"
           onToggle={setIsTypeDropdownOpen}
           onSelect={(event, selection) => {
