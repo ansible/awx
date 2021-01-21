@@ -72,7 +72,7 @@ from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils import (update_scm_url,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
-                            get_awx_version)
+                            get_awx_version, getattr_dne)
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.common import get_custom_venv_choices
 from awx.main.utils.external_logging import reconfigure_rsyslog
@@ -2730,6 +2730,11 @@ class RunProjectExport(BaseTask):
         elif project_export.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
             extra_vars['scm_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
+
+        created_by = getattr_dne(project_export, 'created_by')
+        extra_vars['commit_user'] = "{} {}".format(created_by.first_name, created_by.last_name)
+        extra_vars['commit_email'] = created_by.email
+
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_cwd(self, project_export, private_data_dir):
