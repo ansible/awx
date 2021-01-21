@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { Thead, Tr, Th as PFTh } from '@patternfly/react-table';
@@ -72,6 +73,7 @@ export function HeaderCell({
   columnIndex,
   idPrefix,
   className,
+  alignRight,
   children,
 }) {
   const sort = sortKey
@@ -86,6 +88,7 @@ export function HeaderCell({
       id={sortKey ? `${idPrefix}-${sortKey}` : null}
       className={className}
       sort={sort}
+      css={alignRight ? 'text-align: right' : null}
     >
       {children}
     </Th>

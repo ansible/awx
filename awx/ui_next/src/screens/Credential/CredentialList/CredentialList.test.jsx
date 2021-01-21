@@ -57,25 +57,41 @@ describe('<CredentialList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper.find('DataListCheck[id="select-credential-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(false);
     await act(async () => {
       wrapper
-        .find('DataListCheck[id="select-credential-1"]')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .invoke('onChange')(true);
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-credential-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(true);
     await act(async () => {
       wrapper
-        .find('DataListCheck[id="select-credential-1"]')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .invoke('onChange')(false);
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-credential-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(false);
   });
 
@@ -105,7 +121,9 @@ describe('<CredentialList />', () => {
 
     await act(async () => {
       wrapper
-        .find('DataListCheck[id="select-credential-3"]')
+        .find('.pf-c-table__check')
+        .at(2)
+        .find('input')
         .invoke('onChange')();
     });
     wrapper.update();
@@ -122,7 +140,9 @@ describe('<CredentialList />', () => {
     );
     await act(async () => {
       wrapper
-        .find('DataListCheck[id="select-credential-2"]')
+        .find('.pf-c-table__check')
+        .at(1)
+        .find('input')
         .invoke('onChange')();
     });
     wrapper.update();
