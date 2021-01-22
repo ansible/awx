@@ -227,4 +227,3 @@ class Playbooks(base.Base):
 
 
 page.register_page(resources.project_playbooks, Playbooks)
-

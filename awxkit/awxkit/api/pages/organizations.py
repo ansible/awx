@@ -39,7 +39,6 @@ class Organization(HasCreate, HasInstanceGroups, HasNotifications, base.Base):
                 "disassociate": True,
             })
 
-
     def payload(self, **kwargs):
         payload = PseudoNamespace(name=kwargs.get('name') or 'Organization - {}'.format(random_title()),
                                   description=kwargs.get('description') or random_title(10))
@@ -54,7 +53,6 @@ class Organization(HasCreate, HasInstanceGroups, HasNotifications, base.Base):
                 payload.update(**{fk_field: rel_obj.id})
             else:
                 raise AttributeError(f'Related field {fk_field} must be either integer of pkid or object')
-        
         return payload
 
     def create_payload(self, name='', description='', **kwargs):
@@ -65,7 +63,6 @@ class Organization(HasCreate, HasInstanceGroups, HasNotifications, base.Base):
     def create(self, name='', description='', **kwargs):
         payload = self.create_payload(name=name, description=description, **kwargs)
         return self.update_identity(Organizations(self.connection).post(payload))
-
 
 page.register_page([resources.organization,
                     (resources.organizations, 'post')], Organization)
