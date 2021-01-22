@@ -3,7 +3,6 @@ from django.utils.translation import ugettext_lazy as _
 from urllib.parse import urljoin
 import requests
 import base64
-import json
 pas_inputs = {
     'fields': [{
         'id': 'url',
@@ -65,14 +64,13 @@ def get_ID(**kwargs):
     endpoint = urljoin(kwargs['url'],'/Redrock/query')
     name=" Name='{0}' and User='{1}'".format(kwargs['system_name'],kwargs['acc_name'])
     query  = 'Select ID from VaultAccount where {0}'.format(name)
-    post_data = json.dumps({'Script': query})
     post_headers = {
         "Authorization": "Bearer " + kwargs['access_token'], 
         "X-CENTRIFY-NATIVE-CLIENT":"true"
     }
     response = requests.post(
         endpoint,
-        data = post_data,
+        json = {'Script': query},
         headers = post_headers, 
         timeout = (5, 30)
     )
@@ -87,14 +85,13 @@ def get_ID(**kwargs):
 # CheckOut Password from Centrify Vault, Input : ID
 def get_passwd(**kwargs):
     endpoint = urljoin(kwargs['url'],'/ServerManage/CheckoutPassword')
-    post_data = json.dumps({'ID': kwargs['acc_id']})
     post_headers = {
         "Authorization": "Bearer " + kwargs['access_token'], 
         "X-CENTRIFY-NATIVE-CLIENT":"true"
     }
     response = requests.post(
         endpoint,
-        data = post_data,
+        json = {'ID': kwargs['acc_id']},
         headers = post_headers,
         timeout = (5, 30)
     )
