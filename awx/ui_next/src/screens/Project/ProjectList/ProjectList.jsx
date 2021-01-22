@@ -9,10 +9,14 @@ import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import useWsProjects from './useWsProjects';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 
@@ -116,7 +120,7 @@ function ProjectList({ i18n }) {
     <Fragment>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={projects}
@@ -160,12 +164,15 @@ function ProjectList({ i18n }) {
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
-            toolbarSortColumns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-              },
-            ]}
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Revision`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              </HeaderRow>
+            }
             renderToolbar={props => (
               <DataListToolbar
                 {...props}
@@ -191,14 +198,15 @@ function ProjectList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={o => (
+            renderRow={(project, index) => (
               <ProjectListItem
                 fetchProjects={fetchProjects}
-                key={o.id}
-                project={o}
-                detailUrl={`${match.url}/${o.id}`}
-                isSelected={selected.some(row => row.id === o.id)}
-                onSelect={() => handleSelect(o)}
+                key={project.id}
+                project={project}
+                detailUrl={`${match.url}/${project.id}`}
+                isSelected={selected.some(row => row.id === project.id)}
+                onSelect={() => handleSelect(project)}
+                rowIndex={index}
               />
             )}
             emptyStateControls={
