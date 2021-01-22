@@ -46,20 +46,16 @@ def handle_auth(**kwargs):
         "grant_type": "client_credentials", 
         "scope":"siem" 
     }
-    post_header = {
-        "Authorization": 'Basic ' + base64.b64encode(bytes(kwargs['client_id'] + ":" + kwargs['client_password'], 'ascii')).decode('ascii')
-    }
     response = requests.post(
         kwargs['endpoint'],
         data = post_data,
-        headers = post_header, 
+        auth = (kwargs['client_id'],kwargs['client_password']), 
         verify = True,
         timeout = (5, 30)
     )
     raise_for_status(response)
-    tokens = json.loads(response.text)
     try: 
-        return tokens['access_token']
+        return response.json()['access_token']
     except KeyError:
         raise RuntimeError('OAuth request to tenant was unsuccessful')
 
@@ -81,12 +77,10 @@ def get_ID(**kwargs):
         timeout = (5, 30)
     )
     raise_for_status(response)
-    tokens = json.loads(response.text)
-    result_str=tokens["Result"]["Results"]
     try:
-        acc_ID=result_str[0]["Row"]["ID"]
-        return acc_ID
-    except IndexError:
+        result_str = response.json()["Result"]["Results"]
+        return result_str[0]["Row"]["ID"]
+    except (IndexError, KeyError):
         raise RuntimeError("Error Detected!! Check the Inputs")       
 
 
@@ -105,16 +99,14 @@ def get_passwd(**kwargs):
         timeout = (5, 30)
     )
     raise_for_status(response)
-    tokens=json.loads(response.text)
     try:
-        result_str=tokens["Result"]["Password"]
-        return result_str
-    except TypeError:
+        return response.json()["Result"]["Password"]
+    except KeyError:
         raise RuntimeError("Password Not Found")     
 
 
 def centrify_backend(**kwargs):
-    url = kwargs.get('url')      #
+    url = kwargs.get('url')
     acc_name = kwargs.get('account-name')
     system_name = kwargs.get('system-name')
     client_id = kwargs.get('client_id')
