@@ -151,7 +151,15 @@ import json
 
 def update_survey(module, last_request):
     spec_endpoint = last_request.get('related', {}).get('survey_spec')
-    module.post_endpoint(spec_endpoint, **{'data': module.params.get('survey_spec')})
+    if module.params.get('survey_spec') == {}:
+        response = module.delete_endpoint(spec_endpoint)
+        if response['status_code'] != 200:
+            # Not sure how to make this actually return a non 200 to test what to dump in the respinse
+            module.fail_json(msg="Failed to delete survey: {0}".format(response['json']))
+    else:
+        response = module.post_endpoint(spec_endpoint, **{'data': module.params.get('survey_spec')})
+        if response['status_code'] != 200:
+            module.fail_json(msg="Failed to update survey: {0}".format(response['json']['error']))
     module.exit_json(**module.json_output)
 
 
