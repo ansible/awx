@@ -76,4 +76,3 @@ class Organizations(page.PageList, Organization):
 page.register_page([resources.organizations,
                     resources.user_organizations,
                     resources.project_organizations], Organizations)
-
