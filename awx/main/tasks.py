@@ -60,7 +60,7 @@ from awx.main.models import (
     Inventory, InventorySource, SmartInventoryMembership,
     Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob,
     JobEvent, ProjectUpdateEvent, InventoryUpdateEvent, AdHocCommandEvent, SystemJobEvent,
-    build_safe_env, enforce_bigint_pk_migration
+    build_safe_env
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError, PostRunError
@@ -137,12 +137,6 @@ def dispatch_startup():
     cluster_node_heartbeat()
     if Instance.objects.me().is_controller():
         awx_isolated_heartbeat()
-
-    # at process startup, detect the need to migrate old event records from int
-    # to bigint; at *some point* in the future, once certain versions of AWX
-    # and Tower fall out of use/support, we can probably just _assume_ that
-    # everybody has moved to bigint, and remove this code entirely
-    enforce_bigint_pk_migration()
 
     # Update Tower's rsyslog.conf file based on loggins settings in the db
     reconfigure_rsyslog()
@@ -738,6 +732,12 @@ def update_host_smart_inventory_memberships():
 
 @task(queue=get_local_queuename)
 def migrate_legacy_event_data(tblname):
+    #
+    # NOTE: this function is not actually in use anymore,
+    # but has been intentionally kept for historical purposes,
+    # and to serve as an illustration if we ever need to perform
+    # bulk modification/migration of event data in the future.
+    #
     if 'event' not in tblname:
         return
     with advisory_lock(f'bigint_migration_{tblname}', wait=False) as acquired:

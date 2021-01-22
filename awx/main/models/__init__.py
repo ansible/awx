@@ -81,10 +81,17 @@ User.add_to_class('accessible_objects', user_accessible_objects)
 
 
 def enforce_bigint_pk_migration():
+    #
+    # NOTE: this function is not actually in use anymore,
+    # but has been intentionally kept for historical purposes,
+    # and to serve as an illustration if we ever need to perform
+    # bulk modification/migration of event data in the future.
+    #
     # see: https://github.com/ansible/awx/issues/6010
     # look at all the event tables and verify that they have been fully migrated
     # from the *old* int primary key table to the replacement bigint table
     # if not, attempt to migrate them in the background
+    #
     for tblname in (
         'main_jobevent', 'main_inventoryupdateevent',
         'main_projectupdateevent', 'main_adhoccommandevent',
