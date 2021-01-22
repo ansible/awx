@@ -1,5 +1,6 @@
 import { t } from '@lingui/macro';
 
+import ActivityStream from './screens/ActivityStream';
 import Applications from './screens/Application';
 import Credentials from './screens/Credential';
 import CredentialTypes from './screens/CredentialType';
@@ -43,6 +44,11 @@ function getRouteConfig(i18n) {
           title: i18n._(t`Schedules`),
           path: '/schedules',
           screen: Schedules,
+        },
+        {
+          title: i18n._(t`Activity Stream`),
+          path: '/activity_stream',
+          screen: ActivityStream,
         },
         {
           title: i18n._(t`Workflow Approvals`),

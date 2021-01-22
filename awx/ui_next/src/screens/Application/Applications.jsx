@@ -12,7 +12,7 @@ import {
 import ApplicationsList from './ApplicationsList';
 import ApplicationAdd from './ApplicationAdd';
 import Application from './Application';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader';
 import { Detail, DetailList } from '../../components/DetailList';
 
 const ApplicationAlert = styled(Alert)`
@@ -45,7 +45,10 @@ function Applications({ i18n }) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        streamType="o_auth2_application,o_auth2_access_token"
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/applications/add">
           <ApplicationAdd

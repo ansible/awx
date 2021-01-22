@@ -497,7 +497,7 @@ Before starting the install process, review the [inventory](./installer/inventor
 
 *docker_compose_dir*
 
-> When using docker-compose, the `docker-compose.yml` file will be created there (default `/tmp/awxcompose`).
+> When using docker-compose, the `docker-compose.yml` file will be created there (default `~/.awx/awxcompose`).
 
 *custom_venv_dir*
 

@@ -144,6 +144,7 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
               setDeletionRole(role);
               setShowDeleteModal(true);
             }}
+            i18n={i18n}
           />
         )}
       />

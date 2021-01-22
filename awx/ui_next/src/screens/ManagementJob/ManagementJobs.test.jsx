@@ -4,6 +4,10 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import ManagementJobs from './ManagementJobs';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+}));
+
 describe('<ManagementJobs />', () => {
   let pageWrapper;
 
@@ -17,6 +21,6 @@ describe('<ManagementJobs />', () => {
 
   test('initially renders without crashing', () => {
     expect(pageWrapper.length).toBe(1);
-    expect(pageWrapper.find('Breadcrumbs').length).toBe(1);
+    expect(pageWrapper.find('ScreenHeader').length).toBe(1);
   });
 });

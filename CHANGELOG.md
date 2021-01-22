@@ -2,6 +2,30 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+# 17.0.0 (January 22, 2021)
+- AWX now requires PostgreSQL 12 by default: https://github.com/ansible/awx/pull/8943
+  **Note:** users who encounter permissions errors at upgrade time should `chown -R ~/.awx/pgdocker` to ensure it's owned by the user running the install playbook
+- Added support for region name for OpenStack inventory: https://github.com/ansible/awx/issues/5080
+- Added the ability to chain undefined attributes in custom notification templates: https://github.com/ansible/awx/issues/8677
+- Dramatically simplified the `image_build` role: https://github.com/ansible/awx/pull/8980
+- Fixed a bug which can cause schema migrations to fail at install time: https://github.com/ansible/awx/issues/9077
+- Fixed a bug which caused the `is_superuser` user property to be out of date in certain circumstances: https://github.com/ansible/awx/pull/8833
+- Fixed a bug which sometimes results in race conditions on setting access: https://github.com/ansible/awx/pull/8580
+- Fixed a bug which sometimes causes an unexpected delay in stdout for some playbooks: https://github.com/ansible/awx/issues/9085
+- (UI) Added support for credential password prompting on job launch: https://github.com/ansible/awx/pull/9028
+- (UI) Added the ability to configure LDAP settings in the UI: https://github.com/ansible/awx/issues/8291
+- (UI) Added a sync button to the Project detail view: https://github.com/ansible/awx/issues/8847
+- (UI) Added a form for configuring Google Outh 2.0 settings: https://github.com/ansible/awx/pull/8762
+- (UI) Added searchable keys and related keys to the Credentials list: https://github.com/ansible/awx/issues/8603
+- (UI) Added support for advanced search and copying to Notification Templates: https://github.com/ansible/awx/issues/7879
+- (UI) Added support for prompting on workflow nodes: https://github.com/ansible/awx/issues/5913
+- (UI) Added support for session timeouts: https://github.com/ansible/awx/pull/8250
+- (UI) Fixed a bug that broke websocket streaming for the insecure ws:// protocol: https://github.com/ansible/awx/pull/8877
+- (UI) Fixed a bug in the user interface when a translation for the browser's preferred locale isn't available: https://github.com/ansible/awx/issues/8884
+- (UI) Fixed bug where navigating from one survey question form directly to another wasn't reloading the form: https://github.com/ansible/awx/issues/7522
+- (UI) Fixed a bug which can cause an uncaught error while launching a Job Template: https://github.com/ansible/awx/issues/8936
+- Updated autobahn to address CVE-2020-35678
+
 ## 16.0.0 (December 10, 2020)
 - AWX now ships with a reimagined user interface.  **Please read this before upgrading:** https://groups.google.com/g/awx-project/c/KuT5Ao92HWo
 - Removed support for syncing inventory from Red Hat CloudForms - https://github.com/ansible/awx/commit/0b701b3b2

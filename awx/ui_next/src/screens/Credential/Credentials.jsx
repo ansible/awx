@@ -3,7 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Config } from '../../contexts/Config';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader';
 import Credential from './Credential';
 import CredentialAdd from './CredentialAdd';
 import { CredentialList } from './CredentialList';
@@ -34,7 +34,10 @@ function Credentials({ i18n }) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        streamType="credential"
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/credentials/add">
           <Config>{({ me }) => <CredentialAdd me={me || {}} />}</Config>

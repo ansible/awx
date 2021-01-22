@@ -61,7 +61,12 @@ function PaginatedDataList({
   };
 
   const pushHistoryState = params => {
-    const encodedParams = encodeNonDefaultQueryString(qsConfig, params);
+    const nonNamespacedParams = parseQueryString({}, history.location.search);
+    const encodedParams = encodeNonDefaultQueryString(
+      qsConfig,
+      params,
+      nonNamespacedParams
+    );
     history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
   };
 

@@ -7,6 +7,9 @@ import { DashboardAPI } from '../../api';
 import Dashboard from './Dashboard';
 
 jest.mock('../../api');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+}));
 
 describe('<Dashboard />', () => {
   let pageWrapper;

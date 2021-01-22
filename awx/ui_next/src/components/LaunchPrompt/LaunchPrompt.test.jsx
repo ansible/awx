@@ -82,8 +82,26 @@ describe('LaunchPrompt', () => {
             ask_credential_on_launch: true,
             ask_scm_branch_on_launch: true,
             survey_enabled: true,
+            passwords_needed_to_start: ['ssh_password'],
+            defaults: {
+              credentials: [
+                {
+                  id: 1,
+                  passwords_needed: ['ssh_password'],
+                },
+              ],
+            },
           }}
-          resource={resource}
+          resource={{
+            ...resource,
+            summary_fields: {
+              credentials: [
+                {
+                  id: 1,
+                },
+              ],
+            },
+          }}
           onLaunch={noop}
           onCancel={noop}
           surveyConfig={{
@@ -110,12 +128,13 @@ describe('LaunchPrompt', () => {
     const wizard = await waitForElement(wrapper, 'Wizard');
     const steps = wizard.prop('steps');
 
-    expect(steps).toHaveLength(5);
+    expect(steps).toHaveLength(6);
     expect(steps[0].name.props.children).toEqual('Inventory');
     expect(steps[1].name.props.children).toEqual('Credentials');
-    expect(steps[2].name.props.children).toEqual('Other prompts');
-    expect(steps[3].name.props.children).toEqual('Survey');
-    expect(steps[4].name.props.children).toEqual('Preview');
+    expect(steps[2].name.props.children).toEqual('Credential passwords');
+    expect(steps[3].name.props.children).toEqual('Other prompts');
+    expect(steps[4].name.props.children).toEqual('Survey');
+    expect(steps[5].name.props.children).toEqual('Preview');
   });
 
   test('should add inventory step', async () => {

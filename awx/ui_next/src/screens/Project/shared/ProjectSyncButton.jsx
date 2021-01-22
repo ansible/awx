@@ -6,8 +6,8 @@ import { SyncIcon } from '@patternfly/react-icons';
 import { number } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import { ProjectsAPI } from '../../../api';

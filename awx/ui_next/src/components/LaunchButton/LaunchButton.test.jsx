@@ -4,10 +4,16 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import { sleep } from '../../../testUtils/testUtils';
 
 import LaunchButton from './LaunchButton';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
+import {
+  InventorySourcesAPI,
+  JobsAPI,
+  JobTemplatesAPI,
+  ProjectsAPI,
+  WorkflowJobsAPI,
+  WorkflowJobTemplatesAPI,
+} from '../../api';
 
-jest.mock('../../api/models/WorkflowJobTemplates');
-jest.mock('../../api/models/JobTemplates');
+jest.mock('../../api');
 
 describe('LaunchButton', () => {
   JobTemplatesAPI.readLaunch.mockResolvedValue({
@@ -22,8 +28,12 @@ describe('LaunchButton', () => {
     },
   });
 
-  const children = ({ handleLaunch }) => (
+  const launchButton = ({ handleLaunch }) => (
     <button type="submit" onClick={() => handleLaunch()} />
+  );
+
+  const relaunchButton = ({ handleRelaunch }) => (
+    <button type="submit" onClick={() => handleRelaunch()} />
   );
 
   const resource = {
@@ -35,7 +45,7 @@ describe('LaunchButton', () => {
 
   test('renders the expected content', () => {
     const wrapper = mountWithContexts(
-      <LaunchButton resource={resource}>{children}</LaunchButton>
+      <LaunchButton resource={resource}>{launchButton}</LaunchButton>
     );
     expect(wrapper).toHaveLength(1);
   });
@@ -51,7 +61,7 @@ describe('LaunchButton', () => {
       },
     });
     const wrapper = mountWithContexts(
-      <LaunchButton resource={resource}>{children}</LaunchButton>,
+      <LaunchButton resource={resource}>{launchButton}</LaunchButton>,
       {
         context: {
           router: { history },
@@ -87,7 +97,7 @@ describe('LaunchButton', () => {
           type: 'workflow_job_template',
         }}
       >
-        {children}
+        {launchButton}
       </LaunchButton>,
       {
         context: {
@@ -100,12 +110,162 @@ describe('LaunchButton', () => {
     expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
     expect(WorkflowJobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
-    expect(history.location.pathname).toEqual('/jobs/workflow/9000/output');
+    expect(history.location.pathname).toEqual('/jobs/9000/output');
+  });
+
+  test('should relaunch job correctly', async () => {
+    JobsAPI.readRelaunch.mockResolvedValue({
+      data: {
+        can_start_without_user_input: true,
+      },
+    });
+    const history = createMemoryHistory({
+      initialEntries: ['/jobs/9000'],
+    });
+    JobsAPI.relaunch.mockResolvedValue({
+      data: {
+        id: 9000,
+      },
+    });
+    const wrapper = mountWithContexts(
+      <LaunchButton
+        resource={{
+          id: 1,
+          type: 'job',
+        }}
+      >
+        {relaunchButton}
+      </LaunchButton>,
+      {
+        context: {
+          router: { history },
+        },
+      }
+    );
+    const button = wrapper.find('button');
+    button.prop('onClick')();
+    expect(JobsAPI.readRelaunch).toHaveBeenCalledWith(1);
+    await sleep(0);
+    expect(JobsAPI.relaunch).toHaveBeenCalledWith(1);
+    expect(history.location.pathname).toEqual('/jobs/9000/output');
+  });
+
+  test('should relaunch workflow job correctly', async () => {
+    WorkflowJobsAPI.readRelaunch.mockResolvedValue({
+      data: {
+        can_start_without_user_input: true,
+      },
+    });
+    const history = createMemoryHistory({
+      initialEntries: ['/jobs/9000'],
+    });
+    WorkflowJobsAPI.relaunch.mockResolvedValue({
+      data: {
+        id: 9000,
+      },
+    });
+    const wrapper = mountWithContexts(
+      <LaunchButton
+        resource={{
+          id: 1,
+          type: 'workflow_job',
+        }}
+      >
+        {relaunchButton}
+      </LaunchButton>,
+      {
+        context: {
+          router: { history },
+        },
+      }
+    );
+    const button = wrapper.find('button');
+    button.prop('onClick')();
+    expect(WorkflowJobsAPI.readRelaunch).toHaveBeenCalledWith(1);
+    await sleep(0);
+    expect(WorkflowJobsAPI.relaunch).toHaveBeenCalledWith(1);
+    expect(history.location.pathname).toEqual('/jobs/9000/output');
+  });
+
+  test('should relaunch project sync correctly', async () => {
+    ProjectsAPI.readLaunchUpdate.mockResolvedValue({
+      data: {
+        can_start_without_user_input: true,
+      },
+    });
+    const history = createMemoryHistory({
+      initialEntries: ['/jobs/9000'],
+    });
+    ProjectsAPI.launchUpdate.mockResolvedValue({
+      data: {
+        id: 9000,
+      },
+    });
+    const wrapper = mountWithContexts(
+      <LaunchButton
+        resource={{
+          id: 1,
+          project: 5,
+          type: 'project_update',
+        }}
+      >
+        {relaunchButton}
+      </LaunchButton>,
+      {
+        context: {
+          router: { history },
+        },
+      }
+    );
+    const button = wrapper.find('button');
+    button.prop('onClick')();
+    expect(ProjectsAPI.readLaunchUpdate).toHaveBeenCalledWith(5);
+    await sleep(0);
+    expect(ProjectsAPI.launchUpdate).toHaveBeenCalledWith(5);
+    expect(history.location.pathname).toEqual('/jobs/9000/output');
+  });
+
+  test('should relaunch project sync correctly', async () => {
+    InventorySourcesAPI.readLaunchUpdate.mockResolvedValue({
+      data: {
+        can_start_without_user_input: true,
+      },
+    });
+    const history = createMemoryHistory({
+      initialEntries: ['/jobs/9000'],
+    });
+    InventorySourcesAPI.launchUpdate.mockResolvedValue({
+      data: {
+        id: 9000,
+      },
+    });
+    const wrapper = mountWithContexts(
+      <LaunchButton
+        resource={{
+          id: 1,
+          inventory_source: 5,
+          type: 'inventory_update',
+        }}
+      >
+        {relaunchButton}
+      </LaunchButton>,
+      {
+        context: {
+          router: { history },
+        },
+      }
+    );
+    const button = wrapper.find('button');
+    button.prop('onClick')();
+    expect(InventorySourcesAPI.readLaunchUpdate).toHaveBeenCalledWith(5);
+    await sleep(0);
+    expect(InventorySourcesAPI.launchUpdate).toHaveBeenCalledWith(5);
+    expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
 
   test('displays error modal after unsuccessful launch', async () => {
     const wrapper = mountWithContexts(
-      <LaunchButton resource={resource}>{children}</LaunchButton>
+      <LaunchButton resource={resource}>{launchButton}</LaunchButton>
     );
     JobTemplatesAPI.launch.mockRejectedValue(
       new Error({

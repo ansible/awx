@@ -19,17 +19,18 @@ function PromptModalForm({
   resource,
   surveyConfig,
 }) {
-  const { values, setTouched, validateForm } = useFormikContext();
+  const { setFieldTouched, values } = useFormikContext();
 
   const {
     steps,
     isReady,
+    validateStep,
     visitStep,
     visitAllSteps,
     contentError,
   } = useLaunchSteps(launchConfig, surveyConfig, resource, i18n);
 
-  const handleSave = () => {
+  const handleSubmit = () => {
     const postValues = {};
     const setValue = (key, value) => {
       if (typeof value !== 'undefined' && value !== null) {
@@ -37,6 +38,7 @@ function PromptModalForm({
       }
     };
     const surveyValues = getSurveyValues(values);
+    setValue('credential_passwords', values.credential_passwords);
     setValue('inventory_id', values.inventory?.id);
     setValue(
       'credentials',
@@ -75,22 +77,25 @@ function PromptModalForm({
     <Wizard
       isOpen
       onClose={onCancel}
-      onSave={handleSave}
+      onSave={handleSubmit}
+      onBack={async nextStep => {
+        validateStep(nextStep.id);
+      }}
       onNext={async (nextStep, prevStep) => {
         if (nextStep.id === 'preview') {
-          visitAllSteps(setTouched);
+          visitAllSteps(setFieldTouched);
         } else {
-          visitStep(prevStep.prevId);
+          visitStep(prevStep.prevId, setFieldTouched);
+          validateStep(nextStep.id);
         }
-        await validateForm();
       }}
       onGoToStep={async (nextStep, prevStep) => {
         if (nextStep.id === 'preview') {
-          visitAllSteps(setTouched);
+          visitAllSteps(setFieldTouched);
         } else {
-          visitStep(prevStep.prevId);
+          visitStep(prevStep.prevId, setFieldTouched);
+          validateStep(nextStep.id);
         }
-        await validateForm();
       }}
       title={i18n._(t`Prompts`)}
       steps={
