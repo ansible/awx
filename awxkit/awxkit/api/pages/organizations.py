@@ -43,7 +43,7 @@ class Organization(HasCreate, HasInstanceGroups, HasNotifications, base.Base):
         payload = PseudoNamespace(name=kwargs.get('name') or 'Organization - {}'.format(random_title()),
                                   description=kwargs.get('description') or random_title(10))
         
-        for fk_field in ('inventory', 'default_environment'):
+        for fk_field in ('default_environment'):
             rel_obj = kwargs.get(fk_field)
             if rel_obj is None:
                 continue
