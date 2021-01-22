@@ -2,7 +2,7 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-# 17.0.0 (January 21, 2021)
+# 17.0.0 (January 22, 2021)
 - AWX now requires PostgreSQL 12 by default: https://github.com/ansible/awx/pull/8943
   **Note:** users who encounter permissions errors at upgrade time should `chown -R ~/.awx/pgdocker` to ensure it's owned by the user running the install playbook
 - Added support for region name for OpenStack inventory: https://github.com/ansible/awx/issues/5080
