@@ -1549,10 +1549,8 @@ class ProjectUpdateCancelSerializer(ProjectUpdateSerializer):
 class ProjectExportViewSerializer(ProjectSerializer):
 
     can_export = serializers.BooleanField(read_only=True)
-    commit_message = serializers.CharField(required=True, write_only=True,
-                                     help_text=_('The commit message for this export.'))
-    job_template_ids = serializers.JSONField(required=True, write_only=True, initial=[],
-                                     help_text=_('List of job template IDs for this export.'))
+    commit_message = serializers.CharField(required=True, write_only=True, help_text=_('The commit message for this export.'))
+    job_template_ids = serializers.JSONField(required=True, write_only=True, initial=[], help_text=_('List of job template IDs for this export.'))
 
     class Meta:
         fields = ('can_export','commit_message', 'job_template_ids')
