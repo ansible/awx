@@ -7,24 +7,33 @@ import InventoryListItem from './InventoryListItem';
 jest.mock('../../../api/models/Inventories');
 
 describe('<InventoryListItem />', () => {
-  test('initially renders succesfully', () => {
+  const inventory = {
+    id: 1,
+    name: 'Inventory',
+    kind: '',
+    has_active_failures: true,
+    total_hosts: 10,
+    hosts_with_active_failures: 4,
+    has_inventory_sources: true,
+    total_inventory_sources: 4,
+    inventory_sources_with_failures: 5,
+    summary_fields: {
+      organization: {
+        id: 1,
+        name: 'Default',
+      },
+      user_capabilities: {
+        edit: true,
+      },
+    },
+  };
+
+  test('initially renders successfully', () => {
     mountWithContexts(
       <table>
         <tbody>
           <InventoryListItem
-            inventory={{
-              id: 1,
-              name: 'Inventory',
-              summary_fields: {
-                organization: {
-                  id: 1,
-                  name: 'Default',
-                },
-                user_capabilities: {
-                  edit: true,
-                },
-              },
-            }}
+            inventory={inventory}
             detailUrl="/inventories/inventory/1"
             isSelected
             onSelect={() => {}}
@@ -34,25 +43,50 @@ describe('<InventoryListItem />', () => {
     );
   });
 
+  test('should render not configured tooltip', () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <InventoryListItem
+            inventory={{ ...inventory, has_inventory_sources: false }}
+            detailUrl="/inventories/inventory/1"
+            isSelected
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
+    );
+
+    expect(wrapper.find('StatusLabel').prop('tooltipContent')).toBe(
+      'Not configured for inventory sync.'
+    );
+  });
+
+  test('should render success tooltip', () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <InventoryListItem
+            inventory={{ ...inventory, inventory_sources_with_failures: 0 }}
+            detailUrl="/inventories/inventory/1"
+            isSelected
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
+    );
+
+    expect(wrapper.find('StatusLabel').prop('tooltipContent')).toBe(
+      'No inventory sync failures.'
+    );
+  });
+
   test('should render prompt list item data', () => {
     const wrapper = mountWithContexts(
       <table>
         <tbody>
           <InventoryListItem
-            inventory={{
-              id: 1,
-              name: 'Inventory',
-              kind: '',
-              summary_fields: {
-                organization: {
-                  id: 1,
-                  name: 'Default',
-                },
-                user_capabilities: {
-                  edit: true,
-                },
-              },
-            }}
+            inventory={inventory}
             detailUrl="/inventories/inventory/1"
             isSelected
             onSelect={() => {}}
@@ -61,6 +95,9 @@ describe('<InventoryListItem />', () => {
       </table>
     );
     expect(wrapper.find('StatusLabel').length).toBe(1);
+    expect(wrapper.find('StatusLabel').prop('tooltipContent')).toBe(
+      `${inventory.inventory_sources_with_failures} sources with sync failures.`
+    );
     expect(
       wrapper
         .find('Td')
@@ -72,7 +109,7 @@ describe('<InventoryListItem />', () => {
         .find('Td')
         .at(2)
         .text()
-    ).toBe('Disabled');
+    ).toBe('Error');
     expect(
       wrapper
         .find('Td')
@@ -92,19 +129,7 @@ describe('<InventoryListItem />', () => {
       <table>
         <tbody>
           <InventoryListItem
-            inventory={{
-              id: 1,
-              name: 'Inventory',
-              summary_fields: {
-                organization: {
-                  id: 1,
-                  name: 'Default',
-                },
-                user_capabilities: {
-                  edit: true,
-                },
-              },
-            }}
+            inventory={inventory}
             detailUrl="/inventories/inventory/1"
             isSelected
             onSelect={() => {}}
