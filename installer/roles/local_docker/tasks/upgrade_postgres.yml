@@ -1,5 +1,10 @@
 ---
 
+- name: Create {{ postgres_data_dir }} directory
+  file:
+    path: "{{ postgres_data_dir }}"
+    state: directory
+
 - name: Get full path of postgres data dir
   shell: "echo {{ postgres_data_dir }}"
   register: fq_postgres_data_dir
