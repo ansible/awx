@@ -6,7 +6,7 @@ import { Route, Switch } from 'react-router-dom';
 import ExecutionEnvironment from './ExecutionEnvironment';
 import ExecutionEnvironmentAdd from './ExecutionEnvironmentAdd';
 import ExecutionEnvironmentList from './ExecutionEnvironmentList';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 
 function ExecutionEnvironments({ i18n }) {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
@@ -35,7 +35,10 @@ function ExecutionEnvironments({ i18n }) {
   );
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        streamType="execution_environment"
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/execution_environments/add">
           <ExecutionEnvironmentAdd />
