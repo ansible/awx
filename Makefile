@@ -267,11 +267,27 @@ collectstatic:
 	fi; \
 	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
+UWSGI_DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:awx-dispatcher tower-processes:awx-receiver
+
 uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-    uwsgi -b 32768 --socket 127.0.0.1:8050 --module=awx.wsgi:application --home=/var/lib/awx/venv/awx --chdir=/awx_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --lazy-apps --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" --hook-accepting1="exec:supervisorctl restart tower-processes:awx-dispatcher tower-processes:awx-receiver"
+	uwsgi -b 32768 \
+	    --socket 127.0.0.1:8050 \
+	    --module=awx.wsgi:application \
+	    --home=/var/lib/awx/venv/awx \
+	    --chdir=/awx_devel/ \
+	    --vacuum \
+	    --processes=5 \
+	    --harakiri=120 --master \
+	    --no-orphans \
+	    --py-autoreload 1 \
+	    --max-requests=1000 \
+	    --stats /tmp/stats.socket \
+	    --lazy-apps \
+	    --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" \
+	    --hook-accepting1="exec: $(UWSGI_DEV_RELOAD_COMMAND)"
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -579,8 +595,8 @@ docker-compose-clean: awx/projects
 
 # Base development image build
 docker-compose-build:
-	ansible localhost -m template -a "src=installer/roles/image_build/templates/Dockerfile.j2 dest=tools/docker-compose/Dockerfile" -e build_dev=True
-	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile \
+	ansible-playbook installer/dockerfile.yml -e build_dev=True
+	docker build -t ansible/awx_devel \
 		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
@@ -624,5 +640,15 @@ psql-container:
 VERSION:
 	@echo "awx: $(VERSION)"
 
-Dockerfile: installer/roles/image_build/templates/Dockerfile.j2
-	ansible localhost -m template -a "src=installer/roles/image_build/templates/Dockerfile.j2 dest=Dockerfile"
+Dockerfile: installer/roles/dockerfile/templates/Dockerfile.j2
+	ansible-playbook installer/dockerfile.yml
+
+Dockerfile.kube-dev: installer/roles/dockerfile/templates/Dockerfile.j2
+	ansible-playbook installer/dockerfile.yml \
+	    -e dockerfile_name=Dockerfile.kube-dev \
+	    -e kube_dev=True \
+	    -e template_dest=_build_kube_dev
+
+awx-kube-dev-build: Dockerfile.kube-dev
+	docker build -f Dockerfile.kube-dev \
+	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
