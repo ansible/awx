@@ -17,7 +17,7 @@
 
 - name: Load assets from json files
   set_fact:
-    assets: "{{ assets | default([]) + [ another_asset ] }}"
+    assets: "{{ assets + [ another_asset ] }}"
   loop: "{{ import_files.results[0].files }}"
   loop_control:
      label: "{{ item.path | regex_replace('^.*/assets', 'assets') }}"
@@ -30,7 +30,7 @@
 
 - name: Load job templates tied to the project from yaml files
   set_fact:
-    assets: "{{ assets | default([]) + [ another_asset ] }}"
+    assets: "{{ assets + [ another_asset ] }}"
   loop: "{{ import_files.results[1].files }}"
   loop_control:
      label: "{{ item.path | regex_replace('^.*/assets', 'assets') }}"
@@ -51,3 +51,4 @@
   loop: "{{ assets }}"
   loop_control:
     label: "{{ item.name | default('No Job Template Name')  }}"
+  when: assets | length > 0
