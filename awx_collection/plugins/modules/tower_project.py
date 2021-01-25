@@ -88,6 +88,11 @@ options:
       type: bool
       aliases:
         - scm_allow_override
+    sync_assets:
+      description:
+        - Enable asset syncing for the project
+      type: bool
+      default: 'no'
     timeout:
       description:
         - The amount of time (in seconds) to run before the SCM Update is canceled. A value of 0 means no timeout.
@@ -197,6 +202,7 @@ def main():
         scm_update_on_launch=dict(type='bool', default=False),
         scm_update_cache_timeout=dict(type='int', default=0),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
+        sync_assets=dict(type='bool', default=False),
         timeout=dict(type='int', default=0, aliases=['job_timeout']),
         custom_virtualenv=dict(),
         organization=dict(),
@@ -226,6 +232,7 @@ def main():
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
     allow_override = module.params.get('allow_override')
+    sync_assets = module.params.get('sync_assets')
     timeout = module.params.get('timeout')
     custom_virtualenv = module.params.get('custom_virtualenv')
     organization = module.params.get('organization')
@@ -282,6 +289,7 @@ def main():
         'timeout': timeout,
         'organization': org_id,
         'scm_update_on_launch': scm_update_on_launch,
+        'sync_assets': sync_assets,
         'scm_update_cache_timeout': scm_update_cache_timeout,
         'custom_virtualenv': custom_virtualenv,
     }
