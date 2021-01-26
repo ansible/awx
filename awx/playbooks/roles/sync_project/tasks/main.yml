@@ -4,14 +4,14 @@
     paths: "{{ project_path }}/assets"
     file_type: file
     patterns: "{{ item.patterns }}"
-    recurse: False
+    recurse: false
     size: 0
   register: import_files
   loop:
     - name: JSON
-      patterns: [ "*.json" ]
+      patterns: ["*.json"]
     - name: YAML
-      patterns: [ "*.yaml", "*.yml" ]
+      patterns: ["*.yaml", "*.yml"]
   loop_control:
     label: "{{ item.name }}"
 
@@ -20,7 +20,7 @@
     assets: "{{ assets + [ another_asset ] }}"
   loop: "{{ import_files.results[0].files }}"
   loop_control:
-     label: "{{ item.path | regex_replace('^.*/assets', 'assets') }}"
+    label: "{{ item.path | regex_replace('^.*/assets', 'assets') }}"
   vars:
     another_asset: "{{ lookup('file', item.path) | from_json }}"
   when:
@@ -33,7 +33,7 @@
     assets: "{{ assets + [ another_asset ] }}"
   loop: "{{ import_files.results[1].files }}"
   loop_control:
-     label: "{{ item.path | regex_replace('^.*/assets', 'assets') }}"
+    label: "{{ item.path | regex_replace('^.*/assets', 'assets') }}"
   vars:
     another_asset: "{{ lookup('file', item.path) | from_yaml }}"
   when:
@@ -47,7 +47,7 @@
       job_templates:
         - "{{ item }}"
     tower_host: "{{ awx_host }}"
-    validate_certs: False
+    validate_certs: false
   loop: "{{ assets }}"
   loop_control:
     label: "{{ item.name | default('No Job Template Name')  }}"
