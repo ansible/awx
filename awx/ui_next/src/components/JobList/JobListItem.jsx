@@ -102,14 +102,6 @@ function JobListItem({
         <Td colSpan={showTypeColumn ? 5 : 4}>
           <ExpandableRowContent>
             <DetailList>
-              <Detail
-                label={i18n._(t`Started`)}
-                value={formatDateString(job.started)}
-              />
-              <Detail
-                label={i18n._(t`Finished`)}
-                value={formatDateString(job.started)}
-              />
               <LaunchedByDetail job={job} i18n={i18n} />
               {credentials && credentials.length > 0 && (
                 <Detail
