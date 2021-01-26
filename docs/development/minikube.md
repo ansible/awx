@@ -88,3 +88,9 @@ $ ansible-playbook ansible/instantiate-awx-deployment.yml \
 
 To iterate on changes to the Dockerfile, rebuild and push the image, then delete
 the AWX Pod. A new Pod will respawn with the latest revision. 
+
+## Accessing AWX
+
+```
+$ minikube service awx-service --url
+```
