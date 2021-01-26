@@ -597,13 +597,16 @@ docker-compose-clean: awx/projects
 docker-compose-build:
 	ansible-playbook installer/dockerfile.yml -e build_dev=True
 	docker build -t ansible/awx_devel \
-		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
+	    --build-arg BUILDKIT_INLINE_CACHE=1 \
+	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 # For use when developing on "isolated" AWX deployments
 docker-compose-isolated-build: docker-compose-build
-	docker build -t ansible/awx_isolated -f tools/docker-isolated/Dockerfile .
+	docker build -t ansible/awx_isolated \
+	    --build-arg BUILDKIT_INLINE_CACHE=1 \
+	    -f tools/docker-isolated/Dockerfile .
 	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 
@@ -651,4 +654,5 @@ Dockerfile.kube-dev: installer/roles/dockerfile/templates/Dockerfile.j2
 
 awx-kube-dev-build: Dockerfile.kube-dev
 	docker build -f Dockerfile.kube-dev \
+	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
