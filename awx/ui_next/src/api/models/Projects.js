@@ -16,6 +16,7 @@ class Projects extends SchedulesMixin(
     this.readPlaybooks = this.readPlaybooks.bind(this);
     this.readSync = this.readSync.bind(this);
     this.sync = this.sync.bind(this);
+    this.createSchedule = this.createSchedule.bind(this);
   }
 
   readAccessList(id, params) {

@@ -6,24 +6,21 @@ import ScheduleAdd from './ScheduleAdd';
 import ScheduleList from './ScheduleList';
 
 function Schedules({
-  createSchedule,
+  apiModel,
   loadScheduleOptions,
   loadSchedules,
   setBreadcrumb,
-  unifiedJobTemplate,
+  resource,
 }) {
   const match = useRouteMatch();
 
   return (
     <Switch>
       <Route path={`${match.path}/add`}>
-        <ScheduleAdd createSchedule={createSchedule} />
+        <ScheduleAdd apiModel={apiModel} resource={resource} />
       </Route>
       <Route key="details" path={`${match.path}/:scheduleId`}>
-        <Schedule
-          unifiedJobTemplate={unifiedJobTemplate}
-          setBreadcrumb={setBreadcrumb}
-        />
+        <Schedule setBreadcrumb={setBreadcrumb} resource={resource} />
       </Route>
       <Route key="list" path={`${match.path}`}>
         <ScheduleList

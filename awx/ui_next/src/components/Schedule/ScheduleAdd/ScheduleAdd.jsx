@@ -8,7 +8,7 @@ import { CardBody } from '../../Card';
 import buildRuleObj from '../shared/buildRuleObj';
 import ScheduleForm from '../shared/ScheduleForm';
 
-function ScheduleAdd({ i18n, createSchedule }) {
+function ScheduleAdd({ i18n, resource, apiModel }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
   const location = useLocation();
@@ -18,11 +18,8 @@ function ScheduleAdd({ i18n, createSchedule }) {
   const handleSubmit = async values => {
     try {
       const rule = new RRule(buildRuleObj(values, i18n));
-      const {
-        data: { id: scheduleId },
-      } = await createSchedule({
-        name: values.name,
-        description: values.description,
+
+      const { id: scheduleId } = await apiModel.createSchedule(resource.id, {
         rrule: rule.toString().replace(/\n/g, ' '),
       });
 
@@ -46,7 +43,7 @@ function ScheduleAdd({ i18n, createSchedule }) {
 }
 
 ScheduleAdd.propTypes = {
-  createSchedule: func.isRequired,
+  apiModel: shape({ createSchedule: func.isRequired }).isRequired,
 };
 
 ScheduleAdd.defaultProps = {};

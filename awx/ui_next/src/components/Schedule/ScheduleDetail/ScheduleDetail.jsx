@@ -189,6 +189,14 @@ function ScheduleDetail({ schedule, i18n }) {
     showVerbosityDetail ||
     showVariablesDetail;
 
+  const VERBOSITY = {
+    0: i18n._(t`0 (Normal)`),
+    1: i18n._(t`1 (Verbose)`),
+    2: i18n._(t`2 (More Verbose)`),
+    3: i18n._(t`3 (Debug)`),
+    4: i18n._(t`4 (Connection Debug)`),
+  };
+
   if (isLoading) {
     return <ContentLoading />;
   }
@@ -254,6 +262,12 @@ function ScheduleDetail({ schedule, i18n }) {
                     ' '
                   )
                 }
+              />
+            )}
+            {ask_verbosity_on_launch && (
+              <Detail
+                label={i18n._(t`Verbosity`)}
+                value={VERBOSITY[verbosity]}
               />
             )}
             {ask_scm_branch_on_launch && (

@@ -9,7 +9,7 @@ import { SchedulesAPI } from '../../../api';
 import buildRuleObj from '../shared/buildRuleObj';
 import ScheduleForm from '../shared/ScheduleForm';
 
-function ScheduleEdit({ i18n, schedule }) {
+function ScheduleEdit({ i18n, schedule, resource }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
   const location = useLocation();
