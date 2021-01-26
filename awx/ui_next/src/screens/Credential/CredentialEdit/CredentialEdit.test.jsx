@@ -10,6 +10,8 @@ import {
   CredentialsAPI,
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
+  OrganizationsAPI,
+  UsersAPI,
 } from '../../../api';
 import CredentialEdit from './CredentialEdit';
 
@@ -113,6 +115,25 @@ const mockCredential = {
   cloud: false,
   kubernetes: false,
 };
+
+UsersAPI.readAdminOfOrganizations.mockResolvedValue({
+  data: {
+    count: 1,
+    results: [
+      {
+        id: 1,
+        name: 'org',
+      },
+    ],
+  },
+});
+
+OrganizationsAPI.read.mockResolvedValue({
+  data: {
+    results: [{ id: 1 }],
+    count: 1,
+  },
+});
 
 CredentialTypesAPI.read.mockResolvedValue({
   data: {
@@ -310,7 +331,12 @@ describe('<CredentialEdit />', () => {
         wrapper = mountWithContexts(
           <CredentialEdit credential={mockCredential} />,
           {
-            context: { router: { history } },
+            context: {
+              router: { history },
+              me: {
+                id: 1,
+              },
+            },
           }
         );
       });
@@ -377,6 +403,7 @@ describe('<CredentialEdit />', () => {
       expect(CredentialsAPI.update).toHaveBeenCalledWith(3, {
         user: 1,
         name: 'foo',
+        organization: null,
         description: 'bar',
         credential_type: '1',
         inputs: {
@@ -439,6 +466,7 @@ describe('<CredentialEdit />', () => {
       ).toBe('$encrypted$');
     });
   });
+
   describe('Initial GET request fails', () => {
     test('shows error when initial GET request fails', async () => {
       CredentialTypesAPI.read.mockRejectedValue(new Error());

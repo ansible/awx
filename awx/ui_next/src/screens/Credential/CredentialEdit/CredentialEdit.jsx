@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { object } from 'prop-types';
 import { CardBody } from '../../../components/Card';
@@ -6,15 +6,20 @@ import {
   CredentialsAPI,
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
+  OrganizationsAPI,
+  UsersAPI,
 } from '../../../api';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import CredentialForm from '../shared/CredentialForm';
 import useRequest from '../../../util/useRequest';
+import { useConfig } from '../../../contexts/Config';
 
-function CredentialEdit({ credential, me }) {
+function CredentialEdit({ credential }) {
   const history = useHistory();
   const { id: credId } = useParams();
+  const { me = {} } = useConfig();
+  const [isOrgLookupDisabled, setIsOrgLookupDisabled] = useState(false);
 
   const { error: submitError, request: submitRequest, result } = useRequest(
     useCallback(
@@ -81,8 +86,11 @@ function CredentialEdit({ credential, me }) {
         // can send only one of org, user, team
         if (organization?.id) {
           modifiedData.organization = organization.id;
-        } else if (me?.id) {
-          modifiedData.user = me.id;
+        } else {
+          modifiedData.organization = null;
+          if (me?.id) {
+            modifiedData.user = me.id;
+          }
         }
         const [{ data }] = await Promise.all([
           CredentialsAPI.update(credId, modifiedData),
@@ -114,10 +122,22 @@ function CredentialEdit({ credential, me }) {
         {
           data: { results },
         },
+        {
+          data: { count: adminOrgCount },
+        },
+        {
+          data: { count: credentialAdminCount },
+        },
       ] = await Promise.all([
         CredentialTypesAPI.read({ page_size: 200 }),
         CredentialsAPI.readInputSources(credId),
+        UsersAPI.readAdminOfOrganizations(me.id),
+        OrganizationsAPI.read({
+          page_size: 1,
+          role_level: 'credential_admin_role',
+        }),
       ]);
+      setIsOrgLookupDisabled(!(adminOrgCount || credentialAdminCount));
       const credTypes = data.results;
       if (data.next && data.next.includes('page=2')) {
         const {
@@ -137,7 +157,7 @@ function CredentialEdit({ credential, me }) {
         return inputSourcesMap;
       }, {});
       return { credentialTypes: creds, loadedInputSources: inputSources };
-    }, [credId]),
+    }, [credId, me.id]),
     { credentialTypes: {}, loadedInputSources: {} }
   );
 
@@ -171,6 +191,7 @@ function CredentialEdit({ credential, me }) {
         credentialTypes={credentialTypes}
         inputSources={loadedInputSources}
         submitError={submitError}
+        isOrgLookupDisabled={isOrgLookupDisabled}
       />
     </CardBody>
   );
