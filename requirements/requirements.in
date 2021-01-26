@@ -39,7 +39,7 @@ pygerduty
 pyparsing
 python3-saml
 python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
-pyyaml>=5.3.1  # minimum version to pull in new pyyaml for CVE-2017-18342
+pyyaml>=5.4.1  # minimum to fix https://github.com/yaml/pyyaml/issues/478
 schedule==0.6.0
 social-auth-core==3.3.1  # see UPGRADE BLOCKERs
 social-auth-app-django==3.1.0  # see UPGRADE BLOCKERs
