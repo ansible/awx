@@ -357,7 +357,7 @@ class JobNotificationMixin(object):
                    'url': 'https://towerhost/#/jobs/playbook/1010',
                    'approval_status': 'approved',
                    'approval_node_name': 'Approve Me',
-                   'workflow_url': 'https://towerhost/#/workflows/1010',
+                   'workflow_url': 'https://towerhost/#/jobs/workflow/1010',
                    'job_metadata': """{'url': 'https://towerhost/$/jobs/playbook/13',
  'traceback': '',
  'status': 'running',
