@@ -3,5 +3,6 @@
   hosts: localhost
   gather_facts: true
   roles:
+    - {role: dockerfile}
     - {role: image_build}
     - {role: image_push, when: "docker_registry is defined"}

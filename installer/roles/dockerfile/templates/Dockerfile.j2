@@ -1,12 +1,8 @@
-{% if build_dev|default(False)|bool %}
 ### This file is generated from
-### installer/roles/image_build/templates/Dockerfile.j2
+### installer/roles/dockerfile/templates/Dockerfile.j2
 ###
 ### DO NOT EDIT
 ###
-{% else %}
-     {% set build_dev = False  %}
-{% endif %}
 
 # Locations - set globally to be used across stages
 ARG COLLECTION_BASE="/var/lib/awx/vendor/awx_ansible_collections"
@@ -67,12 +63,10 @@ ADD requirements/requirements_ansible.txt \
 RUN cd /tmp && make requirements_awx requirements_ansible_py3
 RUN cd /tmp && make requirements_collections
 
-{% if build_dev|bool %}
+{% if (build_dev|bool) or (kube_dev|bool) %}
 ADD requirements/requirements_dev.txt /tmp/requirements
 RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev
-{% endif %}
-
-{% if not build_dev|bool %}
+{% else %}
 # Use the distro provided npm to bootstrap our required version of node
 RUN npm install -g n && n 14.15.1 && dnf remove -y nodejs
 
@@ -81,6 +75,7 @@ COPY . /tmp/src/
 WORKDIR /tmp/src/
 RUN make sdist && \
     /var/lib/awx/venv/awx/bin/pip install dist/awx-$(cat VERSION).tar.gz
+RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 {% endif %}
 
 # Final container(s)
@@ -146,7 +141,7 @@ RUN cd /usr/local/bin && \
     curl -L https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz | \
     tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
 
-{% if build_dev|bool %}
+{% if (build_dev|bool) or (kube_dev|bool) %}
 # Install development/test requirements
 RUN dnf -y install \
     gdb \
@@ -183,31 +178,31 @@ RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/n
         -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost" && \
     openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt && \
     chmod 640 /etc/nginx/nginx.{csr,key,crt}
-{% else %}
-RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 {% endif %}
 
 # Create default awx rsyslog config
-ADD installer/roles/image_build/files/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
+ADD installer/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 
 ## File mappings
 {% if build_dev|bool %}
 ADD tools/docker-compose/launch_awx.sh /usr/bin/launch_awx.sh
-ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
-ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
 ADD tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
 ADD tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
 ADD tools/docker-compose/start_tests.sh /start_tests.sh
 ADD tools/docker-compose/bootstrap_development.sh /usr/bin/bootstrap_development.sh
 ADD tools/docker-compose/entrypoint.sh /entrypoint.sh
-ADD tools/scripts/awx-python /usr/bin/awx-python
 {% else %}
-ADD installer/roles/image_build/files/launch_awx.sh /usr/bin/launch_awx.sh
-ADD installer/roles/image_build/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
-ADD installer/roles/image_build/files/settings.py /etc/tower/settings.py
-ADD installer/roles/image_build/files/supervisor.conf /etc/supervisord.conf
-ADD installer/roles/image_build/files/supervisor_task.conf /etc/supervisord_task.conf
+ADD installer/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
+ADD installer/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
+ADD installer/roles/dockerfile/files/settings.py /etc/tower/settings.py
+ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
+ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
 ADD tools/scripts/config-watcher /usr/bin/config-watcher
+{% endif %}
+{% if (build_dev|bool) or (kube_dev|bool) %}
+ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
+ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
+ADD tools/scripts/awx-python /usr/bin/awx-python
 {% endif %}
 
 # Pre-create things we need to access
@@ -231,7 +226,7 @@ RUN chmod u+s /usr/bin/bwrap ; \
     chgrp -R root ${COLLECTION_BASE} ; \
     chmod -R g+rw ${COLLECTION_BASE}
 
-{% if build_dev|bool %}
+{% if (build_dev|bool) or (kube_dev|bool) %}
 RUN for dir in \
       /var/lib/awx/venv \
       /var/lib/awx/venv/awx/lib/python3.6 \
@@ -256,6 +251,7 @@ ENV HOME="/var/lib/awx"
 ENV PATH="/usr/pgsql-10/bin:${PATH}"
 
 {% if build_dev|bool %}
+
 EXPOSE 8043 8013 8080 22
 
 ENTRYPOINT ["/entrypoint.sh"]
