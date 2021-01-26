@@ -1,5 +1,7 @@
 import React from 'react';
+import { mount } from 'enzyme';
 import { Formik } from 'formik';
+import { I18nProvider } from '@lingui/react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import {
@@ -12,28 +14,38 @@ import {
 
 describe('Setting form fields', () => {
   test('BooleanField renders the expected content', async () => {
-    const wrapper = mountWithContexts(
-      <Formik
-        initialValues={{
-          boolean: true,
-        }}
-      >
-        {() => (
-          <BooleanField
-            name="boolean"
-            config={{
-              label: 'test',
-              help_text: 'test',
-            }}
-          />
-        )}
-      </Formik>
+    const outerNode = document.createElement('div');
+    document.body.appendChild(outerNode);
+    const wrapper = mount(
+      <I18nProvider>
+        <Formik
+          initialValues={{
+            boolean: true,
+          }}
+        >
+          {() => (
+            <BooleanField
+              name="boolean"
+              config={{
+                label: 'test',
+                help_text: 'test',
+              }}
+            />
+          )}
+        </Formik>
+      </I18nProvider>,
+      {
+        attachTo: outerNode,
+      }
     );
     expect(wrapper.find('Switch')).toHaveLength(1);
     expect(wrapper.find('Switch').prop('isChecked')).toBe(true);
     expect(wrapper.find('Switch').prop('isDisabled')).toBe(false);
     await act(async () => {
-      wrapper.find('Switch').invoke('onChange')(false);
+      wrapper
+        .find('Switch label')
+        .instance()
+        .dispatchEvent(new Event('click'));
     });
     wrapper.update();
     expect(wrapper.find('Switch').prop('isChecked')).toBe(false);
