@@ -8,10 +8,14 @@ import { HostsAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import {
   encodeQueryString,
@@ -130,7 +134,7 @@ function HostList({ i18n }) {
   return (
     <PageSection>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading}
           items={hosts}
@@ -157,14 +161,14 @@ function HostList({ i18n }) {
               key: 'modified_by__username__icontains',
             },
           ]}
-          toolbarSortColumns={[
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-            },
-          ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
+          headerRow={
+            <HeaderRow qsConfig={QS_CONFIG}>
+              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Inventory`)}</HeaderCell>
+            </HeaderRow>
+          }
           renderToolbar={props => (
             <DataListToolbar
               {...props}
@@ -193,13 +197,14 @@ function HostList({ i18n }) {
               ]}
             />
           )}
-          renderItem={host => (
+          renderRow={(host, index) => (
             <HostListItem
               key={host.id}
               host={host}
               detailUrl={`${match.url}/${host.id}/details`}
               isSelected={selected.some(row => row.id === host.id)}
               onSelect={() => handleSelect(host)}
+              rowIndex={index}
             />
           )}
           emptyStateControls={
