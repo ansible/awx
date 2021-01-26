@@ -578,6 +578,14 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         on_delete=models.SET_NULL,
         help_text=_('The SCM Refresh task used to make sure the playbooks were available for the job run'),
     )
+    project_export = models.ForeignKey(
+        'ProjectExport',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        help_text=_('The SCM Export task used to send Job Templates to the SCM'),
+    )
     job_slice_number = models.PositiveIntegerField(
         blank=True,
         default=0,
