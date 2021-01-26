@@ -2632,6 +2632,7 @@ class ActivityStreamAccess(BaseAccess):
             Q(team__in=team_set) |
             Q(project__in=project_set) |
             Q(project_update__project__in=project_set) |
+            Q(project_export__project__in=project_set) |
             Q(job_template__in=jt_set) |
             Q(job__job_template__in=jt_set) |
             Q(workflow_job_template__in=wfjt_set) |
