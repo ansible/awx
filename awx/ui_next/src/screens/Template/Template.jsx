@@ -86,10 +86,6 @@ function Template({ i18n, setBreadcrumb }) {
     }
   }, [template, setBreadcrumb]);
 
-  const createSchedule = data => {
-    return JobTemplatesAPI.createSchedule(template.id, data);
-  };
-
   const loadScheduleOptions = useCallback(() => {
     return JobTemplatesAPI.readScheduleOptions(templateId);
   }, [templateId]);
@@ -203,9 +199,9 @@ function Template({ i18n, setBreadcrumb }) {
               path="/templates/:templateType/:id/schedules"
             >
               <Schedules
-                createSchedule={createSchedule}
+                apiModel={JobTemplatesAPI}
                 setBreadcrumb={setBreadcrumb}
-                unifiedJobTemplate={template}
+                resource={template}
                 loadSchedules={loadSchedules}
                 loadScheduleOptions={loadScheduleOptions}
               />

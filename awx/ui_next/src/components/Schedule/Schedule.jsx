@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 
@@ -17,37 +17,39 @@ import ContentLoading from '../ContentLoading';
 import ScheduleDetail from './ScheduleDetail';
 import ScheduleEdit from './ScheduleEdit';
 import { SchedulesAPI } from '../../api';
+import useRequest from '../../util/useRequest';
 
-function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
-  const [schedule, setSchedule] = useState(null);
-  const [contentLoading, setContentLoading] = useState(true);
-  const [contentError, setContentError] = useState(null);
+function Schedule({ i18n, setBreadcrumb, resource }) {
   const { scheduleId } = useParams();
-  const location = useLocation();
-  const { pathname } = location;
+
+  const { pathname } = useLocation();
+
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const { data } = await SchedulesAPI.readDetail(scheduleId);
-        setSchedule(data);
-      } catch (err) {
-        setContentError(err);
-      } finally {
-        setContentLoading(false);
-      }
-    };
+  const {
+    isLoading: contentLoading,
+    error: contentError,
+    request: loadData,
+    result: schedule,
+  } = useRequest(
+    useCallback(async () => {
+      const { data } = await SchedulesAPI.readDetail(scheduleId);
 
+      return data;
+    }, [scheduleId]),
+    null
+  );
+
+  useEffect(() => {
     loadData();
-  }, [location.pathname, scheduleId]);
+  }, [loadData, pathname]);
 
   useEffect(() => {
     if (schedule) {
-      setBreadcrumb(unifiedJobTemplate, schedule);
+      setBreadcrumb(resource, schedule);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schedule, unifiedJobTemplate]);
+  }, [schedule, resource]);
   const tabsArray = [
     {
       name: (
@@ -71,8 +73,8 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
   }
 
   if (
-    schedule.summary_fields.unified_job_template.id !==
-    parseInt(unifiedJobTemplate.id, 10)
+    schedule?.summary_fields.unified_job_template.id !==
+    parseInt(resource.id, 10)
   ) {
     return (
       <ContentError>
@@ -89,10 +91,7 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
 
   let showCardHeader = true;
 
-  if (
-    !location.pathname.includes('schedules/') ||
-    location.pathname.endsWith('edit')
-  ) {
+  if (!pathname.includes('schedules/') || pathname.endsWith('edit')) {
     showCardHeader = false;
   }
   return (
@@ -106,7 +105,7 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
         />
         {schedule && [
           <Route key="edit" path={`${pathRoot}schedules/:id/edit`}>
-            <ScheduleEdit schedule={schedule} />
+            <ScheduleEdit schedule={schedule} resource={resource} />
           </Route>,
           <Route
             key="details"
@@ -117,7 +116,7 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
         ]}
         <Route key="not-found" path="*">
           <ContentError>
-            {unifiedJobTemplate && (
+            {resource && (
               <Link to={`${pathRoot}details`}>{i18n._(t`View Details`)}</Link>
             )}
           </ContentError>

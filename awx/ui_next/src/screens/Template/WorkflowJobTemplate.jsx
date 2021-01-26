@@ -73,10 +73,6 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
     loadTemplateAndRoles();
   }, [loadTemplateAndRoles, location.pathname]);
 
-  const createSchedule = data => {
-    return WorkflowJobTemplatesAPI.createSchedule(templateId, data);
-  };
-
   const loadScheduleOptions = useCallback(() => {
     return WorkflowJobTemplatesAPI.readScheduleOptions(templateId);
   }, [templateId]);
@@ -206,9 +202,9 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
               path="/templates/:templateType/:id/schedules"
             >
               <Schedules
-                createSchedule={createSchedule}
+                apiModel={WorkflowJobTemplatesAPI}
                 setBreadcrumb={setBreadcrumb}
-                unifiedJobTemplate={template}
+                resource={template}
                 loadSchedules={loadSchedules}
                 loadScheduleOptions={loadScheduleOptions}
               />

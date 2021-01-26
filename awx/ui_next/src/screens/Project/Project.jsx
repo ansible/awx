@@ -78,10 +78,6 @@ function Project({ i18n, setBreadcrumb }) {
     }
   }, [project, setBreadcrumb]);
 
-  function createSchedule(data) {
-    return ProjectsAPI.createSchedule(project.id, data);
-  }
-
   const loadScheduleOptions = useCallback(() => {
     return ProjectsAPI.readScheduleOptions(project.id);
   }, [project]);
@@ -188,8 +184,8 @@ function Project({ i18n, setBreadcrumb }) {
               <Route path="/projects/:id/schedules">
                 <Schedules
                   setBreadcrumb={setBreadcrumb}
-                  unifiedJobTemplate={project}
-                  createSchedule={createSchedule}
+                  resource={project}
+                  apiModel={ProjectsAPI}
                   loadSchedules={loadSchedules}
                   loadScheduleOptions={loadScheduleOptions}
                 />
