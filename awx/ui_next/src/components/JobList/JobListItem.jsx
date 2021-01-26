@@ -97,7 +97,7 @@ function JobListItem({
           </ActionItem>
         </ActionsTd>
       </Tr>
-      <Tr isExpanded={isExpanded}>
+      <Tr isExpanded={isExpanded} id={`expanded-job-row-${job.id}`}>
         <Td colSpan={2} />
         <Td colSpan={showTypeColumn ? 5 : 4}>
           <ExpandableRowContent>
