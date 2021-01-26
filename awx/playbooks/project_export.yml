@@ -31,12 +31,12 @@
           fail:
             msg: "User running export must have a first/last name and email address"
           when: "not commit_user or not commit_email or commit_user | replace(' ','') == '' or commit_email == ''"
-  
+
         - name: Create working directory
           tempfile:
             state: directory
           register: temp_dir
-  
+
         - name: Clone project using git
           git:
             dest: "{{ temp_dir.path }}"
@@ -45,12 +45,12 @@
             refspec: "{{scm_refspec|default(omit)}}"
             accept_hostkey: "{{scm_accept_hostkey|default(omit)}}"
           register: git_result
-  
+
         - name: Create assets folder if needed
           file:
             state: directory
             path: "{{ temp_dir.path }}/assets"
-  
+
         - name: Run project export
           tower_export:
             job_templates: "{{ item | string }}"
@@ -60,7 +60,7 @@
           loop: "{{ job_template_ids }}"
           loop_control:
             label: "{{ lookup('awx.awx.tower_api', 'job_templates', query_params={ 'id': item }, verify_ssl=false, host=awx_host).name }}"
-  
+
         - name: Write out job templates
           copy:
             dest: "{{ temp_dir.path }}/assets/{{ item.assets.job_templates[0].name }}.yml"
@@ -70,26 +70,26 @@
           loop: "{{ job_template_export.results }}"
           loop_control:
             label: "{{ item.assets.job_templates[0].name }}"
-  
+
         - name: Git add the changes
           command: 'git add --all'
           args:
             chdir: "{{ temp_dir.path }}"
-  
+
         - name: Git status the the code
           command: 'git status --short'
           args:
             chdir: "{{ temp_dir.path }}"
           register: git_status_result
-  
+
         - name: Fail if there are no changes
           fail:
             msg: "This export updates nothing in the SCM"
           when: git_status_result.stdout | length == 0
-  
+
         # Do we want to do anything if the number of changed files != the number of requested assets to export?
         # We could fail?
-  
+
         - name: Configure commit user in git repo
           git_config:
             name: "{{ item.name }}"
@@ -103,7 +103,7 @@
               value: "{{ commit_email }}"
           loop_control:
             label: "{{ item.name }}"
-  
+
         - name: Git commit the changes
           command: 'git commit -m {{ commit_message | quote }} --all'
           args:
@@ -111,7 +111,7 @@
           failed_when: git_commit_result.rc > 1
           changed_when: git_commit_result.rc == 0
           register: git_commit_result
-  
+
         - name: Git push the changes
           command: 'git push'
           args:
