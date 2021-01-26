@@ -99,7 +99,7 @@ python-string-utils==1.0.0  # via openshift
 python3-openid==3.1.0     # via social-auth-core
 python3-saml==1.9.0       # via -r /awx_devel/requirements/requirements.in
 pytz==2019.3              # via django, irc, tempora, twilio
-pyyaml==5.3.1             # via -r /awx_devel/requirements/requirements.in, ansible-runner, djangorestframework-yaml, kubernetes
+pyyaml==5.4.1             # via -r /awx_devel/requirements/requirements.in, ansible-runner, djangorestframework-yaml, kubernetes
 redis==3.4.1              # via -r /awx_devel/requirements/requirements.in, django-redis
 requests-oauthlib==1.3.0  # via kubernetes, msrest, social-auth-core
 requests==2.23.0          # via -r /awx_devel/requirements/requirements.in, adal, azure-keyvault, django-oauth-toolkit, kubernetes, msrest, requests-oauthlib, slackclient, social-auth-core, twilio
