@@ -67,7 +67,8 @@ In the root of awx-operator:
 $ ansible-playbook ansible/instantiate-awx-deployment.yml \
     -e development_mode=yes \
     -e tower_image=gcr.io/ansible-tower-engineering/awx_kube_devel:devel \
-    -e tower_image_pull_policy=Always
+    -e tower_image_pull_policy=Always \
+    -e tower_ingress_type=ingress
 ```
 
 ### Custom AWX Development Image for Kubernetes
@@ -89,7 +90,8 @@ In the root of awx-operator:
 $ ansible-playbook ansible/instantiate-awx-deployment.yml \
     -e development_mode=yes \
     -e tower_image=gcr.io/ansible-tower-engineering/awx_kube_devel:${COMPOSE_TAG} \
-    -e tower_image_pull_policy=Always
+    -e tower_image_pull_policy=Always \
+    -e tower_ingress_type=ingress
 ```
 
 To iterate on changes to the Dockerfile, rebuild and push the image, then delete
