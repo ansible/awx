@@ -29,6 +29,12 @@ $ ls -la /awx_devel
 
 Clone the [awx-operator](https://github.com/ansible/awx-operator).
 
+For the following playbooks to work, you will need to:
+
+```
+$ pip install openshift
+```
+
 If you are not changing any code in the operator itself, simply run:
 
 ```
