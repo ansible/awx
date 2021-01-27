@@ -1,0 +1,33 @@
+---
+- name: Authenticate with Docker registry if registry password given
+  docker_login:
+    registry: "{{ docker_registry }}"
+    username: "{{ docker_registry_username }}"
+    password: "{{ docker_registry_password }}"
+    reauthorize: true
+  when: docker_registry is defined and docker_registry_password is defined
+
+- name: Remove local images to ensure proper push behavior
+  block:
+    - name: Remove awx image
+      docker_image:
+        name: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}"
+        tag: "{{ awx_version }}"
+        state: absent
+
+- name: Tag and Push Container Images
+  block:
+    - name: Tag and push awx image to registry
+      docker_image:
+        name: "{{ awx_image }}"
+        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}"
+        tag: "{{ item }}"
+        push: true
+      with_items:
+        - "latest"
+        - "{{ awx_version }}"
+
+- name: Set full image path for Registry
+  set_fact:
+    awx_docker_actual_image: >-
+      {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}:{{ awx_version }}
