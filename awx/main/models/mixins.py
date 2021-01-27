@@ -455,12 +455,17 @@ class ExecutionEnvironmentMixin(models.Model):
         help_text=_('The container image to be used for execution.'),
     )
 
+    def get_execution_environment_default(self):
+        from awx.main.models.execution_environments import ExecutionEnvironment
+
+        if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
+            return settings.DEFAULT_EXECUTION_ENVIRONMENT
+        return ExecutionEnvironment.objects.filter(organization=None, managed_by_tower=True).first()
+
     def resolve_execution_environment(self):
         """
         Return the execution environment that should be used when creating a new job.
         """
-        from awx.main.models.execution_environments import ExecutionEnvironment
-
         if self.execution_environment is not None:
             return self.execution_environment
         if getattr(self, 'project_id', None) and self.project.default_environment is not None:
@@ -470,9 +475,8 @@ class ExecutionEnvironmentMixin(models.Model):
         if getattr(self, 'inventory', None) and self.inventory.organization is not None:
             if self.inventory.organization.default_environment is not None:
                 return self.inventory.organization.default_environment
-        if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
-            return settings.DEFAULT_EXECUTION_ENVIRONMENT
-        return ExecutionEnvironment.objects.filter(organization=None, managed_by_tower=True).first()
+
+        return self.get_execution_environment_default()
 
 
 class CustomVirtualEnvMixin(models.Model):
