@@ -92,6 +92,8 @@ def main():
         pod_spec_override=dict(),
         instances=dict(required=False, type="list", default=None),
         state=dict(choices=['present', 'absent'], default='present'),
+        is_containerized=dict(type='bool'),
+        summary_fields=dict(),
     )
 
     # Create a module for ourselves
@@ -107,6 +109,8 @@ def main():
     pod_spec_override = module.params.get('pod_spec_override')
     instances = module.params.get('instances')
     state = module.params.get('state')
+    is_containerized = module.params.get('is_containerized')
+    summary_fields = module.params.get('summary_fields')
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('instance_groups', name_or_id=name)
@@ -138,6 +142,10 @@ def main():
         new_fields['policy_instance_list'] = policy_instance_list
     if pod_spec_override is not None:
         new_fields['pod_spec_override'] = pod_spec_override
+    if is_containerized is not None:
+        new_fields['is_containerized'] = is_containerized
+    if summary_fields is not None:
+        new_fields['summary_fields'] = summary_fields
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
