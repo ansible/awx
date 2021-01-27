@@ -32,7 +32,11 @@ describe('<JobListItem />', () => {
       initialEntries: ['/jobs'],
     });
     wrapper = mountWithContexts(
-      <JobListItem job={mockJob} isSelected onSelect={() => {}} />,
+      <table>
+        <tbody>
+          <JobListItem job={mockJob} isSelected onSelect={() => {}} />
+        </tbody>
+      </table>,
       { context: { router: { history } } }
     );
   });
@@ -51,32 +55,40 @@ describe('<JobListItem />', () => {
 
   test('launch button hidden from users without launch capabilities', () => {
     wrapper = mountWithContexts(
-      <JobListItem
-        job={{
-          ...mockJob,
-          summary_fields: { user_capabilities: { start: false } },
-        }}
-        detailUrl={`/jobs/playbook/${mockJob.id}`}
-        onSelect={() => {}}
-        isSelected={false}
-      />
+      <table>
+        <tbody>
+          <JobListItem
+            job={{
+              ...mockJob,
+              summary_fields: { user_capabilities: { start: false } },
+            }}
+            detailUrl={`/jobs/playbook/${mockJob.id}`}
+            onSelect={() => {}}
+            isSelected={false}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('LaunchButton').length).toBe(0);
   });
 
   test('should hide type column when showTypeColumn is false', () => {
-    expect(wrapper.find('DataListCell[aria-label="type"]').length).toBe(0);
+    expect(wrapper.find('Td[dataLabel="Type"]').length).toBe(0);
   });
 
   test('should show type column when showTypeColumn is true', () => {
     wrapper = mountWithContexts(
-      <JobListItem
-        job={mockJob}
-        showTypeColumn
-        isSelected
-        onSelect={() => {}}
-      />
+      <table>
+        <tbody>
+          <JobListItem
+            job={mockJob}
+            showTypeColumn
+            isSelected
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
     );
-    expect(wrapper.find('DataListCell[aria-label="type"]').length).toBe(1);
+    expect(wrapper.find('Td[dataLabel="Type"]').length).toBe(1);
   });
 });

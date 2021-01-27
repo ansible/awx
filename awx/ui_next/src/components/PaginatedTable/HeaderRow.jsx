@@ -12,7 +12,7 @@ const Th = styled(PFTh)`
   --pf-c-table--cell--Overflow: initial;
 `;
 
-export default function HeaderRow({ qsConfig, children }) {
+export default function HeaderRow({ qsConfig, isExpandable, children }) {
   const location = useLocation();
   const history = useHistory();
 
@@ -41,25 +41,38 @@ export default function HeaderRow({ qsConfig, children }) {
     index: sortKey || qsConfig.defaultParams?.order_by,
     direction: params.order_by?.startsWith('-') ? 'desc' : 'asc',
   };
+  const idPrefix = `${qsConfig.namespace}-table-sort`;
 
   // empty first Th aligns with checkboxes in table rows
   return (
     <Thead>
       <Tr>
+        {isExpandable && <Th />}
         <Th />
-        {React.Children.map(children, child =>
-          React.cloneElement(child, {
-            onSort,
-            sortBy,
-            columnIndex: child.props.sortKey,
-          })
+        {React.Children.map(
+          children,
+          child =>
+            child &&
+            React.cloneElement(child, {
+              onSort,
+              sortBy,
+              columnIndex: child.props.sortKey,
+              idPrefix,
+            })
         )}
       </Tr>
     </Thead>
   );
 }
 
-export function HeaderCell({ sortKey, onSort, sortBy, columnIndex, children }) {
+export function HeaderCell({
+  sortKey,
+  onSort,
+  sortBy,
+  columnIndex,
+  idPrefix,
+  children,
+}) {
   const sort = sortKey
     ? {
         onSort: (event, key, order) => onSort(sortKey, order),
@@ -67,5 +80,9 @@ export function HeaderCell({ sortKey, onSort, sortBy, columnIndex, children }) {
         columnIndex,
       }
     : null;
-  return <Th sort={sort}>{children}</Th>;
+  return (
+    <Th sort={sort} id={sortKey ? `${idPrefix}-${sortKey}` : null}>
+      {children}
+    </Th>
+  );
 }
