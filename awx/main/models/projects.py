@@ -187,6 +187,14 @@ class ProjectOptions(models.Model):
                 pass
         return cred
 
+    def resolve_execution_environment(self):
+        """
+        Project updates, themselves, will use the default execution environment.
+        Jobs using the project can use the default_environment, but the project updates
+        are not flexible enough to allow customizing the image they use.
+        """
+        return self.get_execution_environment_default()
+
     def get_project_path(self, check_if_exists=True):
         local_path = os.path.basename(self.local_path)
         if local_path and not local_path.startswith('.'):
