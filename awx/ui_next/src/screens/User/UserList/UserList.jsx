@@ -7,7 +7,11 @@ import { UsersAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
@@ -101,7 +105,7 @@ function UserList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={users}
@@ -122,20 +126,6 @@ function UserList({ i18n }) {
               {
                 name: i18n._(t`Last Name`),
                 key: 'last_name__icontains',
-              },
-            ]}
-            toolbarSortColumns={[
-              {
-                name: i18n._(t`Username`),
-                key: 'username',
-              },
-              {
-                name: i18n._(t`First Name`),
-                key: 'first_name',
-              },
-              {
-                name: i18n._(t`Last Name`),
-                key: 'last_name',
               },
             ]}
             toolbarSearchableKeys={searchableKeys}
@@ -167,13 +157,28 @@ function UserList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={o => (
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="username">
+                  {i18n._(t`Username`)}
+                </HeaderCell>
+                <HeaderCell sortKey="first_name">
+                  {i18n._(t`First Name`)}
+                </HeaderCell>
+                <HeaderCell sortKey="last_name">
+                  {i18n._(t`Last Name`)}
+                </HeaderCell>
+                <HeaderCell>{i18n._(t`Role`)}</HeaderCell>
+              </HeaderRow>
+            }
+            renderRow={(user, index) => (
               <UserListItem
-                key={o.id}
-                user={o}
-                detailUrl={`${match.url}/${o.id}/details`}
-                isSelected={selected.some(row => row.id === o.id)}
-                onSelect={() => handleSelect(o)}
+                key={user.id}
+                user={user}
+                detailUrl={`${match.url}/${user.id}/details`}
+                isSelected={selected.some(row => row.id === user.id)}
+                onSelect={() => handleSelect(user)}
+                rowIndex={index}
               />
             )}
             emptyStateControls={
