@@ -106,4 +106,4 @@ def test_invalid_role(run_module, admin_user, project):
     assert result.get('failed', False)
     msg = result.get('msg')
     assert 'has no role adhoc_role' in msg
-    assert 'available roles: admin_role, use_role, update_role, read_role' in msg
+    assert 'available roles: admin_role, use_role, update_role, export_role, read_role' in msg
