@@ -3026,6 +3026,7 @@ class AWXReceptorJob:
     def __init__(self, task, runner_params):
         self.task = task
         self.runner_params = runner_params
+        self.unit_id = None
 
         if not self.task.instance.is_container_group_task:
             execution_environment_params = self.task.build_execution_environment_params(self.task.instance)
