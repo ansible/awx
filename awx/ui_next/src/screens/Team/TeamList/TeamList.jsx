@@ -9,7 +9,11 @@ import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import DataListToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
@@ -112,7 +116,7 @@ function TeamList({ i18n }) {
     <Fragment>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={teams}
@@ -143,14 +147,14 @@ function TeamList({ i18n }) {
                 key: 'modified_by__username__icontains',
               },
             ]}
-            toolbarSortColumns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-              },
-            ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
+              </HeaderRow>
+            }
             renderToolbar={props => (
               <DataListToolbar
                 {...props}
@@ -176,13 +180,14 @@ function TeamList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={o => (
+            renderRow={(team, index) => (
               <TeamListItem
-                key={o.id}
-                team={o}
-                detailUrl={`${match.url}/${o.id}`}
-                isSelected={selected.some(row => row.id === o.id)}
-                onSelect={() => handleSelect(o)}
+                key={team.id}
+                team={team}
+                detailUrl={`${match.url}/${team.id}`}
+                isSelected={selected.some(row => row.id === team.id)}
+                onSelect={() => handleSelect(team)}
+                rowIndex={index}
               />
             )}
             emptyStateControls={
