@@ -35,6 +35,10 @@ describe('<JobDetail />', () => {
               kubernetes: false,
               credential_type_id: 1,
             },
+            source_workflow_job: {
+              id: 1234,
+              name: 'Test Source Workflow',
+            },
           },
         }}
       />
@@ -45,6 +49,7 @@ describe('<JobDetail />', () => {
     assertDetail('Started', '8/8/2019, 7:24:18 PM');
     assertDetail('Finished', '8/8/2019, 7:24:50 PM');
     assertDetail('Job Template', mockJobData.summary_fields.job_template.name);
+    assertDetail('Source Workflow Job', `1234 - Test Source Workflow`);
     assertDetail('Job Type', 'Playbook Run');
     assertDetail('Launched By', mockJobData.summary_fields.created_by.username);
     assertDetail('Inventory', mockJobData.summary_fields.inventory.name);

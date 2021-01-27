@@ -5,6 +5,14 @@ if [ `id -u` -ge 500 ]; then
     rm /tmp/passwd
 fi
 
+if [ -n "${AWX_KUBE_DEVEL}" ]; then
+    pushd /awx_devel
+    make awx-link
+    popd
+
+    export SDB_NOTIFY_HOST=$(ip route | head -n1 | awk '{print $3}')
+fi
+
 source /etc/tower/conf.d/environment.sh
 
 ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=$DATABASE_HOST port=$DATABASE_PORT" all

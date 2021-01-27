@@ -6,11 +6,17 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import { SettingsAPI } from '../../../api';
+import { SettingsProvider } from '../../../contexts/Settings';
+import mockAllOptions from '../shared/data.allSettingOptions.json';
 import UI from './UI';
 
 jest.mock('../../../api/models/Settings');
 SettingsAPI.readCategory.mockResolvedValue({
-  data: {},
+  data: {
+    CUSTOM_LOGIN_INFO: '',
+    CUSTOM_LOGO: '',
+    PENDO_TRACKING_STATE: 'off',
+  },
 });
 
 describe('<UI />', () => {
@@ -26,9 +32,14 @@ describe('<UI />', () => {
       initialEntries: ['/settings/ui/details'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<UI />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <SettingsProvider value={mockAllOptions.actions}>
+          <UI />
+        </SettingsProvider>,
+        {
+          context: { router: { history } },
+        }
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('UIDetail').length).toBe(1);
@@ -39,9 +50,14 @@ describe('<UI />', () => {
       initialEntries: ['/settings/ui/edit'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<UI />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <SettingsProvider value={mockAllOptions.actions}>
+          <UI />
+        </SettingsProvider>,
+        {
+          context: { router: { history } },
+        }
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('UIEdit').length).toBe(1);

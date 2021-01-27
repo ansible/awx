@@ -94,7 +94,7 @@ const buildAnchor = (obj, resource, activity) => {
         break;
       }
       case 'workflow_job':
-        url = `/workflows/${obj.id}/`;
+        url = `/jobs/workflow/${obj.id}/`;
         break;
       case 'label':
         url = null;

@@ -158,7 +158,10 @@ AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 # default settings for development.  If not present, we can still run using
 # only the defaults.
 try:
-    include(optional('local_*.py'), scope=locals())
+    if os.getenv('AWX_KUBE_DEVEL', False):
+        include(optional('minikube.py'), scope=locals())
+    else:
+        include(optional('local_*.py'), scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)

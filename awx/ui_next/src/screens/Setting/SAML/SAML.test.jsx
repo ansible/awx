@@ -3,11 +3,31 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { SettingsAPI } from '../../../api';
+import { SettingsProvider } from '../../../contexts/Settings';
+import mockAllOptions from '../shared/data.allSettingOptions.json';
 import SAML from './SAML';
 
 jest.mock('../../../api/models/Settings');
 SettingsAPI.readCategory.mockResolvedValue({
-  data: {},
+  data: {
+    SOCIAL_AUTH_SAML_CALLBACK_URL: 'https://towerhost/sso/complete/saml/',
+    SOCIAL_AUTH_SAML_METADATA_URL: 'https://towerhost/sso/metadata/saml/',
+    SOCIAL_AUTH_SAML_SP_ENTITY_ID: '',
+    SOCIAL_AUTH_SAML_SP_PUBLIC_CERT: '',
+    SOCIAL_AUTH_SAML_SP_PRIVATE_KEY: '',
+    SOCIAL_AUTH_SAML_ORG_INFO: {},
+    SOCIAL_AUTH_SAML_TECHNICAL_CONTACT: {},
+    SOCIAL_AUTH_SAML_SUPPORT_CONTACT: {},
+    SOCIAL_AUTH_SAML_ENABLED_IDPS: {},
+    SOCIAL_AUTH_SAML_SECURITY_CONFIG: {},
+    SOCIAL_AUTH_SAML_SP_EXTRA: {},
+    SOCIAL_AUTH_SAML_EXTRA_DATA: [],
+    SOCIAL_AUTH_SAML_ORGANIZATION_MAP: {},
+    SOCIAL_AUTH_SAML_TEAM_MAP: {},
+    SOCIAL_AUTH_SAML_ORGANIZATION_ATTR: {},
+    SOCIAL_AUTH_SAML_TEAM_ATTR: {},
+    SAML_AUTO_CREATE_OBJECTS: false,
+  },
 });
 
 describe('<SAML />', () => {
@@ -23,9 +43,14 @@ describe('<SAML />', () => {
       initialEntries: ['/settings/saml/details'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<SAML />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <SettingsProvider value={mockAllOptions.actions}>
+          <SAML />
+        </SettingsProvider>,
+        {
+          context: { router: { history } },
+        }
+      );
     });
     expect(wrapper.find('SAMLDetail').length).toBe(1);
   });
@@ -35,9 +60,14 @@ describe('<SAML />', () => {
       initialEntries: ['/settings/saml/edit'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<SAML />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <SettingsProvider value={mockAllOptions.actions}>
+          <SAML />
+        </SettingsProvider>,
+        {
+          context: { router: { history } },
+        }
+      );
     });
     expect(wrapper.find('SAMLEdit').length).toBe(1);
   });

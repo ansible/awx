@@ -13,7 +13,13 @@ const ButtonWrapper = styled.div`
   }
 `;
 
-function RevertButton({ i18n, id, defaultValue, isDisabled = false }) {
+function RevertButton({
+  i18n,
+  id,
+  defaultValue,
+  isDisabled = false,
+  onRevertCallback = () => null,
+}) {
   const [field, meta, helpers] = useField(id);
   const initialValue = meta.initialValue ?? '';
   const currentValue = field.value;
@@ -30,6 +36,7 @@ function RevertButton({ i18n, id, defaultValue, isDisabled = false }) {
 
   function handleConfirm() {
     helpers.setValue(isRevertable ? defaultValue : initialValue);
+    onRevertCallback();
   }
 
   const revertTooltipContent = isRevertable

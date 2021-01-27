@@ -21,11 +21,6 @@
   set_fact:
     awx_image: "{{ awx_image|default('awx') }}"
 
-- name: Render Dockerfile
-  template:
-    src: Dockerfile.j2
-    dest: ../Dockerfile
-
 # Calling Docker directly because docker-py doesnt support BuildKit
 - name: Build AWX image
   command: docker build -t {{ awx_image }}:{{ awx_version }} ..
