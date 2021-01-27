@@ -12,6 +12,12 @@ class ExecutionEnvironment(CommonModel):
     class Meta:
         ordering = ('-created',)
 
+    PULL_CHOICES = [
+        ('always', _("Always pull container before running.")),
+        ('missing', _("No pull option has been selected")),
+        ('never', _("Never cull container before running"))
+    ]
+
     organization = models.ForeignKey(
         'Organization',
         null=True,
@@ -34,6 +40,11 @@ class ExecutionEnvironment(CommonModel):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+    )
+    container_options = models.CharField(
+        max_length=1024,
+        choices=PULL_CHOICES,
+        help_text=_('Pull image before running?'),
     )
 
     def get_absolute_url(self, request=None):
