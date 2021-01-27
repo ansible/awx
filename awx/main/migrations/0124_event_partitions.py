@@ -30,28 +30,39 @@ def migrate_event_data(apps, schema_editor):
     #):
     for tblname in ('main_jobevent',):
         with connection.cursor() as cursor:
+            # mark existing table as *_old;
+            # we will drop this table after its data
+            # has been moved over
+            cursor.execute(
+                f'ALTER TABLE {tblname} RENAME TO {tblname}_old'
+            )
+
             # hacky creation of parent table for partition
             cursor.execute(
-                f'CREATE TABLE {tblname}_parent '
-                f'(LIKE {tblname}, job_created TIMESTAMP  WITH TIME ZONE NOT NULL) '
+                f'CREATE TABLE {tblname} '
+                f'(LIKE {tblname}_old, job_created TIMESTAMP WITH TIME ZONE NOT NULL) '
                 f'PARTITION BY RANGE(job_created);'
             )
 
             # .. as well as initial partition containing all existing events
             cursor.execute(
                 f'CREATE TABLE {tblname}_part0 '
-                f'PARTITION OF {tblname}_parent '
+                f'PARTITION OF {tblname} '
                 f'FOR VALUES FROM (\'2000-01-01 00:00:00.000000+00\') to (\'2021-02-01 00:00:00.000000+00\');'
             )
 
             # copy over all job events into partitioned table
             cursor.execute(
-                f'INSERT INTO {tblname}_parent '
-                f'SELECT {tblname}.*, main_unifiedjob.created '
-                f'FROM {tblname} '
-                f'INNER JOIN main_unifiedjob ON {tblname}.job_id = main_unifiedjob.id;'
+                f'INSERT INTO {tblname} '
+                f'SELECT {tblname}_old.*, main_unifiedjob.created '
+                f'FROM {tblname}_old '
+                f'INNER JOIN main_unifiedjob ON {tblname}_old.job_id = main_unifiedjob.id;'
             )
 
+            # drop old table
+            cursor.execute(
+                f'DROP TABLE {tblname}_old'
+            )
 class Migration(migrations.Migration):
 
     dependencies = [
