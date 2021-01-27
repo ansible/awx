@@ -268,13 +268,14 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               ]}
             />
           )}
-          renderRow={job => (
+          renderRow={(job, index) => (
             <JobListItem
               key={job.id}
               job={job}
               showTypeColumn={showTypeColumn}
               onSelect={() => handleSelect(job)}
               isSelected={selected.some(row => row.id === job.id)}
+              rowIndex={index}
             />
           )}
         />

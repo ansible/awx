@@ -51,8 +51,8 @@ function JobListItem({
             rowIndex,
             isSelected,
             onSelect,
-            disable: false,
           }}
+          dataLabel={i18n._(t`Select`)}
         />
         <Td id={labelId} dataLabel={i18n._(t`Name`)}>
           <span>
