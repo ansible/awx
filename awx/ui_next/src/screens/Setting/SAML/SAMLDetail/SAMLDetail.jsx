@@ -18,6 +18,7 @@ import { SettingDetail } from '../../shared';
 function SAMLDetail({ i18n }) {
   const { me } = useConfig();
   const { GET: options } = useSettings();
+  options.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT.type = 'certificate';
 
   const { isLoading, error, request, result: saml } = useRequest(
     useCallback(async () => {

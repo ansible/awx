@@ -8,8 +8,10 @@ import {
   BooleanField,
   ChoiceField,
   EncryptedField,
+  FileUploadField,
   InputField,
   ObjectField,
+  TextAreaField,
 } from './SharedFields';
 
 describe('Setting form fields', () => {
@@ -131,6 +133,38 @@ describe('Setting form fields', () => {
     expect(wrapper.find('TextInputBase').prop('value')).toEqual('foo');
   });
 
+  test('TextAreaField renders the expected content', async () => {
+    const wrapper = mountWithContexts(
+      <Formik
+        initialValues={{
+          mock_textarea: '',
+        }}
+      >
+        {() => (
+          <TextAreaField
+            name="mock_textarea"
+            config={{
+              label: 'mock textarea',
+              help_text: 'help text',
+              default: '',
+            }}
+          />
+        )}
+      </Formik>
+    );
+    expect(wrapper.find('textarea')).toHaveLength(1);
+    expect(wrapper.find('textarea#mock_textarea').prop('value')).toEqual('');
+    await act(async () => {
+      wrapper.find('textarea#mock_textarea').simulate('change', {
+        target: { value: 'new textarea value', name: 'mock_textarea' },
+      });
+    });
+    wrapper.update();
+    expect(wrapper.find('textarea').prop('value')).toEqual(
+      'new textarea value'
+    );
+  });
+
   test('ObjectField renders the expected content', async () => {
     const wrapper = mountWithContexts(
       <Formik
@@ -160,5 +194,47 @@ describe('Setting form fields', () => {
     });
     wrapper.update();
     expect(wrapper.find('CodeMirrorInput').prop('value')).toBe('[]');
+  });
+
+  test('FileUploadField renders the expected content', async () => {
+    const wrapper = mountWithContexts(
+      <Formik
+        initialValues={{
+          mock_file: 'mock file value',
+        }}
+      >
+        {() => (
+          <FileUploadField
+            name="mock_file"
+            config={{
+              label: 'mock file label',
+              help_text: 'mock file help',
+              default: '',
+            }}
+          />
+        )}
+      </Formik>
+    );
+    expect(wrapper.find('FileUploadField')).toHaveLength(1);
+    expect(wrapper.find('label').text()).toEqual('mock file label');
+    expect(wrapper.find('input#mock_file-filename').prop('value')).toEqual('');
+    await act(async () => {
+      wrapper.find('FileUpload').invoke('onChange')(
+        {
+          text: () =>
+            '-----BEGIN PRIVATE KEY-----\\nAAAAAAAAAAAAAA\\n-----END PRIVATE KEY-----\\n',
+        },
+        'new file name'
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('input#mock_file-filename').prop('value')).toEqual(
+      'new file name'
+    );
+    await act(async () => {
+      wrapper.find('button[aria-label="Revert"]').invoke('onClick')();
+    });
+    wrapper.update();
+    expect(wrapper.find('input#mock_file-filename').prop('value')).toEqual('');
   });
 });
