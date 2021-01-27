@@ -41,6 +41,7 @@ export default function HeaderRow({ qsConfig, isExpandable, children }) {
     index: sortKey || qsConfig.defaultParams?.order_by,
     direction: params.order_by?.startsWith('-') ? 'desc' : 'asc',
   };
+  const idPrefix = `${qsConfig.namespace}-table-sort`;
 
   // empty first Th aligns with checkboxes in table rows
   return (
@@ -56,6 +57,7 @@ export default function HeaderRow({ qsConfig, isExpandable, children }) {
               onSort,
               sortBy,
               columnIndex: child.props.sortKey,
+              idPrefix,
             })
         )}
       </Tr>
@@ -63,7 +65,14 @@ export default function HeaderRow({ qsConfig, isExpandable, children }) {
   );
 }
 
-export function HeaderCell({ sortKey, onSort, sortBy, columnIndex, children }) {
+export function HeaderCell({
+  sortKey,
+  onSort,
+  sortBy,
+  columnIndex,
+  idPrefix,
+  children,
+}) {
   const sort = sortKey
     ? {
         onSort: (event, key, order) => onSort(sortKey, order),
@@ -71,5 +80,9 @@ export function HeaderCell({ sortKey, onSort, sortBy, columnIndex, children }) {
         columnIndex,
       }
     : null;
-  return <Th sort={sort}>{children}</Th>;
+  return (
+    <Th sort={sort} id={sortKey ? `${idPrefix}-${sortKey}` : null}>
+      {children}
+    </Th>
+  );
 }
