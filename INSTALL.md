@@ -12,7 +12,6 @@ This document provides a guide for installing AWX.
     + [System Requirements](#system-requirements)
     + [Choose a deployment platform](#choose-a-deployment-platform)
     + [Official vs Building Images](#official-vs-building-images)
-  * [Upgrading from previous versions](#upgrading-from-previous-versions)
   * [OpenShift](#openshift)
     + [Prerequisites](#prerequisites-1)
     + [Pre-install steps](#pre-install-steps)
@@ -29,17 +28,6 @@ This document provides a guide for installing AWX.
     + [Post-install](#post-install-1)
     + [Accessing AWX](#accessing-awx-1)
     + [SSL Termination](#ssl-termination)
-  * [Docker-Compose](#docker-compose)
-    + [Prerequisites](#prerequisites-3)
-    + [Pre-install steps](#pre-install-steps-2)
-      - [Deploying to a remote host](#deploying-to-a-remote-host)
-      - [Inventory variables](#inventory-variables)
-      - [Docker registry](#docker-registry)
-      - [Proxy settings](#proxy-settings)
-      - [PostgreSQL](#postgresql-1)
-    + [Run the installer](#run-the-installer-2)
-    + [Post-install](#post-install-2)
-    + [Accessing AWX](#accessing-awx-2)
 - [Installing the AWX CLI](#installing-the-awx-cli)
   * [Building the CLI Documentation](#building-the-cli-documentation)
 
@@ -84,9 +72,9 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [Git](https://git-scm.com/) Requires Version 1.8.4+
 - Python 3.6+
 - [Node 14.x LTS version](https://nodejs.org/en/download/)
-    + This is only required if you're [building your own container images](#official-vs-building-images) with `use_container_for_build=false`
+    + This is only required if you're [building your own container images](#official-vs-building-images)
 - [NPM 6.x LTS](https://docs.npmjs.com/)
-    + This is only required if you're [building your own container images](#official-vs-building-images) with `use_container_for_build=false`
+    + This is only required if you're [building your own container images](#official-vs-building-images)
 
 ### System Requirements
 
@@ -100,14 +88,13 @@ The system that runs the AWX service will need to satisfy the following requirem
 
 ### Choose a deployment platform
 
-We currently support running AWX as a containerized application using Docker images deployed to either an OpenShift cluster, a Kubernetes cluster, or docker-compose. The remainder of this document will walk you through the process of building the images, and deploying them to either platform.
+We currently support running AWX as a containerized application using Docker images deployed to either an OpenShift cluster or a Kubernetes cluster. The remainder of this document will walk you through the process of building the images, and deploying them to either platform.
 
 The [installer](./installer) directory contains an [inventory](./installer/inventory) file, and a playbook, [install.yml](./installer/install.yml). You'll begin by setting variables in the inventory file according to the platform you wish to use, and then you'll start the image build and deployment process by running the playbook.
 
 In the sections below, you'll find deployment details and instructions for each platform:
 - [OpenShift](#openshift)
 - [Kubernetes](#kubernetes)
-- [Docker Compose](#docker-compose).
 
 ### Official vs Building Images
 
@@ -130,28 +117,15 @@ If these variables are present then all deployments will use these hosted images
 
 > Multiple versions are provided. `latest` always pulls the most recent. You may also select version numbers at different granularities: 1, 1.0, 1.0.1, 1.0.0.123
 
-*use_container_for_build*
-
-> Use a local distribution build container image for building the AWX package. This is helpful if you don't want to bother installing the build-time dependencies as it is taken care of already.
-
-
-## Upgrading from previous versions
-
-Upgrading AWX involves rerunning the install playbook. Download a newer release from [https://github.com/ansible/awx/releases](https://github.com/ansible/awx/releases) and re-populate the inventory file with your customized variables.
-
-For convenience, you can create a file called `vars.yml`:
+To build your own container use the `build.yml` playbook:
 
 ```
-admin_password: 'adminpass'
-pg_password: 'pgpass'
-secret_key: 'mysupersecret'
+ansible-playbook tools/ansible/build.yml -e awx_version=test-build
 ```
 
-And pass it to the installer:
+The resulting image will automatically be pushed to a registry if `docker_registry` is defined. 
 
-```
-$ ansible-playbook -i inventory install.yml -e @vars.yml
-```
+
 
 ## OpenShift
 
@@ -437,6 +411,7 @@ If your provider is able to allocate an IP Address from the Ingress controller t
 Unlike Openshift's `Route` the Kubernetes `Ingress` doesn't yet handle SSL termination. As such the default configuration will only expose AWX through HTTP on port 80. You are responsible for configuring SSL support until support is added (either to Kubernetes or AWX itself).
 
 
+<<<<<<< HEAD
 ## Docker-Compose
 
 ### Prerequisites
@@ -644,6 +619,8 @@ The AWX web server is accessible on the deployment host, using the *host_port* v
 You will prompted with a login dialog. The default administrator username is `admin`, and the password is `password`.
 
 
+=======
+>>>>>>> c4d87ec843... Consolidate the Local Docker installer and the dev env
 # Installing the AWX CLI
 
 `awx` is the official command-line client for AWX.  It:

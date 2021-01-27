@@ -20,19 +20,6 @@ import sys
 # INTERNAL_IPS = ('172.19.0.1', '172.18.0.1', '192.168.100.1')
 # ALLOWED_HOSTS = ['*']
 
-# Database settings to use PostgreSQL for development.
-DATABASES = {
-    'default': {
-        'ENGINE': 'awx.main.db.profiled_pg',
-        'NAME': 'awx-dev',
-        'USER': 'awx-dev',
-        'PASSWORD': 'AWXsome1',
-        'ATOMIC_REQUESTS': True,
-        'HOST': 'postgres',
-        'PORT': '',
-    }
-}
-
 # Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
 # commented out, Django will create the test_awx-dev database in PostgreSQL to
 # run unit tests.
@@ -76,7 +63,6 @@ SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 #LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
 #LOGGING['loggers']['django_auth_ldap']['level'] = 'DEBUG'
 
-BROADCAST_WEBSOCKET_SECRET = '🤖starscream🤖'
 BROADCAST_WEBSOCKET_PORT = 8013
 BROADCAST_WEBSOCKET_VERIFY_CERT = False
 BROADCAST_WEBSOCKET_PROTOCOL = 'http'
