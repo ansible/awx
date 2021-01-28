@@ -2793,6 +2793,7 @@
               "help_text": "The duration (in seconds) access tokens create for project syncs remain valid since thie creation",
               "category": "System",
               "category_slug": "system",
+	      "unit": "seconds",
               "default": 14400
           },
           "REMOTE_HOST_HEADERS": {

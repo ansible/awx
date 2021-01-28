@@ -71,6 +71,7 @@ register(
     help_text=_('The duration (in seconds) access tokens create for project syncs remain valid since thie creation'),
     category=_('System'),
     category_slug='system',
+    unit=_('seconds'),
 )
 
 register(

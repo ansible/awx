@@ -109,7 +109,7 @@ describe('<MiscSystemDetail />', () => {
     );
     assertDetail(wrapper, 'Red Hat customer password', 'Encrypted');
     assertDetail(wrapper, 'Red Hat customer username', 'mock name');
-    assertDetail(wrapper, 'Project Sync Token Expiration', '14400');
+    assertDetail(wrapper, 'Project Sync Token Expiration', '14400 seconds');
     assertDetail(wrapper, 'Refresh Token Expiration', '3 seconds');
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');
     assertVariableDetail(wrapper, 'Custom virtual environment paths', '[]');
