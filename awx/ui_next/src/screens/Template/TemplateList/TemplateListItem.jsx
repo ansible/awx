@@ -25,6 +25,7 @@ import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
 import LaunchButton from '../../../components/LaunchButton';
 import Sparkline from '../../../components/Sparkline';
 import { toTitleCase } from '../../../util/strings';
+import { formatDateString } from '../../../util/dates';
 import CopyButton from '../../../components/CopyButton';
 
 function TemplateListItem({
@@ -87,6 +88,15 @@ function TemplateListItem({
       </Link>
     );
   };
+  let lastRun = '';
+  const mostRecentJob = template.summary_fields.recent_jobs
+    ? template.summary_fields.recent_jobs[0]
+    : null;
+  if (mostRecentJob) {
+    lastRun = mostRecentJob.finished
+      ? formatDateString(mostRecentJob.finished)
+      : i18n._(t`Running`);
+  }
 
   return (
     <>
@@ -122,15 +132,14 @@ function TemplateListItem({
           )}
         </Td>
         <Td dataLabel={i18n._(t`Type`)}>{toTitleCase(template.type)}</Td>
-        <Td dataLabel={i18n._(t`Recent Jobs`)}>
-          <Sparkline jobs={template.summary_fields.recent_jobs} />
-        </Td>
+        <Td dataLabel={i18n._(t`Last Ran`)}>{lastRun}</Td>
         <ActionsTd dataLabel={i18n._(t`Actions`)}>
           <ActionItem
             visible={template.type === 'workflow_job_template'}
             tooltip={i18n._(t`Visualizer`)}
           >
             <Button
+              id={`template-action-visualizer-${template.id}`}
               isDisabled={isDisabled}
               aria-label={i18n._(t`Visualizer`)}
               variant="plain"
@@ -147,6 +156,7 @@ function TemplateListItem({
             <LaunchButton resource={template}>
               {({ handleLaunch }) => (
                 <Button
+                  id={`template-action-launch-${template.id}`}
                   isDisabled={isDisabled}
                   aria-label={i18n._(t`Launch template`)}
                   variant="plain"
@@ -162,6 +172,7 @@ function TemplateListItem({
             tooltip={i18n._(t`Edit Template`)}
           >
             <Button
+              id={`template-action-edit-${template.id}`}
               isDisabled={isDisabled}
               aria-label={i18n._(t`Edit Template`)}
               variant="plain"
@@ -173,6 +184,7 @@ function TemplateListItem({
           </ActionItem>
           <ActionItem visible={template.summary_fields.user_capabilities.copy}>
             <CopyButton
+              id={`template-action-copy-${template.id}`}
               helperText={{
                 errorMessage: i18n._(t`Failed to copy template.`),
                 tooltip: i18n._(t`Copy Template`),
@@ -193,6 +205,7 @@ function TemplateListItem({
               <Detail
                 label={i18n._(t`Activity`)}
                 value={<Sparkline jobs={summaryFields.recent_jobs} />}
+                dataCy={`template-${template.id}-activity`}
               />
               {summaryFields.credentials && summaryFields.credentials.length && (
                 <Detail
@@ -207,6 +220,7 @@ function TemplateListItem({
                       ))}
                     </ChipGroup>
                   }
+                  dataCy={`template-${template.id}-credentials`}
                 />
               )}
               {summaryFields.inventory ? (
@@ -216,6 +230,7 @@ function TemplateListItem({
                     summaryFields.inventory.kind,
                     summaryFields.inventory.id
                   )}
+                  dataCy={`template-${template.id}-inventory`}
                 />
               ) : (
                 !askInventoryOnLaunch && (
@@ -237,9 +252,10 @@ function TemplateListItem({
                       ))}
                     </ChipGroup>
                   }
+                  dataCy={`template-${template.id}-labels`}
                 />
               )}
-              {summaryFields.project ? (
+              {summaryFields.project && (
                 <Detail
                   label={i18n._(t`Project`)}
                   value={
@@ -247,10 +263,14 @@ function TemplateListItem({
                       {summaryFields.project.name}
                     </Link>
                   }
+                  dataCy={`template-${template.id}-project`}
                 />
-              ) : (
-                <DeletedDetail label={i18n._(t`Project`)} />
               )}
+              <Detail
+                label={i18n._(t`Last Modified`)}
+                value={formatDateString(template.modified)}
+                dataCy={`template-${template.id}-last-modified`}
+              />
             </DetailList>
           </ExpandableRowContent>
         </Td>

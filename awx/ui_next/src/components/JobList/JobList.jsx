@@ -242,6 +242,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               <HeaderCell sortKey="finished">
                 {i18n._(t`Finish Time`)}
               </HeaderCell>
+              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
             </HeaderRow>
           }
           toolbarSearchableKeys={searchableKeys}

@@ -215,8 +215,9 @@ function TemplateList({ i18n }) {
               <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
               <HeaderCell sortKey="type">{i18n._(t`Type`)}</HeaderCell>
               <HeaderCell sortKey="last_job_run">
-                {i18n._(t`Last Run`)}
+                {i18n._(t`Last Ran`)}
               </HeaderCell>
+              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
             </HeaderRow>
           }
           renderToolbar={props => (
