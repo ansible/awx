@@ -81,11 +81,11 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
 
 
 @pytest.mark.django_db
-def test_job_launch_with_prompting(run_module, admin_user, project, inventory, machine_credential):
+def test_job_launch_with_prompting(run_module, admin_user, project, organization, inventory, machine_credential):
     JobTemplate.objects.create(
         name='foo',
         project=project,
-        organization='Default',
+        organization=organization,
         playbook='helloworld.yml',
         ask_variables_on_launch=True,
         ask_inventory_on_launch=True,
