@@ -32,6 +32,7 @@ SettingsAPI.readCategory.mockResolvedValue({
     ORG_ADMINS_CAN_SEE_ALL_USERS: true,
     REDHAT_PASSWORD: '$encrypted$',
     REDHAT_USERNAME: 'mock name',
+    PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS: 14400,
     REMOTE_HOST_HEADERS: [],
     SESSIONS_PER_USER: -1,
     SESSION_COOKIE_AGE: 30000000000,
@@ -108,6 +109,7 @@ describe('<MiscSystemDetail />', () => {
     );
     assertDetail(wrapper, 'Red Hat customer password', 'Encrypted');
     assertDetail(wrapper, 'Red Hat customer username', 'mock name');
+    assertDetail(wrapper, 'Project Sync Token Expiration', '14400');
     assertDetail(wrapper, 'Refresh Token Expiration', '3 seconds');
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');
     assertVariableDetail(wrapper, 'Custom virtual environment paths', '[]');

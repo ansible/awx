@@ -2786,6 +2786,15 @@
               "category_slug": "system",
               "default": "https://localhost:8043"
           },
+	  "PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS": {
+              "type": "integer",
+              "required": true,
+              "label": "Project Sync Token Expiration",
+              "help_text": "The duration (in seconds) access tokens create for project syncs remain valid since thie creation",
+              "category": "System",
+              "category_slug": "system",
+              "default": 14400
+          },
           "REMOTE_HOST_HEADERS": {
               "type": "list",
               "required": true,
