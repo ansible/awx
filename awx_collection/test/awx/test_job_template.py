@@ -85,6 +85,7 @@ def test_job_launch_with_prompting(run_module, admin_user, project, inventory, m
     JobTemplate.objects.create(
         name='foo',
         project=project,
+        organization='Default'
         playbook='helloworld.yml',
         ask_variables_on_launch=True,
         ask_inventory_on_launch=True,
