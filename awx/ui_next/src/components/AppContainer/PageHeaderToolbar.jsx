@@ -34,7 +34,6 @@ function PageHeaderToolbar({
   const handleUserSelect = () => {
     setIsUserOpen(!isUserOpen);
   };
-
   return (
     <PageHeaderTools>
       <PageHeaderToolsGroup>
@@ -90,8 +89,11 @@ function PageHeaderToolbar({
               dropdownItems={[
                 <DropdownItem
                   key="user"
+                  aria-label={i18n._(t`User details`)}
                   href={
-                    loggedInUser ? `/users/${loggedInUser.id}/details` : '/home'
+                    loggedInUser
+                      ? `/#/users/${loggedInUser.id}/details`
+                      : '/#/home'
                   }
                 >
                   {i18n._(t`User Details`)}
