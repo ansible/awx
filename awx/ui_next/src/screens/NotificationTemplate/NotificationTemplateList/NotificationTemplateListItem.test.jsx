@@ -26,17 +26,21 @@ const template = {
 describe('<NotificationTemplateListItem />', () => {
   test('should render template row', () => {
     const wrapper = mountWithContexts(
-      <NotificationTemplateListItem
-        template={template}
-        detailUrl="/notification_templates/3/detail"
-      />
+      <table>
+        <tbody>
+          <NotificationTemplateListItem
+            template={template}
+            detailUrl="/notification_templates/3/detail"
+          />
+        </tbody>
+      </table>
     );
 
-    const cells = wrapper.find('DataListCell');
-    expect(cells).toHaveLength(3);
-    expect(cells.at(0).text()).toEqual('Test Notification');
-    expect(cells.at(1).text()).toEqual('Success');
-    expect(cells.at(2).text()).toEqual('Type: Slack');
+    const cells = wrapper.find('Td');
+    expect(cells).toHaveLength(5);
+    expect(cells.at(1).text()).toEqual('Test Notification');
+    expect(cells.at(2).text()).toEqual('Success');
+    expect(cells.at(3).text()).toEqual('Slack');
   });
 
   test('should send test notification', async () => {
@@ -45,10 +49,14 @@ describe('<NotificationTemplateListItem />', () => {
     });
 
     const wrapper = mountWithContexts(
-      <NotificationTemplateListItem
-        template={template}
-        detailUrl="/notification_templates/3/detail"
-      />
+      <table>
+        <tbody>
+          <NotificationTemplateListItem
+            template={template}
+            detailUrl="/notification_templates/3/detail"
+          />
+        </tbody>
+      </table>
     );
     await act(async () => {
       wrapper
@@ -59,8 +67,8 @@ describe('<NotificationTemplateListItem />', () => {
     expect(NotificationTemplatesAPI.test).toHaveBeenCalledTimes(1);
     expect(
       wrapper
-        .find('DataListCell')
-        .at(1)
+        .find('Td')
+        .at(2)
         .text()
     ).toEqual('Running');
   });
@@ -69,10 +77,14 @@ describe('<NotificationTemplateListItem />', () => {
     NotificationTemplatesAPI.copy.mockResolvedValue();
 
     const wrapper = mountWithContexts(
-      <NotificationTemplateListItem
-        template={template}
-        detailUrl="/notification_templates/3/detail"
-      />
+      <table>
+        <tbody>
+          <NotificationTemplateListItem
+            template={template}
+            detailUrl="/notification_templates/3/detail"
+          />
+        </tbody>
+      </table>
     );
 
     await act(async () =>
@@ -86,10 +98,14 @@ describe('<NotificationTemplateListItem />', () => {
     NotificationTemplatesAPI.copy.mockRejectedValue(new Error());
 
     const wrapper = mountWithContexts(
-      <NotificationTemplateListItem
-        template={template}
-        detailUrl="/notification_templates/3/detail"
-      />
+      <table>
+        <tbody>
+          <NotificationTemplateListItem
+            template={template}
+            detailUrl="/notification_templates/3/detail"
+          />
+        </tbody>
+      </table>
     );
     await act(async () =>
       wrapper.find('Button[aria-label="Copy"]').prop('onClick')()
@@ -101,18 +117,22 @@ describe('<NotificationTemplateListItem />', () => {
 
   test('should not render copy button', async () => {
     const wrapper = mountWithContexts(
-      <NotificationTemplateListItem
-        template={{
-          ...template,
-          summary_fields: {
-            user_capabilities: {
-              copy: false,
-              edit: false,
-            },
-          },
-        }}
-        detailUrl="/notification_templates/3/detail"
-      />
+      <table>
+        <tbody>
+          <NotificationTemplateListItem
+            template={{
+              ...template,
+              summary_fields: {
+                user_capabilities: {
+                  copy: false,
+                  edit: false,
+                },
+              },
+            }}
+            detailUrl="/notification_templates/3/detail"
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('CopyButton').length).toBe(0);
   });
