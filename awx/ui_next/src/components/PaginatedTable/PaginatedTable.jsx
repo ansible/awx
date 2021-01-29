@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { TableComposable, Tbody } from '@patternfly/react-table';
@@ -88,13 +89,13 @@ function PaginatedTable({
     );
   } else {
     Content = (
-      <>
+      <div css="overflow: scroll">
         {hasContentLoading && <LoadingSpinner />}
         <TableComposable aria-label={dataListLabel}>
           {headerRow}
           <Tbody>{items.map(renderRow)}</Tbody>
         </TableComposable>
-      </>
+      </div>
     );
   }
 
