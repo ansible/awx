@@ -18,7 +18,7 @@ import {
 
 import useRequest from '../../util/useRequest';
 import { DashboardAPI } from '../../api';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader';
 import JobList from '../../components/JobList';
 import ContentLoading from '../../components/ContentLoading';
 import LineChart from './shared/LineChart';
@@ -117,7 +117,10 @@ function Dashboard({ i18n }) {
   }
   return (
     <Fragment>
-      <Breadcrumbs breadcrumbConfig={{ '/home': i18n._(t`Dashboard`) }} />
+      <ScreenHeader
+        streamType="all"
+        breadcrumbConfig={{ '/home': i18n._(t`Dashboard`) }}
+      />
       <PageSection>
         <Counts>
           <Count

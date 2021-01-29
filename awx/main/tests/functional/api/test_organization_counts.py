@@ -2,7 +2,7 @@ import pytest
 
 from awx.api.versioning import reverse
 
-from awx.main.models import Project
+from awx.main.models import Project, Host
 
 
 @pytest.fixture
@@ -81,6 +81,8 @@ def test_org_counts_detail_admin(resourced_organization, user, get):
     assert response.status_code == 200
 
     counts = response.data['summary_fields']['related_field_counts']
+    assert counts['hosts'] == 0
+    counts.pop('hosts')
     assert counts == COUNTS_PRIMES
 
 
@@ -93,6 +95,8 @@ def test_org_counts_detail_member(resourced_organization, user, get):
     assert response.status_code == 200
 
     counts = response.data['summary_fields']['related_field_counts']
+    assert counts['hosts'] == 0
+    counts.pop('hosts')
     assert counts == {
         'users': COUNTS_PRIMES['users'],  # Policy is that members can see other users and admins
         'admins': COUNTS_PRIMES['admins'],
@@ -111,6 +115,7 @@ def test_org_counts_list_admin(resourced_organization, user, get):
     assert response.status_code == 200
 
     counts = response.data['results'][0]['summary_fields']['related_field_counts']
+    assert 'hosts' not in counts  # doesn't show in list view
     assert counts == COUNTS_PRIMES
 
 
@@ -123,6 +128,7 @@ def test_org_counts_list_member(resourced_organization, user, get):
     assert response.status_code == 200
 
     counts = response.data['results'][0]['summary_fields']['related_field_counts']
+    assert 'hosts' not in counts  # doesn't show in list view
 
     assert counts == {
         'users': COUNTS_PRIMES['users'],  # Policy is that members can see other users and admins
@@ -145,6 +151,7 @@ def test_new_org_zero_counts(user, post):
 
     new_org_list = post_response.render().data
     counts_dict = new_org_list['summary_fields']['related_field_counts']
+    assert 'hosts' not in counts_dict  # doesn't show in list view
     assert counts_dict == COUNTS_ZEROS
 
 
@@ -168,6 +175,19 @@ def test_two_organizations(resourced_organization, organizations, user, get):
 
 
 @pytest.mark.django_db
+def test_hosts_counted(resourced_organization, user, get):
+    admin_user = user('admin', True)
+    assert Host.objects.org_active_count(resourced_organization.id) == 0
+    resourced_organization.inventories.first().hosts.create(name='Some Host')
+    assert Host.objects.org_active_count(resourced_organization.id) == 1
+    response = get(reverse('api:organization_detail', kwargs={'pk': resourced_organization.pk}), admin_user)
+    assert response.status_code == 200
+
+    counts = response.data['summary_fields']['related_field_counts']
+    assert counts['hosts'] == Host.objects.org_active_count(resourced_organization.id) == 1
+
+
+@pytest.mark.django_db
 def test_scan_JT_counted(resourced_organization, user, get):
     admin_user = user('admin', True)
     counts_dict = COUNTS_PRIMES
@@ -180,7 +200,10 @@ def test_scan_JT_counted(resourced_organization, user, get):
     # Test detail view
     detail_response = get(reverse('api:organization_detail', kwargs={'pk': resourced_organization.pk}), admin_user)
     assert detail_response.status_code == 200
-    assert detail_response.data['summary_fields']['related_field_counts'] == counts_dict
+    counts = detail_response.data['summary_fields']['related_field_counts']
+    assert 'hosts' in counts
+    counts.pop('hosts')
+    assert counts == counts_dict
 
 
 @pytest.mark.django_db
@@ -205,4 +228,7 @@ def test_JT_not_double_counted(resourced_organization, user, get):
     # Test detail view
     detail_response = get(reverse('api:organization_detail', kwargs={'pk': resourced_organization.pk}), admin_user)
     assert detail_response.status_code == 200
-    assert detail_response.data['summary_fields']['related_field_counts'] == counts_dict
+    counts = detail_response.data['summary_fields']['related_field_counts']
+    assert 'hosts' in counts
+    counts.pop('hosts')
+    assert counts == counts_dict

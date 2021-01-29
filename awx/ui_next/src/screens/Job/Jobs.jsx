@@ -3,7 +3,7 @@ import { Route, Switch, useParams, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection } from '@patternfly/react-core';
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 import Job from './Job';
 import JobTypeRedirect from './JobTypeRedirect';
 import JobList from '../../components/JobList';
@@ -40,7 +40,7 @@ function Jobs({ i18n }) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader streamType="job" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route exact path={match.path}>
           <PageSection>

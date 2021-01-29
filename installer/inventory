@@ -62,6 +62,7 @@ dockerhub_base=ansible
 # Common Docker parameters
 awx_task_hostname=awx
 awx_web_hostname=awxweb
+# Local directory that is mounted in the awx_postgres docker container to place the db in
 postgres_data_dir="~/.awx/pgdocker"
 host_port=80
 host_port_ssl=443
@@ -104,7 +105,7 @@ pg_port=5432
 # This will create or update a default admin (superuser) account in AWX, if not provided
 # then these default values are used
 admin_user=admin
-admin_password=password
+# admin_password=password
 
 # Whether or not to create preload data for demonstration purposes
 create_preload_data=True

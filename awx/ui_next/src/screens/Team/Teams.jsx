@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Config } from '../../contexts/Config';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader';
 import TeamList from './TeamList';
 import TeamAdd from './TeamAdd';
 import Team from './Team';
@@ -29,6 +29,7 @@ function Teams({ i18n }) {
         [`/teams/${team.id}/details`]: i18n._(t`Details`),
         [`/teams/${team.id}/users`]: i18n._(t`Users`),
         [`/teams/${team.id}/access`]: i18n._(t`Access`),
+        [`/teams/${team.id}/roles`]: i18n._(t`Roles`),
       });
     },
     [i18n]
@@ -36,7 +37,7 @@ function Teams({ i18n }) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader streamType="team" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path="/teams/add">
           <TeamAdd />

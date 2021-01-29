@@ -11,6 +11,7 @@ import {
   DetailList,
   Detail,
   UserDateDetail,
+  LaunchedByDetail,
 } from '../../../components/DetailList';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ChipGroup from '../../../components/ChipGroup';
@@ -53,35 +54,6 @@ const VERBOSITY = {
   4: '4 (Connection Debug)',
 };
 
-const getLaunchedByDetails = ({ summary_fields = {}, related = {} }) => {
-  const {
-    created_by: createdBy,
-    job_template: jobTemplate,
-    schedule,
-  } = summary_fields;
-  const { schedule: relatedSchedule } = related;
-
-  if (!createdBy && !schedule) {
-    return null;
-  }
-
-  let link;
-  let value;
-
-  if (createdBy) {
-    link = `/users/${createdBy.id}`;
-    value = createdBy.username;
-  } else if (relatedSchedule && jobTemplate) {
-    link = `/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
-    value = schedule.name;
-  } else {
-    link = null;
-    value = schedule.name;
-  }
-
-  return { link, value };
-};
-
 function JobDetail({ job, i18n }) {
   const {
     created_by,
@@ -93,6 +65,7 @@ function JobDetail({ job, i18n }) {
     workflow_job_template: workflowJobTemplate,
     labels,
     project,
+    source_workflow_job,
   } = job.summary_fields;
   const [errorMsg, setErrorMsg] = useState();
   const history = useHistory();
@@ -105,9 +78,6 @@ function JobDetail({ job, i18n }) {
     management_job: i18n._(t`Management Job`),
     workflow_job: i18n._(t`Workflow Job`),
   };
-
-  const { value: launchedByValue, link: launchedByLink } =
-    getLaunchedByDetails(job) || {};
 
   const deleteJob = async () => {
     try {
@@ -195,17 +165,18 @@ function JobDetail({ job, i18n }) {
             }
           />
         )}
+        {source_workflow_job && (
+          <Detail
+            label={i18n._(t`Source Workflow Job`)}
+            value={
+              <Link to={`/jobs/workflow/${source_workflow_job.id}`}>
+                {source_workflow_job.id} - {source_workflow_job.name}
+              </Link>
+            }
+          />
+        )}
         <Detail label={i18n._(t`Job Type`)} value={jobTypes[job.type]} />
-        <Detail
-          label={i18n._(t`Launched By`)}
-          value={
-            launchedByLink ? (
-              <Link to={`${launchedByLink}`}>{launchedByValue}</Link>
-            ) : (
-              launchedByValue
-            )
-          }
-        />
+        <LaunchedByDetail job={job} i18n={i18n} />
         {inventory && (
           <Detail
             label={i18n._(t`Inventory`)}

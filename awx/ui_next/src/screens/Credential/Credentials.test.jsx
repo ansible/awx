@@ -3,6 +3,10 @@ import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import Credentials from './Credentials';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+}));
+
 describe('<Credentials />', () => {
   let wrapper;
 
@@ -30,8 +34,8 @@ describe('<Credentials />', () => {
       },
     });
 
-    expect(wrapper.find('Crumb').length).toBe(1);
-    expect(wrapper.find('BreadcrumbHeading').text()).toBe('Credentials');
+    expect(wrapper.find('Crumb').length).toBe(0);
+    expect(wrapper.find('Title').text()).toBe('Credentials');
   });
 
   test('should display create new credential breadcrumb heading', () => {
@@ -51,8 +55,6 @@ describe('<Credentials />', () => {
     });
 
     expect(wrapper.find('Crumb').length).toBe(2);
-    expect(wrapper.find('BreadcrumbHeading').text()).toBe(
-      'Create New Credential'
-    );
+    expect(wrapper.find('Title').text()).toBe('Create New Credential');
   });
 });

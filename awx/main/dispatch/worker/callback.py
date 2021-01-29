@@ -38,6 +38,7 @@ class CallbackBrokerWorker(BaseWorker):
 
     MAX_RETRIES = 2
     last_stats = time.time()
+    last_flush = time.time()
     total = 0
     last_event = ''
     prof = None
@@ -52,7 +53,7 @@ class CallbackBrokerWorker(BaseWorker):
 
     def read(self, queue):
         try:
-            res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=settings.JOB_EVENT_BUFFER_SECONDS)
+            res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=1)
             if res is None:
                 return {'event': 'FLUSH'}
             self.total += 1
@@ -102,6 +103,7 @@ class CallbackBrokerWorker(BaseWorker):
         now = tz_now()
         if (
             force or
+            (time.time() - self.last_flush) > settings.JOB_EVENT_BUFFER_SECONDS or
             any([len(events) >= 1000 for events in self.buff.values()])
         ):
             for cls, events in self.buff.items():
@@ -124,6 +126,7 @@ class CallbackBrokerWorker(BaseWorker):
                 for e in events:
                     emit_event_detail(e)
             self.buff = {}
+            self.last_flush = time.time()
 
     def perform_work(self, body):
         try:

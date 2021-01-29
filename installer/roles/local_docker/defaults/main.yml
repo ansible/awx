@@ -8,3 +8,4 @@ postgresql_version: "12"
 postgresql_image: "postgres:{{postgresql_version}}"
 
 compose_start_containers: true
+upgrade_postgres: false

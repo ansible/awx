@@ -3,7 +3,7 @@ import { Route, withRouter, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 
 import ProjectsList from './ProjectList/ProjectList';
 import ProjectAdd from './ProjectAdd/ProjectAdd';
@@ -45,7 +45,7 @@ function Projects({ i18n }) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader streamType="project" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path="/projects/add">
           <ProjectAdd />
