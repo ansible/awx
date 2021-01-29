@@ -14,14 +14,6 @@ import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import CopyButton from '../../../components/CopyButton';
 import StatusLabel from '../../../components/StatusLabel';
 
-const ResponsiveTd = styled(Td)`
-  @media (max-width: 992px) {
-    && {
-      display: none;
-    }
-  }
-`;
-
 function InventoryListItem({
   inventory,
   rowIndex,
@@ -98,15 +90,6 @@ function InventoryListItem({
           {inventory?.summary_fields?.organization?.name}
         </Link>
       </Td>
-      <ResponsiveTd dataLabel={i18n._(t`Groups`)}>
-        {inventory.total_groups}
-      </ResponsiveTd>
-      <ResponsiveTd dataLabel={i18n._(t`Hosts`)}>
-        {inventory.total_hosts}
-      </ResponsiveTd>
-      <ResponsiveTd dataLabel={i18n._(t`Sources`)}>
-        {inventory.total_inventory_sources}
-      </ResponsiveTd>
       {inventory.pending_deletion ? (
         <Td dataLabel={i18n._(t`Groups`)}>
           <Label color="red">{i18n._(t`Pending delete`)}</Label>
