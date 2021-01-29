@@ -11,22 +11,17 @@ import {
   ProjectDiagramIcon,
   RocketIcon,
 } from '@patternfly/react-icons';
-import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
-import {
-  DetailList,
-  Detail,
-  DeletedDetail,
-} from '../../../components/DetailList';
-import ChipGroup from '../../../components/ChipGroup';
-import CredentialChip from '../../../components/CredentialChip';
-import { timeOfDay } from '../../../util/dates';
+import { ActionsTd, ActionItem } from '../PaginatedTable';
+import { DetailList, Detail, DeletedDetail } from '../DetailList';
+import ChipGroup from '../ChipGroup';
+import CredentialChip from '../CredentialChip';
+import { timeOfDay, formatDateString } from '../../util/dates';
 
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
-import LaunchButton from '../../../components/LaunchButton';
-import Sparkline from '../../../components/Sparkline';
-import { toTitleCase } from '../../../util/strings';
-import { formatDateString } from '../../../util/dates';
-import CopyButton from '../../../components/CopyButton';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
+import LaunchButton from '../LaunchButton';
+import Sparkline from '../Sparkline';
+import { toTitleCase } from '../../util/strings';
+import CopyButton from '../CopyButton';
 
 function TemplateListItem({
   i18n,
