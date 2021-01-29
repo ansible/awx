@@ -195,7 +195,7 @@ const InputField = withI18n()(
 
     return config ? (
       <SettingGroup
-        defaultValue={config.default || ''}
+        defaultValue={config.default ?? ''}
         fieldId={name}
         helperTextInvalid={meta.error}
         isRequired={isRequired}
