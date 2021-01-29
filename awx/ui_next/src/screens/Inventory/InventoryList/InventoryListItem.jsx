@@ -6,7 +6,6 @@ import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import { timeOfDay } from '../../../util/dates';
 import { InventoriesAPI } from '../../../api';
 import { Inventory } from '../../../types';
