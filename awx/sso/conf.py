@@ -865,7 +865,7 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
-    label=_('GitHub Enterprise instance URL'),
+    label=_('GitHub Enterprise URL'),
     help_text=_('The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise '
                 'documentation for more details.'),
     category=_('GitHub Enterprise OAuth2'),
@@ -877,7 +877,7 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
-    label=_('GitHub Enterprise instance API URL'),
+    label=_('GitHub Enterprise API URL'),
     help_text=_('The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github '
                 'Enterprise documentation for more details.'),
     category=_('GitHub Enterprise OAuth2'),
@@ -954,7 +954,7 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
-    label=_('GitHub Enterprise instance URL'),
+    label=_('GitHub Enterprise Organization URL'),
     help_text=_('The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise '
                 'documentation for more details.'),
     category=_('GitHub Enterprise OAuth2'),
@@ -966,7 +966,7 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
-    label=_('GitHub Enterprise instance API URL'),
+    label=_('GitHub Enterprise Organization API URL'),
     help_text=_('The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github '
                 'Enterprise documentation for more details.'),
     category=_('GitHub Enterprise OAuth2'),
@@ -1056,7 +1056,7 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
-    label=_('GitHub Enterprise instance URL'),
+    label=_('GitHub Enterprise Team URL'),
     help_text=_('The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise '
                 'documentation for more details.'),
     category=_('GitHub Enterprise OAuth2'),
@@ -1068,7 +1068,7 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
-    label=_('GitHub Enterprise instance API URL'),
+    label=_('GitHub Enterprise Team API URL'),
     help_text=_('The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github '
                 'Enterprise documentation for more details.'),
     category=_('GitHub Enterprise OAuth2'),

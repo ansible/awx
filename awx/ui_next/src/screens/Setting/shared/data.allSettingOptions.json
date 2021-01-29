@@ -78,7 +78,7 @@
           "REDHAT_USERNAME": {
               "type": "string",
               "label": "Red Hat customer username",
-              "help_text": "This username is used to retrieve license information and to send Automation Analytics",
+              "help_text": "This username is used to send data to Automation Analytics",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -86,7 +86,23 @@
           "REDHAT_PASSWORD": {
               "type": "string",
               "label": "Red Hat customer password",
-              "help_text": "This password is used to retrieve license information and to send Automation Analytics",
+              "help_text": "This password is used to send data to Automation Analytics",
+              "category": "System",
+              "category_slug": "system",
+              "defined_in_file": false
+          },
+          "SUBSCRIPTIONS_USERNAME": {
+              "type": "string",
+              "label": "Red Hat or Satellite username",
+              "help_text": "This username is used to retrieve subscription and content information",
+              "category": "System",
+              "category_slug": "system",
+              "defined_in_file": false
+          },
+          "SUBSCRIPTIONS_PASSWORD": {
+              "type": "string",
+              "label": "Red Hat or Satellite password",
+              "help_text": "This password is used to retrieve subscription and content information",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false
@@ -2449,6 +2465,238 @@
                   }
               }
           },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_CALLBACK_URL": {
+              "type": "string",
+              "label": "GitHub Enterprise OAuth2 Callback URL",
+              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the Ansible Tower documentation for more detail.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_URL": {
+              "type": "string",
+              "label": "GitHub Enterprise URL",
+              "help_text": "The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL": {
+              "type": "string",
+              "label": "GitHub Enterprise API URL",
+              "help_text": "The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY": {
+              "type": "string",
+              "label": "GitHub Enterprise OAuth2 Key",
+              "help_text": "The OAuth2 key (Client ID) from your GitHub Enterprise developer application.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET": {
+              "type": "string",
+              "label": "GitHub Enterprise OAuth2 Secret",
+              "help_text": "The OAuth2 secret (Client Secret) from your GitHub Enterprise developer application.",
+              "category": "GitHub OAuth2",
+              "category_slug": "github-enterprise",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORGANIZATION_MAP": {
+              "type": "nested object",
+              "label": "GitHub Enterprise OAuth2 Organization Map",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "defined_in_file": false,
+              "child": {
+                  "type": "nested object",
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_MAP": {
+              "type": "nested object",
+              "label": "GitHub Enterprise OAuth2 Team Map",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "defined_in_file": false,
+              "child": {
+                  "type": "nested object",
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_CALLBACK_URL": {
+              "type": "string",
+              "label": "GitHub Enterprise Organization OAuth2 Callback URL",
+              "help_text": "Provide this URL as the callback URL for your application as part of your registration process. Refer to the Ansible Tower documentation for more detail.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL": {
+              "type": "string",
+              "label": "GitHub Enterprise Organization URL",
+              "help_text": "The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise-org",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL": {
+              "type": "string",
+              "label": "GitHub Enterprise Organization API URL",
+              "help_text": "The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise-org",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY": {
+              "type": "string",
+              "label": "GitHub Enterprise Organization OAuth2 Key",
+              "help_text": "The OAuth2 key (Client ID) from your GitHub Enterprise organization application.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET": {
+              "type": "string",
+              "label": "GitHub Enterprise Organization OAuth2 Secret",
+              "help_text": "The OAuth2 secret (Client Secret) from your GitHub Enterprise organization application.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME": {
+              "type": "string",
+              "label": "GitHub Enterprise Organization Name",
+              "help_text": "The name of your GitHub Enterprise organization, as used in your organization's URL: https://github.com/<yourorg>/.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_ORGANIZATION_MAP": {
+              "type": "nested object",
+              "label": "GitHub Enterprise Organization OAuth2 Organization Map",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "defined_in_file": false,
+              "child": {
+                  "type": "nested object",
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_TEAM_MAP": {
+              "type": "nested object",
+              "label": "GitHub Enterprise Organization OAuth2 Team Map",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "defined_in_file": false,
+              "child": {
+                  "type": "nested object",
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_CALLBACK_URL": {
+              "type": "string",
+              "label": "GitHub Enterprise Team OAuth2 Callback URL",
+              "help_text": "Create an organization-owned application at https://github.com/organizations/<yourorg>/settings/applications and obtain an OAuth2 key (Client ID) and secret (Client Secret). Provide this URL as the callback URL for your application.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL": {
+              "type": "string",
+              "label": "GitHub Enterprise Team URL",
+              "help_text": "The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise-team",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL": {
+              "type": "string",
+              "label": "GitHub Enterprise Team API URL",
+              "help_text": "The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise-team",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY": {
+              "type": "string",
+              "label": "GitHub Enterprise Team OAuth2 Key",
+              "help_text": "The OAuth2 key (Client ID) from your GitHub Enterprise organization application.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET": {
+              "type": "string",
+              "label": "GitHub Enterprise Team OAuth2 Secret",
+              "help_text": "The OAuth2 secret (Client Secret) from your GitHub Enterprise organization application.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID": {
+              "type": "string",
+              "label": "GitHub Enterprise Team ID",
+              "help_text": "Find the numeric team ID using the Github Enterprise API: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "defined_in_file": false
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ORGANIZATION_MAP": {
+              "type": "nested object",
+              "label": "GitHub Enterprise Team OAuth2 Organization Map",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "defined_in_file": false,
+              "child": {
+                  "type": "nested object",
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_TEAM_MAP": {
+              "type": "nested object",
+              "label": "GitHub Enterprise Team OAuth2 Team Map",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "defined_in_file": false,
+              "child": {
+                  "type": "nested object",
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
           "SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL": {
               "type": "string",
               "label": "Azure AD OAuth2 Callback URL",
@@ -2745,29 +2993,6 @@
               "category_slug": "system",
               "default": true
           },
-          "PENDO_TRACKING_STATE": {
-            "default": "off",
-            "type": "choice",
-            "required": true,
-            "label": "User Analytics Tracking State",
-            "help_text": "Enable or Disable User Analytics Tracking.",
-            "category": "UI",
-            "category_slug": "ui",
-            "choices": [
-                [
-                    "off",
-                    "Off"
-                ],
-                [
-                    "anonymous",
-                    "Anonymous"
-                ],
-                [
-                    "detailed",
-                    "Detailed"
-                ]
-            ]
-        },
           "MANAGE_ORGANIZATION_AUTH": {
               "type": "boolean",
               "required": true,
@@ -2821,7 +3046,7 @@
               "type": "string",
               "required": false,
               "label": "Red Hat customer username",
-              "help_text": "This username is used to retrieve license information and to send Automation Analytics",
+              "help_text": "This username is used to send data to Automation Analytics",
               "category": "System",
               "category_slug": "system",
               "default": ""
@@ -2830,7 +3055,25 @@
               "type": "string",
               "required": false,
               "label": "Red Hat customer password",
-              "help_text": "This password is used to retrieve license information and to send Automation Analytics",
+              "help_text": "This password is used to send data to Automation Analytics",
+              "category": "System",
+              "category_slug": "system",
+              "default": ""
+          },
+          "SUBSCRIPTIONS_USERNAME": {
+              "type": "string",
+              "required": false,
+              "label": "Red Hat or Satellite username",
+              "help_text": "This username is used to retrieve subscription and content information",
+              "category": "System",
+              "category_slug": "system",
+              "default": ""
+          },
+          "SUBSCRIPTIONS_PASSWORD": {
+              "type": "string",
+              "required": false,
+              "label": "Red Hat or Satellite password",
+              "help_text": "This password is used to retrieve subscription and content information",
               "category": "System",
               "category_slug": "system",
               "default": ""
@@ -3512,6 +3755,29 @@
               "category": "Authentication",
               "category_slug": "authentication",
               "default": ""
+          },
+          "PENDO_TRACKING_STATE": {
+              "default": "off",
+              "type": "choice",
+              "required": true,
+              "label": "User Analytics Tracking State",
+              "help_text": "Enable or Disable User Analytics Tracking.",
+              "category": "UI",
+              "category_slug": "ui",
+              "choices": [
+                  [
+                      "off",
+                      "Off"
+                  ],
+                  [
+                      "anonymous",
+                      "Anonymous"
+                  ],
+                  [
+                      "detailed",
+                      "Detailed"
+                  ]
+              ]
           },
           "CUSTOM_LOGIN_INFO": {
               "type": "string",
@@ -6041,6 +6307,357 @@
               "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
               "category": "GitHub Team OAuth2",
               "category_slug": "github-team",
+              "placeholder": {
+                  "My Team": {
+                      "organization": "Test Org",
+                      "users": [
+                          "/^[^@]+?@test\\.example\\.com$/"
+                      ],
+                      "remove": true
+                  },
+                  "Other Team": {
+                      "organization": "Test Org 2",
+                      "users": "/^[^@]+?@test2\\.example\\.com$/i",
+                      "remove": false
+                  }
+              },
+              "default": null,
+              "child": {
+                  "type": "nested object",
+                  "required": true,
+                  "read_only": false,
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_URL": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise URL",
+              "help_text": "The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise API URL",
+              "help_text": "The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise OAuth2 Key",
+              "help_text": "The OAuth2 key (Client ID) from your GitHub Enterprise developer application.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise OAuth2 Secret",
+              "help_text": "The OAuth2 secret (Client Secret) from your GitHub Enterprise developer application.",
+              "category": "GitHub OAuth2",
+              "category_slug": "github-enterprise",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORGANIZATION_MAP": {
+              "type": "nested object",
+              "required": false,
+              "label": "GitHub Enterprise OAuth2 Organization Map",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "placeholder": {
+                  "Default": {
+                      "users": true
+                  },
+                  "Test Org": {
+                      "admins": [
+                          "admin@example.com"
+                      ],
+                      "auditors": [
+                          "auditor@example.com"
+                      ],
+                      "users": true
+                  },
+                  "Test Org 2": {
+                      "admins": [
+                          "admin@example.com",
+                          "/^tower-[^@]+*?@.*$/"
+                      ],
+                      "remove_admins": true,
+                      "users": "/^[^@].*?@example\\.com$/i",
+                      "remove_users": true
+                  }
+              },
+              "default": null,
+              "child": {
+                  "type": "nested object",
+                  "required": true,
+                  "read_only": false,
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_MAP": {
+              "type": "nested object",
+              "required": false,
+              "label": "GitHub Enterprise OAuth2 Team Map",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise",
+              "placeholder": {
+                  "My Team": {
+                      "organization": "Test Org",
+                      "users": [
+                          "/^[^@]+?@test\\.example\\.com$/"
+                      ],
+                      "remove": true
+                  },
+                  "Other Team": {
+                      "organization": "Test Org 2",
+                      "users": "/^[^@]+?@test2\\.example\\.com$/i",
+                      "remove": false
+                  }
+              },
+              "default": null,
+              "child": {
+                  "type": "nested object",
+                  "required": true,
+                  "read_only": false,
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Organization URL",
+              "help_text": "The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise-org",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Organization API URL",
+              "help_text": "The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise-org",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Organization OAuth2 Key",
+              "help_text": "The OAuth2 key (Client ID) from your GitHub Enterprise organization application.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Organization OAuth2 Secret",
+              "help_text": "The OAuth2 secret (Client Secret) from your GitHub Enterprise organization application.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Organization Name",
+              "help_text": "The name of your GitHub Enterprise organization, as used in your organization's URL: https://github.com/<yourorg>/.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_ORGANIZATION_MAP": {
+              "type": "nested object",
+              "required": false,
+              "label": "GitHub Enterprise Organization OAuth2 Organization Map",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "placeholder": {
+                  "Default": {
+                      "users": true
+                  },
+                  "Test Org": {
+                      "admins": [
+                          "admin@example.com"
+                      ],
+                      "auditors": [
+                          "auditor@example.com"
+                      ],
+                      "users": true
+                  },
+                  "Test Org 2": {
+                      "admins": [
+                          "admin@example.com",
+                          "/^tower-[^@]+*?@.*$/"
+                      ],
+                      "remove_admins": true,
+                      "users": "/^[^@].*?@example\\.com$/i",
+                      "remove_users": true
+                  }
+              },
+              "default": null,
+              "child": {
+                  "type": "nested object",
+                  "required": true,
+                  "read_only": false,
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_TEAM_MAP": {
+              "type": "nested object",
+              "required": false,
+              "label": "GitHub Enterprise Organization OAuth2 Team Map",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "category": "GitHub Enterprise Organization OAuth2",
+              "category_slug": "github-enterprise-org",
+              "placeholder": {
+                  "My Team": {
+                      "organization": "Test Org",
+                      "users": [
+                          "/^[^@]+?@test\\.example\\.com$/"
+                      ],
+                      "remove": true
+                  },
+                  "Other Team": {
+                      "organization": "Test Org 2",
+                      "users": "/^[^@]+?@test2\\.example\\.com$/i",
+                      "remove": false
+                  }
+              },
+              "default": null,
+              "child": {
+                  "type": "nested object",
+                  "required": true,
+                  "read_only": false,
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Team URL",
+              "help_text": "The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise-team",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Team API URL",
+              "help_text": "The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github Enterprise documentation for more details.",
+              "category": "GitHub Enterprise OAuth2",
+              "category_slug": "github-enterprise-team",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Team OAuth2 Key",
+              "help_text": "The OAuth2 key (Client ID) from your GitHub Enterprise organization application.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Team OAuth2 Secret",
+              "help_text": "The OAuth2 secret (Client Secret) from your GitHub Enterprise organization application.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID": {
+              "type": "string",
+              "required": false,
+              "label": "GitHub Enterprise Team ID",
+              "help_text": "Find the numeric team ID using the Github Enterprise API: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "default": ""
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ORGANIZATION_MAP": {
+              "type": "nested object",
+              "required": false,
+              "label": "GitHub Enterprise Team OAuth2 Organization Map",
+              "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which Tower organizations based on their\nusername and email address. Configuration details are available in the Ansible\nTower documentation.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
+              "placeholder": {
+                  "Default": {
+                      "users": true
+                  },
+                  "Test Org": {
+                      "admins": [
+                          "admin@example.com"
+                      ],
+                      "auditors": [
+                          "auditor@example.com"
+                      ],
+                      "users": true
+                  },
+                  "Test Org 2": {
+                      "admins": [
+                          "admin@example.com",
+                          "/^tower-[^@]+*?@.*$/"
+                      ],
+                      "remove_admins": true,
+                      "users": "/^[^@].*?@example\\.com$/i",
+                      "remove_users": true
+                  }
+              },
+              "default": null,
+              "child": {
+                  "type": "nested object",
+                  "required": true,
+                  "read_only": false,
+                  "child": {
+                      "type": "field",
+                      "required": true,
+                      "read_only": false
+                  }
+              }
+          },
+          "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_TEAM_MAP": {
+              "type": "nested object",
+              "required": false,
+              "label": "GitHub Enterprise Team OAuth2 Team Map",
+              "help_text": "Mapping of team members (users) from social auth accounts. Configuration\ndetails are available in Tower documentation.",
+              "category": "GitHub Enterprise Team OAuth2",
+              "category_slug": "github-enterprise-team",
               "placeholder": {
                   "My Team": {
                       "organization": "Test Org",
