@@ -106,7 +106,7 @@ function JobDetail({ job, i18n }) {
     }
   };
 
-  const isIsolatedInstanceGroup = item => {
+  const buildInstanceGroupLink = item => {
     if (item.is_isolated) {
       return (
         <>
@@ -120,6 +120,14 @@ function JobDetail({ job, i18n }) {
       );
     }
     return <Link to={`/instance_groups/${item.id}`}>{item.name}</Link>;
+  };
+
+  const buildContainerGroupLink = item => {
+    return (
+      <Link to={`/instance_groups/container_group/${item.id}`}>
+        {item.name}
+      </Link>
+    );
   };
 
   return (
@@ -210,10 +218,16 @@ function JobDetail({ job, i18n }) {
         <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[job.verbosity]} />
         <Detail label={i18n._(t`Environment`)} value={job.custom_virtualenv} />
         <Detail label={i18n._(t`Execution Node`)} value={job.execution_node} />
-        {instanceGroup && (
+        {instanceGroup && !instanceGroup?.is_containerized && (
           <Detail
             label={i18n._(t`Instance Group`)}
-            value={isIsolatedInstanceGroup(instanceGroup)}
+            value={buildInstanceGroupLink(instanceGroup)}
+          />
+        )}
+        {instanceGroup && instanceGroup?.is_containerized && (
+          <Detail
+            label={i18n._(t`Container Group`)}
+            value={buildContainerGroupLink(instanceGroup)}
           />
         )}
         {typeof job.job_slice_number === 'number' &&
