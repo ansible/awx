@@ -7,7 +7,7 @@ import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { RocketIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { ActionsTd, ActionItem } from '../PaginatedTable';
-import LaunchButton from '../LaunchButton';
+import { LaunchButton, ReLaunchDropDown } from '../LaunchButton';
 import StatusLabel from '../StatusLabel';
 import { DetailList, Detail, LaunchedByDetail } from '../DetailList';
 import ChipGroup from '../ChipGroup';
@@ -83,19 +83,31 @@ function JobListItem({
               job.type !== 'system_job' &&
               job.summary_fields?.user_capabilities?.start
             }
-            tooltip={i18n._(t`Relaunch Job`)}
+            tooltip={
+              job.status === 'failed' && job.type === 'job'
+                ? i18n._(t`Relaunch using host parameters`)
+                : i18n._(t`Relaunch Job`)
+            }
           >
-            <LaunchButton resource={job}>
-              {({ handleRelaunch }) => (
-                <Button
-                  variant="plain"
-                  onClick={handleRelaunch}
-                  aria-label={i18n._(t`Relaunch`)}
-                >
-                  <RocketIcon />
-                </Button>
-              )}
-            </LaunchButton>
+            {job.status === 'failed' && job.type === 'job' ? (
+              <LaunchButton resource={job}>
+                {({ handleRelaunch }) => (
+                  <ReLaunchDropDown handleRelaunch={handleRelaunch} />
+                )}
+              </LaunchButton>
+            ) : (
+              <LaunchButton resource={job}>
+                {({ handleRelaunch }) => (
+                  <Button
+                    variant="plain"
+                    onClick={handleRelaunch}
+                    aria-label={i18n._(t`Relaunch`)}
+                  >
+                    <RocketIcon />
+                  </Button>
+                )}
+              </LaunchButton>
+            )}
           </ActionItem>
         </ActionsTd>
       </Tr>
