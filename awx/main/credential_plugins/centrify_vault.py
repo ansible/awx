@@ -2,7 +2,6 @@ from .plugin import CredentialPlugin, raise_for_status
 from django.utils.translation import ugettext_lazy as _
 from urllib.parse import urljoin
 import requests
-import base64
 pas_inputs = {
     'fields': [{
         'id': 'url',
@@ -40,7 +39,6 @@ pas_inputs = {
 
 # generate bearer token to authenticate with PAS portal, Input : Client ID, Client Secret
 def handle_auth(**kwargs):
-    tokens = None
     post_data = {
         "grant_type": "client_credentials", 
         "scope":"siem" 
