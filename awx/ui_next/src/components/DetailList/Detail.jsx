@@ -34,7 +34,6 @@ const DetailValue = styled(
 `;
 
 const Detail = ({
-  id,
   label,
   value,
   fullWidth,
@@ -78,7 +77,6 @@ const Detail = ({
   );
 };
 Detail.propTypes = {
-  id: string,
   label: node.isRequired,
   value: node,
   fullWidth: bool,
@@ -86,7 +84,6 @@ Detail.propTypes = {
   helpText: string,
 };
 Detail.defaultProps = {
-  id: null,
   value: null,
   fullWidth: false,
   alwaysVisible: false,
