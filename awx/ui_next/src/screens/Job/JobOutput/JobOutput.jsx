@@ -225,7 +225,7 @@ class JobOutput extends Component {
     this.state = {
       contentError: null,
       deletionError: null,
-      hasContentLoading: !props?.job?.result_traceback,
+      hasContentLoading: true,
       results: {},
       currentlyLoading: [],
       remoteRowCount: 0,
@@ -241,7 +241,6 @@ class JobOutput extends Component {
 
     this._isMounted = false;
     this.loadJobEvents = this.loadJobEvents.bind(this);
-    this.loadTracebackEvents = this.loadTracebackEvents.bind(this);
     this.handleDeleteJob = this.handleDeleteJob.bind(this);
     this.rowRenderer = this.rowRenderer.bind(this);
     this.handleHostEventClick = this.handleHostEventClick.bind(this);
@@ -311,32 +310,8 @@ class JobOutput extends Component {
     }
   }
 
-  loadTracebackEvents() {
-    // When a job has traceback results, render it as a job event
-    // with the traceback as the stdout text
-    const { job } = this.props;
-    const remoteRowCount = 1;
-    const results = [
-      {
-        counter: -1,
-        created: null,
-        event: null,
-        type: null,
-        stdout: job?.result_traceback || '',
-        start_line: 0,
-      },
-    ];
-    this._isMounted && this.setState({ results, remoteRowCount });
-  }
-
   async loadJobEvents() {
     const { job, type } = this.props;
-    if (job.result_traceback) {
-      // Jobs with tracebacks don't have actual job events to show,
-      // so just render the traceback as stdout
-      this.loadTracebackEvents();
-      return;
-    }
 
     const loadRange = range(1, 50);
     this._isMounted &&
@@ -353,10 +328,32 @@ class JobOutput extends Component {
       });
       this._isMounted &&
         this.setState(({ results }) => {
+          let countOffset = 1;
+          if (job?.result_traceback) {
+            const tracebackEvent = {
+              counter: -1,
+              created: null,
+              event: null,
+              type: null,
+              stdout: job?.result_traceback,
+              start_line: 0,
+            };
+            const firstIndex = newResults.findIndex(
+              jobEvent => jobEvent.counter === 1
+            );
+            if (firstIndex) {
+              const stdoutLines = newResults[firstIndex].stdout.split('\r\n');
+              stdoutLines[0] = tracebackEvent.stdout;
+              newResults[firstIndex].stdout = stdoutLines.join('\r\n');
+            } else {
+              countOffset += 1;
+              newResults.unshift(tracebackEvent);
+            }
+          }
           newResults.forEach(jobEvent => {
             results[jobEvent.counter] = jobEvent;
           });
-          return { results, remoteRowCount: count + 1 };
+          return { results, remoteRowCount: count + countOffset };
         });
     } catch (err) {
       this.setState({ contentError: err });
