@@ -129,6 +129,7 @@ function ScheduleList({
             <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
             <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
             <HeaderCell sortKey="next_run">{i18n._(t`Next Run`)}</HeaderCell>
+            <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
           </HeaderRow>
         }
         renderRow={(item, index) => (
