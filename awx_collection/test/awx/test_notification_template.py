@@ -136,5 +136,5 @@ def test_build_notification_message_undefined(run_module, admin_user, organizati
     ), admin_user)
     nt = NotificationTemplate.objects.get(id=result['id'])
 
-    _, body = job.build_notification_message(nt, 'running')
-    assert '{"started_by": "My Placeholder"}' in body
+    body = job.build_notification_message(nt, 'running')
+    assert '{"started_by": "My Placeholder"}' in body[1]
