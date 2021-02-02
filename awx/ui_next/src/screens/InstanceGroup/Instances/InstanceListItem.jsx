@@ -113,7 +113,7 @@ function InstanceListItem({
           ]}
         />
         <DataListAction
-          aria-label="actions"
+          aria-label={i18n._(t`actions`)}
           aria-labelledby={labelId}
           id={labelId}
         >

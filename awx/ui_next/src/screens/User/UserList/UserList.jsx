@@ -162,7 +162,7 @@ function UserList({ i18n }) {
                     key="delete"
                     onDelete={handleUserDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName="Users"
+                    pluralizedItemName={i18n._(t`Users`)}
                   />,
                 ]}
               />

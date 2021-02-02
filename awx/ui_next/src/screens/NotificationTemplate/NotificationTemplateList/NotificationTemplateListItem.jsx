@@ -127,7 +127,10 @@ function NotificationTemplateListItem({
             </DataListCell>,
           ]}
         />
-        <DataListAction aria-label="actions" aria-labelledby={labelId}>
+        <DataListAction
+          aria-label={i18n._(t`actions`)}
+          aria-labelledby={labelId}
+        >
           <Tooltip content={i18n._(t`Test Notification`)} position="top">
             <Button
               aria-label={i18n._(t`Test Notification`)}

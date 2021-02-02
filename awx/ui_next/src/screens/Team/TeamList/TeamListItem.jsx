@@ -68,7 +68,7 @@ function TeamListItem({ team, isSelected, onSelect, detailUrl, i18n }) {
           ]}
         />
         <DataListAction
-          aria-label="actions"
+          aria-label={i18n._(t`Actions`)}
           aria-labelledby={labelId}
           id={labelId}
         >

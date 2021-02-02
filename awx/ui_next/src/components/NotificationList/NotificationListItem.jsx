@@ -63,7 +63,7 @@ function NotificationListItem({
           ]}
         />
         <DataListAction
-          aria-label="actions"
+          aria-label={i18n._(t`actions`)}
           aria-labelledby={`items-list-item-${notification.id}`}
           id={`items-list-item-${notification.id}`}
           columns={showApprovalsToggle ? 4 : 3}

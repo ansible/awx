@@ -138,7 +138,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
         <>
           <Divider css="margin-top: var(--pf-global--spacer--lg)" />
           <PromptHeader>{i18n._(t`Prompted Values`)}</PromptHeader>
-          <DetailList aria-label="Prompt Overrides">
+          <DetailList aria-label={i18n._(t`Prompt Overrides`)}>
             {launchConfig.ask_job_type_on_launch && (
               <Detail
                 label={i18n._(t`Job Type`)}

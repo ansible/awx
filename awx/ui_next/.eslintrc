@@ -8,8 +8,8 @@
       "modules": true
     }
   },
-  "plugins": ["react-hooks", "jsx-a11y"],
-  "extends": ["airbnb", "prettier", "prettier/react", "plugin:jsx-a11y/strict"],
+  "plugins": ["react-hooks", "jsx-a11y",  "i18next"],
+  "extends": ["airbnb", "prettier", "prettier/react", "plugin:jsx-a11y/strict", "plugin:i18next/recommended"],
   "settings": {
     "react": {
       "version": "16.5.2"
@@ -24,6 +24,7 @@
     "window": true
   },
   "rules": {
+    "i18next/no-literal-string": [2, {"markupOnly": true, "ignoreAttribute": ["to", "streamType", "path", "component", "variant", "key", "position", "promptName", "color","promptId", "headingLevel", "size", "target", "autoComplete","trigger", "from", "name", "fieldId", "css", "gutter", "dataCy", "tooltipMaxWidth", "mode", "aria-labelledby","aria-hidden","sortKey", "ouiaId", "credentialTypeNamespace", "link", "value", "credentialTypeKind", "linkTo", "scrollToAlignment", "displayKey", "sortedColumnKey", "maxHeight", "role", "aria-haspopup", "dropDirection", "resizeOrientation", "src", "theme"], "ignore":["Ansible", "Tower", "JSON", "YAML", "lg", "START"],"ignoreComponent":["code", "Omit","PotentialLink", "TypeRedirect", "Radio", "RunOnRadio", "NodeTypeLetter", "SelectableItem", "Dash"],   "ignoreCallee": ["describe"] }],
     "camelcase": "off",
     "arrow-parens": "off",
     "comma-dangle": "off",

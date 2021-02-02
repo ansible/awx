@@ -103,7 +103,7 @@ function Lookup(props) {
     <Fragment>
       <InputGroup onBlur={onBlur}>
         <Button
-          aria-label="Search"
+          aria-label={i18n._(t`Search`)}
           id={id}
           onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
           variant={ButtonVariant.control}

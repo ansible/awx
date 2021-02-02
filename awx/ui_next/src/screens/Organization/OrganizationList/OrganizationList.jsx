@@ -172,7 +172,7 @@ function OrganizationsList({ i18n }) {
                     key="delete"
                     onDelete={handleOrgDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName="Organizations"
+                    pluralizedItemName={i18n._(t`Organizations`)}
                   />,
                 ]}
               />

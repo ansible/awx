@@ -258,7 +258,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
                   key="delete"
                   onDelete={handleJobDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName="Jobs"
+                  pluralizedItemName={i18n._(t`Jobs`)}
                 />,
                 <JobListCancelButton
                   key="cancel"

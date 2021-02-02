@@ -247,7 +247,7 @@ function TemplateList({ i18n }) {
                   key="delete"
                   onDelete={handleTemplateDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName="Templates"
+                  pluralizedItemName={i18n._(t`Templates`)}
                 />,
               ]}
             />
