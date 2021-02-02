@@ -157,6 +157,7 @@
 - name: Launch job template with inventory and credential for prompt on launch
   tower_job_launch:
     job_template: "{{ jt_name2 }}"
+    organization: Default
   register: result
 
 - assert:

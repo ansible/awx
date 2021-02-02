@@ -37,6 +37,12 @@ options:
       description:
         - Inventory to use for the job, only used if prompt for inventory is set.
       type: str
+    organization:
+      description:
+        - Organization the job template exists in.
+        - Used to help lookup the object, cannot be modified using this module.
+        - If not provided, will lookup by name only, which does not work with duplicates.
+      type: str
     credentials:
       description:
         - Credential to use for job, only used if prompt for credential is set.
@@ -149,6 +155,7 @@ def main():
         name=dict(required=True, aliases=['job_template']),
         job_type=dict(choices=['run', 'check']),
         inventory=dict(default=None),
+        organization=dict(),
         # Credentials will be a str instead of a list for backwards compatability
         credentials=dict(type='list', default=None, aliases=['credential'], elements='str'),
         limit=dict(),
@@ -172,6 +179,7 @@ def main():
     name = module.params.get('name')
     optional_args['job_type'] = module.params.get('job_type')
     inventory = module.params.get('inventory')
+    organization = module.params.get('organization')
     credentials = module.params.get('credentials')
     optional_args['limit'] = module.params.get('limit')
     optional_args['tags'] = module.params.get('tags')
@@ -201,7 +209,10 @@ def main():
             post_data['credentials'].append(module.resolve_name_to_id('credentials', credential))
 
     # Attempt to look up job_template based on the provided name
-    job_template = module.get_one('job_templates', name_or_id=name)
+    lookup_data = {}
+    if organization:
+        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+    job_template = module.get_one('job_templates', name_or_id=name, data=lookup_data)
 
     if job_template is None:
         module.fail_json(msg="Unable to find job template by name {0}".format(name))
