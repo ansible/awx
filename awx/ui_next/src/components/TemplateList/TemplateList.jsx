@@ -7,29 +7,33 @@ import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
-} from '../../../api';
-import AlertModal from '../../../components/AlertModal';
-import DatalistToolbar from '../../../components/DataListToolbar';
-import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList, {
-  ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
-import { getQSConfig, parseQueryString } from '../../../util/qs';
-import useWsTemplates from '../../../util/useWsTemplates';
-import AddDropDownButton from '../../../components/AddDropDownButton';
+} from '../../api';
+import AlertModal from '../AlertModal';
+import DatalistToolbar from '../DataListToolbar';
+import ErrorDetail from '../ErrorDetail';
+import { ToolbarDeleteButton } from '../PaginatedDataList';
+import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
+import useRequest, { useDeleteItems } from '../../util/useRequest';
+import { getQSConfig, parseQueryString } from '../../util/qs';
+import useWsTemplates from '../../util/useWsTemplates';
+import AddDropDownButton from '../AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
 
-// The type value in const QS_CONFIG below does not have a space between job_template and
-// workflow_job_template so the params sent to the API match what the api expects.
-const QS_CONFIG = getQSConfig('template', {
-  page: 1,
-  page_size: 20,
-  order_by: 'name',
-  type: 'job_template,workflow_job_template',
-});
+function TemplateList({ defaultParams, i18n }) {
+  // The type value in const qsConfig below does not have a space between job_template and
+  // workflow_job_template so the params sent to the API match what the api expects.
+  const qsConfig = getQSConfig(
+    'template',
+    {
+      page: 1,
+      page_size: 20,
+      order_by: 'name',
+      type: 'job_template,workflow_job_template',
+      ...defaultParams,
+    },
+    ['id', 'page', 'page_size']
+  );
 
-function TemplateList({ i18n }) {
   const location = useLocation();
   const [selected, setSelected] = useState([]);
 
@@ -47,7 +51,7 @@ function TemplateList({ i18n }) {
     request: fetchTemplates,
   } = useRequest(
     useCallback(async () => {
-      const params = parseQueryString(QS_CONFIG, location.search);
+      const params = parseQueryString(qsConfig, location.search);
       const responses = await Promise.all([
         UnifiedJobTemplatesAPI.read(params),
         JobTemplatesAPI.readOptions(),
@@ -66,7 +70,7 @@ function TemplateList({ i18n }) {
           responses[3].data.actions?.GET || {}
         ).filter(key => responses[3].data.actions?.GET[key].filterable),
       };
-    }, [location]),
+    }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
     {
       results: [],
       count: 0,
@@ -105,7 +109,7 @@ function TemplateList({ i18n }) {
       );
     }, [selected]),
     {
-      qsConfig: QS_CONFIG,
+      qsConfig,
       allItemsSelected: isAllSelected,
       fetchItems: fetchTemplates,
     }
@@ -167,13 +171,13 @@ function TemplateList({ i18n }) {
   return (
     <Fragment>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading}
           items={templates}
           itemCount={count}
           pluralizedItemName={i18n._(t`Templates`)}
-          qsConfig={QS_CONFIG}
+          qsConfig={qsConfig}
           onRowClick={handleSelect}
           toolbarSearchColumns={[
             {
@@ -206,41 +210,25 @@ function TemplateList({ i18n }) {
               key: 'modified_by__username__icontains',
             },
           ]}
-          toolbarSortColumns={[
-            {
-              name: i18n._(t`Inventory`),
-              key: 'job_template__inventory__id',
-            },
-            {
-              name: i18n._(t`Last Job Run`),
-              key: 'last_job_run',
-            },
-            {
-              name: i18n._(t`Modified`),
-              key: 'modified',
-            },
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-            },
-            {
-              name: i18n._(t`Project`),
-              key: 'jobtemplate__project__id',
-            },
-            {
-              name: i18n._(t`Type`),
-              key: 'type',
-            },
-          ]}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
+          headerRow={
+            <HeaderRow qsConfig={qsConfig} isExpandable>
+              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+              <HeaderCell sortKey="type">{i18n._(t`Type`)}</HeaderCell>
+              <HeaderCell sortKey="last_job_run">
+                {i18n._(t`Last Ran`)}
+              </HeaderCell>
+              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+            </HeaderRow>
+          }
           renderToolbar={props => (
             <DatalistToolbar
               {...props}
               showSelectAll
               isAllSelected={isAllSelected}
               onSelectAll={handleSelectAll}
-              qsConfig={QS_CONFIG}
+              qsConfig={qsConfig}
               additionalControls={[
                 ...(canAddJT || canAddWFJT ? [addButton] : []),
                 <ToolbarDeleteButton
@@ -252,7 +240,7 @@ function TemplateList({ i18n }) {
               ]}
             />
           )}
-          renderItem={template => (
+          renderRow={(template, index) => (
             <TemplateListItem
               key={template.id}
               value={template.name}
@@ -261,6 +249,7 @@ function TemplateList({ i18n }) {
               onSelect={() => handleSelect(template)}
               isSelected={selected.some(row => row.id === template.id)}
               fetchTemplates={fetchTemplates}
+              rowIndex={index}
             />
           )}
           emptyStateControls={(canAddJT || canAddWFJT) && addButton}

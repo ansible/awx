@@ -44,7 +44,7 @@ describe('<Dashboard />', () => {
         .simulate('click');
     });
     pageWrapper.update();
-    expect(pageWrapper.find('DashboardTemplateList').length).toBe(1);
+    expect(pageWrapper.find('TemplateList').length).toBe(1);
   });
 
   test('renders month-based/all job type chart by default', () => {
