@@ -77,7 +77,6 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       alwaysVisible={false}
                       fullWidth={false}
                       helpText={null}
-                      id={null}
                       label="Name"
                       value="jane brown"
                     />
@@ -91,7 +90,6 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       alwaysVisible={false}
                       fullWidth={false}
                       helpText={null}
-                      id={null}
                       label="Team Roles"
                       value={
                         <WithI18n
@@ -145,7 +143,6 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         alwaysVisible={false}
                         fullWidth={false}
                         helpText={null}
-                        id={null}
                         label="Name"
                         value="jane brown"
                       />
@@ -159,7 +156,6 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         alwaysVisible={false}
                         fullWidth={false}
                         helpText={null}
-                        id={null}
                         label="Team Roles"
                         value={
                           <WithI18n
@@ -236,7 +232,6 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           alwaysVisible={false}
                           fullWidth={false}
                           helpText={null}
-                          id={null}
                           label="Name"
                           value="jane brown"
                         />
@@ -250,7 +245,6 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           alwaysVisible={false}
                           fullWidth={false}
                           helpText={null}
-                          id={null}
                           label="Team Roles"
                           value={
                             <WithI18n
@@ -462,7 +456,6 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       alwaysVisible={false}
                                       fullWidth={false}
                                       helpText={null}
-                                      id={null}
                                       label="Name"
                                       value="jane brown"
                                     >
@@ -687,7 +680,6 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       alwaysVisible={false}
                                       fullWidth={false}
                                       helpText={null}
-                                      id={null}
                                       label="Team Roles"
                                       value={
                                         <WithI18n
