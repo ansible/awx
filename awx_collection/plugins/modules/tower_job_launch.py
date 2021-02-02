@@ -211,7 +211,6 @@ def main():
     check_vars_to_prompts = {
         'scm_branch': 'ask_scm_branch_on_launch',
         'diff_mode': 'ask_diff_mode_on_launch',
-        'extra_vars': 'ask_variables_on_launch',
         'limit': 'ask_limit_on_launch',
         'tags': 'ask_tags_on_launch',
         'skip_tags': 'ask_skip_tags_on_launch',
@@ -225,6 +224,9 @@ def main():
     for variable_name in check_vars_to_prompts:
         if module.params.get(variable_name) and not job_template[check_vars_to_prompts[variable_name]]:
             param_errors.append("The field {0} was specified but the job template does not allow for it to be overridden".format(variable_name))
+    # Check if Either ask_variables_on_launch, or survey_enabled is enabled for use of extra vars.
+    if module.params.get('extra_vars') and not (job_template['ask_variables_on_launch'] or job_template['survey_enabled']):
+        param_errors.append("The field extra_vars was specified but the job template does not allow for it to be overridden")
     if len(param_errors) > 0:
         module.fail_json(msg="Parameters specified which can not be passed into job template, see errors for details", **{'errors': param_errors})
 
