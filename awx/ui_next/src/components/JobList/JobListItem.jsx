@@ -160,6 +160,14 @@ function JobListItem({
                   }
                 />
               )}
+
+              {job.job_explanation && (
+                <Detail
+                  fullWidth
+                  label={i18n._(t`Explanation`)}
+                  value={job.job_explanation}
+                />
+              )}
             </DetailList>
           </ExpandableRowContent>
         </Td>

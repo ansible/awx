@@ -1,22 +1,36 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { shape, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
 import { RRule } from 'rrule';
-import { Form, FormGroup, Title } from '@patternfly/react-core';
+import {
+  Button,
+  Form,
+  FormGroup,
+  Title,
+  ActionGroup,
+} from '@patternfly/react-core';
 import { Config } from '../../../contexts/Config';
-import { SchedulesAPI } from '../../../api';
+import {
+  SchedulesAPI,
+  JobTemplatesAPI,
+  WorkflowJobTemplatesAPI,
+} from '../../../api';
 import AnsibleSelect from '../../AnsibleSelect';
 import ContentError from '../../ContentError';
 import ContentLoading from '../../ContentLoading';
-import FormActionGroup from '../../FormActionGroup/FormActionGroup';
 import FormField, { FormSubmitError } from '../../FormField';
-import { FormColumnLayout, SubFormLayout } from '../../FormLayout';
+import {
+  FormColumnLayout,
+  SubFormLayout,
+  FormFullWidthLayout,
+} from '../../FormLayout';
 import { dateToInputDateTime, formatDateStringUTC } from '../../../util/dates';
 import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
+import SchedulePromptableFields from './SchedulePromptableFields';
 
 const generateRunOnTheDay = (days = []) => {
   if (
@@ -179,8 +193,12 @@ function ScheduleForm({
   i18n,
   schedule,
   submitError,
+  resource,
   ...rest
 }) {
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isSaveDisabled, setIsSaveDisabled] = useState(false);
+
   let rruleError;
   const now = new Date();
   const closestQuarterHour = new Date(
@@ -188,6 +206,123 @@ function ScheduleForm({
   );
   const tomorrow = new Date(closestQuarterHour);
   tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const isTemplate =
+    resource.type === 'workflow_job_template' ||
+    resource.type === 'job_template';
+  const isWorkflowJobTemplate =
+    isTemplate && resource.type === 'workflow_job_template';
+
+  const {
+    request: loadScheduleData,
+    error: contentError,
+    contentLoading,
+    result: { zoneOptions, surveyConfig, launchConfig, credentials },
+  } = useRequest(
+    useCallback(async () => {
+      const readLaunch =
+        isTemplate &&
+        (isWorkflowJobTemplate
+          ? WorkflowJobTemplatesAPI.readLaunch(resource.id)
+          : JobTemplatesAPI.readLaunch(resource.id));
+      const [{ data }, { data: launchConfiguration }] = await Promise.all([
+        SchedulesAPI.readZoneInfo(),
+        readLaunch,
+      ]);
+
+      const readSurvey = isWorkflowJobTemplate
+        ? WorkflowJobTemplatesAPI.readSurvey(resource.id)
+        : JobTemplatesAPI.readSurvey(resource.id);
+
+      let surveyConfiguration = null;
+
+      if (isTemplate && launchConfiguration.survey_enabled) {
+        const { data: survey } = await readSurvey;
+
+        surveyConfiguration = survey;
+      }
+      let creds;
+      if (schedule.id) {
+        const {
+          data: { results },
+        } = await SchedulesAPI.readCredentials(schedule.id);
+        creds = results;
+      }
+
+      const missingRequiredInventory = Boolean(
+        !resource.inventory && !schedule?.summary_fields?.inventory.id
+      );
+      let missingRequiredSurvey = false;
+
+      if (
+        schedule.id &&
+        isTemplate &&
+        !launchConfiguration?.can_start_without_user_input
+      ) {
+        missingRequiredSurvey = surveyConfiguration?.spec?.every(question => {
+          let hasValue;
+          if (Object.keys(schedule)?.length === 0) {
+            hasValue = true;
+          }
+          Object.entries(schedule?.extra_data).forEach(([key, value]) => {
+            if (
+              question.required &&
+              question.variable === key &&
+              value.length > 0
+            ) {
+              hasValue = false;
+            }
+          });
+          return hasValue;
+        });
+      }
+      if (missingRequiredInventory || missingRequiredSurvey) {
+        setIsSaveDisabled(true);
+      }
+
+      const zones = data.map(zone => {
+        return {
+          value: zone.name,
+          key: zone.name,
+          label: zone.name,
+        };
+      });
+
+      return {
+        zoneOptions: zones,
+        surveyConfig: surveyConfiguration || {},
+        launchConfig: launchConfiguration,
+        credentials: creds || [],
+      };
+    }, [isTemplate, isWorkflowJobTemplate, resource, schedule]),
+    {
+      zonesOptions: [],
+      surveyConfig: {},
+      launchConfig: {},
+      credentials: [],
+    }
+  );
+
+  useEffect(() => {
+    loadScheduleData();
+  }, [loadScheduleData]);
+
+  let showPromptButton = false;
+
+  if (
+    launchConfig &&
+    (launchConfig.ask_inventory_on_launch ||
+      launchConfig.ask_variables_on_launch ||
+      launchConfig.ask_job_type_on_launch ||
+      launchConfig.ask_limit_on_launch ||
+      launchConfig.ask_credential_on_launch ||
+      launchConfig.ask_scm_branch_on_launch ||
+      launchConfig.survey_enabled ||
+      launchConfig.inventory_needed_to_start ||
+      launchConfig.variables_needed_to_start?.length > 0)
+  ) {
+    showPromptButton = true;
+  }
 
   const initialValues = {
     daysOfWeek: [],
@@ -206,6 +341,19 @@ function ScheduleForm({
     runOnTheOccurrence: 1,
     startDateTime: dateToInputDateTime(closestQuarterHour),
     timezone: schedule.timezone || 'America/New_York',
+  };
+  const submitSchedule = (
+    values,
+    launchConfiguration,
+    surveyConfiguration,
+    scheduleCredentials
+  ) => {
+    handleSubmit(
+      values,
+      launchConfiguration,
+      surveyConfiguration,
+      scheduleCredentials
+    );
   };
 
   const overriddenValues = {};
@@ -297,28 +445,6 @@ function ScheduleForm({
     }
   }
 
-  const {
-    request: loadZoneInfo,
-    error: contentError,
-    contentLoading,
-    result: zoneOptions,
-  } = useRequest(
-    useCallback(async () => {
-      const { data } = await SchedulesAPI.readZoneInfo();
-      return data.map(zone => {
-        return {
-          value: zone.name,
-          key: zone.name,
-          label: zone.name,
-        };
-      });
-    }, [])
-  );
-
-  useEffect(() => {
-    loadZoneInfo();
-  }, [loadZoneInfo]);
-
   if (contentError || rruleError) {
     return <ContentError error={contentError || rruleError} />;
   }
@@ -333,7 +459,9 @@ function ScheduleForm({
         return (
           <Formik
             initialValues={Object.assign(initialValues, overriddenValues)}
-            onSubmit={handleSubmit}
+            onSubmit={values => {
+              submitSchedule(values, launchConfig, surveyConfig, credentials);
+            }}
             validate={values => {
               const errors = {};
               const {
@@ -375,11 +503,55 @@ function ScheduleForm({
                     zoneOptions={zoneOptions}
                     {...rest}
                   />
+                  {isWizardOpen && (
+                    <SchedulePromptableFields
+                      schedule={schedule}
+                      credentials={credentials}
+                      surveyConfig={surveyConfig}
+                      launchConfig={launchConfig}
+                      resource={resource}
+                      onCloseWizard={hasErrors => {
+                        setIsWizardOpen(false);
+                        setIsSaveDisabled(hasErrors);
+                      }}
+                      onSave={() => {
+                        setIsWizardOpen(false);
+                        setIsSaveDisabled(false);
+                      }}
+                    />
+                  )}
                   <FormSubmitError error={submitError} />
-                  <FormActionGroup
-                    onCancel={handleCancel}
-                    onSubmit={formik.handleSubmit}
-                  />
+                  <FormFullWidthLayout>
+                    <ActionGroup>
+                      <Button
+                        aria-label={i18n._(t`Save`)}
+                        variant="primary"
+                        type="button"
+                        onClick={formik.handleSubmit}
+                        isDisabled={isSaveDisabled}
+                      >
+                        {i18n._(t`Save`)}
+                      </Button>
+                      {isTemplate && showPromptButton && (
+                        <Button
+                          variant="secondary"
+                          type="button"
+                          aria-label={i18n._(t`Prompt`)}
+                          onClick={() => setIsWizardOpen(true)}
+                        >
+                          {i18n._(t`Prompt`)}
+                        </Button>
+                      )}
+                      <Button
+                        aria-label={i18n._(t`Cancel`)}
+                        variant="secondary"
+                        type="button"
+                        onClick={handleCancel}
+                      >
+                        {i18n._(t`Cancel`)}
+                      </Button>
+                    </ActionGroup>
+                  </FormFullWidthLayout>
                 </FormColumnLayout>
               </Form>
             )}

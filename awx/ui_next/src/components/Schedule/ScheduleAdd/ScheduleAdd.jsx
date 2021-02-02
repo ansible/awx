@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
-import { func } from 'prop-types';
+import { func, shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { Card } from '@patternfly/react-core';
+import yaml from 'js-yaml';
 import { CardBody } from '../../Card';
+import { parseVariableField } from '../../../util/yaml';
+
 import buildRuleObj from '../shared/buildRuleObj';
 import ScheduleForm from '../shared/ScheduleForm';
+import { SchedulesAPI } from '../../../api';
+import mergeExtraVars from '../../../util/prompt/mergeExtraVars';
+import getSurveyValues from '../../../util/prompt/getSurveyValues';
+import { getAddedAndRemoved } from '../../../util/lists';
 
 function ScheduleAdd({ i18n, resource, apiModel }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
@@ -15,14 +22,63 @@ function ScheduleAdd({ i18n, resource, apiModel }) {
   const { pathname } = location;
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values, launchConfig, surveyConfig) => {
+    const {
+      inventory,
+      extra_vars,
+      originalCredentials,
+      end,
+      frequency,
+      interval,
+      startDateTime,
+      timezone,
+      occurrences,
+      runOn,
+      runOnTheDay,
+      runOnTheMonth,
+      runOnDayMonth,
+      runOnDayNumber,
+      endDateTime,
+      runOnTheOccurrence,
+      credentials,
+      daysOfWeek,
+      ...submitValues
+    } = values;
+    const { added } = getAddedAndRemoved(
+      resource?.summary_fields.credentials,
+      credentials
+    );
+    let extraVars;
+    const surveyValues = getSurveyValues(values);
+    const initialExtraVars =
+      launchConfig?.ask_variables_on_launch && (values.extra_vars || '---');
+    if (surveyConfig?.spec) {
+      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, surveyValues));
+    } else {
+      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, {}));
+    }
+    submitValues.extra_data = extraVars && parseVariableField(extraVars);
+    delete values.extra_vars;
+    if (inventory) {
+      submitValues.inventory = inventory.id;
+    }
+
     try {
       const rule = new RRule(buildRuleObj(values, i18n));
 
-      const { id: scheduleId } = await apiModel.createSchedule(resource.id, {
+      const {
+        data: { id: scheduleId },
+      } = await apiModel.createSchedule(resource.id, {
+        ...submitValues,
         rrule: rule.toString().replace(/\n/g, ' '),
       });
-
+      if (credentials?.length > 0) {
+        await Promise.all(
+          added.map(({ id: credentialId }) =>
+            SchedulesAPI.associateCredential(scheduleId, credentialId)
+          )
+        );
+      }
       history.push(`${pathRoot}schedules/${scheduleId}`);
     } catch (err) {
       setFormSubmitError(err);
@@ -36,6 +92,7 @@ function ScheduleAdd({ i18n, resource, apiModel }) {
           handleCancel={() => history.push(`${pathRoot}schedules`)}
           handleSubmit={handleSubmit}
           submitError={formSubmitError}
+          resource={resource}
         />
       </CardBody>
     </Card>

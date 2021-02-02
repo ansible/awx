@@ -26,12 +26,7 @@ function Schedule({ i18n, setBreadcrumb, resource }) {
 
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
 
-  const {
-    isLoading: contentLoading,
-    error: contentError,
-    request: loadData,
-    result: schedule,
-  } = useRequest(
+  const { isLoading, error, request: loadData, result: schedule } = useRequest(
     useCallback(async () => {
       const { data } = await SchedulesAPI.readDetail(scheduleId);
 
@@ -68,7 +63,7 @@ function Schedule({ i18n, setBreadcrumb, resource }) {
     },
   ];
 
-  if (contentLoading) {
+  if (isLoading) {
     return <ContentLoading />;
   }
 
@@ -85,8 +80,8 @@ function Schedule({ i18n, setBreadcrumb, resource }) {
     );
   }
 
-  if (contentError) {
-    return <ContentError error={contentError} />;
+  if (error) {
+    return <ContentError error={error} />;
   }
 
   let showCardHeader = true;
