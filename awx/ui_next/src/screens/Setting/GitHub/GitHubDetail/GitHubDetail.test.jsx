@@ -51,6 +51,44 @@ const mockTeam = {
     SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP: {},
   },
 };
+const mockEnterprise = {
+  data: {
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_CALLBACK_URL:
+      'https://towerhost/sso/complete/github-enterprise/',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_URL: 'https://localhost/enterpriseurl',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL: 'https://localhost/enterpriseapi',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY: 'foobar',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET: '$encrypted$',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_ORGANIZATION_MAP: null,
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_MAP: null,
+  },
+};
+const mockEnterpriseOrg = {
+  data: {
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_CALLBACK_URL:
+      'https://towerhost/sso/complete/github-enterprise-org/',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL: 'https://localhost/orgurl',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL: 'https://localhost/orgapi',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY: 'foobar',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET: '$encrypted$',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME: 'foo',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_ORGANIZATION_MAP: null,
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_TEAM_MAP: null,
+  },
+};
+const mockEnterpriseTeam = {
+  data: {
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_CALLBACK_URL:
+      'https://towerhost/sso/complete/github-enterprise-team/',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL: 'https://localhost/teamurl',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL: 'https://localhost/teamapi',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY: 'foobar',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET: '$encrypted$',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID: 'foo',
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ORGANIZATION_MAP: null,
+    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_TEAM_MAP: null,
+  },
+};
 
 describe('<GitHubDetail />', () => {
   describe('Default', () => {
@@ -60,6 +98,9 @@ describe('<GitHubDetail />', () => {
       SettingsAPI.readCategory.mockResolvedValueOnce(mockDefault);
       SettingsAPI.readCategory.mockResolvedValueOnce(mockOrg);
       SettingsAPI.readCategory.mockResolvedValueOnce(mockTeam);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterprise);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseOrg);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseTeam);
       useRouteMatch.mockImplementation(() => ({
         url: '/settings/github/default/details',
         path: '/settings/github/:category/details',
@@ -90,6 +131,9 @@ describe('<GitHubDetail />', () => {
         'GitHub Default',
         'GitHub Organization',
         'GitHub Team',
+        'GitHub Enterprise',
+        'GitHub Enterprise Organization',
+        'GitHub Enterprise Team',
       ];
       wrapper.find('RoutedTabs li').forEach((tab, index) => {
         expect(tab.text()).toEqual(expectedTabs[index]);
@@ -149,6 +193,9 @@ describe('<GitHubDetail />', () => {
       SettingsAPI.readCategory.mockResolvedValueOnce(mockDefault);
       SettingsAPI.readCategory.mockResolvedValueOnce(mockOrg);
       SettingsAPI.readCategory.mockResolvedValueOnce(mockTeam);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterprise);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseOrg);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseTeam);
       useRouteMatch.mockImplementation(() => ({
         url: '/settings/github/organization/details',
         path: '/settings/github/:category/details',
@@ -198,6 +245,9 @@ describe('<GitHubDetail />', () => {
       SettingsAPI.readCategory.mockResolvedValueOnce(mockDefault);
       SettingsAPI.readCategory.mockResolvedValueOnce(mockOrg);
       SettingsAPI.readCategory.mockResolvedValueOnce(mockTeam);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterprise);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseOrg);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseTeam);
       useRouteMatch.mockImplementation(() => ({
         url: '/settings/github/team/details',
         path: '/settings/github/:category/details',
@@ -233,6 +283,199 @@ describe('<GitHubDetail />', () => {
         '{}'
       );
       assertVariableDetail(wrapper, 'GitHub Team OAuth2 Team Map', '{}');
+    });
+  });
+
+  describe('Enterprise', () => {
+    let wrapper;
+
+    beforeAll(async () => {
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockDefault);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockOrg);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockTeam);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterprise);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseOrg);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseTeam);
+      useRouteMatch.mockImplementation(() => ({
+        url: '/settings/github/enterprise/details',
+        path: '/settings/github/:category/details',
+        params: { category: 'enterprise' },
+      }));
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <SettingsProvider value={mockAllOptions.actions}>
+            <GitHubDetail />
+          </SettingsProvider>
+        );
+      });
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    });
+
+    afterAll(() => {
+      wrapper.unmount();
+      jest.clearAllMocks();
+    });
+
+    test('should render expected details', () => {
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise OAuth2 Callback URL',
+        'https://towerhost/sso/complete/github-enterprise/'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise URL',
+        'https://localhost/enterpriseurl'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise API URL',
+        'https://localhost/enterpriseapi'
+      );
+      assertDetail(wrapper, 'GitHub Enterprise OAuth2 Key', 'foobar');
+      assertDetail(wrapper, 'GitHub Enterprise OAuth2 Secret', 'Encrypted');
+      assertVariableDetail(
+        wrapper,
+        'GitHub Enterprise OAuth2 Organization Map',
+        '{}'
+      );
+      assertVariableDetail(wrapper, 'GitHub Enterprise OAuth2 Team Map', '{}');
+    });
+  });
+
+  describe('Enterprise Org', () => {
+    let wrapper;
+
+    beforeAll(async () => {
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockDefault);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockOrg);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockTeam);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterprise);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseOrg);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseTeam);
+      useRouteMatch.mockImplementation(() => ({
+        url: '/settings/github/enterprise_organization/details',
+        path: '/settings/github/:category/details',
+        params: { category: 'enterprise_organization' },
+      }));
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <SettingsProvider value={mockAllOptions.actions}>
+            <GitHubDetail />
+          </SettingsProvider>
+        );
+      });
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    });
+
+    afterAll(() => {
+      wrapper.unmount();
+      jest.clearAllMocks();
+    });
+
+    test('should render expected details', () => {
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Organization OAuth2 Callback URL',
+        'https://towerhost/sso/complete/github-enterprise-org/'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Organization URL',
+        'https://localhost/orgurl'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Organization API URL',
+        'https://localhost/orgapi'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Organization OAuth2 Key',
+        'foobar'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Organization OAuth2 Secret',
+        'Encrypted'
+      );
+      assertDetail(wrapper, 'GitHub Enterprise Organization Name', 'foo');
+      assertVariableDetail(
+        wrapper,
+        'GitHub Enterprise Organization OAuth2 Organization Map',
+        '{}'
+      );
+      assertVariableDetail(
+        wrapper,
+        'GitHub Enterprise Organization OAuth2 Team Map',
+        '{}'
+      );
+    });
+  });
+
+  describe('Enterprise Team', () => {
+    let wrapper;
+
+    beforeAll(async () => {
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockDefault);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockOrg);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockTeam);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterprise);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseOrg);
+      SettingsAPI.readCategory.mockResolvedValueOnce(mockEnterpriseTeam);
+      useRouteMatch.mockImplementation(() => ({
+        url: '/settings/github/enterprise_team/details',
+        path: '/settings/github/:category/details',
+        params: { category: 'enterprise_team' },
+      }));
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <SettingsProvider value={mockAllOptions.actions}>
+            <GitHubDetail />
+          </SettingsProvider>
+        );
+      });
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    });
+
+    afterAll(() => {
+      wrapper.unmount();
+      jest.clearAllMocks();
+    });
+
+    test('should render expected details', () => {
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Team OAuth2 Callback URL',
+        'https://towerhost/sso/complete/github-enterprise-team/'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Team URL',
+        'https://localhost/teamurl'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Team API URL',
+        'https://localhost/teamapi'
+      );
+      assertDetail(wrapper, 'GitHub Enterprise Team OAuth2 Key', 'foobar');
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Team OAuth2 Secret',
+        'Encrypted'
+      );
+      assertDetail(wrapper, 'GitHub Enterprise Team ID', 'foo');
+      assertVariableDetail(
+        wrapper,
+        'GitHub Enterprise Team OAuth2 Organization Map',
+        '{}'
+      );
+      assertVariableDetail(
+        wrapper,
+        'GitHub Enterprise Team OAuth2 Team Map',
+        '{}'
+      );
     });
   });
 
