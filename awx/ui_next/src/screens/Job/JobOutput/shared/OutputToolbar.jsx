@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { shape, func } from 'prop-types';
+import { bool, shape, func } from 'prop-types';
 import {
   MinusCircleIcon,
   DownloadIcon,
@@ -62,7 +62,14 @@ const OUTPUT_NO_COUNT_JOB_TYPES = [
   'inventory_update',
 ];
 
-const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
+const OutputToolbar = ({
+  i18n,
+  job,
+  jobStatus,
+  onDelete,
+  onCancel,
+  isDeleteDisabled,
+}) => {
   const hideCounts = OUTPUT_NO_COUNT_JOB_TYPES.includes(job.type);
 
   const playCount = job?.playbook_counts?.play_count;
@@ -178,7 +185,6 @@ const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
             </Button>
           </Tooltip>
         )}
-
       {job.summary_fields.user_capabilities.delete &&
         ['new', 'successful', 'failed', 'error', 'canceled'].includes(
           jobStatus
@@ -189,6 +195,7 @@ const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
               modalTitle={i18n._(t`Delete Job`)}
               onConfirm={onDelete}
               variant="plain"
+              isDisabled={isDeleteDisabled}
             >
               <TrashAltIcon />
             </DeleteButton>
@@ -199,8 +206,13 @@ const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
 };
 
 OutputToolbar.propTypes = {
+  isDeleteDisabled: bool,
   job: shape({}).isRequired,
   onDelete: func.isRequired,
+};
+
+OutputToolbar.defaultProps = {
+  isDeleteDisabled: false,
 };
 
 export default withI18n()(OutputToolbar);
