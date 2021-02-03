@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { oneOf, bool, number, string, func } from 'prop-types';
+import AceEditor from 'react-ace';
+// import * as ace from 'ace-builds';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/mode-yaml';
+import 'ace-builds/src-noconflict/theme-github';
 import { Controlled as ReactCodeMirror } from 'react-codemirror2';
 import styled from 'styled-components';
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/mode/yaml/yaml';
-import 'codemirror/mode/jinja2/jinja2';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/addon/display/placeholder';
+// import 'codemirror/mode/javascript/javascript';
+// import 'codemirror/mode/yaml/yaml';
+// import 'codemirror/mode/jinja2/jinja2';
+// import 'codemirror/lib/codemirror.css';
+// import 'codemirror/addon/display/placeholder';
+// require("ace/edit_session").EditSession.prototype.$useWorker=false
 
 const LINE_HEIGHT = 24;
 const PADDING = 12;
+
+// ace.config.set('basePath', 'path');
 
 const CodeMirror = styled(ReactCodeMirror)`
   && {
@@ -95,22 +104,37 @@ function CodeMirrorInput({
   }
 
   return (
-    <CodeMirror
-      className={`pf-c-form-control ${className}`}
-      value={value}
-      onBeforeChange={(editor, data, val) => onChange(val)}
-      mode={mode}
-      hasErrors={hasErrors}
-      options={{
-        smartIndent: false,
-        lineNumbers: true,
-        lineWrapping: true,
-        placeholder,
-        readOnly,
-      }}
-      fullHeight={fullHeight}
-      rows={rows}
-    />
+    <>
+      {/* <CodeMirror
+        className={`pf-c-form-control ${className}`}
+        value={value}
+        onBeforeChange={(editor, data, val) => onChange(val)}
+        mode={mode}
+        hasErrors={hasErrors}
+        options={{
+          smartIndent: false,
+          lineNumbers: true,
+          lineWrapping: true,
+          placeholder,
+          readOnly,
+        }}
+        fullHeight={fullHeight}
+        rows={rows}
+      /> */}
+      <AceEditor
+        mode={mode === 'javascript' ? 'json' : mode}
+        theme="github"
+        onChange={onChange}
+        value={value}
+        name="UNIQUE_ID_OF_DIV"
+        editorProps={{ $blockScrolling: true }}
+        width="100%"
+        setOptions={{
+          readOnly,
+          useWorker: false,
+        }}
+      />
+    </>
   );
 }
 CodeMirrorInput.propTypes = {
