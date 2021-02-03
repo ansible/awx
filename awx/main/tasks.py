@@ -891,6 +891,9 @@ class BaseTask(object):
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
     def build_execution_environment_params(self, instance):
+        if settings.IS_K8S:
+            return {}
+
         if instance.execution_environment_id is None:
             from awx.main.signals import disable_activity_stream
 
@@ -1417,6 +1420,9 @@ class BaseTask(object):
                 # Disable Ansible fact cache.
                 params['fact_cache_type'] = ''
 
+            if self.instance.is_container_group_task or settings.IS_K8S:
+                params['envvars'].pop('HOME', None)
+
             '''
             Delete parameters if the values are None or empty array
             '''
@@ -1427,8 +1433,16 @@ class BaseTask(object):
             self.dispatcher = CallbackQueueDispatcher()
 
             self.instance.log_lifecycle("running_playbook")
-            receptor_job = AWXReceptorJob(self, params)
-            res = receptor_job.run()
+            if isinstance(self.instance, SystemJob):
+                cwd = self.build_cwd(self.instance, private_data_dir)
+                res = ansible_runner.interface.run(project_dir=cwd,
+                                                   event_handler=self.event_handler,
+                                                   finished_callback=self.finished_callback,
+                                                   status_handler=self.status_handler,
+                                                   **params)
+            else:
+                receptor_job = AWXReceptorJob(self, params)
+                res = receptor_job.run()
 
             status = res.status
             rc = res.rc
@@ -1763,6 +1777,9 @@ class RunJob(BaseTask):
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def build_execution_environment_params(self, instance):
+        if settings.IS_K8S:
+            return {}
+
         params = super(RunJob, self).build_execution_environment_params(instance)
         # If this has an insights agent and it is not already mounted then show it
         insights_dir = os.path.dirname(settings.INSIGHTS_SYSTEM_ID_FILE)
@@ -2392,6 +2409,9 @@ class RunProjectUpdate(BaseTask):
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def build_execution_environment_params(self, instance):
+        if settings.IS_K8S:
+            return {}
+
         params = super(RunProjectUpdate, self).build_execution_environment_params(instance)
         project_path = instance.get_project_path(check_if_exists=False)
         cache_path = instance.get_cache_path()
@@ -3092,7 +3112,7 @@ class AWXReceptorJob:
     # Spawned in a thread so Receptor can start reading before we finish writing, we
     # write our payload to the left side of our socketpair.
     def transmit(self, _socket):
-        if self.work_type == 'local':
+        if not settings.IS_K8S and self.work_type == 'local':
             self.runner_params['only_transmit_kwargs'] = True
 
         ansible_runner.interface.run(streamer='transmit',
@@ -3115,12 +3135,14 @@ class AWXReceptorJob:
     def receptor_params(self):
         if self.task.instance.is_container_group_task:
             spec_yaml = yaml.dump(self.pod_definition, explicit_start=True)
-            kubeconfig_yaml = yaml.dump(self.kube_config, explicit_start=True)
 
             receptor_params = {
                 "secret_kube_pod": spec_yaml,
-                "secret_kube_config": kubeconfig_yaml
             }
+
+            if self.credential:
+                kubeconfig_yaml = yaml.dump(self.kube_config, explicit_start=True)
+                receptor_params["secret_kube_config"] = kubeconfig_yaml
         else:
             private_data_dir = self.runner_params['private_data_dir']
             receptor_params = {
@@ -3134,7 +3156,10 @@ class AWXReceptorJob:
     @property
     def work_type(self):
         if self.task.instance.is_container_group_task:
-            work_type = 'ocp'
+            if self.credential:
+                work_type = 'kubernetes-runtime-auth'
+            else:
+                work_type = 'kubernetes-incluster-auth'
         else:
             work_type = 'local'
 
