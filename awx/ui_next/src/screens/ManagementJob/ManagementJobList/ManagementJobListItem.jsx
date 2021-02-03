@@ -11,10 +11,13 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import { PencilAltIcon, RocketIcon } from '@patternfly/react-icons';
+import { RocketIcon, PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
 import { SystemJobTemplatesAPI } from '../../../api';
+import AlertModal from '../../../components/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail';
+import LaunchManagementPrompt from './LaunchManagementPrompt';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
@@ -31,6 +34,7 @@ function ManagementJobListItem({
   id,
   name,
   description,
+  defaultDays,
 }) {
   const detailsUrl = `/management_jobs/${id}/details`;
   const editUrl = `/management_jobs/${id}/edit`;
@@ -38,6 +42,28 @@ function ManagementJobListItem({
 
   const history = useHistory();
   const [isLaunchLoading, setIsLaunchLoading] = useState(false);
+
+  const [isManagementPromptOpen, setIsManagementPromptOpen] = useState(false);
+  const [isManagementPromptLoading, setIsManagementPromptLoading] = useState(
+    false
+  );
+  const [managementPromptError, setManagementPromptError] = useState(null);
+  const handleManagementPromptClick = () => setIsManagementPromptOpen(true);
+  const handleManagementPromptClose = () => setIsManagementPromptOpen(false);
+
+  const handleManagementPromptConfirm = async days => {
+    setIsManagementPromptLoading(true);
+    try {
+      const { data } = await SystemJobTemplatesAPI.launch(id, {
+        extra_vars: { days },
+      });
+      history.push(`/jobs/management/${data.id}/output`);
+    } catch (error) {
+      setManagementPromptError(error);
+    } finally {
+      setIsManagementPromptLoading(false);
+    }
+  };
 
   const handleLaunch = async () => {
     setIsLaunchLoading(true);
@@ -52,67 +78,89 @@ function ManagementJobListItem({
   };
 
   return (
-    <DataListItem key={id} id={id} aria-labelledby={labelId}>
-      <DataListItemRow>
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell
-              key="name"
-              aria-label={i18n._(t`management job name`)}
-            >
-              <Link to={detailsUrl}>
-                <b>{name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell
-              key="description"
-              aria-label={i18n._(t`management job description`)}
-            >
-              <strong>{i18n._(t`Description:`)}</strong> {description}
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label="actions"
-          aria-labelledby={labelId}
-          id={labelId}
-        >
-          {isSuperUser ? (
-            <>
-              <Tooltip
-                content={i18n._(t`Launch management job`)}
-                position="top"
+    <>
+      <DataListItem key={id} id={id} aria-labelledby={labelId}>
+        <DataListItemRow>
+          <DataListItemCells
+            dataListCells={[
+              <DataListCell
+                key="name"
+                aria-label={i18n._(t`management job name`)}
               >
-                <Button
-                  aria-label={i18n._(t`Launch management job`)}
-                  variant="plain"
-                  onClick={handleLaunch}
-                  isDisabled={isLaunchLoading}
-                >
-                  <RocketIcon />
-                </Button>
-              </Tooltip>
-              {isConfigurable ? (
-                <Tooltip
-                  content={i18n._(t`Edit management job`)}
-                  position="top"
-                >
-                  <Button
-                    aria-label={i18n._(t`Edit management job`)}
-                    variant="plain"
-                    component={Link}
-                    to={editUrl}
-                    isDisabled={isLaunchLoading}
+                <Link to={detailsUrl}>
+                  <b>{name}</b>
+                </Link>
+              </DataListCell>,
+              <DataListCell
+                key="description"
+                aria-label={i18n._(t`management job description`)}
+              >
+                <strong>{i18n._(t`Description:`)}</strong> {description}
+              </DataListCell>,
+            ]}
+          />
+          <DataListAction aria-labelledby={labelId} id={labelId}>
+            {isSuperUser ? (
+              <>
+                {isConfigurable ? (
+                  <>
+                    <LaunchManagementPrompt
+                      isOpen={isManagementPromptOpen}
+                      isLoading={isManagementPromptLoading}
+                      onClick={handleManagementPromptClick}
+                      onClose={handleManagementPromptClose}
+                      onConfirm={handleManagementPromptConfirm}
+                      defaultDays={defaultDays}
+                    />
+                    <Tooltip
+                      content={i18n._(t`Edit management job`)}
+                      position="top"
+                    >
+                      <Button
+                        aria-label={i18n._(t`Edit management job`)}
+                        variant="plain"
+                        component={Link}
+                        to={editUrl}
+                        isDisabled={isLaunchLoading}
+                      >
+                        <PencilAltIcon />
+                      </Button>
+                    </Tooltip>
+                  </>
+                ) : (
+                  <Tooltip
+                    content={i18n._(t`Launch management job`)}
+                    position="top"
                   >
-                    <PencilAltIcon />
-                  </Button>
-                </Tooltip>
-              ) : null}
-            </>
-          ) : null}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+                    <Button
+                      aria-label={i18n._(t`Launch management job`)}
+                      variant="plain"
+                      onClick={handleLaunch}
+                      isDisabled={isLaunchLoading}
+                    >
+                      <RocketIcon />
+                    </Button>
+                  </Tooltip>
+                )}{' '}
+              </>
+            ) : null}
+          </DataListAction>
+        </DataListItemRow>
+      </DataListItem>
+      {managementPromptError && (
+        <>
+          <AlertModal
+            isOpen={managementPromptError}
+            variant="danger"
+            onClose={() => setManagementPromptError(null)}
+            title={i18n._(t`Management job launch error`)}
+            label={i18n._(t`Management job launch error`)}
+          >
+            <ErrorDetail error={managementPromptError} />
+          </AlertModal>
+        </>
+      )}
+    </>
   );
 }
 

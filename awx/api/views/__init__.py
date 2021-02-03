@@ -3423,7 +3423,7 @@ class SystemJobTemplateList(ListAPIView):
         return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
 
 
-class SystemJobTemplateDetail(RetrieveAPIView):
+class SystemJobTemplateDetail(RetrieveUpdateAPIView):
 
     model = models.SystemJobTemplate
     serializer_class = serializers.SystemJobTemplateSerializer

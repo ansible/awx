@@ -91,6 +91,7 @@ function ManagementJobList({ i18n }) {
               name,
               description,
               has_configurable_retention,
+              default_days,
             }) => (
               <ManagementJobListItem
                 key={id}
@@ -99,6 +100,7 @@ function ManagementJobList({ i18n }) {
                 description={description}
                 isSuperUser={me?.is_superuser}
                 isConfigurable={has_configurable_retention}
+                defaultDays={default_days}
                 onLaunchError={setLaunchError}
               />
             )}
