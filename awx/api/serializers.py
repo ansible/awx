@@ -1350,6 +1350,7 @@ class ProjectOptionsSerializer(BaseSerializer):
             'scm_branch',
             'scm_refspec',
             'scm_clean',
+            'scm_track_submodules',
             'scm_delete_on_update',
             'credential',
             'timeout',
@@ -1497,7 +1498,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                     )
 
         if get_field_from_model_or_attrs('scm_type') == '':
-            for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_clean'):
+            for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_track_submodules', 'scm_clean'):
                 if get_field_from_model_or_attrs(fd):
                     raise serializers.ValidationError({fd: _('Update options must be set to false for manual projects.')})
         return super(ProjectSerializer, self).validate(attrs)

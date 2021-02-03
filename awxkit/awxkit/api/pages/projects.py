@@ -35,6 +35,7 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
             'local_path',
             'scm_clean',
             'scm_delete_on_update',
+            'scm_track_submodules',
             'scm_update_cache_timeout',
             'scm_update_on_launch',
             'scm_refspec',

@@ -159,6 +159,7 @@ export const Project = shape({
   scm_refspec: string,
   scm_clean: bool,
   scm_delete_on_update: bool,
+  scm_track_submodules: bool,
   credential: number,
   status: oneOf([
     'new',
