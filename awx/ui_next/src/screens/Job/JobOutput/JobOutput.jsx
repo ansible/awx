@@ -261,6 +261,8 @@ class JobOutput extends Component {
     this._isMounted = true;
     this.loadJobEvents();
 
+    if (job.result_traceback) return;
+
     connectJobSocket(job, data => {
       if (data.counter && data.counter > this.jobSocketCounter) {
         this.jobSocketCounter = data.counter;
@@ -326,10 +328,32 @@ class JobOutput extends Component {
       });
       this._isMounted &&
         this.setState(({ results }) => {
+          let countOffset = 1;
+          if (job?.result_traceback) {
+            const tracebackEvent = {
+              counter: -1,
+              created: null,
+              event: null,
+              type: null,
+              stdout: job?.result_traceback,
+              start_line: 0,
+            };
+            const firstIndex = newResults.findIndex(
+              jobEvent => jobEvent.counter === 1
+            );
+            if (firstIndex) {
+              const stdoutLines = newResults[firstIndex].stdout.split('\r\n');
+              stdoutLines[0] = tracebackEvent.stdout;
+              newResults[firstIndex].stdout = stdoutLines.join('\r\n');
+            } else {
+              countOffset += 1;
+              newResults.unshift(tracebackEvent);
+            }
+          }
           newResults.forEach(jobEvent => {
             results[jobEvent.counter] = jobEvent;
           });
-          return { results, remoteRowCount: count + 1 };
+          return { results, remoteRowCount: count + countOffset };
         });
     } catch (err) {
       this.setState({ contentError: err });
