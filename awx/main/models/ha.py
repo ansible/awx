@@ -255,6 +255,9 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     @property
     def is_container_group(self):
+        if settings.IS_K8S:
+            return True
+
         return bool(self.credential and self.credential.kubernetes)
 
     '''
