@@ -3359,6 +3359,13 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
             del result['default_days']
         return result
 
+    def __init__(self, *args, **kwargs):
+        super(SystemJobTemplateSerializer, self).__init__(*args, **kwargs)
+        for field_name, field_instance in self.fields.items():
+            if field_name != 'default_days':
+                field_instance.read_only = True
+
+
 
 class SystemJobSerializer(UnifiedJobSerializer):
 
