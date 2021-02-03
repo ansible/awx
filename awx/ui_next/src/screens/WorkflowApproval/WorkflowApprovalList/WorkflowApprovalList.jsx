@@ -4,9 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { WorkflowApprovalsAPI } from '../../../api';
-import PaginatedDataList, {
-  ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import { ToolbarDeleteButton } from '../../../components/PaginatedDataList';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import DataListToolbar from '../../../components/DataListToolbar';
@@ -155,7 +157,7 @@ function WorkflowApprovalsList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={
               isWorkflowApprovalsLoading ||
@@ -181,16 +183,6 @@ function WorkflowApprovalsList({ i18n }) {
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
-            toolbarSortColumns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-              },
-              {
-                name: i18n._(t`Started`),
-                key: 'started',
-              },
-            ]}
             renderToolbar={props => (
               <DataListToolbar
                 {...props}
@@ -227,7 +219,15 @@ function WorkflowApprovalsList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={workflowApproval => (
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Job`)}</HeaderCell>
+                <HeaderCell sortKey="started">{i18n._(t`Started`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
+              </HeaderRow>
+            }
+            renderRow={(workflowApproval, index) => (
               <WorkflowApprovalListItem
                 key={workflowApproval.id}
                 workflowApproval={workflowApproval}
@@ -237,6 +237,7 @@ function WorkflowApprovalsList({ i18n }) {
                 )}
                 onSelect={() => handleSelect(workflowApproval)}
                 onSuccessfulAction={fetchWorkflowApprovals}
+                rowIndex={index}
               />
             )}
           />

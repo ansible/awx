@@ -2,26 +2,13 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { string, bool, func } from 'prop-types';
-import {
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Label,
-} from '@patternfly/react-core';
+import { Label } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import DataListCell from '../../../components/DataListCell';
 import { WorkflowApproval } from '../../../types';
 import { formatDateString } from '../../../util/dates';
 import WorkflowApprovalStatus from '../shared/WorkflowApprovalStatus';
-
-const StatusCell = styled(DataListCell)`
-  @media screen and (min-width: 768px) {
-    display: flex;
-    justify-content: flex-end;
-  }
-`;
 
 const JobLabel = styled.b`
   margin-right: 24px;
@@ -32,6 +19,7 @@ function WorkflowApprovalListItem({
   isSelected,
   onSelect,
   detailUrl,
+  rowIndex,
   i18n,
 }) {
   const labelId = `check-action-${workflowApproval.id}`;
@@ -62,44 +50,39 @@ function WorkflowApprovalListItem({
   };
 
   return (
-    <DataListItem
-      key={workflowApproval.id}
-      aria-labelledby={labelId}
-      id={`${workflowApproval.id}`}
-    >
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-workflowApproval-${workflowApproval.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="title">
-              <Link to={`${detailUrl}`}>
-                <b>{workflowApproval.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key="job">
-              <>
-                <JobLabel>{i18n._(t`Job`)}</JobLabel>
-                {workflowJob && workflowJob?.id ? (
-                  <Link to={`/jobs/workflow/${workflowJob?.id}`}>
-                    {`${workflowJob?.id} - ${workflowJob?.name}`}
-                  </Link>
-                ) : (
-                  i18n._(t`Deleted`)
-                )}
-              </>
-            </DataListCell>,
-            <StatusCell key="status">
-              <div>{getStatus()}</div>
-            </StatusCell>,
-          ]}
-        />
-      </DataListItemRow>
-    </DataListItem>
+    <Tr id={`workflow-approval-row-${workflowApproval.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+        dataLabel={i18n._(t`Selected`)}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <Link to={`${detailUrl}`}>
+          <b>{workflowApproval.name}</b>
+        </Link>
+      </Td>
+      <Td>
+        <>
+          <JobLabel>{i18n._(t`Job`)}</JobLabel>
+          {workflowJob && workflowJob?.id ? (
+            <Link to={`/jobs/workflow/${workflowJob?.id}`}>
+              {`${workflowJob?.id} - ${workflowJob?.name}`}
+            </Link>
+          ) : (
+            i18n._(t`Deleted`)
+          )}
+        </>
+      </Td>
+      <Td dataLabel={i18n._(t`Started`)}>
+        {formatDateString(workflowApproval.started)}
+      </Td>
+      <Td dataLabel={i18n._(t`Status`)}>
+        <div>{getStatus()}</div>
+      </Td>
+    </Tr>
   );
 }
 
