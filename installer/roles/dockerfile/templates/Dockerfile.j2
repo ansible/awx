@@ -139,7 +139,7 @@ RUN python3 -m ensurepip && pip3 install "virtualenv < 20" supervisor {% if buil
     pip3 install --no-cache-dir https://github.com/ansible/ansible/archive/${ANSIBLE_BRANCH}.tar.gz
 
 # TODO: Remove this once launch script removes need for postres modules
-RUN ansible-galaxy collection install --collections-path /usr/share/ansible/collections community.general
+RUN ansible-galaxy collection install --collections-path /usr/share/ansible/collections community.general community.postgresql
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
