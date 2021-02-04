@@ -159,13 +159,13 @@ parameters:
 - description: Username for PostgreSQL user that will be used for accessing the
     database.
   displayName: PostgreSQL Connection Username
-  from: user[A-Z0-9]{3}
+  from: {{ pg_username }}
   generate: expression
   name: POSTGRESQL_USER
   required: true
 - description: Password for the PostgreSQL connection user.
   displayName: PostgreSQL Connection Password
-  from: '[a-zA-Z0-9]{16}'
+  from: '{{ pg_password }}'
   generate: expression
   name: POSTGRESQL_PASSWORD
   required: true
@@ -173,4 +173,4 @@ parameters:
   displayName: PostgreSQL Database Name
   name: POSTGRESQL_DATABASE
   required: true
-  value: sampledb
+  value: {{ pg_database }}
