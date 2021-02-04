@@ -133,7 +133,10 @@ function NotificationTemplateListItem({
             <PencilAltIcon />
           </Button>
         </ActionItem>
-        <ActionItem visible={template.summary_fields.user_capabilities.copy}>
+        <ActionItem
+          visible={template.summary_fields.user_capabilities.copy}
+          tooltip={i18n._(t`Copy Notification Template`)}
+        >
           <CopyButton
             copyItem={copyTemplate}
             isCopyDisabled={isCopyDisabled}
