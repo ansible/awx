@@ -22,7 +22,11 @@ const FieldHeader = styled.div`
 
 function OtherPromptsStep({ launchConfig, i18n }) {
   return (
-    <Form>
+    <Form
+      onSubmit={e => {
+        e.preventDefault();
+      }}
+    >
       {launchConfig.ask_job_type_on_launch && <JobTypeField i18n={i18n} />}
       {launchConfig.ask_limit_on_launch && (
         <FormField
