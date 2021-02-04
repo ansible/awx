@@ -167,6 +167,7 @@ function HostList({ i18n }) {
             <HeaderRow qsConfig={QS_CONFIG}>
               <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Inventory`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
             </HeaderRow>
           }
           renderToolbar={props => (

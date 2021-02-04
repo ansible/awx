@@ -169,6 +169,7 @@ function UserList({ i18n }) {
                   {i18n._(t`Last Name`)}
                 </HeaderCell>
                 <HeaderCell>{i18n._(t`Role`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
               </HeaderRow>
             }
             renderRow={(user, index) => (

@@ -153,6 +153,7 @@ function TeamList({ i18n }) {
               <HeaderRow qsConfig={QS_CONFIG}>
                 <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
               </HeaderRow>
             }
             renderToolbar={props => (
