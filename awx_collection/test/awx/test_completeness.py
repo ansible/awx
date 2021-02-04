@@ -37,7 +37,7 @@ ignore_parameters = [
 # Add the module name as the key with the value being the list of params to ignore
 no_api_parameter_ok = {
     # The wait is for whether or not to wait for a project update on change
-    'tower_project': ['wait'],
+    'tower_project': ['wait', 'interval', 'update_project'],
     # Existing_token and id are for working with an existing tokens
     'tower_token': ['existing_token', 'existing_token_id'],
     # /survey spec is now how we handle associations
