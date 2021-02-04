@@ -12,7 +12,7 @@ from django.core.mail.message import EmailMessage
 from django.db import connection
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, force_text
-from jinja2 import sandbox
+from jinja2 import sandbox, ChainableUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 # AWX
@@ -357,7 +357,7 @@ class JobNotificationMixin(object):
                    'url': 'https://towerhost/#/jobs/playbook/1010',
                    'approval_status': 'approved',
                    'approval_node_name': 'Approve Me',
-                   'workflow_url': 'https://towerhost/#/workflows/1010',
+                   'workflow_url': 'https://towerhost/#/jobs/workflow/1010',
                    'job_metadata': """{'url': 'https://towerhost/$/jobs/playbook/13',
  'traceback': '',
  'status': 'running',
@@ -429,7 +429,7 @@ class JobNotificationMixin(object):
         raise RuntimeError("Define me")
 
     def build_notification_message(self, nt, status):
-        env = sandbox.ImmutableSandboxedEnvironment()
+        env = sandbox.ImmutableSandboxedEnvironment(undefined=ChainableUndefined)
 
         from awx.api.serializers import UnifiedJobSerializer
         job_serialization = UnifiedJobSerializer(self).to_representation(self)

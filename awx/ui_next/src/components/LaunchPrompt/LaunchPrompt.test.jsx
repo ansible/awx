@@ -76,28 +76,65 @@ describe('LaunchPrompt', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <LaunchPrompt
-          config={{
+          launchConfig={{
             ...config,
             ask_inventory_on_launch: true,
             ask_credential_on_launch: true,
             ask_scm_branch_on_launch: true,
             survey_enabled: true,
+            passwords_needed_to_start: ['ssh_password'],
+            defaults: {
+              credentials: [
+                {
+                  id: 1,
+                  passwords_needed: ['ssh_password'],
+                },
+              ],
+            },
           }}
-          resource={resource}
+          resource={{
+            ...resource,
+            summary_fields: {
+              credentials: [
+                {
+                  id: 1,
+                },
+              ],
+            },
+          }}
           onLaunch={noop}
           onCancel={noop}
+          surveyConfig={{
+            name: '',
+            description: '',
+            spec: [
+              {
+                choices: '',
+                default: '',
+                max: 1024,
+                min: 0,
+                new_question: false,
+                question_description: '',
+                question_name: 'foo',
+                required: true,
+                type: 'text',
+                variable: 'foo',
+              },
+            ],
+          }}
         />
       );
     });
     const wizard = await waitForElement(wrapper, 'Wizard');
     const steps = wizard.prop('steps');
 
-    expect(steps).toHaveLength(5);
+    expect(steps).toHaveLength(6);
     expect(steps[0].name.props.children).toEqual('Inventory');
-    expect(steps[1].name).toEqual('Credentials');
-    expect(steps[2].name).toEqual('Other Prompts');
-    expect(steps[3].name.props.children).toEqual('Survey');
-    expect(steps[4].name).toEqual('Preview');
+    expect(steps[1].name.props.children).toEqual('Credentials');
+    expect(steps[2].name.props.children).toEqual('Credential passwords');
+    expect(steps[3].name.props.children).toEqual('Other prompts');
+    expect(steps[4].name.props.children).toEqual('Survey');
+    expect(steps[5].name.props.children).toEqual('Preview');
   });
 
   test('should add inventory step', async () => {
@@ -105,7 +142,7 @@ describe('LaunchPrompt', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <LaunchPrompt
-          config={{
+          launchConfig={{
             ...config,
             ask_inventory_on_launch: true,
           }}
@@ -129,7 +166,7 @@ describe('LaunchPrompt', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <LaunchPrompt
-          config={{
+          launchConfig={{
             ...config,
             ask_credential_on_launch: true,
           }}
@@ -143,7 +180,7 @@ describe('LaunchPrompt', () => {
     const steps = wizard.prop('steps');
 
     expect(steps).toHaveLength(2);
-    expect(steps[0].name).toEqual('Credentials');
+    expect(steps[0].name.props.children).toEqual('Credentials');
     expect(isElementOfType(steps[0].component, CredentialsStep)).toEqual(true);
     expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
   });
@@ -153,7 +190,7 @@ describe('LaunchPrompt', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <LaunchPrompt
-          config={{
+          launchConfig={{
             ...config,
             ask_verbosity_on_launch: true,
           }}
@@ -167,7 +204,7 @@ describe('LaunchPrompt', () => {
     const steps = wizard.prop('steps');
 
     expect(steps).toHaveLength(2);
-    expect(steps[0].name).toEqual('Other Prompts');
+    expect(steps[0].name.props.children).toEqual('Other prompts');
     expect(isElementOfType(steps[0].component, OtherPromptsStep)).toEqual(true);
     expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
   });

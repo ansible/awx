@@ -6,11 +6,9 @@ import { t } from '@lingui/macro';
 import { SchedulesAPI } from '../../../api';
 import AlertModal from '../../AlertModal';
 import ErrorDetail from '../../ErrorDetail';
+import PaginatedTable, { HeaderRow, HeaderCell } from '../../PaginatedTable';
 import DataListToolbar from '../../DataListToolbar';
-import PaginatedDataList, {
-  ToolbarAddButton,
-  ToolbarDeleteButton,
-} from '../../PaginatedDataList';
+import { ToolbarAddButton, ToolbarDeleteButton } from '../../PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ScheduleListItem from './ScheduleListItem';
@@ -62,7 +60,7 @@ function ScheduleList({
           scheduleActions.data.actions?.GET || {}
         ).filter(key => scheduleActions.data.actions?.GET[key].filterable),
       };
-    }, [location, loadSchedules, loadScheduleOptions]),
+    }, [location.search, loadSchedules, loadScheduleOptions]),
     {
       schedules: [],
       itemCount: 0,
@@ -119,19 +117,28 @@ function ScheduleList({
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading || isDeleteLoading}
         items={schedules}
         itemCount={itemCount}
         qsConfig={QS_CONFIG}
         onRowClick={handleSelect}
-        renderItem={item => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG}>
+            <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+            <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
+            <HeaderCell sortKey="next_run">{i18n._(t`Next Run`)}</HeaderCell>
+            <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(item, index) => (
           <ScheduleListItem
             isSelected={selected.some(row => row.id === item.id)}
             key={item.id}
             onSelect={() => handleSelect(item)}
             schedule={item}
+            rowIndex={index}
           />
         )}
         toolbarSearchColumns={[
@@ -151,16 +158,6 @@ function ScheduleList({
           {
             name: i18n._(t`Modified By (Username)`),
             key: 'modified_by__username__icontains',
-          },
-        ]}
-        toolbarSortColumns={[
-          {
-            name: i18n._(t`Name`),
-            key: 'name',
-          },
-          {
-            name: i18n._(t`Next Run`),
-            key: 'next_run',
           },
         ]}
         toolbarSearchableKeys={searchableKeys}

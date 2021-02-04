@@ -30,6 +30,29 @@ describe('<JobListCancelButton />', () => {
                 start: false,
               },
             },
+            status: 'running',
+          },
+        ]}
+      />
+    );
+    expect(wrapper.find('JobListCancelButton button').props().disabled).toBe(
+      true
+    );
+  });
+  test('should be disabled when selected job is not running', () => {
+    wrapper = mountWithContexts(
+      <JobListCancelButton
+        jobsToCancel={[
+          {
+            id: 1,
+            name: 'some job',
+            summary_fields: {
+              user_capabilities: {
+                delete: false,
+                start: false,
+              },
+            },
+            status: 'successful',
           },
         ]}
       />
@@ -51,6 +74,7 @@ describe('<JobListCancelButton />', () => {
                 start: true,
               },
             },
+            status: 'running',
           },
         ]}
       />
@@ -73,6 +97,7 @@ describe('<JobListCancelButton />', () => {
                 start: true,
               },
             },
+            status: 'running',
           },
         ]}
         onCancel={onCancel}

@@ -30,7 +30,12 @@ const ProtectedRoute = ({ children, ...rest }) =>
 
 function App() {
   const catalogs = { en, ja };
-  const language = getLanguageWithoutRegionCode(navigator);
+  let language = getLanguageWithoutRegionCode(navigator);
+  if (!Object.keys(catalogs).includes(language)) {
+    // If there isn't a string catalog available for the browser's
+    // preferred language, default to one that has strings.
+    language = 'en';
+  }
   const match = useRouteMatch();
   const { hash, search, pathname } = useLocation();
 

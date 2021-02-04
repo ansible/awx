@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { sleep } from '../../../../testUtils/testUtils';
 
@@ -8,39 +9,39 @@ import { ProjectsAPI } from '../../../api';
 jest.mock('../../../api');
 
 describe('ProjectSyncButton', () => {
-  ProjectsAPI.readSync.mockResolvedValue({
-    data: {
-      can_update: true,
-    },
-  });
+  let wrapper;
 
   const children = handleSync => (
     <button type="submit" onClick={() => handleSync()} />
   );
 
-  test('renders the expected content', () => {
-    const wrapper = mountWithContexts(
-      <ProjectSyncButton projectId={1}>{children}</ProjectSyncButton>
-    );
+  test('renders the expected content', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectSyncButton projectId={1}>{children}</ProjectSyncButton>
+      );
+    });
     expect(wrapper).toHaveLength(1);
   });
-  test('correct api calls are made on sync', async done => {
+  test('correct api calls are made on sync', async () => {
     ProjectsAPI.sync.mockResolvedValue({
       data: {
         id: 9000,
       },
     });
-    const wrapper = mountWithContexts(
-      <ProjectSyncButton projectId={1}>{children}</ProjectSyncButton>
-    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectSyncButton projectId={1}>{children}</ProjectSyncButton>
+      );
+    });
     const button = wrapper.find('button');
-    button.prop('onClick')();
-    expect(ProjectsAPI.readSync).toHaveBeenCalledWith(1);
-    await sleep(0);
+    await act(async () => {
+      button.prop('onClick')();
+    });
+
     expect(ProjectsAPI.sync).toHaveBeenCalledWith(1);
-    done();
   });
-  test('displays error modal after unsuccessful sync', async done => {
+  test('displays error modal after unsuccessful sync', async () => {
     ProjectsAPI.sync.mockRejectedValue(
       new Error({
         response: {
@@ -53,18 +54,23 @@ describe('ProjectSyncButton', () => {
         },
       })
     );
-    const wrapper = mountWithContexts(
-      <ProjectSyncButton projectId={1}>{children}</ProjectSyncButton>
-    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectSyncButton projectId={1}>{children}</ProjectSyncButton>
+      );
+    });
     expect(wrapper.find('Modal').length).toBe(0);
-    wrapper.find('button').prop('onClick')();
+    await act(async () => {
+      wrapper.find('button').prop('onClick')();
+    });
     await sleep(0);
     wrapper.update();
     expect(wrapper.find('Modal').length).toBe(1);
-    wrapper.find('ModalBoxCloseButton').simulate('click');
+    await act(async () => {
+      wrapper.find('ModalBoxCloseButton').simulate('click');
+    });
     await sleep(0);
     wrapper.update();
     expect(wrapper.find('Modal').length).toBe(0);
-    done();
   });
 });

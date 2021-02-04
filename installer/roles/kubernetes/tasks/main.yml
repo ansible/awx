@@ -76,7 +76,7 @@
           -e POSTGRESQL_USER={{ pg_username }} \
           -e POSTGRESQL_PASSWORD={{ pg_password | quote }} \
           -e POSTGRESQL_DATABASE={{ pg_database | quote }} \
-          -e POSTGRESQL_VERSION=10 \
+          -e POSTGRESQL_VERSION=12 \
           -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
       no_log: true
@@ -101,7 +101,7 @@
 
     - name: Deploy and Activate Postgres (Kubernetes)
       shell: |
-        helm repo add stable https://kubernetes-charts.storage.googleapis.com
+        helm repo add stable https://charts.helm.sh/stable
         helm repo update
         helm upgrade {{ postgresql_service_name }} \
           --install \
@@ -133,9 +133,9 @@
     seconds: "{{ postgress_activate_wait }}"
   when: openshift_pg_activate.changed or kubernetes_pg_activate.changed
 
-- name: Check postgres version and upgrade Postgres if necessary
+- name: Check postgres version and upgrade Postgres if necessary (Openshift)
   block:
-    - name: Check if Postgres 9.6 is being used
+    - name: Check if Postgres 10 is being used
       shell: |
         POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
           get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
@@ -145,7 +145,7 @@
       block:
         - name: Set new pg image
           shell: |
-            IMAGE=registry.redhat.io/rhel-8/postgresql-10
+            IMAGE=registry.redhat.io/rhel-8/postgresql-12
             {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set image dc/postgresql postgresql=$IMAGE
 
         - name: Wait for change to take affect
@@ -162,7 +162,7 @@
 
         - name: Set env var for new pg version
           shell: |
-            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_VERSION=10
+            {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} set env dc/postgresql POSTGRESQL_VERSION=12
 
         - name: Wait for Postgres to redeploy
           pause:
@@ -185,9 +185,11 @@
         - name: Wait for Postgres to redeploy
           pause:
             seconds: "{{ postgress_activate_wait }}"
-      when: "pg_version is success and '9.6' in pg_version.stdout"
+      when: "pg_version is success and '10' in pg_version.stdout"
   when:
     - pg_hostname is not defined or pg_hostname == ''
+    - postgres_svc_details is defined and postgres_svc_details.rc != 0
+    - openshift_host is defined
 
 - name: Set image names if using custom registry
   block:
@@ -237,7 +239,6 @@
     - 'secret'
     - 'deployment'
     - 'supervisor'
-    - 'launch_awx'
   no_log: true
 
 - name: Apply Deployment
@@ -248,7 +249,6 @@
     - "{{ secret }}"
     - "{{ deployment }}"
     - "{{ supervisor }}"
-    - "{{ launch_awx }}"
   no_log: true
 
 - name: Delete any existing management pod

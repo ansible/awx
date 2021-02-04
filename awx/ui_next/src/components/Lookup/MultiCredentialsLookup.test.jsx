@@ -13,11 +13,29 @@ describe('<MultiCredentialsLookup />', () => {
   let wrapper;
 
   const credentials = [
-    { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
-    { id: 2, kind: 'ssh', name: 'Alex', url: 'www.google.com' },
-    { name: 'Gatsby', id: 21, kind: 'vault', inputs: { vault_id: '1' } },
-    { name: 'Gatsby 2', id: 23, kind: 'vault' },
-    { name: 'Gatsby', id: 8, kind: 'Machine' },
+    {
+      id: 1,
+      credential_type: 1,
+      kind: 'gce',
+      name: 'Foo',
+      url: 'www.google.com',
+    },
+    {
+      id: 2,
+      credential_type: 2,
+      kind: 'ssh',
+      name: 'Alex',
+      url: 'www.google.com',
+    },
+    {
+      id: 21,
+      credential_type: 3,
+      kind: 'vault',
+      inputs: { vault_id: '1' },
+      name: 'Gatsby',
+    },
+    { id: 23, credential_type: 3, kind: 'vault', name: 'Gatsby 2' },
+    { id: 8, credential_type: 4, kind: 'Machine', name: 'Gatsby' },
   ];
 
   beforeEach(() => {
@@ -34,11 +52,58 @@ describe('<MultiCredentialsLookup />', () => {
     CredentialsAPI.read.mockResolvedValueOnce({
       data: {
         results: [
-          { id: 1, kind: 'cloud', name: 'Cred 1', url: 'www.google.com' },
-          { id: 2, kind: 'ssh', name: 'Cred 2', url: 'www.google.com' },
-          { id: 3, kind: 'Ansible', name: 'Cred 3', url: 'www.google.com' },
-          { id: 4, kind: 'Machine', name: 'Cred 4', url: 'www.google.com' },
-          { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
+          {
+            id: 1,
+            credential_type: 1,
+            kind: 'gc2',
+            name: 'Cred 1',
+            url: 'www.google.com',
+          },
+          {
+            id: 2,
+            credential_type: 2,
+            kind: 'ssh',
+            name: 'Cred 2',
+            url: 'www.google.com',
+          },
+          {
+            id: 3,
+            credential_type: 5,
+            kind: 'Ansible',
+            name: 'Cred 3',
+            url: 'www.google.com',
+          },
+          {
+            id: 4,
+            credential_type: 4,
+            kind: 'Machine',
+            name: 'Cred 4',
+            url: 'www.google.com',
+          },
+          {
+            id: 5,
+            credential_type: 4,
+            kind: 'Machine',
+            name: 'Cred 5',
+            url: 'www.google.com',
+          },
+
+          {
+            id: 6,
+            credential_type: 5,
+            kind: 'vault',
+            name: 'Cred 6',
+            url: 'www.google.com',
+            inputs: { vault_id: 'vault ID' },
+          },
+          {
+            id: 7,
+            credential_type: 5,
+            kind: 'vault',
+            name: 'Cred 7',
+            url: 'www.google.com',
+            inputs: {},
+          },
         ],
         count: 3,
       },
@@ -95,10 +160,22 @@ describe('<MultiCredentialsLookup />', () => {
       button.invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
-      { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
-      { id: 21, inputs: { vault_id: '1' }, kind: 'vault', name: 'Gatsby' },
-      { id: 23, kind: 'vault', name: 'Gatsby 2' },
-      { id: 8, kind: 'Machine', name: 'Gatsby' },
+      {
+        id: 1,
+        credential_type: 1,
+        kind: 'gce',
+        name: 'Foo',
+        url: 'www.google.com',
+      },
+      {
+        id: 21,
+        credential_type: 3,
+        kind: 'vault',
+        inputs: { vault_id: '1' },
+        name: 'Gatsby',
+      },
+      { id: 23, credential_type: 3, kind: 'vault', name: 'Gatsby 2' },
+      { id: 8, credential_type: 4, kind: 'Machine', name: 'Gatsby' },
     ]);
   });
 
@@ -136,7 +213,13 @@ describe('<MultiCredentialsLookup />', () => {
     wrapper.update();
     expect(CredentialsAPI.read).toHaveBeenCalledTimes(2);
     expect(wrapper.find('OptionsList').prop('options')).toEqual([
-      { id: 1, kind: 'cloud', name: 'New Cred', url: 'www.google.com' },
+      {
+        id: 1,
+        kind: 'cloud',
+        name: 'New Cred',
+        url: 'www.google.com',
+        label: 'New Cred',
+      },
     ]);
   });
 
@@ -165,6 +248,7 @@ describe('<MultiCredentialsLookup />', () => {
     act(() => {
       optionsList.invoke('selectItem')({
         id: 5,
+        credential_type: 4,
         kind: 'Machine',
         name: 'Cred 5',
         url: 'www.google.com',
@@ -175,12 +259,66 @@ describe('<MultiCredentialsLookup />', () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
-      { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
-      { id: 2, kind: 'ssh', name: 'Alex', url: 'www.google.com' },
-      { id: 21, inputs: { vault_id: '1' }, kind: 'vault', name: 'Gatsby' },
-      { id: 23, kind: 'vault', name: 'Gatsby 2' },
-      { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
+      {
+        id: 1,
+        credential_type: 1,
+        kind: 'gce',
+        name: 'Foo',
+        url: 'www.google.com',
+      },
+      {
+        id: 2,
+        credential_type: 2,
+        kind: 'ssh',
+        name: 'Alex',
+        url: 'www.google.com',
+      },
+      {
+        id: 21,
+        credential_type: 3,
+        kind: 'vault',
+        inputs: { vault_id: '1' },
+        name: 'Gatsby',
+      },
+      { id: 23, credential_type: 3, kind: 'vault', name: 'Gatsby 2' },
+      {
+        id: 5,
+        credential_type: 4,
+        kind: 'Machine',
+        name: 'Cred 5',
+        url: 'www.google.com',
+      },
     ]);
+  });
+
+  test('should properly render vault credential labels', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <MultiCredentialsLookup
+          value={credentials}
+          tooltip="This is credentials look up"
+          onChange={() => {}}
+          onError={() => {}}
+        />
+      );
+    });
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
+    await act(async () => {
+      searchButton.invoke('onClick')();
+    });
+    wrapper.update();
+    const typeSelect = wrapper.find('AnsibleSelect');
+    act(() => {
+      typeSelect.invoke('onChange')({}, 500);
+    });
+    wrapper.update();
+    const optionsList = wrapper.find('OptionsList');
+    expect(optionsList.prop('multiple')).toEqual(true);
+    expect(wrapper.find('CheckboxListItem[label="Cred 6 | vault ID"]'));
+    expect(wrapper.find('CheckboxListItem[label="Cred 7"]'));
   });
 
   test('should allow multiple vault credentials with no vault id', async () => {
@@ -212,10 +350,10 @@ describe('<MultiCredentialsLookup />', () => {
     expect(optionsList.prop('multiple')).toEqual(true);
     act(() => {
       optionsList.invoke('selectItem')({
-        id: 5,
+        id: 11,
+        credential_type: 3,
         kind: 'vault',
-        name: 'Cred 5',
-        url: 'www.google.com',
+        name: 'Vault',
       });
     });
     wrapper.update();
@@ -223,12 +361,30 @@ describe('<MultiCredentialsLookup />', () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
-      { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
-      { id: 2, kind: 'ssh', name: 'Alex', url: 'www.google.com' },
-      { id: 21, kind: 'vault', name: 'Gatsby', inputs: { vault_id: '1' } },
-      { id: 23, kind: 'vault', name: 'Gatsby 2' },
-      { id: 8, kind: 'Machine', name: 'Gatsby' },
-      { id: 5, kind: 'vault', name: 'Cred 5', url: 'www.google.com' },
+      {
+        id: 1,
+        credential_type: 1,
+        kind: 'gce',
+        name: 'Foo',
+        url: 'www.google.com',
+      },
+      {
+        id: 2,
+        credential_type: 2,
+        kind: 'ssh',
+        name: 'Alex',
+        url: 'www.google.com',
+      },
+      {
+        id: 21,
+        credential_type: 3,
+        kind: 'vault',
+        inputs: { vault_id: '1' },
+        name: 'Gatsby',
+      },
+      { id: 23, credential_type: 3, kind: 'vault', name: 'Gatsby 2' },
+      { id: 8, credential_type: 4, kind: 'Machine', name: 'Gatsby' },
+      { id: 11, credential_type: 3, kind: 'vault', name: 'Vault' },
     ]);
   });
 
@@ -261,11 +417,11 @@ describe('<MultiCredentialsLookup />', () => {
     expect(optionsList.prop('multiple')).toEqual(true);
     act(() => {
       optionsList.invoke('selectItem')({
-        id: 5,
+        id: 12,
+        credential_type: 3,
         kind: 'vault',
-        name: 'Cred 5',
-        url: 'www.google.com',
-        inputs: { vault_id: '2' },
+        name: 'Other Vault',
+        vault_id: '2',
       });
     });
     wrapper.update();
@@ -273,17 +429,35 @@ describe('<MultiCredentialsLookup />', () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
-      { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
-      { id: 2, kind: 'ssh', name: 'Alex', url: 'www.google.com' },
-      { id: 21, kind: 'vault', name: 'Gatsby', inputs: { vault_id: '1' } },
-      { id: 23, kind: 'vault', name: 'Gatsby 2' },
-      { id: 8, kind: 'Machine', name: 'Gatsby' },
       {
-        id: 5,
-        kind: 'vault',
-        name: 'Cred 5',
+        id: 1,
+        credential_type: 1,
+        kind: 'gce',
+        name: 'Foo',
         url: 'www.google.com',
-        inputs: { vault_id: '2' },
+      },
+      {
+        id: 2,
+        credential_type: 2,
+        kind: 'ssh',
+        name: 'Alex',
+        url: 'www.google.com',
+      },
+      {
+        id: 21,
+        credential_type: 3,
+        kind: 'vault',
+        inputs: { vault_id: '1' },
+        name: 'Gatsby',
+      },
+      { id: 23, credential_type: 3, kind: 'vault', name: 'Gatsby 2' },
+      { id: 8, credential_type: 4, kind: 'Machine', name: 'Gatsby' },
+      {
+        id: 12,
+        credential_type: 3,
+        kind: 'vault',
+        name: 'Other Vault',
+        vault_id: '2',
       },
     ]);
   });
@@ -317,10 +491,10 @@ describe('<MultiCredentialsLookup />', () => {
     expect(optionsList.prop('multiple')).toEqual(true);
     act(() => {
       optionsList.invoke('selectItem')({
-        id: 24,
+        id: 13,
+        credential_type: 3,
         kind: 'vault',
-        name: 'Cred 5',
-        url: 'www.google.com',
+        name: 'Vault Cred with Same Vault Id',
         inputs: { vault_id: '1' },
       });
     });
@@ -329,15 +503,27 @@ describe('<MultiCredentialsLookup />', () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
-      { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
-      { id: 2, kind: 'ssh', name: 'Alex', url: 'www.google.com' },
-      { id: 23, kind: 'vault', name: 'Gatsby 2' },
-      { id: 8, kind: 'Machine', name: 'Gatsby' },
       {
-        id: 24,
-        kind: 'vault',
-        name: 'Cred 5',
+        id: 1,
+        credential_type: 1,
+        kind: 'gce',
+        name: 'Foo',
         url: 'www.google.com',
+      },
+      {
+        id: 2,
+        credential_type: 2,
+        kind: 'ssh',
+        name: 'Alex',
+        url: 'www.google.com',
+      },
+      { id: 23, credential_type: 3, kind: 'vault', name: 'Gatsby 2' },
+      { id: 8, credential_type: 4, kind: 'Machine', name: 'Gatsby' },
+      {
+        id: 13,
+        credential_type: 3,
+        kind: 'vault',
+        name: 'Vault Cred with Same Vault Id',
         inputs: { vault_id: '1' },
       },
     ]);

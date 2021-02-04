@@ -85,7 +85,7 @@ If you're not using Docker for Mac, or Docker for Windows, you may need, or choo
 
 #### Frontend Development
 
-See [the ui development documentation](awx/ui/README.md).
+See [the ui development documentation](awx/ui_next/CONTRIBUTING.md).
 
 
 ### Build the environment
@@ -158,7 +158,7 @@ $ docker ps
 CONTAINER ID        IMAGE                                              COMMAND                  CREATED             STATUS              PORTS                                                                                                                                                              NAMES
 44251b476f98        gcr.io/ansible-tower-engineering/awx_devel:devel   "/entrypoint.sh /bin…"   27 seconds ago      Up 23 seconds       0.0.0.0:6899->6899/tcp, 0.0.0.0:7899-7999->7899-7999/tcp, 0.0.0.0:8013->8013/tcp, 0.0.0.0:8043->8043/tcp, 0.0.0.0:8080->8080/tcp, 22/tcp, 0.0.0.0:8888->8888/tcp   tools_awx_run_9e820694d57e
 40de380e3c2e        redis:latest                                       "docker-entrypoint.s…"   28 seconds ago      Up 26 seconds
-b66a506d3007        postgres:10                                        "docker-entrypoint.s…"   28 seconds ago      Up 26 seconds       0.0.0.0:5432->5432/tcp                                                                                                                                             tools_postgres_1
+b66a506d3007        postgres:12                                        "docker-entrypoint.s…"   28 seconds ago      Up 26 seconds       0.0.0.0:5432->5432/tcp                                                                                                                                             tools_postgres_1
 ```
 **NOTE**
 

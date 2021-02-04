@@ -5,7 +5,7 @@ import { RRule, rrulestr } from 'rrule';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Chip, Title, Button } from '@patternfly/react-core';
+import { Chip, Divider, Title, Button } from '@patternfly/react-core';
 import { Schedule } from '../../../types';
 import AlertModal from '../../AlertModal';
 import { CardBody, CardActionsRow } from '../../Card';
@@ -27,9 +27,19 @@ import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeMirrorInput';
 
+const PromptDivider = styled(Divider)`
+  margin-top: var(--pf-global--spacer--lg);
+  margin-bottom: var(--pf-global--spacer--lg);
+`;
+
 const PromptTitle = styled(Title)`
+  margin-top: 40px;
   --pf-c-title--m-md--FontWeight: 700;
   grid-column: 1 / -1;
+`;
+
+const PromptDetailList = styled(DetailList)`
+  padding: 0px 20px;
 `;
 
 function ScheduleDetail({ schedule, i18n }) {
@@ -41,6 +51,7 @@ function ScheduleDetail({ schedule, i18n }) {
     dtend,
     dtstart,
     extra_data,
+    inventory,
     job_tags,
     job_type,
     limit,
@@ -52,11 +63,20 @@ function ScheduleDetail({ schedule, i18n }) {
     skip_tags,
     summary_fields,
     timezone,
+    verbosity,
   } = schedule;
 
   const history = useHistory();
   const { pathname } = useLocation();
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
+
+  const VERBOSITY = {
+    0: i18n._(t`0 (Normal)`),
+    1: i18n._(t`1 (Verbose)`),
+    2: i18n._(t`2 (More Verbose)`),
+    3: i18n._(t`3 (Debug)`),
+    4: i18n._(t`4 (Connection Debug)`),
+  };
 
   const {
     request: deleteSchedule,
@@ -140,18 +160,34 @@ function ScheduleDetail({ schedule, i18n }) {
     survey_enabled,
   } = launchData || {};
 
+  const showCredentialsDetail =
+    ask_credential_on_launch && credentials.length > 0;
+  const showInventoryDetail = ask_inventory_on_launch && inventory;
+  const showVariablesDetail =
+    (ask_variables_on_launch || survey_enabled) &&
+    ((typeof extra_data === 'string' && extra_data !== '') ||
+      (typeof extra_data === 'object' && Object.keys(extra_data).length > 0));
+  const showTagsDetail = ask_tags_on_launch && job_tags && job_tags.length > 0;
+  const showSkipTagsDetail =
+    ask_skip_tags_on_launch && skip_tags && skip_tags.length > 0;
+  const showDiffModeDetail =
+    ask_diff_mode_on_launch && typeof diff_mode === 'boolean';
+  const showLimitDetail = ask_limit_on_launch && limit;
+  const showJobTypeDetail = ask_job_type_on_launch && job_type;
+  const showSCMBranchDetail = ask_scm_branch_on_launch && scm_branch;
+  const showVerbosityDetail = ask_verbosity_on_launch && VERBOSITY[verbosity];
+
   const showPromptedFields =
-    ask_credential_on_launch ||
-    ask_diff_mode_on_launch ||
-    ask_inventory_on_launch ||
-    ask_job_type_on_launch ||
-    ask_limit_on_launch ||
-    ask_scm_branch_on_launch ||
-    ask_skip_tags_on_launch ||
-    ask_tags_on_launch ||
-    ask_variables_on_launch ||
-    ask_verbosity_on_launch ||
-    survey_enabled;
+    showCredentialsDetail ||
+    showDiffModeDetail ||
+    showInventoryDetail ||
+    showJobTypeDetail ||
+    showLimitDetail ||
+    showSCMBranchDetail ||
+    showSkipTagsDetail ||
+    showTagsDetail ||
+    showVerbosityDetail ||
+    showVariablesDetail;
 
   if (isLoading) {
     return <ContentLoading />;
@@ -189,27 +225,34 @@ function ScheduleDetail({ schedule, i18n }) {
           date={modified}
           user={summary_fields.modified_by}
         />
-        {showPromptedFields && (
-          <>
-            <PromptTitle headingLevel="h2">
-              {i18n._(t`Prompted Fields`)}
-            </PromptTitle>
+      </DetailList>
+      {showPromptedFields && (
+        <>
+          <PromptTitle headingLevel="h2">
+            {i18n._(t`Prompted Values`)}
+          </PromptTitle>
+          <PromptDivider />
+          <PromptDetailList>
             {ask_job_type_on_launch && (
               <Detail label={i18n._(t`Job Type`)} value={job_type} />
             )}
-            {ask_inventory_on_launch && (
+            {showInventoryDetail && (
               <Detail
                 label={i18n._(t`Inventory`)}
                 value={
-                  <Link
-                    to={`/inventories/${
-                      summary_fields.inventory.kind === 'smart'
-                        ? 'smart_inventory'
-                        : 'inventory'
-                    }/${summary_fields.inventory.id}/details`}
-                  >
-                    {summary_fields.inventory.name}
-                  </Link>
+                  summary_fields?.inventory ? (
+                    <Link
+                      to={`/inventories/${
+                        summary_fields?.inventory?.kind === 'smart'
+                          ? 'smart_inventory'
+                          : 'inventory'
+                      }/${summary_fields?.inventory?.id}/details`}
+                    >
+                      {summary_fields?.inventory?.name}
+                    </Link>
+                  ) : (
+                    ' '
+                  )
                 }
               />
             )}
@@ -222,13 +265,19 @@ function ScheduleDetail({ schedule, i18n }) {
             {ask_limit_on_launch && (
               <Detail label={i18n._(t`Limit`)} value={limit} />
             )}
-            {ask_diff_mode_on_launch && typeof diff_mode === 'boolean' && (
+            {ask_verbosity_on_launch && (
+              <Detail
+                label={i18n._(t`Verbosity`)}
+                value={VERBOSITY[verbosity]}
+              />
+            )}
+            {showDiffModeDetail && (
               <Detail
                 label={i18n._(t`Show Changes`)}
                 value={diff_mode ? i18n._(t`On`) : i18n._(t`Off`)}
               />
             )}
-            {ask_credential_on_launch && (
+            {showCredentialsDetail && (
               <Detail
                 fullWidth
                 label={i18n._(t`Credentials`)}
@@ -241,7 +290,7 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            {ask_tags_on_launch && job_tags && job_tags.length > 0 && (
+            {showTagsDetail && (
               <Detail
                 fullWidth
                 label={i18n._(t`Job Tags`)}
@@ -259,7 +308,7 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            {ask_skip_tags_on_launch && skip_tags && skip_tags.length > 0 && (
+            {showSkipTagsDetail && (
               <Detail
                 fullWidth
                 label={i18n._(t`Skip Tags`)}
@@ -277,16 +326,16 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            {(ask_variables_on_launch || survey_enabled) && (
+            {showVariablesDetail && (
               <VariablesDetail
                 value={extra_data}
                 rows={4}
                 label={i18n._(t`Variables`)}
               />
             )}
-          </>
-        )}
-      </DetailList>
+          </PromptDetailList>
+        </>
+      )}
       <CardActionsRow>
         {summary_fields?.user_capabilities?.edit && (
           <Button

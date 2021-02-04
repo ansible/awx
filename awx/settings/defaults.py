@@ -116,7 +116,7 @@ LOGIN_URL = '/api/login/'
 
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should not be web-accessible.
-PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
+PROJECTS_ROOT = '/var/lib/awx/projects/'
 
 # Absolute filesystem path to the directory to host collections for
 # running inventory imports, isolated playbooks
@@ -125,10 +125,10 @@ AWX_ANSIBLE_COLLECTIONS_PATHS = os.path.join(BASE_DIR, 'vendor', 'awx_ansible_co
 # Absolute filesystem path to the directory for job status stdout (default for
 # development and tests, default for production defined in production.py). This
 # directory should not be web-accessible
-JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_output')
+JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 
 # Absolute filesystem path to the directory to store logs
-LOG_ROOT = os.path.join(BASE_DIR)
+LOG_ROOT = '/var/log/tower/'
 
 # The heartbeat file for the tower scheduler
 SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
@@ -196,9 +196,9 @@ LOCAL_STDOUT_EXPIRE_TIME = 2592000
 # events into the database
 JOB_EVENT_WORKERS = 4
 
-# The number of seconds (must be an integer) to buffer callback receiver bulk
+# The number of seconds to buffer callback receiver bulk
 # writes in memory before flushing via JobEvent.objects.bulk_create()
-JOB_EVENT_BUFFER_SECONDS = 1
+JOB_EVENT_BUFFER_SECONDS = .1
 
 # The interval at which callback receiver statistics should be
 # recorded
@@ -248,6 +248,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'awx.ui.context_processors.csp',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
@@ -343,6 +344,9 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.github.GithubOrganizationOAuth2',
     'social_core.backends.github.GithubTeamOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
@@ -519,6 +523,20 @@ SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
 SOCIAL_AUTH_GITHUB_TEAM_ID = ''
 SOCIAL_AUTH_GITHUB_TEAM_SCOPE = ['user:email', 'read:org']
 
+SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_SCOPE = ['user:email', 'read:org']
+
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SCOPE = ['user:email', 'read:org']
+
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SCOPE = ['user:email', 'read:org']
+
 SOCIAL_AUTH_AZUREAD_OAUTH2_KEY = ''
 SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET = ''
 
@@ -661,7 +679,7 @@ INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
 # ----------------
 EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
-EC2_INSTANCE_ID_VAR = 'ec2_id'
+EC2_INSTANCE_ID_VAR = 'instance_id'
 EC2_EXCLUDE_EMPTY_GROUPS = True
 
 # ------------
@@ -769,6 +787,7 @@ LOG_AGGREGATOR_LEVEL = 'INFO'
 LOG_AGGREGATOR_MAX_DISK_USAGE_GB = 1
 LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
+LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
 
 # The number of retry attempts for websocket session establishment
 # If you're encountering issues establishing websockets in clustered Tower,
@@ -852,38 +871,30 @@ LOGGING = {
         },
         'tower_warnings': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'tower.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'callback_receiver': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'dispatcher': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'dispatcher.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'dispatcher',
         },
         'wsbroadcast': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'wsbroadcast.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'celery.beat': {
@@ -897,38 +908,36 @@ LOGGING = {
         },
         'task_system': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'task_system.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'management_playbooks': {
             'level': 'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
+            'class':'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'management_playbooks.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'system_tracking_migrations': {
             'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
+            'class':'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'tower_system_tracking_migrations.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'rbac_migrations': {
             'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
+            'class':'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'tower_rbac_migrations.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
+            'formatter':'simple',
+        },
+        'isolated_manager': {
+            'level': 'WARNING',
+            'class':'logging.handlers.WatchedFileHandler',
+            'filename': os.path.join(LOG_ROOT, 'isolated_manager.log'),
             'formatter':'simple',
         },
     },
@@ -979,6 +988,11 @@ LOGGING = {
         },
         'awx.main.wsbroadcast': {
             'handlers': ['wsbroadcast'],
+        },
+        'awx.isolated.manager': {
+            'level': 'WARNING',
+            'handlers': ['console', 'file', 'isolated_manager'],
+            'propagate': True
         },
         'awx.isolated.manager.playbooks': {
             'handlers': ['management_playbooks'],

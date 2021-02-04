@@ -31,35 +31,31 @@ const ToolbarItem = styled(PFToolbarItem)`
 
 // TODO: Recommend renaming this component to avoid confusion
 // with ExpandingContainer
-class ExpandCollapse extends React.Component {
-  render() {
-    const { isCompact, onCompact, onExpand, i18n } = this.props;
-
-    return (
-      <Fragment>
-        <ToolbarItem>
-          <Button
-            variant="plain"
-            aria-label={i18n._(t`Collapse`)}
-            onClick={onCompact}
-            isActive={isCompact}
-          >
-            <BarsIcon />
-          </Button>
-        </ToolbarItem>
-        <ToolbarItem>
-          <Button
-            variant="plain"
-            aria-label={i18n._(t`Expand`)}
-            onClick={onExpand}
-            isActive={!isCompact}
-          >
-            <EqualsIcon />
-          </Button>
-        </ToolbarItem>
-      </Fragment>
-    );
-  }
+function ExpandCollapse({ isCompact, onCompact, onExpand, i18n }) {
+  return (
+    <Fragment>
+      <ToolbarItem>
+        <Button
+          variant="plain"
+          aria-label={i18n._(t`Collapse`)}
+          onClick={onCompact}
+          isActive={isCompact}
+        >
+          <BarsIcon />
+        </Button>
+      </ToolbarItem>
+      <ToolbarItem>
+        <Button
+          variant="plain"
+          aria-label={i18n._(t`Expand`)}
+          onClick={onExpand}
+          isActive={!isCompact}
+        >
+          <EqualsIcon />
+        </Button>
+      </ToolbarItem>
+    </Fragment>
+  );
 }
 
 ExpandCollapse.propTypes = {

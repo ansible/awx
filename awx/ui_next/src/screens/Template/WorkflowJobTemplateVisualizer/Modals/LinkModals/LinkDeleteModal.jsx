@@ -14,7 +14,7 @@ function LinkDeleteModal({ i18n }) {
   return (
     <AlertModal
       variant="danger"
-      title="Remove Link"
+      title={i18n._(t`Remove Link`)}
       isOpen={linkToDelete}
       onClose={() => dispatch({ type: 'SET_LINK_TO_DELETE', value: null })}
       actions={[

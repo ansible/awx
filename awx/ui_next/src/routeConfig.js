@@ -1,5 +1,6 @@
 import { t } from '@lingui/macro';
 
+import ActivityStream from './screens/ActivityStream';
 import Applications from './screens/Application';
 import Credentials from './screens/Credential';
 import CredentialTypes from './screens/CredentialType';
@@ -17,6 +18,7 @@ import Settings from './screens/Setting';
 import Teams from './screens/Team';
 import Templates from './screens/Template';
 import Users from './screens/User';
+import WorkflowApprovals from './screens/WorkflowApproval';
 
 // Ideally, this should just be a regular object that we export, but we
 // need the i18n. When lingui3 arrives, we will be able to import i18n
@@ -42,6 +44,16 @@ function getRouteConfig(i18n) {
           title: i18n._(t`Schedules`),
           path: '/schedules',
           screen: Schedules,
+        },
+        {
+          title: i18n._(t`Activity Stream`),
+          path: '/activity_stream',
+          screen: ActivityStream,
+        },
+        {
+          title: i18n._(t`Workflow Approvals`),
+          path: '/workflow_approvals',
+          screen: WorkflowApprovals,
         },
       ],
     },

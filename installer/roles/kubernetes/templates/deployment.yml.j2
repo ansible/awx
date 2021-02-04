@@ -7,7 +7,7 @@ metadata:
 {% if kubernetes_service_account_annotations is defined %}
   annotations:
 {% for key, value in kubernetes_service_account_annotations.items() %}
-    {{ key }}: {{ value }}
+    {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
 {% if kubernetes_image_pull_secrets is defined %}
@@ -88,7 +88,7 @@ metadata:
 {% if kubernetes_deployment_annotations is defined %}
   annotations:
 {% for key, value in kubernetes_deployment_annotations.items() %}
-    {{ key }}: {{ value }}
+    {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
 {% if openshift_host is defined %}
@@ -107,7 +107,7 @@ spec:
 {% if kubernetes_pod_annotations is defined %}
       annotations:
 {% for key, value in kubernetes_pod_annotations.items() %}
-        {{ key }}: {{ value }}
+        {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
       labels:
@@ -116,8 +116,6 @@ spec:
         app: {{ kubernetes_deployment_name }}
     spec:
       serviceAccountName: {{ kubernetes_serviceaccount_name }}
-      securityContext:
-        fsGroup: 0
       terminationGracePeriodSeconds: 10
 {% if custom_venvs is defined %}
 {% set trusted_hosts = "" %}
@@ -223,16 +221,6 @@ spec:
               mountPath: "/etc/tower/conf.d/"
               readOnly: true
 
-            - name: {{ kubernetes_deployment_name }}-launch-awx-web
-              mountPath: "/usr/bin/launch_awx.sh"
-              subPath: "launch_awx.sh"
-              readOnly: true
-
-            - name: {{ kubernetes_deployment_name }}-launch-awx-task
-              mountPath: "/usr/bin/launch_awx_task.sh"
-              subPath: "launch_awx_task.sh"
-              readOnly: true
-
             - name: {{ kubernetes_deployment_name }}-supervisor-web-config
               mountPath: "/etc/supervisord.conf"
               subPath: supervisor.conf
@@ -304,16 +292,6 @@ spec:
 
             - name: "{{ kubernetes_deployment_name }}-application-credentials"
               mountPath: "/etc/tower/conf.d/"
-              readOnly: true
-
-            - name: {{ kubernetes_deployment_name }}-launch-awx-web
-              mountPath: "/usr/bin/launch_awx.sh"
-              subPath: "launch_awx.sh"
-              readOnly: true
-
-            - name: {{ kubernetes_deployment_name }}-launch-awx-task
-              mountPath: "/usr/bin/launch_awx_task.sh"
-              subPath: "launch_awx_task.sh"
               readOnly: true
 
             - name: {{ kubernetes_deployment_name }}-supervisor-web-config
@@ -470,22 +448,6 @@ spec:
               - key: environment_sh
                 path: 'environment.sh'
 
-        - name: {{ kubernetes_deployment_name }}-launch-awx-web
-          configMap:
-            name: {{ kubernetes_deployment_name }}-launch-awx
-            items:
-              - key: launch-awx-web
-                path: 'launch_awx.sh'
-            defaultMode: 0755
-
-        - name: {{ kubernetes_deployment_name }}-launch-awx-task
-          configMap:
-            name: {{ kubernetes_deployment_name }}-launch-awx
-            items:
-              - key: launch-awx-task
-                path: 'launch_awx_task.sh'
-            defaultMode: 0755
-
         - name: {{ kubernetes_deployment_name }}-supervisor-web-config
           configMap:
             name: {{ kubernetes_deployment_name }}-supervisor-config
@@ -518,6 +480,12 @@ metadata:
   namespace: {{ kubernetes_namespace }}
   labels:
     name: {{ kubernetes_deployment_name }}-web-svc
+{% if kubernetes_service_annotations is defined %}
+  annotations:
+{% for key, value in kubernetes_service_annotations.items() %}
+    {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
 spec:
   type: {{ kubernetes_web_svc_type }}
   ports:
@@ -540,18 +508,12 @@ metadata:
 {% if kubernetes_ingress_annotations is defined %}
   annotations:
 {% for key, value in kubernetes_ingress_annotations.items() %}
-    {{ key }}: {{ value }}
+    {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
 
 spec:
 {% if kubernetes_ingress_hostname is defined %}
-{% if kubernetes_ingress_tls_secret is defined %}
-  tls:
-  - hosts:
-    - {{ kubernetes_ingress_hostname }}
-    secretName: {{ kubernetes_ingress_tls_secret }}
-{% endif %}
   rules:
   - host: {{ kubernetes_ingress_hostname }}
     http:
@@ -561,10 +523,15 @@ spec:
           serviceName: {{ kubernetes_deployment_name }}-web-svc
           servicePort: 80
 {% else %}
-spec:
   backend:
     serviceName: {{ kubernetes_deployment_name }}-web-svc
     servicePort: 80
+{% endif %}
+{% if kubernetes_ingress_tls_secret is defined %}
+  tls:
+  - hosts:
+    - {{ kubernetes_ingress_hostname }}
+    secretName: {{ kubernetes_ingress_tls_secret }}
 {% endif %}
 {% endif %}
 {% if openshift_host is defined %}

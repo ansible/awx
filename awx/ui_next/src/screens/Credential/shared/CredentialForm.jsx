@@ -22,10 +22,24 @@ function CredentialFormFields({
   initialValues,
 }) {
   const { setFieldValue } = useFormikContext();
-  const [orgField, orgMeta, orgHelpers] = useField('organization');
+
   const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
     name: 'credential_type',
     validate: required(i18n._(t`Select a value for this field`), i18n),
+  });
+
+  const isGalaxyCredential =
+    !!credTypeField.value &&
+    credentialTypes[credTypeField.value].kind === 'galaxy';
+
+  const [orgField, orgMeta, orgHelpers] = useField({
+    name: 'organization',
+    validate:
+      isGalaxyCredential &&
+      required(
+        i18n._(t`Galaxy credentials must be owned by an Organization.`),
+        i18n
+      ),
   });
 
   const credentialTypeOptions = Object.keys(credentialTypes)
@@ -108,6 +122,7 @@ function CredentialFormFields({
         value={orgField.value}
         touched={orgMeta.touched}
         error={orgMeta.error}
+        required={isGalaxyCredential}
       />
       <FormGroup
         fieldId="credential-Type"

@@ -200,7 +200,7 @@ describe('<OrganizationForm />', () => {
         .find('FormSelectOption')
         .first()
         .prop('value')
-    ).toEqual('/venv/ansible/');
+    ).toEqual('/var/lib/awx/venv/ansible/');
   });
 
   test('onSubmit associates and disassociates instance groups', async () => {

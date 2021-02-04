@@ -187,6 +187,26 @@ class AuthenticationBackendsField(fields.StringListField):
             'SOCIAL_AUTH_GITHUB_TEAM_SECRET',
             'SOCIAL_AUTH_GITHUB_TEAM_ID',
         ]),
+        ('social_core.backends.github_enterprise.GithubEnterpriseOAuth2', [
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET',
+        ]),
+        ('social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2', [
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME',
+        ]),
+        ('social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2', [
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID',
+        ]),
         ('social_core.backends.azuread.AzureADOAuth2', [
             'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY',
             'SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET',
@@ -445,7 +465,8 @@ class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
 
     default_error_messages = {
         'type_error': _('Expected an instance of LDAPGroupType but got {input_type} instead.'),
-        'missing_parameters': _('Missing required parameters in {dependency}.')
+        'missing_parameters': _('Missing required parameters in {dependency}.'),
+        'invalid_parameters': _('Invalid group_type parameters. Expected instance of dict but got {parameters_type} instead.')
     }
 
     def __init__(self, choices=None, **kwargs):
@@ -465,7 +486,6 @@ class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
         if not data:
             return None
 
-        params = self.get_depends_on() or {}
         cls = find_class_in_modules(data)
         if not cls:
             return None
@@ -475,8 +495,16 @@ class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
         # Backwords compatability. Before AUTH_LDAP_GROUP_TYPE_PARAMS existed
         # MemberDNGroupType was the only group type, of the underlying lib, that
         # took a parameter.
+        params = self.get_depends_on() or {}
         params_sanitized = dict()
-        for attr in inspect.getargspec(cls.__init__).args[1:]:
+
+        cls_args = inspect.getargspec(cls.__init__).args[1:]
+
+        if cls_args:
+            if not isinstance(params, dict):
+                self.fail('invalid_parameters', parameters_type=type(params))
+
+        for attr in cls_args:
             if attr in params:
                 params_sanitized[attr] = params[attr]
 

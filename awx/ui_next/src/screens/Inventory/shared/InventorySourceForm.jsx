@@ -55,7 +55,7 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
   const [venvField] = useField('custom_virtualenv');
   const defaultVenv = {
     label: i18n._(t`Use Default Ansible Environment`),
-    value: '/venv/ansible/',
+    value: '/var/lib/awx/venv/ansible/',
     key: 'default',
   };
 

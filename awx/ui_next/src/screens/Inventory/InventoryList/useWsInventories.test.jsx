@@ -59,7 +59,7 @@ describe('useWsInventories hook', () => {
 
   test('should establish websocket connection', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const inventories = [{ id: 1 }];
     await act(async () => {
@@ -83,7 +83,7 @@ describe('useWsInventories hook', () => {
 
   test('should update inventory sync status', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const inventories = [{ id: 1 }];
     await act(async () => {
@@ -121,7 +121,7 @@ describe('useWsInventories hook', () => {
 
   test('should fetch fresh inventory after sync runs', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
     const inventories = [{ id: 1 }];
     const fetchInventories = jest.fn(() => []);
     const fetchInventoriesById = jest.fn(() => []);
@@ -152,7 +152,7 @@ describe('useWsInventories hook', () => {
 
   test('should update inventory pending_deletion', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
 
     const inventories = [{ id: 1, pending_deletion: false }];
     await act(async () => {
@@ -190,7 +190,7 @@ describe('useWsInventories hook', () => {
 
   test('should refetch inventories after an inventory is deleted', async () => {
     global.document.cookie = 'csrftoken=abc123';
-    const mockServer = new WS('wss://localhost/websocket/');
+    const mockServer = new WS('ws://localhost/websocket/');
     const inventories = [{ id: 1 }, { id: 2 }];
     const fetchInventories = jest.fn(() => []);
     const fetchInventoriesById = jest.fn(() => []);

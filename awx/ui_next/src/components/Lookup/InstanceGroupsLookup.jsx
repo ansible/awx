@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
-import { arrayOf, string, func, object, bool } from 'prop-types';
+import { arrayOf, string, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { InstanceGroupsAPI } from '../../api';
+import { InstanceGroup } from '../../types';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import Popover from '../Popover';
 import OptionsList from '../OptionsList';
@@ -12,7 +13,7 @@ import useRequest from '../../util/useRequest';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
-const QS_CONFIG = getQSConfig('instance_groups', {
+const QS_CONFIG = getQSConfig('instance-groups', {
   page: 1,
   page_size: 5,
   order_by: 'name',
@@ -120,7 +121,7 @@ function InstanceGroupsLookup(props) {
 }
 
 InstanceGroupsLookup.propTypes = {
-  value: arrayOf(object).isRequired,
+  value: arrayOf(InstanceGroup).isRequired,
   tooltip: string,
   onChange: func.isRequired,
   className: string,

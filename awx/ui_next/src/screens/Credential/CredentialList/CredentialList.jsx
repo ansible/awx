@@ -26,7 +26,13 @@ function CredentialList({ i18n }) {
   const location = useLocation();
 
   const {
-    result: { credentials, credentialCount, actions },
+    result: {
+      credentials,
+      credentialCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchCredentials,
@@ -37,16 +43,29 @@ function CredentialList({ i18n }) {
         CredentialsAPI.read(params),
         CredentialsAPI.readOptions(),
       ]);
+      const searchKeys = Object.keys(
+        credActions.data.actions?.GET || {}
+      ).filter(key => credActions.data.actions?.GET[key].filterable);
+      const item = searchKeys.indexOf('type');
+      if (item) {
+        searchKeys[item] = 'credential_type__kind';
+      }
       return {
         credentials: creds.data.results,
         credentialCount: creds.data.count,
         actions: credActions.data.actions,
+        relatedSearchableKeys: (
+          credActions?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: searchKeys,
       };
     }, [location]),
     {
       credentials: [],
       credentialCount: 0,
       actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -102,6 +121,8 @@ function CredentialList({ i18n }) {
           itemCount={credentialCount}
           qsConfig={QS_CONFIG}
           onRowClick={handleSelect}
+          toolbarSearchableKeys={searchableKeys}
+          toolbarRelatedSearchableKeys={relatedSearchableKeys}
           toolbarSearchColumns={[
             {
               name: i18n._(t`Name`),

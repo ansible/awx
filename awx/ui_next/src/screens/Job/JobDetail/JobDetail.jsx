@@ -7,7 +7,12 @@ import { Button, Chip, Label } from '@patternfly/react-core';
 import styled from 'styled-components';
 
 import AlertModal from '../../../components/AlertModal';
-import { DetailList, Detail } from '../../../components/DetailList';
+import {
+  DetailList,
+  Detail,
+  UserDateDetail,
+  LaunchedByDetail,
+} from '../../../components/DetailList';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ChipGroup from '../../../components/ChipGroup';
 import CredentialChip from '../../../components/CredentialChip';
@@ -49,37 +54,10 @@ const VERBOSITY = {
   4: '4 (Connection Debug)',
 };
 
-const getLaunchedByDetails = ({ summary_fields = {}, related = {} }) => {
-  const {
-    created_by: createdBy,
-    job_template: jobTemplate,
-    schedule,
-  } = summary_fields;
-  const { schedule: relatedSchedule } = related;
-
-  if (!createdBy && !schedule) {
-    return null;
-  }
-
-  let link;
-  let value;
-
-  if (createdBy) {
-    link = `/users/${createdBy.id}`;
-    value = createdBy.username;
-  } else if (relatedSchedule && jobTemplate) {
-    link = `/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
-    value = schedule.name;
-  } else {
-    link = null;
-    value = schedule.name;
-  }
-
-  return { link, value };
-};
-
 function JobDetail({ job, i18n }) {
   const {
+    created_by,
+    credential,
     credentials,
     instance_group: instanceGroup,
     inventory,
@@ -87,12 +65,19 @@ function JobDetail({ job, i18n }) {
     workflow_job_template: workflowJobTemplate,
     labels,
     project,
+    source_workflow_job,
   } = job.summary_fields;
   const [errorMsg, setErrorMsg] = useState();
   const history = useHistory();
 
-  const { value: launchedByValue, link: launchedByLink } =
-    getLaunchedByDetails(job) || {};
+  const jobTypes = {
+    project_update: i18n._(t`Source Control Update`),
+    inventory_update: i18n._(t`Inventory Sync`),
+    job: i18n._(t`Playbook Run`),
+    ad_hoc_command: i18n._(t`Command`),
+    management_job: i18n._(t`Management Job`),
+    workflow_job: i18n._(t`Workflow Job`),
+  };
 
   const deleteJob = async () => {
     try {
@@ -121,7 +106,7 @@ function JobDetail({ job, i18n }) {
     }
   };
 
-  const isIsolatedInstanceGroup = item => {
+  const buildInstanceGroupLink = item => {
     if (item.is_isolated) {
       return (
         <>
@@ -137,16 +122,26 @@ function JobDetail({ job, i18n }) {
     return <Link to={`/instance_groups/${item.id}`}>{item.name}</Link>;
   };
 
+  const buildContainerGroupLink = item => {
+    return (
+      <Link to={`/instance_groups/container_group/${item.id}`}>
+        {item.name}
+      </Link>
+    );
+  };
+
   return (
     <CardBody>
       <DetailList>
-        {/* TODO: hookup status to websockets */}
         <Detail
+          fullWidth={Boolean(job.job_explanation)}
           label={i18n._(t`Status`)}
           value={
             <StatusDetailValue>
               {job.status && <StatusIcon status={job.status} />}
-              {toTitleCase(job.status)}
+              {job.job_explanation
+                ? job.job_explanation
+                : toTitleCase(job.status)}
             </StatusDetailValue>
           }
         />
@@ -180,17 +175,18 @@ function JobDetail({ job, i18n }) {
             }
           />
         )}
-        <Detail label={i18n._(t`Job Type`)} value={toTitleCase(job.job_type)} />
-        <Detail
-          label={i18n._(t`Launched By`)}
-          value={
-            launchedByLink ? (
-              <Link to={`${launchedByLink}`}>{launchedByValue}</Link>
-            ) : (
-              launchedByValue
-            )
-          }
-        />
+        {source_workflow_job && (
+          <Detail
+            label={i18n._(t`Source Workflow Job`)}
+            value={
+              <Link to={`/jobs/workflow/${source_workflow_job.id}`}>
+                {source_workflow_job.id} - {source_workflow_job.name}
+              </Link>
+            }
+          />
+        )}
+        <Detail label={i18n._(t`Job Type`)} value={jobTypes[job.type]} />
+        <LaunchedByDetail job={job} i18n={i18n} />
         {inventory && (
           <Detail
             label={i18n._(t`Inventory`)}
@@ -224,10 +220,16 @@ function JobDetail({ job, i18n }) {
         <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[job.verbosity]} />
         <Detail label={i18n._(t`Environment`)} value={job.custom_virtualenv} />
         <Detail label={i18n._(t`Execution Node`)} value={job.execution_node} />
-        {instanceGroup && (
+        {instanceGroup && !instanceGroup?.is_containerized && (
           <Detail
             label={i18n._(t`Instance Group`)}
-            value={isIsolatedInstanceGroup(instanceGroup)}
+            value={buildInstanceGroupLink(instanceGroup)}
+          />
+        )}
+        {instanceGroup && instanceGroup?.is_containerized && (
+          <Detail
+            label={i18n._(t`Container Group`)}
+            value={buildContainerGroupLink(instanceGroup)}
           />
         )}
         {typeof job.job_slice_number === 'number' &&
@@ -237,6 +239,20 @@ function JobDetail({ job, i18n }) {
               value={`${job.job_slice_number}/${job.job_slice_count}`}
             />
           )}
+        {credential && (
+          <Detail
+            label={i18n._(t`Machine Credential`)}
+            value={
+              <ChipGroup numChips={5} totalChips={1}>
+                <CredentialChip
+                  key={credential.id}
+                  credential={credential}
+                  isReadOnly
+                />
+              </ChipGroup>
+            }
+          />
+        )}
         {credentials && credentials.length > 0 && (
           <Detail
             fullWidth
@@ -265,6 +281,12 @@ function JobDetail({ job, i18n }) {
             }
           />
         )}
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={job.created}
+          user={created_by}
+        />
+        <UserDateDetail label={i18n._(t`Last Modified`)} date={job.modified} />
       </DetailList>
       {job.extra_vars && (
         <VariablesInput

@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import {
+  Redirect,
+  useHistory,
+  useLocation,
+  useRouteMatch,
+} from 'react-router-dom';
 import ContentLoading from '../../../components/ContentLoading';
 import { CardBody } from '../../../components/Card';
 import SurveyQuestionForm from './SurveyQuestionForm';
@@ -8,12 +13,23 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
   const [formError, setFormError] = useState(null);
   const history = useHistory();
   const match = useRouteMatch();
+  const { search } = useLocation();
+  const queryParams = new URLSearchParams(search);
+  const questionVariable = queryParams.get('question_variable');
 
   if (!survey) {
     return <ContentLoading />;
   }
 
-  const question = survey.spec.find(q => q.variable === match.params.variable);
+  const question = survey.spec.find(q => q.variable === questionVariable);
+
+  if (!question) {
+    return (
+      <Redirect
+        to={`/templates/${match.params.templateType}/${match.params.id}/survey`}
+      />
+    );
+  }
 
   const navigateToList = () => {
     const index = match.url.indexOf('/edit');
@@ -34,7 +50,7 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
         return;
       }
       const questionIndex = survey.spec.findIndex(
-        q => q.variable === match.params.variable
+        q => q.variable === questionVariable
       );
       if (questionIndex === -1) {
         throw new Error('Question not found in spec');

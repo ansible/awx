@@ -6,7 +6,7 @@ from collections import OrderedDict
 from django.db.models.deletion import Collector, SET_NULL, CASCADE
 from django.core.management import call_command
 
-from awx.main.management.commands.deletion import AWXCollector
+from awx.main.utils.deletion import AWXCollector
 from awx.main.models import (
     JobTemplate, User, Job, JobEvent, Notification,
     WorkflowJobNode, JobHostSummary

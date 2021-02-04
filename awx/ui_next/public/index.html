@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <% if (process.env.NODE_ENV === 'production') { %>
+      <script nonce="{{ csp_nonce }}" type="text/javascript">
+        window.NONCE_ID = '{{ csp_nonce }}';
+      </script>
+      <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:;"
+      />
+    <% } %>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
@@ -12,6 +21,10 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="app" style="height: 100%"></div>
+    <% if (process.env.NODE_ENV === 'production') { %>
+      <style nonce="{{ csp_nonce }}">.app{height: 100%;}</style><div id="app" class="app"></div>
+    <% } else { %>
+      <div id="app" style="height: 100%"></div>
+    <% } %>
   </body>
 </html>

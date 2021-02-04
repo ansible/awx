@@ -4,7 +4,6 @@ The following lists the expected format and details of our rrules:
 * DTSTART is expected to be in UTC
 * INTERVAL is required
 * SECONDLY is not supported
-* TZID is not supported
 * RRULE must precede the rule statements
 * BYDAY is supported but not BYDAY with a numerical prefix
 * BYYEARDAY and BYWEEKNO are not supported

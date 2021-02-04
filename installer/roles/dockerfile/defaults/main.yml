@@ -1,0 +1,6 @@
+---
+build_dev: false
+kube_dev: false
+dockerfile_dest: '..'
+dockerfile_name: 'Dockerfile'
+template_dest: '_build'

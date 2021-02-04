@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -17,95 +17,57 @@ const readTeams = async queryParams => TeamsAPI.read(queryParams);
 
 const readTeamsOptions = async () => TeamsAPI.readOptions();
 
-class AddResourceRole extends React.Component {
-  constructor(props) {
-    super(props);
+function AddResourceRole({ onSave, onClose, roles, i18n, resource }) {
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [selectedResourceRows, setSelectedResourceRows] = useState([]);
+  const [selectedRoleRows, setSelectedRoleRows] = useState([]);
+  const [currentStepId, setCurrentStepId] = useState(1);
+  const [maxEnabledStep, setMaxEnabledStep] = useState(1);
 
-    this.state = {
-      selectedResource: null,
-      selectedResourceRows: [],
-      selectedRoleRows: [],
-      currentStepId: 1,
-      maxEnabledStep: 1,
-    };
-
-    this.handleResourceCheckboxClick = this.handleResourceCheckboxClick.bind(
-      this
-    );
-    this.handleResourceSelect = this.handleResourceSelect.bind(this);
-    this.handleRoleCheckboxClick = this.handleRoleCheckboxClick.bind(this);
-    this.handleWizardNext = this.handleWizardNext.bind(this);
-    this.handleWizardSave = this.handleWizardSave.bind(this);
-    this.handleWizardGoToStep = this.handleWizardGoToStep.bind(this);
-  }
-
-  handleResourceCheckboxClick(user) {
-    const { selectedResourceRows, currentStepId } = this.state;
-
+  const handleResourceCheckboxClick = user => {
     const selectedIndex = selectedResourceRows.findIndex(
       selectedRow => selectedRow.id === user.id
     );
-
     if (selectedIndex > -1) {
       selectedResourceRows.splice(selectedIndex, 1);
-      const stateToUpdate = { selectedResourceRows };
       if (selectedResourceRows.length === 0) {
-        stateToUpdate.maxEnabledStep = currentStepId;
+        setMaxEnabledStep(currentStepId);
       }
-      this.setState(stateToUpdate);
+      setSelectedRoleRows(selectedResourceRows);
     } else {
-      this.setState(prevState => ({
-        selectedResourceRows: [...prevState.selectedResourceRows, user],
-      }));
+      setSelectedResourceRows([...selectedResourceRows, user]);
     }
-  }
+  };
 
-  handleRoleCheckboxClick(role) {
-    const { selectedRoleRows } = this.state;
-
+  const handleRoleCheckboxClick = role => {
     const selectedIndex = selectedRoleRows.findIndex(
       selectedRow => selectedRow.id === role.id
     );
 
     if (selectedIndex > -1) {
       selectedRoleRows.splice(selectedIndex, 1);
-      this.setState({ selectedRoleRows });
+      setSelectedRoleRows(selectedRoleRows);
     } else {
-      this.setState(prevState => ({
-        selectedRoleRows: [...prevState.selectedRoleRows, role],
-      }));
+      setSelectedRoleRows([...selectedRoleRows, role]);
     }
-  }
+  };
 
-  handleResourceSelect(resourceType) {
-    this.setState({
-      selectedResource: resourceType,
-      selectedResourceRows: [],
-      selectedRoleRows: [],
-    });
-  }
+  const handleResourceSelect = resourceType => {
+    setSelectedResource(resourceType);
+    setSelectedResourceRows([]);
+    setSelectedRoleRows([]);
+  };
 
-  handleWizardNext(step) {
-    this.setState({
-      currentStepId: step.id,
-      maxEnabledStep: step.id,
-    });
-  }
+  const handleWizardNext = step => {
+    setCurrentStepId(step.id);
+    setMaxEnabledStep(step.id);
+  };
 
-  handleWizardGoToStep(step) {
-    this.setState({
-      currentStepId: step.id,
-    });
-  }
+  const handleWizardGoToStep = step => {
+    setCurrentStepId(step.id);
+  };
 
-  async handleWizardSave() {
-    const { onSave } = this.props;
-    const {
-      selectedResourceRows,
-      selectedRoleRows,
-      selectedResource,
-    } = this.state;
-
+  const handleWizardSave = async () => {
     try {
       const roleRequests = [];
 
@@ -134,205 +96,198 @@ class AddResourceRole extends React.Component {
     } catch (err) {
       // TODO: handle this error
     }
+  };
+
+  // Object roles can be user only, so we remove them when
+  // showing role choices for team access
+  const selectableRoles = { ...roles };
+  if (selectedResource === 'teams') {
+    Object.keys(roles).forEach(key => {
+      if (selectableRoles[key].user_only) {
+        delete selectableRoles[key];
+      }
+    });
   }
 
-  render() {
-    const {
-      selectedResource,
-      selectedResourceRows,
-      selectedRoleRows,
-      currentStepId,
-      maxEnabledStep,
-    } = this.state;
-    const { onClose, roles, i18n } = this.props;
+  const userSearchColumns = [
+    {
+      name: i18n._(t`Username`),
+      key: 'username__icontains',
+      isDefault: true,
+    },
+    {
+      name: i18n._(t`First Name`),
+      key: 'first_name__icontains',
+    },
+    {
+      name: i18n._(t`Last Name`),
+      key: 'last_name__icontains',
+    },
+  ];
+  const userSortColumns = [
+    {
+      name: i18n._(t`Username`),
+      key: 'username',
+    },
+    {
+      name: i18n._(t`First Name`),
+      key: 'first_name',
+    },
+    {
+      name: i18n._(t`Last Name`),
+      key: 'last_name',
+    },
+  ];
+  const teamSearchColumns = [
+    {
+      name: i18n._(t`Name`),
+      key: 'name',
+      isDefault: true,
+    },
+    {
+      name: i18n._(t`Created By (Username)`),
+      key: 'created_by__username',
+    },
+    {
+      name: i18n._(t`Modified By (Username)`),
+      key: 'modified_by__username',
+    },
+  ];
 
-    // Object roles can be user only, so we remove them when
-    // showing role choices for team access
-    const selectableRoles = { ...roles };
-    if (selectedResource === 'teams') {
-      Object.keys(roles).forEach(key => {
-        if (selectableRoles[key].user_only) {
-          delete selectableRoles[key];
-        }
-      });
-    }
+  const teamSortColumns = [
+    {
+      name: i18n._(t`Name`),
+      key: 'name',
+    },
+  ];
 
-    const userSearchColumns = [
-      {
-        name: i18n._(t`Username`),
-        key: 'username__icontains',
-        isDefault: true,
-      },
-      {
-        name: i18n._(t`First Name`),
-        key: 'first_name__icontains',
-      },
-      {
-        name: i18n._(t`Last Name`),
-        key: 'last_name__icontains',
-      },
-    ];
+  let wizardTitle = '';
 
-    const userSortColumns = [
-      {
-        name: i18n._(t`Username`),
-        key: 'username',
-      },
-      {
-        name: i18n._(t`First Name`),
-        key: 'first_name',
-      },
-      {
-        name: i18n._(t`Last Name`),
-        key: 'last_name',
-      },
-    ];
+  switch (selectedResource) {
+    case 'users':
+      wizardTitle = i18n._(t`Add User Roles`);
+      break;
+    case 'teams':
+      wizardTitle = i18n._(t`Add Team Roles`);
+      break;
+    default:
+      wizardTitle = i18n._(t`Add Roles`);
+  }
 
-    const teamSearchColumns = [
-      {
-        name: i18n._(t`Name`),
-        key: 'name',
-        isDefault: true,
-      },
-      {
-        name: i18n._(t`Created By (Username)`),
-        key: 'created_by__username',
-      },
-      {
-        name: i18n._(t`Modified By (Username)`),
-        key: 'modified_by__username',
-      },
-    ];
-
-    const teamSortColumns = [
-      {
-        name: i18n._(t`Name`),
-        key: 'name',
-      },
-    ];
-
-    let wizardTitle = '';
-
-    switch (selectedResource) {
-      case 'users':
-        wizardTitle = i18n._(t`Add User Roles`);
-        break;
-      case 'teams':
-        wizardTitle = i18n._(t`Add Team Roles`);
-        break;
-      default:
-        wizardTitle = i18n._(t`Add Roles`);
-    }
-
-    const steps = [
-      {
-        id: 1,
-        name: i18n._(t`Select a Resource Type`),
-        component: (
-          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-            <div style={{ width: '100%', marginBottom: '10px' }}>
-              {i18n._(
-                t`Choose the type of resource that will be receiving new roles.  For example, if you'd like to add new roles to a set of users please choose Users and click Next.  You'll be able to select the specific resources in the next step.`
-              )}
-            </div>
-            <SelectableCard
-              isSelected={selectedResource === 'users'}
-              label={i18n._(t`Users`)}
-              dataCy="add-role-users"
-              onClick={() => this.handleResourceSelect('users')}
-            />
+  const steps = [
+    {
+      id: 1,
+      name: i18n._(t`Select a Resource Type`),
+      component: (
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <div style={{ width: '100%', marginBottom: '10px' }}>
+            {i18n._(
+              t`Choose the type of resource that will be receiving new roles.  For example, if you'd like to add new roles to a set of users please choose Users and click Next.  You'll be able to select the specific resources in the next step.`
+            )}
+          </div>
+          <SelectableCard
+            isSelected={selectedResource === 'users'}
+            label={i18n._(t`Users`)}
+            ariaLabel={i18n._(t`Users`)}
+            dataCy="add-role-users"
+            onClick={() => handleResourceSelect('users')}
+          />
+          {resource?.type === 'credential' && !resource?.organization ? null : (
             <SelectableCard
               isSelected={selectedResource === 'teams'}
               label={i18n._(t`Teams`)}
+              ariaLabel={i18n._(t`Teams`)}
               dataCy="add-role-teams"
-              onClick={() => this.handleResourceSelect('teams')}
+              onClick={() => handleResourceSelect('teams')}
             />
-          </div>
-        ),
-        enableNext: selectedResource !== null,
-      },
-      {
-        id: 2,
-        name: i18n._(t`Select Items from List`),
-        component: (
-          <Fragment>
-            {selectedResource === 'users' && (
-              <SelectResourceStep
-                searchColumns={userSearchColumns}
-                sortColumns={userSortColumns}
-                displayKey="username"
-                onRowClick={this.handleResourceCheckboxClick}
-                fetchItems={readUsers}
-                fetchOptions={readUsersOptions}
-                selectedLabel={i18n._(t`Selected`)}
-                selectedResourceRows={selectedResourceRows}
-                sortedColumnKey="username"
-              />
-            )}
-            {selectedResource === 'teams' && (
-              <SelectResourceStep
-                searchColumns={teamSearchColumns}
-                sortColumns={teamSortColumns}
-                onRowClick={this.handleResourceCheckboxClick}
-                fetchItems={readTeams}
-                fetchOptions={readTeamsOptions}
-                selectedLabel={i18n._(t`Selected`)}
-                selectedResourceRows={selectedResourceRows}
-              />
-            )}
-          </Fragment>
-        ),
-        enableNext: selectedResourceRows.length > 0,
-        canJumpTo: maxEnabledStep >= 2,
-      },
-      {
-        id: 3,
-        name: i18n._(t`Select Roles to Apply`),
-        component: (
-          <SelectRoleStep
-            onRolesClick={this.handleRoleCheckboxClick}
-            roles={selectableRoles}
-            selectedListKey={selectedResource === 'users' ? 'username' : 'name'}
-            selectedListLabel={i18n._(t`Selected`)}
-            selectedResourceRows={selectedResourceRows}
-            selectedRoleRows={selectedRoleRows}
-          />
-        ),
-        nextButtonText: i18n._(t`Save`),
-        enableNext: selectedRoleRows.length > 0,
-        canJumpTo: maxEnabledStep >= 3,
-      },
-    ];
+          )}
+        </div>
+      ),
+      enableNext: selectedResource !== null,
+    },
+    {
+      id: 2,
+      name: i18n._(t`Select Items from List`),
+      component: (
+        <Fragment>
+          {selectedResource === 'users' && (
+            <SelectResourceStep
+              searchColumns={userSearchColumns}
+              sortColumns={userSortColumns}
+              displayKey="username"
+              onRowClick={handleResourceCheckboxClick}
+              fetchItems={readUsers}
+              fetchOptions={readUsersOptions}
+              selectedLabel={i18n._(t`Selected`)}
+              selectedResourceRows={selectedResourceRows}
+              sortedColumnKey="username"
+            />
+          )}
+          {selectedResource === 'teams' && (
+            <SelectResourceStep
+              searchColumns={teamSearchColumns}
+              sortColumns={teamSortColumns}
+              onRowClick={handleResourceCheckboxClick}
+              fetchItems={readTeams}
+              fetchOptions={readTeamsOptions}
+              selectedLabel={i18n._(t`Selected`)}
+              selectedResourceRows={selectedResourceRows}
+            />
+          )}
+        </Fragment>
+      ),
+      enableNext: selectedResourceRows.length > 0,
+      canJumpTo: maxEnabledStep >= 2,
+    },
+    {
+      id: 3,
+      name: i18n._(t`Select Roles to Apply`),
+      component: (
+        <SelectRoleStep
+          onRolesClick={handleRoleCheckboxClick}
+          roles={selectableRoles}
+          selectedListKey={selectedResource === 'users' ? 'username' : 'name'}
+          selectedListLabel={i18n._(t`Selected`)}
+          selectedResourceRows={selectedResourceRows}
+          selectedRoleRows={selectedRoleRows}
+        />
+      ),
+      nextButtonText: i18n._(t`Save`),
+      enableNext: selectedRoleRows.length > 0,
+      canJumpTo: maxEnabledStep >= 3,
+    },
+  ];
 
-    const currentStep = steps.find(step => step.id === currentStepId);
+  const currentStep = steps.find(step => step.id === currentStepId);
 
-    // TODO: somehow internationalize steps and currentStep.nextButtonText
-    return (
-      <Wizard
-        style={{ overflow: 'scroll' }}
-        isOpen
-        onNext={this.handleWizardNext}
-        onClose={onClose}
-        onSave={this.handleWizardSave}
-        onGoToStep={this.handleWizardGoToStep}
-        steps={steps}
-        title={wizardTitle}
-        nextButtonText={currentStep.nextButtonText || undefined}
-        backButtonText={i18n._(t`Back`)}
-        cancelButtonText={i18n._(t`Cancel`)}
-      />
-    );
-  }
+  // TODO: somehow internationalize steps and currentStep.nextButtonText
+  return (
+    <Wizard
+      style={{ overflow: 'scroll' }}
+      isOpen
+      onNext={handleWizardNext}
+      onClose={onClose}
+      onSave={handleWizardSave}
+      onGoToStep={step => handleWizardGoToStep(step)}
+      steps={steps}
+      title={wizardTitle}
+      nextButtonText={currentStep.nextButtonText || undefined}
+      backButtonText={i18n._(t`Back`)}
+      cancelButtonText={i18n._(t`Cancel`)}
+    />
+  );
 }
 
 AddResourceRole.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   roles: PropTypes.shape(),
+  resource: PropTypes.shape(),
 };
 
 AddResourceRole.defaultProps = {
   roles: {},
+  resource: {},
 };
 
 export { AddResourceRole as _AddResourceRole };

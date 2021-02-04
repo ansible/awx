@@ -96,8 +96,8 @@ describe('<InventoryForm />', () => {
     expect(wrapper.find('VariablesField[label="Variables"]').length).toBe(1);
   });
 
-  test('should update form values', () => {
-    act(() => {
+  test('should update form values', async () => {
+    await act(async () => {
       wrapper.find('OrganizationLookup').invoke('onBlur')();
       wrapper.find('OrganizationLookup').invoke('onChange')({
         id: 3,

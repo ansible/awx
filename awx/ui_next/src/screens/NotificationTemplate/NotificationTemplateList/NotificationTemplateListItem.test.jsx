@@ -13,6 +13,7 @@ const template = {
   summary_fields: {
     user_capabilities: {
       edit: true,
+      copy: true,
     },
     recent_notifications: [
       {
@@ -62,5 +63,57 @@ describe('<NotificationTemplateListItem />', () => {
         .at(1)
         .text()
     ).toEqual('Running');
+  });
+
+  test('should call api to copy inventory', async () => {
+    NotificationTemplatesAPI.copy.mockResolvedValue();
+
+    const wrapper = mountWithContexts(
+      <NotificationTemplateListItem
+        template={template}
+        detailUrl="/notification_templates/3/detail"
+      />
+    );
+
+    await act(async () =>
+      wrapper.find('Button[aria-label="Copy"]').prop('onClick')()
+    );
+    expect(NotificationTemplatesAPI.copy).toHaveBeenCalled();
+    jest.clearAllMocks();
+  });
+
+  test('should render proper alert modal on copy error', async () => {
+    NotificationTemplatesAPI.copy.mockRejectedValue(new Error());
+
+    const wrapper = mountWithContexts(
+      <NotificationTemplateListItem
+        template={template}
+        detailUrl="/notification_templates/3/detail"
+      />
+    );
+    await act(async () =>
+      wrapper.find('Button[aria-label="Copy"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find('Modal').prop('isOpen')).toBe(true);
+    jest.clearAllMocks();
+  });
+
+  test('should not render copy button', async () => {
+    const wrapper = mountWithContexts(
+      <NotificationTemplateListItem
+        template={{
+          ...template,
+          summary_fields: {
+            user_capabilities: {
+              copy: false,
+              edit: false,
+            },
+          },
+        }}
+        detailUrl="/notification_templates/3/detail"
+      />
+    );
+    expect(wrapper.find('CopyButton').length).toBe(0);
   });
 });

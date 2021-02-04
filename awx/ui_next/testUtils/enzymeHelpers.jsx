@@ -125,7 +125,7 @@ export function mountWithContexts(node, options = {}) {
   const context = applyDefaultContexts(options.context);
   const childContextTypes = {
     linguiPublisher: shape({
-      i18n: object.isRequired,
+      i18n: object.isRequired, // eslint-disable-line react/forbid-prop-types
     }).isRequired,
     config: shape({
       ansible_version: string,

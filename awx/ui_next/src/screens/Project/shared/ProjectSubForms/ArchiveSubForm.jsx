@@ -21,8 +21,16 @@ const ArchiveSubForm = ({
         <span>
           {i18n._(t`Example URLs for Remote Archive Source Control include:`)}
           <ul css={{ margin: '10px 0 10px 20px' }}>
-            <li>https://github.com/username/project/archive/v0.0.1.tar.gz</li>
-            <li>https://github.com/username/project/archive/v0.0.2.zip</li>
+            <li>
+              <code>
+                https://github.com/username/project/archive/v0.0.1.tar.gz
+              </code>
+            </li>
+            <li>
+              <code>
+                https://github.com/username/project/archive/v0.0.2.zip
+              </code>
+            </li>
           </ul>
         </span>
       }

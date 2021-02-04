@@ -12,6 +12,7 @@ import {
   FormGroup,
   InputGroup,
   Modal,
+  Tooltip,
 } from '@patternfly/react-core';
 import ChipGroup from '../ChipGroup';
 import Popover from '../Popover';
@@ -243,6 +244,36 @@ function HostFilterLookup({
     });
   };
 
+  const renderLookup = () => (
+    <InputGroup onBlur={onBlur}>
+      <Button
+        aria-label={i18n._(t`Search`)}
+        id="host-filter"
+        isDisabled={isDisabled}
+        onClick={handleOpenModal}
+        variant={ButtonVariant.control}
+      >
+        <SearchIcon />
+      </Button>
+      <ChipHolder className="pf-c-form-control">
+        {searchColumns.map(({ name, key }) => (
+          <ChipGroup
+            categoryName={name}
+            key={name}
+            numChips={5}
+            totalChips={chips[key]?.chips?.length || 0}
+          >
+            {chips[key]?.chips?.map(chip => (
+              <Chip key={chip.key} isReadOnly>
+                {chip.node}
+              </Chip>
+            ))}
+          </ChipGroup>
+        ))}
+      </ChipHolder>
+    </InputGroup>
+  );
+
   return (
     <FormGroup
       fieldId="host-filter"
@@ -261,33 +292,17 @@ function HostFilterLookup({
         />
       }
     >
-      <InputGroup onBlur={onBlur}>
-        <Button
-          aria-label={i18n._(t`Search`)}
-          id="host-filter"
-          isDisabled={isDisabled}
-          onClick={handleOpenModal}
-          variant={ButtonVariant.control}
+      {isDisabled ? (
+        <Tooltip
+          content={i18n._(
+            t`Please select an organization before editing the host filter`
+          )}
         >
-          <SearchIcon />
-        </Button>
-        <ChipHolder className="pf-c-form-control">
-          {searchColumns.map(({ name, key }) => (
-            <ChipGroup
-              categoryName={name}
-              key={name}
-              numChips={5}
-              totalChips={chips[key]?.chips?.length || 0}
-            >
-              {chips[key]?.chips?.map((chip, index) => (
-                <Chip key={index} isReadOnly>
-                  {chip.node}
-                </Chip>
-              ))}
-            </ChipGroup>
-          ))}
-        </ChipHolder>
-      </InputGroup>
+          {renderLookup()}
+        </Tooltip>
+      ) : (
+        renderLookup()
+      )}
       <Modal
         aria-label={i18n._(t`Lookup modal`)}
         isOpen={isModalOpen}

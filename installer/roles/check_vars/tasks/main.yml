@@ -1,5 +1,11 @@
 # main.yml
 ---
+- name: admin_password should be defined
+  assert:
+    that:
+      - admin_password is defined and admin_password != ''
+    msg: "Set the value of 'admin_password' in the inventory file."
+
 - include_tasks: check_openshift.yml
   when: openshift_host is defined and openshift_host != ''
 

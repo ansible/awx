@@ -39,12 +39,16 @@ const options = {
   },
 };
 
+const onSuccessfulAdd = jest.fn();
+
 describe('<ApplicationAdd/>', () => {
   let wrapper;
   test('should render properly', async () => {
     ApplicationsAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
-      wrapper = mountWithContexts(<ApplicationAdd />);
+      wrapper = mountWithContexts(
+        <ApplicationAdd onSuccessfulAdd={onSuccessfulAdd} />
+      );
     });
     expect(wrapper.find('ApplicationAdd').length).toBe(1);
     expect(wrapper.find('ApplicationForm').length).toBe(1);
@@ -59,9 +63,12 @@ describe('<ApplicationAdd/>', () => {
 
     ApplicationsAPI.create.mockResolvedValue({ data: { id: 8 } });
     await act(async () => {
-      wrapper = mountWithContexts(<ApplicationAdd />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <ApplicationAdd onSuccessfulAdd={onSuccessfulAdd} />,
+        {
+          context: { router: { history } },
+        }
+      );
     });
 
     await act(async () => {
@@ -124,6 +131,7 @@ describe('<ApplicationAdd/>', () => {
       redirect_uris: 'http://www.google.com',
     });
     expect(history.location.pathname).toBe('/applications/8/details');
+    expect(onSuccessfulAdd).toHaveBeenCalledWith({ id: 8 });
   });
 
   test('should cancel form properly', async () => {
@@ -134,9 +142,12 @@ describe('<ApplicationAdd/>', () => {
 
     ApplicationsAPI.create.mockResolvedValue({ data: { id: 8 } });
     await act(async () => {
-      wrapper = mountWithContexts(<ApplicationAdd />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <ApplicationAdd onSuccessfulAdd={onSuccessfulAdd} />,
+        {
+          context: { router: { history } },
+        }
+      );
     });
     await act(async () => {
       wrapper.find('Button[aria-label="Cancel"]').prop('onClick')();
@@ -157,7 +168,9 @@ describe('<ApplicationAdd/>', () => {
     ApplicationsAPI.create.mockRejectedValue(error);
     ApplicationsAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
-      wrapper = mountWithContexts(<ApplicationAdd />);
+      wrapper = mountWithContexts(
+        <ApplicationAdd onSuccessfulAdd={onSuccessfulAdd} />
+      );
     });
     await act(async () => {
       wrapper.find('Formik').prop('onSubmit')({
@@ -181,7 +194,9 @@ describe('<ApplicationAdd/>', () => {
       })
     );
     await act(async () => {
-      wrapper = mountWithContexts(<ApplicationAdd />);
+      wrapper = mountWithContexts(
+        <ApplicationAdd onSuccessfulAdd={onSuccessfulAdd} />
+      );
     });
 
     wrapper.update();

@@ -81,10 +81,11 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
 
 
 @pytest.mark.django_db
-def test_job_launch_with_prompting(run_module, admin_user, project, inventory, machine_credential):
+def test_job_launch_with_prompting(run_module, admin_user, project, organization, inventory, machine_credential):
     JobTemplate.objects.create(
         name='foo',
         project=project,
+        organization=organization,
         playbook='helloworld.yml',
         ask_variables_on_launch=True,
         ask_inventory_on_launch=True,
@@ -175,6 +176,38 @@ def test_job_template_with_survey_spec(run_module, admin_user, project, inventor
 
     assert jt.survey_spec == survey_spec
     assert ActivityStream.objects.count() == prior_ct
+
+
+@pytest.mark.django_db
+def test_job_template_with_wrong_survey_spec(run_module, admin_user, project, inventory, survey_spec):
+    result = run_module('tower_job_template', dict(
+        name='foo',
+        playbook='helloworld.yml',
+        project=project.name,
+        inventory=inventory.name,
+        survey_spec=survey_spec,
+        survey_enabled=True
+    ), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed', False), result
+    jt = JobTemplate.objects.get(pk=result['id'])
+
+    assert jt.survey_spec == survey_spec
+
+    prior_ct = ActivityStream.objects.count()
+
+    del survey_spec['description']
+
+    result = run_module('tower_job_template', dict(
+        name='foo',
+        playbook='helloworld.yml',
+        project=project.name,
+        inventory=inventory.name,
+        survey_spec=survey_spec,
+        survey_enabled=True
+    ), admin_user)
+    assert result.get('failed', True)
+    assert result.get('msg') == "Failed to update survey: Field 'description' is missing from survey spec."
 
 
 @pytest.mark.django_db

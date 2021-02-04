@@ -31,7 +31,14 @@ const Description = styled.p`
   font-size: 14px;
 `;
 
-function SelectableCard({ label, description, onClick, isSelected, dataCy }) {
+function SelectableCard({
+  label,
+  description,
+  onClick,
+  isSelected,
+  dataCy,
+  ariaLabel,
+}) {
   return (
     <SelectableItem
       onClick={onClick}
@@ -40,6 +47,7 @@ function SelectableCard({ label, description, onClick, isSelected, dataCy }) {
       tabIndex="0"
       data-cy={dataCy}
       isSelected={isSelected}
+      aria-label={ariaLabel}
     >
       <Indicator isSelected={isSelected} />
       <Contents>
@@ -55,12 +63,14 @@ SelectableCard.propTypes = {
   description: PropTypes.string,
   onClick: PropTypes.func.isRequired,
   isSelected: PropTypes.bool,
+  ariaLabel: PropTypes.string,
 };
 
 SelectableCard.defaultProps = {
   label: '',
   description: '',
   isSelected: false,
+  ariaLabel: '',
 };
 
 export default SelectableCard;

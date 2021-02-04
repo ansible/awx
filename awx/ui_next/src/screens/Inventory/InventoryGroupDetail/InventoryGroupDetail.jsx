@@ -17,7 +17,7 @@ import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
 
 function InventoryGroupDetail({ i18n, inventoryGroup }) {
   const {
-    summary_fields: { created_by, modified_by },
+    summary_fields: { created_by, modified_by, user_capabilities },
     created,
     modified,
     name,
@@ -54,24 +54,28 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
         />
       </DetailList>
       <CardActionsRow>
-        <Button
-          variant="primary"
-          aria-label={i18n._(t`Edit`)}
-          onClick={() =>
-            history.push(
-              `/inventories/inventory/${params.id}/groups/${params.groupId}/edit`
-            )
-          }
-        >
-          {i18n._(t`Edit`)}
-        </Button>
-        <InventoryGroupsDeleteModal
-          groups={[inventoryGroup]}
-          isDisabled={false}
-          onAfterDelete={() =>
-            history.push(`/inventories/inventory/${params.id}/groups`)
-          }
-        />
+        {user_capabilities?.edit && (
+          <Button
+            variant="primary"
+            aria-label={i18n._(t`Edit`)}
+            onClick={() =>
+              history.push(
+                `/inventories/inventory/${params.id}/groups/${params.groupId}/edit`
+              )
+            }
+          >
+            {i18n._(t`Edit`)}
+          </Button>
+        )}
+        {user_capabilities?.delete && (
+          <InventoryGroupsDeleteModal
+            groups={[inventoryGroup]}
+            isDisabled={false}
+            onAfterDelete={() =>
+              history.push(`/inventories/inventory/${params.id}/groups`)
+            }
+          />
+        )}
       </CardActionsRow>
       {error && (
         <AlertModal

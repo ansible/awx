@@ -92,6 +92,7 @@ function AdvancedSearch({
         isOpen={isPrefixDropdownOpen}
         placeholderText={i18n._(t`Set type`)}
         maxHeight="500px"
+        noResultsFoundText={i18n._(t`No results found`)}
       >
         <SelectOption
           key="and"
@@ -129,6 +130,7 @@ function AdvancedSearch({
         isCreatable
         onCreateOption={setKeySelection}
         maxHeight="500px"
+        noResultsFoundText={i18n._(t`No results found`)}
       >
         {allKeys.map(optionKey => (
           <SelectOption key={optionKey} value={optionKey}>
@@ -148,6 +150,7 @@ function AdvancedSearch({
         isOpen={isLookupDropdownOpen}
         placeholderText={i18n._(t`Lookup type`)}
         maxHeight="500px"
+        noResultsFoundText={i18n._(t`No results found`)}
       >
         <SelectOption
           key="exact"

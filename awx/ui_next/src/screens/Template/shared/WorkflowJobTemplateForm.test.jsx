@@ -221,10 +221,14 @@ describe('<WorkflowJobTemplateForm/>', () => {
       wrapper.find('Checkbox[aria-label="Enable Webhook"]').prop('isChecked')
     ).toBe(true);
     expect(
-      wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('readOnly')
+      wrapper
+        .find('input[aria-label="workflow job template webhook key"]')
+        .prop('readOnly')
     ).toBe(true);
     expect(
-      wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('value')
+      wrapper
+        .find('input[aria-label="workflow job template webhook key"]')
+        .prop('value')
     ).toBe('sdfghjklmnbvcdsew435678iokjhgfd');
     await act(() =>
       wrapper.find('Button[aria-label="Update webhook key"]').prop('onClick')()

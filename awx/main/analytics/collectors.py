@@ -280,14 +280,16 @@ def _copy_table(table, query, path):
     return file.file_list()
 
 
-@register('events_table', '1.1', format='csv', description=_('Automation task records'), expensive=True)
+@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=True)
 def events_table(since, full_path, until, **kwargs):
     events_query = '''COPY (SELECT main_jobevent.id, 
                               main_jobevent.created,
+                              main_jobevent.modified,
                               main_jobevent.uuid,
                               main_jobevent.parent_uuid,
                               main_jobevent.event, 
                               main_jobevent.event_data::json->'task_action' AS task_action,
+                              (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
                               main_jobevent.failed, 
                               main_jobevent.changed, 
                               main_jobevent.playbook, 

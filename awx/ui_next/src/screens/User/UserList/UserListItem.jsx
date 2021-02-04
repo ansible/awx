@@ -95,7 +95,7 @@ function UserListItem({ user, isSelected, onSelect, detailUrl, i18n }) {
           ]}
         />
         <DataListAction
-          aria-label="actions"
+          aria-label={i18n._(t`actions`)}
           aria-labelledby={labelId}
           id={labelId}
         >

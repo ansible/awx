@@ -114,7 +114,7 @@
   "started": "2019-08-08T19:24:18.329589Z",
   "finished": "2019-08-08T19:24:50.119995Z",
   "elapsed": 31.79,
-  "job_args": "[\"bwrap\", \"--unshare-pid\", \"--dev-bind\", \"/\", \"/\", \"--proc\", \"/proc\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpvsg8ly2y\", \"/etc/ssh\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpq_grmdym\", \"/projects\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpfq8ea2z6\", \"/tmp\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpq6v4y_tt\", \"/var/lib/awx\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpupj_jhhb\", \"/var/log\", \"--ro-bind\", \"/venv/ansible\", \"/venv/ansible\", \"--ro-bind\", \"/venv/awx\", \"/venv/awx\", \"--bind\", \"/projects/_6__demo_project\", \"/projects/_6__demo_project\", \"--bind\", \"/tmp/awx_2_a4b1afiw\", \"/tmp/awx_2_a4b1afiw\", \"--chdir\", \"/projects/_6__demo_project\", \"ansible-playbook\", \"-u\", \"admin\", \"-i\", \"/tmp/awx_2_a4b1afiw/tmppb57i4_e\", \"-e\", \"@/tmp/awx_2_a4b1afiw/env/extravars\", \"chatty_tasks.yml\"]",
+  "job_args": "[\"bwrap\", \"--unshare-pid\", \"--dev-bind\", \"/\", \"/\", \"--proc\", \"/proc\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpvsg8ly2y\", \"/etc/ssh\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpq_grmdym\", \"/projects\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpfq8ea2z6\", \"/tmp\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpq6v4y_tt\", \"/var/lib/awx\", \"--bind\", \"/tmp/ansible_runner_pi_pzufy15c/ansible_runner_pi_r_aeukpy/tmpupj_jhhb\", \"/var/log\", \"--ro-bind\", \"/var/lib/awx/venv/ansible\", \"/var/lib/awx/venv/ansible\", \"--ro-bind\", \"/var/lib/awx/venv/awx\", \"/var/lib/awx/venv/awx\", \"--bind\", \"/projects/_6__demo_project\", \"/projects/_6__demo_project\", \"--bind\", \"/tmp/awx_2_a4b1afiw\", \"/tmp/awx_2_a4b1afiw\", \"--chdir\", \"/projects/_6__demo_project\", \"ansible-playbook\", \"-u\", \"admin\", \"-i\", \"/tmp/awx_2_a4b1afiw/tmppb57i4_e\", \"-e\", \"@/tmp/awx_2_a4b1afiw/env/extravars\", \"chatty_tasks.yml\"]",
   "job_cwd": "/projects/_6__demo_project",
   "job_env": {
       "HOSTNAME": "awx",
@@ -123,9 +123,9 @@
       "LC_ALL": "en_US.UTF-8",
       "SDB_HOST": "0.0.0.0",
       "MAKELEVEL": "2",
-      "VIRTUAL_ENV": "/venv/ansible",
+      "VIRTUAL_ENV": "/var/lib/awx/venv/ansible",
       "MFLAGS": "-w",
-      "PATH": "/venv/ansible/bin:/venv/awx/bin:/venv/awx/bin:/usr/local/n/versions/node/10.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PATH": "/var/lib/awx/venv/ansible/bin:/var/lib/awx/venv/awx/bin:/var/lib/awx/venv/awx/bin:/usr/local/n/versions/node/10.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
       "SUPERVISOR_GROUP_NAME": "tower-processes",
       "PWD": "/awx_devel",
       "LANG": "\"en-us\"",
@@ -138,7 +138,7 @@
       "SUPERVISOR_SERVER_URL": "unix:///tmp/supervisor.sock",
       "SUPERVISOR_PROCESS_NAME": "awx-dispatcher",
       "CURRENT_UID": "501",
-      "_": "/venv/awx/bin/python3",
+      "_": "/var/lib/awx/venv/awx/bin/python3",
       "DJANGO_SETTINGS_MODULE": "awx.settings.development",
       "DJANGO_LIVE_TEST_SERVER_ADDRESS": "localhost:9013-9199",
       "SDB_NOTIFY_HOST": "docker.for.mac.host.internal",
@@ -147,11 +147,11 @@
       "ANSIBLE_HOST_KEY_CHECKING": "False",
       "ANSIBLE_INVENTORY_UNPARSED_FAILED": "True",
       "ANSIBLE_PARAMIKO_RECORD_HOST_KEYS": "False",
-      "ANSIBLE_VENV_PATH": "/venv/ansible",
+      "ANSIBLE_VENV_PATH": "/var/lib/awx/venv/ansible",
       "PROOT_TMP_DIR": "/tmp",
       "AWX_PRIVATE_DATA_DIR": "/tmp/awx_2_a4b1afiw",
       "ANSIBLE_COLLECTIONS_PATHS": "/tmp/collections",
-      "PYTHONPATH": "/venv/ansible/lib/python2.7/site-packages:/awx_devel/awx/lib:",
+      "PYTHONPATH": "/var/lib/awx/venv/ansible/lib/python2.7/site-packages:/awx_devel/awx/lib:",
       "JOB_ID": "2",
       "INVENTORY_ID": "1",
       "PROJECT_REVISION": "23f070aad8e2da131d97ea98b42b553ccf0b0b82",
@@ -184,5 +184,5 @@
       "play_count": 1,
       "task_count": 1
   },
-  "custom_virtualenv": "/venv/ansible"
+  "custom_virtualenv": "/var/lib/awx/venv/ansible"
 }

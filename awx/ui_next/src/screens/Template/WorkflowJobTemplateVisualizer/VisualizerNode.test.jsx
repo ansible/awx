@@ -1,10 +1,31 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '../../../contexts/Workflow';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { JobTemplatesAPI, WorkflowJobTemplateNodesAPI } from '../../../api';
 import VisualizerNode from './VisualizerNode';
+import { asyncFlush } from '../../../setupTests';
+
+jest.mock('../../../api/models/JobTemplates');
+jest.mock('../../../api/models/WorkflowJobTemplateNodes');
+
+WorkflowJobTemplateNodesAPI.readCredentials.mockResolvedValue({
+  data: {
+    results: [],
+  },
+});
+
+const nodeWithJT = {
+  id: 2,
+  fullUnifiedJobTemplate: {
+    id: 77,
+    name: 'Automation JT',
+    type: 'job_template',
+  },
+};
 
 const mockedContext = {
   addingLink: false,
@@ -23,15 +44,7 @@ const mockedContext = {
       y: 40,
     },
   },
-};
-
-const nodeWithJT = {
-  id: 2,
-  unifiedJobTemplate: {
-    id: 77,
-    name: 'Automation JT',
-    type: 'job_template',
-  },
+  nodes: [nodeWithJT],
 };
 
 const dispatch = jest.fn();
@@ -47,8 +60,6 @@ describe('VisualizerNode', () => {
           <WorkflowStateContext.Provider value={mockedContext}>
             <svg>
               <VisualizerNode
-                mouseEnter={() => {}}
-                mouseLeave={() => {}}
                 node={nodeWithJT}
                 readOnly={false}
                 updateHelpText={updateHelpText}
@@ -59,6 +70,9 @@ describe('VisualizerNode', () => {
         </WorkflowDispatchContext.Provider>
       );
     });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
     afterAll(() => {
       wrapper.unmount();
     });
@@ -67,10 +81,10 @@ describe('VisualizerNode', () => {
     });
     test('Displays action tooltip on hover and updates help text on hover', () => {
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
-      wrapper.find('VisualizerNode').simulate('mouseenter');
+      wrapper.find('g').simulate('mouseenter');
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(1);
       expect(wrapper.find('WorkflowActionTooltipItem').length).toBe(5);
-      wrapper.find('VisualizerNode').simulate('mouseleave');
+      wrapper.find('g').simulate('mouseleave');
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
       wrapper
         .find('foreignObject')
@@ -85,7 +99,7 @@ describe('VisualizerNode', () => {
     });
 
     test('Add tooltip action hover/click updates help text and dispatches properly', () => {
-      wrapper.find('VisualizerNode').simulate('mouseenter');
+      wrapper.find('g').simulate('mouseenter');
       wrapper.find('WorkflowActionTooltipItem#node-add').simulate('mouseenter');
       expect(updateHelpText).toHaveBeenCalledWith('Add a new node');
       wrapper.find('WorkflowActionTooltipItem#node-add').simulate('mouseleave');
@@ -98,8 +112,8 @@ describe('VisualizerNode', () => {
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
     });
 
-    test('Edit tooltip action hover/click updates help text and dispatches properly', () => {
-      wrapper.find('VisualizerNode').simulate('mouseenter');
+    test('Edit tooltip action hover/click updates help text and dispatches properly', async () => {
+      wrapper.find('g').simulate('mouseenter');
       wrapper
         .find('WorkflowActionTooltipItem#node-edit')
         .simulate('mouseenter');
@@ -109,15 +123,27 @@ describe('VisualizerNode', () => {
         .simulate('mouseleave');
       expect(updateHelpText).toHaveBeenCalledWith(null);
       wrapper.find('WorkflowActionTooltipItem#node-edit').simulate('click');
-      expect(dispatch).toHaveBeenCalledWith({
-        type: 'SET_NODE_TO_EDIT',
-        value: nodeWithJT,
-      });
+      await asyncFlush();
+      expect(dispatch).toHaveBeenCalledTimes(2);
+      expect(dispatch.mock.calls).toEqual([
+        [
+          {
+            type: 'SET_NODES',
+            value: [nodeWithJT],
+          },
+        ],
+        [
+          {
+            type: 'SET_NODE_TO_EDIT',
+            value: nodeWithJT,
+          },
+        ],
+      ]);
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
     });
 
-    test('Details tooltip action hover/click updates help text and dispatches properly', () => {
-      wrapper.find('VisualizerNode').simulate('mouseenter');
+    test('Details tooltip action hover/click updates help text and dispatches properly', async () => {
+      wrapper.find('g').simulate('mouseenter');
       wrapper
         .find('WorkflowActionTooltipItem#node-details')
         .simulate('mouseenter');
@@ -127,15 +153,27 @@ describe('VisualizerNode', () => {
         .simulate('mouseleave');
       expect(updateHelpText).toHaveBeenCalledWith(null);
       wrapper.find('WorkflowActionTooltipItem#node-details').simulate('click');
-      expect(dispatch).toHaveBeenCalledWith({
-        type: 'SET_NODE_TO_VIEW',
-        value: nodeWithJT,
-      });
+      await asyncFlush();
+      expect(dispatch).toHaveBeenCalledTimes(2);
+      expect(dispatch.mock.calls).toEqual([
+        [
+          {
+            type: 'SET_NODES',
+            value: [nodeWithJT],
+          },
+        ],
+        [
+          {
+            type: 'SET_NODE_TO_VIEW',
+            value: nodeWithJT,
+          },
+        ],
+      ]);
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
     });
 
     test('Link tooltip action hover/click updates help text and dispatches properly', () => {
-      wrapper.find('VisualizerNode').simulate('mouseenter');
+      wrapper.find('g').simulate('mouseenter');
       wrapper
         .find('WorkflowActionTooltipItem#node-link')
         .simulate('mouseenter');
@@ -153,7 +191,7 @@ describe('VisualizerNode', () => {
     });
 
     test('Delete tooltip action hover/click updates help text and dispatches properly', () => {
-      wrapper.find('VisualizerNode').simulate('mouseenter');
+      wrapper.find('g').simulate('mouseenter');
       wrapper
         .find('WorkflowActionTooltipItem#node-delete')
         .simulate('mouseenter');
@@ -201,12 +239,12 @@ describe('VisualizerNode', () => {
     });
     test('Displays correct help text when hovering over node while adding link', () => {
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
-      wrapper.find('VisualizerNode').simulate('mouseenter');
+      wrapper.find('g').simulate('mouseenter');
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
       expect(updateHelpText).toHaveBeenCalledWith(
         'Click to create a new link to this node.'
       );
-      wrapper.find('VisualizerNode').simulate('mouseleave');
+      wrapper.find('g').simulate('mouseleave');
       expect(wrapper.find('WorkflowActionTooltip').length).toBe(0);
       expect(updateHelpText).toHaveBeenCalledWith(null);
     });
@@ -227,8 +265,6 @@ describe('VisualizerNode', () => {
         <svg>
           <WorkflowStateContext.Provider value={mockedContext}>
             <VisualizerNode
-              mouseEnter={() => {}}
-              mouseLeave={() => {}}
               node={{
                 id: 2,
               }}
@@ -241,6 +277,145 @@ describe('VisualizerNode', () => {
       );
       expect(wrapper).toHaveLength(1);
       expect(wrapper.find('NodeResourceName').text()).toBe('DELETED');
+    });
+  });
+  describe('Node without full unified job template', () => {
+    let wrapper;
+    beforeEach(() => {
+      wrapper = mountWithContexts(
+        <WorkflowDispatchContext.Provider value={dispatch}>
+          <WorkflowStateContext.Provider value={mockedContext}>
+            <svg>
+              <VisualizerNode
+                node={{
+                  id: 2,
+                  originalNodeObject: {
+                    all_parents_must_converge: false,
+                    always_nodes: [],
+                    created: '2020-11-19T21:47:55.278081Z',
+                    diff_mode: null,
+                    extra_data: {},
+                    failure_nodes: [],
+                    id: 49,
+                    identifier: 'f03b62c5-40f8-49e4-97c3-5bb20c91ec91',
+                    inventory: null,
+                    job_tags: null,
+                    job_type: null,
+                    limit: null,
+                    modified: '2020-11-19T21:47:55.278156Z',
+                    related: {
+                      credentials:
+                        '/api/v2/workflow_job_template_nodes/49/credentials/',
+                    },
+                    scm_branch: null,
+                    skip_tags: null,
+                    success_nodes: [],
+                    summary_fields: {
+                      workflow_job_template: { id: 15 },
+                      unified_job_template: {
+                        id: 7,
+                        description: '',
+                        name: 'Example',
+                        unified_job_type: 'job',
+                      },
+                    },
+                    type: 'workflow_job_template_node',
+                    unified_job_template: 7,
+                    url: '/api/v2/workflow_job_template_nodes/49/',
+                    verbosity: null,
+                    workflowMakerNodeId: 2,
+                    workflow_job_template: 15,
+                  },
+                }}
+                readOnly={false}
+                updateHelpText={updateHelpText}
+                updateNodeHelp={updateNodeHelp}
+              />
+            </svg>
+          </WorkflowStateContext.Provider>
+        </WorkflowDispatchContext.Provider>
+      );
+    });
+    afterEach(() => {
+      wrapper.unmount();
+    });
+    test('Attempts to fetch full unified job template on view', async () => {
+      wrapper.find('g').simulate('mouseenter');
+      await act(async () => {
+        wrapper
+          .find('WorkflowActionTooltipItem#node-details')
+          .simulate('click');
+      });
+      expect(JobTemplatesAPI.readDetail).toHaveBeenCalledWith(7);
+    });
+    test('Displays error fetching full unified job template', async () => {
+      JobTemplatesAPI.readDetail.mockRejectedValueOnce(
+        new Error({
+          response: {
+            config: {
+              method: 'get',
+              url: '/api/v2/job_templates/7',
+            },
+            data: 'An error occurred',
+            status: 403,
+          },
+        })
+      );
+      expect(wrapper.find('AlertModal').length).toBe(0);
+      wrapper.find('g').simulate('mouseenter');
+      await act(async () => {
+        wrapper
+          .find('WorkflowActionTooltipItem#node-details')
+          .simulate('click');
+      });
+      wrapper.update();
+      expect(wrapper.find('AlertModal').length).toBe(1);
+    });
+    test('Attempts to fetch credentials on view', async () => {
+      JobTemplatesAPI.readDetail.mockResolvedValueOnce({
+        data: {
+          id: 7,
+          name: 'Example',
+        },
+      });
+      wrapper.find('g').simulate('mouseenter');
+      await act(async () => {
+        wrapper
+          .find('WorkflowActionTooltipItem#node-details')
+          .simulate('click');
+      });
+      expect(WorkflowJobTemplateNodesAPI.readCredentials).toHaveBeenCalledWith(
+        49
+      );
+    });
+    test('Displays error fetching credentials', async () => {
+      JobTemplatesAPI.readDetail.mockResolvedValueOnce({
+        data: {
+          id: 7,
+          name: 'Example',
+        },
+      });
+      WorkflowJobTemplateNodesAPI.readCredentials.mockRejectedValueOnce(
+        new Error({
+          response: {
+            config: {
+              method: 'get',
+              url: '/api/v2/workflow_job_template_nodes/49/credentials',
+            },
+            data: 'An error occurred',
+            status: 403,
+          },
+        })
+      );
+      expect(wrapper.find('AlertModal').length).toBe(0);
+      wrapper.find('g').simulate('mouseenter');
+      await act(async () => {
+        wrapper
+          .find('WorkflowActionTooltipItem#node-details')
+          .simulate('click');
+      });
+      wrapper.update();
+      expect(wrapper.find('AlertModal').length).toBe(1);
     });
   });
 });

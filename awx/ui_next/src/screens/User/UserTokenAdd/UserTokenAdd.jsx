@@ -6,22 +6,27 @@ import { TokensAPI, UsersAPI } from '../../../api';
 import useRequest from '../../../util/useRequest';
 import UserTokenFrom from '../shared/UserTokenForm';
 
-function UserTokenAdd() {
+function UserTokenAdd({ onSuccessfulAdd }) {
   const history = useHistory();
   const { id: userId } = useParams();
   const { error: submitError, request: handleSubmit } = useRequest(
     useCallback(
       async formData => {
+        let response;
         if (formData.application) {
-          formData.application = formData.application?.id || null;
-          await UsersAPI.createToken(userId, formData);
+          response = await UsersAPI.createToken(userId, {
+            ...formData,
+            application: formData.application?.id || null,
+          });
         } else {
-          await TokensAPI.create(formData);
+          response = await TokensAPI.create(formData);
         }
 
-        history.push(`/users/${userId}/tokens`);
+        onSuccessfulAdd(response.data);
+
+        history.push(`/users/${userId}/tokens/${response.data.id}/details`);
       },
-      [history, userId]
+      [history, userId, onSuccessfulAdd]
     )
   );
 

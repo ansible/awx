@@ -14,25 +14,33 @@ import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 import { JobsAPI } from '../../api';
 import ContentError from '../../components/ContentError';
+import ContentLoading from '../../components/ContentLoading';
 import RoutedTabs from '../../components/RoutedTabs';
 import useRequest from '../../util/useRequest';
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 import { WorkflowOutput } from './WorkflowOutput';
 import useWsJob from './useWsJob';
-import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
-function Job({ i18n, lookup, setBreadcrumb }) {
+function Job({ i18n, setBreadcrumb }) {
   const { id, type } = useParams();
   const match = useRouteMatch();
 
   const { isLoading, error, request: fetchJob, result } = useRequest(
     useCallback(async () => {
       const { data } = await JobsAPI.readDetail(id, type);
+      if (
+        data?.summary_fields?.credentials?.find(cred => cred.kind === 'vault')
+      ) {
+        const {
+          data: { results },
+        } = await JobsAPI.readCredentials(data.id, type);
+
+        data.summary_fields.credentials = results;
+      }
       setBreadcrumb(data);
       return data;
-    }, [id, type, setBreadcrumb]),
-    null
+    }, [id, type, setBreadcrumb])
   );
 
   useEffect(() => {
@@ -40,11 +48,6 @@ function Job({ i18n, lookup, setBreadcrumb }) {
   }, [fetchJob]);
 
   const job = useWsJob(result);
-
-  let jobType;
-  if (job) {
-    jobType = JOB_TYPE_URL_SEGMENTS[job.type];
-  }
 
   const tabsArray = [
     {
@@ -61,7 +64,17 @@ function Job({ i18n, lookup, setBreadcrumb }) {
     { name: i18n._(t`Output`), link: `${match.url}/output`, id: 1 },
   ];
 
-  if (!isLoading && error) {
+  if (isLoading) {
+    return (
+      <PageSection>
+        <Card>
+          <ContentLoading />
+        </Card>
+      </PageSection>
+    );
+  }
+
+  if (error) {
     return (
       <PageSection>
         <Card>
@@ -78,20 +91,10 @@ function Job({ i18n, lookup, setBreadcrumb }) {
     );
   }
 
-  if (lookup && job) {
-    return (
-      <Switch>
-        <Redirect from="jobs/:id" to={`/jobs/${jobType}/:id/output`} />
-        <Redirect from="jobs/:id/details" to={`/jobs/${jobType}/:id/details`} />
-        <Redirect from="jobs/:id/output" to={`/jobs/${jobType}/:id/output`} />
-      </Switch>
-    );
-  }
-
   return (
     <PageSection>
       <Card>
-        {!isLoading && <RoutedTabs tabsArray={tabsArray} />}
+        <RoutedTabs tabsArray={tabsArray} />
         <Switch>
           <Redirect from="/jobs/:type/:id" to="/jobs/:type/:id/output" exact />
           {job &&
@@ -112,13 +115,11 @@ function Job({ i18n, lookup, setBreadcrumb }) {
                 <JobOutput type={type} job={job} />
               </Route>,
               <Route key="not-found" path="*">
-                {!isLoading && (
-                  <ContentError isNotFound>
-                    <Link to={`/jobs/${type}/${id}/details`}>
-                      {i18n._(t`View Job Details`)}
-                    </Link>
-                  </ContentError>
-                )}
+                <ContentError isNotFound>
+                  <Link to={`/jobs/${type}/${id}/details`}>
+                    {i18n._(t`View Job Details`)}
+                  </Link>
+                </ContentError>
               </Route>,
             ]}
         </Switch>

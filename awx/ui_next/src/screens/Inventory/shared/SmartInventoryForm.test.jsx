@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 import {
   mountWithContexts,
   waitForElement,
@@ -27,7 +28,7 @@ const mockFormValues = {
   organization: { id: 1, name: 'mock organization' },
   host_filter:
     'name__icontains=mock and name__icontains=foo and groups__name__icontains=mock group',
-  instance_groups: [{ id: 123 }],
+  instance_groups: [{ id: 123, name: 'mock instance group' }],
   variables: '---',
 };
 
@@ -133,6 +134,29 @@ describe('<SmartInventoryForm />', () => {
       wrapper.update();
       expect(onSubmit).toHaveBeenCalledWith(mockFormValues);
     });
+  });
+
+  test('should pre-fill the host filter when query param present and not editing', async () => {
+    let wrapper;
+    const history = createMemoryHistory({
+      initialEntries: [
+        '/inventories/smart_inventory/add?host_filter=name__icontains%3Dfoo',
+      ],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <SmartInventoryForm onCancel={() => {}} onSubmit={() => {}} />,
+        {
+          context: { router: { history } },
+        }
+      );
+    });
+    wrapper.update();
+    const nameChipGroup = wrapper.find(
+      'HostFilterLookup ChipGroup[categoryName="Name"]'
+    );
+    expect(nameChipGroup.find('Chip').length).toBe(1);
+    wrapper.unmount();
   });
 
   test('should throw content error when option request fails', async () => {

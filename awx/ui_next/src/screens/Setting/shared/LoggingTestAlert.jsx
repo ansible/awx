@@ -33,6 +33,7 @@ function LoggingTestAlert({ i18n, successResponse, errorResponse, onClose }) {
       {testMessage && (
         <Alert
           actionClose={<AlertActionCloseButton onClose={onClose} />}
+          ouiaId="logging-test-alert"
           title={successResponse ? i18n._(t`Success`) : i18n._(t`Error`)}
           variant={successResponse ? 'success' : 'danger'}
         >

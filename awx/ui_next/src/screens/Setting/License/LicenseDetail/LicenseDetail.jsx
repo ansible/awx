@@ -13,6 +13,7 @@ function LicenseDetail({ i18n }) {
         <Button
           aria-label={i18n._(t`Edit`)}
           component={Link}
+          ouiaId="edit-button"
           to="/settings/license/edit"
         >
           {i18n._(t`Edit`)}

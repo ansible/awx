@@ -1,9 +1,13 @@
 import json
+import re
+import logging
 
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import iri_to_uri
 
 
 FrozenInjectors = dict()
+logger = logging.getLogger('awx.main.migrations')
 
 
 class PluginFileInjector(object):
@@ -128,6 +132,7 @@ class azure_rm(PluginFileInjector):
             # and put that as an entry in the exclusions list
             ret['exclude_host_filters'].append("location not in {}".format(repr(python_regions)))
         return ret
+
 
 class ec2(PluginFileInjector):
     plugin_name = 'aws_ec2'
@@ -585,6 +590,7 @@ class openstack(PluginFileInjector):
         if 'use_hostnames' in source_vars:
             ret['inventory_hostname'] = use_host_name_for_name(source_vars['use_hostnames'])
         return ret
+
 
 class rhv(PluginFileInjector):
     """ovirt uses the custom credential templating, and that is all

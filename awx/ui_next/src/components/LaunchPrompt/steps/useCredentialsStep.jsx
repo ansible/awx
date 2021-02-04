@@ -1,30 +1,47 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import CredentialsStep from './CredentialsStep';
+import StepName from './StepName';
 
 const STEP_ID = 'credentials';
 
-export default function useCredentialsStep(config, i18n) {
+export default function useCredentialsStep(launchConfig, resource, i18n) {
   return {
-    step: getStep(config, i18n),
+    step: getStep(launchConfig, i18n),
+    initialValues: getInitialValues(launchConfig, resource),
     isReady: true,
     contentError: null,
-    formError: null,
-    setTouched: setFieldsTouched => {
-      setFieldsTouched({
-        credentials: true,
-      });
+    hasError: false,
+    setTouched: setFieldTouched => {
+      setFieldTouched('credentials', true, false);
     },
+    validate: () => {},
   };
 }
 
-function getStep(config, i18n) {
-  if (!config.ask_credential_on_launch) {
+function getStep(launchConfig, i18n) {
+  if (!launchConfig.ask_credential_on_launch) {
     return null;
   }
   return {
     id: STEP_ID,
-    name: i18n._(t`Credentials`),
+    key: 4,
+    name: (
+      <StepName hasErrors={false} id="credentials-step">
+        {i18n._(t`Credentials`)}
+      </StepName>
+    ),
     component: <CredentialsStep i18n={i18n} />,
+    enableNext: true,
+  };
+}
+
+function getInitialValues(launchConfig, resource) {
+  if (!launchConfig.ask_credential_on_launch) {
+    return {};
+  }
+
+  return {
+    credentials: resource?.summary_fields?.credentials || [],
   };
 }

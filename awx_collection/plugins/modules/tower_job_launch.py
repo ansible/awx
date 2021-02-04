@@ -37,6 +37,12 @@ options:
       description:
         - Inventory to use for the job, only used if prompt for inventory is set.
       type: str
+    organization:
+      description:
+        - Organization the job template exists in.
+        - Used to help lookup the object, cannot be modified using this module.
+        - If not provided, will lookup by name only, which does not work with duplicates.
+      type: str
     credentials:
       description:
         - Credential to use for job, only used if prompt for credential is set.
@@ -149,6 +155,7 @@ def main():
         name=dict(required=True, aliases=['job_template']),
         job_type=dict(choices=['run', 'check']),
         inventory=dict(default=None),
+        organization=dict(),
         # Credentials will be a str instead of a list for backwards compatability
         credentials=dict(type='list', default=None, aliases=['credential'], elements='str'),
         limit=dict(),
@@ -172,6 +179,7 @@ def main():
     name = module.params.get('name')
     optional_args['job_type'] = module.params.get('job_type')
     inventory = module.params.get('inventory')
+    organization = module.params.get('organization')
     credentials = module.params.get('credentials')
     optional_args['limit'] = module.params.get('limit')
     optional_args['tags'] = module.params.get('tags')
@@ -201,7 +209,10 @@ def main():
             post_data['credentials'].append(module.resolve_name_to_id('credentials', credential))
 
     # Attempt to look up job_template based on the provided name
-    job_template = module.get_one('job_templates', name_or_id=name)
+    lookup_data = {}
+    if organization:
+        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+    job_template = module.get_one('job_templates', name_or_id=name, data=lookup_data)
 
     if job_template is None:
         module.fail_json(msg="Unable to find job template by name {0}".format(name))
@@ -211,7 +222,6 @@ def main():
     check_vars_to_prompts = {
         'scm_branch': 'ask_scm_branch_on_launch',
         'diff_mode': 'ask_diff_mode_on_launch',
-        'extra_vars': 'ask_variables_on_launch',
         'limit': 'ask_limit_on_launch',
         'tags': 'ask_tags_on_launch',
         'skip_tags': 'ask_skip_tags_on_launch',
@@ -225,6 +235,9 @@ def main():
     for variable_name in check_vars_to_prompts:
         if module.params.get(variable_name) and not job_template[check_vars_to_prompts[variable_name]]:
             param_errors.append("The field {0} was specified but the job template does not allow for it to be overridden".format(variable_name))
+    # Check if Either ask_variables_on_launch, or survey_enabled is enabled for use of extra vars.
+    if module.params.get('extra_vars') and not (job_template['ask_variables_on_launch'] or job_template['survey_enabled']):
+        param_errors.append("The field extra_vars was specified but the job template does not allow for it to be overridden")
     if len(param_errors) > 0:
         module.fail_json(msg="Parameters specified which can not be passed into job template, see errors for details", **{'errors': param_errors})
 

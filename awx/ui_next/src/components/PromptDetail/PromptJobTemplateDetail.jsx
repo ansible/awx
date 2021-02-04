@@ -72,7 +72,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
       ? 'smart_inventory'
       : 'inventory';
 
-  const recentJobs = summary_fields.recent_jobs.map(job => ({
+  const recentJobs = summary_fields?.recent_jobs?.map(job => ({
     ...job,
     type: 'job',
   }));
@@ -133,10 +133,12 @@ function PromptJobTemplateDetail({ i18n, resource }) {
       <Detail label={i18n._(t`Forks`)} value={forks || '0'} />
       <Detail label={i18n._(t`Limit`)} value={limit} />
       <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[verbosity]} />
-      <Detail
-        label={i18n._(t`Show Changes`)}
-        value={diff_mode ? i18n._(t`On`) : i18n._(t`Off`)}
-      />
+      {typeof diff_mode === 'boolean' && (
+        <Detail
+          label={i18n._(t`Show Changes`)}
+          value={diff_mode ? i18n._(t`On`) : i18n._(t`Off`)}
+        />
+      )}
       <Detail label={i18n._(t` Job Slicing`)} value={job_slice_count} />
       <Detail label={i18n._(t`Host Config Key`)} value={host_config_key} />
       {related?.callback && (
@@ -149,7 +151,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
         label={i18n._(t`Webhook Service`)}
         value={toTitleCase(webhook_service)}
       />
-      {related.webhook_receiver && (
+      {related?.webhook_receiver && (
         <Detail
           label={i18n._(t`Webhook URL`)}
           value={`${window.location.origin}${related.webhook_receiver}`}

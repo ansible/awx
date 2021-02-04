@@ -153,7 +153,7 @@ export const Project = shape({
   created: string,
   name: string.isRequired,
   description: string,
-  scm_type: oneOf(['', 'git', 'hg', 'svn', 'archive', 'insights']),
+  scm_type: oneOf(['', 'git', 'svn', 'archive', 'insights']),
   scm_url: string,
   scm_branch: string,
   scm_refspec: string,
@@ -390,4 +390,20 @@ export const NotificationTemplate = shape({
   summary_fields: shape({
     organization: Organization,
   }),
+});
+
+export const WorkflowApproval = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+  description: string,
+  url: string.isRequired,
+  failed: bool,
+  started: string,
+  finished: string,
+  canceled_on: string,
+  elapsed: number,
+  job_explanation: string,
+  can_approve_or_deny: bool,
+  approval_expiration: string,
+  timed_out: bool,
 });

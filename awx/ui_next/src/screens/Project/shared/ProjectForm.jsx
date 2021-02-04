@@ -21,7 +21,6 @@ import {
 import Popover from '../../../components/Popover';
 import {
   GitSubForm,
-  HgSubForm,
   SvnSubForm,
   ArchiveSubForm,
   InsightsSubForm,
@@ -237,13 +236,6 @@ function ProjectFormFields({
                     scmUpdateOnLaunch={formik.values.scm_update_on_launch}
                   />
                 ),
-                hg: (
-                  <HgSubForm
-                    credential={credentials.scm}
-                    onCredentialSelection={handleCredentialSelection}
-                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
-                  />
-                ),
                 svn: (
                   <SvnSubForm
                     credential={credentials.scm}
@@ -292,11 +284,11 @@ function ProjectFormFields({
                 data={[
                   {
                     label: i18n._(t`Use Default Ansible Environment`),
-                    value: '/venv/ansible/',
+                    value: '/var/lib/awx/venv/ansible/',
                     key: 'default',
                   },
                   ...custom_virtualenvs
-                    .filter(datum => datum !== '/venv/ansible/')
+                    .filter(datum => datum !== '/var/lib/awx/venv/ansible/')
                     .map(datum => ({
                       label: datum,
                       value: datum,
@@ -318,7 +310,17 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
   const { summary_fields = {} } = project;
   const [contentError, setContentError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [scmSubFormState, setScmSubFormState] = useState(null);
+  const [scmSubFormState, setScmSubFormState] = useState({
+    scm_url: '',
+    scm_branch: '',
+    scm_refspec: '',
+    credential: '',
+    scm_clean: false,
+    scm_delete_on_update: false,
+    scm_update_on_launch: false,
+    allow_override: false,
+    scm_update_cache_timeout: 0,
+  });
   const [scmTypeOptions, setScmTypeOptions] = useState(null);
   const [credentials, setCredentials] = useState({
     scm: { typeId: null, value: null },

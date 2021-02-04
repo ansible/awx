@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Config } from '../../contexts/Config';
-import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 
 import HostList from './HostList';
 import HostAdd from './HostAdd';
@@ -37,7 +37,7 @@ function Hosts({ i18n }) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader streamType="host" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path="/hosts/add">
           <HostAdd />

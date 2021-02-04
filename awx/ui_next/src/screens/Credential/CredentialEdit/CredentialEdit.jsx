@@ -39,7 +39,7 @@ function CredentialEdit({ credential, me }) {
 
         possibleFields.forEach(field => {
           const input = inputs[field.id];
-          if (input.credential && input.inputs) {
+          if (input?.credential && input?.inputs) {
             pluginInputs[field.id] = input;
           } else if (passwordPrompts[field.id]) {
             nonPluginInputs[field.id] = 'ASK';

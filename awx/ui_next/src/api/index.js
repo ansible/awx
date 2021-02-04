@@ -1,5 +1,7 @@
+import ActivityStream from './models/ActivityStream';
 import AdHocCommands from './models/AdHocCommands';
 import Applications from './models/Applications';
+import Auth from './models/Auth';
 import Config from './models/Config';
 import CredentialInputSources from './models/CredentialInputSources';
 import CredentialTypes from './models/CredentialTypes';
@@ -32,13 +34,16 @@ import Tokens from './models/Tokens';
 import UnifiedJobTemplates from './models/UnifiedJobTemplates';
 import UnifiedJobs from './models/UnifiedJobs';
 import Users from './models/Users';
+import WorkflowApprovals from './models/WorkflowApprovals';
 import WorkflowApprovalTemplates from './models/WorkflowApprovalTemplates';
 import WorkflowJobTemplateNodes from './models/WorkflowJobTemplateNodes';
 import WorkflowJobTemplates from './models/WorkflowJobTemplates';
 import WorkflowJobs from './models/WorkflowJobs';
 
+const ActivityStreamAPI = new ActivityStream();
 const AdHocCommandsAPI = new AdHocCommands();
 const ApplicationsAPI = new Applications();
+const AuthAPI = new Auth();
 const ConfigAPI = new Config();
 const CredentialInputSourcesAPI = new CredentialInputSources();
 const CredentialTypesAPI = new CredentialTypes();
@@ -71,14 +76,17 @@ const TokensAPI = new Tokens();
 const UnifiedJobTemplatesAPI = new UnifiedJobTemplates();
 const UnifiedJobsAPI = new UnifiedJobs();
 const UsersAPI = new Users();
+const WorkflowApprovalsAPI = new WorkflowApprovals();
 const WorkflowApprovalTemplatesAPI = new WorkflowApprovalTemplates();
 const WorkflowJobTemplateNodesAPI = new WorkflowJobTemplateNodes();
 const WorkflowJobTemplatesAPI = new WorkflowJobTemplates();
 const WorkflowJobsAPI = new WorkflowJobs();
 
 export {
+  ActivityStreamAPI,
   AdHocCommandsAPI,
   ApplicationsAPI,
+  AuthAPI,
   ConfigAPI,
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
@@ -111,6 +119,7 @@ export {
   UnifiedJobTemplatesAPI,
   UnifiedJobsAPI,
   UsersAPI,
+  WorkflowApprovalsAPI,
   WorkflowApprovalTemplatesAPI,
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,

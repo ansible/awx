@@ -18,6 +18,7 @@ import { SettingDetail } from '../../shared';
 function SAMLDetail({ i18n }) {
   const { me } = useConfig();
   const { GET: options } = useSettings();
+  options.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT.type = 'certificate';
 
   const { isLoading, error, request, result: saml } = useRequest(
     useCallback(async () => {
@@ -78,6 +79,7 @@ function SAMLDetail({ i18n }) {
             <Button
               aria-label={i18n._(t`Edit`)}
               component={Link}
+              ouiaId="edit-button"
               to="/settings/saml/edit"
             >
               {i18n._(t`Edit`)}

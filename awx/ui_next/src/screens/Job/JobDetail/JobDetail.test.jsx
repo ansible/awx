@@ -10,16 +10,8 @@ jest.mock('../../../api');
 
 describe('<JobDetail />', () => {
   let wrapper;
-  beforeEach(() => {
-    wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
-  });
   afterEach(() => {
     wrapper.unmount();
-  });
-  test('initially renders succesfully', () => {
-    wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
-
-    expect(wrapper.length).toBe(1);
   });
 
   test('should display details', () => {
@@ -28,12 +20,37 @@ describe('<JobDetail />', () => {
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
     }
 
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          summary_fields: {
+            ...mockJobData.summary_fields,
+            credential: {
+              id: 2,
+              name: 'Machine cred',
+              description: '',
+              kind: 'ssh',
+              cloud: false,
+              kubernetes: false,
+              credential_type_id: 1,
+            },
+            source_workflow_job: {
+              id: 1234,
+              name: 'Test Source Workflow',
+            },
+          },
+        }}
+      />
+    );
+
     // StatusIcon adds visibly hidden accessibility text " successful "
     assertDetail('Status', ' successful Successful');
     assertDetail('Started', '8/8/2019, 7:24:18 PM');
     assertDetail('Finished', '8/8/2019, 7:24:50 PM');
     assertDetail('Job Template', mockJobData.summary_fields.job_template.name);
-    assertDetail('Job Type', 'Run');
+    assertDetail('Source Workflow Job', `1234 - Test Source Workflow`);
+    assertDetail('Job Type', 'Playbook Run');
     assertDetail('Launched By', mockJobData.summary_fields.created_by.username);
     assertDetail('Inventory', mockJobData.summary_fields.inventory.name);
     assertDetail(
@@ -51,29 +68,30 @@ describe('<JobDetail />', () => {
     );
     assertDetail('Job Slice', '0/1');
     assertDetail('Credentials', 'SSH: Demo Credential');
-  });
+    assertDetail('Machine Credential', 'SSH: Machine cred');
 
-  test('should display credentials', () => {
-    const credentialChip = wrapper.find('CredentialChip');
-
+    const credentialChip = wrapper.find(
+      `Detail[label="Credentials"] CredentialChip`
+    );
     expect(credentialChip.prop('credential')).toEqual(
       mockJobData.summary_fields.credentials[0]
     );
-  });
 
-  test('should display successful job status icon', () => {
     const statusDetail = wrapper.find('Detail[label="Status"]');
     expect(statusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(1);
     expect(statusDetail.find('StatusIcon SuccessfulBottom')).toHaveLength(1);
-  });
 
-  test('should display successful project status icon', () => {
-    const statusDetail = wrapper.find('Detail[label="Project"]');
-    expect(statusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(1);
-    expect(statusDetail.find('StatusIcon SuccessfulBottom')).toHaveLength(1);
+    const projectStatusDetail = wrapper.find('Detail[label="Project"]');
+    expect(projectStatusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(
+      1
+    );
+    expect(
+      projectStatusDetail.find('StatusIcon SuccessfulBottom')
+    ).toHaveLength(1);
   });
 
   test('should properly delete job', async () => {
+    wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     wrapper.find('button[aria-label="Delete"]').simulate('click');
     await sleep(1);
     wrapper.update();
@@ -96,6 +114,7 @@ describe('<JobDetail />', () => {
         },
       })
     );
+    wrapper = mountWithContexts(<JobDetail job={mockJobData} />);
     wrapper.find('button[aria-label="Delete"]').simulate('click');
     const modal = wrapper.find('Modal');
     expect(modal.length).toBe(1);
@@ -109,19 +128,24 @@ describe('<JobDetail />', () => {
   });
 
   test('DELETED is shown for required Job resources that have been deleted', () => {
-    const newMockJobData = { ...mockJobData };
-    newMockJobData.summary_fields.inventory = null;
-    newMockJobData.summary_fields.project = null;
-    const newWrapper = mountWithContexts(
-      <JobDetail job={newMockJobData} />
-    ).find('JobDetail');
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          summary_fields: {
+            ...mockJobData.summary_fields,
+            inventory: null,
+            project: null,
+          },
+        }}
+      />
+    );
+    const detail = wrapper.find('JobDetail');
     async function assertMissingDetail(label) {
-      expect(newWrapper.length).toBe(1);
+      expect(detail.length).toBe(1);
       await sleep(0);
-      expect(newWrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(newWrapper.find(`Detail[label="${label}"] dd`).text()).toBe(
-        'DELETED'
-      );
+      expect(detail.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+      expect(detail.find(`Detail[label="${label}"] dd`).text()).toBe('DELETED');
     }
     assertMissingDetail('Project');
     assertMissingDetail('Inventory');
