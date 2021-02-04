@@ -205,7 +205,7 @@ function UserRolesList({ i18n, user }) {
             </Button>,
             <Button
               key="cancel"
-              variant="secondary"
+              variant="link"
               aria-label={i18n._(t`Cancel`)}
               onClick={() => setRoleToDisassociate(null)}
             >

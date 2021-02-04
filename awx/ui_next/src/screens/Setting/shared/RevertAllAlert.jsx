@@ -24,7 +24,7 @@ function RevertAllAlert({ i18n, onClose, onRevertAll }) {
         </Button>,
         <Button
           key="cancel"
-          variant="secondary"
+          variant="link"
           aria-label={i18n._(t`Cancel revert`)}
           onClick={onClose}
           ouiaId="cancel-revert-all-button"

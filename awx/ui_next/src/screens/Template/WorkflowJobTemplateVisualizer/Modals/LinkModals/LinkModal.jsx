@@ -36,7 +36,7 @@ function LinkModal({ header, i18n, onConfirm }) {
         <Button
           id="link-cancel"
           key="cancel"
-          variant="secondary"
+          variant="link"
           aria-label={i18n._(t`Cancel link changes`)}
           onClick={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
         >

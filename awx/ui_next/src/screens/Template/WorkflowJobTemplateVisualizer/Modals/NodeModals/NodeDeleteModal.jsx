@@ -31,7 +31,7 @@ function NodeDeleteModal({ i18n }) {
         <Button
           id="cancel-node-removal"
           key="cancel"
-          variant="secondary"
+          variant="link"
           aria-label={i18n._(t`Cancel node removal`)}
           onClick={() => dispatch({ type: 'SET_NODE_TO_DELETE', value: null })}
         >
