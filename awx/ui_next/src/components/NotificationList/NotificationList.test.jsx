@@ -87,10 +87,6 @@ describe('<NotificationList />', () => {
     wrapper.unmount();
   });
 
-  test('initially renders succesfully', () => {
-    expect(wrapper.find('PaginatedDataList')).toHaveLength(1);
-  });
-
   test('should render list fetched of items', () => {
     expect(NotificationTemplatesAPI.read).toHaveBeenCalled();
     expect(NotificationTemplatesAPI.readOptions).toHaveBeenCalled();
