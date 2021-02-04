@@ -73,9 +73,6 @@
           -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi \
           -e DATABASE_SERVICE_NAME=postgresql  \
           -e POSTGRESQL_MAX_CONNECTIONS={{ pg_max_connections|default(1024) }} \
-          -e POSTGRESQL_USER={{ pg_username }} \
-          -e POSTGRESQL_PASSWORD={{ pg_password | quote }} \
-          -e POSTGRESQL_DATABASE={{ pg_database | quote }} \
           -e POSTGRESQL_VERSION=12 \
           -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
