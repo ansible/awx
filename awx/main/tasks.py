@@ -336,6 +336,7 @@ def send_notifications(notification_list, job_id=None):
             sent = notification.notification_template.send(notification.subject, notification.body)
             notification.status = "successful"
             notification.notifications_sent = sent
+            job_actual.log_lifecycle("notifications_sent")
         except Exception as e:
             logger.exception("Send Notification Failed {}".format(e))
             notification.status = "failed"
@@ -1186,16 +1187,19 @@ class BaseTask(object):
         '''
         Hook for any steps to run before the job/task starts
         '''
+        instance.log_lifecycle("pre_run")
 
     def post_run_hook(self, instance, status):
         '''
         Hook for any steps to run before job/task is marked as complete.
         '''
+        instance.log_lifecycle("post_run")
 
     def final_run_hook(self, instance, status, private_data_dir, fact_modification_times, isolated_manager_instance=None):
         '''
         Hook for any steps to run after job/task is marked as complete.
         '''
+        instance.log_lifecycle("finalize_run")
         job_profiling_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
         awx_profiling_dir = '/var/log/tower/playbook_profiling/'
         if not os.path.exists(awx_profiling_dir):
@@ -1358,7 +1362,6 @@ class BaseTask(object):
         # self.instance because of the update_model pattern and when it's used in callback handlers
         self.instance = self.update_model(pk, status='running',
                                           start_args='')  # blank field to remove encrypted passwords
-
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
         extra_update_fields = {}
@@ -1383,6 +1386,7 @@ class BaseTask(object):
             self.instance.send_notification_templates("running")
             private_data_dir = self.build_private_data_dir(self.instance)
             self.pre_run_hook(self.instance, private_data_dir)
+            self.instance.log_lifecycle("preparing_playbook")
             if self.instance.cancel_flag:
                 self.instance = self.update_model(self.instance.pk, status='canceled')
             if self.instance.status != 'running':
@@ -1510,6 +1514,7 @@ class BaseTask(object):
                 res = ansible_runner.interface.run(**params)
                 status = res.status
                 rc = res.rc
+            self.instance.log_lifecycle("running_playbook")
 
             if status == 'timeout':
                 self.instance.job_explanation = "Job terminated due to timeout"
@@ -1868,6 +1873,7 @@ class RunJob(BaseTask):
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def pre_run_hook(self, job, private_data_dir):
+        super(RunJob, self).pre_run_hook(job, private_data_dir)
         if job.inventory is None:
             error = _('Job could not start because it does not have a valid inventory.')
             self.update_model(job.pk, status='failed', job_explanation=error)
@@ -2313,6 +2319,7 @@ class RunProjectUpdate(BaseTask):
                 'for path {}.'.format(instance.log_format, waiting_time, lock_path))
 
     def pre_run_hook(self, instance, private_data_dir):
+        super(RunProjectUpdate, self).pre_run_hook(instance, private_data_dir)
         # re-create root project folder if a natural disaster has destroyed it
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
@@ -2408,6 +2415,7 @@ class RunProjectUpdate(BaseTask):
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(p).__name__, p.pk, dest_subpath))
 
     def post_run_hook(self, instance, status):
+        super(RunProjectUpdate, self).post_run_hook(instance, status)
         # To avoid hangs, very important to release lock even if errors happen here
         try:
             if self.playbook_new_revision:
@@ -2663,6 +2671,7 @@ class RunInventoryUpdate(BaseTask):
         return inventory_update.get_extra_credentials()
 
     def pre_run_hook(self, inventory_update, private_data_dir):
+        super(RunInventoryUpdate, self).pre_run_hook(inventory_update, private_data_dir)
         source_project = None
         if inventory_update.inventory_source:
             source_project = inventory_update.inventory_source.source_project
@@ -2707,6 +2716,7 @@ class RunInventoryUpdate(BaseTask):
             RunProjectUpdate.make_local_copy(source_project, private_data_dir)
 
     def post_run_hook(self, inventory_update, status):
+        super(RunInventoryUpdate, self).post_run_hook(inventory_update, status)
         if status != 'successful':
             return # nothing to save, step out of the way to allow error reporting
 

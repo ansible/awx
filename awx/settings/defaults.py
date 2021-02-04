@@ -842,6 +842,9 @@ LOGGING = {
         'dispatcher': {
             'format': '%(asctime)s %(levelname)-8s %(name)s PID:%(process)d %(message)s',
         },
+        'job_lifecycle': {
+            '()': 'awx.main.utils.formatters.JobLifeCycleFormatter',
+        },
     },
     'handlers': {
         'console': {
@@ -940,6 +943,12 @@ LOGGING = {
             'filename': os.path.join(LOG_ROOT, 'isolated_manager.log'),
             'formatter':'simple',
         },
+        'job_lifecycle': {
+            'level': 'DEBUG',
+            'class':'logging.handlers.WatchedFileHandler',
+            'filename': os.path.join(LOG_ROOT, 'job_lifecycle.log'),
+            'formatter': 'job_lifecycle',
+        },
     },
     'loggers': {
         'django': {
@@ -1027,6 +1036,11 @@ LOGGING = {
         'awx.analytics': {
             'handlers': ['external_logger'],
             'level': 'INFO',
+            'propagate': False
+        },
+        'awx.analytics.job_lifecycle': {
+            'handlers': ['console', 'job_lifecycle'],
+            'level': 'DEBUG',
             'propagate': False
         },
         'django_auth_ldap': {
