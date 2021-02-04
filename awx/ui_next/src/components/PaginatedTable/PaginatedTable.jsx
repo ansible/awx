@@ -89,7 +89,7 @@ function PaginatedTable({
     );
   } else {
     Content = (
-      <div css="overflow: scroll">
+      <div css="overflow: auto">
         {hasContentLoading && <LoadingSpinner />}
         <TableComposable aria-label={dataListLabel}>
           {headerRow}
