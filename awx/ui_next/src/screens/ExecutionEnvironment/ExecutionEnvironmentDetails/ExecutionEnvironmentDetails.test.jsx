@@ -39,6 +39,7 @@ const executionEnvironment = {
       last_name: '',
     },
   },
+  name: 'Default EE',
   created: '2020-09-17T20:14:15.408782Z',
   modified: '2020-09-17T20:14:15.408802Z',
   description: 'Foo',

@@ -1,18 +1,28 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { func, shape } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Form } from '@patternfly/react-core';
+import { Form, FormGroup } from '@patternfly/react-core';
 
+import { ExecutionEnvironmentsAPI } from '../../../api';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 import FormActionGroup from '../../../components/FormActionGroup';
 import FormField, { FormSubmitError } from '../../../components/FormField';
+import AnsibleSelect from '../../../components/AnsibleSelect';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import { OrganizationLookup } from '../../../components/Lookup';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
 import { required, url } from '../../../util/validators';
+import useRequest from '../../../util/useRequest';
 
-function ExecutionEnvironmentFormFields({ i18n, me, executionEnvironment }) {
+function ExecutionEnvironmentFormFields({
+  i18n,
+  me,
+  options,
+  executionEnvironment,
+}) {
   const [credentialField] = useField('credential');
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
@@ -37,8 +47,28 @@ function ExecutionEnvironmentFormFields({ i18n, me, executionEnvironment }) {
     [setFieldValue]
   );
 
+  const [
+    containerOptionsField,
+    containerOptionsMeta,
+    containerOptionsHelpers,
+  ] = useField({
+    name: 'container_options',
+  });
+
+  const containerPullChoices = options?.actions?.POST?.container_options?.choices.map(
+    ([value, label]) => ({ value, label, key: value })
+  );
+
   return (
     <>
+      <FormField
+        id="execution-environment-name"
+        label={i18n._(t`Name`)}
+        name="name"
+        type="text"
+        validate={required(null, i18n)}
+        isRequired
+      />
       <FormField
         id="execution-environment-image"
         label={i18n._(t`Image name`)}
@@ -50,6 +80,25 @@ function ExecutionEnvironmentFormFields({ i18n, me, executionEnvironment }) {
           t`The registry location where the container is stored.`
         )}
       />
+      <FormGroup
+        fieldId="execution-environment-container-options"
+        helperTextInvalid={containerOptionsMeta.error}
+        validated={
+          !containerOptionsMeta.touched || !containerOptionsMeta.error
+            ? 'default'
+            : 'error'
+        }
+        label={i18n._(t`Container Pull Option`)}
+      >
+        <AnsibleSelect
+          {...containerOptionsField}
+          id="container-pull-options"
+          data={containerPullChoices}
+          onChange={(event, value) => {
+            containerOptionsHelpers.setValue(value);
+          }}
+        />
+      </FormGroup>
       <FormField
         id="execution-environment-description"
         label={i18n._(t`Description`)}
@@ -90,8 +139,36 @@ function ExecutionEnvironmentForm({
   me,
   ...rest
 }) {
+  const {
+    isLoading,
+    error,
+    request: fetchOptions,
+    result: options,
+  } = useRequest(
+    useCallback(async () => {
+      const res = await ExecutionEnvironmentsAPI.readOptions();
+      const { data } = res;
+      return data;
+    }, []),
+    null
+  );
+
+  useEffect(() => {
+    fetchOptions();
+  }, [fetchOptions]);
+
+  if (isLoading || !options) {
+    return <ContentLoading />;
+  }
+
+  if (error) {
+    return <ContentError error={error} />;
+  }
+
   const initialValues = {
+    name: executionEnvironment.name || '',
     image: executionEnvironment.image || '',
+    container_options: executionEnvironment?.container_options || '',
     description: executionEnvironment.description || '',
     credential: executionEnvironment.summary_fields?.credential || null,
     organization: executionEnvironment.summary_fields?.organization || null,
@@ -101,7 +178,12 @@ function ExecutionEnvironmentForm({
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
-            <ExecutionEnvironmentFormFields me={me} {...rest} />
+            <ExecutionEnvironmentFormFields
+              me={me}
+              options={options}
+              executionEnvironment={executionEnvironment}
+              {...rest}
+            />
             {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
               onCancel={onCancel}

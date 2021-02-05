@@ -1,6 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { ExecutionEnvironmentsAPI } from '../../../api';
 
 import ExecutionEnvironmentForm from './ExecutionEnvironmentForm';
 
@@ -13,7 +17,9 @@ const mockMe = {
 
 const executionEnvironment = {
   id: 16,
+  name: 'Test EE',
   type: 'execution_environment',
+  container_options: 'one',
   url: '/api/v2/execution_environments/16/',
   related: {
     created_by: '/api/v2/users/1/',
@@ -38,6 +44,22 @@ const executionEnvironment = {
   credential: 4,
 };
 
+const mockOptions = {
+  data: {
+    actions: {
+      POST: {
+        container_options: {
+          choices: [
+            ['one', 'One'],
+            ['two', 'Two'],
+            ['three', 'Three'],
+          ],
+        },
+      },
+    },
+  },
+};
+
 describe('<ExecutionEnvironmentForm/>', () => {
   let wrapper;
   let onCancel;
@@ -46,16 +68,19 @@ describe('<ExecutionEnvironmentForm/>', () => {
   beforeEach(async () => {
     onCancel = jest.fn();
     onSubmit = jest.fn();
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
     await act(async () => {
       wrapper = mountWithContexts(
         <ExecutionEnvironmentForm
           onCancel={onCancel}
           onSubmit={onSubmit}
           executionEnvironment={executionEnvironment}
+          options={mockOptions}
           me={mockMe}
         />
       );
     });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
 
   afterEach(() => {
@@ -83,6 +108,12 @@ describe('<ExecutionEnvironmentForm/>', () => {
 
   test('should update form values', async () => {
     await act(async () => {
+      wrapper.find('input#execution-environment-image').simulate('change', {
+        target: {
+          value: 'Updated EE Name',
+          name: 'name',
+        },
+      });
       wrapper.find('input#execution-environment-image').simulate('change', {
         target: {
           value: 'https://registry.com/image/container2',
