@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
-import { I18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
@@ -10,6 +10,7 @@ import {
   InfiniteLoader,
   List,
 } from 'react-virtualized';
+import { Button } from '@patternfly/react-core';
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
 import { AllHtmlEntities } from 'html-entities';
@@ -225,6 +226,7 @@ class JobOutput extends Component {
     this.state = {
       contentError: null,
       deletionError: null,
+      cancelError: null,
       hasContentLoading: true,
       results: {},
       currentlyLoading: [],
@@ -232,6 +234,9 @@ class JobOutput extends Component {
       isHostModalOpen: false,
       hostEvent: {},
       cssMap: {},
+      jobStatus: props.job.status ?? 'waiting',
+      showCancelPrompt: false,
+      cancelInProgress: false,
     };
 
     this.cache = new CellMeasurerCache({
@@ -242,6 +247,9 @@ class JobOutput extends Component {
     this._isMounted = false;
     this.loadJobEvents = this.loadJobEvents.bind(this);
     this.handleDeleteJob = this.handleDeleteJob.bind(this);
+    this.handleCancelOpen = this.handleCancelOpen.bind(this);
+    this.handleCancelConfirm = this.handleCancelConfirm.bind(this);
+    this.handleCancelClose = this.handleCancelClose.bind(this);
     this.rowRenderer = this.rowRenderer.bind(this);
     this.handleHostEventClick = this.handleHostEventClick.bind(this);
     this.handleHostModalClose = this.handleHostModalClose.bind(this);
@@ -264,10 +272,18 @@ class JobOutput extends Component {
     if (job.result_traceback) return;
 
     connectJobSocket(job, data => {
-      if (data.counter && data.counter > this.jobSocketCounter) {
-        this.jobSocketCounter = data.counter;
-      } else if (data.final_counter && data.unified_job_id === job.id) {
-        this.jobSocketCounter = data.final_counter;
+      if (data.group_name === 'job_events') {
+        if (data.counter && data.counter > this.jobSocketCounter) {
+          this.jobSocketCounter = data.counter;
+        }
+      }
+      if (data.group_name === 'jobs' && data.unified_job_id === job.id) {
+        if (data.final_counter) {
+          this.jobSocketCounter = data.final_counter;
+        }
+        if (data.status) {
+          this.setState({ jobStatus: data.status });
+        }
       }
     });
     this.interval = setInterval(() => this.monitorJobSocketCounter(), 5000);
@@ -365,6 +381,26 @@ class JobOutput extends Component {
             n => !loadRange.includes(n)
           ),
         }));
+    }
+  }
+
+  handleCancelOpen() {
+    this.setState({ showCancelPrompt: true });
+  }
+
+  handleCancelClose() {
+    this.setState({ showCancelPrompt: false });
+  }
+
+  async handleCancelConfirm() {
+    const { job, type } = this.props;
+    this.setState({ cancelInProgress: true });
+    try {
+      await JobsAPI.cancel(job.id, type);
+    } catch (cancelError) {
+      this.setState({ cancelError });
+    } finally {
+      this.setState({ showCancelPrompt: false, cancelInProgress: false });
     }
   }
 
@@ -542,7 +578,7 @@ class JobOutput extends Component {
   }
 
   render() {
-    const { job } = this.props;
+    const { job, i18n } = this.props;
 
     const {
       contentError,
@@ -552,6 +588,10 @@ class JobOutput extends Component {
       isHostModalOpen,
       remoteRowCount,
       cssMap,
+      jobStatus,
+      showCancelPrompt,
+      cancelError,
+      cancelInProgress,
     } = this.state;
 
     if (hasContentLoading) {
@@ -577,7 +617,12 @@ class JobOutput extends Component {
               <StatusIcon status={job.status} />
               <h1>{job.name}</h1>
             </HeaderTitle>
-            <OutputToolbar job={job} onDelete={this.handleDeleteJob} />
+            <OutputToolbar
+              job={job}
+              jobStatus={jobStatus}
+              onDelete={this.handleDeleteJob}
+              onCancel={this.handleCancelOpen}
+            />
           </OutputHeader>
           <HostStatusBar counts={job.host_status_counts} />
           <PageControls
@@ -619,21 +664,65 @@ class JobOutput extends Component {
             <OutputFooter />
           </OutputWrapper>
         </CardBody>
+        {showCancelPrompt &&
+          ['pending', 'waiting', 'running'].includes(jobStatus) && (
+            <AlertModal
+              isOpen={showCancelPrompt}
+              variant="danger"
+              onClose={this.handleCancelClose}
+              title={i18n._(t`Cancel Job`)}
+              label={i18n._(t`Cancel Job`)}
+              actions={[
+                <Button
+                  id="cancel-job-confirm-button"
+                  key="delete"
+                  variant="danger"
+                  isDisabled={cancelInProgress}
+                  aria-label={i18n._(t`Cancel job`)}
+                  onClick={this.handleCancelConfirm}
+                >
+                  {i18n._(t`Cancel job`)}
+                </Button>,
+                <Button
+                  id="cancel-job-return-button"
+                  key="cancel"
+                  variant="secondary"
+                  aria-label={i18n._(t`Return`)}
+                  onClick={this.handleCancelClose}
+                >
+                  {i18n._(t`Return`)}
+                </Button>,
+              ]}
+            >
+              {i18n._(
+                t`Are you sure you want to submit the request to cancel this job?`
+              )}
+            </AlertModal>
+          )}
+        {cancelError && (
+          <>
+            <AlertModal
+              isOpen={cancelError}
+              variant="danger"
+              onClose={() => this.setState({ cancelError: null })}
+              title={i18n._(t`Job Cancel Error`)}
+              label={i18n._(t`Job Cancel Error`)}
+            >
+              <ErrorDetail error={cancelError} />
+            </AlertModal>
+          </>
+        )}
         {deletionError && (
           <>
-            <I18n>
-              {({ i18n }) => (
-                <AlertModal
-                  isOpen={deletionError}
-                  variant="danger"
-                  onClose={() => this.setState({ deletionError: null })}
-                  title={i18n._(t`Job Delete Error`)}
-                  label={i18n._(t`Job Delete Error`)}
-                >
-                  <ErrorDetail error={deletionError} />
-                </AlertModal>
-              )}
-            </I18n>
+            <AlertModal
+              isOpen={deletionError}
+              variant="danger"
+              onClose={() => this.setState({ deletionError: null })}
+              title={i18n._(t`Job Delete Error`)}
+              label={i18n._(t`Job Delete Error`)}
+            >
+              <ErrorDetail error={deletionError} />
+            </AlertModal>
           </>
         )}
       </Fragment>
@@ -642,4 +731,4 @@ class JobOutput extends Component {
 }
 
 export { JobOutput as _JobOutput };
-export default withRouter(JobOutput);
+export default withI18n()(withRouter(JobOutput));

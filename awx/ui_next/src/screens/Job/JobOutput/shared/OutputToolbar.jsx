@@ -4,6 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { shape, func } from 'prop-types';
 import {
+  MinusCircleIcon,
   DownloadIcon,
   RocketIcon,
   TrashAltIcon,
@@ -58,7 +59,7 @@ const OUTPUT_NO_COUNT_JOB_TYPES = [
   'inventory_update',
 ];
 
-const OutputToolbar = ({ i18n, job, onDelete }) => {
+const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
   const hideCounts = OUTPUT_NO_COUNT_JOB_TYPES.includes(job.type);
 
   const playCount = job?.playbook_counts?.play_count;
@@ -148,19 +149,34 @@ const OutputToolbar = ({ i18n, job, onDelete }) => {
           </a>
         </Tooltip>
       )}
+      {job.summary_fields.user_capabilities.start &&
+        ['pending', 'waiting', 'running'].includes(jobStatus) && (
+          <Tooltip content={i18n._(t`Cancel Job`)}>
+            <Button
+              variant="plain"
+              aria-label={i18n._(t`Cancel Job`)}
+              onClick={onCancel}
+            >
+              <MinusCircleIcon />
+            </Button>
+          </Tooltip>
+        )}
 
-      {job.summary_fields.user_capabilities.delete && (
-        <Tooltip content={i18n._(t`Delete Job`)}>
-          <DeleteButton
-            name={job.name}
-            modalTitle={i18n._(t`Delete Job`)}
-            onConfirm={onDelete}
-            variant="plain"
-          >
-            <TrashAltIcon />
-          </DeleteButton>
-        </Tooltip>
-      )}
+      {job.summary_fields.user_capabilities.delete &&
+        ['new', 'successful', 'failed', 'error', 'canceled'].includes(
+          jobStatus
+        ) && (
+          <Tooltip content={i18n._(t`Delete Job`)}>
+            <DeleteButton
+              name={job.name}
+              modalTitle={i18n._(t`Delete Job`)}
+              onConfirm={onDelete}
+              variant="plain"
+            >
+              <TrashAltIcon />
+            </DeleteButton>
+          </Tooltip>
+        )}
     </Wrapper>
   );
 };
