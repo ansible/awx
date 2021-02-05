@@ -1,25 +1,40 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en-US">
-  <head>
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'nonce-{{ csp_nonce }}'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:;"
-    />
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script nonce="{{ csp_nonce }}">
-      setInterval(function() {
-      window.location = '/';
-      }, 10000);
-    </script>
-  </head>
-  <body>
-    <div>
-      <span>
-        <p>AWX is installing.</p>
-        <p>This page will refresh when complete.</p>
-      </span>
-    </div>
-  </body>
+   <head>
+      <title>{{ title }}</title>
+      <meta
+         http-equiv="Content-Security-Policy"
+         content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'nonce-{{ csp_nonce }}'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:;"
+         />
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link href="{% static 'css/fonts/assets/RedHatDisplay/RedHatDisplay-Medium.woff' %}" rel="stylesheet" type="application/font-woff" media="all"/>
+      <link href="{% static 'css/fonts/assets/RedHatText/RedHatText-Regular.woff' %}" rel="stylesheet" type="application/font-woff" media="all"/>
+      <link href="{% static 'css/patternfly.min.css' %}" rel="stylesheet" type="text/css" media="all"/>
+      <script nonce="{{ csp_nonce }}">
+         setInterval(function() {
+         window.location = '/';
+         }, 10000);
+      </script>
+   </head>
+   <body>
+      <div class="pf-l-bullseye pf-m-gutter">
+         <div class="pf-l-bullseye__item">
+            <div class="pf-l-bullseye">
+            <img src="{% static 'media/logo-header.svg' %}" width="300px" alt={{image_alt}} />
+            </div>
+            <div class="pf-l-bullseye">
+              <span class="pf-c-spinner" role="progressbar" aria-valuetext={{aria_spinner}}>
+                <span class="pf-c-spinner__clipper"></span>
+                <span class="pf-c-spinner__lead-ball"></span>
+                <span class="pf-c-spinner__tail-ball"></span>
+              </span>
+            </div>
+            <h2 class="pf-l-bullseye pf-c-title pf-m-2xl ws-heading ws-title ws-h2">{{message_upgrade}}</h2>
+            <h2 class="pf-l-bullseye pf-c-title pf-m-2xl ws-heading ws-title ws-h2">{{message_refresh}}</h2>
+         </div>
+      </div>
+   </body>
 </html>
