@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { oneOf, bool, number, string, func } from 'prop-types';
 import AceEditor from 'react-ace';
 // import * as ace from 'ace-builds';
@@ -79,6 +79,7 @@ const CodeMirror = styled(ReactCodeMirror)`
 `;
 
 function CodeMirrorInput({
+  id,
   value,
   onChange,
   mode,
@@ -89,19 +90,33 @@ function CodeMirrorInput({
   className,
   placeholder,
 }) {
-  // Workaround for CodeMirror bug: If CodeMirror renders in a modal on the
-  // modal's initial render, it appears as an empty box due to mis-calculated
-  // element height. Forcing an initial render before mounting <CodeMirror>
-  // fixes this.
-  const [isInitialized, setIsInitialized] = useState(false);
-  useEffect(() => {
-    if (!isInitialized) {
-      setIsInitialized(true);
+  const wrapper = useRef(null);
+  const editor = useRef(null);
+
+  useEffect(function removeTextareaTabIndex() {
+    const editorInput = editor.current.refEditor?.querySelector('textarea');
+    if (editorInput) {
+      editorInput.tabIndex = -1;
     }
-  }, [isInitialized]);
-  if (!isInitialized) {
-    return <div />;
-  }
+  }, []);
+
+  const listen = useCallback(event => {
+    if (wrapper.current === document.activeElement && event.key === 'Enter') {
+      const editorInput = editor.current.refEditor?.querySelector('textarea');
+      if (editorInput) {
+        editorInput.focus();
+      }
+    }
+  }, []);
+
+  useEffect(function addKeyEventListeners() {
+    const wrapperEl = wrapper.current;
+    wrapperEl.addEventListener('keydown', listen);
+
+    return () => {
+      wrapperEl.removeEventListener('keydown', listen);
+    };
+  });
 
   return (
     <>
@@ -121,19 +136,38 @@ function CodeMirrorInput({
         fullHeight={fullHeight}
         rows={rows}
       /> */}
-      <AceEditor
-        mode={mode === 'javascript' ? 'json' : mode}
-        theme="github"
-        onChange={onChange}
-        value={value}
-        name="UNIQUE_ID_OF_DIV"
-        editorProps={{ $blockScrolling: true }}
-        width="100%"
-        setOptions={{
-          readOnly,
-          useWorker: false,
-        }}
-      />
+      <div ref={wrapper} tabIndex={0}>
+        <AceEditor
+          mode={mode === 'javascript' ? 'json' : mode}
+          theme="github"
+          onChange={onChange}
+          value={value}
+          name={id || 'code-editor'}
+          editorProps={{ $blockScrolling: true }}
+          width="100%"
+          setOptions={{
+            readOnly,
+            useWorker: false,
+          }}
+          commands={[
+            {
+              name: 'escape',
+              bindKey: { win: 'Esc', mac: 'Esc' },
+              exec: () => {
+                wrapper.current.focus();
+              },
+            },
+            {
+              name: 'tab escape',
+              bindKey: { win: 'Shift-Tab', mac: 'Shift-Tab' },
+              exec: () => {
+                wrapper.current.focus();
+              },
+            },
+          ]}
+          ref={editor}
+        />
+      </div>
     </>
   );
 }
