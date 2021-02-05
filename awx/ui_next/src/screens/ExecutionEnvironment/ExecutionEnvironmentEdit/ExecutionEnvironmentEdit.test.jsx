@@ -19,12 +19,32 @@ const executionEnvironmentData = {
   credential: { id: 4 },
   description: 'A simple EE',
   image: 'https://registry.com/image/container',
+  container_options: 'one',
+  name: 'Test EE',
 };
 
 const updateExecutionEnvironmentData = {
   image: 'https://registry.com/image/container2',
   description: 'Updated new description',
 };
+
+const mockOptions = {
+  data: {
+    actions: {
+      POST: {
+        container_options: {
+          choices: [
+            ['one', 'One'],
+            ['two', 'Two'],
+            ['three', 'Three'],
+          ],
+        },
+      },
+    },
+  },
+};
+
+ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
 
 describe('<ExecutionEnvironmentEdit/>', () => {
   let wrapper;
