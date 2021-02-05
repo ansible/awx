@@ -348,7 +348,7 @@ class JobNotificationMixin(object):
                                               'schedule': {'description': 'Sample schedule',
                                                            'id': 42,
                                                            'name': 'Stub schedule',
-                                                           'next_run': '2038-01-01T00:00:00Z'},
+                                                           'next_run': datetime.datetime(2038, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc)},
                                               'unified_job_template': {'description': 'Sample unified job template description',
                                                                        'id': 39,
                                                                        'name': 'Stub Job Template',

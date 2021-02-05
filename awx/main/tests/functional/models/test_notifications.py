@@ -6,7 +6,7 @@ import pytest
 
 #from awx.main.models import NotificationTemplates, Notifications, JobNotificationMixin
 from awx.main.models import (AdHocCommand, InventoryUpdate, Job, JobNotificationMixin, ProjectUpdate,
-                             SystemJob, WorkflowJob)
+                             Schedule, SystemJob, WorkflowJob)
 from awx.api.serializers import UnifiedJobSerializer
 
 
@@ -75,7 +75,7 @@ class TestJobNotificationMixin(object):
                                                     'schedule': {'description': str,
                                                                  'id': int,
                                                                  'name': str,
-                                                                 'next_run': str},
+                                                                 'next_run': datetime.datetime},
                                                     'unified_job_template': {'description': str,
                                                                              'id': int,
                                                                              'name': str,
@@ -93,27 +93,27 @@ class TestJobNotificationMixin(object):
                          'workflow_url': str,
                          'url': str}
 
+    def check_structure(self, expected_structure, obj):
+        if isinstance(expected_structure, dict):
+            assert isinstance(obj, dict)
+            for key in obj:
+                assert key in expected_structure
+                if obj[key] is None:
+                    continue
+                if isinstance(expected_structure[key], dict):
+                    assert isinstance(obj[key], dict)
+                    self.check_structure(expected_structure[key], obj[key])
+                else:
+                    if key == 'job_explanation':
+                        assert isinstance(str(obj[key]), expected_structure[key])
+                    else:
+                        assert isinstance(obj[key], expected_structure[key])
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('JobClass', [AdHocCommand, InventoryUpdate, Job, ProjectUpdate, SystemJob, WorkflowJob])
     def test_context(self, JobClass, sqlite_copy_expert, project, inventory_source):
         """The Jinja context defines all of the fields that can be used by a template. Ensure that the context generated
         for each job type has the expected structure."""
-        def check_structure(expected_structure, obj):
-            if isinstance(expected_structure, dict):
-                assert isinstance(obj, dict)
-                for key in obj:
-                    assert key in expected_structure
-                    if obj[key] is None:
-                        continue
-                    if isinstance(expected_structure[key], dict):
-                        assert isinstance(obj[key], dict)
-                        check_structure(expected_structure[key], obj[key])
-                    else:
-                        if key == 'job_explanation':
-                            assert isinstance(str(obj[key]), expected_structure[key])
-                        else:
-                            assert isinstance(obj[key], expected_structure[key])
         kwargs = {}
         if JobClass is InventoryUpdate:
             kwargs['inventory_source'] = inventory_source
@@ -125,8 +125,26 @@ class TestJobNotificationMixin(object):
         job_serialization = UnifiedJobSerializer(job).to_representation(job)
 
         context = job.context(job_serialization)
-        check_structure(TestJobNotificationMixin.CONTEXT_STRUCTURE, context)
+        self.check_structure(TestJobNotificationMixin.CONTEXT_STRUCTURE, context)
 
+    @pytest.mark.django_db
+    def test_schedule_context(self, job_template, admin_user):
+        schedule = Schedule.objects.create(
+            name='job-schedule',
+            rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY',
+            unified_job_template=job_template
+        )
+        job = Job.objects.create(
+            name='fake-job',
+            launch_type='workflow',
+            schedule=schedule,
+            job_template=job_template
+        )
+
+        job_serialization = UnifiedJobSerializer(job).to_representation(job)
+
+        context = job.context(job_serialization)
+        self.check_structure(TestJobNotificationMixin.CONTEXT_STRUCTURE, context)
 
     @pytest.mark.django_db
     def test_context_job_metadata_with_unicode(self):
