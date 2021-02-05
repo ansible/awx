@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
