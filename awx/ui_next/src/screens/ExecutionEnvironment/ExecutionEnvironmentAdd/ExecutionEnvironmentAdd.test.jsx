@@ -2,7 +2,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import { ExecutionEnvironmentsAPI } from '../../../api';
 import ExecutionEnvironmentAdd from './ExecutionEnvironmentAdd';
 
@@ -14,11 +17,30 @@ const mockMe = {
 };
 
 const executionEnvironmentData = {
+  name: 'Test EE',
   credential: 4,
   description: 'A simple EE',
   image: 'https://registry.com/image/container',
+  container_options: 'one',
 };
 
+const mockOptions = {
+  data: {
+    actions: {
+      POST: {
+        container_options: {
+          choices: [
+            ['one', 'One'],
+            ['two', 'Two'],
+            ['three', 'Three'],
+          ],
+        },
+      },
+    },
+  },
+};
+
+ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
 ExecutionEnvironmentsAPI.create.mockResolvedValue({
   data: {
     id: 42,
@@ -61,6 +83,8 @@ describe('<ExecutionEnvironmentAdd/>', () => {
   });
 
   test('handleCancel should return the user back to the execution environments list', async () => {
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+
     wrapper.find('Button[aria-label="Cancel"]').simulate('click');
     expect(history.location.pathname).toEqual('/execution_environments');
   });
