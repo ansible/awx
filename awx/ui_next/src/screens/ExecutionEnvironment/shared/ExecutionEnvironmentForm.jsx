@@ -14,7 +14,7 @@ import { FormColumnLayout } from '../../../components/FormLayout';
 import { OrganizationLookup } from '../../../components/Lookup';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
-import { required, url } from '../../../util/validators';
+import { required } from '../../../util/validators';
 import useRequest from '../../../util/useRequest';
 
 function ExecutionEnvironmentFormFields({
@@ -74,7 +74,7 @@ function ExecutionEnvironmentFormFields({
         label={i18n._(t`Image name`)}
         name="image"
         type="text"
-        validate={url(i18n)}
+        validate={required(null, i18n)}
         isRequired
         tooltip={i18n._(
           t`The registry location where the container is stored.`
