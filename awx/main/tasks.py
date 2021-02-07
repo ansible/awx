@@ -904,7 +904,8 @@ class BaseTask(object):
         image = instance.execution_environment.image
         params = {
             "container_image": image,
-            "process_isolation": True
+            "process_isolation": True,
+            "container_options": ['--user=root'],
         }
         if settings.AWX_PROOT_SHOW_PATHS:
             params['container_volume_mounts'] = []
