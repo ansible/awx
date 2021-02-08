@@ -7,10 +7,14 @@ import { CredentialsAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList, {
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import CredentialListItem from './CredentialListItem';
@@ -114,7 +118,7 @@ function CredentialList({ i18n }) {
   return (
     <PageSection>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading}
           items={credentials}
@@ -142,7 +146,14 @@ function CredentialList({ i18n }) {
               key: 'modified_by__username__icontains',
             },
           ]}
-          renderItem={item => (
+          headerRow={
+            <HeaderRow qsConfig={QS_CONFIG}>
+              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
+              <HeaderCell alignRight>{i18n._(t`Actions`)}</HeaderCell>
+            </HeaderRow>
+          }
+          renderRow={(item, index) => (
             <CredentialListItem
               key={item.id}
               credential={item}
@@ -150,6 +161,7 @@ function CredentialList({ i18n }) {
               detailUrl={`/credentials/${item.id}/details`}
               isSelected={selected.some(row => row.id === item.id)}
               onSelect={() => handleSelect(item)}
+              rowIndex={index}
             />
           )}
           renderToolbar={props => (

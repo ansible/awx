@@ -16,24 +16,32 @@ describe('<CredentialListItem />', () => {
 
   test('edit button shown to users with edit capabilities', () => {
     wrapper = mountWithContexts(
-      <CredentialListItem
-        credential={mockCredentials.results[0]}
-        detailUrl="/foo/bar"
-        isSelected={false}
-        onSelect={() => {}}
-      />
+      <table>
+        <tbody>
+          <CredentialListItem
+            credential={mockCredentials.results[0]}
+            detailUrl="/foo/bar"
+            isSelected={false}
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
   });
 
   test('edit button hidden from users without edit capabilities', () => {
     wrapper = mountWithContexts(
-      <CredentialListItem
-        credential={mockCredentials.results[1]}
-        detailUrl="/foo/bar"
-        isSelected={false}
-        onSelect={() => {}}
-      />
+      <table>
+        <tbody>
+          <CredentialListItem
+            credential={mockCredentials.results[1]}
+            detailUrl="/foo/bar"
+            isSelected={false}
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
   });
@@ -41,12 +49,16 @@ describe('<CredentialListItem />', () => {
     CredentialsAPI.copy.mockResolvedValue();
 
     wrapper = mountWithContexts(
-      <CredentialListItem
-        isSelected={false}
-        detailUrl="/foo/bar"
-        credential={mockCredentials.results[0]}
-        onSelect={() => {}}
-      />
+      <table>
+        <tbody>
+          <CredentialListItem
+            isSelected={false}
+            detailUrl="/foo/bar"
+            credential={mockCredentials.results[0]}
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
     );
 
     await act(async () =>
@@ -60,12 +72,16 @@ describe('<CredentialListItem />', () => {
     CredentialsAPI.copy.mockRejectedValue(new Error());
 
     wrapper = mountWithContexts(
-      <CredentialListItem
-        isSelected={false}
-        detailUrl="/foo/bar"
-        onSelect={() => {}}
-        credential={mockCredentials.results[0]}
-      />
+      <table>
+        <tbody>
+          <CredentialListItem
+            isSelected={false}
+            detailUrl="/foo/bar"
+            onSelect={() => {}}
+            credential={mockCredentials.results[0]}
+          />
+        </tbody>
+      </table>
     );
     await act(async () =>
       wrapper.find('Button[aria-label="Copy"]').prop('onClick')()
@@ -77,12 +93,16 @@ describe('<CredentialListItem />', () => {
 
   test('should not render copy button', async () => {
     wrapper = mountWithContexts(
-      <CredentialListItem
-        isSelected={false}
-        detailUrl="/foo/bar"
-        onSelect={() => {}}
-        credential={mockCredentials.results[1]}
-      />
+      <table>
+        <tbody>
+          <CredentialListItem
+            isSelected={false}
+            detailUrl="/foo/bar"
+            onSelect={() => {}}
+            credential={mockCredentials.results[1]}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('CopyButton').length).toBe(0);
   });
