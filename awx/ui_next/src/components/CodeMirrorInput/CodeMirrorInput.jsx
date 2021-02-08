@@ -1,35 +1,24 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { oneOf, bool, number, string, func } from 'prop-types';
-import AceEditor from 'react-ace';
-// import * as ace from 'ace-builds';
+import ReactAceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-yaml';
+import 'ace-builds/src-noconflict/mode-django';
 import 'ace-builds/src-noconflict/theme-github';
-import { Controlled as ReactCodeMirror } from 'react-codemirror2';
 import styled from 'styled-components';
-// import 'codemirror/mode/javascript/javascript';
-// import 'codemirror/mode/yaml/yaml';
-// import 'codemirror/mode/jinja2/jinja2';
-// import 'codemirror/lib/codemirror.css';
-// import 'codemirror/addon/display/placeholder';
-// require("ace/edit_session").EditSession.prototype.$useWorker=false
 
 const LINE_HEIGHT = 24;
 const PADDING = 12;
 
-// ace.config.set('basePath', 'path');
+const AceEditor = styled(ReactAceEditor)`
+  font-family: var(--pf-global--FontFamily--monospace);
+  max-height: 90vh;
 
-const CodeMirror = styled(ReactCodeMirror)`
-  && {
-    height: initial;
-    padding: 0;
-  }
-
-  & > .CodeMirror {
-    height: ${props =>
-      props.fullHeight ? 'auto' : `${props.rows * LINE_HEIGHT + PADDING}px`};
-    font-family: var(--pf-global--FontFamily--monospace);
+  & .ace_gutter,
+  & .ace_scroller {
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
 
   ${props =>
@@ -43,42 +32,9 @@ const CodeMirror = styled(ReactCodeMirror)`
       background: var(--pf-c-form-control--invalid--Background);
       border-bottom-width: var(--pf-c-form-control--invalid--BorderBottomWidth);
     }`}
-
-  ${props =>
-    props.options &&
-    props.options.readOnly &&
-    `
-    &,
-    &:hover {
-      --pf-c-form-control--BorderBottomColor: var(--pf-global--BorderColor--300);
-    }
-
-    .CodeMirror-cursors {
-      display: none;
-    }
-
-    .CodeMirror-lines {
-      cursor: default;
-    }
-
-    .CodeMirror-scroll {
-      background-color: var(--pf-c-form-control--disabled--BackgroundColor);
-    }
-  `}
-  ${props =>
-    props.options &&
-    props.options.placeholder &&
-    `
-    .CodeMirror-empty {
-      pre.CodeMirror-placeholder {
-        color: var(--pf-c-form-control--placeholder--Color);
-        height: 100% !important;
-      }
-    }
-  `}
 `;
 
-function CodeMirrorInput({
+function CodeInput({
   id,
   value,
   onChange,
@@ -88,7 +44,6 @@ function CodeMirrorInput({
   rows,
   fullHeight,
   className,
-  placeholder,
 }) {
   const wrapper = useRef(null);
   const editor = useRef(null);
@@ -101,11 +56,16 @@ function CodeMirrorInput({
   }, []);
 
   const listen = useCallback(event => {
-    if (wrapper.current === document.activeElement && event.key === 'Enter') {
+    if (
+      (wrapper.current === document.activeElement && event.key === 'Enter') ||
+      event.key === ' '
+    ) {
       const editorInput = editor.current.refEditor?.querySelector('textarea');
-      if (editorInput) {
-        editorInput.focus();
+      if (!editorInput) {
+        return;
       }
+      editorInput.focus();
+      event.stopPropagation();
     }
   }, []);
 
@@ -118,57 +78,52 @@ function CodeMirrorInput({
     };
   });
 
+  const aceModes = {
+    javascript: 'json',
+    yaml: 'yaml',
+    jinja2: 'django',
+  };
+
+  const numRows = fullHeight ? value.split('\n').length : rows;
+
   return (
-    <>
-      {/* <CodeMirror
+    /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
+    <div ref={wrapper} tabIndex={0}>
+      <AceEditor
+        mode={aceModes[mode] || 'text'}
         className={`pf-c-form-control ${className}`}
+        theme="github"
+        onChange={onChange}
         value={value}
-        onBeforeChange={(editor, data, val) => onChange(val)}
-        mode={mode}
+        name={id || 'code-editor'}
+        editorProps={{ $blockScrolling: true }}
+        fontSize={16}
+        width="100%"
+        height={`${numRows * LINE_HEIGHT + PADDING}px`}
         hasErrors={hasErrors}
-        options={{
-          smartIndent: false,
-          lineNumbers: true,
-          lineWrapping: true,
-          placeholder,
+        setOptions={{
           readOnly,
+          useWorker: false,
         }}
-        fullHeight={fullHeight}
-        rows={rows}
-      /> */}
-      <div ref={wrapper} tabIndex={0}>
-        <AceEditor
-          mode={mode === 'javascript' ? 'json' : mode}
-          theme="github"
-          onChange={onChange}
-          value={value}
-          name={id || 'code-editor'}
-          editorProps={{ $blockScrolling: true }}
-          width="100%"
-          setOptions={{
-            readOnly,
-            useWorker: false,
-          }}
-          commands={[
-            {
-              name: 'escape',
-              bindKey: { win: 'Esc', mac: 'Esc' },
-              exec: () => {
-                wrapper.current.focus();
-              },
+        commands={[
+          {
+            name: 'escape',
+            bindKey: { win: 'Esc', mac: 'Esc' },
+            exec: () => {
+              wrapper.current.focus();
             },
-            {
-              name: 'tab escape',
-              bindKey: { win: 'Shift-Tab', mac: 'Shift-Tab' },
-              exec: () => {
-                wrapper.current.focus();
-              },
+          },
+          {
+            name: 'tab escape',
+            bindKey: { win: 'Shift-Tab', mac: 'Shift-Tab' },
+            exec: () => {
+              wrapper.current.focus();
             },
-          ]}
-          ref={editor}
-        />
-      </div>
-    </>
+          },
+        ]}
+        ref={editor}
+      />
+    </div>
   );
 }
 CodeMirrorInput.propTypes = {
@@ -190,4 +145,4 @@ CodeMirrorInput.defaultProps = {
   className: '',
 };
 
-export default CodeMirrorInput;
+export default CodeInput;
