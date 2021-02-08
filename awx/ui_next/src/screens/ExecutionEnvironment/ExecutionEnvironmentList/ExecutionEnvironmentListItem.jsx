@@ -3,18 +3,11 @@ import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import {
-  Button,
-  DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemRow,
-  DataListItemCells,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import DataListCell from '../../../components/DataListCell';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { ExecutionEnvironment } from '../../../types';
 
 function ExecutionEnvironmentListItem({
@@ -23,55 +16,56 @@ function ExecutionEnvironmentListItem({
   isSelected,
   onSelect,
   i18n,
+  rowIndex,
 }) {
   const labelId = `check-action-${executionEnvironment.id}`;
 
   return (
-    <DataListItem
-      key={executionEnvironment.id}
-      aria-labelledby={labelId}
-      id={`${executionEnvironment.id} `}
-    >
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-execution-environment-${executionEnvironment.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell
-              key="image"
-              aria-label={i18n._(t`execution environment image`)}
-            >
-              <Link to={`${detailUrl}`}>
-                <b>{executionEnvironment.image}</b>
-              </Link>
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={i18n._(t`actions`)}
-          aria-labelledby={labelId}
-          id={labelId}
-        >
-          <Tooltip
-            content={i18n._(t`Edit execution environment`)}
-            position="top"
+    <Tr id={`ee-row-${executionEnvironment.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+          disable: false,
+        }}
+        dataLabel={i18n._(t`Selected`)}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <Link to={`${detailUrl}`}>
+          <b>{executionEnvironment.name}</b>
+        </Link>
+      </Td>
+      <Td id={labelId} dataLabel={i18n._(t`Image`)}>
+        {executionEnvironment.image}
+      </Td>
+      <Td id={labelId} dataLabel={i18n._(t`Organization`)}>
+        {executionEnvironment.organization ? (
+          <Link
+            to={`/organizations/${executionEnvironment?.summary_fields?.organization?.id}/details`}
           >
-            <Button
-              aria-label={i18n._(t`Edit execution environment`)}
-              variant="plain"
-              component={Link}
-              to={`/execution_environments/${executionEnvironment.id}/edit`}
-            >
-              <PencilAltIcon />
-            </Button>
-          </Tooltip>
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+            <b>{executionEnvironment?.summary_fields?.organization?.name}</b>
+          </Link>
+        ) : (
+          i18n._(t`Globally Available`)
+        )}
+      </Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionItem
+          visible={executionEnvironment.summary_fields.user_capabilities.edit}
+          tooltip={i18n._(t`Edit Execution Environment`)}
+        >
+          <Button
+            aria-label={i18n._(t`Edit Execution Environment`)}
+            variant="plain"
+            component={Link}
+            to={`/execution_environments/${executionEnvironment.id}/edit`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 
