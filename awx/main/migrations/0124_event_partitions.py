@@ -84,6 +84,6 @@ class Migration(migrations.Migration):
         FakeAddField(
             model_name='jobevent',
             name='job_created',
-            field=models.DateTimeField(editable=False),
+            field=models.DateTimeField(null=True, editable=False),
         ),
     ]
