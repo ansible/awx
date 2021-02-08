@@ -63,6 +63,16 @@ def migrate_event_data(apps, schema_editor):
             cursor.execute(
                 f'DROP TABLE {tblname}_old'
             )
+
+
+class FakeAddField(migrations.AddField):
+
+    def database_forwards(self, *args):
+        # this is intentionally left blank, because we're
+        # going to accomplish the migration with some custom raw SQL
+        pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -71,4 +81,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(migrate_event_data),
+        FakeAddField(
+            model_name='jobevent',
+            name='job_created',
+            field=models.DateTimeField(editable=False),
+        ),
     ]
