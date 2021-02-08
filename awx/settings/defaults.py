@@ -66,7 +66,7 @@ DATABASES = {
 IS_K8S = False
 
 # TODO: remove this setting in favor of a default execution environment
-AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE = 'quay.io/shanemcd/awx-ee'
+AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE = 'quay.io/ansible/awx-ee'
 
 AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
 AWX_CONTAINER_GROUP_POD_LAUNCH_RETRIES = 100
