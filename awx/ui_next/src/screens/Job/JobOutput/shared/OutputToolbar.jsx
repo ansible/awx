@@ -65,10 +65,10 @@ const OUTPUT_NO_COUNT_JOB_TYPES = [
 const OutputToolbar = ({
   i18n,
   job,
-  jobStatus,
   onDelete,
   onCancel,
   isDeleteDisabled,
+  jobStatus,
 }) => {
   const hideCounts = OUTPUT_NO_COUNT_JOB_TYPES.includes(job.type);
 

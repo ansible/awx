@@ -14,6 +14,7 @@ import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
 import { AllHtmlEntities } from 'html-entities';
 import {
+  Button,
   Toolbar as _Toolbar,
   ToolbarContent as _ToolbarContent,
   ToolbarItem,
@@ -293,13 +294,15 @@ function JobOutput({
   const interval = useRef(null);
   const history = useHistory();
   const [contentError, setContentError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
-  const [results, setResults] = useState({});
-  const [currentlyLoading, setCurrentlyLoading] = useState([]);
-  const [isHostModalOpen, setIsHostModalOpen] = useState(false);
-  const [hostEvent, setHostEvent] = useState({});
   const [cssMap, setCssMap] = useState({});
+  const [currentlyLoading, setCurrentlyLoading] = useState([]);
+  const [hasContentLoading, setHasContentLoading] = useState(true);
+  const [hostEvent, setHostEvent] = useState({});
+  const [isHostModalOpen, setIsHostModalOpen] = useState(false);
+  const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [remoteRowCount, setRemoteRowCount] = useState(0);
+  const [results, setResults] = useState({});
 
   useEffect(() => {
     isMounted.current = true;
@@ -307,10 +310,18 @@ function JobOutput({
 
     if (isJobRunning(job.status)) {
       connectJobSocket(job, data => {
-        if (data.counter && data.counter > jobSocketCounter.current) {
-          jobSocketCounter.current = data.counter;
-        } else if (data.final_counter && data.unified_job_id === job.id) {
-          jobSocketCounter.current = data.final_counter;
+        if (data.group_name === 'job_events') {
+          if (data.counter && data.counter > jobSocketCounter.current) {
+            jobSocketCounter.current = data.counter;
+          }
+        }
+        if (data.group_name === 'jobs' && data.unified_job_id === job.id) {
+          if (data.final_counter) {
+            jobSocketCounter.current = data.final_counter;
+          }
+          if (job.status) {
+            setJobStatus(job.status);
+          }
         }
       });
       interval.current = setInterval(() => monitorJobSocketCounter(), 5000);
@@ -332,8 +343,24 @@ function JobOutput({
   }, [currentlyLoading, cssMap, remoteRowCount]);
 
   const {
+    error: cancelError,
+    isLoading: isCancelling,
+    request: cancelJob,
+  } = useRequest(
+    useCallback(async () => {
+      await JobsAPI.cancel(job.id, type);
+    }, [job.id, type]),
+    {}
+  );
+
+  const {
+    error: dismissableCancelError,
+    dismissError: dismissCancelError,
+  } = useDismissableError(cancelError);
+
+  const {
     request: deleteJob,
-    isLoading: isDeleteLoading,
+    isLoading: isDeleting,
     error: deleteError,
   } = useRequest(
     useCallback(async () => {
@@ -360,7 +387,10 @@ function JobOutput({
     }, [job, history])
   );
 
-  const { error, dismissError } = useDismissableError(deleteError);
+  const {
+    error: dismissableDeleteError,
+    dismissError: dismissDeleteError,
+  } = useDismissableError(deleteError);
 
   const monitorJobSocketCounter = () => {
     if (jobSocketCounter.current === remoteRowCount) {
@@ -702,8 +732,10 @@ function JobOutput({
               </HeaderTitle>
               <OutputToolbar
                 job={job}
+                jobStatus={jobStatus}
+                onCancel={() => setShowCancelModal(true)}
                 onDelete={deleteJob}
-                isDeleteDisabled={isDeleteLoading}
+                isDeleteDisabled={isDeleting}
               />
             </OutputHeader>
             <HostStatusBar counts={job.host_status_counts} />
@@ -770,15 +802,60 @@ function JobOutput({
               <OutputFooter />
             </OutputWrapper>
           </CardBody>
-          {error && (
+          {showCancelModal && isJobRunning(job.status) && (
             <AlertModal
-              isOpen={error}
+              isOpen={showCancelModal}
               variant="danger"
-              onClose={dismissError}
+              onClose={() => setShowCancelModal(false)}
+              title={i18n._(t`Cancel Job`)}
+              label={i18n._(t`Cancel Job`)}
+              actions={[
+                <Button
+                  id="cancel-job-confirm-button"
+                  key="delete"
+                  variant="danger"
+                  isDisabled={isCancelling}
+                  aria-label={i18n._(t`Cancel job`)}
+                  onClick={cancelJob}
+                >
+                  {i18n._(t`Cancel job`)}
+                </Button>,
+                <Button
+                  id="cancel-job-return-button"
+                  key="cancel"
+                  variant="secondary"
+                  aria-label={i18n._(t`Return`)}
+                  onClick={() => setShowCancelModal(false)}
+                >
+                  {i18n._(t`Return`)}
+                </Button>,
+              ]}
+            >
+              {i18n._(
+                t`Are you sure you want to submit the request to cancel this job?`
+              )}
+            </AlertModal>
+          )}
+          {dismissableDeleteError && (
+            <AlertModal
+              isOpen={dismissableDeleteError}
+              variant="danger"
+              onClose={dismissDeleteError}
               title={i18n._(t`Job Delete Error`)}
               label={i18n._(t`Job Delete Error`)}
             >
-              <ErrorDetail error={error} />
+              <ErrorDetail error={dismissableDeleteError} />
+            </AlertModal>
+          )}
+          {dismissableCancelError && (
+            <AlertModal
+              isOpen={dismissableCancelError}
+              variant="danger"
+              onClose={dismissCancelError}
+              title={i18n._(t`Job Cancel Error`)}
+              label={i18n._(t`Job Cancel Error`)}
+            >
+              <ErrorDetail error={dismissableCancelError} />
             </AlertModal>
           )}
         </>
