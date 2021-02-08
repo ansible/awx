@@ -705,10 +705,6 @@ function JobOutput({
     />
   );
 
-  if (hasContentLoading) {
-    return <ContentLoading />;
-  }
-
   if (contentError) {
     return <ContentError error={contentError} />;
   }
@@ -779,21 +775,29 @@ function JobOutput({
                   <AutoSizer nonce={window.NONCE_ID} onResize={handleResize}>
                     {({ width, height }) => {
                       return (
-                        <List
-                          ref={ref => {
-                            registerChild(ref);
-                            listRef.current = ref;
-                          }}
-                          deferredMeasurementCache={cache}
-                          height={height || 1}
-                          onRowsRendered={onRowsRendered}
-                          rowCount={remoteRowCount}
-                          rowHeight={cache.rowHeight}
-                          rowRenderer={rowRenderer}
-                          scrollToAlignment="start"
-                          width={width || 1}
-                          overscanRowCount={20}
-                        />
+                        <>
+                          {hasContentLoading ? (
+                            <div style={{ width }}>
+                              <ContentLoading />
+                            </div>
+                          ) : (
+                            <List
+                              ref={ref => {
+                                registerChild(ref);
+                                listRef.current = ref;
+                              }}
+                              deferredMeasurementCache={cache}
+                              height={height || 1}
+                              onRowsRendered={onRowsRendered}
+                              rowCount={remoteRowCount}
+                              rowHeight={cache.rowHeight}
+                              rowRenderer={rowRenderer}
+                              scrollToAlignment="start"
+                              width={width || 1}
+                              overscanRowCount={20}
+                            />
+                          )}
+                        </>
                       );
                     }}
                   </AutoSizer>
