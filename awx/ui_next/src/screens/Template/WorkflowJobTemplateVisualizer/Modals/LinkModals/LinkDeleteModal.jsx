@@ -32,7 +32,7 @@ function LinkDeleteModal({ i18n }) {
           aria-label={i18n._(t`Cancel link removal`)}
           key="cancel"
           onClick={() => dispatch({ type: 'SET_LINK_TO_DELETE', value: null })}
-          variant="secondary"
+          variant="link"
         >
           {i18n._(t`Cancel`)}
         </Button>,

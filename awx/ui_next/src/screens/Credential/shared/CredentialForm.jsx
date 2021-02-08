@@ -270,7 +270,7 @@ function CredentialForm({
                   <Button
                     id="credential-form-cancel-button"
                     aria-label={i18n._(t`Cancel`)}
-                    variant="secondary"
+                    variant="link"
                     type="button"
                     onClick={onCancel}
                   >
