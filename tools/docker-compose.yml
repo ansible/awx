@@ -52,6 +52,9 @@ services:
     container_name: tools_postgres_1
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: awx-dev
+      POSTGRES_DB: awx-dev
+      POSTGRES_PASSWORD: AWXsome1
     volumes:
       - "awx_db:/var/lib/postgresql/data"
   redis:
