@@ -224,7 +224,9 @@ RUN for dir in \
 {% if (build_dev|bool) or (kube_dev|bool) %}
 RUN for dir in \
       /var/lib/awx/venv \
+      /var/lib/awx/venv/awx/bin \
       /var/lib/awx/venv/awx/lib/python3.6 \
+      /var/lib/awx/venv/awx/lib/python3.6/site-packages \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \
