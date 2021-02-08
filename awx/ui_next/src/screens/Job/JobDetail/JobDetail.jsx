@@ -220,13 +220,13 @@ function JobDetail({ job, i18n }) {
         <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[job.verbosity]} />
         <Detail label={i18n._(t`Environment`)} value={job.custom_virtualenv} />
         <Detail label={i18n._(t`Execution Node`)} value={job.execution_node} />
-        {instanceGroup && !instanceGroup?.is_containerized && (
+        {instanceGroup && !instanceGroup?.is_container_group && (
           <Detail
             label={i18n._(t`Instance Group`)}
             value={buildInstanceGroupLink(instanceGroup)}
           />
         )}
-        {instanceGroup && instanceGroup?.is_containerized && (
+        {instanceGroup && instanceGroup?.is_container_group && (
           <Detail
             label={i18n._(t`Container Group`)}
             value={buildContainerGroupLink(instanceGroup)}
