@@ -8,21 +8,27 @@ import ExecutionEnvironmentListItem from './ExecutionEnvironmentListItem';
 describe('<ExecutionEnvironmentListItem/>', () => {
   let wrapper;
   const executionEnvironment = {
+    name: 'Foo',
     id: 1,
     image: 'https://registry.com/r/image/manifest',
     organization: null,
     credential: null,
+    summary_fields: { user_capabilities: { edit: true } },
   };
 
   test('should mount successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ExecutionEnvironmentListItem
-          executionEnvironment={executionEnvironment}
-          detailUrl="execution_environments/1/details"
-          isSelected={false}
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <ExecutionEnvironmentListItem
+              executionEnvironment={executionEnvironment}
+              detailUrl="execution_environments/1/details"
+              isSelected={false}
+              onSelect={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('ExecutionEnvironmentListItem').length).toBe(1);
@@ -31,22 +37,38 @@ describe('<ExecutionEnvironmentListItem/>', () => {
   test('should render the proper data', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ExecutionEnvironmentListItem
-          executionEnvironment={executionEnvironment}
-          detailUrl="execution_environments/1/details"
-          isSelected={false}
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <ExecutionEnvironmentListItem
+              executionEnvironment={executionEnvironment}
+              detailUrl="execution_environments/1/details"
+              isSelected={false}
+              onSelect={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(
       wrapper
-        .find('DataListCell[aria-label="execution environment image"]')
+        .find('Td')
+        .at(1)
+        .text()
+    ).toBe(executionEnvironment.name);
+    expect(
+      wrapper
+        .find('Td')
+        .at(2)
         .text()
     ).toBe(executionEnvironment.image);
-    expect(wrapper.find('PencilAltIcon').length).toBe(1);
+
     expect(
-      wrapper.find('input#select-execution-environment-1').prop('checked')
-    ).toBe(false);
+      wrapper
+        .find('Td')
+        .at(3)
+        .text()
+    ).toBe('Globally Available');
+
+    expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
   });
 });
