@@ -381,7 +381,8 @@ test_collection:
 	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
+	fi && \
+	pip install ansible && \
 	py.test $(COLLECTION_TEST_DIRS) -v
 	# The python path needs to be modified so that the tests can find Ansible within the container
 	# First we will use anything expility set as PYTHONPATH
