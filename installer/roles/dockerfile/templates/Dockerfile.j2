@@ -4,14 +4,8 @@
 ### DO NOT EDIT
 ###
 
-# Locations - set globally to be used across stages
-ARG COLLECTION_BASE="/var/lib/awx/vendor/awx_ansible_collections"
-ARG ANSIBLE_BRANCH=devel
-
 # Build container
 FROM centos:8 as builder
-
-ARG ANSIBLE_BRANCH
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -49,8 +43,7 @@ RUN dnf -y update && \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN python3 -m ensurepip && pip3 install "virtualenv < 20" && \
-    pip3 install --no-cache-dir https://github.com/ansible/ansible/archive/${ANSIBLE_BRANCH}.tar.gz
+RUN python3 -m ensurepip && pip3 install "virtualenv < 20"
 
 # Install & build requirements
 ADD Makefile /tmp/Makefile
@@ -61,11 +54,9 @@ ADD requirements/requirements_ansible.txt \
     requirements/requirements.txt \
     requirements/requirements_tower_uninstall.txt \
     requirements/requirements_git.txt \
-    requirements/collections_requirements.yml \
     /tmp/requirements/
 
 RUN cd /tmp && make requirements_awx requirements_ansible_py3
-RUN cd /tmp && make requirements_collections
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD requirements/requirements_dev.txt /tmp/requirements
@@ -84,9 +75,6 @@ RUN make sdist && \
 # Final container(s)
 FROM centos:8
 
-ARG COLLECTION_BASE
-ARG ANSIBLE_BRANCH
-
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
@@ -100,7 +88,6 @@ RUN dnf -y update && \
     dnf module -y enable 'postgresql:12' && \
     dnf config-manager --set-enabled powertools && \
     dnf -y install acl \
-    bubblewrap \
     git-core \
     git-lfs \
     glibc-langpack-en \
@@ -135,11 +122,7 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master
 RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \
     chmod +x /usr/bin/tini
 
-RUN python3 -m ensurepip && pip3 install "virtualenv < 20" supervisor {% if build_dev|bool %}flake8{% endif %} && \
-    pip3 install --no-cache-dir https://github.com/ansible/ansible/archive/${ANSIBLE_BRANCH}.tar.gz
-
-# TODO: Remove this once launch script removes need for postres modules
-RUN ansible-galaxy collection install --collections-path /usr/share/ansible/collections community.general community.postgresql
+RUN python3 -m ensurepip && pip3 install "virtualenv < 20" supervisor {% if build_dev|bool %}flake8{% endif %}
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
@@ -185,7 +168,7 @@ COPY --from=builder /var/lib/awx /var/lib/awx
 RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 
 {%if build_dev|bool %}
-COPY --from=quay.io/shanemcd/receptor /usr/bin/receptor /usr/bin/receptor
+COPY --from=quay.io/shanemcd/receptor:latest /usr/bin/receptor /usr/bin/receptor
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr \
         -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost" && \
     openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt && \
@@ -237,11 +220,6 @@ RUN for dir in \
       /etc/group \
       /etc/passwd ; \
     do touch $file ; chmod g+rw $file ; chgrp root $file ; done
-
-# Adjust any remaining permissions
-RUN chmod u+s /usr/bin/bwrap ; \
-    chgrp -R root ${COLLECTION_BASE} ; \
-    chmod -R g+rw ${COLLECTION_BASE}
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 RUN for dir in \
