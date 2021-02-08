@@ -15,6 +15,7 @@ const executionEnvironments = {
   data: {
     results: [
       {
+        name: 'Foo',
         id: 1,
         image: 'https://registry.com/r/image/manifest',
         organization: null,
@@ -23,6 +24,7 @@ const executionEnvironments = {
         summary_fields: { user_capabilities: { edit: true, delete: true } },
       },
       {
+        name: 'Bar',
         id: 2,
         image: 'https://registry.com/r/image2/manifest',
         organization: null,
@@ -38,6 +40,14 @@ const executionEnvironments = {
 const options = { data: { actions: { POST: true } } };
 
 describe('<ExecutionEnvironmentList/>', () => {
+  beforeEach(() => {
+    ExecutionEnvironmentsAPI.read.mockResolvedValue(executionEnvironments);
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(options);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   let wrapper;
 
   test('should mount successfully', async () => {
@@ -52,9 +62,6 @@ describe('<ExecutionEnvironmentList/>', () => {
   });
 
   test('should have data fetched and render 2 rows', async () => {
-    ExecutionEnvironmentsAPI.read.mockResolvedValue(executionEnvironments);
-    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(options);
-
     await act(async () => {
       wrapper = mountWithContexts(<ExecutionEnvironmentList />);
     });
@@ -69,10 +76,7 @@ describe('<ExecutionEnvironmentList/>', () => {
     expect(ExecutionEnvironmentsAPI.readOptions).toBeCalled();
   });
 
-  test('should delete item successfully', async () => {
-    ExecutionEnvironmentsAPI.read.mockResolvedValue(executionEnvironments);
-    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(options);
-
+  test('should delete items successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<ExecutionEnvironmentList />);
     });
@@ -82,27 +86,25 @@ describe('<ExecutionEnvironmentList/>', () => {
       el => el.length > 0
     );
 
-    wrapper
-      .find('input#select-execution-environment-1')
-      .simulate('change', executionEnvironments.data.results[0]);
-    wrapper.update();
-
-    expect(
-      wrapper.find('input#select-execution-environment-1').prop('checked')
-    ).toBe(true);
-
     await act(async () => {
-      wrapper.find('Button[aria-label="Delete"]').prop('onClick')();
+      wrapper
+        .find('ExecutionEnvironmentListItem')
+        .at(0)
+        .invoke('onSelect')();
     });
     wrapper.update();
-
     await act(async () => {
-      wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')();
+      wrapper
+        .find('ExecutionEnvironmentListItem')
+        .at(1)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
     });
 
-    expect(ExecutionEnvironmentsAPI.destroy).toBeCalledWith(
-      executionEnvironments.data.results[0].id
-    );
+    expect(ExecutionEnvironmentsAPI.destroy).toHaveBeenCalledTimes(2);
   });
 
   test('should render deletion error modal', async () => {
@@ -117,19 +119,24 @@ describe('<ExecutionEnvironmentList/>', () => {
         },
       })
     );
-    ExecutionEnvironmentsAPI.read.mockResolvedValue(executionEnvironments);
-    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
       wrapper = mountWithContexts(<ExecutionEnvironmentList />);
     });
     waitForElement(wrapper, 'ExecutionEnvironmentList', el => el.length > 0);
 
     wrapper
-      .find('input#select-execution-environment-1')
+      .find('ExecutionEnvironmentListItem')
+      .at(0)
+      .find('input')
       .simulate('change', 'a');
     wrapper.update();
+
     expect(
-      wrapper.find('input#select-execution-environment-1').prop('checked')
+      wrapper
+        .find('ExecutionEnvironmentListItem')
+        .at(0)
+        .find('input')
+        .prop('checked')
     ).toBe(true);
 
     await act(async () =>
@@ -156,7 +163,6 @@ describe('<ExecutionEnvironmentList/>', () => {
         },
       })
     );
-    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
       wrapper = mountWithContexts(<ExecutionEnvironmentList />);
     });
