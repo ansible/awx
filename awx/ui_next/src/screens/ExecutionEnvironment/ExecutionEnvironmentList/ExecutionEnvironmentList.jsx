@@ -8,10 +8,14 @@ import { ExecutionEnvironmentsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
-import PaginatedDataList, {
+import {
   ToolbarDeleteButton,
   ToolbarAddButton,
 } from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
@@ -21,7 +25,7 @@ import ExecutionEnvironmentsListItem from './ExecutionEnvironmentListItem';
 const QS_CONFIG = getQSConfig('execution_environments', {
   page: 1,
   page_size: 20,
-  order_by: 'image',
+  order_by: 'name',
 });
 
 function ExecutionEnvironmentList({ i18n }) {
@@ -106,7 +110,7 @@ function ExecutionEnvironmentList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={isLoading || deleteLoading}
             items={executionEnvironments}
@@ -141,6 +145,13 @@ function ExecutionEnvironmentList({ i18n }) {
                 key: 'description',
               },
             ]}
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Image`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
+              </HeaderRow>
+            }
             renderToolbar={props => (
               <DatalistToolbar
                 {...props}
@@ -168,9 +179,10 @@ function ExecutionEnvironmentList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={executionEnvironment => (
+            renderRow={(executionEnvironment, index) => (
               <ExecutionEnvironmentsListItem
                 key={executionEnvironment.id}
+                rowIndex={index}
                 executionEnvironment={executionEnvironment}
                 detailUrl={`${match.url}/${executionEnvironment.id}/details`}
                 onSelect={() => handleSelect(executionEnvironment)}
