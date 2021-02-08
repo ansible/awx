@@ -483,6 +483,7 @@ class JobEvent(BasePlaybookEvent):
         editable=False,
     )
     job_created = models.DateTimeField(
+        null=True,
         editable=False
     )
 
