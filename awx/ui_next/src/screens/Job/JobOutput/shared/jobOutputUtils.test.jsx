@@ -3,9 +3,9 @@ import getRowRangePageSize from './jobOutputUtils';
 describe('getRowRangePageSize', () => {
   test('handles range of 1', () => {
     expect(getRowRangePageSize(1, 1)).toEqual({
-      page: 1,
+      page: 2,
       pageSize: 1,
-      firstIndex: 0,
+      firstIndex: 1,
     });
   });
   test('handles range larger than 50 rows', () => {
