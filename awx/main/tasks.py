@@ -336,7 +336,8 @@ def send_notifications(notification_list, job_id=None):
             sent = notification.notification_template.send(notification.subject, notification.body)
             notification.status = "successful"
             notification.notifications_sent = sent
-            job_actual.log_lifecycle("notifications_sent")
+            if job_id is not None:
+                job_actual.log_lifecycle("notifications_sent")
         except Exception as e:
             logger.exception("Send Notification Failed {}".format(e))
             notification.status = "failed"
