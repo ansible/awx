@@ -347,7 +347,7 @@ class JobOutput extends Component {
           let countOffset = 1;
           if (job?.result_traceback) {
             const tracebackEvent = {
-              counter: -1,
+              counter: 1,
               created: null,
               event: null,
               type: null,
@@ -357,7 +357,7 @@ class JobOutput extends Component {
             const firstIndex = newResults.findIndex(
               jobEvent => jobEvent.counter === 1
             );
-            if (firstIndex) {
+            if (firstIndex && newResults[firstIndex]?.stdout) {
               const stdoutLines = newResults[firstIndex].stdout.split('\r\n');
               stdoutLines[0] = tracebackEvent.stdout;
               newResults[firstIndex].stdout = stdoutLines.join('\r\n');
