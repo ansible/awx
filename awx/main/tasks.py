@@ -1451,6 +1451,9 @@ class BaseTask(object):
                 receptor_job = AWXReceptorJob(self, params)
                 res = receptor_job.run()
 
+                if not res:
+                    return
+
             status = res.status
             rc = res.rc
 
@@ -3112,7 +3115,15 @@ class AWXReceptorJob:
             elif res.status == 'error':
                 # TODO: There should be a more efficient way of getting this information
                 receptor_work_list = receptor_ctl.simple_command("work list")
-                raise RuntimeError(receptor_work_list[self.unit_id]['Detail'])
+                detail = receptor_work_list[self.unit_id]['Detail']
+                if 'exceeded quota' in detail:
+                    logger.warn(detail)
+                    log_name = self.task.instance.log_format
+                    logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
+                    self.task.update_model(self.task.instance.pk, status='pending')
+                    return
+
+                raise RuntimeError(detail)
 
         return res
 
