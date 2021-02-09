@@ -416,4 +416,5 @@ export const ExecutionEnvironment = shape({
   url: string,
   summary_fields: shape({}),
   description: string,
+  pull: string,
 });

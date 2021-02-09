@@ -94,6 +94,12 @@ function OrganizationDetail({ i18n, organization }) {
           label={i18n._(t`Ansible Environment`)}
           value={custom_virtualenv}
         />
+        {summary_fields?.default_environment?.name && (
+          <Detail
+            label={i18n._(t`Default Execution Environment`)}
+            value={summary_fields.default_environment.name}
+          />
+        )}
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={created}

@@ -58,6 +58,7 @@ const jobTemplateData = {
   timeout: 0,
   use_fact_cache: false,
   verbosity: '0',
+  execution_environment: { id: 1, name: 'Foo' },
 };
 
 describe('<JobTemplateAdd />', () => {
@@ -77,6 +78,12 @@ describe('<JobTemplateAdd />', () => {
 
   beforeEach(() => {
     LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+    ProjectsAPI.readDetail.mockReturnValue({
+      name: 'foo',
+      id: 1,
+      allow_override: true,
+      organization: 1,
+    });
   });
 
   afterEach(() => {
@@ -126,12 +133,13 @@ describe('<JobTemplateAdd />', () => {
         ...jobTemplateData,
       },
     });
+
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<JobTemplateAdd />);
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    act(() => {
+    await act(() => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'Bar', name: 'name' },
       });
@@ -143,6 +151,10 @@ describe('<JobTemplateAdd />', () => {
         id: 2,
         name: 'project',
         summary_fields: { organization: { id: 1, name: 'Org Foo' } },
+      });
+      wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')({
+        id: 1,
+        name: 'Foo',
       });
       wrapper.update();
       wrapper
@@ -173,6 +185,7 @@ describe('<JobTemplateAdd />', () => {
       inventory: 2,
       webhook_credential: undefined,
       webhook_service: '',
+      execution_environment: 1,
     });
   });
 
@@ -193,7 +206,7 @@ describe('<JobTemplateAdd />', () => {
       });
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    act(() => {
+    await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'Foo', name: 'name' },
       });
