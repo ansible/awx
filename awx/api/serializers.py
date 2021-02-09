@@ -1365,7 +1365,7 @@ class ExecutionEnvironmentSerializer(BaseSerializer):
 
     class Meta:
         model = ExecutionEnvironment
-        fields = ('*', 'organization', 'image', 'managed_by_tower', 'credential', 'container_options')
+        fields = ('*', 'organization', 'image', 'managed_by_tower', 'credential', 'pull')
 
     def get_related(self, obj):
         res = super(ExecutionEnvironmentSerializer, self).get_related(obj)
