@@ -72,16 +72,16 @@ function CredentialListItem({
             <PencilAltIcon />
           </Button>
         </ActionItem>
-        <ActionItem visible={credential.summary_fields.user_capabilities.copy}>
+        <ActionItem
+          tooltip={i18n._(t`Copy Credential`)}
+          visible={credential.summary_fields.user_capabilities.copy}
+        >
           <CopyButton
             isDisabled={isDisabled}
             onCopyStart={handleCopyStart}
             onCopyFinish={handleCopyFinish}
             copyItem={copyCredential}
-            helperText={{
-              tooltip: i18n._(t`Copy Credential`),
-              errorMessage: i18n._(t`Failed to copy credential.`),
-            }}
+            errorMessage={i18n._(t`Failed to copy credential.`)}
           />
         </ActionItem>
       </ActionsTd>
