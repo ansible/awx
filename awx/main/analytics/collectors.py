@@ -282,32 +282,34 @@ def _copy_table(table, query, path):
 
 @register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=True)
 def events_table(since, full_path, until, **kwargs):
-    events_query = '''COPY (SELECT main_jobevent.id, 
+
+    safe_event_data = "replace(main_jobevent.event_data::text, '\\u0000', '')::json"
+    events_query = f'''COPY (SELECT main_jobevent.id,
                               main_jobevent.created,
                               main_jobevent.modified,
                               main_jobevent.uuid,
                               main_jobevent.parent_uuid,
-                              main_jobevent.event, 
-                              main_jobevent.event_data::json->'task_action' AS task_action,
+                              main_jobevent.event,
+                              {safe_event_data}->>'task_action' AS task_action,
                               (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
-                              main_jobevent.failed, 
-                              main_jobevent.changed, 
-                              main_jobevent.playbook, 
+                              main_jobevent.failed,
+                              main_jobevent.changed,
+                              main_jobevent.playbook,
                               main_jobevent.play,
                               main_jobevent.task,
-                              main_jobevent.role, 
-                              main_jobevent.job_id, 
-                              main_jobevent.host_id, 
-                              main_jobevent.host_name
-                              , CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
-                              CAST(main_jobevent.event_data::json->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
-                              main_jobevent.event_data::json->'duration' AS duration,
-                              main_jobevent.event_data::json->'res'->'warnings' AS warnings,
-                              main_jobevent.event_data::json->'res'->'deprecations' AS deprecations
-                              FROM main_jobevent 
-                              WHERE (main_jobevent.created > '{}' AND main_jobevent.created <= '{}')
+                              main_jobevent.role,
+                              main_jobevent.job_id,
+                              main_jobevent.host_id,
+                              main_jobevent.host_name,
+                              CAST({safe_event_data}->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
+                              CAST({safe_event_data}->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
+                              {safe_event_data}->'duration' AS duration,
+                              {safe_event_data}->'res'->'warnings' AS warnings,
+                              {safe_event_data}->'res'->'deprecations' AS deprecations
+                              FROM main_jobevent
+                              WHERE (main_jobevent.created > '{since.isoformat()}' AND main_jobevent.created <= '{until.isoformat()}')
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER
-                   '''.format(since.isoformat(),until.isoformat())
+                   '''
     return _copy_table(table='events', query=events_query, path=full_path)
 
 
