@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='executionenvironment',
-            name='container_options',
-            field=models.CharField(choices=[('always', 'Always pull container before running.'), ('missing', 'No pull option has been selected'), ('never', 'Never pull container before running')], default='missing', help_text='Pull image before running?', max_length=1024),
+            name='pull',
+            field=models.CharField(choices=[('always', 'Always pull container before running.'), ('missing', 'No pull option has been selected.'), ('never', 'Never pull container before running.')], default='missing', help_text='Pull image before running?', max_length=1024),
         ),
     ]

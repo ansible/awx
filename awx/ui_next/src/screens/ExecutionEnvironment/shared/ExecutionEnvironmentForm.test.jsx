@@ -19,7 +19,7 @@ const executionEnvironment = {
   id: 16,
   name: 'Test EE',
   type: 'execution_environment',
-  container_options: 'one',
+  pull: 'one',
   url: '/api/v2/execution_environments/16/',
   related: {
     created_by: '/api/v2/users/1/',
@@ -48,7 +48,7 @@ const mockOptions = {
   data: {
     actions: {
       POST: {
-        container_options: {
+        pull: {
           choices: [
             ['one', 'One'],
             ['two', 'Two'],
