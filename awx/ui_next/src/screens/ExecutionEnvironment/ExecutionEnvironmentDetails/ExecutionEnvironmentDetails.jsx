@@ -18,13 +18,7 @@ import { ExecutionEnvironmentsAPI } from '../../../api';
 
 function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
   const history = useHistory();
-  const {
-    id,
-    name,
-    image,
-    description,
-    container_options,
-  } = executionEnvironment;
+  const { id, name, image, description, pull } = executionEnvironment;
 
   const {
     request: deleteExecutionEnvironment,
@@ -54,12 +48,8 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
         />
         <Detail label={i18n._(t`Description`)} value={description} />
         <Detail
-          label={i18n._(t`Container Options`)}
-          value={
-            container_options === ''
-              ? i18n._(t`Missing`)
-              : toTitleCase(container_options)
-          }
+          label={i18n._(t`Pull`)}
+          value={pull === '' ? i18n._(t`Missing`) : toTitleCase(pull)}
         />
         {executionEnvironment.summary_fields.credential && (
           <Detail

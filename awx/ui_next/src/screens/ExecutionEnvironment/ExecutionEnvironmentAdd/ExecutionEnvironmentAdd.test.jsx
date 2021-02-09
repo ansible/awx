@@ -21,14 +21,14 @@ const executionEnvironmentData = {
   credential: 4,
   description: 'A simple EE',
   image: 'https://registry.com/image/container',
-  container_options: 'one',
+  pull: 'one',
 };
 
 const mockOptions = {
   data: {
     actions: {
       POST: {
-        container_options: {
+        pull: {
           choices: [
             ['one', 'One'],
             ['two', 'Two'],
