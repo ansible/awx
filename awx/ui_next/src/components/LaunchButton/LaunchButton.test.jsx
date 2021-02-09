@@ -1,5 +1,6 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import { sleep } from '../../../testUtils/testUtils';
 
@@ -69,7 +70,7 @@ describe('LaunchButton', () => {
       }
     );
     const button = wrapper.find('button');
-    button.prop('onClick')();
+    await act(() => button.prop('onClick')());
     expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
     expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
@@ -106,7 +107,7 @@ describe('LaunchButton', () => {
       }
     );
     const button = wrapper.find('button');
-    button.prop('onClick')();
+    await act(() => button.prop('onClick')());
     expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
     expect(WorkflowJobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
@@ -143,7 +144,7 @@ describe('LaunchButton', () => {
       }
     );
     const button = wrapper.find('button');
-    button.prop('onClick')();
+    await act(() => button.prop('onClick')());
     expect(JobsAPI.readRelaunch).toHaveBeenCalledWith(1);
     await sleep(0);
     expect(JobsAPI.relaunch).toHaveBeenCalledWith(1);
@@ -180,7 +181,7 @@ describe('LaunchButton', () => {
       }
     );
     const button = wrapper.find('button');
-    button.prop('onClick')();
+    await act(() => button.prop('onClick')());
     expect(WorkflowJobsAPI.readRelaunch).toHaveBeenCalledWith(1);
     await sleep(0);
     expect(WorkflowJobsAPI.relaunch).toHaveBeenCalledWith(1);
@@ -218,7 +219,7 @@ describe('LaunchButton', () => {
       }
     );
     const button = wrapper.find('button');
-    button.prop('onClick')();
+    await act(() => button.prop('onClick')());
     expect(ProjectsAPI.readLaunchUpdate).toHaveBeenCalledWith(5);
     await sleep(0);
     expect(ProjectsAPI.launchUpdate).toHaveBeenCalledWith(5);
@@ -256,7 +257,7 @@ describe('LaunchButton', () => {
       }
     );
     const button = wrapper.find('button');
-    button.prop('onClick')();
+    await act(() => button.prop('onClick')());
     expect(InventorySourcesAPI.readLaunchUpdate).toHaveBeenCalledWith(5);
     await sleep(0);
     expect(InventorySourcesAPI.launchUpdate).toHaveBeenCalledWith(5);
@@ -280,7 +281,7 @@ describe('LaunchButton', () => {
       })
     );
     expect(wrapper.find('Modal').length).toBe(0);
-    wrapper.find('button').prop('onClick')();
+    await act(() => wrapper.find('button').prop('onClick')());
     await sleep(0);
     wrapper.update();
     expect(wrapper.find('Modal').length).toBe(1);
