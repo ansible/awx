@@ -840,6 +840,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                         isClosable={false}
                                                         numChips={5}
                                                         onClick={[Function]}
+                                                        onOverflowChipClick={[Function]}
                                                         tooltipPosition="top"
                                                       >
                                                         <GenerateId
