@@ -14,8 +14,8 @@ class ExecutionEnvironment(CommonModel):
 
     PULL_CHOICES = [
         ('always', _("Always pull container before running.")),
-        ('missing', _("No pull option has been selected")),
-        ('never', _("Never pull container before running"))
+        ('missing', _("No pull option has been selected.")),
+        ('never', _("Never pull container before running."))
     ]
 
     organization = models.ForeignKey(
@@ -41,7 +41,7 @@ class ExecutionEnvironment(CommonModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    container_options = models.CharField(
+    pull = models.CharField(
         max_length=1024,
         choices=PULL_CHOICES,
         default='missing',

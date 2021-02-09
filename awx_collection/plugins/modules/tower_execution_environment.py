@@ -50,6 +50,12 @@ options:
       choices: ["present", "absent"]
       default: "present"
       type: str
+    pull:
+      description:
+        - determine image pull behavior
+      choices: ["always", "missing", "never"]
+      default: "missing"
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -75,6 +81,7 @@ def main():
         organization=dict(),
         credential=dict(default=''),
         state=dict(choices=['present', 'absent'], default='present'),
+        pull=dict(choices=['always', 'missing', 'never'], default='missing')
     )
 
     # Create a module for ourselves
@@ -85,6 +92,7 @@ def main():
     image = module.params.get('image')
     description = module.params.get('description')
     state = module.params.get('state')
+    pull = module.params.get('pull')
 
     existing_item = module.get_one('execution_environments', name_or_id=name)
 
@@ -98,6 +106,9 @@ def main():
     if description:
         new_fields['description'] = description
 
+    if pull:
+        new_fields['pull'] = pull
+        
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization = module.params.get('organization')
     if organization:
