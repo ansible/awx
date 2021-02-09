@@ -40,7 +40,7 @@ def migrate_event_data(apps, schema_editor):
             # hacky creation of parent table for partition
             cursor.execute(
                 f'CREATE TABLE {tblname} '
-                f'(LIKE {tblname}_old, job_created TIMESTAMP WITH TIME ZONE NOT NULL) '
+                f'(LIKE {tblname}_old INCLUDING ALL, job_created TIMESTAMP WITH TIME ZONE NOT NULL) '
                 f'PARTITION BY RANGE(job_created);'
             )
 
