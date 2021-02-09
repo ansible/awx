@@ -52,10 +52,10 @@ function ExecutionEnvironmentFormFields({
     containerOptionsMeta,
     containerOptionsHelpers,
   ] = useField({
-    name: 'container_options',
+    name: 'pull',
   });
 
-  const containerPullChoices = options?.actions?.POST?.container_options?.choices.map(
+  const containerPullChoices = options?.actions?.POST?.pull?.choices.map(
     ([value, label]) => ({ value, label, key: value })
   );
 
@@ -168,7 +168,7 @@ function ExecutionEnvironmentForm({
   const initialValues = {
     name: executionEnvironment.name || '',
     image: executionEnvironment.image || '',
-    container_options: executionEnvironment?.container_options || '',
+    pull: executionEnvironment?.pull || '',
     description: executionEnvironment.description || '',
     credential: executionEnvironment.summary_fields?.credential || null,
     organization: executionEnvironment.summary_fields?.organization || null,
