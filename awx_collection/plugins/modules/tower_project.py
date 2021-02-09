@@ -179,7 +179,13 @@ from ..module_utils.tower_api import TowerAPIModule
 
 
 def wait_for_project_update(module, last_request):
-    # The current running job for the udpate is in last_request['summary_fields']['current_update']['id']
+    # The current running job for the update is in last_request['summary_fields']['current_update']['id']
+
+    # Get parameters that were not passed in
+    update_project = module.params.get('update_project')
+    wait = module.params.get('wait')
+    timeout = module.params.get('timeout')
+    interval = module.params.get('interval')
 
     if 'current_update' in last_request['summary_fields']:
         running = True
