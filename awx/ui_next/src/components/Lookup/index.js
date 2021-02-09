@@ -7,3 +7,4 @@ export { default as CredentialLookup } from './CredentialLookup';
 export { default as ApplicationLookup } from './ApplicationLookup';
 export { default as HostFilterLookup } from './HostFilterLookup';
 export { default as OrganizationLookup } from './OrganizationLookup';
+export { default as ExecutionEnvironmentLookup } from './ExecutionEnvironmentLookup';

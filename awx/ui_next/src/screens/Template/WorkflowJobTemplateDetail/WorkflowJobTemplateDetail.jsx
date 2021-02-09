@@ -125,6 +125,12 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
             }
           />
         )}
+        {summary_fields?.execution_environment && (
+          <Detail
+            label={i18n._(t`Execution Environment`)}
+            value={summary_fields.execution_environment.name}
+          />
+        )}
         <Detail label={i18n._(t`Job Type`)} value={toTitleCase(type)} />
         {summary_fields.inventory && (
           <Detail
