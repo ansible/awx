@@ -206,6 +206,12 @@ function JobTemplateDetail({ i18n, template }) {
         ) : (
           <DeletedDetail label={i18n._(t`Project`)} />
         )}
+        {summary_fields?.execution_environment && (
+          <Detail
+            label={i18n._(t`Execution Environment`)}
+            value={summary_fields.execution_environment.name}
+          />
+        )}
         <Detail
           label={i18n._(t`Source Control Branch`)}
           value={template.scm_branch}

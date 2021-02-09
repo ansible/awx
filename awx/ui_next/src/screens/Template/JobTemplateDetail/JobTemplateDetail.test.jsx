@@ -142,6 +142,7 @@ describe('<JobTemplateDetail />', () => {
       el => el.length === 0
     );
   });
+
   test('webhook fields should render properly', () => {
     expect(wrapper.find('Detail[label="Webhook Service"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Webhook Service"]').prop('value')).toBe(
@@ -153,5 +154,14 @@ describe('<JobTemplateDetail />', () => {
     );
     expect(wrapper.find('Detail[label="Webhook Key"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Webhook Credential"]').length).toBe(1);
+  });
+
+  test('execution environment field should render properly', () => {
+    expect(wrapper.find('Detail[label="Execution Environment"]').length).toBe(
+      1
+    );
+    expect(
+      wrapper.find('Detail[label="Execution Environment"]').prop('value')
+    ).toBe('Default EE');
   });
 });
