@@ -88,7 +88,7 @@ function ExecutionEnvironmentFormFields({
             ? 'default'
             : 'error'
         }
-        label={i18n._(t`Container Pull Option`)}
+        label={i18n._(t`Pull`)}
       >
         <AnsibleSelect
           {...containerOptionsField}
