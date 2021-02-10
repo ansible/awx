@@ -16,7 +16,7 @@ import {
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ChipGroup from '../../../components/ChipGroup';
 import CredentialChip from '../../../components/CredentialChip';
-import { VariablesInput as _VariablesInput } from '../../../components/CodeMirrorInput';
+import { VariablesInput as _VariablesInput } from '../../../components/CodeEditor';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
 import {

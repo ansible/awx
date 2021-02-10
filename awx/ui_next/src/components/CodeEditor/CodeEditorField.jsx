@@ -11,10 +11,10 @@ import {
 } from 'prop-types';
 import { useField } from 'formik';
 import { FormGroup } from '@patternfly/react-core';
-import CodeMirrorInput from './CodeMirrorInput';
+import CodeEditor from './CodeEditor';
 import Popover from '../Popover';
 
-function CodeMirrorField({
+function CodeEditorField({
   id,
   name,
   label,
@@ -39,7 +39,7 @@ function CodeMirrorField({
       label={label}
       labelIcon={<Popover content={tooltip} />}
     >
-      <CodeMirrorInput
+      <CodeEditor
         id={id}
         {...rest}
         {...field}
@@ -51,7 +51,7 @@ function CodeMirrorField({
     </FormGroup>
   );
 }
-CodeMirrorField.propTypes = {
+CodeEditorField.propTypes = {
   helperText: string,
   id: string.isRequired,
   name: string.isRequired,
@@ -63,7 +63,7 @@ CodeMirrorField.propTypes = {
   rows: number,
 };
 
-CodeMirrorField.defaultProps = {
+CodeEditorField.defaultProps = {
   helperText: '',
   validate: () => {},
   isRequired: false,
@@ -71,4 +71,4 @@ CodeMirrorField.defaultProps = {
   rows: 5,
 };
 
-export default CodeMirrorField;
+export default CodeEditorField;

@@ -122,7 +122,7 @@ describe('<GoogleOAuth2Edit />', () => {
         target: { value: 'new key', name: 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY' },
       });
       wrapper
-        .find('CodeMirrorInput#SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP')
+        .find('CodeEditor#SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP')
         .invoke('onChange')('{\n"Default":{\n"users":\nfalse\n}\n}');
     });
     wrapper.update();

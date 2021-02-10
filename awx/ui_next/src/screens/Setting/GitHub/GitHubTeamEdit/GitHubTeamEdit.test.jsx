@@ -108,7 +108,7 @@ describe('<GitHubTeamEdit />', () => {
         target: { value: '12345', name: 'SOCIAL_AUTH_GITHUB_TEAM_ID' },
       });
       wrapper
-        .find('CodeMirrorInput#SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP')
+        .find('CodeEditor#SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP')
         .invoke('onChange')('{\n"Default":{\n"users":\ntrue\n}\n}');
     });
     wrapper.update();

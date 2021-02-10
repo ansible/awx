@@ -19,7 +19,7 @@ import {
   SubFormLayout,
 } from '../../../components/FormLayout';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
-import { VariablesField } from '../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../components/CodeEditor';
 
 function ContainerGroupFormFields({ i18n, instanceGroup }) {
   const { setFieldValue } = useFormikContext();

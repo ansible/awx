@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { oneOf, bool, number, string, func } from 'prop-types';
-import ReactAceEditor from 'react-ace';
+import ReactAce from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-yaml';
@@ -11,7 +11,7 @@ import styled from 'styled-components';
 const LINE_HEIGHT = 24;
 const PADDING = 12;
 
-const AceEditor = styled(ReactAceEditor)`
+const AceEditor = styled(ReactAce)`
   font-family: var(--pf-global--FontFamily--monospace);
   max-height: 90vh;
 
@@ -33,8 +33,9 @@ const AceEditor = styled(ReactAceEditor)`
       border-bottom-width: var(--pf-c-form-control--invalid--BorderBottomWidth);
     }`}
 `;
+AceEditor.displayName = 'AceEditor';
 
-function CodeInput({
+function CodeEditor({
   id,
   value,
   onChange,
@@ -126,7 +127,7 @@ function CodeInput({
     </div>
   );
 }
-CodeMirrorInput.propTypes = {
+CodeEditor.propTypes = {
   value: string.isRequired,
   onChange: func,
   mode: oneOf(['javascript', 'yaml', 'jinja2']).isRequired,
@@ -136,7 +137,7 @@ CodeMirrorInput.propTypes = {
   rows: number,
   className: string,
 };
-CodeMirrorInput.defaultProps = {
+CodeEditor.defaultProps = {
   readOnly: false,
   onChange: () => {},
   rows: 6,
@@ -145,4 +146,4 @@ CodeMirrorInput.defaultProps = {
   className: '',
 };
 
-export default CodeInput;
+export default CodeEditor;

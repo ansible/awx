@@ -29,7 +29,7 @@ import {
   FormCheckboxLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import { VariablesField } from '../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../components/CodeEditor';
 import { required } from '../../../util/validators';
 import { JobTemplate } from '../../../types';
 import {

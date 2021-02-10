@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 import { Chip, List, ListItem } from '@patternfly/react-core';
 import { Detail, DeletedDetail } from '../DetailList';
-import { VariablesDetail } from '../CodeMirrorInput';
+import { VariablesDetail } from '../CodeEditor';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 

@@ -14,7 +14,7 @@ import FormField, {
   ArrayTextField,
 } from '../../../components/FormField';
 import AnsibleSelect from '../../../components/AnsibleSelect';
-import { CodeMirrorField } from '../../../components/CodeMirrorInput';
+import { CodeEditorField } from '../../../components/CodeEditor';
 import {
   combine,
   required,
@@ -470,7 +470,7 @@ function WebhookFields({ i18n }) {
         name="notification_configuration.disable_ssl_verification"
       />
       <FormFullWidthLayout>
-        <CodeMirrorField
+        <CodeEditorField
           id="webhook-headers"
           name="notification_configuration.headers"
           label={i18n._(t`HTTP Headers`)}

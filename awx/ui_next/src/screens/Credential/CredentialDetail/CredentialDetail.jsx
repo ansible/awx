@@ -16,14 +16,14 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import ChipGroup from '../../../components/ChipGroup';
-import CodeMirrorInput from '../../../components/CodeMirrorInput';
+import CodeEditor from '../../../components/CodeEditor';
 import CredentialChip from '../../../components/CredentialChip';
 import ErrorDetail from '../../../components/ErrorDetail';
 import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
 import { Credential } from '../../../types';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 
-const PluginInputMetadata = styled(CodeMirrorInput)`
+const PluginInputMetadata = styled(CodeEditor)`
   grid-column: 1 / -1;
 `;
 

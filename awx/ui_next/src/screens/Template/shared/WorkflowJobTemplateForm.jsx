@@ -26,7 +26,7 @@ import {
   InventoryLookup,
   ExecutionEnvironmentLookup,
 } from '../../../components/Lookup';
-import { VariablesField } from '../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../components/CodeEditor';
 import FormActionGroup from '../../../components/FormActionGroup';
 import ContentError from '../../../components/ContentError';
 import CheckboxField from '../../../components/FormField/CheckboxField';

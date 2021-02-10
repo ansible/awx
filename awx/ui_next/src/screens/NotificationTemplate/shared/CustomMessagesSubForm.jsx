@@ -8,7 +8,7 @@ import {
   FormFullWidthLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import CodeMirrorField from '../../../components/CodeMirrorInput/CodeMirrorField';
+import CodeEditorField from '../../../components/CodeEditor/CodeEditorField';
 
 function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
   const [useCustomField, , useCustomHelpers] = useField('useCustomMessages');
@@ -102,7 +102,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
           </Text>
           <FormFullWidthLayout>
             {showMessages && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="start-message"
                 name="messages.started.message"
                 label={i18n._(t`Start message`)}
@@ -111,7 +111,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showBodies && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="start-body"
                 name="messages.started.body"
                 label={i18n._(t`Start message body`)}
@@ -120,7 +120,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showMessages && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="success-message"
                 name="messages.success.message"
                 label={i18n._(t`Success message`)}
@@ -129,7 +129,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showBodies && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="success-body"
                 name="messages.success.body"
                 label={i18n._(t`Success message body`)}
@@ -138,7 +138,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showMessages && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="error-message"
                 name="messages.error.message"
                 label={i18n._(t`Error message`)}
@@ -147,7 +147,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showBodies && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="error-body"
                 name="messages.error.body"
                 label={i18n._(t`Error message body`)}
@@ -156,7 +156,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showMessages && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="wf-approved-message"
                 name="messages.workflow_approval.approved.message"
                 label={i18n._(t`Workflow approved message`)}
@@ -165,7 +165,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showBodies && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="wf-approved-body"
                 name="messages.workflow_approval.approved.body"
                 label={i18n._(t`Workflow approved message body`)}
@@ -174,7 +174,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showMessages && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="wf-denied-message"
                 name="messages.workflow_approval.denied.message"
                 label={i18n._(t`Workflow denied message`)}
@@ -183,7 +183,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showBodies && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="wf-denied-body"
                 name="messages.workflow_approval.denied.body"
                 label={i18n._(t`Workflow denied message body`)}
@@ -192,7 +192,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showMessages && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="wf-running-message"
                 name="messages.workflow_approval.running.message"
                 label={i18n._(t`Workflow pending message`)}
@@ -201,7 +201,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showBodies && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="wf-running-body"
                 name="messages.workflow_approval.running.body"
                 label={i18n._(t`Workflow pending message body`)}
@@ -210,7 +210,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showMessages && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="wf-timed-out-message"
                 name="messages.workflow_approval.timed_out.message"
                 label={i18n._(t`Workflow timed out message`)}
@@ -219,7 +219,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               />
             )}
             {showBodies && (
-              <CodeMirrorField
+              <CodeEditorField
                 id="wf-timed-out-body"
                 name="messages.workflow_approval.timed_out.body"
                 label={i18n._(t`Workflow timed out message body`)}

@@ -25,7 +25,7 @@ import {
 import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
-import { VariablesDetail } from '../../CodeMirrorInput';
+import { VariablesDetail } from '../../CodeEditor';
 import { parseVariableField } from '../../../util/yaml';
 
 const PromptDivider = styled(Divider)`
