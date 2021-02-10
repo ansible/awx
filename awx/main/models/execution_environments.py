@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from awx.api.versioning import reverse
 from awx.main.models.base import CommonModel
+from awx.main.utils import copy_model_by_class, copy_m2m_relationships
 
 
 __all__ = ['ExecutionEnvironment']
@@ -48,6 +49,22 @@ class ExecutionEnvironment(CommonModel):
         default='',
         help_text=_('Pull image before running?'),
     )
+
+    def copy_execution_environment(self):
+        '''
+        Returns saved object, including related fields.
+        Create a copy of this unified job template.
+        '''
+        execution_environment_class = self.__class__
+        fields = (f.name for f in self.Meta.fields)
+        execution_environment_copy = copy_model_by_class(self, execution_environment_class, fields, {})
+
+        time_now = now()
+        execution_environment_copy.name = execution_environment_copy.name.split('@', 1)[0] + ' @ ' + time_now.strftime('%I:%M:%S %p')
+
+        execution_environment_copy.save()
+        copy_m2m_relationships(self, execution_environment_copy, fields)
+        return execution_environment_copy
 
     def get_absolute_url(self, request=None):
         return reverse('api:execution_environment_detail', kwargs={'pk': self.pk}, request=request)
