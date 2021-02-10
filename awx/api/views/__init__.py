@@ -710,6 +710,12 @@ class ExecutionEnvironmentJobTemplateList(SubListAPIView):
     relationship = 'unifiedjobtemplates'
 
 
+class ExecutionEnvironmentCopy(CopyAPIView):
+    
+    model = models.ExecutionEnvironment
+    copy_return_serializer_class = serializers.ExecutionEnvironmentSerializer
+
+
 class ExecutionEnvironmentActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
