@@ -62,7 +62,7 @@ The AWX UI requires the following:
 
 Run the following to install all the dependencies:
 ```bash
-(host) $ npm run install
+(host) $ npm install
 ```
 
 #### Build the User Interface

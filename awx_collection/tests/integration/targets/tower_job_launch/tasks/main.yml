@@ -70,12 +70,84 @@
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
 
+- name: Create the job template with survey
+  tower_job_template:
+    name: "{{ jt_name2 }}"
+    project: "{{ proj_name }}"
+    playbook: debug.yml
+    job_type: run
+    state: present
+    inventory: "Demo Inventory"
+    survey_enabled: true
+    ask_variables_on_launch: false
+    survey_spec:
+      name: ''
+      description: ''
+      spec:
+        - question_name: Basic Name
+          question_description: Name
+          required: true
+          type: text
+          variable: basic_name
+          min: 0
+          max: 1024
+          default: ''
+          choices: ''
+          new_question: true
+        - question_name: Choose yes or no?
+          question_description: Choosing yes or no.
+          required: false
+          type: multiplechoice
+          variable: option_true_false
+          min:
+          max:
+          default: 'yes'
+          choices: |-
+            yes
+            no
+          new_question: true
+
+- name: Kick off a job template with survey
+  tower_job_launch:
+    job_template: "{{ jt_name2 }}"
+    extra_vars:
+      basic_name: My First Variable
+      option_true_false: 'no'
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+
+- name: Prompt the job templates extra_vars on launch
+  tower_job_template:
+    name: "{{ jt_name2 }}"
+    state: present
+    ask_variables_on_launch: true
+
+
+- name: Kick off a job template with extra_vars
+  tower_job_launch:
+    job_template: "{{ jt_name2 }}"
+    extra_vars:
+      basic_name: My First Variable
+      var1: My First Variable
+      var2: My Second Variable
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+
 - name: Create a Job Template for testing extra_vars
   tower_job_template:
     name: "{{ jt_name2 }}"
     project: "{{ proj_name }}"
     playbook: debug.yml
     job_type: run
+    survey_enabled: false
     state: present
     inventory: "Demo Inventory"
     extra_vars:
@@ -85,6 +157,7 @@
 - name: Launch job template with inventory and credential for prompt on launch
   tower_job_launch:
     job_template: "{{ jt_name2 }}"
+    organization: Default
   register: result
 
 - assert:

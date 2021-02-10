@@ -10,12 +10,13 @@ import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 
 function CopyButton({
-  i18n,
+  id,
   copyItem,
   isDisabled,
   onCopyStart,
   onCopyFinish,
   helperText,
+  i18n,
 }) {
   const { isLoading, error: copyError, request: copyItemToAPI } = useRequest(
     copyItem
@@ -34,6 +35,7 @@ function CopyButton({
     <>
       <Tooltip content={helperText.tooltip} position="top">
         <Button
+          id={id}
           isDisabled={isLoading || isDisabled}
           aria-label={i18n._(t`Copy`)}
           variant="plain"

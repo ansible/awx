@@ -31,21 +31,33 @@ function GitHubDetail({ i18n }) {
         { data: gitHubDefault },
         { data: gitHubOrganization },
         { data: gitHubTeam },
+        { data: gitHubEnterprise },
+        { data: gitHubEnterpriseOrganization },
+        { data: gitHubEnterpriseTeam },
       ] = await Promise.all([
         SettingsAPI.readCategory('github'),
         SettingsAPI.readCategory('github-org'),
         SettingsAPI.readCategory('github-team'),
+        SettingsAPI.readCategory('github-enterprise'),
+        SettingsAPI.readCategory('github-enterprise-org'),
+        SettingsAPI.readCategory('github-enterprise-team'),
       ]);
       return {
         default: gitHubDefault,
         organization: gitHubOrganization,
         team: gitHubTeam,
+        enterprise: gitHubEnterprise,
+        enterprise_organization: gitHubEnterpriseOrganization,
+        enterprise_team: gitHubEnterpriseTeam,
       };
     }, []),
     {
       default: null,
       organization: null,
       team: null,
+      enterprise: null,
+      enterprise_organization: null,
+      enterprise_team: null,
     }
   );
 
@@ -78,6 +90,21 @@ function GitHubDetail({ i18n }) {
       name: i18n._(t`GitHub Team`),
       link: `${baseURL}/team/details`,
       id: 2,
+    },
+    {
+      name: i18n._(t`GitHub Enterprise`),
+      link: `${baseURL}/enterprise/details`,
+      id: 3,
+    },
+    {
+      name: i18n._(t`GitHub Enterprise Organization`),
+      link: `${baseURL}/enterprise_organization/details`,
+      id: 4,
+    },
+    {
+      name: i18n._(t`GitHub Enterprise Team`),
+      link: `${baseURL}/enterprise_team/details`,
+      id: 5,
     },
   ];
 

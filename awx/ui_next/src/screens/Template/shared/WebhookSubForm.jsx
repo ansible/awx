@@ -196,7 +196,7 @@ function WebhookSubForm({ i18n, templateType }) {
             <TextInput
               id="template-webhook_key"
               isReadOnly
-              aria-label="wfjt-webhook-key"
+              aria-label={i18n._(t`workflow job template webhook key`)}
               value={webhookKeyField.value}
             />
             <Button

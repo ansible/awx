@@ -48,6 +48,44 @@ describe('<GitHub />', () => {
         SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP: {},
       },
     });
+    SettingsAPI.readCategory.mockResolvedValueOnce({
+      data: {
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_CALLBACK_URL:
+          'https://towerhost/sso/complete/github-enterprise/',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_URL: 'https://localhost/url',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL: 'https://localhost/apiurl',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY: 'ent_key',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET: '$encrypted',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_ORGANIZATION_MAP: {},
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_MAP: {},
+      },
+    });
+    SettingsAPI.readCategory.mockResolvedValueOnce({
+      data: {
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_CALLBACK_URL:
+          'https://towerhost/sso/complete/github-enterprise-org/',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL: 'https://localhost/url',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL: 'https://localhost/apiurl',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY: 'ent_org_key',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET: '$encrypted$',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME: 'ent_org_name',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_ORGANIZATION_MAP: {},
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_TEAM_MAP: {},
+      },
+    });
+    SettingsAPI.readCategory.mockResolvedValueOnce({
+      data: {
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_CALLBACK_URL:
+          'https://towerhost/sso/complete/github-enterprise-team/',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL: 'https://localhost/url',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL: 'https://localhost/apiurl',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY: 'ent_team_key',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET: '$encrypted$',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID: 'ent_team_id',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ORGANIZATION_MAP: {},
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_TEAM_MAP: {},
+      },
+    });
   });
 
   afterEach(() => {

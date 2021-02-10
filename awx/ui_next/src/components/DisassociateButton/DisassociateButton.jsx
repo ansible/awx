@@ -118,7 +118,7 @@ function DisassociateButton({
             </Button>,
             <Button
               key="cancel"
-              variant="secondary"
+              variant="link"
               aria-label={i18n._(t`Cancel`)}
               onClick={() => setIsOpen(false)}
             >

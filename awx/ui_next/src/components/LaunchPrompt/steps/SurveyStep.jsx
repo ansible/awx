@@ -33,7 +33,11 @@ function SurveyStep({ surveyConfig, i18n }) {
     float: NumberField,
   };
   return (
-    <Form>
+    <Form
+      onSubmit={e => {
+        e.preventDefault();
+      }}
+    >
       {surveyConfig.spec.map(question => {
         const Field = fieldTypes[question.type];
         return (

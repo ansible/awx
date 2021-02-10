@@ -84,7 +84,11 @@ function CredentialPasswordsStep({ launchConfig, i18n }) {
   }
 
   return (
-    <Form>
+    <Form
+      onSubmit={e => {
+        e.preventDefault();
+      }}
+    >
       {showcredentialPasswordSsh && (
         <PasswordField
           id="launch-ssh-password"

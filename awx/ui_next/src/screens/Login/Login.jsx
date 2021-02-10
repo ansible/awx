@@ -165,6 +165,41 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                   </LoginMainFooterLinksItem>
                 );
               }
+              if (authKey === 'github-enterprise') {
+                return (
+                  <LoginMainFooterLinksItem href={loginUrl} key={authKey}>
+                    <Tooltip
+                      content={i18n._(t`Sign in with GitHub Enterprise`)}
+                    >
+                      <GithubIcon />
+                    </Tooltip>
+                  </LoginMainFooterLinksItem>
+                );
+              }
+              if (authKey === 'github-enterprise-org') {
+                return (
+                  <LoginMainFooterLinksItem href={loginUrl} key={authKey}>
+                    <Tooltip
+                      content={i18n._(
+                        t`Sign in with GitHub Enterprise Organizations`
+                      )}
+                    >
+                      <GithubIcon />
+                    </Tooltip>
+                  </LoginMainFooterLinksItem>
+                );
+              }
+              if (authKey === 'github-enterprise-team') {
+                return (
+                  <LoginMainFooterLinksItem href={loginUrl} key={authKey}>
+                    <Tooltip
+                      content={i18n._(t`Sign in with GitHub Enterprise Teams`)}
+                    >
+                      <GithubIcon />
+                    </Tooltip>
+                  </LoginMainFooterLinksItem>
+                );
+              }
               if (authKey === 'google-oauth2') {
                 return (
                   <LoginMainFooterLinksItem href={loginUrl} key={authKey}>

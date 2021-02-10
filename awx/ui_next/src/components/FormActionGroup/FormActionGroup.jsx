@@ -20,7 +20,7 @@ const FormActionGroup = ({ onCancel, onSubmit, submitDisabled, i18n }) => {
         </Button>
         <Button
           aria-label={i18n._(t`Cancel`)}
-          variant="secondary"
+          variant="link"
           type="button"
           onClick={onCancel}
         >

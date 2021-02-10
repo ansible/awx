@@ -348,11 +348,11 @@ def test_job_not_blocking_project_update(default_instance_group, job_template_fa
         project_update.instance_group = default_instance_group
         project_update.status = "pending"
         project_update.save()
-        assert not task_manager.is_job_blocked(project_update)
+        assert not task_manager.job_blocked_by(project_update)
 
-        dependency_graph = DependencyGraph(None)
+        dependency_graph = DependencyGraph()
         dependency_graph.add_job(job)
-        assert not dependency_graph.is_job_blocked(project_update)
+        assert not dependency_graph.task_blocked_by(project_update)
 
 
 @pytest.mark.django_db
@@ -378,11 +378,11 @@ def test_job_not_blocking_inventory_update(default_instance_group, job_template_
         inventory_update.status = "pending"
         inventory_update.save()
 
-        assert not task_manager.is_job_blocked(inventory_update)
+        assert not task_manager.job_blocked_by(inventory_update)
 
-        dependency_graph = DependencyGraph(None)
+        dependency_graph = DependencyGraph()
         dependency_graph.add_job(job)
-        assert not dependency_graph.is_job_blocked(inventory_update)
+        assert not dependency_graph.task_blocked_by(inventory_update)
 
 
 @pytest.mark.django_db

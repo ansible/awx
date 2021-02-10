@@ -75,7 +75,6 @@ COPY . /tmp/src/
 WORKDIR /tmp/src/
 RUN make sdist && \
     /var/lib/awx/venv/awx/bin/pip install dist/awx-$(cat VERSION).tar.gz
-RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 {% endif %}
 
 # Final container(s)
@@ -172,6 +171,8 @@ RUN dnf --enablerepo=debuginfo -y install python3-debuginfo || :
 
 # Copy app from builder
 COPY --from=builder /var/lib/awx /var/lib/awx
+
+RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 
 {%if build_dev|bool %}
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr \

@@ -23,9 +23,15 @@ const GitSubForm = ({
         <span>
           {i18n._(t`Example URLs for GIT Source Control include:`)}
           <ul css="margin: 10px 0 10px 20px">
-            <li>https://github.com/ansible/ansible.git</li>
-            <li>git@github.com:ansible/ansible.git</li>
-            <li>git://servername.example.com/ansible.git</li>
+            <li>
+              <code>https://github.com/ansible/ansible.git</code>
+            </li>
+            <li>
+              <code>git@github.com:ansible/ansible.git</code>
+            </li>
+            <li>
+              <code>git://servername.example.com/ansible.git</code>
+            </li>
           </ul>
           {i18n._(t`Note: When using SSH protocol for GitHub or
             Bitbucket, enter an SSH key only, do not enter a username
@@ -58,8 +64,12 @@ const GitSubForm = ({
           <br />
           {i18n._(t`Examples include:`)}
           <ul css={{ margin: '10px 0 10px 20px' }}>
-            <li>refs/*:refs/remotes/origin/*</li>
-            <li>refs/pull/62/head:refs/remotes/origin/pull/62/head</li>
+            <li>
+              <code>refs/*:refs/remotes/origin/*</code>
+            </li>
+            <li>
+              <code>refs/pull/62/head:refs/remotes/origin/pull/62/head</code>
+            </li>
           </ul>
           {i18n._(t`The first fetches all references. The second
             fetches the Github pull request number 62, in this example

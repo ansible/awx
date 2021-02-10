@@ -129,51 +129,66 @@ describe('UsersList with full permissions', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper.find('DataListCheck[id="select-user-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check input')
+        .first()
+        .props().checked
     ).toBe(false);
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-user-1"]').invoke('onChange')(
-        true
-      );
+      wrapper
+        .find('.pf-c-table__check input')
+        .first()
+        .invoke('onChange')(true);
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-user-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check input')
+        .first()
+        .props().checked
     ).toBe(true);
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-user-1"]').invoke('onChange')(
-        false
-      );
+      wrapper
+        .find('.pf-c-table__check input')
+        .first()
+        .invoke('onChange')(false);
     });
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-user-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check input')
+        .first()
+        .props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
-    wrapper.find('DataListCheck').forEach(el => {
+    expect(wrapper.find('.pf-c-table__check input')).toHaveLength(2);
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
+    wrapper.find('.pf-c-table__check input').forEach(el => {
       expect(el.props().checked).toBe(false);
     });
   });
 
   test('should call api delete users for each selected user', async () => {
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-user-1"]').invoke('onChange')();
+      wrapper
+        .find('.pf-c-table__check input')
+        .first()
+        .invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {
@@ -185,10 +200,12 @@ describe('UsersList with full permissions', () => {
 
   test('should show error modal when user is not successfully deleted from api', async () => {
     UsersAPI.destroy.mockImplementationOnce(() => Promise.reject(new Error()));
-    // expect(wrapper.debug()).toBe(false);
     expect(wrapper.find('Modal').length).toBe(0);
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-user-1"]').invoke('onChange')();
+      wrapper
+        .find('.pf-c-table__check input')
+        .first()
+        .invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {

@@ -112,7 +112,7 @@ function AssociateModal({
           <Button
             aria-label={i18n._(t`Cancel`)}
             key="cancel"
-            variant="secondary"
+            variant="link"
             onClick={handleClose}
           >
             {i18n._(t`Cancel`)}

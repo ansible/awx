@@ -105,7 +105,7 @@ const InventoryGroupsDeleteModal = ({
             <Button
               aria-label={i18n._(t`Close`)}
               onClick={() => setIsModalOpen(false)}
-              variant="secondary"
+              variant="link"
               key="cancel"
             >
               {i18n._(t`Cancel`)}

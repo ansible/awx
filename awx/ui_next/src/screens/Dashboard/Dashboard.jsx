@@ -23,7 +23,7 @@ import JobList from '../../components/JobList';
 import ContentLoading from '../../components/ContentLoading';
 import LineChart from './shared/LineChart';
 import Count from './shared/Count';
-import DashboardTemplateList from './shared/DashboardTemplateList';
+import TemplateList from '../../components/TemplateList';
 
 const Counts = styled.div`
   display: grid;
@@ -247,7 +247,9 @@ function Dashboard({ i18n }) {
               </Fragment>
             )}
             {activeTabId === 1 && <JobList defaultParams={{ page_size: 5 }} />}
-            {activeTabId === 2 && <DashboardTemplateList />}
+            {activeTabId === 2 && (
+              <TemplateList defaultParams={{ page_size: 5 }} />
+            )}
           </Card>
         </div>
       </MainPageSection>

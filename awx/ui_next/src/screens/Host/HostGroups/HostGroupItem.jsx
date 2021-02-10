@@ -42,7 +42,7 @@ function HostGroupItem({ i18n, group, inventoryId, isSelected, onSelect }) {
           ]}
         />
         <DataListAction
-          aria-label="actions"
+          aria-label={i18n._(t`actions`)}
           aria-labelledby={labelId}
           id={labelId}
         >
