@@ -281,6 +281,42 @@ function JobDetail({ job, i18n }) {
             }
           />
         )}
+        {job.job_tags && job.job_tags.length > 0 && (
+          <Detail
+            fullWidth
+            label={i18n._(t`Job Tags`)}
+            value={
+              <ChipGroup
+                numChips={5}
+                totalChips={job.job_tags.split(',').length}
+              >
+                {job.job_tags.split(',').map(jobTag => (
+                  <Chip key={jobTag} isReadOnly>
+                    {jobTag}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            }
+          />
+        )}
+        {job.skip_tags && job.skip_tags.length > 0 && (
+          <Detail
+            fullWidth
+            label={i18n._(t`Skip Tags`)}
+            value={
+              <ChipGroup
+                numChips={5}
+                totalChips={job.skip_tags.split(',').length}
+              >
+                {job.skip_tags.split(',').map(skipTag => (
+                  <Chip key={skipTag} isReadOnly>
+                    {skipTag}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            }
+          />
+        )}
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={job.created}
