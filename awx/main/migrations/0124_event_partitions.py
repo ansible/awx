@@ -37,11 +37,25 @@ def migrate_event_data(apps, schema_editor):
                 f'ALTER TABLE {tblname} RENAME TO {tblname}_old'
             )
 
-            # hacky creation of parent table for partition
+            # drop primary key constraint; in a partioned table
+            # constraints must include the partition key itself
+            # TODO: do more generic search for pkey constraints
+            # instead of hardcoding this one that applies to main_jobevent
+            cursor.execute(
+                f'ALTER TABLE {tblname}_old DROP CONSTRAINT {tblname}_pkey1'
+            )
+
+            # create parent table
             cursor.execute(
                 f'CREATE TABLE {tblname} '
                 f'(LIKE {tblname}_old INCLUDING ALL, job_created TIMESTAMP WITH TIME ZONE NOT NULL) '
                 f'PARTITION BY RANGE(job_created);'
+            )
+
+            # recreate primary key constraint
+            cursor.execute(
+                f'ALTER TABLE ONLY {tblname} '
+                f'ADD CONSTRAINT {tblname}_pkey PRIMARY KEY (id, job_created);'
             )
 
             # .. as well as initial partition containing all existing events
