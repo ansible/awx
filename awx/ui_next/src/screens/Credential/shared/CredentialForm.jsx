@@ -8,10 +8,11 @@ import {
   Button,
   Form,
   FormGroup,
-  Select,
-  SelectOption,
+  Select as PFSelect,
+  SelectOption as PFSelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
+import styled from 'styled-components';
 import FormField, { FormSubmitError } from '../../../components/FormField';
 import {
   FormColumnLayout,
@@ -21,6 +22,18 @@ import { required } from '../../../util/validators';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import TypeInputsSubForm from './TypeInputsSubForm';
 import ExternalTestModal from './ExternalTestModal';
+
+const Select = styled(PFSelect)`
+  ul {
+    max-width: 495px;
+  }
+`;
+
+const SelectOption = styled(PFSelectOption)`
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
 
 function CredentialFormFields({ i18n, credentialTypes }) {
   const { setFieldValue, initialValues, setFieldTouched } = useFormikContext();
@@ -142,11 +155,13 @@ function CredentialFormFields({ i18n, credentialTypes }) {
           onSelect={(event, value) => {
             credTypeHelpers.setValue(value);
             resetSubFormFields(value);
+            setIsSelectOpen(false);
           }}
           selections={credTypeField.value}
           placeholder={i18n._(t`Select a credential Type`)}
           isCreatable={false}
           maxHeight="300px"
+          width="100%"
         >
           {credentialTypeOptions.map(credType => (
             <SelectOption key={credType.value} value={credType.value}>
