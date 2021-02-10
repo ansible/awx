@@ -36,7 +36,7 @@ function DeleteRoleConfirmationModal({
         >
           {i18n._(t`Delete`)}
         </Button>,
-        <Button key="cancel" variant="secondary" onClick={onCancel}>
+        <Button key="cancel" variant="link" onClick={onCancel}>
           {i18n._(t`Cancel`)}
         </Button>,
       ]}

@@ -107,7 +107,7 @@ function SurveyList({
         </Button>,
         <Button
           key="cancel"
-          variant="secondary"
+          variant="link"
           aria-label={i18n._(t`cancel delete`)}
           onClick={() => {
             setIsDeleteModalOpen(false);

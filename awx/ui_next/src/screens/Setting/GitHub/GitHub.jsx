@@ -8,6 +8,9 @@ import GitHubDetail from './GitHubDetail';
 import GitHubEdit from './GitHubEdit';
 import GitHubOrgEdit from './GitHubOrgEdit';
 import GitHubTeamEdit from './GitHubTeamEdit';
+import GitHubEnterpriseEdit from './GitHubEnterpriseEdit';
+import GitHubEnterpriseOrgEdit from './GitHubEnterpriseOrgEdit';
+import GitHubEnterpriseTeamEdit from './GitHubEnterpriseTeamEdit';
 
 function GitHub({ i18n }) {
   const baseURL = '/settings/github';
@@ -39,6 +42,15 @@ function GitHub({ i18n }) {
           </Route>
           <Route path={`${baseURL}/team/edit`}>
             <GitHubTeamEdit />
+          </Route>
+          <Route path={`${baseURL}/enterprise/edit`}>
+            <GitHubEnterpriseEdit />
+          </Route>
+          <Route path={`${baseURL}/enterprise_organization/edit`}>
+            <GitHubEnterpriseOrgEdit />
+          </Route>
+          <Route path={`${baseURL}/enterprise_team/edit`}>
+            <GitHubEnterpriseTeamEdit />
           </Route>
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>

@@ -11,20 +11,24 @@ describe('<TeamListItem />', () => {
     mountWithContexts(
       <I18nProvider>
         <MemoryRouter initialEntries={['/teams']} initialIndex={0}>
-          <TeamListItem
-            team={{
-              id: 1,
-              name: 'Team 1',
-              summary_fields: {
-                user_capabilities: {
-                  edit: true,
-                },
-              },
-            }}
-            detailUrl="/team/1"
-            isSelected
-            onSelect={() => {}}
-          />
+          <table>
+            <tbody>
+              <TeamListItem
+                team={{
+                  id: 1,
+                  name: 'Team 1',
+                  summary_fields: {
+                    user_capabilities: {
+                      edit: true,
+                    },
+                  },
+                }}
+                detailUrl="/team/1"
+                isSelected
+                onSelect={() => {}}
+              />
+            </tbody>
+          </table>
         </MemoryRouter>
       </I18nProvider>
     );
@@ -33,20 +37,24 @@ describe('<TeamListItem />', () => {
     const wrapper = mountWithContexts(
       <I18nProvider>
         <MemoryRouter initialEntries={['/teams']} initialIndex={0}>
-          <TeamListItem
-            team={{
-              id: 1,
-              name: 'Team',
-              summary_fields: {
-                user_capabilities: {
-                  edit: true,
-                },
-              },
-            }}
-            detailUrl="/team/1"
-            isSelected
-            onSelect={() => {}}
-          />
+          <table>
+            <tbody>
+              <TeamListItem
+                team={{
+                  id: 1,
+                  name: 'Team',
+                  summary_fields: {
+                    user_capabilities: {
+                      edit: true,
+                    },
+                  },
+                }}
+                detailUrl="/team/1"
+                isSelected
+                onSelect={() => {}}
+              />
+            </tbody>
+          </table>
         </MemoryRouter>
       </I18nProvider>
     );
@@ -56,20 +64,24 @@ describe('<TeamListItem />', () => {
     const wrapper = mountWithContexts(
       <I18nProvider>
         <MemoryRouter initialEntries={['/teams']} initialIndex={0}>
-          <TeamListItem
-            team={{
-              id: 1,
-              name: 'Team',
-              summary_fields: {
-                user_capabilities: {
-                  edit: false,
-                },
-              },
-            }}
-            detailUrl="/team/1"
-            isSelected
-            onSelect={() => {}}
-          />
+          <table>
+            <tbody>
+              <TeamListItem
+                team={{
+                  id: 1,
+                  name: 'Team',
+                  summary_fields: {
+                    user_capabilities: {
+                      edit: false,
+                    },
+                  },
+                }}
+                detailUrl="/team/1"
+                isSelected
+                onSelect={() => {}}
+              />
+            </tbody>
+          </table>
         </MemoryRouter>
       </I18nProvider>
     );

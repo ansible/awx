@@ -25,12 +25,16 @@ describe('<HostsListItem />', () => {
 
   beforeEach(() => {
     wrapper = mountWithContexts(
-      <HostsListItem
-        isSelected={false}
-        detailUrl="/host/1"
-        onSelect={() => {}}
-        host={mockHost}
-      />
+      <table>
+        <tbody>
+          <HostsListItem
+            isSelected={false}
+            detailUrl="/host/1"
+            onSelect={() => {}}
+            host={mockHost}
+          />
+        </tbody>
+      </table>
     );
   });
 
@@ -46,12 +50,16 @@ describe('<HostsListItem />', () => {
     const copyMockHost = Object.assign({}, mockHost);
     copyMockHost.summary_fields.user_capabilities.edit = false;
     wrapper = mountWithContexts(
-      <HostsListItem
-        isSelected={false}
-        detailUrl="/host/1"
-        onSelect={() => {}}
-        host={copyMockHost}
-      />
+      <table>
+        <tbody>
+          <HostsListItem
+            isSelected={false}
+            detailUrl="/host/1"
+            onSelect={() => {}}
+            host={copyMockHost}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
   });

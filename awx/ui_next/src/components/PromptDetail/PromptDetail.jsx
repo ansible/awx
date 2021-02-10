@@ -5,7 +5,7 @@ import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Chip, Divider } from '@patternfly/react-core';
+import { Chip, Divider, Title } from '@patternfly/react-core';
 import { toTitleCase } from '../../util/strings';
 
 import CredentialChip from '../CredentialChip';
@@ -18,9 +18,19 @@ import PromptInventorySourceDetail from './PromptInventorySourceDetail';
 import PromptJobTemplateDetail from './PromptJobTemplateDetail';
 import PromptWFJobTemplateDetail from './PromptWFJobTemplateDetail';
 
-const PromptHeader = styled.h2`
-  font-weight: bold;
-  margin: var(--pf-global--spacer--lg) 0;
+const PromptTitle = styled(Title)`
+  margin-top: var(--pf-global--spacer--xl);
+  --pf-c-title--m-md--FontWeight: 700;
+  grid-column: 1 / -1;
+`;
+
+const PromptDivider = styled(Divider)`
+  margin-top: var(--pf-global--spacer--lg);
+  margin-bottom: var(--pf-global--spacer--lg);
+`;
+
+const PromptDetailList = styled(DetailList)`
+  padding: 0px var(--pf-global--spacer--lg);
 `;
 
 function formatTimeout(timeout) {
@@ -136,9 +146,11 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
 
       {hasPromptData(launchConfig) && hasOverrides && (
         <>
-          <Divider css="margin-top: var(--pf-global--spacer--lg)" />
-          <PromptHeader>{i18n._(t`Prompted Values`)}</PromptHeader>
-          <DetailList aria-label="Prompt Overrides">
+          <PromptTitle headingLevel="h2">
+            {i18n._(t`Prompted Values`)}
+          </PromptTitle>
+          <PromptDivider />
+          <PromptDetailList aria-label={i18n._(t`Prompt Overrides`)}>
             {launchConfig.ask_job_type_on_launch && (
               <Detail
                 label={i18n._(t`Job Type`)}
@@ -250,7 +262,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                 value={overrides.extra_vars}
               />
             )}
-          </DetailList>
+          </PromptDetailList>
         </>
       )}
     </>

@@ -2,13 +2,13 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import Jobs from './Jobs';
-
+import mockJobSettings from '../shared/data.jobSettings.json';
 import { SettingsAPI } from '../../../api';
+import Jobs from './Jobs';
 
 jest.mock('../../../api/models/Settings');
 SettingsAPI.readCategory.mockResolvedValue({
-  data: {},
+  data: mockJobSettings,
 });
 
 describe('<Jobs />', () => {

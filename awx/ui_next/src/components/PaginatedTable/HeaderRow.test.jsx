@@ -62,4 +62,20 @@ describe('<HeaderRow />', () => {
     const cell = wrapper.find('Th').at(2);
     expect(cell.prop('sort')).toEqual(null);
   });
+
+  test('should handle null children gracefully', async () => {
+    const nope = false;
+    const wrapper = mountWithContexts(
+      <table>
+        <HeaderRow qsConfig={qsConfig}>
+          <HeaderCell sortKey="one">One</HeaderCell>
+          {nope && <HeaderCell>Hidden</HeaderCell>}
+          <HeaderCell>Two</HeaderCell>
+        </HeaderRow>
+      </table>
+    );
+
+    const cells = wrapper.find('Th');
+    expect(cells).toHaveLength(3);
+  });
 });

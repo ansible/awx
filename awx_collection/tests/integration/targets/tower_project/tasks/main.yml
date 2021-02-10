@@ -138,6 +138,29 @@
     that:
       - result is changed
 
+- name: Update a git project, update the project and wait.
+  tower_project:
+    name: "{{ project_name3 }}"
+    organization: Default
+    scm_type: git
+    scm_branch: empty_branch
+    scm_url: https://github.com/ansible/test-playbooks
+    allow_override: true
+    wait: true
+    update_project: true
+  register: result
+
+- name: Update a git project, update the project without waiting.
+  tower_project:
+    name: "{{ project_name3 }}"
+    organization: Default
+    scm_type: git
+    scm_branch: empty_branch
+    scm_url: https://github.com/ansible/test-playbooks
+    wait: false
+    update_project: true
+  register: result
+
 - name: Create a job template that overrides the project scm_branch
   tower_job_template:
     name: "{{ jt1 }}"

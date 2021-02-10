@@ -1,5 +1,3 @@
-from django.utils.timezone import now as tz_now
-
 from awx.main.models import (
     Job,
     ProjectUpdate,
@@ -20,119 +18,110 @@ class DependencyGraph(object):
     INVENTORY_SOURCE_UPDATES = 'inventory_source_updates'
     WORKFLOW_JOB_TEMPLATES_JOBS = 'workflow_job_template_jobs'
 
-    LATEST_PROJECT_UPDATES = 'latest_project_updates'
-    LATEST_INVENTORY_UPDATES = 'latest_inventory_updates'
-
     INVENTORY_SOURCES = 'inventory_source_ids'
 
-    def __init__(self, queue):
-        self.queue = queue
+    def __init__(self):
         self.data = {}
-        # project_id -> True / False
         self.data[self.PROJECT_UPDATES] = {}
-        # inventory_id -> True / False
+        # The reason for tracking both inventory and inventory sources:
+        # Consider InvA, which has two sources, InvSource1, InvSource2.
+        # JobB might depend on InvA, which launches two updates, one for each source.
+        # To determine if JobB can run, we can just check InvA, which is  marked in
+        # INVENTORY_UPDATES, instead of having to check for both entries in
+        # INVENTORY_SOURCE_UPDATES.
         self.data[self.INVENTORY_UPDATES] = {}
-        # job_template_id -> True / False
-        self.data[self.JOB_TEMPLATE_JOBS] = {}
-
-        '''
-        Track runnable job related project and inventory to ensure updates
-        don't run while a job needing those resources is running.
-        '''
-
-        # inventory_source_id -> True / False
         self.data[self.INVENTORY_SOURCE_UPDATES] = {}
-        # True / False
-        self.data[self.SYSTEM_JOB] = True
-        # workflow_job_template_id -> True / False
+        self.data[self.JOB_TEMPLATE_JOBS] = {}
+        self.data[self.SYSTEM_JOB] = {}
         self.data[self.WORKFLOW_JOB_TEMPLATES_JOBS] = {}
 
-        # project_id -> latest ProjectUpdateLatestDict'
-        self.data[self.LATEST_PROJECT_UPDATES] = {}
-        # inventory_source_id -> latest InventoryUpdateLatestDict
-        self.data[self.LATEST_INVENTORY_UPDATES] = {}
+    def mark_if_no_key(self, job_type, id, job):
+        # only mark first occurrence of a task. If 10 of JobA are launched
+        # (concurrent disabled), the dependency graph should return that jobs
+        # 2 through 10 are blocked by job1
+        if id not in self.data[job_type]:
+            self.data[job_type][id] = job
 
-        # inventory_id -> [inventory_source_ids]
-        self.data[self.INVENTORY_SOURCES] = {}
+    def get_item(self, job_type, id):
+        return self.data[job_type].get(id, None)
 
-    def add_latest_project_update(self, job):
-        self.data[self.LATEST_PROJECT_UPDATES][job.project_id] = job
-
-    def get_now(self):
-        return tz_now()
-
-    def mark_system_job(self):
-        self.data[self.SYSTEM_JOB] = False
+    def mark_system_job(self, job):
+        # Don't track different types of system jobs, so that only one can run
+        # at a time. Therefore id in this case is just 'system_job'.
+        self.mark_if_no_key(self.SYSTEM_JOB, 'system_job', job)
 
     def mark_project_update(self, job):
-        self.data[self.PROJECT_UPDATES][job.project_id] = False
+        self.mark_if_no_key(self.PROJECT_UPDATES, job.project_id, job)
 
-    def mark_inventory_update(self, inventory_id):
-        self.data[self.INVENTORY_UPDATES][inventory_id] = False
+    def mark_inventory_update(self, job):
+        if type(job) is AdHocCommand:
+            self.mark_if_no_key(self.INVENTORY_UPDATES, job.inventory_id, job)
+        else:
+            self.mark_if_no_key(self.INVENTORY_UPDATES, job.inventory_source.inventory_id, job)
 
-    def mark_inventory_source_update(self, inventory_source_id):
-        self.data[self.INVENTORY_SOURCE_UPDATES][inventory_source_id] = False
+    def mark_inventory_source_update(self, job):
+        self.mark_if_no_key(self.INVENTORY_SOURCE_UPDATES, job.inventory_source_id, job)
 
     def mark_job_template_job(self, job):
-        self.data[self.JOB_TEMPLATE_JOBS][job.job_template_id] = False
+        self.mark_if_no_key(self.JOB_TEMPLATE_JOBS, job.job_template_id, job)
 
     def mark_workflow_job(self, job):
-        self.data[self.WORKFLOW_JOB_TEMPLATES_JOBS][job.workflow_job_template_id] = False
+        self.mark_if_no_key(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.workflow_job_template_id, job)
 
-    def can_project_update_run(self, job):
-        return self.data[self.PROJECT_UPDATES].get(job.project_id, True)
+    def project_update_blocked_by(self, job):
+        return self.get_item(self.PROJECT_UPDATES, job.project_id)
 
-    def can_inventory_update_run(self, job):
-        return self.data[self.INVENTORY_SOURCE_UPDATES].get(job.inventory_source_id, True)
+    def inventory_update_blocked_by(self, job):
+        return self.get_item(self.INVENTORY_SOURCE_UPDATES, job.inventory_source_id)
 
-    def can_job_run(self, job):
-        if self.data[self.PROJECT_UPDATES].get(job.project_id, True) is True and \
-                self.data[self.INVENTORY_UPDATES].get(job.inventory_id, True) is True:
-            if job.allow_simultaneous is False:
-                return self.data[self.JOB_TEMPLATE_JOBS].get(job.job_template_id, True)
-            else:
-                return True
-        return False
+    def job_blocked_by(self, job):
+        project_block = self.get_item(self.PROJECT_UPDATES, job.project_id)
+        inventory_block = self.get_item(self.INVENTORY_UPDATES, job.inventory_id)
+        if job.allow_simultaneous is False:
+            job_block = self.get_item(self.JOB_TEMPLATE_JOBS, job.job_template_id)
+        else:
+            job_block = None
+        return project_block or inventory_block or job_block
 
-    def can_workflow_job_run(self, job):
-        if job.allow_simultaneous:
-            return True
-        return self.data[self.WORKFLOW_JOB_TEMPLATES_JOBS].get(job.workflow_job_template_id, True)
+    def workflow_job_blocked_by(self, job):
+        if job.allow_simultaneous is False:
+            return self.get_item(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.workflow_job_template_id)
+        return None
 
-    def can_system_job_run(self):
-        return self.data[self.SYSTEM_JOB]
+    def system_job_blocked_by(self, job):
+        return self.get_item(self.SYSTEM_JOB, 'system_job')
 
-    def can_ad_hoc_command_run(self, job):
-        return self.data[self.INVENTORY_UPDATES].get(job.inventory_id, True)
+    def ad_hoc_command_blocked_by(self, job):
+        return self.get_item(self.INVENTORY_UPDATES, job.inventory_id)
 
-    def is_job_blocked(self, job):
+    def task_blocked_by(self, job):
         if type(job) is ProjectUpdate:
-            return not self.can_project_update_run(job)
+            return self.project_update_blocked_by(job)
         elif type(job) is InventoryUpdate:
-            return not self.can_inventory_update_run(job)
+            return self.inventory_update_blocked_by(job)
         elif type(job) is Job:
-            return not self.can_job_run(job)
+            return self.job_blocked_by(job)
         elif type(job) is SystemJob:
-            return not self.can_system_job_run()
+            return self.system_job_blocked_by(job)
         elif type(job) is AdHocCommand:
-            return not self.can_ad_hoc_command_run(job)
+            return self.ad_hoc_command_blocked_by(job)
         elif type(job) is WorkflowJob:
-            return not self.can_workflow_job_run(job)
+            return self.workflow_job_blocked_by(job)
 
     def add_job(self, job):
         if type(job) is ProjectUpdate:
             self.mark_project_update(job)
         elif type(job) is InventoryUpdate:
-            self.mark_inventory_update(job.inventory_source.inventory_id)
-            self.mark_inventory_source_update(job.inventory_source_id)
+            self.mark_inventory_update(job)
+            self.mark_inventory_source_update(job)
         elif type(job) is Job:
             self.mark_job_template_job(job)
         elif type(job) is WorkflowJob:
             self.mark_workflow_job(job)
         elif type(job) is SystemJob:
-            self.mark_system_job()
+            self.mark_system_job(job)
         elif type(job) is AdHocCommand:
-            self.mark_inventory_update(job.inventory_id)
+            self.mark_inventory_update(job)
 
     def add_jobs(self, jobs):
         for j in jobs:

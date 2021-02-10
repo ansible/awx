@@ -134,8 +134,9 @@ describe('<HostList />', () => {
 
     act(() => {
       wrapper
-        .find('input#select-host-1')
-        .closest('DataListCheck')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .invoke('onChange')();
     });
     wrapper.update();
@@ -147,8 +148,9 @@ describe('<HostList />', () => {
     ).toEqual(true);
     act(() => {
       wrapper
-        .find('input#select-host-1')
-        .closest('DataListCheck')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .invoke('onChange')();
     });
     wrapper.update();

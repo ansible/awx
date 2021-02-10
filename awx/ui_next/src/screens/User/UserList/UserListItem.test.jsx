@@ -18,12 +18,16 @@ describe('UserListItem with full permissions', () => {
     wrapper = mountWithContexts(
       <I18nProvider>
         <MemoryRouter initialEntries={['/users']} initialIndex={0}>
-          <UserListItem
-            user={mockDetails}
-            detailUrl="/user/1"
-            isSelected
-            onSelect={() => {}}
-          />
+          <table>
+            <tbody>
+              <UserListItem
+                user={mockDetails}
+                detailUrl="/user/1"
+                isSelected
+                onSelect={() => {}}
+              />
+            </tbody>
+          </table>
         </MemoryRouter>
       </I18nProvider>
     );
@@ -36,9 +40,9 @@ describe('UserListItem with full permissions', () => {
   });
 
   test('should display user data', () => {
-    expect(
-      wrapper.find('DataListCell[aria-label="user type"]').prop('children')
-    ).toEqual('System Administrator');
+    expect(wrapper.find('td[data-label="Role"]').prop('children')).toEqual(
+      'System Administrator'
+    );
     expect(
       wrapper.find('Label[aria-label="social login"]').prop('children')
     ).toEqual('SOCIAL');
@@ -50,19 +54,23 @@ describe('UserListItem without full permissions', () => {
     wrapper = mountWithContexts(
       <I18nProvider>
         <MemoryRouter initialEntries={['/users']} initialIndex={0}>
-          <UserListItem
-            user={{
-              ...mockDetails,
-              summary_fields: {
-                user_capabilities: {
-                  edit: false,
-                },
-              },
-            }}
-            detailUrl="/user/1"
-            isSelected
-            onSelect={() => {}}
-          />
+          <table>
+            <tbody>
+              <UserListItem
+                user={{
+                  ...mockDetails,
+                  summary_fields: {
+                    user_capabilities: {
+                      edit: false,
+                    },
+                  },
+                }}
+                detailUrl="/user/1"
+                isSelected
+                onSelect={() => {}}
+              />
+            </tbody>
+          </table>
         </MemoryRouter>
       </I18nProvider>
     );
