@@ -13,11 +13,12 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import { toTitleCase } from '../../../util/strings';
 import { ExecutionEnvironmentsAPI } from '../../../api';
 
 function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
   const history = useHistory();
-  const { id, image, description } = executionEnvironment;
+  const { id, name, image, description, pull } = executionEnvironment;
 
   const {
     request: deleteExecutionEnvironment,
@@ -36,11 +37,20 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
     <CardBody>
       <DetailList>
         <Detail
+          label={i18n._(t`Name`)}
+          value={name}
+          dataCy="execution-environment-detail-name"
+        />
+        <Detail
           label={i18n._(t`Image`)}
           value={image}
           dataCy="execution-environment-detail-image"
         />
         <Detail label={i18n._(t`Description`)} value={description} />
+        <Detail
+          label={i18n._(t`Pull`)}
+          value={pull === '' ? i18n._(t`Missing`) : toTitleCase(pull)}
+        />
         {executionEnvironment.summary_fields.credential && (
           <Detail
             label={i18n._(t`Credential`)}
