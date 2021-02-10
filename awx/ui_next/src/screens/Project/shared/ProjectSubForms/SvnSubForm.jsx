@@ -22,9 +22,15 @@ const SvnSubForm = ({
         <span>
           {i18n._(t`Example URLs for Subversion Source Control include:`)}
           <ul css={{ margin: '10px 0 10px 20px' }}>
-            <li>https://github.com/ansible/ansible</li>
-            <li>svn://servername.example.com/path</li>
-            <li>svn+ssh://servername.example.com/path</li>
+            <li>
+              <code>https://github.com/ansible/ansible</code>
+            </li>
+            <li>
+              <code>svn://servername.example.com/path</code>
+            </li>
+            <li>
+              <code>svn+ssh://servername.example.com/path</code>
+            </li>
           </ul>
         </span>
       }

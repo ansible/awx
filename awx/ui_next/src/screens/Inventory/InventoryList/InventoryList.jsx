@@ -195,9 +195,6 @@ function InventoryList({ i18n }) {
               <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Groups`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Hosts`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Sources`)}</HeaderCell>
               <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
             </HeaderRow>
           }

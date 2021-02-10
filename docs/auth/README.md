@@ -5,6 +5,9 @@ When a user wants to log into Tower, she can explicitly choose some of the suppo
 * Github OAuth2
 * Github Organization OAuth2
 * Github Team OAuth2
+* Github Enterprise OAuth2
+* Github Enterprise Organization OAuth2
+* Github Enterprise Team OAuth2
 * Microsoft Azure Active Directory (AD) OAuth2
 
 On the other hand, the other authentication methods use the same types of login info as Tower (username and password), but authenticate using external auth systems rather than Tower's own database. If some of these methods are enabled, Tower will try authenticating using the enabled methods *before Tower's own authentication method*. The order of precedence is:

@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { useEffect, useRef } from 'react';
-import { withI18n } from '@lingui/react';
+import { Trans, withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField, useFormikContext } from 'formik';
 import { Switch, Text } from '@patternfly/react-core';
@@ -69,9 +69,11 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
             css="margin-bottom: var(--pf-c-content--MarginBottom)"
           >
             <small>
-              Use custom messages to change the content of notifications sent
-              when a job starts, succeeds, or fails. Use curly braces to access
-              information about the job:{' '}
+              <Trans>
+                Use custom messages to change the content of notifications sent
+                when a job starts, succeeds, or fails. Use curly braces to
+                access information about the job:{' '}
+              </Trans>
               <code>
                 {'{{'} job_friendly_name {'}}'}
               </code>
@@ -79,12 +81,15 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               <code>
                 {'{{'} url {'}}'}
               </code>
-              , or attributes of the job such as{' '}
+              , <Trans>or attributes of the job such as</Trans>{' '}
               <code>
                 {'{{'} job.status {'}}'}
               </code>
-              . You may apply a number of possible variables in the message.
-              Refer to the{' '}
+              .{' '}
+              <Trans>
+                You may apply a number of possible variables in the message.
+                Refer to the{' '}
+              </Trans>{' '}
               <a
                 href="https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications"
                 target="_blank"
@@ -92,7 +97,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               >
                 Ansible Tower documentation
               </a>{' '}
-              for more details.
+              <Trans>for more details.</Trans>
             </small>
           </Text>
           <FormFullWidthLayout>

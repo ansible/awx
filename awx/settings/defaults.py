@@ -262,6 +262,7 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
             os.path.join(BASE_DIR, 'ui_next', 'build'),
+            os.path.join(BASE_DIR, 'ui_next', 'public')
         ],
     },
 ]
@@ -289,6 +290,7 @@ INSTALLED_APPS = [
     'awx.main',
     'awx.api',
     'awx.ui',
+    'awx.ui_next',
     'awx.sso',
     'solo'
 ]
@@ -344,6 +346,9 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.github.GithubOrganizationOAuth2',
     'social_core.backends.github.GithubTeamOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
@@ -519,6 +524,20 @@ SOCIAL_AUTH_GITHUB_TEAM_KEY = ''
 SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
 SOCIAL_AUTH_GITHUB_TEAM_ID = ''
 SOCIAL_AUTH_GITHUB_TEAM_SCOPE = ['user:email', 'read:org']
+
+SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_SCOPE = ['user:email', 'read:org']
+
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SCOPE = ['user:email', 'read:org']
+
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SCOPE = ['user:email', 'read:org']
 
 SOCIAL_AUTH_AZUREAD_OAUTH2_KEY = ''
 SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET = ''
@@ -770,6 +789,7 @@ LOG_AGGREGATOR_LEVEL = 'INFO'
 LOG_AGGREGATOR_MAX_DISK_USAGE_GB = 1
 LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
+LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
 
 # The number of retry attempts for websocket session establishment
 # If you're encountering issues establishing websockets in clustered Tower,
@@ -824,6 +844,9 @@ LOGGING = {
         'dispatcher': {
             'format': '%(asctime)s %(levelname)-8s %(name)s PID:%(process)d %(message)s',
         },
+        'job_lifecycle': {
+            '()': 'awx.main.utils.formatters.JobLifeCycleFormatter',
+        },
     },
     'handlers': {
         'console': {
@@ -853,38 +876,30 @@ LOGGING = {
         },
         'tower_warnings': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'tower.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'callback_receiver': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'dispatcher': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'dispatcher.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'dispatcher',
         },
         'wsbroadcast': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'wsbroadcast.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'celery.beat': {
@@ -898,47 +913,43 @@ LOGGING = {
         },
         'task_system': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false', 'dynamic_level_filter'],
             'filename': os.path.join(LOG_ROOT, 'task_system.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'management_playbooks': {
             'level': 'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
+            'class':'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'management_playbooks.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'system_tracking_migrations': {
             'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
+            'class':'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'tower_system_tracking_migrations.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'rbac_migrations': {
             'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
+            'class':'logging.handlers.WatchedFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'tower_rbac_migrations.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
         },
         'isolated_manager': {
             'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
+            'class':'logging.handlers.WatchedFileHandler',
             'filename': os.path.join(LOG_ROOT, 'isolated_manager.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
             'formatter':'simple',
+        },
+        'job_lifecycle': {
+            'level': 'DEBUG',
+            'class':'logging.handlers.WatchedFileHandler',
+            'filename': os.path.join(LOG_ROOT, 'job_lifecycle.log'),
+            'formatter': 'job_lifecycle',
         },
     },
     'loggers': {
@@ -1027,6 +1038,11 @@ LOGGING = {
         'awx.analytics': {
             'handlers': ['external_logger'],
             'level': 'INFO',
+            'propagate': False
+        },
+        'awx.analytics.job_lifecycle': {
+            'handlers': ['console', 'job_lifecycle'],
+            'level': 'DEBUG',
             'propagate': False
         },
         'django_auth_ldap': {

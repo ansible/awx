@@ -73,10 +73,6 @@ const schedule = {
       first_name: '',
       last_name: '',
     },
-    inventory: {
-      id: 1,
-      name: 'Test Inventory',
-    },
   },
   created: '2020-03-03T20:38:54.210306Z',
   modified: '2020-03-03T20:38:54.210336Z',
@@ -88,6 +84,27 @@ const schedule = {
   dtend: '2020-07-06T04:00:00Z',
   next_run: '2020-03-16T04:00:00Z',
   extra_data: {},
+  inventory: null,
+  scm_branch: null,
+  job_type: null,
+  job_tags: null,
+  skip_tags: null,
+  limit: null,
+  diff_mode: null,
+  verbosity: null,
+};
+
+const scheduleWithPrompts = {
+  ...schedule,
+  job_type: 'run',
+  inventory: 1,
+  job_tags: 'tag1',
+  skip_tags: 'tag2',
+  scm_branch: 'foo/branch',
+  limit: 'localhost',
+  diff_mode: true,
+  verbosity: 1,
+  extra_data: { foo: 'fii' },
 };
 
 SchedulesAPI.createPreview.mockResolvedValue({
@@ -159,13 +176,14 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Repeat Frequency"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Created"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Last Modified"]').length).toBe(1);
-    expect(wrapper.find('Title[children="Prompted Fields"]').length).toBe(0);
+    expect(wrapper.find('Title[children="Prompted Values"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Job Type"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Inventory"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Source Control Branch"]').length).toBe(
       0
     );
     expect(wrapper.find('Detail[label="Limit"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Verbosity"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Show Changes"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Credentials"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
@@ -189,18 +207,6 @@ describe('<ScheduleDetail />', () => {
       },
     });
     JobTemplatesAPI.readLaunch.mockResolvedValueOnce(allPrompts);
-    const scheduleWithPrompts = {
-      ...schedule,
-      job_type: 'run',
-      inventory: 1,
-      job_tags: 'tag1',
-      skip_tags: 'tag2',
-      scm_branch: 'foo/branch',
-      limit: 'localhost',
-      diff_mode: true,
-      verbosity: 1,
-      extra_data: { foo: 'fii' },
-    };
     await act(async () => {
       wrapper = mountWithContexts(
         <Route
@@ -245,7 +251,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Repeat Frequency"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Created"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Last Modified"]').length).toBe(1);
-    expect(wrapper.find('Title[children="Prompted Fields"]').length).toBe(1);
+    expect(wrapper.find('Title[children="Prompted Values"]').length).toBe(1);
     expect(
       wrapper
         .find('Detail[label="Job Type"]')
@@ -265,11 +271,101 @@ describe('<ScheduleDetail />', () => {
         .find('dd')
         .text()
     ).toBe('localhost');
+    expect(
+      wrapper
+        .find('Detail[label="Verbosity"]')
+        .find('dd')
+        .text()
+    ).toBe('1 (Verbose)');
     expect(wrapper.find('Detail[label="Show Changes"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Credentials"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(1);
     expect(wrapper.find('VariablesDetail').length).toBe(1);
+  });
+  test('prompt values section should be hidden if no overrides are present on the schedule but ask_ options are all true', async () => {
+    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    JobTemplatesAPI.readLaunch.mockResolvedValueOnce(allPrompts);
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/schedules/:scheduleId"
+          component={() => <ScheduleDetail schedule={schedule} />}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('Title[children="Prompted Values"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Job Type"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Inventory"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Source Control Branch"]').length).toBe(
+      0
+    );
+    expect(wrapper.find('Detail[label="Limit"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Verbosity"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Show Changes"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Credentials"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
+    expect(wrapper.find('VariablesDetail').length).toBe(0);
+  });
+  test('prompt values section should be hidden if overrides are present on the schedule but ask_ options are all false', async () => {
+    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    JobTemplatesAPI.readLaunch.mockResolvedValueOnce(noPrompts);
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/schedules/:scheduleId"
+          component={() => <ScheduleDetail schedule={scheduleWithPrompts} />}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('Title[children="Prompted Values"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Job Type"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Inventory"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Source Control Branch"]').length).toBe(
+      0
+    );
+    expect(wrapper.find('Detail[label="Limit"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Verbosity"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Show Changes"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Credentials"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
+    expect(wrapper.find('VariablesDetail').length).toBe(0);
   });
   test('error shown when error encountered fetching credentials', async () => {
     SchedulesAPI.readCredentials.mockRejectedValueOnce(

@@ -4,15 +4,15 @@ import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
-} from '../../../api';
+} from '../../api';
 import {
   mountWithContexts,
   waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
+} from '../../../testUtils/enzymeHelpers';
 
 import TemplateList from './TemplateList';
 
-jest.mock('../../../api');
+jest.mock('../../api');
 
 const mockTemplates = [
   {

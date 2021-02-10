@@ -89,11 +89,6 @@ function InventoryListItem({
           {inventory?.summary_fields?.organization?.name}
         </Link>
       </Td>
-      <Td dataLabel={i18n._(t`Groups`)}>{inventory.total_groups}</Td>
-      <Td dataLabel={i18n._(t`Hosts`)}>{inventory.total_hosts}</Td>
-      <Td dataLabel={i18n._(t`Sources`)}>
-        {inventory.total_inventory_sources}
-      </Td>
       {inventory.pending_deletion ? (
         <Td dataLabel={i18n._(t`Groups`)}>
           <Label color="red">{i18n._(t`Pending delete`)}</Label>

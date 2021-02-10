@@ -16,6 +16,7 @@ describe('<OutputToolbar />', () => {
             failures: 2,
           },
         }}
+        jobStatus="successful"
         onDelete={() => {}}
       />
     );
@@ -33,6 +34,7 @@ describe('<OutputToolbar />', () => {
     wrapper = mountWithContexts(
       <OutputToolbar
         job={{ ...mockJobData, type: 'system_job' }}
+        jobStatus="successful"
         onDelete={() => {}}
       />
     );
@@ -54,6 +56,7 @@ describe('<OutputToolbar />', () => {
           host_status_counts: {},
           playbook_counts: {},
         }}
+        jobStatus="successful"
         onDelete={() => {}}
       />
     );
@@ -74,6 +77,7 @@ describe('<OutputToolbar />', () => {
           ...mockJobData,
           elapsed: 274265,
         }}
+        jobStatus="successful"
         onDelete={() => {}}
       />
     );
@@ -95,6 +99,7 @@ describe('<OutputToolbar />', () => {
             },
           },
         }}
+        jobStatus="successful"
         onDelete={() => {}}
       />
     );
@@ -113,6 +118,7 @@ describe('<OutputToolbar />', () => {
             },
           },
         }}
+        jobStatus="successful"
         onDelete={() => {}}
       />
     );

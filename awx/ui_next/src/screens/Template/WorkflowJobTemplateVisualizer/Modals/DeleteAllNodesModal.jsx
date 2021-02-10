@@ -22,7 +22,7 @@ function DeleteAllNodesModal({ i18n }) {
         <Button
           id="cancel-delete-all-nodes"
           key="cancel"
-          variant="secondary"
+          variant="link"
           aria-label={i18n._(t`Cancel node removal`)}
           onClick={() => dispatch({ type: 'TOGGLE_DELETE_ALL_NODES_MODAL' })}
         >
