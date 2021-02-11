@@ -8,6 +8,7 @@ import {
   url,
   combine,
   regExp,
+  requiredEmail,
 } from './validators';
 
 const i18n = { _: val => val };
@@ -186,5 +187,15 @@ describe('validators', () => {
     expect(regExp(i18n)('')).toBeUndefined();
     expect(regExp(i18n)('ok')).toBeUndefined();
     expect(regExp(i18n)('[^a-zA-Z]')).toBeUndefined();
+  });
+
+  test('email validator rejects obviously invalid email ', () => {
+    expect(requiredEmail(i18n)('foobar321')).toEqual({
+      id: 'Invalid email address',
+    });
+  });
+
+  test('bob has email', () => {
+    expect(requiredEmail(i18n)('bob@localhost')).toBeUndefined();
   });
 });
