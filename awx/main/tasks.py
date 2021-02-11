@@ -1321,7 +1321,7 @@ class BaseTask(object):
 
         # TODO: can we count on instance always having created?
         # If we can't how can we store the job_event?
-        self.job_created = self.instance.created
+        self.job_created = str(self.instance.created)
 
         try:
             isolated = self.instance.is_isolated()
