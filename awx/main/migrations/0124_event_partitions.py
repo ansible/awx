@@ -64,12 +64,6 @@ def migrate_event_data(apps, schema_editor):
                 f'PARTITION OF {tblname} '
                 f'FOR VALUES FROM (\'2000-01-01 00:00:00.000000+00\') to (\'2021-02-01 00:00:00.000000+00\');'
             )
-            # .. as well as a tmp partition for all future events (just for testing)
-            cursor.execute(
-                f'CREATE TABLE {tblname}_part1 '
-                f'PARTITION OF {tblname} '
-                f'FOR VALUES FROM (\'2021-02-01 00:00:00.000000+00\') to (\'2022-01-01 00:00:00.000000+00\');'
-            )
 
             # copy over all job events into partitioned table
             cursor.execute(
