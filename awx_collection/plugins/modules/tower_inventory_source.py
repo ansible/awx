@@ -166,7 +166,7 @@ def main():
         #
         source=dict(choices=["scm", "ec2", "gce",
                              "azure_rm", "vmware", "satellite6",
-                             "openstack", "rhv", "tower", "custom"], required=True),
+                             "openstack", "rhv", "tower", "custom"], required=True, default='scm'),
         source_path=dict(),
         source_script=dict(),
         source_vars=dict(type='dict'),
