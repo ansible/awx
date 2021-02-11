@@ -423,6 +423,16 @@ class BasePlaybookEvent(CreatedModifiedModel):
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
+        # same as above, for job_created
+        # TODO: if this approach, identical to above, works, can convert to for loop
+        try:
+            if not isinstance(kwargs['job_created'], datetime.datetime):
+                kwargs['job_created'] = parse_datetime(kwargs['job_created'])
+            if not kwargs['job_created'].tzinfo:
+                kwargs['job_created'] = kwargs['job_created'].replace(tzinfo=utc)
+        except (KeyError, ValueError):
+            kwargs.pop('job_created', None)
+
         host_map = kwargs.pop('host_map', {})
 
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
