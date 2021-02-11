@@ -850,6 +850,7 @@ class BaseTask(object):
         self.parent_workflow_job_id = None
         self.host_map = {}
         self.guid = GuidMiddleware.get_guid()
+        self.job_created = None
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -1226,6 +1227,10 @@ class BaseTask(object):
                 event_data.pop('parent_uuid', None)
         if self.parent_workflow_job_id:
             event_data['workflow_job_id'] = self.parent_workflow_job_id
+        # Do we have to check if the field exists? if it doesn't
+        # how will be eventually store the event in the db?
+        if self.job_created:
+            event_data['job_created'] = self.job_created
         if self.host_map:
             host = event_data.get('event_data', {}).get('host', '').strip()
             if host:
@@ -1351,6 +1356,10 @@ class BaseTask(object):
         # it in event data JSON
         if self.instance.spawned_by_workflow:
             self.parent_workflow_job_id = self.instance.get_workflow_job().id
+
+        # TODO: can we count on instance always having created?
+        # If we can't how can we store the job_event?
+        self.job_created = self.instance.created
 
         try:
             isolated = self.instance.is_isolated()
