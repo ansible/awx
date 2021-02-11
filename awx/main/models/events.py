@@ -430,6 +430,11 @@ class BasePlaybookEvent(CreatedModifiedModel):
         event = cls(**kwargs)
         if workflow_job_id:
             setattr(event, 'workflow_job_id', workflow_job_id)
+        # shouldn't job_created _always_ be present?
+        # if it's not, how could we save the event to the db?
+        job_created = kwargs.pop('job_created', None)
+        if job_created:
+            setattr(event, 'job_created', job_created)
         setattr(event, 'host_map', host_map)
         event._update_from_event_data()
         return event
@@ -444,7 +449,7 @@ class JobEvent(BasePlaybookEvent):
     An event/message logged from the callback when running a job.
     """
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created']
 
     class Meta:
         app_label = 'main'
@@ -567,7 +572,7 @@ class JobEvent(BasePlaybookEvent):
 
 class ProjectUpdateEvent(BasePlaybookEvent):
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id', 'job_created']
 
     class Meta:
         app_label = 'main'
@@ -685,7 +690,7 @@ class BaseCommandEvent(CreatedModifiedModel):
 
 class AdHocCommandEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id', 'job_created']
 
     class Meta:
         app_label = 'main'
@@ -774,7 +779,7 @@ class AdHocCommandEvent(BaseCommandEvent):
 
 class InventoryUpdateEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id', 'job_created']
 
     class Meta:
         app_label = 'main'
@@ -808,7 +813,7 @@ class InventoryUpdateEvent(BaseCommandEvent):
 
 class SystemJobEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['system_job_id']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['system_job_id', 'job_created']
 
     class Meta:
         app_label = 'main'
