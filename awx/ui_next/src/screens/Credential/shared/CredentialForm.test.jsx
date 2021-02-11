@@ -137,15 +137,28 @@ describe('<CredentialForm />', () => {
     test('should display cred type subform when scm type select has a value', async () => {
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential-type"]')
-          .invoke('onChange')(null, 1);
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onToggle')();
       });
       wrapper.update();
+      await act(async () => {
+        await wrapper
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onSelect')(null, 1);
+      });
+      wrapper.update();
+
       machineFieldExpects();
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential-type"]')
-          .invoke('onChange')(null, 2);
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onToggle')();
+      });
+      wrapper.update();
+      await act(async () => {
+        await wrapper
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onSelect')(null, 2);
       });
       wrapper.update();
       sourceFieldExpects();
@@ -154,8 +167,14 @@ describe('<CredentialForm />', () => {
     test('should update expected fields when gce service account json file uploaded', async () => {
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential-type"]')
-          .invoke('onChange')(null, 10);
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onToggle')();
+      });
+      wrapper.update();
+      await act(async () => {
+        await wrapper
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onSelect')(null, 10);
       });
       wrapper.update();
       gceFieldExpects();
@@ -215,8 +234,14 @@ describe('<CredentialForm />', () => {
     test('should show error when error thrown parsing JSON', async () => {
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential-type"]')
-          .invoke('onChange')(null, 10);
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onToggle')();
+      });
+      wrapper.update();
+      await act(async () => {
+        await wrapper
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onSelect')(null, 10);
       });
       wrapper.update();
       expect(wrapper.find('#credential-gce-file-helper').text()).toBe(
@@ -246,8 +271,14 @@ describe('<CredentialForm />', () => {
     test('should show Test button when external credential type is selected', async () => {
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential-type"]')
-          .invoke('onChange')(null, 21);
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onToggle')();
+      });
+      wrapper.update();
+      await act(async () => {
+        await wrapper
+          .find('Select[aria-label="Credential Type"]')
+          .invoke('onSelect')(null, 21);
       });
       wrapper.update();
       expect(wrapper.find('Button[children="Test"]').length).toBe(1);

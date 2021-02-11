@@ -14,6 +14,12 @@ import {
 import CredentialEdit from './CredentialEdit';
 
 jest.mock('../../../api');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({
+    id: 3,
+  }),
+}));
 
 const mockCredential = {
   id: 3,
