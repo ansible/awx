@@ -437,6 +437,10 @@ class BasePlaybookEvent(CreatedModifiedModel):
 
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
         workflow_job_id = kwargs.pop('workflow_job_id', None)
+        # TODO: remove once we convert _all_ jobevent tables to
+        # the new partioned format
+        if cls is not JobEvent and 'job_created' in kwargs:
+            del kwargs['job_created']
         event = cls(**kwargs)
         if workflow_job_id:
             setattr(event, 'workflow_job_id', workflow_job_id)
