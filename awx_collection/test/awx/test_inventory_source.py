@@ -169,7 +169,7 @@ def test_falsy_value(run_module, admin_user, base_inventory):
     result = run_module('tower_inventory_source', dict(
         name='falsy-test',
         inventory=base_inventory.name,
-        # source='ec2',
+        source='ec2',
         update_on_launch=False
     ), admin_user)
 
