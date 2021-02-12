@@ -4,7 +4,7 @@ from unittest import mock
 from django.test import TransactionTestCase
 
 from awx.main.access import UserAccess, RoleAccess, TeamAccess
-from awx.main.models import User, Organization, Inventory, Role, ExecutionEnvironment
+from awx.main.models import User, Organization, Inventory, Role
 
 
 class TestSysAuditorTransactional(TransactionTestCase):
