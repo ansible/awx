@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
@@ -578,7 +578,7 @@ class JobOutput extends Component {
   }
 
   render() {
-    const { job, i18n } = this.props;
+    const { job } = this.props;
 
     const {
       contentError,
@@ -666,64 +666,72 @@ class JobOutput extends Component {
         </CardBody>
         {showCancelPrompt &&
           ['pending', 'waiting', 'running'].includes(jobStatus) && (
-            <AlertModal
-              isOpen={showCancelPrompt}
-              variant="danger"
-              onClose={this.handleCancelClose}
-              title={i18n._(t`Cancel Job`)}
-              label={i18n._(t`Cancel Job`)}
-              actions={[
-                <Button
-                  id="cancel-job-confirm-button"
-                  key="delete"
+            <I18n>
+              {({ i18n }) => (
+                <AlertModal
+                  isOpen={showCancelPrompt}
                   variant="danger"
-                  isDisabled={cancelInProgress}
-                  aria-label={i18n._(t`Cancel job`)}
-                  onClick={this.handleCancelConfirm}
+                  onClose={this.handleCancelClose}
+                  title={i18n._(t`Cancel Job`)}
+                  label={i18n._(t`Cancel Job`)}
+                  actions={[
+                    <Button
+                      id="cancel-job-confirm-button"
+                      key="delete"
+                      variant="danger"
+                      isDisabled={cancelInProgress}
+                      aria-label={i18n._(t`Cancel job`)}
+                      onClick={this.handleCancelConfirm}
+                    >
+                      {i18n._(t`Cancel job`)}
+                    </Button>,
+                    <Button
+                      id="cancel-job-return-button"
+                      key="cancel"
+                      variant="secondary"
+                      aria-label={i18n._(t`Return`)}
+                      onClick={this.handleCancelClose}
+                    >
+                      {i18n._(t`Return`)}
+                    </Button>,
+                  ]}
                 >
-                  {i18n._(t`Cancel job`)}
-                </Button>,
-                <Button
-                  id="cancel-job-return-button"
-                  key="cancel"
-                  variant="secondary"
-                  aria-label={i18n._(t`Return`)}
-                  onClick={this.handleCancelClose}
-                >
-                  {i18n._(t`Return`)}
-                </Button>,
-              ]}
-            >
-              {i18n._(
-                t`Are you sure you want to submit the request to cancel this job?`
+                  {i18n._(
+                    t`Are you sure you want to submit the request to cancel this job?`
+                  )}
+                </AlertModal>
               )}
-            </AlertModal>
+            </I18n>
           )}
         {cancelError && (
-          <>
-            <AlertModal
-              isOpen={cancelError}
-              variant="danger"
-              onClose={() => this.setState({ cancelError: null })}
-              title={i18n._(t`Job Cancel Error`)}
-              label={i18n._(t`Job Cancel Error`)}
-            >
-              <ErrorDetail error={cancelError} />
-            </AlertModal>
-          </>
+          <I18n>
+            {({ i18n }) => (
+              <AlertModal
+                isOpen={cancelError}
+                variant="danger"
+                onClose={() => this.setState({ cancelError: null })}
+                title={i18n._(t`Job Cancel Error`)}
+                label={i18n._(t`Job Cancel Error`)}
+              >
+                <ErrorDetail error={cancelError} />
+              </AlertModal>
+            )}
+          </I18n>
         )}
         {deletionError && (
-          <>
-            <AlertModal
-              isOpen={deletionError}
-              variant="danger"
-              onClose={() => this.setState({ deletionError: null })}
-              title={i18n._(t`Job Delete Error`)}
-              label={i18n._(t`Job Delete Error`)}
-            >
-              <ErrorDetail error={deletionError} />
-            </AlertModal>
-          </>
+          <I18n>
+            {({ i18n }) => (
+              <AlertModal
+                isOpen={deletionError}
+                variant="danger"
+                onClose={() => this.setState({ deletionError: null })}
+                title={i18n._(t`Job Delete Error`)}
+                label={i18n._(t`Job Delete Error`)}
+              >
+                <ErrorDetail error={deletionError} />
+              </AlertModal>
+            )}
+          </I18n>
         )}
       </Fragment>
     );
@@ -731,4 +739,4 @@ class JobOutput extends Component {
 }
 
 export { JobOutput as _JobOutput };
-export default withI18n()(withRouter(JobOutput));
+export default withRouter(JobOutput);
