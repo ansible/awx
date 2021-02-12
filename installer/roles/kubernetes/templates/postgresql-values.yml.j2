@@ -40,10 +40,20 @@ image:
   registry: {{ pg_image_registry }}
 {% endif %}
 {% if pg_image_registry is not defined %}
-  registry: docker.io/bitnami
+  registry: docker.io
 {% endif %}
-  repository: postgresql
+{% if pg_image_repository is defined %}
+  repository: {{ pg_image_repository }}
+{% endif %}
+{% if pg_image_repository is not defined %}
+  repository: bitnami/postgresql
+{% endif %}
+{% if pg_image_version is defined %}
+  tag: {{ pg_image_version }}
+{% endif %}
+{% if pg_image_version is not defined %}
   tag: '12.5.0'
+{% endif %}
 volumePermissions:
   image:
 {% if pg_image_registry is defined %}

@@ -23,6 +23,8 @@ dockerhub_base=ansible
 # kubernetes_web_svc_type=NodePort
 # Optional Kubernetes Variables
 # pg_image_registry=docker.io
+# pg_image_repository=bitnami/postgresql
+# pg_image_version=12.5.0
 # pg_serviceaccount=awx
 # pg_volume_capacity=5
 # pg_persistence_storageClass=StorageClassName
