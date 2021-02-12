@@ -434,7 +434,7 @@ function JobOutput({
           const firstIndex = fetchedEvents.findIndex(
             jobEvent => jobEvent.counter === 1
           );
-          if (firstIndex && fetchedResults[firstIndex]?.stdout) {
+          if (firstIndex && fetchedEvents[firstIndex]?.stdout) {
             const stdoutLines = fetchedEvents[firstIndex].stdout.split('\r\n');
             stdoutLines[0] = tracebackEvent.stdout;
             fetchedEvents[firstIndex].stdout = stdoutLines.join('\r\n');
