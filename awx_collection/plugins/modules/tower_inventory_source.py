@@ -45,7 +45,6 @@ options:
         - The source to use for this group.
       choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower", "custom" ]
       type: str
-      required: True
     source_path:
       description:
         - For an SCM based inventory source, the source path points to the file within the repo to use as an inventory.
@@ -166,7 +165,7 @@ def main():
         #
         source=dict(choices=["scm", "ec2", "gce",
                              "azure_rm", "vmware", "satellite6",
-                             "openstack", "rhv", "tower", "custom"], required=True, default='scm'),
+                             "openstack", "rhv", "tower", "custom"]),
         source_path=dict(),
         source_script=dict(),
         source_vars=dict(type='dict'),
