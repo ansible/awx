@@ -8,4 +8,5 @@ clouds:
       project_name: fooo
       username: fooo
     private: true
+    region_name: fooo
     verify: false

@@ -249,7 +249,7 @@ def test_openstack_client_config_generation_with_project_domain_name(mocker, sou
 @pytest.mark.parametrize("source,expected", [
     (None, True), (False, False), (True, True)
 ])
-def test_openstack_client_config_generation_with_project_region_name(mocker, source, expected, private_data_dir):
+def test_openstack_client_config_generation_with_region(mocker, source, expected, private_data_dir):
     update = tasks.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
     inputs = {
@@ -259,7 +259,7 @@ def test_openstack_client_config_generation_with_project_region_name(mocker, sou
         'project': 'demo-project',
         'domain': 'my-demo-domain',
         'project_domain_name': 'project-domain',
-        'project_region_name': 'region-name',
+        'region': 'region-name',
     }
     if source is not None:
         inputs['verify_ssl'] = source
