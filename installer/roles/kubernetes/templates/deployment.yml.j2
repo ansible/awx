@@ -150,9 +150,8 @@ spec:
               virtualenv -p {{ custom_venv.python | default(custom_venvs_python) }} \
                 {{ custom_venvs_path }}/{{ custom_venv.name }} &&
               source {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/activate &&
-              {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install {{ trusted_hosts }} -U psutil \
-                --upgrade pip  &&
-              {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install {{ trusted_hosts }} -U psutil \
+              {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install {{ trusted_hosts }} -U pip &&
+              {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install {{ trusted_hosts }} -U psutil  \
                 "ansible=={{ custom_venv.python_ansible_version }}" &&
 {% if custom_venv.python_modules is defined %}
               {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install {{ trusted_hosts }} -U \
