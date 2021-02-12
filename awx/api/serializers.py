@@ -1361,7 +1361,7 @@ class ProjectOptionsSerializer(BaseSerializer):
 
 
 class ExecutionEnvironmentSerializer(BaseSerializer):
-    show_capabilities = ['edit', 'delete']
+    show_capabilities = ['edit', 'delete', 'copy']
     managed_by_tower = serializers.ReadOnlyField()
 
     class Meta:

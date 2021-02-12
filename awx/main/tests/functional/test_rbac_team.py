@@ -2,7 +2,7 @@ import pytest
 from unittest import mock
 
 from awx.main.access import TeamAccess
-from awx.main.models import Project, Organization, Team, ExecutionEnvironment
+from awx.main.models import Project, Organization, Team
 
 
 @pytest.mark.django_db
@@ -143,12 +143,6 @@ def test_team_member_org_role_access_inventory(team, rando, inventory, organizat
     team.member_role.children.add(organization.inventory_admin_role)
     assert rando in inventory.admin_role
 
-# @pytest.mark.django_db
-# def test_team_member_org_role_access_execution_environment(team, rando, execution_environment, organization):
-#     team.member_role.members.add(rando)
-#     assert rando not in execution_environment.read_role
-#     team.member_role.children.add(organization.execution_environment_admin_role)
-#     assert rando in execution_environment.admin_role
 
 @pytest.mark.django_db
 def test_org_admin_team_access(organization, team, user, project):
