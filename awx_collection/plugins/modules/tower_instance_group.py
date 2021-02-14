@@ -31,7 +31,6 @@ options:
     new_name:
       description:
         - Setting this option will change the existing name (looked up via the name field.
-      required: True
       type: str
     credential:
       description:

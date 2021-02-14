@@ -65,7 +65,9 @@ describe('<WebhookSubForm />', () => {
       wrapper.find('TextInputBase[aria-label="Webhook URL"]').prop('value')
     ).toContain('/api/v2/job_templates/51/github/');
     expect(
-      wrapper.find('TextInputBase[aria-label="wfjt-webhook-key"]').prop('value')
+      wrapper
+        .find('TextInputBase[aria-label="workflow job template webhook key"]')
+        .prop('value')
     ).toBe('webhook key');
     expect(
       wrapper
@@ -89,7 +91,9 @@ describe('<WebhookSubForm />', () => {
       wrapper.find('TextInputBase[aria-label="Webhook URL"]').prop('value')
     ).toContain('/api/v2/job_templates/51/gitlab/');
     expect(
-      wrapper.find('TextInputBase[aria-label="wfjt-webhook-key"]').prop('value')
+      wrapper
+        .find('TextInputBase[aria-label="workflow job template webhook key"]')
+        .prop('value')
     ).toBe('A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE.');
   });
   test('should have disabled button to update webhook key', async () => {

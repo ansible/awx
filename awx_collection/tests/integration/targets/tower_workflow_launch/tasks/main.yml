@@ -66,6 +66,66 @@
       - result is not failed
       - "'id' in result['job_info']"
 
+- name: Kick off a workflow with extra_vars but not enabled
+  tower_workflow_launch:
+    workflow_template: "{{ wfjt_name1 }}"
+    extra_vars:
+      var1: My First Variable
+      var2: My Second Variable
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'The field extra_vars was specified but the workflow job template does not allow for it to be overridden' in result.errors"
+
+- name: Prompt the workflow's with survey
+  tower_workflow_job_template:
+    name: "{{ wfjt_name1 }}"
+    state: present
+    survey_enabled: true
+    ask_variables_on_launch: false
+    survey:
+      name: ''
+      description: ''
+      spec:
+        - question_name: Basic Name
+          question_description: Name
+          required: true
+          type: text
+          variable: basic_name
+          min: 0
+          max: 1024
+          default: ''
+          choices: ''
+          new_question: true
+        - question_name: Choose yes or no?
+          question_description: Choosing yes or no.
+          required: false
+          type: multiplechoice
+          variable: option_true_false
+          min:
+          max:
+          default: 'yes'
+          choices: |-
+            yes
+            no
+          new_question: true
+
+- name: Kick off a workflow with survey
+  tower_workflow_launch:
+    workflow_template: "{{ wfjt_name1 }}"
+    extra_vars:
+      basic_name: My First Variable
+      option_true_false: 'no'
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+
 - name: Prompt the workflow's extra_vars on launch
   tower_workflow_job_template:
     name: "{{ wfjt_name1 }}"
@@ -76,6 +136,7 @@
   tower_workflow_launch:
     workflow_template: "{{ wfjt_name1 }}"
     extra_vars:
+      basic_name: My First Variable
       var1: My First Variable
       var2: My Second Variable
   ignore_errors: true

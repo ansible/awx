@@ -9,7 +9,7 @@ const ActionsGrid = styled.div`
   align-items: center;
 
   ${props => {
-    const columns = '40px '.repeat(props.numActions || 1);
+    const columns = props.gridColumns || '40px '.repeat(props.numActions || 1);
     return css`
       grid-template-columns: ${columns};
     `;
@@ -17,7 +17,7 @@ const ActionsGrid = styled.div`
 `;
 ActionsGrid.displayName = 'ActionsGrid';
 
-export default function ActionsTd({ children, ...props }) {
+export default function ActionsTd({ children, gridColumns, ...props }) {
   const numActions = children.length || 1;
   const width = numActions * 40;
   return (
@@ -28,7 +28,7 @@ export default function ActionsTd({ children, ...props }) {
       `}
       {...props}
     >
-      <ActionsGrid numActions={numActions}>
+      <ActionsGrid numActions={numActions} gridColumns={gridColumns}>
         {React.Children.map(children, (child, i) =>
           React.cloneElement(child, {
             column: i + 1,

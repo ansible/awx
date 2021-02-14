@@ -19,6 +19,7 @@ import CredentialChip from '../../../components/CredentialChip';
 import { ProjectsAPI } from '../../../api';
 import { toTitleCase } from '../../../util/strings';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import ProjectSyncButton from '../shared/ProjectSyncButton';
 
 function ProjectDetail({ project, i18n }) {
   const {
@@ -148,27 +149,28 @@ function ProjectDetail({ project, i18n }) {
         />
       </DetailList>
       <CardActionsRow>
-        {summary_fields.user_capabilities &&
-          summary_fields.user_capabilities.edit && (
-            <Button
-              aria-label={i18n._(t`edit`)}
-              component={Link}
-              to={`/projects/${id}/edit`}
-            >
-              {i18n._(t`Edit`)}
-            </Button>
-          )}
-        {summary_fields.user_capabilities &&
-          summary_fields.user_capabilities.delete && (
-            <DeleteButton
-              name={name}
-              modalTitle={i18n._(t`Delete Project`)}
-              onConfirm={deleteProject}
-              isDisabled={isLoading}
-            >
-              {i18n._(t`Delete`)}
-            </DeleteButton>
-          )}
+        {summary_fields.user_capabilities?.edit && (
+          <Button
+            aria-label={i18n._(t`edit`)}
+            component={Link}
+            to={`/projects/${id}/edit`}
+          >
+            {i18n._(t`Edit`)}
+          </Button>
+        )}
+        {summary_fields.user_capabilities?.start && (
+          <ProjectSyncButton projectId={project.id} />
+        )}
+        {summary_fields.user_capabilities?.delete && (
+          <DeleteButton
+            name={name}
+            modalTitle={i18n._(t`Delete Project`)}
+            onConfirm={deleteProject}
+            isDisabled={isLoading}
+          >
+            {i18n._(t`Delete`)}
+          </DeleteButton>
+        )}
       </CardActionsRow>
       {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
       {error && (

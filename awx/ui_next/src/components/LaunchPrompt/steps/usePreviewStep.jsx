@@ -35,9 +35,9 @@ export default function usePreviewStep(
         }
       : null,
     initialValues: {},
-    validate: () => ({}),
     isReady: true,
     error: null,
     setTouched: () => {},
+    validate: () => {},
   };
 }

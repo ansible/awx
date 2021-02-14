@@ -7,7 +7,11 @@ import { Button } from '@patternfly/react-core';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
-import { Detail, DetailList } from '../../../components/DetailList';
+import {
+  Detail,
+  DetailList,
+  UserDateDetail,
+} from '../../../components/DetailList';
 import { ApplicationsAPI } from '../../../api';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -97,6 +101,11 @@ function ApplicationDetails({
           label={i18n._(t`Client type`)}
           value={getClientType(application.client_type)}
           dataCy="app-detail-client-type"
+        />
+        <UserDateDetail label={i18n._(t`Created`)} date={application.created} />
+        <UserDateDetail
+          label={i18n._(t`Last Modified`)}
+          date={application.modified}
         />
       </DetailList>
       <CardActionsRow>

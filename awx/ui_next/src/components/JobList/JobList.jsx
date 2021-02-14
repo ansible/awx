@@ -7,7 +7,8 @@ import { Card } from '@patternfly/react-core';
 import AlertModal from '../AlertModal';
 import DatalistToolbar from '../DataListToolbar';
 import ErrorDetail from '../ErrorDetail';
-import PaginatedDataList, { ToolbarDeleteButton } from '../PaginatedDataList';
+import { ToolbarDeleteButton } from '../PaginatedDataList';
+import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
 import useRequest, {
   useDeleteItems,
   useDismissableError,
@@ -27,7 +28,7 @@ import {
 } from '../../api';
 
 function JobList({ i18n, defaultParams, showTypeColumn = false }) {
-  const QS_CONFIG = getQSConfig(
+  const qsConfig = getQSConfig(
     'job',
     {
       page: 1,
@@ -49,7 +50,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   } = useRequest(
     useCallback(
       async () => {
-        const params = parseQueryString(QS_CONFIG, location.search);
+        const params = parseQueryString(qsConfig, location.search);
         const [response, actionsResponse] = await Promise.all([
           UnifiedJobsAPI.read({ ...params }),
           UnifiedJobsAPI.readOptions(),
@@ -81,7 +82,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   // TODO: update QS_CONFIG to be safe for deps array
   const fetchJobsById = useCallback(
     async ids => {
-      const params = parseQueryString(QS_CONFIG, location.search);
+      const params = parseQueryString(qsConfig, location.search);
       params.id__in = ids.join(',');
       const { data } = await UnifiedJobsAPI.read(params);
       return data.results;
@@ -89,7 +90,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     [location.search] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const jobs = useWsJobs(results, fetchJobsById, QS_CONFIG);
+  const jobs = useWsJobs(results, fetchJobsById, qsConfig);
 
   const isAllSelected = selected.length === jobs.length && selected.length > 0;
 
@@ -145,7 +146,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
       );
     }, [selected]),
     {
-      qsConfig: QS_CONFIG,
+      qsConfig,
       allItemsSelected: isAllSelected,
       fetchItems: fetchJobs,
     }
@@ -176,14 +177,13 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   return (
     <>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading || isCancelLoading}
           items={jobs}
           itemCount={count}
           pluralizedItemName={i18n._(t`Jobs`)}
-          qsConfig={QS_CONFIG}
-          onRowClick={handleSelect}
+          qsConfig={qsConfig}
           toolbarSearchColumns={[
             {
               name: i18n._(t`Name`),
@@ -233,32 +233,18 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               key: 'job__limit',
             },
           ]}
-          toolbarSortColumns={[
-            {
-              name: i18n._(t`Finish Time`),
-              key: 'finished',
-            },
-            {
-              name: i18n._(t`ID`),
-              key: 'id',
-            },
-            {
-              name: i18n._(t`Launched By`),
-              key: 'created_by__id',
-            },
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-            },
-            {
-              name: i18n._(t`Project`),
-              key: 'unified_job_template__project__id',
-            },
-            {
-              name: i18n._(t`Start Time`),
-              key: 'started',
-            },
-          ]}
+          headerRow={
+            <HeaderRow qsConfig={qsConfig} isExpandable>
+              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+              <HeaderCell sortKey="status">{i18n._(t`Status`)}</HeaderCell>
+              {showTypeColumn && <HeaderCell>{i18n._(t`Type`)}</HeaderCell>}
+              <HeaderCell sortKey="started">{i18n._(t`Start Time`)}</HeaderCell>
+              <HeaderCell sortKey="finished">
+                {i18n._(t`Finish Time`)}
+              </HeaderCell>
+              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+            </HeaderRow>
+          }
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           renderToolbar={props => (
@@ -267,13 +253,13 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               showSelectAll
               isAllSelected={isAllSelected}
               onSelectAll={handleSelectAll}
-              qsConfig={QS_CONFIG}
+              qsConfig={qsConfig}
               additionalControls={[
                 <ToolbarDeleteButton
                   key="delete"
                   onDelete={handleJobDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName="Jobs"
+                  pluralizedItemName={i18n._(t`Jobs`)}
                 />,
                 <JobListCancelButton
                   key="cancel"
@@ -283,13 +269,14 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               ]}
             />
           )}
-          renderItem={job => (
+          renderRow={(job, index) => (
             <JobListItem
               key={job.id}
               job={job}
               showTypeColumn={showTypeColumn}
               onSelect={() => handleSelect(job)}
               isSelected={selected.some(row => row.id === job.id)}
+              rowIndex={index}
             />
           )}
         />

@@ -5,6 +5,10 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import Projects from './Projects';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+}));
+
 describe('<Projects />', () => {
   test('initially renders succesfully', () => {
     mountWithContexts(<Projects />);
@@ -27,7 +31,7 @@ describe('<Projects />', () => {
         },
       },
     });
-    expect(wrapper.find('BreadcrumbHeading').length).toBe(1);
+    expect(wrapper.find('Title').length).toBe(1);
     wrapper.unmount();
   });
 });

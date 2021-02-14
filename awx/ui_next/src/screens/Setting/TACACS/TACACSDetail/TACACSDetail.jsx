@@ -79,6 +79,7 @@ function TACACSDetail({ i18n }) {
               aria-label={i18n._(t`Edit`)}
               component={Link}
               to="/settings/tacacs/edit"
+              ouiaId="edit-button"
             >
               {i18n._(t`Edit`)}
             </Button>

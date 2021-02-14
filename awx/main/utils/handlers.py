@@ -103,6 +103,15 @@ if settings.COLOR_LOGS is True:
         from logutils.colorize import ColorizingStreamHandler
 
         class ColorHandler(ColorizingStreamHandler):
+            def colorize(self, line, record):
+                # comment out this method if you don't like the job_lifecycle
+                # logs rendered with cyan text
+                previous_level_map = self.level_map.copy()
+                if record.name == "awx.analytics.job_lifecycle":
+                    self.level_map[logging.DEBUG] = (None, 'cyan', True)
+                msg = super(ColorHandler, self).colorize(line, record)
+                self.level_map = previous_level_map
+                return msg
 
             def format(self, record):
                 message = logging.StreamHandler.format(self, record)

@@ -1,21 +1,44 @@
 /* eslint react/no-unused-state: 0 */
-import React, { useState } from 'react';
-import { withRouter, Redirect, useHistory } from 'react-router-dom';
-import { CardBody } from '../../../components/Card';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Redirect, useHistory } from 'react-router-dom';
 
-import { JobTemplatesAPI } from '../../../api';
 import { JobTemplate } from '../../../types';
+import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
 import { getAddedAndRemoved } from '../../../util/lists';
+import useRequest from '../../../util/useRequest';
 import JobTemplateForm from '../shared/JobTemplateForm';
-
 import ContentLoading from '../../../components/ContentLoading';
+import { CardBody } from '../../../components/Card';
 
 function JobTemplateEdit({ template }) {
   const history = useHistory();
   const [formSubmitError, setFormSubmitError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const detailsUrl = `/templates/${template.type}/${template.id}/details`;
+
+  const {
+    request: fetchProject,
+    error: fetchProjectError,
+    isLoading: projectLoading,
+  } = useRequest(
+    useCallback(async () => {
+      await ProjectsAPI.readDetail(template.project);
+    }, [template.project])
+  );
+
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
+
+  useEffect(() => {
+    if (fetchProjectError) {
+      if (fetchProjectError.response.status === 403) {
+        setIsDisabled(true);
+      }
+    }
+  }, [fetchProjectError]);
 
   const handleSubmit = async values => {
     const {
@@ -91,22 +114,21 @@ function JobTemplateEdit({ template }) {
     const associateCredentials = added.map(cred =>
       JobTemplatesAPI.associateCredentials(template.id, cred.id)
     );
-    const associatePromise = Promise.all(associateCredentials);
+    const associatePromise = await Promise.all(associateCredentials);
     return Promise.all([disassociatePromise, associatePromise]);
   };
 
-  const handleCancel = () => {
-    history.push(detailsUrl);
-  };
+  const handleCancel = () => history.push(detailsUrl);
 
   const canEdit = template?.summary_fields?.user_capabilities?.edit;
 
   if (!canEdit) {
     return <Redirect to={detailsUrl} />;
   }
-  if (isLoading) {
+  if (isLoading || projectLoading) {
     return <ContentLoading />;
   }
+
   return (
     <CardBody>
       <JobTemplateForm
@@ -114,6 +136,7 @@ function JobTemplateEdit({ template }) {
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
         submitError={formSubmitError}
+        isOverrideDisabledLookup={!isDisabled}
       />
     </CardBody>
   );
@@ -122,5 +145,4 @@ function JobTemplateEdit({ template }) {
 JobTemplateEdit.propTypes = {
   template: JobTemplate.isRequired,
 };
-
-export default withRouter(JobTemplateEdit);
+export default JobTemplateEdit;

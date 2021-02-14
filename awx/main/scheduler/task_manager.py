@@ -64,6 +64,8 @@ class TaskManager():
         # will no longer be started and will be started on the next task manager cycle.
         self.start_task_limit = settings.START_TASK_LIMIT
 
+        self.time_delta_job_explanation = timedelta(seconds=30)
+
     def after_lock_init(self):
         '''
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
@@ -80,7 +82,7 @@ class TaskManager():
         instances_by_hostname = {i.hostname: i for i in instances_partial}
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
-            self.graph[rampart_group.name] = dict(graph=DependencyGraph(rampart_group.name),
+            self.graph[rampart_group.name] = dict(graph=DependencyGraph(),
                                                   capacity_total=rampart_group.capacity,
                                                   consumed_capacity=0,
                                                   instances=[])
@@ -88,18 +90,21 @@ class TaskManager():
                 if instance.hostname in instances_by_hostname:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
 
-    def is_job_blocked(self, task):
+    def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
         #       in the old task manager this was handled as a method on each task object outside of the graph and
         #       probably has the side effect of cutting down *a lot* of the logic from this task manager class
         for g in self.graph:
-            if self.graph[g]['graph'].is_job_blocked(task):
-                return True
+            blocked_by = self.graph[g]['graph'].task_blocked_by(task)
+            if blocked_by:
+                return blocked_by
 
         if not task.dependent_jobs_finished():
-            return True
+            blocked_by = task.dependent_jobs.first()
+            if blocked_by:
+                return blocked_by
 
-        return False
+        return None
 
     def get_tasks(self, status_list=('pending', 'waiting', 'running')):
         jobs = [j for j in Job.objects.filter(status__in=status_list).prefetch_related('instance_group')]
@@ -312,6 +317,7 @@ class TaskManager():
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()
+                task.log_lifecycle("waiting")
 
             if rampart_group is not None:
                 self.consume_capacity(task, rampart_group.name)
@@ -450,6 +456,7 @@ class TaskManager():
     def generate_dependencies(self, undeped_tasks):
         created_dependencies = []
         for task in undeped_tasks:
+            task.log_lifecycle("acknowledged")
             dependencies = []
             if not type(task) is Job:
                 continue
@@ -489,11 +496,18 @@ class TaskManager():
 
     def process_pending_tasks(self, pending_tasks):
         running_workflow_templates = set([wf.unified_job_template_id for wf in self.get_running_workflow_jobs()])
+        tasks_to_update_job_explanation = []
         for task in pending_tasks:
             if self.start_task_limit <= 0:
                 break
-            if self.is_job_blocked(task):
-                logger.debug("{} is blocked from running".format(task.log_format))
+            blocked_by = self.job_blocked_by(task)
+            if blocked_by:
+                task.log_lifecycle("blocked", blocked_by=blocked_by)
+                job_explanation = gettext_noop(f"waiting for {blocked_by._meta.model_name}-{blocked_by.id} to finish")
+                if task.job_explanation != job_explanation:
+                    if task.created < (tz_now() - self.time_delta_job_explanation):
+                        task.job_explanation  = job_explanation
+                        tasks_to_update_job_explanation.append(task)
                 continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
@@ -539,7 +553,17 @@ class TaskManager():
                     logger.debug("No instance available in group {} to run job {} w/ capacity requirement {}".format(
                                  rampart_group.name, task.log_format, task.task_impact))
             if not found_acceptable_queue:
+                task.log_lifecycle("needs_capacity")
+                job_explanation = gettext_noop("This job is not ready to start because there is not enough available capacity.")
+                if task.job_explanation != job_explanation:
+                    if task.created < (tz_now() - self.time_delta_job_explanation):
+                        # Many launched jobs are immediately blocked, but most blocks will resolve in a few seconds.
+                        # Therefore we should only update the job_explanation after some time has elapsed to
+                        # prevent excessive task saves.
+                        task.job_explanation = job_explanation
+                        tasks_to_update_job_explanation.append(task)
                 logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
+        UnifiedJob.objects.bulk_update(tasks_to_update_job_explanation, ['job_explanation'])
 
     def timeout_approval_node(self):
         workflow_approvals = WorkflowApproval.objects.filter(status='pending')

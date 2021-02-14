@@ -126,9 +126,6 @@ def main():
     # Grab our start time to compare against for the timeout
     start = time.time()
 
-    if not wait:
-        module.exit_json(**module.json_output)
-
     # Invoke wait function
     module.wait_on_url(
         url=result['json']['url'],

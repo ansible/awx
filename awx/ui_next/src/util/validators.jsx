@@ -50,10 +50,23 @@ export function requiredEmail(i18n) {
     if (!value) {
       return i18n._(t`This field must not be blank`);
     }
-    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
-      return i18n._(t`Invalid email address`);
+
+    // This isn't a perfect validator. It's likely to let a few
+    // invalid (though unlikely) email addresses through.
+
+    // This is ok, because the server will always do strict validation for us.
+
+    const splitVals = value.split('@');
+
+    if (splitVals.length >= 2) {
+      if (splitVals[0] && splitVals[1]) {
+        // We get here if the string has an '@' that is enclosed by
+        // non-empty substrings
+        return undefined;
+      }
     }
-    return undefined;
+
+    return i18n._(t`Invalid email address`);
   };
 }
 

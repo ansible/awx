@@ -13,6 +13,9 @@ jest.mock('../../api/models/Settings');
 SettingsAPI.readAllOptions.mockResolvedValue({
   data: mockAllOptions,
 });
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+}));
 
 describe('<Settings />', () => {
   let wrapper;

@@ -44,7 +44,7 @@ function NodeModalForm({
 }) {
   const history = useHistory();
   const dispatch = useContext(WorkflowDispatchContext);
-  const { values, setTouched, validateForm } = useFormikContext();
+  const { values, setFieldTouched } = useFormikContext();
 
   const [triggerNext, setTriggerNext] = useState(0);
 
@@ -60,6 +60,7 @@ function NodeModalForm({
 
   const {
     steps: promptSteps,
+    validateStep,
     visitStep,
     visitAllSteps,
     contentError,
@@ -192,24 +193,27 @@ function NodeModalForm({
       onSave={() => {
         handleSaveNode();
       }}
+      onBack={async nextStep => {
+        validateStep(nextStep.id);
+      }}
       onGoToStep={async (nextStep, prevStep) => {
         if (nextStep.id === 'preview') {
-          visitAllSteps(setTouched);
+          visitAllSteps(setFieldTouched);
         } else {
-          visitStep(prevStep.prevId);
+          visitStep(prevStep.prevId, setFieldTouched);
+          validateStep(nextStep.id);
         }
-        await validateForm();
       }}
       steps={promptSteps}
       css="overflow: scroll"
       title={title}
       onNext={async (nextStep, prevStep) => {
         if (nextStep.id === 'preview') {
-          visitAllSteps(setTouched);
+          visitAllSteps(setFieldTouched);
         } else {
-          visitStep(prevStep.prevId);
+          visitStep(prevStep.prevId, setFieldTouched);
+          validateStep(nextStep.id);
         }
-        await validateForm();
       }}
     />
   );

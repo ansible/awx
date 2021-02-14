@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useCallback, useEffect } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { object } from 'prop-types';
 import { CardBody } from '../../../components/Card';
 import {
@@ -13,11 +13,8 @@ import CredentialForm from '../shared/CredentialForm';
 import useRequest from '../../../util/useRequest';
 
 function CredentialEdit({ credential, me }) {
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [credentialTypes, setCredentialTypes] = useState(null);
-  const [inputSources, setInputSources] = useState({});
   const history = useHistory();
+  const { id: credId } = useParams();
 
   const { error: submitError, request: submitRequest, result } = useRequest(
     useCallback(
@@ -55,7 +52,7 @@ function CredentialEdit({ credential, me }) {
                 input_field_name: fieldName,
                 metadata: fieldValue.inputs,
                 source_credential: fieldValue.credential.id,
-                target_credential: credential.id,
+                target_credential: credId,
               });
             }
             if (fieldValue.touched) {
@@ -88,7 +85,7 @@ function CredentialEdit({ credential, me }) {
           modifiedData.user = me.id;
         }
         const [{ data }] = await Promise.all([
-          CredentialsAPI.update(credential.id, modifiedData),
+          CredentialsAPI.update(credId, modifiedData),
           ...destroyInputSources(),
         ]);
 
@@ -96,7 +93,7 @@ function CredentialEdit({ credential, me }) {
 
         return data;
       },
-      [me, credential.id]
+      [me, credId]
     )
   );
 
@@ -105,56 +102,63 @@ function CredentialEdit({ credential, me }) {
       history.push(`/credentials/${result.id}/details`);
     }
   }, [result, history]);
+  const {
+    isLoading,
+    error,
+    request: loadData,
+    result: { credentialTypes, loadedInputSources },
+  } = useRequest(
+    useCallback(async () => {
+      const [
+        { data },
+        {
+          data: { results },
+        },
+      ] = await Promise.all([
+        CredentialTypesAPI.read({ page_size: 200 }),
+        CredentialsAPI.readInputSources(credId, { page_size: 200 }),
+      ]);
+      const credTypes = data.results;
+      if (data.next && data.next.includes('page=2')) {
+        const {
+          data: { results: additionalCredTypes },
+        } = await CredentialTypesAPI.read({
+          page_size: 200,
+          page: 2,
+        });
+        credTypes.concat([...additionalCredTypes]);
+      }
+      const creds = credTypes.reduce((credentialTypesMap, credentialType) => {
+        credentialTypesMap[credentialType.id] = credentialType;
+        return credentialTypesMap;
+      }, {});
+      const inputSources = results.reduce((inputSourcesMap, inputSource) => {
+        inputSourcesMap[inputSource.input_field_name] = inputSource;
+        return inputSourcesMap;
+      }, {});
+      return { credentialTypes: creds, loadedInputSources: inputSources };
+    }, [credId]),
+    { credentialTypes: {}, loadedInputSources: {} }
+  );
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [
-          {
-            data: { results: loadedCredentialTypes },
-          },
-          {
-            data: { results: loadedInputSources },
-          },
-        ] = await Promise.all([
-          CredentialTypesAPI.read(),
-          CredentialsAPI.readInputSources(credential.id, { page_size: 200 }),
-        ]);
-        setCredentialTypes(
-          loadedCredentialTypes.reduce((credentialTypesMap, credentialType) => {
-            credentialTypesMap[credentialType.id] = credentialType;
-            return credentialTypesMap;
-          }, {})
-        );
-        setInputSources(
-          loadedInputSources.reduce((inputSourcesMap, inputSource) => {
-            inputSourcesMap[inputSource.input_field_name] = inputSource;
-            return inputSourcesMap;
-          }, {})
-        );
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadData();
-  }, [credential.id]);
+  }, [loadData]);
 
   const handleCancel = () => {
-    const url = `/credentials/${credential.id}/details`;
+    const url = `/credentials/${credId}/details`;
     history.push(`${url}`);
   };
 
   const handleSubmit = async values => {
-    await submitRequest(values, credentialTypes, inputSources);
+    await submitRequest(values, credentialTypes, loadedInputSources);
   };
 
   if (error) {
     return <ContentError error={error} />;
   }
 
-  if (isLoading) {
+  if (isLoading && !credentialTypes) {
     return <ContentLoading />;
   }
 
@@ -165,7 +169,7 @@ function CredentialEdit({ credential, me }) {
         onSubmit={handleSubmit}
         credential={credential}
         credentialTypes={credentialTypes}
-        inputSources={inputSources}
+        inputSources={loadedInputSources}
         submitError={submitError}
       />
     </CardBody>

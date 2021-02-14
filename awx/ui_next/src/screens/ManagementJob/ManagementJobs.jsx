@@ -2,12 +2,13 @@ import React, { Fragment } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader';
 
 function ManagementJobs({ i18n }) {
   return (
     <Fragment>
-      <Breadcrumbs
+      <ScreenHeader
+        streamType="none"
         breadcrumbConfig={{ '/management_jobs': i18n._(t`Management Jobs`) }}
       />
     </Fragment>

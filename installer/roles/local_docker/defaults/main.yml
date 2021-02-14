@@ -4,7 +4,8 @@ dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
 awx_image: "awx"
 redis_image: "redis"
 
-postgresql_version: "10"
+postgresql_version: "12"
 postgresql_image: "postgres:{{postgresql_version}}"
 
 compose_start_containers: true
+upgrade_postgres: false

@@ -98,8 +98,7 @@ function UserRolesList({ i18n, user }) {
   );
 
   const canAdd =
-    user?.summary_fields?.user_capabilities?.edit ||
-    (actions && Object.prototype.hasOwnProperty.call(actions, 'POST'));
+    actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
   const detailUrl = role => {
     const { resource_id, resource_type } = role.summary_fields;
@@ -206,7 +205,7 @@ function UserRolesList({ i18n, user }) {
             </Button>,
             <Button
               key="cancel"
-              variant="secondary"
+              variant="link"
               aria-label={i18n._(t`Cancel`)}
               onClick={() => setRoleToDisassociate(null)}
             >

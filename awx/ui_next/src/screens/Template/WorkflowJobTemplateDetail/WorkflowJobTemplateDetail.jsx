@@ -135,9 +135,6 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
             )}
           />
         )}
-        {renderOptionsField && (
-          <Detail label={i18n._(t`Options`)} value={renderOptions} />
-        )}
         <Detail
           label={i18n._(t`Webhook Service`)}
           value={toTitleCase(template.webhook_service)}
@@ -162,6 +159,19 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
             }
           />
         )}
+        {renderOptionsField && (
+          <Detail label={i18n._(t`Options`)} value={renderOptions} />
+        )}
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={created}
+          user={summary_fields.created_by}
+        />
+        <UserDateDetail
+          label={i18n._(t`Modified`)}
+          date={modified}
+          user={summary_fields.modified_by}
+        />
         {summary_fields.labels?.results?.length > 0 && (
           <Detail
             fullWidth
@@ -184,16 +194,6 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
           label={i18n._(t`Variables`)}
           value={extra_vars}
           rows={4}
-        />
-        <UserDateDetail
-          label={i18n._(t`Created`)}
-          date={created}
-          user={summary_fields.created_by}
-        />
-        <UserDateDetail
-          label={i18n._(t`Modified`)}
-          date={modified}
-          user={summary_fields.modified_by}
         />
       </DetailList>
       <CardActionsRow>

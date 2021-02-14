@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
-import Breadcrumbs from '../../components/Breadcrumbs';
+import ScreenHeader from '../../components/ScreenHeader';
 import ActivityStream from './ActivityStream';
 import AzureAD from './AzureAD';
 import GitHub from './GitHub';
@@ -57,6 +57,17 @@ function Settings({ i18n }) {
     '/settings/github/team': i18n._(t`GitHub Team`),
     '/settings/github/team/details': i18n._(t`Details`),
     '/settings/github/team/edit': i18n._(t`Edit Details`),
+    '/settings/github/enterprise': i18n._(t`GitHub Enterprise`),
+    '/settings/github/enterprise/details': i18n._(t`Details`),
+    '/settings/github/enterprise/edit': i18n._(t`Edit Details`),
+    '/settings/github/enterprise_organization': i18n._(
+      t`GitHub Enterprise Organization`
+    ),
+    '/settings/github/enterprise_organization/details': i18n._(t`Details`),
+    '/settings/github/enterprise_organization/edit': i18n._(t`Edit Details`),
+    '/settings/github/enterprise_team': i18n._(t`GitHub Enterprise Team`),
+    '/settings/github/enterprise_team/details': i18n._(t`Details`),
+    '/settings/github/enterprise_team/edit': i18n._(t`Edit Details`),
     '/settings/google_oauth2': i18n._(t`Google OAuth2`),
     '/settings/google_oauth2/details': i18n._(t`Details`),
     '/settings/google_oauth2/edit': i18n._(t`Edit Details`),
@@ -129,7 +140,7 @@ function Settings({ i18n }) {
 
   return (
     <SettingsProvider value={result}>
-      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader streamType="setting" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path="/settings/activity_stream">
           <ActivityStream />

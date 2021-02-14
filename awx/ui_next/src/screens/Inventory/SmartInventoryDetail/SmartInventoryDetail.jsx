@@ -152,7 +152,7 @@ function SmartInventoryDetail({ inventory, i18n }) {
           {user_capabilities?.edit && (
             <Button
               component={Link}
-              aria-label="edit"
+              aria-label={i18n._(t`edit`)}
               to={`/inventories/smart_inventory/${id}/edit`}
             >
               {i18n._(t`Edit`)}

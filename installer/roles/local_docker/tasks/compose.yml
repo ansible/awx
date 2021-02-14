@@ -36,6 +36,17 @@
   register: awx_secret_key
 
 - block:
+    - name: Remove AWX containers before migrating postgres so that the old postgres container does not get used
+      docker_compose:
+        project_src: "{{ docker_compose_dir }}"
+        state: absent
+      ignore_errors: true
+
+    - name: Run migrations in task container
+      shell: docker-compose run --rm --service-ports task awx-manage migrate --no-input
+      args:
+        chdir: "{{ docker_compose_dir }}"
+
     - name: Start the containers
       docker_compose:
         project_src: "{{ docker_compose_dir }}"
@@ -49,6 +60,11 @@
     - name: Update CA trust in awx_task container
       command: docker exec awx_task '/usr/bin/update-ca-trust'
       when: awx_compose_config.changed or awx_compose_start.changed
+
+    - name: Wait for launch script to create user
+      wait_for:
+        timeout: 10
+      delegate_to: localhost
 
     - name: Create Preload data
       command: docker exec awx_task bash -c "/usr/bin/awx-manage create_preload_data"

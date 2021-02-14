@@ -1,0 +1,19 @@
+---
+
+- name: Create .build directory
+  file:
+    path: "{{ dockerfile_dest }}/{{ template_dest }}"
+    state: directory
+
+- name: Render supervisor configs
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ dockerfile_dest }}/{{ template_dest }}/{{ item }}"
+  with_items:
+    - "supervisor.conf"
+    - "supervisor_task.conf"
+
+- name: Render Dockerfile
+  template:
+    src: Dockerfile.j2
+    dest: "{{ dockerfile_dest }}/{{ dockerfile_name }}"

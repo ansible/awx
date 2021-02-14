@@ -88,7 +88,7 @@ function InventorySourceListItem({
           <DataListAction
             id="actions"
             aria-labelledby="actions"
-            aria-label="actions"
+            aria-label={i18n._(t`actions`)}
           >
             {source.summary_fields.user_capabilities.start && (
               <InventorySourceSyncButton source={source} />

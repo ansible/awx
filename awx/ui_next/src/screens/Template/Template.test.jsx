@@ -28,6 +28,22 @@ describe('<Template />', () => {
         actions: { PUT: true },
       },
     });
+    JobTemplatesAPI.readCredentials.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 3,
+            type: 'credential',
+            url: '/api/v2/credentials/3/',
+            name: 'Vault1Id1',
+            inputs: {
+              vault_id: '1',
+            },
+            kind: 'vault',
+          },
+        ],
+      },
+    });
     OrganizationsAPI.read.mockResolvedValue({
       data: {
         count: 1,

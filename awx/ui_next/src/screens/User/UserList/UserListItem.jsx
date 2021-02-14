@@ -3,24 +3,22 @@ import React, { Fragment } from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Label,
-  Tooltip,
-} from '@patternfly/react-core';
-
+import { Button, Label } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 
 import { User } from '../../../types';
 
-function UserListItem({ user, isSelected, onSelect, detailUrl, i18n }) {
+function UserListItem({
+  user,
+  isSelected,
+  onSelect,
+  detailUrl,
+  rowIndex,
+  i18n,
+}) {
   const labelId = `check-action-${user.id}`;
 
   let user_type;
@@ -36,84 +34,64 @@ function UserListItem({ user, isSelected, onSelect, detailUrl, i18n }) {
   const socialAuthUser = user.auth.length > 0;
 
   return (
-    <DataListItem key={user.id} aria-labelledby={labelId} id={`${user.id}`}>
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-user-${user.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="username" aria-label={i18n._(t`username`)}>
-              <span id={labelId}>
-                <Link to={`${detailUrl}`} id={labelId}>
-                  <b>{user.username}</b>
-                </Link>
-              </span>
-              {ldapUser && (
-                <span css="margin-left: 12px">
-                  <Label aria-label={i18n._(t`ldap user`)}>
-                    {i18n._(t`LDAP`)}
-                  </Label>
-                </span>
-              )}
-              {socialAuthUser && (
-                <span css="margin-left: 12px">
-                  <Label aria-label={i18n._(t`social login`)}>
-                    {i18n._(t`SOCIAL`)}
-                  </Label>
-                </span>
-              )}
-            </DataListCell>,
-            <DataListCell
-              key="first-name"
-              aria-label={i18n._(t`user first name`)}
-            >
-              {user.first_name && (
-                <Fragment>
-                  <b css="margin-right: 24px">{i18n._(t`First Name`)}</b>
-                  {user.first_name}
-                </Fragment>
-              )}
-            </DataListCell>,
-            <DataListCell
-              key="last-name"
-              aria-label={i18n._(t`user last name`)}
-            >
-              {user.last_name && (
-                <Fragment>
-                  <b css="margin-right: 24px">{i18n._(t`Last Name`)}</b>
-                  {user.last_name}
-                </Fragment>
-              )}
-            </DataListCell>,
-            <DataListCell key="user-type" aria-label={i18n._(t`user type`)}>
-              {user_type}
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label="actions"
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={`user-row-${user.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Username`)}>
+        <Link to={`${detailUrl}`} id={labelId}>
+          <b>{user.username}</b>
+        </Link>
+        {ldapUser && (
+          <span css="margin-left: 12px">
+            <Label aria-label={i18n._(t`ldap user`)}>{i18n._(t`LDAP`)}</Label>
+          </span>
+        )}
+        {socialAuthUser && (
+          <span css="margin-left: 12px">
+            <Label aria-label={i18n._(t`social login`)}>
+              {i18n._(t`SOCIAL`)}
+            </Label>
+          </span>
+        )}
+      </Td>
+      <Td dataLabel={i18n._(t`First Name`)}>
+        {user.first_name && (
+          <Fragment>
+            <b css="margin-right: 24px">{i18n._(t`First Name`)}</b>
+            {user.first_name}
+          </Fragment>
+        )}
+      </Td>
+      <Td dataLabel={i18n._(t`Last Name`)}>
+        {user.last_name && (
+          <Fragment>
+            <b css="margin-right: 24px">{i18n._(t`Last Name`)}</b>
+            {user.last_name}
+          </Fragment>
+        )}
+      </Td>
+      <Td dataLabel={i18n._(t`Role`)}>{user_type}</Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionItem
+          visible={user.summary_fields.user_capabilities.edit}
+          tooltip={i18n._(t`Edit User`)}
         >
-          {user.summary_fields.user_capabilities.edit && (
-            <Tooltip content={i18n._(t`Edit User`)} position="top">
-              <Button
-                aria-label={i18n._(t`Edit User`)}
-                variant="plain"
-                component={Link}
-                to={`/users/${user.id}/edit`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <Button
+            aria-label={i18n._(t`Edit User`)}
+            variant="plain"
+            component={Link}
+            to={`/users/${user.id}/edit`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 

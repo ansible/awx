@@ -44,6 +44,19 @@ function Project({ i18n, setBreadcrumb }) {
           role_level: 'notification_admin_role',
         }),
       ]);
+
+      if (data.summary_fields.credentials) {
+        const params = {
+          page: 1,
+          page_size: 200,
+          order_by: 'name',
+        };
+        const {
+          data: { results },
+        } = await ProjectsAPI.readCredentials(data.id, params);
+
+        data.summary_fields.credentials = results;
+      }
       return {
         project: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,

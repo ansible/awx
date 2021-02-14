@@ -246,6 +246,7 @@ function LoggingEdit({ i18n }) {
                       <div>
                         <Button
                           aria-label={i18n._(t`Test logging`)}
+                          ouiaId="test-logging-button"
                           variant="secondary"
                           type="button"
                           onClick={handleTest}

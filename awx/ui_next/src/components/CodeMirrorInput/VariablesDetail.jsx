@@ -1,6 +1,7 @@
 import 'styled-components/macro';
 import React, { useState, useEffect } from 'react';
 import { node, number, oneOfType, shape, string, arrayOf } from 'prop-types';
+import { Trans, withI18n } from '@lingui/react';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '../DetailList';
 import MultiButtonToggle from '../MultiButtonToggle';
@@ -111,7 +112,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
             css="color: var(--pf-global--danger-color--100);
             font-size: var(--pf-global--FontSize--sm"
           >
-            Error: {error.message}
+            <Trans>Error:</Trans> {error.message}
           </div>
         )}
       </DetailValue>
@@ -131,4 +132,4 @@ VariablesDetail.defaultProps = {
   helpText: '',
 };
 
-export default VariablesDetail;
+export default withI18n()(VariablesDetail);

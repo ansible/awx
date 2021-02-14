@@ -7,6 +7,9 @@ import { DashboardAPI } from '../../api';
 import Dashboard from './Dashboard';
 
 jest.mock('../../api');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+}));
 
 describe('<Dashboard />', () => {
   let pageWrapper;
@@ -41,7 +44,7 @@ describe('<Dashboard />', () => {
         .simulate('click');
     });
     pageWrapper.update();
-    expect(pageWrapper.find('DashboardTemplateList').length).toBe(1);
+    expect(pageWrapper.find('TemplateList').length).toBe(1);
   });
 
   test('renders month-based/all job type chart by default', () => {

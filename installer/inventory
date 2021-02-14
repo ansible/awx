@@ -62,6 +62,7 @@ dockerhub_base=ansible
 # Common Docker parameters
 awx_task_hostname=awx
 awx_web_hostname=awxweb
+# Local directory that is mounted in the awx_postgres docker container to place the db in
 postgres_data_dir="~/.awx/pgdocker"
 host_port=80
 host_port_ssl=443
@@ -101,21 +102,10 @@ pg_port=5432
 # containerized postgres deployment on OpenShift
 # pg_admin_password=postgrespass
 
-# Use a local distribution build container image for building the AWX package
-# This is helpful if you don't want to bother installing the build-time dependencies as
-# it is taken care of already.
-# NOTE: IMPORTANT: If you are running a mininshift install, using this container might not work
-#                  if you are using certain drivers like KVM where the source tree can't be mapped
-#                  into the build container.
-#                  Thus this setting must be set to False which will trigger a local build. To view the
-#                  typical dependencies that you might need to install see:
-#                  installer/image_build/files/Dockerfile.sdist
-# use_container_for_build=true
-
 # This will create or update a default admin (superuser) account in AWX, if not provided
 # then these default values are used
 admin_user=admin
-admin_password=password
+# admin_password=password
 
 # Whether or not to create preload data for demonstration purposes
 create_preload_data=True

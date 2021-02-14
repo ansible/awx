@@ -150,7 +150,8 @@ spec:
               virtualenv -p {{ custom_venv.python | default(custom_venvs_python) }} \
                 {{ custom_venvs_path }}/{{ custom_venv.name }} &&
               source {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/activate &&
-              {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install {{ trusted_hosts }} -U psutil \
+              {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install {{ trusted_hosts }} -U pip &&
+              {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install {{ trusted_hosts }} -U psutil  \
                 "ansible=={{ custom_venv.python_ansible_version }}" &&
 {% if custom_venv.python_modules is defined %}
               {{ custom_venvs_path }}/{{ custom_venv.name }}/bin/pip install {{ trusted_hosts }} -U \
@@ -447,22 +448,6 @@ spec:
                 path: 'credentials.py'
               - key: environment_sh
                 path: 'environment.sh'
-
-        - name: {{ kubernetes_deployment_name }}-launch-awx-web
-          configMap:
-            name: {{ kubernetes_deployment_name }}-launch-awx
-            items:
-              - key: launch-awx-web
-                path: 'launch_awx.sh'
-            defaultMode: 0755
-
-        - name: {{ kubernetes_deployment_name }}-launch-awx-task
-          configMap:
-            name: {{ kubernetes_deployment_name }}-launch-awx
-            items:
-              - key: launch-awx-task
-                path: 'launch_awx_task.sh'
-            defaultMode: 0755
 
         - name: {{ kubernetes_deployment_name }}-supervisor-web-config
           configMap:

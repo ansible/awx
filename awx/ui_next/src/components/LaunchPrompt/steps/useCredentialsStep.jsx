@@ -9,15 +9,13 @@ export default function useCredentialsStep(launchConfig, resource, i18n) {
   return {
     step: getStep(launchConfig, i18n),
     initialValues: getInitialValues(launchConfig, resource),
-    validate: () => ({}),
     isReady: true,
     contentError: null,
-    formError: null,
-    setTouched: setFieldsTouched => {
-      setFieldsTouched({
-        credentials: true,
-      });
+    hasError: false,
+    setTouched: setFieldTouched => {
+      setFieldTouched('credentials', true, false);
     },
+    validate: () => {},
   };
 }
 

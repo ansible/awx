@@ -16,6 +16,7 @@ const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
   page_size: 5,
   order_by: 'name',
+  role_level: 'use_role',
 });
 
 function InventoryLookup({
@@ -29,6 +30,7 @@ function InventoryLookup({
   fieldId,
   promptId,
   promptName,
+  isOverrideDisabled,
 }) {
   const {
     result: {
@@ -57,8 +59,10 @@ function InventoryLookup({
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
-        canEdit: Boolean(actionsResponse.data.actions.POST),
+        canEdit:
+          Boolean(actionsResponse.data.actions.POST) || isOverrideDisabled,
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [history.location]),
     {
       inventories: [],
@@ -195,11 +199,13 @@ InventoryLookup.propTypes = {
   value: Inventory,
   onChange: func.isRequired,
   required: bool,
+  isOverrideDisabled: bool,
 };
 
 InventoryLookup.defaultProps = {
   value: null,
   required: false,
+  isOverrideDisabled: false,
 };
 
 export default withI18n()(withRouter(InventoryLookup));

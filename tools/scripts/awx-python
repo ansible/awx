@@ -1,15 +1,7 @@
 #!/usr/bin/env bash
-# Enable needed Software Collections, if installed
-for scl in rh-postgresql10; do
-  if [ -f /etc/scl/prefixes/$scl ]; then
-    if [ -f `cat /etc/scl/prefixes/$scl`/$scl/enable ]; then
-      . `cat /etc/scl/prefixes/$scl`/$scl/enable
-    fi
-  fi
-done
 
 # Enable Tower virtualenv
-for venv_path in /var/lib/awx/venv/awx /venv/awx; do
+for venv_path in /var/lib/awx/venv/awx; do
   if [ -f $venv_path/bin/activate ]; then
     . $venv_path/bin/activate
   fi

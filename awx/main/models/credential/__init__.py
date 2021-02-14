@@ -820,6 +820,11 @@ ManagedCredentialType(
                                        'URLs. Refer to Ansible Tower documentation for '
                                        'common scenarios.')
         }, {
+            'id': 'region',
+            'label': ugettext_noop('Region Name'),
+            'type': 'string',
+            'help_text': ugettext_noop('For some cloud providers, like OVH, region must be specified'),
+        }, {
             'id': 'verify_ssl',
             'label': ugettext_noop('Verify SSL'),
             'type': 'boolean',

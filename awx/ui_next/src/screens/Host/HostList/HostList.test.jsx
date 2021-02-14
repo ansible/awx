@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 import { HostsAPI } from '../../../api';
 import {
   mountWithContexts,
@@ -133,8 +134,9 @@ describe('<HostList />', () => {
 
     act(() => {
       wrapper
-        .find('input#select-host-1')
-        .closest('DataListCheck')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .invoke('onChange')();
     });
     wrapper.update();
@@ -146,8 +148,9 @@ describe('<HostList />', () => {
     ).toEqual(true);
     act(() => {
       wrapper
-        .find('input#select-host-1')
-        .closest('DataListCheck')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .invoke('onChange')();
     });
     wrapper.update();
@@ -257,7 +260,7 @@ describe('<HostList />', () => {
     expect(modal.prop('title')).toEqual('Error!');
   });
 
-  test('should show Add button according to permissions', async () => {
+  test('should show Add and Smart Inventory buttons according to permissions', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<HostList />);
@@ -265,9 +268,10 @@ describe('<HostList />', () => {
     await waitForLoaded(wrapper);
 
     expect(wrapper.find('ToolbarAddButton').length).toBe(1);
+    expect(wrapper.find('Button[aria-label="Smart Inventory"]').length).toBe(1);
   });
 
-  test('should hide Add button according to permissions', async () => {
+  test('should hide Add and Smart Inventory buttons according to permissions', async () => {
     HostsAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
@@ -282,5 +286,44 @@ describe('<HostList />', () => {
     await waitForLoaded(wrapper);
 
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+    expect(wrapper.find('Button[aria-label="Smart Inventory"]').length).toBe(0);
+  });
+
+  test('Smart Inventory button should be disabled when no search params are present', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />);
+    });
+    await waitForLoaded(wrapper);
+    expect(
+      wrapper.find('Button[aria-label="Smart Inventory"]').props().isDisabled
+    ).toBe(true);
+  });
+
+  test('Clicking Smart Inventory button should navigate to smart inventory form with correct query param', async () => {
+    let wrapper;
+    const history = createMemoryHistory({
+      initialEntries: ['/hosts?host.name__icontains=foo'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />, {
+        context: { router: { history } },
+      });
+    });
+
+    await waitForLoaded(wrapper);
+    expect(
+      wrapper.find('Button[aria-label="Smart Inventory"]').props().isDisabled
+    ).toBe(false);
+    await act(async () => {
+      wrapper.find('Button[aria-label="Smart Inventory"]').simulate('click');
+    });
+    wrapper.update();
+    expect(history.location.pathname).toEqual(
+      '/inventories/smart_inventory/add'
+    );
+    expect(history.location.search).toEqual(
+      '?host_filter=name__icontains%3Dfoo'
+    );
   });
 });

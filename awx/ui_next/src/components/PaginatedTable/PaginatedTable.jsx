@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { TableComposable, Tbody } from '@patternfly/react-table';
@@ -11,6 +12,7 @@ import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import Pagination from '../Pagination';
 import DataListToolbar from '../DataListToolbar';
+import LoadingSpinner from '../LoadingSpinner';
 
 import {
   encodeNonDefaultQueryString,
@@ -39,8 +41,13 @@ function PaginatedTable({
   const history = useHistory();
 
   const pushHistoryState = params => {
-    const { pathname } = history.location;
-    const encodedParams = encodeNonDefaultQueryString(qsConfig, params);
+    const { pathname, search } = history.location;
+    const nonNamespacedParams = parseQueryString({}, search);
+    const encodedParams = encodeNonDefaultQueryString(
+      qsConfig,
+      params,
+      nonNamespacedParams
+    );
     history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
   };
 
@@ -82,10 +89,13 @@ function PaginatedTable({
     );
   } else {
     Content = (
-      <TableComposable aria-label={dataListLabel}>
-        {headerRow}
-        <Tbody>{items.map(renderRow)}</Tbody>
-      </TableComposable>
+      <div css="overflow: auto">
+        {hasContentLoading && <LoadingSpinner />}
+        <TableComposable aria-label={dataListLabel}>
+          {headerRow}
+          <Tbody>{items.map(renderRow)}</Tbody>
+        </TableComposable>
+      </div>
     );
   }
 

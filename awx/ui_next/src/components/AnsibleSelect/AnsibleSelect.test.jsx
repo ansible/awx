@@ -1,21 +1,22 @@
 import React from 'react';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import AnsibleSelect, { _AnsibleSelect } from './AnsibleSelect';
+import AnsibleSelect from './AnsibleSelect';
 
 const mockData = [
   {
     key: 'baz',
     label: 'Baz',
-    value: '/venv/baz/',
+    value: '/var/lib/awx/venv/baz/',
   },
   {
     key: 'default',
     label: 'Default',
-    value: '/venv/ansible/',
+    value: '/var/lib/awx/venv/ansible/',
   },
 ];
 
 describe('<AnsibleSelect />', () => {
+  const onChange = jest.fn();
   test('initially renders succesfully', async () => {
     mountWithContexts(
       <AnsibleSelect
@@ -29,19 +30,18 @@ describe('<AnsibleSelect />', () => {
   });
 
   test('calls "onSelectChange" on dropdown select change', () => {
-    const spy = jest.spyOn(_AnsibleSelect.prototype, 'onSelectChange');
     const wrapper = mountWithContexts(
       <AnsibleSelect
         id="bar"
         value="foo"
         name="bar"
-        onChange={() => {}}
+        onChange={onChange}
         data={mockData}
       />
     );
-    expect(spy).not.toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
     wrapper.find('select').simulate('change');
-    expect(spy).toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalled();
   });
 
   test('Returns correct select options', () => {

@@ -14,12 +14,11 @@ export default function useRunTypeStep(i18n, askLinkType) {
     initialValues: askLinkType ? { linkType: 'success' } : {},
     isReady: true,
     contentError: null,
-    formError: meta.error,
-    setTouched: setFieldsTouched => {
-      setFieldsTouched({
-        inventory: true,
-      });
+    hasError: !!meta.error,
+    setTouched: setFieldTouched => {
+      setFieldTouched('linkType', true, false);
     },
+    validate: () => {},
   };
 }
 function getStep(askLinkType, meta, i18n) {

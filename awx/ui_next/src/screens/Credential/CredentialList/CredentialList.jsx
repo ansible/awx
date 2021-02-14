@@ -7,10 +7,14 @@ import { CredentialsAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList, {
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import CredentialListItem from './CredentialListItem';
@@ -26,7 +30,13 @@ function CredentialList({ i18n }) {
   const location = useLocation();
 
   const {
-    result: { credentials, credentialCount, actions },
+    result: {
+      credentials,
+      credentialCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchCredentials,
@@ -37,16 +47,29 @@ function CredentialList({ i18n }) {
         CredentialsAPI.read(params),
         CredentialsAPI.readOptions(),
       ]);
+      const searchKeys = Object.keys(
+        credActions.data.actions?.GET || {}
+      ).filter(key => credActions.data.actions?.GET[key].filterable);
+      const item = searchKeys.indexOf('type');
+      if (item) {
+        searchKeys[item] = 'credential_type__kind';
+      }
       return {
         credentials: creds.data.results,
         credentialCount: creds.data.count,
         actions: credActions.data.actions,
+        relatedSearchableKeys: (
+          credActions?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: searchKeys,
       };
     }, [location]),
     {
       credentials: [],
       credentialCount: 0,
       actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -95,13 +118,15 @@ function CredentialList({ i18n }) {
   return (
     <PageSection>
       <Card>
-        <PaginatedDataList
+        <PaginatedTable
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading}
           items={credentials}
           itemCount={credentialCount}
           qsConfig={QS_CONFIG}
           onRowClick={handleSelect}
+          toolbarSearchableKeys={searchableKeys}
+          toolbarRelatedSearchableKeys={relatedSearchableKeys}
           toolbarSearchColumns={[
             {
               name: i18n._(t`Name`),
@@ -121,7 +146,14 @@ function CredentialList({ i18n }) {
               key: 'modified_by__username__icontains',
             },
           ]}
-          renderItem={item => (
+          headerRow={
+            <HeaderRow qsConfig={QS_CONFIG}>
+              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+              <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
+              <HeaderCell alignRight>{i18n._(t`Actions`)}</HeaderCell>
+            </HeaderRow>
+          }
+          renderRow={(item, index) => (
             <CredentialListItem
               key={item.id}
               credential={item}
@@ -129,6 +161,7 @@ function CredentialList({ i18n }) {
               detailUrl={`/credentials/${item.id}/details`}
               isSelected={selected.some(row => row.id === item.id)}
               onSelect={() => handleSelect(item)}
+              rowIndex={index}
             />
           )}
           renderToolbar={props => (

@@ -99,7 +99,7 @@ objects:
                 name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_MAX_CONNECTIONS
             value: ${POSTGRESQL_MAX_CONNECTIONS}
-          image: registry.redhat.io/rhel8/postgresql-10
+          image: registry.redhat.io/rhel8/postgresql-12
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:

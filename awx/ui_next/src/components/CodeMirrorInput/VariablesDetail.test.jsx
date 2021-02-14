@@ -1,13 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { shallow, mount } from 'enzyme';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import VariablesDetail from './VariablesDetail';
 
 jest.mock('../../api');
 
 describe('<VariablesDetail>', () => {
   test('should render readonly CodeMirrorInput', () => {
-    const wrapper = shallow(
+    const wrapper = mountWithContexts(
       <VariablesDetail value="---foo: bar" label="Variables" />
     );
     const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
@@ -18,7 +18,7 @@ describe('<VariablesDetail>', () => {
   });
 
   test('should detect JSON', () => {
-    const wrapper = shallow(
+    const wrapper = mountWithContexts(
       <VariablesDetail value='{"foo": "bar"}' label="Variables" />
     );
     const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
@@ -28,7 +28,7 @@ describe('<VariablesDetail>', () => {
   });
 
   test('should convert between modes', () => {
-    const wrapper = shallow(
+    const wrapper = mountWithContexts(
       <VariablesDetail value="---foo: bar" label="Variables" />
     );
     wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
@@ -43,7 +43,9 @@ describe('<VariablesDetail>', () => {
   });
 
   test('should render label and value= --- when there are no values', () => {
-    const wrapper = shallow(<VariablesDetail value="" label="Variables" />);
+    const wrapper = mountWithContexts(
+      <VariablesDetail value="" label="Variables" />
+    );
     expect(wrapper.find('VariablesDetail___StyledCodeMirrorInput').length).toBe(
       1
     );
@@ -51,7 +53,7 @@ describe('<VariablesDetail>', () => {
   });
 
   test('should update value if prop changes', () => {
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <VariablesDetail value="---foo: bar" label="Variables" />
     );
     act(() => {
@@ -67,13 +69,17 @@ describe('<VariablesDetail>', () => {
   });
 
   test('should default yaml value to "---"', () => {
-    const wrapper = shallow(<VariablesDetail value="" label="Variables" />);
+    const wrapper = mountWithContexts(
+      <VariablesDetail value="" label="Variables" />
+    );
     const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
     expect(input.prop('value')).toEqual('---');
   });
 
   test('should default empty json to "{}"', () => {
-    const wrapper = mount(<VariablesDetail value="" label="Variables" />);
+    const wrapper = mountWithContexts(
+      <VariablesDetail value="" label="Variables" />
+    );
     act(() => {
       wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
     });

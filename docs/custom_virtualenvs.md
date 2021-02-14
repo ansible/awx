@@ -21,6 +21,9 @@ using `/opt/my-envs/` as the directory to hold custom venvs. But you can use any
 other directory and replace `/opt/my-envs/` with that. Let's create the directory
 first if absent:
 
+    NOTE: For docker installations, this directory needs to exist on awx_web AND 
+    awx_task container
+
     $ sudo mkdir /opt/my-envs
 
 Now, we need to tell Tower to look into this directory for custom venvs. For that,

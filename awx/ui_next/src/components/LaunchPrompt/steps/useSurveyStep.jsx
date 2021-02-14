@@ -13,89 +13,51 @@ export default function useSurveyStep(
   i18n,
   visitedSteps
 ) {
-  const { values } = useFormikContext();
-  const errors = {};
-  const validate = () => {
-    if (!launchConfig.survey_enabled || !surveyConfig?.spec) {
-      return {};
-    }
-    surveyConfig.spec.forEach(question => {
-      const errMessage = validateField(
-        question,
-        values[`survey_${question.variable}`],
-        i18n
-      );
-      if (errMessage) {
-        errors[`survey_${question.variable}`] = errMessage;
-      }
-    });
-    return errors;
-  };
-  const formError = Object.keys(validate()).length > 0;
+  const { setFieldError, values } = useFormikContext();
+  const hasError =
+    Object.keys(visitedSteps).includes(STEP_ID) &&
+    checkForError(launchConfig, surveyConfig, values);
+
   return {
-    step: getStep(launchConfig, surveyConfig, validate, i18n, visitedSteps),
+    step: launchConfig.survey_enabled
+      ? {
+          id: STEP_ID,
+          name: (
+            <StepName hasErrors={hasError} id="survey-step">
+              {i18n._(t`Survey`)}
+            </StepName>
+          ),
+          component: <SurveyStep surveyConfig={surveyConfig} i18n={i18n} />,
+          enableNext: true,
+        }
+      : null,
     initialValues: getInitialValues(launchConfig, surveyConfig, resource),
-    validate,
     surveyConfig,
     isReady: true,
     contentError: null,
-    formError,
-    setTouched: setFieldsTouched => {
+    hasError,
+    setTouched: setFieldTouched => {
       if (!surveyConfig?.spec) {
         return;
       }
-      const fields = {};
       surveyConfig.spec.forEach(question => {
-        fields[`survey_${question.variable}`] = true;
+        setFieldTouched(`survey_${question.variable}`, true, false);
       });
-      setFieldsTouched(fields);
     },
-  };
-}
-
-function validateField(question, value, i18n) {
-  const isTextField = ['text', 'textarea'].includes(question.type);
-  const isNumeric = ['integer', 'float'].includes(question.type);
-  if (isTextField && (value || value === 0)) {
-    if (question.min && value.length < question.min) {
-      return i18n._(t`This field must be at least ${question.min} characters`);
-    }
-    if (question.max && value.length > question.max) {
-      return i18n._(t`This field must not exceed ${question.max} characters`);
-    }
-  }
-  if (isNumeric && (value || value === 0)) {
-    if (value < question.min || value > question.max) {
-      return i18n._(
-        t`This field must be a number and have a value between ${question.min} and ${question.max}`
-      );
-    }
-  }
-  if (question.required && !value && value !== 0) {
-    return i18n._(t`This field must not be blank`);
-  }
-  return null;
-}
-function getStep(launchConfig, surveyConfig, validate, i18n, visitedSteps) {
-  if (!launchConfig.survey_enabled) {
-    return null;
-  }
-
-  return {
-    id: STEP_ID,
-    name: (
-      <StepName
-        hasErrors={
-          Object.keys(visitedSteps).includes(STEP_ID) &&
-          Object.keys(validate()).length
-        }
-        id="survey-step"
-      >
-        {i18n._(t`Survey`)}
-      </StepName>
-    ),
-    component: <SurveyStep surveyConfig={surveyConfig} i18n={i18n} />,
-    enableNext: true,
+    validate: () => {
+      if (launchConfig.survey_enabled && surveyConfig.spec) {
+        surveyConfig.spec.forEach(question => {
+          const errMessage = validateSurveyField(
+            question,
+            values[`survey_${question.variable}`],
+            i18n
+          );
+          if (errMessage) {
+            setFieldError(`survey_${question.variable}`, errMessage);
+          }
+        });
+      }
+    },
   };
 }
 
@@ -132,4 +94,57 @@ function getInitialValues(launchConfig, surveyConfig, resource) {
   }
 
   return values;
+}
+
+function validateSurveyField(question, value, i18n) {
+  const isTextField = ['text', 'textarea'].includes(question.type);
+  const isNumeric = ['integer', 'float'].includes(question.type);
+  if (isTextField && (value || value === 0)) {
+    if (question.min && value.length < question.min) {
+      return i18n._(t`This field must be at least ${question.min} characters`);
+    }
+    if (question.max && value.length > question.max) {
+      return i18n._(t`This field must not exceed ${question.max} characters`);
+    }
+  }
+  if (isNumeric && (value || value === 0)) {
+    if (value < question.min || value > question.max) {
+      return i18n._(
+        t`This field must be a number and have a value between ${question.min} and ${question.max}`
+      );
+    }
+  }
+  if (question.required && !value && value !== 0) {
+    return i18n._(t`This field must not be blank`);
+  }
+  return null;
+}
+
+function checkForError(launchConfig, surveyConfig, values) {
+  let hasError = false;
+  if (launchConfig.survey_enabled && surveyConfig.spec) {
+    surveyConfig.spec.forEach(question => {
+      const value = values[`survey_${question.variable}`];
+      const isTextField = ['text', 'textarea'].includes(question.type);
+      const isNumeric = ['integer', 'float'].includes(question.type);
+      if (isTextField && (value || value === 0)) {
+        if (
+          (question.min && value.length < question.min) ||
+          (question.max && value.length > question.max)
+        ) {
+          hasError = true;
+        }
+      }
+      if (isNumeric && (value || value === 0)) {
+        if (value < question.min || value > question.max) {
+          hasError = true;
+        }
+      }
+      if (question.required && !value && value !== 0) {
+        hasError = true;
+      }
+    });
+  }
+
+  return hasError;
 }

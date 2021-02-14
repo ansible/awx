@@ -1,97 +1,72 @@
 import 'styled-components/macro';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Tooltip,
-} from '@patternfly/react-core';
-
-import styled from 'styled-components';
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import DataListCell from '../../../components/DataListCell';
-
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { Team } from '../../../types';
 
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: 40px;
-`;
-
-class TeamListItem extends React.Component {
-  static propTypes = {
+function TeamListItem({
+  team,
+  isSelected,
+  onSelect,
+  detailUrl,
+  rowIndex,
+  i18n,
+}) {
+  TeamListItem.propTypes = {
     team: Team.isRequired,
     detailUrl: string.isRequired,
     isSelected: bool.isRequired,
     onSelect: func.isRequired,
   };
 
-  render() {
-    const { team, isSelected, onSelect, detailUrl, i18n } = this.props;
-    const labelId = `check-action-${team.id}`;
+  const labelId = `check-action-${team.id}`;
 
-    return (
-      <DataListItem key={team.id} aria-labelledby={labelId} id={`${team.id}`}>
-        <DataListItemRow>
-          <DataListCheck
-            id={`select-team-${team.id}`}
-            checked={isSelected}
-            onChange={onSelect}
-            aria-labelledby={labelId}
-          />
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell key="name">
-                <Link id={labelId} to={`${detailUrl}`}>
-                  <b>{team.name}</b>
-                </Link>
-              </DataListCell>,
-              <DataListCell key="organization">
-                {team.summary_fields.organization && (
-                  <Fragment>
-                    <b>{i18n._(t`Organization`)}</b>{' '}
-                    <Link
-                      to={`/organizations/${team.summary_fields.organization.id}/details`}
-                    >
-                      <b>{team.summary_fields.organization.name}</b>
-                    </Link>
-                  </Fragment>
-                )}
-              </DataListCell>,
-            ]}
-          />
-          <DataListAction
-            aria-label="actions"
-            aria-labelledby={labelId}
-            id={labelId}
+  return (
+    <Tr id={`team-row-${team.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+        dataLabel={i18n._(t`Selected`)}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <Link id={labelId} to={`${detailUrl}`}>
+          <b>{team.name}</b>
+        </Link>
+      </Td>
+      <Td dataLabel={i18n._(t`Organization`)}>
+        {team.summary_fields.organization && (
+          <Link
+            to={`/organizations/${team.summary_fields.organization.id}/details`}
           >
-            {team.summary_fields.user_capabilities.edit ? (
-              <Tooltip content={i18n._(t`Edit Team`)} position="top">
-                <Button
-                  aria-label={i18n._(t`Edit Team`)}
-                  variant="plain"
-                  component={Link}
-                  to={`/teams/${team.id}/edit`}
-                >
-                  <PencilAltIcon />
-                </Button>
-              </Tooltip>
-            ) : (
-              ''
-            )}
-          </DataListAction>
-        </DataListItemRow>
-      </DataListItem>
-    );
-  }
+            <b>{team.summary_fields.organization.name}</b>
+          </Link>
+        )}
+      </Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionItem
+          visible={team.summary_fields.user_capabilities.edit}
+          tooltip={i18n._(t`Edit Team`)}
+        >
+          <Button
+            aria-label={i18n._(t`Edit Team`)}
+            variant="plain"
+            component={Link}
+            to={`/teams/${team.id}/edit`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
+  );
 }
 export default withI18n()(TeamListItem);

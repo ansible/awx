@@ -12,20 +12,27 @@ export default function useInventoryStep(
   i18n,
   visitedSteps
 ) {
-  const [, meta] = useField('inventory');
+  const [, meta, helpers] = useField('inventory');
   const formError =
-    Object.keys(visitedSteps).includes(STEP_ID) && (!meta.value || meta.error);
+    !resource || resource?.type === 'workflow_job_template'
+      ? false
+      : Object.keys(visitedSteps).includes(STEP_ID) &&
+        meta.touched &&
+        !meta.value;
 
   return {
     step: getStep(launchConfig, i18n, formError),
     initialValues: getInitialValues(launchConfig, resource),
     isReady: true,
     contentError: null,
-    formError: launchConfig.ask_inventory_on_launch && formError,
-    setTouched: setFieldsTouched => {
-      setFieldsTouched({
-        inventory: true,
-      });
+    hasError: launchConfig.ask_inventory_on_launch && formError,
+    setTouched: setFieldTouched => {
+      setFieldTouched('inventory', true, false);
+    },
+    validate: () => {
+      if (meta.touched && !meta.value && resource.type === 'job_template') {
+        helpers.setError(i18n._(t`An inventory must be selected`));
+      }
     },
   };
 }
