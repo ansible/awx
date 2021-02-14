@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { number, shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -32,40 +32,12 @@ function canLaunchWithoutPrompt(launchData) {
   );
 }
 
-class LaunchButton extends React.Component {
-  static propTypes = {
-    resource: shape({
-      id: number.isRequired,
-    }).isRequired,
-  };
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      showLaunchPrompt: false,
-      launchConfig: null,
-      launchError: false,
-      surveyConfig: null,
-    };
-
-    this.handleLaunch = this.handleLaunch.bind(this);
-    this.launchWithParams = this.launchWithParams.bind(this);
-    this.handleRelaunch = this.handleRelaunch.bind(this);
-    this.handleLaunchErrorClose = this.handleLaunchErrorClose.bind(this);
-    this.handlePromptErrorClose = this.handlePromptErrorClose.bind(this);
-  }
-
-  handleLaunchErrorClose() {
-    this.setState({ launchError: null });
-  }
-
-  handlePromptErrorClose() {
-    this.setState({ showLaunchPrompt: false });
-  }
-
-  async handleLaunch() {
-    const { resource } = this.props;
+function LaunchButton({ resource, i18n, children, history }) {
+  const [showLaunchPrompt, setShowLaunchPrompt] = useState(false);
+  const [launchConfig, setLaunchConfig] = useState(null);
+  const [surveyConfig, setSurveyConfig] = useState(null);
+  const [error, setError] = useState(null);
+  const handleLaunch = async () => {
     const readLaunch =
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.readLaunch(resource.id)
@@ -75,33 +47,27 @@ class LaunchButton extends React.Component {
         ? WorkflowJobTemplatesAPI.readSurvey(resource.id)
         : JobTemplatesAPI.readSurvey(resource.id);
     try {
-      const { data: launchConfig } = await readLaunch;
+      const { data: launch } = await readLaunch;
+      setLaunchConfig(launch);
 
-      let surveyConfig = null;
-
-      if (launchConfig.survey_enabled) {
+      if (launch.survey_enabled) {
         const { data } = await readSurvey;
 
-        surveyConfig = data;
+        setSurveyConfig(data);
       }
 
-      if (canLaunchWithoutPrompt(launchConfig)) {
-        this.launchWithParams({});
+      if (canLaunchWithoutPrompt(launch)) {
+        launchWithParams({});
       } else {
-        this.setState({
-          showLaunchPrompt: true,
-          launchConfig,
-          surveyConfig,
-        });
+        setShowLaunchPrompt(true);
       }
     } catch (err) {
-      this.setState({ launchError: err });
+      setError(err);
     }
-  }
+  };
 
-  async launchWithParams(params) {
+  const launchWithParams = async params => {
     try {
-      const { history, resource } = this.props;
       let jobPromise;
 
       if (resource.type === 'job_template') {
@@ -117,13 +83,11 @@ class LaunchButton extends React.Component {
       const { data: job } = await jobPromise;
       history.push(`/jobs/${job.id}/output`);
     } catch (launchError) {
-      this.setState({ launchError });
+      setError(launchError);
     }
-  }
+  };
 
-  async handleRelaunch() {
-    const { history, resource } = this.props;
-
+  const handleRelaunch = async () => {
     let readRelaunch;
     let relaunch;
 
@@ -145,6 +109,7 @@ class LaunchButton extends React.Component {
 
     try {
       const { data: relaunchConfig } = await readRelaunch;
+      setLaunchConfig(relaunchConfig);
       if (
         !relaunchConfig.passwords_needed_to_start ||
         relaunchConfig.passwords_needed_to_start.length === 0
@@ -165,53 +130,47 @@ class LaunchButton extends React.Component {
         const { data: job } = await relaunch;
         history.push(`/jobs/${job.id}/output`);
       } else {
-        this.setState({
-          showLaunchPrompt: true,
-          launchConfig: relaunchConfig,
-        });
+        setShowLaunchPrompt(true);
       }
     } catch (err) {
-      this.setState({ launchError: err });
+      setError(err);
     }
-  }
+  };
 
-  render() {
-    const {
-      launchError,
-      showLaunchPrompt,
-      launchConfig,
-      surveyConfig,
-    } = this.state;
-    const { resource, i18n, children } = this.props;
-    return (
-      <Fragment>
-        {children({
-          handleLaunch: this.handleLaunch,
-          handleRelaunch: this.handleRelaunch,
-        })}
-        {launchError && (
-          <AlertModal
-            isOpen={launchError}
-            variant="error"
-            title={i18n._(t`Error!`)}
-            onClose={this.handleLaunchErrorClose}
-          >
-            {i18n._(t`Failed to launch job.`)}
-            <ErrorDetail error={launchError} />
-          </AlertModal>
-        )}
-        {showLaunchPrompt && (
-          <LaunchPrompt
-            launchConfig={launchConfig}
-            surveyConfig={surveyConfig}
-            resource={resource}
-            onLaunch={this.launchWithParams}
-            onCancel={() => this.setState({ showLaunchPrompt: false })}
-          />
-        )}
-      </Fragment>
-    );
-  }
+  return (
+    <Fragment>
+      {children({
+        handleLaunch,
+        handleRelaunch,
+      })}
+      {error && (
+        <AlertModal
+          isOpen={error}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={() => setError(null)}
+        >
+          {i18n._(t`Failed to launch job.`)}
+          <ErrorDetail error={error} />
+        </AlertModal>
+      )}
+      {showLaunchPrompt && (
+        <LaunchPrompt
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
+          resource={resource}
+          onLaunch={launchWithParams}
+          onCancel={() => setShowLaunchPrompt(false)}
+        />
+      )}
+    </Fragment>
+  );
 }
+
+LaunchButton.propTypes = {
+  resource: shape({
+    id: number.isRequired,
+  }).isRequired,
+};
 
 export default withI18n()(withRouter(LaunchButton));

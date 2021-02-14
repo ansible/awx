@@ -3,26 +3,41 @@ import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func, object, shape } from 'prop-types';
-import { ActionGroup, Button, Form, FormGroup } from '@patternfly/react-core';
+import {
+  ActionGroup,
+  Button,
+  Form,
+  FormGroup,
+  Select as PFSelect,
+  SelectOption as PFSelectOption,
+  SelectVariant,
+} from '@patternfly/react-core';
+import styled from 'styled-components';
 import FormField, { FormSubmitError } from '../../../components/FormField';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
 } from '../../../components/FormLayout';
-import AnsibleSelect from '../../../components/AnsibleSelect';
 import { required } from '../../../util/validators';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import TypeInputsSubForm from './TypeInputsSubForm';
 import ExternalTestModal from './ExternalTestModal';
 
-function CredentialFormFields({
-  i18n,
-  credentialTypes,
-  formik,
-  initialValues,
-}) {
-  const { setFieldValue } = useFormikContext();
+const Select = styled(PFSelect)`
+  ul {
+    max-width: 495px;
+  }
+`;
 
+const SelectOption = styled(PFSelectOption)`
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
+
+function CredentialFormFields({ i18n, credentialTypes }) {
+  const { setFieldValue, initialValues, setFieldTouched } = useFormikContext();
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
     name: 'credential_type',
     validate: required(i18n._(t`Select a value for this field`), i18n),
@@ -30,7 +45,7 @@ function CredentialFormFields({
 
   const isGalaxyCredential =
     !!credTypeField.value &&
-    credentialTypes[credTypeField.value].kind === 'galaxy';
+    credentialTypes[credTypeField.value]?.kind === 'galaxy';
 
   const [orgField, orgMeta, orgHelpers] = useField({
     name: 'organization',
@@ -52,16 +67,14 @@ function CredentialFormFields({
     })
     .sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
 
-  const resetSubFormFields = (newCredentialType, form) => {
+  const resetSubFormFields = newCredentialType => {
     const fields = credentialTypes[newCredentialType].inputs.fields || [];
     fields.forEach(
       ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
-        if (
-          parseInt(newCredentialType, 10) === form.initialValues.credential_type
-        ) {
-          form.setFieldValue(`inputs.${id}`, initialValues.inputs[id]);
+        if (parseInt(newCredentialType, 10) === initialValues.credential_type) {
+          setFieldValue(`inputs.${id}`, initialValues.inputs[id]);
           if (ask_at_runtime) {
-            form.setFieldValue(
+            setFieldValue(
               `passwordPrompts.${id}`,
               initialValues.passwordPrompts[id]
             );
@@ -69,24 +82,24 @@ function CredentialFormFields({
         } else {
           switch (type) {
             case 'string':
-              form.setFieldValue(`inputs.${id}`, defaultValue || '');
+              setFieldValue(`inputs.${id}`, defaultValue || '');
               break;
             case 'boolean':
-              form.setFieldValue(`inputs.${id}`, defaultValue || false);
+              setFieldValue(`inputs.${id}`, defaultValue || false);
               break;
             default:
               break;
           }
 
           if (choices) {
-            form.setFieldValue(`inputs.${id}`, defaultValue);
+            setFieldValue(`inputs.${id}`, defaultValue);
           }
 
           if (ask_at_runtime) {
-            form.setFieldValue(`passwordPrompts.${id}`, false);
+            setFieldValue(`passwordPrompts.${id}`, false);
           }
         }
-        form.setFieldTouched(`inputs.${id}`, false);
+        setFieldTouched(`inputs.${id}`, false);
       }
     );
   };
@@ -133,23 +146,29 @@ function CredentialFormFields({
         }
         label={i18n._(t`Credential Type`)}
       >
-        <AnsibleSelect
-          {...credTypeField}
-          id="credential-type"
-          data={[
-            {
-              value: '',
-              key: '',
-              label: i18n._(t`Choose a Credential Type`),
-              isDisabled: true,
-            },
-            ...credentialTypeOptions,
-          ]}
-          onChange={(event, value) => {
+        <Select
+          aria-label={i18n._(t`Credential Type`)}
+          isOpen={isSelectOpen}
+          variant={SelectVariant.typeahead}
+          ouiaId="credential-select"
+          onToggle={setIsSelectOpen}
+          onSelect={(event, value) => {
             credTypeHelpers.setValue(value);
-            resetSubFormFields(value, formik);
+            resetSubFormFields(value);
+            setIsSelectOpen(false);
           }}
-        />
+          selections={credTypeField.value}
+          placeholder={i18n._(t`Select a credential Type`)}
+          isCreatable={false}
+          maxHeight="300px"
+          width="100%"
+        >
+          {credentialTypeOptions.map(credType => (
+            <SelectOption key={credType.value} value={credType.value}>
+              {credType.label}
+            </SelectOption>
+          ))}
+        </Select>
       </FormGroup>
       {credTypeField.value !== undefined &&
         credTypeField.value !== '' &&
@@ -177,7 +196,7 @@ function CredentialForm({
     name: credential.name || '',
     description: credential.description || '',
     organization: credential?.summary_fields?.organization || null,
-    credential_type: credential.credential_type || '',
+    credential_type: credential?.credential_type || '',
     inputs: {},
     passwordPrompts: {},
   };
@@ -235,8 +254,6 @@ function CredentialForm({
           <Form autoComplete="off" onSubmit={formik.handleSubmit}>
             <FormColumnLayout>
               <CredentialFormFields
-                formik={formik}
-                initialValues={initialValues}
                 credentialTypes={credentialTypes}
                 i18n={i18n}
                 {...rest}

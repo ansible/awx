@@ -123,6 +123,7 @@ function Lookup(props) {
           </ChipGroup>
         </ChipHolder>
       </InputGroup>
+
       <Modal
         variant="large"
         title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
@@ -138,7 +139,12 @@ function Lookup(props) {
           >
             {i18n._(t`Select`)}
           </Button>,
-          <Button key="cancel" variant="link" onClick={closeModal}>
+          <Button
+            key="cancel"
+            variant="link"
+            onClick={closeModal}
+            aria-label={i18n._(t`Cancel lookup`)}
+          >
             {i18n._(t`Cancel`)}
           </Button>,
         ]}

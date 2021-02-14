@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 import { CardBody } from '../../../components/Card';
@@ -14,9 +14,6 @@ import CredentialForm from '../shared/CredentialForm';
 import useRequest from '../../../util/useRequest';
 
 function CredentialAdd({ me }) {
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [credentialTypes, setCredentialTypes] = useState(null);
   const history = useHistory();
 
   const {
@@ -85,34 +82,38 @@ function CredentialAdd({ me }) {
       history.push(`/credentials/${credentialId}/details`);
     }
   }, [credentialId, history]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
+  const { isLoading, error, request: loadData, result } = useRequest(
+    useCallback(async () => {
+      const { data } = await CredentialTypesAPI.read({ page_size: 200 });
+      const credTypes = data.results;
+      if (data.next && data.next.includes('page=2')) {
         const {
-          data: { results: loadedCredentialTypes },
-        } = await CredentialTypesAPI.read();
-        setCredentialTypes(
-          loadedCredentialTypes.reduce((credentialTypesMap, credentialType) => {
-            credentialTypesMap[credentialType.id] = credentialType;
-            return credentialTypesMap;
-          }, {})
-        );
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
+          data: { results },
+        } = await CredentialTypesAPI.read({
+          page_size: 200,
+          page: 2,
+        });
+        credTypes.concat(results);
       }
-    };
+
+      const creds = credTypes.reduce((credentialTypesMap, credentialType) => {
+        credentialTypesMap[credentialType.id] = credentialType;
+        return credentialTypesMap;
+      }, {});
+      return creds;
+    }, []),
+    {}
+  );
+  useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleCancel = () => {
     history.push('/credentials');
   };
 
   const handleSubmit = async values => {
-    await submitRequest(values, credentialTypes);
+    await submitRequest(values, result);
   };
 
   if (error) {
@@ -126,7 +127,7 @@ function CredentialAdd({ me }) {
       </PageSection>
     );
   }
-  if (isLoading) {
+  if (isLoading && !result) {
     return (
       <PageSection>
         <Card>
@@ -144,7 +145,7 @@ function CredentialAdd({ me }) {
           <CredentialForm
             onCancel={handleCancel}
             onSubmit={handleSubmit}
-            credentialTypes={credentialTypes}
+            credentialTypes={result}
             submitError={submitError}
           />
         </CardBody>

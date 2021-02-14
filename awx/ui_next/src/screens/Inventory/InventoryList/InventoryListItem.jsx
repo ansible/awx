@@ -55,6 +55,19 @@ function InventoryListItem({
       inventory.inventory_sources_with_failures > 0 ? 'error' : 'success';
   }
 
+  let tooltipContent = '';
+  if (inventory.has_inventory_sources) {
+    if (inventory.inventory_sources_with_failures > 0) {
+      tooltipContent = i18n._(
+        t`${inventory.inventory_sources_with_failures} sources with sync failures.`
+      );
+    } else {
+      tooltipContent = i18n._(t`No inventory sync failures.`);
+    }
+  } else {
+    tooltipContent = i18n._(t`Not configured for inventory sync.`);
+  }
+
   return (
     <Tr id={inventory.id} aria-labelledby={labelId}>
       <Td
@@ -75,7 +88,9 @@ function InventoryListItem({
         )}
       </Td>
       <Td dataLabel={i18n._(t`Status`)}>
-        {inventory.kind !== 'smart' && <StatusLabel status={syncStatus} />}
+        {inventory.kind !== 'smart' && (
+          <StatusLabel status={syncStatus} tooltipContent={tooltipContent} />
+        )}
       </Td>
       <Td dataLabel={i18n._(t`Type`)}>
         {inventory.kind === 'smart'

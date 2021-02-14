@@ -77,6 +77,18 @@ describe('<JobDetail />', () => {
       mockJobData.summary_fields.credentials[0]
     );
 
+    expect(
+      wrapper
+        .find('Detail[label="Job Tags"]')
+        .containsAnyMatchingElements([<span>a</span>, <span>b</span>])
+    ).toEqual(true);
+
+    expect(
+      wrapper
+        .find('Detail[label="Skip Tags"]')
+        .containsAnyMatchingElements([<span>c</span>, <span>d</span>])
+    ).toEqual(true);
+
     const statusDetail = wrapper.find('Detail[label="Status"]');
     expect(statusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(1);
     expect(statusDetail.find('StatusIcon SuccessfulBottom')).toHaveLength(1);
