@@ -24,6 +24,7 @@ no_module_for_endpoint = []
 
 # Some modules work on the related fields of an endpoint. These modules will not have an auto-associated endpoint
 no_endpoint_for_module = [
+<<<<<<< HEAD
     'tower_import',
     'tower_meta',
     'tower_export',
@@ -40,6 +41,12 @@ no_endpoint_for_module = [
     'tower_workflow_template',
     'tower_ad_hoc_command_wait',
     'tower_ad_hoc_command_cancel',
+=======
+    'tower_import', 'tower_meta', 'tower_export', 'tower_inventory_source_update', 'tower_job_launch', 'tower_job_wait',
+    'tower_job_list', 'tower_license', 'tower_ping', 'tower_receive', 'tower_send', 'tower_workflow_launch',
+    'tower_job_cancel', 'tower_workflow_template', 'tower_workflow_job_template_schema', 
+    'tower_ad_hoc_command_wait', 'tower_ad_hoc_command_cancel',
+>>>>>>> 08e5694d7c (fix completeness parameters)
 ]
 
 # Global module parameters we can ignore
