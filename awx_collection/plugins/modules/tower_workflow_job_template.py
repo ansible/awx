@@ -220,7 +220,7 @@ options:
                   description:
                     - The organization of the job template or project sync the node exists in.
                     - Used for looking up the job template or project sync, not a direct model field.
-                  type:str
+                  type: str
             inventory:
               description:
                 - Name of key for use in model for organizational reference
@@ -236,7 +236,7 @@ options:
                       description:
                         - The organization of the inventory the node exists in.
                         - Used for looking up the job template or project, not a direct model field.
-                      type:str
+                      type: str
         related:
           description:
             - Related items to this workflow node.
