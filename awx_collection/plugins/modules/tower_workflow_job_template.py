@@ -147,7 +147,7 @@ EXAMPLES = '''
 from ..module_utils.tower_api import TowerAPIModule
 
 import json
-
+response = []
 
 def update_survey(module, last_request):
     spec_endpoint = last_request.get('related', {}).get('survey_spec')
@@ -160,7 +160,6 @@ def update_survey(module, last_request):
         response = module.post_endpoint(spec_endpoint, **{'data': module.params.get('survey_spec')})
         if response['status_code'] != 200:
             module.fail_json(msg="Failed to update survey: {0}".format(response['json']['error']))
-    module.exit_json(**module.json_output)
 
 
 def main():
@@ -188,6 +187,8 @@ def main():
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
         notification_templates_approvals=dict(type="list", elements='str'),
+        schema=dict(type='list', elements='dict'),
+        destroy_current_schema=dict(type='bool', default=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -198,6 +199,12 @@ def main():
     name = module.params.get('name')
     new_name = module.params.get("new_name")
     state = module.params.get('state')
+
+    # Extract schema parameters
+    schema = None
+    if module.params.get('schema'):
+        schema = module.params.get('schema')
+    destroy_current_schema = module.params.get('destroy_current_schema')
 
     new_fields = {}
     search_fields = {}
@@ -293,9 +300,24 @@ def main():
         existing_item, new_fields,
         endpoint='workflow_job_templates', item_type='workflow_job_template',
         associations=association_fields,
-        on_create=on_change, on_update=on_change
+        on_create=on_change, on_update=on_change, auto_exit=False,
     )
 
+    # Get Workflow information in case one was just created.
+    existing_item = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})
+    # Destroy current nodes if selected.
+    if destroy_current_schema:
+        module.destroy_schema_nodes(response, existing_item['id'])
+
+    # Work thorugh and lookup value for schema fields
+    if schema:
+        # Create Schema Nodes
+        module.create_schema_nodes(response, schema, existing_item['id'])
+        # Create Schema Associations
+        module.create_schema_nodes_association(response, schema, existing_item['id'])
+        module.json_output['schema_creation_data'] = response
+    
+    module.exit_json(**module.json_output)
 
 if __name__ == '__main__':
     main()
