@@ -21,7 +21,7 @@ short_description: create, update, or destroy Ansible Tower workflow job templat
 description:
     - Create, update, or destroy Ansible Tower workflow job templates.
     - Replaces the deprecated tower_workflow_template module.
-    - Use the tower_workflow_job_template_node after this to build the workflow's graph.
+    - Use the tower_workflow_job_template_node after this, or use the schema paramater to build the workflow's graph
 options:
     name:
       description:
@@ -133,6 +133,164 @@ options:
         - list of notifications to send on start
       type: list
       elements: str
+    schema:
+      description:
+        - A json list of nodes and their coresponding options. The following suboptions describe a single node.
+      type: list
+      suboptions:
+        extra_data:
+          description:
+            - Variables to apply at launch time.
+            - Will only be accepted if job template prompts for vars or has a survey asking for those vars.
+          type: dict
+          default: {}
+        inventory:
+          description:
+            - Inventory applied as a prompt, if job template prompts for inventory
+          type: str
+        scm_branch:
+          description:
+            - SCM branch applied as a prompt, if job template prompts for SCM branch
+          type: str
+        job_type:
+          description:
+            - Job type applied as a prompt, if job template prompts for job type
+          type: str
+          choices:
+            - 'run'
+            - 'check'
+        job_tags:
+          description:
+            - Job tags applied as a prompt, if job template prompts for job tags
+          type: str
+        skip_tags:
+          description:
+            - Tags to skip, applied as a prompt, if job tempalte prompts for job tags
+          type: str
+        limit:
+          description:
+            - Limit to act on, applied as a prompt, if job template prompts for limit
+          type: str
+        diff_mode:
+          description:
+            - Run diff mode, applied as a prompt, if job template prompts for diff mode
+          type: bool
+        verbosity:
+          description:
+            - Verbosity applied as a prompt, if job template prompts for verbosity
+          type: str
+          choices:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+            - '4'
+            - '5'
+        all_parents_must_converge:
+          description:
+            - If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node
+          type: bool
+        identifier:
+          description:
+            - An identifier for this node that is unique within its workflow.
+            - It is copied to workflow job nodes corresponding to this node.
+          required: True
+          type: str
+        state:
+          description:
+            - Desired state of the resource.
+          choices: ["present", "absent"]
+          default: "present"
+          type: str
+
+        unified_job_template:
+          description:
+            - Name of unified job template to run in the workflow.
+            - Can be a job template, project sync, inventory source sync, etc.
+            - Omit if creating an approval node (not yet implemented).
+          type: dict
+          suboptions:
+            organization:
+              description:
+                - Name of key for use in model for organizational reference
+                - Only Valid and used if referencing a job template or project sync
+              type: dict
+              suboptions:
+                name:
+                  description:
+                    - The organization of the job template or project sync the node exists in.
+                    - Used for looking up the job template or project sync, not a direct model field.
+                  type:str
+            inventory:
+              description:
+                - Name of key for use in model for organizational reference
+                - Only Valid and used if referencing an inventory sync
+              type: dict
+              suboptions:
+                organization:
+                  description:
+                    - Name of key for use in model for organizational reference
+                  type: dict
+                  suboptions:
+                    name:
+                      description:
+                        - The organization of the inventory the node exists in.
+                        - Used for looking up the job template or project, not a direct model field.
+                      type:str
+        related:
+          description:
+            - Related items to this workflow node.
+            - Must include credentials, failure_nodes, always_nodes, success_nodes, even if empty.
+          type: dict
+          suboptions:
+            always_nodes:
+              description:
+                - Nodes that will run after this node completes.
+                - List of node identifiers.
+              type: list
+              suboptions:
+                identifier:
+                description:
+                  - Identifier of Node that will run after this node completes given this option.
+                elements: str
+            success_nodes:
+              description:
+                - Nodes that will run after this node on success.
+                - List of node identifiers.
+              type: list
+              suboptions:
+                identifier:
+                description:
+                  - Identifier of Node that will run after this node completes given this option.
+                elements: str
+            failure_nodes:
+              description:
+                - Nodes that will run after this node on failure.
+                - List of node identifiers.
+              type: list
+              suboptions:
+                identifier:
+                description:
+                  - Identifier of Node that will run after this node completes given this option.
+                elements: str
+            credentials:
+              description:
+                - Credentials to be applied to job as launch-time prompts.
+                - List of credential names.
+                - Uniqueness is not handled rigorously.
+              type: list
+              suboptions:
+                name:
+                description:
+                  - Name Credentials to be applied to job as launch-time prompts.
+                elements: str
+    destroy_current_schema:
+      description:
+        - Set in order to destroy current schema on the workflow.
+        - This option is used for full schema update, if not used, nodes not described in schema will persist and keep current associations and links.
+      type: Bool
+      default: False
+
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -142,6 +300,60 @@ EXAMPLES = '''
     name: example-workflow
     description: created by Ansible Playbook
     organization: Default
+
+- name: Create a workflow job template with schema in template
+  awx.awx.tower_workflow_job_template:
+    name: example-workflow
+    inventory: Demo Inventory
+    extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
+    schema:
+      - identifier: node101
+        unified_job_template:
+          name: example-project
+          inventory:
+            organization:
+              name: Default
+        related:
+          success_nodes: []
+          failure_nodes:
+            - identifier: node201
+          always_nodes: []
+          credentials: []
+      - identifier: node201
+        unified_job_template:
+          organization:
+            name: Default
+          name: job template 1
+        credentials: []
+        related:
+          success_nodes:
+            - identifier: node301
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+      - identifier: node202
+        unified_job_template:
+          organization:
+            name: Default
+          name: example-project
+        related:
+          success_nodes: []
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+      - all_parents_must_converge: false
+        identifier: node301
+        unified_job_template:
+          organization:
+            name: Default
+          name: job template 2
+        related:
+          success_nodes: []
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+  register: result
+
 '''
 
 from ..module_utils.tower_api import TowerAPIModule
