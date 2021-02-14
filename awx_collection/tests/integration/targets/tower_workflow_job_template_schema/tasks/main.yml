@@ -5,13 +5,13 @@
 
 - name: Generate random names for test objects
   set_fact:
-    scm_cred_name: "AWX-Collection-tests-tower_workflow_job_template_schema-scm-cred" # -{{ test_id }}"
-    demo_project_name: "AWX-Collection-tests-tower_workflow_job_template_schema-proj" # -{{ test_id }}"
-    jt1_name: "AWX-Collection-tests-tower_workflow_job_template_schema-jt1" # -{{ test_id }}"
-    jt2_name: "AWX-Collection-tests-tower_workflow_job_template_schema-jt2" # -{{ test_id }}"
-    wfjt_name: "AWX-Collection-tests-tower_workflow_job_template_schema-wfjt" # -{{ test_id }}"
-    project_inv: "AWX-Collection-tests-tower_inventory_source-inv-project" #-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    project_inv_source: "AWX-Collection-tests-tower_inventory_source-inv-source-project" #-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    scm_cred_name: "AWX-Collection-tests-tower_workflow_job_template_schema-scm-cred-{{ test_id }}"
+    demo_project_name: "AWX-Collection-tests-tower_workflow_job_template_schema-proj-{{ test_id }}"
+    jt1_name: "AWX-Collection-tests-tower_workflow_job_template_schema-jt1-{{ test_id }}"
+    jt2_name: "AWX-Collection-tests-tower_workflow_job_template_schema-jt2-{{ test_id }}"
+    wfjt_name: "AWX-Collection-tests-tower_workflow_job_template_schema-wfjt-{{ test_id }}"
+    project_inv: "AWX-Collection-tests-tower_inventory_source-inv-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_inv_source: "AWX-Collection-tests-tower_inventory_source-inv-source-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create an SCM Credential
   awx.awx.tower_credential:
@@ -197,7 +197,7 @@
 - assert:
     that:
       - result is failed
-  
+
 - name: Delete a workflow job template
   awx.awx.tower_workflow_job_template:
     name: "{{ wfjt_name }}"
