@@ -19,7 +19,13 @@ import ScheduleEdit from './ScheduleEdit';
 import { SchedulesAPI } from '../../api';
 import useRequest from '../../util/useRequest';
 
-function Schedule({ i18n, setBreadcrumb, resource }) {
+function Schedule({
+  i18n,
+  setBreadcrumb,
+  resource,
+  launchConfig,
+  surveyConfig,
+}) {
   const { scheduleId } = useParams();
 
   const { pathname } = useLocation();
@@ -100,13 +106,18 @@ function Schedule({ i18n, setBreadcrumb, resource }) {
         />
         {schedule && [
           <Route key="edit" path={`${pathRoot}schedules/:id/edit`}>
-            <ScheduleEdit schedule={schedule} resource={resource} />
+            <ScheduleEdit
+              schedule={schedule}
+              resource={resource}
+              launchConfig={launchConfig}
+              surveyConfig={surveyConfig}
+            />
           </Route>,
           <Route
             key="details"
             path={`${pathRoot}schedules/:scheduleId/details`}
           >
-            <ScheduleDetail schedule={schedule} />
+            <ScheduleDetail schedule={schedule} surveyConfig={surveyConfig} />
           </Route>,
         ]}
         <Route key="not-found" path="*">

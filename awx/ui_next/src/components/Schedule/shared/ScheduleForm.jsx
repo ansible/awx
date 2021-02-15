@@ -12,11 +12,7 @@ import {
   ActionGroup,
 } from '@patternfly/react-core';
 import { Config } from '../../../contexts/Config';
-import {
-  SchedulesAPI,
-  JobTemplatesAPI,
-  WorkflowJobTemplatesAPI,
-} from '../../../api';
+import { SchedulesAPI } from '../../../api';
 import AnsibleSelect from '../../AnsibleSelect';
 import ContentError from '../../ContentError';
 import ContentLoading from '../../ContentLoading';
@@ -194,6 +190,8 @@ function ScheduleForm({
   schedule,
   submitError,
   resource,
+  launchConfig,
+  surveyConfig,
   ...rest
 }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -210,74 +208,21 @@ function ScheduleForm({
   const isTemplate =
     resource.type === 'workflow_job_template' ||
     resource.type === 'job_template';
-  const isWorkflowJobTemplate =
-    isTemplate && resource.type === 'workflow_job_template';
-
   const {
     request: loadScheduleData,
     error: contentError,
     contentLoading,
-    result: { zoneOptions, surveyConfig, launchConfig, credentials },
+    result: { zoneOptions, credentials },
   } = useRequest(
     useCallback(async () => {
-      const readLaunch =
-        isTemplate &&
-        (isWorkflowJobTemplate
-          ? WorkflowJobTemplatesAPI.readLaunch(resource.id)
-          : JobTemplatesAPI.readLaunch(resource.id));
-      const [{ data }, { data: launchConfiguration }] = await Promise.all([
-        SchedulesAPI.readZoneInfo(),
-        readLaunch,
-      ]);
+      const { data } = await SchedulesAPI.readZoneInfo();
 
-      const readSurvey = isWorkflowJobTemplate
-        ? WorkflowJobTemplatesAPI.readSurvey(resource.id)
-        : JobTemplatesAPI.readSurvey(resource.id);
-
-      let surveyConfiguration = null;
-
-      if (isTemplate && launchConfiguration.survey_enabled) {
-        const { data: survey } = await readSurvey;
-
-        surveyConfiguration = survey;
-      }
       let creds;
       if (schedule.id) {
         const {
           data: { results },
         } = await SchedulesAPI.readCredentials(schedule.id);
         creds = results;
-      }
-
-      const missingRequiredInventory = Boolean(
-        !resource.inventory && !schedule?.summary_fields?.inventory.id
-      );
-      let missingRequiredSurvey = false;
-
-      if (
-        schedule.id &&
-        isTemplate &&
-        !launchConfiguration?.can_start_without_user_input
-      ) {
-        missingRequiredSurvey = surveyConfiguration?.spec?.every(question => {
-          let hasValue;
-          if (Object.keys(schedule)?.length === 0) {
-            hasValue = true;
-          }
-          Object.entries(schedule?.extra_data).forEach(([key, value]) => {
-            if (
-              question.required &&
-              question.variable === key &&
-              value.length > 0
-            ) {
-              hasValue = false;
-            }
-          });
-          return hasValue;
-        });
-      }
-      if (missingRequiredInventory || missingRequiredSurvey) {
-        setIsSaveDisabled(true);
       }
 
       const zones = data.map(zone => {
@@ -290,18 +235,61 @@ function ScheduleForm({
 
       return {
         zoneOptions: zones,
-        surveyConfig: surveyConfiguration || {},
-        launchConfig: launchConfiguration,
         credentials: creds || [],
       };
-    }, [isTemplate, isWorkflowJobTemplate, resource, schedule]),
+    }, [schedule]),
     {
       zonesOptions: [],
-      surveyConfig: {},
-      launchConfig: {},
       credentials: [],
     }
   );
+  const missingRequiredInventory = useCallback(() => {
+    let missingInventory = false;
+    if (
+      launchConfig.inventory_needed_to_start &&
+      !schedule?.summary_fields?.inventory?.id
+    ) {
+      missingInventory = true;
+    }
+    return missingInventory;
+  }, [launchConfig, schedule]);
+
+  const hasMissingSurveyValue = useCallback(() => {
+    let missingValues = false;
+    if (launchConfig?.survey_enabled) {
+      surveyConfig.spec.forEach(question => {
+        const hasDefaultValue = Boolean(question.default);
+        const hasSchedule = Object.keys(schedule).length;
+        const isRequired = question.required;
+        if (isRequired && !hasDefaultValue) {
+          if (!hasSchedule) {
+            missingValues = true;
+          } else {
+            const hasMatchingKey = Object.keys(schedule?.extra_data).includes(
+              question.variable
+            );
+            Object.values(schedule?.extra_data).forEach(value => {
+              if (!value || !hasMatchingKey) {
+                missingValues = true;
+              } else {
+                missingValues = false;
+              }
+            });
+            if (!Object.values(schedule.extra_data).length) {
+              missingValues = true;
+            }
+          }
+        }
+      });
+    }
+    return missingValues;
+  }, [launchConfig, schedule, surveyConfig]);
+
+  useEffect(() => {
+    if (isTemplate && (missingRequiredInventory() || hasMissingSurveyValue())) {
+      setIsSaveDisabled(true);
+    }
+  }, [isTemplate, hasMissingSurveyValue, missingRequiredInventory]);
 
   useEffect(() => {
     loadScheduleData();
@@ -532,6 +520,7 @@ function ScheduleForm({
                       >
                         {i18n._(t`Save`)}
                       </Button>
+
                       {isTemplate && showPromptButton && (
                         <Button
                           variant="secondary"

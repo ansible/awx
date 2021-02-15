@@ -50,15 +50,13 @@ describe('ScheduleListItem', () => {
   describe('User has edit permissions', () => {
     beforeAll(() => {
       wrapper = mountWithContexts(
-        <table>
-          <tbody>
-            <ScheduleListItem
-              isSelected={false}
-              onSelect={onSelect}
-              schedule={mockSchedule}
-            />
-          </tbody>
-        </table>
+        <ScheduleListItem
+          isSelected={false}
+          onSelect={onSelect}
+          schedule={mockSchedule}
+          isMissingSurvey={false}
+          isMissingInventory={false}
+        />
       );
     });
 
@@ -117,6 +115,9 @@ describe('ScheduleListItem', () => {
         .find('input')
         .simulate('change');
       expect(onSelect).toHaveBeenCalledTimes(1);
+    });
+    test('Toggle button is enabled', () => {
+      expect(wrapper.find('ScheduleToggle').prop('isDisabled')).toBe(false);
     });
   });
 
@@ -184,6 +185,37 @@ describe('ScheduleListItem', () => {
           .first()
           .props().isDisabled
       ).toBe(true);
+    });
+  });
+  describe('schedule has missing prompt data', () => {
+    beforeAll(() => {
+      wrapper = mountWithContexts(
+        <ScheduleListItem
+          isSelected={false}
+          onSelect={onSelect}
+          schedule={{
+            ...mockSchedule,
+            summary_fields: {
+              ...mockSchedule.summary_fields,
+              user_capabilities: {
+                edit: false,
+                delete: false,
+              },
+            },
+          }}
+          isMissingInventory="Inventory Error"
+          isMissingSurvey="Survey Error"
+        />
+      );
+    });
+
+    afterAll(() => {
+      wrapper.unmount();
+    });
+
+    test('should show missing resource icon', () => {
+      expect(wrapper.find('ExclamationTriangleIcon').length).toBe(1);
+      expect(wrapper.find('ScheduleToggle').prop('isDisabled')).toBe(true);
     });
   });
 });

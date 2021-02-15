@@ -10,6 +10,8 @@ function Schedules({
   loadScheduleOptions,
   loadSchedules,
   setBreadcrumb,
+  launchConfig,
+  surveyConfig,
   resource,
 }) {
   const match = useRouteMatch();
@@ -17,14 +19,27 @@ function Schedules({
   return (
     <Switch>
       <Route path={`${match.path}/add`}>
-        <ScheduleAdd apiModel={apiModel} resource={resource} />
+        <ScheduleAdd
+          apiModel={apiModel}
+          resource={resource}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
+        />
       </Route>
       <Route key="details" path={`${match.path}/:scheduleId`}>
-        <Schedule setBreadcrumb={setBreadcrumb} resource={resource} />
+        <Schedule
+          setBreadcrumb={setBreadcrumb}
+          resource={resource}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
+        />
       </Route>
       <Route key="list" path={`${match.path}`}>
         <ScheduleList
+          resource={resource}
           loadSchedules={loadSchedules}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
           loadScheduleOptions={loadScheduleOptions}
         />
       </Route>

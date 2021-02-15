@@ -22,7 +22,7 @@ export default function useSchedulePromptSteps(
     (Object.keys(schedule).length > 0 && schedule) || resource;
 
   sourceOfValues.summary_fields = {
-    credentials: [...resourceCredentials, ...scheduleCredentials],
+    credentials: [...(resourceCredentials || []), ...scheduleCredentials],
     ...sourceOfValues.summary_fields,
   };
   const { resetForm, values } = useFormikContext();

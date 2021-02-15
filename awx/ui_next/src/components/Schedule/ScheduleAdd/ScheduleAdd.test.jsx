@@ -19,45 +19,45 @@ SchedulesAPI.readZoneInfo.mockResolvedValue({
     },
   ],
 });
-JobTemplatesAPI.readLaunch.mockResolvedValue({
-  data: {
-    can_start_without_user_input: false,
-    passwords_needed_to_start: [],
-    ask_scm_branch_on_launch: false,
-    ask_variables_on_launch: false,
-    ask_tags_on_launch: false,
-    ask_diff_mode_on_launch: false,
-    ask_skip_tags_on_launch: false,
-    ask_job_type_on_launch: false,
-    ask_limit_on_launch: false,
-    ask_verbosity_on_launch: false,
-    ask_inventory_on_launch: true,
-    ask_credential_on_launch: false,
-    survey_enabled: false,
-    variables_needed_to_start: [],
-    credential_needed_to_start: false,
-    inventory_needed_to_start: true,
-    job_template_data: {
-      name: 'Demo Job Template',
-      id: 7,
-      description: '',
-    },
-    defaults: {
-      extra_vars: '---',
-      diff_mode: false,
-      limit: '',
-      job_tags: '',
-      skip_tags: '',
-      job_type: 'run',
-      verbosity: 0,
-      inventory: {
-        name: null,
-        id: null,
-      },
-      scm_branch: '',
-    },
+
+const launchConfig = {
+  can_start_without_user_input: false,
+  passwords_needed_to_start: [],
+  ask_scm_branch_on_launch: false,
+  ask_variables_on_launch: false,
+  ask_tags_on_launch: false,
+  ask_diff_mode_on_launch: false,
+  ask_skip_tags_on_launch: false,
+  ask_job_type_on_launch: false,
+  ask_limit_on_launch: false,
+  ask_verbosity_on_launch: false,
+  ask_inventory_on_launch: true,
+  ask_credential_on_launch: false,
+  survey_enabled: false,
+  variables_needed_to_start: [],
+  credential_needed_to_start: false,
+  inventory_needed_to_start: true,
+  job_template_data: {
+    name: 'Demo Job Template',
+    id: 7,
+    description: '',
   },
-});
+  defaults: {
+    extra_vars: '---',
+    diff_mode: false,
+    limit: '',
+    job_tags: '',
+    skip_tags: '',
+    job_type: 'run',
+    verbosity: 0,
+    inventory: {
+      name: null,
+      id: null,
+    },
+    scm_branch: '',
+  },
+};
+
 JobTemplatesAPI.createSchedule.mockResolvedValue({ data: { id: 3 } });
 
 let wrapper;
@@ -74,6 +74,7 @@ describe('<ScheduleAdd />', () => {
             inventory: 2,
             summary_fields: { credentials: [] },
           }}
+          launchConfig={launchConfig}
         />
       );
     });
@@ -377,7 +378,6 @@ describe('<ScheduleAdd />', () => {
     );
     wrapper.update();
     expect(wrapper.find('Wizard').length).toBe(0);
-    // console.log(wrapper.debug());
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         name: 'Schedule',

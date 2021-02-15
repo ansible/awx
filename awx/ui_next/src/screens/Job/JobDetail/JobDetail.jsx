@@ -326,11 +326,6 @@ function JobDetail({ job, i18n }) {
           user={created_by}
         />
         <UserDateDetail label={i18n._(t`Last Modified`)} date={job.modified} />
-        <Detail
-          fullWidth
-          label={i18n._(t`Explanation`)}
-          value={job.job_explanation}
-        />
       </DetailList>
       {job.extra_vars && (
         <VariablesInput

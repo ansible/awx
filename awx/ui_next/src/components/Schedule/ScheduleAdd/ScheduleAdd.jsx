@@ -15,14 +15,18 @@ import mergeExtraVars from '../../../util/prompt/mergeExtraVars';
 import getSurveyValues from '../../../util/prompt/getSurveyValues';
 import { getAddedAndRemoved } from '../../../util/lists';
 
-function ScheduleAdd({ i18n, resource, apiModel }) {
+function ScheduleAdd({ i18n, resource, apiModel, launchConfig, surveyConfig }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
   const location = useLocation();
   const { pathname } = location;
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
 
-  const handleSubmit = async (values, launchConfig, surveyConfig) => {
+  const handleSubmit = async (
+    values,
+    launchConfiguration,
+    surveyConfiguration
+  ) => {
     const {
       inventory,
       extra_vars,
@@ -51,8 +55,9 @@ function ScheduleAdd({ i18n, resource, apiModel }) {
     let extraVars;
     const surveyValues = getSurveyValues(values);
     const initialExtraVars =
-      launchConfig?.ask_variables_on_launch && (values.extra_vars || '---');
-    if (surveyConfig?.spec) {
+      launchConfiguration?.ask_variables_on_launch &&
+      (values.extra_vars || '---');
+    if (surveyConfiguration?.spec) {
       extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, surveyValues));
     } else {
       extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, {}));
@@ -92,6 +97,8 @@ function ScheduleAdd({ i18n, resource, apiModel }) {
           handleCancel={() => history.push(`${pathRoot}schedules`)}
           handleSubmit={handleSubmit}
           submitError={formSubmitError}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
           resource={resource}
         />
       </CardBody>

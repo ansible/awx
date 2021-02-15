@@ -15,7 +15,13 @@ import { parseVariableField } from '../../../util/yaml';
 import mergeExtraVars from '../../../util/prompt/mergeExtraVars';
 import getSurveyValues from '../../../util/prompt/getSurveyValues';
 
-function ScheduleEdit({ i18n, schedule, resource }) {
+function ScheduleEdit({
+  i18n,
+  schedule,
+  resource,
+  launchConfig,
+  surveyConfig,
+}) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
   const location = useLocation();
@@ -24,8 +30,8 @@ function ScheduleEdit({ i18n, schedule, resource }) {
 
   const handleSubmit = async (
     values,
-    launchConfig,
-    surveyConfig,
+    launchConfiguration,
+    surveyConfiguration,
     scheduleCredentials = []
   ) => {
     const {
@@ -36,32 +42,40 @@ function ScheduleEdit({ i18n, schedule, resource }) {
       interval,
       startDateTime,
       timezone,
-      occurrences,
+      occurences,
       runOn,
       runOnTheDay,
       runOnTheMonth,
       runOnDayMonth,
       runOnDayNumber,
       endDateTime,
-      runOnTheOccurrence,
+      runOnTheOccurence,
       daysOfWeek,
       ...submitValues
     } = values;
     const { added, removed } = getAddedAndRemoved(
-      [...resource?.summary_fields.credentials, ...scheduleCredentials],
+      [...(resource?.summary_fields.credentials || []), ...scheduleCredentials],
       credentials
     );
 
     let extraVars;
     const surveyValues = getSurveyValues(values);
     const initialExtraVars =
-      launchConfig?.ask_variables_on_launch && (values.extra_vars || '---');
-    if (surveyConfig?.spec) {
+      launchConfiguration?.ask_variables_on_launch &&
+      (values.extra_vars || '---');
+    if (surveyConfiguration?.spec) {
       extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, surveyValues));
     } else {
       extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, {}));
     }
     submitValues.extra_data = extraVars && parseVariableField(extraVars);
+
+    if (
+      Object.keys(submitValues.extra_data).length === 0 &&
+      Object.keys(schedule.extra_data).length > 0
+    ) {
+      submitValues.extra_data = schedule.extra_data;
+    }
     delete values.extra_vars;
     if (inventory) {
       submitValues.inventory = inventory.id;
@@ -103,6 +117,8 @@ function ScheduleEdit({ i18n, schedule, resource }) {
           handleSubmit={handleSubmit}
           submitError={formSubmitError}
           resource={resource}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
         />
       </CardBody>
     </Card>

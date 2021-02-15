@@ -26,7 +26,7 @@ describe('<WorkflowJobTemplate />', () => {
   let wrapper;
   beforeEach(() => {
     WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
-      data: mockWorkflowJobTemplateData,
+      data: { ...mockWorkflowJobTemplateData, survey_enabled: false },
     });
     WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions.mockResolvedValue({
       data: {
@@ -45,6 +45,7 @@ describe('<WorkflowJobTemplate />', () => {
         ],
       },
     });
+    WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({ data: {} });
     WorkflowJobTemplatesAPI.readWebhookKey.mockResolvedValue({
       data: {
         webhook_key: 'key',
