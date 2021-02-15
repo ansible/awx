@@ -143,16 +143,16 @@ function ProjectListItem({
             <PencilAltIcon />
           </Button>
         </ActionItem>
-        <ActionItem visible={project.summary_fields.user_capabilities.copy}>
+        <ActionItem
+          tooltip={i18n._(t`Copy Project`)}
+          visible={project.summary_fields.user_capabilities.copy}
+        >
           <CopyButton
             copyItem={copyProject}
             isDisabled={isDisabled}
             onCopyStart={handleCopyStart}
             onCopyFinish={handleCopyFinish}
-            helperText={{
-              tooltip: i18n._(t`Copy Project`),
-              errorMessage: i18n._(t`Failed to copy project.`),
-            }}
+            errorMessage={i18n._(t`Failed to copy project.`)}
           />
         </ActionItem>
       </ActionsTd>

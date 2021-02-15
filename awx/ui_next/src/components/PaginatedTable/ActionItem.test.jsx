@@ -12,7 +12,7 @@ describe('<ActionItem />', () => {
 
     const tooltip = wrapper.find('Tooltip');
     expect(tooltip.prop('content')).toEqual('a tooltip');
-    expect(tooltip.prop('children')).toEqual('foo');
+    expect(tooltip.prop('children')).toEqual(<div>foo</div>);
   });
 
   test('should render null if not visible', async () => {
