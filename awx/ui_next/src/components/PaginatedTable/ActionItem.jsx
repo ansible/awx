@@ -14,7 +14,7 @@ export default function ActionItem({ column, tooltip, visible, children }) {
       `}
     >
       <Tooltip content={tooltip} position="top">
-        {children}
+        <div>{children}</div>
       </Tooltip>
     </div>
   );

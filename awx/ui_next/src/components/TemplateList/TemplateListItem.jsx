@@ -177,13 +177,13 @@ function TemplateListItem({
               <PencilAltIcon />
             </Button>
           </ActionItem>
-          <ActionItem visible={template.summary_fields.user_capabilities.copy}>
+          <ActionItem
+            tooltip={i18n._(t`Copy Template`)}
+            visible={template.summary_fields.user_capabilities.copy}
+          >
             <CopyButton
               id={`template-action-copy-${template.id}`}
-              helperText={{
-                errorMessage: i18n._(t`Failed to copy template.`),
-                tooltip: i18n._(t`Copy Template`),
-              }}
+              errorMessage={i18n._(t`Failed to copy template.`)}
               isDisabled={isDisabled}
               onCopyStart={handleCopyStart}
               onCopyFinish={handleCopyFinish}

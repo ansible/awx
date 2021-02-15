@@ -159,16 +159,15 @@ function NotificationTemplateListItem({
             <div />
           )}
           {template.summary_fields.user_capabilities.copy && (
-            <CopyButton
-              copyItem={copyTemplate}
-              isCopyDisabled={isCopyDisabled}
-              onCopyStart={handleCopyStart}
-              onCopyFinish={handleCopyFinish}
-              helperText={{
-                tooltip: i18n._(t`Copy Notification Template`),
-                errorMessage: i18n._(t`Failed to copy template.`),
-              }}
-            />
+            <Tooltip content={i18n._(t`Copy Notification Template`)}>
+              <CopyButton
+                copyItem={copyTemplate}
+                isCopyDisabled={isCopyDisabled}
+                onCopyStart={handleCopyStart}
+                onCopyFinish={handleCopyFinish}
+                errorMessage={i18n._(t`Failed to copy template.`)}
+              />
+            </Tooltip>
           )}
         </DataListAction>
       </DataListItemRow>
