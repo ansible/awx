@@ -12,24 +12,6 @@ jest.mock('../../../api/models/Schedules');
 jest.mock('../../../api/models/JobTemplates');
 jest.mock('../../../api/models/Inventories');
 
-const survey = {
-  name: '',
-  description: '',
-  spec: [
-    {
-      question_name: 'new survey',
-      question_description: '',
-      required: true,
-      type: 'text',
-      variable: 'newsurveyquestion',
-      min: 0,
-      max: 1024,
-      default: '',
-      choices: '',
-      new_question: false,
-    },
-  ],
-};
 const credentials = {
   data: {
     results: [
@@ -145,6 +127,29 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
+            launchConfig={{
+              can_start_without_user_input: false,
+              passwords_needed_to_start: [],
+              ask_scm_branch_on_launch: false,
+              ask_variables_on_launch: false,
+              ask_tags_on_launch: false,
+              ask_diff_mode_on_launch: false,
+              ask_skip_tags_on_launch: false,
+              ask_job_type_on_launch: false,
+              ask_limit_on_launch: false,
+              ask_verbosity_on_launch: false,
+              ask_inventory_on_launch: true,
+              ask_credential_on_launch: false,
+              survey_enabled: false,
+              variables_needed_to_start: [],
+              credential_needed_to_start: false,
+              inventory_needed_to_start: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 7,
+                description: '',
+              },
+            }}
             resource={{ id: 23, type: 'job_template' }}
           />
         );
@@ -158,7 +163,6 @@ describe('<ScheduleForm />', () => {
       const handleCancel = jest.fn();
       JobTemplatesAPI.readLaunch.mockResolvedValue(launchData);
 
-      JobTemplatesAPI.readSurvey.mockResolvedValue(survey);
       SchedulesAPI.readCredentials.mockResolvedValue(credentials);
       SchedulesAPI.readZoneInfo.mockResolvedValue({
         data: [
@@ -172,7 +176,30 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={handleCancel}
-            resource={{ id: 23, type: 'job_template' }}
+            launchConfig={{
+              can_start_without_user_input: false,
+              passwords_needed_to_start: [],
+              ask_scm_branch_on_launch: false,
+              ask_variables_on_launch: false,
+              ask_tags_on_launch: false,
+              ask_diff_mode_on_launch: false,
+              ask_skip_tags_on_launch: false,
+              ask_job_type_on_launch: false,
+              ask_limit_on_launch: false,
+              ask_verbosity_on_launch: false,
+              ask_inventory_on_launch: true,
+              ask_credential_on_launch: false,
+              survey_enabled: false,
+              variables_needed_to_start: [],
+              credential_needed_to_start: false,
+              inventory_needed_to_start: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 7,
+                description: '',
+              },
+            }}
+            resource={{ id: 23, type: 'job_template', inventory: 1 }}
           />
         );
       });
@@ -186,31 +213,6 @@ describe('<ScheduleForm />', () => {
   describe('Prompted Schedule', () => {
     let promptWrapper;
     beforeEach(async () => {
-      JobTemplatesAPI.readLaunch.mockResolvedValue({
-        data: {
-          can_start_without_user_input: false,
-          passwords_needed_to_start: [],
-          ask_scm_branch_on_launch: false,
-          ask_variables_on_launch: false,
-          ask_tags_on_launch: false,
-          ask_diff_mode_on_launch: false,
-          ask_skip_tags_on_launch: false,
-          ask_job_type_on_launch: false,
-          ask_limit_on_launch: false,
-          ask_verbosity_on_launch: false,
-          ask_inventory_on_launch: true,
-          ask_credential_on_launch: false,
-          survey_enabled: false,
-          variables_needed_to_start: [],
-          credential_needed_to_start: false,
-          inventory_needed_to_start: true,
-          job_template_data: {
-            name: 'Demo Job Template',
-            id: 7,
-            description: '',
-          },
-        },
-      });
       SchedulesAPI.readZoneInfo.mockResolvedValue({
         data: [
           {
@@ -231,6 +233,30 @@ describe('<ScheduleForm />', () => {
                 credentials: [],
               },
             }}
+            launchConfig={{
+              can_start_without_user_input: false,
+              passwords_needed_to_start: [],
+              ask_scm_branch_on_launch: false,
+              ask_variables_on_launch: false,
+              ask_tags_on_launch: false,
+              ask_diff_mode_on_launch: false,
+              ask_skip_tags_on_launch: false,
+              ask_job_type_on_launch: false,
+              ask_limit_on_launch: false,
+              ask_verbosity_on_launch: false,
+              ask_inventory_on_launch: true,
+              ask_credential_on_launch: false,
+              survey_enabled: false,
+              variables_needed_to_start: [],
+              credential_needed_to_start: false,
+              inventory_needed_to_start: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 7,
+                description: '',
+              },
+            }}
+            surveyConfig={{ spec: [{ required: true, default: '' }] }}
           />
         );
       });
@@ -255,6 +281,12 @@ describe('<ScheduleForm />', () => {
       expect(promptWrapper.find('StepName#inventory-step').length).toBe(2);
       expect(promptWrapper.find('StepName#preview-step').length).toBe(1);
       expect(promptWrapper.find('WizardNavItem').length).toBe(2);
+    });
+
+    test('should render disabled save button due to missing required surevy values', () => {
+      expect(
+        promptWrapper.find('Button[aria-label="Save"]').prop('isDisabled')
+      ).toBe(true);
     });
 
     test('should update prompt modal data', async () => {
@@ -337,6 +369,29 @@ describe('<ScheduleForm />', () => {
               id: 23,
               type: 'job_template',
             }}
+            launchConfig={{
+              can_start_without_user_input: false,
+              passwords_needed_to_start: [],
+              ask_scm_branch_on_launch: false,
+              ask_variables_on_launch: false,
+              ask_tags_on_launch: false,
+              ask_diff_mode_on_launch: false,
+              ask_skip_tags_on_launch: false,
+              ask_job_type_on_launch: false,
+              ask_limit_on_launch: false,
+              ask_verbosity_on_launch: false,
+              ask_inventory_on_launch: true,
+              ask_credential_on_launch: false,
+              survey_enabled: false,
+              variables_needed_to_start: [],
+              credential_needed_to_start: false,
+              inventory_needed_to_start: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 7,
+                description: '',
+              },
+            }}
           />
         );
       });
@@ -359,31 +414,6 @@ describe('<ScheduleForm />', () => {
           },
         ],
       });
-      JobTemplatesAPI.readLaunch.mockResolvedValue({
-        data: {
-          can_start_without_user_input: true,
-          passwords_needed_to_start: [],
-          ask_scm_branch_on_launch: false,
-          ask_variables_on_launch: false,
-          ask_tags_on_launch: false,
-          ask_diff_mode_on_launch: false,
-          ask_skip_tags_on_launch: false,
-          ask_job_type_on_launch: false,
-          ask_limit_on_launch: false,
-          ask_verbosity_on_launch: false,
-          ask_inventory_on_launch: false,
-          ask_credential_on_launch: false,
-          survey_enabled: false,
-          variables_needed_to_start: [],
-          credential_needed_to_start: false,
-          inventory_needed_to_start: false,
-          job_template_data: {
-            name: 'Demo Job Template',
-            id: 7,
-            description: '',
-          },
-        },
-      });
 
       await act(async () => {
         wrapper = mountWithContexts(
@@ -391,6 +421,29 @@ describe('<ScheduleForm />', () => {
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
             resource={{ id: 23, type: 'job_template', inventory: 1 }}
+            launchConfig={{
+              can_start_without_user_input: true,
+              passwords_needed_to_start: [],
+              ask_scm_branch_on_launch: false,
+              ask_variables_on_launch: false,
+              ask_tags_on_launch: false,
+              ask_diff_mode_on_launch: false,
+              ask_skip_tags_on_launch: false,
+              ask_job_type_on_launch: false,
+              ask_limit_on_launch: false,
+              ask_verbosity_on_launch: false,
+              ask_inventory_on_launch: false,
+              ask_credential_on_launch: false,
+              survey_enabled: false,
+              variables_needed_to_start: [],
+              credential_needed_to_start: false,
+              inventory_needed_to_start: false,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 7,
+                description: '',
+              },
+            }}
           />
         );
       });
@@ -687,32 +740,7 @@ describe('<ScheduleForm />', () => {
           },
         ],
       });
-      JobTemplatesAPI.readLaunch.mockResolvedValue({
-        data: {
-          can_start_without_user_input: true,
-          passwords_needed_to_start: [],
-          ask_scm_branch_on_launch: false,
-          ask_variables_on_launch: false,
-          ask_tags_on_launch: false,
-          ask_diff_mode_on_launch: false,
-          ask_skip_tags_on_launch: false,
-          ask_job_type_on_launch: false,
-          ask_limit_on_launch: false,
-          ask_verbosity_on_launch: false,
-          ask_inventory_on_launch: false,
-          ask_credential_on_launch: false,
-          survey_enabled: false,
-          variables_needed_to_start: [],
-          credential_needed_to_start: false,
-          inventory_needed_to_start: false,
-          job_template_data: {
-            name: 'Demo Job Template',
-            id: 7,
-            description: '',
-          },
-        },
-      });
-      JobTemplatesAPI.readSurvey.mockResolvedValue({});
+
       SchedulesAPI.readCredentials.mockResolvedValue(credentials);
     });
     afterEach(() => {
@@ -728,21 +756,65 @@ describe('<ScheduleForm />', () => {
             handleCancel={jest.fn()}
             schedule={{ inventory: null, ...mockSchedule }}
             resource={{ id: 23, type: 'job_template' }}
+            launchConfig={{
+              can_start_without_user_input: true,
+              passwords_needed_to_start: [],
+              ask_scm_branch_on_launch: false,
+              ask_variables_on_launch: false,
+              ask_tags_on_launch: false,
+              ask_diff_mode_on_launch: false,
+              ask_skip_tags_on_launch: false,
+              ask_job_type_on_launch: false,
+              ask_limit_on_launch: false,
+              ask_verbosity_on_launch: false,
+              ask_inventory_on_launch: false,
+              ask_credential_on_launch: false,
+              survey_enabled: false,
+              variables_needed_to_start: [],
+              credential_needed_to_start: false,
+              inventory_needed_to_start: false,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 7,
+                description: '',
+              },
+            }}
           />
         );
       });
-      expect(JobTemplatesAPI.readLaunch).toBeCalledWith(23);
-      expect(JobTemplatesAPI.readSurvey).toBeCalledWith(23);
       expect(SchedulesAPI.readCredentials).toBeCalledWith(27);
     });
 
-    test('should not  call API to get credentials ', async () => {
+    test('should not call API to get credentials ', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
             resource={{ id: 23, type: 'job_template' }}
+            launchConfig={{
+              can_start_without_user_input: true,
+              passwords_needed_to_start: [],
+              ask_scm_branch_on_launch: false,
+              ask_variables_on_launch: false,
+              ask_tags_on_launch: false,
+              ask_diff_mode_on_launch: false,
+              ask_skip_tags_on_launch: false,
+              ask_job_type_on_launch: false,
+              ask_limit_on_launch: false,
+              ask_verbosity_on_launch: false,
+              ask_inventory_on_launch: false,
+              ask_credential_on_launch: false,
+              survey_enabled: false,
+              variables_needed_to_start: [],
+              credential_needed_to_start: false,
+              inventory_needed_to_start: false,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 7,
+                description: '',
+              },
+            }}
           />
         );
       });
@@ -782,6 +854,7 @@ describe('<ScheduleForm />', () => {
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
             schedule={mockSchedule}
+            launchConfig={{ inventory_needed_to_start: false }}
             resource={{ id: 23, type: 'job_template' }}
           />
         );
@@ -806,6 +879,7 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
+            launchConfig={{ inventory_needed_to_start: false }}
             schedule={Object.assign(mockSchedule, {
               rrule:
                 'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=10;FREQ=MINUTELY',
@@ -839,6 +913,7 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
+            launchConfig={{ inventory_needed_to_start: false }}
             schedule={Object.assign(mockSchedule, {
               rrule:
                 'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;FREQ=HOURLY;COUNT=10',
@@ -874,6 +949,7 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
+            launchConfig={{ inventory_needed_to_start: false }}
             schedule={Object.assign(mockSchedule, {
               rrule:
                 'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;FREQ=DAILY',
@@ -908,6 +984,7 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
+            launchConfig={{ inventory_needed_to_start: false }}
             schedule={Object.assign(mockSchedule, {
               rrule:
                 'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=MO,WE,FR;UNTIL=20210101T050000Z',
@@ -966,6 +1043,7 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
+            launchConfig={{ inventory_needed_to_start: false }}
             schedule={Object.assign(mockSchedule, {
               rrule:
                 'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=-1;BYDAY=MO,TU,WE,TH,FR',
@@ -1012,6 +1090,7 @@ describe('<ScheduleForm />', () => {
           <ScheduleForm
             handleSubmit={jest.fn()}
             handleCancel={jest.fn()}
+            launchConfig={{ inventory_needed_to_start: false }}
             schedule={Object.assign(mockSchedule, {
               rrule:
                 'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;FREQ=YEARLY;BYMONTH=5;BYMONTHDAY=6',

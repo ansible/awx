@@ -7,7 +7,6 @@ import {
 } from '../../../../testUtils/enzymeHelpers';
 import {
   SchedulesAPI,
-  JobTemplatesAPI,
   InventoriesAPI,
   CredentialsAPI,
   CredentialTypesAPI,
@@ -26,46 +25,6 @@ SchedulesAPI.readZoneInfo.mockResolvedValue({
       name: 'America/New_York',
     },
   ],
-});
-
-JobTemplatesAPI.readLaunch.mockResolvedValue({
-  data: {
-    can_start_without_user_input: false,
-    passwords_needed_to_start: [],
-    ask_scm_branch_on_launch: false,
-    ask_variables_on_launch: false,
-    ask_tags_on_launch: false,
-    ask_diff_mode_on_launch: false,
-    ask_skip_tags_on_launch: false,
-    ask_job_type_on_launch: false,
-    ask_limit_on_launch: false,
-    ask_verbosity_on_launch: false,
-    ask_inventory_on_launch: true,
-    ask_credential_on_launch: true,
-    survey_enabled: false,
-    variables_needed_to_start: [],
-    credential_needed_to_start: true,
-    inventory_needed_to_start: true,
-    job_template_data: {
-      name: 'Demo Job Template',
-      id: 7,
-      description: '',
-    },
-    defaults: {
-      extra_vars: '---',
-      diff_mode: false,
-      limit: '',
-      job_tags: '',
-      skip_tags: '',
-      job_type: 'run',
-      verbosity: 0,
-      inventory: {
-        name: null,
-        id: null,
-      },
-      scm_branch: '',
-    },
-  },
 });
 
 SchedulesAPI.readCredentials.mockResolvedValue({
@@ -156,6 +115,44 @@ describe('<ScheduleEdit />', () => {
               ],
             },
           }}
+          launchConfig={{
+            can_start_without_user_input: false,
+            passwords_needed_to_start: [],
+            ask_scm_branch_on_launch: false,
+            ask_variables_on_launch: false,
+            ask_tags_on_launch: false,
+            ask_diff_mode_on_launch: false,
+            ask_skip_tags_on_launch: false,
+            ask_job_type_on_launch: false,
+            ask_limit_on_launch: false,
+            ask_verbosity_on_launch: false,
+            ask_inventory_on_launch: true,
+            ask_credential_on_launch: true,
+            survey_enabled: false,
+            variables_needed_to_start: [],
+            credential_needed_to_start: true,
+            inventory_needed_to_start: true,
+            job_template_data: {
+              name: 'Demo Job Template',
+              id: 7,
+              description: '',
+            },
+            defaults: {
+              extra_vars: '---',
+              diff_mode: false,
+              limit: '',
+              job_tags: '',
+              skip_tags: '',
+              job_type: 'run',
+              verbosity: 0,
+              inventory: {
+                name: null,
+                id: null,
+              },
+              scm_branch: '',
+            },
+          }}
+          surveyConfig={{}}
         />
       );
     });
@@ -202,6 +199,7 @@ describe('<ScheduleEdit />', () => {
       description: 'test description',
       name: 'Run every 10 minutes 10 times',
       extra_data: {},
+      occurrences: 10,
       rrule:
         'DTSTART;TZID=America/New_York:20200325T103000 RRULE:INTERVAL=10;FREQ=MINUTELY;COUNT=10',
     });
@@ -265,6 +263,7 @@ describe('<ScheduleEdit />', () => {
       description: 'test description',
       name: 'Run weekly on mon/wed/fri',
       extra_data: {},
+      occurrences: 1,
       rrule: `DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=${RRule.MO},${RRule.WE},${RRule.FR}`,
     });
   });
@@ -287,6 +286,7 @@ describe('<ScheduleEdit />', () => {
       description: 'test description',
       name: 'Run on the first day of the month',
       extra_data: {},
+      occurrences: 1,
       rrule:
         'DTSTART;TZID=America/New_York:20200401T104500 RRULE:INTERVAL=1;FREQ=MONTHLY;BYMONTHDAY=1',
     });
@@ -312,6 +312,8 @@ describe('<ScheduleEdit />', () => {
       description: 'test description',
       name: 'Run monthly on the last Tuesday',
       extra_data: {},
+      occurrences: 1,
+      runOnTheOccurrence: -1,
       rrule:
         'DTSTART;TZID=America/New_York:20200331T110000 RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=-1;BYDAY=TU',
     });
@@ -336,6 +338,7 @@ describe('<ScheduleEdit />', () => {
       description: 'test description',
       name: 'Yearly on the first day of March',
       extra_data: {},
+      occurrences: 1,
       rrule:
         'DTSTART;TZID=America/New_York:20200301T000000 RRULE:INTERVAL=1;FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=1',
     });
@@ -361,6 +364,8 @@ describe('<ScheduleEdit />', () => {
       description: 'test description',
       name: 'Yearly on the second Friday in April',
       extra_data: {},
+      occurrences: 1,
+      runOnTheOccurrence: 2,
       rrule:
         'DTSTART;TZID=America/New_York:20200410T111500 RRULE:INTERVAL=1;FREQ=YEARLY;BYSETPOS=2;BYDAY=FR;BYMONTH=4',
     });
@@ -386,6 +391,8 @@ describe('<ScheduleEdit />', () => {
       description: 'test description',
       name: 'Yearly on the first weekday in October',
       extra_data: {},
+      occurrences: 1,
+      runOnTheOccurrence: 1,
       rrule:
         'DTSTART;TZID=America/New_York:20200410T111500 RRULE:INTERVAL=1;FREQ=YEARLY;BYSETPOS=1;BYDAY=MO,TU,WE,TH,FR;BYMONTH=10',
     });
@@ -515,6 +522,8 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toBeCalledWith(27, {
       extra_data: {},
       name: 'mock schedule',
+      occurrences: 1,
+      runOnTheOccurrence: 1,
       rrule:
         'DTSTART;TZID=America/New_York:20210128T141500 RRULE:COUNT=1;FREQ=MINUTELY',
       skip_tags: '',
@@ -590,8 +599,10 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toBeCalledWith(27, {
       description: '',
       extra_data: {},
-      inventory: 702,
+      occurrences: 1,
+      runOnTheOccurrence: 1,
       name: 'foo',
+      inventory: 702,
       rrule:
         'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
     });

@@ -42,7 +42,7 @@ const PromptDetailList = styled(DetailList)`
   padding: 0px 20px;
 `;
 
-function ScheduleDetail({ schedule, i18n }) {
+function ScheduleDetail({ schedule, i18n, surveyConfig }) {
   const {
     id,
     created,
@@ -148,6 +148,7 @@ function ScheduleDetail({ schedule, i18n }) {
 
   const {
     ask_credential_on_launch,
+    inventory_needed_to_start,
     ask_diff_mode_on_launch,
     ask_inventory_on_launch,
     ask_job_type_on_launch,
@@ -159,6 +160,41 @@ function ScheduleDetail({ schedule, i18n }) {
     ask_verbosity_on_launch,
     survey_enabled,
   } = launchData || {};
+
+  const missingRequiredInventory = () => {
+    if (!inventory_needed_to_start || schedule?.summary_fields?.inventory?.id) {
+      return false;
+    }
+    return true;
+  };
+
+  const hasMissingSurveyValue = () => {
+    let missingValues = false;
+    if (survey_enabled) {
+      surveyConfig.spec.forEach(question => {
+        const hasDefaultValue = Boolean(question.default);
+        if (question.required && !hasDefaultValue) {
+          const extraDataKeys = Object.keys(schedule?.extra_data);
+
+          const hasMatchingKey = extraDataKeys.includes(question.variable);
+          Object.values(schedule?.extra_data).forEach(value => {
+            if (!value || !hasMatchingKey) {
+              missingValues = true;
+            } else {
+              missingValues = false;
+            }
+          });
+          if (!Object.values(schedule.extra_data).length) {
+            missingValues = true;
+          }
+        }
+      });
+    }
+    return missingValues;
+  };
+  const isDisabled = Boolean(
+    missingRequiredInventory() || hasMissingSurveyValue()
+  );
 
   const showCredentialsDetail =
     ask_credential_on_launch && credentials.length > 0;
@@ -189,14 +225,6 @@ function ScheduleDetail({ schedule, i18n }) {
     showVerbosityDetail ||
     showVariablesDetail;
 
-  const VERBOSITY = {
-    0: i18n._(t`0 (Normal)`),
-    1: i18n._(t`1 (Verbose)`),
-    2: i18n._(t`2 (More Verbose)`),
-    3: i18n._(t`3 (Debug)`),
-    4: i18n._(t`4 (Connection Debug)`),
-  };
-
   if (isLoading) {
     return <ContentLoading />;
   }
@@ -207,7 +235,11 @@ function ScheduleDetail({ schedule, i18n }) {
 
   return (
     <CardBody>
-      <ScheduleToggle schedule={schedule} css="padding-bottom: 40px" />
+      <ScheduleToggle
+        schedule={schedule}
+        css="padding-bottom: 40px"
+        isDisabled={isDisabled}
+      />
       <DetailList gutter="sm">
         <Detail label={i18n._(t`Name`)} value={name} />
         <Detail label={i18n._(t`Description`)} value={description} />
@@ -278,12 +310,6 @@ function ScheduleDetail({ schedule, i18n }) {
             )}
             {ask_limit_on_launch && (
               <Detail label={i18n._(t`Limit`)} value={limit} />
-            )}
-            {ask_verbosity_on_launch && (
-              <Detail
-                label={i18n._(t`Verbosity`)}
-                value={VERBOSITY[verbosity]}
-              />
             )}
             {showDiffModeDetail && (
               <Detail

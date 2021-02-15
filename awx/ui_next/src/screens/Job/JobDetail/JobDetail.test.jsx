@@ -40,7 +40,6 @@ describe('<JobDetail />', () => {
               name: 'Test Source Workflow',
             },
           },
-          job_explanation: 'It failed, bummer!',
         }}
       />
     );
@@ -70,7 +69,6 @@ describe('<JobDetail />', () => {
     assertDetail('Job Slice', '0/1');
     assertDetail('Credentials', 'SSH: Demo Credential');
     assertDetail('Machine Credential', 'SSH: Machine cred');
-    assertDetail('Explanation', 'It failed, bummer!');
 
     const credentialChip = wrapper.find(
       `Detail[label="Credentials"] CredentialChip`

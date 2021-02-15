@@ -32,20 +32,33 @@ function Template({ i18n, setBreadcrumb }) {
   const { me = {} } = useConfig();
 
   const {
-    result: { isNotifAdmin, template },
+    result: { isNotifAdmin, template, surveyConfig, launchConfig },
     isLoading,
     error: contentError,
     request: loadTemplateAndRoles,
   } = useRequest(
     useCallback(async () => {
-      const [{ data }, actions, notifAdminRes] = await Promise.all([
+      const [
+        { data },
+        actions,
+        notifAdminRes,
+        { data: launchConfiguration },
+      ] = await Promise.all([
         JobTemplatesAPI.readDetail(templateId),
         JobTemplatesAPI.readTemplateOptions(templateId),
         OrganizationsAPI.read({
           page_size: 1,
           role_level: 'notification_admin_role',
         }),
+        JobTemplatesAPI.readLaunch(templateId),
       ]);
+      let surveyConfiguration = null;
+
+      if (data.survey_enabled) {
+        const { data: survey } = await JobTemplatesAPI.readSurvey(templateId);
+
+        surveyConfiguration = survey;
+      }
       if (data.summary_fields.credentials) {
         const params = {
           page: 1,
@@ -71,6 +84,8 @@ function Template({ i18n, setBreadcrumb }) {
       return {
         template: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
+        surveyConfig: surveyConfiguration,
+        launchConfig: launchConfiguration,
       };
     }, [templateId]),
     { isNotifAdmin: false, template: null }
@@ -204,6 +219,8 @@ function Template({ i18n, setBreadcrumb }) {
                 resource={template}
                 loadSchedules={loadSchedules}
                 loadScheduleOptions={loadScheduleOptions}
+                surveyConfig={surveyConfig}
+                launchConfig={launchConfig}
               />
             </Route>
             {canSeeNotificationsTab && (
