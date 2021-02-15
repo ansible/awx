@@ -27,7 +27,7 @@ const CheckboxListItem = ({
       aria-labelledby={`check-action-item-${itemId}`}
       id={`${itemId}`}
     >
-      <DataListItemRow>
+      <DataListItemRow onClick={isSelected ? onDeselect : onSelect}>
         <CheckboxRadio
           aria-label={`check-action-item-${itemId}`}
           aria-labelledby={`check-action-item-${itemId}`}
@@ -44,7 +44,6 @@ const CheckboxListItem = ({
             <DataListCell key="name">
               <label
                 id={`check-action-item-${itemId}`}
-                htmlFor={`selected-${itemId}`}
                 className="check-action-item"
               >
                 <b>{label}</b>
