@@ -18,7 +18,7 @@ describe('<CopyButton/>', () => {
           onCopyStart={() => {}}
           onCopyFinish={() => {}}
           copyItem={() => {}}
-          errorMessage={`Failed to copy template.`}
+          errorMessage="Failed to copy template."
         />
       );
     });
@@ -32,7 +32,7 @@ describe('<CopyButton/>', () => {
           onCopyStart={() => {}}
           onCopyFinish={() => {}}
           copyItem={copyItem}
-          errorMessage={`Failed to copy template.`}
+          errorMessage="Failed to copy template."
         />
       );
     });
