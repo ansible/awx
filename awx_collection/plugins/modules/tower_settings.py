@@ -133,7 +133,7 @@ def main():
     existing_settings = module.get_endpoint('settings/all')['json']
 
     # Begin a json response
-    json_output = {'changed': False, 'old_values': {}, 'new_values': {} }
+    json_output = {'changed': False, 'old_values': {}, 'new_values': {}}
 
     # Check any of the settings to see if anything needs to be updated
     needs_update = False
@@ -153,7 +153,7 @@ def main():
     # If nothing needs an update we can simply exit with the response (as not changed)
     if not needs_update:
         module.exit_json(**json_output)
-    
+
     if module.check_mode and module._diff:
         json_output['changed'] = True
         module.exit_json(**json_output)
