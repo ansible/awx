@@ -1,8 +1,14 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection } from '@patternfly/react-core';
+import {
+  Alert,
+  AlertActionCloseButton,
+  AlertGroup,
+  Card,
+  PageSection,
+} from '@patternfly/react-core';
 import { NotificationTemplatesAPI } from '../../../api';
 import PaginatedTable, {
   HeaderRow,
@@ -29,6 +35,7 @@ const QS_CONFIG = getQSConfig('notification-templates', {
 function NotificationTemplatesList({ i18n }) {
   const location = useLocation();
   const match = useRouteMatch();
+  const [testToasts, setTestToasts] = useState([]);
 
   const addUrl = `${match.url}/add`;
 
@@ -100,6 +107,14 @@ function NotificationTemplatesList({ i18n }) {
   const handleDelete = async () => {
     await deleteTemplates();
     setSelected([]);
+  };
+
+  const addTestToast = useCallback(notification => {
+    setTestToasts(oldToasts => [...oldToasts, notification]);
+  }, []);
+
+  const removeTestToast = notificationId => {
+    setTestToasts(testToasts.filter(toast => toast.id !== notificationId));
   };
 
   const canAdd = actions && actions.POST;
@@ -185,6 +200,7 @@ function NotificationTemplatesList({ i18n }) {
             }
             renderRow={(template, index) => (
               <NotificationTemplateListItem
+                onAddToast={addTestToast}
                 key={template.id}
                 fetchTemplates={fetchTemplates}
                 template={template}
@@ -209,6 +225,39 @@ function NotificationTemplatesList({ i18n }) {
         {i18n._(t`Failed to delete one or more notification template.`)}
         <ErrorDetail error={deletionError} />
       </AlertModal>
+      <AlertGroup isToast>
+        {testToasts
+          .filter(notification => notification.status !== 'pending')
+          .map(notification => (
+            <Alert
+              actionClose={
+                <AlertActionCloseButton
+                  onClose={() => removeTestToast(notification.id)}
+                />
+              }
+              onTimeout={() => removeTestToast(notification.id)}
+              timeout={notification.status !== 'failed'}
+              title={notification.summary_fields.notification_template.name}
+              variant={notification.status === 'failed' ? 'danger' : 'success'}
+              key={`notification-template-alert-${notification.id}`}
+              ouiaId={`notification-template-alert-${notification.id}`}
+            >
+              <>
+                {notification.status === 'successful' && (
+                  <p>{i18n._(t`Notification sent successfully`)}</p>
+                )}
+                {notification.status === 'failed' &&
+                  notification?.error === 'timed out' && (
+                    <p>{i18n._(t`Notification timed out`)}</p>
+                  )}
+                {notification.status === 'failed' &&
+                  notification?.error !== 'timed out' && (
+                    <p>{notification.error}</p>
+                  )}
+              </>
+            </Alert>
+          ))}
+      </AlertGroup>
     </>
   );
 }

@@ -11,13 +11,16 @@ import { timeOfDay } from '../../../util/dates';
 import { NotificationTemplatesAPI, NotificationsAPI } from '../../../api';
 import StatusLabel from '../../../components/StatusLabel';
 import CopyButton from '../../../components/CopyButton';
-import useRequest from '../../../util/useRequest';
+import AlertModal from '../../../components/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { NOTIFICATION_TYPES } from '../constants';
 
 const NUM_RETRIES = 25;
 const RETRY_TIMEOUT = 5000;
 
 function NotificationTemplateListItem({
+  onAddToast,
   template,
   detailUrl,
   fetchTemplates,
@@ -66,6 +69,7 @@ function NotificationTemplateListItem({
           notificationId
         );
         if (notification.status !== 'pending') {
+          onAddToast(notification);
           setStatus(notification.status);
           return;
         }
@@ -76,8 +80,10 @@ function NotificationTemplateListItem({
       }
 
       setTimeout(pollForStatusChange, RETRY_TIMEOUT);
-    }, [template.id])
+    }, [template.id, onAddToast])
   );
+
+  const { error: sendTestError, dismissError } = useDismissableError(error);
 
   useEffect(() => {
     if (error) {
@@ -88,65 +94,78 @@ function NotificationTemplateListItem({
   const labelId = `template-name-${template.id}`;
 
   return (
-    <Tr id={`notification-template-row-${template.id}`}>
-      <Td
-        select={{
-          rowIndex,
-          isSelected,
-          onSelect,
-        }}
-        dataLabel={i18n._(t`Selected`)}
-      />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
-        <Link to={`${detailUrl}`}>
-          <b>{template.name}</b>
-        </Link>
-      </Td>
-      <Td dataLabel={i18n._(t`Status`)}>
-        {status && <StatusLabel status={status} />}
-      </Td>
-      <Td dataLabel={i18n._(t`Type`)}>
-        {NOTIFICATION_TYPES[template.notification_type] ||
-          template.notification_type}
-      </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)}>
-        <ActionItem visible tooltip={i18n._(t`Test notification`)}>
-          <Button
-            aria-label={i18n._(t`Test Notification`)}
-            variant="plain"
-            onClick={sendTestNotification}
-            isDisabled={isLoading || status === 'running'}
+    <>
+      <Tr id={`notification-template-row-${template.id}`}>
+        <Td
+          select={{
+            rowIndex,
+            isSelected,
+            onSelect,
+          }}
+          dataLabel={i18n._(t`Selected`)}
+        />
+        <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+          <Link to={`${detailUrl}`}>
+            <b>{template.name}</b>
+          </Link>
+        </Td>
+        <Td dataLabel={i18n._(t`Status`)}>
+          {status && <StatusLabel status={status} />}
+        </Td>
+        <Td dataLabel={i18n._(t`Type`)}>
+          {NOTIFICATION_TYPES[template.notification_type] ||
+            template.notification_type}
+        </Td>
+        <ActionsTd dataLabel={i18n._(t`Actions`)}>
+          <ActionItem visible tooltip={i18n._(t`Test notification`)}>
+            <Button
+              aria-label={i18n._(t`Test Notification`)}
+              variant="plain"
+              onClick={sendTestNotification}
+              isDisabled={isLoading || status === 'running'}
+            >
+              <BellIcon />
+            </Button>
+          </ActionItem>
+          <ActionItem
+            visible={template.summary_fields.user_capabilities.edit}
+            tooltip={i18n._(t`Edit`)}
           >
-            <BellIcon />
-          </Button>
-        </ActionItem>
-        <ActionItem
-          visible={template.summary_fields.user_capabilities.edit}
-          tooltip={i18n._(t`Edit`)}
-        >
-          <Button
-            aria-label={i18n._(t`Edit Notification Template`)}
-            variant="plain"
-            component={Link}
-            to={`/notification_templates/${template.id}/edit`}
+            <Button
+              aria-label={i18n._(t`Edit Notification Template`)}
+              variant="plain"
+              component={Link}
+              to={`/notification_templates/${template.id}/edit`}
+            >
+              <PencilAltIcon />
+            </Button>
+          </ActionItem>
+          <ActionItem
+            visible={template.summary_fields.user_capabilities.copy}
+            tooltip={i18n._(t`Copy Notification Template`)}
           >
-            <PencilAltIcon />
-          </Button>
-        </ActionItem>
-        <ActionItem
-          visible={template.summary_fields.user_capabilities.copy}
-          tooltip={i18n._(t`Copy Notification Template`)}
+            <CopyButton
+              copyItem={copyTemplate}
+              isCopyDisabled={isCopyDisabled}
+              onCopyStart={handleCopyStart}
+              onCopyFinish={handleCopyFinish}
+              errorMessage={i18n._(t`Failed to copy template.`)}
+            />
+          </ActionItem>
+        </ActionsTd>
+      </Tr>
+      {sendTestError && (
+        <AlertModal
+          isOpen
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissError}
         >
-          <CopyButton
-            copyItem={copyTemplate}
-            isCopyDisabled={isCopyDisabled}
-            onCopyStart={handleCopyStart}
-            onCopyFinish={handleCopyFinish}
-            errorMessage={i18n._(t`Failed to copy template.`)}
-          />
-        </ActionItem>
-      </ActionsTd>
-    </Tr>
+          {i18n._(t`Failed to send test notification.`)}
+          <ErrorDetail error={sendTestError} />
+        </AlertModal>
+      )}
+    </>
   );
 }
 
