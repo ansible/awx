@@ -114,7 +114,9 @@ function NotificationTemplatesList({ i18n }) {
   }, []);
 
   const removeTestToast = notificationId => {
-    setTestToasts(testToasts.filter(toast => toast.id !== notificationId));
+    setTestToasts(oldToasts =>
+      oldToasts.filter(toast => toast.id !== notificationId)
+    );
   };
 
   const canAdd = actions && actions.POST;
