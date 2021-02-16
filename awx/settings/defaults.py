@@ -285,6 +285,7 @@ INSTALLED_APPS = [
     'polymorphic',
     'taggit',
     'social_django',
+    'django_guid',
     'corsheaders',
     'awx.conf',
     'awx.main',
@@ -828,11 +829,14 @@ LOGGING = {
         },
         'dynamic_level_filter': {
             '()': 'awx.main.utils.filters.DynamicLevelFilter'
-        }
+        },
+        'guid': {
+            '()': 'awx.main.utils.filters.DefaultCorrelationId'
+        },
     },
     'formatters': {
         'simple': {
-            'format': '%(asctime)s %(levelname)-8s %(name)s %(message)s',
+            'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s %(message)s',
         },
         'json': {
             '()': 'awx.main.utils.formatters.LogstashFormatter'
@@ -842,7 +846,7 @@ LOGGING = {
             'format': '%(relativeSeconds)9.3f %(levelname)-8s %(message)s'
         },
         'dispatcher': {
-            'format': '%(asctime)s %(levelname)-8s %(name)s PID:%(process)d %(message)s',
+            'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s PID:%(process)d %(message)s',
         },
         'job_lifecycle': {
             '()': 'awx.main.utils.formatters.JobLifeCycleFormatter',
@@ -852,7 +856,7 @@ LOGGING = {
         'console': {
             '()': 'logging.StreamHandler',
             'level': 'DEBUG',
-            'filters': ['require_debug_true_or_test'],
+            'filters': ['require_debug_true_or_test', 'guid'],
             'formatter': 'simple',
         },
         'null': {
@@ -872,33 +876,33 @@ LOGGING = {
             'class': 'awx.main.utils.handlers.RSysLogHandler',
             'formatter': 'json',
             'address': '/var/run/awx-rsyslog/rsyslog.sock',
-            'filters': ['external_log_enabled', 'dynamic_level_filter'],
+            'filters': ['external_log_enabled', 'dynamic_level_filter', 'guid'],
         },
         'tower_warnings': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'tower.log'),
             'formatter':'simple',
         },
         'callback_receiver': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
             'formatter':'simple',
         },
         'dispatcher': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'dispatcher.log'),
             'formatter':'dispatcher',
         },
         'wsbroadcast': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'wsbroadcast.log'),
             'formatter':'simple',
         },
@@ -914,7 +918,7 @@ LOGGING = {
         'task_system': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'task_system.log'),
             'formatter':'simple',
         },
@@ -1094,6 +1098,7 @@ AWX_CALLBACK_PROFILE = False
 AWX_CLEANUP_PATHS = True
 
 MIDDLEWARE = [
+    'django_guid.middleware.GuidMiddleware',
     'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
@@ -1134,3 +1139,7 @@ BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS = 10
 
 # How often websocket process will generate stats
 BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
+
+DJANGO_GUID = {
+    'GUID_HEADER_NAME': 'X-API-Request-Id',
+}

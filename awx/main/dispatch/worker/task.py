@@ -6,6 +6,8 @@ import traceback
 
 from kubernetes.config import kube_config
 
+from django_guid.middleware import GuidMiddleware
+
 from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
 
 from .base import BaseWorker
@@ -52,6 +54,8 @@ class TaskWorker(BaseWorker):
         uuid = body.get('uuid', '<unknown>')
         args = body.get('args', [])
         kwargs = body.get('kwargs', {})
+        if 'guid' in body:
+            GuidMiddleware.set_guid(body.pop('guid'))
         _call = TaskWorker.resolve_callable(task)
         if inspect.isclass(_call):
             # the callable is a class, e.g., RunJob; instantiate and
