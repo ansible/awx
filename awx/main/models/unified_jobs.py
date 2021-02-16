@@ -50,7 +50,7 @@ from awx.main.utils import (
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
-from awx.main.fields import JSONField, AskForField, OrderedManyToManyField
+from awx.main.fields import JSONField, JSONBField, AskForField, OrderedManyToManyField
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
 
@@ -721,6 +721,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     credentials = models.ManyToManyField(
         'Credential',
         related_name='%(class)ss',
+    )
+    installed_collections = JSONBField(
+        blank=True,
+        default=dict,
+        editable=False,
+        help_text=_("The Collections names and versions installed in the execution environment."),
     )
 
     def get_absolute_url(self, request=None):
