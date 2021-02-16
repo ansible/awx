@@ -21,9 +21,9 @@ class ExecutionEnvironment(HasCreate, base.Base):
     NATURAL_KEY = ('name',)
 
     # fields are name, image, organization, managed_by_tower, credential
-    def create(self, name='', image='quay.io/ansible/ansible-runner:devel', credential=None, **kwargs):
+    def create(self, name='', image='quay.io/ansible/ansible-runner:devel', credential=None, pull=None, **kwargs):
         # we do not want to make a credential by default
-        payload = self.create_payload(name=name, image=image, credential=credential, **kwargs)
+        payload = self.create_payload(name=name, image=image, credential=credential, pull=pull, **kwargs)
         ret = self.update_identity(ExecutionEnvironments(self.connection).post(payload))
         return ret
 
@@ -33,12 +33,13 @@ class ExecutionEnvironment(HasCreate, base.Base):
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload
 
-    def payload(self, name='', image=None, organization=None, credential=None, **kwargs):
+    def payload(self, name='', image=None, organization=None, credential=None, pull=None, **kwargs):
         payload = PseudoNamespace(
             name=name or "EE - {}".format(random_title()),
             image=image or random_title(10),
             organization=organization.id if organization else None,
             credential=credential.id if credential else None,
+            pull=pull if pull else None,
             **kwargs
         )
 
