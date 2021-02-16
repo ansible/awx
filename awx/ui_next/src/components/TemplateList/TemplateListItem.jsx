@@ -18,7 +18,7 @@ import CredentialChip from '../CredentialChip';
 import { timeOfDay, formatDateString } from '../../util/dates';
 
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
-import LaunchButton from '../LaunchButton';
+import { LaunchButton } from '../LaunchButton';
 import Sparkline from '../Sparkline';
 import { toTitleCase } from '../../util/strings';
 import CopyButton from '../CopyButton';

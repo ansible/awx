@@ -87,7 +87,7 @@ function LaunchButton({ resource, i18n, children, history }) {
     }
   };
 
-  const handleRelaunch = async () => {
+  const handleRelaunch = async params => {
     let readRelaunch;
     let relaunch;
 
@@ -125,7 +125,7 @@ function LaunchButton({ resource, i18n, children, history }) {
         } else if (resource.type === 'ad_hoc_command') {
           relaunch = AdHocCommandsAPI.relaunch(resource.id);
         } else if (resource.type === 'job') {
-          relaunch = JobsAPI.relaunch(resource.id);
+          relaunch = JobsAPI.relaunch(resource.id, params || {});
         }
         const { data: job } = await relaunch;
         history.push(`/jobs/${job.id}/output`);

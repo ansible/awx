@@ -18,7 +18,7 @@ import {
   WrenchIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import LaunchButton from '../../../components/LaunchButton';
+import { LaunchButton } from '../../../components/LaunchButton';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
