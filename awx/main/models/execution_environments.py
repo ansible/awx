@@ -42,9 +42,10 @@ class ExecutionEnvironment(CommonModel):
         on_delete=models.SET_NULL,
     )
     pull = models.CharField(
-        max_length=1024,
+        max_length=16,
         choices=PULL_CHOICES,
-        default=None,
+        blank=True,
+        default='',
         help_text=_('Pull image before running?'),
     )
 
