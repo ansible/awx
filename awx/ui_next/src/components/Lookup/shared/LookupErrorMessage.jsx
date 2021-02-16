@@ -9,7 +9,7 @@ function LookupErrorMessage({ error, i18n }) {
 
   return (
     <div className="pf-c-form__helper-text pf-m-error" aria-live="polite">
-      {error.message || i18n._(t`An error occured`)}
+      {error.message || i18n._(t`An error occurred`)}
     </div>
   );
 }
