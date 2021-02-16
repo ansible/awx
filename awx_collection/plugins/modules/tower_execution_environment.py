@@ -54,7 +54,7 @@ options:
       description:
         - determine image pull behavior
       choices: ["always", "missing", "never"]
-      default: "missing"
+      default: None
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
