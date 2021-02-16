@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 import {
+  Badge,
   Dropdown,
   DropdownItem,
   DropdownToggle,
@@ -12,7 +15,25 @@ import {
   PageHeaderToolsItem,
   Tooltip,
 } from '@patternfly/react-core';
-import { QuestionCircleIcon, UserIcon } from '@patternfly/react-icons';
+import {
+  BellIcon,
+  QuestionCircleIcon,
+  UserIcon,
+} from '@patternfly/react-icons';
+import { WorkflowApprovalsAPI } from '../../api';
+import useRequest from '../../util/useRequest';
+import useWsPendingApprovalCount from './useWsPendingApprovalCount';
+
+const PendingWorkflowApprovals = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-right: 10px;
+`;
+
+const PendingWorkflowApprovalBadge = styled(Badge)`
+  margin-left: 10px;
+`;
 
 const DOCLINK =
   'https://docs.ansible.com/ansible-tower/latest/html/userguide/index.html';
@@ -27,6 +48,31 @@ function PageHeaderToolbar({
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
 
+  const {
+    request: fetchPendingApprovalCount,
+    result: pendingApprovals,
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        data: { count },
+      } = await WorkflowApprovalsAPI.read({
+        status: 'pending',
+        page_size: 1,
+      });
+      return count;
+    }, []),
+    0
+  );
+
+  const pendingApprovalsCount = useWsPendingApprovalCount(
+    pendingApprovals,
+    fetchPendingApprovalCount
+  );
+
+  useEffect(() => {
+    fetchPendingApprovalCount();
+  }, [fetchPendingApprovalCount]);
+
   const handleHelpSelect = () => {
     setIsHelpOpen(!isHelpOpen);
   };
@@ -37,7 +83,25 @@ function PageHeaderToolbar({
   return (
     <PageHeaderTools>
       <PageHeaderToolsGroup>
-        <Tooltip position="left" content={<div>{i18n._(t`Info`)}</div>}>
+        <Tooltip
+          position="bottom"
+          content={i18n._(t`Pending Workflow Approvals`)}
+        >
+          <PageHeaderToolsItem>
+            <Link to="/workflow_approvals?workflow_approvals.status=pending">
+              <PendingWorkflowApprovals>
+                <BellIcon color="white" />
+                <PendingWorkflowApprovalBadge
+                  id="toolbar-workflow-approval-badge"
+                  isRead
+                >
+                  {pendingApprovalsCount}
+                </PendingWorkflowApprovalBadge>
+              </PendingWorkflowApprovals>
+            </Link>
+          </PageHeaderToolsItem>
+        </Tooltip>
+        <Tooltip position="bottom" content={<div>{i18n._(t`Info`)}</div>}>
           <PageHeaderToolsItem>
             <Dropdown
               isPlain
