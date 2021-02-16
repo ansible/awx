@@ -4,4 +4,4 @@ updates:
   - package-ecosystem: "pip"
     directory: "/requirements"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
