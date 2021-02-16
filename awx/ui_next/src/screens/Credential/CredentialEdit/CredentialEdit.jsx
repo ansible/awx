@@ -116,7 +116,7 @@ function CredentialEdit({ credential, me }) {
         },
       ] = await Promise.all([
         CredentialTypesAPI.read({ page_size: 200 }),
-        CredentialsAPI.readInputSources(credId, { page_size: 200 }),
+        CredentialsAPI.readInputSources(credId),
       ]);
       const credTypes = data.results;
       if (data.next && data.next.includes('page=2')) {
