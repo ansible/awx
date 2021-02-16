@@ -290,6 +290,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       }
                     }
                     paused={false}
+                    preventScrollOnDeactivate={false}
                   >
                     <div
                       className="pf-l-bullseye"
