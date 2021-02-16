@@ -44,7 +44,7 @@ class ExecutionEnvironment(CommonModel):
     pull = models.CharField(
         max_length=1024,
         choices=PULL_CHOICES,
-        default='missing',
+        default=None,
         help_text=_('Pull image before running?'),
     )
 
