@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { CredentialsAPI } from '../../../api';
+import useSelected from '../../../util/useSelected';
 import AlertModal from '../../../components/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail';
 import DataListToolbar from '../../../components/DataListToolbar';
@@ -18,6 +19,7 @@ import PaginatedTable, {
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import CredentialListItem from './CredentialListItem';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,
@@ -26,9 +28,7 @@ const QS_CONFIG = getQSConfig('credential', {
 });
 
 function CredentialList({ i18n }) {
-  const [selected, setSelected] = useState([]);
   const location = useLocation();
-
   const {
     result: {
       credentials,
@@ -77,8 +77,10 @@ function CredentialList({ i18n }) {
     fetchCredentials();
   }, [fetchCredentials]);
 
-  const isAllSelected =
-    selected.length > 0 && selected.length === credentials.length;
+  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
+    credentials
+  );
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteCredentials,
@@ -100,21 +102,12 @@ function CredentialList({ i18n }) {
     setSelected([]);
   };
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...credentials] : []);
-  };
-
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
-
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-
+  const deleteDetailsRequests = relatedResourceDeleteRequests.credential(
+    selected[0],
+    i18n
+  );
   return (
     <PageSection>
       <Card>
@@ -169,7 +162,9 @@ function CredentialList({ i18n }) {
               {...props}
               showSelectAll
               isAllSelected={isAllSelected}
-              onSelectAll={handleSelectAll}
+              onSelectAll={isSelected =>
+                setSelected(isSelected ? [...credentials] : [])
+              }
               qsConfig={QS_CONFIG}
               additionalControls={[
                 ...(canAdd
@@ -180,6 +175,11 @@ function CredentialList({ i18n }) {
                   onDelete={handleDelete}
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Credentials`)}
+                  deleteDetailsRequests={deleteDetailsRequests}
+                  deleteMessage={i18n._(
+                    '{numItemsToDelete, plural, one {This credential is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these credentials could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                    { numItemsToDelete: selected.length }
+                  )}
                 />,
               ]}
             />

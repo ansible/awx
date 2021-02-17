@@ -16,6 +16,7 @@ import {
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { CredentialTypesAPI } from '../../../api';
 import { jsonToYaml } from '../../../util/yaml';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 function CredentialTypeDetails({ credentialType, i18n }) {
   const { id, name, description, injectors, inputs } = credentialType;
@@ -30,6 +31,11 @@ function CredentialTypeDetails({ credentialType, i18n }) {
       await CredentialTypesAPI.destroy(id);
       history.push(`/credential_types`);
     }, [id, history])
+  );
+
+  const deleteDetailsRequests = relatedResourceDeleteRequests.credentialType(
+    credentialType,
+    i18n
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
@@ -83,6 +89,10 @@ function CredentialTypeDetails({ credentialType, i18n }) {
               modalTitle={i18n._(t`Delete credential type`)}
               onConfirm={deleteCredentialType}
               isDisabled={isLoading}
+              deleteDetailsRequests={deleteDetailsRequests}
+              deleteMessage={i18n._(
+                t`This credential type is currently being used by some credentials. Are you sure you want to delete it?`
+              )}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>

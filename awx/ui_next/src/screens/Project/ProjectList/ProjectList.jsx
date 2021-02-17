@@ -18,6 +18,7 @@ import PaginatedTable, {
   HeaderCell,
 } from '../../../components/PaginatedTable';
 import useWsProjects from './useWsProjects';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 
 import ProjectListItem from './ProjectListItem';
@@ -116,6 +117,11 @@ function ProjectList({ i18n }) {
     }
   };
 
+  const deleteDetailsRequests = relatedResourceDeleteRequests.project(
+    selected[0],
+    i18n
+  );
+
   return (
     <Fragment>
       <PageSection>
@@ -194,6 +200,11 @@ function ProjectList({ i18n }) {
                     onDelete={handleProjectDelete}
                     itemsToDelete={selected}
                     pluralizedItemName={i18n._(t`Projects`)}
+                    deleteDetailsRequests={deleteDetailsRequests}
+                    deleteMessage={i18n._(
+                      '{numItemsToDelete, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                      { numItemsToDelete: selected.length }
+                    )}
                   />,
                 ]}
               />

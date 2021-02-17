@@ -10,14 +10,28 @@ import {
   checkPropTypes,
 } from 'prop-types';
 import styled from 'styled-components';
-import { Alert, Button, DropdownItem, Tooltip } from '@patternfly/react-core';
+import {
+  Alert,
+  Badge,
+  Button,
+  DropdownItem,
+  Tooltip,
+} from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
 import { KebabifiedContext } from '../../contexts/Kebabified';
+import { getRelatedResourceDeleteCounts } from '../../util/getRelatedResourceDeleteDetails';
+
+import ErrorDetail from '../ErrorDetail';
 
 const WarningMessage = styled(Alert)`
   margin-top: 10px;
+`;
+const DetailsWrapper = styled.span`
+  :not(:first-of-type) {
+    padding-left: 10px;
+  }
 `;
 
 const requiredField = props => {
@@ -77,20 +91,40 @@ function ToolbarDeleteButton({
   pluralizedItemName,
   errorMessage,
   onDelete,
+  deleteDetailsRequests,
   warningMessage,
+  deleteMessage,
   i18n,
   cannotDelete,
 }) {
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteDetails, setDeleteDetails] = useState({});
 
+  const deleteMessages = [warningMessage, deleteMessage].filter(
+    message => message
+  );
+
+  const [deleteMessageError, setDeleteMessageError] = useState();
   const handleDelete = () => {
     onDelete();
     toggleModal();
   };
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
+  const toggleModal = async isOpen => {
+    if (itemsToDelete.length === 1 && deleteDetailsRequests?.length > 0) {
+      const { results, error } = await getRelatedResourceDeleteCounts(
+        deleteDetailsRequests
+      );
+
+      if (error) {
+        setDeleteMessageError(error);
+      } else {
+        setDeleteDetails(results);
+      }
+    }
+
+    setIsModalOpen(isOpen);
   };
 
   useEffect(() => {
@@ -126,40 +160,55 @@ function ToolbarDeleteButton({
   const isDisabled =
     itemsToDelete.length === 0 || itemsToDelete.some(cannotDelete);
 
-  // NOTE: Once PF supports tooltips on disabled elements,
-  // we can delete the extra <div> around the <DeleteButton> below.
-  // See: https://github.com/patternfly/patternfly-react/issues/1894
+  if (deleteMessageError) {
+    return (
+      <AlertModal
+        isOpen={deleteMessageError}
+        title={i18n._(t`Error!`)}
+        onClose={() => {
+          toggleModal(false);
+          setDeleteMessageError();
+        }}
+      >
+        <ErrorDetail error={deleteMessageError} />
+      </AlertModal>
+    );
+  }
+
   return (
     <>
       {isKebabified ? (
-        <DropdownItem
-          key="add"
-          isDisabled={isDisabled}
-          component="button"
-          onClick={toggleModal}
-        >
-          {i18n._(t`Delete`)}
-        </DropdownItem>
+        <Tooltip content={renderTooltip()} position="top">
+          <DropdownItem
+            key="add"
+            isDisabled={isDisabled}
+            component="button"
+            onClick={() => toggleModal(true)}
+          >
+            {i18n._(t`Delete`)}
+          </DropdownItem>
+        </Tooltip>
       ) : (
         <Tooltip content={renderTooltip()} position="top">
           <div>
             <Button
               variant="secondary"
               aria-label={i18n._(t`Delete`)}
-              onClick={toggleModal}
-              isDisabled={isDisabled}
+              onClick={() => toggleModal(true)}
+              isAriaDisabled={isDisabled}
             >
               {i18n._(t`Delete`)}
             </Button>
           </div>
         </Tooltip>
       )}
-      {isModalOpen && (
+
+      {isModalOpen && !deleteMessageError && (
         <AlertModal
           variant="danger"
           title={modalTitle}
           isOpen={isModalOpen}
-          onClose={toggleModal}
+          onClose={() => toggleModal(false)}
           actions={[
             <Button
               key="delete"
@@ -173,7 +222,7 @@ function ToolbarDeleteButton({
               key="cancel"
               variant="link"
               aria-label={i18n._(t`cancel delete`)}
-              onClick={toggleModal}
+              onClick={() => toggleModal(false)}
             >
               {i18n._(t`Cancel`)}
             </Button>,
@@ -186,8 +235,43 @@ function ToolbarDeleteButton({
               <br />
             </span>
           ))}
-          {warningMessage && (
-            <WarningMessage variant="warning" isInline title={warningMessage} />
+          {itemsToDelete.length === 1 &&
+            Object.values(deleteDetails).length > 0 && (
+              <WarningMessage
+                variant="warning"
+                isInline
+                title={
+                  <div>
+                    {deleteMessages.map(message => (
+                      <div aria-label={message} key={message}>
+                        {message}
+                      </div>
+                    ))}
+                    {itemsToDelete.length === 1 && (
+                      <>
+                        <br />
+                        {Object.entries(deleteDetails).map(([key, value]) => (
+                          <DetailsWrapper
+                            key={key}
+                            aria-label={`${key}: ${value}`}
+                          >
+                            <span>{key}</span> <Badge>{value}</Badge>
+                          </DetailsWrapper>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                }
+              />
+            )}
+          {itemsToDelete.length > 1 && (
+            <WarningMessage
+              variant="warning"
+              isInline
+              title={deleteMessages.map(message => (
+                <div>{message}</div>
+              ))}
+            />
           )}
         </AlertModal>
       )}

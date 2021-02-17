@@ -18,6 +18,7 @@ import { getQSConfig, parseQueryString } from '../../util/qs';
 import useWsTemplates from '../../util/useWsTemplates';
 import AddDropDownButton from '../AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
+import { deleteRequests } from '../../util/getDeleteDetails';
 
 function TemplateList({ defaultParams, i18n }) {
   // The type value in const qsConfig below does not have a space between job_template and
@@ -168,6 +169,8 @@ function TemplateList({ defaultParams, i18n }) {
     <AddDropDownButton key="add" dropdownItems={addDropDownButton} />
   );
 
+  const deleteDetailsRequests = deleteRequests.template(selected[0], i18n);
+
   return (
     <Fragment>
       <Card>
@@ -236,6 +239,11 @@ function TemplateList({ defaultParams, i18n }) {
                   onDelete={handleTemplateDelete}
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Templates`)}
+                  deleteDetailsRequests={deleteDetailsRequests}
+                  deleteMessage={i18n._(
+                    '{numItemsToDelete, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} other {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}',
+                    { numItemsToDelete: selected.length }
+                  )}
                 />,
               ]}
             />

@@ -74,7 +74,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
         >
           <Button
             aria-label="Delete"
-            isDisabled={true}
+            isAriaDisabled={true}
             onClick={[Function]}
             variant="secondary"
           >
@@ -92,19 +92,20 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
         >
           <Button
             aria-label="Delete"
-            isDisabled={true}
+            isAriaDisabled={true}
             onClick={[Function]}
             variant="secondary"
           >
             <button
               aria-disabled={true}
               aria-label="Delete"
-              className="pf-c-button pf-m-secondary pf-m-disabled"
+              className="pf-c-button pf-m-secondary pf-m-aria-disabled"
               data-ouia-component-id="OUIA-Generated-Button-secondary-1"
               data-ouia-component-type="PF4/Button"
               data-ouia-safe={true}
-              disabled={true}
+              disabled={false}
               onClick={[Function]}
+              onKeyPress={[Function]}
               role={null}
               tabIndex={null}
               type="button"

@@ -20,6 +20,7 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { useConfig } from '../../../contexts/Config';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 function OrganizationDetail({ i18n, organization }) {
   const {
@@ -70,6 +71,11 @@ function OrganizationDetail({ i18n, organization }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
+
+  const deleteDetailsRequests = relatedResourceDeleteRequests.organization(
+    organization,
+    i18n
+  );
 
   if (hasContentLoading) {
     return <ContentLoading />;
@@ -157,6 +163,10 @@ function OrganizationDetail({ i18n, organization }) {
               modalTitle={i18n._(t`Delete Organization`)}
               onConfirm={deleteOrganization}
               isDisabled={isLoading}
+              deleteDetailsRequests={deleteDetailsRequests}
+              deleteMessage={i18n._(
+                t`This organization is currently being used some credentials. Are you sure you want to delete it?`
+              )}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>

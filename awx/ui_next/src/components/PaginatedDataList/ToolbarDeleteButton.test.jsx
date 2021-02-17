@@ -1,6 +1,13 @@
 import React from 'react';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { act } from 'react-dom/test-utils';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
+import { CredentialsAPI } from '../../api';
 import ToolbarDeleteButton from './ToolbarDeleteButton';
+
+jest.mock('../../api');
 
 const itemA = {
   id: 1,
@@ -19,6 +26,15 @@ const itemC = {
 };
 
 describe('<ToolbarDeleteButton />', () => {
+  let deleteDetailsRequests;
+  beforeEach(() => {
+    deleteDetailsRequests = [
+      {
+        label: 'job',
+        request: CredentialsAPI.read.mockResolvedValue({ data: { count: 1 } }),
+      },
+    ];
+  });
   test('should render button', () => {
     const wrapper = mountWithContexts(
       <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[]} />
@@ -27,14 +43,27 @@ describe('<ToolbarDeleteButton />', () => {
     expect(wrapper.find('ToolbarDeleteButton')).toMatchSnapshot();
   });
 
-  test('should open confirmation modal', () => {
-    const wrapper = mountWithContexts(
-      <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[itemA]} />
-    );
+  test('should open confirmation modal', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ToolbarDeleteButton
+          onDelete={() => {}}
+          itemsToDelete={[itemA]}
+          deleteDetailsRequests={deleteDetailsRequests}
+          deleteMessage="Delete this?"
+          warningMessage="Are you sure to want to delete this"
+        />
+      );
+    });
+
     expect(wrapper.find('Modal')).toHaveLength(0);
-    wrapper.find('button').simulate('click');
-    wrapper.update();
+    await act(async () => {
+      wrapper.find('button').prop('onClick')();
+    });
+    await waitForElement(wrapper, 'Modal', el => el.length > 0);
     expect(wrapper.find('Modal')).toHaveLength(1);
+    expect(wrapper.find('div[aria-label="Delete this?"]')).toHaveLength(1);
   });
 
   test('should invoke onDelete prop', () => {
