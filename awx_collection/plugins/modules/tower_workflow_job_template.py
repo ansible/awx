@@ -250,9 +250,9 @@ options:
               type: list
               suboptions:
                 identifier:
-                description:
-                  - Identifier of Node that will run after this node completes given this option.
-                elements: str
+                  description:
+                    - Identifier of Node that will run after this node completes given this option.
+                  elements: str
             success_nodes:
               description:
                 - Nodes that will run after this node on success.
@@ -260,9 +260,9 @@ options:
               type: list
               suboptions:
                 identifier:
-                description:
-                  - Identifier of Node that will run after this node completes given this option.
-                elements: str
+                  description:
+                    - Identifier of Node that will run after this node completes given this option.
+                  elements: str
             failure_nodes:
               description:
                 - Nodes that will run after this node on failure.
@@ -270,9 +270,9 @@ options:
               type: list
               suboptions:
                 identifier:
-                description:
-                  - Identifier of Node that will run after this node completes given this option.
-                elements: str
+                  description:
+                    - Identifier of Node that will run after this node completes given this option.
+                  elements: str
             credentials:
               description:
                 - Credentials to be applied to job as launch-time prompts.
@@ -281,14 +281,14 @@ options:
               type: list
               suboptions:
                 name:
-                description:
-                  - Name Credentials to be applied to job as launch-time prompts.
-                elements: str
+                  description:
+                    - Name Credentials to be applied to job as launch-time prompts.
+                  elements: str
     destroy_current_schema:
       description:
         - Set in order to destroy current schema on the workflow.
         - This option is used for full schema update, if not used, nodes not described in schema will persist and keep current associations and links.
-      type: Bool
+      type: bool
       default: False
 
 extends_documentation_fragment: awx.awx.auth
@@ -360,6 +360,7 @@ from ..module_utils.tower_api import TowerAPIModule
 
 import json
 response = []
+
 
 def update_survey(module, last_request):
     spec_endpoint = last_request.get('related', {}).get('survey_spec')
@@ -528,8 +529,9 @@ def main():
         # Create Schema Associations
         module.create_schema_nodes_association(response, schema, existing_item['id'])
         module.json_output['schema_creation_data'] = response
-    
+
     module.exit_json(**module.json_output)
+
 
 if __name__ == '__main__':
     main()

@@ -691,7 +691,7 @@ class TowerAPIModule(TowerModule):
             workflow_node_fields = {}
             search_fields = {}
             association_fields = {}
-            
+
             # Lookup Job Template ID
             if workflow_node['unified_job_template']['name']:
                 search_fields = {'name': workflow_node['unified_job_template']['name']}
@@ -718,6 +718,7 @@ class TowerAPIModule(TowerModule):
                         search_fields = {'identifier': workflow_node['identifier']}
                 except:
                     pass
+
             # Set Search fields
             search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
 
@@ -732,22 +733,20 @@ class TowerAPIModule(TowerModule):
 
             if state:
                 response.append(
-                self.create_or_update_if_needed(
-                    existing_item, workflow_node_fields,
-                    endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
-                )
+                    self.create_or_update_if_needed(
+                        existing_item, workflow_node_fields,
+                        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
+                    )
                 )
             else:
                 # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
                 response.append(
-                self.delete_if_needed(
-                    existing_item, auto_exit=False,
+                    self.delete_if_needed(
+                        existing_item, auto_exit=False,
+                    )
                 )
-                )
-
 
     def create_schema_nodes_association(self, response, schema, workflow_id):
-
         for workflow_node in schema:
             workflow_node_fields = {}
             search_fields = {}
@@ -763,7 +762,6 @@ class TowerAPIModule(TowerModule):
                     search_fields['identifier'] = workflow_node['identifier']
             except:
                 pass
-
             # Attempt to look up an existing item based on the provided data
             existing_item = self.get_one('workflow_job_template_nodes', **{'data': search_fields})
 
@@ -799,16 +797,14 @@ class TowerAPIModule(TowerModule):
                             association_fields[association] = id_list
 
                     response.append(
-                    self.create_or_update_if_needed(
-                        existing_item, workflow_node_fields,
-                        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
-                        associations=association_fields,
-                    )
+                        self.create_or_update_if_needed(
+                            existing_item, workflow_node_fields,
+                            endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
+                            associations=association_fields,
+                        )
                     )
                 except:
-                    raise AnsibleError('error in association error: {}, node: {}'.format(association, workflow_node))
-                    continue
-
+                    self.fail_json(msg='error in association error: {0}, node: {1}'.format(association, workflow_node))
 
     def destroy_schema_nodes(self, response, workflow_id):
             search_fields = {}
@@ -821,6 +817,4 @@ class TowerAPIModule(TowerModule):
                 pass
             # Loop through found fields
             for workflow_node in existing_items['json']['results']:
-                response.append(
-                self.delete_endpoint(workflow_node['url'])
-                )
+                response.append(self.delete_endpoint(workflow_node['url']))
