@@ -250,7 +250,7 @@ function VisualizerGraph({ i18n, readOnly }) {
         </defs>
         <rect
           height="100%"
-          id="workflow-backround"
+          id="workflow-background"
           opacity="0"
           width="100%"
           {...(addingLink && {
@@ -267,12 +267,6 @@ function VisualizerGraph({ i18n, readOnly }) {
         />
         <g id="workflow-g" ref={gRef}>
           {nodePositions && [
-            <WorkflowStartNode
-              key="start"
-              showActionTooltip={!readOnly}
-              onUpdateHelpText={setHelpText}
-              readOnly={readOnly}
-            />,
             links.map(link => {
               if (
                 nodePositions[link.source.id] &&
@@ -307,6 +301,12 @@ function VisualizerGraph({ i18n, readOnly }) {
               }
               return null;
             }),
+            <WorkflowStartNode
+              key="start"
+              showActionTooltip={!readOnly}
+              onUpdateHelpText={setHelpText}
+              readOnly={readOnly}
+            />,
           ]}
           {addingLink && (
             <PotentialLink
