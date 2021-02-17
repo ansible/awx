@@ -197,7 +197,7 @@ function CredentialForm({
     description: credential.description || '',
     organization: credential?.summary_fields?.organization || null,
     credential_type: credential?.credential_type || '',
-    inputs: {},
+    inputs: credential?.inputs || {},
     passwordPrompts: {},
   };
 
