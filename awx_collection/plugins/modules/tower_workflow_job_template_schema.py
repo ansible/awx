@@ -159,9 +159,9 @@ options:
               type: list
               suboptions:
                 identifier:
-                description:
-                  - Identifier of Node that will run after this node completes given this option.
-                elements: str
+                  description:
+                    - Identifier of Node that will run after this node completes given this option.
+                  elements: str
             success_nodes:
               description:
                 - Nodes that will run after this node on success.
@@ -169,9 +169,9 @@ options:
               type: list
               suboptions:
                 identifier:
-                description:
-                  - Identifier of Node that will run after this node completes given this option.
-                elements: str
+                  description:
+                    - Identifier of Node that will run after this node completes given this option.
+                  elements: str
             failure_nodes:
               description:
                 - Nodes that will run after this node on failure.
@@ -179,9 +179,9 @@ options:
               type: list
               suboptions:
                 identifier:
-                description:
-                  - Identifier of Node that will run after this node completes given this option.
-                elements: str
+                  description:
+                    - Identifier of Node that will run after this node completes given this option.
+                  elements: str
             credentials:
               description:
                 - Credentials to be applied to job as launch-time prompts.
@@ -190,14 +190,14 @@ options:
               type: list
               suboptions:
                 name:
-                description:
-                  - Name Credentials to be applied to job as launch-time prompts.
-                elements: str
+                  description:
+                    - Name Credentials to be applied to job as launch-time prompts.
+                  elements: str
     destroy_current_schema:
       description:
         - Set in order to destroy current schema on the workflow.
         - This option is used for full schema update, if not used, nodes not described in schema will persist and keep current associations and links.
-      type: Bool
+      type: bool
       default: False
 
 
@@ -209,7 +209,7 @@ More advanced examples can be made from using the tower_export module
 
 - name: Create a workflow job template schema
   awx.awx.tower_workflow_job_template_schema:
-    workflow_job_template: "{{ wfjt_name }}"
+    workflow_job_template: example-workflow
     schema:
       - identifier: node101
         unified_job_template:
@@ -259,7 +259,7 @@ More advanced examples can be made from using the tower_export module
 
 - name: Destroy schema and create new one
   awx.awx.tower_workflow_job_template_schema:
-    workflow_job_template: "{{ wfjt_name }}"
+    workflow_job_template: example-workflow
     destroy_current_schema: true
     schema:
       - identifier: node101
@@ -289,7 +289,6 @@ More advanced examples can be made from using the tower_export module
 '''
 
 from ..module_utils.tower_api import TowerAPIModule
-from ansible.errors import AnsibleError
 
 response = []
 
