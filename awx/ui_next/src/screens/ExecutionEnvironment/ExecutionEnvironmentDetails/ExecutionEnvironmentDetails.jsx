@@ -46,10 +46,15 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           value={image}
           dataCy="execution-environment-detail-image"
         />
-        <Detail label={i18n._(t`Description`)} value={description} />
+        <Detail
+          label={i18n._(t`Description`)}
+          value={description}
+          dataCy="execution-environment-detail-description"
+        />
         <Detail
           label={i18n._(t`Pull`)}
           value={pull === '' ? i18n._(t`Missing`) : toTitleCase(pull)}
+          dataCy="execution-environment-pull"
         />
         {executionEnvironment.summary_fields.credential && (
           <Detail
@@ -66,11 +71,13 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           label={i18n._(t`Created`)}
           date={executionEnvironment.created}
           user={executionEnvironment.summary_fields.created_by}
+          dataCy="execution-environment-created"
         />
         <UserDateDetail
           label={i18n._(t`Last Modified`)}
           date={executionEnvironment.modified}
           user={executionEnvironment.summary_fields.modified_by}
+          dataCy="execution-environment-modified"
         />
       </DetailList>
       <CardActionsRow>
@@ -78,6 +85,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           aria-label={i18n._(t`edit`)}
           component={Link}
           to={`/execution_environments/${id}/edit`}
+          ouiaId="edit-button"
         >
           {i18n._(t`Edit`)}
         </Button>
@@ -86,6 +94,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           modalTitle={i18n._(t`Delete Execution Environment`)}
           onConfirm={deleteExecutionEnvironment}
           isDisabled={isLoading}
+          ouiaId="delete-button"
         >
           {i18n._(t`Delete`)}
         </DeleteButton>
