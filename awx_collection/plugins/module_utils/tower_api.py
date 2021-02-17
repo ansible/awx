@@ -766,13 +766,11 @@ class TowerAPIModule(TowerModule):
             for field_name in (
                     'identifier', 'extra_data', 'scm_branch', 'job_type', 'job_tags', 'skip_tags',
                     'limit', 'diff_mode', 'verbosity', 'all_parents_must_converge', 'state',):
-                try:
-                    if workflow_node[field_name]:
-                        workflow_node_fields[field_name] = workflow_node[field_name]
-                    if workflow_node['identifier']:
-                        search_fields = {'identifier': workflow_node['identifier']}
-                except:
-                    pass
+                field_val = workflow_node.get(field_name)
+                if field_val:
+                    workflow_node_fields[field_name] = field_val
+                if workflow_node['identifier']:
+                    search_fields = {'identifier': workflow_node['identifier']}
 
             # Set Search fields
             search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
@@ -811,12 +809,10 @@ class TowerAPIModule(TowerModule):
             search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
 
             # Lookup Values for other fields
-            try:
-                if workflow_node['identifier']:
-                    workflow_node_fields['identifier'] = workflow_node['identifier']
-                    search_fields['identifier'] = workflow_node['identifier']
-            except:
-                pass
+            if workflow_node['identifier']:
+                workflow_node_fields['identifier'] = workflow_node['identifier']
+                search_fields['identifier'] = workflow_node['identifier']
+
             # Attempt to look up an existing item based on the provided data
             existing_item = self.get_one('workflow_job_template_nodes', **{'data': search_fields})
 
@@ -869,7 +865,7 @@ class TowerAPIModule(TowerModule):
                 search_fields['workflow_job_template'] = workflow_id
                 existing_items = self.get_all_endpoint('workflow_job_template_nodes', **{'data': search_fields})
             except:
-                pass
+                self.fail_json(msg='Unable to find workflow: {0}'.format(workflow_id))
             # Loop through found fields
             for workflow_node in existing_items['json']['results']:
                 response.append(self.delete_endpoint(workflow_node['url']))
