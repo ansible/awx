@@ -197,6 +197,58 @@ CredentialTypesAPI.read.mockResolvedValue({
         },
         injectors: {},
       },
+      {
+        id: 9,
+        type: 'credential_type',
+        url: '/api/v2/credential_types/9/',
+        related: {
+          credentials: '/api/v2/credential_types/9/credentials/',
+          activity_stream: '/api/v2/credential_types/9/activity_stream/',
+        },
+        summary_fields: {
+          user_capabilities: {
+            edit: true,
+            delete: true,
+          },
+        },
+        created: '2021-02-12T19:13:22.352791Z',
+        modified: '2021-02-12T19:14:15.578773Z',
+        name: 'Google Compute Engine',
+        description: '',
+        kind: 'cloud',
+        namespace: 'gce',
+        managed_by_tower: true,
+        inputs: {
+          fields: [
+            {
+              id: 'username',
+              label: 'Service Account Email Address',
+              type: 'string',
+              help_text:
+                'The email address assigned to the Google Compute Engine service account.',
+            },
+            {
+              id: 'project',
+              label: 'Project',
+              type: 'string',
+              help_text:
+                'The Project ID is the GCE assigned identification. It is often constructed as three words or two words followed by a three-digit number. Examples: project-id-000 and another-project-id',
+            },
+            {
+              id: 'ssh_key_data',
+              label: 'RSA Private Key',
+              type: 'string',
+              format: 'ssh_private_key',
+              secret: true,
+              multiline: true,
+              help_text:
+                'Paste the contents of the PEM file associated with the service account email.',
+            },
+          ],
+          required: ['username', 'ssh_key_data'],
+        },
+        injectors: {},
+      },
     ],
   },
 });
@@ -353,6 +405,38 @@ describe('<CredentialEdit />', () => {
       });
       expect(CredentialInputSourcesAPI.destroy).toHaveBeenCalledWith(34);
       expect(history.location.pathname).toBe('/credentials/3/details');
+    });
+    test('inputs are properly rendered', async () => {
+      history = createMemoryHistory({ initialEntries: ['/credentials'] });
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <CredentialEdit
+            credential={{
+              ...mockCredential,
+              inputs: {
+                project: 'foo',
+                username: 'foo@ansible.com',
+                ssh_key_data: '$encrypted$',
+              },
+              kind: 'gce',
+              credential_type: 9,
+            }}
+          />,
+          {
+            context: { router: { history } },
+          }
+        );
+      });
+      wrapper.update();
+      expect(wrapper.find('input#credential-username').prop('value')).toBe(
+        'foo@ansible.com'
+      );
+      expect(wrapper.find('input#credential-project').prop('value')).toBe(
+        'foo'
+      );
+      expect(
+        wrapper.find('textarea#credential-ssh_key_data').prop('value')
+      ).toBe('$encrypted$');
     });
   });
   describe('Initial GET request fails', () => {
