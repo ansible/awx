@@ -70,18 +70,6 @@ def migrate_event_data(apps, schema_editor):
                 f'FOR VALUES FROM (\'1980-01-01 00:00:00.000000+00\') to (\'{end_timestamp}\');'
             )
 
-            # First partition is a special case since it runs up through this moment
-            # Go ahead and create next partition, since it will also need to be a
-            # custom partition (that accounts for the remainder of the current hour)
-            partition_label = current_time.strftime('%Y%m%d_%H')
-            start_timestamp = end_timestamp
-            end_timestamp = (current_time + timedelta(hours=1)).strftime('%Y-%m-%d %H:00:00.000000%z')
-            cursor.execute(
-                f'CREATE TABLE {tblname}_{partition_label} '
-                f'PARTITION OF {tblname} '
-                f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
-            )
-
             # copy over all job events into partitioned table
             # TODO: https://github.com/ansible/awx/issues/9257
             cursor.execute(
