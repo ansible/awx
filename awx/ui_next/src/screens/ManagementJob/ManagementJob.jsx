@@ -22,9 +22,6 @@ import { Schedules } from '../../components/Schedule';
 import { useConfig } from '../../contexts/Config';
 import useRequest from '../../util/useRequest';
 
-import ManagementJobDetails from './ManagementJobDetails';
-import ManagementJobEdit from './ManagementJobEdit';
-
 function ManagementJob({ i18n, setBreadcrumb }) {
   const basePath = '/management_jobs';
 
@@ -49,12 +46,18 @@ function ManagementJob({ i18n, setBreadcrumb }) {
     setBreadcrumb(result);
   }, [result, setBreadcrumb]);
 
-  const createSchedule = data =>
-    SystemJobTemplatesAPI.createSchedule(result.id, data);
-  const loadSchedules = params =>
-    SystemJobTemplatesAPI.readSchedules(result.id, params);
-  const loadScheduleOptions = () =>
-    SystemJobTemplatesAPI.readScheduleOptions(result.id);
+  const createSchedule = useCallback(
+    data => SystemJobTemplatesAPI.createSchedule(result.id, data),
+    [result]
+  );
+  const loadSchedules = useCallback(
+    params => SystemJobTemplatesAPI.readSchedules(result.id, params),
+    [result]
+  );
+  const loadScheduleOptions = useCallback(
+    () => SystemJobTemplatesAPI.readScheduleOptions(result.id),
+    [result]
+  );
 
   const tabsArray = [
     {
@@ -69,11 +72,6 @@ function ManagementJob({ i18n, setBreadcrumb }) {
     },
     {
       id: 0,
-      link: `${basePath}/${id}/details`,
-      name: i18n._(t`Details`),
-    },
-    {
-      id: 1,
       name: i18n._(t`Schedules`),
       link: `${match.url}/schedules`,
     },
@@ -81,7 +79,7 @@ function ManagementJob({ i18n, setBreadcrumb }) {
 
   if (canReadNotifications) {
     tabsArray.push({
-      id: 2,
+      id: 1,
       name: i18n._(t`Notifications`),
       link: `${match.url}/notifications`,
     });
@@ -92,37 +90,33 @@ function ManagementJob({ i18n, setBreadcrumb }) {
     Tabs = null;
   }
 
-  const LoadingScreen = (
-    <PageSection>
-      <Card>
-        {Tabs}
-        <ContentLoading />
-      </Card>
-    </PageSection>
-  );
-
-  const ErrorScreen = (
-    <PageSection>
-      <Card>
-        <ContentError error={error}>
-          {error?.response?.status === 404 && (
-            <span>
-              {i18n._(t`Management job not found.`)}
-              {''}
-              <Link to={basePath}>{i18n._(t`View all management jobs`)}</Link>
-            </span>
-          )}
-        </ContentError>
-      </Card>
-    </PageSection>
-  );
-
   if (error) {
-    return ErrorScreen;
+    return (
+      <PageSection>
+        <Card>
+          <ContentError error={error}>
+            {error?.response?.status === 404 && (
+              <span>
+                {i18n._(t`Management job not found.`)}
+                {''}
+                <Link to={basePath}>{i18n._(t`View all management jobs`)}</Link>
+              </span>
+            )}
+          </ContentError>
+        </Card>
+      </PageSection>
+    );
   }
 
   if (isLoading) {
-    return LoadingScreen;
+    return (
+      <PageSection>
+        <Card>
+          {Tabs}
+          <ContentLoading />
+        </Card>
+      </PageSection>
+    );
   }
 
   return (
@@ -133,14 +127,8 @@ function ManagementJob({ i18n, setBreadcrumb }) {
           <Redirect
             exact
             from={`${basePath}/:id`}
-            to={`${basePath}/:id/details`}
+            to={`${basePath}/:id/schedules`}
           />
-          <Route path={`${basePath}/:id/details`}>
-            <ManagementJobDetails managementJob={result} />
-          </Route>
-          <Route path={`${basePath}/:id/edit`}>
-            <ManagementJobEdit managementJob={result} />
-          </Route>
           {canReadNotifications ? (
             <Route path={`${basePath}/:id/notifications`}>
               <NotificationList

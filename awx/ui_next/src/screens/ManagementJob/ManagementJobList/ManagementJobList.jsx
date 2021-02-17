@@ -8,7 +8,10 @@ import { SystemJobTemplatesAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import { useConfig } from '../../../contexts/Config';
 import { parseQueryString, getQSConfig } from '../../../util/qs';
 import useRequest from '../../../util/useRequest';
@@ -70,7 +73,7 @@ function ManagementJobList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             qsConfig={QS_CONFIG}
             contentError={error}
             hasContentLoading={isLoading}
@@ -86,21 +89,22 @@ function ManagementJobList({ i18n }) {
                 qsConfig={QS_CONFIG}
               />
             )}
-            renderItem={({
-              id,
-              name,
-              description,
-              has_configurable_retention,
-              default_days,
-            }) => (
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Description`)}</HeaderCell>
+              </HeaderRow>
+            }
+            renderRow={({ id, name, description, job_type }) => (
               <ManagementJobListItem
                 key={id}
                 id={id}
                 name={name}
                 description={description}
                 isSuperUser={me?.is_superuser}
-                isConfigurable={has_configurable_retention}
-                defaultDays={default_days}
+                isPrompted={['cleanup_activitystream', 'cleanup_jobs'].includes(
+                  job_type
+                )}
                 onLaunchError={setLaunchError}
               />
             )}

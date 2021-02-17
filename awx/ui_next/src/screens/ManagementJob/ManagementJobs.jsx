@@ -21,14 +21,16 @@ function ManagementJobs({ i18n }) {
       setBreadcrumbConfig({
         [basePath]: i18n._(t`Management job`),
         [`${basePath}/${id}`]: name,
-        [`${basePath}/${id}/details`]: i18n._(t`Details`),
-        [`${basePath}/${id}/edit`]: i18n._(t`Edit details`),
         [`${basePath}/${id}/notifications`]: i18n._(t`Notifications`),
-        [`${basePath}/schedules`]: i18n._(t`Schedules`),
-        [`${basePath}/schedules/add`]: i18n._(t`Create New Schedule`),
-        [`${basePath}/schedules/${nested?.id}`]: `${nested?.name}`,
-        [`${basePath}/schedules/${nested?.id}/details`]: i18n._(t`Details`),
-        [`${basePath}/schedules/${nested?.id}/edit`]: i18n._(t`Edit Details`),
+        [`${basePath}/${id}/schedules`]: i18n._(t`Schedules`),
+        [`${basePath}/${id}/schedules/add`]: i18n._(t`Create New Schedule`),
+        [`${basePath}/${id}/schedules/${nested?.id}`]: `${nested?.name}`,
+        [`${basePath}/${id}/schedules/${nested?.id}/details`]: i18n._(
+          t`Details`
+        ),
+        [`${basePath}/${id}/schedules/${nested?.id}/edit`]: i18n._(
+          t`Edit Details`
+        ),
       });
     },
     [i18n]

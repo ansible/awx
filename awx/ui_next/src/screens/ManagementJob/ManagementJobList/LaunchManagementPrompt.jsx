@@ -6,6 +6,8 @@ import { RocketIcon } from '@patternfly/react-icons';
 
 import AlertModal from '../../../components/AlertModal';
 
+const MAX_RETENTION = 99999;
+
 const clamp = (val, min, max) => {
   if (val < min) {
     return min;
@@ -58,7 +60,7 @@ function LaunchManagementPrompt({
           <Button
             id="launch-job-cancel-button"
             key="cancel"
-            variant="secondary"
+            variant="link"
             aria-label={i18n._(t`Cancel`)}
             onClick={onClose}
           >
@@ -70,9 +72,7 @@ function LaunchManagementPrompt({
         <TextInput
           value={dataRetention}
           type="number"
-          onChange={value =>
-            setDataRetention(clamp(value, 0, Number.MAX_SAFE_INTEGER))
-          }
+          onChange={value => setDataRetention(clamp(value, 0, MAX_RETENTION))}
           aria-label={i18n._(t`Launch`)}
         />
       </AlertModal>

@@ -95,6 +95,14 @@ function Schedule({
   if (!pathname.includes('schedules/') || pathname.endsWith('edit')) {
     showCardHeader = false;
   }
+
+  // For some management jobs that delete data, we want to provide an additional
+  // field on the scheduler for configuring the number of days to retain.
+  const hasDaysToKeepField = [
+    'cleanup_activitystream',
+    'cleanup_jobs',
+  ].includes(schedule?.summary_fields?.unified_job_template?.job_type);
+
   return (
     <>
       {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
@@ -107,6 +115,7 @@ function Schedule({
         {schedule && [
           <Route key="edit" path={`${pathRoot}schedules/:id/edit`}>
             <ScheduleEdit
+              hasDaysToKeepField={hasDaysToKeepField}
               schedule={schedule}
               resource={resource}
               launchConfig={launchConfig}
@@ -117,7 +126,11 @@ function Schedule({
             key="details"
             path={`${pathRoot}schedules/:scheduleId/details`}
           >
-            <ScheduleDetail schedule={schedule} surveyConfig={surveyConfig} />
+            <ScheduleDetail
+              hasDaysToKeepField={hasDaysToKeepField}
+              schedule={schedule}
+              surveyConfig={surveyConfig}
+            />
           </Route>,
         ]}
         <Route key="not-found" path="*">

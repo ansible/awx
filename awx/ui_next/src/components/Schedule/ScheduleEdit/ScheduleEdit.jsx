@@ -17,6 +17,7 @@ import getSurveyValues from '../../../util/prompt/getSurveyValues';
 
 function ScheduleEdit({
   i18n,
+  hasDaysToKeepField,
   schedule,
   resource,
   launchConfig,
@@ -83,12 +84,22 @@ function ScheduleEdit({
 
     try {
       const rule = new RRule(buildRuleObj(values, i18n));
-      const {
-        data: { id: scheduleId },
-      } = await SchedulesAPI.update(schedule.id, {
+      const requestData = {
         ...submitValues,
         rrule: rule.toString().replace(/\n/g, ' '),
-      });
+      };
+
+      if (Object.keys(values).includes('daysToKeep')) {
+        if (!requestData.extra_data) {
+          requestData.extra_data = JSON.stringify({ days: values.daysToKeep });
+        } else {
+          requestData.extra_data.days = values.daysToKeep;
+        }
+      }
+
+      const {
+        data: { id: scheduleId },
+      } = await SchedulesAPI.update(schedule.id, requestData);
       if (values.credentials?.length > 0) {
         await Promise.all([
           ...removed.map(({ id }) =>
@@ -111,6 +122,7 @@ function ScheduleEdit({
       <CardBody>
         <ScheduleForm
           schedule={schedule}
+          hasDaysToKeepField={hasDaysToKeepField}
           handleCancel={() =>
             history.push(`${pathRoot}schedules/${schedule.id}/details`)
           }
