@@ -3335,11 +3335,9 @@ class AdHocCommandRelaunchSerializer(AdHocCommandSerializer):
 
 class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
 
-    has_configurable_retention = serializers.BooleanField()
-
     class Meta:
         model = SystemJobTemplate
-        fields = ('*', 'job_type', 'has_configurable_retention', 'default_days',)
+        fields = ('*', 'job_type',)
 
     def get_related(self, obj):
         res = super(SystemJobTemplateSerializer, self).get_related(obj)
@@ -3350,21 +3348,9 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
             notification_templates_started = self.reverse('api:system_job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
             notification_templates_success = self.reverse('api:system_job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
             notification_templates_error = self.reverse('api:system_job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
+
         ))
         return res
-
-    def to_representation(self, obj):
-        result = super(SystemJobTemplateSerializer, self).to_representation(obj)
-        if not obj.has_configurable_retention:
-            del result['default_days']
-        return result
-
-    def __init__(self, *args, **kwargs):
-        super(SystemJobTemplateSerializer, self).__init__(*args, **kwargs)
-        for field_name, field_instance in self.fields.items():
-            if field_name != 'default_days':
-                field_instance.read_only = True
-
 
 
 class SystemJobSerializer(UnifiedJobSerializer):

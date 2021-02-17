@@ -82,7 +82,6 @@ from awx.main.utils import (
     get_object_or_400,
     getattrd,
     get_pk_from_dict,
-    parse_yaml_or_json,
     schedule_task_manager,
     ignore_inventory_computed_fields,
     set_environ
@@ -3423,7 +3422,7 @@ class SystemJobTemplateList(ListAPIView):
         return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
 
 
-class SystemJobTemplateDetail(RetrieveUpdateAPIView):
+class SystemJobTemplateDetail(RetrieveAPIView):
 
     model = models.SystemJobTemplate
     serializer_class = serializers.SystemJobTemplateSerializer
@@ -3441,11 +3440,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
-        extra_vars = parse_yaml_or_json(request.data.get('extra_vars', {}))
-        if obj.has_configurable_retention and obj.default_days is not None:
-            extra_vars.setdefault('days', obj.default_days)
-
-        new_job = obj.create_unified_job(extra_vars=extra_vars)
+        new_job = obj.create_unified_job(extra_vars=request.data.get('extra_vars', {}))
         new_job.signal_start()
         data = OrderedDict()
         data['system_job'] = new_job.id
