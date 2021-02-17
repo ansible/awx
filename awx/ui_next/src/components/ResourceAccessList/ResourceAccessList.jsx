@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { TeamsAPI, UsersAPI } from '../../api';
+import { RolesAPI, TeamsAPI, UsersAPI } from '../../api';
 import AddResourceRole from '../AddRole/AddResourceRole';
 import AlertModal from '../AlertModal';
 import DataListToolbar from '../DataListToolbar';
@@ -26,7 +26,13 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
   const location = useLocation();
 
   const {
-    result: { accessRecords, itemCount, relatedSearchableKeys, searchableKeys },
+    result: {
+      accessRecords,
+      itemCount,
+      relatedSearchableKeys,
+      searchableKeys,
+      organizationRoles,
+    },
     error: contentError,
     isLoading,
     request: fetchAccessRecords,
@@ -37,6 +43,41 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
         apiModel.readAccessList(resource.id, params),
         apiModel.readAccessOptions(resource.id),
       ]);
+
+      // Eventually this could be expanded to other access lists.
+      // We will need to combine the role ids of all the different level
+      // of resource level roles.
+
+      let orgRoles;
+      if (location.pathname.includes('/organizations')) {
+        const {
+          data: { results: roles },
+        } = await RolesAPI.read({ content_type__isnull: true });
+        const sysAdmin = roles.filter(
+          role => role.name === 'System Administrator'
+        );
+        const sysAud = roles.filter(role => {
+          let auditor;
+          if (role.name === 'System Auditor') {
+            auditor = role.id;
+          }
+          return auditor;
+        });
+
+        orgRoles = Object.values(resource.summary_fields.object_roles).map(
+          opt => {
+            let item;
+            if (opt.name === 'Admin') {
+              item = [`${opt.id}, ${sysAdmin[0].id}`, opt.name];
+            } else if (sysAud[0].id && opt.name === 'Auditor') {
+              item = [`${sysAud[0].id}, ${opt.id}`, opt.name];
+            } else {
+              item = [`${opt.id}`, opt.name];
+            }
+            return item;
+          }
+        );
+      }
       return {
         accessRecords: response.data.results,
         itemCount: response.data.count,
@@ -46,8 +87,9 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        organizationRoles: orgRoles,
       };
-    }, [apiModel, location, resource.id]),
+    }, [apiModel, location, resource]),
     {
       accessRecords: [],
       itemCount: 0,
@@ -94,17 +136,14 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
     },
   ];
 
-  if (location.pathname.includes('/organizations')) {
-    const roles = Object.values(
-      resource.summary_fields.object_roles
-    ).map(opt => [opt.id.toString(), opt.name]);
-
+  if (organizationRoles?.length > 0) {
     toolbarSearchColumns.push({
       name: i18n._(t`Roles`),
       key: `or__roles__in`,
-      options: roles,
+      options: organizationRoles,
     });
   }
+
   return (
     <>
       <PaginatedDataList

@@ -6,7 +6,7 @@ import {
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 
-import { OrganizationsAPI, TeamsAPI, UsersAPI } from '../../api';
+import { OrganizationsAPI, TeamsAPI, UsersAPI, RolesAPI } from '../../api';
 
 import ResourceAccessList from './ResourceAccessList';
 
@@ -105,6 +105,14 @@ describe('<ResourceAccessList />', () => {
     });
     TeamsAPI.disassociateRole.mockResolvedValue({});
     UsersAPI.disassociateRole.mockResolvedValue({});
+    RolesAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          { id: 1, name: 'System Administrator' },
+          { id: 14, name: 'System Auditor' },
+        ],
+      },
+    });
     const history = createMemoryHistory({
       initialEntries: ['/organizations/1/access'],
     });
@@ -203,7 +211,7 @@ describe('<ResourceAccessList />', () => {
         key: 'or__roles__in',
         name: 'Roles',
         options: [
-          ['2', 'Admin'],
+          ['2, 1', 'Admin'],
           ['3', 'Execute'],
           ['4', 'Project Admin'],
         ],
