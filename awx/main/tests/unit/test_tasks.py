@@ -527,7 +527,7 @@ class TestGenericRun():
         task.instance = Job(pk=1, id=1)
         task.event_ct = 17
         task.finished_callback(None)
-        task.dispatcher.dispatch.assert_called_with({'event': 'EOF', 'final_counter': 17, 'job_id': 1})
+        task.dispatcher.dispatch.assert_called_with({'event': 'EOF', 'final_counter': 17, 'job_id': 1, 'guid': None})
 
     def test_save_job_metadata(self, job, update_model_wrapper):
         class MockMe():

@@ -34,6 +34,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _, gettext_noop
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django_guid.middleware import GuidMiddleware
 
 # Kubernetes
 from kubernetes.client.rest import ApiException
@@ -839,6 +840,7 @@ class BaseTask(object):
         self.cleanup_paths = []
         self.parent_workflow_job_id = None
         self.host_map = {}
+        self.guid = GuidMiddleware.get_guid()
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -1274,6 +1276,9 @@ class BaseTask(object):
             except json.JSONDecodeError:
                 pass
 
+        if 'event_data' in event_data:
+            event_data['event_data']['guid'] = self.guid
+
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
         self.event_ct += 1
@@ -1310,6 +1315,7 @@ class BaseTask(object):
         event_data = {
             'event': 'EOF',
             'final_counter': self.event_ct,
+            'guid': self.guid,
         }
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)

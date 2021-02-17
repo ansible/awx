@@ -15,6 +15,10 @@ from django.apps import apps
 from django.db import models
 from django.conf import settings
 
+from django_guid.log_filters import CorrelationId
+from django_guid.middleware import GuidMiddleware
+
+from awx import MODE
 from awx.main.constants import LOGGER_BLOCKLIST
 from awx.main.utils.common import get_search_fields
 
@@ -364,3 +368,14 @@ class SmartFilter(object):
             return res[0].result
 
         raise RuntimeError("Parsing the filter_string %s went terribly wrong" % filter_string)
+
+
+
+class DefaultCorrelationId(CorrelationId):
+
+    def filter(self, record):
+        guid = GuidMiddleware.get_guid() or '-'
+        if MODE == 'development':
+            guid = guid[:8]
+        record.guid = guid
+        return True
