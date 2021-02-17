@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+from datetime import timedelta
 import json
 import yaml
 import logging
@@ -22,6 +23,7 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
+from django.db import connection
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
@@ -33,6 +35,7 @@ from django.core.cache import cache as django_cache
 from rest_framework.exceptions import ParseError
 from django.utils.encoding import smart_str
 from django.utils.text import slugify
+from django.utils.timezone import now
 from django.apps import apps
 
 # AWX
@@ -1024,15 +1027,24 @@ def deepmerge(a, b):
         return b
 
 
-def cleanup_new_process(func):
-    """
-    Cleanup django connection, cache connection, before executing new thread or processes entry point, func.
-    """
+def create_partition(partition_label, start, end=None):
+    """Creates new partition tables for events."""
+    if not end:
+        end = (now() + timedelta(hours=1))
+    start_timestamp = start.strftime('%Y-%m-%d %H:00:00.000000%z')
+    end_timestamp = end.strftime('%Y-%m-%d %H:00:00.000000%z')
 
-    @wraps(func)
-    def wrapper_cleanup_new_process(*args, **kwargs):
-        django_connection.close()
-        django_cache.close()
-        return func(*args, **kwargs)
-
-    return wrapper_cleanup_new_process
+    with connection.cursor() as cursor:
+        # Only partitioning main_jobevent on first pass
+        #
+        #for tblname in (
+        #    'main_jobevent', 'main_inventoryupdateevent',
+        #    'main_projectupdateevent', 'main_adhoccommandevent',
+        #    'main_systemjobevent'
+        #):
+        for tblname in ('main_jobevent',):
+            cursor.execute(
+                f'CREATE TABLE {tblname}_{partition_label} '
+                f'PARTITION OF {tblname} '
+                f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
+            )
