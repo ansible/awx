@@ -1098,7 +1098,7 @@ AWX_CALLBACK_PROFILE = False
 AWX_CLEANUP_PATHS = True
 
 MIDDLEWARE = [
-    'django_guid.middleware.GuidMiddleware',
+    'awx.main.middleware.AWXGuidMiddleware',
     'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',

@@ -15,6 +15,7 @@ from django.apps import apps
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse, resolve
+from django_guid.middleware import GuidMiddleware
 
 from awx.main.utils.named_url_graph import generate_graph, GraphNode
 from awx.conf import fields, register
@@ -23,6 +24,14 @@ from awx.main.utils.profiling import AWXProfiler
 
 logger = logging.getLogger('awx.main.middleware')
 perf_logger = logging.getLogger('awx.analytics.performance')
+
+
+class AWXGuidMiddleware(GuidMiddleware):
+
+    def _get_id_from_header(self, request):
+        # never accept the correlation ID from the HTTP response header
+        request.correlation_id = self._generate_guid()
+        return request.correlation_id
 
 
 class TimingMiddleware(threading.local, MiddlewareMixin):
