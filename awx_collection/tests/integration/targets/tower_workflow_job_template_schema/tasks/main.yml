@@ -64,6 +64,7 @@
     name: "{{ jt1_name }}"
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
+    ask_variables_on_launch: true
     playbook: hello_world.yml
     credential: Demo Credential
     job_type: run
@@ -108,6 +109,8 @@
           always_nodes: []
           credentials: []
       - identifier: node201
+        extra_data:
+          daisy: flower
         unified_job_template:
           organization:
             name: Default
