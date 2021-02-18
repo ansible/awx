@@ -16,6 +16,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Added ability to relaunch against failed hosts: https://github.com/ansible/awx/pull/9225
 - Added pending workflow approval count to the application header https://github.com/ansible/awx/pull/9334
 - Added user interface for management jobs: https://github.com/ansible/awx/pull/9224
+- Added toast message to show notification template test result to notification templates list https://github.com/ansible/awx/pull/9318
 
 # 17.0.1 (January 26, 2021)
 - Fixed pgdocker directory permissions issue with Local Docker installer: https://github.com/ansible/awx/pull/9152
