@@ -1325,7 +1325,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
 
     def filtered_queryset(self):
         return ExecutionEnvironment.objects.filter(
-            Q(organization__in=Organization.accessible_pk_qs(self.user, 'member_role')) |
+            Q(organization__in=Organization.accessible_pk_qs(self.user, 'read_role')) |
             Q(organization__isnull=True)
         ).distinct()
 
@@ -1333,7 +1333,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'execution_environment_admin_role').exists()
-        return self.check_related('organization', Organization, data)
+        return self.check_related('organization', Organization, data, mandatory=True)
 
     @check_superuser
     def can_change(self, obj, data):
@@ -1341,7 +1341,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
             raise PermissionDenied
         if obj and obj.organization_id is None:
             raise PermissionDenied
-        if self.user not in obj.organization.execution_environment_admin_role and self.user not in obj.organization.admin_role:
+        if self.user not in obj.organization.execution_environment_admin_role:
             raise PermissionDenied
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and obj.organization_id != org_pk:
