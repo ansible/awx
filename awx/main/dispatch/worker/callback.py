@@ -54,12 +54,12 @@ class CallbackBrokerWorker(BaseWorker):
 
     def read(self, queue):
         try:
-            metrics_no_db.hset('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), 'Current number of events in redis queue')
+            metrics_no_db.hset('callback_receiver_events_queue_size_redis_total', self.redis.llen(settings.CALLBACK_QUEUE))
             res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=1)
             if res is None:
                 return {'event': 'FLUSH'}
-            metrics_no_db.hincrby('callback_receiver_events_popped_redis', 1, 'Total number of events popped from redis')
-            metrics_no_db.hincrby('callback_receiver_events_in_memory', 1, 'Total number of events in memory (transfer from redis to db)')
+            metrics_no_db.hincrby('callback_receiver_events_popped_redis_total', 1)
+            metrics_no_db.hincrby('callback_receiver_events_in_memory_total', 1)
             self.total += 1
             return json.loads(res[1])
         except redis.exceptions.RedisError:
@@ -124,6 +124,7 @@ class CallbackBrokerWorker(BaseWorker):
                 duration_to_save = tz_now()
                 try:
                     cls.objects.bulk_create(events)
+                    bulk_events_saved += len(events)
                     stdout_size_saved += sum([len(i.event_data) for i in events])
                 except Exception:
                     # if an exception occurs, we should re-attempt to save the
@@ -145,12 +146,12 @@ class CallbackBrokerWorker(BaseWorker):
             try:
                 # only update metrics if we saved events
                 if (bulk_events_saved + singular_events_saved) > 0:
-                    metrics_no_db.hincrby('callback_receiver_batch_events_errors', metrics_events_batch_save_errors, 'Number of times batch insertion failed')
-                    metrics_no_db.hincrby('callback_receiver_events_size', stdout_size_saved, 'Total size of stdout for events saved to database')
-                    metrics_no_db.hincrbyfloat('callback_receiver_events_insert_db_time', duration_to_save.total_seconds(), 'Time spent saving events to database')
-                    metrics_no_db.hincrby('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved, 'Number of events inserted into database')
-                    metrics_no_db.hincrby('callback_receiver_batch_events_insert_db', bulk_events_saved, 'Number of events batch inserted into database')
-                    metrics_no_db.hincrby('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved), 'Current number of events in memory (transferred from redis to db)')
+                    metrics_no_db.hincrby('callback_receiver_batch_events_errors_total', metrics_events_batch_save_errors)
+                    metrics_no_db.hincrby('callback_receiver_events_size_total', stdout_size_saved)
+                    metrics_no_db.hincrbyfloat('callback_receiver_events_insert_db_seconds_total', duration_to_save.total_seconds())
+                    metrics_no_db.hincrby('callback_receiver_events_insert_db_total', bulk_events_saved + singular_events_saved)
+                    metrics_no_db.hincrby('callback_receiver_batch_events_insert_db_total', bulk_events_saved)
+                    metrics_no_db.hincrby('callback_receiver_events_in_memory_total', -(bulk_events_saved + singular_events_saved))
 
             except Exception:
                 logger.exception('Could not update callback_receiver statistics')
@@ -206,6 +207,7 @@ class CallbackBrokerWorker(BaseWorker):
                     except Exception:
                         logger.exception('Worker failed to emit notifications: Job {}'.format(job_identifier))
                     finally:
+                        metrics_no_db.hincrby('callback_receiver_events_in_memory_total', -1)
                         GuidMiddleware.set_guid('')
                     return
 
