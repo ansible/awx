@@ -22,7 +22,7 @@ from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
 from awx.main.tasks import handle_success_and_failure_notifications
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
-
+import awx.main.analytics.metrics_no_db as metrics_no_db
 from .base import BaseWorker
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -54,9 +54,12 @@ class CallbackBrokerWorker(BaseWorker):
 
     def read(self, queue):
         try:
+            metrics_no_db.hset('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), 'Current number of events in redis queue')
             res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=1)
             if res is None:
                 return {'event': 'FLUSH'}
+            metrics_no_db.hincrby('callback_receiver_events_popped_redis', 1, 'Total number of events popped from redis')
+            metrics_no_db.hincrby('callback_receiver_events_in_memory', 1, 'Total number of events in memory (transfer from redis to db)')
             self.total += 1
             return json.loads(res[1])
         except redis.exceptions.RedisError:
@@ -66,6 +69,7 @@ class CallbackBrokerWorker(BaseWorker):
             logger.exception("failed to decode JSON message from redis")
         finally:
             self.record_statistics()
+
         return {'event': 'FLUSH'}
 
     def record_statistics(self):
@@ -107,27 +111,49 @@ class CallbackBrokerWorker(BaseWorker):
             (time.time() - self.last_flush) > settings.JOB_EVENT_BUFFER_SECONDS or
             any([len(events) >= 1000 for events in self.buff.values()])
         ):
+            bulk_events_saved = 0
+            singular_events_saved = 0
+            stdout_size_saved = 0
+            metrics_events_batch_save_errors = 0
             for cls, events in self.buff.items():
                 logger.debug(f'{cls.__name__}.objects.bulk_create({len(events)})')
                 for e in events:
                     if not e.created:
                         e.created = now
                     e.modified = now
+                duration_to_save = tz_now()
                 try:
                     cls.objects.bulk_create(events)
+                    stdout_size_saved += sum([len(i.event_data) for i in events])
                 except Exception:
                     # if an exception occurs, we should re-attempt to save the
                     # events one-by-one, because something in the list is
                     # broken/stale
+                    metrics_events_batch_save_errors += 1
                     for e in events:
                         try:
                             e.save()
+                            singular_events_saved += 1
+                            stdout_size_saved += len(e.event_data)
                         except Exception:
                             logger.exception('Database Error Saving Job Event')
+                duration_to_save = tz_now() - duration_to_save
                 for e in events:
                     emit_event_detail(e)
             self.buff = {}
             self.last_flush = time.time()
+            try:
+                # only update metrics if we saved events
+                if (bulk_events_saved + singular_events_saved) > 0:
+                    metrics_no_db.hincrby('callback_receiver_batch_events_errors', metrics_events_batch_save_errors, 'Number of times batch insertion failed')
+                    metrics_no_db.hincrby('callback_receiver_events_size', stdout_size_saved, 'Total size of stdout for events saved to database')
+                    metrics_no_db.hincrbyfloat('callback_receiver_events_insert_db_time', duration_to_save.total_seconds(), 'Time spent saving events to database')
+                    metrics_no_db.hincrby('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved, 'Number of events inserted into database')
+                    metrics_no_db.hincrby('callback_receiver_batch_events_insert_db', bulk_events_saved, 'Number of events batch inserted into database')
+                    metrics_no_db.hincrby('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved), 'Current number of events in memory (transferred from redis to db)')
+
+            except Exception:
+                logger.exception('Could not update callback_receiver statistics')
 
     def perform_work(self, body):
         try:

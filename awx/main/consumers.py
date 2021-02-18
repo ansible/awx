@@ -13,7 +13,6 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
 
-
 logger = logging.getLogger('awx.main.consumers')
 XRF_KEY = '_auth_user_xrf'
 
@@ -22,7 +21,7 @@ class WebsocketSecretAuthHelper:
     """
     Middlewareish for websockets to verify node websocket broadcast interconnect.
 
-    Note: The "ish" is due to the channels routing interface. Routing occurs 
+    Note: The "ish" is due to the channels routing interface. Routing occurs
     _after_ authentication; making it hard to apply this auth to _only_ a subset of
     websocket endpoints.
     """
@@ -228,12 +227,21 @@ def emit_channel_notification(group, payload):
         return
 
     channel_layer = get_channel_layer()
+    # if group == "metrics":
+    #     run_sync(channel_layer.group_send(
+    #         settings.BROADCAST_WEBSOCKET_GROUP_NAME,
+    #         {
+    #             "type": "internal.message",
+    #             "text": payload_dumped,
+    #         },
+    #     ))
+    #     return
 
     run_sync(channel_layer.group_send(
         group,
         {
             "type": "internal.message",
-            "text": payload_dumped
+            "text": payload_dumped,
         },
     ))
 

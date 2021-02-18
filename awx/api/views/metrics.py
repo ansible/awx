@@ -14,7 +14,7 @@ from rest_framework.exceptions import PermissionDenied
 
 # AWX
 # from awx.main.analytics import collectors
-from awx.main.analytics.metrics import metrics
+from awx.main.analytics.metrics_no_db import metrics
 from awx.api import renderers
 
 from awx.api.generics import (
@@ -37,6 +37,5 @@ class MetricsView(APIView):
     def get(self, request):
         ''' Show Metrics Details '''
         if (request.user.is_superuser or request.user.is_system_auditor):
-            return Response(metrics().decode('UTF-8'))
+            return Response(metrics(request))
         raise PermissionDenied()
-

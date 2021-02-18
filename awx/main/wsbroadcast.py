@@ -16,7 +16,6 @@ from awx.main.analytics.broadcast_websocket import (
     BroadcastWebsocketStatsManager,
 )
 
-
 logger = logging.getLogger('awx.main.wsbroadcast')
 
 
@@ -140,9 +139,10 @@ class BroadcastWebsocketTask(WebsocketTask):
                         logmsg = "{} {}".format(logmsg, payload)
                     logger.warn(logmsg)
                     continue
-
                 (group, message) = unwrap_broadcast_msg(payload)
-
+                if group == "metrics":
+                    import awx.main.analytics.metrics_no_db as metrics_no_db
+                    metrics_no_db.store_metrics(message)
                 await self.channel_layer.group_send(group, {"type": "internal.message", "text": message})
 
 
