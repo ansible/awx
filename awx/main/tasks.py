@@ -1179,14 +1179,14 @@ class BaseTask(object):
         instance.log_lifecycle("finalize_run")
         job_profiling_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
         awx_profiling_dir = '/var/log/tower/playbook_profiling/'
-        collections_info = os.path.join(private_data_dir, 'artifacts/')
+        collections_info = os.path.join(private_data_dir, 'artifacts/', 'collections.json')
 
         if not os.path.exists(awx_profiling_dir):
             os.mkdir(awx_profiling_dir)
         if os.path.isdir(job_profiling_dir):
             shutil.copytree(job_profiling_dir, os.path.join(awx_profiling_dir, str(instance.pk)))
         if os.path.exists(collections_info):
-            with open(collections_info + 'collections.json') as ee_json_info:
+            with open(collections_info) as ee_json_info:
                 ee_collections_info = ee_json_info.read()
                 instance.installed_collections = ee_collections_info
                 instance.save(update_fields=['installed_collections'])
