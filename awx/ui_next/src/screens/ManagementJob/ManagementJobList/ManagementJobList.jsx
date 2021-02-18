@@ -93,6 +93,7 @@ function ManagementJobList({ i18n }) {
               <HeaderRow qsConfig={QS_CONFIG}>
                 <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Description`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
               </HeaderRow>
             }
             renderRow={({ id, name, description, job_type }) => (
