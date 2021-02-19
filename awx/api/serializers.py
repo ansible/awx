@@ -2921,8 +2921,8 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
             'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
             'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
-            'become_enabled', 'diff_mode', 'allow_simultaneous', 'custom_virtualenv',
-            'job_slice_count', 'webhook_service', 'webhook_credential',
+            'survey_spec', 'become_enabled', 'diff_mode', 'allow_simultaneous',
+            'custom_virtualenv', 'job_slice_count', 'webhook_service', 'webhook_credential',
         )
 
     def get_related(self, obj):
@@ -4064,7 +4064,7 @@ class JobLaunchSerializer(BaseSerializer):
                   'ask_scm_branch_on_launch', 'ask_variables_on_launch', 'ask_tags_on_launch',
                   'ask_diff_mode_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_limit_on_launch',
                   'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
-                  'survey_enabled', 'variables_needed_to_start', 'credential_needed_to_start',
+                  'survey_enabled', 'survey_spec', 'variables_needed_to_start', 'credential_needed_to_start',
                   'inventory_needed_to_start', 'job_template_data', 'defaults', 'verbosity')
         read_only_fields = (
             'ask_scm_branch_on_launch',
