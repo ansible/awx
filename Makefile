@@ -599,7 +599,7 @@ detect-schema-change: genschema
 	diff -u -b reference-schema.json schema.json
 
 docker-compose-clean: awx/projects
-	docker-compose rm -sf
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml rm -sf
 
 # Base development image build
 docker-compose-build:
