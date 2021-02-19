@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block style %}
-<link href="{% static 'assets/favicon.ico' %}?v={{tower_version}}" rel="shortcut icon" />
+<link href="{% static 'favicon.ico' %}?v={{tower_version}}" rel="shortcut icon" />
 {{ block.super }}
 {% endblock %}
 
@@ -24,7 +24,7 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="{% url 'api:api_root_view' %}">
-          <img class="logo" src="{% static 'assets/logo-header.svg' %}">
+          <img class="logo" src="{% static 'media/logo-header.svg' %}">
           <span>{% trans 'REST API' %}</span>
         </a>
         <a class="navbar-title" href="{{ request.get_full_path }}">
