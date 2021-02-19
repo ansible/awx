@@ -25,6 +25,7 @@ class Control(object):
 
     def status(self, *args, **kwargs):
         r = redis.Redis.from_url(settings.BROKER_URL)
+        r.client_setname("control")
         if self.service == 'dispatcher':
             stats = r.get(f'awx_{self.service}_statistics') or b''
             return stats.decode('utf-8')

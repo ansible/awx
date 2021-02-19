@@ -58,6 +58,7 @@ class AWXConsumerBase(object):
             self.pool = WorkerPool()
         self.pool.init_workers(self.worker.work_loop)
         self.redis = redis.Redis.from_url(settings.BROKER_URL)
+        self.redis.client_setname("awx_consumer_base")
 
     @property
     def listening_on(self):

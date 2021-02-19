@@ -104,6 +104,7 @@ class BroadcastWebsocketStatsManager():
         Stringified verion of all the stats
         '''
         redis_conn = redis.Redis.from_url(settings.BROKER_URL)
+        redis_conn.client_setname("broadcast_websocket")
         stats_str = redis_conn.get(BROADCAST_WEBSOCKET_REDIS_KEY_NAME) or b''
         return parser.text_string_to_metric_families(stats_str.decode('UTF-8'))
 

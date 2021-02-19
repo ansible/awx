@@ -50,52 +50,77 @@ def get_local_instance_name():
             instance_name = conn.set(redis_key + "_local_instance_name", instance_name)
         return instance_name.decode('UTF-8')
 
-def hincrby(field, increment_by):
+class RedisConn():
+    def __init__(self, conn = None):
+        if conn is None:
+            self.close_conn_on_exit = True
+            self.conn = redis.Redis.from_url(settings.BROKER_URL)
+            self.conn.client_setname(redis_key)
+        else:
+            self.close_conn_on_exit = False
+            self.conn = conn
+    def __enter__(self):
+        return self.conn
+    def __exit__(self, exception_type, exception_value, exception_traceback):
+        if self.close_conn_on_exit:
+            self.conn.close()
+
+class RedisPipe():
+    def __init__(self):
+        self.pipe = redis.Redis.from_url(settings.BROKER_URL).pipeline()
+        self.pipe.client_setname(redis_key)
+    def __enter__(self):
+        return self.pipe
+    def __exit__(self, exception_type, exception_value, exception_traceback):
+        self.pipe.reset()
+
+def hincrby(field, increment_by, conn=None):
     if increment_by != 0:
-        with redis.Redis.from_url(settings.BROKER_URL) as conn:
-            conn.hincrby(redis_key, field, increment_by)
-            send_broadcast(conn)
+        with RedisConn(conn) as inner_conn:
+            inner_conn.hincrby(redis_key, field, increment_by)
+            send_broadcast()
 
-def hset(field, value):
-    with redis.Redis.from_url(settings.BROKER_URL) as conn:
-        conn.hset(redis_key, field, value)
-        send_broadcast(conn)
+def hset(field, value, conn=None):
+    with RedisConn(conn) as inner_conn:
+        inner_conn.hset(redis_key, field, value)
+        send_broadcast()
 
-def hincrbyfloat(field, increment_by):
+def hincrbyfloat(field, increment_by, conn=None):
     if increment_by != 0:
-        with redis.Redis.from_url(settings.BROKER_URL) as conn:
-            conn.hincrbyfloat(redis_key, field, increment_by)
-            send_broadcast(conn)
+        with RedisConn(conn) as inner_conn:
+            inner_conn.hincrbyfloat(redis_key, field, increment_by)
+            send_broadcast()
 
-def send_broadcast(conn):
+def send_broadcast():
     # send a serialized copy of the metrics to other nodes
     # only send metrics if last_broadcast is older than broadcast interval
     # uses a lock on redis to prevent this method from being called simultaneously
     from awx.main.consumers import emit_channel_notification
-    lock = conn.lock(redis_key + '_lock', thread_local = False)
-    if not lock.acquire(blocking=False):
-        # logger.debug(f"node {get_local_instance_name()} could not acquire lock")
-        return
-    try:
-        # logger.debug(f"node {get_local_instance_name()} acquired lock")
-        should_broadcast = False
-        if not conn.exists(redis_key + '_last_broadcast'):
-            should_broadcast = True
-        else:
-            last_broadcast = float(conn.get(redis_key + '_last_broadcast'))
-            if (time.time() - last_broadcast) > broadcast_interval:
+    with RedisConn() as conn:
+        lock = conn.lock(redis_key + '_lock', thread_local = False)
+        if not lock.acquire(blocking=False):
+            # logger.debug(f"node {get_local_instance_name()} could not acquire lock")
+            return
+        try:
+            # logger.debug(f"node {get_local_instance_name()} acquired lock")
+            should_broadcast = False
+            if not conn.exists(redis_key + '_last_broadcast'):
                 should_broadcast = True
-        if should_broadcast:
-            payload = {
-                'node': get_local_instance_name(),
-                'metrics': serialize_local_metrics(),
-            }
-            emit_channel_notification("metrics", payload)
-            logger.debug(f"node {get_local_instance_name()} sending metrics")
-            conn.set(redis_key + '_last_broadcast', time.time())
-    finally:
-        # logger.debug(f"node {get_local_instance_name()} releasing lock")
-        lock.release()
+            else:
+                last_broadcast = float(conn.get(redis_key + '_last_broadcast'))
+                if (time.time() - last_broadcast) > broadcast_interval:
+                    should_broadcast = True
+            if should_broadcast:
+                payload = {
+                    'node': get_local_instance_name(),
+                    'metrics': serialize_local_metrics(),
+                }
+                emit_channel_notification("metrics", payload)
+                logger.debug(f"node {get_local_instance_name()} sending metrics")
+                conn.set(redis_key + '_last_broadcast', time.time())
+        finally:
+            # logger.debug(f"node {get_local_instance_name()} releasing lock")
+            lock.release()
 
 def store_metrics(data_json):
     # called when receiving metrics from other nodes

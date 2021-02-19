@@ -17,6 +17,7 @@ class AWXProtocolTypeRouter(ProtocolTypeRouter):
     def __init__(self, *args, **kwargs):
         try:
             r = redis.Redis.from_url(settings.BROKER_URL)
+            r.client_setname("routing")
             for k in r.scan_iter('asgi:*', 500):
                 logger.debug(f"cleaning up Redis key {k}")
                 r.delete(k)

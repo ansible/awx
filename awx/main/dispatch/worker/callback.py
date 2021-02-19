@@ -48,20 +48,24 @@ class CallbackBrokerWorker(BaseWorker):
         self.buff = {}
         self.pid = os.getpid()
         self.redis = redis.Redis.from_url(settings.BROKER_URL)
+        self.redis.client_setname("callbackbrokerworker")
         self.prof = AWXProfiler("CallbackBrokerWorker")
         for key in self.redis.keys('awx_callback_receiver_statistics_*'):
             self.redis.delete(key)
 
     def read(self, queue):
         try:
-            metrics_no_db.hset('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE))
-            res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=1)
-            if res is None:
-                return {'event': 'FLUSH'}
-            metrics_no_db.hincrby('callback_receiver_events_popped_redis', 1)
-            metrics_no_db.hincrby('callback_receiver_events_in_memory', 1)
-            self.total += 1
-            return json.loads(res[1])
+            with metrics_no_db.RedisPipe() as pipe:
+                metrics_no_db.hset('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), conn = pipe)
+                res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=1)
+                if res is None:
+                    pipe.execute()
+                    return {'event': 'FLUSH'}
+                metrics_no_db.hincrby('callback_receiver_events_popped_redis', 1, conn = pipe)
+                metrics_no_db.hincrby('callback_receiver_events_in_memory', 1, conn = pipe)
+                self.total += 1
+                pipe.execute()
+                return json.loads(res[1])
         except redis.exceptions.RedisError:
             logger.exception("encountered an error communicating with redis")
             time.sleep(1)
@@ -146,13 +150,14 @@ class CallbackBrokerWorker(BaseWorker):
             try:
                 # only update metrics if we saved events
                 if (bulk_events_saved + singular_events_saved) > 0:
-                    metrics_no_db.hincrby('callback_receiver_batch_events_errors', metrics_events_batch_save_errors)
-                    metrics_no_db.hincrby('callback_receiver_events_size', stdout_size_saved)
-                    metrics_no_db.hincrbyfloat('callback_receiver_events_insert_db_seconds', duration_to_save.total_seconds())
-                    metrics_no_db.hincrby('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved)
-                    metrics_no_db.hincrby('callback_receiver_batch_events_insert_db', bulk_events_saved)
-                    metrics_no_db.hincrby('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved))
-
+                    with metrics_no_db.RedisPipe() as pipe:
+                        metrics_no_db.hincrby('callback_receiver_batch_events_errors', metrics_events_batch_save_errors, conn=pipe)
+                        metrics_no_db.hincrby('callback_receiver_events_size', stdout_size_saved, conn=pipe)
+                        metrics_no_db.hincrbyfloat('callback_receiver_events_insert_db_seconds', duration_to_save.total_seconds(), conn=pipe)
+                        metrics_no_db.hincrby('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved, conn=pipe)
+                        metrics_no_db.hincrby('callback_receiver_batch_events_insert_db', bulk_events_saved, conn=pipe)
+                        metrics_no_db.hincrby('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved), conn=pipe)
+                        pipe.execute()
             except Exception:
                 logger.exception('Could not update callback_receiver statistics')
 
