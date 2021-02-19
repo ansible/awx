@@ -19,77 +19,44 @@ broadcast_interval = 3 # seconds
 logger = logging.getLogger('awx.main.wsbroadcast')
 
 METRICS = {
-    'callback_receiver_events_queue_size_redis_total':
+    'callback_receiver_events_queue_size_redis':
         {'type': 'Gauge',
         'help_text': 'Current number of events in redis queue'},
-    'callback_receiver_events_popped_redis_total':
+    'callback_receiver_events_popped_redis':
         {'type': 'Counter',
-        'help_text': 'Total number of events popped from redis'},
-    'callback_receiver_events_in_memory_total':
+        'help_text': 'Number of events popped from redis'},
+    'callback_receiver_events_in_memory':
         {'type': 'Gauge',
-        'help_text': 'Total number of events in memory (in transfer from redis to db)'},
-    'callback_receiver_batch_events_errors_total':
+        'help_text': 'Current number of events in memory (in transfer from redis to db)'},
+    'callback_receiver_batch_events_errors':
         {'type': 'Counter',
         'help_text': 'Number of times batch insertion failed'},
-    'callback_receiver_events_size_total':
+    'callback_receiver_events_size':
         {'type': 'Counter',
-        'help_text': 'Total size of stdout for events saved to database'},
-    'callback_receiver_events_insert_db_seconds_total':
+        'help_text': 'Number of events saved to database'},
+    'callback_receiver_events_insert_db_seconds':
         {'type': 'Counter',
         'help_text': 'Time spent saving events to database'},
-    'callback_receiver_events_insert_db_total':
+    'callback_receiver_events_insert_db':
         {'type': 'Counter',
         'help_text': 'Number of events inserted into database'},
-    'callback_receiver_batch_events_insert_db_total':
+    'callback_receiver_batch_events_insert_db':
         {'type': 'Counter',
         'help_text': 'Number of events batch inserted into database'},
-    'callback_receiver_events_insert_redis_total':
+    'callback_receiver_events_insert_redis':
         {'type': 'Counter',
-        'help_text': 'Total number of events inserted into redis'},
+        'help_text': 'Number of events inserted into redis'},
 }
 
-def get_local_host():
+def get_local_instance_name():
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
-        hostname = conn.get(redis_key + "_" + "local_hostname")
-        if hostname is None:
-            logger.debug(f"setting local hostname redis key")
+        instance_name = conn.get(redis_key + "_local_instance_name")
+        if instance_name is None:
+            logger.debug(f"setting local instance name redis key")
             Instance = apps.get_model('main', 'Instance')
-            hostname = Instance.objects.me().hostname
-            hostname = conn.set(redis_key + "_" + "local_hostname", hostname)
-        return hostname.decode('UTF-8')
-
-def store_metrics(data_json):
-    with redis.Redis.from_url(settings.BROKER_URL) as conn:
-        data = json.loads(data_json)
-        logger.debug(f"node {get_local_host()} received metrics from node {data['node']}")
-        conn.set(redis_key + "_node_" + data['node'], data['metrics'])
-
-def send_broadcast(conn):
-    from awx.main.consumers import emit_channel_notification
-    lock = conn.lock(redis_key + '_lock', thread_local = False)
-    if not lock.acquire(blocking=False):
-        # logger.debug(f"node {get_local_host()} could not acquire lock")
-        return
-    try:
-        # logger.debug(f"node {get_local_host()} acquired lock")
-        should_broadcast = False
-        if not conn.exists(redis_key + '_last_broadcast'):
-            should_broadcast = True
-        else:
-            last_broadcast = float(conn.get(redis_key + '_last_broadcast'))
-            if (time.time() - last_broadcast) > broadcast_interval:
-                should_broadcast = True
-        if should_broadcast:
-            payload = {
-                'node': get_local_host(),
-                'metrics': serialize_local_metrics(),
-            }
-            emit_channel_notification("metrics", payload)
-            logger.debug(f"node {get_local_host()} sending metrics")
-            conn.set(redis_key + '_last_broadcast', time.time())
-    finally:
-        # logger.debug(f"node {get_local_host()} releasing lock")
-        lock.release()
+            instance_name = Instance.objects.me().hostname
+            instance_name = conn.set(redis_key + "_local_instance_name", instance_name)
+        return instance_name.decode('UTF-8')
 
 def hincrby(field, increment_by):
     if increment_by != 0:
@@ -108,28 +75,62 @@ def hincrbyfloat(field, increment_by):
             conn.hincrbyfloat(redis_key, field, increment_by)
             send_broadcast(conn)
 
+def send_broadcast(conn):
+    from awx.main.consumers import emit_channel_notification
+    lock = conn.lock(redis_key + '_lock', thread_local = False)
+    if not lock.acquire(blocking=False):
+        # logger.debug(f"node {get_local_instance_name()} could not acquire lock")
+        return
+    try:
+        # logger.debug(f"node {get_local_instance_name()} acquired lock")
+        should_broadcast = False
+        if not conn.exists(redis_key + '_last_broadcast'):
+            should_broadcast = True
+        else:
+            last_broadcast = float(conn.get(redis_key + '_last_broadcast'))
+            if (time.time() - last_broadcast) > broadcast_interval:
+                should_broadcast = True
+        if should_broadcast:
+            payload = {
+                'node': get_local_instance_name(),
+                'metrics': serialize_local_metrics(),
+            }
+            emit_channel_notification("metrics", payload)
+            logger.debug(f"node {get_local_instance_name()} sending metrics")
+            conn.set(redis_key + '_last_broadcast', time.time())
+    finally:
+        # logger.debug(f"node {get_local_instance_name()} releasing lock")
+        lock.release()
+
+def store_metrics(data_json):
+    with redis.Redis.from_url(settings.BROKER_URL) as conn:
+        data = json.loads(data_json)
+        logger.debug(f"node {get_local_instance_name()} received metrics from node {data['node']}")
+        conn.set(redis_key + "_node_" + data['node'], data['metrics'])
+
 def metrics(request):
     REGISTRY = CollectorRegistry()
     logger.debug(f"query params {request.query_params}")
-    nodes_filter = request.query_params.getlist("node", None)
-    all_nodes = False
-    if nodes_filter is None:
-        all_nodes = True
+    nodes_filter = request.query_params.getlist("node")
+    use_all_nodes = False
+    if len(nodes_filter) == 0:
+        use_all_nodes = True
     all_node_data = {}
-    if all_nodes or get_local_host() in nodes_filter:
-        all_node_data[get_local_host()] = load_local_metrics()
+    if use_all_nodes or get_local_instance_name() in nodes_filter:
+        all_node_data[get_local_instance_name()] = load_local_metrics()
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
         for m in conn.scan_iter(redis_key + '_node_*'):
-            hostname = m.decode('UTF-8').split('_node_')[1]
-            logger.debug(f"{hostname} in {nodes_filter}")
-            if all_nodes or hostname in nodes_filter:
+            node_name = m.decode('UTF-8').split('_node_')[1]
+            logger.debug(f"{node_name} in {nodes_filter}")
+            if use_all_nodes or node_name in nodes_filter:
                 node_metrics = json.loads(conn.get(m).decode('UTF-8'))
-                all_node_data[hostname] = node_metrics
-    for field in METRICS:
-        help_text = METRICS[field]['help_text']
-        prometheus_object = Gauge(field, help_text, ['node'], registry=REGISTRY)
-        for node in all_node_data:
-            prometheus_object.labels(node=node).set(all_node_data[node][field])
+                all_node_data[node_name] = node_metrics
+    if all_node_data:
+        for field in METRICS:
+            help_text = METRICS[field]['help_text']
+            prometheus_object = Gauge(field, help_text, ['node'], registry=REGISTRY)
+            for node in all_node_data:
+                prometheus_object.labels(node=node).set(all_node_data[node][field])
     return generate_latest(registry=REGISTRY)
 
 def load_local_metrics():
