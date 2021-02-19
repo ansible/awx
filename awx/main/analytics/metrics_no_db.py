@@ -15,7 +15,7 @@ from prometheus_client import (
 )
 
 redis_key = 'awx_metrics'
-broadcast_interval = 10 # seconds
+broadcast_interval = 3 # seconds
 logger = logging.getLogger('awx.main.wsbroadcast')
 
 METRICS = {
@@ -86,6 +86,28 @@ METRICS = {
 #             set_help_text(conn, field, help_text)
 #             send_broadcast(conn)
 
+# class ConnPipe():
+#     def __init__(self, use_pipe=False):
+#         self.use_pipe = True
+#         if self.use_pipe == True:
+#             self.conn = redis.Redis.from_url(settings.BROKER_URL).pipeline()
+#
+# class RedisMetrics():
+#     def __init__(self):
+#         self.conn = redis.Redis.from_url(settings.BROKER_URL)
+#         self.pipe = None
+#         self.called_as_context = False
+#     def __enter__(self):
+#         self.called_as_context = True
+#         return self.pipe
+#     def __exit__(self, exception_type, exception_value, exception_traceback):
+#         self.pipe.reset()
+#     def hincrby(self, field, increment_by):
+#         if increment_by != 0:
+#             with redis.Redis.from_url(settings.BROKER_URL) as conn:
+#                 conn.hincrby(redis_key, field, increment_by)
+#                 send_broadcast(conn)
+
 def get_local_host():
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
         hostname = conn.get(redis_key + "_" + "local_hostname")
@@ -104,21 +126,30 @@ def store_metrics(data_json):
 
 def send_broadcast(conn):
     from awx.main.consumers import emit_channel_notification
-    with redis.Redis.from_url(settings.BROKER_URL) as conn:
+    lock = conn.lock(redis_key + '_lock', thread_local = False)
+    if not lock.acquire(blocking=False):
+        # logger.debug(f"node {get_local_host()} could not acquire lock")
+        return
+    try:
+        # logger.debug(f"node {get_local_host()} acquired lock")
         should_broadcast = False
         if not conn.exists(redis_key + '_last_broadcast'):
             should_broadcast = True
         else:
             last_broadcast = float(conn.get(redis_key + '_last_broadcast'))
-            if time.time() - last_broadcast > broadcast_interval:
+            if (time.time() - last_broadcast) > broadcast_interval:
                 should_broadcast = True
         if should_broadcast:
             payload = {
                 'node': get_local_host(),
-                'metrics': local_metrics().decode('UTF-8'),
+                'metrics': serialize_local_metrics(),
             }
             emit_channel_notification("metrics", payload)
+            logger.debug(f"node {get_local_host()} sending metrics")
             conn.set(redis_key + '_last_broadcast', time.time())
+    finally:
+        # logger.debug(f"node {get_local_host()} releasing lock")
+        lock.release()
 
 def hincrby(field, increment_by):
     if increment_by != 0:
@@ -138,18 +169,44 @@ def hincrbyfloat(field, increment_by):
             send_broadcast(conn)
 
 def metrics(request):
+    REGISTRY = CollectorRegistry()
+    logger.debug(f"query params {request.query_params}")
+    nodes_filter = request.query_params.getlist("node", None)
+    all_nodes = False
+    if nodes_filter is None:
+        all_nodes = True
+    all_node_data = {}
+    if all_nodes or get_local_host() in nodes_filter:
+        all_node_data[get_local_host()] = load_local_metrics()
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
-        node_metrics = ''
         for m in conn.scan_iter(redis_key + '_node_*'):
-            node_metrics += conn.get(m).decode('UTF-8')
-        node_metrics += local_metrics().decode('UTF-8')
-        # parsed_metrics = text_string_to_metric_families(node_metrics)
-        # data = {}
-        # for family in parsed_metrics:
-        #     print(family.name)
-        #     for sample in family.samples:
-        #         data[family.name] = {"labels": sample[1], "value": sample[2]}
-        return node_metrics
+            hostname = m.decode('UTF-8').split('_node_')[1]
+            logger.debug(f"{hostname} in {nodes_filter}")
+            if all_nodes or hostname in nodes_filter:
+                node_metrics = json.loads(conn.get(m).decode('UTF-8'))
+                all_node_data[hostname] = node_metrics
+    for field in METRICS:
+        help_text = METRICS[field]['help_text']
+        prometheus_object = Gauge(field, help_text, ['node'], registry=REGISTRY)
+        for node in all_node_data:
+            prometheus_object.labels(node=node).set(all_node_data[node][field])
+    return generate_latest(registry=REGISTRY)
+
+def load_local_metrics():
+    data = {}
+    for field in METRICS:
+        with redis.Redis.from_url(settings.BROKER_URL) as conn:
+            field_value = conn.hget(redis_key, field)
+            if field_value is not None:
+                field_value = float(field_value)
+            else:
+                field_value = 0.0
+            data[field] = field_value
+    return data
+
+def serialize_local_metrics():
+    data = load_local_metrics()
+    return json.dumps(data)
 
 def local_metrics():
     REGISTRY = CollectorRegistry()
@@ -173,61 +230,3 @@ def local_metrics():
         prometheus_object = Gauge(field, help_text, ['node'], registry=REGISTRY)
         prometheus_object.labels(node=get_local_host()).set(prometheus_value)
     return generate_latest(registry=REGISTRY)
-# def hset(data):
-#     with redis.Redis.from_url(settings.BROKER_URL) as conn:
-#         conn.hset(data)
-# def set(subsystem, field, value, prometheus_type):
-#     with redis.Redis.from_url(settings.BROKER_URL) as conn:
-#         data_json = json.dumps(value)
-#         conn.hset(key, field, data_json)
-#
-# def get(key, field):
-#     with redis.Redis.from_url(settings.BROKER_URL) as conn:
-#         data_json = conn.hget(key, field)
-#         data = data_json.loads(data_json)
-#         return data
-#     return None
-
-# def render():
-#     pass
-#
-# def render_to_prometheus():
-#     pass
-#
-# def tags_in_query_params(keywords, query_params):
-#     return any([i in query_params for i in keywords])
-#
-# def bytes_to_int(value):
-#     try:
-#         return int(value)
-#     except:
-#         return None
-
-
-# bash-4.4# awx-manage run_wsbroadcast --status
-# Broadcast websocket connection status from "awx-1" to:
-# hostname     state            start time                     duration (sec)
-# awx          disconnected     N/A                            N/A
-# awx-2        connected        2021-02-09 23:53:59.374506     192
-# awx-3        connected        2021-02-09 23:53:59.484018     192
-#
-#======================================================================
-# bash-4.4# awx-manage run_dispatcher --status
-# Recorded at: 2021-02-09 23:50:52 UTC
-# awx[pid:469] workers total=4 min=4 max=80
-# .  worker[pid:502] sent=6 finished=6 qsize=0 rss=138.113MB [IDLE]
-# .  worker[pid:525] sent=9 finished=8 qsize=1 rss=140.562MB
-#      - running d11a492d-dacc-45c8-9aa5-1b7c7e4ea51f RunJob(*[10])
-# .  worker[pid:570] sent=7 finished=6 qsize=1 rss=139.105MB
-#      - running for: 0.0s f9b48010-7e4f-47e1-b889-d6083a61edf5 run_task_manager(*[])
-# .  worker[pid:820] sent=1 finished=1 qsize=0 rss=138.992MB [IDLE]
-# ======================================================================
-# bash-4.4# awx-manage callback_stats
-# main_jobevent
-# ↳  last minute 0
-# main_inventoryupdateevent
-# ↳  last minute 0
-# main_projectupdateevent
-# ↳  last minute 0
-# main_adhoccommandevent
-# ↳  last minute 0
