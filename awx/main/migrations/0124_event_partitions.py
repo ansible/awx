@@ -60,12 +60,18 @@ def migrate_event_data(apps, schema_editor):
             # recreate primary key constraint
             cursor.execute(
                 f'ALTER TABLE ONLY {tblname} '
-                f'ADD CONSTRAINT {tblname}_pkey PRIMARY KEY (id, job_created);'
+                f'ADD CONSTRAINT {tblname}_pkey_new PRIMARY KEY (id, job_created);'
             )
+
+            current_time = now()
 
             # .. as well as initial partition containing all existing events
             epoch = datetime(1980, 1, 1, 0, 0)
-            create_partition('old_events', epoch, now())
+            create_partition(epoch, current_time, 'old_events')
+
+            # .. and first partition
+            # .. which is a special case, as it only covers remainder of current hour
+            create_partition(current_time)
 
             # copy over all job events into partitioned table
             # TODO: https://github.com/ansible/awx/issues/9257
