@@ -1045,7 +1045,7 @@ def create_partition(start, end=None, partition_label=None):
         #):
         for tblname in ('main_jobevent',):
             cursor.execute(
-                f'CREATE TABLE {tblname}_{partition_label} '
+                f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
                 f'PARTITION OF {tblname} '
                 f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
             )
