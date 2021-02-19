@@ -227,15 +227,6 @@ def emit_channel_notification(group, payload):
         return
 
     channel_layer = get_channel_layer()
-    # if group == "metrics":
-    #     run_sync(channel_layer.group_send(
-    #         settings.BROADCAST_WEBSOCKET_GROUP_NAME,
-    #         {
-    #             "type": "internal.message",
-    #             "text": payload_dumped,
-    #         },
-    #     ))
-    #     return
 
     run_sync(channel_layer.group_send(
         group,
