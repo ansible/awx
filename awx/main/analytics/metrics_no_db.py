@@ -20,35 +20,27 @@ logger = logging.getLogger('awx.main.wsbroadcast')
 
 METRICS = {
     'callback_receiver_events_queue_size_redis':
-        {'type': 'Gauge',
-        'help_text': 'Current number of events in redis queue'},
+        {'help_text': 'Current number of events in redis queue'},
     'callback_receiver_events_popped_redis':
-        {'type': 'Counter',
-        'help_text': 'Number of events popped from redis'},
+        {'help_text': 'Number of events popped from redis'},
     'callback_receiver_events_in_memory':
-        {'type': 'Gauge',
-        'help_text': 'Current number of events in memory (in transfer from redis to db)'},
+        {'help_text': 'Current number of events in memory (in transfer from redis to db)'},
     'callback_receiver_batch_events_errors':
-        {'type': 'Counter',
-        'help_text': 'Number of times batch insertion failed'},
+        {'help_text': 'Number of times batch insertion failed'},
     'callback_receiver_events_size':
-        {'type': 'Counter',
-        'help_text': 'Number of events saved to database'},
+        {'help_text': 'Number of events saved to database'},
     'callback_receiver_events_insert_db_seconds':
-        {'type': 'Counter',
-        'help_text': 'Time spent saving events to database'},
+        {'help_text': 'Time spent saving events to database'},
     'callback_receiver_events_insert_db':
-        {'type': 'Counter',
-        'help_text': 'Number of events inserted into database'},
+        {'help_text': 'Number of events inserted into database'},
     'callback_receiver_batch_events_insert_db':
-        {'type': 'Counter',
-        'help_text': 'Number of events batch inserted into database'},
+        {'help_text': 'Number of events batch inserted into database'},
     'callback_receiver_events_insert_redis':
-        {'type': 'Counter',
-        'help_text': 'Number of events inserted into redis'},
+        {'help_text': 'Number of events inserted into redis'},
 }
 
 def get_local_instance_name():
+    # get local instance name and cache it in redis
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
         instance_name = conn.get(redis_key + "_local_instance_name")
         if instance_name is None:
@@ -76,6 +68,9 @@ def hincrbyfloat(field, increment_by):
             send_broadcast(conn)
 
 def send_broadcast(conn):
+    # send a serialized copy of the metrics to other nodes
+    # only send metrics if last_broadcast is older than broadcast interval
+    # uses a lock on redis to prevent this method from being called simultaneously
     from awx.main.consumers import emit_channel_notification
     lock = conn.lock(redis_key + '_lock', thread_local = False)
     if not lock.acquire(blocking=False):
@@ -103,12 +98,14 @@ def send_broadcast(conn):
         lock.release()
 
 def store_metrics(data_json):
+    # called when receiving metrics from other nodes
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
         data = json.loads(data_json)
         logger.debug(f"node {get_local_instance_name()} received metrics from node {data['node']}")
         conn.set(redis_key + "_node_" + data['node'], data['metrics'])
 
 def metrics(request):
+    # takes the api request, filters, and generates prometheus data
     REGISTRY = CollectorRegistry()
     logger.debug(f"query params {request.query_params}")
     nodes_filter = request.query_params.getlist("node")
@@ -134,6 +131,7 @@ def metrics(request):
     return generate_latest(registry=REGISTRY)
 
 def load_local_metrics():
+    # generate python dictionary of key values from metrics stored in redis
     data = {}
     for field in METRICS:
         with redis.Redis.from_url(settings.BROKER_URL) as conn:
