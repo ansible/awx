@@ -1329,29 +1329,31 @@ class ExecutionEnvironmentAccess(BaseAccess):
             Q(organization__isnull=True)
         ).distinct()
 
-    @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'execution_environment_admin_role').exists()
-        return self.check_related('organization', Organization, data, mandatory=True)
-
-    @check_superuser
-    def can_change(self, obj, data):
-        if obj.managed_by_tower is True:
+        if obj.managed_by_tower:
             raise PermissionDenied
+        if self.user.is_superuser:
+            return True
+        return self.check_related('organization', Organization, data, mandatory=True,
+                                  role_field='execution_environment_admin_role')
+
+    def can_change(self, obj, data):
+        if obj.managed_by_tower:
+            raise PermissionDenied
+        if self.user.is_superuser:
+            return True
         if obj and obj.organization_id is None:
             raise PermissionDenied
         if self.user not in obj.organization.execution_environment_admin_role:
             raise PermissionDenied
-        org_pk = get_pk_from_dict(data, 'organization')
-        if obj and obj.organization_id != org_pk:
-            # Prevent moving an EE to a different organization, unless a superuser or admin on both orgs.
-            if obj.organization_id is None or org_pk is None:
-                raise PermissionDenied
-            if self.user not in Organization.objects.get(id=org_pk).execution_environment_admin_role:
-                raise PermissionDenied
-
-        return True
+        if data and 'organization' in data:
+            new_org = get_object_from_data('organization', Organization, data, obj=obj)
+            if not new_org or self.user not in new_org.execution_environment_admin_role:
+                return False
+        return self.check_related('organization', Organization, data, obj=obj, mandatory=True,
+                                  role_field='execution_environment_admin_role')
 
     def can_delete(self, obj):
         return self.can_change(obj, None)
