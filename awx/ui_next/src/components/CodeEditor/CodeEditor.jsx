@@ -44,6 +44,14 @@ const AceEditor = styled(ReactAce)`
       background: var(--pf-c-form-control--invalid--Background);
       border-bottom-width: var(--pf-c-form-control--invalid--BorderBottomWidth);
     }`}
+
+  ${props =>
+    props.setOptions.readOnly &&
+    `
+    && .ace_cursor {
+      opacity: 0;
+    }
+    `}
 `;
 AceEditor.displayName = 'AceEditor';
 
@@ -132,6 +140,8 @@ function CodeEditor({
           hasErrors={hasErrors}
           setOptions={{
             readOnly,
+            highlightActiveLine: !readOnly,
+            highlightGutterLine: !readOnly,
             useWorker: false,
           }}
           commands={[
