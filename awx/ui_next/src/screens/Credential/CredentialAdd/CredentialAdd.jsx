@@ -127,7 +127,7 @@ function CredentialAdd({ me }) {
       </PageSection>
     );
   }
-  if (isLoading && !result) {
+  if (isLoading) {
     return (
       <PageSection>
         <Card>

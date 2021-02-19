@@ -27,8 +27,16 @@ function CredentialPluginInput(props) {
   } = props;
 
   const [showPluginWizard, setShowPluginWizard] = useState(false);
-  const [inputField, , helpers] = useField(`inputs.${fieldOptions.id}`);
+  const [inputField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const [passwordPromptField] = useField(`passwordPrompts.${fieldOptions.id}`);
+
+  const disableFieldAndButtons =
+    !!passwordPromptField.value ||
+    !!(
+      meta.initialValue &&
+      meta.initialValue !== '' &&
+      meta.value === meta.initialValue
+    );
 
   return (
     <>
@@ -44,7 +52,7 @@ function CredentialPluginInput(props) {
             ...inputField,
             isRequired,
             validated: isValid ? 'default' : 'error',
-            isDisabled: !!passwordPromptField.value,
+            isDisabled: disableFieldAndButtons,
             onChange: (_, event) => {
               inputField.onChange(event);
             },
@@ -61,7 +69,7 @@ function CredentialPluginInput(props) {
                 t`Populate field from an external secret management system`
               )}
               onClick={() => setShowPluginWizard(true)}
-              isDisabled={isDisabled || !!passwordPromptField.value}
+              isDisabled={isDisabled || disableFieldAndButtons}
             >
               <KeyIcon />
             </Button>

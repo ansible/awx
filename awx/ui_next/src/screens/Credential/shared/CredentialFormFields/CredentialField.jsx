@@ -5,11 +5,15 @@ import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
+  Button,
+  ButtonVariant,
   FileUpload as PFFileUpload,
   FormGroup,
   InputGroup,
   TextInput,
+  Tooltip,
 } from '@patternfly/react-core';
+import { PficonHistoryIcon } from '@patternfly/react-icons';
 import { PasswordInput } from '../../../../components/FormField';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
 import Popover from '../../../../components/Popover';
@@ -22,20 +26,79 @@ const FileUpload = styled(PFFileUpload)`
   flex-grow: 1;
 `;
 
-function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
+function CredentialInput({ i18n, fieldOptions, credentialKind, ...rest }) {
   const [fileName, setFileName] = useState('');
   const [fileIsUploading, setFileIsUploading] = useState(false);
   const [subFormField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const isValid = !(meta.touched && meta.error);
+
+  const RevertReplaceButton = (
+    <>
+      {meta.initialValue &&
+        meta.initialValue !== '' &&
+        !meta.initialValue.credential && (
+          <Tooltip
+            id={`credential-${fieldOptions.id}-replace-tooltip`}
+            content={
+              meta.value !== meta.initialValue
+                ? i18n._(t`Revert`)
+                : i18n._(t`Replace`)
+            }
+          >
+            <Button
+              id={`credential-${fieldOptions.id}-replace-button`}
+              variant={ButtonVariant.control}
+              aria-label={
+                meta.touched
+                  ? i18n._(t`Revert field to previously saved value`)
+                  : i18n._(t`Replace field with new value`)
+              }
+              onClick={() => {
+                if (meta.value !== meta.initialValue) {
+                  helpers.setValue(meta.initialValue);
+                } else {
+                  helpers.setValue('', false);
+                }
+              }}
+            >
+              <PficonHistoryIcon />
+            </Button>
+          </Tooltip>
+        )}
+    </>
+  );
+
   if (fieldOptions.multiline) {
     const handleFileChange = (value, filename) => {
       helpers.setValue(value);
       setFileName(filename);
     };
 
+    if (fieldOptions.secret) {
+      return (
+        <>
+          {RevertReplaceButton}
+          <FileUpload
+            {...subFormField}
+            {...rest}
+            id={`credential-${fieldOptions.id}`}
+            type="text"
+            filename={fileName}
+            onChange={handleFileChange}
+            onReadStarted={() => setFileIsUploading(true)}
+            onReadFinished={() => setFileIsUploading(false)}
+            isLoading={fileIsUploading}
+            allowEditingUploadedText
+            validated={isValid ? 'default' : 'error'}
+          />
+        </>
+      );
+    }
+
     return (
       <FileUpload
         {...subFormField}
+        {...rest}
         id={`credential-${fieldOptions.id}`}
         type="text"
         filename={fileName}
@@ -48,13 +111,17 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
       />
     );
   }
+
   if (fieldOptions.secret) {
     const passwordInput = () => (
-      <PasswordInput
-        {...subFormField}
-        id={`credential-${fieldOptions.id}`}
-        {...rest}
-      />
+      <>
+        {RevertReplaceButton}
+        <PasswordInput
+          {...subFormField}
+          id={`credential-${fieldOptions.id}`}
+          {...rest}
+        />
+      </>
     );
     return credentialKind === 'external' ? (
       <InputGroup>{passwordInput()}</InputGroup>
@@ -147,8 +214,16 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
         validated={isValid ? 'default' : 'error'}
       >
         <CredentialInput
+          i18n={i18n}
           credentialKind={credentialType.kind}
           fieldOptions={fieldOptions}
+          isDisabled={
+            !!(
+              meta.initialValue &&
+              meta.initialValue !== '' &&
+              meta.value === meta.initialValue
+            )
+          }
         />
       </FormGroup>
     );
@@ -164,7 +239,7 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
       isRequired={isRequired}
       validated={isValid ? 'default' : 'error'}
     >
-      <CredentialInput fieldOptions={fieldOptions} />
+      <CredentialInput i18n={i18n} fieldOptions={fieldOptions} />
     </CredentialPluginField>
   );
 }

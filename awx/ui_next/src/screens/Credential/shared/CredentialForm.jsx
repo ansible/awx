@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { func, shape } from 'prop-types';
+import { shape } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -315,8 +315,6 @@ function CredentialForm({
 }
 
 CredentialForm.propTypes = {
-  handleSubmit: func.isRequired,
-  handleCancel: func.isRequired,
   credentialTypes: shape({}).isRequired,
   credential: shape({}),
   inputSources: shape({}),
