@@ -48,66 +48,6 @@ METRICS = {
         'help_text': 'Total number of events inserted into redis'},
 }
 
-# class AWXCounter():
-#     def inc(conn, field, increment_by):
-#         conn.hincrby(redis_key, field, increment_by)
-#
-# class AWXGauge():
-#     def incint(conn, field, increment_by):
-#         conn.hincrby(redis_key, field, increment_by)
-#     def incfloat(conn, field, increment_by):
-#         conn.hincrbyfloat(redis_key, field, increment_by)
-#
-#
-# class RedisConn():
-#     def __init__(self, use_pipeline = False):
-#         if use_pipeline:
-#             self.conn =
-#
-#     def incint(self, field):
-#         if self.use_pipeline:
-#
-#
-#     def incfloat(self, field):
-#
-#     def set(self):
-#
-#     def hincrbyfloat(self, field, increment_by, help_text=''):
-#         pass
-#     def hincrby(self, field, increment_by, help_text=''):
-#         if increment_by != 0:
-#             with redis.Redis.from_url(settings.BROKER_URL) as conn:
-#                 conn.hincrby(redis_key, field, increment_by)
-#                 set_help_text(conn, field, help_text)
-#                 send_broadcast(conn)
-#     def hset(self, field, value, help_text=''):
-#         with redis.Redis.from_url(settings.BROKER_URL) as conn:
-#             conn.hset(redis_key, field, value)
-#             set_help_text(conn, field, help_text)
-#             send_broadcast(conn)
-
-# class ConnPipe():
-#     def __init__(self, use_pipe=False):
-#         self.use_pipe = True
-#         if self.use_pipe == True:
-#             self.conn = redis.Redis.from_url(settings.BROKER_URL).pipeline()
-#
-# class RedisMetrics():
-#     def __init__(self):
-#         self.conn = redis.Redis.from_url(settings.BROKER_URL)
-#         self.pipe = None
-#         self.called_as_context = False
-#     def __enter__(self):
-#         self.called_as_context = True
-#         return self.pipe
-#     def __exit__(self, exception_type, exception_value, exception_traceback):
-#         self.pipe.reset()
-#     def hincrby(self, field, increment_by):
-#         if increment_by != 0:
-#             with redis.Redis.from_url(settings.BROKER_URL) as conn:
-#                 conn.hincrby(redis_key, field, increment_by)
-#                 send_broadcast(conn)
-
 def get_local_host():
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
         hostname = conn.get(redis_key + "_" + "local_hostname")
@@ -207,26 +147,3 @@ def load_local_metrics():
 def serialize_local_metrics():
     data = load_local_metrics()
     return json.dumps(data)
-
-def local_metrics():
-    REGISTRY = CollectorRegistry()
-    # query_params = request.query_params.copy()
-    # tags = ['callbackreceiver', 'events']
-    # if not any([i in query_params for i in tags]):
-    #     # if query_params does not include anything in tags list, then grab everything
-    #     query_params['all'] = ''
-    #
-    # if tags_in_query_params(['callbackreceiver', 'events', 'all'], query_params):
-    #     EVENTS_INSERT_DB.set(bytes_to_int(get('metrics.callbackreceiver', 'events_insert_db')))
-    #     EVENTS_BATCH_INSERT_DB.set(bytes_to_int(get('metrics.callbackreceiver', 'events_batch_insert_db')))
-
-    for field in METRICS:
-        prometheus_value = 0.0
-        with redis.Redis.from_url(settings.BROKER_URL) as conn:
-            field_value = conn.hget(redis_key, field)
-            if field_value is not None:
-                prometheus_value = float(field_value)
-        help_text = METRICS[field]['help_text']
-        prometheus_object = Gauge(field, help_text, ['node'], registry=REGISTRY)
-        prometheus_object.labels(node=get_local_host()).set(prometheus_value)
-    return generate_latest(registry=REGISTRY)
