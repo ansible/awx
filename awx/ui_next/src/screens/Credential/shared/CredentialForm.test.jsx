@@ -327,6 +327,27 @@ describe('<CredentialForm />', () => {
       machineFieldExpects();
     });
 
+    test('organization lookup should be disabled', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <CredentialForm
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            credential={machineCredential}
+            credentialTypes={credentialTypes}
+            isOrgLookupDisabled
+          />
+        );
+      });
+
+      expect(
+        wrapper
+          .find('CredentialFormFields')
+          .find('OrganizationLookup')
+          .prop('isDisabled')
+      ).toBe(true);
+    });
+
     test('should display form fields for source control credential properly', async () => {
       await act(async () => {
         wrapper = mountWithContexts(

@@ -18,7 +18,7 @@ import CredentialChip from '../CredentialChip';
 import { timeOfDay, formatDateString } from '../../util/dates';
 
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
-import LaunchButton from '../LaunchButton';
+import { LaunchButton } from '../LaunchButton';
 import Sparkline from '../Sparkline';
 import { toTitleCase } from '../../util/strings';
 import CopyButton from '../CopyButton';
@@ -177,13 +177,13 @@ function TemplateListItem({
               <PencilAltIcon />
             </Button>
           </ActionItem>
-          <ActionItem visible={template.summary_fields.user_capabilities.copy}>
+          <ActionItem
+            tooltip={i18n._(t`Copy Template`)}
+            visible={template.summary_fields.user_capabilities.copy}
+          >
             <CopyButton
               id={`template-action-copy-${template.id}`}
-              helperText={{
-                errorMessage: i18n._(t`Failed to copy template.`),
-                tooltip: i18n._(t`Copy Template`),
-              }}
+              errorMessage={i18n._(t`Failed to copy template.`)}
               isDisabled={isDisabled}
               onCopyStart={handleCopyStart}
               onCopyFinish={handleCopyFinish}

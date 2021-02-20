@@ -133,7 +133,7 @@ def main():
     existing_settings = module.get_endpoint('settings/all')['json']
 
     # Begin a json response
-    json_response = {'changed': False, 'old_values': {}}
+    json_output = {'changed': False, 'old_values': {}, 'new_values': {}}
 
     # Check any of the settings to see if anything needs to be updated
     needs_update = False
@@ -141,18 +141,29 @@ def main():
         if a_setting not in existing_settings or existing_settings[a_setting] != new_settings[a_setting]:
             # At least one thing is different so we need to patch
             needs_update = True
-            json_response['old_values'][a_setting] = existing_settings[a_setting]
+            json_output['old_values'][a_setting] = existing_settings[a_setting]
+            json_output['new_values'][a_setting] = new_settings[a_setting]
+
+    if module._diff:
+        json_output['diff'] = {
+            'before': json_output['old_values'],
+            'after': json_output['new_values']
+        }
 
     # If nothing needs an update we can simply exit with the response (as not changed)
     if not needs_update:
-        module.exit_json(**json_response)
+        module.exit_json(**json_output)
+
+    if module.check_mode and module._diff:
+        json_output['changed'] = True
+        module.exit_json(**json_output)
 
     # Make the call to update the settings
     response = module.patch_endpoint('settings/all', **{'data': new_settings})
 
     if response['status_code'] == 200:
         # Set the changed response to True
-        json_response['changed'] = True
+        json_output['changed'] = True
 
         # To deal with the old style values we need to return 'value' in the response
         new_values = {}
@@ -161,11 +172,11 @@ def main():
 
         # If we were using a name we will just add a value of a string, otherwise we will return an array in values
         if name is not None:
-            json_response['value'] = new_values[name]
+            json_output['value'] = new_values[name]
         else:
-            json_response['values'] = new_values
+            json_output['values'] = new_values
 
-        module.exit_json(**json_response)
+        module.exit_json(**json_output)
     elif 'json' in response and '__all__' in response['json']:
         module.fail_json(msg=response['json']['__all__'])
     else:

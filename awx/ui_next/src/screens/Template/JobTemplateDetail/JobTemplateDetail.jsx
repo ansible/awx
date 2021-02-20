@@ -26,7 +26,7 @@ import {
 } from '../../../components/DetailList';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
-import LaunchButton from '../../../components/LaunchButton';
+import { LaunchButton } from '../../../components/LaunchButton';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
 import { JobTemplatesAPI } from '../../../api';
 import useRequest, { useDismissableError } from '../../../util/useRequest';

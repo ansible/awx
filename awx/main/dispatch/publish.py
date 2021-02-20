@@ -5,6 +5,7 @@ import json
 from uuid import uuid4
 
 from django.conf import settings
+from django_guid.middleware import GuidMiddleware
 
 from . import pg_bus_conn
 
@@ -83,6 +84,9 @@ class task:
                     'kwargs': kwargs,
                     'task': cls.name
                 }
+                guid = GuidMiddleware.get_guid()
+                if guid:
+                    obj['guid'] = guid
                 obj.update(**kw)
                 if callable(queue):
                     queue = queue()

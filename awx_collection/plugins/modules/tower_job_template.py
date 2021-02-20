@@ -340,24 +340,24 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(),
-        description=dict(default=''),
+        description=dict(),
         organization=dict(),
         job_type=dict(choices=['run', 'check']),
         inventory=dict(),
         project=dict(),
         playbook=dict(),
-        credential=dict(default=''),
-        vault_credential=dict(default=''),
+        credential=dict(),
+        vault_credential=dict(),
         custom_virtualenv=dict(),
         credentials=dict(type='list', elements='str'),
         forks=dict(type='int'),
-        limit=dict(default=''),
+        limit=dict(),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
         extra_vars=dict(type='dict'),
-        job_tags=dict(default=''),
+        job_tags=dict(),
         force_handlers=dict(type='bool', default=False, aliases=['force_handlers_enabled']),
-        skip_tags=dict(default=''),
-        start_at_task=dict(default=''),
+        skip_tags=dict(),
+        start_at_task=dict(),
         timeout=dict(type='int', default=0),
         use_fact_cache=dict(type='bool', aliases=['fact_caching_enabled']),
         host_config_key=dict(),
@@ -399,11 +399,11 @@ def main():
     credential = module.params.get('credential')
     vault_credential = module.params.get('vault_credential')
     credentials = module.params.get('credentials')
-    if vault_credential != '':
+    if vault_credential:
         if credentials is None:
             credentials = []
         credentials.append(vault_credential)
-    if credential != '':
+    if credential:
         if credentials is None:
             credentials = []
         credentials.append(credential)
