@@ -35,7 +35,7 @@ from awx.main.models import (
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
-from awx.main.utils import get_type_for_model, task_manager_bulk_reschedule, schedule_task_manager
+from awx.main.utils import get_type_for_model, task_manager_bulk_reschedule, schedule_task_manager, create_partition
 from awx.main.signals import disable_activity_stream
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.utils import decrypt_field
@@ -261,6 +261,8 @@ class TaskManager:
                 logger.debug("No controllers available in group {} to run {}".format(rampart_group.name, task.log_format))
                 return
 
+        # Before task leaves pending state, ensure that job_event partitions exist
+        create_partition()
         task.status = 'waiting'
 
         (start_status, opts) = task.pre_start()
