@@ -44,6 +44,7 @@ options:
     schema:
       description:
         - A json list of nodes and their coresponding options. The following suboptions describe a single node.
+        - Using the tower_export module can be helpful in learning how to create schemas from existing workflows
       type: list
       required: True
       suboptions:
@@ -205,7 +206,6 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-More advanced examples can be made from using the tower_export module
 
 - name: Create a workflow job template schema
   awx.awx.tower_workflow_job_template_schema:
