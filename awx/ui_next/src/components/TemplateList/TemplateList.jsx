@@ -18,7 +18,7 @@ import { getQSConfig, parseQueryString } from '../../util/qs';
 import useWsTemplates from '../../util/useWsTemplates';
 import AddDropDownButton from '../AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
-import { deleteRequests } from '../../util/getDeleteDetails';
+import { relatedResourceDeleteRequests } from '../../util/getRelatedResourceDeleteDetails';
 
 function TemplateList({ defaultParams, i18n }) {
   // The type value in const qsConfig below does not have a space between job_template and
@@ -169,7 +169,10 @@ function TemplateList({ defaultParams, i18n }) {
     <AddDropDownButton key="add" dropdownItems={addDropDownButton} />
   );
 
-  const deleteDetailsRequests = deleteRequests.template(selected[0], i18n);
+  const deleteDetailsRequests = relatedResourceDeleteRequests.template(
+    selected[0],
+    i18n
+  );
 
   return (
     <Fragment>

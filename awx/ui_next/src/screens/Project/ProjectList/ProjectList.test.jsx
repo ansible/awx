@@ -1,7 +1,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ProjectsAPI } from '../../../api';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import {
+  ProjectsAPI,
+  JobTemplatesAPI,
+  WorkflowJobTemplatesAPI,
+  InventorySourcesAPI,
+} from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import ProjectList from './ProjectList';
 
 jest.mock('../../../api');
@@ -83,6 +91,9 @@ const mockProjects = [
 
 describe('<ProjectList />', () => {
   beforeEach(() => {
+    JobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    WorkflowJobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    InventorySourcesAPI.read.mockResolvedValue({ data: { count: 0 } });
     ProjectsAPI.read.mockResolvedValue({
       data: {
         count: mockProjects.length,
@@ -138,6 +149,17 @@ describe('<ProjectList />', () => {
     ).toEqual(true);
   });
 
+  test('should have proper number of delete detail requests', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectList />);
+    });
+    wrapper.update();
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(3);
+  });
+
   test('should select all', async () => {
     let wrapper;
     await act(async () => {
@@ -177,10 +199,11 @@ describe('<ProjectList />', () => {
         .at(2)
         .invoke('onSelect')();
     });
-    wrapper.update();
 
-    expect(wrapper.find('ToolbarDeleteButton button').prop('disabled')).toEqual(
-      true
+    waitForElement(
+      wrapper,
+      'ToolbarDeleteButton button',
+      el => el.prop('disabled') === true
     );
   });
 

@@ -7,9 +7,20 @@ import {
 } from '../../../../testUtils/enzymeHelpers';
 import InventorySourceDetail from './InventorySourceDetail';
 import mockInvSource from '../shared/data.inventory_source.json';
-import { InventorySourcesAPI } from '../../../api';
+import {
+  InventorySourcesAPI,
+  InventoriesAPI,
+  WorkflowJobTemplateNodesAPI,
+} from '../../../api';
 
 jest.mock('../../../api/models/InventorySources');
+jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/WorkflowJobTemplateNodes');
+
+InventoriesAPI.updateSources.mockResolvedValue({
+  data: [{ inventory_source: 1 }],
+});
+WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
 InventorySourcesAPI.readOptions.mockResolvedValue({
   data: {
     actions: {
@@ -99,6 +110,17 @@ describe('InventorySourceDetail', () => {
     );
     expect(wrapper.find('DeleteButton')).toHaveLength(1);
     expect(wrapper.find('InventorySourceSyncButton')).toHaveLength(1);
+  });
+
+  test('should have proper number of delete detail requests', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventorySourceDetail inventorySource={mockInvSource} />
+      );
+    });
+    expect(
+      wrapper.find('DeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(1);
   });
 
   test('should hide expected action buttons for users without permissions', async () => {

@@ -92,6 +92,12 @@ describe('<CredentialTypeDetails/>', () => {
     );
   });
 
+  test('should have proper number of delete detail requests', () => {
+    expect(
+      wrapper.find('DeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(1);
+  });
+
   test('expected api call is made for delete', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/credential_types/42/details'],

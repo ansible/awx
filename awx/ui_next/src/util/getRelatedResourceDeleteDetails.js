@@ -21,6 +21,7 @@ export async function getRelatedResourceDeleteCounts(requests) {
         const {
           data: { count },
         } = await request();
+
         if (count > 0) {
           results[label] = count;
           hasCount = true;
@@ -40,7 +41,7 @@ export async function getRelatedResourceDeleteCounts(requests) {
 export const relatedResourceDeleteRequests = {
   credential: (selected, i18n) => [
     {
-      request: async () =>
+      request: () =>
         JobTemplatesAPI.read({
           credentials: selected.id,
         }),
@@ -63,37 +64,6 @@ export const relatedResourceDeleteRequests = {
           credentials__id: selected.id,
         }),
       label: i18n._(t`Inventory Sources`),
-    },
-  ],
-
-  project: (selected, i18n) => [
-    {
-      request: async () =>
-        JobTemplatesAPI.read({
-          credentials: selected.id,
-        }),
-      label: i18n._(t`Job Templates`),
-    },
-    {
-      request: () => WorkflowJobTemplatesAPI.read({ credentials: selected.id }),
-      label: i18n._(t`Workflow Job Templates`),
-    },
-    {
-      request: () =>
-        InventorySourcesAPI.read({
-          credentials__id: selected.id,
-        }),
-      label: i18n._(t`Inventory Sources`),
-    },
-  ],
-
-  template: (selected, i18n) => [
-    {
-      request: async () =>
-        WorkflowJobTemplateNodesAPI.read({
-          unified_job_template: selected.id,
-        }),
-      label: [i18n._(t`Workflow Job Template Node`)],
     },
   ],
 
@@ -134,6 +104,37 @@ export const relatedResourceDeleteRequests = {
         }
       },
       label: i18n._(t`Workflow Job Template Node`),
+    },
+  ],
+
+  project: (selected, i18n) => [
+    {
+      request: () =>
+        JobTemplatesAPI.read({
+          credentials: selected.id,
+        }),
+      label: i18n._(t`Job Templates`),
+    },
+    {
+      request: () => WorkflowJobTemplatesAPI.read({ credentials: selected.id }),
+      label: i18n._(t`Workflow Job Templates`),
+    },
+    {
+      request: () =>
+        InventorySourcesAPI.read({
+          credentials__id: selected.id,
+        }),
+      label: i18n._(t`Inventory Sources`),
+    },
+  ],
+
+  template: (selected, i18n) => [
+    {
+      request: async () =>
+        WorkflowJobTemplateNodesAPI.read({
+          unified_job_template: selected.id,
+        }),
+      label: [i18n._(t`Workflow Job Template Node`)],
     },
   ],
 

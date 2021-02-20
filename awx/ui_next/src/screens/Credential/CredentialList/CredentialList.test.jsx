@@ -40,6 +40,12 @@ describe('<CredentialList />', () => {
     expect(wrapper.find('CredentialList').length).toBe(1);
   });
 
+  test('should have proper number of delete detail requests', () => {
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(4);
+  });
+
   test('should fetch credentials from api and render the in the list', () => {
     expect(CredentialsAPI.read).toHaveBeenCalled();
     expect(wrapper.find('CredentialListItem').length).toBe(5);

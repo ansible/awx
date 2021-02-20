@@ -38,7 +38,6 @@ describe('<DeleteButton />', () => {
       );
     });
 
-    // expect(wrapper.find('Modal')).toHaveLength(0);
     await act(async () => {
       wrapper.find('button').prop('onClick')();
     });

@@ -30,7 +30,7 @@ describe('<ToolbarDeleteButton />', () => {
   beforeEach(() => {
     deleteDetailsRequests = [
       {
-        label: 'job',
+        label: 'Workflow Job Template Node',
         request: CredentialsAPI.read.mockResolvedValue({ data: { count: 1 } }),
       },
     ];
@@ -62,8 +62,53 @@ describe('<ToolbarDeleteButton />', () => {
       wrapper.find('button').prop('onClick')();
     });
     await waitForElement(wrapper, 'Modal', el => el.length > 0);
+    expect(CredentialsAPI.read).toBeCalled();
     expect(wrapper.find('Modal')).toHaveLength(1);
+    expect(
+      wrapper.find('span[aria-label="Workflow Job Template Node: 1"]')
+    ).toHaveLength(1);
     expect(wrapper.find('div[aria-label="Delete this?"]')).toHaveLength(1);
+  });
+
+  test('should open delete error modal', async () => {
+    const request = [
+      {
+        label: 'Workflow Job Template Node',
+        request: CredentialsAPI.read.mockRejectedValue(
+          new Error({
+            response: {
+              config: {
+                method: 'get',
+                url: '/api/v2/credentals',
+              },
+              data: 'An error occurred',
+              status: 403,
+            },
+          })
+        ),
+      },
+    ];
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ToolbarDeleteButton
+          onDelete={() => {}}
+          itemsToDelete={[itemA]}
+          deleteDetailsRequests={request}
+          deleteMessage="Delete this?"
+          warningMessage="Are you sure to want to delete this"
+        />
+      );
+    });
+
+    expect(wrapper.find('Modal')).toHaveLength(0);
+    await act(async () => wrapper.find('button').simulate('click'));
+    await waitForElement(wrapper, 'Modal', el => el.length > 0);
+    expect(CredentialsAPI.read).toBeCalled();
+
+    wrapper.update();
+
+    expect(wrapper.find('AlertModal[title="Error!"]')).toHaveLength(1);
   });
 
   test('should invoke onDelete prop', () => {

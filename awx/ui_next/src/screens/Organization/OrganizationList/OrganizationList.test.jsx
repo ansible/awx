@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI, CredentialsAPI } from '../../../api';
 import {
   mountWithContexts,
   waitForElement,
@@ -70,6 +70,7 @@ const mockOrganizations = {
 describe('<OrganizationsList />', () => {
   let wrapper;
   beforeEach(() => {
+    CredentialsAPI.read.mockResolvedValue({ data: { count: 0 } });
     OrganizationsAPI.read.mockResolvedValue(mockOrganizations);
     OrganizationsAPI.readOptions.mockResolvedValue({
       data: {
@@ -88,6 +89,20 @@ describe('<OrganizationsList />', () => {
     await act(async () => {
       mountWithContexts(<OrganizationsList />);
     });
+  });
+
+  test('should have proper number of delete detail requests', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(<OrganizationsList />);
+    });
+    await waitForElement(
+      wrapper,
+      'OrganizationsList',
+      el => el.find('ContentLoading').length === 0
+    );
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(1);
   });
 
   test('Items are rendered after loading', async () => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI, CredentialsAPI } from '../../../api';
 import {
   mountWithContexts,
   waitForElement,
@@ -44,6 +44,8 @@ describe('<OrganizationDetail />', () => {
   };
 
   beforeEach(() => {
+    CredentialsAPI.read.mockResolvedValue({ data: { count: 0 } });
+
     OrganizationsAPI.readInstanceGroups.mockResolvedValue(mockInstanceGroups);
   });
 
@@ -62,6 +64,20 @@ describe('<OrganizationDetail />', () => {
       mountWithContexts(<OrganizationDetail organization={mockOrganization} />);
     });
     expect(OrganizationsAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
+  });
+
+  test('should have proper number of delete detail requests', async () => {
+    let component;
+    await act(async () => {
+      component = mountWithContexts(
+        <OrganizationDetail organization={mockOrganization} />
+      );
+    });
+    await waitForElement(component, 'ContentLoading', el => el.length === 0);
+
+    expect(
+      component.find('DeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(1);
   });
 
   test('should render the expected instance group', async () => {

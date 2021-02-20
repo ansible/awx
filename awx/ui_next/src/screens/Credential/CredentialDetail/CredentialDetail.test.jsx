@@ -65,6 +65,12 @@ describe('<CredentialDetail />', () => {
     expect(wrapper.find('CredentialDetail').length).toBe(1);
   });
 
+  test('should have proper number of delete detail requests', () => {
+    expect(
+      wrapper.find('DeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(4);
+  });
+
   test('should render details', () => {
     expectDetailToMatch(wrapper, 'Name', mockCredential.name);
     expectDetailToMatch(wrapper, 'Description', mockCredential.description);

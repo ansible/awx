@@ -112,7 +112,11 @@ function ToolbarDeleteButton({
   };
 
   const toggleModal = async isOpen => {
-    if (itemsToDelete.length === 1 && deleteDetailsRequests?.length > 0) {
+    if (
+      isOpen &&
+      itemsToDelete.length === 1 &&
+      deleteDetailsRequests?.length > 0
+    ) {
       const { results, error } = await getRelatedResourceDeleteCounts(
         deleteDetailsRequests
       );
@@ -195,7 +199,7 @@ function ToolbarDeleteButton({
               variant="secondary"
               aria-label={i18n._(t`Delete`)}
               onClick={() => toggleModal(true)}
-              isAriaDisabled={isDisabled}
+              isDisabled={isDisabled}
             >
               {i18n._(t`Delete`)}
             </Button>
@@ -203,7 +207,7 @@ function ToolbarDeleteButton({
         </Tooltip>
       )}
 
-      {isModalOpen && !deleteMessageError && (
+      {isModalOpen && (
         <AlertModal
           variant="danger"
           title={modalTitle}

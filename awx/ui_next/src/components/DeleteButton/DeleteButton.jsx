@@ -70,56 +70,55 @@ function DeleteButton({
       >
         {children || i18n._(t`Delete`)}
       </Button>
-      {!deleteMessageError && (
-        <AlertModal
-          isOpen={isOpen}
-          title={modalTitle}
-          variant="danger"
-          onClose={() => toggleModal(false)}
-          actions={[
-            <Button
-              ouiaId="delete-modal-confirm"
-              key="delete"
-              variant="danger"
-              aria-label={i18n._(t`Confirm Delete`)}
-              isDisabled={isDisabled}
-              onClick={onConfirm}
-            >
-              {i18n._(t`Delete`)}
-            </Button>,
-            <Button
-              ouiaId="delete-modal-cancel"
-              key="cancel"
-              variant="link"
-              aria-label={i18n._(t`Cancel`)}
-              onClick={() => toggleModal(false)}
-            >
-              {i18n._(t`Cancel`)}
-            </Button>,
-          ]}
-        >
-          {i18n._(t`Are you sure you want to delete:`)}
-          <br />
-          <strong>{name}</strong>
-          {Object.values(deleteDetails).length > 0 && (
-            <WarningMessage
-              variant="warning"
-              isInline
-              title={
-                <div>
-                  <div aria-label={deleteMessage}>{deleteMessage}</div>
-                  <br />
-                  {Object.entries(deleteDetails).map(([key, value]) => (
-                    <DetailsWrapper aria-label={`${key}: ${value}`} key={key}>
-                      <span>{key}</span> <Badge>{value}</Badge>
-                    </DetailsWrapper>
-                  ))}
-                </div>
-              }
-            />
-          )}
-        </AlertModal>
-      )}
+
+      <AlertModal
+        isOpen={isOpen}
+        title={modalTitle}
+        variant="danger"
+        onClose={() => toggleModal(false)}
+        actions={[
+          <Button
+            ouiaId="delete-modal-confirm"
+            key="delete"
+            variant="danger"
+            aria-label={i18n._(t`Confirm Delete`)}
+            isDisabled={isDisabled}
+            onClick={onConfirm}
+          >
+            {i18n._(t`Delete`)}
+          </Button>,
+          <Button
+            ouiaId="delete-modal-cancel"
+            key="cancel"
+            variant="link"
+            aria-label={i18n._(t`Cancel`)}
+            onClick={() => toggleModal(false)}
+          >
+            {i18n._(t`Cancel`)}
+          </Button>,
+        ]}
+      >
+        {i18n._(t`Are you sure you want to delete:`)}
+        <br />
+        <strong>{name}</strong>
+        {Object.values(deleteDetails).length > 0 && (
+          <WarningMessage
+            variant="warning"
+            isInline
+            title={
+              <div>
+                <div aria-label={deleteMessage}>{deleteMessage}</div>
+                <br />
+                {Object.entries(deleteDetails).map(([key, value]) => (
+                  <DetailsWrapper aria-label={`${key}: ${value}`} key={key}>
+                    <span>{key}</span> <Badge>{value}</Badge>
+                  </DetailsWrapper>
+                ))}
+              </div>
+            }
+          />
+        )}
+      </AlertModal>
     </>
   );
 }
