@@ -1024,21 +1024,33 @@ def deepmerge(a, b):
         return b
 
 
-def create_partition(start=None, end=None, partition_label=None):
+def create_partition(start=None, end=None, partition_label=None, minutely=True):
     """Creates new partition tables for events.
     - start defaults to beginning of current hour
     - end defaults to end of current hour
-    - partition_label defaults to YYYYMMDD_HH"""
+    - partition_label defaults to YYYYMMDD_HH
 
+    - minutely will create partitions that span _a single minute_ for testing purposes
+    """
+    current_time = now()
     if not start:
-        start = now().replace(microsecond=0, second=0, minute=0)
+        if minutely:
+            start = current_time.replace(microsecond=0, second=0)
+        else:
+            start = current_time.replace(microsecond=0, second=0, minute=0)
     if not end:
-        end = start.replace(microsecond=0, second=0, minute=0) + timedelta(hours=1)
+        if minutely:
+            end = start.replace(microsecond=0, second=0) + timedelta(minutes=1)
+        else:
+            end = start.replace(microsecond=0, second=0, minute=0) + timedelta(hours=1)
     start_timestamp = str(start)
     end_timestamp = str(end)
 
     if not partition_label:
-        partition_label = start.strftime('%Y%m%d_%H')
+        if minutely:
+            partition_label = start.strftime('%Y%m%d_%H%M')
+        else:
+            partition_label = start.strftime('%Y%m%d_%H')
 
     with connection.cursor() as cursor:
         # Only partitioning main_jobevent on first pass
