@@ -11,7 +11,7 @@ import FormField, {
   FormSubmitError,
 } from '../../../components/FormField';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import { required, requiredEmail } from '../../../util/validators';
+import { required } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 
 function UserFormFields({ user, i18n }) {
@@ -76,8 +76,7 @@ function UserFormFields({ user, i18n }) {
         id="user-email"
         label={i18n._(t`Email`)}
         name="email"
-        validate={requiredEmail(i18n)}
-        isRequired
+        type="text"
       />
       {!ldapUser && !(socialAuthUser && externalAccount) && (
         <>
