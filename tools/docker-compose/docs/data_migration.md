@@ -5,6 +5,8 @@ migrate your data to the development environment via the migrate.yml playbook, o
 
 > Note: This will also convert your postgresql bind-mount into a docker volume.
 
+First, in the  `inventory` file, set your `pg_password`, `broadcast_websocket_secret`, `secret_key`, and any other settings you need for your deployment.  **Make sure you use the same secret key value you had with your previous Local Docker deployment.**  
+
 ### Migrate data with migrate.yml
 
 If you had a custom pgdocker or awxcompose location, you will need to set the `postgres_data_dir` and `old_docker_compose_dir` variables. 
