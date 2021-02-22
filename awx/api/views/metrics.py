@@ -14,7 +14,7 @@ from rest_framework.exceptions import PermissionDenied
 
 # AWX
 # from awx.main.analytics import collectors
-from awx.main.analytics.metrics_no_db import metrics as redismetrics
+from awx.main.analytics.metrics_redis import metrics as redismetrics
 from awx.main.analytics.metrics import metrics
 from awx.api import renderers
 

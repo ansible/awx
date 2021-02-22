@@ -22,7 +22,7 @@ from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
 from awx.main.tasks import handle_success_and_failure_notifications
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
-import awx.main.analytics.metrics_no_db as metrics_no_db
+import awx.main.analytics.metrics_redis as metrics_redis
 from .base import BaseWorker
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -55,14 +55,14 @@ class CallbackBrokerWorker(BaseWorker):
 
     def read(self, queue):
         try:
-            with metrics_no_db.RedisPipe() as pipe:
-                metrics_no_db.hset('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), conn = pipe)
+            with metrics_redis.RedisPipe() as pipe:
+                metrics_redis.hset('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), conn = pipe)
                 res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=1)
                 if res is None:
                     pipe.execute()
                     return {'event': 'FLUSH'}
-                metrics_no_db.hincrby('callback_receiver_events_popped_redis', 1, conn = pipe)
-                metrics_no_db.hincrby('callback_receiver_events_in_memory', 1, conn = pipe)
+                metrics_redis.hincrby('callback_receiver_events_popped_redis', 1, conn = pipe)
+                metrics_redis.hincrby('callback_receiver_events_in_memory', 1, conn = pipe)
                 self.total += 1
                 pipe.execute()
                 return json.loads(res[1])
@@ -150,13 +150,13 @@ class CallbackBrokerWorker(BaseWorker):
             try:
                 # only update metrics if we saved events
                 if (bulk_events_saved + singular_events_saved) > 0:
-                    with metrics_no_db.RedisPipe() as pipe:
-                        metrics_no_db.hincrby('callback_receiver_batch_events_errors', metrics_events_batch_save_errors, conn=pipe)
-                        metrics_no_db.hincrby('callback_receiver_events_size', stdout_size_saved, conn=pipe)
-                        metrics_no_db.hincrbyfloat('callback_receiver_events_insert_db_seconds', duration_to_save.total_seconds(), conn=pipe)
-                        metrics_no_db.hincrby('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved, conn=pipe)
-                        metrics_no_db.hincrby('callback_receiver_batch_events_insert_db', bulk_events_saved, conn=pipe)
-                        metrics_no_db.hincrby('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved), conn=pipe)
+                    with metrics_redis.RedisPipe() as pipe:
+                        metrics_redis.hincrby('callback_receiver_batch_events_errors', metrics_events_batch_save_errors, conn=pipe)
+                        metrics_redis.hincrby('callback_receiver_events_size', stdout_size_saved, conn=pipe)
+                        metrics_redis.hincrbyfloat('callback_receiver_events_insert_db_seconds', duration_to_save.total_seconds(), conn=pipe)
+                        metrics_redis.hincrby('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved, conn=pipe)
+                        metrics_redis.hincrby('callback_receiver_batch_events_insert_db', bulk_events_saved, conn=pipe)
+                        metrics_redis.hincrby('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved), conn=pipe)
                         pipe.execute()
             except Exception:
                 logger.exception('Could not update callback_receiver statistics')
@@ -212,7 +212,7 @@ class CallbackBrokerWorker(BaseWorker):
                     except Exception:
                         logger.exception('Worker failed to emit notifications: Job {}'.format(job_identifier))
                     finally:
-                        metrics_no_db.hincrby('callback_receiver_events_in_memory', -1)
+                        metrics_redis.hincrby('callback_receiver_events_in_memory', -1)
                         GuidMiddleware.set_guid('')
                     return
 
