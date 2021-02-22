@@ -29,12 +29,18 @@ function OrganizationExecEnvListItem({
         <DataListItemCells
           dataListCells={[
             <DataListCell
+              key="name"
+              aria-label={i18n._(t`Execution environment name`)}
+            >
+              <Link to={`${detailUrl}`}>
+                <b>{executionEnvironment.name}</b>
+              </Link>
+            </DataListCell>,
+            <DataListCell
               key="image"
               aria-label={i18n._(t`Execution environment image`)}
             >
-              <Link to={`${detailUrl}`}>
-                <b>{executionEnvironment.image}</b>
-              </Link>
+              {executionEnvironment.image}
             </DataListCell>,
           ]}
         />

@@ -15,7 +15,7 @@ import OrganizationExecEnvListItem from './OrganizationExecEnvListItem';
 const QS_CONFIG = getQSConfig('organizations', {
   page: 1,
   page_size: 20,
-  order_by: 'image',
+  order_by: 'name',
 });
 
 function OrganizationExecEnvList({ i18n, organization }) {
@@ -80,9 +80,14 @@ function OrganizationExecEnvList({ i18n, organization }) {
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           toolbarSearchColumns={[
             {
+              name: i18n._(t`Name`),
+              key: 'name__icontains',
+              isDefault: true,
+            },
+            {
               name: i18n._(t`Image`),
               key: 'image__icontains',
-              isDefault: true,
+              isDefault: false,
             },
             {
               name: i18n._(t`Created By (Username)`),
@@ -94,6 +99,10 @@ function OrganizationExecEnvList({ i18n, organization }) {
             },
           ]}
           toolbarSortColumns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+            },
             {
               name: i18n._(t`Image`),
               key: 'image',
