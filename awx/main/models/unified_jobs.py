@@ -1453,6 +1453,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             for name in ('awx', 'tower'):
                 r['{}_workflow_job_id'.format(name)] = wj.pk
                 r['{}_workflow_job_name'.format(name)] = wj.name
+                r['{}_workflow_job_launch_type'.format(name)] = wj.launch_type
                 if schedule:
                     r['{}_parent_job_schedule_id'.format(name)] = schedule.pk
                     r['{}_parent_job_schedule_name'.format(name)] = schedule.name
