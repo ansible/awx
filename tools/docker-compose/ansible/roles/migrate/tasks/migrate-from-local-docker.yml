@@ -4,6 +4,7 @@
 - name: Remove awx_postgres to ensure consistent start state
   shell: |
     docker rm -f awx_postgres
+  ignore_errors: true
 
 - name: Start Local Docker database container
   docker_compose:
@@ -12,6 +13,10 @@
       - postgres
     state: present
     recreate: always
+
+- name: Wait for postgres to initialize
+  wait_for:
+    timeout: 3
 
 - name: Database dump to local filesystem
   shell: |
