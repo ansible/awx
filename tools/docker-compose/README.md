@@ -4,18 +4,18 @@
 
 Here are the main make targets:
 
-* `docker-compose-build` - used for building the development image, which is used by both `docker-compose`
-* `docker-compose` - Make target for development, passes awx_devel image and tag.  
+* `docker-compose-build` - used for building the development image, which is used by the `docker-compose` target
+* `docker-compose` - make target for development, passes awx_devel image and tag
 
 Notable files:
-* `tools/docker-compose/inventory` file - used to configure the local AWX development deployment.  
-* `migrate.yml` - playbook for migrating data from Local Docker to the Development Environment.  
+* `tools/docker-compose/inventory` file - used to configure the local AWX development deploymen
+* `migrate.yml` - playbook for migrating data from Local Docker to the Development Environment  
 
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/engine/installation/) on the host where AWX will be deployed. After installing Docker, the Docker service must be started (depending on your OS, you may have to add the local user that uses Docker to the ``docker`` group, refer to the documentation for details)
 - [docker-compose](https://pypi.org/project/docker-compose/) Python module.
-    + This also installs the `docker` Python module, which is incompatible with `docker-py`. If you have previously installed `docker-py`, please uninstall it.
+    + This also installs the `docker` Python module, which is incompatible with [`docker-py`](https://pypi.org/project/docker-py/). If you have previously installed `docker-py`, please uninstall it.
 - [Docker Compose](https://docs.docker.com/compose/install/).
 
 ## Configuration
