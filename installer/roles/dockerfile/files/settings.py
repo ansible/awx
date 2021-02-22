@@ -50,6 +50,7 @@ LOGGING['handlers']['console'] = {
     '()': 'logging.StreamHandler',
     'level': 'DEBUG',
     'formatter': 'simple',
+    'filters': ['guid'],
 }
 
 LOGGING['loggers']['django.request']['handlers'] = ['console']
