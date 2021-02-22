@@ -688,6 +688,7 @@ class TeamAccessList(ResourceAccessList):
 
 class ExecutionEnvironmentList(ListCreateAPIView):
 
+    always_allow_superuser = False
     model = models.ExecutionEnvironment
     serializer_class = serializers.ExecutionEnvironmentSerializer
     swagger_topic = "Execution Environments"
@@ -695,6 +696,7 @@ class ExecutionEnvironmentList(ListCreateAPIView):
 
 class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
 
+    always_allow_superuser = False
     model = models.ExecutionEnvironment
     serializer_class = serializers.ExecutionEnvironmentSerializer
     swagger_topic = "Execution Environments"

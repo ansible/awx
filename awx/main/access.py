@@ -1329,13 +1329,10 @@ class ExecutionEnvironmentAccess(BaseAccess):
             Q(organization__isnull=True)
         ).distinct()
 
+    @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'execution_environment_admin_role').exists()
-        if obj.managed_by_tower:
-            raise PermissionDenied
-        if self.user.is_superuser:
-            return True
         return self.check_related('organization', Organization, data, mandatory=True,
                                   role_field='execution_environment_admin_role')
 
