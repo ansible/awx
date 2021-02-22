@@ -6,28 +6,40 @@ import ScheduleAdd from './ScheduleAdd';
 import ScheduleList from './ScheduleList';
 
 function Schedules({
-  createSchedule,
+  apiModel,
   loadScheduleOptions,
   loadSchedules,
   setBreadcrumb,
-  unifiedJobTemplate,
+  launchConfig,
+  surveyConfig,
+  resource,
 }) {
   const match = useRouteMatch();
 
   return (
     <Switch>
       <Route path={`${match.path}/add`}>
-        <ScheduleAdd createSchedule={createSchedule} />
+        <ScheduleAdd
+          apiModel={apiModel}
+          resource={resource}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
+        />
       </Route>
       <Route key="details" path={`${match.path}/:scheduleId`}>
         <Schedule
-          unifiedJobTemplate={unifiedJobTemplate}
           setBreadcrumb={setBreadcrumb}
+          resource={resource}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
         />
       </Route>
       <Route key="list" path={`${match.path}`}>
         <ScheduleList
+          resource={resource}
           loadSchedules={loadSchedules}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
           loadScheduleOptions={loadScheduleOptions}
         />
       </Route>

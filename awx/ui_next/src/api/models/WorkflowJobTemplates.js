@@ -6,6 +6,7 @@ class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/workflow_job_templates/';
+    this.createSchedule = this.createSchedule.bind(this);
   }
 
   readWebhookKey(id) {

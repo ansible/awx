@@ -4,28 +4,101 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { shape } from 'prop-types';
 import { Card } from '@patternfly/react-core';
+import yaml from 'js-yaml';
 import { CardBody } from '../../Card';
 import { SchedulesAPI } from '../../../api';
 import buildRuleObj from '../shared/buildRuleObj';
 import ScheduleForm from '../shared/ScheduleForm';
+import { getAddedAndRemoved } from '../../../util/lists';
 
-function ScheduleEdit({ i18n, schedule }) {
+import { parseVariableField } from '../../../util/yaml';
+import mergeExtraVars from '../../../util/prompt/mergeExtraVars';
+import getSurveyValues from '../../../util/prompt/getSurveyValues';
+
+function ScheduleEdit({
+  i18n,
+  schedule,
+  resource,
+  launchConfig,
+  surveyConfig,
+}) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
   const location = useLocation();
   const { pathname } = location;
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (
+    values,
+    launchConfiguration,
+    surveyConfiguration,
+    scheduleCredentials = []
+  ) => {
+    const {
+      inventory,
+      credentials = [],
+      end,
+      frequency,
+      interval,
+      startDateTime,
+      timezone,
+      occurences,
+      runOn,
+      runOnTheDay,
+      runOnTheMonth,
+      runOnDayMonth,
+      runOnDayNumber,
+      endDateTime,
+      runOnTheOccurence,
+      daysOfWeek,
+      ...submitValues
+    } = values;
+    const { added, removed } = getAddedAndRemoved(
+      [...(resource?.summary_fields.credentials || []), ...scheduleCredentials],
+      credentials
+    );
+
+    let extraVars;
+    const surveyValues = getSurveyValues(values);
+    const initialExtraVars =
+      launchConfiguration?.ask_variables_on_launch &&
+      (values.extra_vars || '---');
+    if (surveyConfiguration?.spec) {
+      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, surveyValues));
+    } else {
+      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, {}));
+    }
+    submitValues.extra_data = extraVars && parseVariableField(extraVars);
+
+    if (
+      Object.keys(submitValues.extra_data).length === 0 &&
+      Object.keys(schedule.extra_data).length > 0
+    ) {
+      submitValues.extra_data = schedule.extra_data;
+    }
+    delete values.extra_vars;
+    if (inventory) {
+      submitValues.inventory = inventory.id;
+    }
+
     try {
       const rule = new RRule(buildRuleObj(values, i18n));
       const {
         data: { id: scheduleId },
       } = await SchedulesAPI.update(schedule.id, {
-        name: values.name,
-        description: values.description,
+        ...submitValues,
         rrule: rule.toString().replace(/\n/g, ' '),
       });
+      if (values.credentials?.length > 0) {
+        await Promise.all([
+          ...removed.map(({ id }) =>
+            SchedulesAPI.disassociateCredential(scheduleId, id)
+          ),
+          ...added.map(({ id }) =>
+            SchedulesAPI.associateCredential(scheduleId, id)
+          ),
+        ]);
+      }
 
       history.push(`${pathRoot}schedules/${scheduleId}/details`);
     } catch (err) {
@@ -43,6 +116,9 @@ function ScheduleEdit({ i18n, schedule }) {
           }
           handleSubmit={handleSubmit}
           submitError={formSubmitError}
+          resource={resource}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
         />
       </CardBody>
     </Card>

@@ -24,6 +24,9 @@ function ScheduleList({
   loadSchedules,
   loadScheduleOptions,
   hideAddButton,
+  resource,
+  launchConfig,
+  surveyConfig,
 }) {
   const [selected, setSelected] = useState([]);
 
@@ -114,6 +117,47 @@ function ScheduleList({
     actions &&
     Object.prototype.hasOwnProperty.call(actions, 'POST') &&
     !hideAddButton;
+  const isTemplate =
+    resource?.type === 'workflow_job_template' ||
+    resource?.type === 'job_template';
+
+  const missingRequiredInventory = schedule => {
+    if (
+      !launchConfig.inventory_needed_to_start ||
+      schedule?.summary_fields?.inventory?.id
+    ) {
+      return null;
+    }
+    return i18n._(t`This schedule is missing an Inventory`);
+  };
+
+  const hasMissingSurveyValue = schedule => {
+    let missingValues;
+    if (launchConfig.survey_enabled) {
+      surveyConfig.spec.forEach(question => {
+        const hasDefaultValue = Boolean(question.default);
+        if (question.required && !hasDefaultValue) {
+          const extraDataKeys = Object.keys(schedule?.extra_data);
+
+          const hasMatchingKey = extraDataKeys.includes(question.variable);
+          Object.values(schedule?.extra_data).forEach(value => {
+            if (!value || !hasMatchingKey) {
+              missingValues = true;
+            } else {
+              missingValues = false;
+            }
+          });
+          if (!Object.values(schedule.extra_data).length) {
+            missingValues = true;
+          }
+        }
+      });
+    }
+    return (
+      missingValues &&
+      i18n._(t`This schedule is missing required survey values`)
+    );
+  };
 
   return (
     <>
@@ -139,6 +183,8 @@ function ScheduleList({
             onSelect={() => handleSelect(item)}
             schedule={item}
             rowIndex={index}
+            isMissingInventory={isTemplate && missingRequiredInventory(item)}
+            isMissingSurvey={isTemplate && hasMissingSurveyValue(item)}
           />
         )}
         toolbarSearchColumns={[
