@@ -66,7 +66,7 @@ def migrate_event_data(apps, schema_editor):
             current_time = now()
 
             # .. as well as initial partition containing all existing events
-            epoch = datetime(1980, 1, 1, 0, 0)
+            epoch = datetime(2000, 1, 1, 0, 0)
             create_partition(epoch, current_time, 'old_events')
 
             # .. and first partition
