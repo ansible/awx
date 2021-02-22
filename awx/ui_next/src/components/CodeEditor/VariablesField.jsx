@@ -4,7 +4,8 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import styled from 'styled-components';
-import { Split, SplitItem } from '@patternfly/react-core';
+import { Split, SplitItem, Button, Modal } from '@patternfly/react-core';
+import { ExpandArrowsAltIcon } from '@patternfly/react-icons';
 import { CheckboxField } from '../FormField';
 import MultiButtonToggle from '../MultiButtonToggle';
 import { yamlToJson, jsonToYaml, isJsonString } from '../../util/yaml';
@@ -20,6 +21,7 @@ const FieldHeader = styled.div`
 
 const StyledCheckboxField = styled(CheckboxField)`
   --pf-c-check__label--FontSize: var(--pf-c-form__label--FontSize);
+  margin-left: auto;
 `;
 
 function VariablesField({
@@ -31,10 +33,91 @@ function VariablesField({
   promptId,
   tooltip,
 }) {
-  const [field, meta, helpers] = useField(name);
+  const [field, meta] = useField(name);
   const [mode, setMode] = useState(
     isJsonString(field.value) ? JSON_MODE : YAML_MODE
   );
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <>
+      <VariablesFieldInternals
+        i18n={i18n}
+        id={id}
+        name={name}
+        label={label}
+        readOnly={readOnly}
+        promptId={promptId}
+        tooltip={tooltip}
+        onExpand={() => setIsExpanded(true)}
+        mode={mode}
+        setMode={setMode}
+      />
+      <Modal
+        variant="xlarge"
+        title={label}
+        isOpen={isExpanded}
+        onClose={() => setIsExpanded(false)}
+        actions={[
+          <Button
+            aria-label={i18n._(t`Done`)}
+            key="select"
+            variant="primary"
+            onClick={() => setIsExpanded(false)}
+          >
+            {i18n._(t`Done`)}
+          </Button>,
+        ]}
+      >
+        <div className="pf-c-form">
+          <VariablesFieldInternals
+            i18n={i18n}
+            id={`${id}-expanded`}
+            name={name}
+            label={label}
+            readOnly={readOnly}
+            promptId={promptId}
+            tooltip={tooltip}
+            fullHeight
+            mode={mode}
+            setMode={setMode}
+          />
+        </div>
+      </Modal>
+      {meta.error ? (
+        <div className="pf-c-form__helper-text pf-m-error" aria-live="polite">
+          {meta.error}
+        </div>
+      ) : null}
+    </>
+  );
+}
+VariablesField.propTypes = {
+  id: string.isRequired,
+  name: string.isRequired,
+  label: string.isRequired,
+  readOnly: bool,
+  promptId: string,
+};
+VariablesField.defaultProps = {
+  readOnly: false,
+  promptId: null,
+};
+
+function VariablesFieldInternals({
+  i18n,
+  id,
+  name,
+  label,
+  readOnly,
+  promptId,
+  tooltip,
+  fullHeight,
+  mode,
+  setMode,
+  onExpand,
+}) {
+  const [field, meta, helpers] = useField(name);
 
   return (
     <div className="pf-c-form__group">
@@ -75,6 +158,15 @@ function VariablesField({
             name="ask_variables_on_launch"
           />
         )}
+        {onExpand && (
+          <Button
+            variant="plain"
+            aria-label={i18n._(t`Expand input`)}
+            onClick={onExpand}
+          >
+            <ExpandArrowsAltIcon />
+          </Button>
+        )}
       </FieldHeader>
       <CodeEditor
         mode={mode}
@@ -83,26 +175,11 @@ function VariablesField({
         onChange={newVal => {
           helpers.setValue(newVal);
         }}
+        fullHeight={fullHeight}
         hasErrors={!!meta.error}
       />
-      {meta.error ? (
-        <div className="pf-c-form__helper-text pf-m-error" aria-live="polite">
-          {meta.error}
-        </div>
-      ) : null}
     </div>
   );
 }
-VariablesField.propTypes = {
-  id: string.isRequired,
-  name: string.isRequired,
-  label: string.isRequired,
-  readOnly: bool,
-  promptId: string,
-};
-VariablesField.defaultProps = {
-  readOnly: false,
-  promptId: null,
-};
 
 export default withI18n()(VariablesField);

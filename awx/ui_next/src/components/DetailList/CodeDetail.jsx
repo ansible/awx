@@ -14,15 +14,7 @@ import { DetailName, DetailValue } from './Detail';
 import CodeEditor from '../CodeEditor';
 import Popover from '../Popover';
 
-function CodeDetail({
-  value,
-  label,
-  mode,
-  rows,
-  fullHeight,
-  helpText,
-  dataCy,
-}) {
+function CodeDetail({ value, label, mode, rows, helpText, dataCy }) {
   const labelCy = dataCy ? `${dataCy}-label` : null;
   const valueCy = dataCy ? `${dataCy}-value` : null;
 
@@ -57,7 +49,6 @@ function CodeDetail({
           value={value}
           readOnly
           rows={rows}
-          fullHeight={fullHeight}
           css="margin-top: 10px"
         />
       </DetailValue>
@@ -69,7 +60,7 @@ CodeDetail.propTypes = {
   label: node.isRequired,
   dataCy: string,
   helpText: string,
-  rows: number,
+  rows: oneOfType(number, string),
   mode: oneOf(['javascript', 'yaml', 'jinja2']).isRequired,
 };
 CodeDetail.defaultProps = {

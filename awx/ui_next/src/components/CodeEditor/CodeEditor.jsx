@@ -77,6 +77,13 @@ function CodeEditor({
   className,
   i18n,
 }) {
+  if (typeof rows !== 'number' && rows !== 'auto') {
+    // eslint-disable-next-line no-console
+    console.warning(
+      `CodeEditor: Unexpected value for 'rows': ${rows}; expected number or 'auto'`
+    );
+  }
+
   const wrapper = useRef(null);
   const editor = useRef(null);
 
@@ -117,7 +124,8 @@ function CodeEditor({
     jinja2: 'django',
   };
 
-  const numRows = fullHeight ? value.split('\n').length : rows;
+  const numRows = rows === 'auto' ? value.split('\n').length : rows;
+  const height = fullHeight ? '50vh' : `${numRows * LINE_HEIGHT + PADDING}px`;
 
   return (
     <>
@@ -132,7 +140,7 @@ function CodeEditor({
           editorProps={{ $blockScrolling: true }}
           fontSize={16}
           width="100%"
-          height={`${numRows * LINE_HEIGHT + PADDING}px`}
+          height={height}
           hasErrors={hasErrors}
           setOptions={{
             readOnly,
@@ -178,7 +186,7 @@ CodeEditor.propTypes = {
   readOnly: bool,
   hasErrors: bool,
   fullHeight: bool,
-  rows: number,
+  rows: oneOf(number, string),
   className: string,
 };
 CodeEditor.defaultProps = {

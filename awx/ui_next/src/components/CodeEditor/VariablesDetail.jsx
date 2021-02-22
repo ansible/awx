@@ -2,7 +2,14 @@ import 'styled-components/macro';
 import React, { useState, useEffect } from 'react';
 import { node, number, oneOfType, shape, string, arrayOf } from 'prop-types';
 import { Trans, withI18n } from '@lingui/react';
-import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
+import { t } from '@lingui/macro';
+import {
+  Split,
+  SplitItem,
+  TextListItemVariants,
+  Button,
+} from '@patternfly/react-core';
+import { ExpandArrowsAltIcon } from '@patternfly/react-icons';
 import { DetailName, DetailValue } from '../DetailList';
 import MultiButtonToggle from '../MultiButtonToggle';
 import Popover from '../Popover';
@@ -29,13 +36,22 @@ function getValueAsMode(value, mode) {
   return mode === YAML_MODE ? jsonToYaml(value) : yamlToJson(value);
 }
 
-function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
+function VariablesDetail({
+  dataCy,
+  helpText,
+  value,
+  label,
+  rows,
+  fullHeight,
+  i18n,
+}) {
   const [mode, setMode] = useState(
     isJsonObject(value) || isJsonString(value) ? JSON_MODE : YAML_MODE
   );
   const [currentValue, setCurrentValue] = useState(
     isJsonObject(value) ? JSON.stringify(value, null, 2) : value || '---'
   );
+  const [isExpanded, setIsExpanded] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -61,35 +77,48 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
         css="grid-column: 1 / -1"
       >
         <Split hasGutter>
-          <SplitItem>
-            <div className="pf-c-form__label">
-              <span
-                className="pf-c-form__label-text"
-                css="font-weight: var(--pf-global--FontWeight--bold)"
-              >
-                {label}
-              </span>
-              {helpText && (
-                <Popover header={label} content={helpText} id={dataCy} />
-              )}
-            </div>
+          <SplitItem isFilled>
+            <Split hasGutter>
+              <SplitItem>
+                <div className="pf-c-form__label">
+                  <span
+                    className="pf-c-form__label-text"
+                    css="font-weight: var(--pf-global--FontWeight--bold)"
+                  >
+                    {label}
+                  </span>
+                  {helpText && (
+                    <Popover header={label} content={helpText} id={dataCy} />
+                  )}
+                </div>
+              </SplitItem>
+              <SplitItem>
+                <MultiButtonToggle
+                  buttons={[
+                    [YAML_MODE, 'YAML'],
+                    [JSON_MODE, 'JSON'],
+                  ]}
+                  value={mode}
+                  onChange={newMode => {
+                    try {
+                      setCurrentValue(getValueAsMode(currentValue, newMode));
+                      setMode(newMode);
+                    } catch (err) {
+                      setError(err);
+                    }
+                  }}
+                />
+              </SplitItem>
+            </Split>
           </SplitItem>
           <SplitItem>
-            <MultiButtonToggle
-              buttons={[
-                [YAML_MODE, 'YAML'],
-                [JSON_MODE, 'JSON'],
-              ]}
-              value={mode}
-              onChange={newMode => {
-                try {
-                  setCurrentValue(getValueAsMode(currentValue, newMode));
-                  setMode(newMode);
-                } catch (err) {
-                  setError(err);
-                }
-              }}
-            />
+            <Button
+              variant="plain"
+              aria-label={i18n._(t`Expand input`)}
+              onClick={() => setIsExpanded(true)}
+            >
+              <ExpandArrowsAltIcon />
+            </Button>
           </SplitItem>
         </Split>
       </DetailName>
@@ -122,7 +151,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
 VariablesDetail.propTypes = {
   value: oneOfType([shape({}), arrayOf(string), string]).isRequired,
   label: node.isRequired,
-  rows: number,
+  rows: oneOfType(number, string),
   dataCy: string,
   helpText: string,
 };
