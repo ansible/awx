@@ -410,6 +410,27 @@ class TowerAPIModule(TowerModule):
             else:
                 self.fail_json(msg="Failed to associate item {0}".format(response['json'].get('detail', response['json'])))
 
+    def copy_item(self, existing_item, name, item_type='unknown'):
+
+        if not existing_item:
+            self.fail_json(msg="Unable to create copy {0} due to missing endpoint".format(item_type))
+        item_url = existing_item['related']['copy']
+        response = self.post_endpoint(item_url, **{'data': {'name': name}})
+
+        if response['status_code'] in [201]:
+            self.json_output['id'] = response['json']['id']
+            self.json_output['changed'] = True
+            item_url = response['json']['url']
+        else:
+            if 'json' in response and '__all__' in response['json']:
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, name, response['json']['__all__'][0]))
+            elif 'json' in response:
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, name, response['json']))
+            else:
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, name, response['status_code']))
+        last_data = response['json']
+        return last_data
+
     def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, auto_exit=True, item_type='unknown', associations=None):
 
         # This will exit from the module on its own

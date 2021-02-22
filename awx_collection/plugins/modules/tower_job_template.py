@@ -31,6 +31,14 @@ options:
       description:
         - Setting this option will change the existing name (looed up via the name field.
       type: str
+    copy_from:
+      description:
+        - Name or id to copy the job template from.
+        - This will copy an existing job template and change any parameters supplied.
+        - The new job template name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple job templates share the same name.
+      type: str
     description:
       description:
         - Description to use for the job template.
@@ -315,6 +323,15 @@ EXAMPLES = '''
     notification_templates_started:
       - Notification2
 
+- name: Copy Job Template
+  tower_job_template:
+    name: copy job template
+    copy_from: test job template
+    job_type: "run"
+    inventory: Copy Foo Inventory
+    project: test
+    playbook: hello_world.yml
+    state: "present"
 '''
 
 from ..module_utils.tower_api import TowerAPIModule
@@ -340,6 +357,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(),
+        copy_from=dict(),
         description=dict(),
         organization=dict(),
         job_type=dict(choices=['run', 'check']),
@@ -393,6 +411,7 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get("new_name")
+    copy_from = module.params.get('copy_from')
     state = module.params.get('state')
 
     # Deal with legacy credential and vault_credential
@@ -417,6 +436,25 @@ def main():
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
         search_fields['organization'] = new_fields['organization'] = organization_id
+
+    # Attempt to look up job template to copy based on the provided name
+    if copy_from:
+        # Check if job template exists, as API will allow you to create an identical item with the same name in same org, but GUI will not.
+        job_template = module.get_one('job_templates', name_or_id=name, **{'data': search_fields})
+        if job_template is not None:
+            module.fail_json(msg="A job template with the name {0} already exists.".format(name))
+        else:
+            # Lookup existing job template.
+            copy_from_lookup = module.get_one('job_templates', name_or_id=copy_from)
+            if copy_from_lookup is None:
+                module.fail_json(msg="A job template with the name {0} was not able to be found.".format(copy_from))
+            else:
+                # Because the initial copy will keep its organization, this can be different then the specified one.
+                search_fields['organization'] = copy_from_lookup['organization']
+                module.copy_item(
+                    copy_from_lookup, name,
+                    item_type='job_template'
+                )
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('job_templates', name_or_id=name, **{'data': search_fields})

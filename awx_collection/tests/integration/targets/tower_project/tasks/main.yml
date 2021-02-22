@@ -75,13 +75,14 @@
     scm_credential: "{{ cred_name }}"
   check_mode: true
 
-- name: Create a new test project
+- name: "Copy tower project from {{ project_name1 }}"
   tower_project:
     name: "{{ project_name2 }}"
+    copy_from: "{{ project_name1 }}"
     organization: "{{ org_name }}"
     scm_type: git
-    scm_url: https://github.com/ansible/test-playbooks
     scm_credential: "{{ cred_name }}"
+    state: present
   register: result
 
 # If this fails it may be because the check_mode task actually already created

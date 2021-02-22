@@ -27,6 +27,14 @@ options:
         - Name to use for the project.
       required: True
       type: str
+    copy_from:
+      description:
+        - Name or id to copy the project from.
+        - This will copy an existing project and change any parameters supplied.
+        - The new project name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple projects share the same name.
+      type: str
     description:
       description:
         - Description to use for the project.
@@ -171,6 +179,14 @@ EXAMPLES = '''
     custom_virtualenv: "/var/lib/awx/var/lib/awx/venv/ansible-2.2"
     state: present
     tower_config_file: "~/tower_cli.cfg"
+
+- name: Copy tower project
+  tower_project:
+    name: copy
+    copy_from: test
+    description: Foo copy project
+    organization: Foo
+    state: present
 '''
 
 import time
@@ -225,6 +241,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        copy_from=dict(),
         description=dict(),
         scm_type=dict(choices=['manual', 'git', 'svn', 'insights'], default='manual'),
         scm_url=dict(),
@@ -254,22 +271,14 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
-    description = module.params.get('description')
+    copy_from = module.params.get('copy_from')
     scm_type = module.params.get('scm_type')
     if scm_type == "manual":
         scm_type = ""
-    scm_url = module.params.get('scm_url')
     local_path = module.params.get('local_path')
-    scm_branch = module.params.get('scm_branch')
-    scm_refspec = module.params.get('scm_refspec')
     credential = module.params.get('credential')
-    scm_clean = module.params.get('scm_clean')
-    scm_delete_on_update = module.params.get('scm_delete_on_update')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
-    allow_override = module.params.get('allow_override')
-    timeout = module.params.get('timeout')
-    custom_virtualenv = module.params.get('custom_virtualenv')
     organization = module.params.get('organization')
     state = module.params.get('state')
     wait = module.params.get('wait')
@@ -282,6 +291,25 @@ def main():
     if organization:
         org_id = module.resolve_name_to_id('organizations', organization)
         lookup_data['organization'] = org_id
+
+    # Attempt to look up project to copy based on the provided name
+    if copy_from:
+        # Check if project exists, as API will allow you to create an identical item with the same name in same org, but GUI will not.
+        project = module.get_one('projects', name_or_id=name, data=lookup_data)
+        if project is not None:
+            module.fail_json(msg="A project with the name {0} already exists.".format(name))
+        else:
+            # Lookup existing project.
+            copy_from_lookup = module.get_one('projects', name_or_id=copy_from)
+            if copy_from_lookup is None:
+                module.fail_json(msg="A project with the name {0} was not able to be found.".format(copy_from))
+            else:
+                # Because the initial copy will keep its organization, this can be different then the specified one.
+                lookup_data['organization'] = copy_from_lookup['organization']
+                module.copy_item(
+                    copy_from_lookup, name,
+                    item_type='project'
+                )
 
     # Attempt to look up project based on the provided name and org ID
     project = module.get_one('projects', name_or_id=name, data=lookup_data)
@@ -318,25 +346,23 @@ def main():
     project_fields = {
         'name': module.get_item_name(project) if project else name,
         'scm_type': scm_type,
-        'scm_url': scm_url,
-        'scm_branch': scm_branch,
-        'scm_refspec': scm_refspec,
-        'scm_clean': scm_clean,
-        'scm_delete_on_update': scm_delete_on_update,
-        'timeout': timeout,
         'organization': org_id,
-        'scm_update_on_launch': scm_update_on_launch,
-        'scm_update_cache_timeout': scm_update_cache_timeout,
-        'custom_virtualenv': custom_virtualenv,
     }
-    if description is not None:
-        project_fields['description'] = description
+
+    for field_name in (
+        'scm_url', 'scm_branch', 'scm_refspec', 'scm_clean', 'scm_delete_on_update',
+        'timeout', 'scm_update_cache_timeout', 'custom_virtualenv',
+        'description', 'allow_override',
+    ):
+        field_val = module.params.get(field_name)
+        if field_val is not None:
+            project_fields[field_name] = field_val
+
     if credential is not None:
         project_fields['credential'] = credential
-    if allow_override is not None:
-        project_fields['allow_override'] = allow_override
     if scm_type == '':
-        project_fields['local_path'] = local_path
+        if local_path is not None:
+            project_fields['local_path'] = local_path
 
     if scm_update_cache_timeout != 0 and scm_update_on_launch is not True:
         module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')

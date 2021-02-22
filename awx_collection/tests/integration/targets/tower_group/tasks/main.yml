@@ -29,9 +29,79 @@
     that:
       - "result is changed"
 
+- name: Create a Group
+  tower_group:
+    name: "{{ group_name2 }}"
+    inventory: "{{ inv_name }}"
+    state: present
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create a Group
+  tower_group:
+    name: "{{ group_name3 }}"
+    inventory: "{{ inv_name }}"
+    state: present
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: add hosts
+  tower_host:
+    name: "{{ item }}"
+    inventory: "{{ inv_name }}"
+  loop:
+    - "{{ host_name1 }}"
+    - "{{ host_name2 }}"
+    - "{{ host_name3 }}"
+
+- name: Create a Group with hosts and sub group
+  tower_group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    hosts:
+      - "{{ host_name1 }}"
+      - "{{ host_name2 }}"
+    children:
+      - "{{ group_name2 }}"
+    state: present
+    variables:
+      foo: bar
+  register: result
+
+- name: Create a Group with hosts and sub group
+  tower_group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    hosts:
+      - "{{ host_name3 }}"
+    children:
+      - "{{ group_name3 }}"
+    state: present
+    preserve_existing_hosts: True
+    preserve_existing_children: True
+  register: result
+
+- name: "Find number of hosts in {{ group_name1 }}"
+  set_fact:
+    group1_host_count: "{{ lookup('awx.awx.tower_api', 'groups/{{result.id}}/all_hosts/') |length}}"
+
+- assert:
+    that:
+      - group1_host_count  == "3"
+
 - name: Delete a Group
   tower_group:
-    name: "{{ result.id }}"
+    name: "{{ group_name1 }}"
     inventory: "{{ inv_name }}"
     state: absent
   register: result
@@ -39,6 +109,28 @@
 - assert:
     that:
       - "result is changed"
+
+- name: Delete a Group
+  tower_group:
+    name: "{{ group_name2 }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a Group
+  tower_group:
+    name: "{{ group_name3 }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
 
 - name: Check module fails with correct msg
   tower_group:

@@ -32,6 +32,14 @@ options:
       description:
         - Setting this option will change the existing name.
       type: str
+    copy_from:
+      description:
+        - Name or id to copy the workflow job template from.
+        - This will copy an existing workflow job template and change any parameters supplied.
+        - The new workflow job template name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple workflow job templates share the same name.
+      type: str
     description:
       description:
         - Optional description of this workflow job template.
@@ -142,6 +150,12 @@ EXAMPLES = '''
     name: example-workflow
     description: created by Ansible Playbook
     organization: Default
+
+- name: Copy a workflow job template
+  tower_workflow_job_template:
+    name: copy-workflow
+    copy_from: example-workflow
+    organization: Foo
 '''
 
 from ..module_utils.tower_api import TowerAPIModule
@@ -168,6 +182,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(),
+        copy_from=dict(),
         description=dict(),
         extra_vars=dict(type='dict'),
         organization=dict(),
@@ -197,6 +212,7 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get("new_name")
+    copy_from = module.params.get('copy_from')
     state = module.params.get('state')
 
     new_fields = {}
@@ -207,6 +223,34 @@ def main():
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
         search_fields['organization'] = new_fields['organization'] = organization_id
+
+    # Attempt to look up workflow job template to copy based on the provided name
+    if copy_from:
+        # Check if workflow job template exists, as API will allow you to create an identical item with the same name in same org, but GUI will not.
+        workflow_job_template = module.get_one('workflow_job_templates', name_or_id=name, data=search_fields)
+        if workflow_job_template is not None:
+            module.fail_json(msg="A workflow job template with the name {0} already exists.".format(name))
+        else:
+            # Lookup existing workflow job template.
+            copy_from_lookup = module.get_one('workflow_job_templates', name_or_id=copy_from)
+            if copy_from_lookup is None:
+                module.fail_json(msg="A workflow job template with the name {0} was not able to be found.".format(copy_from))
+            else:
+                workflow_copy_get_check = module.get_endpoint(copy_from_lookup['related']['copy'])
+                if workflow_copy_get_check['status_code'] in [200]:
+                    if (workflow_copy_get_check['json']['can_copy'] and workflow_copy_get_check['json']['can_copy_without_user_input'] and
+                        not workflow_copy_get_check['json']['templates_unable_to_copy'] and not workflow_copy_get_check['json']['credentials_unable_to_copy']
+                            and not workflow_copy_get_check['json']['inventories_unable_to_copy']):
+                        # Because the initial copy will keep its organization, this can be different then the specified one.
+                        search_fields['organization'] = copy_from_lookup['organization']
+                        module.copy_item(
+                            copy_from_lookup, name,
+                            item_type='workflow_job_template'
+                        )
+                    else:
+                        module.fail_json(msg="Unable to copy workflow {0} error: {1}".format(copy_from, workflow_copy_get_check))
+                else:
+                    module.fail_json(msg="Error accessing workflow {0} error: {1} ".format(copy_from, workflow_copy_get_check))
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})

@@ -31,6 +31,14 @@ options:
       description:
         - Setting this option will change the existing name (looked up via the name field.
       type: str
+    copy_from:
+      description:
+        - Name or id to copy the notification from.
+        - This will copy an existing notification and change any parameters supplied.
+        - The new notification name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple notifications share the same name.
+      type: str
     description:
       description:
         - The description of the notification.
@@ -294,6 +302,12 @@ EXAMPLES = '''
     name: old notification
     state: absent
     tower_config_file: "~/tower_cli.cfg"
+
+- name: Copy webhook notification
+  tower_notification_template:
+    name: foo notification
+    copy_from: email notification
+    organization: Foo
 '''
 
 
@@ -318,6 +332,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(),
+        copy_from=dict(),
         description=dict(),
         organization=dict(),
         notification_type=dict(choices=[
@@ -360,6 +375,7 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get('new_name')
+    copy_from = module.params.get('copy_from')
     description = module.params.get('description')
     organization = module.params.get('organization')
     notification_type = module.params.get('notification_type')
@@ -379,12 +395,39 @@ def main():
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
 
+    # Attempt to look up notification template to copy based on the provided name
+    if copy_from:
+        # Check if notification template exists, as API will allow you to create an identical item with the same name in same org, but GUI will not.
+        notification_template = module.get_one('notification_templates', name_or_id=name, **{
+            'data': {
+                'organization': organization_id
+            }
+        })
+        if notification_template is not None:
+            module.fail_json(msg="A notification template with the name {0} already exists.".format(name))
+        else:
+            # Lookup existing notification template.
+            copy_from_lookup = module.get_one('notification_templates', name_or_id=copy_from)
+            if copy_from_lookup is None:
+                module.fail_json(msg="An notification template with the name {0} was not able to be found.".format(copy_from))
+            else:
+                # Because the initial copy will keep its organization, this can be different then the specified one.
+                organization_id = copy_from_lookup['organization']
+                module.copy_item(
+                    copy_from_lookup, name,
+                    item_type='notification_template'
+                )
+
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('notification_templates', name_or_id=name, **{
         'data': {
             'organization': organization_id,
         }
     })
+
+    # Reset Org id to push in case copy_from was used.
+    if organization:
+        organization_id = module.resolve_name_to_id('organizations', organization)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

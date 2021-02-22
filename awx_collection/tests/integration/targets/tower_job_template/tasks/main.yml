@@ -155,6 +155,19 @@
     that:
       - "result is changed"
 
+- name: Copy Job Template
+  tower_job_template:
+    name: "copy_{{ jt1 }}"
+    copy_from: "{{ jt1 }}"
+    state: "present"
+
+- name: Delete copied Job Template
+  tower_job_template:
+    name: "copy_{{ jt1 }}"
+    job_type: run
+    state: absent
+  register: result
+
 # This doesnt work if you include the credentials parameter
 - name: Delete Job Template 1
   tower_job_template:
