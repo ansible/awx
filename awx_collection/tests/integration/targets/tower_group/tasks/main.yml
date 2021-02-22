@@ -87,8 +87,8 @@
     children:
       - "{{ group_name3 }}"
     state: present
-    preserve_existing_hosts: True
-    preserve_existing_children: True
+    preserve_existing_hosts: true
+    preserve_existing_children: true
   register: result
 
 - name: "Find number of hosts in {{ group_name1 }}"
