@@ -263,7 +263,10 @@ class TaskManager:
                 return
 
         # Before task leaves pending state, ensure that job_event partitions exist
-        create_partition()
+        # TODO: Currently, only creating partition for jobs. Drop contiditional once
+        # there are partitions for all job event types
+        if task_actual['type'] == 'job':
+            create_partition()
         task.status = 'waiting'
 
         (start_status, opts) = task.pre_start()
