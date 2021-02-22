@@ -9,9 +9,6 @@ ansible -i "127.0.0.1," -c local -v -m wait_for -a "path=/var/run/redis/redis.so
 # TODO: FIX
 #/etc/init.d/ssh start
 
-ansible -i "127.0.0.1," -c local -v -m postgresql_user --become-user postgres -a "name=awx-dev password=AWXsome1 encrypted=yes login_user=postgres login_password=postgrespass login_host=postgres" all
-ansible -i "127.0.0.1," -c local -v -m postgresql_db --become-user postgres -a "name=awx-dev owner=awx-dev login_user=postgres login_password=postgrespass login_host=postgres" all
-
 # Move to the source directory so we can bootstrap
 if [ -f "/awx_devel/manage.py" ]; then
     cd /awx_devel

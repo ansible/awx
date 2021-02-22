@@ -1,0 +1,53 @@
+---
+
+# Migrate data from old Local Docker to a fresh development environment
+- name: Remove awx_postgres to ensure consistent start state
+  shell: |
+    docker rm -f awx_postgres
+  ignore_errors: true
+
+- name: Start Local Docker database container
+  docker_compose:
+    project_src: "{{ old_docker_compose_dir }}"
+    services:
+      - postgres
+    state: present
+    recreate: always
+
+- name: Wait for postgres to initialize
+  wait_for:
+    timeout: 3
+
+- name: Database dump to local filesystem
+  shell: |
+    docker-compose -f {{ old_docker_compose_dir }}/docker-compose.yml exec -T postgres pg_dumpall -U {{ pg_username }} > awx_dump.sql
+
+- name: Stop AWX containers so the old postgres container does not get used
+  docker_compose:
+    project_src: "{{ old_docker_compose_dir }}"
+    state: absent
+  ignore_errors: true
+
+- name: Start dev env database container
+  docker_compose:
+    project_src: "{{ playbook_dir }}/../_sources"
+    files: "docker-compose.yml"
+    services:
+      - postgres
+    state: present
+    recreate: always
+  environment:
+    COMPOSE_PROJECT_NAME: "tools"
+
+- name: Wait for postgres to initialize
+  wait_for:
+    timeout: 3
+
+- name: Restore to new postgres container
+  shell: |
+    COMPOSE_PROJECT_NAME=tools docker-compose -f {{ playbook_dir }}/../_sources/docker-compose.yml exec -T postgres psql -U {{ pg_username }} -d {{ pg_database }} -p {{ pg_port }} < awx_dump.sql
+
+- name: Clean up temporary awx db dump
+  file:
+    path: awx_dump.sql
+    state: absent

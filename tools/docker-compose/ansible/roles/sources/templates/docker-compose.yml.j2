@@ -1,0 +1,65 @@
+---
+version: '2'
+services:
+  # Primary AWX Development Container
+  awx:
+    user: "{{ ansible_user_uid }}"
+    image: "{{ awx_image }}:{{ awx_image_tag }}"
+    container_name: tools_awx_1
+    hostname: awx
+    command: launch_awx.sh
+    environment:
+      OS: "{{ os_info.stdout }}"
+      SDB_HOST: 0.0.0.0
+      SDB_PORT: 7899
+      AWX_GROUP_QUEUES: tower
+    ports:
+      - "8888:8888"
+      - "8080:8080"
+      - "8013:8013"
+      - "8043:8043"
+      - "6899:6899"  # default port range for sdb-listen
+      - "7899-7999:7899-7999"  # default port range for sdb-listen
+    links:
+      - postgres
+      - redis
+    working_dir: "/awx_devel"
+    volumes:
+      - "../../../:/awx_devel"
+      - "../../docker-compose/supervisor.conf:/etc/supervisord.conf"
+      - "../../docker-compose/_sources/database.py:/etc/tower/conf.d/database.py"
+      - "../../docker-compose/_sources/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py"
+      - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
+      - "redis_socket:/var/run/redis/:rw"
+    privileged: true
+    tty: true
+  # A useful container that simply passes through log messages to the console
+  # helpful for testing awx/tower logging
+  # logstash:
+  #   build:
+  #     context: ./docker-compose
+  #     dockerfile: Dockerfile-logstash
+
+  # Postgres Database Container
+  postgres:
+    image: postgres:12
+    container_name: tools_postgres_1
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: {{ pg_username }}
+      POSTGRES_DB: {{ pg_database }}
+      POSTGRES_PASSWORD: {{ pg_password }}
+    volumes:
+      - "awx_db:/var/lib/postgresql/data"
+  redis:
+    image: redis:latest
+    container_name: tools_redis_1
+    volumes:
+      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "redis_socket:/var/run/redis/:rw"
+    entrypoint: ["redis-server"]
+    command: ["/usr/local/etc/redis/redis.conf"]
+
+volumes:
+  awx_db:
+  redis_socket:
