@@ -334,7 +334,8 @@ def unified_jobs_table(since, full_path, until, **kwargs):
                                  main_unifiedjob.finished, 
                                  main_unifiedjob.elapsed, 
                                  main_unifiedjob.job_explanation, 
-                                 main_unifiedjob.instance_group_id
+                                 main_unifiedjob.instance_group_id,
+                                 main_unifiedjob.installed_collections
                                  FROM main_unifiedjob
                                  JOIN django_content_type ON main_unifiedjob.polymorphic_ctype_id = django_content_type.id
                                  LEFT JOIN main_job ON main_unifiedjob.id = main_job.unifiedjob_ptr_id
