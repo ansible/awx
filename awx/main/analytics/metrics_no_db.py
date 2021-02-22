@@ -137,22 +137,26 @@ def metrics(request):
     use_all_nodes = False
     if len(nodes_filter) == 0:
         use_all_nodes = True
-    all_node_data = {}
-    if use_all_nodes or get_local_instance_name() in nodes_filter:
-        all_node_data[get_local_instance_name()] = load_local_metrics()
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
+        node_names = [get_local_instance_name()]
         for m in conn.scan_iter(redis_key + '_node_*'):
-            node_name = m.decode('UTF-8').split('_node_')[1]
-            logger.debug(f"{node_name} in {nodes_filter}")
-            if use_all_nodes or node_name in nodes_filter:
-                node_metrics = json.loads(conn.get(m).decode('UTF-8'))
-                all_node_data[node_name] = node_metrics
-    if all_node_data:
+            node_names.append(m.decode('UTF-8').split('_node_')[1])
+        node_names.sort()
+        node_data = {}
+        for node in node_names:
+            logger.debug(f"{node} in {nodes_filter}")
+            if use_all_nodes or node in nodes_filter:
+                if node == get_local_instance_name():
+                    node_metrics = load_local_metrics()
+                else:
+                    node_metrics = json.loads(conn.get(redis_key + '_node_' + node).decode('UTF-8'))
+                node_data[node] = node_metrics
+    if node_data:
         for field in METRICS:
             help_text = METRICS[field]['help_text']
             prometheus_object = Gauge(field, help_text, ['node'], registry=REGISTRY)
-            for node in all_node_data:
-                prometheus_object.labels(node=node).set(all_node_data[node][field])
+            for node in node_data:
+                prometheus_object.labels(node=node).set(node_data[node][field])
     return generate_latest(registry=REGISTRY)
 
 def load_local_metrics():
