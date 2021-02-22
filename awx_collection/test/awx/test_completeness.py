@@ -30,7 +30,7 @@ no_endpoint_for_module = [
 
 # Global module parameters we can ignore
 ignore_parameters = [
-    'state', 'new_name', 'update_secrets'
+    'state', 'new_name', 'update_secrets', 'copy_from'
 ]
 
 # Some modules take additional parameters that do not appear in the API
@@ -48,8 +48,10 @@ no_api_parameter_ok = {
     'tower_workflow_job_template_node': ['organization', 'approval_node'],
     # Survey is how we handle associations
     'tower_workflow_job_template': ['survey_spec'],
-    # ad hoc commands support interval and timeout since its more like tower_job_launc
+    # ad hoc commands support interval and timeout since its more like tower_job_launch
     'tower_ad_hoc_command': ['interval', 'timeout', 'wait'],
+    # tower_group parameters to perserve hosts and children.
+    'tower_group': ['preserve_existing_children', 'preserve_existing_hosts'],
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module

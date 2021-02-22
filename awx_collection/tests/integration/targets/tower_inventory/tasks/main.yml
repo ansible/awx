@@ -47,7 +47,7 @@
     - assert:
         that:
           - "result is not changed"
-  
+
     - name: Copy an inventory
       tower_inventory:
         name: "copy_{{ inv_name1 }}"
