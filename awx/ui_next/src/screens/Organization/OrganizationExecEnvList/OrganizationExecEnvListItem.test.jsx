@@ -10,8 +10,10 @@ describe('<OrganizationExecEnvListItem/>', () => {
   const executionEnvironment = {
     id: 1,
     image: 'https://registry.com/r/image/manifest',
+    name: 'foo',
     organization: 1,
     credential: null,
+    pull: 'always',
   };
 
   test('should mount successfully', async () => {
