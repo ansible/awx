@@ -5,13 +5,15 @@ migrate your data to the development environment via the migrate.yml playbook, o
 
 > Note: This will also convert your postgresql bind-mount into a docker volume.
 
+First, in the  `inventory` file, set your `pg_password`, `broadcast_websocket_secret`, `secret_key`, and any other settings you need for your deployment.  **Make sure you use the same secret key value you had with your previous Local Docker deployment.**  
+
 ### Migrate data with migrate.yml
 
 If you had a custom pgdocker or awxcompose location, you will need to set the `postgres_data_dir` and `old_docker_compose_dir` variables. 
 
 1. Run the [migrate playbook](./ansible/migrate.yml) to migrate your data to the new postgresql container and convert the data directory to a volume mount.
 ```bash
-$ ansible-playbook migrate.yml -e "migrate_local_docker=true" -e "postgres_data_dir=~/.awx/pgdocker" -e "old_docker_compose_dir=~/.awx/awxcompose"
+$ ansible-playbook  -i tools/docker-compose/inventory tools/docker-compose/migrate.yml -e "migrate_local_docker=true" -e "postgres_data_dir=~/.awx/pgdocker" -e "old_docker_compose_dir=~/.awx/awxcompose"
 ```
 
 2. Change directory to the top of your awx checkout and start your containers

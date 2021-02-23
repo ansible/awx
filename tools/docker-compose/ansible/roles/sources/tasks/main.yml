@@ -30,6 +30,12 @@
   when: not lookup('vars', item.item, default='')
   loop: "{{ secrets.results }}"
 
+- name: Write out SECRET_KEY
+  copy:
+    content: "{{ secret_key }}"
+    dest: "{{ sources_dest }}/SECRET_KEY"
+  no_log: true
+
 - name: Render configuration templates
   template:
     src: "{{ item }}.j2"
