@@ -82,6 +82,13 @@ function ManagementJobList({ i18n }) {
             pluralizedItemName={i18n._(t`Management Jobs`)}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            toolbarSearchColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name__icontains',
+                isDefault: true,
+              },
+            ]}
             renderToolbar={props => (
               <DatalistToolbar
                 {...props}
