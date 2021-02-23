@@ -13,7 +13,7 @@ If you had a custom pgdocker or awxcompose location, you will need to set the `p
 
 1. Run the [migrate playbook](./ansible/migrate.yml) to migrate your data to the new postgresql container and convert the data directory to a volume mount.
 ```bash
-$ ansible-playbook migrate.yml -e "migrate_local_docker=true" -e "postgres_data_dir=~/.awx/pgdocker" -e "old_docker_compose_dir=~/.awx/awxcompose"
+$ ansible-playbook  -i tools/docker-compose/inventory tools/docker-compose/migrate.yml -e "migrate_local_docker=true" -e "postgres_data_dir=~/.awx/pgdocker" -e "old_docker_compose_dir=~/.awx/awxcompose"
 ```
 
 2. Change directory to the top of your awx checkout and start your containers
