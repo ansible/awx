@@ -909,6 +909,11 @@ class BaseTask(object):
             "process_isolation": True,
             "container_options": ['--user=root'],
         }
+
+        pull = instance.execution_environment.pull
+        if pull:
+            params['container_options'].append(f'--pull={pull}')
+
         if settings.AWX_PROOT_SHOW_PATHS:
             params['container_volume_mounts'] = []
             for this_path in settings.AWX_PROOT_SHOW_PATHS:
