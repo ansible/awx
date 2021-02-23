@@ -109,6 +109,7 @@ function ManagementJobList({ i18n }) {
                 key={id}
                 id={id}
                 name={name}
+                jobType={job_type}
                 description={description}
                 isSuperUser={me?.is_superuser}
                 isPrompted={['cleanup_activitystream', 'cleanup_jobs'].includes(

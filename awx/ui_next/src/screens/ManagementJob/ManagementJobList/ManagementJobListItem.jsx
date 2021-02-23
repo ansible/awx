@@ -18,6 +18,7 @@ function ManagementJobListItem({
   isPrompted,
   isSuperUser,
   id,
+  jobType,
   name,
   description,
 }) {
@@ -62,7 +63,7 @@ function ManagementJobListItem({
 
   return (
     <>
-      <Tr id={`mgmt-jobs-row-${id}`}>
+      <Tr id={`mgmt-jobs-row-${jobType ? jobType.replace('_', '-') : ''}`}>
         <Td />
         <Td dataLabel={i18n._(t`Name`)}>
           <Link to={`${detailsUrl}`}>
