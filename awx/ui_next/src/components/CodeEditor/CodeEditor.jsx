@@ -14,11 +14,11 @@ const LINE_HEIGHT = 24;
 const PADDING = 12;
 
 const FocusWrapper = styled.div`
-  && + .pf-c-form__helper-text {
+  && + .keyboard-help-text {
     display: none;
   }
 
-  &:focus-within + .pf-c-form__helper-text {
+  &:focus-within + .keyboard-help-text {
     display: block;
   }
 `;
@@ -164,7 +164,10 @@ function CodeEditor({
         />
       </FocusWrapper>
       {isKeyboardFocused && (
-        <div className="pf-c-form__helper-text" aria-live="polite">
+        <div
+          className="pf-c-form__helper-text keyboard-help-text"
+          aria-live="polite"
+        >
           {i18n._(t`Press Enter to edit. Press ESC to stop editing.`)}
         </div>
       )}
