@@ -24,7 +24,7 @@ COLLECTION_BASE ?= /var/lib/awx/vendor/awx_ansible_collections
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
-DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
+DEV_DOCKER_TAG_BASE ?= ansible
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 # Python packages to install only from source (not from binary wheels)
