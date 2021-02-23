@@ -893,10 +893,19 @@ class BaseTask(object):
         '''
         Create a temporary directory for job-related files.
         '''
-        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk, dir=settings.AWX_PROOT_BASE_PATH)
-        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+        bwrap_path = tempfile.mkdtemp(
+            prefix=f'bwrap_{instance.pk}_',
+            dir=settings.AWX_PROOT_BASE_PATH
+        )
+        os.chmod(bwrap_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         if settings.AWX_CLEANUP_PATHS:
-            self.cleanup_paths.append(path)
+            self.cleanup_paths.append(bwrap_path)
+
+        path = tempfile.mkdtemp(
+            prefix='awx_%s_' % instance.pk,
+            dir=bwrap_path,
+        )
+        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         runner_project_folder = os.path.join(path, 'project')
         if not os.path.exists(runner_project_folder):
             # Ansible Runner requires that this directory exists.
@@ -1008,6 +1017,8 @@ class BaseTask(object):
                     '/etc/ssh',
                     '/var/lib/awx',
                     '/var/log',
+                    '/home',
+                    '/var/tmp',
                     settings.PROJECTS_ROOT,
                     settings.JOBOUTPUT_ROOT,
                 ] + getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [],
