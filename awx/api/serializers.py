@@ -1373,6 +1373,7 @@ class ExecutionEnvironmentSerializer(BaseSerializer):
         res.update(
             activity_stream=self.reverse('api:execution_environment_activity_stream_list', kwargs={'pk': obj.pk}),
             unified_job_templates=self.reverse('api:execution_environment_job_template_list', kwargs={'pk': obj.pk}),
+            copy=self.reverse('api:execution_environment_copy', kwargs={'pk': obj.pk}),
         )
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
