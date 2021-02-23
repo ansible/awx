@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Link,
   Redirect,
@@ -13,7 +13,7 @@ import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { SystemJobTemplatesAPI } from '../../api';
+import { SystemJobTemplatesAPI, OrganizationsAPI } from '../../api';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
 import NotificationList from '../../components/NotificationList';
@@ -28,12 +28,25 @@ function ManagementJob({ i18n, setBreadcrumb }) {
   const match = useRouteMatch();
   const { id } = useParams();
   const { pathname } = useLocation();
-  const { me, isNotificationAdmin } = useConfig();
+  const { me } = useConfig();
 
-  const canReadNotifications = isNotificationAdmin || me?.is_system_auditor;
+  const [isNotificationAdmin, setIsNotificationAdmin] = useState(false);
 
   const { isLoading, error, request, result } = useRequest(
-    useCallback(async () => SystemJobTemplatesAPI.readDetail(id), [id])
+    useCallback(
+      () =>
+        Promise.all([
+          SystemJobTemplatesAPI.readDetail(id),
+          OrganizationsAPI.read({
+            page_size: 1,
+            role_level: 'notification_admin_role',
+          }),
+        ]).then(([systemJobTemplate, notificationRoles]) => ({
+          systemJobTemplate,
+          notificationRoles,
+        })),
+      [id]
+    )
   );
 
   useEffect(() => {
@@ -42,22 +55,38 @@ function ManagementJob({ i18n, setBreadcrumb }) {
 
   useEffect(() => {
     if (!result) return;
+    setIsNotificationAdmin(
+      Boolean(result?.notificationRoles?.data?.results?.length)
+    );
+    setBreadcrumb(result);
+  }, [result, setBreadcrumb, setIsNotificationAdmin]);
+
+  useEffect(() => {
+    if (!result) return;
 
     setBreadcrumb(result);
   }, [result, setBreadcrumb]);
 
   const createSchedule = useCallback(
-    data => SystemJobTemplatesAPI.createSchedule(result.id, data),
+    data =>
+      SystemJobTemplatesAPI.createSchedule(result?.systemJobTemplate.id, data),
     [result]
   );
   const loadSchedules = useCallback(
-    params => SystemJobTemplatesAPI.readSchedules(result.id, params),
+    params =>
+      SystemJobTemplatesAPI.readSchedules(result?.systemJobTemplate.id, params),
     [result]
   );
   const loadScheduleOptions = useCallback(
-    () => SystemJobTemplatesAPI.readScheduleOptions(result.id),
+    () =>
+      SystemJobTemplatesAPI.readScheduleOptions(result?.systemJobTemplate.id),
     [result]
   );
+
+  const shouldShowNotifications =
+    result?.systemJobTemplate?.id &&
+    (isNotificationAdmin || me?.is_system_auditor);
+  const shouldShowSchedules = !!result?.systemJobTemplate?.id;
 
   const tabsArray = [
     {
@@ -70,14 +99,17 @@ function ManagementJob({ i18n, setBreadcrumb }) {
         </>
       ),
     },
-    {
+  ];
+
+  if (shouldShowSchedules) {
+    tabsArray.push({
       id: 0,
       name: i18n._(t`Schedules`),
       link: `${match.url}/schedules`,
-    },
-  ];
+    });
+  }
 
-  if (canReadNotifications) {
+  if (shouldShowNotifications) {
     tabsArray.push({
       id: 1,
       name: i18n._(t`Notifications`),
@@ -129,27 +161,29 @@ function ManagementJob({ i18n, setBreadcrumb }) {
             from={`${basePath}/:id`}
             to={`${basePath}/:id/schedules`}
           />
-          {canReadNotifications ? (
+          {shouldShowNotifications ? (
             <Route path={`${basePath}/:id/notifications`}>
               <NotificationList
-                id={Number(result?.id)}
+                id={Number(result?.systemJobTemplate?.id)}
                 canToggleNotifications={isNotificationAdmin}
                 apiModel={SystemJobTemplatesAPI}
               />
             </Route>
           ) : null}
-          <Route path={`${basePath}/:id/schedules`}>
-            <Schedules
-              apiModel={SystemJobTemplatesAPI}
-              resource={result}
-              createSchedule={createSchedule}
-              loadSchedules={loadSchedules}
-              loadScheduleOptions={loadScheduleOptions}
-              setBreadcrumb={setBreadcrumb}
-              launchConfig={{}}
-              surveyConfig={{}}
-            />
-          </Route>
+          {shouldShowSchedules ? (
+            <Route path={`${basePath}/:id/schedules`}>
+              <Schedules
+                apiModel={SystemJobTemplatesAPI}
+                resource={result.systemJobTemplate}
+                createSchedule={createSchedule}
+                loadSchedules={loadSchedules}
+                loadScheduleOptions={loadScheduleOptions}
+                setBreadcrumb={setBreadcrumb}
+                launchConfig={{}}
+                surveyConfig={{}}
+              />
+            </Route>
+          ) : null}
         </Switch>
       </Card>
     </PageSection>

@@ -12,7 +12,7 @@ import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import styled from 'styled-components';
 
-import { ConfigAPI, MeAPI, OrganizationsAPI, RootAPI } from '../../api';
+import { ConfigAPI, MeAPI, RootAPI } from '../../api';
 import { ConfigProvider } from '../../contexts/Config';
 import { SESSION_TIMEOUT_KEY } from '../../constants';
 import { isAuthenticated } from '../../util/auth';
@@ -148,22 +148,8 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
               results: [me],
             },
           },
-          {
-            data: { results: notificationAdminResults },
-          },
-        ] = await Promise.all([
-          ConfigAPI.read(),
-          MeAPI.read(),
-          OrganizationsAPI.read({
-            page_size: 1,
-            role_level: 'notification_admin_role',
-          }),
-        ]);
-        setConfig({
-          ...data,
-          me,
-          isNotificationAdmin: Boolean(notificationAdminResults?.length),
-        });
+        ] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
+        setConfig({ ...data, me });
         setIsReady(true);
       } catch (err) {
         if (err.response.status === 401) {
