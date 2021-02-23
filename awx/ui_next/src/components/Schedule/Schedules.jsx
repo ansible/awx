@@ -16,10 +16,18 @@ function Schedules({
 }) {
   const match = useRouteMatch();
 
+  // For some management jobs that delete data, we want to provide an additional
+  // field on the scheduler for configuring the number of days to retain.
+  const hasDaysToKeepField = [
+    'cleanup_activitystream',
+    'cleanup_jobs',
+  ].includes(resource?.job_type);
+
   return (
     <Switch>
       <Route path={`${match.path}/add`}>
         <ScheduleAdd
+          hasDaysToKeepField={hasDaysToKeepField}
           apiModel={apiModel}
           resource={resource}
           launchConfig={launchConfig}
@@ -28,6 +36,7 @@ function Schedules({
       </Route>
       <Route key="details" path={`${match.path}/:scheduleId`}>
         <Schedule
+          hasDaysToKeepField={hasDaysToKeepField}
           setBreadcrumb={setBreadcrumb}
           resource={resource}
           launchConfig={launchConfig}

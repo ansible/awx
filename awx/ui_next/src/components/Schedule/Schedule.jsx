@@ -25,6 +25,7 @@ function Schedule({
   resource,
   launchConfig,
   surveyConfig,
+  hasDaysToKeepField,
 }) {
   const { scheduleId } = useParams();
 
@@ -95,13 +96,6 @@ function Schedule({
   if (!pathname.includes('schedules/') || pathname.endsWith('edit')) {
     showCardHeader = false;
   }
-
-  // For some management jobs that delete data, we want to provide an additional
-  // field on the scheduler for configuring the number of days to retain.
-  const hasDaysToKeepField = [
-    'cleanup_activitystream',
-    'cleanup_jobs',
-  ].includes(schedule?.summary_fields?.unified_job_template?.job_type);
 
   return (
     <>

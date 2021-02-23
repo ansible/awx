@@ -15,7 +15,14 @@ import mergeExtraVars from '../../../util/prompt/mergeExtraVars';
 import getSurveyValues from '../../../util/prompt/getSurveyValues';
 import { getAddedAndRemoved } from '../../../util/lists';
 
-function ScheduleAdd({ i18n, resource, apiModel, launchConfig, surveyConfig }) {
+function ScheduleAdd({
+  i18n,
+  resource,
+  apiModel,
+  launchConfig,
+  surveyConfig,
+  hasDaysToKeepField,
+}) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
   const location = useLocation();
@@ -70,13 +77,22 @@ function ScheduleAdd({ i18n, resource, apiModel, launchConfig, surveyConfig }) {
 
     try {
       const rule = new RRule(buildRuleObj(values, i18n));
+      const requestData = {
+        ...submitValues,
+        rrule: rule.toString().replace(/\n/g, ' '),
+      };
+
+      if (Object.keys(values).includes('daysToKeep')) {
+        if (requestData.extra_data) {
+          requestData.extra_data.days = values.daysToKeep;
+        } else {
+          requestData.extra_data = JSON.stringify({ days: values.daysToKeep });
+        }
+      }
 
       const {
         data: { id: scheduleId },
-      } = await apiModel.createSchedule(resource.id, {
-        ...submitValues,
-        rrule: rule.toString().replace(/\n/g, ' '),
-      });
+      } = await apiModel.createSchedule(resource.id, requestData);
       if (credentials?.length > 0) {
         await Promise.all(
           added.map(({ id: credentialId }) =>
@@ -94,6 +110,7 @@ function ScheduleAdd({ i18n, resource, apiModel, launchConfig, surveyConfig }) {
     <Card>
       <CardBody>
         <ScheduleForm
+          hasDaysToKeepField={hasDaysToKeepField}
           handleCancel={() => history.push(`${pathRoot}schedules`)}
           handleSubmit={handleSubmit}
           submitError={formSubmitError}

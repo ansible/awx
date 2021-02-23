@@ -140,11 +140,14 @@ function ManagementJob({ i18n, setBreadcrumb }) {
           ) : null}
           <Route path={`${basePath}/:id/schedules`}>
             <Schedules
-              unifiedJobTemplate={result}
+              apiModel={SystemJobTemplatesAPI}
+              resource={result}
               createSchedule={createSchedule}
               loadSchedules={loadSchedules}
               loadScheduleOptions={loadScheduleOptions}
               setBreadcrumb={setBreadcrumb}
+              launchConfig={{}}
+              surveyConfig={{}}
             />
           </Route>
         </Switch>
