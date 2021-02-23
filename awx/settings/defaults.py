@@ -148,7 +148,7 @@ SCHEDULE_MAX_JOBS = 10
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'p7z7g1ql4%6+(6nlebb6hdk7sd^&fnjpal308%n%+p^_e6vo1y'
+SECRET_KEY = open('/etc/tower/SECRET_KEY', 'rb').read().strip()
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
