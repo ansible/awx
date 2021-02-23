@@ -1187,7 +1187,7 @@ class BaseTask(object):
             shutil.copytree(job_profiling_dir, os.path.join(awx_profiling_dir, str(instance.pk)))
         if os.path.exists(collections_info):
             with open(collections_info) as ee_json_info:
-                ee_collections_info = ee_json_info.read()
+                ee_collections_info = json.loads(ee_json_info.read())
                 instance.installed_collections = ee_collections_info
                 instance.save(update_fields=['installed_collections'])
 
