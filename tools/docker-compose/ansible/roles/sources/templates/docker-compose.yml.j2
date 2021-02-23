@@ -33,10 +33,10 @@ services:
       - "../../docker-compose/_sources/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py"
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
+      - "../../docker-compose/receptor.conf:/etc/receptor/receptor.conf"
       - "redis_socket:/var/run/redis/:rw"
       - "receptor:/var/run/receptor/"
       - "/sys/fs/cgroup:/sys/fs/cgroup"
-      - "./docker-compose/receptor.conf:/etc/receptor/receptor.conf"
       - "~/.kube/config:/var/lib/awx/.kube/config"
     privileged: true
     tty: true
