@@ -73,7 +73,7 @@ function LaunchManagementPrompt({
           value={dataRetention}
           type="number"
           onChange={value => setDataRetention(clamp(value, 0, MAX_RETENTION))}
-          aria-label={i18n._(t`Launch`)}
+          aria-label={i18n._(t`Data retention period`)}
         />
       </AlertModal>
     </>
