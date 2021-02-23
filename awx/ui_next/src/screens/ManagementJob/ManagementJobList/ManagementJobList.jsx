@@ -80,6 +80,7 @@ function ManagementJobList({ i18n }) {
             items={items}
             itemCount={count}
             pluralizedItemName={i18n._(t`Management Jobs`)}
+            emptyContentMessage={' '}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             toolbarSearchColumns={[
