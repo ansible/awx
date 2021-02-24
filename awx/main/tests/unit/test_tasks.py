@@ -552,8 +552,8 @@ class TestGenericRun():
         task.should_use_proot = lambda instance: True
         task.instance = job
 
-        private_data_dir = '/foo'
-        cwd = '/bar'
+        private_data_dir = os.path.join(settings.AWX_PROOT_BASE_PATH, 'foo')
+        cwd = '/the/bar'
 
         settings.AWX_PROOT_HIDE_PATHS = ['/AWX_PROOT_HIDE_PATHS1', '/AWX_PROOT_HIDE_PATHS2']
         settings.ANSIBLE_VENV_PATH = '/ANSIBLE_VENV_PATH'
@@ -578,7 +578,7 @@ class TestGenericRun():
                   '/AWX_PROOT_HIDE_PATHS1',
                   '/AWX_PROOT_HIDE_PATHS2']:
             assert p in process_isolation_params['process_isolation_hide_paths']
-        assert 9 == len(process_isolation_params['process_isolation_hide_paths'])
+        assert 11 == len(process_isolation_params['process_isolation_hide_paths'])
         assert '/ANSIBLE_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
         assert '/AWX_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
         assert 2 == len(process_isolation_params['process_isolation_ro_paths'])

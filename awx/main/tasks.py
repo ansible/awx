@@ -998,14 +998,7 @@ class BaseTask(object):
             show_paths = self.proot_show_paths + local_paths + \
                 settings.AWX_PROOT_SHOW_PATHS
 
-            pi_path = settings.AWX_PROOT_BASE_PATH
-            if not self.instance.is_isolated() and not self.instance.is_containerized:
-                pi_path = tempfile.mkdtemp(
-                    prefix='ansible_runner_pi_',
-                    dir=settings.AWX_PROOT_BASE_PATH
-                )
-                os.chmod(pi_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-                self.cleanup_paths.append(pi_path)
+            pi_path = os.path.split(private_data_dir)[0]
 
             process_isolation_params = {
                 'process_isolation': True,

@@ -169,7 +169,7 @@ class IsolatedManager(object):
 
         extravars = {
             'src': self.private_data_dir,
-            'dest': settings.AWX_PROOT_BASE_PATH,
+            'dest': os.path.split(self.private_data_dir)[0],
             'ident': self.ident,
             'job_id': self.instance.id,
         }
