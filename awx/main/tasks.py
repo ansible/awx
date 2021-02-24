@@ -1227,10 +1227,7 @@ class BaseTask(object):
                 event_data.pop('parent_uuid', None)
         if self.parent_workflow_job_id:
             event_data['workflow_job_id'] = self.parent_workflow_job_id
-        # Do we have to check if the field exists? if it doesn't
-        # how will be eventually store the event in the db?
-        if self.job_created:
-            event_data['job_created'] = self.job_created
+        event_data['job_created'] = self.job_created
         if self.host_map:
             host = event_data.get('event_data', {}).get('host', '').strip()
             if host:
