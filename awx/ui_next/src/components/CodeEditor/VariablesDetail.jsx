@@ -1,13 +1,14 @@
 import 'styled-components/macro';
 import React, { useState, useEffect } from 'react';
 import { node, number, oneOfType, shape, string, arrayOf } from 'prop-types';
-import { Trans, withI18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Split,
   SplitItem,
   TextListItemVariants,
   Button,
+  Modal,
 } from '@patternfly/react-core';
 import { ExpandArrowsAltIcon } from '@patternfly/react-icons';
 import { DetailName, DetailValue } from '../DetailList';
@@ -36,15 +37,7 @@ function getValueAsMode(value, mode) {
   return mode === YAML_MODE ? jsonToYaml(value) : yamlToJson(value);
 }
 
-function VariablesDetail({
-  dataCy,
-  helpText,
-  value,
-  label,
-  rows,
-  fullHeight,
-  i18n,
-}) {
+function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
   const [mode, setMode] = useState(
     isJsonObject(value) || isJsonString(value) ? JSON_MODE : YAML_MODE
   );
@@ -76,51 +69,18 @@ function VariablesDetail({
         fullWidth
         css="grid-column: 1 / -1"
       >
-        <Split hasGutter>
-          <SplitItem isFilled>
-            <Split hasGutter>
-              <SplitItem>
-                <div className="pf-c-form__label">
-                  <span
-                    className="pf-c-form__label-text"
-                    css="font-weight: var(--pf-global--FontWeight--bold)"
-                  >
-                    {label}
-                  </span>
-                  {helpText && (
-                    <Popover header={label} content={helpText} id={dataCy} />
-                  )}
-                </div>
-              </SplitItem>
-              <SplitItem>
-                <MultiButtonToggle
-                  buttons={[
-                    [YAML_MODE, 'YAML'],
-                    [JSON_MODE, 'JSON'],
-                  ]}
-                  value={mode}
-                  onChange={newMode => {
-                    try {
-                      setCurrentValue(getValueAsMode(currentValue, newMode));
-                      setMode(newMode);
-                    } catch (err) {
-                      setError(err);
-                    }
-                  }}
-                />
-              </SplitItem>
-            </Split>
-          </SplitItem>
-          <SplitItem>
-            <Button
-              variant="plain"
-              aria-label={i18n._(t`Expand input`)}
-              onClick={() => setIsExpanded(true)}
-            >
-              <ExpandArrowsAltIcon />
-            </Button>
-          </SplitItem>
-        </Split>
+        <ModeToggle
+          label={label}
+          helpText={helpText}
+          dataCy={dataCy}
+          mode={mode}
+          setMode={setMode}
+          currentValue={currentValue}
+          setCurrentValue={setCurrentValue}
+          setError={setError}
+          onExpand={() => setIsExpanded(true)}
+          i18n={i18n}
+        />
       </DetailName>
       <DetailValue
         data-cy={valueCy}
@@ -133,7 +93,6 @@ function VariablesDetail({
           value={currentValue}
           readOnly
           rows={rows}
-          fullHeight={fullHeight}
           css="margin-top: 10px"
         />
         {error && (
@@ -141,10 +100,48 @@ function VariablesDetail({
             css="color: var(--pf-global--danger-color--100);
             font-size: var(--pf-global--FontSize--sm"
           >
-            <Trans>Error:</Trans> {error.message}
+            {i18n._(t`Error:`)} {error.message}
           </div>
         )}
       </DetailValue>
+      <Modal
+        variant="xlarge"
+        title={label}
+        isOpen={isExpanded}
+        onClose={() => setIsExpanded(false)}
+        actions={[
+          <Button
+            aria-label={i18n._(t`Done`)}
+            key="select"
+            variant="primary"
+            onClick={() => setIsExpanded(false)}
+          >
+            {i18n._(t`Done`)}
+          </Button>,
+        ]}
+      >
+        <div className="pf-c-form">
+          <ModeToggle
+            label={label}
+            helpText={helpText}
+            dataCy={dataCy}
+            mode={mode}
+            setMode={setMode}
+            currentValue={currentValue}
+            setCurrentValue={setCurrentValue}
+            setError={setError}
+            i18n={i18n}
+          />
+          <CodeEditor
+            mode={mode}
+            value={currentValue}
+            readOnly
+            rows={rows}
+            fullHeight
+            css="margin-top: 10px"
+          />
+        </div>
+      </Modal>
     </>
   );
 }
@@ -160,5 +157,68 @@ VariablesDetail.defaultProps = {
   dataCy: '',
   helpText: '',
 };
+
+function ModeToggle({
+  label,
+  helpText,
+  dataCy,
+  currentValue,
+  setCurrentValue,
+  mode,
+  setMode,
+  setError,
+  onExpand,
+  i18n,
+}) {
+  return (
+    <Split hasGutter>
+      <SplitItem isFilled>
+        <Split hasGutter css="align-items: baseline">
+          <SplitItem>
+            <div className="pf-c-form__label">
+              <span
+                className="pf-c-form__label-text"
+                css="font-weight: var(--pf-global--FontWeight--bold)"
+              >
+                {label}
+              </span>
+              {helpText && (
+                <Popover header={label} content={helpText} id={dataCy} />
+              )}
+            </div>
+          </SplitItem>
+          <SplitItem>
+            <MultiButtonToggle
+              buttons={[
+                [YAML_MODE, 'YAML'],
+                [JSON_MODE, 'JSON'],
+              ]}
+              value={mode}
+              onChange={newMode => {
+                try {
+                  setCurrentValue(getValueAsMode(currentValue, newMode));
+                  setMode(newMode);
+                } catch (err) {
+                  setError(err);
+                }
+              }}
+            />
+          </SplitItem>
+        </Split>
+      </SplitItem>
+      {onExpand && (
+        <SplitItem>
+          <Button
+            variant="plain"
+            aria-label={i18n._(t`Expand input`)}
+            onClick={onExpand}
+          >
+            <ExpandArrowsAltIcon />
+          </Button>
+        </SplitItem>
+      )}
+    </Split>
+  );
+}
 
 export default withI18n()(VariablesDetail);
