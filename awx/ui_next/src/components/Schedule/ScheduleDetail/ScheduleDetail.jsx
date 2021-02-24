@@ -26,6 +26,7 @@ import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeMirrorInput';
+import { parseVariableField } from '../../../util/yaml';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -42,7 +43,7 @@ const PromptDetailList = styled(DetailList)`
   padding: 0px 20px;
 `;
 
-function ScheduleDetail({ schedule, i18n, surveyConfig }) {
+function ScheduleDetail({ hasDaysToKeepField, schedule, i18n, surveyConfig }) {
   const {
     id,
     created,
@@ -233,6 +234,16 @@ function ScheduleDetail({ schedule, i18n, surveyConfig }) {
     return <ContentError error={readContentError} />;
   }
 
+  let daysToKeep = null;
+  if (hasDaysToKeepField && extra_data) {
+    if (typeof extra_data === 'string' && extra_data !== '') {
+      daysToKeep = parseVariableField(extra_data).days;
+    }
+    if (typeof extra_data === 'object') {
+      daysToKeep = extra_data?.days;
+    }
+  }
+
   return (
     <CardBody>
       <ScheduleToggle
@@ -254,6 +265,9 @@ function ScheduleDetail({ schedule, i18n, surveyConfig }) {
         <Detail label={i18n._(t`Last Run`)} value={formatDateString(dtend)} />
         <Detail label={i18n._(t`Local Time Zone`)} value={timezone} />
         <Detail label={i18n._(t`Repeat Frequency`)} value={repeatFrequency} />
+        {hasDaysToKeepField ? (
+          <Detail label={i18n._(t`Days of Data to Keep`)} value={daysToKeep} />
+        ) : null}
         <ScheduleOccurrences preview={preview} />
         <UserDateDetail
           label={i18n._(t`Created`)}

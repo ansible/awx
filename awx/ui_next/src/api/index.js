@@ -29,6 +29,7 @@ import Root from './models/Root';
 import Schedules from './models/Schedules';
 import Settings from './models/Settings';
 import SystemJobs from './models/SystemJobs';
+import SystemJobTemplates from './models/SystemJobTemplates';
 import Teams from './models/Teams';
 import Tokens from './models/Tokens';
 import UnifiedJobTemplates from './models/UnifiedJobTemplates';
@@ -71,6 +72,7 @@ const RootAPI = new Root();
 const SchedulesAPI = new Schedules();
 const SettingsAPI = new Settings();
 const SystemJobsAPI = new SystemJobs();
+const SystemJobTemplatesAPI = new SystemJobTemplates();
 const TeamsAPI = new Teams();
 const TokensAPI = new Tokens();
 const UnifiedJobTemplatesAPI = new UnifiedJobTemplates();
@@ -114,6 +116,7 @@ export {
   SchedulesAPI,
   SettingsAPI,
   SystemJobsAPI,
+  SystemJobTemplatesAPI,
   TeamsAPI,
   TokensAPI,
   UnifiedJobTemplatesAPI,
