@@ -1024,8 +1024,8 @@ def deepmerge(a, b):
         return b
 
 
-def create_partition(start=None, end=None, partition_label=None, minutely=True):
-    """Creates new partition tables for events.
+def create_partition(tblname, start=None, end=None, partition_label=None, minutely=False):
+    """Creates new partition table for events.
     - start defaults to beginning of current hour
     - end defaults to end of current hour
     - partition_label defaults to YYYYMMDD_HH
@@ -1053,16 +1053,8 @@ def create_partition(start=None, end=None, partition_label=None, minutely=True):
             partition_label = start.strftime('%Y%m%d_%H')
 
     with connection.cursor() as cursor:
-        # Only partitioning main_jobevent on first pass
-        #
-        #for tblname in (
-        #    'main_jobevent', 'main_inventoryupdateevent',
-        #    'main_projectupdateevent', 'main_adhoccommandevent',
-        #    'main_systemjobevent'
-        #):
-        for tblname in ('main_jobevent',):
-            cursor.execute(
-                f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
-                f'PARTITION OF {tblname} '
-                f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
-            )
+        cursor.execute(
+            f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
+            f'PARTITION OF {tblname} '
+            f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
+        )
