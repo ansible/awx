@@ -70,7 +70,7 @@ function Schedule({
     },
   ];
 
-  if (isLoading) {
+  if (isLoading || !schedule?.summary_fields?.unified_job_template?.id) {
     return <ContentLoading />;
   }
 
