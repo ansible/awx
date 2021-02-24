@@ -32,7 +32,7 @@ describe('VariablesField', () => {
       </Formik>
     );
     const buttons = wrapper.find('Button');
-    expect(buttons).toHaveLength(2);
+    expect(buttons).toHaveLength(3);
     expect(buttons.at(0).prop('variant')).toEqual('primary');
     expect(buttons.at(1).prop('variant')).toEqual('secondary');
     await act(async () => {

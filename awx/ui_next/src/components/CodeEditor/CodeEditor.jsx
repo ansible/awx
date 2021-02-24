@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { oneOf, bool, number, string, func } from 'prop-types';
+import { oneOf, bool, number, string, func, oneOfType } from 'prop-types';
 import ReactAce from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-javascript';
@@ -77,7 +77,7 @@ function CodeEditor({
   className,
   i18n,
 }) {
-  if (typeof rows !== 'number' && rows !== 'auto') {
+  if (rows && typeof rows !== 'number' && rows !== 'auto') {
     // eslint-disable-next-line no-console
     console.warning(
       `CodeEditor: Unexpected value for 'rows': ${rows}; expected number or 'auto'`
@@ -186,7 +186,7 @@ CodeEditor.propTypes = {
   readOnly: bool,
   hasErrors: bool,
   fullHeight: bool,
-  rows: oneOf(number, string),
+  rows: oneOfType([number, string]),
   className: string,
 };
 CodeEditor.defaultProps = {

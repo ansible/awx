@@ -148,7 +148,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
 VariablesDetail.propTypes = {
   value: oneOfType([shape({}), arrayOf(string), string]).isRequired,
   label: node.isRequired,
-  rows: oneOfType(number, string),
+  rows: oneOfType([number, string]),
   dataCy: string,
   helpText: string,
 };
