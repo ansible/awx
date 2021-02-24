@@ -52,6 +52,7 @@ from awx.main.models.events import (
 from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
 from awx.main.models.oauth import OAuth2Application as Application
+from awx.main.models.execution_environments import ExecutionEnvironment
 
 __SWAGGER_REQUESTS__ = {}
 
@@ -850,3 +851,8 @@ def slice_job_factory(slice_jt_factory):
                 node.save()
         return slice_job
     return r
+
+
+@pytest.fixture
+def execution_environment(organization):
+    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", organization=organization)
