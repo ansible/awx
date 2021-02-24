@@ -307,9 +307,10 @@ function JobTemplateForm({
           }
         >
           <PlaybookSelect
+            onChange={playbookHelpers.setValue}
             projectId={projectField.value?.id}
             isValid={!playbookMeta.touched || !playbookMeta.error}
-            field={playbookField}
+            selected={playbookField.value}
             onBlur={() => playbookHelpers.setTouched()}
             onError={setContentError}
           />
