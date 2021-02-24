@@ -122,9 +122,13 @@ function ExecutionEnvironmentList({ i18n }) {
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             toolbarSearchColumns={[
               {
+                name: i18n._(t`Name`),
+                key: 'name__icontains',
+                isDefault: true,
+              },
+              {
                 name: i18n._(t`Image`),
                 key: 'image__icontains',
-                isDefault: true,
               },
             ]}
             toolbarSortColumns={[
@@ -150,6 +154,7 @@ function ExecutionEnvironmentList({ i18n }) {
                 <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Image`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
               </HeaderRow>
             }
             renderToolbar={props => (
