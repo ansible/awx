@@ -53,13 +53,21 @@ export default function StatusLabel({ status, tooltipContent = '' }) {
   const color = colors[status] || 'grey';
   const Icon = icons[status];
 
+  const renderLabel = () => (
+    <Label variant="outline" color={color} icon={Icon ? <Icon /> : null}>
+      {label}
+    </Label>
+  );
+
   return (
     <>
-      <Tooltip content={tooltipContent} position="top">
-        <Label variant="outline" color={color} icon={Icon ? <Icon /> : null}>
-          {label}
-        </Label>
-      </Tooltip>
+      {tooltipContent ? (
+        <Tooltip content={tooltipContent} position="top">
+          {renderLabel()}
+        </Tooltip>
+      ) : (
+        renderLabel()
+      )}
     </>
   );
 }
