@@ -1301,8 +1301,6 @@ class BaseTask(object):
         if self.instance.spawned_by_workflow:
             self.parent_workflow_job_id = self.instance.get_workflow_job().id
 
-        # TODO: can we count on instance always having created?
-        # If we can't how can we store the job_event?
         self.job_created = str(self.instance.created)
 
         try:
