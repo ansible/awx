@@ -24,14 +24,11 @@ def migrate_event_data(apps, schema_editor):
     # All events for a given job should be placed in
     # a partition based on the job's _created time_.
 
-    # Only partitioning main_jobevent on first pass
-    #
-    #for tblname in (
-    #    'main_jobevent', 'main_inventoryupdateevent',
-    #    'main_projectupdateevent', 'main_adhoccommandevent',
-    #    'main_systemjobevent'
-    #):
-    for tblname in ('main_jobevent',):
+    for tblname in (
+        'main_jobevent', 'main_inventoryupdateevent',
+        'main_projectupdateevent', 'main_adhoccommandevent',
+        'main_systemjobevent'
+    ):
         with connection.cursor() as cursor:
             # mark existing table as *_old;
             # we will drop this table after its data
