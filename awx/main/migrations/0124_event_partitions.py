@@ -66,7 +66,7 @@ def migrate_event_data(apps, schema_editor):
 
             # .. and first partition
             # .. which is a special case, as it only covers remainder of current hour
-            create_partition(current_time)
+            create_partition(tblname, current_time)
 
             # copy over all job events into partitioned table
             # TODO: https://github.com/ansible/awx/issues/9257
