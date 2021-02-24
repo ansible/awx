@@ -50,7 +50,7 @@ function ExecutionEnvironmentListItem({
           i18n._(t`Globally Available`)
         )}
       </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+      <ActionsTd dataLabel={i18n._(t`Actions`)} gridColumns="auto 40px">
         <ActionItem
           visible={executionEnvironment.summary_fields.user_capabilities.edit}
           tooltip={i18n._(t`Edit Execution Environment`)}
