@@ -17,10 +17,11 @@ Notable files:
 - [docker-compose](https://pypi.org/project/docker-compose/) Python module.
     + This also installs the `docker` Python module, which is incompatible with [`docker-py`](https://pypi.org/project/docker-py/). If you have previously installed `docker-py`, please uninstall it.
 - [Docker Compose](https://docs.docker.com/compose/install/).
+- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) will need to be installed as we use it to template files needed for the docker-compose.
 
 ## Configuration
 
-In the  `inventory` file, set your `pg_password`, `broadcast_websocket_secret`, `secret_key`, and any other settings you need for your deployment.  
+In the  [`inventory` file](../inventory), set your `pg_password`, `broadcast_websocket_secret`, `secret_key`, and any other settings you need for your deployment.  
 
 AWX requires access to a PostgreSQL database, and by default, one will be created and deployed in a container, and data will be persisted to a docker volume. When the container is stopped, the database files will still exist in the docker volume. An external database can be used by setting the `pg_host`, `pg_hostname`, and `pg_username`.  
 

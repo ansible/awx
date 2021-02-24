@@ -1,13 +1,17 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { FormGroup } from '@patternfly/react-core';
+import {
+  FormGroup,
+  SelectVariant,
+  Select,
+  SelectOption,
+} from '@patternfly/react-core';
 import { ProjectsAPI } from '../../../../api';
 import useRequest from '../../../../util/useRequest';
 import { required } from '../../../../util/validators';
 
-import AnsibleSelect from '../../../../components/AnsibleSelect';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
 import Popover from '../../../../components/Popover';
@@ -21,6 +25,8 @@ import {
 } from './SharedFields';
 
 const SCMSubForm = ({ autoPopulateProject, i18n }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [sourcePath, setSourcePath] = useState([]);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField] = useField('credential');
   const [projectField, projectMeta, projectHelpers] = useField({
@@ -32,14 +38,10 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
 
-  const {
-    error: sourcePathError,
-    request: fetchSourcePath,
-    result: sourcePath,
-  } = useRequest(
+  const { error: sourcePathError, request: fetchSourcePath } = useRequest(
     useCallback(async projectId => {
       const { data } = await ProjectsAPI.readInventories(projectId);
-      return [...data, '/ (project root)'];
+      setSourcePath([...data, '/ (project root)']);
     }, []),
     []
   );
@@ -106,26 +108,40 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
           />
         }
       >
-        <AnsibleSelect
-          {...sourcePathField}
+        <Select
+          variant={SelectVariant.typeahead}
+          onToggle={setIsOpen}
+          isOpen={isOpen}
+          selections={sourcePathField.value}
           id="source_path"
           isValid={
             (!sourcePathMeta.error || !sourcePathMeta.touched) &&
             !sourcePathError?.message
           }
-          data={[
-            {
-              value: '',
-              key: '',
-              label: i18n._(t`Choose an inventory file`),
-              isDisabled: true,
-            },
-            ...sourcePath.map(value => ({ value, label: value, key: value })),
-          ]}
-          onChange={(event, value) => {
+          onSelect={(event, value) => {
+            setIsOpen(false);
+            value = value.trim();
+            if (!value.endsWith('/')) {
+              value += '/';
+            }
             sourcePathHelpers.setValue(value);
           }}
-        />
+          aria-label={i18n._(t`Select source path`)}
+          placeholder={i18n._(t`Select source path`)}
+          isCreatable
+          onCreateOption={value => {
+            value.trim();
+
+            if (!value.endsWith('/')) {
+              value += '/';
+            }
+            setSourcePath([...sourcePath, value]);
+          }}
+        >
+          {sourcePath.map(path => (
+            <SelectOption key={path} id={path} value={path} />
+          ))}
+        </Select>
       </FormGroup>
       <VerbosityField />
       <HostFilterField />

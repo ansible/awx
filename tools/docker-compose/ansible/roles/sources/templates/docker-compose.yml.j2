@@ -30,6 +30,7 @@ services:
       - "../../docker-compose/_sources/database.py:/etc/tower/conf.d/database.py"
       - "../../docker-compose/_sources/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py"
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
+      - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "redis_socket:/var/run/redis/:rw"
     privileged: true
     tty: true
