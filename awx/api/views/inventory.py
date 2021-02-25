@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import datetime
 import logging
 
 # Django
@@ -40,6 +41,8 @@ from awx.api.views.mixin import RelatedJobsPreventDeleteMixin, ControlledByScmMi
 
 logger = logging.getLogger('awx.api.views.organization')
 
+EPOCH = datetime.datetime.utcfromtimestamp(0)
+
 
 class InventoryUpdateEventsList(SubListAPIView):
 
@@ -49,6 +52,11 @@ class InventoryUpdateEventsList(SubListAPIView):
     relationship = 'inventory_update_events'
     name = _('Inventory Update Events List')
     search_fields = ('stdout',)
+
+    def get_queryset(self):
+        return super(InventoryUpdateEventsList, self).get_queryset().filter(
+            job_created__in=(self.get_parent_object().created, EPOCH)
+        )
 
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
