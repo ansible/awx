@@ -262,11 +262,6 @@ class TaskManager:
                 logger.debug("No controllers available in group {} to run {}".format(rampart_group.name, task.log_format))
                 return
 
-        # Before task leaves pending state, ensure that job_event partitions exist
-        # TODO: Currently, only creating partition for jobs. Drop contiditional once
-        # there are partitions for all job event types
-        if task_actual['type'] == 'job':
-            create_partition()
         task.status = 'waiting'
 
         (start_status, opts) = task.pre_start()
@@ -330,6 +325,9 @@ class TaskManager:
 
         def post_commit():
             if task.status != 'failed' and type(task) is not WorkflowJob:
+                # Ensure that job event partition exists
+                create_partition('main_jobevent')
+
                 task_cls = task._get_task_class()
                 task_cls.apply_async(
                     [task.pk],
