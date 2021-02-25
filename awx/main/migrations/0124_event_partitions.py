@@ -110,4 +110,24 @@ class Migration(migrations.Migration):
             name='job_created',
             field=models.DateTimeField(null=True, editable=False),
         ),
+        FakeAddField(
+            model_name='inventoryupdateevent',
+            name='job_created',
+            field=models.DateTimeField(null=True, editable=False),
+        ),
+        FakeAddField(
+            model_name='projectupdateevent',
+            name='job_created',
+            field=models.DateTimeField(null=True, editable=False),
+        ),
+        FakeAddField(
+            model_name='adhoccommandevent',
+            name='job_created',
+            field=models.DateTimeField(null=True, editable=False),
+        ),
+        FakeAddField(
+            model_name='systemjobevent',
+            name='job_created',
+            field=models.DateTimeField(null=True, editable=False),
+        ),
     ]
