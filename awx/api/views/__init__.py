@@ -902,12 +902,9 @@ class ProjectUpdateEventsList(SubListAPIView):
         return super(ProjectUpdateEventsList, self).finalize_response(request, response, *args, **kwargs)
 
     def get_queryset(self):
-        job = self.get_parent_object()
-        self.check_parent_access(job)
-        qs = super(ProjectUpdateEventsList, self).get_queryset()
-        return qs.filter(
-            job_created__in=(job.created, EPOCH)
-        ).order_by('start_line').all()
+        return super(ProjectUpdateEventsList, self).get_queryset().filter(
+            job_created__in=(self.get_parent_object().created, EPOCH)
+        )
 
 class SystemJobEventsList(SubListAPIView):
 
@@ -923,12 +920,9 @@ class SystemJobEventsList(SubListAPIView):
         return super(SystemJobEventsList, self).finalize_response(request, response, *args, **kwargs)
 
     def get_queryset(self):
-        job = self.get_parent_object()
-        self.check_parent_access(job)
-        qs = job.system_job_events.select_related('host').filter(
-            job_created__in=(job.created, EPOCH)
-        ).order_by('start_line')
-        return qs.all()
+        return super(SystemJobEventsList, self).get_queryset().filter(
+            job_created__in=(self.get_parent_object().created, EPOCH)
+        )
 
 class ProjectUpdateCancel(RetrieveAPIView):
 
@@ -4030,12 +4024,9 @@ class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
     search_fields = ('stdout',)
 
     def get_queryset(self):
-        job = self.get_parent_object()
-        self.check_parent_access(job)
-        qs = job.ad_hoc_command_events.select_related('host').filter(
-            job_created__in=(job.created, EPOCH)
-        ).order_by('start_line')
-        return qs.all()
+        return super(BaseAdHocCommandEventsList, self).get_queryset().filter(
+            job_created__in=(self.get_parent_object().created, EPOCH)
+        )
 
 
 class HostAdHocCommandEventsList(BaseAdHocCommandEventsList):
