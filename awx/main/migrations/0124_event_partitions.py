@@ -30,11 +30,11 @@ def migrate_event_data(apps, schema_editor):
         'main_systemjobevent'
     ):
         with connection.cursor() as cursor:
-            # mark existing table as *_old;
+            # mark existing table as _unpartitioned_*
             # we will drop this table after its data
             # has been moved over
             cursor.execute(
-                f'ALTER TABLE {tblname} RENAME TO {tblname}_old'
+                f'ALTER TABLE {tblname} RENAME TO _unpartitioned_{tblname}'
             )
 
             # drop primary key constraint; in a partioned table
@@ -42,15 +42,19 @@ def migrate_event_data(apps, schema_editor):
             # TODO: do more generic search for pkey constraints
             # instead of hardcoding this one that applies to main_jobevent
             cursor.execute(
-                f'ALTER TABLE {tblname}_old DROP CONSTRAINT {tblname}_pkey1'
+                f'ALTER TABLE _unpartitioned_{tblname} DROP CONSTRAINT {tblname}_pkey1'
             )
 
             # create parent table
             cursor.execute(
                 f'CREATE TABLE {tblname} '
-                f'(LIKE {tblname}_old INCLUDING ALL, job_created TIMESTAMP WITH TIME ZONE NOT NULL) '
+                f'(LIKE _unpartitioned_{tblname} INCLUDING ALL, job_created TIMESTAMP WITH TIME ZONE NOT NULL) '
                 f'PARTITION BY RANGE(job_created);'
             )
+
+            # let's go ahead and add and subtract a few indexes while we're here
+            cursor.execute(f'CREATE INDEX {tblname}_modified_idx ON {tblname} (modified);')
+            cursor.execute(f'DROP INDEX IF EXISTS {tblname}_job_id_brin_idx;')
 
             # recreate primary key constraint
             cursor.execute(
@@ -61,32 +65,12 @@ def migrate_event_data(apps, schema_editor):
             current_time = now()
 
             # .. as well as initial partition containing all existing events
-            awx_epoch = datetime(2000, 1, 1, 0, 0) # .. so to speak
-            create_partition(tblname, awx_epoch, current_time, 'old_events')
+            epoch = datetime.utcfromtimestamp(0)
+            create_partition(tblname, epoch, current_time, 'old_events')
 
             # .. and first partition
             # .. which is a special case, as it only covers remainder of current hour
             create_partition(tblname, current_time)
-
-            # copy over all job events into partitioned table
-            # TODO: bigint style migration (https://github.com/ansible/awx/issues/9257)
-            tblname_to_uj_fk = {'main_jobevent': 'job_id',
-                                'main_inventoryupdateevent': 'inventory_update_id',
-                                'main_projectupdateevent': 'project_update_id',
-                                'main_adhoccommandevent': 'ad_hoc_command_id',
-                                'main_systemjobevent': 'system_job_id'}
-            uj_fk_col = tblname_to_uj_fk[tblname]
-            cursor.execute(
-                f'INSERT INTO {tblname} '
-                f'SELECT {tblname}_old.*, main_unifiedjob.created '
-                f'FROM {tblname}_old '
-                f'INNER JOIN main_unifiedjob ON {tblname}_old.{uj_fk_col} = main_unifiedjob.id;'
-            )
-
-            # drop old table
-            cursor.execute(
-                f'DROP TABLE {tblname}_old'
-            )
 
 
 class FakeAddField(migrations.AddField):

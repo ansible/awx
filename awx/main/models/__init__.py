@@ -83,21 +83,10 @@ User.add_to_class('can_access_with_errors', check_user_access_with_errors)
 User.add_to_class('accessible_objects', user_accessible_objects)
 
 
-def enforce_bigint_pk_migration():
-    #
-    # NOTE: this function is not actually in use anymore,
-    # but has been intentionally kept for historical purposes,
-    # and to serve as an illustration if we ever need to perform
-    # bulk modification/migration of event data in the future.
-    #
-    # see: https://github.com/ansible/awx/issues/6010
-    # look at all the event tables and verify that they have been fully migrated
-    # from the *old* int primary key table to the replacement bigint table
-    # if not, attempt to migrate them in the background
-    #
+def migrate_events_to_partitions():
     for tblname in ('main_jobevent', 'main_inventoryupdateevent', 'main_projectupdateevent', 'main_adhoccommandevent', 'main_systemjobevent'):
         with connection.cursor() as cursor:
-            cursor.execute('SELECT 1 FROM information_schema.tables WHERE table_name=%s', (f'_old_{tblname}',))
+            cursor.execute('SELECT 1 FROM information_schema.tables WHERE table_name=%s', (f'_unpartitioned_{tblname}',))
             if bool(cursor.rowcount):
                 from awx.main.tasks import migrate_legacy_event_data
 
