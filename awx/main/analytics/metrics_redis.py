@@ -92,12 +92,18 @@ def hincrby(field, increment_by, conn=None):
     if increment_by != 0:
         with RedisConn(conn) as inner_conn:
             inner_conn.hincrby(redis_key, field, increment_by)
+            logger.debug(f"updated {field}")
             send_metrics()
 
 
-def hset(field, value, conn=None):
+def hsetfloat(field, value, conn=None):
     with RedisConn(conn) as inner_conn:
+        with RedisConn() as tmp_conn:
+            field_value = tmp_conn.hget(redis_key, field)
+            if float(field_value.decode('UTF-8')) == value:
+                return
         inner_conn.hset(redis_key, field, value)
+        logger.debug(f"updated {field}")
         send_metrics()
 
 
@@ -105,6 +111,7 @@ def hincrbyfloat(field, increment_by, conn=None):
     if increment_by != 0:
         with RedisConn(conn) as inner_conn:
             inner_conn.hincrbyfloat(redis_key, field, increment_by)
+            logger.debug(f"updated {field}")
             send_metrics()
 
 
@@ -134,7 +141,7 @@ def send_metrics():
                     'metrics': serialize_local_metrics(),
                 }
                 emit_channel_notification("metrics", payload)
-                # logger.debug(f"node {get_local_instance_name()} sending metrics")
+                logger.debug(f"node {get_local_instance_name()} sending metrics")
                 conn.set(redis_key + '_last_broadcast', time.time())
                 conn.hset(redis_key, 'debug_send_metrics_interval', f'{metrics_last_sent:.2f}')
         finally:

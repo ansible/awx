@@ -56,7 +56,6 @@ class CallbackBrokerWorker(BaseWorker):
     def read(self, queue):
         try:
             with metrics_redis.RedisPipe() as pipe:
-                metrics_redis.hset('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), conn = pipe)
                 res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=1)
                 if res is None:
                     pipe.execute()
@@ -72,6 +71,7 @@ class CallbackBrokerWorker(BaseWorker):
         except (json.JSONDecodeError, KeyError):
             logger.exception("failed to decode JSON message from redis")
         finally:
+            metrics_redis.hsetfloat('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), conn = pipe)
             self.record_statistics()
 
         return {'event': 'FLUSH'}
