@@ -175,9 +175,6 @@ from awx.api.views.root import (  # noqa
 from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
 
 
-EPOCH = datetime.datetime.utcfromtimestamp(0)
-
-
 logger = logging.getLogger('awx.api.views')
 
 
@@ -889,7 +886,7 @@ class ProjectUpdateEventsList(SubListAPIView):
 
     def get_queryset(self):
         return super(ProjectUpdateEventsList, self).get_queryset().filter(
-            job_created__in=(self.get_parent_object().created, EPOCH)
+            job_created=self.get_parent_object().created_or_epoch
         )
 
 class SystemJobEventsList(SubListAPIView):
@@ -907,7 +904,7 @@ class SystemJobEventsList(SubListAPIView):
 
     def get_queryset(self):
         return super(SystemJobEventsList, self).get_queryset().filter(
-            job_created__in=(self.get_parent_object().created, EPOCH)
+            job_created=self.get_parent_object().created_or_epoch
         )
 
 class ProjectUpdateCancel(RetrieveAPIView):
@@ -3828,7 +3825,7 @@ class JobJobEventsList(BaseJobEventsList):
         job = self.get_parent_object()
         self.check_parent_access(job)
         qs = job.job_events.filter(
-            job_created__in=(job.created, EPOCH)
+            job_created=self.get_parent_object().created_or_epoch
         ).select_related('host').order_by('start_line')
         return qs.all()
 
@@ -4011,7 +4008,7 @@ class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
 
     def get_queryset(self):
         return super(BaseAdHocCommandEventsList, self).get_queryset().filter(
-            job_created__in=(self.get_parent_object().created, EPOCH)
+            job_created=self.get_parent_object().created_or_epoch
         )
 
 
