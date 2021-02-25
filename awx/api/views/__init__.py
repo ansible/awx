@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import datetime
 import dateutil
 import functools
 import html
@@ -176,6 +177,9 @@ from awx.api.views.root import (  # noqa
     ApiV2AttachView,
 )
 from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
+
+
+EPOCH = datetime.datetime.utcfromtimestamp(0)
 
 
 logger = logging.getLogger('awx.api.views')
@@ -901,7 +905,9 @@ class ProjectUpdateEventsList(SubListAPIView):
         job = self.get_parent_object()
         self.check_parent_access(job)
         qs = super(ProjectUpdateEventsList, self).get_queryset()
-        return qs.filter(job_created=job.created).order_by('start_line').all()
+        return qs.filter(
+            job_created__in=(job.created, EPOCH)
+        ).order_by('start_line').all()
 
 class SystemJobEventsList(SubListAPIView):
 
@@ -919,7 +925,9 @@ class SystemJobEventsList(SubListAPIView):
     def get_queryset(self):
         job = self.get_parent_object()
         self.check_parent_access(job)
-        qs = job.system_job_events.select_related('host').filter(job_created=job.created).order_by('start_line')
+        qs = job.system_job_events.select_related('host').filter(
+            job_created__in=(job.created, EPOCH)
+        ).order_by('start_line')
         return qs.all()
 
 class ProjectUpdateCancel(RetrieveAPIView):
@@ -3823,7 +3831,7 @@ class HostJobEventsList(BaseJobEventsList):
     def get_queryset(self):
         parent_obj = self.get_parent_object()
         self.check_parent_access(parent_obj)
-        qs = self.request.user.get_queryset(self.model).filter(host=parent_obj, job_created=parent_obj.created)
+        qs = self.request.user.get_queryset(self.model).filter(host=parent_obj)
         return qs
 
 
@@ -3839,7 +3847,9 @@ class JobJobEventsList(BaseJobEventsList):
     def get_queryset(self):
         job = self.get_parent_object()
         self.check_parent_access(job)
-        qs = job.job_events.filter(job_created=job.created).select_related('host').order_by('start_line')
+        qs = job.job_events.filter(
+            job_created__in=(job.created, EPOCH)
+        ).select_related('host').order_by('start_line')
         return qs.all()
 
 
@@ -4022,7 +4032,9 @@ class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
     def get_queryset(self):
         job = self.get_parent_object()
         self.check_parent_access(job)
-        qs = job.ad_hoc_command_events.select_related('host').filter(job_created=job.created).order_by('start_line')
+        qs = job.ad_hoc_command_events.select_related('host').filter(
+            job_created__in=(job.created, EPOCH)
+        ).order_by('start_line')
         return qs.all()
 
 

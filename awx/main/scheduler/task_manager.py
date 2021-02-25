@@ -325,9 +325,8 @@ class TaskManager:
 
         def post_commit():
             if task.status != 'failed' and type(task) is not WorkflowJob:
-                # Ensure that job event partition exists
-                create_partition('main_jobevent')
-
+                # Before task is dispatched, ensure that job_event partitions exist
+                create_partition(task.event_class._meta.db_table, start=task.created)
                 task_cls = task._get_task_class()
                 task_cls.apply_async(
                     [task.pk],
