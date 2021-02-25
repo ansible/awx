@@ -61,8 +61,8 @@ def migrate_event_data(apps, schema_editor):
             current_time = now()
 
             # .. as well as initial partition containing all existing events
-            epoch = datetime(2000, 1, 1, 0, 0)
-            create_partition(epoch, current_time, 'old_events')
+            awx_epoch = datetime(2000, 1, 1, 0, 0) # .. so to speak
+            create_partition(tblname, awx_epoch, current_time, 'old_events')
 
             # .. and first partition
             # .. which is a special case, as it only covers remainder of current hour
