@@ -135,9 +135,11 @@ class PrometheusJSONRenderer(renderers.JSONRenderer):
         parsed_metrics = text_string_to_metric_families(data)
         data = {}
         for family in parsed_metrics:
-            data[family.name] = []
+            data[family.name] = {}
+            data[family.name]['help_text'] = family.documentation
+            data[family.name]['samples'] = []
             for sample in family.samples:
-                data[family.name].append({"labels": sample[1], "values": sample[2]})
+                data[family.name]['samples'].append({"labels": sample[1], "value": sample[2]})
         return super(PrometheusJSONRenderer, self).render(
             data, accepted_media_type, renderer_context
         )

@@ -14,7 +14,7 @@ from rest_framework.exceptions import PermissionDenied
 
 # AWX
 # from awx.main.analytics import collectors
-from awx.main.analytics.metrics_redis import metrics as redismetrics
+from awx.main.analytics.metrics_redis import metrics as metrics_redis
 from awx.main.analytics.metrics import metrics
 from awx.api import renderers
 
@@ -39,9 +39,9 @@ class MetricsView(APIView):
         ''' Show Metrics Details '''
         if (request.user.is_superuser or request.user.is_system_auditor):
             metrics_to_show = ''
-            if 'redisonly' not in request.query_params:
+            if not request.query_params.get('redisonly', "0") == "1":
                 metrics_to_show += metrics().decode('UTF-8')
-            if 'dbonly' not in request.query_params:
-                metrics_to_show += redismetrics(request).decode('UTF-8')
+            if not request.query_params.get('dbonly', "0") == "1":
+                metrics_to_show += metrics_redis(request).decode('UTF-8')
             return Response(metrics_to_show)
         raise PermissionDenied()

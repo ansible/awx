@@ -5,12 +5,10 @@ import logging
 
 from django.conf import settings
 from django.apps import apps
+from awx.main.consumers import emit_channel_notification
 from prometheus_client import (
     CollectorRegistry,
     Gauge,
-    Counter,
-    Summary,
-    Histogram,
     generate_latest
 )
 
@@ -37,20 +35,25 @@ METRICS = {
         {'help_text': 'Number of events batch inserted into database'},
     'callback_receiver_events_insert_redis':
         {'help_text': 'Number of events inserted into redis'},
+    'debug_send_metrics_interval':
+        {'help_text': 'Elapsed time (seconds) between sending the previous two metrics',
+         'debug': True},
 }
+
 
 def get_local_instance_name():
     # get local instance name and cache it in redis
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
         instance_name = conn.get(redis_key + "_local_instance_name")
         if instance_name is None:
-            logger.debug(f"setting local instance name redis key")
             Instance = apps.get_model('main', 'Instance')
             instance_name = Instance.objects.me().hostname
             instance_name = conn.set(redis_key + "_local_instance_name", instance_name)
         return instance_name.decode('UTF-8')
 
+
 class RedisConn():
+    # context capable class that can accept an already existing conn
     def __init__(self, conn = None):
         if conn is None:
             self.close_conn_on_exit = True
@@ -59,43 +62,54 @@ class RedisConn():
         else:
             self.close_conn_on_exit = False
             self.conn = conn
+
     def __enter__(self):
         return self.conn
+
     def __exit__(self, exception_type, exception_value, exception_traceback):
         if self.close_conn_on_exit:
             self.conn.close()
 
+
 class RedisPipe():
+    # Returns a redis client pipeline, intended to be used in a
+    # `with RedisPipe() as` block. pipeline.execute() should be called elsewhere
+    # to submit transaction to redis
     def __init__(self):
         self.pipe = redis.Redis.from_url(settings.BROKER_URL).pipeline()
         self.pipe.client_setname(redis_key)
+
     def __enter__(self):
         return self.pipe
+
     def __exit__(self, exception_type, exception_value, exception_traceback):
         self.pipe.reset()
+
 
 def hincrby(field, increment_by, conn=None):
     if increment_by != 0:
         with RedisConn(conn) as inner_conn:
             inner_conn.hincrby(redis_key, field, increment_by)
-            send_broadcast()
+            send_metrics()
+
 
 def hset(field, value, conn=None):
     with RedisConn(conn) as inner_conn:
         inner_conn.hset(redis_key, field, value)
-        send_broadcast()
+        send_metrics()
+
 
 def hincrbyfloat(field, increment_by, conn=None):
     if increment_by != 0:
         with RedisConn(conn) as inner_conn:
             inner_conn.hincrbyfloat(redis_key, field, increment_by)
-            send_broadcast()
+            send_metrics()
 
-def send_broadcast():
+
+def send_metrics():
     # send a serialized copy of the metrics to other nodes
     # only send metrics if last_broadcast is older than broadcast interval
     # uses a lock on redis to prevent this method from being called simultaneously
-    from awx.main.consumers import emit_channel_notification
     with RedisConn() as conn:
         lock = conn.lock(redis_key + '_lock', thread_local = False)
         if not lock.acquire(blocking=False):
@@ -104,11 +118,13 @@ def send_broadcast():
         try:
             # logger.debug(f"node {get_local_instance_name()} acquired lock")
             should_broadcast = False
+            metrics_last_sent = 0.0
             if not conn.exists(redis_key + '_last_broadcast'):
                 should_broadcast = True
             else:
                 last_broadcast = float(conn.get(redis_key + '_last_broadcast'))
-                if (time.time() - last_broadcast) > broadcast_interval:
+                metrics_last_sent = time.time() - last_broadcast
+                if metrics_last_sent > broadcast_interval:
                     should_broadcast = True
             if should_broadcast:
                 payload = {
@@ -116,24 +132,28 @@ def send_broadcast():
                     'metrics': serialize_local_metrics(),
                 }
                 emit_channel_notification("metrics", payload)
-                logger.debug(f"node {get_local_instance_name()} sending metrics")
+                # logger.debug(f"node {get_local_instance_name()} sending metrics")
                 conn.set(redis_key + '_last_broadcast', time.time())
+                conn.hset(redis_key, 'debug_send_metrics_interval', f'{metrics_last_sent:.2f}')
         finally:
             # logger.debug(f"node {get_local_instance_name()} releasing lock")
             lock.release()
+
 
 def store_metrics(data_json):
     # called when receiving metrics from other nodes
     with redis.Redis.from_url(settings.BROKER_URL) as conn:
         data = json.loads(data_json)
-        logger.debug(f"node {get_local_instance_name()} received metrics from node {data['node']}")
+        # logger.debug(f"node {get_local_instance_name()} received metrics from node {data['node']}")
         conn.set(redis_key + "_node_" + data['node'], data['metrics'])
+
 
 def metrics(request):
     # takes the api request, filters, and generates prometheus data
     REGISTRY = CollectorRegistry()
-    logger.debug(f"query params {request.query_params}")
+    # logger.debug(f"query params {request.query_params}")
     nodes_filter = request.query_params.getlist("node")
+    include_debug_filter = request.query_params.get("debug", "1")
     use_all_nodes = False
     if len(nodes_filter) == 0:
         use_all_nodes = True
@@ -144,7 +164,6 @@ def metrics(request):
         node_names.sort()
         node_data = {}
         for node in node_names:
-            logger.debug(f"{node} in {nodes_filter}")
             if use_all_nodes or node in nodes_filter:
                 if node == get_local_instance_name():
                     node_metrics = load_local_metrics()
@@ -154,10 +173,14 @@ def metrics(request):
     if node_data:
         for field in METRICS:
             help_text = METRICS[field]['help_text']
+            is_debug = METRICS[field].get('debug', False)
+            if is_debug and include_debug_filter == "0":
+                continue
             prometheus_object = Gauge(field, help_text, ['node'], registry=REGISTRY)
             for node in node_data:
                 prometheus_object.labels(node=node).set(node_data[node][field])
     return generate_latest(registry=REGISTRY)
+
 
 def load_local_metrics():
     # generate python dictionary of key values from metrics stored in redis
@@ -171,6 +194,7 @@ def load_local_metrics():
                 field_value = 0.0
             data[field] = field_value
     return data
+
 
 def serialize_local_metrics():
     data = load_local_metrics()
