@@ -69,12 +69,18 @@ def migrate_event_data(apps, schema_editor):
             create_partition(tblname, current_time)
 
             # copy over all job events into partitioned table
-            # TODO: https://github.com/ansible/awx/issues/9257
+            # TODO: bigint style migration (https://github.com/ansible/awx/issues/9257)
+            tblname_to_uj_fk = {'main_jobevent': 'job_id',
+                                'main_inventoryupdateevent': 'inventory_update_id',
+                                'main_projectupdateevent': 'project_update_id',
+                                'main_adhoccommandevent': 'ad_hoc_command_id',
+                                'main_systemjobevent': 'system_job_id'}
+            uj_fk_col = tblname_to_uj_fk[tblname]
             cursor.execute(
                 f'INSERT INTO {tblname} '
                 f'SELECT {tblname}_old.*, main_unifiedjob.created '
                 f'FROM {tblname}_old '
-                f'INNER JOIN main_unifiedjob ON {tblname}_old.job_id = main_unifiedjob.id;'
+                f'INNER JOIN main_unifiedjob ON {tblname}_old.{uj_fk_col} = main_unifiedjob.id;'
             )
 
             # drop old table
