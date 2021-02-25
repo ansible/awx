@@ -49,6 +49,7 @@ from awx.main.utils import (
     getattr_dne,
     polymorphic,
     schedule_task_manager,
+    get_event_partition_epoch
 )
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
@@ -734,6 +735,18 @@ class UnifiedJob(
     @classmethod
     def _get_task_class(cls):
         raise NotImplementedError  # Implement in subclasses.
+
+    @property
+    def created_or_epoch(self):
+        # returns self.created *unless* the job was created *prior*
+        # to the datetime the event partition migration is applied
+        # (in that case, it returns the epoch, which is the date
+        # which is automatically applied to all events rows that predate
+        # that migration)
+        applied = get_event_partition_epoch()
+        if applied and self.created < applied:
+            return datetime.datetime.utcfromtimestamp(0)
+        return self.created
 
     @property
     def can_run_containerized(self):
