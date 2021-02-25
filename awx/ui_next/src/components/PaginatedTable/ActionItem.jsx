@@ -13,9 +13,13 @@ export default function ActionItem({ column, tooltip, visible, children }) {
         grid-column: ${column};
       `}
     >
-      <Tooltip content={tooltip} position="top">
-        <div>{children}</div>
-      </Tooltip>
+      {tooltip ? (
+        <Tooltip content={tooltip} position="top">
+          <div>{children}</div>
+        </Tooltip>
+      ) : (
+        children
+      )}
     </div>
   );
 }

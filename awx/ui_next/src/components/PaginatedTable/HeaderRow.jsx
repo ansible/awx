@@ -13,7 +13,12 @@ const Th = styled(PFTh)`
   --pf-c-table--cell--Overflow: initial;
 `;
 
-export default function HeaderRow({ qsConfig, isExpandable, children }) {
+export default function HeaderRow({
+  qsConfig,
+  isExpandable,
+  isSelectable,
+  children,
+}) {
   const location = useLocation();
   const history = useHistory();
 
@@ -49,7 +54,7 @@ export default function HeaderRow({ qsConfig, isExpandable, children }) {
     <Thead>
       <Tr>
         {isExpandable && <Th />}
-        <Th />
+        {isSelectable && <Th />}
         {React.Children.map(
           children,
           child =>
@@ -65,6 +70,10 @@ export default function HeaderRow({ qsConfig, isExpandable, children }) {
     </Thead>
   );
 }
+
+HeaderRow.defaultProps = {
+  isSelectable: true,
+};
 
 export function HeaderCell({
   sortKey,
