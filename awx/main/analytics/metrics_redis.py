@@ -48,8 +48,10 @@ def get_local_instance_name():
         if instance_name is None:
             Instance = apps.get_model('main', 'Instance')
             instance_name = Instance.objects.me().hostname
-            instance_name = conn.set(redis_key + "_local_instance_name", instance_name)
-        return instance_name.decode('UTF-8')
+            conn.set(redis_key + "_local_instance_name", instance_name)
+            return instance_name
+        else:
+            return instance_name.decode('UTF-8')
 
 
 class RedisConn():
