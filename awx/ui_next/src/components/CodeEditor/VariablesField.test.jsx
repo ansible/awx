@@ -136,4 +136,27 @@ describe('VariablesField', () => {
 
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('javascript');
   });
+
+  it('should open modal when expanded', async () => {
+    const value = '---';
+    const wrapper = mountWithContexts(
+      <Formik initialValues={{ variables: value }} onSubmit={jest.fn()}>
+        {formik => (
+          <form onSubmit={formik.handleSubmit}>
+            <VariablesField id="the-field" name="variables" label="Variables" />
+            <button type="submit" id="submit">
+              Submit
+            </button>
+          </form>
+        )}
+      </Formik>
+    );
+    expect(wrapper.find('Modal').prop('isOpen')).toEqual(false);
+
+    wrapper.find('Button[variant="plain"]').invoke('onClick')();
+    wrapper.update();
+
+    expect(wrapper.find('Modal').prop('isOpen')).toEqual(true);
+    expect(wrapper.find('Modal CodeEditor')).toHaveLength(1);
+  });
 });
