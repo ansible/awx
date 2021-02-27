@@ -109,6 +109,7 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
         }
       >
         <Select
+          ouiaId="InventorySourceForm-source_path"
           variant={SelectVariant.typeahead}
           onToggle={setIsOpen}
           isOpen={isOpen}

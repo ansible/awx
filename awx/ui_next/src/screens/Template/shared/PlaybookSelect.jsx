@@ -50,6 +50,7 @@ function PlaybookSelect({
 
   return (
     <Select
+      ouiaId="JobTemplateForm-playbook"
       isOpen={isOpen}
       variant={SelectVariant.typeahead}
       selections={selected}
