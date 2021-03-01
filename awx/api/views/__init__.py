@@ -3752,13 +3752,6 @@ class JobHostSummaryDetail(RetrieveAPIView):
     serializer_class = serializers.JobHostSummarySerializer
 
 
-class JobEventList(NoTruncateMixin, ListAPIView):
-
-    model = models.JobEvent
-    serializer_class = serializers.JobEventSerializer
-    search_fields = ('stdout',)
-
-
 class JobEventDetail(RetrieveAPIView):
 
     model = models.JobEvent
@@ -3782,7 +3775,11 @@ class JobEventChildrenList(NoTruncateMixin, SubListAPIView):
     def get_queryset(self):
         parent_event = self.get_parent_object()
         self.check_parent_access(parent_event)
-        qs = self.request.user.get_queryset(self.model).filter(parent_uuid=parent_event.uuid)
+        qs = self.request.user.get_queryset(self.model).filter(
+            parent_uuid=parent_event.uuid
+        ).filter(
+            job_created=parent_event.job.created_or_epoch
+        )
         return qs
 
 
