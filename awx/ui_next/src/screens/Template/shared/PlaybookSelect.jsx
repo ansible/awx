@@ -2,10 +2,25 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { number, string, oneOfType } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { SelectVariant, Select, SelectOption } from '@patternfly/react-core';
+import styled from 'styled-components';
+import {
+  Select as PFSelect,
+  SelectVariant,
+  SelectOption as PFSelectOption,
+} from '@patternfly/react-core';
 import { ProjectsAPI } from '../../../api';
 import useRequest from '../../../util/useRequest';
 
+const Select = styled(PFSelect)`
+  ul {
+    max-width: 495px;
+  }
+`;
+const SelectOption = styled(PFSelectOption)`
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
 function PlaybookSelect({
   projectId,
   isValid,
@@ -14,6 +29,7 @@ function PlaybookSelect({
   onError,
   onChange,
   i18n,
+  helpers,
 }) {
   const [isDisabled, setIsDisabled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -50,18 +66,28 @@ function PlaybookSelect({
 
   return (
     <Select
+      ouiaId="JobTemplateForm-playbook"
       isOpen={isOpen}
+      maxHeight="100vh"
+      noResultsFoundText={i18n._(t`No results found`)}
       variant={SelectVariant.typeahead}
       selections={selected}
-      onToggle={setIsOpen}
+      onToggle={() => {
+        helpers.setTouched();
+        setIsOpen(!isOpen);
+      }}
       placeholderText={i18n._(t`Select a playbook`)}
-      isCreateable={false}
-      onSelect={(event, value) => {
-        onChange(value);
+      onSelect={(event, selection) => {
+        setIsOpen(false);
+        onChange(selection);
       }}
       id="template-playbook"
       isValid={isValid}
       onBlur={onBlur}
+      onClear={() => {
+        helpers.setTouched();
+        onChange('');
+      }}
       isDisabled={isLoading || isDisabled}
     >
       {options.map(opt => (

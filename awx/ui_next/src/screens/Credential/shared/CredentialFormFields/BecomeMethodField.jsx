@@ -42,6 +42,7 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
       validated={!(meta.touched && meta.error) ? 'default' : 'error'}
     >
       <Select
+        ouiaId={`CredentialForm-${fieldOptions.id}`}
         maxHeight={200}
         variant={SelectVariant.typeahead}
         onToggle={setIsOpen}

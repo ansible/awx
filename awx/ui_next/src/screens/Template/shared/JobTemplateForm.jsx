@@ -147,7 +147,7 @@ function JobTemplateForm({
 
   const handleProjectUpdate = useCallback(
     value => {
-      setFieldValue('playbook', 0);
+      setFieldValue('playbook', '');
       setFieldValue('scm_branch', '');
       setFieldValue('project', value);
     },
@@ -307,12 +307,13 @@ function JobTemplateForm({
           }
         >
           <PlaybookSelect
-            onChange={playbookHelpers.setValue}
             projectId={projectField.value?.id}
             isValid={!playbookMeta.touched || !playbookMeta.error}
             selected={playbookField.value}
             onBlur={() => playbookHelpers.setTouched()}
             onError={setContentError}
+            helpers={playbookHelpers}
+            onChange={selection => playbookHelpers.setValue(selection)}
           />
         </FormGroup>
         <FormFullWidthLayout>
