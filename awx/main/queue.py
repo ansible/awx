@@ -8,7 +8,7 @@ import redis
 
 # Django
 from django.conf import settings
-import awx.main.analytics.metrics_redis as metrics_redis
+import awx.main.analytics.subsystem_metrics as s_metrics
 
 __all__ = ['CallbackQueueDispatcher']
 
@@ -30,8 +30,9 @@ class CallbackQueueDispatcher(object):
         self.queue = getattr(settings, 'CALLBACK_QUEUE', '')
         self.logger = logging.getLogger('awx.main.queue.CallbackQueueDispatcher')
         self.connection = redis.Redis.from_url(settings.BROKER_URL)
+        self.subsystem_metrics = s_metrics.Metrics(conn=self.connection)
         self.connection.client_setname("callbackqueuedispatcher")
 
     def dispatch(self, obj):
         self.connection.rpush(self.queue, json.dumps(obj, cls=AnsibleJSONEncoder))
-        metrics_redis.incrint('callback_receiver_events_insert_redis', 1, conn = self.connection)
+        self.subsystem_metrics.inc('callback_receiver_events_insert_redis', 1)

@@ -10,6 +10,7 @@ from awx.main.consumers import emit_channel_notification
 from prometheus_client import (
     CollectorRegistry,
     Gauge,
+    Info,
     generate_latest
 )
 
@@ -17,6 +18,9 @@ redis_key = 'awx_metrics'
 send_metrics_interval = 3 # seconds
 logger = logging.getLogger('awx.main.wsbroadcast')
 
+# METRICS defaults
+# 'debug': True
+# 'data_type': 'float'
 METRICS = {
     'callback_receiver_events_queue_size_redis':
         {'help_text': 'Current number of events in redis queue'},
@@ -41,7 +45,13 @@ METRICS = {
          'debug': True},
     'debug_send_metrics_timestamp':
         {'help_text': 'Timestamp when last metrics were sent',
-         'debug': True},
+         'debug': True,
+         'data_type': 'string',
+         'prometheus_type': 'Info',},
+    # 'debug_store_metrics_timestamp':
+    #     {'help_text': 'Timestamp when last metrics were sent',
+    #      'debug': True,
+    #      'data_type': 'string'},
 }
 
 
@@ -93,15 +103,21 @@ class RedisPipe():
         self.pipe.reset()
 
 
-def setfloat(field, value, conn=None):
+def decode_value(value, field):
+    data_type = METRICS[field].get('data_type', 'float')
+    if data_type == 'float':
+        return float(value)
+    if data_type == 'string':
+        return value.decode('UTF-8')
+
+
+def set(field, value, conn=None):
     with RedisConn(conn) as inner_conn:
         with RedisConn() as tmp_conn:
             previous_value = tmp_conn.hget(redis_key, field)
-            logger.debug(f"{previous_value}")
-            if previous_value is not None and float(previous_value) == value:
-                logger.debug(f"{previous_value} compare with {float(previous_value)}")
+            previous_value = decode_value(previous_value, field)
+            if previous_value is not None and previous_value == value:
                 return
-        # logger.debug(f"{previous_value} compare with {float(previous_value)}")
         inner_conn.hset(redis_key, field, value)
         logger.debug(f"updated {field}")
         send_metrics()
@@ -165,6 +181,10 @@ def store_metrics(data_json):
         conn.set(redis_key + "_instance_" + data['instance'], data['metrics'])
 
 
+def get_prometheus_type(field):
+    return METRICS[field].get('prometheus_type', 'Gauge')
+
+
 def metrics(request):
     # takes the api request, filters, and generates prometheus data
     REGISTRY = CollectorRegistry()
@@ -193,10 +213,23 @@ def metrics(request):
             is_debug = METRICS[field].get('debug', False)
             if is_debug and include_debug_filter == "0":
                 continue
-            prometheus_object = Gauge(field, help_text, ['instance'], registry=REGISTRY)
+            prometheus_type = get_prometheus_type(field)
             for instance in instance_data:
-                prometheus_object.labels(node=instance).set(instance_data[instance][field])
+                if prometheus_type == 'Gauge':
+                    prometheus_object = Gauge(field, help_text, ['node'], registry=REGISTRY)
+                    prometheus_object.labels(node=instance).set(instance_data[instance][field])
+                elif prometheus_type == 'Info':
+                    prometheus_object = Info(field, help_text, ['node'], registry=REGISTRY)
+                    prometheus_object.labels(node=instance).info({'data': instance_data[instance][field]})
     return generate_latest(registry=REGISTRY)
+
+
+def get_default_value(field):
+    data_type = METRICS[field].get('data_type', 'float')
+    if data_type == 'float':
+        return 0.0
+    if data_type == 'string':
+        return ''
 
 
 def load_local_metrics():
@@ -206,9 +239,9 @@ def load_local_metrics():
         with redis.Redis.from_url(settings.BROKER_URL) as conn:
             field_value = conn.hget(redis_key, field)
             if field_value is not None:
-                field_value = float(field_value)
+                field_value = decode_value(field_value, field)
             else:
-                field_value = 0.0
+                field_value = get_default_value(field)
             data[field] = field_value
     return data
 

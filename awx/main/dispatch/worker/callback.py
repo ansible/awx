@@ -22,7 +22,7 @@ from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
 from awx.main.tasks import handle_success_and_failure_notifications
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
-import awx.main.analytics.metrics_redis as metrics_redis
+import awx.main.analytics.subsystem_metrics as s_metrics
 from .base import BaseWorker
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -49,19 +49,20 @@ class CallbackBrokerWorker(BaseWorker):
         self.pid = os.getpid()
         self.redis = redis.Redis.from_url(settings.BROKER_URL)
         self.redis.client_setname("callbackbrokerworker")
+        self.subsystem_metrics = s_metrics.Metrics(conn=self.redis)
         self.prof = AWXProfiler("CallbackBrokerWorker")
         for key in self.redis.keys('awx_callback_receiver_statistics_*'):
             self.redis.delete(key)
 
     def read(self, queue):
         try:
-            with self.redis.pipeline() as pipe:
+            with self.subsystem_metrics.conn.pipeline() as pipe:
                 res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=1)
+                self.subsystem_metrics.set('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), conn = pipe)
                 if res is None:
                     return {'event': 'FLUSH'}
-                metrics_redis.setfloat('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), conn = pipe)
-                metrics_redis.incrint('callback_receiver_events_popped_redis', 1, conn = pipe)
-                metrics_redis.incrint('callback_receiver_events_in_memory', 1, conn = pipe)
+                self.subsystem_metrics.inc('callback_receiver_events_popped_redis', 1, conn = pipe)
+                self.subsystem_metrics.inc('callback_receiver_events_in_memory', 1, conn = pipe)
                 pipe.execute()
                 self.total += 1
                 return json.loads(res[1])
@@ -150,12 +151,12 @@ class CallbackBrokerWorker(BaseWorker):
                 # only update metrics if we saved events
                 if (bulk_events_saved + singular_events_saved) > 0:
                     with self.redis.pipeline() as pipe:
-                        metrics_redis.incrint('callback_receiver_batch_events_errors', metrics_events_batch_save_errors, conn=pipe)
-                        metrics_redis.incrint('callback_receiver_events_size', stdout_size_saved, conn=pipe)
-                        metrics_redis.incrfloat('callback_receiver_events_insert_db_seconds', duration_to_save.total_seconds(), conn=pipe)
-                        metrics_redis.incrint('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved, conn=pipe)
-                        metrics_redis.incrint('callback_receiver_batch_events_insert_db', bulk_events_saved, conn=pipe)
-                        metrics_redis.incrint('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved), conn=pipe)
+                        self.subsystem_metrics.inc('callback_receiver_batch_events_errors', metrics_events_batch_save_errors, conn=pipe)
+                        self.subsystem_metrics.inc('callback_receiver_events_size', stdout_size_saved, conn=pipe)
+                        self.subsystem_metrics.inc('callback_receiver_events_insert_db_seconds', duration_to_save.total_seconds(), conn=pipe)
+                        self.subsystem_metrics.inc('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved, conn=pipe)
+                        self.subsystem_metrics.inc('callback_receiver_batch_events_insert_db', bulk_events_saved, conn=pipe)
+                        self.subsystem_metrics.inc('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved), conn=pipe)
                         pipe.execute()
             except Exception:
                 logger.exception('Could not update callback_receiver statistics')
@@ -211,7 +212,7 @@ class CallbackBrokerWorker(BaseWorker):
                     except Exception:
                         logger.exception('Worker failed to emit notifications: Job {}'.format(job_identifier))
                     finally:
-                        metrics_redis.incrint('callback_receiver_events_in_memory', -1)
+                        self.subsystem_metrics.inc('callback_receiver_events_in_memory', -1)
                         GuidMiddleware.set_guid('')
                     return
 
