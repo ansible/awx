@@ -25,6 +25,7 @@ function Schedule({
   resource,
   launchConfig,
   surveyConfig,
+  hasDaysToKeepField,
 }) {
   const { scheduleId } = useParams();
 
@@ -69,7 +70,7 @@ function Schedule({
     },
   ];
 
-  if (isLoading) {
+  if (isLoading || !schedule?.summary_fields?.unified_job_template?.id) {
     return <ContentLoading />;
   }
 
@@ -95,6 +96,7 @@ function Schedule({
   if (!pathname.includes('schedules/') || pathname.endsWith('edit')) {
     showCardHeader = false;
   }
+
   return (
     <>
       {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
@@ -107,6 +109,7 @@ function Schedule({
         {schedule && [
           <Route key="edit" path={`${pathRoot}schedules/:id/edit`}>
             <ScheduleEdit
+              hasDaysToKeepField={hasDaysToKeepField}
               schedule={schedule}
               resource={resource}
               launchConfig={launchConfig}
@@ -117,7 +120,11 @@ function Schedule({
             key="details"
             path={`${pathRoot}schedules/:scheduleId/details`}
           >
-            <ScheduleDetail schedule={schedule} surveyConfig={surveyConfig} />
+            <ScheduleDetail
+              hasDaysToKeepField={hasDaysToKeepField}
+              schedule={schedule}
+              surveyConfig={surveyConfig}
+            />
           </Route>,
         ]}
         <Route key="not-found" path="*">

@@ -47,12 +47,16 @@ describe('<InstanceGroupListItem/>', () => {
   test('should mount successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceGroupListItem
-          instanceGroup={instanceGroups[1]}
-          detailUrl="instance_groups/1/details"
-          isSelected={false}
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <InstanceGroupListItem
+              instanceGroup={instanceGroups[1]}
+              detailUrl="instance_groups/1/details"
+              isSelected={false}
+              onSelect={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('InstanceGroupListItem').length).toBe(1);
@@ -61,73 +65,81 @@ describe('<InstanceGroupListItem/>', () => {
   test('should render the proper data instance group', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceGroupListItem
-          instanceGroup={instanceGroups[0]}
-          detailUrl="instance_groups/1/details"
-          isSelected={false}
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <InstanceGroupListItem
+              instanceGroup={instanceGroups[0]}
+              detailUrl="instance_groups/1/details"
+              isSelected={false}
+              onSelect={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(
-      wrapper.find('PFDataListCell[aria-label="instance group name"]').text()
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
     ).toBe('Foo');
     expect(wrapper.find('Progress').prop('value')).toBe(40);
     expect(
-      wrapper.find('PFDataListCell[aria-label="instance group type"]').text()
-    ).toBe('TypeInstance group');
+      wrapper
+        .find('Td')
+        .at(2)
+        .text()
+    ).toBe('Instance group');
     expect(wrapper.find('PencilAltIcon').length).toBe(1);
-    expect(wrapper.find('input#select-instance-groups-1').prop('checked')).toBe(
-      false
+    expect(wrapper.find('.pf-c-table__check input').prop('checked')).toBe(
+      undefined
     );
   });
 
   test('should render the proper data container group', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceGroupListItem
-          instanceGroup={instanceGroups[1]}
-          detailUrl="instance_groups/2/details"
-          isSelected={false}
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <InstanceGroupListItem
+              instanceGroup={instanceGroups[1]}
+              detailUrl="instance_groups/2/details"
+              isSelected={false}
+              onSelect={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(
-      wrapper.find('PFDataListCell[aria-label="instance group name"]').text()
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
     ).toBe('Bar');
 
     expect(
-      wrapper.find('PFDataListCell[aria-label="instance group type"]').text()
-    ).toBe('TypeContainer group');
+      wrapper
+        .find('Td')
+        .at(2)
+        .text()
+    ).toBe('Container group');
     expect(wrapper.find('PencilAltIcon').length).toBe(0);
-  });
-
-  test('should be checked', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <InstanceGroupListItem
-          instanceGroup={instanceGroups[0]}
-          detailUrl="instance_groups/1/details"
-          isSelected
-          onSelect={() => {}}
-        />
-      );
-    });
-    expect(wrapper.find('input#select-instance-groups-1').prop('checked')).toBe(
-      true
-    );
   });
 
   test('edit button shown to users with edit capabilities', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceGroupListItem
-          instanceGroup={instanceGroups[0]}
-          detailUrl="instance_groups/1/details"
-          isSelected
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <InstanceGroupListItem
+              instanceGroup={instanceGroups[0]}
+              detailUrl="instance_groups/1/details"
+              isSelected
+              onSelect={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
 
@@ -137,12 +149,16 @@ describe('<InstanceGroupListItem/>', () => {
   test('edit button hidden from users without edit capabilities', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <InstanceGroupListItem
-          instanceGroup={instanceGroups[1]}
-          detailsUrl="instance_group/2/details"
-          isSelected
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <InstanceGroupListItem
+              instanceGroup={instanceGroups[1]}
+              detailsUrl="instance_group/2/details"
+              isSelected
+              onSelect={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
 

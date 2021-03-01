@@ -89,21 +89,33 @@ describe('<NotificationTemplateList />', () => {
   });
 
   test('should select item', async () => {
-    const itemCheckboxInput = 'input#select-template-1';
     await act(async () => {
       wrapper = mountWithContexts(<NotificationTemplateList />);
     });
     wrapper.update();
-    expect(wrapper.find(itemCheckboxInput).prop('checked')).toEqual(false);
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
+    ).toEqual(false);
     await act(async () => {
       wrapper
-        .find(itemCheckboxInput)
-        .closest('DataListCheck')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .props()
         .onChange();
     });
     wrapper.update();
-    expect(wrapper.find(itemCheckboxInput).prop('checked')).toEqual(true);
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
+    ).toEqual(true);
   });
 
   test('should delete notifications', async () => {
@@ -135,7 +147,6 @@ describe('<NotificationTemplateList />', () => {
   });
 
   test('should show error dialog shown for failed deletion', async () => {
-    const itemCheckboxInput = 'input#select-template-1';
     OrganizationsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -153,8 +164,9 @@ describe('<NotificationTemplateList />', () => {
     wrapper.update();
     await act(async () => {
       wrapper
-        .find(itemCheckboxInput)
-        .closest('DataListCheck')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .props()
         .onChange();
     });

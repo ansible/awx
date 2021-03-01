@@ -72,12 +72,18 @@ describe('<CredentialTypeList', () => {
     await waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
 
     wrapper
-      .find('input#select-credential-types-1')
+      .find('.pf-c-table__check')
+      .first()
+      .find('input')
       .simulate('change', credentialTypes.data.results[0]);
     wrapper.update();
 
     expect(
-      wrapper.find('input#select-credential-types-1').prop('checked')
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
     ).toBe(true);
 
     await act(async () => {
@@ -133,10 +139,18 @@ describe('<CredentialTypeList', () => {
     });
     waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
 
-    wrapper.find('input#select-credential-types-1').simulate('change', 'a');
+    wrapper
+      .find('.pf-c-table__check')
+      .first()
+      .find('input')
+      .simulate('change', 'a');
     wrapper.update();
     expect(
-      wrapper.find('input#select-credential-types-1').prop('checked')
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
     ).toBe(true);
 
     await act(async () =>

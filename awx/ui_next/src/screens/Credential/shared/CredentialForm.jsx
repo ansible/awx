@@ -148,10 +148,10 @@ function CredentialFormFields({ i18n, credentialTypes }) {
         label={i18n._(t`Credential Type`)}
       >
         <Select
+          ouiaId="CredentialForm-credential_type"
           aria-label={i18n._(t`Credential Type`)}
           isOpen={isSelectOpen}
           variant={SelectVariant.typeahead}
-          ouiaId="credential-select"
           onToggle={setIsSelectOpen}
           onSelect={(event, value) => {
             credTypeHelpers.setValue(value);

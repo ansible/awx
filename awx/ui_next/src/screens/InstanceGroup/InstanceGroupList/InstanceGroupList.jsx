@@ -8,9 +8,11 @@ import { InstanceGroupsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
-import PaginatedDataList, {
-  ToolbarDeleteButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import { ToolbarDeleteButton } from '../../../components/PaginatedDataList';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
@@ -189,7 +191,7 @@ function InstanceGroupList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={isLoading || deleteLoading}
             items={instanceGroups}
@@ -220,7 +222,18 @@ function InstanceGroupList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={instanceGroup => (
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Running Jobs`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Total Jobs`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Instances`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Capacity`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              </HeaderRow>
+            }
+            renderRow={(instanceGroup, index) => (
               <InstanceGroupListItem
                 key={instanceGroup.id}
                 value={instanceGroup.name}
@@ -228,6 +241,7 @@ function InstanceGroupList({ i18n }) {
                 detailUrl={getDetailUrl(instanceGroup)}
                 onSelect={() => handleSelect(instanceGroup)}
                 isSelected={selected.some(row => row.id === instanceGroup.id)}
+                rowIndex={index}
               />
             )}
             emptyStateControls={canAdd && addButton}

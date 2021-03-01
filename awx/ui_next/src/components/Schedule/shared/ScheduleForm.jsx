@@ -25,6 +25,7 @@ import {
 import { dateToInputDateTime, formatDateStringUTC } from '../../../util/dates';
 import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
+import { parseVariableField } from '../../../util/yaml';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 import SchedulePromptableFields from './SchedulePromptableFields';
 
@@ -77,7 +78,7 @@ const generateRunOnTheDay = (days = []) => {
   return null;
 };
 
-function ScheduleFormFields({ i18n, zoneOptions }) {
+function ScheduleFormFields({ i18n, hasDaysToKeepField, zoneOptions }) {
   const [startDateTime, startDateTimeMeta] = useField({
     name: 'startDateTime',
     validate: required(
@@ -169,6 +170,16 @@ function ScheduleFormFields({ i18n, zoneOptions }) {
           {...frequency}
         />
       </FormGroup>
+      {hasDaysToKeepField ? (
+        <FormField
+          id="schedule-days-to-keep"
+          label={i18n._(t`Days of Data to Keep`)}
+          name="daysToKeep"
+          type="number"
+          validate={required(null, i18n)}
+          isRequired
+        />
+      ) : null}
       {frequency.value !== 'none' && (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
@@ -184,6 +195,7 @@ function ScheduleFormFields({ i18n, zoneOptions }) {
 }
 
 function ScheduleForm({
+  hasDaysToKeepField,
   handleCancel,
   handleSubmit,
   i18n,
@@ -344,6 +356,22 @@ function ScheduleForm({
     );
   };
 
+  if (hasDaysToKeepField) {
+    let initialDaysToKeep = 30;
+    if (schedule?.extra_data) {
+      if (
+        typeof schedule?.extra_data === 'string' &&
+        schedule?.extra_data !== ''
+      ) {
+        initialDaysToKeep = parseVariableField(schedule?.extra_data).days;
+      }
+      if (typeof schedule?.extra_data === 'object') {
+        initialDaysToKeep = schedule?.extra_data?.days;
+      }
+    }
+    initialValues.daysToKeep = initialDaysToKeep;
+  }
+
   const overriddenValues = {};
 
   if (Object.keys(schedule).length > 0) {
@@ -487,6 +515,7 @@ function ScheduleForm({
               <Form autoComplete="off" onSubmit={formik.handleSubmit}>
                 <FormColumnLayout>
                   <ScheduleFormFields
+                    hasDaysToKeepField={hasDaysToKeepField}
                     i18n={i18n}
                     zoneOptions={zoneOptions}
                     {...rest}
