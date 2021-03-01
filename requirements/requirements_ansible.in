@@ -25,7 +25,7 @@ azure-mgmt-resource==2.1.0
 azure-mgmt-rdbms==1.4.1
 azure-mgmt-servicebus==0.5.3
 azure-mgmt-sql==0.10.0
-azure-mgmt-storage==3.1.0
+azure-mgmt-storage==17.0.0
 azure-mgmt-trafficmanager==0.50.0
 azure-mgmt-web==0.41.0
 azure-nspkg==2.0.0
