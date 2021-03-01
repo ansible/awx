@@ -55,15 +55,15 @@ class CallbackBrokerWorker(BaseWorker):
 
     def read(self, queue):
         try:
-            with metrics_redis.RedisPipe() as pipe:
+            with self.redis.pipeline() as pipe:
                 res = self.redis.blpop(settings.CALLBACK_QUEUE, timeout=1)
                 if res is None:
-                    pipe.execute()
                     return {'event': 'FLUSH'}
-                metrics_redis.hincrby('callback_receiver_events_popped_redis', 1, conn = pipe)
-                metrics_redis.hincrby('callback_receiver_events_in_memory', 1, conn = pipe)
-                self.total += 1
+                metrics_redis.setfloat('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), conn = pipe)
+                metrics_redis.incrint('callback_receiver_events_popped_redis', 1, conn = pipe)
+                metrics_redis.incrint('callback_receiver_events_in_memory', 1, conn = pipe)
                 pipe.execute()
+                self.total += 1
                 return json.loads(res[1])
         except redis.exceptions.RedisError:
             logger.exception("encountered an error communicating with redis")
@@ -71,7 +71,6 @@ class CallbackBrokerWorker(BaseWorker):
         except (json.JSONDecodeError, KeyError):
             logger.exception("failed to decode JSON message from redis")
         finally:
-            metrics_redis.hsetfloat('callback_receiver_events_queue_size_redis', self.redis.llen(settings.CALLBACK_QUEUE), conn = pipe)
             self.record_statistics()
 
         return {'event': 'FLUSH'}
@@ -150,13 +149,13 @@ class CallbackBrokerWorker(BaseWorker):
             try:
                 # only update metrics if we saved events
                 if (bulk_events_saved + singular_events_saved) > 0:
-                    with metrics_redis.RedisPipe() as pipe:
-                        metrics_redis.hincrby('callback_receiver_batch_events_errors', metrics_events_batch_save_errors, conn=pipe)
-                        metrics_redis.hincrby('callback_receiver_events_size', stdout_size_saved, conn=pipe)
-                        metrics_redis.hincrbyfloat('callback_receiver_events_insert_db_seconds', duration_to_save.total_seconds(), conn=pipe)
-                        metrics_redis.hincrby('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved, conn=pipe)
-                        metrics_redis.hincrby('callback_receiver_batch_events_insert_db', bulk_events_saved, conn=pipe)
-                        metrics_redis.hincrby('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved), conn=pipe)
+                    with self.redis.pipeline() as pipe:
+                        metrics_redis.incrint('callback_receiver_batch_events_errors', metrics_events_batch_save_errors, conn=pipe)
+                        metrics_redis.incrint('callback_receiver_events_size', stdout_size_saved, conn=pipe)
+                        metrics_redis.incrfloat('callback_receiver_events_insert_db_seconds', duration_to_save.total_seconds(), conn=pipe)
+                        metrics_redis.incrint('callback_receiver_events_insert_db', bulk_events_saved + singular_events_saved, conn=pipe)
+                        metrics_redis.incrint('callback_receiver_batch_events_insert_db', bulk_events_saved, conn=pipe)
+                        metrics_redis.incrint('callback_receiver_events_in_memory', -(bulk_events_saved + singular_events_saved), conn=pipe)
                         pipe.execute()
             except Exception:
                 logger.exception('Could not update callback_receiver statistics')
@@ -212,7 +211,7 @@ class CallbackBrokerWorker(BaseWorker):
                     except Exception:
                         logger.exception('Worker failed to emit notifications: Job {}'.format(job_identifier))
                     finally:
-                        metrics_redis.hincrby('callback_receiver_events_in_memory', -1)
+                        metrics_redis.incrint('callback_receiver_events_in_memory', -1)
                         GuidMiddleware.set_guid('')
                     return
 
