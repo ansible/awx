@@ -18,7 +18,15 @@ import { ExecutionEnvironmentsAPI } from '../../../api';
 
 function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
   const history = useHistory();
-  const { id, name, image, description, pull } = executionEnvironment;
+  const {
+    id,
+    name,
+    image,
+    description,
+    pull,
+    organization,
+    summary_fields,
+  } = executionEnvironment;
 
   const {
     request: deleteExecutionEnvironment,
@@ -50,6 +58,21 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           label={i18n._(t`Description`)}
           value={description}
           dataCy="execution-environment-detail-description"
+        />
+        <Detail
+          label={i18n._(t`Organization`)}
+          value={
+            organization ? (
+              <Link
+                to={`/organizations/${summary_fields.organization.id}/details`}
+              >
+                {summary_fields.organization.name}
+              </Link>
+            ) : (
+              i18n._(t`Globally Available`)
+            )
+          }
+          dataCy="execution-environment-detail-organization"
         />
         <Detail
           label={i18n._(t`Pull`)}
