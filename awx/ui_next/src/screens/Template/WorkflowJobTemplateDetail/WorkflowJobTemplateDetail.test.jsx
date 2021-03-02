@@ -134,11 +134,6 @@ describe('<WorkflowJobTemplateDetail/>', () => {
         prop: 'value',
         value: 'Workflow Job Template',
       },
-      {
-        element: 'Detail[label="Execution Environment"]',
-        prop: 'value',
-        value: 'Demo EE',
-      },
     ];
 
     const organization = wrapper
@@ -162,6 +157,10 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     };
 
     renderedValues.map(value => assertValue(value));
+
+    expect(
+      wrapper.find(`Detail[label="Execution Environment"] dd`).text()
+    ).toBe('Demo EE');
   });
 
   test('link out resource have the correct url', () => {

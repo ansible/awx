@@ -97,7 +97,13 @@ function OrganizationDetail({ i18n, organization }) {
         {summary_fields?.default_environment?.name && (
           <Detail
             label={i18n._(t`Default Execution Environment`)}
-            value={summary_fields.default_environment.name}
+            value={
+              <Link
+                to={`/execution_environments/${summary_fields.default_environment.id}/details`}
+              >
+                {summary_fields.default_environment.name}
+              </Link>
+            }
           />
         )}
         <UserDateDetail

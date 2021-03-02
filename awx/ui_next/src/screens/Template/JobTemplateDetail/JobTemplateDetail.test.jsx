@@ -161,7 +161,7 @@ describe('<JobTemplateDetail />', () => {
       1
     );
     expect(
-      wrapper.find('Detail[label="Execution Environment"]').prop('value')
+      wrapper.find(`Detail[label="Execution Environment"] dd`).text()
     ).toBe('Default EE');
   });
 });
