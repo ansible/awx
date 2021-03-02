@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { string, func, bool } from 'prop-types';
-import { withRouter, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
@@ -164,4 +164,4 @@ ExecutionEnvironmentLookup.defaultProps = {
   value: null,
 };
 
-export default withI18n()(withRouter(ExecutionEnvironmentLookup));
+export default withI18n()(ExecutionEnvironmentLookup);
