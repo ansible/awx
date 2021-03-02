@@ -627,6 +627,7 @@ awx-kube-dev-build: Dockerfile.kube-dev
 # generate UI .pot
 pot: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-template
 
 # generate API django .pot .po
 LANG = "en-us"
@@ -635,33 +636,3 @@ messages:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
-
-# check for UI po files
-HAVE_PO := $(shell ls awx/ui/po/*.po 2>/dev/null)
-check-po:
-ifdef HAVE_PO
-	# Should be 'Language: zh-CN' but not 'Language: zh_CN' in zh_CN.po
-	for po in awx/ui/po/*.po ; do \
-	    echo $$po; \
-	    mo="awx/ui/po/`basename $$po .po`.mo"; \
-	    msgfmt --check --verbose $$po -o $$mo; \
-	    if test "$$?" -ne 0 ; then \
-	        exit -1; \
-	    fi; \
-	    rm $$mo; \
-	    name=`echo "$$po" | grep '-'`; \
-	    if test "x$$name" != x ; then \
-	        right_name=`echo $$language | sed -e 's/-/_/'`; \
-	        echo "ERROR: WRONG $$name CORRECTION: $$right_name"; \
-	        exit -1; \
-	    fi; \
-	    language=`grep '^"Language:' "$$po" | grep '_'`; \
-	    if test "x$$language" != x ; then \
-	        right_language=`echo $$language | sed -e 's/_/-/'`; \
-	        echo "ERROR: WRONG $$language CORRECTION: $$right_language in $$po"; \
-	        exit -1; \
-	    fi; \
-	done;
-else
-	@echo No PO files
-endif
