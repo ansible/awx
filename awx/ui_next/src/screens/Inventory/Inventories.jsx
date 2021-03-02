@@ -117,7 +117,7 @@ function Inventories({ i18n }) {
           t`Schedule details`
         ),
         [`${inventorySourcesPath}/${nestedObject?.id}/notifications`]: i18n._(
-          t`Notifcations`
+          t`Notifications`
         ),
       });
     },
