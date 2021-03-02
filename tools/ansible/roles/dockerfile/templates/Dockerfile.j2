@@ -148,7 +148,6 @@ RUN dnf -y install \
     nss \
     make \
     patch \
-    podman \
     socat \
     tmux \
     wget \
@@ -160,6 +159,11 @@ RUN dnf -y install \
 # It is nice to have in the dev env, but not necessary.
 # Add it back to the list above if the repo ever straighten up.
 RUN dnf --enablerepo=debuginfo -y install python3-debuginfo || :
+{% endif %}
+
+{% if build_dev|bool %}
+RUN dnf install -y podman
+RUN echo -e 'cgroup_manager = "cgroupfs"\nevents_logger = "file"' > /etc/containers/libpod.conf
 {% endif %}
 
 # Copy app from builder
@@ -245,8 +249,6 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 {% endif %}
 
-RUN echo -e 'cgroup_manager = "cgroupfs"\nevents_logger = "file"' > /etc/containers/libpod.conf
-
 ENV HOME="/var/lib/awx"
 ENV PATH="/usr/pgsql-10/bin:${PATH}"
 
@@ -264,6 +266,5 @@ EXPOSE 8052
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD /usr/bin/launch_awx.sh
 VOLUME /var/lib/nginx
-{% endif %}
-
 VOLUME /var/lib/awx/.local/share/containers/storage
+{% endif %}
