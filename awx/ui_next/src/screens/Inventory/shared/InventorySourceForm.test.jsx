@@ -72,6 +72,7 @@ describe('<InventorySourceForm />', () => {
       expect(
         wrapper.find('FormGroup[label="Ansible Environment"]')
       ).toHaveLength(1);
+      expect(wrapper.find('ExecutionEnvironmentLookup')).toHaveLength(1);
     });
 
     test('should display subform when source dropdown has a value', async () => {
