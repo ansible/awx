@@ -215,7 +215,10 @@ CredentialsAPI.read.mockResolvedValue({
 CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
 
 ExecutionEnvironmentsAPI.read.mockResolvedValue({
-  data: mockExecutionEnvironment,
+  data: {
+    results: mockExecutionEnvironment,
+    count: 1,
+  },
 });
 
 describe('<JobTemplateEdit />', () => {

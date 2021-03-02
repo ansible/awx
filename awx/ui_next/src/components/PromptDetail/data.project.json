@@ -28,6 +28,12 @@
         "name":"Default",
         "description":""
      },
+     "default_environment": {
+      "id": 1,
+      "name": "Default EE",
+      "description": "",
+      "image": "quay.io/ansible/awx-ee"
+  },
      "credential": {
         "id": 9,
         "name": "mock scm",
@@ -103,5 +109,6 @@
   "allow_override":true,
   "custom_virtualenv": "mock virtual env",
   "last_update_failed":false,
-  "last_updated":"2020-03-11T20:18:14Z"
+  "last_updated":"2020-03-11T20:18:14Z",
+  "default_environment": 1
 }

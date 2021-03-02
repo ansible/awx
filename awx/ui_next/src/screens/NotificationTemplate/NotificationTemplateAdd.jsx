@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { useHistory, Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
@@ -77,10 +76,6 @@ function NotificationTemplateAdd({ i18n }) {
     </PageSection>
   );
 }
-
-NotificationTemplateAdd.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
-};
 
 export { NotificationTemplateAdd as _NotificationTemplateAdd };
 export default withI18n()(NotificationTemplateAdd);

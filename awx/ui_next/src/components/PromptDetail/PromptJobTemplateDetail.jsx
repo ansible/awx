@@ -9,6 +9,7 @@ import ChipGroup from '../ChipGroup';
 import Sparkline from '../Sparkline';
 import { Detail, DeletedDetail } from '../DetailList';
 import { VariablesDetail } from '../CodeEditor';
+import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 import { toTitleCase } from '../../util/strings';
 
 function PromptJobTemplateDetail({ i18n, resource }) {
@@ -34,6 +35,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
     verbosity,
     webhook_key,
     webhook_service,
+    custom_virtualenv,
   } = resource;
 
   const VERBOSITY = {
@@ -128,6 +130,10 @@ function PromptJobTemplateDetail({ i18n, resource }) {
       ) : (
         <DeletedDetail label={i18n._(t`Project`)} />
       )}
+      <ExecutionEnvironmentDetail
+        virtualEnvironment={custom_virtualenv}
+        executionEnvironment={summary_fields?.execution_environment}
+      />
       <Detail label={i18n._(t`Source Control Branch`)} value={scm_branch} />
       <Detail label={i18n._(t`Playbook`)} value={playbook} />
       <Detail label={i18n._(t`Forks`)} value={forks || '0'} />

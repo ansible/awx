@@ -30,6 +30,12 @@
           "name": "Default",
           "description": ""
       },
+      "execution_environment": {
+        "id": 1,
+        "name": "Default EE",
+        "description": "",
+        "image": "quay.io/ansible/awx-ee"
+        },
       "last_job": {
           "id": 8,
           "name": "Mike's Project",
@@ -111,5 +117,6 @@
   "allow_override": false,
   "custom_virtualenv": null,
   "last_update_failed": false,
-  "last_updated": "2019-09-30T18:06:34.713654Z"
+  "last_updated": "2019-09-30T18:06:34.713654Z",
+  "execution_environment": 1
 }

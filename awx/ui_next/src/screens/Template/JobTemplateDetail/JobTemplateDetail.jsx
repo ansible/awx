@@ -30,6 +30,7 @@ import { LaunchButton } from '../../../components/LaunchButton';
 import { VariablesDetail } from '../../../components/CodeEditor';
 import { JobTemplatesAPI } from '../../../api';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 
 function JobTemplateDetail({ i18n, template }) {
   const {
@@ -58,6 +59,7 @@ function JobTemplateDetail({ i18n, template }) {
     webhook_service,
     related: { webhook_receiver },
     webhook_key,
+    custom_virtualenv,
   } = template;
   const { id: templateId } = useParams();
   const history = useHistory();
@@ -206,18 +208,10 @@ function JobTemplateDetail({ i18n, template }) {
         ) : (
           <DeletedDetail label={i18n._(t`Project`)} />
         )}
-        {summary_fields?.execution_environment && (
-          <Detail
-            label={i18n._(t`Execution Environment`)}
-            value={
-              <Link
-                to={`/execution_environments/${summary_fields.execution_environment.id}/details`}
-              >
-                {summary_fields.execution_environment.name}
-              </Link>
-            }
-          />
-        )}
+        <ExecutionEnvironmentDetail
+          virtualEnvironment={custom_virtualenv}
+          executionEnvironment={summary_fields?.execution_environment}
+        />
         <Detail
           label={i18n._(t`Source Control Branch`)}
           value={template.scm_branch}

@@ -40,9 +40,5 @@ NotificationTemplateEdit.propTypes = {
   template: PropTypes.shape().isRequired,
 };
 
-NotificationTemplateEdit.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
-};
-
 export { NotificationTemplateEdit as _NotificationTemplateEdit };
 export default NotificationTemplateEdit;

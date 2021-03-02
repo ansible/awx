@@ -10,7 +10,6 @@ jest.mock('../../../../api/models/Credentials');
 
 const initialValues = {
   credential: null,
-  custom_virtualenv: '',
   overwrite: false,
   overwrite_vars: false,
   source_path: '',
@@ -115,7 +114,6 @@ describe('<SCMSubForm />', () => {
   test('should be able to create custom source path', async () => {
     const customInitialValues = {
       credential: { id: 1, name: 'Credential' },
-      custom_virtualenv: '',
       overwrite: false,
       overwrite_vars: false,
       source_path: '/path',

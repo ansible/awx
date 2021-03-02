@@ -11,14 +11,12 @@ jest.mock('../../api');
 
 describe('<AppContainer />', () => {
   const ansible_version = '111';
-  const custom_virtualenvs = [];
   const version = '222';
 
   beforeEach(() => {
     ConfigAPI.read.mockResolvedValue({
       data: {
         ansible_version,
-        custom_virtualenvs,
         version,
       },
     });

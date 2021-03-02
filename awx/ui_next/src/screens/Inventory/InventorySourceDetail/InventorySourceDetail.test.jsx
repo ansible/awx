@@ -58,11 +58,19 @@ describe('InventorySourceDetail', () => {
     assertDetail(wrapper, 'Description', 'mock description');
     assertDetail(wrapper, 'Source', 'Sourced from a Project');
     assertDetail(wrapper, 'Organization', 'Mock Org');
-    assertDetail(wrapper, 'Ansible environment', '/var/lib/awx/venv/custom');
     assertDetail(wrapper, 'Project', 'Mock Project');
     assertDetail(wrapper, 'Inventory file', 'foo');
     assertDetail(wrapper, 'Verbosity', '2 (Debug)');
     assertDetail(wrapper, 'Cache timeout', '2 seconds');
+    const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
+    expect(executionEnvironment).toHaveLength(1);
+    expect(executionEnvironment.find('dt').text()).toEqual(
+      'Execution Environment'
+    );
+    expect(executionEnvironment.find('dd').text()).toEqual(
+      mockInvSource.summary_fields.execution_environment.name
+    );
+
     expect(wrapper.find('CredentialChip').text()).toBe('Cloud: mock cred');
     expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
       '---\nfoo: bar'
