@@ -539,25 +539,23 @@ docker-compose-sources:
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG)
+	    -e cluster_node_count=$(CLUSER_NODE_COUNT)
 
 docker-compose: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up --no-recreate awx
-
-docker-compose-cluster: docker-auth awx/projects
-	docker-compose -f tools/docker-compose-cluster.yml up
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up --no-recreate awx_1
 
 docker-compose-credential-plugins: docker-auth awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx
 
 docker-compose-test: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx /bin/bash
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /bin/bash
 
 docker-compose-runtest: awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx /start_tests.sh
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /start_tests.sh
 
 docker-compose-build-swagger: awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx /start_tests.sh swagger
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 /start_tests.sh swagger
 
 detect-schema-change: genschema
 	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
