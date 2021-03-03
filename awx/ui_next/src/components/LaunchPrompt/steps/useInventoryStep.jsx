@@ -1,9 +1,14 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
+import styled from 'styled-components';
 import { Alert } from '@patternfly/react-core';
 import InventoryStep from './InventoryStep';
 import StepName from './StepName';
+
+const InventoryAlert = styled(Alert)`
+  margin-bottom: 16px;
+`;
 
 const STEP_ID = 'inventory';
 
@@ -53,11 +58,11 @@ function getStep(launchConfig, i18n, formError, resource) {
         i18n={i18n}
         warningMessage={
           resource.type === 'workflow_job_template' ? (
-            <Alert
+            <InventoryAlert
               variant="warning"
               isInline
               title={i18n._(
-                t`This inventory is applied to all job template nodes within this workflow that prompt for an inventory.`
+                t`This inventory is applied to all job template nodes within this workflow (${resource.name}) that prompt for an inventory.`
               )}
             />
           ) : null
