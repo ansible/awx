@@ -26,6 +26,7 @@ import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeMirrorInput';
+import { parseVariableField } from '../../../util/yaml';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -42,7 +43,7 @@ const PromptDetailList = styled(DetailList)`
   padding: 0px 20px;
 `;
 
-function ScheduleDetail({ schedule, i18n }) {
+function ScheduleDetail({ hasDaysToKeepField, schedule, i18n, surveyConfig }) {
   const {
     id,
     created,
@@ -148,6 +149,7 @@ function ScheduleDetail({ schedule, i18n }) {
 
   const {
     ask_credential_on_launch,
+    inventory_needed_to_start,
     ask_diff_mode_on_launch,
     ask_inventory_on_launch,
     ask_job_type_on_launch,
@@ -159,6 +161,41 @@ function ScheduleDetail({ schedule, i18n }) {
     ask_verbosity_on_launch,
     survey_enabled,
   } = launchData || {};
+
+  const missingRequiredInventory = () => {
+    if (!inventory_needed_to_start || schedule?.summary_fields?.inventory?.id) {
+      return false;
+    }
+    return true;
+  };
+
+  const hasMissingSurveyValue = () => {
+    let missingValues = false;
+    if (survey_enabled) {
+      surveyConfig.spec.forEach(question => {
+        const hasDefaultValue = Boolean(question.default);
+        if (question.required && !hasDefaultValue) {
+          const extraDataKeys = Object.keys(schedule?.extra_data);
+
+          const hasMatchingKey = extraDataKeys.includes(question.variable);
+          Object.values(schedule?.extra_data).forEach(value => {
+            if (!value || !hasMatchingKey) {
+              missingValues = true;
+            } else {
+              missingValues = false;
+            }
+          });
+          if (!Object.values(schedule.extra_data).length) {
+            missingValues = true;
+          }
+        }
+      });
+    }
+    return missingValues;
+  };
+  const isDisabled = Boolean(
+    missingRequiredInventory() || hasMissingSurveyValue()
+  );
 
   const showCredentialsDetail =
     ask_credential_on_launch && credentials.length > 0;
@@ -197,9 +234,23 @@ function ScheduleDetail({ schedule, i18n }) {
     return <ContentError error={readContentError} />;
   }
 
+  let daysToKeep = null;
+  if (hasDaysToKeepField && extra_data) {
+    if (typeof extra_data === 'string' && extra_data !== '') {
+      daysToKeep = parseVariableField(extra_data).days;
+    }
+    if (typeof extra_data === 'object') {
+      daysToKeep = extra_data?.days;
+    }
+  }
+
   return (
     <CardBody>
-      <ScheduleToggle schedule={schedule} css="padding-bottom: 40px" />
+      <ScheduleToggle
+        schedule={schedule}
+        css="padding-bottom: 40px"
+        isDisabled={isDisabled}
+      />
       <DetailList gutter="sm">
         <Detail label={i18n._(t`Name`)} value={name} />
         <Detail label={i18n._(t`Description`)} value={description} />
@@ -214,6 +265,9 @@ function ScheduleDetail({ schedule, i18n }) {
         <Detail label={i18n._(t`Last Run`)} value={formatDateString(dtend)} />
         <Detail label={i18n._(t`Local Time Zone`)} value={timezone} />
         <Detail label={i18n._(t`Repeat Frequency`)} value={repeatFrequency} />
+        {hasDaysToKeepField ? (
+          <Detail label={i18n._(t`Days of Data to Keep`)} value={daysToKeep} />
+        ) : null}
         <ScheduleOccurrences preview={preview} />
         <UserDateDetail
           label={i18n._(t`Created`)}
@@ -256,6 +310,12 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
+            {ask_verbosity_on_launch && (
+              <Detail
+                label={i18n._(t`Verbosity`)}
+                value={VERBOSITY[verbosity]}
+              />
+            )}
             {ask_scm_branch_on_launch && (
               <Detail
                 label={i18n._(t`Source Control Branch`)}
@@ -264,12 +324,6 @@ function ScheduleDetail({ schedule, i18n }) {
             )}
             {ask_limit_on_launch && (
               <Detail label={i18n._(t`Limit`)} value={limit} />
-            )}
-            {ask_verbosity_on_launch && (
-              <Detail
-                label={i18n._(t`Verbosity`)}
-                value={VERBOSITY[verbosity]}
-              />
             )}
             {showDiffModeDetail && (
               <Detail

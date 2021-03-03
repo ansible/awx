@@ -4,26 +4,23 @@ AWX supports the use of Ansible Collections. This section will give ways to use 
 
 ### Project Collections Requirements
 
-If you specify a collections requirements file in SCM at `collections/requirements.yml`,
-then AWX will install collections from that file to a special cache folder in project updates.
+If you specify a collections requirements file in SCM at `collections/requirements.yml` of a project,
+ then AWX will install collections from that file to a special cache folder in project updates.
 Before a job runs, the roles and/or collections will be copied from the special
 cache folder to the job temporary folder.
 
 The invocation looks like:
 
 ```
-ansible-galaxy collection install -r requirements.yml -p <project cache location>/requirements_collections
+ansible-galaxy collection install -r requirements.yml -p <project cache location>/_<project #>__<project name>/stage/requirements_collections
 ```
 
 Example of the resultant job `tmp` directory where job is running:
 
 ```
-├── project
-│   ├── ansible.cfg
-│   └── debug.yml
 ├── requirements_collections
 │   └── ansible_collections
-│       └── collection_namespace
+│       └── namespace
 │           └── collection_name
 │               ├── FILES.json
 │               ├── MANIFEST.json
@@ -38,22 +35,20 @@ Example of the resultant job `tmp` directory where job is running:
 │               │   │       └── stuff.j2
 │               └── tests
 │                   └── main.yml
-├── requirements_roles
-│   └── username.role_name
-│       ├── defaults
-│       │   └── main.yml
-│       ├── meta
-│       │   └── main.yml
-│       ├── README.md
-│       ├── tasks
-│       │   ├── main.yml
-│       │   └── some_role.yml
-│       ├── templates
-│       │   └── stuff.j2
-│       └── vars
-│           └── Archlinux.yml
-└── tmp_6wod58k
-
+└── requirements_roles
+    └── namespace.role_name
+        ├── defaults
+        │   └── main.yml
+        ├── meta
+        │   └── main.yml
+        ├── README.md
+        ├── tasks
+        │   ├── main.yml
+        │   └── some_role.yml
+        ├── templates
+        │   └── stuff.j2
+        └── vars
+            └── Archlinux.yml
 ```
 
 ### Cache Folder Mechanics

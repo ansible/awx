@@ -14,6 +14,8 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Fixed a bug where launch prompt inputs were unexpectedly deposited in the url: https://github.com/ansible/awx/pull/9231
 - Playbook, credential type, and inventory file inputs now support type-ahead and manual type-in! https://github.com/ansible/awx/pull/9120
 - Added ability to relaunch against failed hosts: https://github.com/ansible/awx/pull/9225
+- Added pending workflow approval count to the application header https://github.com/ansible/awx/pull/9334
+- Added user interface for management jobs: https://github.com/ansible/awx/pull/9224
 
 # 17.0.1 (January 26, 2021)
 - Fixed pgdocker directory permissions issue with Local Docker installer: https://github.com/ansible/awx/pull/9152

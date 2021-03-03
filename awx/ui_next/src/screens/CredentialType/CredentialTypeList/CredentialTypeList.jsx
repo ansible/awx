@@ -8,10 +8,14 @@ import { CredentialTypesAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
-import PaginatedDataList, {
+import {
   ToolbarDeleteButton,
   ToolbarAddButton,
 } from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
@@ -106,7 +110,7 @@ function CredentialTypeList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={isLoading || deleteLoading}
             items={credentialTypes}
@@ -162,7 +166,13 @@ function CredentialTypeList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={credentialType => (
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              </HeaderRow>
+            }
+            renderRow={(credentialType, index) => (
               <CredentialTypeListItem
                 key={credentialType.id}
                 value={credentialType.name}
@@ -170,6 +180,7 @@ function CredentialTypeList({ i18n }) {
                 detailUrl={`${match.url}/${credentialType.id}/details`}
                 onSelect={() => handleSelect(credentialType)}
                 isSelected={selected.some(row => row.id === credentialType.id)}
+                rowIndex={index}
               />
             )}
             emptyStateControls={

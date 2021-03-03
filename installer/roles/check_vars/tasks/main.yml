@@ -8,6 +8,3 @@
 
 - include_tasks: check_openshift.yml
   when: openshift_host is defined and openshift_host != ''
-
-- include_tasks: check_docker.yml
-  when: openshift_host is not defined or openshift_host == ''

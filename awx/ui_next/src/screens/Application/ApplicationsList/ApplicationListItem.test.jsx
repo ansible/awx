@@ -18,12 +18,16 @@ describe('<ApplicationListItem/>', () => {
   test('should mount successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ApplicationListItem
-          application={application}
-          detailUrl="/organizations/2/details"
-          isSelected={false}
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <ApplicationListItem
+              application={application}
+              detailUrl="/organizations/2/details"
+              isSelected={false}
+              onSelect={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(wrapper.find('ApplicationListItem').length).toBe(1);
@@ -31,38 +35,30 @@ describe('<ApplicationListItem/>', () => {
   test('should render the proper data', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <ApplicationListItem
-          application={application}
-          detailUrl="/organizations/2/details"
-          isSelected={false}
-          onSelect={() => {}}
-        />
+        <table>
+          <tbody>
+            <ApplicationListItem
+              application={application}
+              detailUrl="/organizations/2/details"
+              isSelected={false}
+              onSelect={() => {}}
+            />
+          </tbody>
+        </table>
       );
     });
     expect(
-      wrapper.find('DataListCell[aria-label="application name"]').text()
+      wrapper
+        .find('Td')
+        .at(1)
+        .text()
     ).toBe('Foo');
     expect(
-      wrapper.find('DataListCell[aria-label="organization name"]').text()
+      wrapper
+        .find('Td')
+        .at(2)
+        .text()
     ).toBe('Organization');
-    expect(wrapper.find('input#select-application-1').prop('checked')).toBe(
-      false
-    );
     expect(wrapper.find('PencilAltIcon').length).toBe(1);
-  });
-  test('should be checked', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <ApplicationListItem
-          application={application}
-          detailUrl="/organizations/2/details"
-          isSelected
-          onSelect={() => {}}
-        />
-      );
-    });
-    expect(wrapper.find('input#select-application-1').prop('checked')).toBe(
-      true
-    );
   });
 });

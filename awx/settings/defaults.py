@@ -1,6 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import base64
 import os
 import re  # noqa
 import sys
@@ -148,7 +149,10 @@ SCHEDULE_MAX_JOBS = 10
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'p7z7g1ql4%6+(6nlebb6hdk7sd^&fnjpal308%n%+p^_e6vo1y'
+if os.path.exists('/etc/tower/SECRET_KEY'):
+    SECRET_KEY = open('/etc/tower/SECRET_KEY', 'rb').read().strip()
+else:
+    SECRET_KEY = base64.encodebytes(os.urandom(32)).decode().rstrip()
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
@@ -738,10 +742,10 @@ TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
 # ---------------------
 # ----- Foreman -----
 # ---------------------
-SATELLITE6_ENABLED_VAR = 'foreman.enabled'
+SATELLITE6_ENABLED_VAR = 'foreman_enabled'
 SATELLITE6_ENABLED_VALUE = 'True'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
-SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
+SATELLITE6_INSTANCE_ID_VAR = 'foreman_id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
 
 # ---------------------

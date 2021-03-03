@@ -71,13 +71,19 @@ describe('<InstanceGroupList />', () => {
     await waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
 
     wrapper
-      .find('input#select-instance-groups-1')
+      .find('.pf-c-table__check')
+      .first()
+      .find('input')
       .simulate('change', instanceGroups);
     wrapper.update();
 
-    expect(wrapper.find('input#select-instance-groups-1').prop('checked')).toBe(
-      true
-    );
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
+    ).toBe(true);
 
     await act(async () => {
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')();
@@ -102,16 +108,22 @@ describe('<InstanceGroupList />', () => {
     });
     await waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
 
-    const instanceGroupIndex = [1, 2, 3];
+    const instanceGroupIndex = [0, 1, 2];
 
     instanceGroupIndex.forEach(element => {
       wrapper
-        .find(`input#select-instance-groups-${element}`)
+        .find('.pf-c-table__check')
+        .at(element)
+        .find('input')
         .simulate('change', instanceGroups);
       wrapper.update();
 
       expect(
-        wrapper.find(`input#select-instance-groups-${element}`).prop('checked')
+        wrapper
+          .find('.pf-c-table__check')
+          .at(element)
+          .find('input')
+          .prop('checked')
       ).toBe(true);
     });
 
@@ -159,11 +171,19 @@ describe('<InstanceGroupList />', () => {
     });
     waitForElement(wrapper, 'InstanceGroupList', el => el.length > 0);
 
-    wrapper.find('input#select-instance-groups-1').simulate('change', 'a');
+    wrapper
+      .find('.pf-c-table__check')
+      .first()
+      .find('input')
+      .simulate('change', 'a');
     wrapper.update();
-    expect(wrapper.find('input#select-instance-groups-1').prop('checked')).toBe(
-      true
-    );
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
+    ).toBe(true);
 
     await act(async () =>
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()

@@ -375,25 +375,6 @@
     that:
       - "result is changed"
 
-# We should decide when to delete this test
-- name: Create a valid Vault credential w/ kind=ssh (deprecated, will now fail)
-  tower_credential:
-    name: "{{ vault_cred_name2 }}"
-    organization: Default
-    state: present
-    kind: ssh
-    description: An example Vault credential
-    vault_password: secret-vault
-  register: result
-  ignore_errors: true
-
-- assert:
-    that:
-      - result is failed
-      - "'Unable to create credential {{ vault_cred_name2 }}' in result.msg"
-      - "'Additional properties are not allowed' in result.msg"
-      - "'\\'vault_password\\' was unexpected' in result.msg"
-
 - name: Delete a Vault credential
   tower_credential:
     name: "{{ vault_cred_name1 }}"

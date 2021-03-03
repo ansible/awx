@@ -93,10 +93,7 @@ describe('<Schedule />', () => {
         <Route
           path="/templates/job_template/:id/schedules"
           component={() => (
-            <Schedule
-              setBreadcrumb={() => {}}
-              unifiedJobTemplate={unifiedJobTemplate}
-            />
+            <Schedule setBreadcrumb={() => {}} resource={unifiedJobTemplate} />
           )}
         />,
         {
