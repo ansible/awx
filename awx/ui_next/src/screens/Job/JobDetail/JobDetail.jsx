@@ -64,6 +64,8 @@ function JobDetail({ job, i18n }) {
     credentials,
     instance_group: instanceGroup,
     inventory,
+    inventory_source,
+    source_project,
     job_template: jobTemplate,
     workflow_job_template: workflowJobTemplate,
     labels,
@@ -203,6 +205,33 @@ function JobDetail({ job, i18n }) {
               >
                 {inventory.name}
               </Link>
+            }
+          />
+        )}
+        {inventory_source && (
+          <Detail
+            label={i18n._(t`Inventory Source`)}
+            value={
+              <Link
+                to={`/inventories/inventory/${inventory.id}/sources/${inventory_source.id}`}
+              >
+                {inventory_source.name}
+              </Link>
+            }
+          />
+        )}
+        {inventory_source && inventory_source.source === 'scm' && (
+          <Detail
+            label={i18n._(t`Project`)}
+            value={
+              <StatusDetailValue>
+                {source_project.status && (
+                  <StatusIcon status={source_project.status} />
+                )}
+                <Link to={`/projects/${source_project.id}`}>
+                  {source_project.name}
+                </Link>
+              </StatusDetailValue>
             }
           />
         )}
