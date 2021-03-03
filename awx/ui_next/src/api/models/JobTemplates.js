@@ -10,6 +10,7 @@ class JobTemplates extends SchedulesMixin(
     super(http);
     this.baseUrl = '/api/v2/job_templates/';
 
+    this.createSchedule = this.createSchedule.bind(this);
     this.launch = this.launch.bind(this);
     this.readLaunch = this.readLaunch.bind(this);
     this.associateLabel = this.associateLabel.bind(this);

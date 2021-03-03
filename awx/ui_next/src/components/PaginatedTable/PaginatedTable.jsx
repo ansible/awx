@@ -37,6 +37,7 @@ function PaginatedTable({
   showPageSizeOptions,
   i18n,
   renderToolbar,
+  emptyContentMessage,
 }) {
   const history = useHistory();
 
@@ -73,9 +74,6 @@ function PaginatedTable({
   const queryParams = parseQueryString(qsConfig, history.location.search);
 
   const dataListLabel = i18n._(t`${pluralizedItemName} List`);
-  const emptyContentMessage = i18n._(
-    t`Please add ${pluralizedItemName} to populate this list `
-  );
   const emptyContentTitle = i18n._(t`No ${pluralizedItemName} Found `);
 
   let Content;
@@ -85,7 +83,13 @@ function PaginatedTable({
     Content = <ContentError error={contentError} />;
   } else if (items.length <= 0) {
     Content = (
-      <ContentEmpty title={emptyContentTitle} message={emptyContentMessage} />
+      <ContentEmpty
+        title={emptyContentTitle}
+        message={
+          emptyContentMessage ||
+          i18n._(t`Please add ${pluralizedItemName} to populate this list `)
+        }
+      />
     );
   } else {
     Content = (

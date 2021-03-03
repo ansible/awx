@@ -10,6 +10,7 @@ class InventorySources extends LaunchUpdateMixin(
     super(http);
     this.baseUrl = '/api/v2/inventory_sources/';
 
+    this.createSchedule = this.createSchedule.bind(this);
     this.createSyncStart = this.createSyncStart.bind(this);
     this.destroyGroups = this.destroyGroups.bind(this);
     this.destroyHosts = this.destroyHosts.bind(this);

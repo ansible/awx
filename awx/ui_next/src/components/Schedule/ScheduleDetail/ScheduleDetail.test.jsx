@@ -26,6 +26,7 @@ const allPrompts = {
     ask_variables_on_launch: true,
     ask_verbosity_on_launch: true,
     survey_enabled: true,
+    inventory_needed_to_start: true,
   },
 };
 
@@ -488,5 +489,40 @@ describe('<ScheduleDetail />', () => {
       el => el.length === 0
     );
     expect(SchedulesAPI.destroy).toHaveBeenCalledTimes(1);
+  });
+  test('should have disabled toggle', async () => {
+    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    JobTemplatesAPI.readLaunch.mockResolvedValueOnce(allPrompts);
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/schedules/:scheduleId"
+          component={() => (
+            <ScheduleDetail schedule={schedule} surveyConfig={{ spec: [] }} />
+          )}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    await waitForElement(
+      wrapper,
+      'ScheduleToggle',
+      el => el.prop('isDisabled') === true
+    );
   });
 });

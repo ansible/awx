@@ -145,12 +145,9 @@ describe('<JobTemplateAdd />', () => {
         summary_fields: { organization: { id: 1, name: 'Org Foo' } },
       });
       wrapper.update();
-      wrapper
-        .find('PlaybookSelect')
-        .prop('field')
-        .onChange({
-          target: { value: 'Baz', name: 'playbook' },
-        });
+      wrapper.find('Select#template-playbook').prop('onToggle')();
+      wrapper.update();
+      wrapper.find('Select#template-playbook').prop('onSelect')(null, 'Baz');
     });
     wrapper.update();
     act(() => {
@@ -207,12 +204,9 @@ describe('<JobTemplateAdd />', () => {
         summary_fields: { organization: { id: 1, name: 'Org Foo' } },
       });
       wrapper.update();
-      wrapper
-        .find('PlaybookSelect')
-        .prop('field')
-        .onChange({
-          target: { value: 'Bar', name: 'playbook' },
-        });
+      wrapper.find('Select#template-playbook').prop('onToggle')();
+      wrapper.update();
+      wrapper.find('Select#template-playbook').prop('onSelect')(null, 'Bar');
     });
     wrapper.update();
     act(() => {

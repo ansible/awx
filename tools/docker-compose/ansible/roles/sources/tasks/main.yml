@@ -1,0 +1,82 @@
+---
+
+- name: Create _sources directory
+  file:
+    path: "{{ sources_dest }}/secrets"
+    state: 'directory'
+    mode: '0700'
+
+- name: Detect secrets
+  stat:
+    path: "{{ sources_dest }}/secrets/{{ item }}.yml"
+  register: secrets
+  when: not lookup('vars', item, default='')
+  loop:
+    - pg_password
+    - secret_key
+    - broadcast_websocket_secret
+
+- name: Generate secrets if needed
+  template:
+    src: 'secrets.yml.j2'
+    dest: '{{ sources_dest }}/secrets/{{ item.item }}.yml'
+    mode: '0600'
+  when: not lookup('vars', item.item, default='') and not item.stat.exists
+  loop: "{{ secrets.results }}"
+
+- name: Include generated secrets unless they are explicitly passed in
+  include_vars: "{{ sources_dest }}/secrets/{{ item.item }}.yml"
+  no_log: true
+  when: not lookup('vars', item.item, default='')
+  loop: "{{ secrets.results }}"
+
+- name: Write out SECRET_KEY
+  copy:
+    content: "{{ secret_key }}"
+    dest: "{{ sources_dest }}/SECRET_KEY"
+  no_log: true
+
+- name: Render configuration templates
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ sources_dest }}/{{ item }}"
+    mode: '0600'
+  with_items:
+    - "database.py"
+    - "websocket_secret.py"
+
+- name: Delete old local_settings.py
+  file:
+    path: "{{ playbook_dir }}/../../../awx/settings/local_settings.py"
+    state: absent
+
+- name: Copy local_settings.py
+  copy:
+    src: "local_settings.py"
+    dest: "{{ sources_dest }}/local_settings.py"
+
+- name: Get OS info for sdb
+  shell: |
+    docker info | grep 'Operating System'
+  register: os_info
+  changed_when: false
+
+- name: Get user UID
+  shell: id -u
+  register: current_user
+  changed_when: false
+
+- name: Set fact with user UID
+  set_fact:
+    user_id: "'{{ current_user.stdout }}'"
+
+- name: Set global version if not provided
+  set_fact:
+    awx_image_tag: "{{ lookup('file', playbook_dir + '/../../../VERSION') }}"
+  when: awx_image_tag is not defined
+
+- name: Render Docker-Compose
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ sources_dest }}/{{ compose_name }}"
+    mode: '0600'

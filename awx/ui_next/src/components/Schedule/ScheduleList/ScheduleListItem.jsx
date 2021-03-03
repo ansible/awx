@@ -4,16 +4,33 @@ import { bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import { Button } from '@patternfly/react-core';
+import { Button, Tooltip } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
-import { PencilAltIcon } from '@patternfly/react-icons';
+import {
+  PencilAltIcon,
+  ExclamationTriangleIcon as PFExclamationTriangleIcon,
+} from '@patternfly/react-icons';
+import styled from 'styled-components';
 import { DetailList, Detail } from '../../DetailList';
 import { ActionsTd, ActionItem } from '../../PaginatedTable';
 import { ScheduleToggle } from '..';
 import { Schedule } from '../../../types';
 import { formatDateString } from '../../../util/dates';
 
-function ScheduleListItem({ i18n, isSelected, onSelect, schedule, rowIndex }) {
+const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
+  color: #c9190b;
+  margin-left: 20px;
+`;
+
+function ScheduleListItem({
+  i18n,
+  rowIndex,
+  isSelected,
+  onSelect,
+  schedule,
+  isMissingInventory,
+  isMissingSurvey,
+}) {
   const labelId = `check-action-${schedule.id}`;
 
   const jobTypeLabels = {
@@ -45,6 +62,7 @@ function ScheduleListItem({ i18n, isSelected, onSelect, schedule, rowIndex }) {
     default:
       break;
   }
+  const isDisabled = Boolean(isMissingInventory || isMissingSurvey);
 
   return (
     <Tr id={`schedule-row-${schedule.id}`}>
@@ -61,6 +79,18 @@ function ScheduleListItem({ i18n, isSelected, onSelect, schedule, rowIndex }) {
         <Link to={`${scheduleBaseUrl}/details`}>
           <b>{schedule.name}</b>
         </Link>
+        {Boolean(isMissingInventory || isMissingSurvey) && (
+          <span>
+            <Tooltip
+              content={[isMissingInventory, isMissingSurvey].map(message => (
+                <div key={message}>{message}</div>
+              ))}
+              position="right"
+            >
+              <ExclamationTriangleIcon />
+            </Tooltip>
+          </span>
+        )}
       </Td>
       <Td dataLabel={i18n._(t`Type`)}>
         {
@@ -80,7 +110,7 @@ function ScheduleListItem({ i18n, isSelected, onSelect, schedule, rowIndex }) {
         )}
       </Td>
       <ActionsTd dataLabel={i18n._(t`Actions`)} gridColumns="auto 40px">
-        <ScheduleToggle schedule={schedule} />
+        <ScheduleToggle schedule={schedule} isDisabled={isDisabled} />
         <ActionItem
           visible={schedule.summary_fields.user_capabilities.edit}
           tooltip={i18n._(t`Edit Schedule`)}

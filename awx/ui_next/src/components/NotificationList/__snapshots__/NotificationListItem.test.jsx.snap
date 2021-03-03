@@ -24,398 +24,442 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
     }
   }
 >
-  <DataListItem
-    aria-labelledby="items-list-item-9000"
-    className=""
-    id="9000"
-    isExpanded={false}
-    key="9000"
+  <Tr
+    id="notification-row-9000"
   >
-    <li
-      aria-labelledby="items-list-item-9000"
-      className="pf-c-data-list__item"
-      id="9000"
+    <TrBase
+      id="notification-row-9000"
+      innerRef={null}
     >
-      <DataListItemRow
-        key=".0"
-        rowid="items-list-item-9000"
+      <tr
+        className=""
+        data-ouia-component-id="OUIA-Generated-TableRow-1"
+        data-ouia-component-type="PF4/TableRow"
+        data-ouia-safe={true}
+        hidden={false}
+        id="notification-row-9000"
       >
-        <div
-          className="pf-c-data-list__item-row"
+        <Td
+          dataLabel="Name"
+          id="notification-9000"
         >
-          <DataListItemCells
-            dataListCells={
-              Array [
-                <ForwardRef(Styled(PFDataListCell))>
-                  <ForwardRef
-                    to={
-                      Object {
-                        "pathname": "/foo",
-                      }
-                    }
+          <TdBase
+            dataLabel="Name"
+            id="notification-9000"
+            innerRef={null}
+          >
+            <td
+              className=""
+              data-label="Name"
+              id="notification-9000"
+            >
+              <Link
+                to="/foo"
+              >
+                <LinkAnchor
+                  href="/foo"
+                  navigate={[Function]}
+                >
+                  <a
+                    href="/foo"
+                    onClick={[Function]}
                   >
-                    <b
-                      id="items-list-item-9000"
-                    >
+                    <b>
                       Foo
                     </b>
-                  </ForwardRef>
-                </ForwardRef(Styled(PFDataListCell))>,
-                <ForwardRef(Styled(PFDataListCell))>
-                  <ForwardRef(styled.b)>
-                    Type
-                  </ForwardRef(styled.b)>
-                  Slack
-                </ForwardRef(Styled(PFDataListCell))>,
-              ]
-            }
-            key=".0"
-            rowid="items-list-item-9000"
+                  </a>
+                </LinkAnchor>
+              </Link>
+            </td>
+          </TdBase>
+        </Td>
+        <Td
+          dataLabel="Type"
+        >
+          <TdBase
+            dataLabel="Type"
+            innerRef={null}
           >
-            <div
-              className="pf-c-data-list__item-content"
+            <td
+              className=""
+              data-label="Type"
             >
-              <DataListCell
-                key="name"
-              >
-                <StyledComponent
-                  forwardedComponent={
-                    Object {
-                      "$$typeof": Symbol(react.forward_ref),
-                      "attrs": Array [],
-                      "componentStyle": ComponentStyle {
-                        "componentId": "sc-bdVaJa",
-                        "isStatic": false,
-                        "lastClassName": "kruorc",
-                        "rules": Array [
-                          "
-  word-break: break-word;
-",
-                        ],
-                      },
-                      "displayName": "DataListCell",
-                      "foldedComponentIds": Array [],
-                      "render": [Function],
-                      "styledComponentId": "sc-bdVaJa",
-                      "target": [Function],
-                      "toString": [Function],
-                      "warnTooManyClasses": [Function],
-                      "withComponent": [Function],
-                    }
-                  }
-                  forwardedRef={null}
-                >
-                  <PFDataListCell
-                    className="sc-bdVaJa kruorc"
-                  >
-                    <div
-                      className="pf-c-data-list__cell sc-bdVaJa kruorc"
-                    >
-                      <Link
-                        to={
-                          Object {
-                            "pathname": "/foo",
-                          }
-                        }
-                      >
-                        <LinkAnchor
-                          href="/foo"
-                          navigate={[Function]}
-                        >
-                          <a
-                            href="/foo"
-                            onClick={[Function]}
-                          >
-                            <b
-                              id="items-list-item-9000"
-                            >
-                              Foo
-                            </b>
-                          </a>
-                        </LinkAnchor>
-                      </Link>
-                    </div>
-                  </PFDataListCell>
-                </StyledComponent>
-              </DataListCell>
-              <DataListCell
-                key="type"
-              >
-                <StyledComponent
-                  forwardedComponent={
-                    Object {
-                      "$$typeof": Symbol(react.forward_ref),
-                      "attrs": Array [],
-                      "componentStyle": ComponentStyle {
-                        "componentId": "sc-bdVaJa",
-                        "isStatic": false,
-                        "lastClassName": "kruorc",
-                        "rules": Array [
-                          "
-  word-break: break-word;
-",
-                        ],
-                      },
-                      "displayName": "DataListCell",
-                      "foldedComponentIds": Array [],
-                      "render": [Function],
-                      "styledComponentId": "sc-bdVaJa",
-                      "target": [Function],
-                      "toString": [Function],
-                      "warnTooManyClasses": [Function],
-                      "withComponent": [Function],
-                    }
-                  }
-                  forwardedRef={null}
-                >
-                  <PFDataListCell
-                    className="sc-bdVaJa kruorc"
-                  >
-                    <div
-                      className="pf-c-data-list__cell sc-bdVaJa kruorc"
-                    >
-                      <styled.b>
-                        <StyledComponent
-                          forwardedComponent={
-                            Object {
-                              "$$typeof": Symbol(react.forward_ref),
-                              "attrs": Array [],
-                              "componentStyle": ComponentStyle {
-                                "componentId": "sc-htpNat",
-                                "isStatic": false,
-                                "lastClassName": "jyYvCB",
-                                "rules": Array [
-                                  "
-  margin-right: 20px;
-",
-                                ],
-                              },
-                              "displayName": "styled.b",
-                              "foldedComponentIds": Array [],
-                              "render": [Function],
-                              "styledComponentId": "sc-htpNat",
-                              "target": "b",
-                              "toString": [Function],
-                              "warnTooManyClasses": [Function],
-                              "withComponent": [Function],
-                            }
-                          }
-                          forwardedRef={null}
-                        >
-                          <b
-                            className="sc-htpNat jyYvCB"
-                          >
-                            Type
-                          </b>
-                        </StyledComponent>
-                      </styled.b>
-                      Slack
-                    </div>
-                  </PFDataListCell>
-                </StyledComponent>
-              </DataListCell>
-            </div>
-          </DataListItemCells>
-          <Styled(DataListAction)
-            aria-label="actions"
-            aria-labelledby="items-list-item-9000"
-            columns={3}
-            id="items-list-item-9000"
-            key=".1"
-            rowid="items-list-item-9000"
+              Slack
+            </td>
+          </TdBase>
+        </Td>
+        <ActionsTd
+          dataLabel="Options"
+          gridColumns="120px 120px 120px 120px"
+        >
+          <ActionsTd___StyledTd
+            _css={160}
+            dataLabel="Options"
           >
             <StyledComponent
-              aria-label="actions"
-              aria-labelledby="items-list-item-9000"
-              columns={3}
+              _css={160}
+              dataLabel="Options"
               forwardedComponent={
                 Object {
                   "$$typeof": Symbol(react.forward_ref),
                   "attrs": Array [],
                   "componentStyle": ComponentStyle {
-                    "componentId": "sc-bwzfXH",
+                    "componentId": "ActionsTd___StyledTd-sc-1ys3lw-1",
                     "isStatic": false,
-                    "lastClassName": "llKtln",
+                    "lastClassName": "dIDjZI",
                     "rules": Array [
-                      "
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: ",
+                      "text-align:right;--pf-c-table--cell--Width:",
                       [Function],
-                      ";
-",
+                      "px;",
                     ],
                   },
-                  "displayName": "Styled(DataListAction)",
+                  "displayName": "ActionsTd___StyledTd",
                   "foldedComponentIds": Array [],
                   "render": [Function],
-                  "styledComponentId": "sc-bwzfXH",
-                  "target": [Function],
+                  "styledComponentId": "ActionsTd___StyledTd-sc-1ys3lw-1",
+                  "target": Object {
+                    "$$typeof": Symbol(react.forward_ref),
+                    "displayName": "Td",
+                    "render": [Function],
+                  },
                   "toString": [Function],
                   "warnTooManyClasses": [Function],
                   "withComponent": [Function],
                 }
               }
               forwardedRef={null}
-              id="items-list-item-9000"
-              rowid="items-list-item-9000"
             >
-              <DataListAction
-                aria-label="actions"
-                aria-labelledby="items-list-item-9000"
-                className="sc-bwzfXH llKtln"
-                columns={3}
-                id="items-list-item-9000"
-                rowid="items-list-item-9000"
+              <Td
+                _css={160}
+                className="ActionsTd___StyledTd-sc-1ys3lw-1 dIDjZI"
+                dataLabel="Options"
               >
-                <div
-                  className="pf-c-data-list__item-action sc-bwzfXH llKtln"
-                  columns={3}
-                  rowid="items-list-item-9000"
+                <TdBase
+                  _css={160}
+                  className="ActionsTd___StyledTd-sc-1ys3lw-1 dIDjZI"
+                  dataLabel="Options"
+                  innerRef={null}
                 >
-                  <Switch
-                    aria-label="Toggle notification start"
-                    id="notification-9000-started-toggle"
-                    isChecked={false}
-                    isDisabled={false}
-                    label="Start"
-                    labelOff="Start"
-                    onChange={[Function]}
+                  <td
+                    _css={160}
+                    className="ActionsTd___StyledTd-sc-1ys3lw-1 dIDjZI"
+                    data-label="Options"
                   >
-                    <label
-                      className="pf-c-switch"
-                      data-ouia-component-id="OUIA-Generated-Switch-1"
-                      data-ouia-component-type="PF4/Switch"
-                      data-ouia-safe={true}
-                      htmlFor="notification-9000-started-toggle"
+                    <ActionsGrid
+                      gridColumns="120px 120px 120px 120px"
+                      numActions={4}
                     >
-                      <input
-                        aria-label="Toggle notification start"
-                        aria-labelledby={null}
-                        checked={false}
-                        className="pf-c-switch__input"
-                        disabled={false}
-                        id="notification-9000-started-toggle"
-                        onChange={[Function]}
-                        type="checkbox"
-                      />
-                      <span
-                        className="pf-c-switch__toggle"
-                      />
-                      <span
-                        aria-hidden="true"
-                        className="pf-c-switch__label pf-m-on"
-                        id={null}
+                      <StyledComponent
+                        forwardedComponent={
+                          Object {
+                            "$$typeof": Symbol(react.forward_ref),
+                            "attrs": Array [],
+                            "componentStyle": ComponentStyle {
+                              "componentId": "ActionsTd__ActionsGrid-sc-1ys3lw-0",
+                              "isStatic": false,
+                              "lastClassName": "dkSSIN",
+                              "rules": Array [
+                                "display:grid;grid-gap:16px;align-items:center;",
+                                [Function],
+                              ],
+                            },
+                            "displayName": "ActionsGrid",
+                            "foldedComponentIds": Array [],
+                            "render": [Function],
+                            "styledComponentId": "ActionsTd__ActionsGrid-sc-1ys3lw-0",
+                            "target": "div",
+                            "toString": [Function],
+                            "warnTooManyClasses": [Function],
+                            "withComponent": [Function],
+                          }
+                        }
+                        forwardedRef={null}
+                        gridColumns="120px 120px 120px 120px"
+                        numActions={4}
                       >
-                        Start
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        className="pf-c-switch__label pf-m-off"
-                        id={null}
-                      >
-                        Start
-                      </span>
-                    </label>
-                  </Switch>
-                  <Switch
-                    aria-label="Toggle notification success"
-                    id="notification-9000-success-toggle"
-                    isChecked={false}
-                    isDisabled={false}
-                    label="Success"
-                    labelOff="Success"
-                    onChange={[Function]}
-                  >
-                    <label
-                      className="pf-c-switch"
-                      data-ouia-component-id="OUIA-Generated-Switch-2"
-                      data-ouia-component-type="PF4/Switch"
-                      data-ouia-safe={true}
-                      htmlFor="notification-9000-success-toggle"
-                    >
-                      <input
-                        aria-label="Toggle notification success"
-                        aria-labelledby={null}
-                        checked={false}
-                        className="pf-c-switch__input"
-                        disabled={false}
-                        id="notification-9000-success-toggle"
-                        onChange={[Function]}
-                        type="checkbox"
-                      />
-                      <span
-                        className="pf-c-switch__toggle"
-                      />
-                      <span
-                        aria-hidden="true"
-                        className="pf-c-switch__label pf-m-on"
-                        id={null}
-                      >
-                        Success
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        className="pf-c-switch__label pf-m-off"
-                        id={null}
-                      >
-                        Success
-                      </span>
-                    </label>
-                  </Switch>
-                  <Switch
-                    aria-label="Toggle notification failure"
-                    id="notification-9000-error-toggle"
-                    isChecked={false}
-                    isDisabled={false}
-                    label="Failure"
-                    labelOff="Failure"
-                    onChange={[Function]}
-                  >
-                    <label
-                      className="pf-c-switch"
-                      data-ouia-component-id="OUIA-Generated-Switch-3"
-                      data-ouia-component-type="PF4/Switch"
-                      data-ouia-safe={true}
-                      htmlFor="notification-9000-error-toggle"
-                    >
-                      <input
-                        aria-label="Toggle notification failure"
-                        aria-labelledby={null}
-                        checked={false}
-                        className="pf-c-switch__input"
-                        disabled={false}
-                        id="notification-9000-error-toggle"
-                        onChange={[Function]}
-                        type="checkbox"
-                      />
-                      <span
-                        className="pf-c-switch__toggle"
-                      />
-                      <span
-                        aria-hidden="true"
-                        className="pf-c-switch__label pf-m-on"
-                        id={null}
-                      >
-                        Failure
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        className="pf-c-switch__label pf-m-off"
-                        id={null}
-                      >
-                        Failure
-                      </span>
-                    </label>
-                  </Switch>
-                </div>
-              </DataListAction>
+                        <div
+                          className="ActionsTd__ActionsGrid-sc-1ys3lw-0 dkSSIN"
+                        >
+                          <ActionItem
+                            column={1}
+                            key=".0"
+                            visible={false}
+                          />
+                          <ActionItem
+                            column={2}
+                            key=".1"
+                            visible={true}
+                          >
+                            <ActionItem___StyledDiv
+                              _css={2}
+                            >
+                              <StyledComponent
+                                _css={2}
+                                forwardedComponent={
+                                  Object {
+                                    "$$typeof": Symbol(react.forward_ref),
+                                    "attrs": Array [],
+                                    "componentStyle": ComponentStyle {
+                                      "componentId": "ActionItem___StyledDiv-sc-1x1z9nz-0",
+                                      "isStatic": false,
+                                      "lastClassName": "gydHvj",
+                                      "rules": Array [
+                                        "grid-column:",
+                                        [Function],
+                                        ";",
+                                      ],
+                                    },
+                                    "displayName": "ActionItem___StyledDiv",
+                                    "foldedComponentIds": Array [],
+                                    "render": [Function],
+                                    "styledComponentId": "ActionItem___StyledDiv-sc-1x1z9nz-0",
+                                    "target": "div",
+                                    "toString": [Function],
+                                    "warnTooManyClasses": [Function],
+                                    "withComponent": [Function],
+                                  }
+                                }
+                                forwardedRef={null}
+                              >
+                                <div
+                                  className="ActionItem___StyledDiv-sc-1x1z9nz-0 cSmxUZ"
+                                >
+                                  <Switch
+                                    aria-label="Toggle notification start"
+                                    id="notification-9000-started-toggle"
+                                    isChecked={false}
+                                    isDisabled={false}
+                                    label="Start"
+                                    labelOff="Start"
+                                    onChange={[Function]}
+                                  >
+                                    <label
+                                      className="pf-c-switch"
+                                      data-ouia-component-id="OUIA-Generated-Switch-1"
+                                      data-ouia-component-type="PF4/Switch"
+                                      data-ouia-safe={true}
+                                      htmlFor="notification-9000-started-toggle"
+                                    >
+                                      <input
+                                        aria-label="Toggle notification start"
+                                        aria-labelledby={null}
+                                        checked={false}
+                                        className="pf-c-switch__input"
+                                        disabled={false}
+                                        id="notification-9000-started-toggle"
+                                        onChange={[Function]}
+                                        type="checkbox"
+                                      />
+                                      <span
+                                        className="pf-c-switch__toggle"
+                                      />
+                                      <span
+                                        aria-hidden="true"
+                                        className="pf-c-switch__label pf-m-on"
+                                        id={null}
+                                      >
+                                        Start
+                                      </span>
+                                      <span
+                                        aria-hidden="true"
+                                        className="pf-c-switch__label pf-m-off"
+                                        id={null}
+                                      >
+                                        Start
+                                      </span>
+                                    </label>
+                                  </Switch>
+                                </div>
+                              </StyledComponent>
+                            </ActionItem___StyledDiv>
+                          </ActionItem>
+                          <ActionItem
+                            column={3}
+                            key=".2"
+                            visible={true}
+                          >
+                            <ActionItem___StyledDiv
+                              _css={3}
+                            >
+                              <StyledComponent
+                                _css={3}
+                                forwardedComponent={
+                                  Object {
+                                    "$$typeof": Symbol(react.forward_ref),
+                                    "attrs": Array [],
+                                    "componentStyle": ComponentStyle {
+                                      "componentId": "ActionItem___StyledDiv-sc-1x1z9nz-0",
+                                      "isStatic": false,
+                                      "lastClassName": "gydHvj",
+                                      "rules": Array [
+                                        "grid-column:",
+                                        [Function],
+                                        ";",
+                                      ],
+                                    },
+                                    "displayName": "ActionItem___StyledDiv",
+                                    "foldedComponentIds": Array [],
+                                    "render": [Function],
+                                    "styledComponentId": "ActionItem___StyledDiv-sc-1x1z9nz-0",
+                                    "target": "div",
+                                    "toString": [Function],
+                                    "warnTooManyClasses": [Function],
+                                    "withComponent": [Function],
+                                  }
+                                }
+                                forwardedRef={null}
+                              >
+                                <div
+                                  className="ActionItem___StyledDiv-sc-1x1z9nz-0 fZyHIW"
+                                >
+                                  <Switch
+                                    aria-label="Toggle notification success"
+                                    id="notification-9000-success-toggle"
+                                    isChecked={false}
+                                    isDisabled={false}
+                                    label="Success"
+                                    labelOff="Success"
+                                    onChange={[Function]}
+                                  >
+                                    <label
+                                      className="pf-c-switch"
+                                      data-ouia-component-id="OUIA-Generated-Switch-2"
+                                      data-ouia-component-type="PF4/Switch"
+                                      data-ouia-safe={true}
+                                      htmlFor="notification-9000-success-toggle"
+                                    >
+                                      <input
+                                        aria-label="Toggle notification success"
+                                        aria-labelledby={null}
+                                        checked={false}
+                                        className="pf-c-switch__input"
+                                        disabled={false}
+                                        id="notification-9000-success-toggle"
+                                        onChange={[Function]}
+                                        type="checkbox"
+                                      />
+                                      <span
+                                        className="pf-c-switch__toggle"
+                                      />
+                                      <span
+                                        aria-hidden="true"
+                                        className="pf-c-switch__label pf-m-on"
+                                        id={null}
+                                      >
+                                        Success
+                                      </span>
+                                      <span
+                                        aria-hidden="true"
+                                        className="pf-c-switch__label pf-m-off"
+                                        id={null}
+                                      >
+                                        Success
+                                      </span>
+                                    </label>
+                                  </Switch>
+                                </div>
+                              </StyledComponent>
+                            </ActionItem___StyledDiv>
+                          </ActionItem>
+                          <ActionItem
+                            column={4}
+                            key=".3"
+                            visible={true}
+                          >
+                            <ActionItem___StyledDiv
+                              _css={4}
+                            >
+                              <StyledComponent
+                                _css={4}
+                                forwardedComponent={
+                                  Object {
+                                    "$$typeof": Symbol(react.forward_ref),
+                                    "attrs": Array [],
+                                    "componentStyle": ComponentStyle {
+                                      "componentId": "ActionItem___StyledDiv-sc-1x1z9nz-0",
+                                      "isStatic": false,
+                                      "lastClassName": "gydHvj",
+                                      "rules": Array [
+                                        "grid-column:",
+                                        [Function],
+                                        ";",
+                                      ],
+                                    },
+                                    "displayName": "ActionItem___StyledDiv",
+                                    "foldedComponentIds": Array [],
+                                    "render": [Function],
+                                    "styledComponentId": "ActionItem___StyledDiv-sc-1x1z9nz-0",
+                                    "target": "div",
+                                    "toString": [Function],
+                                    "warnTooManyClasses": [Function],
+                                    "withComponent": [Function],
+                                  }
+                                }
+                                forwardedRef={null}
+                              >
+                                <div
+                                  className="ActionItem___StyledDiv-sc-1x1z9nz-0 gydHvj"
+                                >
+                                  <Switch
+                                    aria-label="Toggle notification failure"
+                                    id="notification-9000-error-toggle"
+                                    isChecked={false}
+                                    isDisabled={false}
+                                    label="Failure"
+                                    labelOff="Failure"
+                                    onChange={[Function]}
+                                  >
+                                    <label
+                                      className="pf-c-switch"
+                                      data-ouia-component-id="OUIA-Generated-Switch-3"
+                                      data-ouia-component-type="PF4/Switch"
+                                      data-ouia-safe={true}
+                                      htmlFor="notification-9000-error-toggle"
+                                    >
+                                      <input
+                                        aria-label="Toggle notification failure"
+                                        aria-labelledby={null}
+                                        checked={false}
+                                        className="pf-c-switch__input"
+                                        disabled={false}
+                                        id="notification-9000-error-toggle"
+                                        onChange={[Function]}
+                                        type="checkbox"
+                                      />
+                                      <span
+                                        className="pf-c-switch__toggle"
+                                      />
+                                      <span
+                                        aria-hidden="true"
+                                        className="pf-c-switch__label pf-m-on"
+                                        id={null}
+                                      >
+                                        Failure
+                                      </span>
+                                      <span
+                                        aria-hidden="true"
+                                        className="pf-c-switch__label pf-m-off"
+                                        id={null}
+                                      >
+                                        Failure
+                                      </span>
+                                    </label>
+                                  </Switch>
+                                </div>
+                              </StyledComponent>
+                            </ActionItem___StyledDiv>
+                          </ActionItem>
+                        </div>
+                      </StyledComponent>
+                    </ActionsGrid>
+                  </td>
+                </TdBase>
+              </Td>
             </StyledComponent>
-          </Styled(DataListAction)>
-        </div>
-      </DataListItemRow>
-    </li>
-  </DataListItem>
+          </ActionsTd___StyledTd>
+        </ActionsTd>
+      </tr>
+    </TrBase>
+  </Tr>
 </NotificationListItem>
 `;

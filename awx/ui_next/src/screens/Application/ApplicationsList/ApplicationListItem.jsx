@@ -1,104 +1,65 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Tooltip,
-} from '@patternfly/react-core';
-
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { formatDateString } from '../../../util/dates';
 import { Application } from '../../../types';
-import DataListCell from '../../../components/DataListCell';
-
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: 40px;
-`;
-
-const Label = styled.b`
-  margin-right: 20px;
-`;
 
 function ApplicationListItem({
   application,
   isSelected,
   onSelect,
   detailUrl,
+  rowIndex,
   i18n,
 }) {
   const labelId = `check-action-${application.id}`;
   return (
-    <DataListItem
-      key={application.id}
-      aria-labelledby={labelId}
-      id={`${application.id}`}
-    >
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-application-${application.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell
-              key="divider"
-              aria-label={i18n._(t`application name`)}
-            >
-              <Link to={`${detailUrl}`}>
-                <b>{application.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell
-              key="organization"
-              aria-label={i18n._(t`organization name`)}
-            >
-              <Link
-                to={`/organizations/${application.summary_fields.organization.id}`}
-              >
-                <b>{application.summary_fields.organization.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key="modified" aria-label={i18n._(t`last modified`)}>
-              <Label>{i18n._(t`Last Modified`)}</Label>
-              <span>{formatDateString(application.modified)}</span>
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={i18n._(t`actions`)}
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={`application-row-${application.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+        dataLabel={i18n._(t`Selected`)}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <Link to={`${detailUrl}`}>
+          <b>{application.name}</b>
+        </Link>
+      </Td>
+      <Td dataLabel={i18n._(t`Organization`)}>
+        <Link
+          to={`/organizations/${application.summary_fields.organization.id}`}
         >
-          {application.summary_fields.user_capabilities.edit ? (
-            <Tooltip content={i18n._(t`Edit application`)} position="top">
-              <Button
-                aria-label={i18n._(t`Edit application`)}
-                variant="plain"
-                component={Link}
-                to={`/applications/${application.id}/edit`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          ) : (
-            ''
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <b>{application.summary_fields.organization.name}</b>
+        </Link>
+      </Td>
+      <Td dataLabel={i18n._(t`Last Modified`)}>
+        {formatDateString(application.modified)}
+      </Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionItem
+          visible={application.summary_fields.user_capabilities.edit}
+          tooltip={i18n._(t`Edit application`)}
+        >
+          <Button
+            aria-label={i18n._(t`Edit application`)}
+            variant="plain"
+            component={Link}
+            to={`/applications/${application.id}/edit`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 

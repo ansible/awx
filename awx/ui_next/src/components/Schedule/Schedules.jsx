@@ -6,28 +6,49 @@ import ScheduleAdd from './ScheduleAdd';
 import ScheduleList from './ScheduleList';
 
 function Schedules({
-  createSchedule,
+  apiModel,
   loadScheduleOptions,
   loadSchedules,
   setBreadcrumb,
-  unifiedJobTemplate,
+  launchConfig,
+  surveyConfig,
+  resource,
 }) {
   const match = useRouteMatch();
+
+  // For some management jobs that delete data, we want to provide an additional
+  // field on the scheduler for configuring the number of days to retain.
+  const hasDaysToKeepField = [
+    'cleanup_activitystream',
+    'cleanup_jobs',
+  ].includes(resource?.job_type);
 
   return (
     <Switch>
       <Route path={`${match.path}/add`}>
-        <ScheduleAdd createSchedule={createSchedule} />
+        <ScheduleAdd
+          hasDaysToKeepField={hasDaysToKeepField}
+          apiModel={apiModel}
+          resource={resource}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
+        />
       </Route>
       <Route key="details" path={`${match.path}/:scheduleId`}>
         <Schedule
-          unifiedJobTemplate={unifiedJobTemplate}
+          hasDaysToKeepField={hasDaysToKeepField}
           setBreadcrumb={setBreadcrumb}
+          resource={resource}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
         />
       </Route>
       <Route key="list" path={`${match.path}`}>
         <ScheduleList
+          resource={resource}
           loadSchedules={loadSchedules}
+          launchConfig={launchConfig}
+          surveyConfig={surveyConfig}
           loadScheduleOptions={loadScheduleOptions}
         />
       </Route>

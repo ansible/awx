@@ -1,0 +1,31 @@
+---
+- name: Set global version if not provided
+  set_fact:
+    awx_version: "{{ lookup('file', playbook_dir + '/../../VERSION') }}"
+  when: awx_version is not defined
+
+- name: Verify awx-logos directory exists for official install
+  stat:
+    path: "../../awx-logos"
+  register: logosdir
+  failed_when: logosdir.stat.isdir is not defined or not logosdir.stat.isdir
+  when: awx_official|default(false)|bool
+
+- name: Copy logos for inclusion in sdist
+  copy:
+    src: "../../awx-logos/awx/ui/client/assets/"
+    dest: "../awx/ui_next/public/static/media/"
+  when: awx_official|default(false)|bool
+
+- name: Set awx image name
+  set_fact:
+    awx_image: "{{ awx_image|default('awx') }}"
+
+# Calling Docker directly because docker-py doesnt support BuildKit
+- name: Build AWX image
+  command: docker build -t {{ awx_image }}:{{ awx_version }} -f ../../{{ dockerfile_name }} ../..
+
+- name: Tag awx images as latest
+  command: "docker tag {{ item }}:{{ awx_version }} {{ item }}:latest"
+  with_items:
+    - "{{ awx_image }}"

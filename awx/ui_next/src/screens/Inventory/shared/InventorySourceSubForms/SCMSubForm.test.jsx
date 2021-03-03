@@ -89,17 +89,17 @@ describe('<SCMSubForm />', () => {
   });
 
   test('changing source project should reset source path dropdown', async () => {
-    expect(wrapper.find('AnsibleSelect#source_path').prop('value')).toEqual('');
-
+    expect(wrapper.find('Select#source_path').prop('selections')).toEqual('');
     await act(async () => {
-      await wrapper.find('AnsibleSelect#source_path').prop('onChange')(
-        null,
-        'bar'
-      );
+      await wrapper.find('Select#source_path').prop('onToggle')();
     });
     wrapper.update();
-    expect(wrapper.find('AnsibleSelect#source_path').prop('value')).toEqual(
-      'bar'
+    await act(async () => {
+      await wrapper.find('Select#source_path').prop('onSelect')(null, 'bar');
+    });
+    wrapper.update();
+    expect(wrapper.find('Select#source_path').prop('selections')).toEqual(
+      'bar/'
     );
 
     await act(async () => {
@@ -109,6 +109,37 @@ describe('<SCMSubForm />', () => {
       });
     });
     wrapper.update();
-    expect(wrapper.find('AnsibleSelect#source_path').prop('value')).toEqual('');
+    expect(wrapper.find('Select#source_path').prop('selections')).toEqual('');
+  });
+
+  test('should be able to create custom source path', async () => {
+    const customInitialValues = {
+      credential: { id: 1, name: 'Credential' },
+      custom_virtualenv: '',
+      overwrite: false,
+      overwrite_vars: false,
+      source_path: '/path',
+      source_project: { id: 1, name: 'Source project' },
+      source_script: null,
+      source_vars: '---\n',
+      update_cache_timeout: 0,
+      update_on_launch: true,
+      update_on_project_update: false,
+      verbosity: 1,
+    };
+    let customWrapper;
+    await act(async () => {
+      customWrapper = mountWithContexts(
+        <Formik initialValues={customInitialValues}>
+          <SCMSubForm />
+        </Formik>
+      );
+    });
+
+    await act(async () => {
+      customWrapper.find('Select').invoke('onSelect')({}, 'newPath');
+    });
+    customWrapper.update();
+    expect(customWrapper.find('Select').prop('selections')).toBe('newPath/');
   });
 });

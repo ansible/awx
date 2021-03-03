@@ -36,7 +36,7 @@
 - assert:
     that:
       - results is failed
-      # We don't assert a message here because it handled by ansible
+      # We don't assert a message here because it's handled by ansible
 
 - name: Try to delete a token with both existing_token or existing_token_id
   tower_token:
@@ -50,7 +50,7 @@
 - assert:
     that:
       - results is failed
-      # We don't assert a message here because it handled by ansible
+      # We don't assert a message here because it's handled by ansible
 
 
 - block:

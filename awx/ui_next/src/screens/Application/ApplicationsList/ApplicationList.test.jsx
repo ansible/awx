@@ -48,6 +48,7 @@ describe('<ApplicationsList/>', () => {
     });
     await waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
   });
+
   test('should have data fetched and render 2 rows', async () => {
     ApplicationsAPI.read.mockResolvedValue(applications);
     ApplicationsAPI.readOptions.mockResolvedValue(options);
@@ -69,14 +70,20 @@ describe('<ApplicationsList/>', () => {
     waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
 
     wrapper
-      .find('input#select-application-1')
+      .find('.pf-c-table__check')
+      .first()
+      .find('input')
       .simulate('change', applications.data.results[0]);
 
     wrapper.update();
 
-    expect(wrapper.find('input#select-application-1').prop('checked')).toBe(
-      true
-    );
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
+    ).toBe(true);
     await act(async () =>
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
     );
@@ -131,13 +138,21 @@ describe('<ApplicationsList/>', () => {
     });
     waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
 
-    wrapper.find('input#select-application-1').simulate('change', 'a');
+    wrapper
+      .find('.pf-c-table__check')
+      .first()
+      .find('input')
+      .simulate('change', 'a');
 
     wrapper.update();
 
-    expect(wrapper.find('input#select-application-1').prop('checked')).toBe(
-      true
-    );
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
+    ).toBe(true);
     await act(async () =>
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
     );
@@ -163,6 +178,7 @@ describe('<ApplicationsList/>', () => {
     waitForElement(wrapper, 'ApplicationsList', el => el.length > 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
+
   test('should not render edit button for first list item', async () => {
     applications.data.results[0].summary_fields.user_capabilities.edit = false;
     ApplicationsAPI.read.mockResolvedValue(applications);
