@@ -98,11 +98,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         >
                           <Chip
                             className=""
-                            closeBtnAriaLabel="close"
+                            closeBtnAriaLabel="Remove Member chip"
                             component="div"
                             isOverflowChip={false}
                             isReadOnly={false}
                             onClick={[Function]}
+                            ouiaId="Member-3"
                             tooltipPosition="top"
                           >
                             Member
@@ -164,11 +165,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           >
                             <Chip
                               className=""
-                              closeBtnAriaLabel="close"
+                              closeBtnAriaLabel="Remove Member chip"
                               component="div"
                               isOverflowChip={false}
                               isReadOnly={false}
                               onClick={[Function]}
+                              ouiaId="Member-3"
                               tooltipPosition="top"
                             >
                               Member
@@ -253,11 +255,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                             >
                               <Chip
                                 className=""
-                                closeBtnAriaLabel="close"
+                                closeBtnAriaLabel="Remove Member chip"
                                 component="div"
                                 isOverflowChip={false}
                                 isReadOnly={false}
                                 onClick={[Function]}
+                                ouiaId="Member-3"
                                 tooltipPosition="top"
                               >
                                 Member
@@ -688,11 +691,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                         >
                                           <Chip
                                             className=""
-                                            closeBtnAriaLabel="close"
+                                            closeBtnAriaLabel="Remove Member chip"
                                             component="div"
                                             isOverflowChip={false}
                                             isReadOnly={false}
                                             onClick={[Function]}
+                                            ouiaId="Member-3"
                                             tooltipPosition="top"
                                           >
                                             Member
@@ -840,6 +844,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                         isClosable={false}
                                                         numChips={5}
                                                         onClick={[Function]}
+                                                        onOverflowChipClick={[Function]}
                                                         tooltipPosition="top"
                                                       >
                                                         <GenerateId
@@ -864,12 +869,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                                 >
                                                                   <Chip
                                                                     className=""
-                                                                    closeBtnAriaLabel="close"
+                                                                    closeBtnAriaLabel="Remove Member chip"
                                                                     component="div"
                                                                     isOverflowChip={false}
                                                                     isReadOnly={false}
                                                                     key=".$3"
                                                                     onClick={[Function]}
+                                                                    ouiaId="Member-3"
                                                                     tooltipPosition="top"
                                                                   >
                                                                     <GenerateId
@@ -877,7 +883,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                                     >
                                                                       <div
                                                                         className="pf-c-chip"
-                                                                        data-ouia-component-id="OUIA-Generated-Chip-1"
+                                                                        data-ouia-component-id="Member-3"
                                                                         data-ouia-component-type="PF4/Chip"
                                                                         data-ouia-safe={true}
                                                                       >
@@ -888,19 +894,19 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                                           Member
                                                                         </span>
                                                                         <Button
-                                                                          aria-label="close"
+                                                                          aria-label="Remove Member chip"
                                                                           aria-labelledby="remove_pf-random-id-1 pf-random-id-1"
                                                                           id="remove_pf-random-id-1"
                                                                           onClick={[Function]}
-                                                                          ouiaId="close"
+                                                                          ouiaId="Member-3"
                                                                           variant="plain"
                                                                         >
                                                                           <button
                                                                             aria-disabled={false}
-                                                                            aria-label="close"
+                                                                            aria-label="Remove Member chip"
                                                                             aria-labelledby="remove_pf-random-id-1 pf-random-id-1"
                                                                             className="pf-c-button pf-m-plain"
-                                                                            data-ouia-component-id="close"
+                                                                            data-ouia-component-id="Member-3"
                                                                             data-ouia-component-type="PF4/Button"
                                                                             data-ouia-safe={true}
                                                                             disabled={false}

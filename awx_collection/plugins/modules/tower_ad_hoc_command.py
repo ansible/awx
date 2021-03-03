@@ -118,7 +118,7 @@ def main():
         limit=dict(),
         credential=dict(required=True),
         module_name=dict(required=True),
-        module_args=dict(default=""),
+        module_args=dict(),
         forks=dict(type='int'),
         verbosity=dict(type='int', choices=['0', '1', '2', '3', '4', '5']),
         extra_vars=dict(type='dict'),

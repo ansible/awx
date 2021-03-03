@@ -6,7 +6,7 @@ import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 import NotificationListItem from './NotificationListItem';
-import PaginatedDataList from '../PaginatedDataList';
+import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import useRequest from '../../util/useRequest';
 import { NotificationTemplatesAPI } from '../../api';
@@ -169,7 +169,7 @@ function NotificationList({
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         contentError={contentError}
         hasContentLoading={isLoading}
         items={notifications}
@@ -211,19 +211,18 @@ function NotificationList({
             key: 'modified_by__username__icontains',
           },
         ]}
-        toolbarSortColumns={[
-          {
-            name: i18n._(t`Name`),
-            key: 'name',
-          },
-          {
-            name: i18n._(t`Type`),
-            key: 'notification_type',
-          },
-        ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
-        renderItem={notification => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+            <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+            <HeaderCell sortKey="notification_type">
+              {i18n._(t`Type`)}
+            </HeaderCell>
+            <HeaderCell>{i18n._(t`Options`)}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(notification, index) => (
           <NotificationListItem
             key={notification.id}
             notification={notification}
@@ -239,6 +238,7 @@ function NotificationList({
             successTurnedOn={successTemplateIds.includes(notification.id)}
             typeLabels={typeLabels}
             showApprovalsToggle={showApprovalsToggle}
+            rowIndex={index}
           />
         )}
       />

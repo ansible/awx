@@ -138,7 +138,7 @@ function InventoryForm({
   );
 }
 
-InventoryForm.proptype = {
+InventoryForm.propType = {
   handleSubmit: func.isRequired,
   handleCancel: func.isRequired,
   instanceGroups: shape(),

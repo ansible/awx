@@ -154,6 +154,7 @@ class TestMetaVars:
         assert data['awx_user_id'] == admin_user.id
         assert data['awx_user_name'] == admin_user.username
         assert data['awx_workflow_job_id'] == workflow_job.pk
+        assert data['awx_workflow_job_launch_type'] == workflow_job.launch_type
 
     def test_scheduled_job_metavars(self, job_template, admin_user):
         schedule = Schedule.objects.create(
@@ -197,6 +198,8 @@ class TestMetaVars:
             'tower_workflow_job_name': 'workflow-job',
             'awx_workflow_job_id': workflow_job.id,
             'tower_workflow_job_id': workflow_job.id,
+            'awx_workflow_job_launch_type': workflow_job.launch_type,
+            'tower_workflow_job_launch_type': workflow_job.launch_type,
             'awx_parent_job_schedule_id': schedule.id,
             'tower_parent_job_schedule_id': schedule.id,
             'awx_parent_job_schedule_name': 'job-schedule',

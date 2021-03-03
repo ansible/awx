@@ -28,7 +28,7 @@ function InventoryListItem({
     isSelected: bool.isRequired,
     onSelect: func.isRequired,
   };
-  const [isDisabled, setIsDisabled] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
 
   const copyInventory = useCallback(async () => {
     await InventoriesAPI.copy(inventory.id, {
@@ -38,11 +38,11 @@ function InventoryListItem({
   }, [inventory.id, inventory.name, fetchInventories]);
 
   const handleCopyStart = useCallback(() => {
-    setIsDisabled(true);
+    setIsCopying(true);
   }, []);
 
   const handleCopyFinish = useCallback(() => {
-    setIsDisabled(false);
+    setIsCopying(false);
   }, []);
 
   const labelId = `check-action-${inventory.id}`;
@@ -115,7 +115,7 @@ function InventoryListItem({
             tooltip={i18n._(t`Edit Inventory`)}
           >
             <Button
-              isDisabled={isDisabled}
+              isDisabled={isCopying}
               aria-label={i18n._(t`Edit Inventory`)}
               variant="plain"
               component={Link}
@@ -128,17 +128,18 @@ function InventoryListItem({
           </ActionItem>
           <ActionItem
             visible={inventory.summary_fields.user_capabilities.copy}
-            tooltip={i18n._(t`Copy Inventory`)}
+            tooltip={
+              inventory.has_inventory_sources
+                ? i18n._(t`Inventories with sources cannot be copied`)
+                : i18n._(t`Copy Inventory`)
+            }
           >
             <CopyButton
               copyItem={copyInventory}
-              isDisabled={isDisabled}
+              isDisabled={isCopying || inventory.has_inventory_sources}
               onCopyStart={handleCopyStart}
               onCopyFinish={handleCopyFinish}
-              helperText={{
-                tooltip: i18n._(t`Copy Inventory`),
-                errorMessage: i18n._(t`Failed to copy inventory.`),
-              }}
+              errorMessage={i18n._(t`Failed to copy inventory.`)}
             />
           </ActionItem>
         </ActionsTd>

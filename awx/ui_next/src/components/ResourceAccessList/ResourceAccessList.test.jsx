@@ -1,11 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 
-import { OrganizationsAPI, TeamsAPI, UsersAPI } from '../../api';
+import { OrganizationsAPI, TeamsAPI, UsersAPI, RolesAPI } from '../../api';
 
 import ResourceAccessList from './ResourceAccessList';
 
@@ -17,7 +18,24 @@ describe('<ResourceAccessList />', () => {
     id: 1,
     name: 'Default',
     summary_fields: {
-      object_roles: {},
+      object_roles: {
+        admin_role: {
+          description: 'Can manage all aspects of the organization',
+          name: 'Admin',
+          id: 2,
+          user_only: true,
+        },
+        execute_role: {
+          description: 'May run any executable resources in the organization',
+          name: 'Execute',
+          id: 3,
+        },
+        project_admin_role: {
+          description: 'Can manage all projects of the organization',
+          name: 'Project Admin',
+          id: 4,
+        },
+      },
       user_capabilities: {
         edit: true,
       },
@@ -87,12 +105,24 @@ describe('<ResourceAccessList />', () => {
     });
     TeamsAPI.disassociateRole.mockResolvedValue({});
     UsersAPI.disassociateRole.mockResolvedValue({});
+    RolesAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          { id: 1, name: 'System Administrator' },
+          { id: 14, name: 'System Auditor' },
+        ],
+      },
+    });
+    const history = createMemoryHistory({
+      initialEntries: ['/organizations/1/access'],
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <ResourceAccessList
           resource={organization}
           apiModel={OrganizationsAPI}
-        />
+        />,
+        { context: { router: { history } } }
       );
     });
     wrapper.update();
@@ -167,5 +197,25 @@ describe('<ResourceAccessList />', () => {
     expect(UsersAPI.disassociateRole).not.toHaveBeenCalled();
     expect(OrganizationsAPI.readAccessList).toHaveBeenCalledTimes(2);
     done();
+  });
+  test('should call api to get org details', async () => {
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+
+    expect(
+      wrapper.find('PaginatedDataList').prop('toolbarSearchColumns')
+    ).toStrictEqual([
+      { isDefault: true, key: 'username__icontains', name: 'Username' },
+      { key: 'first_name__icontains', name: 'First Name' },
+      { key: 'last_name__icontains', name: 'Last Name' },
+      {
+        key: 'or__roles__in',
+        name: 'Roles',
+        options: [
+          ['2, 1', 'Admin'],
+          ['3', 'Execute'],
+          ['4', 'Project Admin'],
+        ],
+      },
+    ]);
   });
 });

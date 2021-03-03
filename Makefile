@@ -25,6 +25,8 @@ SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
 DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
+DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
+
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio,pycurl
@@ -64,7 +66,7 @@ I18N_FLAG_FILE = .i18n_built
 	receiver test test_unit test_coverage coverage_html \
 	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
-	ui-test ui-deps ui-test-ci VERSION
+	ui-test ui-deps ui-test-ci VERSION docker-compose-sources
 
 clean-tmp:
 	rm -rf tmp/
@@ -443,39 +445,6 @@ bulk_data:
 	fi; \
 	$(PYTHON) tools/data_generators/rbac_dummy_data_generator.py --preset=$(DATA_GEN_PRESET)
 
-# l10n TASKS
-# --------------------------------------
-
-# check for UI po files
-HAVE_PO := $(shell ls awx/ui/po/*.po 2>/dev/null)
-check-po:
-ifdef HAVE_PO
-	# Should be 'Language: zh-CN' but not 'Language: zh_CN' in zh_CN.po
-	for po in awx/ui/po/*.po ; do \
-	    echo $$po; \
-	    mo="awx/ui/po/`basename $$po .po`.mo"; \
-	    msgfmt --check --verbose $$po -o $$mo; \
-	    if test "$$?" -ne 0 ; then \
-	        exit -1; \
-	    fi; \
-	    rm $$mo; \
-	    name=`echo "$$po" | grep '-'`; \
-	    if test "x$$name" != x ; then \
-	        right_name=`echo $$language | sed -e 's/-/_/'`; \
-	        echo "ERROR: WRONG $$name CORRECTION: $$right_name"; \
-	        exit -1; \
-	    fi; \
-	    language=`grep '^"Language:' "$$po" | grep '_'`; \
-	    if test "x$$language" != x ; then \
-	        right_language=`echo $$language | sed -e 's/_/-/'`; \
-	        echo "ERROR: WRONG $$language CORRECTION: $$right_language in $$po"; \
-	        exit -1; \
-	    fi; \
-	done;
-else
-	@echo No PO files
-endif
-
 
 # UI TASKS
 # --------------------------------------
@@ -494,10 +463,8 @@ awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
 
 $(UI_BUILD_FLAG_FILE):
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build
-	git checkout awx/ui_next/src/locales
 	mkdir -p awx/public/static/css
 	mkdir -p awx/public/static/js
 	mkdir -p awx/public/static/media
@@ -511,11 +478,17 @@ ui-release: awx/ui_next/node_modules $(UI_BUILD_FLAG_FILE)
 ui-devel: awx/ui_next/node_modules
 	@$(MAKE) -B $(UI_BUILD_FLAG_FILE)
 
+ui-devel-instrumented: awx/ui_next/node_modules
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run start-instrumented
+
+ui-devel-test: awx/ui_next/node_modules
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run start
+
 ui-zuul-lint-and-test:
 	$(NPM_BIN) --prefix awx/ui_next install
 	$(NPM_BIN) run --prefix awx/ui_next lint
 	$(NPM_BIN) run --prefix awx/ui_next prettier-check
-	$(NPM_BIN) run --prefix awx/ui_next test
+	$(NPM_BIN) run --prefix awx/ui_next test -- --coverage --watchAll=false
 
 
 # Build a pip-installable package into dist/ with a timestamped version number.
@@ -559,31 +532,31 @@ docker-auth:
 awx/projects:
 	@mkdir -p $@
 
-# Docker isolated rampart
-docker-compose-isolated: awx/projects
-	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
-
 COMPOSE_UP_OPTS ?=
 
-# Docker Compose Development environment
-docker-compose: docker-auth awx/projects
-	CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml $(COMPOSE_UP_OPTS) up --no-recreate awx
+docker-compose-sources:
+	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
+	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
+	    -e awx_image_tag=$(COMPOSE_TAG)
+
+docker-compose: docker-auth awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up --no-recreate awx
 
 docker-compose-cluster: docker-auth awx/projects
-	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml up
+	docker-compose -f tools/docker-compose-cluster.yml up
 
-docker-compose-credential-plugins: docker-auth awx/projects
+docker-compose-credential-plugins: docker-auth awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
-	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx
 
-docker-compose-test: docker-auth awx/projects
-	cd tools && CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /bin/bash
+docker-compose-test: docker-auth awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx /bin/bash
 
-docker-compose-runtest: awx/projects
-	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh
+docker-compose-runtest: awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx /start_tests.sh
 
-docker-compose-build-swagger: awx/projects
-	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports --no-deps awx /start_tests.sh swagger
+docker-compose-build-swagger: awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx /start_tests.sh swagger
 
 detect-schema-change: genschema
 	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
@@ -591,24 +564,14 @@ detect-schema-change: genschema
 	diff -u -b reference-schema.json schema.json
 
 docker-compose-clean: awx/projects
-	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose rm -sf
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml rm -sf
 
 # Base development image build
 docker-compose-build:
-	ansible-playbook installer/dockerfile.yml -e build_dev=True
-	docker build -t ansible/awx_devel \
+	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True
+	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
-	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
-	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
-
-# For use when developing on "isolated" AWX deployments
-docker-compose-isolated-build: docker-compose-build
-	docker build -t ansible/awx_isolated \
-	    --build-arg BUILDKIT_INLINE_CACHE=1 \
-	    -f tools/docker-isolated/Dockerfile .
-	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
-	#docker push $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 
 docker-clean:
 	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq),docker stop $(container_id); docker rm -f $(container_id);)
@@ -620,11 +583,11 @@ docker-clean-volumes: docker-compose-clean
 docker-refresh: docker-clean docker-compose
 
 # Docker Development Environment with Elastic Stack Connected
-docker-compose-elk: docker-auth awx/projects
-	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+docker-compose-elk: docker-auth awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
-docker-compose-cluster-elk: docker-auth awx/projects
-	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+docker-compose-cluster-elk: docker-auth awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 prometheus:
 	docker run -u0 --net=tools_default --link=`docker ps | egrep -o "tools_awx(_run)?_([^ ]+)?"`:awxweb --volume `pwd`/tools/prometheus:/prometheus --name prometheus -d -p 0.0.0.0:9090:9090 prom/prometheus --web.enable-lifecycle --config.file=/prometheus/prometheus.yml
@@ -643,11 +606,11 @@ psql-container:
 VERSION:
 	@echo "awx: $(VERSION)"
 
-Dockerfile: installer/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook installer/dockerfile.yml
+Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
+	ansible-playbook tools/ansible/dockerfile.yml
 
-Dockerfile.kube-dev: installer/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook installer/dockerfile.yml \
+Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
+	ansible-playbook tools/ansible/dockerfile.yml \
 	    -e dockerfile_name=Dockerfile.kube-dev \
 	    -e kube_dev=True \
 	    -e template_dest=_build_kube_dev
@@ -656,3 +619,20 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	docker build -f Dockerfile.kube-dev \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
+
+
+# Translation TASKS
+# --------------------------------------
+
+# generate UI .pot
+pot: $(UI_BUILD_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-template
+
+# generate API django .pot .po
+LANG = "en-us"
+messages:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot

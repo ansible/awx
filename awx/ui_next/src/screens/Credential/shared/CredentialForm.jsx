@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from 'react';
+import { func, shape } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { arrayOf, func, object, shape } from 'prop-types';
 import {
   ActionGroup,
   Button,
@@ -136,6 +136,7 @@ function CredentialFormFields({ i18n, credentialTypes }) {
         touched={orgMeta.touched}
         error={orgMeta.error}
         required={isGalaxyCredential}
+        isDisabled={initialValues.isOrgLookupDisabled}
       />
       <FormGroup
         fieldId="credential-Type"
@@ -147,10 +148,10 @@ function CredentialFormFields({ i18n, credentialTypes }) {
         label={i18n._(t`Credential Type`)}
       >
         <Select
+          ouiaId="CredentialForm-credential_type"
           aria-label={i18n._(t`Credential Type`)}
           isOpen={isSelectOpen}
           variant={SelectVariant.typeahead}
-          ouiaId="credential-select"
           onToggle={setIsSelectOpen}
           onSelect={(event, value) => {
             credTypeHelpers.setValue(value);
@@ -189,6 +190,7 @@ function CredentialForm({
   onSubmit,
   onCancel,
   submitError,
+  isOrgLookupDisabled,
   ...rest
 }) {
   const [showExternalTestModal, setShowExternalTestModal] = useState(false);
@@ -197,8 +199,9 @@ function CredentialForm({
     description: credential.description || '',
     organization: credential?.summary_fields?.organization || null,
     credential_type: credential?.credential_type || '',
-    inputs: {},
+    inputs: credential?.inputs || {},
     passwordPrompts: {},
+    isOrgLookupDisabled: isOrgLookupDisabled || false,
   };
 
   Object.values(credentialTypes).forEach(credentialType => {
@@ -311,18 +314,18 @@ function CredentialForm({
   );
 }
 
-CredentialForm.proptype = {
+CredentialForm.propTypes = {
   handleSubmit: func.isRequired,
   handleCancel: func.isRequired,
   credentialTypes: shape({}).isRequired,
   credential: shape({}),
-  inputSources: arrayOf(object),
+  inputSources: shape({}),
   submitError: shape({}),
 };
 
 CredentialForm.defaultProps = {
   credential: {},
-  inputSources: [],
+  inputSources: {},
   submitError: null,
 };
 

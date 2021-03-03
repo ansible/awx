@@ -3,25 +3,9 @@ import { shape, number, string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import {
-  DataListAction as _DataListAction,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Switch,
-} from '@patternfly/react-core';
-import styled from 'styled-components';
-import DataListCell from '../DataListCell';
-
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: ${props => `repeat(${props.columns}, max-content)`};
-`;
-const Label = styled.b`
-  margin-right: 20px;
-`;
+import { Switch } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
+import { ActionsTd, ActionItem } from '../PaginatedTable';
 
 function NotificationListItem({
   canToggleNotifications,
@@ -37,54 +21,37 @@ function NotificationListItem({
   showApprovalsToggle,
 }) {
   return (
-    <DataListItem
-      aria-labelledby={`items-list-item-${notification.id}`}
-      key={notification.id}
-      id={`${notification.id}`}
-    >
-      <DataListItemRow>
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name">
-              <Link
-                to={{
-                  pathname: detailUrl,
-                }}
-              >
-                <b id={`items-list-item-${notification.id}`}>
-                  {notification.name}
-                </b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key="type">
-              <Label>{i18n._(t`Type `)}</Label>
-              {typeLabels[notification.notification_type]}
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={i18n._(t`actions`)}
-          aria-labelledby={`items-list-item-${notification.id}`}
-          id={`items-list-item-${notification.id}`}
-          columns={showApprovalsToggle ? 4 : 3}
-        >
-          {showApprovalsToggle && (
-            <Switch
-              id={`notification-${notification.id}-approvals-toggle`}
-              label={i18n._(t`Approval`)}
-              labelOff={i18n._(t`Approval`)}
-              isChecked={approvalsTurnedOn}
-              isDisabled={!canToggleNotifications}
-              onChange={() =>
-                toggleNotification(
-                  notification.id,
-                  approvalsTurnedOn,
-                  'approvals'
-                )
-              }
-              aria-label={i18n._(t`Toggle notification approvals`)}
-            />
-          )}
+    <Tr id={`notification-row-${notification.id}`}>
+      <Td id={`notification-${notification.id}`} dataLabel={i18n._(t`Name`)}>
+        <Link to={`${detailUrl}`}>
+          <b>{notification.name}</b>
+        </Link>
+      </Td>
+      <Td dataLabel={i18n._(t`Type`)}>
+        {typeLabels[notification.notification_type]}
+      </Td>
+      <ActionsTd
+        dataLabel={i18n._(t`Options`)}
+        gridColumns="120px 120px 120px 120px"
+      >
+        <ActionItem visible={showApprovalsToggle}>
+          <Switch
+            id={`notification-${notification.id}-approvals-toggle`}
+            label={i18n._(t`Approval`)}
+            labelOff={i18n._(t`Approval`)}
+            isChecked={approvalsTurnedOn}
+            isDisabled={!canToggleNotifications}
+            onChange={() =>
+              toggleNotification(
+                notification.id,
+                approvalsTurnedOn,
+                'approvals'
+              )
+            }
+            aria-label={i18n._(t`Toggle notification approvals`)}
+          />
+        </ActionItem>
+        <ActionItem visible>
           <Switch
             id={`notification-${notification.id}-started-toggle`}
             label={i18n._(t`Start`)}
@@ -96,6 +63,8 @@ function NotificationListItem({
             }
             aria-label={i18n._(t`Toggle notification start`)}
           />
+        </ActionItem>
+        <ActionItem visible>
           <Switch
             id={`notification-${notification.id}-success-toggle`}
             label={i18n._(t`Success`)}
@@ -107,6 +76,8 @@ function NotificationListItem({
             }
             aria-label={i18n._(t`Toggle notification success`)}
           />
+        </ActionItem>
+        <ActionItem visible>
           <Switch
             id={`notification-${notification.id}-error-toggle`}
             label={i18n._(t`Failure`)}
@@ -118,9 +89,9 @@ function NotificationListItem({
             }
             aria-label={i18n._(t`Toggle notification failure`)}
           />
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 

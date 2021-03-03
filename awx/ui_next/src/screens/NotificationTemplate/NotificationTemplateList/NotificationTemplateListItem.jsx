@@ -3,31 +3,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon, BellIcon } from '@patternfly/react-icons';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { timeOfDay } from '../../../util/dates';
 import { NotificationTemplatesAPI, NotificationsAPI } from '../../../api';
-import DataListCell from '../../../components/DataListCell';
 import StatusLabel from '../../../components/StatusLabel';
 import CopyButton from '../../../components/CopyButton';
 import useRequest from '../../../util/useRequest';
 import { NOTIFICATION_TYPES } from '../constants';
-
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: repeat(3, 40px);
-`;
 
 const NUM_RETRIES = 25;
 const RETRY_TIMEOUT = 5000;
@@ -38,6 +23,7 @@ function NotificationTemplateListItem({
   fetchTemplates,
   isSelected,
   onSelect,
+  rowIndex,
   i18n,
 }) {
   const recentNotifications = template.summary_fields?.recent_notifications;
@@ -102,77 +88,65 @@ function NotificationTemplateListItem({
   const labelId = `template-name-${template.id}`;
 
   return (
-    <DataListItem key={template.id} aria-labelledby={labelId} id={template.id}>
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-template-${template.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell key="name" id={labelId}>
-              <Link to={detailUrl}>
-                <b>{template.name}</b>
-              </Link>
-            </DataListCell>,
-            <DataListCell key="status">
-              {status && <StatusLabel status={status} />}
-            </DataListCell>,
-            <DataListCell key="type">
-              <strong>{i18n._(t`Type:`)}</strong>{' '}
-              {NOTIFICATION_TYPES[template.notification_type] ||
-                template.notification_type}
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={i18n._(t`actions`)}
-          aria-labelledby={labelId}
+    <Tr id={`notification-template-row-${template.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+        dataLabel={i18n._(t`Selected`)}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <Link to={`${detailUrl}`}>
+          <b>{template.name}</b>
+        </Link>
+      </Td>
+      <Td dataLabel={i18n._(t`Status`)}>
+        {status && <StatusLabel status={status} />}
+      </Td>
+      <Td dataLabel={i18n._(t`Type`)}>
+        {NOTIFICATION_TYPES[template.notification_type] ||
+          template.notification_type}
+      </Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionItem visible tooltip={i18n._(t`Test notification`)}>
+          <Button
+            aria-label={i18n._(t`Test Notification`)}
+            variant="plain"
+            onClick={sendTestNotification}
+            isDisabled={isLoading || status === 'running'}
+          >
+            <BellIcon />
+          </Button>
+        </ActionItem>
+        <ActionItem
+          visible={template.summary_fields.user_capabilities.edit}
+          tooltip={i18n._(t`Edit`)}
         >
-          <Tooltip content={i18n._(t`Test Notification`)} position="top">
-            <Button
-              aria-label={i18n._(t`Test Notification`)}
-              variant="plain"
-              onClick={sendTestNotification}
-              isDisabled={isLoading || status === 'running'}
-            >
-              <BellIcon />
-            </Button>
-          </Tooltip>
-          {template.summary_fields.user_capabilities.edit ? (
-            <Tooltip
-              content={i18n._(t`Edit Notification Template`)}
-              position="top"
-            >
-              <Button
-                aria-label={i18n._(t`Edit Notification Template`)}
-                variant="plain"
-                component={Link}
-                to={`/notification_templates/${template.id}/edit`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          ) : (
-            <div />
-          )}
-          {template.summary_fields.user_capabilities.copy && (
-            <CopyButton
-              copyItem={copyTemplate}
-              isCopyDisabled={isCopyDisabled}
-              onCopyStart={handleCopyStart}
-              onCopyFinish={handleCopyFinish}
-              helperText={{
-                tooltip: i18n._(t`Copy Notification Template`),
-                errorMessage: i18n._(t`Failed to copy template.`),
-              }}
-            />
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <Button
+            aria-label={i18n._(t`Edit Notification Template`)}
+            variant="plain"
+            component={Link}
+            to={`/notification_templates/${template.id}/edit`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+        <ActionItem
+          visible={template.summary_fields.user_capabilities.copy}
+          tooltip={i18n._(t`Copy Notification Template`)}
+        >
+          <CopyButton
+            copyItem={copyTemplate}
+            isCopyDisabled={isCopyDisabled}
+            onCopyStart={handleCopyStart}
+            onCopyFinish={handleCopyFinish}
+            errorMessage={i18n._(t`Failed to copy template.`)}
+          />
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 

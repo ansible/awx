@@ -19,7 +19,10 @@ import CredentialChip from '../../../components/CredentialChip';
 import { VariablesInput as _VariablesInput } from '../../../components/CodeMirrorInput';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
-import LaunchButton from '../../../components/LaunchButton';
+import {
+  LaunchButton,
+  ReLaunchDropDown,
+} from '../../../components/LaunchButton';
 import StatusIcon from '../../../components/StatusIcon';
 import { toTitleCase } from '../../../util/strings';
 import { formatDateString } from '../../../util/dates';
@@ -61,6 +64,8 @@ function JobDetail({ job, i18n }) {
     credentials,
     instance_group: instanceGroup,
     inventory,
+    inventory_source,
+    source_project,
     job_template: jobTemplate,
     workflow_job_template: workflowJobTemplate,
     labels,
@@ -200,6 +205,33 @@ function JobDetail({ job, i18n }) {
               >
                 {inventory.name}
               </Link>
+            }
+          />
+        )}
+        {inventory_source && (
+          <Detail
+            label={i18n._(t`Inventory Source`)}
+            value={
+              <Link
+                to={`/inventories/inventory/${inventory.id}/sources/${inventory_source.id}`}
+              >
+                {inventory_source.name}
+              </Link>
+            }
+          />
+        )}
+        {inventory_source && inventory_source.source === 'scm' && (
+          <Detail
+            label={i18n._(t`Project`)}
+            value={
+              <StatusDetailValue>
+                {source_project.status && (
+                  <StatusIcon status={source_project.status} />
+                )}
+                <Link to={`/projects/${source_project.id}`}>
+                  {source_project.name}
+                </Link>
+              </StatusDetailValue>
             }
           />
         )}
@@ -346,7 +378,14 @@ function JobDetail({ job, i18n }) {
       )}
       <CardActionsRow>
         {job.type !== 'system_job' &&
-          job.summary_fields.user_capabilities.start && (
+          job.summary_fields.user_capabilities.start &&
+          (job.status === 'failed' && job.type === 'job' ? (
+            <LaunchButton resource={job}>
+              {({ handleRelaunch }) => (
+                <ReLaunchDropDown isPrimary handleRelaunch={handleRelaunch} />
+              )}
+            </LaunchButton>
+          ) : (
             <LaunchButton resource={job} aria-label={i18n._(t`Relaunch`)}>
               {({ handleRelaunch }) => (
                 <Button type="submit" onClick={handleRelaunch}>
@@ -354,7 +393,7 @@ function JobDetail({ job, i18n }) {
                 </Button>
               )}
             </LaunchButton>
-          )}
+          ))}
         {job.summary_fields.user_capabilities.delete && (
           <DeleteButton
             name={job.name}

@@ -8,7 +8,7 @@ import ErrorDetail from '../../ErrorDetail';
 import useRequest from '../../../util/useRequest';
 import { SchedulesAPI } from '../../../api';
 
-function ScheduleToggle({ schedule, onToggle, className, i18n }) {
+function ScheduleToggle({ schedule, onToggle, className, i18n, isDisabled }) {
   const [isEnabled, setIsEnabled] = useState(schedule.enabled);
   const [showError, setShowError] = useState(false);
 
@@ -55,7 +55,9 @@ function ScheduleToggle({ schedule, onToggle, className, i18n }) {
           labelOff={i18n._(t`Off`)}
           isChecked={isEnabled}
           isDisabled={
-            isLoading || !schedule.summary_fields.user_capabilities.edit
+            isLoading ||
+            !schedule.summary_fields.user_capabilities.edit ||
+            isDisabled
           }
           onChange={toggleSchedule}
           aria-label={i18n._(t`Toggle schedule`)}

@@ -24,4 +24,4 @@
       - "'Non_existing_org' in result.msg"
       - "result.total_results == 0"
 
-# TODO: Deleting labels doesn't seem to work currently
+# You can't delete a label directly so no cleanup is necessary

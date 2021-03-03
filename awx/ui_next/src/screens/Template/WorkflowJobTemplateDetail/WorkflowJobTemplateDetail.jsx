@@ -24,7 +24,7 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
-import LaunchButton from '../../../components/LaunchButton';
+import { LaunchButton } from '../../../components/LaunchButton';
 import Sparkline from '../../../components/Sparkline';
 import { toTitleCase } from '../../../util/strings';
 import useRequest, { useDismissableError } from '../../../util/useRequest';

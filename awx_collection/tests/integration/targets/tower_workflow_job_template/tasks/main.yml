@@ -101,7 +101,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: present
   register: result
@@ -116,7 +115,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: present
   register: result
@@ -131,7 +129,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: present
     survey_enabled: true
@@ -428,7 +425,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: absent
   register: result
@@ -443,7 +439,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: absent
   register: result

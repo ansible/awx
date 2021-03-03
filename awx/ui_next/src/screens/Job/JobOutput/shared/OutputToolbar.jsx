@@ -11,7 +11,10 @@ import {
 } from '@patternfly/react-icons';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
 import DeleteButton from '../../../../components/DeleteButton';
-import LaunchButton from '../../../../components/LaunchButton';
+import {
+  LaunchButton,
+  ReLaunchDropDown,
+} from '../../../../components/LaunchButton';
 
 const BadgeGroup = styled.div`
   margin-left: 20px;
@@ -125,18 +128,32 @@ const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
 
       {job.type !== 'system_job' &&
         job.summary_fields.user_capabilities?.start && (
-          <Tooltip content={i18n._(t`Relaunch Job`)}>
-            <LaunchButton resource={job} aria-label={i18n._(t`Relaunch`)}>
-              {({ handleRelaunch }) => (
-                <Button
-                  variant="plain"
-                  onClick={handleRelaunch}
-                  aria-label={i18n._(t`Relaunch`)}
-                >
-                  <RocketIcon />
-                </Button>
-              )}
-            </LaunchButton>
+          <Tooltip
+            content={
+              job.status === 'failed' && job.type === 'job'
+                ? i18n._(t`Relaunch using host parameters`)
+                : i18n._(t`Relaunch Job`)
+            }
+          >
+            {job.status === 'failed' && job.type === 'job' ? (
+              <LaunchButton resource={job}>
+                {({ handleRelaunch }) => (
+                  <ReLaunchDropDown handleRelaunch={handleRelaunch} />
+                )}
+              </LaunchButton>
+            ) : (
+              <LaunchButton resource={job}>
+                {({ handleRelaunch }) => (
+                  <Button
+                    variant="plain"
+                    onClick={handleRelaunch}
+                    aria-label={i18n._(t`Relaunch`)}
+                  >
+                    <RocketIcon />
+                  </Button>
+                )}
+              </LaunchButton>
+            )}
           </Tooltip>
         )}
 

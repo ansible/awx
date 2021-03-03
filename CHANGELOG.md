@@ -2,6 +2,21 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+# (TBD)
+- Added user interface for the activity stream: https://github.com/ansible/awx/pull/9083
+- Converted many of the top-level list views (Jobs, Teams, Hosts, Inventories, Projects, and more) to a new, permanent table component for substantially increased responsiveness, usability, maintainability, and other 'ility's: https://github.com/ansible/awx/pull/8970, https://github.com/ansible/awx/pull/9182 and many others!
+- Added click-to-expand details for job tables
+- Add search filtering to job output https://github.com/ansible/awx/pull/9208
+- Added the new migration, update, and "installation in progress" page https://github.com/ansible/awx/pull/9123
+- Added the user interface for job settings https://github.com/ansible/awx/pull/8661
+- Runtime errors from jobs are now displayed, along with an explanation for what went wrong, on the output page https://github.com/ansible/awx/pull/9264
+- You can now cancel a running job from its output and details panel https://github.com/ansible/awx/pull/9199
+- Fixed a bug where launch prompt inputs were unexpectedly deposited in the url: https://github.com/ansible/awx/pull/9231
+- Playbook, credential type, and inventory file inputs now support type-ahead and manual type-in! https://github.com/ansible/awx/pull/9120
+- Added ability to relaunch against failed hosts: https://github.com/ansible/awx/pull/9225
+- Added pending workflow approval count to the application header https://github.com/ansible/awx/pull/9334
+- Added user interface for management jobs: https://github.com/ansible/awx/pull/9224
+
 # 17.0.1 (January 26, 2021)
 - Fixed pgdocker directory permissions issue with Local Docker installer: https://github.com/ansible/awx/pull/9152
 - Fixed a bug in the UI which caused toggle settings to not be changed when clicked: https://github.com/ansible/awx/pull/9093

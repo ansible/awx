@@ -14,6 +14,19 @@ class Schedules extends Base {
     return this.http.get(`${this.baseUrl}${resourceId}/credentials/`, params);
   }
 
+  associateCredential(resourceId, credentialId) {
+    return this.http.post(`${this.baseUrl}${resourceId}/credentials/`, {
+      id: credentialId,
+    });
+  }
+
+  disassociateCredential(resourceId, credentialId) {
+    return this.http.post(`${this.baseUrl}${resourceId}/credentials/`, {
+      id: credentialId,
+      disassociate: true,
+    });
+  }
+
   readZoneInfo() {
     return this.http.get(`${this.baseUrl}zoneinfo/`);
   }

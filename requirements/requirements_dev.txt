@@ -21,4 +21,4 @@ backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirector
 mockldap
 sdb
 gprof2dot
-atomicwrites==1.1.5
+atomicwrites==1.4.0

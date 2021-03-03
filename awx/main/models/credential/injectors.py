@@ -92,8 +92,8 @@ def _openstack_data(cred):
         },
     }
 
-    if cred.has_input('project_region_name'):
-        openstack_data['clouds']['devstack']['region_name'] = cred.get_input('project_region_name', default='')
+    if cred.has_input('region'):
+        openstack_data['clouds']['devstack']['region_name'] = cred.get_input('region', default='')
 
     return openstack_data
 

@@ -200,9 +200,12 @@ describe('<JobTemplateForm />', () => {
         'devel'
       );
       wrapper.find('TextInputBase#template-limit').prop('onChange')(1234567890);
-      wrapper.find('AnsibleSelect[name="playbook"]').simulate('change', {
-        target: { value: 'new baz type', name: 'playbook' },
-      });
+      wrapper.find('Select#template-playbook').prop('onToggle')();
+      wrapper.update();
+      wrapper.find('Select#template-playbook').prop('onSelect')(
+        null,
+        'new baz type'
+      );
     });
 
     await act(async () => {
@@ -237,9 +240,9 @@ describe('<JobTemplateForm />', () => {
     expect(wrapper.find('input#template-limit').prop('value')).toEqual(
       1234567890
     );
-    expect(
-      wrapper.find('AnsibleSelect[name="playbook"]').prop('value')
-    ).toEqual('new baz type');
+    expect(wrapper.find('Select#template-playbook').prop('selections')).toEqual(
+      'new baz type'
+    );
     expect(wrapper.find('MultiCredentialsLookup').prop('value')).toEqual([
       {
         id: 2,

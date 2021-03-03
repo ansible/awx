@@ -32,19 +32,22 @@ describe('ScheduleList', () => {
   });
 
   describe('read call successful', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       await act(async () => {
         wrapper = mountWithContexts(
           <ScheduleList
             loadSchedules={loadSchedules}
             loadScheduleOptions={loadScheduleOptions}
+            resource={{ type: 'job_template', inventory: 1 }}
+            launchConfig={{ survey_enabled: false }}
+            surveyConfig={{}}
           />
         );
       });
       wrapper.update();
     });
 
-    afterAll(() => {
+    afterEach(() => {
       wrapper.unmount();
     });
 
@@ -202,6 +205,60 @@ describe('ScheduleList', () => {
       });
       wrapper.update();
       expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+    });
+    test('should show missing resource icon and disabled toggle', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <ScheduleList
+            loadSchedules={loadSchedules}
+            loadScheduleOptions={loadScheduleOptions}
+            hideAddButton
+            resource={{ type: 'job_template', inventory: 1 }}
+            launchConfig={{ survey_enabled: true }}
+            surveyConfig={{ spec: [{ required: true, default: null }] }}
+          />
+        );
+      });
+      wrapper.update();
+      expect(
+        wrapper
+          .find('ScheduleListItem')
+          .at(4)
+          .prop('isMissingSurvey')
+      ).toBe('This schedule is missing required survey values');
+      expect(wrapper.find('ExclamationTriangleIcon').length).toBe(5);
+      expect(wrapper.find('Switch#schedule-5-toggle').prop('isDisabled')).toBe(
+        true
+      );
+    });
+    test('should show missing resource icon and disabled toggle', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <ScheduleList
+            loadSchedules={loadSchedules}
+            loadScheduleOptions={loadScheduleOptions}
+            hideAddButton
+            resource={{ type: 'job_template' }}
+            launchConfig={{
+              survey_enabled: true,
+              inventory_needed_to_start: true,
+            }}
+            surveyConfig={{ spec: [] }}
+          />
+        );
+      });
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('ScheduleListItem')
+          .at(3)
+          .prop('isMissingInventory')
+      ).toBe('This schedule is missing an Inventory');
+      expect(wrapper.find('ExclamationTriangleIcon').length).toBe(4);
+      expect(wrapper.find('Switch#schedule-3-toggle').prop('isDisabled')).toBe(
+        true
+      );
     });
   });
 
