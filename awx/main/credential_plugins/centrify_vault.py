@@ -21,6 +21,18 @@ pas_inputs = {
         'type':'string',
         'help_text': _('Password of Centrify API User with necessary permissions'),
         'secret':True,
+    },{
+        'id':'oauth_application_id',
+        'label':_('OAuth2 Application ID'),
+        'type':'string',
+        'help_text': _('Application ID of the configured OAuth2 Client (defaults to \'awx\')'),
+        'default': 'awx',
+    },{
+        'id':'oauth_scope',
+        'label':_('OAuth2 Scope'),
+        'type':'string',
+        'help_text': _('Scope of the configured OAuth2 Client (defaults to \'awx\')'),
+        'default': 'awx',
     }],
     'metadata': [{
         'id': 'account-name',
@@ -41,7 +53,7 @@ pas_inputs = {
 def handle_auth(**kwargs):
     post_data = {
         "grant_type": "client_credentials", 
-        "scope":"siem" 
+        "scope": kwargs['oauth_scope']
     }
     response = requests.post(
         kwargs['endpoint'],
@@ -106,8 +118,14 @@ def centrify_backend(**kwargs):
     system_name = kwargs.get('system-name')
     client_id = kwargs.get('client_id')
     client_password = kwargs.get('client_password')
-    endpoint = urljoin(url,'/oauth2/token/oauthsiem')
-    endpoint = {'endpoint':endpoint,'client_id':client_id,'client_password':client_password}
+    app_id = kwargs.get('oauth_application_id', 'awx')
+    endpoint = urljoin(url, f'/oauth2/token/{app_id}')
+    endpoint = {
+        'endpoint': endpoint,
+        'client_id': client_id,
+        'client_password': client_password
+        'oauth_scope': kwargs.get('oauth_scope', 'awx')
+    }
     token = handle_auth(**endpoint)
     get_id_args = {'system_name':system_name,'acc_name':acc_name,'url':url,'access_token':token}
     acc_id = get_ID(**get_id_args)

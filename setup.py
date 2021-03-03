@@ -131,7 +131,7 @@ setup(
             'hashivault_ssh = awx.main.credential_plugins.hashivault:hashivault_ssh_plugin',
             'azure_kv = awx.main.credential_plugins.azure_kv:azure_keyvault_plugin',
             'aim = awx.main.credential_plugins.aim:aim_plugin',
-            'centrify_vault_kv=awx.main.credential_plugins.centrify_vault:centrify_plugin'
+            'centrify_vault_kv = awx.main.credential_plugins.centrify_vault:centrify_plugin'
         ]
     },
     data_files = proc_data_files([
