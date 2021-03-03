@@ -1,6 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
+import { Alert } from '@patternfly/react-core';
 import InventoryStep from './InventoryStep';
 import StepName from './StepName';
 
@@ -21,7 +22,7 @@ export default function useInventoryStep(
         !meta.value;
 
   return {
-    step: getStep(launchConfig, i18n, formError),
+    step: getStep(launchConfig, i18n, formError, resource),
     initialValues: getInitialValues(launchConfig, resource),
     isReady: true,
     contentError: null,
@@ -36,7 +37,7 @@ export default function useInventoryStep(
     },
   };
 }
-function getStep(launchConfig, i18n, formError) {
+function getStep(launchConfig, i18n, formError, resource) {
   if (!launchConfig.ask_inventory_on_launch) {
     return null;
   }
@@ -47,7 +48,22 @@ function getStep(launchConfig, i18n, formError) {
         {i18n._(t`Inventory`)}
       </StepName>
     ),
-    component: <InventoryStep i18n={i18n} />,
+    component: (
+      <InventoryStep
+        i18n={i18n}
+        warningMessage={
+          resource.type === 'workflow_job_template' ? (
+            <Alert
+              variant="warning"
+              isInline
+              title={i18n._(
+                t`This inventory is applied to all job template nodes within this workflow that prompt for an inventory.`
+              )}
+            />
+          ) : null
+        }
+      />
+    ),
     enableNext: true,
   };
 }

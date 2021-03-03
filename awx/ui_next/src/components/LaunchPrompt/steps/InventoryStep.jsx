@@ -17,7 +17,7 @@ const QS_CONFIG = getQSConfig('inventory', {
   order_by: 'name',
 });
 
-function InventoryStep({ i18n }) {
+function InventoryStep({ i18n, warningMessage = null }) {
   const [field, meta, helpers] = useField({
     name: 'inventory',
   });
@@ -68,6 +68,7 @@ function InventoryStep({ i18n }) {
 
   return (
     <>
+      {warningMessage}
       <OptionsList
         value={field.value ? [field.value] : []}
         options={inventories}
