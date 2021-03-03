@@ -59,7 +59,7 @@
 
     - assert:
         that:
-          - "result is changed"
+          - result.copied
 
     - name: Delete an Inventory
       tower_inventory:

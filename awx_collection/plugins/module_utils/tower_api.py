@@ -413,7 +413,10 @@ class TowerAPIModule(TowerModule):
     def copy_item(self, existing_item, copy_from_name_or_id, new_item_name, endpoint=None, item_type='unknown', copy_lookup_data={}):
 
         if existing_item is not None:
-            self.fail_json(msg="A {0} with the name {1} already exists.".format(item_type, new_item_name))
+            self.warn(msg="A {0} with the name {1} already exists.".format(item_type, new_item_name))
+            self.json_output['changed'] = False
+            self.json_output['copied'] = False
+            return existing_item
 
         # Lookup existing item to copy from
         copy_from_lookup = self.get_one(endpoint, name_or_id=copy_from_name_or_id, **{'data': copy_lookup_data})
@@ -441,6 +444,7 @@ class TowerAPIModule(TowerModule):
         if response['status_code'] in [201]:
             self.json_output['id'] = response['json']['id']
             self.json_output['changed'] = True
+            self.json_output['copied'] = True
             new_existing_item = response['json']
         else:
             if 'json' in response and '__all__' in response['json']:

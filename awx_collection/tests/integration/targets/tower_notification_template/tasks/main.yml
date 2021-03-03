@@ -142,7 +142,7 @@
 
 - assert:
     that:
-      - result is changed
+      - result.copied
 
 - name: Delete copied email notification
   tower_notification_template:

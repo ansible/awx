@@ -253,7 +253,7 @@
 
 - assert:
     that:
-      - "result is changed"
+      - result.copied
 
 - name: Fail Remove "on start" webhook notification from copied workflow job template
   tower_workflow_job_template:

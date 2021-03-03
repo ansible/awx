@@ -212,7 +212,7 @@
 
 - assert:
     that:
-      - result is changed
+      - result.copied
 
 - name: Delete an SSH credential
   tower_credential:

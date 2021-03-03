@@ -89,7 +89,7 @@
 # the project, or it could be because the module actually failed somehow
 - assert:
     that:
-      - "result is changed"
+      - result.copied
 
 - name: Check module fails with correct msg when given non-existing org as param
   tower_project:
