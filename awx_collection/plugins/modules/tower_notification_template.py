@@ -395,29 +395,6 @@ def main():
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
 
-    # Attempt to look up notification template to copy based on the provided name
-    if copy_from:
-        # Check if notification template exists, as API will allow you to create an identical item with the same name in same org, but GUI will not.
-        notification_template = module.get_one('notification_templates', name_or_id=name, **{
-            'data': {
-                'organization': organization_id
-            }
-        })
-        if notification_template is not None:
-            module.fail_json(msg="A notification template with the name {0} already exists.".format(name))
-        else:
-            # Lookup existing notification template.
-            copy_from_lookup = module.get_one('notification_templates', name_or_id=copy_from)
-            if copy_from_lookup is None:
-                module.fail_json(msg="An notification template with the name {0} was not able to be found.".format(copy_from))
-            else:
-                # Because the initial copy will keep its organization, this can be different then the specified one.
-                organization_id = copy_from_lookup['organization']
-                module.copy_item(
-                    copy_from_lookup, name,
-                    item_type='notification_template'
-                )
-
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('notification_templates', name_or_id=name, **{
         'data': {
@@ -425,9 +402,13 @@ def main():
         }
     })
 
-    # Reset Org id to push in case copy_from was used.
-    if organization:
-        organization_id = module.resolve_name_to_id('organizations', organization)
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        existing_item = module.copy_item(
+            existing_item, copy_from, name,
+            endpoint='notification_templates', item_type='notification_template',
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

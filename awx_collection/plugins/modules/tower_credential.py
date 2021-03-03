@@ -398,32 +398,21 @@ def main():
     lookup_data = {
         'credential_type': cred_type_id,
     }
+    # Create a copy of lookup data for copying without org.
+    copy_lookup_data = lookup_data
     if organization:
         lookup_data['organization'] = org_id
 
+    credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
+
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
-        # Check if credential exists, as API will allow you to create an identical item with the same name in same org, but GUI will not.
-        credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
-        if credential is not None:
-            module.fail_json(msg="A credential with the name {0} already exists.".format(name))
-        else:
-            # Lookup existing credential.
-            copy_lookup_data = {
-                'credential_type': cred_type_id,
-            }
-            copy_from_lookup = module.get_one('credentials', name_or_id=copy_from, **{'data': copy_lookup_data})
-            if copy_from_lookup is None:
-                module.fail_json(msg="A credential with the name {0} was not able to be found.".format(copy_from))
-            else:
-                # Because the initial copy will keep its organization, this can be different then the specified one.
-                lookup_data['organization'] = copy_from_lookup['organization']
-                module.copy_item(
-                    copy_from_lookup, name,
-                    item_type='credential'
-                )
-
-    credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
+        # a new existing item is formed when copying and is returned.
+        credential = module.copy_item(
+            credential, copy_from, name,
+            endpoint='credentials', item_type='credential',
+            copy_lookup_data=copy_lookup_data
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

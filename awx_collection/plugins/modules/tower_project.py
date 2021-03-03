@@ -292,27 +292,16 @@ def main():
         org_id = module.resolve_name_to_id('organizations', organization)
         lookup_data['organization'] = org_id
 
-    # Attempt to look up project to copy based on the provided name
-    if copy_from:
-        # Check if project exists, as API will allow you to create an identical item with the same name in same org, but GUI will not.
-        project = module.get_one('projects', name_or_id=name, data=lookup_data)
-        if project is not None:
-            module.fail_json(msg="A project with the name {0} already exists.".format(name))
-        else:
-            # Lookup existing project.
-            copy_from_lookup = module.get_one('projects', name_or_id=copy_from)
-            if copy_from_lookup is None:
-                module.fail_json(msg="A project with the name {0} was not able to be found.".format(copy_from))
-            else:
-                # Because the initial copy will keep its organization, this can be different then the specified one.
-                lookup_data['organization'] = copy_from_lookup['organization']
-                module.copy_item(
-                    copy_from_lookup, name,
-                    item_type='project'
-                )
-
     # Attempt to look up project based on the provided name and org ID
     project = module.get_one('projects', name_or_id=name, data=lookup_data)
+
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        project = module.copy_item(
+            project, copy_from, name,
+            endpoint='projects', item_type='project',
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

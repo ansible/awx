@@ -126,29 +126,6 @@ def main():
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
 
-    # Attempt to look up inventory to copy based on the provided name
-    if copy_from:
-        # Check if inventory exists, as API will allow you to create an identical item with the same name in same org, but GUI will not.
-        inventory = module.get_one('inventories', name_or_id=name, **{
-            'data': {
-                'organization': org_id
-            }
-        })
-        if inventory is not None:
-            module.fail_json(msg="A inventory with the name {0} already exists.".format(name))
-        else:
-            # Lookup existing inventory.
-            copy_from_lookup = module.get_one('inventories', name_or_id=copy_from)
-            if copy_from_lookup is None:
-                module.fail_json(msg="An inventory with the name {0} was not able to be found.".format(copy_from))
-            else:
-                # Because the initial copy will keep its organization, this can be different then the specified one.
-                org_id = copy_from_lookup['organization']
-                module.copy_item(
-                    copy_from_lookup, name,
-                    item_type='inventory'
-                )
-
     # Attempt to look up inventory based on the provided name and org ID
     inventory = module.get_one('inventories', name_or_id=name, **{
         'data': {
@@ -156,12 +133,17 @@ def main():
         }
     })
 
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        inventory = module.copy_item(
+            inventory, copy_from, name,
+            endpoint='inventories', item_type='inventory',
+        )
+
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(inventory)
-
-    # Reset Org id to push in case copy_from was used.
-    org_id = module.resolve_name_to_id('organizations', organization)
 
     # Create the data that gets sent for create and update
     inventory_fields = {

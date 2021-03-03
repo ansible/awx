@@ -437,27 +437,16 @@ def main():
         organization_id = module.resolve_name_to_id('organizations', organization)
         search_fields['organization'] = new_fields['organization'] = organization_id
 
-    # Attempt to look up job template to copy based on the provided name
-    if copy_from:
-        # Check if job template exists, as API will allow you to create an identical item with the same name in same org, but GUI will not.
-        job_template = module.get_one('job_templates', name_or_id=name, **{'data': search_fields})
-        if job_template is not None:
-            module.fail_json(msg="A job template with the name {0} already exists.".format(name))
-        else:
-            # Lookup existing job template.
-            copy_from_lookup = module.get_one('job_templates', name_or_id=copy_from)
-            if copy_from_lookup is None:
-                module.fail_json(msg="A job template with the name {0} was not able to be found.".format(copy_from))
-            else:
-                # Because the initial copy will keep its organization, this can be different then the specified one.
-                search_fields['organization'] = copy_from_lookup['organization']
-                module.copy_item(
-                    copy_from_lookup, name,
-                    item_type='job_template'
-                )
-
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('job_templates', name_or_id=name, **{'data': search_fields})
+
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        existing_item = module.copy_item(
+            existing_item, copy_from, name,
+            endpoint='job_templates', item_type='job_template',
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
