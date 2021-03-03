@@ -37,7 +37,7 @@ function ContainerGroupEdit({ instanceGroup }) {
     try {
       await InstanceGroupsAPI.update(instanceGroup.id, {
         name: values.name,
-        credential: values.credential.id,
+        credential: values.credential ? values.credential.id : null,
         pod_spec_override: values.override ? values.pod_spec_override : null,
       });
       history.push(detailsIUrl);
