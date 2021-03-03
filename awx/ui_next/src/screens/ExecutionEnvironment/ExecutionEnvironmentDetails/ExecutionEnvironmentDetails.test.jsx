@@ -67,6 +67,45 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(wrapper.find('Detail[label="Description"]').prop('value')).toEqual(
       'Foo'
     );
+    expect(wrapper.find('Detail[label="Organization"]').prop('value')).toEqual(
+      'Globally Available'
+    );
+    expect(
+      wrapper.find('Detail[label="Credential"]').prop('value').props.children
+    ).toEqual(executionEnvironment.summary_fields.credential.name);
+    const dates = wrapper.find('UserDateDetail');
+    expect(dates).toHaveLength(2);
+    expect(dates.at(0).prop('date')).toEqual(executionEnvironment.created);
+    expect(dates.at(1).prop('date')).toEqual(executionEnvironment.modified);
+  });
+
+  test('should render organization detail', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ExecutionEnvironmentDetails
+          executionEnvironment={{
+            ...executionEnvironment,
+            organization: 1,
+            summary_fields: {
+              organization: { id: 1, name: 'Bar' },
+              credential: {
+                id: 4,
+                name: 'Container Registry',
+              },
+            },
+          }}
+        />
+      );
+    });
+    wrapper.update();
+
+    expect(wrapper.find('Detail[label="Image"]').prop('value')).toEqual(
+      executionEnvironment.image
+    );
+    expect(wrapper.find('Detail[label="Description"]').prop('value')).toEqual(
+      'Foo'
+    );
+    expect(wrapper.find(`Detail[label="Organization"] dd`).text()).toBe('Bar');
     expect(
       wrapper.find('Detail[label="Credential"]').prop('value').props.children
     ).toEqual(executionEnvironment.summary_fields.credential.name);
