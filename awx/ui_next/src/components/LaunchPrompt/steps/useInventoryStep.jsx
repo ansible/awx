@@ -59,6 +59,7 @@ function getStep(launchConfig, i18n, formError, resource) {
         warningMessage={
           resource.type === 'workflow_job_template' ? (
             <InventoryAlert
+              ouiaId="InventoryStep-alert"
               variant="warning"
               isInline
               title={i18n._(
