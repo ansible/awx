@@ -458,7 +458,6 @@ clean-ui:
 	rm -rf awx/ui_next/build
 	rm -rf awx/ui_next/src/locales/_build
 	rm -rf $(UI_BUILD_FLAG_FILE)
-	git checkout awx/ui_next/src/locales
 
 awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
