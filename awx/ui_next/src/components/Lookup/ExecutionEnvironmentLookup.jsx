@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
-import { string, func, bool } from 'prop-types';
+import { string, func, bool, oneOfType, number } from 'prop-types';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup, Tooltip } from '@patternfly/react-core';
 
-import { ExecutionEnvironmentsAPI } from '../../api';
+import { ExecutionEnvironmentsAPI, ProjectsAPI } from '../../api';
 import { ExecutionEnvironment } from '../../types';
 import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
 import Popover from '../Popover';
@@ -26,14 +26,37 @@ function ExecutionEnvironmentLookup({
   i18n,
   isDefaultEnvironment,
   isDisabled,
+  onBlur,
   onChange,
   organizationId,
   popoverContent,
+  projectId,
   tooltip,
   value,
-  onBlur,
 }) {
   const location = useLocation();
+
+  const {
+    request: fetchProject,
+    error: fetchProjectError,
+    isLoading: fetchProjectLoading,
+    result: project,
+  } = useRequest(
+    useCallback(async () => {
+      if (!projectId) {
+        return {};
+      }
+      const { data } = await ProjectsAPI.readDetail(projectId);
+      return data;
+    }, [projectId]),
+    {
+      project: null,
+    }
+  );
+
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
 
   const {
     result: {
@@ -51,9 +74,10 @@ function ExecutionEnvironmentLookup({
       const globallyAvailableParams = globallyAvailable
         ? { or__organization__isnull: 'True' }
         : {};
-      const organizationIdParams = organizationId
-        ? { or__organization__id: organizationId }
-        : {};
+      const organizationIdParams =
+        organizationId || project?.organization
+          ? { or__organization__id: organizationId }
+          : {};
       const [{ data }, actionsResponse] = await Promise.all([
         ExecutionEnvironmentsAPI.read(
           mergeParams(params, {
@@ -73,7 +97,7 @@ function ExecutionEnvironmentLookup({
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
-    }, [location, globallyAvailable, organizationId]),
+    }, [location, globallyAvailable, organizationId, project]),
     {
       executionEnvironments: [],
       count: 0,
@@ -95,7 +119,7 @@ function ExecutionEnvironmentLookup({
         onBlur={onBlur}
         onChange={onChange}
         qsConfig={QS_CONFIG}
-        isLoading={isLoading}
+        isLoading={isLoading || fetchProjectLoading}
         isDisabled={isDisabled}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
@@ -146,7 +170,7 @@ function ExecutionEnvironmentLookup({
         renderLookup()
       )}
 
-      <LookupErrorMessage error={error} />
+      <LookupErrorMessage error={error || fetchProjectError} />
     </FormGroup>
   );
 }
@@ -156,12 +180,16 @@ ExecutionEnvironmentLookup.propTypes = {
   popoverContent: string,
   onChange: func.isRequired,
   isDefaultEnvironment: bool,
+  projectId: oneOfType([number, string]),
+  organizationId: oneOfType([number, string]),
 };
 
 ExecutionEnvironmentLookup.defaultProps = {
   popoverContent: '',
   isDefaultEnvironment: false,
   value: null,
+  projectId: null,
+  organizationId: null,
 };
 
 export default withI18n()(ExecutionEnvironmentLookup);

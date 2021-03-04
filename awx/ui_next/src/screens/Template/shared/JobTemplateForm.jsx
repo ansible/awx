@@ -40,7 +40,7 @@ import {
   ExecutionEnvironmentLookup,
 } from '../../../components/Lookup';
 import Popover from '../../../components/Popover';
-import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
+import { JobTemplatesAPI } from '../../../api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
@@ -107,30 +107,6 @@ function JobTemplateForm({
     executionEnvironmentMeta,
     executionEnvironmentHelpers,
   ] = useField({ name: 'execution_environment' });
-
-  const projectId = projectField.value?.id;
-
-  const {
-    request: fetchProject,
-    error: fetchProjectError,
-    isLoading: fetchProjectLoading,
-    result: projectData,
-  } = useRequest(
-    useCallback(async () => {
-      if (!projectId) {
-        return {};
-      }
-      const { data } = await ProjectsAPI.readDetail(projectId);
-      return data;
-    }, [projectId]),
-    {
-      projectData: null,
-    }
-  );
-
-  useEffect(() => {
-    fetchProject();
-  }, [fetchProject]);
 
   const {
     request: loadRelatedInstanceGroups,
@@ -213,16 +189,12 @@ function JobTemplateForm({
     callbackUrl = `${origin}${path}`;
   }
 
-  if (instanceGroupLoading || fetchProjectLoading) {
+  if (instanceGroupLoading) {
     return <ContentLoading />;
   }
 
-  if (contentError || instanceGroupError || fetchProjectError) {
-    return (
-      <ContentError
-        error={contentError || instanceGroupError || fetchProjectError}
-      />
-    );
+  if (contentError || instanceGroupError) {
+    return <ContentError error={contentError || instanceGroupError} />;
   }
 
   return (
@@ -323,7 +295,7 @@ function JobTemplateForm({
           )}
           globallyAvailable
           isDisabled={!projectField.value}
-          organizationId={projectData?.organization}
+          projectId={projectField.value?.id}
         />
 
         {projectField.value?.allow_override && (
