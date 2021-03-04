@@ -534,15 +534,16 @@ awx/projects:
 	@mkdir -p $@
 
 COMPOSE_UP_OPTS ?=
+CLUSER_NODE_COUNT ?= 1
 
 docker-compose-sources:
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
-	    -e awx_image_tag=$(COMPOSE_TAG)
+	    -e awx_image_tag=$(COMPOSE_TAG) \
 	    -e cluster_node_count=$(CLUSER_NODE_COUNT)
 
 docker-compose: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up --no-recreate awx_1
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up
 
 docker-compose-credential-plugins: docker-auth awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"

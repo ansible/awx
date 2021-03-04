@@ -44,6 +44,28 @@ services:
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     privileged: true
     tty: true
+    ports:
+      - "{{ awx_sdb_port_start }}:{{ awx_sdb_port_end }}"  # sdb-listen
+{% if cluster_node_count|int == 1 %}
+      - "8080:8080"  # unused but mapped for debugging
+      - "8888:8888"  # jupyter notebook
+      - "8013:8013"  # http
+      - "8043:8043"  # https
+{% else %}
+  haproxy:
+    image: haproxy
+    volumes:
+      - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+    depends_on:
+{% for i in range(cluster_node_count|int) -%}
+  {% set container_postfix = loop.index %}
+      - "awx_{{ container_postfix }}"
+{% endfor %}
+    ports:
+      - "8013:8013"
+      - "8043:8043"
+      - "1936:1936"
+{% endif %}
   redis_{{ container_postfix }}:
     image: redis:latest
     container_name: tools_redis_{{ container_postfix }}
@@ -69,22 +91,6 @@ services:
       POSTGRES_PASSWORD: {{ pg_password }}
     volumes:
       - "awx_db:/var/lib/postgresql/data"
-{% if cluster_node_count|int > 1 %}
-  haproxy:
-    image: haproxy
-    volumes:
-      - "../ha.conf:/usr/local/etc/haproxy/haproxy.cfg"
-    depends_on:
-{% for i in range(cluster_node_count|int) -%}
-  {% set container_postfix = loop.index %}
-      - "awx_{{ container_postfix }}"
-{% endfor %}
-    ports:
-      - "8013:8013"
-      - "8043:8043"
-      - "1936:1936"
-{% endif -%} {# haproxy #}
-
 volumes:
   awx_db:
   receptor:
