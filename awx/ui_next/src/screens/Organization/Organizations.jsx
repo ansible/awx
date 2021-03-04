@@ -34,6 +34,9 @@ function Organizations({ i18n }) {
         [`/organizations/${organization.id}/notifications`]: i18n._(
           t`Notifications`
         ),
+        [`/organizations/${organization.id}/execution_environments`]: i18n._(
+          t`Execution Environments`
+        ),
       };
       setBreadcrumbConfig(breadcrumb);
     },

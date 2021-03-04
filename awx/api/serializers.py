@@ -50,7 +50,7 @@ from awx.main.constants import (
 )
 from awx.main.models import (
     ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
-    CredentialType, CustomInventoryScript, Group, Host, Instance,
+    CredentialType, CustomInventoryScript, ExecutionEnvironment, Group, Host, Instance,
     InstanceGroup, Inventory, InventorySource, InventoryUpdate,
     InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
     JobNotificationMixin, JobTemplate, Label, Notification, NotificationTemplate,
@@ -107,6 +107,8 @@ SUMMARIZABLE_FK_FIELDS = {
                                            'insights_credential_id',),
     'host': DEFAULT_SUMMARY_FIELDS,
     'group': DEFAULT_SUMMARY_FIELDS,
+    'default_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
+    'execution_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
@@ -124,12 +126,12 @@ SUMMARIZABLE_FK_FIELDS = {
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
-    'inventory_source': ('source', 'last_updated', 'status'),
+    'inventory_source': ('id', 'name', 'source', 'last_updated', 'status'),
     'custom_inventory_script': DEFAULT_SUMMARY_FIELDS,
     'source_script': DEFAULT_SUMMARY_FIELDS,
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
-    'instance_group': ('id', 'name', 'controller_id', 'is_containerized'),
+    'instance_group': ('id', 'name', 'controller_id', 'is_container_group'),
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
@@ -647,7 +649,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
     class Meta:
         model = UnifiedJobTemplate
         fields = ('*', 'last_job_run', 'last_job_failed',
-                  'next_job_run', 'status')
+                  'next_job_run', 'status', 'execution_environment')
 
     def get_related(self, obj):
         res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
@@ -657,6 +659,9 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             res['last_job'] = obj.last_job.get_absolute_url(request=self.context.get('request'))
         if obj.next_schedule:
             res['next_schedule'] = obj.next_schedule.get_absolute_url(request=self.context.get('request'))
+        if obj.execution_environment_id:
+            res['execution_environment'] = self.reverse('api:execution_environment_detail',
+                                                        kwargs={'pk': obj.execution_environment_id})
         return res
 
     def get_types(self):
@@ -711,6 +716,7 @@ class UnifiedJobSerializer(BaseSerializer):
     class Meta:
         model = UnifiedJob
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
+                  'execution_environment',
                   'failed', 'started', 'finished', 'canceled_on', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation',
                   'execution_node', 'controller_node',
@@ -748,6 +754,9 @@ class UnifiedJobSerializer(BaseSerializer):
             res['stdout'] = self.reverse('api:ad_hoc_command_stdout', kwargs={'pk': obj.pk})
         if obj.workflow_job_id:
             res['source_workflow_job'] = self.reverse('api:workflow_job_detail', kwargs={'pk': obj.workflow_job_id})
+        if obj.execution_environment_id:
+            res['execution_environment'] = self.reverse('api:execution_environment_detail',
+                                                        kwargs={'pk': obj.execution_environment_id})
         return res
 
     def get_summary_fields(self, obj):
@@ -1243,11 +1252,12 @@ class OrganizationSerializer(BaseSerializer):
 
     class Meta:
         model = Organization
-        fields = ('*', 'max_hosts', 'custom_virtualenv',)
+        fields = ('*', 'max_hosts', 'custom_virtualenv', 'default_environment',)
 
     def get_related(self, obj):
         res = super(OrganizationSerializer, self).get_related(obj)
-        res.update(dict(
+        res.update(
+            execution_environments = self.reverse('api:organization_execution_environments_list', kwargs={'pk': obj.pk}),
             projects    = self.reverse('api:organization_projects_list',       kwargs={'pk': obj.pk}),
             inventories = self.reverse('api:organization_inventories_list',    kwargs={'pk': obj.pk}),
             job_templates = self.reverse('api:organization_job_templates_list', kwargs={'pk': obj.pk}),
@@ -1267,7 +1277,10 @@ class OrganizationSerializer(BaseSerializer):
             access_list = self.reverse('api:organization_access_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:organization_instance_groups_list', kwargs={'pk': obj.pk}),
             galaxy_credentials = self.reverse('api:organization_galaxy_credentials_list', kwargs={'pk': obj.pk}),
-        ))
+        )
+        if obj.default_environment:
+            res['default_environment'] = self.reverse('api:execution_environment_detail',
+                                                      kwargs={'pk': obj.default_environment_id})
         return res
 
     def get_summary_fields(self, obj):
@@ -1347,6 +1360,29 @@ class ProjectOptionsSerializer(BaseSerializer):
         return super(ProjectOptionsSerializer, self).validate(attrs)
 
 
+class ExecutionEnvironmentSerializer(BaseSerializer):
+    show_capabilities = ['edit', 'delete', 'copy']
+    managed_by_tower = serializers.ReadOnlyField()
+
+    class Meta:
+        model = ExecutionEnvironment
+        fields = ('*', 'organization', 'image', 'managed_by_tower', 'credential', 'pull')
+
+    def get_related(self, obj):
+        res = super(ExecutionEnvironmentSerializer, self).get_related(obj)
+        res.update(
+            activity_stream=self.reverse('api:execution_environment_activity_stream_list', kwargs={'pk': obj.pk}),
+            unified_job_templates=self.reverse('api:execution_environment_job_template_list', kwargs={'pk': obj.pk}),
+            copy=self.reverse('api:execution_environment_copy', kwargs={'pk': obj.pk}),
+        )
+        if obj.organization:
+            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
+        if obj.credential:
+            res['credential'] = self.reverse('api:credential_detail',
+                                             kwargs={'pk': obj.credential.pk})
+        return res
+
+
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True)
@@ -1360,8 +1396,8 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = Project
-        fields = ('*', 'organization', 'scm_update_on_launch',
-                  'scm_update_cache_timeout', 'allow_override', 'custom_virtualenv',) + \
+        fields = ('*', '-execution_environment', 'organization', 'scm_update_on_launch',
+                  'scm_update_cache_timeout', 'allow_override', 'custom_virtualenv', 'default_environment') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
 
     def get_related(self, obj):
@@ -1386,6 +1422,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail',
                                                kwargs={'pk': obj.organization.pk})
+        if obj.default_environment:
+            res['default_environment'] = self.reverse('api:execution_environment_detail',
+                                                      kwargs={'pk': obj.default_environment_id})
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = self.reverse('api:project_update_detail',
@@ -4731,7 +4770,7 @@ class InstanceGroupSerializer(BaseSerializer):
                     'Isolated groups have a designated controller group.'),
         read_only=True
     )
-    is_containerized = serializers.BooleanField(
+    is_container_group = serializers.BooleanField(
         help_text=_('Indicates whether instances in this group are containerized.'
                     'Containerized groups have a designated Openshift or Kubernetes cluster.'),
         read_only=True
@@ -4761,7 +4800,7 @@ class InstanceGroupSerializer(BaseSerializer):
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
                   "percent_capacity_remaining", "jobs_running", "jobs_total",
-                  "instances", "controller", "is_controller", "is_isolated", "is_containerized", "credential",
+                  "instances", "controller", "is_controller", "is_isolated", "is_container_group", "credential",
                   "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list",
                   "pod_spec_override", "summary_fields")
 
@@ -4786,17 +4825,17 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('Isolated instances may not be added or removed from instances groups via the API.'))
             if self.instance and self.instance.controller_id is not None:
                 raise serializers.ValidationError(_('Isolated instance group membership may not be managed via the API.'))
-        if value and self.instance and self.instance.is_containerized:
+        if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 
     def validate_policy_instance_percentage(self, value):
-        if value and self.instance and self.instance.is_containerized:
+        if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 
     def validate_policy_instance_minimum(self, value):
-        if value and self.instance and self.instance.is_containerized:
+        if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value
 

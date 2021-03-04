@@ -34,7 +34,7 @@ logger = logging.getLogger('awx.main.models.mixins')
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
            'TaskManagerUnifiedJobMixin', 'TaskManagerJobMixin', 'TaskManagerProjectUpdateMixin',
-           'TaskManagerInventoryUpdateMixin', 'CustomVirtualEnvMixin']
+           'TaskManagerInventoryUpdateMixin', 'ExecutionEnvironmentMixin', 'CustomVirtualEnvMixin']
 
 
 class ResourceMixin(models.Model):
@@ -439,6 +439,44 @@ class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
 class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
+
+
+class ExecutionEnvironmentMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    execution_environment = models.ForeignKey(
+        'ExecutionEnvironment',
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        related_name='%(class)ss',
+        help_text=_('The container image to be used for execution.'),
+    )
+
+    def get_execution_environment_default(self):
+        from awx.main.models.execution_environments import ExecutionEnvironment
+
+        if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
+            return settings.DEFAULT_EXECUTION_ENVIRONMENT
+        return ExecutionEnvironment.objects.filter(organization=None, managed_by_tower=True).first()
+
+    def resolve_execution_environment(self):
+        """
+        Return the execution environment that should be used when creating a new job.
+        """
+        if self.execution_environment is not None:
+            return self.execution_environment
+        if getattr(self, 'project_id', None) and self.project.default_environment is not None:
+            return self.project.default_environment
+        if getattr(self, 'organization', None) and self.organization.default_environment is not None:
+            return self.organization.default_environment
+        if getattr(self, 'inventory', None) and self.inventory.organization is not None:
+            if self.inventory.organization.default_environment is not None:
+                return self.inventory.organization.default_environment
+
+        return self.get_execution_environment_default()
 
 
 class CustomVirtualEnvMixin(models.Model):

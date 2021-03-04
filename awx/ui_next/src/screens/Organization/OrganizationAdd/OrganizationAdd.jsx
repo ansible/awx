@@ -13,7 +13,10 @@ function OrganizationAdd() {
 
   const handleSubmit = async (values, groupsToAssociate) => {
     try {
-      const { data: response } = await OrganizationsAPI.create(values);
+      const { data: response } = await OrganizationsAPI.create({
+        ...values,
+        default_environment: values.default_environment?.id,
+      });
       await Promise.all(
         groupsToAssociate
           .map(id => OrganizationsAPI.associateInstanceGroup(response.id, id))

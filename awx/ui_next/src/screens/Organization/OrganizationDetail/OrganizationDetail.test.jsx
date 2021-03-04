@@ -13,6 +13,7 @@ jest.mock('../../../api');
 
 describe('<OrganizationDetail />', () => {
   const mockOrganization = {
+    id: 12,
     name: 'Foo',
     description: 'Bar',
     custom_virtualenv: 'Fizz',
@@ -24,7 +25,14 @@ describe('<OrganizationDetail />', () => {
         edit: true,
         delete: true,
       },
+      default_environment: {
+        id: 1,
+        name: 'Default EE',
+        description: '',
+        image: 'quay.io/ansible/awx-ee',
+      },
     },
+    default_environment: 1,
   };
   const mockInstanceGroups = {
     data: {
@@ -43,7 +51,7 @@ describe('<OrganizationDetail />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders succesfully', async () => {
+  test('initially renders successfully', async () => {
     await act(async () => {
       mountWithContexts(<OrganizationDetail organization={mockOrganization} />);
     });
@@ -86,6 +94,7 @@ describe('<OrganizationDetail />', () => {
       { label: 'Created', value: '7/7/2015, 5:21:26 PM' },
       { label: 'Last Modified', value: '8/11/2019, 7:47:37 PM' },
       { label: 'Max Hosts', value: '0' },
+      { label: 'Default Execution Environment', value: 'Default EE' },
     ];
     for (let i = 0; i < testParams.length; i++) {
       const { label, value } = testParams[i];

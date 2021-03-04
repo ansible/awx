@@ -4,7 +4,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { OrganizationsAPI } from '../../../api';
+import { OrganizationsAPI, ExecutionEnvironmentsAPI } from '../../../api';
 
 import OrganizationForm from './OrganizationForm';
 
@@ -31,6 +31,8 @@ describe('<OrganizationForm />', () => {
     { name: 'One', id: 1 },
     { name: 'Two', id: 2 },
   ];
+
+  const mockExecutionEnvironment = [{ name: 'EE' }];
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -132,6 +134,11 @@ describe('<OrganizationForm />', () => {
         results: mockInstanceGroups,
       },
     });
+    ExecutionEnvironmentsAPI.read.mockReturnValue({
+      data: {
+        results: mockExecutionEnvironment,
+      },
+    });
     let wrapper;
     const onSubmit = jest.fn();
     await act(async () => {
@@ -155,10 +162,15 @@ describe('<OrganizationForm />', () => {
       wrapper.find('input#org-max_hosts').simulate('change', {
         target: { value: 134, name: 'max_hosts' },
       });
+      wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')({
+        id: 1,
+        name: 'Test EE',
+      });
     });
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').simulate('click');
     });
+    wrapper.update();
     expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit.mock.calls[0][0]).toEqual({
       name: 'new foo',
@@ -166,6 +178,7 @@ describe('<OrganizationForm />', () => {
       galaxy_credentials: [],
       custom_virtualenv: 'Fizz',
       max_hosts: 134,
+      default_environment: { id: 1, name: 'Test EE' },
     });
   });
 
@@ -209,12 +222,16 @@ describe('<OrganizationForm />', () => {
         results: mockInstanceGroups,
       },
     });
+    ExecutionEnvironmentsAPI.read.mockReturnValue({
+      data: { results: mockExecutionEnvironment },
+    });
     const mockDataForm = {
       name: 'Foo',
       description: 'Bar',
       galaxy_credentials: [],
       max_hosts: 1,
       custom_virtualenv: 'Fizz',
+      default_environment: '',
     };
     const onSubmit = jest.fn();
     OrganizationsAPI.update.mockResolvedValue(1, mockDataForm);
@@ -320,6 +337,7 @@ describe('<OrganizationForm />', () => {
         galaxy_credentials: [],
         max_hosts: 0,
         custom_virtualenv: 'Fizz',
+        default_environment: '',
       },
       [],
       []

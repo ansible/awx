@@ -177,15 +177,6 @@ CELERYBEAT_SCHEDULE.update({  # noqa
 
 CLUSTER_HOST_ID = socket.gethostname()
 
-
-if 'Docker Desktop' in os.getenv('OS', ''):
-    os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.host.internal'
-else:
-    try:
-        os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
-    except Exception:
-        pass
-
 AWX_CALLBACK_PROFILE = True
 
 if 'sqlite3' not in DATABASES['default']['ENGINE']: # noqa

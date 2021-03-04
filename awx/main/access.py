@@ -29,9 +29,9 @@ from awx.main.utils import (
 )
 from awx.main.models import (
     ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialType,
-    CredentialInputSource, CustomInventoryScript, Group, Host, Instance, InstanceGroup,
-    Inventory, InventorySource, InventoryUpdate, InventoryUpdateEvent, Job, JobEvent,
-    JobHostSummary, JobLaunchConfig, JobTemplate, Label, Notification,
+    CredentialInputSource, CustomInventoryScript, ExecutionEnvironment, Group, Host, Instance,
+    InstanceGroup, Inventory, InventorySource, InventoryUpdate, InventoryUpdateEvent, Job,
+    JobEvent, JobHostSummary, JobLaunchConfig, JobTemplate, Label, Notification,
     NotificationTemplate, Organization, Project, ProjectUpdate,
     ProjectUpdateEvent, Role, Schedule, SystemJob, SystemJobEvent,
     SystemJobTemplate, Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob,
@@ -1306,6 +1306,54 @@ class TeamAccess(BaseAccess):
 
         return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
                                                     *args, **kwargs)
+
+
+class ExecutionEnvironmentAccess(BaseAccess):
+    """
+    I can see an execution environment when:
+     - I'm a superuser
+     - I'm a member of the same organization
+     - it is a global ExecutionEnvironment
+    I can create/change an execution environment when:
+     - I'm a superuser
+     - I'm an admin for the organization(s)
+    """
+
+    model = ExecutionEnvironment
+    select_related = ('organization',)
+    prefetch_related = ('organization__admin_role', 'organization__execution_environment_admin_role')
+
+    def filtered_queryset(self):
+        return ExecutionEnvironment.objects.filter(
+            Q(organization__in=Organization.accessible_pk_qs(self.user, 'read_role')) |
+            Q(organization__isnull=True)
+        ).distinct()
+
+    @check_superuser
+    def can_add(self, data):
+        if not data:  # So the browseable API will work
+            return Organization.accessible_objects(self.user, 'execution_environment_admin_role').exists()
+        return self.check_related('organization', Organization, data, mandatory=True,
+                                  role_field='execution_environment_admin_role')
+
+    def can_change(self, obj, data):
+        if obj.managed_by_tower:
+            raise PermissionDenied
+        if self.user.is_superuser:
+            return True
+        if obj and obj.organization_id is None:
+            raise PermissionDenied
+        if self.user not in obj.organization.execution_environment_admin_role:
+            raise PermissionDenied
+        if data and 'organization' in data:
+            new_org = get_object_from_data('organization', Organization, data, obj=obj)
+            if not new_org or self.user not in new_org.execution_environment_admin_role:
+                return False
+        return self.check_related('organization', Organization, data, obj=obj, mandatory=True,
+                                  role_field='execution_environment_admin_role')
+
+    def can_delete(self, obj):
+        return self.can_change(obj, None)
 
 
 class ProjectAccess(NotificationAttachMixin, BaseAccess):

@@ -6,7 +6,7 @@ import re
 from collections import namedtuple
 
 from awx.main.tasks import RunInventoryUpdate
-from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob
+from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob, ExecutionEnvironment
 from awx.main.constants import CLOUD_PROVIDERS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.tests import data
 
@@ -110,7 +110,8 @@ def read_content(private_data_dir, raw_env, inventory_update):
             continue  # Ansible runner
         abs_file_path = os.path.join(private_data_dir, filename)
         file_aliases[abs_file_path] = filename
-        if abs_file_path in inverse_env:
+        runner_path = os.path.join('/runner', os.path.basename(abs_file_path))
+        if runner_path in inverse_env:
             referenced_paths.add(abs_file_path)
             alias = 'file_reference'
             for i in range(10):
@@ -121,7 +122,7 @@ def read_content(private_data_dir, raw_env, inventory_update):
                 raise RuntimeError('Test not able to cope with >10 references by env vars. '
                                    'Something probably went very wrong.')
             file_aliases[abs_file_path] = alias
-            for env_key in inverse_env[abs_file_path]:
+            for env_key in inverse_env[runner_path]:
                 env[env_key] = '{{{{ {} }}}}'.format(alias)
         try:
             with open(abs_file_path, 'r') as f:
@@ -182,6 +183,8 @@ def create_reference_data(source_dir, env, content):
 @pytest.mark.django_db
 @pytest.mark.parametrize('this_kind', CLOUD_PROVIDERS)
 def test_inventory_update_injected_content(this_kind, inventory, fake_credential_factory):
+    ExecutionEnvironment.objects.create(name='test EE', managed_by_tower=True)
+
     injector = InventorySource.injectors[this_kind]
     if injector.plugin_name is None:
         pytest.skip('Use of inventory plugin is not enabled for this source')
@@ -197,12 +200,14 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
     inventory_update = inventory_source.create_unified_job()
     task = RunInventoryUpdate()
 
-    def substitute_run(envvars=None, **_kw):
+    def substitute_run(awx_receptor_job):
         """This method will replace run_pexpect
         instead of running, it will read the private data directory contents
         It will make assertions that the contents are correct
         If MAKE_INVENTORY_REFERENCE_FILES is set, it will produce reference files
         """
+        envvars = awx_receptor_job.runner_params['envvars']
+
         private_data_dir = envvars.pop('AWX_PRIVATE_DATA_DIR')
         assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == 'auto'
         set_files = bool(os.getenv("MAKE_INVENTORY_REFERENCE_FILES", 'false').lower()[0] not in ['f', '0'])
@@ -214,9 +219,6 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
             f"'{inventory_filename}' file not found in inventory update runtime files {content.keys()}"
 
         env.pop('ANSIBLE_COLLECTIONS_PATHS', None)  # collection paths not relevant to this test
-        env.pop('PYTHONPATH')
-        env.pop('VIRTUAL_ENV')
-        env.pop('PROOT_TMP_DIR')
         base_dir = os.path.join(DATA, 'plugins')
         if not os.path.exists(base_dir):
             os.mkdir(base_dir)
@@ -256,6 +258,6 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
         # Also do not send websocket status updates
         with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
             # The point of this test is that we replace run with assertions
-            with mock.patch('awx.main.tasks.ansible_runner.interface.run', substitute_run):
+            with mock.patch('awx.main.tasks.AWXReceptorJob.run', substitute_run):
                 # so this sets up everything for a run and then yields control over to substitute_run
                 task.run(inventory_update.pk)

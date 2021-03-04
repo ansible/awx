@@ -167,9 +167,10 @@ function CredentialsStep({ i18n }) {
             const hasSameVaultID = val =>
               val?.inputs?.vault_id !== undefined &&
               val?.inputs?.vault_id === item?.inputs?.vault_id;
-            const hasSameKind = val => val.kind === item.kind;
+            const hasSameCredentialType = val =>
+              val.credential_type === item.credential_type;
             const newItems = field.value.filter(i =>
-              isVault ? !hasSameVaultID(i) : !hasSameKind(i)
+              isVault ? !hasSameVaultID(i) : !hasSameCredentialType(i)
             );
             newItems.push(item);
             helpers.setValue(newItems);

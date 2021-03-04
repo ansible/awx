@@ -13,7 +13,9 @@ services:
       SDB_HOST: 0.0.0.0
       SDB_PORT: 7899
       AWX_GROUP_QUEUES: tower
+      RECEPTORCTL_SOCKET: /var/run/receptor/receptor.sock
     ports:
+      - "2222:2222"
       - "8888:8888"
       - "8080:8080"
       - "8013:8013"
@@ -31,7 +33,11 @@ services:
       - "../../docker-compose/_sources/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py"
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
+      - "../../docker-compose/receptor.conf:/etc/receptor/receptor.conf"
       - "redis_socket:/var/run/redis/:rw"
+      - "receptor:/var/run/receptor/"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
+      - "~/.kube/config:/var/lib/awx/.kube/config"
     privileged: true
     tty: true
   # A useful container that simply passes through log messages to the console
@@ -40,8 +46,6 @@ services:
   #   build:
   #     context: ./docker-compose
   #     dockerfile: Dockerfile-logstash
-
-  # Postgres Database Container
   postgres:
     image: postgres:12
     container_name: tools_postgres_1
@@ -64,3 +68,4 @@ services:
 volumes:
   awx_db:
   redis_socket:
+  receptor:

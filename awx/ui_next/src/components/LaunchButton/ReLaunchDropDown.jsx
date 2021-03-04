@@ -62,7 +62,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n }) {
           <DropdownToggle
             toggleIndicator={null}
             onToggle={onToggle}
-            aria-label={i18n._(`relaunch jobs`)}
+            aria-label={i18n._(t`relaunch jobs`)}
             id="relaunch_jobs"
             isPrimary
           >
@@ -83,7 +83,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n }) {
         <DropdownToggle
           toggleIndicator={null}
           onToggle={onToggle}
-          aria-label={i18n._(`relaunch jobs`)}
+          aria-label={i18n._(t`relaunch jobs`)}
           id="relaunch_jobs"
         >
           <RocketIcon />

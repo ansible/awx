@@ -1,14 +1,6 @@
 #!/bin/bash
 set +x
 
-# Wait for the databases to come up
-ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=postgres port=5432" all
-ansible -i "127.0.0.1," -c local -v -m wait_for -a "path=/var/run/redis/redis.sock" all
-
-# In case AWX in the container wants to connect to itself, use "docker exec" to attach to the container otherwise
-# TODO: FIX
-#/etc/init.d/ssh start
-
 # Move to the source directory so we can bootstrap
 if [ -f "/awx_devel/manage.py" ]; then
     cd /awx_devel
@@ -22,6 +14,15 @@ make awx-link
 make version_file
 make migrate
 make init
+
+
+if output=$(awx-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
+    echo $output
+    admin_password=$(openssl rand -base64 12)
+    echo "Admin password: ${admin_password}"
+    awx-manage update_password --username=admin --password=${admin_password}
+fi
+awx-manage create_preload_data
 
 mkdir -p /awx_devel/awx/public/static
 mkdir -p /awx_devel/awx/ui/static

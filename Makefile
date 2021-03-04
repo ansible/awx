@@ -383,7 +383,8 @@ test_collection:
 	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
+	fi && \
+	pip install ansible && \
 	py.test $(COLLECTION_TEST_DIRS) -v
 	# The python path needs to be modified so that the tests can find Ansible within the container
 	# First we will use anything expility set as PYTHONPATH
@@ -445,39 +446,6 @@ bulk_data:
 	fi; \
 	$(PYTHON) tools/data_generators/rbac_dummy_data_generator.py --preset=$(DATA_GEN_PRESET)
 
-# l10n TASKS
-# --------------------------------------
-
-# check for UI po files
-HAVE_PO := $(shell ls awx/ui/po/*.po 2>/dev/null)
-check-po:
-ifdef HAVE_PO
-	# Should be 'Language: zh-CN' but not 'Language: zh_CN' in zh_CN.po
-	for po in awx/ui/po/*.po ; do \
-	    echo $$po; \
-	    mo="awx/ui/po/`basename $$po .po`.mo"; \
-	    msgfmt --check --verbose $$po -o $$mo; \
-	    if test "$$?" -ne 0 ; then \
-	        exit -1; \
-	    fi; \
-	    rm $$mo; \
-	    name=`echo "$$po" | grep '-'`; \
-	    if test "x$$name" != x ; then \
-	        right_name=`echo $$language | sed -e 's/-/_/'`; \
-	        echo "ERROR: WRONG $$name CORRECTION: $$right_name"; \
-	        exit -1; \
-	    fi; \
-	    language=`grep '^"Language:' "$$po" | grep '_'`; \
-	    if test "x$$language" != x ; then \
-	        right_language=`echo $$language | sed -e 's/_/-/'`; \
-	        echo "ERROR: WRONG $$language CORRECTION: $$right_language in $$po"; \
-	        exit -1; \
-	    fi; \
-	done;
-else
-	@echo No PO files
-endif
-
 
 # UI TASKS
 # --------------------------------------
@@ -496,10 +464,8 @@ awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
 
 $(UI_BUILD_FLAG_FILE):
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build
-	git checkout awx/ui_next/src/locales
 	mkdir -p awx/public/static/css
 	mkdir -p awx/public/static/js
 	mkdir -p awx/public/static/media
@@ -644,7 +610,6 @@ VERSION:
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml
 
-# TODO: test kube-dev target after changing dockerfile.yml location - refer to https://github.com/ansible/awx/commit/7c8bd471980d26083d4c4e11067bb53730175496
 Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml \
 	    -e dockerfile_name=Dockerfile.kube-dev \
@@ -655,3 +620,20 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	docker build -f Dockerfile.kube-dev \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
+
+
+# Translation TASKS
+# --------------------------------------
+
+# generate UI .pot
+pot: $(UI_BUILD_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-template
+
+# generate API django .pot .po
+LANG = "en-us"
+messages:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot

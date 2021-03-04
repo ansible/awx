@@ -64,6 +64,8 @@ function JobDetail({ job, i18n }) {
     credentials,
     instance_group: instanceGroup,
     inventory,
+    inventory_source,
+    source_project,
     job_template: jobTemplate,
     workflow_job_template: workflowJobTemplate,
     labels,
@@ -206,6 +208,33 @@ function JobDetail({ job, i18n }) {
             }
           />
         )}
+        {inventory_source && (
+          <Detail
+            label={i18n._(t`Inventory Source`)}
+            value={
+              <Link
+                to={`/inventories/inventory/${inventory.id}/sources/${inventory_source.id}`}
+              >
+                {inventory_source.name}
+              </Link>
+            }
+          />
+        )}
+        {inventory_source && inventory_source.source === 'scm' && (
+          <Detail
+            label={i18n._(t`Project`)}
+            value={
+              <StatusDetailValue>
+                {source_project.status && (
+                  <StatusIcon status={source_project.status} />
+                )}
+                <Link to={`/projects/${source_project.id}`}>
+                  {source_project.name}
+                </Link>
+              </StatusDetailValue>
+            }
+          />
+        )}
         {project && (
           <Detail
             label={i18n._(t`Project`)}
@@ -223,13 +252,13 @@ function JobDetail({ job, i18n }) {
         <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[job.verbosity]} />
         <Detail label={i18n._(t`Environment`)} value={job.custom_virtualenv} />
         <Detail label={i18n._(t`Execution Node`)} value={job.execution_node} />
-        {instanceGroup && !instanceGroup?.is_containerized && (
+        {instanceGroup && !instanceGroup?.is_container_group && (
           <Detail
             label={i18n._(t`Instance Group`)}
             value={buildInstanceGroupLink(instanceGroup)}
           />
         )}
-        {instanceGroup && instanceGroup?.is_containerized && (
+        {instanceGroup && instanceGroup?.is_container_group && (
           <Detail
             label={i18n._(t`Container Group`)}
             value={buildContainerGroupLink(instanceGroup)}

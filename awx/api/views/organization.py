@@ -15,6 +15,7 @@ from awx.main.models import (
     Inventory,
     Host,
     Project,
+    ExecutionEnvironment,
     JobTemplate,
     WorkflowJobTemplate,
     Organization,
@@ -45,6 +46,7 @@ from awx.api.serializers import (
     RoleSerializer,
     NotificationTemplateSerializer,
     InstanceGroupSerializer,
+    ExecutionEnvironmentSerializer,
     ProjectSerializer, JobTemplateSerializer, WorkflowJobTemplateSerializer,
     CredentialSerializer
 )
@@ -139,6 +141,16 @@ class OrganizationProjectsList(SubListCreateAPIView):
     serializer_class = ProjectSerializer
     parent_model = Organization
     parent_key = 'organization'
+
+
+class OrganizationExecutionEnvironmentsList(SubListCreateAttachDetachAPIView):
+
+    model = ExecutionEnvironment
+    serializer_class = ExecutionEnvironmentSerializer
+    parent_model = Organization
+    relationship = 'executionenvironments'
+    parent_key = 'organization'
+    swagger_topic = "Execution Environments"
 
 
 class OrganizationJobTemplatesList(SubListCreateAPIView):

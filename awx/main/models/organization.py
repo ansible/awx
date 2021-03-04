@@ -61,6 +61,15 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         blank=True,
         related_name='%(class)s_notification_templates_for_approvals'
     )
+    default_environment = models.ForeignKey(
+        'ExecutionEnvironment',
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text=_('The default execution environment for jobs run by this organization.'),
+    )
 
     admin_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -86,6 +95,9 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     job_template_admin_role = ImplicitRoleField(
         parent_role='admin_role',
     )
+    execution_environment_admin_role = ImplicitRoleField(
+        parent_role='admin_role',
+    )
     auditor_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
     )
@@ -97,7 +109,8 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
                      'execute_role', 'project_admin_role',
                      'inventory_admin_role', 'workflow_admin_role',
                      'notification_admin_role', 'credential_admin_role',
-                     'job_template_admin_role', 'approval_role',],
+                     'job_template_admin_role', 'approval_role', 
+                     'execution_environment_admin_role',],
     )
     approval_role = ImplicitRoleField(
         parent_role='admin_role',
