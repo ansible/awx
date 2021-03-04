@@ -122,6 +122,24 @@ ansible-playbook tools/ansible/build.yml -e awx_version=test-build
 The resulting image will automatically be pushed to a registry if `docker_registry` is defined. 
 
 
+## Upgrading from previous versions
+
+Upgrading AWX involves rerunning the install playbook. Download a newer release from [https://github.com/ansible/awx/releases](https://github.com/ansible/awx/releases) and re-populate the inventory file with your customized variables.
+
+For convenience, you can create a file called `vars.yml`:
+
+```
+admin_password: 'adminpass'
+pg_password: 'pgpass'
+secret_key: 'mysupersecret'
+```
+
+And pass it to the installer:
+
+```
+$ ansible-playbook -i inventory install.yml -e @vars.yml
+```
+
 
 ## OpenShift
 
