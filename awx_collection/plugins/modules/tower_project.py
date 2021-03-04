@@ -102,6 +102,10 @@ options:
         - Local absolute file path containing a custom Python virtualenv to use
       type: str
       default: ''
+    default_environment:
+      description:
+        - Default Execution Environment to use for jobs relating to the project.
+      type: str
     organization:
       description:
         - Name of organization for project.
@@ -239,6 +243,7 @@ def main():
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
         timeout=dict(type='int', default=0, aliases=['job_timeout']),
         custom_virtualenv=dict(),
+        default_environment=dict(),
         organization=dict(),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
@@ -270,6 +275,7 @@ def main():
     allow_override = module.params.get('allow_override')
     timeout = module.params.get('timeout')
     custom_virtualenv = module.params.get('custom_virtualenv')
+    default_ee = module.params.get('default_environment')
     organization = module.params.get('organization')
     state = module.params.get('state')
     wait = module.params.get('wait')
@@ -333,6 +339,8 @@ def main():
         project_fields['description'] = description
     if credential is not None:
         project_fields['credential'] = credential
+    if default_ee is not None:
+        project_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
     if allow_override is not None:
         project_fields['allow_override'] = allow_override
     if scm_type == '':

@@ -32,7 +32,7 @@ function InstanceGroupListItem({
   const labelId = `check-action-${instanceGroup.id}`;
 
   const isContainerGroup = item => {
-    return item.is_containerized;
+    return item.is_container_group;
   };
 
   function usedCapacity(item) {

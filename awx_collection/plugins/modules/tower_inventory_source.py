@@ -73,6 +73,10 @@ options:
       description:
         - Credential to use for the source.
       type: str
+    execution_environment:
+      description:
+        - Execution Environment to use for the source.
+      type: str
     overwrite:
       description:
         - Delete child groups and hosts not found in source.
@@ -173,6 +177,7 @@ def main():
         enabled_value=dict(),
         host_filter=dict(),
         credential=dict(),
+        execution_environment=dict(),
         organization=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
@@ -199,6 +204,7 @@ def main():
     organization = module.params.get('organization')
     source_script = module.params.get('source_script')
     credential = module.params.get('credential')
+    ee = module.params.get('execution_environment')
     source_project = module.params.get('source_project')
     state = module.params.get('state')
 
@@ -250,6 +256,8 @@ def main():
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if credential is not None:
         inventory_source_fields['credential'] = module.resolve_name_to_id('credentials', credential)
+    if ee is not None:
+        inventory_source_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
     if source_project is not None:
         inventory_source_fields['source_project'] = module.resolve_name_to_id('projects', source_project)
     if source_script is not None:

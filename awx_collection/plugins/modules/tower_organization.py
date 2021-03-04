@@ -36,6 +36,10 @@ options:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
       default: ''
+    default_environment:
+      description:
+        - Default Execution Environment to use for jobs owned by the Organization.
+      type: str
     max_hosts:
       description:
         - The max hosts allowed in this organizations
@@ -110,6 +114,7 @@ def main():
         name=dict(required=True),
         description=dict(),
         custom_virtualenv=dict(),
+        default_environment=dict(),
         max_hosts=dict(type='int', default="0"),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
@@ -126,6 +131,7 @@ def main():
     name = module.params.get('name')
     description = module.params.get('description')
     custom_virtualenv = module.params.get('custom_virtualenv')
+    default_ee = module.params.get('default_environment')
     max_hosts = module.params.get('max_hosts')
     # instance_group_names = module.params.get('instance_groups')
     state = module.params.get('state')
@@ -175,6 +181,8 @@ def main():
         org_fields['description'] = description
     if custom_virtualenv is not None:
         org_fields['custom_virtualenv'] = custom_virtualenv
+    if default_ee is not None:
+        org_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
     if max_hosts is not None:
         org_fields['max_hosts'] = max_hosts
 

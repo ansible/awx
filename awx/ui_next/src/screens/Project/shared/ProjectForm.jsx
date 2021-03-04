@@ -12,6 +12,7 @@ import ContentLoading from '../../../components/ContentLoading';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import FormField, { FormSubmitError } from '../../../components/FormField';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import ExecutionEnvironmentLookup from '../../../components/Lookup/ExecutionEnvironmentLookup';
 import { CredentialTypesAPI, ProjectsAPI } from '../../../api';
 import { required } from '../../../util/validators';
 import {
@@ -101,6 +102,14 @@ function ProjectFormFields({
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
 
+  const [
+    executionEnvironmentField,
+    executionEnvironmentMeta,
+    executionEnvironmentHelpers,
+  ] = useField({
+    name: 'default_environment',
+  });
+
   /* Save current scm subform field values to state */
   const saveSubFormState = form => {
     const currentScmFormFields = { ...scmFormFields };
@@ -177,6 +186,25 @@ function ProjectFormFields({
         value={organizationField.value}
         required
         autoPopulate={!project?.id}
+      />
+      <ExecutionEnvironmentLookup
+        helperTextInvalid={executionEnvironmentMeta.error}
+        isValid={
+          !executionEnvironmentMeta.touched || !executionEnvironmentMeta.error
+        }
+        onBlur={() => executionEnvironmentHelpers.setTouched()}
+        value={executionEnvironmentField.value}
+        onChange={value => executionEnvironmentHelpers.setValue(value)}
+        popoverContent={i18n._(
+          t`Select the default execution environment for this project.`
+        )}
+        tooltip={i18n._(
+          t`Select an organization before editing the default execution environment.`
+        )}
+        globallyAvailable
+        isDisabled={!organizationField.value}
+        organizationId={organizationField.value?.id}
+        isDefaultEnvironment
       />
       <FormGroup
         fieldId="project-scm-type"
@@ -387,6 +415,8 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
             scm_update_cache_timeout: project.scm_update_cache_timeout || 0,
             scm_update_on_launch: project.scm_update_on_launch || false,
             scm_url: project.scm_url || '',
+            default_environment:
+              project.summary_fields?.default_environment || null,
           }}
           onSubmit={handleSubmit}
         >

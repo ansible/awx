@@ -39,10 +39,20 @@ class Organization(HasCreate, HasInstanceGroups, HasNotifications, base.Base):
                 "disassociate": True,
             })
 
-
     def payload(self, **kwargs):
         payload = PseudoNamespace(name=kwargs.get('name') or 'Organization - {}'.format(random_title()),
                                   description=kwargs.get('description') or random_title(10))
+
+        for fk_field in ('default_environment',):
+            rel_obj = kwargs.get(fk_field)
+            if rel_obj is None:
+                continue
+            elif isinstance(rel_obj, int):
+                payload.update(**{fk_field: int(rel_obj)})
+            elif hasattr(rel_obj, 'id'):
+                payload.update(**{fk_field: rel_obj.id})
+            else:
+                raise AttributeError(f'Related field {fk_field} must be either integer of pkid or object')
         return payload
 
     def create_payload(self, name='', description='', **kwargs):

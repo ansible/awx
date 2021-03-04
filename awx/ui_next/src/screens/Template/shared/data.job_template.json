@@ -133,6 +133,12 @@
             "id": "1",
             "name": "Webhook Credential"
 
+        },
+        "execution_environment": {
+            "id": 1,
+            "name": "Default EE",
+            "description": "",
+            "image": "quay.io/ansible/awx-ee"
         }
     },
     "created": "2019-09-30T16:18:34.564820Z",
@@ -177,5 +183,6 @@
     "job_slice_count": 1,
     "webhook_credential": 1,
     "webhook_key": "asertdyuhjkhgfd234567kjgfds",
-    "webhook_service": "github"
+    "webhook_service": "github",
+    "execution_environment": 1
 }

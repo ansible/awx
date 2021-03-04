@@ -27,6 +27,7 @@ function ProjectAdd() {
       } = await ProjectsAPI.create({
         ...values,
         organization: values.organization.id,
+        default_environment: values.default_environment?.id,
       });
       history.push(`/projects/${id}/details`);
     } catch (error) {

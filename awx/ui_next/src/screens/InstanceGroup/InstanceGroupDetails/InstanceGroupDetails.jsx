@@ -78,7 +78,7 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
         <Detail
           label={i18n._(t`Type`)}
           value={
-            instanceGroup.is_containerized
+            instanceGroup.is_container_group
               ? i18n._(t`Container group`)
               : i18n._(t`Instance group`)
           }

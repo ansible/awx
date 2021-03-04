@@ -331,6 +331,7 @@ class CredentialType(CommonModelNameNotUnique):
         ('net', _('Network')),
         ('scm', _('Source Control')),
         ('cloud', _('Cloud')),
+        ('registry', _('Container Registry')),
         ('token', _('Personal Access Token')),
         ('insights', _('Insights')),
         ('external', _('External')),
@@ -528,15 +529,20 @@ class CredentialType(CommonModelNameNotUnique):
             with open(path, 'w') as f:
                 f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+            # FIXME: develop some better means of referencing paths inside containers
+            container_path = os.path.join(
+                '/runner',
+                os.path.basename(path)
+            )
 
             # determine if filename indicates single file or many
             if file_label.find('.') == -1:
-                tower_namespace.filename = path
+                tower_namespace.filename = container_path
             else:
                 if not hasattr(tower_namespace, 'filename'):
                     tower_namespace.filename = TowerNamespace()
                 file_label = file_label.split('.')[1]
-                setattr(tower_namespace.filename, file_label, path)
+                setattr(tower_namespace.filename, file_label, container_path)
 
         injector_field = self._meta.get_field('injectors')
         for env_var, tmpl in self.injectors.get('env', {}).items():
@@ -564,7 +570,12 @@ class CredentialType(CommonModelNameNotUnique):
 
             if extra_vars:
                 path = build_extra_vars_file(extra_vars, private_data_dir)
-                args.extend(['-e', '@%s' % path])
+                # FIXME: develop some better means of referencing paths inside containers
+                container_path = os.path.join(
+                    '/runner',
+                    os.path.basename(path)
+                )
+                args.extend(['-e', '@%s' % container_path])
 
 
 class ManagedCredentialType(SimpleNamespace):
@@ -1123,7 +1134,6 @@ ManagedCredentialType(
     },
 )
 
-
 ManagedCredentialType(
     namespace='kubernetes_bearer_token',
     kind='kubernetes',
@@ -1152,6 +1162,37 @@ ManagedCredentialType(
             'multiline': True,
         }],
         'required': ['host', 'bearer_token'],
+    }
+)
+
+ManagedCredentialType(
+    namespace='registry',
+    kind='registry',
+    name=ugettext_noop('Container Registry'),
+    inputs={
+        'fields': [{
+            'id': 'host',
+            'label': ugettext_noop('Authentication URL'),
+            'type': 'string',
+            'help_text': ugettext_noop('Authentication endpoint for the container registry.'),
+        }, {
+            'id': 'username',
+            'label': ugettext_noop('Username'),
+            'type': 'string',
+        }, {
+            'id': 'password',
+            'label': ugettext_noop('Password'),
+            'type': 'string',
+            'secret': True,
+        }, {
+            'id': 'token',
+            'label': ugettext_noop('Access Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': ugettext_noop('A token to use to authenticate with. '
+                                       'This should not be set if username/password are being used.'),
+        }],
+        'required': ['host'],
     }
 )
 

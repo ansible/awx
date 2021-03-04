@@ -75,6 +75,10 @@ options:
         - Name of the vault credential to use for the job template.
         - Deprecated, use 'credentials'.
       type: str
+    execution_environment:
+      description:
+        - Execution Environment to use for the JT.
+      type: str
     forks:
       description:
         - The number of parallel or simultaneous processes to use while executing the playbook.
@@ -350,6 +354,7 @@ def main():
         vault_credential=dict(),
         custom_virtualenv=dict(),
         credentials=dict(type='list', elements='str'),
+        execution_environment=dict(),
         forks=dict(type='int'),
         limit=dict(),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
@@ -417,6 +422,10 @@ def main():
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
         search_fields['organization'] = new_fields['organization'] = organization_id
+
+    ee = module.params.get('execution_environment')
+    if ee:
+        new_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('job_templates', name_or_id=name, **{'data': search_fields})
