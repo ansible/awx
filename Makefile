@@ -540,7 +540,7 @@ docker-compose-sources:
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
-	    -e cluster_node_count=$(CLUSER_NODE_COUNT)
+	    -e cluster_node_count=$(CLUSTER_NODE_COUNT)
 
 docker-compose: docker-auth awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up
