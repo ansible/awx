@@ -77,7 +77,7 @@ describe('<OrganizationDetail />', () => {
 
     expect(
       component.find('DeleteButton').prop('deleteDetailsRequests')
-    ).toHaveLength(1);
+    ).toHaveLength(4);
   });
 
   test('should render the expected instance group', async () => {

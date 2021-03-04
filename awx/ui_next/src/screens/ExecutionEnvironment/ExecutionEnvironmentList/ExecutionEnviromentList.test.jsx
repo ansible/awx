@@ -9,7 +9,7 @@ import {
 import { ExecutionEnvironmentsAPI } from '../../../api';
 import ExecutionEnvironmentList from './ExecutionEnvironmentList';
 
-jest.mock('../../../api/models/ExecutionEnvironments');
+jest.mock('../../../api');
 
 const executionEnvironments = {
   data: {
@@ -143,7 +143,6 @@ describe('<ExecutionEnvironmentList/>', () => {
       wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
     );
     wrapper.update();
-
     await act(async () =>
       wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
     );
@@ -184,5 +183,18 @@ describe('<ExecutionEnvironmentList/>', () => {
     });
     waitForElement(wrapper, 'ExecutionEnvironmentList', el => el.length > 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+  });
+
+  test('should have proper number of delete detail requests', async () => {
+    ExecutionEnvironmentsAPI.read.mockResolvedValue(executionEnvironments);
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { POST: false } },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<ExecutionEnvironmentList />);
+    });
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(2);
   });
 });

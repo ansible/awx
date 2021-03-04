@@ -54,13 +54,13 @@ describe('delete details', () => {
     getRelatedResourceDeleteCounts(
       relatedResourceDeleteRequests.project({ id: 1 }, i18n)
     );
-    expect(WorkflowJobTemplatesAPI.read).toBeCalledWith({
-      credentials: 1,
+    expect(WorkflowJobTemplateNodesAPI.read).toBeCalledWith({
+      unified_job_template: 1,
     });
     expect(InventorySourcesAPI.read).toBeCalledWith({
-      credentials__id: 1,
+      source_project: 1,
     });
-    expect(JobTemplatesAPI.read).toBeCalledWith({ credentials: 1 });
+    expect(JobTemplatesAPI.read).toBeCalledWith({ project: 1 });
   });
 
   test('should call api for templates list', () => {

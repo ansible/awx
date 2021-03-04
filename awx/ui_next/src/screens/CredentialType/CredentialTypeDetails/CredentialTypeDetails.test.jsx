@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { CredentialTypesAPI } from '../../../api';
+import { CredentialTypesAPI, CredentialsAPI } from '../../../api';
 import { jsonToYaml } from '../../../util/yaml';
 
 import CredentialTypeDetails from './CredentialTypeDetails';
@@ -66,6 +66,10 @@ function expectDetailToMatch(wrapper, label, value) {
 
 describe('<CredentialTypeDetails/>', () => {
   let wrapper;
+  afterEach(() => {
+    wrapper.unmount();
+    jest.clearAllMocks();
+  });
   test('should render details properly', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
@@ -92,10 +96,36 @@ describe('<CredentialTypeDetails/>', () => {
     );
   });
 
-  test('should have proper number of delete detail requests', () => {
-    expect(
-      wrapper.find('DeleteButton').prop('deleteDetailsRequests')
-    ).toHaveLength(1);
+  test('should disabled delete and show proper tooltip requests', async () => {
+    CredentialsAPI.read.mockResolvedValue({ data: { count: 15 } });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <CredentialTypeDetails credentialType={credentialTypeData} />
+      );
+    });
+    wrapper.update();
+
+    expect(wrapper.find('DeleteButton').prop('disabledTooltip')).toBe(
+      'This credential type is currently being used by some credentials and cannot be deleted'
+    );
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      true
+    );
+    expect(wrapper.find('Tooltip').length).toBe(1);
+    expect(wrapper.find('Tooltip').prop('content')).toBe(
+      'This credential type is currently being used by some credentials and cannot be deleted'
+    );
+  });
+
+  test('should throw error', async () => {
+    CredentialsAPI.read.mockRejectedValue(new Error('error'));
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <CredentialTypeDetails credentialType={credentialTypeData} />
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('ErrorDetail').length).toBe(1);
   });
 
   test('expected api call is made for delete', async () => {

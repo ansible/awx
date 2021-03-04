@@ -1,6 +1,7 @@
 import { t } from '@lingui/macro';
 
 import {
+  UnifiedJobTemplatesAPI,
   CredentialsAPI,
   InventoriesAPI,
   InventorySourcesAPI,
@@ -8,6 +9,12 @@ import {
   ProjectsAPI,
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,
+  CredentialInputSourcesAPI,
+  TeamsAPI,
+  NotificationTemplatesAPI,
+  ExecutionEnvironmentsAPI,
+  ApplicationsAPI,
+  OrganizationsAPI,
 } from '../api';
 
 export async function getRelatedResourceDeleteCounts(requests) {
@@ -65,6 +72,20 @@ export const relatedResourceDeleteRequests = {
         }),
       label: i18n._(t`Inventory Sources`),
     },
+    {
+      request: () =>
+        CredentialInputSourcesAPI.read({
+          source_credential: selected.id,
+        }),
+      label: i18n._(t`Credential`),
+    },
+    {
+      request: () =>
+        ExecutionEnvironmentsAPI.read({
+          credential: selected.id,
+        }),
+      label: i18n._(t`Execution Environments`),
+    },
   ],
 
   credentialType: (selected, i18n) => [
@@ -111,18 +132,21 @@ export const relatedResourceDeleteRequests = {
     {
       request: () =>
         JobTemplatesAPI.read({
-          credentials: selected.id,
+          project: selected.id,
         }),
       label: i18n._(t`Job Templates`),
     },
     {
-      request: () => WorkflowJobTemplatesAPI.read({ credentials: selected.id }),
+      request: () =>
+        WorkflowJobTemplateNodesAPI.read({
+          unified_job_template: selected.id,
+        }),
       label: i18n._(t`Workflow Job Templates`),
     },
     {
       request: () =>
         InventorySourcesAPI.read({
-          credentials__id: selected.id,
+          source_project: selected.id,
         }),
       label: i18n._(t`Inventory Sources`),
     },
@@ -134,7 +158,7 @@ export const relatedResourceDeleteRequests = {
         WorkflowJobTemplateNodesAPI.read({
           unified_job_template: selected.id,
         }),
-      label: [i18n._(t`Workflow Job Template Node`)],
+      label: [i18n._(t`Workflow Job Template Nodes`)],
     },
   ],
 
@@ -145,6 +169,88 @@ export const relatedResourceDeleteRequests = {
           organization: selected.id,
         }),
       label: i18n._(t`Credential`),
+    },
+    {
+      request: async () =>
+        TeamsAPI.read({
+          organization: selected.id,
+        }),
+      label: i18n._(t`Teams`),
+    },
+    {
+      request: async () =>
+        NotificationTemplatesAPI.read({
+          organization: selected.id,
+        }),
+      label: i18n._(t`Notification Templates`),
+    },
+    {
+      request: () =>
+        ExecutionEnvironmentsAPI.read({
+          organization: selected.id,
+        }),
+      label: i18n._(t`Execution Environments`),
+    },
+    {
+      request: async () =>
+        ProjectsAPI.read({
+          organization: selected.id,
+        }),
+      label: [i18n._(t`Projects`)],
+    },
+    {
+      request: () =>
+        InventoriesAPI.read({
+          organization: selected.id,
+        }),
+      label: i18n._(t`Inventories`),
+    },
+    {
+      request: () =>
+        ApplicationsAPI.read({
+          organization: selected.id,
+        }),
+      label: i18n._(t`Applications`),
+    },
+  ],
+  executionEnvironment: (selected, i18n) => [
+    {
+      request: async () =>
+        UnifiedJobTemplatesAPI.read({
+          execution_environment: selected.id,
+        }),
+      label: [i18n._(t`Templates`)],
+    },
+    {
+      request: async () =>
+        ProjectsAPI.read({
+          default_environment: selected.id,
+        }),
+      label: [i18n._(t`Projects`)],
+    },
+    {
+      request: async () =>
+        OrganizationsAPI.read({
+          execution_environment: selected.id,
+        }),
+      label: [i18n._(t`Organizations`)],
+    },
+    {
+      request: async () => {
+        try {
+          const { data } = await WorkflowJobTemplateNodesAPI.read({
+            execution_environment: selected.id,
+          });
+          if (
+            data.summary_fields.unified_job_template.unified_job_type ===
+            'inventory_update'
+          ) {
+            await InventorySourcesAPI.read();
+          }
+        } catch {}
+      },
+
+      label: [i18n._(t`Organizations`)],
     },
   ],
 };

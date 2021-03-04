@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { Button, Badge, Alert } from '@patternfly/react-core';
+import { Button, Badge, Alert, Tooltip } from '@patternfly/react-core';
 import AlertModal from '../AlertModal';
 import { getRelatedResourceDeleteCounts } from '../../util/getRelatedResourceDeleteDetails';
 import ErrorDetail from '../ErrorDetail';
@@ -11,9 +11,9 @@ import ErrorDetail from '../ErrorDetail';
 const WarningMessage = styled(Alert)`
   margin-top: 10px;
 `;
-const DetailsWrapper = styled.span`
-  :not(:first-of-type) {
-    padding-left: 10px;
+const Label = styled.span`
+  && {
+    margin-right: 10px;
   }
 `;
 function DeleteButton({
@@ -27,11 +27,11 @@ function DeleteButton({
   ouiaId,
   deleteMessage,
   deleteDetailsRequests,
+  disabledTooltip,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [deleteMessageError, setDeleteMessageError] = useState();
   const [deleteDetails, setDeleteDetails] = useState({});
-
   const toggleModal = async isModalOpen => {
     if (deleteDetailsRequests?.length && isModalOpen) {
       const { results, error } = await getRelatedResourceDeleteCounts(
@@ -62,15 +62,29 @@ function DeleteButton({
   }
   return (
     <>
-      <Button
-        variant={variant || 'secondary'}
-        aria-label={i18n._(t`Delete`)}
-        isDisabled={isDisabled}
-        onClick={() => toggleModal(true)}
-      >
-        {children || i18n._(t`Delete`)}
-      </Button>
-
+      {disabledTooltip ? (
+        <Tooltip content={disabledTooltip} position="top">
+          <div>
+            <Button
+              variant={variant || 'secondary'}
+              aria-label={i18n._(t`Delete`)}
+              isDisabled={isDisabled}
+              onClick={() => toggleModal(true)}
+            >
+              {children || i18n._(t`Delete`)}
+            </Button>
+          </div>
+        </Tooltip>
+      ) : (
+        <Button
+          variant={variant || 'secondary'}
+          aria-label={i18n._(t`Delete`)}
+          isDisabled={isDisabled}
+          onClick={() => toggleModal(true)}
+        >
+          {children || i18n._(t`Delete`)}
+        </Button>
+      )}
       <AlertModal
         isOpen={isOpen}
         title={modalTitle}
@@ -83,7 +97,10 @@ function DeleteButton({
             variant="danger"
             aria-label={i18n._(t`Confirm Delete`)}
             isDisabled={isDisabled}
-            onClick={onConfirm}
+            onClick={() => {
+              onConfirm();
+              toggleModal(false);
+            }}
           >
             {i18n._(t`Delete`)}
           </Button>,
@@ -110,9 +127,9 @@ function DeleteButton({
                 <div aria-label={deleteMessage}>{deleteMessage}</div>
                 <br />
                 {Object.entries(deleteDetails).map(([key, value]) => (
-                  <DetailsWrapper aria-label={`${key}: ${value}`} key={key}>
-                    <span>{key}</span> <Badge>{value}</Badge>
-                  </DetailsWrapper>
+                  <div aria-label={`${key}: ${value}`} key={key}>
+                    <Label>{key}</Label> <Badge>{value}</Badge>
+                  </div>
                 ))}
               </div>
             }

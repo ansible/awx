@@ -28,9 +28,10 @@ import ErrorDetail from '../ErrorDetail';
 const WarningMessage = styled(Alert)`
   margin-top: 10px;
 `;
-const DetailsWrapper = styled.span`
-  :not(:first-of-type) {
-    padding-left: 10px;
+
+const Label = styled.span`
+  && {
+    margin-right: 10px;
   }
 `;
 
@@ -99,11 +100,7 @@ function ToolbarDeleteButton({
 }) {
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteDetails, setDeleteDetails] = useState({});
-
-  const deleteMessages = [warningMessage, deleteMessage].filter(
-    message => message
-  );
+  const [deleteDetails, setDeleteDetails] = useState(null);
 
   const [deleteMessageError, setDeleteMessageError] = useState();
   const handleDelete = () => {
@@ -112,6 +109,7 @@ function ToolbarDeleteButton({
   };
 
   const toggleModal = async isOpen => {
+    setDeleteDetails(null);
     if (
       isOpen &&
       itemsToDelete.length === 1 &&
@@ -163,6 +161,36 @@ function ToolbarDeleteButton({
 
   const isDisabled =
     itemsToDelete.length === 0 || itemsToDelete.some(cannotDelete);
+
+  const buildDeleteWarning = () => {
+    const deleteMessages = [];
+    if (warningMessage) {
+      deleteMessages.push(warningMessage);
+    }
+    if (deleteMessage) {
+      if (itemsToDelete[0]?.type !== 'inventory') {
+        deleteMessages.push(deleteMessage);
+      } else if (deleteDetails || itemsToDelete.length > 1) {
+        deleteMessages.push(deleteMessage);
+      }
+    }
+    return (
+      <div>
+        {deleteMessages.map(message => (
+          <div aria-label={message} key={message}>
+            {message}
+          </div>
+        ))}
+        {deleteDetails &&
+          Object.entries(deleteDetails).map(([key, value]) => (
+            <div key={key} aria-label={`${key}: ${value}`}>
+              <Label>{key}</Label>
+              <Badge>{value}</Badge>
+            </div>
+          ))}
+      </div>
+    );
+  };
 
   if (deleteMessageError) {
     return (
@@ -218,6 +246,9 @@ function ToolbarDeleteButton({
               key="delete"
               variant="danger"
               aria-label={i18n._(t`confirm delete`)}
+              isDisabled={Boolean(
+                deleteDetails && itemsToDelete[0]?.type === 'credential_type'
+              )}
               onClick={handleDelete}
             >
               {i18n._(t`Delete`)}
@@ -239,42 +270,11 @@ function ToolbarDeleteButton({
               <br />
             </span>
           ))}
-          {itemsToDelete.length === 1 &&
-            Object.values(deleteDetails).length > 0 && (
-              <WarningMessage
-                variant="warning"
-                isInline
-                title={
-                  <div>
-                    {deleteMessages.map(message => (
-                      <div aria-label={message} key={message}>
-                        {message}
-                      </div>
-                    ))}
-                    {itemsToDelete.length === 1 && (
-                      <>
-                        <br />
-                        {Object.entries(deleteDetails).map(([key, value]) => (
-                          <DetailsWrapper
-                            key={key}
-                            aria-label={`${key}: ${value}`}
-                          >
-                            <span>{key}</span> <Badge>{value}</Badge>
-                          </DetailsWrapper>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                }
-              />
-            )}
-          {itemsToDelete.length > 1 && (
+          {(deleteDetails || deleteMessage || warningMessage) && (
             <WarningMessage
               variant="warning"
               isInline
-              title={deleteMessages.map(message => (
-                <div>{message}</div>
-              ))}
+              title={buildDeleteWarning()}
             />
           )}
         </AlertModal>

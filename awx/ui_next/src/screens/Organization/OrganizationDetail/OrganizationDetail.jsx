@@ -165,7 +165,7 @@ function OrganizationDetail({ i18n, organization }) {
               isDisabled={isLoading}
               deleteDetailsRequests={deleteDetailsRequests}
               deleteMessage={i18n._(
-                t`This organization is currently being used some credentials. Are you sure you want to delete it?`
+                t`This organization is currently being by other resources. Are you sure you want to delete it?`
               )}
             >
               {i18n._(t`Delete`)}

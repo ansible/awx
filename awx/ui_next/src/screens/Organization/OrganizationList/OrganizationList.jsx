@@ -180,7 +180,7 @@ function OrganizationsList({ i18n }) {
                     pluralizedItemName={i18n._(t`Organizations`)}
                     deleteDetailsRequests={deleteDetailsRequests}
                     deleteMessage={i18n._(
-                      '{numItemsToDelete, plural, one {This organization is currently being used some credentials. Are you sure you want to delete it?} other {Deleting these organizations could impact some credentials that rely on them. Are you sure you want to delete anyway?}}',
+                      '{numItemsToDelete, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
                       { numItemsToDelete: selected.length }
                     )}
                   />,

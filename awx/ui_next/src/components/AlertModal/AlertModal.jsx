@@ -77,7 +77,7 @@ function AlertModal({
       aria-label={label || i18n._(t`Alert modal`)}
       aria-labelledby="alert-modal-header-label"
       isOpen={Boolean(isOpen)}
-      variant="medium"
+      variant="small"
       title={title}
       {...props}
     >

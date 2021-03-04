@@ -119,7 +119,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           title="Remove Team Access"
           titleIconVariant={null}
           titleLabel=""
-          variant="medium"
+          variant="small"
         >
           <Portal
             containerInfo={
@@ -135,8 +135,8 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       aria-label="Alert modal"
                       aria-labelledby="pf-modal-part-0 alert-modal-header-label pf-modal-part-1"
                       aria-modal="true"
-                      class="pf-c-modal-box pf-m-md"
-                      data-ouia-component-id="OUIA-Generated-Modal-medium-1"
+                      class="pf-c-modal-box pf-m-sm"
+                      data-ouia-component-id="OUIA-Generated-Modal-small-1"
                       data-ouia-component-type="PF4/ModalContent"
                       data-ouia-safe="true"
                       id="pf-modal-part-0"
@@ -277,13 +277,13 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               isOpen={true}
               labelId="pf-modal-part-1"
               onClose={[Function]}
-              ouiaId="OUIA-Generated-Modal-medium-1"
+              ouiaId="OUIA-Generated-Modal-small-1"
               ouiaSafe={true}
               showClose={true}
               title="Remove Team Access"
               titleIconVariant={null}
               titleLabel=""
-              variant="medium"
+              variant="small"
             >
               <Backdrop>
                 <div
@@ -308,20 +308,20 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                         aria-label="Alert modal"
                         aria-labelledby="pf-modal-part-0 alert-modal-header-label pf-modal-part-1"
                         className=""
-                        data-ouia-component-id="OUIA-Generated-Modal-medium-1"
+                        data-ouia-component-id="OUIA-Generated-Modal-small-1"
                         data-ouia-component-type="PF4/ModalContent"
                         data-ouia-safe={true}
                         id="pf-modal-part-0"
                         style={Object {}}
-                        variant="medium"
+                        variant="small"
                       >
                         <div
                           aria-describedby="pf-modal-part-2"
                           aria-label="Alert modal"
                           aria-labelledby="pf-modal-part-0 alert-modal-header-label pf-modal-part-1"
                           aria-modal="true"
-                          className="pf-c-modal-box pf-m-md"
-                          data-ouia-component-id="OUIA-Generated-Modal-medium-1"
+                          className="pf-c-modal-box pf-m-sm"
+                          data-ouia-component-id="OUIA-Generated-Modal-small-1"
                           data-ouia-component-type="PF4/ModalContent"
                           data-ouia-safe={true}
                           id="pf-modal-part-0"

@@ -169,7 +169,7 @@ function CredentialTypeList({ i18n }) {
                     pluralizedItemName={i18n._(t`Credential Types`)}
                     deleteDetailsRequests={deleteDetailsRequests}
                     deleteMessage={i18n._(
-                      '{numItemsToDelete, plural, one {This credential type is currently being used by some credentials. Are you sure you want to delete it?} other {Deleting these credential types could impact other credentials that rely on them. Are you sure you want to delete anyway?}}',
+                      '{numItemsToDelete, plural, one {This credential type is currently being used by some credentials and cannot be deleted.} other {Credential types that are being used by credentials cannot be deleted. Are you sure you want to delete anyway?}}',
                       { numItemsToDelete: selected.length }
                     )}
                   />,
