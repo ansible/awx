@@ -40,6 +40,7 @@ describe('VariablesField', () => {
     });
     wrapper.update();
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('javascript');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual('{}');
     const buttons2 = wrapper.find('Button');
     expect(buttons2.at(0).prop('variant')).toEqual('secondary');
     expect(buttons2.at(1).prop('variant')).toEqual('primary');
@@ -69,6 +70,7 @@ describe('VariablesField', () => {
     expect(field.prop('hasErrors')).toEqual(true);
     expect(wrapper.find('.pf-m-error')).toHaveLength(1);
   });
+
   it('should render tooltip', () => {
     const value = '---\n';
     const wrapper = mountWithContexts(

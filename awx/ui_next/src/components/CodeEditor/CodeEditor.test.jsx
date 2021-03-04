@@ -10,11 +10,12 @@ describe('CodeEditor', () => {
   it('should trigger onChange prop', () => {
     const onChange = jest.fn();
     const wrapper = mount(
-      <CodeEditor value="---\n" onChange={onChange} mode="yaml" />
+      <CodeEditor value="---" onChange={onChange} mode="yaml" />
     );
     const aceEditor = wrapper.find('AceEditor');
     expect(aceEditor.prop('mode')).toEqual('yaml');
     expect(aceEditor.prop('setOptions').readOnly).toEqual(false);
+    expect(aceEditor.prop('value')).toEqual('---');
     aceEditor.prop('onChange')('newvalue');
     expect(onChange).toHaveBeenCalledWith('newvalue');
   });
@@ -22,9 +23,10 @@ describe('CodeEditor', () => {
   it('should render in read only mode', () => {
     const onChange = jest.fn();
     const wrapper = mount(
-      <CodeEditor value="---\n" onChange={onChange} mode="yaml" readOnly />
+      <CodeEditor value="---" onChange={onChange} mode="yaml" readOnly />
     );
     const aceEditor = wrapper.find('AceEditor');
     expect(aceEditor.prop('setOptions').readOnly).toEqual(true);
+    expect(aceEditor.prop('value')).toEqual('---');
   });
 });
