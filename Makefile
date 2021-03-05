@@ -534,7 +534,7 @@ awx/projects:
 	@mkdir -p $@
 
 COMPOSE_UP_OPTS ?=
-CLUSER_NODE_COUNT ?= 1
+CLUSTER_NODE_COUNT ?= 1
 
 docker-compose-sources:
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
