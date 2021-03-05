@@ -7,7 +7,7 @@ import { shape, object, string, arrayOf } from 'prop-types';
 import { mount, shallow } from 'enzyme';
 import { MemoryRouter, Router } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
-import { ConfigProvider } from '../src/contexts/Config';
+import { ConfigProvider } from '../src/contexts/Config'
 
 const language = 'en-US';
 const intlProvider = new I18nProvider(
@@ -44,6 +44,9 @@ const defaultContexts = {
     version: null,
     me: { is_superuser: true },
     toJSON: () => '/config/',
+    license_info: {
+      valid_key: true
+    }
   },
   router: {
     history_: {

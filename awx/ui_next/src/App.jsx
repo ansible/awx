@@ -8,7 +8,9 @@ import {
   Redirect,
 } from 'react-router-dom';
 import { I18n, I18nProvider } from '@lingui/react';
+import { Card, PageSection } from '@patternfly/react-core';
 
+import { ConfigProvider, useAuthorizedPath } from './contexts/Config';
 import AppContainer from './components/AppContainer';
 import Background from './components/Background';
 import NotFound from './screens/NotFound';
@@ -20,6 +22,49 @@ import { isAuthenticated } from './util/auth';
 import { getLanguageWithoutRegionCode } from './util/language';
 
 import getRouteConfig from './routeConfig';
+import SubscriptionEdit from './screens/Setting/Subscription/SubscriptionEdit';
+
+const AuthorizedRoutes = ({ routeConfig }) => {
+  const isAuthorized = useAuthorizedPath();
+  const match = useRouteMatch();
+
+  if (!isAuthorized) {
+    return (
+      <Switch>
+        <ProtectedRoute
+          key="/subscription_management"
+          path="/subscription_management"
+        >
+          <PageSection>
+            <Card>
+              <SubscriptionEdit />
+            </Card>
+          </PageSection>
+        </ProtectedRoute>
+        <Route path="*">
+          <Redirect to="/subscription_management" />
+        </Route>
+      </Switch>
+    );
+  }
+
+  return (
+    <Switch>
+      {routeConfig
+        .flatMap(({ routes }) => routes)
+        .map(({ path, screen: Screen }) => (
+          <ProtectedRoute key={path} path={path}>
+            <Screen match={match} />
+          </ProtectedRoute>
+        ))
+        .concat(
+          <ProtectedRoute key="not-found" path="*">
+            <NotFound />
+          </ProtectedRoute>
+        )}
+    </Switch>
+  );
+};
 
 const ProtectedRoute = ({ children, ...rest }) =>
   isAuthenticated(document.cookie) ? (
@@ -36,7 +81,6 @@ function App() {
     // preferred language, default to one that has strings.
     language = 'en';
   }
-  const match = useRouteMatch();
   const { hash, search, pathname } = useLocation();
 
   return (
@@ -55,22 +99,11 @@ function App() {
                 <Redirect to="/home" />
               </Route>
               <ProtectedRoute>
-                <AppContainer navRouteConfig={getRouteConfig(i18n)}>
-                  <Switch>
-                    {getRouteConfig(i18n)
-                      .flatMap(({ routes }) => routes)
-                      .map(({ path, screen: Screen }) => (
-                        <ProtectedRoute key={path} path={path}>
-                          <Screen match={match} />
-                        </ProtectedRoute>
-                      ))
-                      .concat(
-                        <ProtectedRoute key="not-found" path="*">
-                          <NotFound />
-                        </ProtectedRoute>
-                      )}
-                  </Switch>
-                </AppContainer>
+                <ConfigProvider>
+                  <AppContainer navRouteConfig={getRouteConfig(i18n)}>
+                    <AuthorizedRoutes routeConfig={getRouteConfig(i18n)} />
+                  </AppContainer>
+                </ConfigProvider>
               </ProtectedRoute>
             </Switch>
           </Background>
