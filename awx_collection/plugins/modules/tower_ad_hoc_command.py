@@ -132,6 +132,7 @@ def main():
         wait=dict(default=False, type='bool'),
         interval=dict(default=1.0, type='float'),
         timeout=dict(default=None, type='int'),
+        execution_environment=dict(),
     )
 
     # Create a module for ourselves
