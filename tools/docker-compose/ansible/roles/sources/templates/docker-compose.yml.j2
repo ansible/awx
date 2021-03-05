@@ -18,14 +18,6 @@ services:
       SDB_PORT: {{ awx_sdb_port_start }}
       AWX_GROUP_QUEUES: tower
       RECEPTORCTL_SOCKET: /var/run/receptor/receptor.sock
-    ports:
-{% if cluster_node_count|int == 1 %}
-      - "8080:8080"  # unused but mapped for debugging
-      - "8888:8888"  # jupyter notebook
-      - "8013:8013"  # http
-      - "8043:8043"  # https
-{% endif %}
-      - "{{ awx_sdb_port_start }}:{{ awx_sdb_port_end }}"  # sdb-listen
     links:
       - postgres
       - redis_{{ container_postfix }}
@@ -45,7 +37,8 @@ services:
     privileged: true
     tty: true
     ports:
-      - "{{ awx_sdb_port_start }}:{{ awx_sdb_port_end }}"  # sdb-listen
+      - "6899:6899"
+      - "{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}:{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}"  # sdb-listen
 {% if cluster_node_count|int == 1 %}
       - "8080:8080"  # unused but mapped for debugging
       - "8888:8888"  # jupyter notebook
