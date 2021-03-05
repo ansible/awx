@@ -8,6 +8,7 @@ WORKDIR /ui_next
 ADD public public
 ADD package.json package.json
 ADD package-lock.json package-lock.json
+ADD .linguirc .linguirc
 COPY ${NPMRC_FILE} .npmrc
 RUN npm install
 ADD src src
