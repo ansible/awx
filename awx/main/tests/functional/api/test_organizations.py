@@ -1,11 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-# Python
-import os
-
-from backports.tempfile import TemporaryDirectory
-from django.conf import settings
 import pytest
 
 # AWX
@@ -240,32 +235,6 @@ def test_delete_organization_xfail1(delete, organization, alice):
 @pytest.mark.django_db
 def test_delete_organization_xfail2(delete, organization):
     delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=None, expect=401)
-
-
-@pytest.mark.django_db
-def test_organization_custom_virtualenv(get, patch, organization, admin):
-    with TemporaryDirectory(dir=settings.BASE_VENV_PATH) as temp_dir:
-        os.makedirs(os.path.join(temp_dir, 'bin', 'activate'))
-        url = reverse('api:organization_detail', kwargs={'pk': organization.id})
-        patch(url, {'custom_virtualenv': temp_dir}, user=admin, expect=200)
-        assert get(url, user=admin).data['custom_virtualenv'] == os.path.join(temp_dir, '')
-
-
-@pytest.mark.django_db
-def test_organization_invalid_custom_virtualenv(get, patch, organization, admin):
-    url = reverse('api:organization_detail', kwargs={'pk': organization.id})
-    resp = patch(url, {'custom_virtualenv': '/foo/bar'}, user=admin, expect=400)
-    assert resp.data['custom_virtualenv'] == [
-        '/foo/bar is not a valid virtualenv in {}'.format(settings.BASE_VENV_PATH)
-    ]
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('value', ["", None])
-def test_organization_unset_custom_virtualenv(get, patch, organization, admin, value):
-    url = reverse('api:organization_detail', kwargs={'pk': organization.id})
-    resp = patch(url, {'custom_virtualenv': value}, user=admin, expect=200)
-    assert resp.data['custom_virtualenv'] is None
 
 
 @pytest.mark.django_db
