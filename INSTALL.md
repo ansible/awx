@@ -15,6 +15,11 @@ Table of Contents
 
 # Installing AWX
 
+> NOTE: If you're installing an older release of AWX (pre-18.0), these instructions have changed.  Take a look at your version specific instructions, e.g.,
+> for AWX 17.0.1, see: [17.0.1 Installation Guide](https://github.com/ansible/awx/blob/17.0.1/INSTALL.md)
+> 
+> If you're attempting to upgrade/migrate a Docker-based AWX installation, see: [Migrating Data from Local Docker](https://github.com/ansible/awx/blob/devel/tools/docker-compose/docs/data_migration.md)
+
 ## The AWX Operator
 
 Starting in version 18.0, the [AWX Operator](https://github.com/ansible/awx-operator) is the preferred way to install AWX.
