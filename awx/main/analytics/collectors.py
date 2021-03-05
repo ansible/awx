@@ -5,9 +5,9 @@ import platform
 import distro
 
 from django.db import connection
-from django.db.models import Count
+from django.db.models import Count, Max
 from django.conf import settings
-from django.utils.timezone import now
+from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
 
 from awx.conf.license import get_license
@@ -31,6 +31,14 @@ All functions - when called - will be passed a datetime.datetime object,
 functions - like those that return metadata about playbook runs, may return
 data _since_ the last report date - i.e., new data in the last 24 hours)
 '''
+
+
+def four_hour_slicing(key, since, until):
+    start, end = since, None
+    while start < until:
+        end = min(start + timedelta(hours=4), until)
+        yield (start, end)
+        start = end
 
 
 @register('config', '1.3', description=_('General platform configuration.'))
@@ -270,7 +278,7 @@ class FileSplitter(io.StringIO):
 
     def write(self, s):
         if not self.header:
-            self.header = s[0 : s.index('\n')]
+            self.header = s[: s.index('\n')]
         self.counter += self.currentfile.write(s)
         if self.counter >= MAX_TABLE_SIZE:
             self.cycle_file()
@@ -284,7 +292,20 @@ def _copy_table(table, query, path):
     return file.file_list()
 
 
-@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=True)
+def events_slicing(key, since, until):
+    from awx.conf.models import Setting
+
+    step = 100000
+    last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
+    last_entries = last_entries.value if last_entries is not None else {}
+    previous_pk = last_entries.get(key) or 0
+    final_pk = models.JobEvent.objects.filter(created_lte=until).aggregate(Max('pk'))['pk__max']
+
+    for start in range(previous_pk, final_pk + 1, step):
+        yield (start, min(start + step, final_pk))
+
+
+@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing)
 def events_table(since, full_path, until, **kwargs):
     events_query = '''COPY (SELECT main_jobevent.id, 
                               main_jobevent.created,
@@ -302,22 +323,22 @@ def events_table(since, full_path, until, **kwargs):
                               main_jobevent.role, 
                               main_jobevent.job_id, 
                               main_jobevent.host_id, 
-                              main_jobevent.host_name
-                              , CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
+                              main_jobevent.host_name,
+                              CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
                               CAST(main_jobevent.event_data::json->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
                               main_jobevent.event_data::json->'duration' AS duration,
                               main_jobevent.event_data::json->'res'->'warnings' AS warnings,
                               main_jobevent.event_data::json->'res'->'deprecations' AS deprecations
                               FROM main_jobevent 
-                              WHERE (main_jobevent.created > '{}' AND main_jobevent.created <= '{}')
+                              WHERE (main_jobevent.id > {} AND main_jobevent.id <= {})
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER
                    '''.format(
-        since.isoformat(), until.isoformat()
+        since, until
     )
     return _copy_table(table='events', query=events_query, path=full_path)
 
 
-@register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=True)
+@register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
 def unified_jobs_table(since, full_path, until, **kwargs):
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
@@ -381,7 +402,7 @@ def unified_job_template_table(since, full_path, **kwargs):
     return _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
 
 
-@register('workflow_job_node_table', '1.0', format='csv', description=_('Data on workflow runs'), expensive=True)
+@register('workflow_job_node_table', '1.0', format='csv', description=_('Data on workflow runs'), expensive=four_hour_slicing)
 def workflow_job_node_table(since, full_path, until, **kwargs):
     workflow_job_node_query = '''COPY (SELECT main_workflowjobnode.id,
                                  main_workflowjobnode.created,

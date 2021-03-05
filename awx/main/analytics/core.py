@@ -1,20 +1,24 @@
 import inspect
+import io
 import json
 import logging
 import os
 import os.path
-import tempfile
+import pathlib
 import shutil
-import requests
+import tarfile
+import tempfile
 
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 from rest_framework.exceptions import PermissionDenied
+import requests
 
 from awx.conf.license import get_license
 from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.utils import get_awx_http_client_headers, set_environ
+from awx.main.utils.pglock import advisory_lock
 
 __all__ = ['register', 'gather', 'ship']
 
@@ -36,29 +40,18 @@ def _valid_license():
 def all_collectors():
     from awx.main.analytics import collectors
 
-    collector_dict = {}
-    module = collectors
-    for name, func in inspect.getmembers(module):
-        if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__'):
-            key = func.__awx_analytics_key__
-            desc = func.__awx_analytics_description__ or ''
-            version = func.__awx_analytics_version__
-            collector_dict[key] = {'name': key, 'version': version, 'description': desc}
-    return collector_dict
+    return {
+        func.__awx_analytics_key__: {
+            'name': func.__awx_analytics_key__,
+            'version': func.__awx_analytics_version__,
+            'description': func.__awx_analytics_description__ or '',
+        }
+        for name, func in inspect.getmembers(collectors)
+        if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__')
+    }
 
 
-def expensive_collectors():
-    from awx.main.analytics import collectors
-
-    ret = []
-    module = collectors
-    for name, func in inspect.getmembers(module):
-        if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__') and func.__awx_expensive__:
-            ret.append(func.__awx_analytics_key__)
-    return ret
-
-
-def register(key, version, description=None, format='json', expensive=False):
+def register(key, version, description=None, format='json', expensive=None):
     """
     A decorator used to register a function as a metric collector.
 
@@ -82,136 +75,154 @@ def register(key, version, description=None, format='json', expensive=False):
     return decorate
 
 
-def gather(dest=None, module=None, subset=None, since=None, until=now(), collection_type='scheduled'):
+def package(target, data, timestamp):
+    try:
+        tarname_base = f'{settings.SYSTEM_UUID}-{timestamp.strftime("%Y-%m-%d-%H%M%S%z")}'
+        path = pathlib.Path(target)
+        index = len(list(path.glob(f'{tarname_base}-*.*')))
+        tarname = f'{tarname_base}-{index}.tar.gz'
+
+        manifest = {}
+        with tarfile.open(target.joinpath(tarname), 'w:gz') as f:
+            for name, (item, version) in data.items():
+                manifest[name] = version
+                if isinstance(item, str):
+                    info = f.gettarinfo(item, arcname=name)
+                    f.addfile(info)
+                else:
+                    info = tarfile.TarInfo(name)
+                    fileobj = io.BytesIO(json.dumps(item).encode('utf-8'))
+                    fileobj.size = len(fileobj.getvalue())
+                    f.addfile(info, fileobj=fileobj)
+
+            info = tarfile.TarInfo('manifest.json')
+            fileobj = io.BytesIO(json.dumps(manifest).encode('utf-8'))
+            fileobj.size = len(fileobj.getvalue())
+            f.addfile(info, fileobj=fileobj)
+
+        return f.name
+    except Exception:
+        logger.exception("Failed to write analytics archive file")
+        return None
+
+
+def gather(dest=None, module=None, subset=None, since=None, until=None, collection_type='scheduled'):
     """
     Gather all defined metrics and write them as JSON files in a .tgz
 
-    :param dest:    the (optional) absolute path to write a compressed tarball
+    :param dest:   the (optional) absolute path to write a compressed tarball
     :param module: the module to search for registered analytic collector
-                    functions; defaults to awx.main.analytics.collectors
+                   functions; defaults to awx.main.analytics.collectors
     """
 
-    def _write_manifest(destdir, manifest):
-        path = os.path.join(destdir, 'manifest.json')
-        with open(path, 'w', encoding='utf-8') as f:
-            try:
-                json.dump(manifest, f)
-            except Exception:
-                f.close()
-                os.remove(f.name)
-                logger.exception("Could not generate manifest.json")
-
-    last_run = since or settings.AUTOMATION_ANALYTICS_LAST_GATHER or (now() - timedelta(weeks=4))
-    logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
-
-    if _valid_license() is False:
-        logger.exception("Invalid License provided, or No License Provided")
+    if not _valid_license():
+        logger.error("Invalid License provided, or No License Provided")
         return None
 
-    if collection_type != 'dry-run' and not settings.INSIGHTS_TRACKING_STATE:
-        logger.error("Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
-        return None
+    if collection_type != 'dry-run':
+        if not settings.INSIGHTS_TRACKING_STATE:
+            logger.error("Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
+            return None
 
-    collector_list = []
-    if module:
-        collector_module = module
-    else:
-        from awx.main.analytics import collectors
+        if not (settings.AUTOMATION_ANALYTICS_URL and settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD):
+            logger.debug('Not gathering analytics, configuration is invalid')
+            return None
 
-        collector_module = collectors
-    for name, func in inspect.getmembers(collector_module):
-        if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__') and (not subset or name in subset):
-            collector_list.append((name, func))
+    with advisory_lock('gather_analytics_lock', wait=False) as acquired:
+        if not acquired:
+            logger.debug('Not gathering analytics, another task holds lock')
+            return None
 
-    manifest = dict()
-    dest = dest or tempfile.mkdtemp(prefix='awx_analytics')
-    gather_dir = os.path.join(dest, 'stage')
-    os.mkdir(gather_dir, 0o700)
-    num_splits = 1
-    for name, func in collector_list:
-        if func.__awx_analytics_type__ == 'json':
+        from awx.conf.models import Setting
+        from awx.main.signals import disable_activity_stream
+
+        if until is None:
+            until = now()
+        last_run = since or settings.AUTOMATION_ANALYTICS_LAST_GATHER or (until - timedelta(weeks=4))
+        last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
+        last_entries = last_entries.value if last_entries is not None else {}
+        logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
+
+        if module:
+            collector_module = module
+        else:
+            from awx.main.analytics import collectors
+
+            collector_module = collectors
+            if subset:  # ensure that the config collector is added to any explicit subset of our builtins
+                subset = set(subset) | {
+                    'config',
+                }
+
+        collector_list = [
+            func
+            for name, func in inspect.getmembers(collector_module)
+            if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__') and (not subset or name in subset)
+        ]
+        json_collectors = [func for func in collector_list if func.__awx_analytics_type__ == 'json']
+        csv_collectors = [func for func in collector_list if func.__awx_analytics_type__ == 'csv']
+
+        dest = pathlib.Path(dest or tempfile.mkdtemp(prefix='awx_analytics'))
+        gather_dir = dest.joinpath('stage')
+        gather_dir.mkdir(mode=0o700)
+        tarfiles = []
+
+        # These json collectors are pretty compact, so collect all of them before shipping to analytics.
+        data = {}
+        for func in json_collectors:
             key = func.__awx_analytics_key__
-            path = '{}.json'.format(os.path.join(gather_dir, key))
-            with open(path, 'w', encoding='utf-8') as f:
-                try:
-                    json.dump(func(last_run, collection_type=collection_type, until=until), f)
-                    manifest['{}.json'.format(key)] = func.__awx_analytics_version__
-                except Exception:
-                    logger.exception("Could not generate metric {}.json".format(key))
-                    f.close()
-                    os.remove(f.name)
-        elif func.__awx_analytics_type__ == 'csv':
+            filename = f'{key}.json'
+            try:
+                data[filename] = (func(last_run, collection_type=collection_type, until=until), func.__awx_analytics_version__)
+            except Exception:
+                logger.exception("Could not generate metric {}".format(filename))
+        if data:
+            tgzfile = package(dest.parent, data, until)
+            if tgzfile is not None:
+                tarfiles.append(tgzfile)
+
+                if collection_type != 'dry-run':
+                    ship(tgzfile)
+                    with disable_activity_stream():
+                        for filename in data:
+                            last_entries[filename.replace('.json', '')] = until
+                        settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = last_entries
+
+        for func in csv_collectors:
             key = func.__awx_analytics_key__
+            filename = f'{key}.csv'
             try:
-                files = func(last_run, full_path=gather_dir, until=until)
-                if files:
-                    manifest['{}.csv'.format(key)] = func.__awx_analytics_version__
-                if len(files) > num_splits:
-                    num_splits = len(files)
+                slices = [(last_run, until)]
+                if func.__awx_expensive__:
+                    slices = func.__awx_expensive__(key, last_run, until)  # it's ok if this returns a generator
+                for start, end in slices:
+                    files = func(start, full_path=gather_dir, until=end)
+
+                    if not files:
+                        continue
+                    for fpath in files:
+                        tgzfile = package(dest.parent, {filename: (fpath, func.__awx_analytics_version__)}, until)
+                        if tgzfile is not None:
+                            tarfiles.append(tgzfile)
+
+                            if collection_type != 'dry-run':
+                                ship(tgzfile)
+                                with disable_activity_stream():
+                                    last_entries[key] = end
+                                    settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = last_entries
             except Exception:
-                logger.exception("Could not generate metric {}.csv".format(key))
+                logger.exception("Could not generate metric {}".format(filename))
 
-    if not manifest:
-        # No data was collected
-        logger.warning("No data from {} to {}".format(last_run, until))
-        shutil.rmtree(dest)
-        return None
+        with disable_activity_stream():
+            settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
 
-    # Always include config.json if we're using our collectors
-    if 'config.json' not in manifest.keys() and not module:
-        from awx.main.analytics import collectors
+        shutil.rmtree(dest, ignore_errors=True)  # clean up individual artifact files
+        if not tarfiles:
+            # No data was collected
+            logger.warning("No data from {} to {}".format(last_run, until))
+            return None
 
-        config = collectors.config
-        path = '{}.json'.format(os.path.join(gather_dir, config.__awx_analytics_key__))
-        with open(path, 'w', encoding='utf-8') as f:
-            try:
-                json.dump(collectors.config(last_run), f)
-                manifest['config.json'] = config.__awx_analytics_version__
-            except Exception:
-                logger.exception("Could not generate metric {}.json".format(key))
-                f.close()
-                os.remove(f.name)
-                shutil.rmtree(dest)
-                return None
-
-    stage_dirs = [gather_dir]
-    if num_splits > 1:
-        for i in range(0, num_splits):
-            split_path = os.path.join(dest, 'split{}'.format(i))
-            os.mkdir(split_path, 0o700)
-            filtered_manifest = {}
-            shutil.copy(os.path.join(gather_dir, 'config.json'), split_path)
-            filtered_manifest['config.json'] = manifest['config.json']
-            suffix = '_split{}'.format(i)
-            for file in os.listdir(gather_dir):
-                if file.endswith(suffix):
-                    old_file = os.path.join(gather_dir, file)
-                    new_filename = file.replace(suffix, '')
-                    new_file = os.path.join(split_path, new_filename)
-                    shutil.move(old_file, new_file)
-                    filtered_manifest[new_filename] = manifest[new_filename]
-            _write_manifest(split_path, filtered_manifest)
-            stage_dirs.append(split_path)
-
-    for item in list(manifest.keys()):
-        if not os.path.exists(os.path.join(gather_dir, item)):
-            manifest.pop(item)
-    _write_manifest(gather_dir, manifest)
-
-    tarfiles = []
-    try:
-        for i in range(0, len(stage_dirs)):
-            stage_dir = stage_dirs[i]
-            # can't use isoformat() since it has colons, which GNU tar doesn't like
-            tarname = '_'.join([settings.SYSTEM_UUID, until.strftime('%Y-%m-%d-%H%M%S%z'), str(i)])
-            tgz = shutil.make_archive(os.path.join(os.path.dirname(dest), tarname), 'gztar', stage_dir)
-            tarfiles.append(tgz)
-    except Exception:
-        shutil.rmtree(stage_dir, ignore_errors=True)
-        logger.exception("Failed to write analytics archive file")
-    finally:
-        shutil.rmtree(dest, ignore_errors=True)
-    return tarfiles
+        return tarfiles
 
 
 def ship(path):

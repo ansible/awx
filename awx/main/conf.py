@@ -10,6 +10,7 @@ from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
+from awx.main.fields import JSONField
 from awx.main.models import ExecutionEnvironment
 
 
@@ -775,6 +776,13 @@ register(
     field_class=fields.DateTimeField,
     label=_('Last gather date for Automation Analytics.'),
     allow_null=True,
+    category=_('System'),
+    category_slug='system',
+)
+register(
+    'AUTOMATION_ANALYTICS_LAST_ENTRIES',
+    field_class=JSONField,
+    # label=_('Last gathered entries for expensive Automation Analytics collectors.'),
     category=_('System'),
     category_slug='system',
 )
