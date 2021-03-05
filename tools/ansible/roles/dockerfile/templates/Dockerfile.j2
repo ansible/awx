@@ -48,19 +48,16 @@ RUN python3 -m ensurepip && pip3 install "virtualenv < 20"
 # Install & build requirements
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
-ADD requirements/requirements_ansible.txt \
-    requirements/requirements_ansible_uninstall.txt \
-    requirements/requirements_ansible_git.txt \
-    requirements/requirements.txt \
+ADD requirements/requirements.txt \
     requirements/requirements_tower_uninstall.txt \
     requirements/requirements_git.txt \
     /tmp/requirements/
 
-RUN cd /tmp && make requirements_awx requirements_ansible_py3
+RUN cd /tmp && make requirements_awx
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD requirements/requirements_dev.txt /tmp/requirements
-RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev
+RUN cd /tmp && make requirements_awx_dev
 {% else %}
 # Use the distro provided npm to bootstrap our required version of node
 RUN npm install -g n && n 14.15.1 && dnf remove -y nodejs

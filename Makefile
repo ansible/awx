@@ -20,7 +20,6 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
 
 VENV_BASE ?= /var/lib/awx/venv/
-COLLECTION_BASE ?= /var/lib/awx/vendor/awx_ansible_collections
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
@@ -115,31 +114,7 @@ guard-%:
 	    exit 1; \
 	fi
 
-virtualenv: virtualenv_ansible virtualenv_awx
-
-# virtualenv_* targets do not use --system-site-packages to prevent bugs installing packages
-# but Ansible venvs are expected to have this, so that must be done after venv creation
-virtualenv_ansible:
-	if [ "$(VENV_BASE)" ]; then \
-		if [ ! -d "$(VENV_BASE)" ]; then \
-			mkdir $(VENV_BASE); \
-		fi; \
-		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv -p python $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
-		fi; \
-	fi
-
-virtualenv_ansible_py3:
-	if [ "$(VENV_BASE)" ]; then \
-		if [ ! -d "$(VENV_BASE)" ]; then \
-			mkdir $(VENV_BASE); \
-		fi; \
-		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv -p $(PYTHON) $(VENV_BASE)/ansible; \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
-		fi; \
-	fi
+virtualenv: virtualenv_awx
 
 # flit is needed for offline install of certain packages, specifically ptyprocess
 # it is needed for setup, but not always recognized as a setup dependency
@@ -155,32 +130,6 @@ virtualenv_awx:
 		fi; \
 	fi
 
-# --ignore-install flag is not used because *.txt files should specify exact versions
-requirements_ansible: virtualenv_ansible
-	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) -r /dev/stdin ; \
-	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
-	fi
-	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
-	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
-
-requirements_ansible_py3: virtualenv_ansible_py3
-	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) -r /dev/stdin ; \
-	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
-	fi
-	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
-	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
-
-requirements_ansible_dev:
-	if [ "$(VENV_BASE)" ]; then \
-		$(VENV_BASE)/ansible/bin/pip install pytest mock; \
-	fi
-
 # Install third-party requirements needed for AWX's environment.
 # this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
@@ -194,17 +143,9 @@ requirements_awx: virtualenv_awx
 requirements_awx_dev:
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt
 
-requirements_collections:
-	mkdir -p $(COLLECTION_BASE)
-	n=0; \
-	until [ "$$n" -ge 5 ]; do \
-	    ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE) && break; \
-	    n=$$((n+1)); \
-	done
+requirements: requirements_awx
 
-requirements: requirements_ansible requirements_awx requirements_collections
-
-requirements_dev: requirements_awx requirements_ansible_py3 requirements_awx_dev requirements_ansible_dev
+requirements_dev: requirements_awx requirements_awx_dev
 
 requirements_test: requirements
 
