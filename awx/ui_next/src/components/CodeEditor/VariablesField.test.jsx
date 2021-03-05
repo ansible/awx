@@ -22,8 +22,8 @@ describe('VariablesField', () => {
     expect(codeEditor.prop('value')).toEqual(value);
   });
 
-  it('should render yaml/json toggles', async () => {
-    const value = '---\n';
+  it('should toggle between yaml/json', async () => {
+    const value = '---\nfoo: bar\nbaz: 3';
     const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }}>
         {() => (
@@ -40,7 +40,9 @@ describe('VariablesField', () => {
     });
     wrapper.update();
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('javascript');
-    expect(wrapper.find('CodeEditor').prop('value')).toEqual('{}');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(
+      '{\n  "foo": "bar",\n  "baz": 3\n}'
+    );
     const buttons2 = wrapper.find('Button');
     expect(buttons2.at(0).prop('variant')).toEqual('secondary');
     expect(buttons2.at(1).prop('variant')).toEqual('primary');
@@ -49,6 +51,9 @@ describe('VariablesField', () => {
     });
     wrapper.update();
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(
+      'foo: bar\nbaz: 3\n'
+    );
   });
 
   it('should set Formik error if yaml is invalid', async () => {
