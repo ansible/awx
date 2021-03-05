@@ -62,11 +62,11 @@ WHEEL_FILE ?= $(WHEEL_NAME)-py2-none-any.whl
 I18N_FLAG_FILE = .i18n_built
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
-	develop refresh adduser migrate dbchange runserver \
+	develop refresh adduser migrate dbchange \
 	receiver test test_unit test_coverage coverage_html \
-	dev_build release_build release_clean sdist \
-	ui-docker-machine ui-docker ui-release ui-devel \
-	ui-test ui-deps ui-test-ci VERSION docker-compose-sources
+	dev_build release_build sdist \
+	ui-release ui-devel \
+	VERSION docker-compose-sources
 
 clean-tmp:
 	rm -rf tmp/
@@ -458,7 +458,6 @@ clean-ui:
 	rm -rf awx/ui_next/build
 	rm -rf awx/ui_next/src/locales/_build
 	rm -rf $(UI_BUILD_FLAG_FILE)
-	git checkout awx/ui_next/src/locales
 
 awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
