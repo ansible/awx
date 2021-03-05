@@ -16,7 +16,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: tower_execution_environment
-author: "Shane McDonald"
+author: "Shane McDonald (@shanemcd)"
 short_description: create, update, or destroy Execution Environments in Ansible Tower.
 description:
     - Create, update, or destroy Execution Environments in Ansible Tower. See
@@ -54,7 +54,7 @@ options:
       description:
         - determine image pull behavior
       choices: ["always", "missing", "never"]
-      default: ''
+      default: 'missing'
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -108,7 +108,7 @@ def main():
 
     if pull:
         new_fields['pull'] = pull
-        
+
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization = module.params.get('organization')
     if organization:
