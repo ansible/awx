@@ -1,6 +1,0 @@
----
-- name: Build and deploy AWX
-  hosts: all
-  roles:
-    - {role: check_vars}
-    - {role: kubernetes, when: "openshift_host is defined or kubernetes_context is defined"}
