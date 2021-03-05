@@ -2,11 +2,34 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-# (TBD)
+# (March TBD, 2021)
+
+**IMPORTANT INSTALL AND UPGRADE NOTES**
+
+Starting in version 18.0, the [AWX Operator](https://github.com/ansible/awx-operator) is the preferred way to install AWX: https://github.com/ansible/awx/blob/devel/INSTALL.md#installing-awx
+
+If you have a pre-existing installation of AWX that utilizes the Docker-based installation method, this install method has ** notably changed** from 17.x to 18.x.  For details, please see:
+
+- https://groups.google.com/g/awx-project/c/47MjWSUQaOc/m/bCjSDn0eBQAJ
+- https://github.com/ansible/awx/blob/devel/tools/docker-compose
+- https://github.com/ansible/awx/blob/devel/tools/docker-compose/docs/data_migration.md
+
+### Introducing Execution Environments
+
+After a hurculean effort from a number of contributors, we're excited to announce that AWX 18.0.0 introduces a new concept called Execution Environments.
+
+Execution Environments are container images which consist of everything necessary to run a playbook within AWX, and which drive the entire management and lifecycle of playbook execution runtime in AWX: https://github.com/ansible/awx/issues/5157.  This means that going forward, AWX no longer utilizes the [bubblewrap](https://github.com/containers/bubblewrap) project for playbook isolation, but instead utilizes a container per playbook run.
+
+Much like custom virtualenvs, custom Execution Environments can be crafted to specify additional Python or system-level dependencies.  Ansible Builder outputs images you can upload to your registry which can *then* be defined in AWX and utilized for playbook runs.
+
+To learn more about Ansible Builder and Execution Environments, see: https://www.ansible.com/blog/introduction-to-ansible-builder
+
+### Other Notable Changes
+
 - Added user interface for the activity stream: https://github.com/ansible/awx/pull/9083
 - Converted many of the top-level list views (Jobs, Teams, Hosts, Inventories, Projects, and more) to a new, permanent table component for substantially increased responsiveness, usability, maintainability, and other 'ility's: https://github.com/ansible/awx/pull/8970, https://github.com/ansible/awx/pull/9182 and many others!
 - Added click-to-expand details for job tables
-- Add search filtering to job output https://github.com/ansible/awx/pull/9208
+- Added search filtering to job output https://github.com/ansible/awx/pull/9208
 - Added the new migration, update, and "installation in progress" page https://github.com/ansible/awx/pull/9123
 - Added the user interface for job settings https://github.com/ansible/awx/pull/8661
 - Runtime errors from jobs are now displayed, along with an explanation for what went wrong, on the output page https://github.com/ansible/awx/pull/9264
