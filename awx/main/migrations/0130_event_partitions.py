@@ -114,4 +114,9 @@ class Migration(migrations.Migration):
             name='job_created',
             field=models.DateTimeField(null=True, editable=False),
         ),
+        migrations.AlterField(
+            model_name='jobevent',
+            name='job',
+            field=models.ForeignKey(editable=False, null=True, on_delete=models.deletion.SET_NULL, related_name='job_events', to='main.Job'),
+        ),
     ]
