@@ -97,11 +97,6 @@ options:
       type: int
       aliases:
         - job_timeout
-    custom_virtualenv:
-      description:
-        - Local absolute file path containing a custom Python virtualenv to use
-      type: str
-      default: ''
     default_environment:
       description:
         - Default Execution Environment to use for jobs relating to the project.
@@ -172,7 +167,6 @@ EXAMPLES = '''
     organization: "test"
     scm_update_on_launch: True
     scm_update_cache_timeout: 60
-    custom_virtualenv: "/var/lib/awx/var/lib/awx/venv/ansible-2.2"
     state: present
     tower_config_file: "~/tower_cli.cfg"
 '''
@@ -242,7 +236,6 @@ def main():
         scm_update_cache_timeout=dict(type='int', default=0),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
         timeout=dict(type='int', default=0, aliases=['job_timeout']),
-        custom_virtualenv=dict(),
         default_environment=dict(),
         organization=dict(),
         notification_templates_started=dict(type="list", elements='str'),
@@ -274,7 +267,6 @@ def main():
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
     allow_override = module.params.get('allow_override')
     timeout = module.params.get('timeout')
-    custom_virtualenv = module.params.get('custom_virtualenv')
     default_ee = module.params.get('default_environment')
     organization = module.params.get('organization')
     state = module.params.get('state')
@@ -333,7 +325,6 @@ def main():
         'organization': org_id,
         'scm_update_on_launch': scm_update_on_launch,
         'scm_update_cache_timeout': scm_update_cache_timeout,
-        'custom_virtualenv': custom_virtualenv,
     }
     if description is not None:
         project_fields['description'] = description
