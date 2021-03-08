@@ -1,6 +1,3 @@
-import os
-
-from backports.tempfile import TemporaryDirectory
 import pytest
 
 # AWX
@@ -10,7 +7,6 @@ from awx.main.models import Job, JobTemplate, CredentialType, WorkflowJobTemplat
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
-from django.conf import settings
 from django.apps import apps
 
 # DRF
@@ -300,61 +296,6 @@ def test_save_survey_passwords_on_migration(job_template_with_survey_passwords):
     save_password_keys.migrate_survey_passwords(apps, None)
     job = job_template_with_survey_passwords.jobs.all()[0]
     assert job.survey_passwords == {'SSN': '$encrypted$', 'secret_key': '$encrypted$'}
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('access', ["superuser", "admin", "peon"])
-def test_job_template_custom_virtualenv(get, patch, organization_factory, job_template_factory, alice, access):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-
-    user = alice
-    if access == "superuser":
-        user = objs.superusers.admin
-    elif access == "admin":
-        jt.admin_role.members.add(alice)
-    else:
-        jt.read_role.members.add(alice)
-
-    with TemporaryDirectory(dir=settings.BASE_VENV_PATH) as temp_dir:
-        os.makedirs(os.path.join(temp_dir, 'bin', 'activate'))
-        url = reverse('api:job_template_detail', kwargs={'pk': jt.id})
-
-        if access == "peon":
-            patch(url, {'custom_virtualenv': temp_dir}, user=user, expect=403)
-            assert 'custom_virtualenv' not in get(url, user=user)
-            assert JobTemplate.objects.get(pk=jt.id).custom_virtualenv is None
-        else:
-            patch(url, {'custom_virtualenv': temp_dir}, user=user, expect=200)
-            assert get(url, user=user).data['custom_virtualenv'] == os.path.join(temp_dir, '')
-
-
-@pytest.mark.django_db
-def test_job_template_invalid_custom_virtualenv(get, patch, organization_factory,
-                                                job_template_factory):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-
-    url = reverse('api:job_template_detail', kwargs={'pk': jt.id})
-    resp = patch(url, {'custom_virtualenv': '/foo/bar'}, user=objs.superusers.admin, expect=400)
-    assert resp.data['custom_virtualenv'] == [
-        '/foo/bar is not a valid virtualenv in {}'.format(settings.BASE_VENV_PATH)
-    ]
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('value', ["", None])
-def test_job_template_unset_custom_virtualenv(get, patch, organization_factory,
-                                              job_template_factory, value):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-
-    url = reverse('api:job_template_detail', kwargs={'pk': jt.id})
-    resp = patch(url, {'custom_virtualenv': value}, user=objs.superusers.admin, expect=200)
-    assert resp.data['custom_virtualenv'] is None
 
 
 @pytest.mark.django_db

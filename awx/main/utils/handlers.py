@@ -3,7 +3,8 @@
 
 # Python
 import logging
-import os.path
+import sys
+import traceback
 
 # Django
 from django.conf import settings
@@ -21,27 +22,31 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
         super(RSysLogHandler, self)._connect_unixsocket(address)
         self.socket.setblocking(False)
 
+    def handleError(self, record):
+        # for any number of reasons, rsyslogd has gone to lunch;
+        # this usually means that it's just been restarted (due to
+        # a configuration change) unfortunately, we can't log that
+        # because...rsyslogd is down (and would just put us back down this
+        # code path)
+        # as a fallback, it makes the most sense to just write the
+        # messages to sys.stderr (which will end up in supervisord logs,
+        # and in containerized installs, cascaded down to pod logs)
+        # because the alternative is blocking the
+        # socket.send() in the Python process, which we definitely don't
+        # want to do)
+        msg = f'{record.asctime} ERROR rsyslogd was unresponsive: '
+        exc = traceback.format_exc()
+        try:
+            msg += exc.splitlines()[-1]
+        except Exception:
+            msg += exc
+        msg = '\n'.join([msg, record.msg, ''])
+        sys.stderr.write(msg)
+
     def emit(self, msg):
         if not settings.LOG_AGGREGATOR_ENABLED:
             return
-        if not os.path.exists(settings.LOGGING['handlers']['external_logger']['address']):
-            return
-        try:
-            return super(RSysLogHandler, self).emit(msg)
-        except ConnectionRefusedError:
-            # rsyslogd has gone to lunch; this generally means that it's just
-            # been restarted (due to a configuration change)
-            # unfortunately, we can't log that because...rsyslogd is down (and
-            # would just us back ddown this code path)
-            pass
-        except BlockingIOError:
-            # for <some reason>, rsyslogd is no longer reading from the domain socket, and
-            # we're unable to write any more to it without blocking (we've seen this behavior
-            # from time to time when logging is totally misconfigured;
-            # in this scenario, it also makes more sense to just drop the messages,
-            # because the alternative is blocking the socket.send() in the
-            # Python process, which we definitely don't want to do)
-            pass
+        return super(RSysLogHandler, self).emit(msg)
 
 
 class SpecialInventoryHandler(logging.Handler):

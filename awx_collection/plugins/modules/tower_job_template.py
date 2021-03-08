@@ -227,10 +227,6 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish (server-side).
       type: int
-    custom_virtualenv:
-      description:
-        - Local absolute file path containing a custom Python virtualenv to use.
-      type: str
     job_slice_count:
       description:
         - The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.
@@ -304,7 +300,6 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
     survey_enabled: yes
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
-    custom_virtualenv: "/var/lib/awx/venv/custom-venv/"
 
 - name: Add start notification to Job Template
   tower_job_template:
@@ -352,7 +347,6 @@ def main():
         playbook=dict(),
         credential=dict(),
         vault_credential=dict(),
-        custom_virtualenv=dict(),
         credentials=dict(type='list', elements='str'),
         execution_environment=dict(),
         forks=dict(type='int'),
@@ -442,7 +436,7 @@ def main():
         'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch', 'ask_variables_on_launch',
         'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch',
         'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
-        'become_enabled', 'diff_mode', 'allow_simultaneous', 'custom_virtualenv', 'job_slice_count', 'webhook_service',
+        'become_enabled', 'diff_mode', 'allow_simultaneous', 'job_slice_count', 'webhook_service',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:

@@ -85,10 +85,6 @@ options:
       description:
         - Override vars in child groups and hosts with those from external source.
       type: bool
-    custom_virtualenv:
-      description:
-        - Local absolute file path containing a custom Python virtualenv to use.
-      type: str
     timeout:
       description: The amount of time (in seconds) to run before the task is canceled.
       type: int
@@ -181,7 +177,6 @@ def main():
         organization=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
-        custom_virtualenv=dict(),
         timeout=dict(type='int'),
         verbosity=dict(type='int', choices=[0, 1, 2]),
         update_on_launch=dict(type='bool'),
@@ -265,7 +260,7 @@ def main():
 
     OPTIONAL_VARS = (
         'description', 'source', 'source_path', 'source_vars',
-        'overwrite', 'overwrite_vars', 'custom_virtualenv',
+        'overwrite', 'overwrite_vars',
         'timeout', 'verbosity', 'update_on_launch', 'update_cache_timeout',
         'update_on_project_update', 'enabled_var', 'enabled_value', 'host_filter',
     )

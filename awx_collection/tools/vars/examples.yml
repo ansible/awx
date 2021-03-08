@@ -49,4 +49,3 @@ examples:
         tower_config_file: "~/tower_cli.cfg"
         survey_enabled: yes
         survey_spec: "{{ '{{' }} lookup('file', 'my_survey.json') {{ '}}' }}"
-        custom_virtualenv: "/var/lib/awx/venv/custom-venv/"

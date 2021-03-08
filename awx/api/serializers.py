@@ -1253,6 +1253,7 @@ class OrganizationSerializer(BaseSerializer):
     class Meta:
         model = Organization
         fields = ('*', 'max_hosts', 'custom_virtualenv', 'default_environment',)
+        read_only_fields = ('*', 'custom_virtualenv',)
 
     def get_related(self, obj):
         res = super(OrganizationSerializer, self).get_related(obj)
@@ -1399,6 +1400,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         fields = ('*', '-execution_environment', 'organization', 'scm_update_on_launch',
                   'scm_update_cache_timeout', 'allow_override', 'custom_virtualenv', 'default_environment') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
+        read_only_fields = ('*', 'custom_virtualenv',)
 
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
@@ -1978,6 +1980,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
                   'enabled_var', 'enabled_value', 'host_filter', 'overwrite', 'overwrite_vars',
                   'custom_virtualenv', 'timeout', 'verbosity')
+        read_only_fields = ('*', 'custom_virtualenv',)
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -2963,6 +2966,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             'become_enabled', 'diff_mode', 'allow_simultaneous', 'custom_virtualenv',
             'job_slice_count', 'webhook_service', 'webhook_credential',
         )
+        read_only_fields = ('*', 'custom_virtualenv',)
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)

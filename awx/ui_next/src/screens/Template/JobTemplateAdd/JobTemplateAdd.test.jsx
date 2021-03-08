@@ -58,7 +58,7 @@ const jobTemplateData = {
   timeout: 0,
   use_fact_cache: false,
   verbosity: '0',
-  execution_environment: { id: 1, name: 'Foo' },
+  execution_environment: { id: 1, name: 'Foo', image: 'localhost.com' },
 };
 
 describe('<JobTemplateAdd />', () => {
@@ -139,7 +139,7 @@ describe('<JobTemplateAdd />', () => {
       wrapper = mountWithContexts(<JobTemplateAdd />);
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    await act(() => {
+    await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'Bar', name: 'name' },
       });
