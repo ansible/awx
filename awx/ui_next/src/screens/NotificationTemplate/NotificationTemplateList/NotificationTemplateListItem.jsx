@@ -119,6 +119,7 @@ function NotificationTemplateListItem({
         <ActionsTd dataLabel={i18n._(t`Actions`)}>
           <ActionItem visible tooltip={i18n._(t`Test notification`)}>
             <Button
+              ouiaId={`notification-test-button-${template.id}`}
               aria-label={i18n._(t`Test Notification`)}
               variant="plain"
               onClick={sendTestNotification}
@@ -132,6 +133,7 @@ function NotificationTemplateListItem({
             tooltip={i18n._(t`Edit`)}
           >
             <Button
+              ouiaId={`notification-edit-button-${template.id}`}
               aria-label={i18n._(t`Edit Notification Template`)}
               variant="plain"
               component={Link}
@@ -145,6 +147,7 @@ function NotificationTemplateListItem({
             tooltip={i18n._(t`Copy Notification Template`)}
           >
             <CopyButton
+              ouiaId={`notification-copy-button-${template.id}`}
               copyItem={copyTemplate}
               isCopyDisabled={isCopyDisabled}
               onCopyStart={handleCopyStart}

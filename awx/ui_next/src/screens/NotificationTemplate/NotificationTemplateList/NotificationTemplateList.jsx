@@ -227,7 +227,7 @@ function NotificationTemplatesList({ i18n }) {
         {i18n._(t`Failed to delete one or more notification template.`)}
         <ErrorDetail error={deletionError} />
       </AlertModal>
-      <AlertGroup isToast>
+      <AlertGroup ouiaId="notification-template-alerts" isToast>
         {testToasts
           .filter(notification => notification.status !== 'pending')
           .map(notification => (
