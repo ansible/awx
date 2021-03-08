@@ -37,20 +37,31 @@ def migrate_event_data(apps, schema_editor):
                 f'ALTER TABLE {tblname} RENAME TO _unpartitioned_{tblname}'
             )
 
+            # create a copy of the table that we will use as a reference for schema
+            # otherwise, the schema changes we would make on the old jobevents table
+            # (namely, dropping the primary key constraint) would cause the migration
+            # to suffer a serious performance degradation
+            cursor.execute(
+                f'CREATE TABLE tmp_{tblname} '
+                f'(LIKE _unpartitioned_{tblname} INCLUDING ALL)'
+            )
+
             # drop primary key constraint; in a partioned table
             # constraints must include the partition key itself
             # TODO: do more generic search for pkey constraints
             # instead of hardcoding this one that applies to main_jobevent
             cursor.execute(
-                f'ALTER TABLE _unpartitioned_{tblname} DROP CONSTRAINT {tblname}_pkey1'
+                f'ALTER TABLE tmp_{tblname} DROP CONSTRAINT {tblname}_pkey1'
             )
 
             # create parent table
             cursor.execute(
                 f'CREATE TABLE {tblname} '
-                f'(LIKE _unpartitioned_{tblname} INCLUDING ALL, job_created TIMESTAMP WITH TIME ZONE NOT NULL) '
+                f'(LIKE tmp_{tblname} INCLUDING ALL, job_created TIMESTAMP WITH TIME ZONE NOT NULL) '
                 f'PARTITION BY RANGE(job_created);'
             )
+
+            cursor.execute(f'DROP TABLE tmp_{tblname}')
 
             # let's go ahead and add and subtract a few indexes while we're here
             cursor.execute(f'CREATE INDEX {tblname}_modified_idx ON {tblname} (modified);')
@@ -64,7 +75,7 @@ def migrate_event_data(apps, schema_editor):
 
             current_time = now()
 
-            # .. as well as initial partition containing all existing events
+            # create initial partition containing all existing events
             epoch = datetime.utcfromtimestamp(0)
             create_partition(tblname, epoch, current_time, 'old_events')
 
