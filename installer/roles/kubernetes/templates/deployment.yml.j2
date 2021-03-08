@@ -362,6 +362,9 @@ spec:
 
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
+
+            - name: {{ kubernetes_deployment_name }}-redis-data
+              mountPath: "/data"
           resources:
             requests:
               memory: "{{ redis_mem_request }}Gi"
@@ -470,6 +473,9 @@ spec:
                 path: SECRET_KEY
 
         - name: {{ kubernetes_deployment_name }}-redis-socket
+          emptyDir: {}
+
+        - name: {{ kubernetes_deployment_name }}-redis-data
           emptyDir: {}
 
 ---
