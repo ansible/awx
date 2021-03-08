@@ -51,7 +51,7 @@ def migrate_event_data(apps, schema_editor):
             # TODO: do more generic search for pkey constraints
             # instead of hardcoding this one that applies to main_jobevent
             cursor.execute(
-                f'ALTER TABLE tmp_{tblname} DROP CONSTRAINT {tblname}_pkey1'
+                f'ALTER TABLE tmp_{tblname} DROP CONSTRAINT tmp_{tblname}_pkey'
             )
 
             # create parent table
