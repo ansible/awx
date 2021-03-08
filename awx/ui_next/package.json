@@ -27,6 +27,7 @@
     "react-router-dom": "^5.1.2",
     "react-virtualized": "^9.21.1",
     "rrule": "^2.6.4",
+    "sanitize-html": "^2.3.2",
     "styled-components": "^4.2.0"
   },
   "devDependencies": {
