@@ -31,6 +31,7 @@ import {
   VMwareSubForm,
   VirtualizationSubForm,
 } from './InventorySourceSubForms';
+import { ExecutionEnvironmentLookup } from '../../../components/Lookup';
 
 const buildSourceChoiceOptions = options => {
   const sourceChoices = options.actions.GET.source.choices.map(
@@ -39,7 +40,12 @@ const buildSourceChoiceOptions = options => {
   return sourceChoices.filter(({ key }) => key !== 'file');
 };
 
-const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
+const InventorySourceFormFields = ({
+  source,
+  sourceOptions,
+  organizationId,
+  i18n,
+}) => {
   const {
     values,
     initialValues,
@@ -50,6 +56,13 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
   const [sourceField, sourceMeta] = useField({
     name: 'source',
     validate: required(i18n._(t`Set a value for this field`), i18n),
+  });
+  const [
+    executionEnvironmentField,
+    executionEnvironmentMeta,
+    executionEnvironmentHelpers,
+  ] = useField({
+    name: 'execution_environment',
   });
   const { custom_virtualenvs } = useContext(ConfigContext);
   const [venvField] = useField('custom_virtualenv');
@@ -110,6 +123,17 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
         label={i18n._(t`Description`)}
         name="description"
         type="text"
+      />
+      <ExecutionEnvironmentLookup
+        helperTextInvalid={executionEnvironmentMeta.error}
+        isValid={
+          !executionEnvironmentMeta.touched || !executionEnvironmentMeta.error
+        }
+        onBlur={() => executionEnvironmentHelpers.setTouched()}
+        value={executionEnvironmentField.value}
+        onChange={value => executionEnvironmentHelpers.setValue(value)}
+        globallyAvailable
+        organizationId={organizationId}
       />
       <FormGroup
         fieldId="source"
@@ -244,6 +268,7 @@ const InventorySourceForm = ({
   onSubmit,
   source,
   submitError = null,
+  organizationId,
 }) => {
   const initialValues = {
     credential: source?.summary_fields?.credential || null,
@@ -264,6 +289,8 @@ const InventorySourceForm = ({
     enabled_var: source?.enabled_var || '',
     enabled_value: source?.enabled_value || '',
     host_filter: source?.host_filter || '',
+    execution_environment:
+      source?.summary_fields?.execution_environment || null,
   };
 
   const {
@@ -306,6 +333,7 @@ const InventorySourceForm = ({
               i18n={i18n}
               source={source}
               sourceOptions={sourceOptions}
+              organizationId={organizationId}
             />
             {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup

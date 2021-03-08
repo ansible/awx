@@ -22,7 +22,10 @@ import {
   SubFormLayout,
 } from '../../../components/FormLayout';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import { InventoryLookup } from '../../../components/Lookup';
+import {
+  InventoryLookup,
+  ExecutionEnvironmentLookup,
+} from '../../../components/Lookup';
 import { VariablesField } from '../../../components/CodeMirrorInput';
 import FormActionGroup from '../../../components/FormActionGroup';
 import ContentError from '../../../components/ContentError';
@@ -62,6 +65,14 @@ function WorkflowJobTemplateForm({
   const [, webhookCredentialMeta, webhookCredentialHelpers] = useField(
     'webhook_credential'
   );
+
+  const [
+    executionEnvironmentField,
+    executionEnvironmentMeta,
+    executionEnvironmentHelpers,
+  ] = useField({
+    name: 'execution_environment',
+  });
 
   useEffect(() => {
     if (enableWebhooks) {
@@ -178,6 +189,20 @@ function WorkflowJobTemplateForm({
             }}
           />
         </FieldWithPrompt>
+        <ExecutionEnvironmentLookup
+          helperTextInvalid={executionEnvironmentMeta.error}
+          isValid={
+            !executionEnvironmentMeta.touched || !executionEnvironmentMeta.error
+          }
+          onBlur={() => executionEnvironmentHelpers.setTouched()}
+          value={executionEnvironmentField.value}
+          onChange={value => executionEnvironmentHelpers.setValue(value)}
+          tooltip={i18n._(
+            t`Select the default execution environment for this organization to run on.`
+          )}
+          globallyAvailable
+          organizationId={organizationField.value?.id}
+        />
       </FormColumnLayout>
       <FormFullWidthLayout>
         <FormGroup
@@ -296,6 +321,8 @@ const FormikApp = withFormik({
         ? `${urlOrigin}${template.related.webhook_receiver}`
         : '',
       webhook_key: template.webhook_key || '',
+      execution_environment:
+        template.summary_fields?.execution_environment || '',
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {

@@ -47,6 +47,10 @@ options:
       description:
         - credential name to export
       type: str
+    execution_environments:
+      description:
+        - execution environment name to export
+      type: str
     notification_templates:
       description:
         - notification template name to export

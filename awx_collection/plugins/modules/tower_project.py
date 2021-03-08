@@ -105,11 +105,10 @@ options:
       type: int
       aliases:
         - job_timeout
-    custom_virtualenv:
+    default_environment:
       description:
-        - Local absolute file path containing a custom Python virtualenv to use
+        - Default Execution Environment to use for jobs relating to the project.
       type: str
-      default: ''
     organization:
       description:
         - Name of organization for project.
@@ -169,14 +168,13 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Add Tower Project with cache timeout and custom virtualenv
+- name: Add Tower Project with cache timeout
   tower_project:
     name: "Foo"
     description: "Foo bar project"
     organization: "test"
     scm_update_on_launch: True
     scm_update_cache_timeout: 60
-    custom_virtualenv: "/var/lib/awx/var/lib/awx/venv/ansible-2.2"
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
@@ -255,7 +253,7 @@ def main():
         scm_update_cache_timeout=dict(type='int', default=0),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
         timeout=dict(type='int', default=0, aliases=['job_timeout']),
-        custom_virtualenv=dict(),
+        default_environment=dict(),
         organization=dict(),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
@@ -279,6 +277,7 @@ def main():
     credential = module.params.get('credential')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
+    default_ee = module.params.get('default_environment')
     organization = module.params.get('organization')
     state = module.params.get('state')
     wait = module.params.get('wait')
@@ -336,6 +335,8 @@ def main():
         'name': module.get_item_name(project) if project else name,
         'scm_type': scm_type,
         'organization': org_id,
+        'scm_update_on_launch': scm_update_on_launch,
+        'scm_update_cache_timeout': scm_update_cache_timeout,
     }
 
     for field_name in (
@@ -349,6 +350,8 @@ def main():
 
     if credential is not None:
         project_fields['credential'] = credential
+    if default_ee is not None:
+        project_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
     if scm_type == '':
         if local_path is not None:
             project_fields['local_path'] = local_path

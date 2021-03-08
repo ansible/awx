@@ -42,6 +42,7 @@ from .user import urls as user_urls
 from .project import urls as project_urls
 from .project_update import urls as project_update_urls
 from .inventory import urls as inventory_urls
+from .execution_environments import urls as execution_environment_urls
 from .team import urls as team_urls
 from .host import urls as host_urls
 from .group import urls as group_urls
@@ -106,6 +107,7 @@ v2_urls = [
     url(r'^schedules/', include(schedule_urls)),
     url(r'^organizations/', include(organization_urls)),
     url(r'^users/', include(user_urls)),
+    url(r'^execution_environments/', include(execution_environment_urls)),
     url(r'^projects/', include(project_urls)),
     url(r'^project_updates/', include(project_update_urls)),
     url(r'^teams/', include(team_urls)),

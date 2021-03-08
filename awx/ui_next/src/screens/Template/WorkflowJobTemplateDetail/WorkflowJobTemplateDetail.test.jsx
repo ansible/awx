@@ -22,6 +22,12 @@ describe('<WorkflowJobTemplateDetail/>', () => {
       created_by: { id: 1, username: 'Athena' },
       modified_by: { id: 1, username: 'Apollo' },
       organization: { id: 1, name: 'Org' },
+      execution_environment: {
+        id: 4,
+        name: 'Demo EE',
+        description: '',
+        image: 'quay.io/ansible/awx-ee',
+      },
       inventory: { kind: 'Foo', id: 1, name: 'Bar' },
       labels: {
         results: [
@@ -40,6 +46,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     },
     webhook_service: 'Github',
     webhook_key: 'Foo webhook key',
+    execution_environment: 4,
   };
 
   beforeEach(async () => {
@@ -150,6 +157,10 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     };
 
     renderedValues.map(value => assertValue(value));
+
+    expect(
+      wrapper.find(`Detail[label="Execution Environment"] dd`).text()
+    ).toBe('Demo EE');
   });
 
   test('link out resource have the correct url', () => {

@@ -284,7 +284,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
             ['name', 'description', 'organization', 'survey_passwords', 'labels', 'credentials',
-             'job_slice_number', 'job_slice_count']
+             'job_slice_number', 'job_slice_count', 'execution_environment']
         )
 
     @property
@@ -768,11 +768,11 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def can_run_containerized(self):
-        return any([ig for ig in self.preferred_instance_groups if ig.is_containerized])
+        return any([ig for ig in self.preferred_instance_groups if ig.is_container_group])
 
     @property
-    def is_containerized(self):
-        return bool(self.instance_group and self.instance_group.is_containerized)
+    def is_container_group_task(self):
+        return bool(self.instance_group and self.instance_group.is_container_group)
 
     @property
     def preferred_instance_groups(self):
@@ -1286,6 +1286,8 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     @property
     def task_impact(self):
+        if settings.IS_K8S:
+            return 0
         return 5
 
     @property
