@@ -124,10 +124,23 @@ function ProjectDetail({ project, i18n }) {
           label={i18n._(t`Cache Timeout`)}
           value={`${scm_update_cache_timeout} ${i18n._(t`Seconds`)}`}
         />
+
         <Detail
           label={i18n._(t`Ansible Environment`)}
           value={custom_virtualenv}
         />
+        {summary_fields?.default_environment?.name && (
+          <Detail
+            label={i18n._(t`Execution Environment`)}
+            value={
+              <Link
+                to={`/execution_environments/${summary_fields.default_environment.id}/details`}
+              >
+                {summary_fields.default_environment.name}
+              </Link>
+            }
+          />
+        )}
         <Config>
           {({ project_base_dir }) => (
             <Detail
@@ -137,6 +150,7 @@ function ProjectDetail({ project, i18n }) {
           )}
         </Config>
         <Detail label={i18n._(t`Playbook Directory`)} value={local_path} />
+
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={created}

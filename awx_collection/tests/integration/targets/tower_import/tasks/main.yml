@@ -17,7 +17,6 @@
             - name: "{{ org_name1 }}"
               description: ""
               max_hosts: 0
-              custom_virtualenv: null
               related:
                 notification_templates: []
                 notification_templates_started: []
@@ -40,7 +39,6 @@
             - name: "{{ org_name1 }}"
               description: ""
               max_hosts: 0
-              custom_virtualenv: null
               related:
                 notification_templates: []
                 notification_templates_started: []
@@ -67,7 +65,6 @@
                            "name": "{{ org_name2 }}",
                            "description": "",
                            "max_hosts": 0,
-                           "custom_virtualenv": null,
                            "related": {
                                 "notification_templates": [],
                                 "notification_templates_started": [],

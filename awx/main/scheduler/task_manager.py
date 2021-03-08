@@ -70,7 +70,7 @@ class TaskManager():
         '''
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
         '''
-        instances = Instance.objects.filter(~Q(hostname=None), capacity__gt=0, enabled=True)
+        instances = Instance.objects.filter(~Q(hostname=None), enabled=True)
         self.real_instances = {i.hostname: i for i in instances}
 
         instances_partial = [SimpleNamespace(obj=instance,
@@ -86,7 +86,7 @@ class TaskManager():
                                                   capacity_total=rampart_group.capacity,
                                                   consumed_capacity=0,
                                                   instances=[])
-            for instance in rampart_group.instances.filter(capacity__gt=0, enabled=True).order_by('hostname'):
+            for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
                 if instance.hostname in instances_by_hostname:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
 
@@ -283,12 +283,12 @@ class TaskManager():
                 task.controller_node = controller_node
                 logger.debug('Submitting isolated {} to queue {} controlled by {}.'.format(
                              task.log_format, task.execution_node, controller_node))
-            elif rampart_group.is_containerized:
+            elif rampart_group.is_container_group:
                 # find one real, non-containerized instance with capacity to
                 # act as the controller for k8s API interaction
                 match = None
                 for group in InstanceGroup.objects.all():
-                    if group.is_containerized or group.controller_id:
+                    if group.is_container_group or group.controller_id:
                         continue
                     match = group.fit_task_to_most_remaining_capacity_instance(task, group.instances.all())
                     if match:
@@ -521,14 +521,17 @@ class TaskManager():
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
             for rampart_group in preferred_instance_groups:
-                if task.can_run_containerized and rampart_group.is_containerized:
+                if task.can_run_containerized and rampart_group.is_container_group:
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
                     break
 
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name)
-                if not rampart_group.is_containerized and self.get_remaining_capacity(rampart_group.name) <= 0:
+                if (
+                        task.task_impact > 0 and  # project updates have a cost of zero
+                        not rampart_group.is_container_group and
+                        self.get_remaining_capacity(rampart_group.name) <= 0):
                     logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(
                                  rampart_group.name, remaining_capacity))
                     continue
@@ -536,8 +539,8 @@ class TaskManager():
                 execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(task, self.graph[rampart_group.name]['instances']) or \
                     InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'])
 
-                if execution_instance or rampart_group.is_containerized:
-                    if not rampart_group.is_containerized:
+                if execution_instance or rampart_group.is_container_group:
+                    if not rampart_group.is_container_group:
                         execution_instance.remaining_capacity = max(0, execution_instance.remaining_capacity - task.task_impact)
                         execution_instance.jobs_running += 1
                         logger.debug("Starting {} in group {} instance {} (remaining_capacity={})".format(
@@ -594,7 +597,7 @@ class TaskManager():
         ).exclude(
             execution_node__in=Instance.objects.values_list('hostname', flat=True)
         ):
-            if j.execution_node and not j.is_containerized:
+            if j.execution_node and not j.is_container_group_task:
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')
 

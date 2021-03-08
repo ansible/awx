@@ -57,7 +57,10 @@ function JobTemplateEdit({ template }) {
     remainingValues.project = values.project.id;
     remainingValues.webhook_credential = webhook_credential?.id || null;
     try {
-      await JobTemplatesAPI.update(template.id, remainingValues);
+      await JobTemplatesAPI.update(template.id, {
+        ...remainingValues,
+        execution_environment: values.execution_environment?.id,
+      });
       await Promise.all([
         submitLabels(labels, template?.organization),
         submitInstanceGroups(instanceGroups, initialInstanceGroups),

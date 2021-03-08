@@ -12,16 +12,21 @@ import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import FormField, { FormSubmitError } from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import { InstanceGroupsLookup } from '../../../components/Lookup';
+import {
+  InstanceGroupsLookup,
+  ExecutionEnvironmentLookup,
+} from '../../../components/Lookup';
 import { getAddedAndRemoved } from '../../../util/lists';
 import { required, minMaxValue } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 
 function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
+  const { license_info = {}, me = {} } = useConfig();
+  const { custom_virtualenvs } = useContext(ConfigContext);
+
   const { setFieldValue } = useFormikContext();
   const [venvField] = useField('custom_virtualenv');
-  const { license_info = {}, me = {} } = useConfig();
 
   const [
     galaxyCredentialsField,
@@ -29,12 +34,19 @@ function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
     galaxyCredentialsHelpers,
   ] = useField('galaxy_credentials');
 
+  const [
+    executionEnvironmentField,
+    executionEnvironmentMeta,
+    executionEnvironmentHelpers,
+  ] = useField({
+    name: 'default_environment',
+  });
+
   const defaultVenv = {
     label: i18n._(t`Use Default Ansible Environment`),
     value: '/var/lib/awx/venv/ansible/',
     key: 'default',
   };
-  const { custom_virtualenvs } = useContext(ConfigContext);
 
   const handleCredentialUpdate = useCallback(
     value => {
@@ -99,6 +111,20 @@ function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
         tooltip={i18n._(
           t`Select the Instance Groups for this Organization to run on.`
         )}
+      />
+      <ExecutionEnvironmentLookup
+        helperTextInvalid={executionEnvironmentMeta.error}
+        isValid={
+          !executionEnvironmentMeta.touched || !executionEnvironmentMeta.error
+        }
+        onBlur={() => executionEnvironmentHelpers.setTouched()}
+        value={executionEnvironmentField.value}
+        onChange={value => executionEnvironmentHelpers.setValue(value)}
+        popoverContent={i18n._(
+          t`Select the default execution environment for this organization.`
+        )}
+        globallyAvailable
+        isDefaultEnvironment
       />
       <CredentialLookup
         credentialTypeNamespace="galaxy_api_token"
@@ -185,6 +211,8 @@ function OrganizationForm({
         custom_virtualenv: organization.custom_virtualenv || '',
         max_hosts: organization.max_hosts || '0',
         galaxy_credentials: organization.galaxy_credentials || [],
+        default_environment:
+          organization.summary_fields?.default_environment || '',
       }}
       onSubmit={handleSubmit}
     >
@@ -221,6 +249,7 @@ OrganizationForm.defaultProps = {
     description: '',
     max_hosts: '0',
     custom_virtualenv: '',
+    default_environment: '',
   },
   submitError: null,
 };

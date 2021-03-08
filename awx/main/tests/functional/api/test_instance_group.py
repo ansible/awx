@@ -255,7 +255,7 @@ def test_instance_group_update_fields(patch, instance, instance_group, admin, co
     # policy_instance_ variables can only be updated in instance groups that are NOT containerized
     # instance group (not containerized)
     ig_url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
-    assert not instance_group.is_containerized
+    assert not instance_group.is_container_group
     assert not containerized_instance_group.is_isolated
     resp = patch(ig_url, {'policy_instance_percentage':15}, admin, expect=200)
     assert 15 == resp.data['policy_instance_percentage']
@@ -266,7 +266,7 @@ def test_instance_group_update_fields(patch, instance, instance_group, admin, co
 
     # containerized instance group
     cg_url = reverse("api:instance_group_detail", kwargs={'pk': containerized_instance_group.pk})
-    assert containerized_instance_group.is_containerized
+    assert containerized_instance_group.is_container_group
     assert not containerized_instance_group.is_isolated
     resp = patch(cg_url, {'policy_instance_percentage':15}, admin, expect=400)
     assert ["Containerized instances may not be managed via the API"] == resp.data['policy_instance_percentage']
@@ -291,4 +291,3 @@ def test_containerized_group_default_fields(instance_group, kube_credential):
     assert ig.policy_instance_list == []
     assert ig.policy_instance_minimum == 0
     assert ig.policy_instance_percentage == 0
-    

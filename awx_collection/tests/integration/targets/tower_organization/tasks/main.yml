@@ -28,22 +28,10 @@
     that:
       - "result is not changed"
 
-- name: "Try adding a bad custom_virtualenv"
-  tower_organization:
-    name: "{{ org_name }}"
-    custom_virtualenv: "/does/not/exit"
-  register: result
-  ignore_errors: true
-
-- assert:
-    that:
-      - "result is failed"
-
 - name: "Pass in all parameters"
   tower_organization:
     name: "{{ org_name }}"
     description: "A description"
-    custom_virtualenv: ""
   register: result
 
 - assert:
@@ -54,7 +42,6 @@
   tower_organization:
     name: "{{ org_name }}"
     description: "A new description"
-    custom_virtualenv: ""
   register: result
 
 - assert:

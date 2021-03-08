@@ -112,6 +112,7 @@ from awx.api.views.organization import ( # noqa
     OrganizationInventoriesList,
     OrganizationUsersList,
     OrganizationAdminsList,
+    OrganizationExecutionEnvironmentsList,
     OrganizationProjectsList,
     OrganizationJobTemplatesList,
     OrganizationWorkflowJobTemplatesList,
@@ -396,7 +397,7 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     permission_classes = (InstanceGroupTowerPermission,)
 
     def update_raw_data(self, data):
-        if self.get_object().is_containerized:
+        if self.get_object().is_container_group:
             data.pop('policy_instance_percentage', None)
             data.pop('policy_instance_minimum', None)
             data.pop('policy_instance_list', None)
@@ -683,6 +684,52 @@ class TeamAccessList(ResourceAccessList):
 
     model = models.User # needs to be User for AccessLists's
     parent_model = models.Team
+
+
+class ExecutionEnvironmentList(ListCreateAPIView):
+
+    always_allow_superuser = False
+    model = models.ExecutionEnvironment
+    serializer_class = serializers.ExecutionEnvironmentSerializer
+    swagger_topic = "Execution Environments"
+
+
+class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
+
+    always_allow_superuser = False
+    model = models.ExecutionEnvironment
+    serializer_class = serializers.ExecutionEnvironmentSerializer
+    swagger_topic = "Execution Environments"
+
+
+class ExecutionEnvironmentJobTemplateList(SubListAPIView):
+
+    model = models.UnifiedJobTemplate
+    serializer_class = serializers.UnifiedJobTemplateSerializer
+    parent_model = models.ExecutionEnvironment
+    relationship = 'unifiedjobtemplates'
+
+
+class ExecutionEnvironmentCopy(CopyAPIView):
+    
+    model = models.ExecutionEnvironment
+    copy_return_serializer_class = serializers.ExecutionEnvironmentSerializer
+
+
+class ExecutionEnvironmentActivityStreamList(SubListAPIView):
+
+    model = models.ActivityStream
+    serializer_class = serializers.ActivityStreamSerializer
+    parent_model = models.ExecutionEnvironment
+    relationship = 'activitystream_set'
+    search_fields = ('changes',)
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(execution_environment=parent)
 
 
 class ProjectList(ListCreateAPIView):

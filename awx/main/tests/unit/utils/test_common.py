@@ -9,9 +9,6 @@ import json
 import yaml
 from unittest import mock
 
-from backports.tempfile import TemporaryDirectory
-from django.conf import settings
-
 from rest_framework.exceptions import ParseError
 
 from awx.main.utils import common
@@ -194,24 +191,3 @@ def test_extract_ansible_vars():
     redacted, var_list = common.extract_ansible_vars(json.dumps(my_dict))
     assert var_list == set(['ansible_connetion_setting'])
     assert redacted == {"foobar": "baz"}
-
-
-def test_get_custom_venv_choices():
-    bundled_venv = os.path.join(settings.BASE_VENV_PATH, 'ansible', '')
-    assert sorted(common.get_custom_venv_choices()) == [bundled_venv]
-
-    with TemporaryDirectory(dir=settings.BASE_VENV_PATH, prefix='tmp') as temp_dir:
-        os.makedirs(os.path.join(temp_dir, 'bin', 'activate'))
-
-        custom_venv_dir = os.path.join(temp_dir, 'custom')
-        custom_venv_1 = os.path.join(custom_venv_dir, 'venv-1')
-        custom_venv_awx = os.path.join(custom_venv_dir, 'custom', 'awx')
-
-        os.makedirs(os.path.join(custom_venv_1, 'bin', 'activate'))
-        os.makedirs(os.path.join(custom_venv_awx, 'bin', 'activate'))
-
-        assert sorted(common.get_custom_venv_choices([custom_venv_dir])) == [
-            bundled_venv,
-            os.path.join(temp_dir, ''),
-            os.path.join(custom_venv_1, '')
-        ]

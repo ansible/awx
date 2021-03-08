@@ -25,6 +25,11 @@ describe('<ProjectDetail />', () => {
         id: 10,
         name: 'Foo',
       },
+      default_environment: {
+        id: 12,
+        name: 'Bar',
+        image: 'quay.io/ansible/awx-ee',
+      },
       credential: {
         id: 1000,
         name: 'qux',
@@ -67,9 +72,10 @@ describe('<ProjectDetail />', () => {
     scm_update_cache_timeout: 5,
     allow_override: true,
     custom_virtualenv: '/custom-venv',
+    default_environment: 1,
   };
 
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(<ProjectDetail project={mockProject} />);
   });
 
@@ -95,6 +101,10 @@ describe('<ProjectDetail />', () => {
       `${mockProject.scm_update_cache_timeout} Seconds`
     );
     assertDetail('Ansible Environment', mockProject.custom_virtualenv);
+    assertDetail(
+      'Execution Environment',
+      mockProject.summary_fields.default_environment.name
+    );
     const dateDetails = wrapper.find('UserDateDetail');
     expect(dateDetails).toHaveLength(2);
     expect(dateDetails.at(0).prop('label')).toEqual('Created');

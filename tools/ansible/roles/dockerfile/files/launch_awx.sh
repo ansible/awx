@@ -10,7 +10,7 @@ if [ -n "${AWX_KUBE_DEVEL}" ]; then
     make awx-link
     popd
 
-    export SDB_NOTIFY_HOST=$(ip route | head -n1 | awk '{print $3}')
+    export SDB_NOTIFY_HOST=$MY_POD_IP
 fi
 
 source /etc/tower/conf.d/environment.sh

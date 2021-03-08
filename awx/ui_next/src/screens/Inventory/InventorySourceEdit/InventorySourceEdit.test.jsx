@@ -18,7 +18,7 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-describe('<InventorySourceAdd />', () => {
+describe('<InventorySourceEdit />', () => {
   let wrapper;
   let history;
   const mockInvSrc = {
@@ -36,6 +36,11 @@ describe('<InventorySourceAdd />', () => {
     update_on_launch: false,
     update_on_project_update: false,
     verbosity: 1,
+  };
+  const mockInventory = {
+    id: 1,
+    name: 'Foo',
+    organization: 1,
   };
   InventorySourcesAPI.readOptions.mockResolvedValue({
     data: {
@@ -89,9 +94,12 @@ describe('<InventorySourceAdd />', () => {
   beforeAll(async () => {
     history = createMemoryHistory();
     await act(async () => {
-      wrapper = mountWithContexts(<InventorySourceEdit source={mockInvSrc} />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <InventorySourceEdit inventory={mockInventory} source={mockInvSrc} />,
+        {
+          context: { router: { history } },
+        }
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
@@ -133,7 +141,9 @@ describe('<InventorySourceAdd />', () => {
     };
     InventorySourcesAPI.replace.mockImplementation(() => Promise.reject(error));
     await act(async () => {
-      wrapper = mountWithContexts(<InventorySourceEdit source={mockInvSrc} />);
+      wrapper = mountWithContexts(
+        <InventorySourceEdit inventory={mockInventory} source={mockInvSrc} />
+      );
     });
     expect(wrapper.find('FormSubmitError').length).toBe(0);
     await act(async () => {

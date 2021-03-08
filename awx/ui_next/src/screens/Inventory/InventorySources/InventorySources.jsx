@@ -9,7 +9,7 @@ function InventorySources({ inventory, setBreadcrumb }) {
   return (
     <Switch>
       <Route key="add" path="/inventories/inventory/:id/sources/add">
-        <InventorySourceAdd />
+        <InventorySourceAdd inventory={inventory} />
       </Route>
       <Route path="/inventories/inventory/:id/sources/:sourceId">
         <Config>

@@ -19,6 +19,13 @@ describe('<OrganizationEdit />', () => {
     related: {
       instance_groups: '/api/v2/organizations/1/instance_groups',
     },
+    default_environment: 1,
+    summary_fields: {
+      default_environment: {
+        id: 1,
+        name: 'Baz',
+      },
+    },
   };
 
   test('onSubmit should call api update', async () => {
@@ -31,6 +38,7 @@ describe('<OrganizationEdit />', () => {
       name: 'new name',
       description: 'new description',
       custom_virtualenv: 'Buzz',
+      default_environment: null,
     };
     wrapper.find('OrganizationForm').prop('onSubmit')(updatedOrgData, [], []);
 

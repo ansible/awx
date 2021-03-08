@@ -35,6 +35,7 @@ from awx.main.models.events import (  # noqa
 )
 from awx.main.models.ad_hoc_commands import AdHocCommand # noqa
 from awx.main.models.schedules import Schedule # noqa
+from awx.main.models.execution_environments import ExecutionEnvironment # noqa
 from awx.main.models.activity_stream import ActivityStream # noqa
 from awx.main.models.ha import (  # noqa
     Instance, InstanceGroup, TowerScheduleState,
@@ -45,7 +46,7 @@ from awx.main.models.rbac import (  # noqa
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.models.mixins import (  # noqa
-    CustomVirtualEnvMixin, ResourceMixin, SurveyJobMixin,
+    CustomVirtualEnvMixin, ExecutionEnvironmentMixin, ResourceMixin, SurveyJobMixin,
     SurveyJobTemplateMixin, TaskManagerInventoryUpdateMixin,
     TaskManagerJobMixin, TaskManagerProjectUpdateMixin,
     TaskManagerUnifiedJobMixin,
@@ -221,6 +222,7 @@ activity_stream_registrar.connect(CredentialType)
 activity_stream_registrar.connect(Team)
 activity_stream_registrar.connect(Project)
 #activity_stream_registrar.connect(ProjectUpdate)
+activity_stream_registrar.connect(ExecutionEnvironment)
 activity_stream_registrar.connect(JobTemplate)
 activity_stream_registrar.connect(Job)
 activity_stream_registrar.connect(AdHocCommand)
