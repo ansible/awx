@@ -2,6 +2,9 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+# TBD
+- Added support for html in custom login text https://github.com/ansible/awx/pull/9519
+
 # (March 19, 2021)
 
 **IMPORTANT INSTALL AND UPGRADE NOTES**
@@ -43,6 +46,7 @@ To learn more about Ansible Builder and Execution Environments, see: https://www
 - Added ability to relaunch against failed hosts: https://github.com/ansible/awx/pull/9225
 - Added pending workflow approval count to the application header https://github.com/ansible/awx/pull/9334
 - Added user interface for management jobs: https://github.com/ansible/awx/pull/9224
+<<<<<<< HEAD
 - Added toast message to show notification template test result to notification templates list https://github.com/ansible/awx/pull/9318
 - Replaced CodeMirror with AceEditor for editing template variables and notification templates https://github.com/ansible/awx/pull/9281
 - Added support for filtering and pagination on job output https://github.com/ansible/awx/pull/9208
