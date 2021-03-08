@@ -493,13 +493,6 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
             inventory=inventory.id,
             source=source)
 
-        if credential:
-            payload.credential = credential.id
-        if source_script:
-            payload.source_script = source_script.id
-        if project:
-            payload.source_project = project.id
-
         optional_fields = (
             'source_path',
             'source_vars',
@@ -512,6 +505,23 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
             'verbosity')
 
         update_payload(payload, optional_fields, kwargs)
+
+        extra_vars = kwargs.get('extra_vars', not_provided)
+        if extra_vars != not_provided:
+            if isinstance(extra_vars, dict):
+                extra_vars = json.dumps(extra_vars)
+            payload.update(extra_vars=extra_vars)
+
+        for fk_field in ('project', 'credential', 'source_script', 'execution_environment'):
+            rel_obj = kwargs.get(fk_field)
+            if rel_obj is None:
+                continue
+            elif isinstance(rel_obj, int):
+                payload.update(**{fk_field: int(rel_obj)})
+            elif hasattr(rel_obj, 'id'):
+                payload.update(**{fk_field: rel_obj.id})
+            else:
+                raise AttributeError(f'Related field {fk_field} must be either integer of pkid or object')
 
         return payload
 
