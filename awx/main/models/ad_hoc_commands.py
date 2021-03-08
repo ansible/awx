@@ -151,8 +151,8 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         return True
 
     @property
-    def is_containerized(self):
-        return bool(self.instance_group and self.instance_group.is_containerized)
+    def is_container_group_task(self):
+        return bool(self.instance_group and self.instance_group.is_container_group)
 
     @property
     def can_run_containerized(self):
@@ -198,8 +198,8 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     def copy(self):
         data = {}
         for field in ('job_type', 'inventory_id', 'limit', 'credential_id',
-                      'module_name', 'module_args', 'forks', 'verbosity',
-                      'extra_vars', 'become_enabled', 'diff_mode'):
+                      'execution_environment_id', 'module_name', 'module_args',
+                      'forks', 'verbosity', 'extra_vars', 'become_enabled', 'diff_mode'):
             data[field] = getattr(self, field)
         return AdHocCommand.objects.create(**data)
 
@@ -209,6 +209,9 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
             self.name = Truncator(u': '.join(filter(None, (self.module_name, self.module_args)))).chars(512)
             if 'name' not in update_fields:
                 update_fields.append('name')
+        if not self.execution_environment_id:
+            self.execution_environment = self.resolve_execution_environment()
+            update_fields.append('execution_environment')
         super(AdHocCommand, self).save(*args, **kwargs)
 
     @property

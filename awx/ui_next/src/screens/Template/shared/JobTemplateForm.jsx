@@ -37,6 +37,7 @@ import {
   InstanceGroupsLookup,
   ProjectLookup,
   MultiCredentialsLookup,
+  ExecutionEnvironmentLookup,
 } from '../../../components/Lookup';
 import Popover from '../../../components/Popover';
 import { JobTemplatesAPI } from '../../../api';
@@ -101,10 +102,16 @@ function JobTemplateForm({
     'webhook_credential'
   );
 
+  const [
+    executionEnvironmentField,
+    executionEnvironmentMeta,
+    executionEnvironmentHelpers,
+  ] = useField({ name: 'execution_environment' });
+
   const {
     request: loadRelatedInstanceGroups,
     error: instanceGroupError,
-    contentLoading: instanceGroupLoading,
+    isLoading: instanceGroupLoading,
   } = useRequest(
     useCallback(async () => {
       if (!template?.id) {
@@ -258,6 +265,7 @@ function JobTemplateForm({
             isOverrideDisabled={isOverrideDisabledLookup}
           />
         </FormGroup>
+
         <ProjectLookup
           value={projectField.value}
           onBlur={() => projectHelpers.setTouched()}
@@ -270,6 +278,26 @@ function JobTemplateForm({
           autoPopulate={!template?.id}
           isOverrideDisabled={isOverrideDisabledLookup}
         />
+
+        <ExecutionEnvironmentLookup
+          helperTextInvalid={executionEnvironmentMeta.error}
+          isValid={
+            !executionEnvironmentMeta.touched || !executionEnvironmentMeta.error
+          }
+          onBlur={() => executionEnvironmentHelpers.setTouched()}
+          value={executionEnvironmentField.value}
+          onChange={value => executionEnvironmentHelpers.setValue(value)}
+          popoverContent={i18n._(
+            t`Select the execution environment for this job template.`
+          )}
+          tooltip={i18n._(
+            t`Select a project before editing the execution environment.`
+          )}
+          globallyAvailable
+          isDisabled={!projectField.value}
+          projectId={projectField.value?.id}
+        />
+
         {projectField.value?.allow_override && (
           <FieldWithPrompt
             fieldId="template-scm-branch"
@@ -703,6 +731,8 @@ const FormikApp = withFormik({
         template.webhook_key ||
         i18n._(t`a new webhook key will be generated on save.`).toUpperCase(),
       webhook_credential: template?.summary_fields?.webhook_credential || null,
+      execution_environment:
+        template.summary_fields?.execution_environment || '',
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {

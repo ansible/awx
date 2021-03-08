@@ -1,0 +1,49 @@
+global
+    stats socket /tmp/admin.sock
+    stats timeout 30s
+
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 5000
+    timeout client  50000
+    timeout server  50000
+
+frontend localnodes
+    bind *:8013
+    mode http
+    default_backend nodes
+
+frontend localnodes_ssl
+    bind *:8043
+    mode tcp
+    default_backend nodes_ssl
+
+backend nodes
+    mode http
+    balance roundrobin
+    option forwardfor
+    option http-pretend-keepalive
+    http-request set-header X-Forwarded-Port %[dst_port]
+    http-request add-header X-Forwarded-Proto https if { ssl_fc }
+    option httpchk HEAD / HTTP/1.1\r\nHost:localhost
+{% for i in range(cluster_node_count|int) %}
+    {% set container_postfix = loop.index %}
+    server tools_awx_{{ container_postfix }} tools_awx_{{ container_postfix }}:8013 check
+{% endfor %}
+
+backend nodes_ssl
+    mode tcp
+    balance roundrobin
+{% for i in range(cluster_node_count|int) %}
+    {% set container_postfix = loop.index %}
+    server tools_awx_{{ container_postfix }} tools_awx_{{ container_postfix }}:8043 check
+{% endfor %}
+
+listen stats
+    bind *:1936
+    stats enable
+    stats uri /
+

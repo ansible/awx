@@ -44,6 +44,7 @@
   with_items:
     - "database.py"
     - "websocket_secret.py"
+    - "haproxy.cfg"
 
 - name: Delete old local_settings.py
   file:

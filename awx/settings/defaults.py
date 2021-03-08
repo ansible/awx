@@ -59,11 +59,23 @@ DATABASES = {
     }
 }
 
+# Whether or not the deployment is a K8S-based deployment
+# In K8S-based deployments, instances have zero capacity - all playbook
+# automation is intended to flow through defined Container Groups that
+# interface with some (or some set of) K8S api (which may or may not include
+# the K8S cluster where awx itself is running)
+IS_K8S = False
+
+# TODO: remove this setting in favor of a default execution environment
+AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE = 'quay.io/ansible/awx-ee'
+
 AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
 AWX_CONTAINER_GROUP_POD_LAUNCH_RETRIES = 100
 AWX_CONTAINER_GROUP_POD_LAUNCH_RETRY_DELAY = 5
-AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = 'default'
-AWX_CONTAINER_GROUP_DEFAULT_IMAGE = 'ansible/ansible-runner'
+AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = os.getenv('MY_POD_NAMESPACE', 'default')
+
+# TODO: remove this setting in favor of a default execution environment
+AWX_CONTAINER_GROUP_DEFAULT_IMAGE = AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -173,6 +185,7 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 PROXY_IP_ALLOWED_LIST = []
 
 CUSTOM_VENV_PATHS = []
+DEFAULT_EXECUTION_ENVIRONMENT = None
 
 # Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
@@ -679,7 +692,7 @@ AD_HOC_COMMANDS = [
     'win_user',
 ]
 
-INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
+INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM", "PATH")
 
 # ----------------
 # -- Amazon EC2 --
@@ -783,6 +796,8 @@ TOWER_URL_BASE = "https://towerhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_AGENT_MIME = 'application/example'
+# See https://github.com/ansible/awx-facts-playbooks
+INSIGHTS_SYSTEM_ID_FILE='/etc/redhat-access-insights/machine-id'
 
 TOWER_SETTINGS_MANIFEST = {}
 

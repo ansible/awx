@@ -6,6 +6,7 @@ import {
   WorkflowJobTemplatesAPI,
   OrganizationsAPI,
   LabelsAPI,
+  ExecutionEnvironmentsAPI,
 } from '../../../api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
@@ -15,6 +16,7 @@ jest.mock('../../../api/models/WorkflowJobTemplates');
 jest.mock('../../../api/models/Organizations');
 jest.mock('../../../api/models/Labels');
 jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/ExecutionEnvironments');
 
 describe('<WorkflowJobTemplateAdd/>', () => {
   let wrapper;
@@ -32,6 +34,10 @@ describe('<WorkflowJobTemplateAdd/>', () => {
           { name: 'Label 3', id: 3 },
         ],
       },
+    });
+
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: { results: [{ id: 1, name: 'Foo', image: 'localhost.com' }] },
     });
 
     await act(async () => {
@@ -82,6 +88,11 @@ describe('<WorkflowJobTemplateAdd/>', () => {
         .find('LabelSelect')
         .find('SelectToggle')
         .simulate('click');
+
+      wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')({
+        id: 1,
+        name: 'Foo',
+      });
     });
 
     wrapper.update();
@@ -113,6 +124,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
       webhook_credential: undefined,
       webhook_service: '',
       webhook_url: '',
+      execution_environment: 1,
     });
 
     expect(WorkflowJobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(1);

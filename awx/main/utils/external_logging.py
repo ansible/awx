@@ -32,7 +32,7 @@ def construct_rsyslog_conf_template(settings=settings):
         '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
         f'main_queue(queue.spoolDirectory="{spool_directory}" queue.maxdiskspace="{max_disk_space}g" queue.type="Disk" queue.filename="awx-external-logger-backlog")',  # noqa
         'module(load="imuxsock" SysSock.Use="off")',
-        'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
+        'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on" RateLimit.Burst="0")',
         'template(name="awx" type="string" string="%rawmsg-after-pri%")',
     ])
 

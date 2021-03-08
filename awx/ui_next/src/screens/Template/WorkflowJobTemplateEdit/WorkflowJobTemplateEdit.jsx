@@ -20,7 +20,7 @@ function WorkflowJobTemplateEdit({ template }) {
       ...templatePayload
     } = values;
     templatePayload.inventory = inventory?.id || null;
-    templatePayload.organization = organization?.id;
+    templatePayload.organization = organization?.id || null;
     templatePayload.webhook_credential = webhook_credential?.id || null;
 
     const formOrgId =
@@ -29,7 +29,10 @@ function WorkflowJobTemplateEdit({ template }) {
       await Promise.all(
         await submitLabels(labels, formOrgId, template.organization)
       );
-      await WorkflowJobTemplatesAPI.update(template.id, templatePayload);
+      await WorkflowJobTemplatesAPI.update(template.id, {
+        ...templatePayload,
+        execution_environment: values.execution_environment?.id,
+      });
       history.push(`/templates/workflow_job_template/${template.id}/details`);
     } catch (err) {
       setFormSubmitError(err);

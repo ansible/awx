@@ -27,6 +27,14 @@ options:
         - The name to use for the inventory.
       required: True
       type: str
+    copy_from:
+      description:
+        - Name or id to copy the inventory from.
+        - This will copy an existing inventory and change any parameters supplied.
+        - The new inventory name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple inventories share the same name.
+      type: str
     description:
       description:
         - The description to use for the inventory.
@@ -72,6 +80,14 @@ EXAMPLES = '''
     organization: "Bar Org"
     state: present
     tower_config_file: "~/tower_cli.cfg"
+
+- name: Copy tower inventory
+  tower_inventory:
+    name: Copy Foo Inventory
+    copy_from: Default Inventory
+    description: "Our Foo Cloud Servers"
+    organization: Foo
+    state: present
 '''
 
 
@@ -83,6 +99,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        copy_from=dict(),
         description=dict(),
         organization=dict(required=True),
         variables=dict(type='dict'),
@@ -97,6 +114,7 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
+    copy_from = module.params.get('copy_from')
     description = module.params.get('description')
     organization = module.params.get('organization')
     variables = module.params.get('variables')
@@ -114,6 +132,14 @@ def main():
             'organization': org_id
         }
     })
+
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        inventory = module.copy_item(
+            inventory, copy_from, name,
+            endpoint='inventories', item_type='inventory',
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

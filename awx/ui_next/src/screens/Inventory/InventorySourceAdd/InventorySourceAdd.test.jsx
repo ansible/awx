@@ -35,6 +35,12 @@ describe('<InventorySourceAdd />', () => {
     verbosity: 1,
   };
 
+  const mockInventory = {
+    id: 111,
+    name: 'Foo',
+    organization: 2,
+  };
+
   InventorySourcesAPI.readOptions.mockResolvedValue({
     data: {
       actions: {
@@ -72,9 +78,12 @@ describe('<InventorySourceAdd />', () => {
       custom_virtualenvs: ['venv/foo', 'venv/bar'],
     };
     await act(async () => {
-      wrapper = mountWithContexts(<InventorySourceAdd />, {
-        context: { config },
-      });
+      wrapper = mountWithContexts(
+        <InventorySourceAdd inventory={mockInventory} />,
+        {
+          context: { config },
+        }
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('FormGroup[label="Name"]')).toHaveLength(1);
@@ -88,9 +97,12 @@ describe('<InventorySourceAdd />', () => {
   test('should navigate to inventory sources list when cancel is clicked', async () => {
     const history = createMemoryHistory({});
     await act(async () => {
-      wrapper = mountWithContexts(<InventorySourceAdd />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <InventorySourceAdd inventory={mockInventory} />,
+        {
+          context: { router: { history } },
+        }
+      );
     });
     await act(async () => {
       wrapper.find('InventorySourceForm').invoke('onCancel')();
@@ -103,7 +115,9 @@ describe('<InventorySourceAdd />', () => {
   test('should post to the api when submit is clicked', async () => {
     InventorySourcesAPI.create.mockResolvedValueOnce({ data: {} });
     await act(async () => {
-      wrapper = mountWithContexts(<InventorySourceAdd />);
+      wrapper = mountWithContexts(
+        <InventorySourceAdd inventory={mockInventory} />
+      );
     });
     await act(async () => {
       wrapper.find('InventorySourceForm').invoke('onSubmit')(invSourceData);
@@ -114,6 +128,7 @@ describe('<InventorySourceAdd />', () => {
       credential: 222,
       source_project: 999,
       source_script: null,
+      execution_environment: null,
     });
   });
 
@@ -123,9 +138,12 @@ describe('<InventorySourceAdd />', () => {
       data: { id: 123, inventory: 111 },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<InventorySourceAdd />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <InventorySourceAdd inventory={mockInventory} />,
+        {
+          context: { router: { history } },
+        }
+      );
     });
     await act(async () => {
       wrapper.find('InventorySourceForm').invoke('onSubmit')(invSourceData);
@@ -143,7 +161,9 @@ describe('<InventorySourceAdd />', () => {
     };
     InventorySourcesAPI.create.mockImplementation(() => Promise.reject(error));
     await act(async () => {
-      wrapper = mountWithContexts(<InventorySourceAdd />);
+      wrapper = mountWithContexts(
+        <InventorySourceAdd inventory={mockInventory} />
+      );
     });
     expect(wrapper.find('FormSubmitError').length).toBe(0);
     await act(async () => {

@@ -368,6 +368,7 @@ def model_serializer_mapping():
         models.Credential: serializers.CredentialSerializer,
         models.Team: serializers.TeamSerializer,
         models.Project: serializers.ProjectSerializer,
+        models.ExecutionEnvironment: serializers.ExecutionEnvironmentSerializer,
         models.JobTemplate: serializers.JobTemplateWithSpecSerializer,
         models.Job: serializers.JobSerializer,
         models.AdHocCommand: serializers.AdHocCommandSerializer,
