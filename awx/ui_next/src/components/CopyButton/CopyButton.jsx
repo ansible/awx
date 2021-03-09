@@ -17,6 +17,7 @@ function CopyButton({
   onCopyFinish,
   errorMessage,
   i18n,
+  ouiaId,
 }) {
   const { isLoading, error: copyError, request: copyItemToAPI } = useRequest(
     copyItem
@@ -35,6 +36,7 @@ function CopyButton({
     <>
       <Button
         id={id}
+        ouiaId={ouiaId}
         isDisabled={isLoading || isDisabled}
         aria-label={i18n._(t`Copy`)}
         variant="plain"
@@ -62,10 +64,12 @@ CopyButton.propTypes = {
   onCopyFinish: PropTypes.func.isRequired,
   errorMessage: PropTypes.string.isRequired,
   isDisabled: PropTypes.bool,
+  ouiaId: PropTypes.string,
 };
 
 CopyButton.defaultProps = {
   isDisabled: false,
+  ouiaId: null,
 };
 
 export default withI18n()(CopyButton);
