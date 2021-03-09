@@ -90,8 +90,9 @@ function CodeEditor({
       if (!editorInput) {
         return;
       }
-      editorInput.focus();
+      event.preventDefault();
       event.stopPropagation();
+      editorInput.focus();
     }
   }, []);
 
