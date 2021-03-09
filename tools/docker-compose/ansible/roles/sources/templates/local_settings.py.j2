@@ -20,6 +20,19 @@ import sys
 # INTERNAL_IPS = ('172.19.0.1', '172.18.0.1', '192.168.100.1')
 # ALLOWED_HOSTS = ['*']
 
+
+DATABASES = {
+    'default': {
+        'ATOMIC_REQUESTS': True,
+        'ENGINE': 'awx.main.db.profiled_pg',
+        'NAME': "{{ pg_database }}",
+        'USER': "{{ pg_username }}",
+        'PASSWORD': "{{ pg_password }}",
+        'HOST': "{{ pg_hostname | default('postgres') }}",
+        'PORT': "{{ pg_port }}",
+    }
+}
+
 # Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
 # commented out, Django will create the test_awx-dev database in PostgreSQL to
 # run unit tests.
