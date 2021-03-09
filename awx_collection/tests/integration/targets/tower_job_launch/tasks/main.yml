@@ -169,6 +169,11 @@
     query: {"id": "{{result.id}}"}
   register: result
 
+- name: Wait for 2nd job max 120s
+  tower_job_wait:
+    job_id: "{{result.id}}"
+    timeout: 120
+
 - assert:
     that:
       - '{"foo": "bar"} | to_json in result.results[0].extra_vars'
