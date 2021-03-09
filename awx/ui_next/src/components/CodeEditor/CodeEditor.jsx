@@ -33,6 +33,10 @@ const AceEditor = styled(ReactAce)`
     padding-bottom: 4px;
   }
 
+  & .ace_mobile-menu {
+    display: none;
+  }
+
   ${props =>
     props.hasErrors &&
     `
