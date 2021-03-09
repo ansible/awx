@@ -163,7 +163,7 @@ function CodeEditor({
           ref={editor}
         />
       </FocusWrapper>
-      {isKeyboardFocused && (
+      {isKeyboardFocused && !readOnly && (
         <div
           className="pf-c-form__helper-text keyboard-help-text"
           aria-live="polite"
