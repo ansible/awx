@@ -447,6 +447,7 @@ describe('<ScheduleForm />', () => {
           />
         );
       });
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
     afterAll(() => {
       wrapper.unmount();
