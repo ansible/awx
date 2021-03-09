@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import {
   DataListItem,
   DataListItemRow,
@@ -8,6 +9,14 @@ import {
   Radio,
 } from '@patternfly/react-core';
 import DataListCell from '../DataListCell';
+
+const Label = styled.label`
+  ${({ isDisabled }) =>
+    isDisabled &&
+    `
+    opacity: 0.5;
+  `}
+`;
 
 const CheckboxListItem = ({
   isDisabled = false,
@@ -32,7 +41,7 @@ const CheckboxListItem = ({
           aria-label={`check-action-item-${itemId}`}
           aria-labelledby={`check-action-item-${itemId}`}
           checked={isSelected}
-          disabled={isDisabled}
+          isDisabled={isDisabled}
           id={`selected-${itemId}`}
           isChecked={isSelected}
           name={name}
@@ -42,13 +51,14 @@ const CheckboxListItem = ({
         <DataListItemCells
           dataListCells={[
             <DataListCell key="name">
-              <label
+              <Label
                 id={`check-action-item-${itemId}`}
                 htmlFor={`selected-${itemId}`}
                 className="check-action-item"
+                isDisabled={isDisabled}
               >
                 <b>{label}</b>
-              </label>
+              </Label>
             </DataListCell>,
           ]}
         />

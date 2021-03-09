@@ -94,6 +94,7 @@ const mockJobTemplate = {
   },
   related: { webhook_receiver: '' },
   inventory: 1,
+  project: 5,
 };
 
 describe('NodeModal', () => {
