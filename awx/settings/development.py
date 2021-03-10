@@ -53,6 +53,10 @@ LOGGING['loggers']['awx.isolated.manager.playbooks']['propagate'] = True  # noqa
 
 # celery is annoyingly loud when docker containers start
 LOGGING['loggers'].pop('celery', None)  # noqa
+# avoid awx.main.dispatch WARNING-level scaling worker up/down messages
+LOGGING['loggers']['awx.main.dispatch']['level'] = 'ERROR'  # noqa
+# suppress the spamminess of the awx.main.scheduler and .tasks loggers
+LOGGING['loggers']['awx']['level'] = 'INFO'  # noqa
 
 ALLOWED_HOSTS = ['*']
 
