@@ -89,7 +89,7 @@ def get_ID(**kwargs):
         result_str = response.json()["Result"]["Results"]
         return result_str[0]["Row"]["ID"]
     except (IndexError, KeyError):
-        raise RuntimeError("Error Detected!! Check the Inputs")       
+        raise RuntimeError("Error Detected!! Check the Inputs")
 
 
 # CheckOut Password from Centrify Vault, Input : ID
@@ -123,7 +123,7 @@ def centrify_backend(**kwargs):
     endpoint = {
         'endpoint': endpoint,
         'client_id': client_id,
-        'client_password': client_password
+        'client_password': client_password,
         'oauth_scope': kwargs.get('oauth_scope', 'awx')
     }
     token = handle_auth(**endpoint)
