@@ -43,14 +43,21 @@ export default function useLaunchSteps(
   launchConfig,
   surveyConfig,
   resource,
-  i18n
+  i18n,
+  resourceDefaultCredentials
 ) {
   const [visited, setVisited] = useState({});
   const [isReady, setIsReady] = useState(false);
   const { touched, values: formikValues } = useFormikContext();
   const steps = [
     useInventoryStep(launchConfig, resource, i18n, visited),
-    useCredentialsStep(launchConfig, resource, i18n),
+    useCredentialsStep(
+      launchConfig,
+      resource,
+      resourceDefaultCredentials,
+      i18n,
+      true
+    ),
     useCredentialPasswordsStep(
       launchConfig,
       i18n,

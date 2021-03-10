@@ -13,6 +13,7 @@ function Schedules({
   launchConfig,
   surveyConfig,
   resource,
+  resourceDefaultCredentials,
 }) {
   const match = useRouteMatch();
 
@@ -32,6 +33,7 @@ function Schedules({
           resource={resource}
           launchConfig={launchConfig}
           surveyConfig={surveyConfig}
+          resourceDefaultCredentials={resourceDefaultCredentials}
         />
       </Route>
       <Route key="details" path={`${match.path}/:scheduleId`}>
@@ -41,6 +43,7 @@ function Schedules({
           resource={resource}
           launchConfig={launchConfig}
           surveyConfig={surveyConfig}
+          resourceDefaultCredentials={resourceDefaultCredentials}
         />
       </Route>
       <Route key="list" path={`${match.path}`}>

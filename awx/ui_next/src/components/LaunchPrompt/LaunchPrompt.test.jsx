@@ -87,7 +87,9 @@ describe('LaunchPrompt', () => {
               credentials: [
                 {
                   id: 1,
+                  name: 'cred that prompts',
                   passwords_needed: ['ssh_password'],
+                  credential_type: 1,
                 },
               ],
             },
@@ -122,6 +124,16 @@ describe('LaunchPrompt', () => {
               },
             ],
           }}
+          resourceDefaultCredentials={[
+            {
+              id: 5,
+              name: 'cred that prompts',
+              credential_type: 1,
+              inputs: {
+                password: 'ASK',
+              },
+            },
+          ]}
         />
       );
     });

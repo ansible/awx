@@ -22,6 +22,7 @@ function ScheduleEdit({
   resource,
   launchConfig,
   surveyConfig,
+  resourceDefaultCredentials,
 }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
@@ -131,6 +132,7 @@ function ScheduleEdit({
           resource={resource}
           launchConfig={launchConfig}
           surveyConfig={surveyConfig}
+          resourceDefaultCredentials={resourceDefaultCredentials}
         />
       </CardBody>
     </Card>

@@ -32,7 +32,13 @@ function Template({ i18n, setBreadcrumb }) {
   const { me = {} } = useConfig();
 
   const {
-    result: { isNotifAdmin, template, surveyConfig, launchConfig },
+    result: {
+      isNotifAdmin,
+      template,
+      surveyConfig,
+      launchConfig,
+      resourceDefaultCredentials,
+    },
     isLoading,
     error: contentError,
     request: loadTemplateAndRoles,
@@ -40,11 +46,17 @@ function Template({ i18n, setBreadcrumb }) {
     useCallback(async () => {
       const [
         { data },
+        {
+          data: { results: defaultCredentials },
+        },
         actions,
         notifAdminRes,
         { data: launchConfiguration },
       ] = await Promise.all([
         JobTemplatesAPI.readDetail(templateId),
+        JobTemplatesAPI.readCredentials(templateId, {
+          page_size: 200,
+        }),
         JobTemplatesAPI.readTemplateOptions(templateId),
         OrganizationsAPI.read({
           page_size: 1,
@@ -52,7 +64,7 @@ function Template({ i18n, setBreadcrumb }) {
         }),
         JobTemplatesAPI.readLaunch(templateId),
       ]);
-      let surveyConfiguration = null;
+      let surveyConfiguration = {};
 
       if (data.survey_enabled) {
         const { data: survey } = await JobTemplatesAPI.readSurvey(templateId);
@@ -86,9 +98,10 @@ function Template({ i18n, setBreadcrumb }) {
         isNotifAdmin: notifAdminRes.data.results.length > 0,
         surveyConfig: surveyConfiguration,
         launchConfig: launchConfiguration,
+        resourceDefaultCredentials: defaultCredentials,
       };
     }, [templateId]),
-    { isNotifAdmin: false, template: null }
+    { isNotifAdmin: false, template: null, resourceDefaultCredentials: [] }
   );
 
   useEffect(() => {
@@ -221,6 +234,7 @@ function Template({ i18n, setBreadcrumb }) {
                 loadScheduleOptions={loadScheduleOptions}
                 surveyConfig={surveyConfig}
                 launchConfig={launchConfig}
+                resourceDefaultCredentials={resourceDefaultCredentials}
               />
             </Route>
             {canSeeNotificationsTab && (

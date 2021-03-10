@@ -204,6 +204,7 @@ function ScheduleForm({
   resource,
   launchConfig,
   surveyConfig,
+  resourceDefaultCredentials,
   ...rest
 }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -297,11 +298,84 @@ function ScheduleForm({
     return missingValues;
   }, [launchConfig, schedule, surveyConfig]);
 
+  const hasCredentialsThatPrompt = useCallback(() => {
+    if (launchConfig?.ask_credential_on_launch) {
+      if (Object.keys(schedule).length > 0) {
+        const defaultCredsWithoutOverrides = [];
+
+        const credentialHasOverride = templateDefaultCred => {
+          let hasOverride = false;
+          credentials.forEach(nodeCredential => {
+            if (
+              templateDefaultCred.credential_type ===
+              nodeCredential.credential_type
+            ) {
+              if (
+                (!templateDefaultCred.vault_id &&
+                  !nodeCredential.inputs.vault_id) ||
+                (templateDefaultCred.vault_id &&
+                  nodeCredential.inputs.vault_id &&
+                  templateDefaultCred.vault_id ===
+                    nodeCredential.inputs.vault_id)
+              ) {
+                hasOverride = true;
+              }
+            }
+          });
+
+          return hasOverride;
+        };
+
+        if (resourceDefaultCredentials) {
+          resourceDefaultCredentials.forEach(defaultCred => {
+            if (!credentialHasOverride(defaultCred)) {
+              defaultCredsWithoutOverrides.push(defaultCred);
+            }
+          });
+        }
+
+        return (
+          credentials
+            .concat(defaultCredsWithoutOverrides)
+            .filter(credential => {
+              let credentialRequiresPass = false;
+
+              Object.entries(credential.inputs).forEach(([key, value]) => {
+                if (key !== 'vault_id' && value === 'ASK') {
+                  credentialRequiresPass = true;
+                }
+              });
+
+              return credentialRequiresPass;
+            }).length > 0
+        );
+      }
+
+      return launchConfig?.defaults?.credentials
+        ? launchConfig.defaults.credentials.filter(
+            credential => credential?.passwords_needed.length > 0
+          ).length > 0
+        : false;
+    }
+
+    return false;
+  }, [launchConfig, schedule, credentials, resourceDefaultCredentials]);
+
   useEffect(() => {
-    if (isTemplate && (missingRequiredInventory() || hasMissingSurveyValue())) {
+    if (
+      isTemplate &&
+      (missingRequiredInventory() ||
+        hasMissingSurveyValue() ||
+        hasCredentialsThatPrompt())
+    ) {
       setIsSaveDisabled(true);
     }
-  }, [isTemplate, hasMissingSurveyValue, missingRequiredInventory]);
+  }, [
+    isTemplate,
+    hasMissingSurveyValue,
+    missingRequiredInventory,
+    hasCredentialsThatPrompt,
+  ]);
 
   useEffect(() => {
     loadScheduleData();
@@ -527,14 +601,14 @@ function ScheduleForm({
                       surveyConfig={surveyConfig}
                       launchConfig={launchConfig}
                       resource={resource}
-                      onCloseWizard={hasErrors => {
+                      onCloseWizard={() => {
                         setIsWizardOpen(false);
-                        setIsSaveDisabled(hasErrors);
                       }}
                       onSave={() => {
                         setIsWizardOpen(false);
                         setIsSaveDisabled(false);
                       }}
+                      resourceDefaultCredentials={resourceDefaultCredentials}
                     />
                   )}
                   <FormSubmitError error={submitError} />
