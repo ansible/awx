@@ -7,6 +7,7 @@ from ansible.module_utils.urls import Request, SSLValidationError, ConnectionErr
 from ansible.module_utils.six import PY2
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
+import semver
 import time
 from json import loads, dumps
 
@@ -259,10 +260,17 @@ class TowerAPIModule(TowerModule):
                 tower_type = response.info().getheader('X-API-Product-Name', None)
                 tower_version = response.info().getheader('X-API-Product-Version', None)
 
+            semver_collection_version = semver.VersionInfo.parse(self._COLLECTION_VERSION)
+            semver_tower_version = semver.VersionInfo.parse(tower_version)
+
             if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
-                self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, tower_type))
-            elif self._COLLECTION_VERSION != tower_version:
-                self.warn("You are running collection version {0} but connecting to tower version {1}".format(self._COLLECTION_VERSION, tower_version))
+                self.warn("You are using the {0} version of this collection but connecting to {1}".format(
+                    self._COLLECTION_TYPE, tower_type
+                ))
+            elif semver_collection_version.major != semver_tower_version.major:
+                self.warn("You are running collection version {0} but connecting to tower version {1}".format(
+                    self._COLLECTION_VERSION, tower_version
+                ))
             self.version_checked = True
 
         response_body = ''
