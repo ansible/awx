@@ -21,13 +21,6 @@ from split_settings.tools import optional, include
 # Load default settings.
 from .defaults import *  # NOQA
 
-if "pytest" in sys.modules:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-{}'.format(str(uuid.uuid4())),
-        },
-    }
 
 # awx-manage shell_plus --notebook
 NOTEBOOK_ARGUMENTS = [
@@ -169,6 +162,27 @@ try:
 except ImportError:
     traceback.print_exc()
     sys.exit(1)
+
+# Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
+# commented out, Django will create the test_awx-dev database in PostgreSQL to
+# run unit tests.
+if "pytest" in sys.modules:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-{}'.format(str(uuid.uuid4())),
+        },
+    }
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'), # noqa
+            'TEST': {
+                # Test database cannot be :memory: for inventory tests.
+                'NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'), # noqa
+            },
+        }
+    }
 
 
 CELERYBEAT_SCHEDULE.update({  # noqa
