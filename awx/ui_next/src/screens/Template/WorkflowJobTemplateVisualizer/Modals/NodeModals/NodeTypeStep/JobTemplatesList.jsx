@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
+import { Tooltip } from '@patternfly/react-core';
 import { JobTemplatesAPI } from '../../../../../../api';
 import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
 import useRequest from '../../../../../../util/useRequest';
@@ -56,26 +57,56 @@ function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
     fetchJobTemplates();
   }, [fetchJobTemplates]);
 
+  const onSelectRow = row => {
+    if (
+      row.project &&
+      row.project !== null &&
+      ((row.inventory && row.inventory !== null) || row.ask_inventory_on_launch)
+    ) {
+      onUpdateNodeResource(row);
+    }
+  };
+
   return (
     <PaginatedDataList
       contentError={error}
       hasContentLoading={isLoading}
       itemCount={count}
       items={jobTemplates}
-      onRowClick={row => onUpdateNodeResource(row)}
+      onRowClick={row => onSelectRow(row)}
       qsConfig={QS_CONFIG}
-      renderItem={item => (
-        <CheckboxListItem
-          isSelected={!!(nodeResource && nodeResource.id === item.id)}
-          itemId={item.id}
-          key={item.id}
-          name={item.name}
-          label={item.name}
-          onSelect={() => onUpdateNodeResource(item)}
-          onDeselect={() => onUpdateNodeResource(null)}
-          isRadio
-        />
-      )}
+      renderItem={item => {
+        const isDisabled =
+          !item.project ||
+          item.project === null ||
+          ((!item.inventory || item.inventory === null) &&
+            !item.ask_inventory_on_launch);
+        const listItem = (
+          <CheckboxListItem
+            isDisabled={isDisabled}
+            isSelected={!!(nodeResource && nodeResource.id === item.id)}
+            itemId={item.id}
+            key={`${item.id}-listItem`}
+            name={item.name}
+            label={item.name}
+            onSelect={() => onSelectRow(item)}
+            onDeselect={() => onUpdateNodeResource(null)}
+            isRadio
+          />
+        );
+        return isDisabled ? (
+          <Tooltip
+            key={`${item.id}-tooltip`}
+            content={i18n._(
+              t`Job Templates with a missing inventory or project cannot be selected when creating or editing nodes`
+            )}
+          >
+            {listItem}
+          </Tooltip>
+        ) : (
+          listItem
+        );
+      }}
       renderToolbar={props => <DataListToolbar {...props} fillWidth />}
       showPageSizeOptions={false}
       toolbarSearchColumns={[

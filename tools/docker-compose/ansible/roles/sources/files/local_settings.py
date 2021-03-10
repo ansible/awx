@@ -11,29 +11,12 @@
 ###############################################################################
 # MISC PROJECT SETTINGS
 ###############################################################################
-import os
-import sys
 
 # Enable the following lines and install the browser extension to use Django debug toolbar
 # if your deployment method is not VMWare of Docker-for-Mac you may
 # need a different IP address from request.META['REMOTE_ADDR']
 # INTERNAL_IPS = ('172.19.0.1', '172.18.0.1', '192.168.100.1')
 # ALLOWED_HOSTS = ['*']
-
-# Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
-# commented out, Django will create the test_awx-dev database in PostgreSQL to
-# run unit tests.
-if "pytest" in sys.modules:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
-            'TEST': {
-                # Test database cannot be :memory: for inventory tests.
-                'NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
-            },
-        }
-    }
 
 # Location for cross-development of inventory plugins
 AWX_ANSIBLE_COLLECTIONS_PATHS = '/var/lib/awx/vendor/awx_ansible_collections'

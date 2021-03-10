@@ -1,6 +1,6 @@
 # Migrating Data from Local Docker
 
-If you are migrating data from a Local Docker installation (17.0.1 and prior), you can 
+If you are migrating data from a Local Docker installation (17.0.1 and prior) to AWX 18.0 or higher, you can 
 migrate your data to the development environment via the migrate.yml playbook. 
 
 > Note: This will also convert your postgresql bind-mount into a docker volume.

@@ -5,13 +5,13 @@ Django Debug Toolbar (DDT)
 ----------------
 This is a useful tool for examining SQL queries, performance, headers, requests, signals, cache, logging, and more.  
 
-To enable DDT, you need to set your `INTERNAL_IPS` to the IP address of your load balancer.  This can be overriden in `local_settings`.  
+To enable DDT, you need to set your `INTERNAL_IPS` to the IP address of your load balancer.  This can be overridden by creating a new settings file beginning with `local_` in `awx/settings/` (e.g. `local_overrides.py`).
 This IP address can be found by making a GET to any page on the browsable API and looking for a like this in the standard output:
 ```
 awx_1        | 14:42:08 uwsgi.1     | 172.18.0.1 GET /api/v2/tokens/ - HTTP/1.1 200
 ```
 
-Allow this IP address by adding it to the `INTERNAL_IPS` variable in `local_settings`, then navigate to the API and you should see DDT on the
+Allow this IP address by adding it to the `INTERNAL_IPS` variable in your new override local settings file, then navigate to the API and you should see DDT on the
 right side.  If you don't see it, make sure to set `DEBUG=True`.  
 > Note that enabling DDT is detrimental to the performance of AWX and adds overhead to every API request.  It is
 recommended to keep this turned off when you are not using it.  

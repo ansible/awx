@@ -223,7 +223,7 @@ function ScheduleForm({
   const {
     request: loadScheduleData,
     error: contentError,
-    contentLoading,
+    isLoading: contentLoading,
     result: { zoneOptions, credentials },
   } = useRequest(
     useCallback(async () => {

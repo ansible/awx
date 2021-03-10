@@ -21,13 +21,6 @@ from split_settings.tools import optional, include
 # Load default settings.
 from .defaults import *  # NOQA
 
-if "pytest" in sys.modules:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-{}'.format(str(uuid.uuid4())),
-        },
-    }
 
 # awx-manage shell_plus --notebook
 NOTEBOOK_ARGUMENTS = [
@@ -53,6 +46,10 @@ LOGGING['loggers']['awx.isolated.manager.playbooks']['propagate'] = True  # noqa
 
 # celery is annoyingly loud when docker containers start
 LOGGING['loggers'].pop('celery', None)  # noqa
+# avoid awx.main.dispatch WARNING-level scaling worker up/down messages
+LOGGING['loggers']['awx.main.dispatch']['level'] = 'ERROR'  # noqa
+# suppress the spamminess of the awx.main.scheduler and .tasks loggers
+LOGGING['loggers']['awx']['level'] = 'INFO'  # noqa
 
 ALLOWED_HOSTS = ['*']
 
@@ -165,6 +162,27 @@ try:
 except ImportError:
     traceback.print_exc()
     sys.exit(1)
+
+# Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
+# commented out, Django will create the test_awx-dev database in PostgreSQL to
+# run unit tests.
+if "pytest" in sys.modules:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-{}'.format(str(uuid.uuid4())),
+        },
+    }
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'), # noqa
+            'TEST': {
+                # Test database cannot be :memory: for inventory tests.
+                'NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'), # noqa
+            },
+        }
+    }
 
 
 CELERYBEAT_SCHEDULE.update({  # noqa
