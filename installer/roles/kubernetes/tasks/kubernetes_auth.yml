@@ -1,3 +1,0 @@
----
-- name: Set the Kubernetes Context
-  shell: "kubectl config use-context {{ kubernetes_context }}"

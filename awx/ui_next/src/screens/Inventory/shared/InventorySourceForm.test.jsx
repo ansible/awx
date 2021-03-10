@@ -72,6 +72,7 @@ describe('<InventorySourceForm />', () => {
       expect(
         wrapper.find('FormGroup[label="Ansible Environment"]')
       ).toHaveLength(1);
+      expect(wrapper.find('ExecutionEnvironmentLookup')).toHaveLength(1);
     });
 
     test('should display subform when source dropdown has a value', async () => {
@@ -93,7 +94,8 @@ describe('<InventorySourceForm />', () => {
           id: 2,
           name: 'mock proj',
         });
-        wrapper.find('AnsibleSelect#source_path').prop('onChange')(null, 'foo');
+        wrapper.find('Select#source_path').prop('onToggle')();
+        wrapper.find('Select#source_path').prop('onSelect')(null, 'foo');
         wrapper.find('AnsibleSelect#verbosity').prop('onChange')(null, '2');
         wrapper.find('button[aria-label="Save"]').simulate('click');
       });

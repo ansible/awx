@@ -1373,6 +1373,7 @@ class PluginFileInjector(object):
     collection = None
     collection_migration = '2.9'  # Starting with this version, we use collections
 
+    # TODO: delete this method and update unit tests
     @classmethod
     def get_proper_name(cls):
         if cls.plugin_name is None:
@@ -1397,13 +1398,12 @@ class PluginFileInjector(object):
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
         source_vars = dict(inventory_update.source_vars_dict) # make a copy
-        proper_name = self.get_proper_name()
         '''
         None conveys that we should use the user-provided plugin.
         Note that a plugin value of '' should still be overridden.
         '''
-        if proper_name is not None:
-            source_vars['plugin'] = proper_name
+        if self.plugin_name is not None:
+            source_vars['plugin'] = self.plugin_name
         return source_vars
 
     def build_env(self, inventory_update, env, private_data_dir, private_data_files):
@@ -1441,7 +1441,6 @@ class PluginFileInjector(object):
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
         env = self._get_shared_env(inventory_update, private_data_dir, private_data_files)
-        env['ANSIBLE_COLLECTIONS_PATHS'] = settings.AWX_ANSIBLE_COLLECTIONS_PATHS
         return env
 
     def build_private_data(self, inventory_update, private_data_dir):
@@ -1544,7 +1543,7 @@ class openstack(PluginFileInjector):
         env = super(openstack, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
         credential = inventory_update.get_cloud_credential()
         cred_data = private_data_files['credentials']
-        env['OS_CLIENT_CONFIG_FILE'] = cred_data[credential]
+        env['OS_CLIENT_CONFIG_FILE'] = os.path.join('/runner', os.path.basename(cred_data[credential]))
         return env
 
 
@@ -1572,6 +1571,12 @@ class satellite6(PluginFileInjector):
             ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
             ret['FOREMAN_USER'] = credential.get_input('username', default='')
             ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
+        return ret
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(satellite6, self).inventory_as_dict(inventory_update, private_data_dir)
+        # this inventory plugin requires the fully qualified inventory plugin name
+        ret['plugin'] = f'{self.namespace}.{self.collection}.{self.plugin_name}'
         return ret
 
 

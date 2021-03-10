@@ -311,7 +311,7 @@ describe('<MultiCredentialsLookup />', () => {
     });
     wrapper.update();
     const typeSelect = wrapper.find('AnsibleSelect');
-    act(() => {
+    await act(async () => {
       typeSelect.invoke('onChange')({}, 500);
     });
     wrapper.update();

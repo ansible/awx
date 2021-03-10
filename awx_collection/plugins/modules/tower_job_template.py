@@ -31,6 +31,14 @@ options:
       description:
         - Setting this option will change the existing name (looed up via the name field.
       type: str
+    copy_from:
+      description:
+        - Name or id to copy the job template from.
+        - This will copy an existing job template and change any parameters supplied.
+        - The new job template name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple job templates share the same name.
+      type: str
     description:
       description:
         - Description to use for the job template.
@@ -74,6 +82,10 @@ options:
       description:
         - Name of the vault credential to use for the job template.
         - Deprecated, use 'credentials'.
+      type: str
+    execution_environment:
+      description:
+        - Execution Environment to use for the JT.
       type: str
     forks:
       description:
@@ -223,10 +235,6 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish (server-side).
       type: int
-    custom_virtualenv:
-      description:
-        - Local absolute file path containing a custom Python virtualenv to use.
-      type: str
     job_slice_count:
       description:
         - The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.
@@ -300,7 +308,6 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
     survey_enabled: yes
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
-    custom_virtualenv: "/var/lib/awx/venv/custom-venv/"
 
 - name: Add start notification to Job Template
   tower_job_template:
@@ -315,6 +322,15 @@ EXAMPLES = '''
     notification_templates_started:
       - Notification2
 
+- name: Copy Job Template
+  tower_job_template:
+    name: copy job template
+    copy_from: test job template
+    job_type: "run"
+    inventory: Copy Foo Inventory
+    project: test
+    playbook: hello_world.yml
+    state: "present"
 '''
 
 from ..module_utils.tower_api import TowerAPIModule
@@ -340,24 +356,25 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(),
-        description=dict(default=''),
+        copy_from=dict(),
+        description=dict(),
         organization=dict(),
         job_type=dict(choices=['run', 'check']),
         inventory=dict(),
         project=dict(),
         playbook=dict(),
-        credential=dict(default=''),
-        vault_credential=dict(default=''),
-        custom_virtualenv=dict(),
+        credential=dict(),
+        vault_credential=dict(),
         credentials=dict(type='list', elements='str'),
+        execution_environment=dict(),
         forks=dict(type='int'),
-        limit=dict(default=''),
+        limit=dict(),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
         extra_vars=dict(type='dict'),
-        job_tags=dict(default=''),
+        job_tags=dict(),
         force_handlers=dict(type='bool', default=False, aliases=['force_handlers_enabled']),
-        skip_tags=dict(default=''),
-        start_at_task=dict(default=''),
+        skip_tags=dict(),
+        start_at_task=dict(),
         timeout=dict(type='int', default=0),
         use_fact_cache=dict(type='bool', aliases=['fact_caching_enabled']),
         host_config_key=dict(),
@@ -393,17 +410,18 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get("new_name")
+    copy_from = module.params.get('copy_from')
     state = module.params.get('state')
 
     # Deal with legacy credential and vault_credential
     credential = module.params.get('credential')
     vault_credential = module.params.get('vault_credential')
     credentials = module.params.get('credentials')
-    if vault_credential != '':
+    if vault_credential:
         if credentials is None:
             credentials = []
         credentials.append(vault_credential)
-    if credential != '':
+    if credential:
         if credentials is None:
             credentials = []
         credentials.append(credential)
@@ -418,8 +436,20 @@ def main():
         organization_id = module.resolve_name_to_id('organizations', organization)
         search_fields['organization'] = new_fields['organization'] = organization_id
 
+    ee = module.params.get('execution_environment')
+    if ee:
+        new_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
+
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('job_templates', name_or_id=name, **{'data': search_fields})
+
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        existing_item = module.copy_item(
+            existing_item, copy_from, name,
+            endpoint='job_templates', item_type='job_template',
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -433,7 +463,7 @@ def main():
         'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch', 'ask_variables_on_launch',
         'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch',
         'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
-        'become_enabled', 'diff_mode', 'allow_simultaneous', 'custom_virtualenv', 'job_slice_count', 'webhook_service',
+        'become_enabled', 'diff_mode', 'allow_simultaneous', 'job_slice_count', 'webhook_service',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:

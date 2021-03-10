@@ -1,6 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import base64
 import os
 import re  # noqa
 import sys
@@ -58,11 +59,23 @@ DATABASES = {
     }
 }
 
+# Whether or not the deployment is a K8S-based deployment
+# In K8S-based deployments, instances have zero capacity - all playbook
+# automation is intended to flow through defined Container Groups that
+# interface with some (or some set of) K8S api (which may or may not include
+# the K8S cluster where awx itself is running)
+IS_K8S = False
+
+# TODO: remove this setting in favor of a default execution environment
+AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE = 'quay.io/ansible/awx-ee'
+
 AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
 AWX_CONTAINER_GROUP_POD_LAUNCH_RETRIES = 100
 AWX_CONTAINER_GROUP_POD_LAUNCH_RETRY_DELAY = 5
-AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = 'default'
-AWX_CONTAINER_GROUP_DEFAULT_IMAGE = 'ansible/ansible-runner'
+AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = os.getenv('MY_POD_NAMESPACE', 'default')
+
+# TODO: remove this setting in favor of a default execution environment
+AWX_CONTAINER_GROUP_DEFAULT_IMAGE = AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -148,7 +161,10 @@ SCHEDULE_MAX_JOBS = 10
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'p7z7g1ql4%6+(6nlebb6hdk7sd^&fnjpal308%n%+p^_e6vo1y'
+if os.path.exists('/etc/tower/SECRET_KEY'):
+    SECRET_KEY = open('/etc/tower/SECRET_KEY', 'rb').read().strip()
+else:
+    SECRET_KEY = base64.encodebytes(os.urandom(32)).decode().rstrip()
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
@@ -169,6 +185,7 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 PROXY_IP_ALLOWED_LIST = []
 
 CUSTOM_VENV_PATHS = []
+DEFAULT_EXECUTION_ENVIRONMENT = None
 
 # Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
@@ -285,6 +302,7 @@ INSTALLED_APPS = [
     'polymorphic',
     'taggit',
     'social_django',
+    'django_guid',
     'corsheaders',
     'awx.conf',
     'awx.main',
@@ -674,7 +692,7 @@ AD_HOC_COMMANDS = [
     'win_user',
 ]
 
-INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
+INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM", "PATH")
 
 # ----------------
 # -- Amazon EC2 --
@@ -737,10 +755,10 @@ TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
 # ---------------------
 # ----- Foreman -----
 # ---------------------
-SATELLITE6_ENABLED_VAR = 'foreman.enabled'
+SATELLITE6_ENABLED_VAR = 'foreman_enabled'
 SATELLITE6_ENABLED_VALUE = 'True'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
-SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
+SATELLITE6_INSTANCE_ID_VAR = 'foreman_id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
 
 # ---------------------
@@ -778,6 +796,8 @@ TOWER_URL_BASE = "https://towerhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_AGENT_MIME = 'application/example'
+# See https://github.com/ansible/awx-facts-playbooks
+INSIGHTS_SYSTEM_ID_FILE='/etc/redhat-access-insights/machine-id'
 
 TOWER_SETTINGS_MANIFEST = {}
 
@@ -828,11 +848,14 @@ LOGGING = {
         },
         'dynamic_level_filter': {
             '()': 'awx.main.utils.filters.DynamicLevelFilter'
-        }
+        },
+        'guid': {
+            '()': 'awx.main.utils.filters.DefaultCorrelationId'
+        },
     },
     'formatters': {
         'simple': {
-            'format': '%(asctime)s %(levelname)-8s %(name)s %(message)s',
+            'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s %(message)s',
         },
         'json': {
             '()': 'awx.main.utils.formatters.LogstashFormatter'
@@ -842,7 +865,7 @@ LOGGING = {
             'format': '%(relativeSeconds)9.3f %(levelname)-8s %(message)s'
         },
         'dispatcher': {
-            'format': '%(asctime)s %(levelname)-8s %(name)s PID:%(process)d %(message)s',
+            'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s PID:%(process)d %(message)s',
         },
         'job_lifecycle': {
             '()': 'awx.main.utils.formatters.JobLifeCycleFormatter',
@@ -852,7 +875,7 @@ LOGGING = {
         'console': {
             '()': 'logging.StreamHandler',
             'level': 'DEBUG',
-            'filters': ['require_debug_true_or_test'],
+            'filters': ['require_debug_true_or_test', 'guid'],
             'formatter': 'simple',
         },
         'null': {
@@ -872,33 +895,33 @@ LOGGING = {
             'class': 'awx.main.utils.handlers.RSysLogHandler',
             'formatter': 'json',
             'address': '/var/run/awx-rsyslog/rsyslog.sock',
-            'filters': ['external_log_enabled', 'dynamic_level_filter'],
+            'filters': ['external_log_enabled', 'dynamic_level_filter', 'guid'],
         },
         'tower_warnings': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'tower.log'),
             'formatter':'simple',
         },
         'callback_receiver': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
             'formatter':'simple',
         },
         'dispatcher': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'dispatcher.log'),
             'formatter':'dispatcher',
         },
         'wsbroadcast': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'wsbroadcast.log'),
             'formatter':'simple',
         },
@@ -914,7 +937,7 @@ LOGGING = {
         'task_system': {
             # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
             'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
             'filename': os.path.join(LOG_ROOT, 'task_system.log'),
             'formatter':'simple',
         },
@@ -1094,6 +1117,7 @@ AWX_CALLBACK_PROFILE = False
 AWX_CLEANUP_PATHS = True
 
 MIDDLEWARE = [
+    'django_guid.middleware.GuidMiddleware',
     'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
@@ -1134,3 +1158,7 @@ BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS = 10
 
 # How often websocket process will generate stats
 BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
+
+DJANGO_GUID = {
+    'GUID_HEADER_NAME': 'X-API-Request-Id',
+}

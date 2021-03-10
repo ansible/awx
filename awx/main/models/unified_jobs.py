@@ -39,7 +39,7 @@ from awx.main.models.base import (
 from awx.main.dispatch import get_local_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
-from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
 from awx.main.utils import (
     camelcase_to_underscore, get_model_for_type,
     encrypt_dict, decrypt_field, _inventory_updates,
@@ -50,7 +50,7 @@ from awx.main.utils import (
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
-from awx.main.fields import JSONField, AskForField, OrderedManyToManyField
+from awx.main.fields import JSONField, JSONBField, AskForField, OrderedManyToManyField
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
 
@@ -59,7 +59,7 @@ logger_job_lifecycle = logging.getLogger('awx.analytics.job_lifecycle')
 # NOTE: ACTIVE_STATES moved to constants because it is used by parent modules
 
 
-class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, NotificationFieldsModel):
+class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEnvironmentMixin, NotificationFieldsModel):
     '''
     Concrete base class for unified job templates.
     '''
@@ -376,6 +376,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             for fd, val in eager_fields.items():
                 setattr(unified_job, fd, val)
 
+        unified_job.execution_environment = self.resolve_execution_environment()
+
         # NOTE: slice workflow jobs _get_parent_field_name method
         # is not correct until this is set
         if not parent_field_name:
@@ -527,7 +529,7 @@ class StdoutMaxBytesExceeded(Exception):
 
 
 class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique,
-                 UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
+                 UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin):
     '''
     Concrete base class for unified job run by the task engine.
     '''
@@ -719,6 +721,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     credentials = models.ManyToManyField(
         'Credential',
         related_name='%(class)ss',
+    )
+    installed_collections = JSONBField(
+        blank=True,
+        default=dict,
+        editable=False,
+        help_text=_("The Collections names and versions installed in the execution environment."),
     )
 
     def get_absolute_url(self, request=None):
@@ -1453,6 +1461,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             for name in ('awx', 'tower'):
                 r['{}_workflow_job_id'.format(name)] = wj.pk
                 r['{}_workflow_job_name'.format(name)] = wj.name
+                r['{}_workflow_job_launch_type'.format(name)] = wj.launch_type
                 if schedule:
                     r['{}_parent_job_schedule_id'.format(name)] = schedule.pk
                     r['{}_parent_job_schedule_name'.format(name)] = schedule.name
@@ -1487,7 +1496,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return bool(self.controller_node)
 
     @property
-    def is_containerized(self):
+    def is_container_group_task(self):
         return False
 
     def log_lifecycle(self, state, blocked_by=None):

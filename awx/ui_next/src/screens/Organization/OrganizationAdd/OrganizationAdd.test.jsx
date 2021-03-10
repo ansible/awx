@@ -17,13 +17,18 @@ describe('<OrganizationAdd />', () => {
       description: 'new description',
       custom_virtualenv: 'Buzz',
       galaxy_credentials: [],
+      default_environment: { id: 1, name: 'Foo' },
     };
     OrganizationsAPI.create.mockResolvedValueOnce({ data: {} });
     await act(async () => {
       const wrapper = mountWithContexts(<OrganizationAdd />);
       wrapper.find('OrganizationForm').prop('onSubmit')(updatedOrgData, []);
     });
-    expect(OrganizationsAPI.create).toHaveBeenCalledWith(updatedOrgData);
+    expect(OrganizationsAPI.create).toHaveBeenCalledWith({
+      ...updatedOrgData,
+      default_environment: 1,
+    });
+    expect(OrganizationsAPI.create).toHaveBeenCalledTimes(1);
   });
 
   test('should navigate to organizations list when cancel is clicked', async () => {

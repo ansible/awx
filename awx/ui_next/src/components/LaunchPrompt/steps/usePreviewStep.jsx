@@ -11,7 +11,8 @@ export default function usePreviewStep(
   resource,
   surveyConfig,
   hasErrors,
-  showStep
+  showStep,
+  nextButtonText
 ) {
   return {
     step: showStep
@@ -31,7 +32,7 @@ export default function usePreviewStep(
             />
           ),
           enableNext: !hasErrors,
-          nextButtonText: i18n._(t`Launch`),
+          nextButtonText: nextButtonText || i18n._(t`Launch`),
         }
       : null,
     initialValues: {},

@@ -147,7 +147,7 @@ describe('LaunchButton', () => {
     await act(() => button.prop('onClick')());
     expect(JobsAPI.readRelaunch).toHaveBeenCalledWith(1);
     await sleep(0);
-    expect(JobsAPI.relaunch).toHaveBeenCalledWith(1);
+    expect(JobsAPI.relaunch).toHaveBeenCalledWith(1, {});
     expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
 

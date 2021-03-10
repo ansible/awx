@@ -147,6 +147,13 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return self.rampart_groups.filter(controller__isnull=False).exists()
 
     def refresh_capacity(self):
+        if settings.IS_K8S:
+            self.capacity = self.cpu = self.memory = self.cpu_capacity = self.mem_capacity = 0  # noqa
+            self.version = awx_application_version
+            self.save(update_fields=['capacity', 'version', 'modified', 'cpu',
+                                     'memory', 'cpu_capacity', 'mem_capacity'])
+            return
+
         cpu = get_cpu_capacity()
         mem = get_mem_capacity()
         if self.enabled:
@@ -247,7 +254,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         return bool(self.controller)
 
     @property
-    def is_containerized(self):
+    def is_container_group(self):
+        if settings.IS_K8S:
+            return True
+
         return bool(self.credential and self.credential.kubernetes)
 
     '''
@@ -306,9 +316,9 @@ def schedule_policy_task():
 @receiver(post_save, sender=InstanceGroup)
 def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
     if created or instance.has_policy_changes():
-        if not instance.is_containerized:
+        if not instance.is_container_group:
             schedule_policy_task()
-    elif created or instance.is_containerized:
+    elif created or instance.is_container_group:
         instance.set_default_policy_fields()
 
 
@@ -320,7 +330,7 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
 
 @receiver(post_delete, sender=InstanceGroup)
 def on_instance_group_deleted(sender, instance, using, **kwargs):
-    if not instance.is_containerized:
+    if not instance.is_container_group:
         schedule_policy_task()
 
 

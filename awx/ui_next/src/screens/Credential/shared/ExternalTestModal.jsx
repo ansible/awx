@@ -168,7 +168,7 @@ function ExternalTestModal({
   );
 }
 
-ExternalTestModal.proptype = {
+ExternalTestModal.propType = {
   credential: shape({}),
   credentialType: shape({}).isRequired,
   credentialFormValues: shape({}).isRequired,

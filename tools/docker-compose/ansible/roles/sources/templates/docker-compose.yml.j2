@@ -1,0 +1,93 @@
+---
+version: '2'
+services:
+{% for i in range(cluster_node_count|int) %}
+  {% set container_postfix = loop.index %}
+  {% set awx_sdb_port_start = 7899 + (loop.index0*100) | int %}
+  {% set awx_sdb_port_end = 7999 + (loop.index0*100) | int %}
+  # Primary AWX Development Container
+  awx_{{ container_postfix }}:
+    user: "{{ ansible_user_uid }}"
+    image: "{{ awx_image }}:{{ awx_image_tag }}"
+    container_name: tools_awx_{{ container_postfix }}
+    hostname: awx_{{ container_postfix }}
+    command: launch_awx.sh
+    environment:
+      OS: "{{ os_info.stdout }}"
+      SDB_HOST: 0.0.0.0
+      SDB_PORT: {{ awx_sdb_port_start }}
+      AWX_GROUP_QUEUES: tower
+      RECEPTORCTL_SOCKET: /var/run/receptor/receptor.sock
+    links:
+      - postgres
+      - redis_{{ container_postfix }}
+    working_dir: "/awx_devel"
+    volumes:
+      - "../../../:/awx_devel"
+      - "../../docker-compose/supervisor.conf:/etc/supervisord.conf"
+      - "../../docker-compose/_sources/database.py:/etc/tower/conf.d/database.py"
+      - "../../docker-compose/_sources/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py"
+      - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
+      - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
+      - "../../docker-compose/receptor.conf:/etc/receptor/receptor.conf"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
+      - "~/.kube/config:/var/lib/awx/.kube/config"
+      - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
+      - "receptor_{{ container_postfix }}:/var/run/receptor/"
+    privileged: true
+    tty: true
+    ports:
+      - "6899:6899"
+      - "{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}:{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}"  # sdb-listen
+{% if cluster_node_count|int == 1 %}
+      - "8080:8080"  # unused but mapped for debugging
+      - "8888:8888"  # jupyter notebook
+      - "8013:8013"  # http
+      - "8043:8043"  # https
+{% else %}
+  haproxy:
+    image: haproxy
+    volumes:
+      - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+    depends_on:
+{% for i in range(cluster_node_count|int) -%}
+  {% set container_postfix = loop.index %}
+      - "awx_{{ container_postfix }}"
+{% endfor %}
+    ports:
+      - "8013:8013"
+      - "8043:8043"
+      - "1936:1936"
+{% endif %}
+  redis_{{ container_postfix }}:
+    image: redis:latest
+    container_name: tools_redis_{{ container_postfix }}
+    volumes:
+      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
+    entrypoint: ["redis-server"]
+    command: ["/usr/local/etc/redis/redis.conf"]
+{% endfor %}
+  # A useful container that simply passes through log messages to the console
+  # helpful for testing awx/tower logging
+  # logstash:
+  #   build:
+  #     context: ./docker-compose
+  #     dockerfile: Dockerfile-logstash
+  postgres:
+    image: postgres:12
+    container_name: tools_postgres_1
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: {{ pg_username }}
+      POSTGRES_DB: {{ pg_database }}
+      POSTGRES_PASSWORD: {{ pg_password }}
+    volumes:
+      - "awx_db:/var/lib/postgresql/data"
+volumes:
+  awx_db:
+{% for i in range(cluster_node_count|int) -%}
+  {% set container_postfix = loop.index %}
+  receptor_{{ container_postfix }}:
+  redis_socket_{{ container_postfix }}:
+{% endfor -%}

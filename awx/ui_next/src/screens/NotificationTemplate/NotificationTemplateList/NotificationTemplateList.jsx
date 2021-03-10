@@ -4,7 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { NotificationTemplatesAPI } from '../../../api';
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
@@ -104,7 +108,7 @@ function NotificationTemplatesList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={contentError}
             hasContentLoading={isTemplatesLoading || isDeleteLoading}
             items={templates}
@@ -149,16 +153,6 @@ function NotificationTemplatesList({ i18n }) {
             ]}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
-            toolbarSortColumns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-              },
-              {
-                name: i18n._(t`Type`),
-                key: 'notification_type',
-              },
-            ]}
             renderToolbar={props => (
               <DataListToolbar
                 {...props}
@@ -179,7 +173,17 @@ function NotificationTemplatesList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={template => (
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
+                <HeaderCell sortKey="notification_type">
+                  {i18n._(t`Type`)}
+                </HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              </HeaderRow>
+            }
+            renderRow={(template, index) => (
               <NotificationTemplateListItem
                 key={template.id}
                 fetchTemplates={fetchTemplates}
@@ -187,6 +191,7 @@ function NotificationTemplatesList({ i18n }) {
                 detailUrl={`${match.url}/${template.id}`}
                 isSelected={selected.some(row => row.id === template.id)}
                 onSelect={() => handleSelect(template)}
+                rowIndex={index}
               />
             )}
             emptyStateControls={

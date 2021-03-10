@@ -28,6 +28,11 @@ options:
         - Job_type to use for the ad hoc command.
       type: str
       choices: [ 'run', 'check' ]
+    execution_environment:
+      description:
+        - Execution Environment to use for the ad hoc command.
+      required: False
+      type: str
     inventory:
       description:
         - Inventory to use for the ad hoc command.
@@ -118,7 +123,7 @@ def main():
         limit=dict(),
         credential=dict(required=True),
         module_name=dict(required=True),
-        module_args=dict(default=""),
+        module_args=dict(),
         forks=dict(type='int'),
         verbosity=dict(type='int', choices=['0', '1', '2', '3', '4', '5']),
         extra_vars=dict(type='dict'),
@@ -127,6 +132,7 @@ def main():
         wait=dict(default=False, type='bool'),
         interval=dict(default=1.0, type='float'),
         timeout=dict(default=None, type='int'),
+        execution_environment=dict(),
     )
 
     # Create a module for ourselves

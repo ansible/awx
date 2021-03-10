@@ -5,8 +5,10 @@ import { Button } from '@patternfly/react-core';
 import ButtonGroup from './ButtonGroup';
 
 const SmallButton = styled(Button)`
-  padding: 3px 8px;
-  font-size: var(--pf-global--FontSize--xs);
+  && {
+    padding: 3px 8px;
+    font-size: var(--pf-global--FontSize--xs);
+  }
 `;
 
 function MultiButtonToggle({ buttons, value, onChange }) {

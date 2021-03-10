@@ -410,6 +410,51 @@ class TowerAPIModule(TowerModule):
             else:
                 self.fail_json(msg="Failed to associate item {0}".format(response['json'].get('detail', response['json'])))
 
+    def copy_item(self, existing_item, copy_from_name_or_id, new_item_name, endpoint=None, item_type='unknown', copy_lookup_data={}):
+
+        if existing_item is not None:
+            self.warn(msg="A {0} with the name {1} already exists.".format(item_type, new_item_name))
+            self.json_output['changed'] = False
+            self.json_output['copied'] = False
+            return existing_item
+
+        # Lookup existing item to copy from
+        copy_from_lookup = self.get_one(endpoint, name_or_id=copy_from_name_or_id, **{'data': copy_lookup_data})
+
+        # Fail if the copy_from_lookup is empty
+        if copy_from_lookup is None:
+            self.fail_json(msg="A {0} with the name {1} was not able to be found.".format(item_type, copy_from_name_or_id))
+
+        # Do checks for copy permisions if warrented
+        if item_type == 'workflow_job_template':
+            copy_get_check = self.get_endpoint(copy_from_lookup['related']['copy'])
+            if copy_get_check['status_code'] in [200]:
+                if (copy_get_check['json']['can_copy'] and copy_get_check['json']['can_copy_without_user_input'] and not
+                    copy_get_check['json']['templates_unable_to_copy'] and not copy_get_check['json']['credentials_unable_to_copy'] and not
+                        copy_get_check['json']['inventories_unable_to_copy']):
+                    # Because checks have passed
+                    self.json_output['copy_checks'] = 'passed'
+                else:
+                    self.fail_json(msg="Unable to copy {0} {1} error: {2}".format(item_type, copy_from_name_or_id, copy_get_check))
+            else:
+                self.fail_json(msg="Error accessing {0} {1} error: {2} ".format(item_type, copy_from_name_or_id, copy_get_check))
+
+        response = self.post_endpoint(copy_from_lookup['related']['copy'], **{'data': {'name': new_item_name}})
+
+        if response['status_code'] in [201]:
+            self.json_output['id'] = response['json']['id']
+            self.json_output['changed'] = True
+            self.json_output['copied'] = True
+            new_existing_item = response['json']
+        else:
+            if 'json' in response and '__all__' in response['json']:
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, new_item_name, response['json']['__all__'][0]))
+            elif 'json' in response:
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, new_item_name, response['json']))
+            else:
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, new_item_name, response['status_code']))
+        return new_existing_item
+
     def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, auto_exit=True, item_type='unknown', associations=None):
 
         # This will exit from the module on its own

@@ -29,6 +29,8 @@ function OrganizationLookup({
   value,
   history,
   autoPopulate,
+  isDisabled,
+  helperText,
 }) {
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
 
@@ -78,8 +80,10 @@ function OrganizationLookup({
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Organization`)}
+      helperText={helperText}
     >
       <Lookup
+        isDisabled={isDisabled}
         id="organization"
         header={i18n._(t`Organization`)}
         value={value}
@@ -139,6 +143,7 @@ OrganizationLookup.propTypes = {
   required: bool,
   value: Organization,
   autoPopulate: bool,
+  isDisabled: bool,
 };
 
 OrganizationLookup.defaultProps = {
@@ -148,6 +153,7 @@ OrganizationLookup.defaultProps = {
   required: false,
   value: null,
   autoPopulate: false,
+  isDisabled: false,
 };
 
 export { OrganizationLookup as _OrganizationLookup };

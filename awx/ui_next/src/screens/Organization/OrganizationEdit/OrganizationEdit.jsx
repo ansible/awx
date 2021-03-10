@@ -28,7 +28,10 @@ function OrganizationEdit({ organization }) {
       const addedCredentialIds = addedCredentials.map(({ id }) => id);
       const removedCredentialIds = removedCredentials.map(({ id }) => id);
 
-      await OrganizationsAPI.update(organization.id, values);
+      await OrganizationsAPI.update(organization.id, {
+        ...values,
+        default_environment: values.default_environment?.id || null,
+      });
       await Promise.all(
         groupsToAssociate
           .map(id =>

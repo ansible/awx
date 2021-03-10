@@ -187,6 +187,14 @@ class ProjectOptions(models.Model):
                 pass
         return cred
 
+    def resolve_execution_environment(self):
+        """
+        Project updates, themselves, will use the default execution environment.
+        Jobs using the project can use the default_environment, but the project updates
+        are not flexible enough to allow customizing the image they use.
+        """
+        return self.get_execution_environment_default()
+
     def get_project_path(self, check_if_exists=True):
         local_path = os.path.basename(self.local_path)
         if local_path and not local_path.startswith('.'):
@@ -259,6 +267,15 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         app_label = 'main'
         ordering = ('id',)
 
+    default_environment = models.ForeignKey(
+        'ExecutionEnvironment',
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text=_('The default execution environment for jobs run using this project.'),
+    )
     scm_update_on_launch = models.BooleanField(
         default=False,
         help_text=_('Update the project when a job is launched that uses the project.'),
@@ -554,6 +571,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     @property
     def task_impact(self):
+        if settings.IS_K8S:
+            return 0
         return 0 if self.job_type == 'run' else 1
 
     @property

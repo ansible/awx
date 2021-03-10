@@ -118,7 +118,7 @@ function InventoryEdit({ inventory }) {
   );
 }
 
-InventoryEdit.proptype = {
+InventoryEdit.propType = {
   inventory: object.isRequired,
 };
 

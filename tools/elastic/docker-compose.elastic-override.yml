@@ -10,7 +10,7 @@ services:
 
   # Components of ELK stack for logging
   elasticsearch:
-    build: elastic/elasticsearch/
+    build: ../../elastic/elasticsearch/
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -18,12 +18,11 @@ services:
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       # networks: # add back in when a connection to tower_tools is possible
       #   - docker_elk
-
   logstash:
-    build: elastic/logstash/
+    build: ../../elastic/logstash/
     command: -f /etc/logstash/conf.d/
     volumes:
-      - ./elastic/logstash/config:/etc/logstash/conf.d
+      - ../../elastic/logstash/config:/etc/logstash/conf.d
     ports:
       - "8085:8085"
     links:
@@ -33,9 +32,9 @@ services:
     depends_on:
       - elasticsearch
   kibana:
-    build: elastic/kibana/
+    build: ../../elastic/kibana/
     volumes:
-      - ./elastic/kibana/config/:/opt/kibana/config/
+      - ../../elastic/kibana/config/:/opt/kibana/config/
     ports:
       - "5601:5601"
     links:

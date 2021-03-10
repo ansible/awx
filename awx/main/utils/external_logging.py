@@ -32,7 +32,7 @@ def construct_rsyslog_conf_template(settings=settings):
         '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
         f'main_queue(queue.spoolDirectory="{spool_directory}" queue.maxdiskspace="{max_disk_space}g" queue.type="Disk" queue.filename="awx-external-logger-backlog")',  # noqa
         'module(load="imuxsock" SysSock.Use="off")',
-        'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
+        'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on" RateLimit.Burst="0")',
         'template(name="awx" type="string" string="%rawmsg-after-pri%")',
     ])
 
@@ -116,7 +116,7 @@ def construct_rsyslog_conf_template(settings=settings):
 def reconfigure_rsyslog():
     tmpl = construct_rsyslog_conf_template()
     # Write config to a temp file then move it to preserve atomicity
-    with tempfile.TemporaryDirectory(prefix='rsyslog-conf-') as temp_dir:
+    with tempfile.TemporaryDirectory(dir='/var/lib/awx/rsyslog/', prefix='rsyslog-conf-') as temp_dir:
         path = temp_dir + '/rsyslog.conf.temp'
         with open(path, 'w') as f:
             os.chmod(path, 0o640)

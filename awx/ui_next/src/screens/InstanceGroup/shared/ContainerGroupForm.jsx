@@ -25,7 +25,6 @@ function ContainerGroupFormFields({ i18n, instanceGroup }) {
   const { setFieldValue } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] = useField({
     name: 'credential',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
   });
 
   const [overrideField] = useField('override');
@@ -55,9 +54,8 @@ function ContainerGroupFormFields({ i18n, instanceGroup }) {
         onBlur={() => credentialHelpers.setTouched()}
         onChange={onCredentialChange}
         value={credentialField.value}
-        required
         tooltip={i18n._(
-          t`Credential to authenticate with Kubernetes or OpenShift.  Must be of type "Kubernetes/OpenShift API Bearer Token”.`
+          t`Credential to authenticate with Kubernetes or OpenShift. Must be of type "Kubernetes/OpenShift API Bearer Token". If left blank, the underlying Pod's service account will be used.`
         )}
         autoPopulate={!instanceGroup?.id}
       />

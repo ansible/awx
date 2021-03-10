@@ -154,6 +154,9 @@ class LogstashFormatter(LogstashFormatterBase):
 
         if kind == 'job_events' and raw_data.get('python_objects', {}).get('job_event'):
             job_event = raw_data['python_objects']['job_event']
+            guid = job_event.event_data.pop('guid', None)
+            if guid:
+                data_for_log['guid'] = guid
             for field_object in job_event._meta.fields:
 
                 if not field_object.__class__ or not field_object.__class__.__name__:

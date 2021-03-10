@@ -26,7 +26,7 @@ import {
 } from '../../../components/DetailList';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
-import LaunchButton from '../../../components/LaunchButton';
+import { LaunchButton } from '../../../components/LaunchButton';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
 import { JobTemplatesAPI } from '../../../api';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
@@ -205,6 +205,18 @@ function JobTemplateDetail({ i18n, template }) {
           />
         ) : (
           <DeletedDetail label={i18n._(t`Project`)} />
+        )}
+        {summary_fields?.execution_environment && (
+          <Detail
+            label={i18n._(t`Execution Environment`)}
+            value={
+              <Link
+                to={`/execution_environments/${summary_fields.execution_environment.id}/details`}
+              >
+                {summary_fields.execution_environment.name}
+              </Link>
+            }
+          />
         )}
         <Detail
           label={i18n._(t`Source Control Branch`)}

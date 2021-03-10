@@ -53,6 +53,9 @@ npm --prefix awx/ui_next test -- src/screens/Login/Login.test.jsx
 
 # start the test watcher and run tests on files that you've changed
 npm --prefix awx/ui_next run test-watch
+
+# start the tests and get the coverage report after the tests have completed
+npm --prefix awx/ui_next run test -- --coverage
 ```
 #### Note:
 - Once the test watcher is up and running you can hit `a` to run all the tests.

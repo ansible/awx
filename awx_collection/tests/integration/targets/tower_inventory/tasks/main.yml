@@ -36,7 +36,6 @@
     - assert:
         that:
           - "result is changed"
-
     - name: Test Inventory module idempotency
       tower_inventory:
         name: "{{ result.id }}"
@@ -48,6 +47,30 @@
     - assert:
         that:
           - "result is not changed"
+
+    - name: Copy an inventory
+      tower_inventory:
+        name: "copy_{{ inv_name1 }}"
+        copy_from: "{{ inv_name1 }}"
+        organization: Default
+        description: "Our Foo Cloud Servers"
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - result.copied
+
+    - name: Delete an Inventory
+      tower_inventory:
+        name: "copy_{{ inv_name1 }}"
+        organization: Default
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
 
     - name: Fail Change Regular to Smart
       tower_inventory:
@@ -133,6 +156,7 @@
       loop:
         - "{{ inv_name1 }}"
         - "{{ inv_name2 }}"
+        - "copy_{{ inv_name1 }}"
 
     - name: Delete Insights Credential
       tower_credential:

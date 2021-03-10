@@ -6,7 +6,6 @@ import os
 import shutil
 import tempfile
 
-from backports.tempfile import TemporaryDirectory
 import fcntl
 from unittest import mock
 import pytest
@@ -19,6 +18,7 @@ from awx.main.models import (
     AdHocCommand,
     Credential,
     CredentialType,
+    ExecutionEnvironment,
     Inventory,
     InventorySource,
     InventoryUpdate,
@@ -249,7 +249,7 @@ def test_openstack_client_config_generation_with_project_domain_name(mocker, sou
 @pytest.mark.parametrize("source,expected", [
     (None, True), (False, False), (True, True)
 ])
-def test_openstack_client_config_generation_with_project_region_name(mocker, source, expected, private_data_dir):
+def test_openstack_client_config_generation_with_region(mocker, source, expected, private_data_dir):
     update = tasks.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
     inputs = {
@@ -259,7 +259,7 @@ def test_openstack_client_config_generation_with_project_region_name(mocker, sou
         'project': 'demo-project',
         'domain': 'my-demo-domain',
         'project_domain_name': 'project-domain',
-        'project_region_name': 'region-name',
+        'region': 'region-name',
     }
     if source is not None:
         inputs['verify_ssl'] = source
@@ -347,11 +347,12 @@ def pytest_generate_tests(metafunc):
             )
 
 
-def parse_extra_vars(args):
+def parse_extra_vars(args, private_data_dir):
     extra_vars = {}
     for chunk in args:
-        if chunk.startswith('@/tmp/'):
-            with open(chunk.strip('@'), 'r') as f:
+        if chunk.startswith('@/runner/'):
+            local_path = os.path.join(private_data_dir, os.path.basename(chunk.strip('@')))
+            with open(local_path, 'r') as f:
                 extra_vars.update(yaml.load(f, Loader=SafeLoader))
     return extra_vars
 
@@ -527,7 +528,7 @@ class TestGenericRun():
         task.instance = Job(pk=1, id=1)
         task.event_ct = 17
         task.finished_callback(None)
-        task.dispatcher.dispatch.assert_called_with({'event': 'EOF', 'final_counter': 17, 'job_id': 1})
+        task.dispatcher.dispatch.assert_called_with({'event': 'EOF', 'final_counter': 17, 'job_id': 1, 'guid': None})
 
     def test_save_job_metadata(self, job, update_model_wrapper):
         class MockMe():
@@ -546,44 +547,6 @@ class TestGenericRun():
                                              job_cwd='/foobar', job_env={'switch': 'blade', 'foot': 'ball', 'secret_key': 'redacted_value'})
 
 
-    def test_uses_process_isolation(self, settings):
-        job = Job(project=Project(), inventory=Inventory())
-        task = tasks.RunJob()
-        task.should_use_proot = lambda instance: True
-        task.instance = job
-
-        private_data_dir = '/foo'
-        cwd = '/bar'
-
-        settings.AWX_PROOT_HIDE_PATHS = ['/AWX_PROOT_HIDE_PATHS1', '/AWX_PROOT_HIDE_PATHS2']
-        settings.ANSIBLE_VENV_PATH = '/ANSIBLE_VENV_PATH'
-        settings.AWX_VENV_PATH = '/AWX_VENV_PATH'
-
-        process_isolation_params = task.build_params_process_isolation(job, private_data_dir, cwd)
-        assert True is process_isolation_params['process_isolation']
-        assert process_isolation_params['process_isolation_path'].startswith(settings.AWX_PROOT_BASE_PATH), \
-            "Directory where a temp directory will be created for the remapping to take place"
-        assert private_data_dir in process_isolation_params['process_isolation_show_paths'], \
-            "The per-job private data dir should be in the list of directories the user can see."
-        assert cwd in process_isolation_params['process_isolation_show_paths'], \
-            "The current working directory should be in the list of directories the user can see."
-
-        for p in [settings.AWX_PROOT_BASE_PATH,
-                  '/etc/tower',
-                  '/etc/ssh',
-                  '/var/lib/awx',
-                  '/var/log',
-                  settings.PROJECTS_ROOT,
-                  settings.JOBOUTPUT_ROOT,
-                  '/AWX_PROOT_HIDE_PATHS1',
-                  '/AWX_PROOT_HIDE_PATHS2']:
-            assert p in process_isolation_params['process_isolation_hide_paths']
-        assert 9 == len(process_isolation_params['process_isolation_hide_paths'])
-        assert '/ANSIBLE_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
-        assert '/AWX_VENV_PATH' in process_isolation_params['process_isolation_ro_paths']
-        assert 2 == len(process_isolation_params['process_isolation_ro_paths'])
-
-
     @mock.patch('os.makedirs')
     def test_build_params_resource_profiling(self, os_makedirs):
         job = Job(project=Project(), inventory=Inventory())
@@ -597,7 +560,7 @@ class TestGenericRun():
         assert resource_profiling_params['resource_profiling_cpu_poll_interval'] == '0.25'
         assert resource_profiling_params['resource_profiling_memory_poll_interval'] == '0.25'
         assert resource_profiling_params['resource_profiling_pid_poll_interval'] == '0.25'
-        assert resource_profiling_params['resource_profiling_results_dir'] == '/fake_private_data_dir/artifacts/playbook_profiling'
+        assert resource_profiling_params['resource_profiling_results_dir'] == '/runner/artifacts/playbook_profiling'
 
 
     @pytest.mark.parametrize("scenario, profiling_enabled", [
@@ -656,34 +619,13 @@ class TestGenericRun():
             env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
 
-    def test_valid_custom_virtualenv(self, patch_Job, private_data_dir):
-        job = Job(project=Project(), inventory=Inventory())
 
-        with TemporaryDirectory(dir=settings.BASE_VENV_PATH) as tempdir:
-            job.project.custom_virtualenv = tempdir
-            os.makedirs(os.path.join(tempdir, 'lib'))
-            os.makedirs(os.path.join(tempdir, 'bin', 'activate'))
-
-            task = tasks.RunJob()
-            env = task.build_env(job, private_data_dir)
-
-            assert env['PATH'].startswith(os.path.join(tempdir, 'bin'))
-            assert env['VIRTUAL_ENV'] == tempdir
-
-    def test_invalid_custom_virtualenv(self, patch_Job, private_data_dir):
-        job = Job(project=Project(), inventory=Inventory())
-        job.project.custom_virtualenv = '/var/lib/awx/venv/missing'
-        task = tasks.RunJob()
-
-        with pytest.raises(tasks.InvalidVirtualenvError) as e:
-            task.build_env(job, private_data_dir)
-
-        assert 'Invalid virtual environment selected: /var/lib/awx/venv/missing' == str(e.value)
-
-
+@pytest.mark.django_db
 class TestAdhocRun(TestJobExecution):
 
     def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper):
+        ExecutionEnvironment.objects.create(name='test EE', managed_by_tower=True)
+
         adhoc_job.module_args = '{{ ansible_ssh_pass }}'
         adhoc_job.websocket_emit_status = mock.Mock()
         adhoc_job.send_notification_templates = mock.Mock()
@@ -1203,7 +1145,9 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(
             credential, env, safe_env, [], private_data_dir
         )
-        json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
+        runner_path = env['GCE_CREDENTIALS_FILE_PATH']
+        local_path = os.path.join(private_data_dir, os.path.basename(runner_path))
+        json_data = json.load(open(local_path, 'rb'))
         assert json_data['type'] == 'service_account'
         assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
         assert json_data['client_email'] == 'bob'
@@ -1306,7 +1250,11 @@ class TestJobCredentials(TestJobExecution):
             credential, env, {}, [], private_data_dir
         )
 
-        shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
+        # convert container path to host machine path
+        config_loc = os.path.join(
+            private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE'])
+        )
+        shade_config = open(config_loc, 'r').read()
         assert shade_config == '\n'.join([
             'clouds:',
             '  devstack:',
@@ -1344,7 +1292,7 @@ class TestJobCredentials(TestJobExecution):
         )
 
         config = configparser.ConfigParser()
-        config.read(env['OVIRT_INI_PATH'])
+        config.read(os.path.join(private_data_dir, os.path.basename(env['OVIRT_INI_PATH'])))
         assert config.get('ovirt', 'ovirt_url') == 'some-ovirt-host.example.org'
         assert config.get('ovirt', 'ovirt_username') == 'bob'
         assert config.get('ovirt', 'ovirt_password') == 'some-pass'
@@ -1577,7 +1525,7 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(
             credential, {}, {}, args, private_data_dir
         )
-        extra_vars = parse_extra_vars(args)
+        extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["api_token"] == "ABC123"
         assert hasattr(extra_vars["api_token"], '__UNSAFE__')
@@ -1612,7 +1560,7 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(
             credential, {}, {}, args, private_data_dir
         )
-        extra_vars = parse_extra_vars(args)
+        extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["turbo_button"] == "True"
         return ['successful', 0]
@@ -1647,7 +1595,7 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(
             credential, {}, {}, args, private_data_dir
         )
-        extra_vars = parse_extra_vars(args)
+        extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["turbo_button"] == "FAST!"
 
@@ -1687,7 +1635,7 @@ class TestJobCredentials(TestJobExecution):
             credential, {}, {}, args, private_data_dir
         )
 
-        extra_vars = parse_extra_vars(args)
+        extra_vars = parse_extra_vars(args, private_data_dir)
         assert extra_vars["password"] == "SUPER-SECRET-123"
 
     def test_custom_environment_injectors_with_file(self, private_data_dir):
@@ -1722,7 +1670,8 @@ class TestJobCredentials(TestJobExecution):
             credential, env, {}, [], private_data_dir
         )
 
-        assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == '[mycloud]\nABC123'
+        path = os.path.join(private_data_dir, os.path.basename(env['MY_CLOUD_INI_FILE']))
+        assert open(path, 'r').read() == '[mycloud]\nABC123'
 
     def test_custom_environment_injectors_with_unicode_content(self, private_data_dir):
         value = 'Iñtërnâtiônàlizætiøn'
@@ -1746,7 +1695,8 @@ class TestJobCredentials(TestJobExecution):
             credential, env, {}, [], private_data_dir
         )
 
-        assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == value
+        path = os.path.join(private_data_dir, os.path.basename(env['MY_CLOUD_INI_FILE']))
+        assert open(path, 'r').read() == value
 
     def test_custom_environment_injectors_with_files(self, private_data_dir):
         some_cloud = CredentialType(
@@ -1786,8 +1736,10 @@ class TestJobCredentials(TestJobExecution):
             credential, env, {}, [], private_data_dir
         )
 
-        assert open(env['MY_CERT_INI_FILE'], 'r').read() == '[mycert]\nCERT123'
-        assert open(env['MY_KEY_INI_FILE'], 'r').read() == '[mykey]\nKEY123'
+        cert_path = os.path.join(private_data_dir, os.path.basename(env['MY_CERT_INI_FILE']))
+        key_path = os.path.join(private_data_dir, os.path.basename(env['MY_KEY_INI_FILE']))
+        assert open(cert_path, 'r').read() == '[mycert]\nCERT123'
+        assert open(key_path, 'r').read() == '[mykey]\nKEY123'
 
     def test_multi_cloud(self, private_data_dir):
         gce = CredentialType.defaults['gce']()
@@ -1826,7 +1778,8 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
 
-        json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
+        path = os.path.join(private_data_dir, os.path.basename(env['GCE_CREDENTIALS_FILE_PATH']))
+        json_data = json.load(open(path, 'rb'))
         assert json_data['type'] == 'service_account'
         assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
         assert json_data['client_email'] == 'bob'
@@ -1971,29 +1924,6 @@ class TestProjectUpdateCredentials(TestJobExecution):
         ]
     }
 
-    def test_process_isolation_exposes_projects_root(self, private_data_dir, project_update):
-        task = tasks.RunProjectUpdate()
-        task.revision_path = 'foobar'
-        task.instance = project_update
-        ssh = CredentialType.defaults['ssh']()
-        project_update.scm_type = 'git'
-        project_update.credential = Credential(
-            pk=1,
-            credential_type=ssh,
-        )
-        process_isolation = task.build_params_process_isolation(job, private_data_dir, 'cwd')
-
-        assert process_isolation['process_isolation'] is True
-        assert settings.PROJECTS_ROOT in process_isolation['process_isolation_show_paths']
-
-        task._write_extra_vars_file = mock.Mock()
-
-        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
-            task.build_extra_vars_file(project_update, private_data_dir)
-
-        call_args, _ = task._write_extra_vars_file.call_args_list[0]
-        _, extra_vars = call_args
-
     def test_username_and_password_auth(self, project_update, scm_type):
         task = tasks.RunProjectUpdate()
         ssh = CredentialType.defaults['ssh']()
@@ -2107,7 +2037,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         assert '-i' in ' '.join(args)
         script = args[args.index('-i') + 1]
-        with open(script, 'r') as f:
+        host_script = script.replace('/runner', private_data_dir)
+        with open(host_script, 'r') as f:
             assert f.read() == inventory_update.source_script.script
         assert env['FOO'] == 'BAR'
         if with_credential:
@@ -2307,7 +2238,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
+        path = os.path.join(private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE']))
+        shade_config = open(path, 'r').read()
         assert '\n'.join([
             'clouds:',
             '  devstack:',

@@ -20,7 +20,7 @@ import {
 import styled from 'styled-components';
 import DataListCell from '../../../components/DataListCell';
 
-import LaunchButton from '../../../components/LaunchButton';
+import { LaunchButton } from '../../../components/LaunchButton';
 import Sparkline from '../../../components/Sparkline';
 import { toTitleCase } from '../../../util/strings';
 

@@ -29,14 +29,18 @@ awx/ui/client/languages
 awx/ui/templates/ui/index.html
 awx/ui/templates/ui/installing.html
 awx/ui_next/node_modules/
-awx/ui_next/src/locales/
+awx/ui_next/src/locales/*/messages.js
 awx/ui_next/coverage/
 awx/ui_next/build
 awx/ui_next/.env.local
 awx/ui_next/instrumented
 rsyslog.pid
 tools/prometheus/data
+tools/docker-compose/ansible/awx_dump.sql
 tools/docker-compose/Dockerfile
+tools/docker-compose/_build
+tools/docker-compose/_sources
+tools/docker-compose/overrides/
 
 # Tower setup playbook testing
 setup/test/roles/postgresql
@@ -146,7 +150,6 @@ use_dev_supervisor.txt
 .idea/*
 *.unison.tmp
 *.#
-/tools/docker-compose/overrides/
 /awx/ui_next/.ui-built
 /Dockerfile
 /_build/

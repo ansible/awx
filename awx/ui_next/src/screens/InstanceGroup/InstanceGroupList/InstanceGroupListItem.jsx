@@ -5,47 +5,17 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import 'styled-components/macro';
 import {
-  Badge as PFBadge,
   Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemCells,
-  DataListItemRow,
   Label,
   Progress,
   ProgressMeasureLocation,
   ProgressSize,
-  Tooltip,
 } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-
-import _DataListCell from '../../../components/DataListCell';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { InstanceGroup } from '../../../types';
-
-const DataListCell = styled(_DataListCell)`
-  white-space: nowrap;
-`;
-
-const Badge = styled(PFBadge)`
-  margin-left: 8px;
-`;
-
-const ListGroup = styled.span`
-  margin-left: 12px;
-
-  &:first-of-type {
-    margin-left: 0;
-  }
-`;
-
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: 40px;
-`;
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
@@ -56,12 +26,13 @@ function InstanceGroupListItem({
   detailUrl,
   isSelected,
   onSelect,
+  rowIndex,
   i18n,
 }) {
   const labelId = `check-action-${instanceGroup.id}`;
 
   const isContainerGroup = item => {
-    return item.is_containerized;
+    return item.is_container_group;
   };
 
   function usedCapacity(item) {
@@ -104,98 +75,50 @@ function InstanceGroupListItem({
   };
 
   return (
-    <DataListItem
-      key={instanceGroup.id}
-      aria-labelledby={labelId}
-      id={`${instanceGroup.id} `}
-    >
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-instance-groups-${instanceGroup.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell
-              key="name"
-              aria-label={i18n._(t`instance group name`)}
-            >
-              <span id={labelId}>
-                <Link to={`${detailUrl}`}>
-                  <b>{instanceGroup.name}</b>
-                </Link>
-              </span>
-              {verifyInstanceGroup(instanceGroup)}
-            </DataListCell>,
-
-            <DataListCell
-              key="type"
-              aria-label={i18n._(t`instance group type`)}
-            >
-              <b css="margin-right: 24px">{i18n._(t`Type`)}</b>
-              <span id={labelId}>
-                {isContainerGroup(instanceGroup)
-                  ? i18n._(t`Container group`)
-                  : i18n._(t`Instance group`)}
-              </span>
-            </DataListCell>,
-            <DataListCell
-              key="related-field-counts"
-              aria-label={i18n._(t`instance counts`)}
-              width={2}
-            >
-              <ListGroup>
-                <b>{i18n._(t`Running jobs`)}</b>
-                <Badge isRead>{instanceGroup.jobs_running}</Badge>
-              </ListGroup>
-              <ListGroup>
-                <b>{i18n._(t`Total jobs`)}</b>
-                <Badge isRead>{instanceGroup.jobs_total}</Badge>
-              </ListGroup>
-
-              {!instanceGroup.is_containerized ? (
-                <ListGroup>
-                  <b>{i18n._(t`Instances`)}</b>
-                  <Badge isRead>{instanceGroup.instances}</Badge>
-                </ListGroup>
-              ) : null}
-            </DataListCell>,
-
-            <DataListCell
-              key="capacity"
-              aria-label={i18n._(t`instance group used capacity`)}
-            >
-              {usedCapacity(instanceGroup)}
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={i18n._(t`actions`)}
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={`ig-row-${instanceGroup.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+        dataLabel={i18n._(t`Selected`)}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <Link to={`${detailUrl}`}>
+          <b>{instanceGroup.name}</b>
+          {verifyInstanceGroup(instanceGroup)}
+        </Link>
+      </Td>
+      <Td dataLabel={i18n._(t`Type`)}>
+        {isContainerGroup(instanceGroup)
+          ? i18n._(t`Container group`)
+          : i18n._(t`Instance group`)}
+      </Td>
+      <Td dataLabel={i18n._(t`Running jobs`)}>{instanceGroup.jobs_running}</Td>
+      <Td dataLabel={i18n._(t`Total jobs`)}>{instanceGroup.jobs_total}</Td>
+      <Td dataLabel={i18n._(t`Instances`)}>{instanceGroup.instances}</Td>
+      <Td dataLabel={i18n._(t`Capacity`)}>{usedCapacity(instanceGroup)}</Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionItem
+          visible={instanceGroup.summary_fields.user_capabilities.edit}
+          tooltip={i18n._(t`Edit instance group`)}
         >
-          {instanceGroup.summary_fields.user_capabilities.edit && (
-            <Tooltip content={i18n._(t`Edit instance group`)} position="top">
-              <Button
-                aria-label={i18n._(t`Edit instance group`)}
-                variant="plain"
-                component={Link}
-                to={
-                  isContainerGroup(instanceGroup)
-                    ? `/instance_groups/container_group/${instanceGroup.id}/edit`
-                    : `/instance_groups/${instanceGroup.id}/edit`
-                }
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <Button
+            aria-label={i18n._(t`Edit instance group`)}
+            variant="plain"
+            component={Link}
+            to={
+              isContainerGroup(instanceGroup)
+                ? `/instance_groups/container_group/${instanceGroup.id}/edit`
+                : `/instance_groups/${instanceGroup.id}/edit`
+            }
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 InstanceGroupListItem.prototype = {

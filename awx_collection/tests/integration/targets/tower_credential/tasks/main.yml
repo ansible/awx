@@ -203,6 +203,29 @@
     that:
       - result is not changed
 
+- name: Copy ssh Credential
+  tower_credential:
+    name: "copy_{{ ssh_cred_name2 }}"
+    copy_from: "{{ ssh_cred_name2 }}"
+    credential_type: Machine
+  register: result
+
+- assert:
+    that:
+      - result.copied
+
+- name: Delete an SSH credential
+  tower_credential:
+    name: "copy_{{ ssh_cred_name2 }}"
+    organization: Default
+    state: absent
+    credential_type: Machine
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Create a valid SSH credential from lookup source (old school)
   tower_credential:
     name: "{{ ssh_cred_name3 }}"
@@ -351,25 +374,6 @@
 - assert:
     that:
       - "result is changed"
-
-# We should decide when to delete this test
-- name: Create a valid Vault credential w/ kind=ssh (deprecated, will now fail)
-  tower_credential:
-    name: "{{ vault_cred_name2 }}"
-    organization: Default
-    state: present
-    kind: ssh
-    description: An example Vault credential
-    vault_password: secret-vault
-  register: result
-  ignore_errors: true
-
-- assert:
-    that:
-      - result is failed
-      - "'Unable to create credential {{ vault_cred_name2 }}' in result.msg"
-      - "'Additional properties are not allowed' in result.msg"
-      - "'\\'vault_password\\' was unexpected' in result.msg"
 
 - name: Delete a Vault credential
   tower_credential:

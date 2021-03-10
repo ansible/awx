@@ -11,7 +11,11 @@ import AlertModal from '../../../components/AlertModal';
 
 import DatalistToolbar from '../../../components/DataListToolbar';
 import { ApplicationsAPI } from '../../../api';
-import PaginatedDataList, {
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
+import {
   ToolbarDeleteButton,
   ToolbarAddButton,
 } from '../../../components/PaginatedDataList';
@@ -104,7 +108,7 @@ function ApplicationsList({ i18n }) {
     <>
       <PageSection>
         <Card>
-          <PaginatedDataList
+          <PaginatedTable
             contentError={error}
             hasContentLoading={isLoading || deleteLoading}
             items={applications}
@@ -121,24 +125,6 @@ function ApplicationsList({ i18n }) {
               {
                 name: i18n._(t`Description`),
                 key: 'description__icontains',
-              },
-            ]}
-            toolbarSortColumns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-              },
-              {
-                name: i18n._(t`Created`),
-                key: 'created',
-              },
-              {
-                name: i18n._(t`Organization`),
-                key: 'organization',
-              },
-              {
-                name: i18n._(t`Description`),
-                key: 'description',
               },
             ]}
             toolbarSearchableKeys={searchableKeys}
@@ -170,7 +156,17 @@ function ApplicationsList({ i18n }) {
                 ]}
               />
             )}
-            renderItem={application => (
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
+                <HeaderCell sortKey="organization">
+                  {i18n._(t`Organization`)}
+                </HeaderCell>
+                <HeaderCell>{i18n._(t`Last Modified`)}</HeaderCell>
+                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              </HeaderRow>
+            }
+            renderRow={(application, index) => (
               <ApplicationListItem
                 key={application.id}
                 value={application.name}
@@ -178,6 +174,7 @@ function ApplicationsList({ i18n }) {
                 detailUrl={`${match.url}/${application.id}/details`}
                 onSelect={() => handleSelect(application)}
                 isSelected={selected.some(row => row.id === application.id)}
+                rowIndex={index}
               />
             )}
             emptyStateControls={

@@ -31,6 +31,14 @@ options:
       description:
         - Setting this option will change the existing name (looked up via the name field.
       type: str
+    copy_from:
+      description:
+        - Name or id to copy the notification from.
+        - This will copy an existing notification and change any parameters supplied.
+        - The new notification name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple notifications share the same name.
+      type: str
     description:
       description:
         - The description of the notification.
@@ -294,6 +302,12 @@ EXAMPLES = '''
     name: old notification
     state: absent
     tower_config_file: "~/tower_cli.cfg"
+
+- name: Copy webhook notification
+  tower_notification_template:
+    name: foo notification
+    copy_from: email notification
+    organization: Foo
 '''
 
 
@@ -318,6 +332,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(),
+        copy_from=dict(),
         description=dict(),
         organization=dict(),
         notification_type=dict(choices=[
@@ -360,6 +375,7 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get('new_name')
+    copy_from = module.params.get('copy_from')
     description = module.params.get('description')
     organization = module.params.get('organization')
     notification_type = module.params.get('notification_type')
@@ -385,6 +401,14 @@ def main():
             'organization': organization_id,
         }
     })
+
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        existing_item = module.copy_item(
+            existing_item, copy_from, name,
+            endpoint='notification_templates', item_type='notification_template',
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

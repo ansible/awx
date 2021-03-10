@@ -23,6 +23,10 @@ import fcntl
 from pathlib import Path
 from uuid import uuid4
 import urllib.parse as urlparse
+import socket
+import threading
+import concurrent.futures
+from base64 import b64encode
 
 # Django
 from django.conf import settings
@@ -34,9 +38,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _, gettext_noop
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-
-# Kubernetes
-from kubernetes.client.rest import ApiException
+from django_guid.middleware import GuidMiddleware
 
 # Django-CRUM
 from crum import impersonate
@@ -47,6 +49,9 @@ from gitdb.exc import BadName as BadGitName
 
 # Runner
 import ansible_runner
+
+# Receptor
+from receptorctl.socket_interface import ReceptorControl
 
 # AWX
 from awx import __version__ as awx_application_version
@@ -71,9 +76,10 @@ from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils import (update_scm_url,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
-                            get_awx_version)
+                            get_awx_version,
+                            deepmerge,
+                            parse_yaml_or_json)
 from awx.main.utils.ansible import read_ansible_config
-from awx.main.utils.common import get_custom_venv_choices
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
@@ -256,7 +262,7 @@ def apply_cluster_membership_policies():
         # On a differential basis, apply instances to non-isolated groups
         with transaction.atomic():
             for g in actual_groups:
-                if g.obj.is_containerized:
+                if g.obj.is_container_group:
                     logger.debug('Skipping containerized group {} for policy calculation'.format(g.obj.name))
                     continue
                 instances_to_add = set(g.instances) - set(g.prior_instances)
@@ -501,7 +507,7 @@ def cluster_node_heartbeat():
 def awx_k8s_reaper():
     from awx.main.scheduler.kubernetes import PodManager # prevent circular import
     for group in InstanceGroup.objects.filter(credential__isnull=False).iterator():
-        if group.is_containerized:
+        if group.is_container_group:
             logger.debug("Checking for orphaned k8s pods for {}.".format(group))
             for job in UnifiedJob.objects.filter(
                 pk__in=list(PodManager.list_active_jobs(group))
@@ -839,6 +845,7 @@ class BaseTask(object):
         self.cleanup_paths = []
         self.parent_workflow_job_id = None
         self.host_map = {}
+        self.guid = GuidMiddleware.get_guid()
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -884,6 +891,34 @@ class BaseTask(object):
         Return absolute path relative to this file.
         '''
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
+
+    def build_execution_environment_params(self, instance):
+        if settings.IS_K8S:
+            return {}
+
+        if instance.execution_environment_id is None:
+            from awx.main.signals import disable_activity_stream
+
+            with disable_activity_stream():
+                self.instance = instance = self.update_model(
+                    instance.pk, execution_environment=instance.resolve_execution_environment())
+
+        image = instance.execution_environment.image
+        params = {
+            "container_image": image,
+            "process_isolation": True,
+            "container_options": ['--user=root'],
+        }
+
+        pull = instance.execution_environment.pull
+        if pull:
+            params['container_options'].append(f'--pull={pull}')
+
+        if settings.AWX_PROOT_SHOW_PATHS:
+            params['container_volume_mounts'] = []
+            for this_path in settings.AWX_PROOT_SHOW_PATHS:
+                params['container_volume_mounts'].append(f'{this_path}:{this_path}:Z')
+        return params
 
     def build_private_data(self, instance, private_data_dir):
         '''
@@ -979,46 +1014,6 @@ class BaseTask(object):
         Build ansible yaml file filled with extra vars to be passed via -e@file.yml
         '''
 
-    def build_params_process_isolation(self, instance, private_data_dir, cwd):
-        '''
-        Build ansible runner .run() parameters for process isolation.
-        '''
-        process_isolation_params = dict()
-        if self.should_use_proot(instance):
-            local_paths = [private_data_dir]
-            if cwd != private_data_dir and Path(private_data_dir) not in Path(cwd).parents:
-                local_paths.append(cwd)
-            show_paths = self.proot_show_paths + local_paths + \
-                settings.AWX_PROOT_SHOW_PATHS
-
-            pi_path = settings.AWX_PROOT_BASE_PATH
-            if not self.instance.is_isolated() and not self.instance.is_containerized:
-                pi_path = tempfile.mkdtemp(
-                    prefix='ansible_runner_pi_',
-                    dir=settings.AWX_PROOT_BASE_PATH
-                )
-                os.chmod(pi_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-                self.cleanup_paths.append(pi_path)
-
-            process_isolation_params = {
-                'process_isolation': True,
-                'process_isolation_path': pi_path,
-                'process_isolation_show_paths': show_paths,
-                'process_isolation_hide_paths': [
-                    settings.AWX_PROOT_BASE_PATH,
-                    '/etc/tower',
-                    '/etc/ssh',
-                    '/var/lib/awx',
-                    '/var/log',
-                    settings.PROJECTS_ROOT,
-                    settings.JOBOUTPUT_ROOT,
-                ] + getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [],
-                'process_isolation_ro_paths': [settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH],
-            }
-            if getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH) != settings.ANSIBLE_VENV_PATH:
-                process_isolation_params['process_isolation_ro_paths'].append(instance.ansible_virtualenv_path)
-        return process_isolation_params
-
     def build_params_resource_profiling(self, instance, private_data_dir):
         resource_profiling_params = {}
         if self.should_use_resource_profiling(instance):
@@ -1029,6 +1024,8 @@ class BaseTask(object):
             results_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
             if not os.path.isdir(results_dir):
                 os.makedirs(results_dir, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+            # FIXME: develop some better means of referencing paths inside containers
+            container_results_dir = os.path.join('/runner', 'artifacts/playbook_profiling')
 
             logger.debug('Collected the following resource profiling intervals: cpu: {} mem: {} pid: {}'
                          .format(cpu_poll_interval, mem_poll_interval, pid_poll_interval))
@@ -1038,7 +1035,7 @@ class BaseTask(object):
                                               'resource_profiling_cpu_poll_interval': cpu_poll_interval,
                                               'resource_profiling_memory_poll_interval': mem_poll_interval,
                                               'resource_profiling_pid_poll_interval': pid_poll_interval,
-                                              'resource_profiling_results_dir': results_dir})
+                                              'resource_profiling_results_dir': container_results_dir})
 
         return resource_profiling_params
 
@@ -1061,30 +1058,18 @@ class BaseTask(object):
         os.chmod(path, stat.S_IRUSR)
         return path
 
-    def add_ansible_venv(self, venv_path, env, isolated=False):
-        env['VIRTUAL_ENV'] = venv_path
-        env['PATH'] = os.path.join(venv_path, "bin") + ":" + env['PATH']
-        venv_libdir = os.path.join(venv_path, "lib")
-
-        if not isolated and (
-            not os.path.exists(venv_libdir) or
-            os.path.join(venv_path, '') not in get_custom_venv_choices()
-        ):
-            raise InvalidVirtualenvError(_(
-                'Invalid virtual environment selected: {}'.format(venv_path)
-            ))
-
-        isolated_manager.set_pythonpath(venv_libdir, env)
-
     def add_awx_venv(self, env):
         env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
-        env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin") + ":" + env['PATH']
+        if 'PATH' in env:
+            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin") + ":" + env['PATH']
+        else:
+            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin")
 
     def build_env(self, instance, private_data_dir, isolated, private_data_files=None):
         '''
         Build environment dictionary for ansible-playbook.
         '''
-        env = dict(os.environ.items())
+        env = {}
         # Add ANSIBLE_* settings to the subprocess environment.
         for attr in dir(settings):
             if attr == attr.upper() and attr.startswith('ANSIBLE_'):
@@ -1092,14 +1077,9 @@ class BaseTask(object):
         # Also set environment variables configured in AWX_TASK_ENV setting.
         for key, value in settings.AWX_TASK_ENV.items():
             env[key] = str(value)
-        # Set environment variables needed for inventory and job event
-        # callbacks to work.
-        # Update PYTHONPATH to use local site-packages.
-        # NOTE:
-        # Derived class should call add_ansible_venv() or add_awx_venv()
-        if self.should_use_proot(instance):
-            env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
+
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
+
         return env
 
     def should_use_resource_profiling(self, job):
@@ -1127,12 +1107,13 @@ class BaseTask(object):
             for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()
         }
         json_data = json.dumps(script_data)
-        handle, path = tempfile.mkstemp(dir=private_data_dir)
-        f = os.fdopen(handle, 'w')
-        f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json_data)
-        f.close()
-        os.chmod(path, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
-        return path
+        path = os.path.join(private_data_dir, 'inventory')
+        os.makedirs(path, mode=0o700)
+        fn = os.path.join(path, 'hosts')
+        with open(fn, 'w') as f:
+            os.chmod(fn, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
+            f.write('#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json_data)
+        return fn
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError
@@ -1203,17 +1184,17 @@ class BaseTask(object):
         instance.log_lifecycle("finalize_run")
         job_profiling_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
         awx_profiling_dir = '/var/log/tower/playbook_profiling/'
+        collections_info = os.path.join(private_data_dir, 'artifacts/', 'collections.json')
+
         if not os.path.exists(awx_profiling_dir):
             os.mkdir(awx_profiling_dir)
         if os.path.isdir(job_profiling_dir):
             shutil.copytree(job_profiling_dir, os.path.join(awx_profiling_dir, str(instance.pk)))
-
-        if instance.is_containerized:
-            from awx.main.scheduler.kubernetes import PodManager # prevent circular import
-            pm = PodManager(instance)
-            logger.debug(f"Deleting pod {pm.pod_name}")
-            pm.delete()
-
+        if os.path.exists(collections_info):
+            with open(collections_info) as ee_json_info:
+                ee_collections_info = json.loads(ee_json_info.read())
+                instance.installed_collections = ee_collections_info
+                instance.save(update_fields=['installed_collections'])
 
     def event_handler(self, event_data):
         #
@@ -1274,6 +1255,9 @@ class BaseTask(object):
             except json.JSONDecodeError:
                 pass
 
+        if 'event_data' in event_data:
+            event_data['event_data']['guid'] = self.guid
+
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
         self.event_ct += 1
@@ -1310,6 +1294,7 @@ class BaseTask(object):
         event_data = {
             'event': 'EOF',
             'final_counter': self.event_ct,
+            'guid': self.guid,
         }
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
@@ -1349,16 +1334,6 @@ class BaseTask(object):
         Run the job/task and capture its output.
         '''
         self.instance = self.model.objects.get(pk=pk)
-        containerized = self.instance.is_containerized
-        pod_manager = None
-        if containerized:
-            # Here we are trying to launch a pod before transitioning the job into a running
-            # state. For some scenarios (like waiting for resources to become available) we do this
-            # rather than marking the job as error or failed. This is not always desirable. Cases
-            # such as invalid authentication should surface as an error.
-            pod_manager = self.deploy_container_group_pod(self.instance)
-            if not pod_manager:
-                return
 
         # self.instance because of the update_model pattern and when it's used in callback handlers
         self.instance = self.update_model(pk, status='running',
@@ -1417,12 +1392,8 @@ class BaseTask(object):
             passwords = self.build_passwords(self.instance, kwargs)
             self.build_extra_vars_file(self.instance, private_data_dir)
             args = self.build_args(self.instance, private_data_dir, passwords)
-            cwd = self.build_cwd(self.instance, private_data_dir)
             resource_profiling_params = self.build_params_resource_profiling(self.instance,
                                                                              private_data_dir)
-            process_isolation_params = self.build_params_process_isolation(self.instance,
-                                                                           private_data_dir,
-                                                                           cwd)
             env = self.build_env(self.instance, private_data_dir, isolated,
                                  private_data_files=private_data_files)
             self.safe_env = build_safe_env(env)
@@ -1445,26 +1416,16 @@ class BaseTask(object):
             params = {
                 'ident': self.instance.id,
                 'private_data_dir': private_data_dir,
-                'project_dir': cwd,
                 'playbook': self.build_playbook_path_relative_to_cwd(self.instance, private_data_dir),
                 'inventory': self.build_inventory(self.instance, private_data_dir),
                 'passwords': expect_passwords,
                 'envvars': env,
-                'event_handler': self.event_handler,
-                'cancel_callback': self.cancel_callback,
-                'finished_callback': self.finished_callback,
-                'status_handler': self.status_handler,
                 'settings': {
                     'job_timeout': self.get_instance_timeout(self.instance),
                     'suppress_ansible_output': True,
-                    **process_isolation_params,
                     **resource_profiling_params,
                 },
             }
-
-            if containerized:
-                # We don't want HOME passed through to container groups.
-                params['envvars'].pop('HOME')
 
             if isinstance(self.instance, AdHocCommand):
                 params['module'] = self.build_module_name(self.instance)
@@ -1477,6 +1438,9 @@ class BaseTask(object):
                 # Disable Ansible fact cache.
                 params['fact_cache_type'] = ''
 
+            if self.instance.is_container_group_task or settings.IS_K8S:
+                params['envvars'].pop('HOME', None)
+
             '''
             Delete parameters if the values are None or empty array
             '''
@@ -1485,37 +1449,24 @@ class BaseTask(object):
                     del params[v]
 
             self.dispatcher = CallbackQueueDispatcher()
-            if self.instance.is_isolated() or containerized:
-                module_args = None
-                if 'module_args' in params:
-                    # if it's adhoc, copy the module args
-                    module_args = ansible_runner.utils.args2cmdline(
-                        params.get('module_args'),
-                    )
-                shutil.move(
-                    params.pop('inventory'),
-                    os.path.join(private_data_dir, 'inventory')
-                )
 
-                ansible_runner.utils.dump_artifacts(params)
-                isolated_manager_instance = isolated_manager.IsolatedManager(
-                    self.event_handler,
-                    canceled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
-                    check_callback=self.check_handler,
-                    pod_manager=pod_manager
-                )
-                status, rc = isolated_manager_instance.run(self.instance,
-                                                           private_data_dir,
-                                                           params.get('playbook'),
-                                                           params.get('module'),
-                                                           module_args,
-                                                           ident=str(self.instance.pk))
-                self.finished_callback(None)
-            else:
-                res = ansible_runner.interface.run(**params)
-                status = res.status
-                rc = res.rc
             self.instance.log_lifecycle("running_playbook")
+            if isinstance(self.instance, SystemJob):
+                cwd = self.build_cwd(self.instance, private_data_dir)
+                res = ansible_runner.interface.run(project_dir=cwd,
+                                                   event_handler=self.event_handler,
+                                                   finished_callback=self.finished_callback,
+                                                   status_handler=self.status_handler,
+                                                   **params)
+            else:
+                receptor_job = AWXReceptorJob(self, params)
+                res = receptor_job.run()
+
+                if not res:
+                    return
+
+            status = res.status
+            rc = res.rc
 
             if status == 'timeout':
                 self.instance.job_explanation = "Job terminated due to timeout"
@@ -1562,37 +1513,6 @@ class BaseTask(object):
             else:
                 raise AwxTaskError.TaskError(self.instance, rc)
 
-
-    def deploy_container_group_pod(self, task):
-        from awx.main.scheduler.kubernetes import PodManager # Avoid circular import
-        pod_manager = PodManager(self.instance)
-        try:
-            log_name = task.log_format
-            logger.debug(f"Launching pod for {log_name}.")
-            pod_manager.deploy()
-        except (ApiException, Exception) as exc:
-            if isinstance(exc, ApiException) and exc.status == 403:
-                try:
-                    if 'exceeded quota' in json.loads(exc.body)['message']:
-                        # If the k8s cluster does not have capacity, we move the
-                        # job back into pending and wait until the next run of
-                        # the task manager. This does not exactly play well with
-                        # our current instance group precendence logic, since it
-                        # will just sit here forever if kubernetes returns this
-                        # error.
-                        logger.warn(exc.body)
-                        logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
-                        self.update_model(task.pk, status='pending')
-                        return
-                except Exception:
-                    logger.exception(f"Unable to handle response from Kubernetes API for {log_name}.")
-
-            logger.exception(f"Error when launching pod for {log_name}")
-            self.update_model(task.pk, status='error', result_traceback=traceback.format_exc())
-            return
-
-        self.update_model(task.pk, execution_node=pod_manager.pod_name)
-        return pod_manager
 
 
 
@@ -1684,7 +1604,6 @@ class RunJob(BaseTask):
                                             private_data_files=private_data_files)
         if private_data_files is None:
             private_data_files = {}
-        self.add_ansible_venv(job.ansible_virtualenv_path, env, isolated=isolated)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
@@ -1703,13 +1622,17 @@ class RunJob(BaseTask):
         cp_dir = os.path.join(private_data_dir, 'cp')
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0o700)
-        env['ANSIBLE_SSH_CONTROL_PATH_DIR'] = cp_dir
+        # FIXME: more elegant way to manage this path in container
+        env['ANSIBLE_SSH_CONTROL_PATH_DIR'] = '/runner/cp'
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
         for cloud_cred in job.cloud_credentials:
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack':
-                env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
+                env['OS_CLIENT_CONFIG_FILE'] = os.path.join(
+                    '/runner',
+                    os.path.basename(cred_files.get(cloud_cred, ''))
+                )
 
         for network_cred in job.network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
@@ -1740,7 +1663,8 @@ class RunJob(BaseTask):
                 for path in config_values[config_setting].split(':'):
                     if path not in paths:
                         paths = [config_values[config_setting]] + paths
-            paths = [os.path.join(private_data_dir, folder)] + paths
+            # FIXME: again, figure out more elegant way for inside container
+            paths = [os.path.join('/runner', folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
         return env
@@ -1869,9 +1793,25 @@ class RunJob(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        if job.is_containerized:
+        if job.is_container_group_task:
             return False
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
+
+    def build_execution_environment_params(self, instance):
+        if settings.IS_K8S:
+            return {}
+
+        params = super(RunJob, self).build_execution_environment_params(instance)
+        # If this has an insights agent and it is not already mounted then show it
+        insights_dir = os.path.dirname(settings.INSIGHTS_SYSTEM_ID_FILE)
+        if instance.use_fact_cache and os.path.exists(insights_dir):
+            logger.info('not parent of others')
+            params.setdefault('container_volume_mounts', [])
+            params['container_volume_mounts'].extend([
+                f"{insights_dir}:{insights_dir}:Z",
+            ])
+
+        return params
 
     def pre_run_hook(self, job, private_data_dir):
         super(RunJob, self).pre_run_hook(job, private_data_dir)
@@ -1983,10 +1923,10 @@ class RunJob(BaseTask):
             return
         if job.use_fact_cache:
             job.finish_job_fact_cache(
-                os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
+                os.path.join(private_data_dir, 'artifacts', 'fact_cache'),
                 fact_modification_times,
             )
-        if isolated_manager_instance and not job.is_containerized:
+        if isolated_manager_instance and not job.is_container_group_task:
             isolated_manager_instance.cleanup()
 
         try:
@@ -2062,7 +2002,6 @@ class RunProjectUpdate(BaseTask):
         env = super(RunProjectUpdate, self).build_env(project_update, private_data_dir,
                                                       isolated=isolated,
                                                       private_data_files=private_data_files)
-        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
         env['ANSIBLE_RETRY_FILES_ENABLED'] = str(False)
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_BECOME_ASK_PASS'] = str(False)
@@ -2196,6 +2135,14 @@ class RunProjectUpdate(BaseTask):
         elif project_update.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
             extra_vars['scm_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
+
+        if project_update.scm_type == 'archive':
+            # for raw archive, prevent error moving files between volumes
+            extra_vars['ansible_remote_tmp'] = os.path.join(
+                project_update.get_project_path(check_if_exists=False),
+                '.ansible_awx', 'tmp'
+            )
+
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_cwd(self, project_update, private_data_dir):
@@ -2324,10 +2271,14 @@ class RunProjectUpdate(BaseTask):
         # re-create root project folder if a natural disaster has destroyed it
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
+        project_path = instance.project.get_project_path(check_if_exists=False)
+        if not os.path.exists(project_path):
+            os.makedirs(project_path)  # used as container mount
+
         self.acquire_lock(instance)
+
         self.original_branch = None
         if instance.scm_type == 'git' and instance.branch_override:
-            project_path = instance.project.get_project_path(check_if_exists=False)
             if os.path.exists(project_path):
                 git_repo = git.Repo(project_path)
                 if git_repo.head.is_detached:
@@ -2343,7 +2294,7 @@ class RunProjectUpdate(BaseTask):
 
         # the project update playbook is not in a git repo, but uses a vendoring directory
         # to be consistent with the ansible-runner model,
-        # that is moved into the runner projecct folder here
+        # that is moved into the runner project folder here
         awx_playbooks = self.get_path_to('..', 'playbooks')
         copy_tree(awx_playbooks, os.path.join(private_data_dir, 'project'))
 
@@ -2478,6 +2429,20 @@ class RunProjectUpdate(BaseTask):
         '''
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
+    def build_execution_environment_params(self, instance):
+        if settings.IS_K8S:
+            return {}
+
+        params = super(RunProjectUpdate, self).build_execution_environment_params(instance)
+        project_path = instance.get_project_path(check_if_exists=False)
+        cache_path = instance.get_cache_path()
+        params.setdefault('container_volume_mounts', [])
+        params['container_volume_mounts'].extend([
+            f"{project_path}:{project_path}:Z",
+            f"{cache_path}:{cache_path}:Z",
+        ])
+        return params
+
 
 @task(queue=get_local_queuename)
 class RunInventoryUpdate(BaseTask):
@@ -2485,18 +2450,6 @@ class RunInventoryUpdate(BaseTask):
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
     event_data_key = 'inventory_update_id'
-
-    # TODO: remove once inv updates run in containers
-    def should_use_proot(self, inventory_update):
-        '''
-        Return whether this task should use proot.
-        '''
-        return getattr(settings, 'AWX_PROOT_ENABLED', False)
-
-    # TODO: remove once inv updates run in containers
-    @property
-    def proot_show_paths(self):
-        return [settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
 
     def build_private_data(self, inventory_update, private_data_dir):
         """
@@ -2524,17 +2477,13 @@ class RunInventoryUpdate(BaseTask):
         are accomplished by the inventory source injectors (in this method)
         or custom credential type injectors (in main run method).
         """
-        env = super(RunInventoryUpdate, self).build_env(inventory_update,
-                                                        private_data_dir,
-                                                        isolated,
-                                                        private_data_files=private_data_files)
+        env = super(RunInventoryUpdate, self).build_env(
+            inventory_update, private_data_dir, isolated,
+            private_data_files=private_data_files)
+
         if private_data_files is None:
             private_data_files = {}
-        # TODO: remove once containers replace custom venvs
-        self.add_ansible_venv(inventory_update.ansible_virtualenv_path, env, isolated=isolated)
-
-        # Legacy environment variables, were used as signal to awx-manage command
-        # now they are provided in case some scripts may be relying on them
+        # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
         env.update(STANDARD_INVENTORY_UPDATE_ENV)
@@ -2572,7 +2521,8 @@ class RunInventoryUpdate(BaseTask):
                 for path in config_values[config_setting].split(':'):
                     if path not in paths:
                         paths = [config_values[config_setting]] + paths
-            paths = [os.path.join(private_data_dir, folder)] + paths
+            # FIXME: containers
+            paths = [os.path.join('/runner', folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
         return env
@@ -2600,17 +2550,20 @@ class RunInventoryUpdate(BaseTask):
         args = ['ansible-inventory', '--list', '--export']
 
         # Add arguments for the source inventory file/script/thing
-        source_location = self.pseudo_build_inventory(inventory_update, private_data_dir)
+        rel_path = self.pseudo_build_inventory(inventory_update, private_data_dir)
+        container_location = os.path.join('/runner', rel_path)  # TODO: make container paths elegant
+        source_location = os.path.join(private_data_dir, rel_path)
+
         args.append('-i')
-        args.append(source_location)
+        args.append(container_location)
 
         args.append('--output')
-        args.append(os.path.join(private_data_dir, 'artifacts', 'output.json'))
+        args.append(os.path.join('/runner', 'artifacts', 'output.json'))
 
         if os.path.isdir(source_location):
-            playbook_dir = source_location
+            playbook_dir = container_location
         else:
-            playbook_dir = os.path.dirname(source_location)
+            playbook_dir = os.path.dirname(container_location)
         args.extend(['--playbook-dir', playbook_dir])
 
         if inventory_update.verbosity:
@@ -2641,8 +2594,10 @@ class RunInventoryUpdate(BaseTask):
             with open(inventory_path, 'w') as f:
                 f.write(content)
             os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
+            rel_path = injector.filename
         elif src == 'scm':
-            inventory_path = os.path.join(private_data_dir, 'project', inventory_update.source_path)
+            rel_path = os.path.join('project', inventory_update.source_path)
         elif src == 'custom':
             handle, inventory_path = tempfile.mkstemp(dir=private_data_dir)
             f = os.fdopen(handle, 'w')
@@ -2651,7 +2606,9 @@ class RunInventoryUpdate(BaseTask):
             f.write(inventory_update.source_script.script)
             f.close()
             os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-        return inventory_path
+
+            rel_path = os.path.split(inventory_path)[-1]
+        return rel_path
 
     def build_cwd(self, inventory_update, private_data_dir):
         '''
@@ -2660,9 +2617,10 @@ class RunInventoryUpdate(BaseTask):
          - SCM, where source needs to live in the project folder
         '''
         src = inventory_update.source
+        container_dir = '/runner'  # TODO: make container paths elegant
         if src == 'scm' and inventory_update.source_project_update:
-            return os.path.join(private_data_dir, 'project')
-        return private_data_dir
+            return os.path.join(container_dir, 'project')
+        return container_dir
 
     def build_playbook_path_relative_to_cwd(self, inventory_update, private_data_dir):
         return None
@@ -2847,7 +2805,6 @@ class RunAdHocCommand(BaseTask):
         env = super(RunAdHocCommand, self).build_env(ad_hoc_command, private_data_dir,
                                                      isolated=isolated,
                                                      private_data_files=private_data_files)
-        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
         # Set environment variables needed for inventory and ad hoc event
         # callbacks to work.
         env['AD_HOC_COMMAND_ID'] = str(ad_hoc_command.pk)
@@ -2861,7 +2818,8 @@ class RunAdHocCommand(BaseTask):
         cp_dir = os.path.join(private_data_dir, 'cp')
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0o700)
-        env['ANSIBLE_SSH_CONTROL_PATH'] = cp_dir
+        # FIXME: more elegant way to manage this path in container
+        env['ANSIBLE_SSH_CONTROL_PATH'] = '/runner/cp'
 
         return env
 
@@ -2968,7 +2926,7 @@ class RunAdHocCommand(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        if ad_hoc_command.is_containerized:
+        if ad_hoc_command.is_container_group_task:
             return False
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
@@ -2984,6 +2942,9 @@ class RunSystemJob(BaseTask):
     model = SystemJob
     event_model = SystemJobEvent
     event_data_key = 'system_job_id'
+
+    def build_execution_environment_params(self, system_job):
+        return {}
 
     def build_args(self, system_job, private_data_dir, passwords):
         args = ['awx-manage', system_job.job_type]
@@ -3016,10 +2977,13 @@ class RunSystemJob(BaseTask):
         return path
 
     def build_env(self, instance, private_data_dir, isolated=False, private_data_files=None):
-        env = super(RunSystemJob, self).build_env(instance, private_data_dir,
-                                                  isolated=isolated,
-                                                  private_data_files=private_data_files)
-        self.add_awx_venv(env)
+        base_env = super(RunSystemJob, self).build_env(
+            instance, private_data_dir, isolated=isolated,
+            private_data_files=private_data_files)
+        # TODO: this is able to run by turning off isolation
+        # the goal is to run it a container instead
+        env = dict(os.environ.items())
+        env.update(base_env)
         return env
 
     def build_cwd(self, instance, private_data_dir):
@@ -3097,3 +3061,235 @@ def deep_copy_model_obj(
             permission_check_func(creater, copy_mapping.values())
     if isinstance(new_obj, Inventory):
         update_inventory_computed_fields.delay(new_obj.id)
+
+
+class AWXReceptorJob:
+    def __init__(self, task=None, runner_params=None):
+        self.task = task
+        self.runner_params = runner_params
+        self.unit_id = None
+
+        if self.task and not self.task.instance.is_container_group_task:
+            execution_environment_params = self.task.build_execution_environment_params(self.task.instance)
+            self.runner_params['settings'].update(execution_environment_params)
+
+    def run(self):
+        # We establish a connection to the Receptor socket
+        receptor_ctl = ReceptorControl('/var/run/receptor/receptor.sock')
+
+        try:
+            return self._run_internal(receptor_ctl)
+        finally:
+            # Make sure to always release the work unit if we established it
+            if self.unit_id is not None:
+                receptor_ctl.simple_command(f"work release {self.unit_id}")
+
+    def _run_internal(self, receptor_ctl):
+        # Create a socketpair. Where the left side will be used for writing our payload
+        # (private data dir, kwargs). The right side will be passed to Receptor for
+        # reading.
+        sockin, sockout = socket.socketpair()
+
+        threading.Thread(target=self.transmit, args=[sockin]).start()
+
+        # submit our work, passing
+        # in the right side of our socketpair for reading.
+        result = receptor_ctl.submit_work(worktype=self.work_type,
+                                          payload=sockout.makefile('rb'),
+                                          params=self.receptor_params)
+        self.unit_id = result['unitid']
+
+        sockin.close()
+        sockout.close()
+
+        resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id,
+                                                               return_socket=True,
+                                                               return_sockfile=True)
+        # Both "processor" and "cancel_watcher" are spawned in separate threads.
+        # We wait for the first one to return. If cancel_watcher returns first,
+        # we yank the socket out from underneath the processor, which will cause it
+        # to exit. A reference to the processor_future is passed into the cancel_watcher_future,
+        # Which exits if the job has finished normally. The context manager ensures we do not
+        # leave any threads laying around.
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            processor_future = executor.submit(self.processor, resultfile)
+            cancel_watcher_future = executor.submit(self.cancel_watcher, processor_future)
+            futures = [processor_future, cancel_watcher_future]
+            first_future = concurrent.futures.wait(futures,
+                                                   return_when=concurrent.futures.FIRST_COMPLETED)
+
+            res = list(first_future.done)[0].result()
+            if res.status == 'canceled':
+                receptor_ctl.simple_command(f"work cancel {self.unit_id}")
+                resultsock.shutdown(socket.SHUT_RDWR)
+                resultfile.close()
+            elif res.status == 'error':
+                # TODO: There should be a more efficient way of getting this information
+                receptor_work_list = receptor_ctl.simple_command("work list")
+                detail = receptor_work_list[self.unit_id]['Detail']
+                if 'exceeded quota' in detail:
+                    logger.warn(detail)
+                    log_name = self.task.instance.log_format
+                    logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
+                    self.task.update_model(self.task.instance.pk, status='pending')
+                    return
+
+                raise RuntimeError(detail)
+
+        return res
+
+    # Spawned in a thread so Receptor can start reading before we finish writing, we
+    # write our payload to the left side of our socketpair.
+    def transmit(self, _socket):
+        if not settings.IS_K8S and self.work_type == 'local':
+            self.runner_params['only_transmit_kwargs'] = True
+
+        ansible_runner.interface.run(streamer='transmit',
+                                     _output=_socket.makefile('wb'),
+                                     **self.runner_params)
+
+        # Socket must be shutdown here, or the reader will hang forever.
+        _socket.shutdown(socket.SHUT_WR)
+
+    def processor(self, resultfile):
+        return ansible_runner.interface.run(streamer='process',
+                                            quiet=True,
+                                            _input=resultfile,
+                                            event_handler=self.task.event_handler,
+                                            finished_callback=self.task.finished_callback,
+                                            status_handler=self.task.status_handler,
+                                            **self.runner_params)
+
+    @property
+    def receptor_params(self):
+        if self.task.instance.is_container_group_task:
+            spec_yaml = yaml.dump(self.pod_definition, explicit_start=True)
+
+            receptor_params = {
+                "secret_kube_pod": spec_yaml,
+            }
+
+            if self.credential:
+                kubeconfig_yaml = yaml.dump(self.kube_config, explicit_start=True)
+                receptor_params["secret_kube_config"] = kubeconfig_yaml
+        else:
+            private_data_dir = self.runner_params['private_data_dir']
+            receptor_params = {
+                "params": f"--private-data-dir={private_data_dir}"
+            }
+
+        return receptor_params
+
+
+
+    @property
+    def work_type(self):
+        if self.task.instance.is_container_group_task:
+            if self.credential:
+                work_type = 'kubernetes-runtime-auth'
+            else:
+                work_type = 'kubernetes-incluster-auth'
+        else:
+            work_type = 'local'
+
+        return work_type
+
+    def cancel_watcher(self, processor_future):
+        while True:
+            if processor_future.done():
+                return processor_future.result()
+
+            if self.task.cancel_callback():
+                result = namedtuple('result', ['status', 'rc'])
+                return result('canceled', 1)
+            time.sleep(1)
+
+    @property
+    def pod_definition(self):
+        default_pod_spec = {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE
+            },
+            "spec": {
+                "containers": [{
+                    "image": settings.AWX_CONTAINER_GROUP_DEFAULT_IMAGE,
+                    "name": 'worker',
+                    "args": ['ansible-runner', 'worker']
+                }]
+            }
+        }
+
+        pod_spec_override = {}
+        if self.task and self.task.instance.instance_group.pod_spec_override:
+            pod_spec_override = parse_yaml_or_json(
+                self.task.instance.instance_group.pod_spec_override)
+        pod_spec = {**default_pod_spec, **pod_spec_override}
+
+        if self.task:
+            pod_spec['metadata'] = deepmerge(
+                pod_spec.get('metadata', {}),
+                dict(name=self.pod_name,
+                     labels={
+                         'ansible-awx': settings.INSTALL_UUID,
+                         'ansible-awx-job-id': str(self.task.instance.id)
+                     }))
+
+        return pod_spec
+
+    @property
+    def pod_name(self):
+        return f"awx-job-{self.task.instance.id}"
+
+    @property
+    def credential(self):
+        return self.task.instance.instance_group.credential
+
+    @property
+    def namespace(self):
+        return self.pod_definition['metadata']['namespace']
+
+    @property
+    def kube_config(self):
+        host_input = self.credential.get_input('host')
+        config = {
+            "apiVersion": "v1",
+            "kind": "Config",
+            "preferences": {},
+            "clusters": [
+                {
+                    "name": host_input,
+                    "cluster": {
+                        "server": host_input
+                    }
+                }
+            ],
+            "users": [
+                {
+                    "name": host_input,
+                    "user": {
+                        "token": self.credential.get_input('bearer_token')
+                    }
+                }
+            ],
+            "contexts": [
+                {
+                    "name": host_input,
+                    "context": {
+                        "cluster": host_input,
+                        "user": host_input,
+                        "namespace": self.namespace
+                    }
+                }
+            ],
+            "current-context": host_input
+        }
+
+        if self.credential.get_input('verify_ssl') and 'ssl_ca_cert' in self.credential.inputs:
+            config["clusters"][0]["cluster"]["certificate-authority-data"] = b64encode(
+                self.credential.get_input('ssl_ca_cert').encode() # encode to bytes
+            ).decode() # decode the base64 data into a str
+        else:
+            config["clusters"][0]["cluster"]["insecure-skip-tls-verify"] = True
+        return config

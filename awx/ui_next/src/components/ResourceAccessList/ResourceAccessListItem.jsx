@@ -56,6 +56,8 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
           onRoleDelete(role, accessRecord);
         }}
         isReadOnly={!role.user_capabilities.unattach}
+        ouiaId={`${role.name}-${role.id}`}
+        closeBtnAriaLabel={i18n._(t`Remove ${role.name} chip`)}
       >
         {role.name}
       </Chip>
