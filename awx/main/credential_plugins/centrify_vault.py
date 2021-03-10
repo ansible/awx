@@ -81,7 +81,8 @@ def get_ID(**kwargs):
     response = requests.post(
         endpoint,
         json = {'Script': query},
-        headers = post_headers, 
+        headers = post_headers,
+        verify = True,
         timeout = (5, 30)
     )
     raise_for_status(response)
@@ -103,6 +104,7 @@ def get_passwd(**kwargs):
         endpoint,
         json = {'ID': kwargs['acc_id']},
         headers = post_headers,
+        verify = True,
         timeout = (5, 30)
     )
     raise_for_status(response)
