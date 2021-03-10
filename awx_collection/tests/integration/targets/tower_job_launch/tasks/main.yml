@@ -164,15 +164,15 @@
     that:
       - "result is changed"
 
-- name: Get the job
-  tower_job_list:
-    query: {"id": "{{result.id}}"}
-  register: result
-
 - name: Wait for 2nd job max 120s
   tower_job_wait:
     job_id: "{{result.id}}"
     timeout: 120
+
+- name: Get the job
+  tower_job_list:
+    query: {"id": "{{result.id}}"}
+  register: result
 
 - assert:
     that:
