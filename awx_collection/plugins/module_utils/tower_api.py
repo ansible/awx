@@ -823,37 +823,38 @@ class TowerAPIModule(TowerModule):
                 if workflow_node['state'] == 'absent':
                     continue
 
-            # Get id's for association fields
-            association_fields = {}
+            if 'related' in workflow_node:
+                # Get id's for association fields
+                association_fields = {}
 
-            for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
-                # Extract out information if it exists
-                # Test if it is defined, else move to next association.
-                if association in workflow_node['related']:
-                    id_list = []
-                    for sub_name in workflow_node['related'][association]:
-                        if association == 'credentials':
-                            endpoint = 'credentials'
-                            lookup_data = {'name': sub_name['name']}
-                        else:
-                            endpoint = 'workflow_job_template_nodes'
-                            lookup_data = {'identifier': sub_name['identifier']}
-                            lookup_data['workflow_job_template'] = workflow_id
-                        sub_obj = self.get_one(endpoint, **{'data': lookup_data})
-                        if sub_obj is None:
-                            self.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
-                        id_list.append(sub_obj['id'])
-                        temp = sub_obj['id']
-                    if id_list:
-                        association_fields[association] = id_list
+                for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
+                    # Extract out information if it exists
+                    # Test if it is defined, else move to next association.
+                    if association in workflow_node['related']:
+                        id_list = []
+                        for sub_name in workflow_node['related'][association]:
+                            if association == 'credentials':
+                                endpoint = 'credentials'
+                                lookup_data = {'name': sub_name['name']}
+                            else:
+                                endpoint = 'workflow_job_template_nodes'
+                                lookup_data = {'identifier': sub_name['identifier']}
+                                lookup_data['workflow_job_template'] = workflow_id
+                            sub_obj = self.get_one(endpoint, **{'data': lookup_data})
+                            if sub_obj is None:
+                                self.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
+                            id_list.append(sub_obj['id'])
+                            temp = sub_obj['id']
+                        if id_list:
+                            association_fields[association] = id_list
 
-                    response.append(
-                        self.create_or_update_if_needed(
-                            existing_item, workflow_node_fields,
-                            endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
-                            associations=association_fields,
+                        response.append(
+                            self.create_or_update_if_needed(
+                                existing_item, workflow_node_fields,
+                                endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
+                                associations=association_fields,
+                            )
                         )
-                    )
 
     def destroy_schema_nodes(self, response, workflow_id):
         search_fields = {}
