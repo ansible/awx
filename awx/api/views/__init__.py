@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-import datetime
 import dateutil
 import functools
 import html
@@ -903,6 +902,7 @@ class ProjectUpdateEventsList(SubListAPIView):
             job_created=self.get_parent_object().created_or_epoch
         )
 
+
 class SystemJobEventsList(SubListAPIView):
 
     model = models.SystemJobEvent
@@ -920,6 +920,7 @@ class SystemJobEventsList(SubListAPIView):
         return super(SystemJobEventsList, self).get_queryset().filter(
             job_created=self.get_parent_object().created_or_epoch
         )
+
 
 class ProjectUpdateCancel(RetrieveAPIView):
 
