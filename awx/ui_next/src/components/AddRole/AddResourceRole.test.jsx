@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-pascal-case */
 import React from 'react';
 import { shallow } from 'enzyme';
+import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
 
 import {
@@ -13,6 +14,11 @@ import { TeamsAPI, UsersAPI } from '../../api';
 jest.mock('../../api/models/Teams');
 jest.mock('../../api/models/Users');
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+
+  useHistory: () => ({ push: jest.fn(), location: { pathname: {} } }),
+}));
 // TODO: Once error handling is functional in
 // this component write tests for it
 
@@ -109,6 +115,112 @@ describe('<_AddResourceRole />', () => {
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
     expect(UsersAPI.associateRole).toBeCalledWith(1, 1);
+  });
+
+  test('should call on error properly', async () => {
+    let wrapper;
+    const onError = jest.fn();
+    UsersAPI.associateRole.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'post',
+            url: '/api/v2/users',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+    act(() => {
+      wrapper = mountWithContexts(
+        <AddResourceRole
+          onClose={() => {}}
+          onError={onError}
+          onSave={() => {}}
+          roles={roles}
+        />,
+        { context: { network: { handleHttpError: () => {} } } }
+      );
+    });
+    wrapper.update();
+
+    // Step 1
+    const selectableCardWrapper = wrapper.find('SelectableCard');
+    expect(selectableCardWrapper.length).toBe(2);
+    act(() => wrapper.find('SelectableCard[label="Users"]').prop('onClick')());
+    wrapper.update();
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    wrapper.update();
+
+    // Step 2
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    act(() =>
+      wrapper.find('DataListCheck[name="foo"]').invoke('onChange')(true)
+    );
+    wrapper.update();
+    expect(wrapper.find('DataListCheck[name="foo"]').prop('checked')).toBe(
+      true
+    );
+    act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
+    wrapper.update();
+
+    // Step 3
+    act(() =>
+      wrapper.find('Checkbox[aria-label="Admin"]').invoke('onChange')(true)
+    );
+    wrapper.update();
+    expect(wrapper.find('Checkbox[aria-label="Admin"]').prop('isChecked')).toBe(
+      true
+    );
+
+    // Save
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    expect(UsersAPI.associateRole).toBeCalledWith(1, 1);
+    expect(onError).toBeCalled();
+  });
+
+  test('should should update history properly', async () => {
+    let wrapper;
+    const history = createMemoryHistory({
+      initialEntries: ['organizations/2/access?resource.order_by=-username'],
+    });
+    act(() => {
+      wrapper = mountWithContexts(
+        <AddResourceRole onClose={() => {}} onSave={() => {}} roles={roles} />,
+        { context: { router: { history } } }
+      );
+    });
+    wrapper.update();
+
+    // Step 1
+    const selectableCardWrapper = wrapper.find('SelectableCard');
+    expect(selectableCardWrapper.length).toBe(2);
+    act(() => wrapper.find('SelectableCard[label="Users"]').prop('onClick')());
+    wrapper.update();
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    wrapper.update();
+
+    // Step 2
+    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    act(() =>
+      wrapper.find('DataListCheck[name="foo"]').invoke('onChange')(true)
+    );
+    wrapper.update();
+    expect(wrapper.find('DataListCheck[name="foo"]').prop('checked')).toBe(
+      true
+    );
+    await act(async () =>
+      wrapper.find('PFWizard').prop('onGoToStep')({ id: 1 })
+    );
+    wrapper.update();
+    expect(history.location.pathname).toEqual('organizations/2/access');
   });
 
   test('should successfuly click user/team cards', async () => {
