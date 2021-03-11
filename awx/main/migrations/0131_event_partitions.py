@@ -95,7 +95,7 @@ class FakeAddField(migrations.AddField):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0129_unifiedjob_installed_collections'),
+        ('main', '0130_ee_polymorphic_set_null'),
     ]
 
     operations = [
