@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-import datetime
 import logging
 
 # Django
