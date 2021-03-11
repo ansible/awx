@@ -27,7 +27,6 @@ from awx.main.models.rbac import (
 )
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.mixins import ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin
-from awx.main.utils import polymorphic
 
 __all__ = ['Organization', 'Team', 'Profile', 'UserSessionMembership']
 
@@ -67,7 +66,7 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         null=True,
         blank=True,
         default=None,
-        on_delete=polymorphic.SET_NULL,
+        on_delete=models.SET_NULL,
         related_name='+',
         help_text=_('The default execution environment for jobs run by this organization.'),
     )
