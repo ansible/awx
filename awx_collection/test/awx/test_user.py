@@ -69,7 +69,7 @@ def test_update_user(run_module, admin_user, mock_auth_stuff):
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed'), result
 
-    update_result =     result = run_module('tower_user', dict(
+    update_result = run_module('tower_user', dict(
         username='Bob',
         password='pass4word',
         is_system_auditor=False
