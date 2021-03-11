@@ -35,7 +35,7 @@ from awx.main.models.mixins import (
     CustomVirtualEnvMixin,
     RelatedJobsMixin
 )
-from awx.main.utils import update_scm_url
+from awx.main.utils import update_scm_url, polymorphic
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import (
@@ -272,7 +272,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         null=True,
         blank=True,
         default=None,
-        on_delete=models.SET_NULL,
+        on_delete=polymorphic.SET_NULL,
         related_name='+',
         help_text=_('The default execution environment for jobs run using this project.'),
     )

@@ -22,7 +22,7 @@ from awx.main.models.base import prevent_search
 from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
-from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser
+from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import JSONField, AskForField
@@ -450,7 +450,7 @@ class ExecutionEnvironmentMixin(models.Model):
         null=True,
         blank=True,
         default=None,
-        on_delete=models.SET_NULL,
+        on_delete=polymorphic.SET_NULL,
         related_name='%(class)ss',
         help_text=_('The container image to be used for execution.'),
     )
