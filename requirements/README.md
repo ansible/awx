@@ -13,6 +13,9 @@ then run the script:
 
 `./updater.sh`
 
+NOTE: `./updater.sh` uses /usr/bin/python3.6, to match the current python version
+(3.6) used to build releases.
+
 #### Upgrading Unpinned Dependency
 
 If you require a new version of a dependency that does not have a pinned version

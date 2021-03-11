@@ -14,11 +14,11 @@ _cleanup() {
 generate_requirements() {
   venv="`pwd`/venv"
   echo $venv
-  /usr/bin/python3 -m venv "${venv}"
+  /usr/bin/python3.6 -m venv "${venv}"
   # shellcheck disable=SC1090
   source ${venv}/bin/activate
 
-  ${venv}/bin/python3 -m pip install -U pip pip-tools
+  ${venv}/bin/python3.6 -m pip install -U pip pip-tools
 
   ${pip_compile} --output-file requirements.txt "${requirements_in}" "${requirements_git}"
   # consider the git requirements for purposes of resolving deps
