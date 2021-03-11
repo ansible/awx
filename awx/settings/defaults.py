@@ -232,6 +232,7 @@ START_TASK_LIMIT = 100
 
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
 
 # Seconds before sessions expire.
 # Note: This setting may be overridden by database settings.

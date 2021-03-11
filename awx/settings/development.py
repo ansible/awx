@@ -57,10 +57,10 @@ mimetypes.add_type("image/svg+xml", ".svg", True)
 mimetypes.add_type("image/svg+xml", ".svgz", True)
 
 # Disallow sending session cookies over insecure connections
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
 
 # Disallow sending csrf cookies over insecure connections
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
 
 # Override django.template.loaders.cached.Loader in defaults.py
 template = next((tpl_backend for tpl_backend in TEMPLATES if tpl_backend['NAME'] == 'default'), None) # noqa

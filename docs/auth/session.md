@@ -13,10 +13,6 @@ is *a random string which will be mapped to user authentication informations by 
 hijack cookies will only get the `session_id` itself, which does not imply any critical user info, is valid only for
 a limited time, and can be revoked at any time.
 
-> Note: The CSRF token will by default allow HTTP.  To increase security, the `CSRF_COOKIE_SECURE` setting should
-be set to True.
-
-
 ## Usage
 
 In session authentication, users log in using the `/api/login/` endpoint. A GET to `/api/login/` displays the
