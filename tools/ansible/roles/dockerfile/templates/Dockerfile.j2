@@ -34,10 +34,10 @@ RUN dnf -y update && \
     patch \
     @postgresql:12 \
     postgresql-devel \
-    python3-devel \
-    python3-pip \
-    python3-psycopg2 \
-    python3-setuptools \
+    python38-devel \
+    python38-pip \
+    python38-psycopg2 \
+    python38-setuptools \
     swig \
     unzip \
     xmlsec1-devel \
@@ -92,11 +92,11 @@ RUN dnf -y update && \
     libcgroup-tools \
     nginx \
     @postgresql:12 \
-    python3-devel \
+    python38-devel \
     python3-libselinux \
-    python3-pip \
-    python3-psycopg2 \
-    python3-setuptools \
+    python38-pip \
+    python38-psycopg2 \
+    python38-setuptools \
     rsync \
     subversion \
     sudo \
@@ -228,8 +228,8 @@ RUN for dir in \
 RUN for dir in \
       /var/lib/awx/venv \
       /var/lib/awx/venv/awx/bin \
-      /var/lib/awx/venv/awx/lib/python3.6 \
-      /var/lib/awx/venv/awx/lib/python3.6/site-packages \
+      /var/lib/awx/venv/awx/lib/python3.8 \
+      /var/lib/awx/venv/awx/lib/python3.8/site-packages \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \
@@ -238,7 +238,7 @@ RUN for dir in \
     do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
     for file in \
       /var/run/nginx.pid \
-      /var/lib/awx/venv/awx/lib/python3.6/site-packages/awx.egg-link ; \
+      /var/lib/awx/venv/awx/lib/python3.8/site-packages/awx.egg-link ; \
     do touch $file ; chmod g+rw $file ; done
 {% endif %}
 

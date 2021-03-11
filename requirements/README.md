@@ -13,8 +13,8 @@ then run the script:
 
 `./updater.sh`
 
-NOTE: `./updater.sh` uses /usr/bin/python3.6, to match the current python version
-(3.6) used to build releases.
+NOTE: `./updater.sh` uses /usr/bin/python3.8, to match the current python version
+(3.8) used to build releases.
 
 #### Upgrading Unpinned Dependency
 
