@@ -1,14 +1,10 @@
 # Dependency Management
 
-The `requirements.txt` and `requirements_ansible.txt` files are generated from `requirements.in` and `requirements_ansible.in`, respectively, using `pip-tools` `pip-compile`.
+The `requirements.txt` file is generated from `requirements.in`, using `pip-tools` `pip-compile`.
 
 ## How To Use
 
 Commands should be run from inside the `./requirements` directory of the awx repository.
-
-Make sure you have `patch, awk, python3, python2, python3-venv, python2-virtualenv, pip2, pip3` installed. The development container image should have all these.
-
-Even in the dev container, you may still have to dnf install `libpq-devel libcurl-devel`.
 
 ### Upgrading or Adding Select Libraries
 
@@ -32,14 +28,6 @@ can be removed, because `*.txt` files are upgraded to latest.
 You can upgrade (`pip-compile --upgrade`) the dependencies by running
 
 `./updater.sh upgrade`.
-
-## What The Script Does
-
-This script will:
-
-  - Update `requirements.txt` based on `requirements.in`
-  - Update/generate `requirements_ansible.txt` based on `requirements_ansible.in`
-    - including an automated patch that adds `python_version < "3"` for Python 2 backward compatibility
 
 ## Licenses and Source Files
 
@@ -128,11 +116,6 @@ https://github.com/adamchainz/django-jsonfield/pull/14
 This breaks a very large amount of AWX code that assumes these fields
 are returned as dicts. Upgrading this library will require a refactor
 to accomidate this change.
-
-### wheel
-
-azure-cli-core requires a version of wheel that is incompatible with
-certain packages building with later versions of pip, so we override it.
 
 ### pip and setuptools
 
