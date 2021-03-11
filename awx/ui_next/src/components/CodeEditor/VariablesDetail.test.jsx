@@ -39,7 +39,7 @@ describe('<VariablesDetail>', () => {
     wrapper.find('MultiButtonToggle').invoke('onChange')('yaml');
     const input2 = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input2.prop('mode')).toEqual('yaml');
-    expect(input2.prop('value')).toEqual('foo: bar\n');
+    expect(input2.prop('value')).toEqual('---foo: bar');
   });
 
   test('should render label and value= --- when there are no values', () => {
