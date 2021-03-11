@@ -1030,6 +1030,7 @@ def truncate_stdout(stdout, size):
 
     return stdout + u'\u001b[0m' * (set_count - reset_count)
 
+
 def deepmerge(a, b):
     """
     Merge dict structures and return the result.
