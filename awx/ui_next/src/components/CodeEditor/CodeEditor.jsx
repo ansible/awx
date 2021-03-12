@@ -9,6 +9,7 @@ import 'ace-builds/src-noconflict/theme-github';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import debounce from '../../util/debounce';
 
 const LINE_HEIGHT = 24;
 const PADDING = 12;
@@ -125,7 +126,7 @@ function CodeEditor({
           mode={aceModes[mode] || 'text'}
           className={`pf-c-form-control ${className}`}
           theme="github"
-          onChange={onChange}
+          onChange={debounce(onChange, 250)}
           value={value}
           name={id || 'code-editor'}
           editorProps={{ $blockScrolling: true }}

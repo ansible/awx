@@ -1,6 +1,9 @@
 import React from 'react';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import CodeEditor from './CodeEditor';
+import debounce from '../../util/debounce';
+
+jest.mock('../../util/debounce');
 
 describe('CodeEditor', () => {
   beforeEach(() => {
@@ -19,6 +22,7 @@ describe('CodeEditor', () => {
   });
 
   it('should trigger onChange prop', () => {
+    debounce.mockImplementation(fn => fn);
     const onChange = jest.fn();
     const wrapper = mountWithContexts(
       <CodeEditor value="---" onChange={onChange} mode="yaml" />
