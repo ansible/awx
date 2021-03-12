@@ -141,7 +141,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             until = now()
         last_run = since or settings.AUTOMATION_ANALYTICS_LAST_GATHER or (until - timedelta(weeks=4))
         last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
-        last_entries = last_entries.value if last_entries is not None else {}
+        last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
         logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
 
         collector_module = module if module else collectors
@@ -151,7 +151,9 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__') and (not subset or name in subset)
         ]
         if collection_type != 'dry-run' and not any(c.__awx_analytics_key__ == 'config' for c in collector_list):
+            # In order to ship to analytics, we must include the output of the built-in 'config' collector.
             collector_list.append(collectors.config)
+
         json_collectors = [func for func in collector_list if func.__awx_analytics_type__ == 'json']
         csv_collectors = [func for func in collector_list if func.__awx_analytics_type__ == 'csv']
 
@@ -182,7 +184,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     with disable_activity_stream():
                         for filename in data:
                             last_entries[filename.replace('.json', '')] = until
-                        settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = last_entries
+                        settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries)
 
         for func in csv_collectors:
             key = func.__awx_analytics_key__
@@ -211,7 +213,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                                 ship(tgzfile)
                                 with disable_activity_stream():
                                     last_entries[key] = end
-                                    settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = last_entries
+                                    settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries)
             except Exception:
                 logger.exception("Could not generate metric {}".format(filename))
 

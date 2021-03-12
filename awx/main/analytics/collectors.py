@@ -1,11 +1,12 @@
 import io
+import json
 import os
 import os.path
 import platform
 import distro
 
 from django.db import connection
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Min
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
@@ -295,11 +296,13 @@ def _copy_table(table, query, path):
 def events_slicing(key, since, until):
     from awx.conf.models import Setting
 
+    pk_values = models.JobEvent.objects.filter(created__gte=since, created__lte=until).aggregate(Min('pk'), Max('pk'))
+
     step = 100000
     last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
-    last_entries = last_entries.value if last_entries is not None else {}
-    previous_pk = last_entries.get(key) or 0
-    final_pk = models.JobEvent.objects.filter(created_lte=until).aggregate(Max('pk'))['pk__max']
+    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
+    previous_pk = last_entries.get(key) or pk_values['pk__min'] or 0
+    final_pk = pk_values['pk__max']
 
     for start in range(previous_pk, final_pk + 1, step):
         yield (start, min(start + step, final_pk))
