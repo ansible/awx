@@ -85,20 +85,29 @@ def package(target, data, timestamp):
         manifest = {}
         with tarfile.open(target.joinpath(tarname), 'w:gz') as f:
             for name, (item, version) in data.items():
-                manifest[name] = version
-                if isinstance(item, str):
-                    info = f.gettarinfo(item, arcname=name)
-                    f.addfile(info)
-                else:
-                    info = tarfile.TarInfo(name)
-                    fileobj = io.BytesIO(json.dumps(item).encode('utf-8'))
-                    fileobj.size = len(fileobj.getvalue())
-                    f.addfile(info, fileobj=fileobj)
+                try:
+                    if isinstance(item, str):
+                        info = f.gettarinfo(item, arcname=f'./{name}')
+                        f.addfile(info)
+                    else:
+                        fileobj = io.BytesIO(json.dumps(item).encode('utf-8'))
+                        info = tarfile.TarInfo(f'./{name}')
+                        info.size = len(fileobj.getvalue())
+                        info.mtime = timestamp.timestamp()
+                        f.addfile(info, fileobj=fileobj)
+                    manifest[name] = version
+                except Exception:
+                    logger.exception(f"Could not generate metric {name}")
 
-            info = tarfile.TarInfo('manifest.json')
-            fileobj = io.BytesIO(json.dumps(manifest).encode('utf-8'))
-            fileobj.size = len(fileobj.getvalue())
-            f.addfile(info, fileobj=fileobj)
+            try:
+                fileobj = io.BytesIO(json.dumps(manifest).encode('utf-8'))
+                info = tarfile.TarInfo('./manifest.json')
+                info.size = len(fileobj.getvalue())
+                info.mtime = timestamp.timestamp()
+                f.addfile(info, fileobj=fileobj)
+            except Exception:
+                logger.exception("Could not generate manifest.json")
+                return None
 
         return f.name
     except Exception:
