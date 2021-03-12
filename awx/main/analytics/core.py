@@ -114,23 +114,24 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
     :param module: the module to search for registered analytic collector
                    functions; defaults to awx.main.analytics.collectors
     """
+    log_level = logging.ERROR if collection_type != 'scheduled' else logging.DEBUG
 
     if not _valid_license():
-        logger.error("Invalid License provided, or No License Provided")
+        logger.log(log_level, "Invalid License provided, or No License Provided")
         return None
 
     if collection_type != 'dry-run':
         if not settings.INSIGHTS_TRACKING_STATE:
-            logger.error("Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
+            logger.log(log_level, "Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
             return None
 
         if not (settings.AUTOMATION_ANALYTICS_URL and settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD):
-            logger.debug('Not gathering analytics, configuration is invalid')
+            logger.log(log_level, "Not gathering analytics, configuration is invalid")
             return None
 
     with advisory_lock('gather_analytics_lock', wait=False) as acquired:
         if not acquired:
-            logger.debug('Not gathering analytics, another task holds lock')
+            logger.log(log_level, "Not gathering analytics, another task holds lock")
             return None
 
         from awx.conf.models import Setting
