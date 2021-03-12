@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import CodeEditor from './CodeEditor';
 
 describe('CodeEditor', () => {
@@ -9,7 +9,7 @@ describe('CodeEditor', () => {
 
   it('should pass value and mode through to ace editor', () => {
     const onChange = jest.fn();
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <CodeEditor value={'---\nfoo: bar'} onChange={onChange} mode="yaml" />
     );
     const aceEditor = wrapper.find('AceEditor');
@@ -20,7 +20,7 @@ describe('CodeEditor', () => {
 
   it('should trigger onChange prop', () => {
     const onChange = jest.fn();
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <CodeEditor value="---" onChange={onChange} mode="yaml" />
     );
     const aceEditor = wrapper.find('AceEditor');
@@ -30,7 +30,7 @@ describe('CodeEditor', () => {
 
   it('should render in read only mode', () => {
     const onChange = jest.fn();
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <CodeEditor value="---" onChange={onChange} mode="yaml" readOnly />
     );
     const aceEditor = wrapper.find('AceEditor');
