@@ -164,6 +164,18 @@
     that:
       - "result is changed"
 
+- name: Wait for a job template to complete
+  tower_job_wait:
+    job_id: "{{ result.id }}"
+    max_interval: 10
+    timeout: 120
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+      - "result.status == 'successful'"
+
 - name: Get the job
   tower_job_list:
     query: {"id": "{{result.id}}"}
