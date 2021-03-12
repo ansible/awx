@@ -4,7 +4,7 @@ import { Split, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { yamlToJson, jsonToYaml, isJsonString } from '../../util/yaml';
 import MultiButtonToggle from '../MultiButtonToggle';
-import CodeMirrorInput from './CodeMirrorInput';
+import CodeEditor from './CodeEditor';
 import { JSON_MODE, YAML_MODE } from './constants';
 
 function formatJson(jsonString) {
@@ -63,7 +63,7 @@ function VariablesInput(props) {
           />
         </SplitItemRight>
       </Split>
-      <CodeMirrorInput
+      <CodeEditor
         mode={mode}
         readOnly={readOnly}
         value={value}

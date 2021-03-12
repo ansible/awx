@@ -79,6 +79,33 @@ describe('<NotificationTemplateForm />', () => {
     ).toEqual(defaultMessages);
   });
 
+  test('should render custom messages fields', () => {
+    const wrapper = mountWithContexts(
+      <NotificationTemplateForm
+        template={{
+          ...template,
+          messages: {
+            started: {
+              message: 'Started',
+              body: null,
+            },
+          },
+        }}
+        defaultMessages={defaultMessages}
+        detailUrl="/notification_templates/3/detail"
+        onSubmit={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(
+      wrapper
+        .find('CodeEditor')
+        .at(0)
+        .prop('value')
+    ).toEqual('Started');
+  });
+
   test('should submit', async () => {
     const handleSubmit = jest.fn();
     const wrapper = mountWithContexts(

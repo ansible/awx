@@ -7,7 +7,7 @@ import { Chip, List, ListItem } from '@patternfly/react-core';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import { Detail } from '../DetailList';
-import { VariablesDetail } from '../CodeMirrorInput';
+import { VariablesDetail } from '../CodeEditor';
 import Sparkline from '../Sparkline';
 import { toTitleCase } from '../../util/strings';
 

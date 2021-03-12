@@ -94,6 +94,7 @@ describe('<InventoryForm />', () => {
       1
     );
     expect(wrapper.find('VariablesField[label="Variables"]').length).toBe(1);
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual('---');
   });
 
   test('should update form values', async () => {

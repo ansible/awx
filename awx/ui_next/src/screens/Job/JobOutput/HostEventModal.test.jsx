@@ -188,12 +188,12 @@ describe('HostEventModal', () => {
     expect(jsonSection.find('EmptyState').length).toBe(1);
     wrapper.find('button[aria-label="JSON tab"]').simulate('click');
     findSections(wrapper);
-    expect(jsonSection.find('CodeMirrorInput').length).toBe(1);
+    expect(jsonSection.find('CodeEditor').length).toBe(1);
 
-    const codemirror = jsonSection.find('CodeMirrorInput Controlled');
-    expect(codemirror.prop('mode')).toBe('javascript');
-    expect(codemirror.prop('options').readOnly).toBe(true);
-    expect(codemirror.prop('value')).toEqual(jsonValue);
+    const codeEditor = jsonSection.find('CodeEditor');
+    expect(codeEditor.prop('mode')).toBe('javascript');
+    expect(codeEditor.prop('readOnly')).toBe(true);
+    expect(codeEditor.prop('value')).toEqual(jsonValue);
   });
 
   test('should display Standard Out tab content on tab click', () => {
@@ -205,12 +205,12 @@ describe('HostEventModal', () => {
     expect(standardOutSection.find('EmptyState').length).toBe(1);
     wrapper.find('button[aria-label="Standard out tab"]').simulate('click');
     findSections(wrapper);
-    expect(standardOutSection.find('CodeMirrorInput').length).toBe(1);
+    expect(standardOutSection.find('CodeEditor').length).toBe(1);
 
-    const codemirror = standardOutSection.find('CodeMirrorInput Controlled');
-    expect(codemirror.prop('mode')).toBe('javascript');
-    expect(codemirror.prop('options').readOnly).toBe(true);
-    expect(codemirror.prop('value')).toEqual(hostEvent.event_data.res.stdout);
+    const codeEditor = standardOutSection.find('CodeEditor');
+    expect(codeEditor.prop('mode')).toBe('javascript');
+    expect(codeEditor.prop('readOnly')).toBe(true);
+    expect(codeEditor.prop('value')).toEqual(hostEvent.event_data.res.stdout);
   });
 
   test('should display Standard Error tab content on tab click', () => {
@@ -229,12 +229,12 @@ describe('HostEventModal', () => {
     expect(standardErrorSection.find('EmptyState').length).toBe(1);
     wrapper.find('button[aria-label="Standard error tab"]').simulate('click');
     findSections(wrapper);
-    expect(standardErrorSection.find('CodeMirrorInput').length).toBe(1);
+    expect(standardErrorSection.find('CodeEditor').length).toBe(1);
 
-    const codemirror = standardErrorSection.find('CodeMirrorInput Controlled');
-    expect(codemirror.prop('mode')).toBe('javascript');
-    expect(codemirror.prop('options').readOnly).toBe(true);
-    expect(codemirror.prop('value')).toEqual(' ');
+    const codeEditor = standardErrorSection.find('CodeEditor');
+    expect(codeEditor.prop('mode')).toBe('javascript');
+    expect(codeEditor.prop('readOnly')).toBe(true);
+    expect(codeEditor.prop('value')).toEqual(' ');
   });
 
   test('should call onClose when close button is clicked', () => {
@@ -263,8 +263,8 @@ describe('HostEventModal', () => {
     );
     wrapper.find('button[aria-label="Standard out tab"]').simulate('click');
     findSections(wrapper);
-    const codemirror = standardOutSection.find('CodeMirrorInput Controlled');
-    expect(codemirror.prop('value')).toEqual('foo bar');
+    const codeEditor = standardOutSection.find('CodeEditor');
+    expect(codeEditor.prop('value')).toEqual('foo bar');
   });
 
   test('should render standard out of yum task', () => {
@@ -282,7 +282,7 @@ describe('HostEventModal', () => {
     );
     wrapper.find('button[aria-label="Standard out tab"]').simulate('click');
     findSections(wrapper);
-    const codemirror = standardOutSection.find('CodeMirrorInput Controlled');
-    expect(codemirror.prop('value')).toEqual('baz');
+    const codeEditor = standardOutSection.find('CodeEditor');
+    expect(codeEditor.prop('value')).toEqual('baz');
   });
 });

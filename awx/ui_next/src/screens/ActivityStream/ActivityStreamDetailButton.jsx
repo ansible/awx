@@ -7,7 +7,7 @@ import { SearchPlusIcon } from '@patternfly/react-icons';
 import { formatDateString } from '../../util/dates';
 
 import { DetailList, Detail } from '../../components/DetailList';
-import { VariablesDetail } from '../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../components/CodeEditor';
 
 function ActivityStreamDetailButton({ i18n, streamItem, user, description }) {
   const [isOpen, setIsOpen] = useState(false);

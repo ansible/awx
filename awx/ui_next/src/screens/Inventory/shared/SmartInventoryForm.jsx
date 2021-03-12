@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { func, shape, arrayOf } from 'prop-types';
 import { Form } from '@patternfly/react-core';
 import { InstanceGroup } from '../../../types';
-import { VariablesField } from '../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../components/CodeEditor';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import FormActionGroup from '../../../components/FormActionGroup';

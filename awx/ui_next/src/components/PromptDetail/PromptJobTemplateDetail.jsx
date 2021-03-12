@@ -8,7 +8,7 @@ import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import Sparkline from '../Sparkline';
 import { Detail, DeletedDetail } from '../DetailList';
-import { VariablesDetail } from '../CodeMirrorInput';
+import { VariablesDetail } from '../CodeEditor';
 import { toTitleCase } from '../../util/strings';
 
 function PromptJobTemplateDetail({ i18n, resource }) {

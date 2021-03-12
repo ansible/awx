@@ -16,7 +16,7 @@ import { WorkflowJobTemplatesAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ChipGroup from '../../../components/ChipGroup';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import DeleteButton from '../../../components/DeleteButton';
 import {
   DetailList,

@@ -8,7 +8,7 @@ import { AllHtmlEntities } from 'html-entities';
 import StatusIcon from '../../../components/StatusIcon';
 import { DetailList, Detail } from '../../../components/DetailList';
 import ContentEmpty from '../../../components/ContentEmpty';
-import CodeMirrorInput from '../../../components/CodeMirrorInput';
+import CodeEditor from '../../../components/CodeEditor';
 
 const entities = new AllHtmlEntities();
 
@@ -45,18 +45,18 @@ const processEventStatus = event => {
   return status;
 };
 
-const processCodeMirrorValue = value => {
-  let codeMirrorValue;
+const processCodeEditorValue = value => {
+  let codeEditorValue;
   if (value === undefined) {
-    codeMirrorValue = false;
+    codeEditorValue = false;
   } else if (value === '') {
-    codeMirrorValue = ' ';
+    codeEditorValue = ' ';
   } else if (typeof value === 'string') {
-    codeMirrorValue = entities.encode(value);
+    codeEditorValue = entities.encode(value);
   } else {
-    codeMirrorValue = value;
+    codeEditorValue = value;
   }
-  return codeMirrorValue;
+  return codeEditorValue;
 };
 
 const processStdOutValue = hostEvent => {
@@ -90,9 +90,9 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
     setActiveTabKey(tabIndex);
   };
 
-  const jsonObj = processCodeMirrorValue(hostEvent?.event_data?.res);
-  const stdErr = processCodeMirrorValue(hostEvent?.event_data?.res?.stderr);
-  const stdOut = processCodeMirrorValue(processStdOutValue(hostEvent));
+  const jsonObj = processCodeEditorValue(hostEvent?.event_data?.res);
+  const stdErr = processCodeEditorValue(hostEvent?.event_data?.res?.stderr);
+  const stdOut = processCodeEditorValue(processStdOutValue(hostEvent));
 
   return (
     <Modal
@@ -145,7 +145,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
           aria-label={i18n._(t`JSON tab`)}
         >
           {activeTabKey === 1 && jsonObj ? (
-            <CodeMirrorInput
+            <CodeEditor
               mode="javascript"
               readOnly
               value={JSON.stringify(jsonObj, null, 2)}
@@ -163,7 +163,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
           aria-label={i18n._(t`Standard out tab`)}
         >
           {activeTabKey === 2 && stdOut ? (
-            <CodeMirrorInput
+            <CodeEditor
               mode="javascript"
               readOnly
               value={stdOut}
@@ -181,7 +181,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
           aria-label={i18n._(t`Standard error tab`)}
         >
           {activeTabKey === 3 && stdErr ? (
-            <CodeMirrorInput
+            <CodeEditor
               mode="javascript"
               readOnly
               onChange={() => {}}
