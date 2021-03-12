@@ -352,7 +352,6 @@ class SettingsWrapper(UserSettingsHolder):
         self.cache.set_many(settings_to_cache, timeout=SETTING_CACHE_TIMEOUT)
 
     def _get_local(self, name, validate=True):
-        self.__clean_on_fork__()
         self._preload_cache()
         cache_key = Setting.get_cache_key(name)
         try:

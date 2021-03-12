@@ -300,6 +300,7 @@ def main():
         project = module.copy_item(
             project, copy_from, name,
             endpoint='projects', item_type='project',
+            copy_lookup_data={},
         )
 
     if state == 'absent':

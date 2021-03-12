@@ -24,6 +24,8 @@ If you're attempting to migrate an older Docker-based AWX installation, see: [Mi
 
 Starting in version 18.0, the [AWX Operator](https://github.com/ansible/awx-operator) is the preferred way to install AWX.
 
+AWX can also alternatively be installed and [run in Docker](./tools/docker-compose/README.md), but this install path is only recommended for development/test-oriented deployments, and has no official published release.
+
 ### Quickstart with minikube
 
 If you don't have an existing OpenShift or Kubernetes cluster, minikube is a fast and easy way to get up and running.

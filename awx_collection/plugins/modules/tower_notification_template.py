@@ -408,6 +408,7 @@ def main():
         existing_item = module.copy_item(
             existing_item, copy_from, name,
             endpoint='notification_templates', item_type='notification_template',
+            copy_lookup_data={},
         )
 
     if state == 'absent':

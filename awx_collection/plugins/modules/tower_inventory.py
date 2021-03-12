@@ -139,6 +139,7 @@ def main():
         inventory = module.copy_item(
             inventory, copy_from, name,
             endpoint='inventories', item_type='inventory',
+            copy_lookup_data={},
         )
 
     if state == 'absent':
