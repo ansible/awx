@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { oneOf, bool, number, string, func } from 'prop-types';
 import ReactAce from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
