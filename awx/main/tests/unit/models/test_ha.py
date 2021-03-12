@@ -9,7 +9,7 @@ from awx.main.models import (
 
 
 def T(impact):
-    j = mock.Mock(Job())
+    j = mock.Mock(Job(id=1))
     j.task_impact = impact
     return j
 

@@ -14,7 +14,7 @@ from awx.main.scheduler.kubernetes import PodManager
 
 @pytest.fixture
 def container_group():
-    instance_group = mock.Mock(InstanceGroup(name='container-group'))
+    instance_group = InstanceGroup(name='container-group', id=1)
 
     return instance_group
 
