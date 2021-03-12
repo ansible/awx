@@ -207,6 +207,10 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     files = func(start, full_path=gather_dir, until=end)
 
                     if not files:
+                        if collection_type != 'dry-run':
+                            with disable_activity_stream():
+                                last_entries[key] = end
+                                settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries)
                         continue
                     for fpath in files:
                         payload = {filename: (fpath, func.__awx_analytics_version__)}
