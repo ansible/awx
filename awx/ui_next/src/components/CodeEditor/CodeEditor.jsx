@@ -15,11 +15,16 @@ const PADDING = 12;
 
 const FocusWrapper = styled.div`
   && + .keyboard-help-text {
-    display: none;
+    opacity: 0;
+    transition: opacity 0.1s linear;
   }
 
   &:focus-within + .keyboard-help-text {
-    display: block;
+    opacity: 1;
+  }
+
+  & .ace_hidden-cursors .ace_cursor {
+    opacity: 0;
   }
 `;
 
@@ -71,7 +76,6 @@ function CodeEditor({
   className,
   i18n,
 }) {
-  const [isKeyboardFocused, setIsKeyboardFocused] = useState(false);
   const wrapper = useRef(null);
   const editor = useRef(null);
 
@@ -86,10 +90,7 @@ function CodeEditor({
   );
 
   const listen = useCallback(event => {
-    if (
-      (wrapper.current === document.activeElement && event.key === 'Enter') ||
-      event.key === ' '
-    ) {
+    if (wrapper.current === document.activeElement && event.key === 'Enter') {
       const editorInput = editor.current.refEditor?.querySelector('textarea');
       if (!editorInput) {
         return;
@@ -119,18 +120,7 @@ function CodeEditor({
 
   return (
     <>
-      <FocusWrapper
-        ref={wrapper}
-        tabIndex={readOnly ? -1 : 0}
-        onFocus={e => {
-          if (e.target === e.currentTarget) {
-            setIsKeyboardFocused(true);
-          }
-          if (e.target.className.includes('ace_scrollbar')) {
-            setIsKeyboardFocused(false);
-          }
-        }}
-      >
+      <FocusWrapper ref={wrapper} tabIndex={readOnly ? -1 : 0}>
         <AceEditor
           mode={aceModes[mode] || 'text'}
           className={`pf-c-form-control ${className}`}
@@ -148,6 +138,7 @@ function CodeEditor({
             highlightActiveLine: !readOnly,
             highlightGutterLine: !readOnly,
             useWorker: false,
+            showPrintMargin: false,
           }}
           commands={[
             {
@@ -168,7 +159,7 @@ function CodeEditor({
           ref={editor}
         />
       </FocusWrapper>
-      {isKeyboardFocused && !readOnly && (
+      {!readOnly && (
         <div
           className="pf-c-form__helper-text keyboard-help-text"
           aria-live="polite"
