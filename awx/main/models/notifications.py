@@ -70,7 +70,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
 
     notification_configuration = prevent_search(JSONField(blank=False))
 
-    def default_messages():
+    def default_messages(self):
         return {'started': None, 'success': None, 'error': None, 'workflow_approval': None}
 
     messages = JSONField(

@@ -412,8 +412,7 @@ def gather_analytics():
                 until = None
                 while start < gather_time:
                     until = start + timedelta(hours = 4)
-                    if (until > gather_time):
-                        until = gather_time
+                    until = min(until, gather_time)
                     if not _gather_and_ship(incremental_collectors, since=start, until=until):
                         break
                     start = until

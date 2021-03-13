@@ -29,7 +29,7 @@ class Pagination(pagination.PageNumberPagination):
     def get_next_link(self):
         if not self.page.has_next():
             return None
-        url = self.request and self.request.get_full_path() or ''
+        url = self.request.get_full_path() if self.request else ''
         url = url.encode('utf-8')
         page_number = self.page.next_page_number()
         return replace_query_param(self.cap_page_size(url), self.page_query_param, page_number)
@@ -37,7 +37,7 @@ class Pagination(pagination.PageNumberPagination):
     def get_previous_link(self):
         if not self.page.has_previous():
             return None
-        url = self.request and self.request.get_full_path() or ''
+        url = self.request.get_full_path() if self.request else ''
         url = url.encode('utf-8')
         page_number = self.page.previous_page_number()
         return replace_query_param(self.cap_page_size(url), self.page_query_param, page_number)

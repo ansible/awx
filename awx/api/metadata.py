@@ -155,10 +155,7 @@ class Metadata(metadata.SimpleMetadata):
         ):
             field_info['type'] = 'id'
         elif (
-            isinstance(field, JSONField) or
-            isinstance(model_field, JSONField) or
-            isinstance(field, DRFJSONField) or
-            isinstance(getattr(field, 'model_field', None), JSONField) or
+            isinstance(field, (JSONField, JSONField, DRFJSONField, JSONField)) or
             field.field_name == 'credential_passwords'
         ):
             field_info['type'] = 'json'

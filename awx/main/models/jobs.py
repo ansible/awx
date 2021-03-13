@@ -1072,8 +1072,8 @@ class JobLaunchConfig(LaunchTimeConfig):
                 if field_name == 'limit' and self.job and self.job.launch_type == 'callback':
                     continue  # exception for relaunching callbacks
                 return True
-        else:
-            return False
+            
+        return False
 
 
 class JobHostSummary(CreatedModifiedModel):

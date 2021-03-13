@@ -233,7 +233,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
                     model_class = self.get_real_concrete_instance_class()
                     errors.setdefault(new_key, []).append(self.unique_error_message(model_class, msg))
             errors[key] = [x for x in msgs if not isinstance(x, (list, tuple))]
-        for key, msgs in errors.items():
+        for key, msgs in errors.copy().items():
             if not msgs:
                 del errors[key]
         return errors

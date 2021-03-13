@@ -4550,9 +4550,6 @@ class WorkflowApprovalList(ListCreateAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalListSerializer
 
-    def get(self, request, *args, **kwargs):
-        return super(WorkflowApprovalList, self).get(request, *args, **kwargs)
-
 
 class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 

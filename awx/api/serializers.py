@@ -383,8 +383,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                 # because it results in additional queries.
                 if fk == 'job' and isinstance(obj, UnifiedJob):
                     continue
-                if fk == 'project' and (isinstance(obj, InventorySource) or
-                                        isinstance(obj, Project)):
+                if fk == 'project' and isinstance(obj, (InventorySource, Project)):
                     continue
 
                 try:
