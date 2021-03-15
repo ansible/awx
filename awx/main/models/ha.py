@@ -199,6 +199,9 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         null=True,
         on_delete=models.CASCADE
     )
+    is_container_group = models.BooleanField(
+        default=False
+    )
     credential = models.ForeignKey(
         'Credential',
         related_name='%(class)ss',
@@ -252,13 +255,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     @property
     def is_isolated(self):
         return bool(self.controller)
-
-    @property
-    def is_container_group(self):
-        if settings.IS_K8S:
-            return True
-
-        return bool(self.credential and self.credential.kubernetes)
 
     '''
     RelatedJobsMixin

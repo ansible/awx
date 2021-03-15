@@ -13,6 +13,7 @@ from awx.main.utils import (
 @pytest.fixture
 def containerized_job(default_instance_group, kube_credential, job_template_factory):
     default_instance_group.credential = kube_credential
+    default_instance_group.is_container_group = True
     default_instance_group.save()
     objects = job_template_factory('jt', organization='org1', project='proj',
                                    inventory='inv', credential='cred',

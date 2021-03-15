@@ -147,6 +147,7 @@ describe('<ContainerGroupEdit/>', () => {
       ...updatedInstanceGroup,
       credential: 12,
       pod_spec_override: null,
+      is_container_group: true,
     });
     expect(history.location.pathname).toEqual(
       '/instance_groups/container_group/123/details'
