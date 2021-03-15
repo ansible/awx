@@ -3,6 +3,19 @@
   set_fact:
     org_name: "AWX-Collection-tests-tower_organization-org-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
+- name: Generate an instance group test_id
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Generate an instance group name
+  set_fact:
+    group_name: "{{ org_name }}-instance_group-group-{{ test_id }}"
+
+- name: Create an instance group
+  tower_instance_group:
+    name: "{{ group_name }}"
+    state: present
+
 - name: Make sure {{ org_name }} is not there
   tower_organization:
     name: "{{ org_name }}"
@@ -14,6 +27,8 @@
     name: "{{ org_name }}"
     galaxy_credentials:
       - Ansible Galaxy
+    instance_groups:
+      - "{{ group_name }}"
   register: result
 
 - assert:
@@ -67,6 +82,11 @@
 - assert:
     that:
       - "result is not changed"
+
+- name: Remove the instance group
+  tower_instance_group:
+    name: "{{ group_name }}"
+    state: absent
 
 # Test behaviour common to all tower modules
 - name: Check that SSL is available and verify_ssl is enabled (task must fail)
