@@ -33,6 +33,7 @@ function ContainerGroupAdd() {
         pod_spec_override: values.override
           ? getPodSpecValue(values.pod_spec_override)
           : null,
+        is_container_group: true,
       });
       history.push(`/instance_groups/container_group/${response.id}/details`);
     } catch (error) {

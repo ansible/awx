@@ -26,6 +26,7 @@ const initialPodSpec = {
         },
       ],
     },
+    is_container_group: true,
   },
 };
 
@@ -80,6 +81,7 @@ describe('<ContainerGroupAdd/>', () => {
     expect(InstanceGroupsAPI.create).toHaveBeenCalledWith({
       ...instanceGroupCreateData,
       credential: 71,
+      is_container_group: true,
     });
     expect(wrapper.find('FormSubmitError').length).toBe(0);
     expect(history.location.pathname).toBe(
