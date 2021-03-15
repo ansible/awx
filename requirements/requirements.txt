@@ -83,6 +83,8 @@ defusedxml==0.6.0
     #   social-auth-core
 dictdiffer==0.8.1
     # via openshift
+distro==1.5.0
+    # via -r /awx_devel/requirements/requirements.in
 django-auth-ldap==2.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-cors-headers==3.2.1
