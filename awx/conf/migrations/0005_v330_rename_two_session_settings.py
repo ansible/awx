@@ -23,4 +23,4 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(copy_session_settings, reverse_copy_session_settings),
     ]
-    
+
