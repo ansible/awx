@@ -1008,7 +1008,10 @@ class UnifiedJob(
         }[tablename]
 
     def get_event_queryset(self):
-        return self.event_class.objects.filter(**{self.event_parent_key: self.id})
+        return self.event_class.objects.filter(**{
+            self.event_parent_key: self.id,
+            'job_created': self.created
+        })
 
     @property
     def event_processing_finished(self):
