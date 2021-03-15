@@ -73,7 +73,28 @@ function VariablesField({
     },
     [shouldValidate, validate] // eslint-disable-line react-hooks/exhaustive-deps
   );
+  const [initialYamlValue] = useState(mode === YAML_MODE ? field.value : null);
+  const [isEdited, setIsEdited] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleModeChange = newMode => {
+    if (newMode === YAML_MODE && !isEdited && initialYamlValue) {
+      helpers.setValue(initialYamlValue);
+      setMode(newMode);
+      return;
+    }
+
+    try {
+      const newVal =
+        newMode === YAML_MODE
+          ? jsonToYaml(field.value)
+          : yamlToJson(field.value);
+      helpers.setValue(newVal);
+      setMode(newMode);
+    } catch (err) {
+      helpers.setError(err.message);
+    }
+  };
 
   return (
     <>
@@ -87,7 +108,8 @@ function VariablesField({
         tooltip={tooltip}
         onExpand={() => setIsExpanded(true)}
         mode={mode}
-        setMode={setMode}
+        setMode={handleModeChange}
+        setIsEdited={setIsEdited}
         setShouldValidate={setShouldValidate}
       />
       <Modal
@@ -118,7 +140,8 @@ function VariablesField({
             tooltip={tooltip}
             fullHeight
             mode={mode}
-            setMode={setMode}
+            setMode={handleModeChange}
+            setIsEdited={setIsEdited}
             setShouldValidate={setShouldValidate}
           />
         </div>
@@ -155,6 +178,7 @@ function VariablesFieldInternals({
   mode,
   setMode,
   onExpand,
+  setIsEdited,
   setShouldValidate,
 }) {
   const [field, meta, helpers] = useField(name);
@@ -176,18 +200,7 @@ function VariablesFieldInternals({
                 [JSON_MODE, 'JSON'],
               ]}
               value={mode}
-              onChange={newMode => {
-                try {
-                  const newVal =
-                    newMode === YAML_MODE
-                      ? jsonToYaml(field.value)
-                      : yamlToJson(field.value);
-                  helpers.setValue(newVal);
-                  setMode(newMode);
-                } catch (err) {
-                  helpers.setError(err.message);
-                }
-              }}
+              onChange={setMode}
             />
           </SplitItem>
         </Split>
@@ -214,6 +227,7 @@ function VariablesFieldInternals({
         readOnly={readOnly}
         {...field}
         onChange={newVal => {
+          setIsEdited(true);
           helpers.setValue(newVal);
         }}
         fullHeight={fullHeight}

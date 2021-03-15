@@ -52,6 +52,59 @@ describe('VariablesField', () => {
     wrapper.update();
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
     expect(wrapper.find('CodeEditor').prop('value')).toEqual(
+      '---\nfoo: bar\nbaz: 3'
+    );
+  });
+
+  it('should retain non-expanded yaml if value not edited', async () => {
+    const value = '---\na: &aa [a,b,c]\nb: *aa';
+    const wrapper = mountWithContexts(
+      <Formik initialValues={{ variables: value }}>
+        {() => (
+          <VariablesField id="the-field" name="variables" label="Variables" />
+        )}
+      </Formik>
+    );
+    const buttons = wrapper.find('Button');
+    expect(buttons).toHaveLength(2);
+    await act(async () => {
+      buttons.at(1).simulate('click');
+    });
+    wrapper.update();
+    const buttons2 = wrapper.find('Button');
+    await act(async () => {
+      buttons2.at(0).simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(value);
+  });
+
+  it('should retain expanded yaml if value is edited', async () => {
+    const value = '---\na: &aa [a,b,c]\nb: *aa';
+    const wrapper = mountWithContexts(
+      <Formik initialValues={{ variables: value }}>
+        {() => (
+          <VariablesField id="the-field" name="variables" label="Variables" />
+        )}
+      </Formik>
+    );
+    const buttons = wrapper.find('Button');
+    expect(buttons).toHaveLength(2);
+    await act(async () => {
+      buttons.at(1).simulate('click');
+    });
+    wrapper.update();
+    wrapper.find('CodeEditor').invoke('onChange')(
+      '{\n  "foo": "bar",\n  "baz": 3\n}'
+    );
+    const buttons2 = wrapper.find('Button');
+    await act(async () => {
+      buttons2.at(0).simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(
       'foo: bar\nbaz: 3\n'
     );
   });
