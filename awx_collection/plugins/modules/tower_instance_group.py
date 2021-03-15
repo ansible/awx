@@ -37,6 +37,11 @@ options:
         - Credential to authenticate with Kubernetes or OpenShift.  Must be of type "Kubernetes/OpenShift API Bearer Token".
       required: False
       type: str
+    is_container_group:
+      description:
+        - Signifies that this InstanceGroup should act as a ContainerGroup. If no credential is specified, the underlying Pod's ServiceAccount will be used.
+      required: False
+      type: bool
     policy_instance_percentage:
       description:
         - Minimum percentage of all instances that will be automatically assigned to this group when new instances come online.
@@ -100,6 +105,7 @@ def main():
     name = module.params.get('name')
     new_name = module.params.get("new_name")
     credential = module.params.get('credential')
+    is_container_group = module.params.get('is_container_group')
     policy_instance_percentage = module.params.get('policy_instance_percentage')
     policy_instance_minimum = module.params.get('policy_instance_minimum')
     policy_instance_list = module.params.get('policy_instance_list')
@@ -129,6 +135,8 @@ def main():
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
     if credential is not None:
         new_fields['credential'] = credential_id
+    if is_container_group is not None:
+        new_fields['is_container_group'] = is_container_group
     if policy_instance_percentage is not None:
         new_fields['policy_instance_percentage'] = policy_instance_percentage
     if policy_instance_minimum is not None:
