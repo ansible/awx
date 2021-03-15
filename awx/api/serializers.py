@@ -4776,8 +4776,7 @@ class InstanceGroupSerializer(BaseSerializer):
     )
     is_container_group = serializers.BooleanField(
         help_text=_('Indicates whether instances in this group are containerized.'
-                    'Containerized groups have a designated Openshift or Kubernetes cluster.'),
-        read_only=True
+                    'Containerized groups have a designated Openshift or Kubernetes cluster.')
     )
     # NOTE: help_text is duplicated from field definitions, no obvious way of
     # both defining field details here and also getting the field's help_text
@@ -4852,6 +4851,15 @@ class InstanceGroupSerializer(BaseSerializer):
         if value and not value.kubernetes:
             raise serializers.ValidationError(_('Only Kubernetes credentials can be associated with an Instance Group'))
         return value
+
+    def validate(self, attrs):
+        attrs = super(InstanceGroupSerializer, self).validate(attrs)
+
+        if attrs.get('credential') and not attrs.get('is_container_group'):
+            raise serializers.ValidationError({'is_container_group': _(
+                'is_container_group must be True when associating a credential to an Instance Group')})
+
+        return attrs
 
     def get_capacity_dict(self):
         # Store capacity values (globally computed) in the context

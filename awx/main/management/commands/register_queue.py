@@ -17,13 +17,14 @@ class InstanceNotFound(Exception):
 
 
 class RegisterQueue:
-    def __init__(self, queuename, controller, instance_percent, inst_min, hostname_list):
+    def __init__(self, queuename, controller, instance_percent, inst_min, hostname_list, is_container_group=None):
         self.instance_not_found_err = None
         self.queuename = queuename
         self.controller = controller
         self.instance_percent = instance_percent
         self.instance_min = inst_min
         self.hostname_list = hostname_list
+        self.is_container_group = is_container_group
 
     def get_create_update_instance_group(self):
         created = False
@@ -34,6 +35,10 @@ class RegisterQueue:
             changed = True
         if ig.policy_instance_minimum != self.instance_min:
             ig.policy_instance_minimum = self.instance_min
+            changed = True
+
+        if self.is_container_group:
+            ig.is_container_group = self.is_container_group
             changed = True
 
         if changed:
