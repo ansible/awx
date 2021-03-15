@@ -90,6 +90,7 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         credential=dict(),
+        is_container_group=dict(type='bool', default=False),
         policy_instance_percentage=dict(type='int', default='0'),
         policy_instance_minimum=dict(type='int', default='0'),
         policy_instance_list=dict(type='list'),
