@@ -8,7 +8,6 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '../../contexts/Workflow';
-import { constants as wfConstants } from './WorkflowUtils';
 import WorkflowActionTooltip from './WorkflowActionTooltip';
 import WorkflowActionTooltipItem from './WorkflowActionTooltipItem';
 
@@ -16,8 +15,25 @@ const StartG = styled.g`
   pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};
 `;
 
+const StartForeignObject = styled.foreignObject`
+  overflow: visible;
+`;
+
+const StartDiv = styled.div`
+  background-color: #0279bc;
+  color: white;
+  width: max-content;
+  min-width: 80px;
+  height: 40px;
+  border-radius: 0.35em;
+  text-align: center;
+  line-height: 40px;
+  padding: 0px 10px;
+`;
+
 function WorkflowStartNode({ i18n, onUpdateHelpText, showActionTooltip }) {
   const ref = useRef(null);
+  const startNodeRef = useRef(null);
   const [hovering, setHovering] = useState(false);
   const dispatch = useContext(WorkflowDispatchContext);
   const { addingLink, nodePositions } = useContext(WorkflowStateContext);
@@ -36,18 +52,14 @@ function WorkflowStartNode({ i18n, onUpdateHelpText, showActionTooltip }) {
       ref={ref}
       transform={`translate(${nodePositions[1].x},0)`}
     >
-      <rect
-        fill="#0279BC"
-        height={wfConstants.rootH}
-        rx="2"
-        ry="2"
-        width={wfConstants.rootW}
+      <StartForeignObject
+        height="1"
+        width="1"
         y="10"
-      />
-      {/* TODO: We need to be able to handle translated text here */}
-      <text x="13" y="30" dy=".35em" fill="white">
-        START
-      </text>
+        style={{ overflow: 'visible' }}
+      >
+        <StartDiv ref={startNodeRef}>{i18n._(t`START`)}</StartDiv>
+      </StartForeignObject>
       {showActionTooltip && hovering && (
         <WorkflowActionTooltip
           actions={[
@@ -65,8 +77,8 @@ function WorkflowStartNode({ i18n, onUpdateHelpText, showActionTooltip }) {
               <PlusIcon />
             </WorkflowActionTooltipItem>,
           ]}
-          pointX={wfConstants.rootW}
-          pointY={wfConstants.rootH / 2 + 10}
+          pointX={startNodeRef.current.offsetWidth}
+          pointY={startNodeRef.current.offsetHeight / 2 + 10}
         />
       )}
     </StartG>
