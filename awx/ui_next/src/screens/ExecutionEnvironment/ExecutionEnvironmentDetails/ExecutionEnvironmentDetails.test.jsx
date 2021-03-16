@@ -191,6 +191,6 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     });
     expect(
       wrapper.find('DeleteButton').prop('deleteDetailsRequests')
-    ).toHaveLength(2);
+    ).toHaveLength(4);
   });
 });

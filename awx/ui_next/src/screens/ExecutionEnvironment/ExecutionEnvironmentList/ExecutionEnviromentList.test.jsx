@@ -195,6 +195,6 @@ describe('<ExecutionEnvironmentList/>', () => {
     });
     expect(
       wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
-    ).toHaveLength(2);
+    ).toHaveLength(4);
   });
 });

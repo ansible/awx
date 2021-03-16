@@ -182,7 +182,7 @@ function InventorySourceList({ i18n }) {
                 pluralizedItemName={i18n._(t`Inventory Sources`)}
                 deleteDetailsRequests={deleteDetailsRequests}
                 deleteMessage={i18n._(
-                  '{numItemsToDelete, plural, one {This inventory source is currently being used workflow job template nodes. Are you sure you want to delete it?} other {Deleting these inventory sources could impact some workflow job template nodes that rely on them. Are you sure you want to delete anyway?}}',
+                  '{numItemsToDelete, plural, one {This inventory source is currently being used by workflow job template nodes. Are you sure you want to delete it?} other {Deleting these inventory sources could impact workflow job template nodes that rely on them. Are you sure you want to delete anyway?}}',
                   { numItemsToDelete: selected.length }
                 )}
               />,

@@ -168,7 +168,10 @@ function ToolbarDeleteButton({
       deleteMessages.push(warningMessage);
     }
     if (deleteMessage) {
-      if (itemsToDelete[0]?.type !== 'inventory') {
+      if (
+        itemsToDelete[0]?.type !== 'inventory' &&
+        (itemsToDelete.length > 1 || deleteDetails)
+      ) {
         deleteMessages.push(deleteMessage);
       } else if (deleteDetails || itemsToDelete.length > 1) {
         deleteMessages.push(deleteMessage);
@@ -206,6 +209,10 @@ function ToolbarDeleteButton({
       </AlertModal>
     );
   }
+  const shouldShowDeleteWarning =
+    warningMessage ||
+    (itemsToDelete.length === 1 && deleteDetails) ||
+    (itemsToDelete.length > 1 && deleteMessage);
 
   return (
     <>
@@ -270,7 +277,7 @@ function ToolbarDeleteButton({
               <br />
             </span>
           ))}
-          {(deleteDetails || deleteMessage || warningMessage) && (
+          {shouldShowDeleteWarning && (
             <WarningMessage
               variant="warning"
               isInline

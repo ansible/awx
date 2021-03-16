@@ -117,14 +117,26 @@ export const relatedResourceDeleteRequests = {
       request: async () => {
         try {
           const { data } = await InventoriesAPI.updateSources(inventoryId);
-          return WorkflowJobTemplateNodesAPI.read({
-            unified_job_template: data[0].inventory_source,
-          });
+          let total = 0;
+          await Promise.all(
+            data.map(async datum => {
+              const {
+                data: { count },
+              } = await WorkflowJobTemplateNodesAPI.read({
+                unified_job_template: datum.inventory_source,
+              });
+              if (count > 0) {
+                total += count;
+              }
+            })
+          );
+          console.log(total, 'total');
+          return { data: { count: total } };
         } catch (err) {
           throw new Error(err);
         }
       },
-      label: i18n._(t`Workflow Job Template Node`),
+      label: i18n._(t`Workflow Job Template Nodes`),
     },
   ],
 
@@ -231,26 +243,37 @@ export const relatedResourceDeleteRequests = {
     {
       request: async () =>
         OrganizationsAPI.read({
-          execution_environment: selected.id,
+          default_environment: selected.id,
         }),
       label: [i18n._(t`Organizations`)],
     },
     {
       request: async () => {
         try {
-          const { data } = await WorkflowJobTemplateNodesAPI.read({
+          const {
+            data: { results },
+          } = await InventorySourcesAPI.read({
             execution_environment: selected.id,
           });
-          if (
-            data.summary_fields.unified_job_template.unified_job_type ===
-            'inventory_update'
-          ) {
-            await InventorySourcesAPI.read();
-          }
-        } catch {}
+          let total = 0;
+          await Promise.all(
+            results.map(async result => {
+              const {
+                data: { count },
+              } = await WorkflowJobTemplateNodesAPI.read({
+                unified_job_template: result.id,
+              });
+              if (count > 0) {
+                total += count;
+              }
+            })
+          );
+          return { data: { count: total } };
+        } catch (err) {
+          throw new Error(err);
+        }
       },
-
-      label: [i18n._(t`Organizations`)],
+      label: [i18n._(t`Workflow Job Template Nodes`)],
     },
   ],
 };

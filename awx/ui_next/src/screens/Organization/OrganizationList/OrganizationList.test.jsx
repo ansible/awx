@@ -102,7 +102,7 @@ describe('<OrganizationsList />', () => {
     );
     expect(
       wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
-    ).toHaveLength(4);
+    ).toHaveLength(7);
   });
 
   test('Items are rendered after loading', async () => {
