@@ -193,7 +193,14 @@ function VariablesFieldInternals({
   setShouldValidate,
   handleChange,
 }) {
-  const [field, meta] = useField(name);
+  const [field, meta, helpers] = useField(name);
+
+  useEffect(function formatJsonString() {
+    if (mode === YAML_MODE) {
+      return;
+    }
+    helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="pf-c-form__group">

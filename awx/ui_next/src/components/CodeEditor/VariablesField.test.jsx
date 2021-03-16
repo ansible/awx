@@ -5,10 +5,6 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import VariablesField from './VariablesField';
 
 describe('VariablesField', () => {
-  beforeEach(() => {
-    document.body.createTextRange = jest.fn();
-  });
-
   it('should render code editor', () => {
     const value = '---\n';
     const wrapper = mountWithContexts(
@@ -200,18 +196,25 @@ describe('VariablesField', () => {
 
   it('should initialize to JSON if value is JSON', async () => {
     const value = '{"foo": "bar"}';
-    const wrapper = mountWithContexts(
-      <Formik initialValues={{ variables: value }} onSubmit={jest.fn()}>
-        {formik => (
-          <form onSubmit={formik.handleSubmit}>
-            <VariablesField id="the-field" name="variables" label="Variables" />
-            <button type="submit" id="submit">
-              Submit
-            </button>
-          </form>
-        )}
-      </Formik>
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik initialValues={{ variables: value }} onSubmit={jest.fn()}>
+          {formik => (
+            <form onSubmit={formik.handleSubmit}>
+              <VariablesField
+                id="the-field"
+                name="variables"
+                label="Variables"
+              />
+              <button type="submit" id="submit">
+                Submit
+              </button>
+            </form>
+          )}
+        </Formik>
+      );
+    });
 
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('javascript');
   });
@@ -237,5 +240,33 @@ describe('VariablesField', () => {
 
     expect(wrapper.find('Modal').prop('isOpen')).toEqual(true);
     expect(wrapper.find('Modal CodeEditor')).toHaveLength(1);
+  });
+
+  it('should format JSON for code editor', async () => {
+    const value = '{"foo": "bar"}';
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik initialValues={{ variables: value }} onSubmit={jest.fn()}>
+          {formik => (
+            <form onSubmit={formik.handleSubmit}>
+              <VariablesField
+                id="the-field"
+                name="variables"
+                label="Variables"
+              />
+              <button type="submit" id="submit">
+                Submit
+              </button>
+            </form>
+          )}
+        </Formik>
+      );
+    });
+    wrapper.update();
+
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(
+      '{\n  "foo": "bar"\n}'
+    );
   });
 });
