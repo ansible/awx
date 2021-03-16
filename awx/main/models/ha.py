@@ -123,33 +123,18 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def jobs_total(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname).count()
 
+    @staticmethod
+    def choose_online_control_plane_node():
+        return random.choice(Instance.objects.filter(enabled=True).exclude(version__startswith='ansible-runner-').values_list('hostname', flat=True))
+
     def is_lost(self, ref_time=None):
         if ref_time is None:
             ref_time = now()
         grace_period = 120
         return self.modified < ref_time - timedelta(seconds=grace_period)
 
-    def refresh_capacity(self):
-        cpu = get_cpu_capacity()
-        mem = get_mem_capacity()
-        if self.enabled:
-            self.capacity = get_system_task_capacity(self.capacity_adjustment)
-        else:
-            self.capacity = 0
-
-        try:
-            # if redis is down for some reason, that means we can't persist
-            # playbook event data; we should consider this a zero capacity event
-            redis.Redis.from_url(settings.BROKER_URL).ping()
-        except redis.ConnectionError:
-            self.capacity = 0
-
-        self.cpu = cpu[0]
-        self.memory = mem[0]
-        self.cpu_capacity = cpu[1]
-        self.mem_capacity = mem[1]
-        self.version = awx_application_version
-        self.save(update_fields=['capacity', 'version', 'modified', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity'])
+    def is_receptor(self):
+        return self.version.startswith('ansible-runner-')
 
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):

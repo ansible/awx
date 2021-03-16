@@ -15,7 +15,6 @@ import urllib.parse
 import threading
 import contextlib
 import tempfile
-import psutil
 from functools import reduce, wraps
 
 from decimal import Decimal
@@ -699,7 +698,7 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
     return vars_dict
 
 
-def get_cpu_capacity():
+def get_cpu_capacity(raw):
     from django.conf import settings
 
     settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
@@ -713,18 +712,16 @@ def get_cpu_capacity():
     elif settings_abscpu is not None:
         return 0, int(settings_abscpu)
 
-    cpu = psutil.cpu_count()
-
     if env_forkcpu:
         forkcpu = int(env_forkcpu)
     elif settings_forkcpu:
         forkcpu = int(settings_forkcpu)
     else:
         forkcpu = 4
-    return (cpu, cpu * forkcpu)
+    return (raw, raw * forkcpu)
 
 
-def get_mem_capacity():
+def get_mem_capacity(raw_mb):
     from django.conf import settings
 
     settings_forkmem = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
@@ -745,8 +742,7 @@ def get_mem_capacity():
     else:
         forkmem = 100
 
-    mem = psutil.virtual_memory().total
-    return (mem, max(1, ((mem // 1024 // 1024) - 2048) // forkmem))
+    return (raw_mb, max(1, ((raw_mb // 1024 // 1024) - 2048) // forkmem))
 
 
 def get_system_task_capacity(scale=Decimal(1.0), cpu_capacity=None, mem_capacity=None):
