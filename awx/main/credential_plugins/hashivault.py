@@ -143,6 +143,9 @@ def approle_auth(**kwargs):
     # AppRole Login
     request_kwargs['json'] = {'role_id': role_id, 'secret_id': secret_id}
     sess = requests.Session()
+    # Namespace support
+    if kwargs.get('namespace'):
+        sess.headers['X-Vault-Namespace'] = kwargs['namespace']
     request_url = '/'.join([url, 'auth', auth_path, 'login']).rstrip('/')
     with CertFiles(cacert) as cert:
         request_kwargs['verify'] = cert
@@ -170,6 +173,8 @@ def kv_backend(**kwargs):
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
     # Compatibility header for older installs of Hashicorp Vault
     sess.headers['X-Vault-Token'] = token
+    if kwargs.get('namespace'):
+        sess.headers['X-Vault-Namespace'] = kwargs['namespace']
 
     if api_version == 'v2':
         if kwargs.get('secret_version'):
@@ -228,6 +233,8 @@ def ssh_backend(**kwargs):
 
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
+    if kwargs.get('namespace'):
+        sess.headers['X-Vault-Namespace'] = kwargs['namespace']
     # Compatability header for older installs of Hashicorp Vault
     sess.headers['X-Vault-Token'] = token
     # https://www.vaultproject.io/api/secret/ssh/index.html#sign-ssh-key
