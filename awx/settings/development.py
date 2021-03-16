@@ -125,6 +125,8 @@ if "pytest" in sys.modules:
         }
     }
 
+CELERYBEAT_SCHEDULE['cluster_heartbeat']['schedule'] = timedelta(seconds=10)
+
 CLUSTER_HOST_ID = socket.gethostname()
 
 AWX_CALLBACK_PROFILE = True
