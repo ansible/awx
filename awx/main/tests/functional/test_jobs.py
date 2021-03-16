@@ -1,11 +1,7 @@
-import redis
 import pytest
-from unittest import mock
 import json
 
-from awx.main.models import Job, Instance, JobHostSummary, InventoryUpdate, InventorySource, Project, ProjectUpdate, SystemJob, AdHocCommand
-from awx.main.tasks import cluster_node_heartbeat
-from django.test.utils import override_settings
+from awx.main.models import Job, JobHostSummary, InventoryUpdate, InventorySource, Project, ProjectUpdate, SystemJob, AdHocCommand
 
 
 @pytest.mark.django_db
@@ -17,36 +13,6 @@ def test_orphan_unified_job_creation(instance, inventory):
     assert job2.name == 'hi world'
     assert job.job_type == job2.job_type
     assert job2.launch_type == 'relaunch'
-
-
-@pytest.mark.django_db
-@mock.patch('awx.main.utils.common.get_cpu_capacity', lambda: (2, 8))
-@mock.patch('awx.main.utils.common.get_mem_capacity', lambda: (8000, 62))
-def test_job_capacity_and_with_inactive_node():
-    i = Instance.objects.create(hostname='test-1')
-    with mock.patch.object(redis.client.Redis, 'ping', lambda self: True):
-        i.refresh_capacity()
-    assert i.capacity == 62
-    i.enabled = False
-    i.save()
-    with override_settings(CLUSTER_HOST_ID=i.hostname):
-        cluster_node_heartbeat()
-        i = Instance.objects.get(id=i.id)
-        assert i.capacity == 0
-
-
-@pytest.mark.django_db
-@mock.patch('awx.main.utils.common.get_cpu_capacity', lambda: (2, 8))
-@mock.patch('awx.main.utils.common.get_mem_capacity', lambda: (8000, 62))
-def test_job_capacity_with_redis_disabled():
-    i = Instance.objects.create(hostname='test-1')
-
-    def _raise(self):
-        raise redis.ConnectionError()
-
-    with mock.patch.object(redis.client.Redis, 'ping', _raise):
-        i.refresh_capacity()
-    assert i.capacity == 0
 
 
 @pytest.mark.django_db
