@@ -728,6 +728,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         editable=False,
         help_text=_("The Collections names and versions installed in the execution environment."),
     )
+    ansible_version = models.CharField(
+        max_length=50,
+        blank=True,
+        default='',
+        editable=False,
+        help_text=_("The version of Ansible Core installed in the execution environment."),
+    )
 
     def get_absolute_url(self, request=None):
         RealClass = self.get_real_instance_class()

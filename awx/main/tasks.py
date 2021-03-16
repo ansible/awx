@@ -1185,6 +1185,7 @@ class BaseTask(object):
         job_profiling_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
         awx_profiling_dir = '/var/log/tower/playbook_profiling/'
         collections_info = os.path.join(private_data_dir, 'artifacts/', 'collections.json')
+        ansible_version_file = os.path.join(private_data_dir, 'artifacts/', 'ansible_version.txt')
 
         if not os.path.exists(awx_profiling_dir):
             os.mkdir(awx_profiling_dir)
@@ -1195,6 +1196,10 @@ class BaseTask(object):
                 ee_collections_info = json.loads(ee_json_info.read())
                 instance.installed_collections = ee_collections_info
                 instance.save(update_fields=['installed_collections'])
+            with open(ansible_version_file) as ee_ansible_info:
+                ansible_version_info = ee_ansible_info.readline()
+                instance.ansible_version = ansible_version_info
+                instance.save(update_fields=['ansible_version'])
 
     def event_handler(self, event_data):
         #
