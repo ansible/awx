@@ -253,13 +253,11 @@ class TaskManager:
         }
         dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
 
-        controller_node = None
-        if task.supports_isolation() and rampart_group.controller_id:
-            try:
-                controller_node = rampart_group.choose_online_controller_node()
-            except IndexError:
-                logger.debug("No controllers available in group {} to run {}".format(rampart_group.name, task.log_format))
-                return
+        try:
+            controller_node = Instance.choose_online_control_plane_node()
+        except IndexError:
+            logger.warning("No control plane nodes available to manage {}".format(task.log_format))
+            return
 
         task.status = 'waiting'
 
@@ -277,16 +275,6 @@ class TaskManager:
                 task.send_notification_templates('running')
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 schedule_task_manager()
-            elif not task.supports_isolation() and rampart_group.controller_id:
-                # non-Ansible jobs on isolated instances run on controller
-                task.instance_group = rampart_group.controller
-                task.execution_node = random.choice(list(rampart_group.controller.instances.all().values_list('hostname', flat=True)))
-                logger.debug('Submitting isolated {} to queue {} on node {}.'.format(task.log_format, task.instance_group.name, task.execution_node))
-            elif controller_node:
-                task.instance_group = rampart_group
-                task.execution_node = instance.hostname
-                task.controller_node = controller_node
-                logger.debug('Submitting isolated {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, controller_node))
             elif rampart_group.is_container_group:
                 # find one real, non-containerized instance with capacity to
                 # act as the controller for k8s API interaction
@@ -311,9 +299,9 @@ class TaskManager:
                         logger.debug('Submitting containerized {} to queue {}.'.format(task.log_format, task.execution_node))
             else:
                 task.instance_group = rampart_group
-                if instance is not None:
-                    task.execution_node = instance.hostname
-                logger.debug('Submitting {} to <instance group, instance> <{},{}>.'.format(task.log_format, task.instance_group_id, task.execution_node))
+                task.execution_node = instance.hostname
+                task.controller_node = controller_node
+                logger.debug('Submitting job {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, controller_node))
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()

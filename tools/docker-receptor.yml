@@ -1,0 +1,60 @@
+#
+# a simple receptor network with a single control plane node and one hop
+# to nodes where receptor + runner are installed
+#
+# <awx:4444>
+#       <receptor-hop:5555>
+#               ^-------------- <receptor-1>
+#               ^-------------- <receptor-2>
+#               ^-------------- <receptor-3>
+#
+---
+version: '2'
+services:
+  awx_1:
+    environment:
+      RECEPTOR_MUTUAL_TLS: awx receptor-hop receptor-1 receptor-2 receptor-3
+    volumes:
+      - "./docker-compose-cluster:/etc/receptor"
+  receptor-hop:
+    image: quay.io/ansible/awx-ee
+    user: root
+    container_name: tools_receptor_hop
+    hostname: receptor-hop
+    command: 'receptor --config /etc/receptor/awx-hop-receptor.conf'
+    links:
+      - awx_1
+    ports:
+      - "5555:5555"
+    volumes:
+      - "../../docker-compose-cluster:/etc/receptor"
+  receptor-1:
+    image: quay.io/ansible/awx-ee
+    user: root
+    container_name: tools_receptor_1
+    hostname: receptor-1
+    command: 'receptor --config /etc/receptor/awx-1-receptor.conf'
+    links:
+      - receptor-hop
+    volumes:
+      - "../../docker-compose-cluster:/etc/receptor"
+  receptor-2:
+    image: quay.io/ansible/awx-ee
+    user: root
+    container_name: tools_receptor_2
+    hostname: receptor-2
+    command: 'receptor --config /etc/receptor/awx-2-receptor.conf'
+    links:
+      - receptor-hop
+    volumes:
+      - "../../docker-compose-cluster:/etc/receptor"
+  receptor-3:
+    image: quay.io/ansible/awx-ee
+    user: root
+    container_name: tools_receptor_3
+    hostname: receptor-3
+    command: 'receptor --config /etc/receptor/awx-3-receptor.conf'
+    links:
+      - receptor-hop
+    volumes:
+      - "../../docker-compose-cluster:/etc/receptor"

@@ -179,6 +179,14 @@ init:
 		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
 		$(MANAGEMENT_COMMAND) generate_isolated_key > /awx_devel/awx/main/isolated/authorized_keys; \
 	fi;
+	if [ ! -f /etc/receptor/certs/awx.key ]; then \
+		rm -f /etc/receptor/certs/*; \
+		receptor --cert-init commonname="AWX Test CA" bits=2048 outcert=/etc/receptor/certs/ca.crt outkey=/etc/receptor/certs/ca.key; \
+		for node in $(RECEPTOR_MUTUAL_TLS); do \
+			receptor --cert-makereq bits=2048 commonname="$$node test cert" dnsname=$$node nodeid=$$node outreq=/etc/receptor/certs/$$node.csr outkey=/etc/receptor/certs/$$node.key; \
+			receptor --cert-signreq req=/etc/receptor/certs/$$node.csr cacert=/etc/receptor/certs/ca.crt cakey=/etc/receptor/certs/ca.key outcert=/etc/receptor/certs/$$node.crt verify=yes; \
+		done; \
+	fi; \
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
@@ -515,6 +523,9 @@ docker-refresh: docker-clean docker-compose
 # Docker Development Environment with Elastic Stack Connected
 docker-compose-elk: docker-auth awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+
+docker-compose-cluster: docker-auth awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-receptor.yml up
 
 docker-compose-cluster-elk: docker-auth awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate

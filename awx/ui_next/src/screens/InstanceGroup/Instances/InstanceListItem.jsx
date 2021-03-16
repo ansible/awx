@@ -50,6 +50,9 @@ function InstanceListItem({
   const labelId = `check-action-${instance.id}`;
 
   function usedCapacity(item) {
+    if (!item.is_receptor) {
+         return ``;
+     }
     if (item.enabled) {
       return (
         <Progress
@@ -85,9 +88,9 @@ function InstanceListItem({
             <DataListCell key="type" aria-label={i18n._(t`instance type`)}>
               <b css="margin-right: 24px">{i18n._(t`Type`)}</b>
               <span id={labelId}>
-                {instance.managed_by_policy
-                  ? i18n._(t`Auto`)
-                  : i18n._(t`Manual`)}
+                {instance.is_receptor
+                  ? i18n._(t`Execution Mesh`)
+                  : i18n._(t`Control Node`)}
               </span>
             </DataListCell>,
             <DataListCell

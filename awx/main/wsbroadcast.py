@@ -35,6 +35,7 @@ def get_broadcast_hosts():
     instances = (
         Instance.objects.filter(rampart_groups__controller__isnull=True)
         .exclude(hostname=Instance.objects.me().hostname)
+        .exclude(version__startswith='ansible-runner-')
         .order_by('hostname')
         .values('hostname', 'ip_address')
         .distinct()

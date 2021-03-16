@@ -4812,6 +4812,7 @@ class InstanceSerializer(BaseSerializer):
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that ' 'are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
+    is_receptor = serializers.SerializerMethodField()
 
     class Meta:
         model = Instance
@@ -4838,6 +4839,7 @@ class InstanceSerializer(BaseSerializer):
             "mem_capacity",
             "enabled",
             "managed_by_policy",
+            "is_receptor",
         )
 
     def get_related(self, obj):
@@ -4854,6 +4856,9 @@ class InstanceSerializer(BaseSerializer):
             return 0.0
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
+
+    def get_is_receptor(self, obj):
+        return obj.is_receptor()
 
 
 class InstanceGroupSerializer(BaseSerializer):
