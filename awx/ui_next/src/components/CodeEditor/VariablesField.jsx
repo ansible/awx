@@ -73,13 +73,15 @@ function VariablesField({
     },
     [shouldValidate, validate] // eslint-disable-line react-hooks/exhaustive-deps
   );
-  const [initialYamlValue] = useState(mode === YAML_MODE ? field.value : null);
-  const [isEdited, setIsEdited] = useState(false);
+  const [lastYamlValue, setLastYamlValue] = useState(
+    mode === YAML_MODE ? field.value : null
+  );
+  const [isJsonEdited, setIsJsonEdited] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleModeChange = newMode => {
-    if (newMode === YAML_MODE && !isEdited && initialYamlValue) {
-      helpers.setValue(initialYamlValue);
+    if (newMode === YAML_MODE && !isJsonEdited && lastYamlValue !== null) {
+      helpers.setValue(lastYamlValue);
       setMode(newMode);
       return;
     }
@@ -96,6 +98,16 @@ function VariablesField({
     }
   };
 
+  const handleChange = newVal => {
+    helpers.setValue(newVal);
+    if (mode === JSON_MODE) {
+      setIsJsonEdited(true);
+    } else {
+      setLastYamlValue(newVal);
+      setIsJsonEdited(false);
+    }
+  };
+
   return (
     <>
       <VariablesFieldInternals
@@ -109,8 +121,8 @@ function VariablesField({
         onExpand={() => setIsExpanded(true)}
         mode={mode}
         setMode={handleModeChange}
-        setIsEdited={setIsEdited}
         setShouldValidate={setShouldValidate}
+        handleChange={handleChange}
       />
       <Modal
         variant="xlarge"
@@ -141,8 +153,8 @@ function VariablesField({
             fullHeight
             mode={mode}
             setMode={handleModeChange}
-            setIsEdited={setIsEdited}
             setShouldValidate={setShouldValidate}
+            handleChange={handleChange}
           />
         </div>
       </Modal>
@@ -178,10 +190,10 @@ function VariablesFieldInternals({
   mode,
   setMode,
   onExpand,
-  setIsEdited,
   setShouldValidate,
+  handleChange,
 }) {
-  const [field, meta, helpers] = useField(name);
+  const [field, meta] = useField(name);
 
   return (
     <div className="pf-c-form__group">
@@ -226,10 +238,7 @@ function VariablesFieldInternals({
         mode={mode}
         readOnly={readOnly}
         {...field}
-        onChange={newVal => {
-          setIsEdited(true);
-          helpers.setValue(newVal);
-        }}
+        onChange={handleChange}
         fullHeight={fullHeight}
         onFocus={() => setShouldValidate(false)}
         onBlur={() => setShouldValidate(true)}

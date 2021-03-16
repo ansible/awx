@@ -11,7 +11,6 @@ import 'ace-builds/src-noconflict/theme-github';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import debounce from '../../util/debounce';
 
 config.set('loadWorkerFromBlob', false);
 
@@ -140,7 +139,8 @@ function CodeEditor({
           mode={aceModes[mode] || 'text'}
           className={`pf-c-form-control ${className}`}
           theme="github"
-          onChange={debounce(onChange, 250)}
+          onChange={onChange}
+          debounceChangePeriod={250}
           value={value}
           onFocus={onFocus}
           onBlur={onBlur}
