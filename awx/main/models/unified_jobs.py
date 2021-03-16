@@ -729,7 +729,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         help_text=_("The Collections names and versions installed in the execution environment."),
     )
     ansible_version = models.CharField(
-        max_length=50,
+        max_length=255,
         blank=True,
         default='',
         editable=False,
