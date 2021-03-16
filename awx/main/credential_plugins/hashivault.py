@@ -41,6 +41,12 @@ base_inputs = {
         'secret': True,
         'help_text': _('The Secret ID for AppRole Authentication')
     }, {
+        'id': 'namespace',
+        'label': _('Namespace name (Vault Enterprise only)'),
+        'type': 'string',
+        'multiline': False,
+        'help_text': _('Name of the namespace to use when authenticate and retrieve secrets')
+    }, {
         'id': 'default_auth_path',
         'label': _('Path to Approle Auth'),
         'type': 'string',
