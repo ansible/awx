@@ -4775,6 +4775,7 @@ class InstanceGroupSerializer(BaseSerializer):
         read_only=True
     )
     is_container_group = serializers.BooleanField(
+        required=False,
         help_text=_('Indicates whether instances in this group are containerized.'
                     'Containerized groups have a designated Openshift or Kubernetes cluster.')
     )
