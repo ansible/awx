@@ -6,6 +6,7 @@ from awxkit.utils import (
     random_title,
     suppress,
     update_payload,
+    set_payload_foreign_key_args,
     PseudoNamespace)
 from awxkit.api.pages import Credential, Inventory, Project, UnifiedJobTemplate
 from awxkit.api.mixins import HasCreate, HasInstanceGroups, HasNotifications, HasSurvey, HasCopy, DSAdapter
@@ -102,16 +103,7 @@ class JobTemplate(
         if kwargs.get('project'):
             payload.update(project=kwargs.get('project').id, playbook=playbook)
 
-        for fk_field in ('inventory', 'credential', 'webhook_credential', 'execution_environment'):
-            rel_obj = kwargs.get(fk_field)
-            if rel_obj is None:
-                continue
-            elif isinstance(rel_obj, int):
-                payload.update(**{fk_field: int(rel_obj)})
-            elif hasattr(rel_obj, 'id'):
-                payload.update(**{fk_field: rel_obj.id})
-            else:
-                raise AttributeError(f'Related field {fk_field} must be either integer of pkid or object')
+        payload = set_payload_foreign_key_args(payload, ('inventory', 'credential', 'webhook_credential', 'execution_environment'), kwargs)
 
         return payload
 
