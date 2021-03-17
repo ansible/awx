@@ -112,31 +112,38 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  inventorySource: (inventoryId, i18n) => [
+  inventorySource: (inventoryId, i18n, inventorySource) => [
     {
       request: async () => {
         try {
           const { data } = await InventoriesAPI.updateSources(inventoryId);
-          let total = 0;
-          await Promise.all(
-            data.map(async datum => {
-              const {
-                data: { count },
-              } = await WorkflowJobTemplateNodesAPI.read({
+
+          const results = await Promise.all(
+            data.map(async datum =>
+              WorkflowJobTemplateNodesAPI.read({
                 unified_job_template: datum.inventory_source,
-              });
-              if (count > 0) {
-                total += count;
-              }
-            })
+              })
+            )
           );
-          console.log(total, 'total');
+          const total = results.reduce(
+            ({ data: { count: acc } }, { data: { count: cur } }) => acc + cur,
+            { data: { count: 0 } }
+          );
+
           return { data: { count: total } };
         } catch (err) {
           throw new Error(err);
         }
       },
       label: i18n._(t`Workflow Job Template Nodes`),
+    },
+    {
+      request: async () => InventorySourcesAPI.readGroups(inventorySource.id),
+      label: i18n._(t`Groups`),
+    },
+    {
+      request: async () => InventorySourcesAPI.readHosts(inventorySource.id),
+      label: i18n._(t`Hosts`),
     },
   ],
 
@@ -255,18 +262,18 @@ export const relatedResourceDeleteRequests = {
           } = await InventorySourcesAPI.read({
             execution_environment: selected.id,
           });
-          let total = 0;
-          await Promise.all(
-            results.map(async result => {
-              const {
-                data: { count },
-              } = await WorkflowJobTemplateNodesAPI.read({
+
+          const responses = await Promise.all(
+            results.map(result =>
+              WorkflowJobTemplateNodesAPI.read({
                 unified_job_template: result.id,
-              });
-              if (count > 0) {
-                total += count;
-              }
-            })
+              })
+            )
+          );
+
+          const total = responses.reduce(
+            ({ data: { count: acc } }, { data: { count: cur } }) => acc + cur,
+            { data: { count: 0 } }
           );
           return { data: { count: total } };
         } catch (err) {

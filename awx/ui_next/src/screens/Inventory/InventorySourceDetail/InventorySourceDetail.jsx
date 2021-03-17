@@ -99,7 +99,8 @@ function InventorySourceDetail({ inventorySource, i18n }) {
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.inventorySource(
     inventorySource.inventory,
-    i18n
+    i18n,
+    inventorySource
   );
 
   const VERBOSITY = {
@@ -289,7 +290,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
             onConfirm={handleDelete}
             deleteDetailsRequests={deleteDetailsRequests}
             deleteMessage={i18n._(
-              t`This inventory source is currently being used some workflow job template nodes. Are you sure you want to delete it?`
+              t`This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?`
             )}
           >
             {i18n._(t`Delete`)}

@@ -32,7 +32,10 @@ function DeleteButton({
   const [isOpen, setIsOpen] = useState(false);
   const [deleteMessageError, setDeleteMessageError] = useState();
   const [deleteDetails, setDeleteDetails] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
   const toggleModal = async isModalOpen => {
+    setIsLoading(true);
     if (deleteDetailsRequests?.length && isModalOpen) {
       const { results, error } = await getRelatedResourceDeleteCounts(
         deleteDetailsRequests
@@ -43,6 +46,7 @@ function DeleteButton({
         setDeleteDetails(results);
       }
     }
+    setIsLoading(false);
     setIsOpen(isModalOpen);
   };
 
@@ -66,10 +70,13 @@ function DeleteButton({
         <Tooltip content={disabledTooltip} position="top">
           <div>
             <Button
+              isLoading={isLoading}
+              spinnerAriaValueText={isLoading ? 'Loading' : undefined}
               variant={variant || 'secondary'}
               aria-label={i18n._(t`Delete`)}
               isDisabled={isDisabled}
               onClick={() => toggleModal(true)}
+              ouiaId={ouiaId}
             >
               {children || i18n._(t`Delete`)}
             </Button>
@@ -77,6 +84,8 @@ function DeleteButton({
         </Tooltip>
       ) : (
         <Button
+          isLoading={isLoading}
+          spinnerAriaValueText={isLoading ? 'Loading' : undefined}
           variant={variant || 'secondary'}
           aria-label={i18n._(t`Delete`)}
           isDisabled={isDisabled}

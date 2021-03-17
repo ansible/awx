@@ -65,11 +65,13 @@ describe('<InventorySourceList />', () => {
   beforeEach(async () => {
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
     global.console.debug = () => {};
+    InventoriesAPI.readSources.mockResolvedValue(sources);
     InventoriesAPI.updateSources.mockResolvedValue({
       data: [{ inventory_source: 1 }],
     });
+    InventorySourcesAPI.readGroups.mockResolvedValue({ data: { count: 0 } });
+    InventorySourcesAPI.readHosts.mockResolvedValue({ data: { count: 0 } });
     WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
-    InventoriesAPI.readSources.mockResolvedValue(sources);
     InventorySourcesAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
@@ -131,7 +133,7 @@ describe('<InventorySourceList />', () => {
   test('should have proper number of delete detail requests', async () => {
     expect(
       wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
-    ).toHaveLength(1);
+    ).toHaveLength(3);
   });
 
   test('source data should render properly', async () => {

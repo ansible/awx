@@ -120,7 +120,7 @@ describe('InventorySourceDetail', () => {
     });
     expect(
       wrapper.find('DeleteButton').prop('deleteDetailsRequests')
-    ).toHaveLength(1);
+    ).toHaveLength(3);
   });
 
   test('should hide expected action buttons for users without permissions', async () => {

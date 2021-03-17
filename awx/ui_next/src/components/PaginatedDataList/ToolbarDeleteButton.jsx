@@ -101,6 +101,7 @@ function ToolbarDeleteButton({
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteDetails, setDeleteDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [deleteMessageError, setDeleteMessageError] = useState();
   const handleDelete = () => {
@@ -109,6 +110,7 @@ function ToolbarDeleteButton({
   };
 
   const toggleModal = async isOpen => {
+    setIsLoading(true);
     setDeleteDetails(null);
     if (
       isOpen &&
@@ -125,7 +127,7 @@ function ToolbarDeleteButton({
         setDeleteDetails(results);
       }
     }
-
+    setIsLoading(false);
     setIsModalOpen(isOpen);
   };
 
@@ -221,8 +223,12 @@ function ToolbarDeleteButton({
           <DropdownItem
             key="add"
             isDisabled={isDisabled}
+            isLoading={isLoading}
+            spinnerAriaValueText={isLoading ? 'Loading' : undefined}
             component="button"
-            onClick={() => toggleModal(true)}
+            onClick={() => {
+              toggleModal(true);
+            }}
           >
             {i18n._(t`Delete`)}
           </DropdownItem>
@@ -232,6 +238,8 @@ function ToolbarDeleteButton({
           <div>
             <Button
               variant="secondary"
+              isLoading={isLoading}
+              spinnerAriaValueText={isLoading ? 'Loading' : undefined}
               aria-label={i18n._(t`Delete`)}
               onClick={() => toggleModal(true)}
               isDisabled={isDisabled}
