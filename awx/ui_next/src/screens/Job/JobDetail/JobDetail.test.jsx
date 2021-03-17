@@ -10,16 +10,15 @@ jest.mock('../../../api');
 
 describe('<JobDetail />', () => {
   let wrapper;
+  function assertDetail(label, value) {
+    expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+    expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+  }
   afterEach(() => {
     wrapper.unmount();
   });
 
   test('should display details', () => {
-    function assertDetail(label, value) {
-      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
-    }
-
     wrapper = mountWithContexts(
       <JobDetail
         job={{
@@ -161,5 +160,16 @@ describe('<JobDetail />', () => {
     }
     assertMissingDetail('Project');
     assertMissingDetail('Inventory');
+  });
+  test('should display Playbook Check detail', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          job_type: 'check',
+        }}
+      />
+    );
+    assertDetail('Job Type', 'Playbook Check');
   });
 });

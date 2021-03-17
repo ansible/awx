@@ -148,8 +148,8 @@ function Template({ i18n, setBreadcrumb }) {
 
   tabsArray.push(
     {
-      name: i18n._(t`Completed Jobs`),
-      link: `${match.url}/completed_jobs`,
+      name: i18n._(t`Jobs`),
+      link: `${match.url}/jobs`,
     },
     {
       name: canAddAndEditSurvey ? i18n._(t`Survey`) : i18n._(t`View Survey`),
@@ -232,7 +232,7 @@ function Template({ i18n, setBreadcrumb }) {
                 />
               </Route>
             )}
-            <Route path="/templates/:templateType/:id/completed_jobs">
+            <Route path="/templates/:templateType/:id/jobs">
               <JobList defaultParams={{ job__job_template: template.id }} />
             </Route>
             <Route path="/templates/:templateType/:id/survey">
