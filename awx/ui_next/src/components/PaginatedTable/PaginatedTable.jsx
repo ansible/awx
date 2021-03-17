@@ -38,6 +38,7 @@ function PaginatedTable({
   i18n,
   renderToolbar,
   emptyContentMessage,
+  ouiaId,
 }) {
   const history = useHistory();
 
@@ -95,7 +96,7 @@ function PaginatedTable({
     Content = (
       <div css="overflow: auto">
         {hasContentLoading && <LoadingSpinner />}
-        <TableComposable aria-label={dataListLabel}>
+        <TableComposable aria-label={dataListLabel} ouiaId={ouiaId}>
           {headerRow}
           <Tbody>{items.map(renderRow)}</Tbody>
         </TableComposable>
@@ -181,6 +182,7 @@ PaginatedTable.propTypes = {
   renderToolbar: PropTypes.func,
   hasContentLoading: PropTypes.bool,
   contentError: PropTypes.shape(),
+  ouiaId: PropTypes.string,
 };
 
 PaginatedTable.defaultProps = {
@@ -192,6 +194,7 @@ PaginatedTable.defaultProps = {
   pluralizedItemName: 'Items',
   showPageSizeOptions: true,
   renderToolbar: props => <DataListToolbar {...props} />,
+  ouiaId: null,
 };
 
 export { PaginatedTable as _PaginatedTable };
