@@ -221,7 +221,7 @@
 
         - name: fetch galaxy roles from requirements.(yml/yaml)
           command: >
-            ansible-galaxy role install -r {{ item.path }}
+            ansible-galaxy role install -r {{ item.stat.path }}
             --roles-path {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_roles
             {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
@@ -236,7 +236,7 @@
 
         - name: fetch galaxy collections from requirements.(yml/yaml)
           command: >
-            ansible-galaxy collection install -r {{ item.path }}
+            ansible-galaxy collection install -r {{ item.stat.path }}
             --collections-path {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_collections
             {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
