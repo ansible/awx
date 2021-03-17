@@ -274,7 +274,10 @@ class FileSplitter(io.StringIO):
             self.files = self.files[:-1]
         # If we only have one file, remove the suffix
         if len(self.files) == 1:
-            os.rename(self.files[0], self.files[0].replace('_split0', ''))
+            filename = self.files.pop()
+            new_filename = filename.replace('_split0', '')
+            os.rename(filename, new_filename)
+            self.files.append(new_filename)
         return self.files
 
     def write(self, s):
@@ -302,7 +305,7 @@ def events_slicing(key, since, until):
     last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
     last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
     previous_pk = last_entries.get(key) or pk_values['pk__min'] or 0
-    final_pk = pk_values['pk__max']
+    final_pk = pk_values['pk__max'] or 0
 
     for start in range(previous_pk, final_pk + 1, step):
         yield (start, min(start + step, final_pk))

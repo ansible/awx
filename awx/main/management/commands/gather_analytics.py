@@ -48,8 +48,7 @@ class Command(BaseCommand):
         if opt_ship and opt_dry_run:
             self.logger.error('Both --ship and --dry-run cannot be processed at the same time.')
             return
-        tgzfiles = analytics.gather(collection_type='manual' if opt_ship else 'dry-run',
-                                    since=since, until=until)
+        tgzfiles = analytics.gather(collection_type='manual' if opt_ship else 'dry-run', since=since, until=until)
         if tgzfiles:
             for tgz in tgzfiles:
                 self.logger.info(tgz)
