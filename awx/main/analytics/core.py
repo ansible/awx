@@ -135,7 +135,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             return None
 
         if not (settings.AUTOMATION_ANALYTICS_URL and settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD):
-            logger.log(log_level, "Not gathering analytics, configuration is invalid")
+            logger.log(log_level, "Not gathering analytics, configuration is invalid. Use --dry-run to gather locally without sending.")
             return None
 
     with advisory_lock('gather_analytics_lock', wait=False) as acquired:
