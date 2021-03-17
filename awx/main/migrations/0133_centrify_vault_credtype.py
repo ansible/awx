@@ -12,7 +12,7 @@ def setup_tower_managed_defaults(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0129_unifiedjob_installed_collections'),
+        ('main', '0132_instancegroup_is_container_group'),
     ]
 
     operations = [
