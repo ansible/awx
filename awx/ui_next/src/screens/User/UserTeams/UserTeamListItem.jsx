@@ -32,7 +32,7 @@ function UserTeamListItem({ team, isSelected, onSelect, i18n }) {
           dataListCells={[
             <DataListCell key="name">
               <Link to={`/teams/${team.id}/details`} id={`team-${team.id}`}>
-                {team.name}
+                <b>{team.name}</b>
               </Link>
             </DataListCell>,
             <DataListCell key="organization">

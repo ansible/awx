@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
@@ -12,6 +13,7 @@ function DeleteButton({
   variant,
   children,
   isDisabled,
+  ouiaId,
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -22,6 +24,7 @@ function DeleteButton({
         aria-label={i18n._(t`Delete`)}
         isDisabled={isDisabled}
         onClick={() => setIsOpen(true)}
+        ouiaId={ouiaId}
       >
         {children || i18n._(t`Delete`)}
       </Button>
@@ -57,5 +60,13 @@ function DeleteButton({
     </>
   );
 }
+
+DeleteButton.propTypes = {
+  ouiaId: PropTypes.string,
+};
+
+DeleteButton.defaultProps = {
+  ouiaId: null,
+};
 
 export default withI18n()(DeleteButton);

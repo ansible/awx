@@ -56,6 +56,7 @@ function ExecutionEnvironmentListItem({
           tooltip={i18n._(t`Edit Execution Environment`)}
         >
           <Button
+            ouiaId={`edit-ee-${executionEnvironment.id}`}
             aria-label={i18n._(t`Edit Execution Environment`)}
             variant="plain"
             component={Link}
