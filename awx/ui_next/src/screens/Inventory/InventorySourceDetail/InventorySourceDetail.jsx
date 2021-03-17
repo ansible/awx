@@ -11,6 +11,7 @@ import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import CredentialChip from '../../../components/CredentialChip';
 import DeleteButton from '../../../components/DeleteButton';
+import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 import {
   DetailList,
@@ -201,9 +202,9 @@ function InventorySourceDetail({ inventorySource, i18n }) {
             }
           />
         )}
-        <Detail
-          label={i18n._(t`Ansible environment`)}
-          value={custom_virtualenv}
+        <ExecutionEnvironmentDetail
+          virtualEnvironment={custom_virtualenv}
+          executionEnvironment={execution_environment}
         />
         {source_project && (
           <Detail
@@ -211,18 +212,6 @@ function InventorySourceDetail({ inventorySource, i18n }) {
             value={
               <Link to={`/projects/${source_project.id}/details`}>
                 {source_project.name}
-              </Link>
-            }
-          />
-        )}
-        {execution_environment?.name && (
-          <Detail
-            label={i18n._(t`Execution Environment`)}
-            value={
-              <Link
-                to={`/execution_environments/${execution_environment.id}/details`}
-              >
-                {execution_environment.name}
               </Link>
             }
           />

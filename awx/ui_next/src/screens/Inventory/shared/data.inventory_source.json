@@ -39,6 +39,12 @@
         "organization_id":1,
         "kind":""
      },
+     "execution_environment": {
+      "id": 1,
+      "name": "Default EE",
+      "description": "",
+      "image": "quay.io/ansible/awx-ee"
+      },
      "source_project":{
         "id":8,
         "name":"Mock Project",
@@ -111,5 +117,6 @@
   "source_project":8,
   "update_on_project_update":true,
   "last_update_failed": true,
-  "last_updated":null
+  "last_updated":null,
+  "execution_environment": 1
 }

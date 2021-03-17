@@ -14,7 +14,6 @@ describe('<OrganizationEdit />', () => {
   const mockData = {
     name: 'Foo',
     description: 'Bar',
-    custom_virtualenv: 'Fizz',
     id: 1,
     related: {
       instance_groups: '/api/v2/organizations/1/instance_groups',
@@ -24,6 +23,7 @@ describe('<OrganizationEdit />', () => {
       default_environment: {
         id: 1,
         name: 'Baz',
+        image: 'quay.io/ansible/awx-ee',
       },
     },
   };
@@ -37,7 +37,6 @@ describe('<OrganizationEdit />', () => {
     const updatedOrgData = {
       name: 'new name',
       description: 'new description',
-      custom_virtualenv: 'Buzz',
       default_environment: null,
     };
     wrapper.find('OrganizationForm').prop('onSubmit')(updatedOrgData, [], []);
@@ -54,7 +53,6 @@ describe('<OrganizationEdit />', () => {
     const updatedOrgData = {
       name: 'new name',
       description: 'new description',
-      custom_virtualenv: 'Buzz',
     };
     await act(async () => {
       wrapper.find('OrganizationForm').invoke('onSubmit')(

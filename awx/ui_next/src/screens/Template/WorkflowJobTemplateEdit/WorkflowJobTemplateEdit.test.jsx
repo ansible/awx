@@ -68,7 +68,10 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     });
     OrganizationsAPI.read.mockResolvedValue({ results: [{ id: 1 }] });
     ExecutionEnvironmentsAPI.read.mockResolvedValue({
-      data: mockExecutionEnvironment,
+      data: {
+        results: mockExecutionEnvironment,
+        count: 1,
+      },
     });
 
     await act(async () => {

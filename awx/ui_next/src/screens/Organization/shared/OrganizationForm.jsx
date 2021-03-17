@@ -1,13 +1,12 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Form, FormGroup } from '@patternfly/react-core';
+import { Form } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '../../../api';
-import { ConfigContext, useConfig } from '../../../contexts/Config';
-import AnsibleSelect from '../../../components/AnsibleSelect';
+import { useConfig } from '../../../contexts/Config';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import FormField, { FormSubmitError } from '../../../components/FormField';
@@ -23,10 +22,8 @@ import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 
 function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
   const { license_info = {}, me = {} } = useConfig();
-  const { custom_virtualenvs } = useContext(ConfigContext);
 
   const { setFieldValue } = useFormikContext();
-  const [venvField] = useField('custom_virtualenv');
 
   const [
     galaxyCredentialsField,
@@ -41,12 +38,6 @@ function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
   ] = useField({
     name: 'default_environment',
   });
-
-  const defaultVenv = {
-    label: i18n._(t`Use Default Ansible Environment`),
-    value: '/var/lib/awx/venv/ansible/',
-    key: 'default',
-  };
 
   const handleCredentialUpdate = useCallback(
     value => {
@@ -86,24 +77,6 @@ function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
           me={me}
           isDisabled={!me.is_superuser}
         />
-      )}
-
-      {custom_virtualenvs && custom_virtualenvs.length > 1 && (
-        <FormGroup
-          fieldId="org-custom-virtualenv"
-          label={i18n._(t`Ansible Environment`)}
-        >
-          <AnsibleSelect
-            id="org-custom-virtualenv"
-            data={[
-              defaultVenv,
-              ...custom_virtualenvs
-                .filter(value => value !== defaultVenv.value)
-                .map(value => ({ value, label: value, key: value })),
-            ]}
-            {...venvField}
-          />
-        </FormGroup>
       )}
       <InstanceGroupsLookup
         value={instanceGroups}
@@ -208,11 +181,10 @@ function OrganizationForm({
       initialValues={{
         name: organization.name,
         description: organization.description,
-        custom_virtualenv: organization.custom_virtualenv || '',
         max_hosts: organization.max_hosts || '0',
         galaxy_credentials: organization.galaxy_credentials || [],
         default_environment:
-          organization.summary_fields?.default_environment || '',
+          organization.summary_fields?.default_environment || null,
       }}
       onSubmit={handleSubmit}
     >
@@ -248,14 +220,9 @@ OrganizationForm.defaultProps = {
     name: '',
     description: '',
     max_hosts: '0',
-    custom_virtualenv: '',
     default_environment: '',
   },
   submitError: null,
-};
-
-OrganizationForm.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
 };
 
 export { OrganizationForm as _OrganizationForm };

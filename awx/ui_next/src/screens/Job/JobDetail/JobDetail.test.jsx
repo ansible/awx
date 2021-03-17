@@ -60,7 +60,6 @@ describe('<JobDetail />', () => {
     assertDetail('Revision', mockJobData.scm_revision);
     assertDetail('Playbook', mockJobData.playbook);
     assertDetail('Verbosity', '0 (Normal)');
-    assertDetail('Environment', mockJobData.custom_virtualenv);
     assertDetail('Execution Node', mockJobData.execution_node);
     assertDetail(
       'Instance Group',
@@ -69,6 +68,15 @@ describe('<JobDetail />', () => {
     assertDetail('Job Slice', '0/1');
     assertDetail('Credentials', 'SSH: Demo Credential');
     assertDetail('Machine Credential', 'SSH: Machine cred');
+
+    const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
+    expect(executionEnvironment).toHaveLength(1);
+    expect(executionEnvironment.find('dt').text()).toEqual(
+      'Execution Environment'
+    );
+    expect(executionEnvironment.find('dd').text()).toEqual(
+      mockJobData.summary_fields.execution_environment.name
+    );
 
     const credentialChip = wrapper.find(
       `Detail[label="Credentials"] CredentialChip`

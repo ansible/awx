@@ -90,7 +90,6 @@ describe('<OrganizationDetail />', () => {
     const testParams = [
       { label: 'Name', value: 'Foo' },
       { label: 'Description', value: 'Bar' },
-      { label: 'Ansible Environment', value: 'Fizz' },
       { label: 'Created', value: '7/7/2015, 5:21:26 PM' },
       { label: 'Last Modified', value: '8/11/2019, 7:47:37 PM' },
       { label: 'Max Hosts', value: '0' },

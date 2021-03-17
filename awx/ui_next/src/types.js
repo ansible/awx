@@ -410,9 +410,10 @@ export const WorkflowApproval = shape({
 
 export const ExecutionEnvironment = shape({
   id: number.isRequired,
+  name: string,
   organization: number,
   credential: number,
-  image: string.isRequired,
+  image: string,
   url: string,
   summary_fields: shape({}),
   description: string,

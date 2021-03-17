@@ -322,7 +322,7 @@ const FormikApp = withFormik({
         : '',
       webhook_key: template.webhook_key || '',
       execution_environment:
-        template.summary_fields?.execution_environment || '',
+        template.summary_fields?.execution_environment || null,
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {

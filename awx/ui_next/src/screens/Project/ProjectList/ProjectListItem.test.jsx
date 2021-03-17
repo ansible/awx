@@ -40,6 +40,45 @@ describe('<ProjectsListItem />', () => {
     expect(wrapper.find('ProjectSyncButton').exists()).toBeTruthy();
   });
 
+  test('should render warning about missing execution environment', () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <ProjectsListItem
+            isSelected={false}
+            detailUrl="/project/1"
+            onSelect={() => {}}
+            project={{
+              id: 1,
+              name: 'Project 1',
+              url: '/api/v2/projects/1',
+              type: 'project',
+              scm_type: 'git',
+              scm_revision: '7788f7erga0jijodfgsjisiodf98sdga9hg9a98gaf',
+              summary_fields: {
+                last_job: {
+                  id: 9000,
+                  status: 'successful',
+                },
+                user_capabilities: {
+                  start: true,
+                },
+              },
+              custom_virtualenv: '/var/lib/awx/env',
+              default_environment: null,
+            }}
+          />
+        </tbody>
+      </table>
+    );
+
+    expect(
+      wrapper.find('.missing-execution-environment').prop('content')
+    ).toEqual(
+      'Custom virtual environment /var/lib/awx/env must be replaced by an execution environment.'
+    );
+  });
+
   test('launch button hidden from users without start capabilities', () => {
     const wrapper = mountWithContexts(
       <table>
