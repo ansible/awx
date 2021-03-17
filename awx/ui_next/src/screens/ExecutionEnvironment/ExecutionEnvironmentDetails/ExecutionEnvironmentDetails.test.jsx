@@ -77,6 +77,12 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(dates).toHaveLength(2);
     expect(dates.at(0).prop('date')).toEqual(executionEnvironment.created);
     expect(dates.at(1).prop('date')).toEqual(executionEnvironment.modified);
+    const editButton = wrapper.find('Button[aria-label="edit"]');
+    expect(editButton.text()).toEqual('Edit');
+    expect(editButton.prop('to')).toBe('/execution_environments/17/edit');
+
+    const deleteButton = wrapper.find('Button[aria-label="Delete"]');
+    expect(deleteButton.text()).toEqual('Delete');
   });
 
   test('should render organization detail', async () => {
@@ -134,5 +140,39 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     });
     expect(ExecutionEnvironmentsAPI.destroy).toHaveBeenCalledTimes(1);
     expect(history.location.pathname).toBe('/execution_environments');
+  });
+
+  test('should not render action buttons to ee managed by tower', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ExecutionEnvironmentDetails
+          executionEnvironment={{
+            ...executionEnvironment,
+            managed_by_tower: true,
+          }}
+        />
+      );
+    });
+    wrapper.update();
+
+    expect(wrapper.find('Detail[label="Image"]').prop('value')).toEqual(
+      executionEnvironment.image
+    );
+    expect(wrapper.find('Detail[label="Description"]').prop('value')).toEqual(
+      'Foo'
+    );
+    expect(wrapper.find('Detail[label="Organization"]').prop('value')).toEqual(
+      'Globally Available'
+    );
+    expect(
+      wrapper.find('Detail[label="Credential"]').prop('value').props.children
+    ).toEqual(executionEnvironment.summary_fields.credential.name);
+    const dates = wrapper.find('UserDateDetail');
+    expect(dates).toHaveLength(2);
+    expect(dates.at(0).prop('date')).toEqual(executionEnvironment.created);
+    expect(dates.at(1).prop('date')).toEqual(executionEnvironment.modified);
+    expect(wrapper.find('Button[aria-label="edit"]')).toHaveLength(0);
+
+    expect(wrapper.find('Button[aria-label="Delete"]')).toHaveLength(0);
   });
 });

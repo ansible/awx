@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -8,7 +8,10 @@ import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
 import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
+import CopyButton from '../../../components/CopyButton';
 import { ExecutionEnvironment } from '../../../types';
+import { ExecutionEnvironmentsAPI } from '../../../api';
+import { timeOfDay } from '../../../util/dates';
 
 function ExecutionEnvironmentListItem({
   executionEnvironment,
@@ -17,7 +20,29 @@ function ExecutionEnvironmentListItem({
   onSelect,
   i18n,
   rowIndex,
+  fetchExecutionEnvironments,
 }) {
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const copyExecutionEnvironment = useCallback(async () => {
+    await ExecutionEnvironmentsAPI.copy(executionEnvironment.id, {
+      name: `${executionEnvironment.name} @ ${timeOfDay()}`,
+    });
+    await fetchExecutionEnvironments();
+  }, [
+    executionEnvironment.id,
+    executionEnvironment.name,
+    fetchExecutionEnvironments,
+  ]);
+
+  const handleCopyStart = useCallback(() => {
+    setIsDisabled(true);
+  }, []);
+
+  const handleCopyFinish = useCallback(() => {
+    setIsDisabled(false);
+  }, []);
+
   const labelId = `check-action-${executionEnvironment.id}`;
 
   return (
@@ -64,6 +89,19 @@ function ExecutionEnvironmentListItem({
           >
             <PencilAltIcon />
           </Button>
+        </ActionItem>
+        <ActionItem
+          visible={executionEnvironment.summary_fields.user_capabilities.copy}
+          tooltip={i18n._(t`Copy Execution Environment`)}
+        >
+          <CopyButton
+            ouiaId={`copy-ee-${executionEnvironment.id}`}
+            isDisabled={isDisabled}
+            onCopyStart={handleCopyStart}
+            onCopyFinish={handleCopyFinish}
+            copyItem={copyExecutionEnvironment}
+            errorMessage={i18n._(t`Failed to copy execution environment`)}
+          />
         </ActionItem>
       </ActionsTd>
     </Tr>
