@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0132_instancegroup_is_container_group'),
+        ('main', '0133_centrify_vault_credtype'),
     ]
 
     operations = [
