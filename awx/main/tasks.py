@@ -1196,6 +1196,7 @@ class BaseTask(object):
                 ee_collections_info = json.loads(ee_json_info.read())
                 instance.installed_collections = ee_collections_info
                 instance.save(update_fields=['installed_collections'])
+        if os.path.exists(ansible_version_file):
             with open(ansible_version_file) as ee_ansible_info:
                 ansible_version_info = ee_ansible_info.readline()
                 instance.ansible_version = ansible_version_info
