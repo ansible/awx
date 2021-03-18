@@ -160,7 +160,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             for name, func in inspect.getmembers(collector_module)
             if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__') and (not subset or name in subset)
         ]
-        if collection_type != 'dry-run' and not any(c.__awx_analytics_key__ == 'config' for c in collector_list):
+        if not any(c.__awx_analytics_key__ == 'config' for c in collector_list):
             # In order to ship to analytics, we must include the output of the built-in 'config' collector.
             collector_list.append(collectors.config)
 
@@ -178,18 +178,21 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             key = func.__awx_analytics_key__
             filename = f'{key}.json'
             try:
-                data[filename] = (func(last_run, collection_type=collection_type, until=until), func.__awx_analytics_version__)
+                results = (func(last_run, collection_type=collection_type, until=until),
+                           func.__awx_analytics_version__)
+                json.dumps(results)  # throwaway check to see if the data is json-serializable
+                data[filename] = results
             except Exception:
                 logger.exception("Could not generate metric {}".format(filename))
         if data:
+            if data.get('config.json') is None:
+                logger.error("'config' collector data is missing.")
+                return None
+
             tgzfile = package(dest.parent, data, until)
             if tgzfile is not None:
                 tarfiles.append(tgzfile)
-
                 if collection_type != 'dry-run':
-                    if data.get('config.json') is None:
-                        logger.error("'config' collector data is missing, and is required to ship.")
-                        return None
                     ship(tgzfile)
                     with disable_activity_stream():
                         for filename in data:
@@ -214,11 +217,12 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                         continue
                     for fpath in files:
                         payload = {filename: (fpath, func.__awx_analytics_version__)}
-                        if collection_type != 'dry-run':
-                            payload['config.json'] = data.get('config.json')
-                            if payload['config.json'] is None:
-                                logger.error("'config' collector data is missing, and is required to ship.")
-                                return None
+
+                        payload['config.json'] = data.get('config.json')
+                        if payload['config.json'] is None:
+                            logger.error("'config' collector data is missing, and is required to ship.")
+                            return None
+
                         tgzfile = package(dest.parent, payload, until)
                         if tgzfile is not None:
                             tarfiles.append(tgzfile)
