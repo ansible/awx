@@ -186,7 +186,7 @@ register(
     default=None,
     queryset=ExecutionEnvironment.objects.all(),
     label=_('Global default execution environment'),
-    help_text=_('.'),
+    help_text=_('The Execution Environment to be used when one has not been configured for a job template.'),
     category=_('System'),
     category_slug='system',
 )
