@@ -106,7 +106,7 @@ class AnsibleInventoryLoader(object):
         bargs.extend(['-v', '{0}:{0}:Z'.format(self.source)])
         for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
-        bargs.extend([settings.AWX_CONTAINER_GROUP_DEFAULT_IMAGE])
+        bargs.extend([settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE])
         bargs.extend(['ansible-inventory', '-i', self.source])
         bargs.extend(['--playbook-dir', functioning_dir(self.source)])
         if self.verbosity:
