@@ -50,6 +50,7 @@ function ApplicationListItem({
           tooltip={i18n._(t`Edit application`)}
         >
           <Button
+            ouiaId={`${application.id}-edit-button`}
             aria-label={i18n._(t`Edit application`)}
             variant="plain"
             component={Link}

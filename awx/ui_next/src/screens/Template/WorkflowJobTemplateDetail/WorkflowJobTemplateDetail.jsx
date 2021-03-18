@@ -212,6 +212,7 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="workflow-job-template-detail-edit-button"
               component={Link}
               to={`/templates/workflow_job_template/${id}/edit`}
               aria-label={i18n._(t`Edit`)}
@@ -222,7 +223,12 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
         {canLaunch && (
           <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
             {({ handleLaunch }) => (
-              <Button variant="secondary" type="submit" onClick={handleLaunch}>
+              <Button
+                ouiaId="workflow-job-template-detail-launch-button"
+                variant="secondary"
+                type="submit"
+                onClick={handleLaunch}
+              >
                 {i18n._(t`Launch`)}
               </Button>
             )}

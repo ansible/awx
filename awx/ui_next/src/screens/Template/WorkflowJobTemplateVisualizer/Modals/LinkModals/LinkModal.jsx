@@ -25,6 +25,7 @@ function LinkModal({ header, i18n, onConfirm }) {
       onClose={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
       actions={[
         <Button
+          ouiaId="link-confirm-button"
           id="link-confirm"
           key="save"
           variant="primary"
@@ -34,6 +35,7 @@ function LinkModal({ header, i18n, onConfirm }) {
           {i18n._(t`Save`)}
         </Button>,
         <Button
+          ouiaId="link-cancel-button"
           id="link-cancel"
           key="cancel"
           variant="link"

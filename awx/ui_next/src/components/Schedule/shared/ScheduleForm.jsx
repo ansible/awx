@@ -541,6 +541,7 @@ function ScheduleForm({
                   <FormFullWidthLayout>
                     <ActionGroup>
                       <Button
+                        ouiaId="schedule-form-save-button"
                         aria-label={i18n._(t`Save`)}
                         variant="primary"
                         type="button"
@@ -552,6 +553,7 @@ function ScheduleForm({
 
                       {isTemplate && showPromptButton && (
                         <Button
+                          ouiaId="schedule-form-prompt-button"
                           variant="secondary"
                           type="button"
                           aria-label={i18n._(t`Prompt`)}
@@ -561,6 +563,7 @@ function ScheduleForm({
                         </Button>
                       )}
                       <Button
+                        ouiaId="schedule-form-cancel-button"
                         aria-label={i18n._(t`Cancel`)}
                         variant="secondary"
                         type="button"

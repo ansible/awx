@@ -151,6 +151,7 @@ function SmartInventoryDetail({ inventory, i18n }) {
         <CardActionsRow>
           {user_capabilities?.edit && (
             <Button
+              ouiaId="smart-inventory-detail-edit-button"
               component={Link}
               aria-label={i18n._(t`edit`)}
               to={`/inventories/smart_inventory/${id}/edit`}

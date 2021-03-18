@@ -118,6 +118,7 @@ function ProjectJobTemplateListItem({
               <LaunchButton resource={template}>
                 {({ handleLaunch }) => (
                   <Button
+                    ouiaId={`${template.id}-launch-button`}
                     css="grid-column: 1"
                     variant="plain"
                     onClick={handleLaunch}
@@ -131,6 +132,7 @@ function ProjectJobTemplateListItem({
           {template.summary_fields.user_capabilities.edit && (
             <Tooltip content={i18n._(t`Edit Template`)} position="top">
               <Button
+                ouiaId={`${template.id}-edit-button`}
                 css="grid-column: 2"
                 variant="plain"
                 component={Link}

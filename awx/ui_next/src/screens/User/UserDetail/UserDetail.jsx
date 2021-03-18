@@ -85,6 +85,7 @@ function UserDetail({ user, i18n }) {
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="user-detail-edit-button"
               aria-label={i18n._(t`edit`)}
               component={Link}
               to={`/users/${id}/edit`}

@@ -157,9 +157,9 @@ function LDAPDetail({ i18n }) {
         {me?.is_superuser && (
           <CardActionsRow>
             <Button
+              ouiaId="ldap-detail-edit-button"
               aria-label={i18n._(t`Edit`)}
               component={Link}
-              ouiaId="edit-button"
               to={`${baseURL}/${category}/edit`}
             >
               {i18n._(t`Edit`)}

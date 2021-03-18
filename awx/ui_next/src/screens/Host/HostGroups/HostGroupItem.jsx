@@ -48,7 +48,12 @@ function HostGroupItem({ i18n, group, inventoryId, isSelected, onSelect }) {
         >
           {group.summary_fields.user_capabilities.edit && (
             <Tooltip content={i18n._(t`Edit Group`)} position="top">
-              <Button variant="plain" component={Link} to={editUrl}>
+              <Button
+                ouiaId={`${group.id}-edit-button`}
+                variant="plain"
+                component={Link}
+                to={editUrl}
+              >
                 <PencilAltIcon />
               </Button>
             </Tooltip>

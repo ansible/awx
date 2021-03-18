@@ -29,6 +29,7 @@ function DeleteRoleConfirmationModal({
       onClose={onCancel}
       actions={[
         <Button
+          ouiaId="delete-role-modal-delete-button"
           key="delete"
           variant="danger"
           aria-label={i18n._(t`Confirm delete`)}
@@ -36,7 +37,12 @@ function DeleteRoleConfirmationModal({
         >
           {i18n._(t`Delete`)}
         </Button>,
-        <Button key="cancel" variant="link" onClick={onCancel}>
+        <Button
+          ouiaId="delete-role-modal-cancel-button"
+          key="cancel"
+          variant="link"
+          onClick={onCancel}
+        >
           {i18n._(t`Cancel`)}
         </Button>,
       ]}

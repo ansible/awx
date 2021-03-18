@@ -20,6 +20,7 @@ function NodeDeleteModal({ i18n }) {
       onClose={() => dispatch({ type: 'SET_NODE_TO_DELETE', value: null })}
       actions={[
         <Button
+          ouiaId="node-removal-confirm-button"
           id="confirm-node-removal"
           key="remove"
           variant="danger"
@@ -29,6 +30,7 @@ function NodeDeleteModal({ i18n }) {
           {i18n._(t`Remove`)}
         </Button>,
         <Button
+          ouiaId="node-removal-cancel-button"
           id="cancel-node-removal"
           key="cancel"
           variant="link"

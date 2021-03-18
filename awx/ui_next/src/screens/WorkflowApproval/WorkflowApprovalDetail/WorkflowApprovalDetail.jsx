@@ -187,6 +187,7 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
         {workflowApproval.can_approve_or_deny && (
           <>
             <Button
+              ouiaId={`${workflowApproval.id}-approve-button`}
               aria-label={i18n._(t`Approve`)}
               variant="primary"
               onClick={approveWorkflowApproval}
@@ -195,6 +196,7 @@ function WorkflowApprovalDetail({ i18n, workflowApproval }) {
               {i18n._(t`Approve`)}
             </Button>
             <Button
+              ouiaId={`${workflowApproval.id}-deny-button`}
               aria-label={i18n._(t`Deny`)}
               variant="danger"
               onClick={denyWorkflowApproval}

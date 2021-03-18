@@ -247,7 +247,11 @@ function CredentialDetail({ i18n, credential }) {
       )}
       <CardActionsRow>
         {user_capabilities.edit && (
-          <Button component={Link} to={`/credentials/${credentialId}/edit`}>
+          <Button
+            ouiaId="credential-detail-edit-button"
+            component={Link}
+            to={`/credentials/${credentialId}/edit`}
+          >
             {i18n._(t`Edit`)}
           </Button>
         )}

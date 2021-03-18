@@ -128,6 +128,7 @@ function AdHocCommands({ adHocItems, i18n, hasListItems }) {
         </DropdownItem>
       ) : (
         <Button
+          ouiaId="run-command-button"
           variant="secondary"
           aria-label={i18n._(t`Run Command`)}
           onClick={() => setIsWizardOpen(true)}

@@ -183,6 +183,7 @@ function InventorySourceList({ i18n }) {
                       position="top"
                     >
                       <Button
+                        ouiaId="sync-all-button"
                         onClick={syncAll}
                         aria-label={i18n._(t`Sync all`)}
                         variant="secondary"

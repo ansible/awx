@@ -10,7 +10,7 @@ const FormActionGroup = ({ onCancel, onSubmit, submitDisabled, i18n }) => {
     <FormFullWidthLayout>
       <ActionGroup>
         <Button
-          ouiaId="Save"
+          ouiaId="form-save-button"
           aria-label={i18n._(t`Save`)}
           variant="primary"
           type="button"
@@ -20,7 +20,7 @@ const FormActionGroup = ({ onCancel, onSubmit, submitDisabled, i18n }) => {
           {i18n._(t`Save`)}
         </Button>
         <Button
-          ouiaId="Cancel"
+          ouiaId="form-cancel-button"
           aria-label={i18n._(t`Cancel`)}
           variant="link"
           type="button"

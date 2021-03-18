@@ -86,6 +86,7 @@ function ContainerGroupDetails({ instanceGroup, i18n }) {
         {instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="container-group-detail-edit-button"
               aria-label={i18n._(t`edit`)}
               component={Link}
               to={`/instance_groups/container_group/${id}/edit`}

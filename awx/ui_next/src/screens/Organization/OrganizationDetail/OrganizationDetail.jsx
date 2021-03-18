@@ -142,6 +142,7 @@ function OrganizationDetail({ i18n, organization }) {
       <CardActionsRow>
         {summary_fields.user_capabilities.edit && (
           <Button
+            ouiaId="organization-detail-edit-button"
             aria-label={i18n._(t`Edit`)}
             component={Link}
             to={`/organizations/${id}/edit`}

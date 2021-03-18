@@ -65,6 +65,7 @@ function SurveyToolbar({
           </ToolbarItem>
           <ToolbarItem>
             <Button
+              ouiaId="survey-delete-button"
               variant="secondary"
               isDisabled={isDeleteDisabled}
               onClick={() => onToggleDeleteModal(true)}

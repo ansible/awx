@@ -90,6 +90,7 @@ function WorkflowTools({
           position="bottom"
         >
           <Button
+            ouiaId="visualizer-zoom-to-fit-button"
             variant="tertiary"
             css="margin-right: 30px;"
             onClick={() => onFitGraph()}
@@ -99,6 +100,7 @@ function WorkflowTools({
         </Tooltip>
         <Tooltip content={i18n._(t`Zoom Out`)} position="bottom">
           <Button
+            ouiaId="visualizer-zoom-out-button"
             variant="tertiary"
             css="margin-right: 10px;"
             onClick={() => zoomOut()}
@@ -119,6 +121,7 @@ function WorkflowTools({
         />
         <Tooltip content={i18n._(t`Zoom In`)} position="bottom">
           <Button
+            ouiaId="visualizer-zoom-in-button"
             variant="tertiary"
             css="margin: 0px 25px 0px 10px;"
             onClick={() => zoomIn()}
@@ -129,6 +132,7 @@ function WorkflowTools({
         <Pan>
           <Tooltip content={i18n._(t`Pan Left`)} position="left">
             <Button
+              ouiaId="visualizer-pan-left-button"
               variant="tertiary"
               css="margin-right: 10px;"
               onClick={() => onPan('left')}
@@ -139,6 +143,7 @@ function WorkflowTools({
           <PanCenter>
             <Tooltip content={i18n._(t`Pan Up`)} position="top">
               <Button
+                ouiaId="visualizer-pan-up-button"
                 variant="tertiary"
                 css="margin-bottom: 10px;"
                 onClick={() => onPan('up')}
@@ -150,12 +155,17 @@ function WorkflowTools({
               content={i18n._(t`Set zoom to 100% and center graph`)}
               position="top"
             >
-              <Button variant="tertiary" onClick={() => onPanToMiddle()}>
+              <Button
+                ouiaId="visualizer-pan-middle-button"
+                variant="tertiary"
+                onClick={() => onPanToMiddle()}
+              >
                 <HomeIcon />
               </Button>
             </Tooltip>
             <Tooltip content={i18n._(t`Pan Down`)} position="bottom">
               <Button
+                ouiaId="visualizer-pan-down-button"
                 variant="tertiary"
                 css="margin-top: 10px;"
                 onClick={() => onPan('down')}
@@ -166,6 +176,7 @@ function WorkflowTools({
           </PanCenter>
           <Tooltip content={i18n._(t`Pan Right`)} position="right">
             <Button
+              ouiaId="visualizer-pan-right-button"
               variant="tertiary"
               css="margin-left: 10px;"
               onClick={() => onPan('right')}
