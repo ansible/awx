@@ -11,7 +11,7 @@ import {
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
 
-function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
+function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n }) {
   const [isOpen, setIsOPen] = useState(false);
 
   const onToggle = () => {
@@ -75,7 +75,6 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
 
   return (
     <Dropdown
-      ouiaId={ouiaId}
       isPlain
       position={DropdownPosition.right}
       isOpen={isOpen}
