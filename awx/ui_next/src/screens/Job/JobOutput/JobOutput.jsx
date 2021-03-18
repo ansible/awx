@@ -200,7 +200,7 @@ const OutputFooter = styled.div`
 `;
 
 const Toolbar = styled(_Toolbar)`
-  position: inherit;
+  position: inherit !important;
 `;
 
 const ToolbarContent = styled(_ToolbarContent)`
