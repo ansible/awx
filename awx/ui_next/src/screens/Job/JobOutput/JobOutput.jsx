@@ -15,8 +15,8 @@ import hasAnsi from 'has-ansi';
 import { AllHtmlEntities } from 'html-entities';
 import {
   Button,
-  Toolbar as _Toolbar,
-  ToolbarContent as _ToolbarContent,
+  Toolbar,
+  ToolbarContent,
   ToolbarItem,
   ToolbarToggleGroup,
   Tooltip,
@@ -199,13 +199,13 @@ const OutputFooter = styled.div`
   flex: 1;
 `;
 
-const Toolbar = styled(_Toolbar)`
+const SearchToolbar = styled(Toolbar)`
   position: inherit !important;
 `;
 
-const ToolbarContent = styled(_ToolbarContent)`
-  padding-left: 0px;
-  padding-right: 0px;
+const SearchToolbarContent = styled(ToolbarContent)`
+  padding-left: 0px !important;
+  padding-right: 0px !important;
 `;
 
 let ws;
@@ -735,13 +735,13 @@ function JobOutput({
               />
             </OutputHeader>
             <HostStatusBar counts={job.host_status_counts} />
-            <Toolbar
+            <SearchToolbar
               id="job_output-toolbar"
               clearAllFilters={handleRemoveAllSearchTerms}
               collapseListedFiltersBreakpoint="lg"
               clearFiltersButtonText={i18n._(t`Clear all filters`)}
             >
-              <ToolbarContent>
+              <SearchToolbarContent>
                 <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
                   <ToolbarItem variant="search-filter">
                     {isJobRunning(job.status) ? (
@@ -757,8 +757,8 @@ function JobOutput({
                     )}
                   </ToolbarItem>
                 </ToolbarToggleGroup>
-              </ToolbarContent>
-            </Toolbar>
+              </SearchToolbarContent>
+            </SearchToolbar>
             <PageControls
               onScrollFirst={handleScrollFirst}
               onScrollLast={handleScrollLast}
