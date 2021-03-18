@@ -16,6 +16,7 @@ import {
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { jsonToYaml, isJsonString } from '../../../util/yaml';
 import { InstanceGroupsAPI } from '../../../api';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 function ContainerGroupDetails({ instanceGroup, i18n }) {
   const { id, name } = instanceGroup;
@@ -34,7 +35,10 @@ function ContainerGroupDetails({ instanceGroup, i18n }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
-
+  const deleteDetailsRequests = relatedResourceDeleteRequests.instanceGroup(
+    instanceGroup,
+    i18n
+  );
   return (
     <CardBody>
       <DetailList>
@@ -101,6 +105,10 @@ function ContainerGroupDetails({ instanceGroup, i18n }) {
               modalTitle={i18n._(t`Delete instance group`)}
               onConfirm={deleteInstanceGroup}
               isDisabled={isLoading}
+              deleteDetailsRequests={deleteDetailsRequests}
+              deleteMessage={i18n._(
+                t`This container group is currently being by other resources. Are you sure you want to delete it?`
+              )}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>

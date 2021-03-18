@@ -283,4 +283,19 @@ export const relatedResourceDeleteRequests = {
       label: [i18n._(t`Workflow Job Template Nodes`)],
     },
   ],
+  instanceGroup: (selected, i18n) => [
+    {
+      request: () => OrganizationsAPI.read({ instance_groups: selected.id }),
+      label: i18n._(t`Organizations`),
+    },
+    {
+      request: () => InventoriesAPI.read({ instance_groups: selected.id }),
+      label: i18n._(t`Inventories`),
+    },
+    {
+      request: () =>
+        UnifiedJobTemplatesAPI.read({ instance_groups: selected.id }),
+      label: i18n._(t`Templates`),
+    },
+  ],
 };

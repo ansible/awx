@@ -258,6 +258,7 @@ function ToolbarDeleteButton({
           onClose={() => toggleModal(false)}
           actions={[
             <Button
+              ouiaId="delete-modal-confirm"
               key="delete"
               variant="danger"
               aria-label={i18n._(t`confirm delete`)}
