@@ -333,8 +333,8 @@ def test_aim_credential_source(run_module, admin_user, organization, source_cred
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
 
-    
- # Test Centrify Vault secret credential source
+
+# Test Centrify Vault secret credential source
 @pytest.fixture
 def source_cred_centrify_secret(organization):
     # Make a credential type which will be used by the credential
@@ -380,4 +380,4 @@ def test_centrify_vault_credential_source(run_module, admin_user, organization, 
     assert cis.source_credential.name == source_cred_centrify_secret.name
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
-    assert result['id'] == cis.pk   
+    assert result['id'] == cis.pk
