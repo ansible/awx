@@ -33,11 +33,15 @@ function Job({ i18n, setBreadcrumb }) {
     result: { jobDetail, eventRelatedSearchableKeys, eventSearchableKeys },
   } = useRequest(
     useCallback(async () => {
+      let eventOptions = {};
       const { data: jobDetailData } = await JobsAPI.readDetail(id, type);
-      const { data: jobEventOptions } = await JobsAPI.readEventOptions(
-        id,
-        type
-      );
+      if (jobDetailData.type !== 'workflow_job') {
+        const { data: jobEventOptions } = await JobsAPI.readEventOptions(
+          id,
+          type
+        );
+        eventOptions = jobEventOptions;
+      }
       if (
         jobDetailData?.summary_fields?.credentials?.find(
           cred => cred.kind === 'vault'
@@ -54,11 +58,11 @@ function Job({ i18n, setBreadcrumb }) {
       return {
         jobDetail: jobDetailData,
         eventRelatedSearchableKeys: (
-          jobEventOptions?.related_search_fields || []
+          eventOptions?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
         eventSearchableKeys: Object.keys(
-          jobEventOptions.actions?.GET || {}
-        ).filter(key => jobEventOptions.actions?.GET[key].filterable),
+          eventOptions?.actions?.GET || {}
+        ).filter(key => eventOptions?.actions?.GET[key].filterable),
       };
     }, [id, type, setBreadcrumb]),
     {
