@@ -165,7 +165,11 @@ function CredentialFormFields({ i18n, credentialTypes }) {
           width="100%"
         >
           {credentialTypeOptions.map(credType => (
-            <SelectOption key={credType.value} value={credType.value}>
+            <SelectOption
+              key={credType.value}
+              value={credType.value}
+              dataCy={`${credType.id}-credential-type-select-option`}
+            >
               {credType.label}
             </SelectOption>
           ))}
