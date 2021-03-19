@@ -15,6 +15,7 @@ from django.utils.encoding import force_text
 
 from awx.api.versioning import reverse
 from awx.main import consumers
+from awx.main.managers import DeferJobCreatedManager
 from awx.main.fields import JSONField
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_underscore
@@ -461,6 +462,8 @@ class JobEvent(BasePlaybookEvent):
 
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created']
 
+    objects = DeferJobCreatedManager()
+
     class Meta:
         app_label = 'main'
         ordering = ('pk',)
@@ -571,9 +574,17 @@ class JobEvent(BasePlaybookEvent):
         return self.job.verbosity
 
 
+class UnpartitionedJobEvent(JobEvent):
+    class Meta:
+        proxy = True
+UnpartitionedJobEvent._meta.db_table = '_unpartitioned_' + JobEvent._meta.db_table  # noqa
+
+
 class ProjectUpdateEvent(BasePlaybookEvent):
 
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id', 'job_created']
+
+    objects = DeferJobCreatedManager()
 
     class Meta:
         app_label = 'main'
@@ -600,6 +611,12 @@ class ProjectUpdateEvent(BasePlaybookEvent):
     @property
     def host_name(self):
         return 'localhost'
+
+
+class UnpartitionedProjectUpdateEvent(ProjectUpdateEvent):
+    class Meta:
+        proxy = True
+UnpartitionedProjectUpdateEvent._meta.db_table = '_unpartitioned_' + ProjectUpdateEvent._meta.db_table  # noqa
 
 
 class BaseCommandEvent(CreatedModifiedModel):
@@ -697,6 +714,8 @@ class AdHocCommandEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id', 'job_created']
 
+    objects = DeferJobCreatedManager()
+
     class Meta:
         app_label = 'main'
         ordering = ('-pk',)
@@ -786,9 +805,17 @@ class AdHocCommandEvent(BaseCommandEvent):
         analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=self)))
 
 
+class UnpartitionedAdHocCommandEvent(AdHocCommandEvent):
+    class Meta:
+        proxy = True
+UnpartitionedAdHocCommandEvent._meta.db_table = '_unpartitioned_' + AdHocCommandEvent._meta.db_table  # noqa
+
+
 class InventoryUpdateEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id', 'job_created']
+
+    objects = DeferJobCreatedManager()
 
     class Meta:
         app_label = 'main'
@@ -824,9 +851,17 @@ class InventoryUpdateEvent(BaseCommandEvent):
         return False
 
 
+class UnpartitionedInventoryUpdateEvent(InventoryUpdateEvent):
+    class Meta:
+        proxy = True
+UnpartitionedInventoryUpdateEvent._meta.db_table = '_unpartitioned_' + InventoryUpdateEvent._meta.db_table  # noqa
+
+
 class SystemJobEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['system_job_id', 'job_created']
+
+    objects = DeferJobCreatedManager()
 
     class Meta:
         app_label = 'main'
@@ -860,3 +895,9 @@ class SystemJobEvent(BaseCommandEvent):
     @property
     def changed(self):
         return False
+
+
+class UnpartitionedSystemJobEvent(SystemJobEvent):
+    class Meta:
+        proxy = True
+UnpartitionedSystemJobEvent._meta.db_table = '_unpartitioned_' + SystemJobEvent._meta.db_table  # noqa

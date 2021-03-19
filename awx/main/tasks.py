@@ -30,7 +30,7 @@ from base64 import b64encode
 
 # Django
 from django.conf import settings
-from django.db import transaction, DatabaseError, IntegrityError, ProgrammingError, connection
+from django.db import transaction, DatabaseError, IntegrityError
 from django.db.models.fields.related import ForeignKey
 from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
@@ -78,8 +78,7 @@ from awx.main.models import (
     InventoryUpdateEvent,
     AdHocCommandEvent,
     SystemJobEvent,
-    build_safe_env,
-    migrate_events_to_partitions
+    build_safe_env
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError, PostRunError
@@ -173,12 +172,6 @@ def dispatch_startup():
     if Instance.objects.me().is_controller():
         awx_isolated_heartbeat()
     Metrics().clear_values()
-
-    # at process startup, detect the need to migrate old event records to
-    # partitions; at *some point* in the future, once certain versions of AWX
-    # and Tower fall out of use/support, we can probably just _assume_ that
-    # everybody has moved to partitions, and remove this code entirely
-    migrate_events_to_partitions()
 
     # Update Tower's rsyslog.conf file based on loggins settings in the db
     reconfigure_rsyslog()
@@ -701,42 +694,6 @@ def update_host_smart_inventory_memberships():
     # Update computed fields for changed inventories outside atomic action
     for smart_inventory in changed_inventories:
         smart_inventory.update_computed_fields()
-
-
-@task(queue=get_local_queuename)
-def migrate_legacy_event_data(tblname):
-    if 'event' not in tblname:
-        return
-    with advisory_lock(f'partition_migration_{tblname}', wait=False) as acquired:
-        if acquired is False:
-            return
-        chunk = settings.JOB_EVENT_MIGRATION_CHUNK_SIZE
-
-        def _remaining():
-            try:
-                cursor.execute(f'SELECT MAX(id) FROM _unpartitioned_{tblname};')
-                return cursor.fetchone()[0]
-            except ProgrammingError:
-                # the table is gone (migration is unnecessary)
-                return None
-
-        with connection.cursor() as cursor:
-            total_rows = _remaining()
-            while total_rows:
-                with transaction.atomic():
-                    cursor.execute(f'''INSERT INTO {tblname} SELECT *, '1970-01-01' as job_created FROM _unpartitioned_{tblname} ORDER BY id DESC LIMIT {chunk} RETURNING id;''')
-                    last_insert_pk = cursor.fetchone()
-                    if last_insert_pk is None:
-                        # this means that the SELECT from the old table was
-                        # empty, and there was nothing to insert (so we're done)
-                        break
-                    last_insert_pk = last_insert_pk[0]
-                    cursor.execute(f'DELETE FROM _unpartitioned_{tblname} WHERE id IN (SELECT id FROM _unpartitioned_{tblname} ORDER BY id DESC LIMIT {chunk});')
-                logger.warn(f'migrated rows to partitioned {tblname} from _unpartitioned_{tblname}; # ({last_insert_pk} rows remaining)')
-
-            if _remaining() is None:
-                cursor.execute(f'DROP TABLE IF EXISTS _unpartitioned_{tblname}')
-                logger.warn(f'{tblname} migration to partitions has finished')
 
 
 @task(queue=get_local_queuename)

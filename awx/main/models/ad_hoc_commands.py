@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import prevent_search, AD_HOC_JOB_TYPE_CHOICES, VERBOSITY_CHOICES, VarsDictProperty
-from awx.main.models.events import AdHocCommandEvent
+from awx.main.models.events import AdHocCommandEvent, UnpartitionedAdHocCommandEvent
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
 
@@ -127,6 +127,8 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     @property
     def event_class(self):
+        if self.has_unpartitioned_events:
+            return UnpartitionedAdHocCommandEvent
         return AdHocCommandEvent
 
     @property

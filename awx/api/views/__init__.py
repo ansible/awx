@@ -21,7 +21,7 @@ from urllib3.exceptions import ConnectTimeoutError
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.db.models import Q, Sum
-from django.db import IntegrityError, transaction, connection
+from django.db import IntegrityError, ProgrammingError, transaction, connection
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -179,6 +179,15 @@ from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, Gitlab
 
 
 logger = logging.getLogger('awx.api.views')
+
+
+def unpartitioned_event_horizon(cls):
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute(f'SELECT MAX(id) FROM _unpartitioned_{cls._meta.db_table}')
+            return cursor.fetchone()[0]
+        except ProgrammingError:
+            return 0
 
 
 def api_exception_handler(exc, context):
@@ -898,9 +907,9 @@ class ProjectUpdateEventsList(SubListAPIView):
         return super(ProjectUpdateEventsList, self).finalize_response(request, response, *args, **kwargs)
 
     def get_queryset(self):
-        return super(ProjectUpdateEventsList, self).get_queryset().filter(
-            job_created=self.get_parent_object().created_or_epoch
-        )
+        pu = self.get_parent_object()
+        self.check_parent_access(pu)
+        return pu.get_event_queryset()
 
 
 class SystemJobEventsList(SubListAPIView):
@@ -917,9 +926,9 @@ class SystemJobEventsList(SubListAPIView):
         return super(SystemJobEventsList, self).finalize_response(request, response, *args, **kwargs)
 
     def get_queryset(self):
-        return super(SystemJobEventsList, self).get_queryset().filter(
-            job_created=self.get_parent_object().created_or_epoch
-        )
+        job = self.get_parent_object()
+        self.check_parent_access(job)
+        return job.get_event_queryset()
 
 
 class ProjectUpdateCancel(RetrieveAPIView):
@@ -3755,8 +3764,17 @@ class JobHostSummaryDetail(RetrieveAPIView):
 
 class JobEventDetail(RetrieveAPIView):
 
-    model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
+
+    @property
+    def is_partitioned(self):
+        return int(self.kwargs['pk']) > unpartitioned_event_horizon(models.JobEvent)
+
+    @property
+    def model(self):
+        if self.is_partitioned:
+            return models.JobEvent
+        return models.UnpartitionedJobEvent
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -3766,37 +3784,31 @@ class JobEventDetail(RetrieveAPIView):
 
 class JobEventChildrenList(NoTruncateMixin, SubListAPIView):
 
-    model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
-    parent_model = models.JobEvent
     relationship = 'children'
     name = _('Job Event Children List')
     search_fields = ('stdout',)
 
+    @property
+    def is_partitioned(self):
+        return int(self.kwargs['pk']) > unpartitioned_event_horizon(models.JobEvent)
+
+    @property
+    def model(self):
+        if self.is_partitioned:
+            return models.JobEvent
+        return models.UnpartitionedJobEvent
+
+    @property
+    def parent_model(self):
+        return self.model
+
     def get_queryset(self):
         parent_event = self.get_parent_object()
         self.check_parent_access(parent_event)
-        qs = self.request.user.get_queryset(self.model).filter(
+        return parent_event.job.get_event_queryset().filter(
             parent_uuid=parent_event.uuid
-        ).filter(
-            job_created=parent_event.job.created_or_epoch
         )
-        return qs
-
-
-class JobEventHostsList(HostRelatedSearchMixin, SubListAPIView):
-
-    model = models.Host
-    serializer_class = serializers.HostSerializer
-    parent_model = models.JobEvent
-    relationship = 'hosts'
-    name = _('Job Event Hosts List')
-
-    def get_queryset(self):
-        parent_event = self.get_parent_object()
-        self.check_parent_access(parent_event)
-        qs = self.request.user.get_queryset(self.model).filter(job_events_as_primary_host=parent_event)
-        return qs
 
 
 class BaseJobEventsList(NoTruncateMixin, SubListAPIView):
@@ -3836,10 +3848,7 @@ class JobJobEventsList(BaseJobEventsList):
     def get_queryset(self):
         job = self.get_parent_object()
         self.check_parent_access(job)
-        qs = job.job_events.filter(
-            job_created=self.get_parent_object().created_or_epoch
-        ).select_related('host').order_by('start_line')
-        return qs.all()
+        return job.get_event_queryset().select_related('host').order_by('start_line')
 
 
 class AdHocCommandList(ListCreateAPIView):
@@ -3997,6 +4006,11 @@ class AdHocCommandEventList(NoTruncateMixin, ListAPIView):
     serializer_class = serializers.AdHocCommandEventSerializer
     search_fields = ('stdout',)
 
+    def get_queryset(self):
+        adhoc = self.get_parent_object()
+        self.check_parent_access(adhoc)
+        return adhoc.get_event_queryset()
+
 
 class AdHocCommandEventDetail(RetrieveAPIView):
 
@@ -4019,9 +4033,9 @@ class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
     search_fields = ('stdout',)
 
     def get_queryset(self):
-        return super(BaseAdHocCommandEventsList, self).get_queryset().filter(
-            job_created=self.get_parent_object().created_or_epoch
-        )
+        adhoc = self.get_parent_object()
+        self.check_parent_access(adhoc)
+        return adhoc.get_event_queryset()
 
 
 class HostAdHocCommandEventsList(BaseAdHocCommandEventsList):
