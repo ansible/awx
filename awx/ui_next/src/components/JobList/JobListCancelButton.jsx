@@ -4,18 +4,18 @@ import { t } from '@lingui/macro';
 import { arrayOf, func } from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { KebabifiedContext } from '../../contexts/Kebabified';
+import isJobRunning from '../../util/jobs';
 import AlertModal from '../AlertModal';
 import { Job } from '../../types';
 
 function cannotCancelBecausePermissions(job) {
   return (
-    !job.summary_fields.user_capabilities.start &&
-    ['pending', 'waiting', 'running'].includes(job.status)
+    !job.summary_fields.user_capabilities.start && isJobRunning(job.status)
   );
 }
 
 function cannotCancelBecauseNotRunning(job) {
-  return !['pending', 'waiting', 'running'].includes(job.status);
+  return !isJobRunning(job.status);
 }
 
 function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {

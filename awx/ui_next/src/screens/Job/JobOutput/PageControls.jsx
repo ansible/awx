@@ -33,6 +33,7 @@ const PageControls = ({
 }) => (
   <Wrapper>
     <Button
+      ouiaId="job-output-expand-collapse-lines-button"
       aria-label={i18n._(t`Toggle expand/collapse event lines`)}
       variant="plain"
       css="margin-right: auto"
@@ -40,6 +41,7 @@ const PageControls = ({
       <PlusIcon />
     </Button>
     <Button
+      ouiaId="job-output-scroll-previous-button"
       aria-label={i18n._(t`Scroll previous`)}
       onClick={onScrollPrevious}
       variant="plain"
@@ -47,6 +49,7 @@ const PageControls = ({
       <AngleUpIcon />
     </Button>
     <Button
+      ouiaId="job-output-scroll-next-button"
       aria-label={i18n._(t`Scroll next`)}
       onClick={onScrollNext}
       variant="plain"
@@ -54,6 +57,7 @@ const PageControls = ({
       <AngleDownIcon />
     </Button>
     <Button
+      ouiaId="job-output-scroll-first-button"
       aria-label={i18n._(t`Scroll first`)}
       onClick={onScrollFirst}
       variant="plain"
@@ -61,6 +65,7 @@ const PageControls = ({
       <AngleDoubleUpIcon />
     </Button>
     <Button
+      ouiaId="job-output-scroll-last-button"
       aria-label={i18n._(t`Scroll last`)}
       onClick={onScrollLast}
       variant="plain"

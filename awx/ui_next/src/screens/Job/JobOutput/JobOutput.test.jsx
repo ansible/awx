@@ -1,14 +1,42 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import JobOutput, { _JobOutput } from './JobOutput';
+import JobOutput from './JobOutput';
 import { JobsAPI } from '../../../api';
 import mockJobData from '../shared/data.job.json';
 import mockJobEventsData from './data.job_events.json';
+import mockFilteredJobEventsData from './data.filtered_job_events.json';
 
 jest.mock('../../../api');
+
+const generateChattyRows = () => {
+  const rows = [
+    '',
+    'PLAY [all] *********************************************************************16:17:13',
+    '',
+    'TASK [debug] *******************************************************************16:17:13',
+  ];
+
+  for (let i = 1; i < 95; i++) {
+    rows.push(
+      `ok: [localhost] => (item=${i}) => {`,
+      `    "msg": "This is a debug message: ${i}"`,
+      '}'
+    );
+  }
+
+  rows.push(
+    '',
+    'PLAY RECAP *********************************************************************16:17:15',
+    'localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   ',
+    ''
+  );
+
+  return rows;
+};
 
 async function checkOutput(wrapper, expectedLines) {
   await waitForElement(wrapper, 'div[type="job_event"]', el => el.length > 1);
@@ -41,11 +69,19 @@ async function findScrollButtons(wrapper) {
   };
 }
 
+const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  'offsetHeight'
+);
+const originalOffsetWidth = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  'offsetWidth'
+);
+
 describe('<JobOutput />', () => {
   let wrapper;
   const mockJob = mockJobData;
   const mockJobEvents = mockJobEventsData;
-  const scrollMock = jest.fn();
 
   beforeEach(() => {
     JobsAPI.readEvents.mockResolvedValue({
@@ -64,289 +100,194 @@ describe('<JobOutput />', () => {
   });
 
   test('initially renders succesfully', async () => {
-    wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    await act(async () => {
+      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    });
     await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
-    await checkOutput(wrapper, [
-      'ok: [localhost] => (item=37) => {',
-      '    "msg": "This is a debug message: 37"',
-      '}',
-      'ok: [localhost] => (item=38) => {',
-      '    "msg": "This is a debug message: 38"',
-      '}',
-      'ok: [localhost] => (item=39) => {',
-      '    "msg": "This is a debug message: 39"',
-      '}',
-      'ok: [localhost] => (item=40) => {',
-      '    "msg": "This is a debug message: 40"',
-      '}',
-      'ok: [localhost] => (item=41) => {',
-      '    "msg": "This is a debug message: 41"',
-      '}',
-      'ok: [localhost] => (item=42) => {',
-      '    "msg": "This is a debug message: 42"',
-      '}',
-      'ok: [localhost] => (item=43) => {',
-      '    "msg": "This is a debug message: 43"',
-      '}',
-      'ok: [localhost] => (item=44) => {',
-      '    "msg": "This is a debug message: 44"',
-      '}',
-      'ok: [localhost] => (item=45) => {',
-      '    "msg": "This is a debug message: 45"',
-      '}',
-      'ok: [localhost] => (item=46) => {',
-      '    "msg": "This is a debug message: 46"',
-      '}',
-      'ok: [localhost] => (item=47) => {',
-      '    "msg": "This is a debug message: 47"',
-      '}',
-      'ok: [localhost] => (item=48) => {',
-      '    "msg": "This is a debug message: 48"',
-      '}',
-      'ok: [localhost] => (item=49) => {',
-      '    "msg": "This is a debug message: 49"',
-      '}',
-      'ok: [localhost] => (item=50) => {',
-      '    "msg": "This is a debug message: 50"',
-      '}',
-      'ok: [localhost] => (item=51) => {',
-      '    "msg": "This is a debug message: 51"',
-      '}',
-      'ok: [localhost] => (item=52) => {',
-      '    "msg": "This is a debug message: 52"',
-      '}',
-      'ok: [localhost] => (item=53) => {',
-      '    "msg": "This is a debug message: 53"',
-      '}',
-      'ok: [localhost] => (item=54) => {',
-      '    "msg": "This is a debug message: 54"',
-      '}',
-      'ok: [localhost] => (item=55) => {',
-      '    "msg": "This is a debug message: 55"',
-      '}',
-      'ok: [localhost] => (item=56) => {',
-      '    "msg": "This is a debug message: 56"',
-      '}',
-      'ok: [localhost] => (item=57) => {',
-      '    "msg": "This is a debug message: 57"',
-      '}',
-      'ok: [localhost] => (item=58) => {',
-      '    "msg": "This is a debug message: 58"',
-      '}',
-      'ok: [localhost] => (item=59) => {',
-      '    "msg": "This is a debug message: 59"',
-      '}',
-      'ok: [localhost] => (item=60) => {',
-      '    "msg": "This is a debug message: 60"',
-      '}',
-      'ok: [localhost] => (item=61) => {',
-      '    "msg": "This is a debug message: 61"',
-      '}',
-      'ok: [localhost] => (item=62) => {',
-      '    "msg": "This is a debug message: 62"',
-      '}',
-      'ok: [localhost] => (item=63) => {',
-      '    "msg": "This is a debug message: 63"',
-      '}',
-      'ok: [localhost] => (item=64) => {',
-      '    "msg": "This is a debug message: 64"',
-      '}',
-      'ok: [localhost] => (item=65) => {',
-      '    "msg": "This is a debug message: 65"',
-      '}',
-      'ok: [localhost] => (item=66) => {',
-      '    "msg": "This is a debug message: 66"',
-      '}',
-      'ok: [localhost] => (item=67) => {',
-      '    "msg": "This is a debug message: 67"',
-      '}',
-      'ok: [localhost] => (item=68) => {',
-      '    "msg": "This is a debug message: 68"',
-      '}',
-      'ok: [localhost] => (item=69) => {',
-      '    "msg": "This is a debug message: 69"',
-      '}',
-      'ok: [localhost] => (item=70) => {',
-      '    "msg": "This is a debug message: 70"',
-      '}',
-      'ok: [localhost] => (item=71) => {',
-      '    "msg": "This is a debug message: 71"',
-      '}',
-      'ok: [localhost] => (item=72) => {',
-      '    "msg": "This is a debug message: 72"',
-      '}',
-      'ok: [localhost] => (item=73) => {',
-      '    "msg": "This is a debug message: 73"',
-      '}',
-      'ok: [localhost] => (item=74) => {',
-      '    "msg": "This is a debug message: 74"',
-      '}',
-      'ok: [localhost] => (item=75) => {',
-      '    "msg": "This is a debug message: 75"',
-      '}',
-      'ok: [localhost] => (item=76) => {',
-      '    "msg": "This is a debug message: 76"',
-      '}',
-      'ok: [localhost] => (item=77) => {',
-      '    "msg": "This is a debug message: 77"',
-      '}',
-      'ok: [localhost] => (item=78) => {',
-      '    "msg": "This is a debug message: 78"',
-      '}',
-      'ok: [localhost] => (item=79) => {',
-      '    "msg": "This is a debug message: 79"',
-      '}',
-      'ok: [localhost] => (item=80) => {',
-      '    "msg": "This is a debug message: 80"',
-      '}',
-      'ok: [localhost] => (item=81) => {',
-      '    "msg": "This is a debug message: 81"',
-      '}',
-      'ok: [localhost] => (item=82) => {',
-      '    "msg": "This is a debug message: 82"',
-      '}',
-      'ok: [localhost] => (item=83) => {',
-      '    "msg": "This is a debug message: 83"',
-      '}',
-      'ok: [localhost] => (item=84) => {',
-      '    "msg": "This is a debug message: 84"',
-      '}',
-      'ok: [localhost] => (item=85) => {',
-      '    "msg": "This is a debug message: 85"',
-      '}',
-      'ok: [localhost] => (item=86) => {',
-      '    "msg": "This is a debug message: 86"',
-      '}',
-      'ok: [localhost] => (item=87) => {',
-      '    "msg": "This is a debug message: 87"',
-      '}',
-      'ok: [localhost] => (item=88) => {',
-      '    "msg": "This is a debug message: 88"',
-      '}',
-      'ok: [localhost] => (item=89) => {',
-      '    "msg": "This is a debug message: 89"',
-      '}',
-      'ok: [localhost] => (item=90) => {',
-      '    "msg": "This is a debug message: 90"',
-      '}',
-      'ok: [localhost] => (item=91) => {',
-      '    "msg": "This is a debug message: 91"',
-      '}',
-      'ok: [localhost] => (item=92) => {',
-      '    "msg": "This is a debug message: 92"',
-      '}',
-      'ok: [localhost] => (item=93) => {',
-      '    "msg": "This is a debug message: 93"',
-      '}',
-      'ok: [localhost] => (item=94) => {',
-      '    "msg": "This is a debug message: 94"',
-      '}',
-      '',
-      'PLAY RECAP *********************************************************************15:37:26',
-      'localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   ',
-      '',
-    ]);
+
+    await checkOutput(wrapper, generateChattyRows());
 
     expect(wrapper.find('JobOutput').length).toBe(1);
   });
 
-  test('should call scrollToRow with expected index when scroll "previous" button is clicked', async () => {
-    const handleScrollPrevious = jest.spyOn(
-      _JobOutput.prototype,
-      'handleScrollPrevious'
-    );
-    wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+  test('navigation buttons should display output properly', async () => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 10,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 100,
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    });
     await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
-    const { scrollLastButton, scrollPreviousButton } = await findScrollButtons(
-      wrapper
+    const {
+      scrollFirstButton,
+      scrollLastButton,
+      scrollPreviousButton,
+    } = await findScrollButtons(wrapper);
+    let jobEvents = wrapper.find('JobEvent');
+    expect(jobEvents.at(0).prop('stdout')).toBe('');
+    expect(jobEvents.at(1).prop('stdout')).toBe(
+      '\r\nPLAY [all] *********************************************************************'
     );
-    wrapper.find('JobOutput').instance().scrollToRow = scrollMock;
-
-    scrollLastButton.simulate('click');
-    scrollPreviousButton.simulate('click');
-
-    expect(handleScrollPrevious).toHaveBeenCalled();
-    expect(scrollMock).toHaveBeenCalledTimes(2);
-    expect(scrollMock.mock.calls).toEqual([[100], [0]]);
-  });
-
-  test('should call scrollToRow with expected indices on when scroll "first" and "last" buttons are clicked', async () => {
-    const handleScrollFirst = jest.spyOn(
-      _JobOutput.prototype,
-      'handleScrollFirst'
+    await act(async () => {
+      scrollLastButton.simulate('click');
+    });
+    wrapper.update();
+    jobEvents = wrapper.find('JobEvent');
+    expect(jobEvents.at(jobEvents.length - 2).prop('stdout')).toBe(
+      '\r\nPLAY RECAP *********************************************************************\r\n\u001b[0;32mlocalhost\u001b[0m                  : \u001b[0;32mok=1   \u001b[0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   \r\n'
     );
-    wrapper = mountWithContexts(<JobOutput job={mockJob} />);
-    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
-    const { scrollFirstButton, scrollLastButton } = await findScrollButtons(
-      wrapper
+    expect(jobEvents.at(jobEvents.length - 1).prop('stdout')).toBe('');
+    await act(async () => {
+      scrollPreviousButton.simulate('click');
+    });
+    wrapper.update();
+    jobEvents = wrapper.find('JobEvent');
+    expect(jobEvents.at(0).prop('stdout')).toBe(
+      '\u001b[0;32mok: [localhost] => (item=76) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 76"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
     );
-    wrapper.find('JobOutput').instance().scrollToRow = scrollMock;
-
-    scrollFirstButton.simulate('click');
-    scrollLastButton.simulate('click');
-    scrollFirstButton.simulate('click');
-
-    expect(handleScrollFirst).toHaveBeenCalled();
-    expect(scrollMock).toHaveBeenCalledTimes(3);
-    expect(scrollMock.mock.calls).toEqual([[0], [100], [0]]);
-  });
-
-  test('should call scrollToRow with expected index on when scroll "last" button is clicked', async () => {
-    const handleScrollLast = jest.spyOn(
-      _JobOutput.prototype,
-      'handleScrollLast'
+    expect(jobEvents.at(1).prop('stdout')).toBe(
+      '\u001b[0;32mok: [localhost] => (item=77) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 77"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
     );
-    wrapper = mountWithContexts(<JobOutput job={mockJob} />);
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper
-      .find('JobOutput')
-      .instance()
-      .handleResize({ width: 100 });
-    const { scrollLastButton } = await findScrollButtons(wrapper);
-    wrapper.find('JobOutput').instance().scrollToRow = scrollMock;
-
-    scrollLastButton.simulate('click');
-
-    expect(handleScrollLast).toHaveBeenCalled();
-    expect(scrollMock).toHaveBeenCalledTimes(1);
-    expect(scrollMock.mock.calls).toEqual([[100]]);
+    await act(async () => {
+      scrollFirstButton.simulate('click');
+    });
+    wrapper.update();
+    jobEvents = wrapper.find('JobEvent');
+    expect(jobEvents.at(0).prop('stdout')).toBe('');
+    expect(jobEvents.at(1).prop('stdout')).toBe(
+      '\r\nPLAY [all] *********************************************************************'
+    );
+    await act(async () => {
+      scrollLastButton.simulate('click');
+    });
+    wrapper.update();
+    jobEvents = wrapper.find('JobEvent');
+    expect(jobEvents.at(jobEvents.length - 2).prop('stdout')).toBe(
+      '\r\nPLAY RECAP *********************************************************************\r\n\u001b[0;32mlocalhost\u001b[0m                  : \u001b[0;32mok=1   \u001b[0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   \r\n'
+    );
+    expect(jobEvents.at(jobEvents.length - 1).prop('stdout')).toBe('');
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetHeight',
+      originalOffsetHeight
+    );
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetWidth',
+      originalOffsetWidth
+    );
   });
 
   test('should make expected api call for delete', async () => {
-    wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    await act(async () => {
+      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    });
     await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
-    wrapper.find('button[aria-label="Delete"]').simulate('click');
-    await waitForElement(
-      wrapper,
-      'Modal',
-      el => el.props().isOpen === true && el.props().title === 'Delete Job'
-    );
-    wrapper.find('Modal button[aria-label="Delete"]').simulate('click');
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
     expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
   });
 
   test('should show error dialog for failed deletion', async () => {
-    JobsAPI.destroy.mockRejectedValue(new Error({}));
-    wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    JobsAPI.destroy.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'delete',
+            url: `/api/v2/jobs/${mockJob.id}`,
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+    await act(async () => {
+      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    });
     await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
-    wrapper.find('button[aria-label="Delete"]').simulate('click');
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
     await waitForElement(
       wrapper,
-      'Modal',
-      el => el.props().isOpen === true && el.props().title === 'Delete Job'
+      'Modal[title="Job Delete Error"]',
+      el => el.length === 1
     );
-    wrapper.find('Modal button[aria-label="Delete"]').simulate('click');
-    await waitForElement(wrapper, 'Modal ErrorDetail');
-    const errorModalCloseBtn = wrapper.find(
-      'ModalBox[aria-label="Job Delete Error"] ModalBoxCloseButton'
+    await act(async () => {
+      wrapper.find('Modal[title="Job Delete Error"]').invoke('onClose')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Job Delete Error"]',
+      el => el.length === 0
     );
-    errorModalCloseBtn.simulate('click');
-    await waitForElement(wrapper, 'Modal ErrorDetail', el => el.length === 0);
+    expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  test('filter should be enabled after job finishes', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    });
+    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
+    expect(wrapper.find('Search').props().isDisabled).toBe(false);
+  });
+
+  test('filter should be disabled while job is running', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobOutput job={{ ...mockJob, status: 'running' }} />
+      );
+    });
+    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
+    expect(wrapper.find('Search').props().isDisabled).toBe(true);
+  });
+
+  test('filter should trigger api call and display correct rows', async () => {
+    const searchBtn = 'button[aria-label="Search submit button"]';
+    const searchTextInput = 'input[aria-label="Search text input"]';
+    await act(async () => {
+      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    });
+    await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
+    JobsAPI.readEvents.mockClear();
+    JobsAPI.readEvents.mockResolvedValueOnce({
+      data: mockFilteredJobEventsData,
+    });
+    await act(async () => {
+      wrapper.find(searchTextInput).instance().value = '99';
+      wrapper.find(searchTextInput).simulate('change');
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find(searchBtn).simulate('click');
+    });
+    wrapper.update();
+    expect(JobsAPI.readEvents).toHaveBeenCalledWith(2, undefined, {
+      order_by: 'start_line',
+      page: 1,
+      page_size: 50,
+      stdout__icontains: '99',
+    });
+    const jobEvents = wrapper.find('JobEvent');
+    expect(jobEvents.at(0).prop('stdout')).toBe(
+      '\u001b[0;32mok: [localhost] => (item=99) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 99"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
+    );
+    expect(jobEvents.at(1).prop('stdout')).toBe(
+      '\u001b[0;32mok: [localhost] => (item=199) => {\u001b[0m\r\n\u001b[0;32m    "msg": "This is a debug message: 199"\u001b[0m\r\n\u001b[0;32m}\u001b[0m'
+    );
   });
 
   test('should throw error', async () => {
     JobsAPI.readEvents = () => Promise.reject(new Error());
-    wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    await act(async () => {
+      wrapper = mountWithContexts(<JobOutput job={mockJob} />);
+    });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
 });

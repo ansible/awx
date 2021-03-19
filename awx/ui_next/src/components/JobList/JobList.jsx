@@ -13,6 +13,7 @@ import useRequest, {
   useDeleteItems,
   useDismissableError,
 } from '../../util/useRequest';
+import isJobRunning from '../../util/jobs';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
 import JobListCancelButton from './JobListCancelButton';
@@ -102,7 +103,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     useCallback(async () => {
       return Promise.all(
         selected.map(job => {
-          if (['new', 'pending', 'waiting', 'running'].includes(job.status)) {
+          if (isJobRunning(job.status)) {
             return JobsAPI.cancel(job.id, job.type);
           }
           return Promise.resolve();
