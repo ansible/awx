@@ -54,9 +54,9 @@ class InventoryUpdateEventsList(SubListAPIView):
     search_fields = ('stdout',)
 
     def get_queryset(self):
-        return super(InventoryUpdateEventsList, self).get_queryset().filter(
-            job_created=self.get_parent_object().created_or_epoch
-        )
+        iu = self.get_parent_object()
+        self.check_parent_access(iu)
+        return iu.get_event_queryset()
 
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS

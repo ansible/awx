@@ -3,7 +3,6 @@
 
 # Django
 from django.conf import settings  # noqa
-from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
 
 # AWX
@@ -27,6 +26,11 @@ from awx.main.models.events import (  # noqa
     JobEvent,
     ProjectUpdateEvent,
     SystemJobEvent,
+    UnpartitionedAdHocCommandEvent,
+    UnpartitionedInventoryUpdateEvent,
+    UnpartitionedJobEvent,
+    UnpartitionedProjectUpdateEvent,
+    UnpartitionedSystemJobEvent,
 )
 from awx.main.models.ad_hoc_commands import AdHocCommand  # noqa
 from awx.main.models.schedules import Schedule  # noqa
@@ -81,16 +85,6 @@ User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
 User.add_to_class('accessible_objects', user_accessible_objects)
-
-
-def migrate_events_to_partitions():
-    for tblname in ('main_jobevent', 'main_inventoryupdateevent', 'main_projectupdateevent', 'main_adhoccommandevent', 'main_systemjobevent'):
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT 1 FROM information_schema.tables WHERE table_name=%s', (f'_unpartitioned_{tblname}',))
-            if bool(cursor.rowcount):
-                from awx.main.tasks import migrate_legacy_event_data
-
-                migrate_legacy_event_data.apply_async([tblname])
 
 
 def cleanup_created_modified_by(sender, **kwargs):
