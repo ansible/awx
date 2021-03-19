@@ -19,7 +19,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import PROJECT_UPDATE_JOB_TYPE_CHOICES, PERM_INVENTORY_DEPLOY
-from awx.main.models.events import ProjectUpdateEvent
+from awx.main.models.events import ProjectUpdateEvent, UnpartitionedProjectUpdateEvent
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
@@ -555,6 +555,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     @property
     def event_class(self):
+        if self.has_unpartitioned_events:
+            return UnpartitionedProjectUpdateEvent
         return ProjectUpdateEvent
 
     @property
