@@ -87,18 +87,24 @@ def could_be_inventory(project_path, dir_path, filename):
 
     # Filter files that do not use a character set consistent with
     # Ansible inventory mainly
+    matched = false
     try:
         # only read through first 10 lines for performance
-        with codecs.open(
+        counter = 0
+        with open(
             inventory_path,
-            'r',
-            encoding='utf-8',
-            errors='ignore'
+            encoding='utf-8'
         ) as inv_file:
-            for line in islice(inv_file, 10):
-                if not valid_inventory_re.match(line):
-                    return None
+            for line in inv_file:
+                counter += 1
+                if counter > 10:
+                    break
+                elif valid_inventory_re.match(line):
+                    matched = True
+                    break
     except IOError:
+        return None
+    if not matched:
         return None
     return inventory_rel_path
 
