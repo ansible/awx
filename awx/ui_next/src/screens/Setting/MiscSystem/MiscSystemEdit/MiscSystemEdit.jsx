@@ -130,7 +130,6 @@ function MiscSystemEdit({ i18n }) {
     } = form;
     await submitForm({
       ...formData,
-      CUSTOM_VENV_PATHS: formatJson(formData.CUSTOM_VENV_PATHS),
       REMOTE_HOST_HEADERS: formatJson(formData.REMOTE_HOST_HEADERS),
       OAUTH2_PROVIDER: {
         ACCESS_TOKEN_EXPIRE_SECONDS,
@@ -270,10 +269,6 @@ function MiscSystemEdit({ i18n }) {
                     name="REMOTE_HOST_HEADERS"
                     config={system.REMOTE_HOST_HEADERS}
                     isRequired
-                  />
-                  <ObjectField
-                    name="CUSTOM_VENV_PATHS"
-                    config={system.CUSTOM_VENV_PATHS}
                   />
                   {submitError && <FormSubmitError error={submitError} />}
                 </FormColumnLayout>

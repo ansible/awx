@@ -6,11 +6,11 @@ import VariablesDetail from './VariablesDetail';
 jest.mock('../../api');
 
 describe('<VariablesDetail>', () => {
-  test('should render readonly CodeMirrorInput', () => {
+  test('should render readonly CodeEditor', () => {
     const wrapper = mountWithContexts(
       <VariablesDetail value="---foo: bar" label="Variables" />
     );
-    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input).toHaveLength(1);
     expect(input.prop('mode')).toEqual('yaml');
     expect(input.prop('value')).toEqual('---foo: bar');
@@ -21,7 +21,7 @@ describe('<VariablesDetail>', () => {
     const wrapper = mountWithContexts(
       <VariablesDetail value='{"foo": "bar"}' label="Variables" />
     );
-    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input).toHaveLength(1);
     expect(input.prop('mode')).toEqual('javascript');
     expect(input.prop('value')).toEqual('{"foo": "bar"}');
@@ -32,12 +32,12 @@ describe('<VariablesDetail>', () => {
       <VariablesDetail value="---foo: bar" label="Variables" />
     );
     wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
-    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input.prop('mode')).toEqual('javascript');
     expect(input.prop('value')).toEqual('{\n  "foo": "bar"\n}');
 
     wrapper.find('MultiButtonToggle').invoke('onChange')('yaml');
-    const input2 = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
+    const input2 = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input2.prop('mode')).toEqual('yaml');
     expect(input2.prop('value')).toEqual('foo: bar\n');
   });
@@ -46,9 +46,7 @@ describe('<VariablesDetail>', () => {
     const wrapper = mountWithContexts(
       <VariablesDetail value="" label="Variables" />
     );
-    expect(wrapper.find('VariablesDetail___StyledCodeMirrorInput').length).toBe(
-      1
-    );
+    expect(wrapper.find('VariablesDetail___StyledCodeEditor').length).toBe(1);
     expect(wrapper.find('div.pf-c-form__label').text()).toBe('Variables');
   });
 
@@ -63,7 +61,7 @@ describe('<VariablesDetail>', () => {
       value: '---bar: baz',
     });
     wrapper.update();
-    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input.prop('mode')).toEqual('javascript');
     expect(input.prop('value')).toEqual('{\n  "bar": "baz"\n}');
   });
@@ -72,7 +70,7 @@ describe('<VariablesDetail>', () => {
     const wrapper = mountWithContexts(
       <VariablesDetail value="" label="Variables" />
     );
-    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input.prop('value')).toEqual('---');
   });
 
@@ -84,7 +82,7 @@ describe('<VariablesDetail>', () => {
       wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
     });
     wrapper.setProps({ value: '' });
-    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input.prop('value')).toEqual('{}');
   });
 });

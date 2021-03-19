@@ -107,15 +107,9 @@ describe('<ProjectForm />', () => {
   });
 
   test('new form displays primary form fields', async () => {
-    const config = {
-      custom_virtualenvs: ['venv/foo', 'venv/bar'],
-    };
     await act(async () => {
       wrapper = mountWithContexts(
-        <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />,
-        {
-          context: { config },
-        }
+        <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -126,7 +120,7 @@ describe('<ProjectForm />', () => {
       wrapper.find('FormGroup[label="Source Control Credential Type"]').length
     ).toBe(1);
     expect(wrapper.find('FormGroup[label="Ansible Environment"]').length).toBe(
-      1
+      0
     );
     expect(wrapper.find('FormGroup[label="Options"]').length).toBe(0);
   });

@@ -64,10 +64,10 @@ const getAggregatedCredentials = (
         templateDefaultCred.credential_type === overrideCred.credential_type
       ) {
         if (
-          (!templateDefaultCred.vault_id && !overrideCred.inputs.vault_id) ||
+          (!templateDefaultCred.vault_id && !overrideCred.inputs?.vault_id) ||
           (templateDefaultCred.vault_id &&
-            overrideCred.inputs.vault_id &&
-            templateDefaultCred.vault_id === overrideCred.inputs.vault_id)
+            overrideCred.inputs?.vault_id &&
+            templateDefaultCred.vault_id === overrideCred.inputs?.vault_id)
         ) {
           credentialHasOverride = true;
         }
@@ -405,16 +405,7 @@ function Visualizer({ template, i18n }) {
                   failure_nodes: [],
                   always_nodes: [],
                 };
-                if (node.promptValues?.removedCredentials?.length > 0) {
-                  node.promptValues.removedCredentials.forEach(cred => {
-                    disassociateCredentialRequests.push(
-                      WorkflowJobTemplateNodesAPI.disassociateCredentials(
-                        data.id,
-                        cred.id
-                      )
-                    );
-                  });
-                }
+
                 if (node.promptValues?.addedCredentials?.length > 0) {
                   node.promptValues.addedCredentials.forEach(cred => {
                     associateCredentialRequests.push(
@@ -583,8 +574,9 @@ function Visualizer({ template, i18n }) {
           <AlertModal
             isOpen
             variant="error"
-            title={i18n._(t`Error!`)}
+            title={i18n._(t`Error saving the workflow!`)}
             onClose={dismissNodeRequestError}
+            aria-label={i18n._(t`Error saving the workflow!`)}
           >
             {i18n._(t`There was an error saving the workflow.`)}
             <ErrorDetail error={nodeRequestError} />

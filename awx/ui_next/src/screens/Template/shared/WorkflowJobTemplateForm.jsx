@@ -26,7 +26,7 @@ import {
   InventoryLookup,
   ExecutionEnvironmentLookup,
 } from '../../../components/Lookup';
-import { VariablesField } from '../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../components/CodeEditor';
 import FormActionGroup from '../../../components/FormActionGroup';
 import ContentError from '../../../components/ContentError';
 import CheckboxField from '../../../components/FormField/CheckboxField';
@@ -322,7 +322,7 @@ const FormikApp = withFormik({
         : '',
       webhook_key: template.webhook_key || '',
       execution_environment:
-        template.summary_fields?.execution_environment || '',
+        template.summary_fields?.execution_environment || null,
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {

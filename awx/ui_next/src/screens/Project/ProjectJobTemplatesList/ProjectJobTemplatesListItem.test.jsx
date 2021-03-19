@@ -186,4 +186,31 @@ describe('<ProjectJobTemplatesListItem />', () => {
       '/templates/job_template/2/details'
     );
   });
+
+  test('should render warning about missing execution environment', () => {
+    const wrapper = mountWithContexts(
+      <ProjectJobTemplatesListItem
+        isSelected={false}
+        template={{
+          id: 1,
+          name: 'Template 1',
+          url: '/templates/job_template/1',
+          type: 'job_template',
+          summary_fields: {
+            user_capabilities: {
+              edit: true,
+            },
+          },
+          custom_virtualenv: '/var/lib/awx/env',
+          execution_environment: null,
+        }}
+      />
+    );
+
+    expect(
+      wrapper.find('.missing-execution-environment').prop('content')
+    ).toEqual(
+      'Custom virtual environment /var/lib/awx/env must be replaced by an execution environment.'
+    );
+  });
 });

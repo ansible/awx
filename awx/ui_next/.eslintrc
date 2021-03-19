@@ -79,7 +79,7 @@
           "theme",
           "gridColumns"
         ],
-        "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg", "START"],
+        "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg"],
         "ignoreComponent": [
           "code",
           "Omit",

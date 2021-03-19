@@ -5,7 +5,7 @@ import { useField } from 'formik';
 import { FormGroup } from '@patternfly/react-core';
 import { minMaxValue, regExp } from '../../../../util/validators';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
-import { VariablesField } from '../../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../../components/CodeEditor';
 import FormField, { CheckboxField } from '../../../../components/FormField';
 import {
   FormFullWidthLayout,

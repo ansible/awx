@@ -11,7 +11,7 @@ import {
 } from 'prop-types';
 import { TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from './Detail';
-import CodeMirrorInput from '../CodeMirrorInput';
+import CodeEditor from '../CodeEditor';
 import Popover from '../Popover';
 
 function CodeDetail({
@@ -52,7 +52,7 @@ function CodeDetail({
         css="grid-column: 1 / -1; margin-top: -20px"
         data-cy={valueCy}
       >
-        <CodeMirrorInput
+        <CodeEditor
           mode={mode}
           value={value}
           readOnly

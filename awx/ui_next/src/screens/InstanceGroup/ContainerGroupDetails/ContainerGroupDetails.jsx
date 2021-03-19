@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button, Label } from '@patternfly/react-core';
 
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import DeleteButton from '../../../components/DeleteButton';

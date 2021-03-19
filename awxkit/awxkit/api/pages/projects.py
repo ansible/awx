@@ -1,7 +1,7 @@
 import json
 
 from awxkit.api.pages import Credential, Organization, UnifiedJob, UnifiedJobTemplate
-from awxkit.utils import filter_by_class, random_title, update_payload, PseudoNamespace
+from awxkit.utils import filter_by_class, random_title, update_payload, set_payload_foreign_key_args, PseudoNamespace
 from awxkit.api.mixins import HasCreate, HasNotifications, HasCopy, DSAdapter
 from awxkit.api.resources import resources
 from awxkit.config import config
@@ -43,16 +43,8 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
             'allow_override')
         update_payload(payload, fields, kwargs)
 
-        for fk_field in ('execution_environment', 'default_environment'):
-            rel_obj = kwargs.get(fk_field)
-            if rel_obj is None:
-                continue
-            elif isinstance(rel_obj, int):
-                payload.update(**{fk_field: int(rel_obj)})
-            elif hasattr(rel_obj, 'id'):
-                payload.update(**{fk_field: rel_obj.id})
-            else:
-                raise AttributeError(f'Related field {fk_field} must be either integer of pkid or object')
+        payload = set_payload_foreign_key_args(payload, ('execution_environment', 'default_environment'), kwargs)
+
         return payload
 
     def create_payload(

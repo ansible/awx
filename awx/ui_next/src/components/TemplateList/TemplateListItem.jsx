@@ -11,6 +11,8 @@ import {
   ProjectDiagramIcon,
   RocketIcon,
 } from '@patternfly/react-icons';
+import styled from 'styled-components';
+
 import { ActionsTd, ActionItem } from '../PaginatedTable';
 import { DetailList, Detail, DeletedDetail } from '../DetailList';
 import ChipGroup from '../ChipGroup';
@@ -22,6 +24,11 @@ import { LaunchButton } from '../LaunchButton';
 import Sparkline from '../Sparkline';
 import { toTitleCase } from '../../util/strings';
 import CopyButton from '../CopyButton';
+
+const ExclamationTriangleIconWarning = styled(ExclamationTriangleIcon)`
+  color: var(--pf-global--warning-color--100);
+  margin-left: 18px;
+`;
 
 function TemplateListItem({
   i18n,
@@ -66,6 +73,11 @@ function TemplateListItem({
     template.type === 'job_template' &&
     (!summaryFields.project ||
       (!summaryFields.inventory && !askInventoryOnLaunch));
+
+  const missingExecutionEnvironment =
+    template.type === 'job_template' &&
+    template.custom_virtualenv &&
+    !template.execution_environment;
 
   const inventoryValue = (kind, id) => {
     const inventorykind = kind === 'smart' ? 'smart_inventory' : 'inventory';
@@ -122,6 +134,19 @@ function TemplateListItem({
                 position="right"
               >
                 <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
+              </Tooltip>
+            </span>
+          )}
+          {missingExecutionEnvironment && (
+            <span>
+              <Tooltip
+                className="missing-execution-environment"
+                content={i18n._(
+                  t`Custom virtual environment ${template.custom_virtualenv} must be replaced by an execution environment.`
+                )}
+                position="right"
+              >
+                <ExclamationTriangleIconWarning />
               </Tooltip>
             </span>
           )}

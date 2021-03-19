@@ -6,6 +6,7 @@ import traceback
 
 from kubernetes.config import kube_config
 
+from django.conf import settings
 from django_guid.middleware import GuidMiddleware
 
 from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
@@ -85,6 +86,7 @@ class TaskWorker(BaseWorker):
             'task': u'awx.main.tasks.RunProjectUpdate'
         }
         '''
+        settings.__clean_on_fork__()
         result = None
         try:
             result = self.run_callable(body)

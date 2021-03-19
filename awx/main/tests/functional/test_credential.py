@@ -79,6 +79,7 @@ def test_default_cred_types():
         'aws',
         'azure_kv',
         'azure_rm',
+        'centrify_vault_kv',
         'conjur',
         'galaxy_api_token',
         'gce',

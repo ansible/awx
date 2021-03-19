@@ -153,7 +153,7 @@ describe('<LDAPEdit />', () => {
           name: 'AUTH_LDAP_SERVER_URI',
         },
       });
-      wrapper.find('CodeMirrorInput#AUTH_LDAP_TEAM_MAP').invoke('onChange')(
+      wrapper.find('CodeEditor#AUTH_LDAP_TEAM_MAP').invoke('onChange')(
         '{\n"LDAP Sales":{\n"organization":\n"mock org"\n}\n}'
       );
     });

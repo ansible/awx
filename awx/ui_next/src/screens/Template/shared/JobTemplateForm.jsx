@@ -29,7 +29,7 @@ import {
   FormCheckboxLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import { VariablesField } from '../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../components/CodeEditor';
 import { required } from '../../../util/validators';
 import { JobTemplate } from '../../../types';
 import {
@@ -732,7 +732,7 @@ const FormikApp = withFormik({
         i18n._(t`a new webhook key will be generated on save.`).toUpperCase(),
       webhook_credential: template?.summary_fields?.webhook_credential || null,
       execution_environment:
-        template.summary_fields?.execution_environment || '',
+        template.summary_fields?.execution_environment || null,
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {

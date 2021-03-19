@@ -50,6 +50,7 @@ def test_container_group_create(run_module, admin_user, kube_credential):
     result = run_module('tower_instance_group', {
         'name': 'foo-c-group',
         'credential': kube_credential.id,
+        'is_container_group': True,
         'state': 'present'
     }, admin_user)
     assert not result.get('failed', False), result['msg']
@@ -61,6 +62,7 @@ def test_container_group_create(run_module, admin_user, kube_credential):
     result = run_module('tower_instance_group', {
         'name': 'foo-c-group',
         'credential': kube_credential.id,
+        'is_container_group': True,
         'pod_spec_override': pod_spec,
         'state': 'present'
     }, admin_user)

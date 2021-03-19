@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import FormField from '../../FormField';
 import { TagMultiSelect } from '../../MultiSelect';
 import AnsibleSelect from '../../AnsibleSelect';
-import { VariablesField } from '../../CodeMirrorInput';
+import { VariablesField } from '../../CodeEditor';
 import Popover from '../../Popover';
 
 const FieldHeader = styled.div`

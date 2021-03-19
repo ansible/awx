@@ -15,7 +15,6 @@ describe('<OrganizationAdd />', () => {
     const updatedOrgData = {
       name: 'new name',
       description: 'new description',
-      custom_virtualenv: 'Buzz',
       galaxy_credentials: [],
       default_environment: { id: 1, name: 'Foo' },
     };
@@ -51,7 +50,6 @@ describe('<OrganizationAdd />', () => {
     const orgData = {
       name: 'new name',
       description: 'new description',
-      custom_virtualenv: 'Buzz',
       galaxy_credentials: [],
     };
     OrganizationsAPI.create.mockResolvedValueOnce({
@@ -78,7 +76,6 @@ describe('<OrganizationAdd />', () => {
     const orgData = {
       name: 'new name',
       description: 'new description',
-      custom_virtualenv: 'Buzz',
       galaxy_credentials: [],
     };
     OrganizationsAPI.create.mockResolvedValueOnce({
@@ -103,7 +100,6 @@ describe('<OrganizationAdd />', () => {
     const orgData = {
       name: 'new name',
       description: 'new description',
-      custom_virtualenv: 'Buzz',
       galaxy_credentials: [
         {
           id: 9000,
@@ -131,36 +127,6 @@ describe('<OrganizationAdd />', () => {
     );
   });
 
-  test('AnsibleSelect component renders if there are virtual environments', async () => {
-    const mockInstanceGroups = [
-      { name: 'One', id: 1 },
-      { name: 'Two', id: 2 },
-    ];
-    OrganizationsAPI.readInstanceGroups.mockReturnValue({
-      data: {
-        results: mockInstanceGroups,
-      },
-    });
-    const config = {
-      custom_virtualenvs: ['foo', 'bar'],
-    };
-    let wrapper;
-    await act(async () => {
-      wrapper = mountWithContexts(<OrganizationAdd />, {
-        context: { config },
-      });
-    });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    expect(wrapper.find('FormSelect')).toHaveLength(1);
-    expect(wrapper.find('FormSelectOption')).toHaveLength(3);
-    expect(
-      wrapper
-        .find('FormSelectOption')
-        .first()
-        .prop('value')
-    ).toEqual('/var/lib/awx/venv/ansible/');
-  });
-
   test('AnsibleSelect component does not render if there are 0 virtual environments', async () => {
     const mockInstanceGroups = [
       { name: 'One', id: 1 },
@@ -171,14 +137,9 @@ describe('<OrganizationAdd />', () => {
         results: mockInstanceGroups,
       },
     });
-    const config = {
-      custom_virtualenvs: [],
-    };
     let wrapper;
     await act(async () => {
-      wrapper = mountWithContexts(<OrganizationAdd />, {
-        context: { config },
-      });
+      wrapper = mountWithContexts(<OrganizationAdd />, {});
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('AnsibleSelect FormSelect')).toHaveLength(0);

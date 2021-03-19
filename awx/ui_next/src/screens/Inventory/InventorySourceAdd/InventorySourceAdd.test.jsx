@@ -74,15 +74,9 @@ describe('<InventorySourceAdd />', () => {
   });
 
   test('new form displays primary form fields', async () => {
-    const config = {
-      custom_virtualenvs: ['venv/foo', 'venv/bar'],
-    };
     await act(async () => {
       wrapper = mountWithContexts(
-        <InventorySourceAdd inventory={mockInventory} />,
-        {
-          context: { config },
-        }
+        <InventorySourceAdd inventory={mockInventory} />
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -90,7 +84,7 @@ describe('<InventorySourceAdd />', () => {
     expect(wrapper.find('FormGroup[label="Description"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Source"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Ansible Environment"]')).toHaveLength(
-      1
+      0
     );
   });
 

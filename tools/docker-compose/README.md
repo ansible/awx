@@ -1,5 +1,23 @@
 # Docker Compose for Development
 
+## Getting started
+
+### Clone the repo
+
+If you have not already done so, you will need to clone, or create a local copy, of the [AWX repo](https://github.com/ansible/awx). We generally recommend that you view the releases page:
+
+https://github.com/ansible/awx/releases/latest
+
+...and clone the latest stable tag, e.g.,
+
+`git clone -b x.y.z https://github.com/ansible/awx.git`
+
+Please note that deploying from `HEAD` (or the latest commit) is **not** stable, and that if you want to do this, you should proceed at your own risk.
+
+For more on how to clone the repo, view [git clone help](https://git-scm.com/docs/git-clone).
+
+Once you have a local copy, run the commands in the following sections from the root of the project tree.
+
 ## Overview
 
 Here are the main make targets:

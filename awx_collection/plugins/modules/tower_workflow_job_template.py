@@ -32,6 +32,14 @@ options:
       description:
         - Setting this option will change the existing name.
       type: str
+    copy_from:
+      description:
+        - Name or id to copy the workflow job template from.
+        - This will copy an existing workflow job template and change any parameters supplied.
+        - The new workflow job template name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple workflow job templates share the same name.
+      type: str
     description:
       description:
         - Optional description of this workflow job template.
@@ -146,6 +154,12 @@ EXAMPLES = '''
     name: example-workflow
     description: created by Ansible Playbook
     organization: Default
+
+- name: Copy a workflow job template
+  tower_workflow_job_template:
+    name: copy-workflow
+    copy_from: example-workflow
+    organization: Foo
 '''
 
 from ..module_utils.tower_api import TowerAPIModule
@@ -172,6 +186,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(),
+        copy_from=dict(),
         description=dict(),
         extra_vars=dict(type='dict'),
         organization=dict(),
@@ -202,6 +217,7 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get("new_name")
+    copy_from = module.params.get('copy_from')
     state = module.params.get('state')
 
     new_fields = {}
@@ -219,6 +235,15 @@ def main():
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})
+
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        existing_item = module.copy_item(
+            existing_item, copy_from, name,
+            endpoint='workflow_job_templates', item_type='workflow_job_template',
+            copy_lookup_data={},
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

@@ -80,9 +80,5 @@ OrganizationEdit.propTypes = {
   organization: PropTypes.shape().isRequired,
 };
 
-OrganizationEdit.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
-};
-
 export { OrganizationEdit as _OrganizationEdit };
 export default OrganizationEdit;

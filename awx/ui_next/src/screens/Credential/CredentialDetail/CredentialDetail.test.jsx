@@ -88,7 +88,7 @@ describe('<CredentialDetail />', () => {
     expect(sshKeyUnlockDetail.length).toBe(1);
     expect(sshKeyUnlockDetail.find('CredentialChip').length).toBe(1);
     expect(
-      wrapper.find('CodeMirrorInput#credential-ssh_key_unlock-metadata').props()
+      wrapper.find('CodeEditor#credential-ssh_key_unlock-metadata').props()
         .value
     ).toBe(JSON.stringify(mockInputSource.metadata, null, 2));
     expectDetailToMatch(

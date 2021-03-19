@@ -19,7 +19,6 @@ import {
   FormColumnLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import Popover from '../../../components/Popover';
 import {
   GitSubForm,
   SvnSubForm,
@@ -96,7 +95,6 @@ function ProjectFormFields({
     name: 'scm_type',
     validate: required(i18n._(t`Set a value for this field`), i18n),
   });
-  const [venvField] = useField('custom_virtualenv');
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
     validate: required(i18n._(t`Select a value for this field`), i18n),
@@ -293,42 +291,6 @@ function ProjectFormFields({
           </FormColumnLayout>
         </SubFormLayout>
       )}
-      <Config>
-        {({ custom_virtualenvs }) =>
-          custom_virtualenvs &&
-          custom_virtualenvs.length > 1 && (
-            <FormGroup
-              fieldId="project-custom-virtualenv"
-              label={i18n._(t`Ansible Environment`)}
-              labelIcon={
-                <Popover
-                  content={i18n._(t`Select the playbook to be executed by
-                this job.`)}
-                />
-              }
-            >
-              <AnsibleSelect
-                id="project-custom-virtualenv"
-                data={[
-                  {
-                    label: i18n._(t`Use Default Ansible Environment`),
-                    value: '/var/lib/awx/venv/ansible/',
-                    key: 'default',
-                  },
-                  ...custom_virtualenvs
-                    .filter(datum => datum !== '/var/lib/awx/venv/ansible/')
-                    .map(datum => ({
-                      label: datum,
-                      value: datum,
-                      key: datum,
-                    })),
-                ]}
-                {...venvField}
-              />
-            </FormGroup>
-          )
-        }
-      </Config>
     </>
   );
 }
@@ -397,7 +359,6 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
             allow_override: project.allow_override || false,
             base_dir: project_base_dir || '',
             credential: project.credential || '',
-            custom_virtualenv: project.custom_virtualenv || '',
             description: project.description || '',
             local_path: project.local_path || '',
             name: project.name || '',

@@ -203,6 +203,29 @@
     that:
       - result is not changed
 
+- name: Copy ssh Credential
+  tower_credential:
+    name: "copy_{{ ssh_cred_name2 }}"
+    copy_from: "{{ ssh_cred_name2 }}"
+    credential_type: Machine
+  register: result
+
+- assert:
+    that:
+      - result.copied
+
+- name: Delete an SSH credential
+  tower_credential:
+    name: "copy_{{ ssh_cred_name2 }}"
+    organization: Default
+    state: absent
+    credential_type: Machine
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Create a valid SSH credential from lookup source (old school)
   tower_credential:
     name: "{{ ssh_cred_name3 }}"

@@ -49,6 +49,7 @@ def isolated_instance_group(instance_group, instance):
 def containerized_instance_group(instance_group, kube_credential):
     ig = InstanceGroup(name="container")
     ig.credential = kube_credential
+    ig.is_container_group = True
     ig.save()
     return ig
 
@@ -287,6 +288,7 @@ def test_containerized_group_default_fields(instance_group, kube_credential):
     assert ig.policy_instance_minimum == 5
     assert ig.policy_instance_percentage == 5
     ig.credential = kube_credential
+    ig.is_container_group = True
     ig.save()
     assert ig.policy_instance_list == []
     assert ig.policy_instance_minimum == 0

@@ -26,6 +26,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
     pull,
     organization,
     summary_fields,
+    managed_by_tower: managedByTower,
   } = executionEnvironment;
 
   const {
@@ -103,25 +104,27 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           dataCy="execution-environment-modified"
         />
       </DetailList>
-      <CardActionsRow>
-        <Button
-          aria-label={i18n._(t`edit`)}
-          component={Link}
-          to={`/execution_environments/${id}/edit`}
-          ouiaId="edit-button"
-        >
-          {i18n._(t`Edit`)}
-        </Button>
-        <DeleteButton
-          name={image}
-          modalTitle={i18n._(t`Delete Execution Environment`)}
-          onConfirm={deleteExecutionEnvironment}
-          isDisabled={isLoading}
-          ouiaId="delete-button"
-        >
-          {i18n._(t`Delete`)}
-        </DeleteButton>
-      </CardActionsRow>
+      {!managedByTower && (
+        <CardActionsRow>
+          <Button
+            aria-label={i18n._(t`edit`)}
+            component={Link}
+            to={`/execution_environments/${id}/edit`}
+            ouiaId="edit-button"
+          >
+            {i18n._(t`Edit`)}
+          </Button>
+          <DeleteButton
+            name={image}
+            modalTitle={i18n._(t`Delete Execution Environment`)}
+            onConfirm={deleteExecutionEnvironment}
+            isDisabled={isLoading}
+            ouiaId="delete-button"
+          >
+            {i18n._(t`Delete`)}
+          </DeleteButton>
+        </CardActionsRow>
+      )}
 
       {error && (
         <AlertModal

@@ -12,7 +12,7 @@ import {
   isJsonObject,
   isJsonString,
 } from '../../util/yaml';
-import CodeMirrorInput from './CodeMirrorInput';
+import CodeEditor from './CodeEditor';
 import { JSON_MODE, YAML_MODE } from './constants';
 
 function getValueAsMode(value, mode) {
@@ -99,7 +99,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, fullHeight }) {
         fullWidth
         css="grid-column: 1 / -1; margin-top: -20px"
       >
-        <CodeMirrorInput
+        <CodeEditor
           mode={mode}
           value={currentValue}
           readOnly

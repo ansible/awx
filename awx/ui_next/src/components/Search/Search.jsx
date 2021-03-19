@@ -41,6 +41,8 @@ function Search({
   searchableKeys,
   relatedSearchableKeys,
   onShowAdvancedSearch,
+  isDisabled,
+  maxSelectHeight,
 }) {
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [searchKey, setSearchKey] = useState(
@@ -178,6 +180,7 @@ function Search({
             selections={searchColumnName}
             isOpen={isSearchDropdownOpen}
             ouiaId="simple-key-select"
+            isDisabled={isDisabled}
           >
             {searchOptions}
           </Select>
@@ -201,6 +204,7 @@ function Search({
               onSearch={onSearch}
               searchableKeys={searchableKeys}
               relatedSearchableKeys={relatedSearchableKeys}
+              maxSelectHeight={maxSelectHeight}
             />
           )) ||
             (options && (
@@ -219,6 +223,8 @@ function Search({
                   isOpen={isFilterDropdownOpen}
                   placeholderText={`Filter By ${name}`}
                   ouiaId={`filter-by-${key}`}
+                  isDisabled={isDisabled}
+                  maxHeight={maxSelectHeight}
                 >
                   {options.map(([optionKey, optionLabel]) => (
                     <SelectOption
@@ -241,6 +247,8 @@ function Search({
                 isOpen={isFilterDropdownOpen}
                 placeholderText={`Filter By ${name}`}
                 ouiaId={`filter-by-${key}`}
+                isDisabled={isDisabled}
+                maxHeight={maxSelectHeight}
               >
                 <SelectOption key="true" value="true">
                   {booleanLabels.true || i18n._(t`Yes`)}
@@ -265,11 +273,12 @@ function Search({
                   value={searchValue}
                   onChange={setSearchValue}
                   onKeyDown={handleTextKeyDown}
+                  isDisabled={isDisabled}
                 />
                 <div css={!searchValue && `cursor:not-allowed`}>
                   <Button
                     variant={ButtonVariant.control}
-                    isDisabled={!searchValue}
+                    isDisabled={!searchValue || isDisabled}
                     aria-label={i18n._(t`Search submit button`)}
                     onClick={handleSearch}
                   >
@@ -310,11 +319,15 @@ Search.propTypes = {
   onSearch: PropTypes.func,
   onRemove: PropTypes.func,
   onShowAdvancedSearch: PropTypes.func.isRequired,
+  isDisabled: PropTypes.bool,
+  maxSelectHeight: PropTypes.string,
 };
 
 Search.defaultProps = {
   onSearch: null,
   onRemove: null,
+  isDisabled: false,
+  maxSelectHeight: '300px',
 };
 
 export default withI18n()(withRouter(Search));
