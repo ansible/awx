@@ -35,7 +35,7 @@ from awx.main.fields import (
 )
 from awx.main.managers import HostManager
 from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, prevent_search, accepts_json
-from awx.main.models.events import InventoryUpdateEvent
+from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -1266,6 +1266,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     @property
     def event_class(self):
+        if self.has_unpartitioned_events:
+            return UnpartitionedInventoryUpdateEvent
         return InventoryUpdateEvent
 
     @property
