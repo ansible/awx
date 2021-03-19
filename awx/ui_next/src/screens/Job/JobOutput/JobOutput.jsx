@@ -319,8 +319,8 @@ function JobOutput({
           if (data.final_counter) {
             jobSocketCounter.current = data.final_counter;
           }
-          if (job.status) {
-            setJobStatus(job.status);
+          if (data.status) {
+            setJobStatus(data.status);
           }
         }
       });
@@ -393,7 +393,10 @@ function JobOutput({
   } = useDismissableError(deleteError);
 
   const monitorJobSocketCounter = () => {
-    if (jobSocketCounter.current === remoteRowCount) {
+    if (
+      jobSocketCounter.current === remoteRowCount &&
+      !isJobRunning(job.status)
+    ) {
       clearInterval(interval.current);
     }
     if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
