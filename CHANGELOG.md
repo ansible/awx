@@ -46,6 +46,7 @@ To learn more about Ansible Builder and Execution Environments, see: https://www
 - Added toast message to show notification template test result to notification templates list https://github.com/ansible/awx/pull/9318
 - Replaced CodeMirror with AceEditor for editing template variables and notification templates https://github.com/ansible/awx/pull/9281
 - Added support for filtering and pagination on job output https://github.com/ansible/awx/pull/9208
+- Added support for html in custom login text https://github.com/ansible/awx/pull/9519
 
 # 17.1.0 (March 9th, 2021)
 - Addressed a security issue in AWX (CVE-2021-20253)
