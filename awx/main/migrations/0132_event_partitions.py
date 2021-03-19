@@ -1,9 +1,4 @@
-from datetime import datetime
-
 from django.db import migrations, models, connection
-from django.utils.timezone import now
-
-from awx.main.utils.common import create_partition
 
 
 def migrate_event_data(apps, schema_editor):
@@ -72,16 +67,6 @@ def migrate_event_data(apps, schema_editor):
                 f'ALTER TABLE ONLY {tblname} '
                 f'ADD CONSTRAINT {tblname}_pkey_new PRIMARY KEY (id, job_created);'
             )
-
-            current_time = now()
-
-            # create initial partition containing all existing events
-            epoch = datetime.utcfromtimestamp(0)
-            create_partition(tblname, epoch, current_time, 'old_events')
-
-            # .. and first partition
-            # .. which is a special case, as it only covers remainder of current hour
-            create_partition(tblname, current_time)
 
 
 class FakeAddField(migrations.AddField):

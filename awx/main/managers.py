@@ -11,9 +11,14 @@ from django.conf import settings
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.pglock import advisory_lock
 
-___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager']
+___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager', 'DeferJobCreatedManager']
 
 logger = logging.getLogger('awx.main.managers')
+
+
+class DeferJobCreatedManager(models.Manager):
+    def get_queryset(self):
+        return super(DeferJobCreatedManager, self).get_queryset().defer('job_created')
 
 
 class HostManager(models.Manager):

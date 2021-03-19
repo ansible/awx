@@ -37,7 +37,7 @@ from awx.main.models.base import (
     VERBOSITY_CHOICES,
     VarsDictProperty,
 )
-from awx.main.models.events import JobEvent, SystemJobEvent
+from awx.main.models.events import JobEvent, UnpartitionedJobEvent, UnpartitionedSystemJobEvent, SystemJobEvent
 from awx.main.models.unified_jobs import UnifiedJobTemplate, UnifiedJob
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -614,6 +614,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def event_class(self):
+        if self.has_unpartitioned_events:
+            return UnpartitionedJobEvent
         return JobEvent
 
     def copy_unified_job(self, **new_prompts):
@@ -1259,6 +1261,8 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     @property
     def event_class(self):
+        if self.has_unpartitioned_events:
+            return UnpartitionedSystemJobEvent
         return SystemJobEvent
 
     @property
