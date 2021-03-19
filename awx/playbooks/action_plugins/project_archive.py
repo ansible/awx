@@ -45,9 +45,7 @@ class ActionModule(ActionBase):
         # Most well formed archives contain a single root directory, typically named
         # project-name-1.0.0. The project contents should be inside that directory.
         start_index = 0
-        root_contents = set(
-            [filename.split(os.path.sep)[0] for filename in get_filenames()]
-        )
+        root_contents = set([filename.split(os.path.sep)[0] for filename in get_filenames()])
         if len(root_contents) == 1:
             start_index = len(list(root_contents)[0]) + 1
 

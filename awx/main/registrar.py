@@ -5,7 +5,6 @@ from django.db.models.signals import pre_save, post_save, pre_delete, m2m_change
 
 
 class ActivityStreamRegistrar(object):
-
     def __init__(self):
         self.models = []
 
@@ -22,8 +21,9 @@ class ActivityStreamRegistrar(object):
             for m2mfield in model._meta.many_to_many:
                 try:
                     m2m_attr = getattr(model, m2mfield.name)
-                    m2m_changed.connect(activity_stream_associate, sender=m2m_attr.through,
-                                        dispatch_uid=str(self.__class__) + str(m2m_attr.through) + "_associate")
+                    m2m_changed.connect(
+                        activity_stream_associate, sender=m2m_attr.through, dispatch_uid=str(self.__class__) + str(m2m_attr.through) + "_associate"
+                    )
                 except AttributeError:
                     pass
 
@@ -33,7 +33,6 @@ class ActivityStreamRegistrar(object):
             pre_save.disconnect(dispatch_uid=str(self.__class__) + str(model) + "_update")
             pre_delete.disconnect(dispatch_uid=str(self.__class__) + str(model) + "_delete")
             self.models.pop(model)
-
 
             for m2mfield in model._meta.many_to_many:
                 m2m_attr = getattr(model, m2mfield.name)

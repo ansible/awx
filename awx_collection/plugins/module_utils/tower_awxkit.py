@@ -1,13 +1,15 @@
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-from . tower_module import TowerModule
+from .tower_module import TowerModule
 from ansible.module_utils.basic import missing_required_lib
 
 try:
     from awxkit.api.client import Connection
     from awxkit.api.pages.api import ApiV2
     from awxkit.api import get_registered_page
+
     HAS_AWX_KIT = True
 except ImportError:
     HAS_AWX_KIT = False

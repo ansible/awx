@@ -5,7 +5,6 @@ from . import page
 
 
 class Job(UnifiedJob):
-
     def relaunch(self, payload={}):
         result = self.related.relaunch.post(payload)
         return self.walk(result.endpoint)
@@ -19,9 +18,7 @@ class Jobs(page.PageList, Job):
     pass
 
 
-page.register_page([resources.jobs,
-                    resources.job_template_jobs,
-                    resources.system_job_template_jobs], Jobs)
+page.register_page([resources.jobs, resources.job_template_jobs, resources.system_job_template_jobs], Jobs)
 
 
 class JobCancel(UnifiedJob):
@@ -37,8 +34,7 @@ class JobEvent(base.Base):
     pass
 
 
-page.register_page([resources.job_event,
-                    resources.job_job_event], JobEvent)
+page.register_page([resources.job_event, resources.job_job_event], JobEvent)
 
 
 class JobEvents(page.PageList, JobEvent):
@@ -46,10 +42,7 @@ class JobEvents(page.PageList, JobEvent):
     pass
 
 
-page.register_page([resources.job_events,
-                    resources.job_job_events,
-                    resources.job_event_children,
-                    resources.group_related_job_events], JobEvents)
+page.register_page([resources.job_events, resources.job_job_events, resources.job_event_children, resources.group_related_job_events], JobEvents)
 
 
 class JobPlay(base.Base):
@@ -97,8 +90,7 @@ class JobHostSummaries(page.PageList, JobHostSummary):
     pass
 
 
-page.register_page([resources.job_host_summaries,
-                    resources.group_related_job_host_summaries], JobHostSummaries)
+page.register_page([resources.job_host_summaries, resources.group_related_job_host_summaries], JobHostSummaries)
 
 
 class JobRelaunch(base.Base):

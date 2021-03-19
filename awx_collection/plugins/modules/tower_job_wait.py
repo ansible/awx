@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -134,26 +133,24 @@ def main():
             interval = abs((min_interval + max_interval) / 2)
         module.deprecate(
             msg="Min and max interval have been deprecated, please use interval instead; interval will be set to {0}".format(interval),
-            version="ansible.tower:4.0.0"
+            version="ansible.tower:4.0.0",
         )
 
     # Attempt to look up job based on the provided id
-    job = module.get_one(job_type, **{
-        'data': {
-            'id': job_id,
+    job = module.get_one(
+        job_type,
+        **{
+            'data': {
+                'id': job_id,
+            }
         }
-    })
+    )
 
     if job is None:
         module.fail_json(msg='Unable to wait on ' + job_type.rstrip("s") + ' {0}; that ID does not exist in Tower.'.format(job_id))
 
     # Invoke wait function
-    result = module.wait_on_url(
-        url=job['url'],
-        object_name=job_id,
-        object_type='legacy_job_wait',
-        timeout=timeout, interval=interval
-    )
+    result = module.wait_on_url(url=job['url'], object_name=job_id, object_type='legacy_job_wait', timeout=timeout, interval=interval)
 
     module.exit_json(**module.json_output)
 

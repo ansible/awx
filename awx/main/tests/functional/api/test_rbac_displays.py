@@ -59,9 +59,7 @@ class TestJobTemplateCopyEdit:
 
     @pytest.fixture
     def jt_copy_edit(self, job_template_factory, project):
-        objects = job_template_factory(
-            'copy-edit-job-template',
-            project=project)
+        objects = job_template_factory('copy-edit-job-template', project=project)
         return objects.job_template
 
     def fake_context(self, user):
@@ -88,8 +86,10 @@ class TestJobTemplateCopyEdit:
         jt_res = JobTemplate.objects.create(
             job_type='run',
             project=project,
-            inventory=None,  ask_inventory_on_launch=False, # not allowed
-            ask_credential_on_launch=True, name='deploy-job-template'
+            inventory=None,
+            ask_inventory_on_launch=False,  # not allowed
+            ask_credential_on_launch=True,
+            name='deploy-job-template',
         )
         serializer = JobTemplateSerializer(jt_res, context=self.fake_context(admin_user))
         response = serializer.to_representation(jt_res)
@@ -143,7 +143,7 @@ class TestJobTemplateCopyEdit:
 def mock_access_method(mocker):
     mock_method = mocker.MagicMock()
     mock_method.return_value = 'foobar'
-    mock_method.__name__ = 'bars' # Required for a logging statement
+    mock_method.__name__ = 'bars'  # Required for a logging statement
     return mock_method
 
 
@@ -162,8 +162,7 @@ class TestAccessListCapabilities:
         assert len(data['results']) == 1
         assert len(data['results'][0]['summary_fields'][sublist]) == 1
 
-    def test_access_list_direct_access_capability(
-            self, inventory, rando, get, mocker, mock_access_method):
+    def test_access_list_direct_access_capability(self, inventory, rando, get, mocker, mock_access_method):
         inventory.admin_role.members.add(rando)
 
         with mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method):
@@ -174,8 +173,7 @@ class TestAccessListCapabilities:
         direct_access_list = response.data['results'][0]['summary_fields']['direct_access']
         assert direct_access_list[0]['role']['user_capabilities']['unattach'] == 'foobar'
 
-    def test_access_list_indirect_access_capability(
-            self, inventory, organization, org_admin, get, mocker, mock_access_method):
+    def test_access_list_indirect_access_capability(self, inventory, organization, org_admin, get, mocker, mock_access_method):
         with mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method):
             response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), org_admin)
 
@@ -184,8 +182,7 @@ class TestAccessListCapabilities:
         indirect_access_list = response.data['results'][0]['summary_fields']['indirect_access']
         assert indirect_access_list[0]['role']['user_capabilities']['unattach'] == 'foobar'
 
-    def test_access_list_team_direct_access_capability(
-            self, inventory, team, team_member, get, mocker, mock_access_method):
+    def test_access_list_team_direct_access_capability(self, inventory, team, team_member, get, mocker, mock_access_method):
         team.member_role.children.add(inventory.admin_role)
 
         with mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method):
@@ -205,8 +202,7 @@ def test_team_roles_unattach(mocker, team, team_member, inventory, mock_access_m
         response = get(reverse('api:team_roles_list', kwargs={'pk': team.id}), team_member)
 
     # Did we assess whether team_member can remove team's permission to the inventory?
-    mock_access_method.assert_called_once_with(
-        inventory.admin_role, team.member_role, 'parents', skip_sub_obj_read_check=True, data={})
+    mock_access_method.assert_called_once_with(inventory.admin_role, team.member_role, 'parents', skip_sub_obj_read_check=True, data={})
     assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == 'foobar'
 
 
@@ -220,8 +216,7 @@ def test_user_roles_unattach(mocker, organization, alice, bob, mock_access_metho
         response = get(reverse('api:user_roles_list', kwargs={'pk': alice.id}), bob)
 
     # Did we assess whether bob can remove alice's permission to the inventory?
-    mock_access_method.assert_called_once_with(
-        organization.member_role, alice, 'members', skip_sub_obj_read_check=True, data={})
+    mock_access_method.assert_called_once_with(organization.member_role, alice, 'members', skip_sub_obj_read_check=True, data={})
     assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == 'foobar'
 
 
@@ -298,17 +293,37 @@ def test_prefetch_jt_copy_capability(job_template, project, inventory, rando):
     job_template.save()
 
     qs = JobTemplate.objects.all()
-    mapping = prefetch_page_capabilities(JobTemplate, qs, [{'copy': [
-        'project.use', 'inventory.use',
-    ]}], rando)
+    mapping = prefetch_page_capabilities(
+        JobTemplate,
+        qs,
+        [
+            {
+                'copy': [
+                    'project.use',
+                    'inventory.use',
+                ]
+            }
+        ],
+        rando,
+    )
     assert mapping[job_template.id] == {'copy': False}
 
     project.use_role.members.add(rando)
     inventory.use_role.members.add(rando)
 
-    mapping = prefetch_page_capabilities(JobTemplate, qs, [{'copy': [
-        'project.use', 'inventory.use',
-    ]}], rando)
+    mapping = prefetch_page_capabilities(
+        JobTemplate,
+        qs,
+        [
+            {
+                'copy': [
+                    'project.use',
+                    'inventory.use',
+                ]
+            }
+        ],
+        rando,
+    )
     assert mapping[job_template.id] == {'copy': True}
 
 
@@ -317,10 +332,7 @@ def test_workflow_orphaned_capabilities(rando):
     wfjt = WorkflowJobTemplate.objects.create(name='test', organization=None)
     wfjt.admin_role.members.add(rando)
     access = WorkflowJobTemplateAccess(rando)
-    assert not access.get_user_capabilities(
-        wfjt, method_list=['edit', 'copy'],
-        capabilities_cache={'copy': True}
-    )['copy']
+    assert not access.get_user_capabilities(wfjt, method_list=['edit', 'copy'], capabilities_cache={'copy': True})['copy']
 
 
 @pytest.mark.django_db

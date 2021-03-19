@@ -9,8 +9,7 @@ _color = threading.local()
 _color.enabled = True
 
 
-__all__ = ['CustomRegistryMeta', 'HelpfulArgumentParser', 'disable_color',
-           'color_enabled', 'colored', 'cprint', 'STATUS_COLORS']
+__all__ = ['CustomRegistryMeta', 'HelpfulArgumentParser', 'disable_color', 'color_enabled', 'colored', 'cprint', 'STATUS_COLORS']
 
 
 STATUS_COLORS = {
@@ -25,17 +24,12 @@ STATUS_COLORS = {
 
 
 class CustomRegistryMeta(type):
-
     @property
     def registry(cls):
-        return dict(
-            (command.name, command)
-            for command in cls.__subclasses__()
-        )
+        return dict((command.name, command) for command in cls.__subclasses__())
 
 
 class HelpfulArgumentParser(ArgumentParser):
-
     def error(self, message):  # pragma: nocover
         """Prints a usage message incorporating the message to stderr and
         exits.
@@ -67,10 +61,16 @@ COLORS = dict(
     list(
         zip(
             [
-                'grey', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan',
+                'grey',
+                'red',
+                'green',
+                'yellow',
+                'blue',
+                'magenta',
+                'cyan',
                 'white',
             ],
-            list(range(30, 38))
+            list(range(30, 38)),
         )
     )
 )

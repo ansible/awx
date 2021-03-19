@@ -4,10 +4,10 @@ from django.db import migrations, models
 
 
 def remove_manual_inventory_sources(apps, schema_editor):
-    '''Previously we would automatically create inventory sources after
+    """Previously we would automatically create inventory sources after
     Group creation and we would use the parent Group as our interface for the user.
     During that process we would create InventorySource that had a source of "manual".
-    '''
+    """
     InventoryUpdate = apps.get_model('main', 'InventoryUpdate')
     InventoryUpdate.objects.filter(source='').delete()
     InventorySource = apps.get_model('main', 'InventorySource')
@@ -29,11 +29,45 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='inventorysource',
             name='source',
-            field=models.CharField(choices=[('file', 'File, Directory or Script'), ('scm', 'Sourced from a Project'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure_rm', 'Microsoft Azure Resource Manager'), ('vmware', 'VMware vCenter'), ('satellite6', 'Red Hat Satellite 6'), ('cloudforms', 'Red Hat CloudForms'), ('openstack', 'OpenStack'), ('rhv', 'Red Hat Virtualization'), ('tower', 'Ansible Tower'), ('custom', 'Custom Script')], default=None, max_length=32),
+            field=models.CharField(
+                choices=[
+                    ('file', 'File, Directory or Script'),
+                    ('scm', 'Sourced from a Project'),
+                    ('ec2', 'Amazon EC2'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure_rm', 'Microsoft Azure Resource Manager'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Red Hat Satellite 6'),
+                    ('cloudforms', 'Red Hat CloudForms'),
+                    ('openstack', 'OpenStack'),
+                    ('rhv', 'Red Hat Virtualization'),
+                    ('tower', 'Ansible Tower'),
+                    ('custom', 'Custom Script'),
+                ],
+                default=None,
+                max_length=32,
+            ),
         ),
         migrations.AlterField(
             model_name='inventoryupdate',
             name='source',
-            field=models.CharField(choices=[('file', 'File, Directory or Script'), ('scm', 'Sourced from a Project'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure_rm', 'Microsoft Azure Resource Manager'), ('vmware', 'VMware vCenter'), ('satellite6', 'Red Hat Satellite 6'), ('cloudforms', 'Red Hat CloudForms'), ('openstack', 'OpenStack'), ('rhv', 'Red Hat Virtualization'), ('tower', 'Ansible Tower'), ('custom', 'Custom Script')], default=None, max_length=32),
+            field=models.CharField(
+                choices=[
+                    ('file', 'File, Directory or Script'),
+                    ('scm', 'Sourced from a Project'),
+                    ('ec2', 'Amazon EC2'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure_rm', 'Microsoft Azure Resource Manager'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Red Hat Satellite 6'),
+                    ('cloudforms', 'Red Hat CloudForms'),
+                    ('openstack', 'OpenStack'),
+                    ('rhv', 'Red Hat Virtualization'),
+                    ('tower', 'Ansible Tower'),
+                    ('custom', 'Custom Script'),
+                ],
+                default=None,
+                max_length=32,
+            ),
         ),
     ]

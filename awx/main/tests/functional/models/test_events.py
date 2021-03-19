@@ -16,20 +16,9 @@ def test_parent_changed(emit):
     for e in JobEvent.objects.all():
         assert e.changed is False
 
-    JobEvent.create_from_data(
-        job_id=j.pk,
-        parent_uuid='abc123',
-        event='runner_on_ok',
-        event_data={
-            'res': {'changed': ['localhost']}
-        }
-    ).save()
+    JobEvent.create_from_data(job_id=j.pk, parent_uuid='abc123', event='runner_on_ok', event_data={'res': {'changed': ['localhost']}}).save()
     # the `playbook_on_stats` event is where we update the parent changed linkage
-    JobEvent.create_from_data(
-        job_id=j.pk,
-        parent_uuid='abc123',
-        event='playbook_on_stats'
-    ).save()
+    JobEvent.create_from_data(job_id=j.pk, parent_uuid='abc123', event='playbook_on_stats').save()
     events = JobEvent.objects.filter(event__in=['playbook_on_task_start', 'runner_on_ok'])
     assert events.count() == 2
     for e in events.all():
@@ -47,18 +36,10 @@ def test_parent_failed(emit, event):
     for e in JobEvent.objects.all():
         assert e.failed is False
 
-    JobEvent.create_from_data(
-        job_id=j.pk,
-        parent_uuid='abc123',
-        event=event
-    ).save()
+    JobEvent.create_from_data(job_id=j.pk, parent_uuid='abc123', event=event).save()
 
     # the `playbook_on_stats` event is where we update the parent failed linkage
-    JobEvent.create_from_data(
-        job_id=j.pk,
-        parent_uuid='abc123',
-        event='playbook_on_stats'
-    ).save()
+    JobEvent.create_from_data(job_id=j.pk, parent_uuid='abc123', event='playbook_on_stats').save()
     events = JobEvent.objects.filter(event__in=['playbook_on_task_start', event])
     assert events.count() == 2
     for e in events.all():
@@ -70,10 +51,7 @@ def test_host_summary_generation():
     hostnames = [f'Host {i}' for i in range(100)]
     inv = Inventory()
     inv.save()
-    Host.objects.bulk_create([
-        Host(created=now(), modified=now(), name=h, inventory_id=inv.id)
-        for h in hostnames
-    ])
+    Host.objects.bulk_create([Host(created=now(), modified=now(), name=h, inventory_id=inv.id) for h in hostnames])
     j = Job(inventory=inv)
     j.save()
     host_map = dict((host.name, host.id) for host in inv.hosts.all())
@@ -91,7 +69,7 @@ def test_host_summary_generation():
             'rescued': {},
             'skipped': {},
         },
-        host_map=host_map
+        host_map=host_map,
     ).save()
 
     assert j.job_host_summaries.count() == len(hostnames)
@@ -118,10 +96,7 @@ def test_host_summary_generation_with_deleted_hosts():
     hostnames = [f'Host {i}' for i in range(10)]
     inv = Inventory()
     inv.save()
-    Host.objects.bulk_create([
-        Host(created=now(), modified=now(), name=h, inventory_id=inv.id)
-        for h in hostnames
-    ])
+    Host.objects.bulk_create([Host(created=now(), modified=now(), name=h, inventory_id=inv.id) for h in hostnames])
     j = Job(inventory=inv)
     j.save()
     host_map = dict((host.name, host.id) for host in inv.hosts.all())
@@ -144,15 +119,13 @@ def test_host_summary_generation_with_deleted_hosts():
             'rescued': {},
             'skipped': {},
         },
-        host_map=host_map
+        host_map=host_map,
     ).save()
-
 
     ids = sorted([s.host_id or -1 for s in j.job_host_summaries.order_by('id').all()])
     names = sorted([s.host_name for s in j.job_host_summaries.all()])
     assert ids == [-1, -1, -1, -1, -1, 6, 7, 8, 9, 10]
-    assert names == ['Host 0', 'Host 1', 'Host 2', 'Host 3', 'Host 4', 'Host 5',
-                     'Host 6', 'Host 7', 'Host 8', 'Host 9']
+    assert names == ['Host 0', 'Host 1', 'Host 2', 'Host 3', 'Host 4', 'Host 5', 'Host 6', 'Host 7', 'Host 8', 'Host 9']
 
 
 @pytest.mark.django_db
@@ -164,10 +137,7 @@ def test_host_summary_generation_with_limit():
     hostnames = [f'Host {i}' for i in range(10)]
     inv = Inventory()
     inv.save()
-    Host.objects.bulk_create([
-        Host(created=now(), modified=now(), name=h, inventory_id=inv.id)
-        for h in hostnames
-    ])
+    Host.objects.bulk_create([Host(created=now(), modified=now(), name=h, inventory_id=inv.id) for h in hostnames])
     j = Job(inventory=inv)
     j.save()
 
@@ -184,7 +154,7 @@ def test_host_summary_generation_with_limit():
         parent_uuid='abc123',
         event='playbook_on_stats',
         event_data={
-            'ok': {matching_host.name: len(matching_host.name)}, # effectively, limit=Host 1
+            'ok': {matching_host.name: len(matching_host.name)},  # effectively, limit=Host 1
             'changed': {},
             'dark': {},
             'failures': {},
@@ -193,7 +163,7 @@ def test_host_summary_generation_with_limit():
             'rescued': {},
             'skipped': {},
         },
-        host_map=host_map
+        host_map=host_map,
     ).save()
 
     # since the playbook_on_stats only references one host,

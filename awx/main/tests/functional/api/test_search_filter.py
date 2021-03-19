@@ -32,7 +32,7 @@ class TestSearchFilter:
         # Actually test the endpoint.
         host_list_url = reverse('api:host_list')
 
-        # Test if the OR releation works. 
+        # Test if the OR releation works.
         request = factory.get(host_list_url, data={'groups__search': ['g1', 'g2']})
         request.user = admin
         response = HostList.as_view()(request)

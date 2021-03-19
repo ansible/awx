@@ -271,20 +271,8 @@ jupyter:
 reports:
 	mkdir -p $@
 
-pep8: reports
-	@(set -o pipefail && $@ | tee reports/$@.report)
-
-flake8: reports
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	(set -o pipefail && $@ | tee reports/$@.report)
-
-pyflakes: reports
-	@(set -o pipefail && $@ | tee reports/$@.report)
-
-pylint: reports
-	@(set -o pipefail && $@ | reports/$@.report)
+black: reports
+	(set -o pipefail && $@ $(BLACK_ARGS) --skip-string-normalization --fast --line-length 160 awx awxkit awx_collection | tee reports/$@.report)
 
 genschema: reports
 	$(MAKE) swagger PYTEST_ARGS="--genschema --create-db "
@@ -296,7 +284,7 @@ swagger: reports
 	fi; \
 	(set -o pipefail && py.test $(PYTEST_ARGS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
 
-check: flake8 pep8 # pyflakes pylint
+check: black
 
 awx-link:
 	[ -d "/awx_devel/awx.egg-info" ] || python3 /awx_devel/setup.py egg_info_dev
@@ -332,10 +320,7 @@ test_collection:
 	# Second we will load any libraries out of the virtualenv (if it's unspecified that should be ok because python should not load out of an empty directory)
 	# Finally we will add the system path so that the tests can find the ansible libraries
 
-flake8_collection:
-	flake8 awx_collection/  # Different settings, in main exclude list
-
-test_collection_all: test_collection flake8_collection
+test_collection_all: test_collection
 
 # WARNING: symlinking a collection is fundamentally unstable
 # this is for rapid development iteration with playbooks, do not use with other test targets

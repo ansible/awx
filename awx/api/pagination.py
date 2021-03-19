@@ -10,7 +10,6 @@ from rest_framework.utils.urls import replace_query_param
 
 
 class DisabledPaginator(DjangoPaginator):
-
     @property
     def num_pages(self):
         return 1
@@ -49,8 +48,7 @@ class Pagination(pagination.PageNumberPagination):
 
     def get_html_context(self):
         context = super().get_html_context()
-        context['page_links'] = [pl._replace(url=self.cap_page_size(pl.url))
-                                 for pl in context['page_links']]
+        context['page_links'] = [pl._replace(url=self.cap_page_size(pl.url)) for pl in context['page_links']]
 
         return context
 

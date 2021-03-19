@@ -26,9 +26,7 @@ import subprocess
 
 
 def main():
-    module = AnsibleModule(
-        argument_spec = dict()
-    )
+    module = AnsibleModule(argument_spec=dict())
     changed = False
     paths_removed = set([])
 
@@ -38,9 +36,7 @@ def main():
     # this datetime, then it will be deleted because its job has finished
     job_cutoff = datetime.datetime.now() - datetime.timedelta(hours=1)
 
-    for search_pattern in [
-        '/tmp/awx_[0-9]*_*', '/tmp/ansible_runner_pi_*',
-    ]:
+    for search_pattern in ['/tmp/awx_[0-9]*_*', '/tmp/ansible_runner_pi_*']:
         for path in glob.iglob(search_pattern):
             st = os.stat(path)
             modtime = datetime.datetime.fromtimestamp(st.st_mtime)

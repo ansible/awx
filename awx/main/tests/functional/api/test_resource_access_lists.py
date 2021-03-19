@@ -31,7 +31,7 @@ def test_indirect_access_list(get, organization, project, team_factory, user, ad
 
     project_admin_res = [r for r in result.data['results'] if r['id'] == project_admin.id][0]
     team_admin_res = [r for r in result.data['results'] if r['id'] == team_admin.id][0]
-    project_admin_team_member_res   = [r for r in result.data['results'] if r['id'] == project_admin_team_member.id][0]
+    project_admin_team_member_res = [r for r in result.data['results'] if r['id'] == project_admin_team_member.id][0]
     admin_res = [r for r in result.data['results'] if r['id'] == admin.id][0]
 
     assert len(project_admin_res['summary_fields']['direct_access']) == 1
@@ -55,4 +55,3 @@ def test_indirect_access_list(get, organization, project, team_factory, user, ad
 
     admin_entry = admin_res['summary_fields']['indirect_access'][0]['role']
     assert admin_entry['name'] == Role.singleton('system_administrator').name
-

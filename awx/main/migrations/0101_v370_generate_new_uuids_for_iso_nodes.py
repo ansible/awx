@@ -21,6 +21,4 @@ class Migration(migrations.Migration):
         ('main', '0100_v370_projectupdate_job_tags'),
     ]
 
-    operations = [
-        migrations.RunPython(_generate_new_uuid_for_iso_nodes)
-    ]
+    operations = [migrations.RunPython(_generate_new_uuid_for_iso_nodes)]

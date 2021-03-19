@@ -6,9 +6,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('conf', '0003_v310_JSONField_changes'),
-    ]
+    dependencies = [('conf', '0003_v310_JSONField_changes')]
 
     operations = [
         # This list is intentionally empty.

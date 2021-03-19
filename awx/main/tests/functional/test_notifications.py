@@ -23,14 +23,17 @@ def test_get_notification_template_list(get, user, notification_template):
 def test_basic_parameterization(get, post, user, organization):
     u = user('admin-poster', True)
     url = reverse('api:notification_template_list')
-    response = post(url,
-                    dict(name="test-webhook",
-                         description="test webhook",
-                         organization=organization.id,
-                         notification_type="webhook",
-                         notification_configuration=dict(url="http://localhost", disable_ssl_verification=False,
-                                                         headers={"Test": "Header"})),
-                    u)
+    response = post(
+        url,
+        dict(
+            name="test-webhook",
+            description="test webhook",
+            organization=organization.id,
+            notification_type="webhook",
+            notification_configuration=dict(url="http://localhost", disable_ssl_verification=False, headers={"Test": "Header"}),
+        ),
+        u,
+    )
     assert response.status_code == 201
     url = reverse('api:notification_template_detail', kwargs={'pk': response.data['id']})
     response = get(url, u)
@@ -51,18 +54,20 @@ def test_encrypted_subfields(get, post, user, organization):
     def assert_send(self, messages):
         assert self.account_token == "shouldhide"
         return 1
+
     u = user('admin-poster', True)
     url = reverse('api:notification_template_list')
-    response = post(url,
-                    dict(name="test-twilio",
-                         description="test twilio",
-                         organization=organization.id,
-                         notification_type="twilio",
-                         notification_configuration=dict(account_sid="dummy",
-                                                         account_token="shouldhide",
-                                                         from_number="+19999999999",
-                                                         to_numbers=["9998887777"])),
-                    u)
+    response = post(
+        url,
+        dict(
+            name="test-twilio",
+            description="test twilio",
+            organization=organization.id,
+            notification_type="twilio",
+            notification_configuration=dict(account_sid="dummy", account_token="shouldhide", from_number="+19999999999", to_numbers=["9998887777"]),
+        ),
+        u,
+    )
     assert response.status_code == 201
     notification_template_actual = NotificationTemplate.objects.get(id=response.data['id'])
     url = reverse('api:notification_template_detail', kwargs={'pk': response.data['id']})
@@ -78,14 +83,17 @@ def test_inherited_notification_templates(get, post, user, organization, project
     url = reverse('api:notification_template_list')
     notification_templates = []
     for nfiers in range(3):
-        response = post(url,
-                        dict(name="test-webhook-{}".format(nfiers),
-                             description="test webhook {}".format(nfiers),
-                             organization=organization.id,
-                             notification_type="webhook",
-                             notification_configuration=dict(url="http://localhost", disable_ssl_verification=False,
-                                                             headers={"Test": "Header"})),
-                        u)
+        response = post(
+            url,
+            dict(
+                name="test-webhook-{}".format(nfiers),
+                description="test webhook {}".format(nfiers),
+                organization=organization.id,
+                notification_type="webhook",
+                notification_configuration=dict(url="http://localhost", disable_ssl_verification=False, headers={"Test": "Header"}),
+            ),
+            u,
+        )
         assert response.status_code == 201
         notification_templates.append(response.data['id'])
     i = Inventory.objects.create(name='test', organization=organization)
@@ -98,20 +106,19 @@ def test_inherited_notification_templates(get, post, user, organization, project
 
 @pytest.mark.django_db
 def test_notification_template_simple_patch(patch, notification_template, admin):
-    patch(reverse('api:notification_template_detail', kwargs={'pk': notification_template.id}), { 'name': 'foo'}, admin, expect=200)
+    patch(reverse('api:notification_template_detail', kwargs={'pk': notification_template.id}), {'name': 'foo'}, admin, expect=200)
 
 
 @pytest.mark.django_db
 def test_notification_template_invalid_notification_type(patch, notification_template, admin):
-    patch(reverse('api:notification_template_detail', kwargs={'pk': notification_template.id}), { 'notification_type': 'invalid'}, admin, expect=400)
+    patch(reverse('api:notification_template_detail', kwargs={'pk': notification_template.id}), {'notification_type': 'invalid'}, admin, expect=400)
 
 
 @pytest.mark.django_db
 def test_disallow_delete_when_notifications_pending(delete, user, notification_template):
     u = user('superuser', True)
     url = reverse('api:notification_template_detail', kwargs={'pk': notification_template.id})
-    Notification.objects.create(notification_template=notification_template,
-                                status='pending')
+    Notification.objects.create(notification_template=notification_template, status='pending')
     response = delete(url, user=u)
     assert response.status_code == 405
 
@@ -120,21 +127,26 @@ def test_disallow_delete_when_notifications_pending(delete, user, notification_t
 def test_custom_environment_injection(post, user, organization):
     u = user('admin-poster', True)
     url = reverse('api:notification_template_list')
-    response = post(url,
-                    dict(name="test-webhook",
-                         description="test webhook",
-                         organization=organization.id,
-                         notification_type="webhook",
-                         notification_configuration=dict(url="https://example.org", disable_ssl_verification=False,
-                                                         http_method="POST", headers={"Test": "Header"})),
-                    u)
+    response = post(
+        url,
+        dict(
+            name="test-webhook",
+            description="test webhook",
+            organization=organization.id,
+            notification_type="webhook",
+            notification_configuration=dict(url="https://example.org", disable_ssl_verification=False, http_method="POST", headers={"Test": "Header"}),
+        ),
+        u,
+    )
     assert response.status_code == 201
     template = NotificationTemplate.objects.get(pk=response.data['id'])
-    with pytest.raises(ConnectionError), \
-            mock.patch('django.conf.settings.AWX_TASK_ENV', {'HTTPS_PROXY': '192.168.50.100:1234'}), \
-            mock.patch.object(HTTPAdapter, 'send') as fake_send:
+    with pytest.raises(ConnectionError), mock.patch('django.conf.settings.AWX_TASK_ENV', {'HTTPS_PROXY': '192.168.50.100:1234'}), mock.patch.object(
+        HTTPAdapter, 'send'
+    ) as fake_send:
+
         def _send_side_effect(request, **kw):
             assert select_proxy(request.url, kw['proxies']) == '192.168.50.100:1234'
             raise ConnectionError()
+
         fake_send.side_effect = _send_side_effect
         template.send('subject', 'message')

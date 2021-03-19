@@ -34,13 +34,11 @@ def test_custom_inv_script_access(organization, user):
 
 @pytest.fixture
 def custom_inv(organization):
-    return CustomInventoryScript.objects.create(
-        name='test', script='test', description='test', organization=organization)
+    return CustomInventoryScript.objects.create(name='test', script='test', description='test', organization=organization)
 
 
 @pytest.mark.django_db
-def test_modify_inv_script_foreign_org_admin(
-        org_admin, organization, organization_factory, project, custom_inv):
+def test_modify_inv_script_foreign_org_admin(org_admin, organization, organization_factory, project, custom_inv):
     other_org = organization_factory('not-my-org').organization
     access = CustomInventoryScriptAccess(org_admin)
     assert not access.can_change(custom_inv, {'organization': other_org.pk, 'name': 'new-project'})
@@ -59,11 +57,7 @@ def test_copy_only_admin(org_member, organization, custom_inv):
     custom_inv.admin_role.members.add(org_member)
     access = CustomInventoryScriptAccess(org_member)
     assert not access.can_copy(custom_inv)
-    assert access.get_user_capabilities(custom_inv, method_list=['edit', 'delete', 'copy']) == {
-        'edit': True,
-        'delete': True,
-        'copy': False
-    }
+    assert access.get_user_capabilities(custom_inv, method_list=['edit', 'delete', 'copy']) == {'edit': True, 'delete': True, 'copy': False}
 
 
 @pytest.mark.django_db
@@ -111,13 +105,7 @@ def test_inventory_update_org_admin(inventory_update, org_admin):
     assert access.can_delete(inventory_update)
 
 
-@pytest.mark.parametrize("role_field,allowed", [
-    (None, False),
-    ('admin_role', True),
-    ('update_role', False),
-    ('adhoc_role', False),
-    ('use_role', False)
-])
+@pytest.mark.parametrize("role_field,allowed", [(None, False), ('admin_role', True), ('update_role', False), ('adhoc_role', False), ('use_role', False)])
 @pytest.mark.django_db
 def test_inventory_source_delete(inventory_source, alice, role_field, allowed):
     if role_field:
@@ -126,13 +114,7 @@ def test_inventory_source_delete(inventory_source, alice, role_field, allowed):
 
 
 # See companion test in tests/functional/api/test_inventory.py::test_inventory_update_access_called
-@pytest.mark.parametrize("role_field,allowed", [
-    (None, False),
-    ('admin_role', True),
-    ('update_role', True),
-    ('adhoc_role', False),
-    ('use_role', False)
-])
+@pytest.mark.parametrize("role_field,allowed", [(None, False), ('admin_role', True), ('update_role', True), ('adhoc_role', False), ('use_role', False)])
 @pytest.mark.django_db
 def test_inventory_source_update(inventory_source, alice, role_field, allowed):
     if role_field:
@@ -175,9 +157,7 @@ def test_inventory_source_credential_check(rando, inventory_source, credential):
 
 @pytest.mark.django_db
 def test_inventory_source_org_admin_schedule_access(org_admin, inventory_source):
-    schedule = Schedule.objects.create(
-        unified_job_template=inventory_source,
-        rrule='DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1')
+    schedule = Schedule.objects.create(unified_job_template=inventory_source, rrule='DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1')
     access = ScheduleAccess(org_admin)
     assert access.get_queryset()
     assert access.can_read(schedule)
@@ -191,7 +171,6 @@ def smart_inventory(organization):
 
 @pytest.mark.django_db
 class TestSmartInventory:
-
     def test_host_filter_edit(self, smart_inventory, rando, org_admin):
         assert InventoryAccess(org_admin).can_admin(smart_inventory, {'host_filter': 'search=foo'})
         smart_inventory.admin_role.members.add(rando)

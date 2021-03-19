@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -157,9 +156,26 @@ def main():
     argument_spec = dict(
         user=dict(),
         team=dict(),
-        role=dict(choices=["admin", "read", "member", "execute", "adhoc", "update", "use", "approval",
-                           "auditor", "project_admin", "inventory_admin", "credential_admin",
-                           "workflow_admin", "notification_admin", "job_template_admin"], required=True),
+        role=dict(
+            choices=[
+                "admin",
+                "read",
+                "member",
+                "execute",
+                "adhoc",
+                "update",
+                "use",
+                "approval",
+                "auditor",
+                "project_admin",
+                "inventory_admin",
+                "credential_admin",
+                "workflow_admin",
+                "notification_admin",
+                "job_template_admin",
+            ],
+            required=True,
+        ),
         target_team=dict(),
         target_teams=dict(type='list', elements='str'),
         inventory=dict(),
@@ -194,12 +210,10 @@ def main():
         'organizations': 'organization',
         'projects': 'project',
         'target_teams': 'target_team',
-        'workflows': 'workflow'
+        'workflows': 'workflow',
     }
     # Singular parameters
-    resource_param_keys = (
-        'user', 'team', 'lookup_organization'
-    )
+    resource_param_keys = ('user', 'team', 'lookup_organization')
 
     resources = {}
     for resource_group in resource_list_param_keys:
@@ -256,9 +270,9 @@ def main():
                 resource_roles = resource['summary_fields']['object_roles']
                 if role_field not in resource_roles:
                     available_roles = ', '.join(list(resource_roles.keys()))
-                    module.fail_json(msg='Resource {0} has no role {1}, available roles: {2}'.format(
-                        resource['url'], role_field, available_roles
-                    ), changed=False)
+                    module.fail_json(
+                        msg='Resource {0} has no role {1}, available roles: {2}'.format(resource['url'], role_field, available_roles), changed=False
+                    )
                 role_data = resource_roles[role_field]
                 endpoint = '/roles/{0}/{1}/'.format(role_data['id'], module.param_to_endpoint(actor_type))
                 associations.setdefault(endpoint, [])

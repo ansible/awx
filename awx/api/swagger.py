@@ -14,7 +14,6 @@ from rest_framework_swagger import renderers
 
 
 class SuperUserSchemaGenerator(SchemaGenerator):
-
     def has_view_permissions(self, path, method, view):
         #
         # Generate the Swagger schema as if you were a superuser and
@@ -25,17 +24,17 @@ class SuperUserSchemaGenerator(SchemaGenerator):
 
 
 class AutoSchema(DRFAuthSchema):
-
     def get_link(self, path, method, base_url):
         link = super(AutoSchema, self).get_link(path, method, base_url)
         try:
             serializer = self.view.get_serializer()
         except Exception:
             serializer = None
-            warnings.warn('{}.get_serializer() raised an exception during '
-                          'schema generation. Serializer fields will not be '
-                          'generated for {} {}.'
-                          .format(self.view.__class__.__name__, method, path))
+            warnings.warn(
+                '{}.get_serializer() raised an exception during '
+                'schema generation. Serializer fields will not be '
+                'generated for {} {}.'.format(self.view.__class__.__name__, method, path)
+            )
 
         link.__dict__['deprecated'] = getattr(self.view, 'deprecated', False)
 
@@ -43,9 +42,7 @@ class AutoSchema(DRFAuthSchema):
         if hasattr(self.view, 'swagger_topic'):
             link.__dict__['topic'] = str(self.view.swagger_topic).title()
         elif serializer and hasattr(serializer, 'Meta'):
-            link.__dict__['topic'] = str(
-                serializer.Meta.model._meta.verbose_name_plural
-            ).title()
+            link.__dict__['topic'] = str(serializer.Meta.model._meta.verbose_name_plural).title()
         elif hasattr(self.view, 'model'):
             link.__dict__['topic'] = str(self.view.model._meta.verbose_name_plural).title()
         else:
@@ -62,18 +59,10 @@ class SwaggerSchemaView(APIView):
     _ignore_model_permissions = True
     exclude_from_schema = True
     permission_classes = [AllowAny]
-    renderer_classes = [
-        CoreJSONRenderer,
-        renderers.OpenAPIRenderer,
-        renderers.SwaggerUIRenderer
-    ]
+    renderer_classes = [CoreJSONRenderer, renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer]
 
     def get(self, request):
-        generator = SuperUserSchemaGenerator(
-            title='Ansible Tower API',
-            patterns=None,
-            urlconf=None
-        )
+        generator = SuperUserSchemaGenerator(title='Ansible Tower API', patterns=None, urlconf=None)
         schema = generator.get_schema(request=request)
         # python core-api doesn't support the deprecation yet, so track it
         # ourselves and return it in a response header
@@ -103,11 +92,6 @@ class SwaggerSchemaView(APIView):
                     schema._data[topic]._data[path] = node
 
         if not schema:
-            raise exceptions.ValidationError(
-                'The schema generator did not return a schema Document'
-            )
+            raise exceptions.ValidationError('The schema generator did not return a schema Document')
 
-        return Response(
-            schema,
-            headers={'X-Deprecated-Paths': json.dumps(_deprecated)}
-        )
+        return Response(schema, headers={'X-Deprecated-Paths': json.dumps(_deprecated)})

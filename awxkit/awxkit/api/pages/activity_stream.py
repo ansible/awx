@@ -16,5 +16,4 @@ class ActivityStreams(page.PageList, ActivityStream):
     pass
 
 
-page.register_page([resources.activity_stream,
-                    resources.object_activity_stream], ActivityStreams)
+page.register_page([resources.activity_stream, resources.object_activity_stream], ActivityStreams)

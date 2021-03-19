@@ -18,11 +18,11 @@ def do_init_workflow(job_template_success, job_template_fail, job_template_never
     nodes_never = []
     for x in range(0, 3):
         nodes_never.append(WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt, unified_job_template=job_template_never))
-    
+
     nodes_parallel = []
     for jt in jts_parallel:
         nodes_parallel.append(WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt, unified_job_template=jt))
-        
+
     node_success.success_nodes.add(nodes_parallel[0])
     node_success.success_nodes.add(nodes_parallel[1])
     node_success.success_nodes.add(nodes_parallel[2])
@@ -34,9 +34,9 @@ def do_init_workflow(job_template_success, job_template_fail, job_template_never
 
 def do_init():
     jt_success = JobTemplate.objects.get(id=5)
-    jt_fail= JobTemplate.objects.get(id=6)
-    jt_never= JobTemplate.objects.get(id=7)
-    
+    jt_fail = JobTemplate.objects.get(id=6)
+    jt_never = JobTemplate.objects.get(id=7)
+
     jt_parallel = []
     jt_parallel.append(JobTemplate.objects.get(id=16))
     jt_parallel.append(JobTemplate.objects.get(id=17))

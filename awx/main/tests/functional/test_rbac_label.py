@@ -49,9 +49,7 @@ def test_label_access_superuser(label, user):
 def test_label_access_admin(organization_factory):
     '''can_change because I am an admin of that org'''
     no_members = organization_factory("no_members")
-    members = organization_factory("has_members",
-                                   users=['admin'],
-                                   labels=['test'])
+    members = organization_factory("has_members", users=['admin'], labels=['test'])
 
     label = members.labels.test
     admin = members.users.admin

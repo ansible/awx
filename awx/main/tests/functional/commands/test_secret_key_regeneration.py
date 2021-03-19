@@ -16,7 +16,6 @@ PREFIX = '$encrypted$UTF8$AESCBC$'
 
 @pytest.mark.django_db
 class TestKeyRegeneration:
-
     def test_encrypted_ssh_password(self, credential):
         # test basic decryption
         assert credential.inputs['password'].startswith(PREFIX)
@@ -67,7 +66,6 @@ class TestKeyRegeneration:
         Slack = nt.CLASS_FOR_NOTIFICATION_TYPE[nt.notification_type]
 
         class TestBackend(Slack):
-
             def __init__(self, *args, **kw):
                 assert kw['token'] == 'token'
 
@@ -112,9 +110,7 @@ class TestKeyRegeneration:
 
         # verify that the new SECRET_KEY *does* work
         with override_settings(SECRET_KEY=new_key):
-            assert json.loads(
-                decrypt_field(new_job, field_name='start_args')
-            ) == {'foo': 'bar'}
+            assert json.loads(decrypt_field(new_job, field_name='start_args')) == {'foo': 'bar'}
 
     @pytest.mark.parametrize('cls', ('JobTemplate', 'WorkflowJobTemplate'))
     def test_survey_spec(self, inventory, project, survey_spec_factory, cls):
@@ -125,11 +121,7 @@ class TestKeyRegeneration:
         # test basic decryption
         jt = getattr(models, cls).objects.create(
             name='Example Template',
-            survey_spec=survey_spec_factory([{
-                'variable': 'secret_key',
-                'default': encrypt_value('donttell', pk=None),
-                'type': 'password'
-            }]),
+            survey_spec=survey_spec_factory([{'variable': 'secret_key', 'default': encrypt_value('donttell', pk=None), 'type': 'password'}]),
             survey_enabled=True,
             **params
         )
@@ -149,9 +141,7 @@ class TestKeyRegeneration:
 
         # verify that the new SECRET_KEY *does* work
         with override_settings(SECRET_KEY=new_key):
-            assert json.loads(
-                new_job.decrypted_extra_vars()
-            )['secret_key'] == 'donttell'
+            assert json.loads(new_job.decrypted_extra_vars())['secret_key'] == 'donttell'
 
     def test_oauth2_application_client_secret(self, oauth_application):
         # test basic decryption
@@ -163,12 +153,8 @@ class TestKeyRegeneration:
 
         # verify that the old SECRET_KEY doesn't work
         with pytest.raises(InvalidToken):
-            models.OAuth2Application.objects.get(
-                pk=oauth_application.pk
-            ).client_secret
+            models.OAuth2Application.objects.get(pk=oauth_application.pk).client_secret
 
         # verify that the new SECRET_KEY *does* work
         with override_settings(SECRET_KEY=new_key):
-            assert models.OAuth2Application.objects.get(
-                pk=oauth_application.pk
-            ).client_secret == secret
+            assert models.OAuth2Application.objects.get(pk=oauth_application.pk).client_secret == secret

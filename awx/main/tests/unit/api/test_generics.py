@@ -1,4 +1,3 @@
-
 # Python
 import pytest
 from unittest import mock
@@ -9,12 +8,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 
 # AWX
-from awx.api.generics import (
-    ParentMixin,
-    SubListCreateAttachDetachAPIView, SubListAttachDetachAPIView,
-    ResourceAccessList,
-    ListAPIView
-)
+from awx.api.generics import ParentMixin, SubListCreateAttachDetachAPIView, SubListAttachDetachAPIView, ResourceAccessList, ListAPIView
 from awx.main.models import Organization, Credential
 
 
@@ -45,6 +39,7 @@ def parent_relationship_factory(mocker):
         serializer.relationship = relationship_name
 
         return (serializer, mock_parent_relationship)
+
     return rf
 
 
@@ -183,11 +178,8 @@ class TestParentMixin:
 
 
 class TestResourceAccessList:
-
     def mock_request(self):
-        return mock.MagicMock(
-            user=mock.MagicMock(is_anonymous=False, is_superuser=False),
-            method='GET')
+        return mock.MagicMock(user=mock.MagicMock(is_anonymous=False, is_superuser=False), method='GET')
 
     def mock_view(self, parent=None):
         view = ResourceAccessList()

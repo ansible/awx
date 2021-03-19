@@ -22,8 +22,7 @@ class Ungrouped(object):
 
 
 class Command(BaseCommand):
-    """List instances from the Tower database
-    """
+    """List instances from the Tower database"""
 
     def handle(self, *args, **options):
         super(Command, self).__init__()

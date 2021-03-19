@@ -46,17 +46,12 @@ def get_mem_capacity():
 
 
 def main():
-    module = AnsibleModule(
-        argument_spec = dict()
-    )
+    module = AnsibleModule(argument_spec=dict())
 
     ar = module.get_bin_path('ansible-runner', required=True)
 
     try:
-        version = subprocess.check_output(
-            [ar, '--version'],
-            stderr=subprocess.STDOUT
-        ).strip()
+        version = subprocess.check_output([ar, '--version'], stderr=subprocess.STDOUT).strip()
     except subprocess.CalledProcessError as e:
         module.fail_json(msg=to_text(e))
         return
@@ -65,15 +60,13 @@ def main():
     mem, capacity_mem = get_mem_capacity()
 
     # Module never results in a change
-    module.exit_json(changed=False, capacity_cpu=capacity_cpu,
-                     capacity_mem=capacity_mem, version=version,
-                     ansible_facts=dict(
-                         awx_cpu=cpu,
-                         awx_mem=mem,
-                         awx_capacity_cpu=capacity_cpu,
-                         awx_capacity_mem=capacity_mem,
-                         awx_capacity_version=version
-                     ))
+    module.exit_json(
+        changed=False,
+        capacity_cpu=capacity_cpu,
+        capacity_mem=capacity_mem,
+        version=version,
+        ansible_facts=dict(awx_cpu=cpu, awx_mem=mem, awx_capacity_cpu=capacity_cpu, awx_capacity_mem=capacity_mem, awx_capacity_version=version),
+    )
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ from awx.api.versioning import reverse
 
 
 @pytest.mark.django_db
-def test_workflow_can_add_label(org_admin,organization, post):
+def test_workflow_can_add_label(org_admin, organization, post):
     # create workflow
     wfjt = WorkflowJobTemplate.objects.create(name='test-wfjt')
     wfjt.organization = organization
@@ -28,10 +28,7 @@ def test_workflow_can_remove_label(org_admin, organization, post, get):
     label = wfjt.labels.create(name='dev-label', organization=organization)
     # delete label
     url = reverse('api:workflow_job_template_label_list', kwargs={'pk': wfjt.pk})
-    data = {
-        "id": label.pk,
-        "disassociate": True
-    }
+    data = {"id": label.pk, "disassociate": True}
     post(url, data, org_admin, expect=204)
     results = get(url, org_admin, expect=200)
     assert results.data['count'] == 0

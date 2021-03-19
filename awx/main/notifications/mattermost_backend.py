@@ -15,13 +15,13 @@ logger = logging.getLogger('awx.main.notifications.mattermost_backend')
 
 class MattermostBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
-    init_parameters = {"mattermost_url": {"label": "Target URL", "type": "string"},
-                       "mattermost_no_verify_ssl": {"label": "Verify SSL", "type": "bool"}}
+    init_parameters = {"mattermost_url": {"label": "Target URL", "type": "string"}, "mattermost_no_verify_ssl": {"label": "Verify SSL", "type": "bool"}}
     recipient_parameter = "mattermost_url"
     sender_parameter = None
 
-    def __init__(self, mattermost_no_verify_ssl=False, mattermost_channel=None, mattermost_username=None,
-                 mattermost_icon_url=None, fail_silently=False, **kwargs):
+    def __init__(
+        self, mattermost_no_verify_ssl=False, mattermost_channel=None, mattermost_username=None, mattermost_icon_url=None, fail_silently=False, **kwargs
+    ):
         super(MattermostBackend, self).__init__(fail_silently=fail_silently)
         self.mattermost_channel = mattermost_channel
         self.mattermost_username = mattermost_username
@@ -35,16 +35,14 @@ class MattermostBackend(AWXBaseEmailBackend, CustomNotificationBase):
         sent_messages = 0
         for m in messages:
             payload = {}
-            for opt, optval in {'mattermost_icon_url':'icon_url',
-                                'mattermost_channel': 'channel', 'mattermost_username': 'username'}.items():
+            for opt, optval in {'mattermost_icon_url': 'icon_url', 'mattermost_channel': 'channel', 'mattermost_username': 'username'}.items():
                 optvalue = getattr(self, opt)
                 if optvalue is not None:
                     payload[optval] = optvalue.strip()
 
             payload['text'] = m.subject
 
-            r = requests.post("{}".format(m.recipients()[0]),
-                              json=payload, verify=(not self.mattermost_no_verify_ssl))
+            r = requests.post("{}".format(m.recipients()[0]), json=payload, verify=(not self.mattermost_no_verify_ssl))
             if r.status_code >= 400:
                 logger.error(smart_text(_("Error sending notification mattermost: {}").format(r.status_code)))
                 if not self.fail_silently:

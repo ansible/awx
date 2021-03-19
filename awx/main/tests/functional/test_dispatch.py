@@ -36,7 +36,6 @@ def add(a, b):
 
 
 class BaseTask(object):
-
     def add(self, a, b):
         return add(a, b)
 
@@ -58,19 +57,16 @@ def multiply(a, b):
 
 
 class SimpleWorker(BaseWorker):
-
     def perform_work(self, body, *args):
         pass
 
 
 class ResultWriter(BaseWorker):
-
     def perform_work(self, body, result_queue):
         result_queue.put(body + '!!!')
 
 
 class SlowResultWriter(BaseWorker):
-
     def perform_work(self, body, result_queue):
         time.sleep(3)
         super(SlowResultWriter, self).perform_work(body, result_queue)
@@ -78,13 +74,12 @@ class SlowResultWriter(BaseWorker):
 
 @pytest.mark.usefixtures("disable_database_settings")
 class TestPoolWorker:
-
     def setup_method(self, test_method):
         self.worker = StatefulPoolWorker(1000, self.tick, tuple())
 
     def tick(self):
         self.worker.finished.put(self.worker.queue.get()['uuid'])
-        time.sleep(.5)
+        time.sleep(0.5)
 
     def test_qsize(self):
         assert self.worker.qsize == 0
@@ -127,7 +122,6 @@ class TestPoolWorker:
 
 @pytest.mark.django_db
 class TestWorkerPool:
-
     def setup_method(self, test_method):
         self.pool = WorkerPool(min_workers=3)
 
@@ -159,16 +153,10 @@ class TestWorkerPool:
         result_queue = multiprocessing.Queue()
         self.pool.init_workers(ResultWriter().work_loop, result_queue)
         for i in range(10):
-            self.pool.write(
-                random.choice(range(len(self.pool))),
-                'Hello, Worker {}'.format(i)
-            )
+            self.pool.write(random.choice(range(len(self.pool))), 'Hello, Worker {}'.format(i))
         all_messages = [result_queue.get(timeout=1) for i in range(10)]
         all_messages.sort()
-        assert all_messages == [
-            'Hello, Worker {}!!!'.format(i)
-            for i in range(10)
-        ]
+        assert all_messages == ['Hello, Worker {}!!!'.format(i) for i in range(10)]
 
         total_handled = sum([worker.messages_sent for worker in self.pool.workers])
         assert total_handled == 10
@@ -176,7 +164,6 @@ class TestWorkerPool:
 
 @pytest.mark.django_db
 class TestAutoScaling:
-
     def setup_method(self, test_method):
         self.pool = AutoscalePool(min_workers=2, max_workers=10)
 
@@ -275,59 +262,45 @@ class TestAutoScaling:
 
 @pytest.mark.usefixtures("disable_database_settings")
 class TestTaskDispatcher:
-
     @property
     def tm(self):
         return TaskWorker()
 
     def test_function_dispatch(self):
-        result = self.tm.perform_work({
-            'task': 'awx.main.tests.functional.test_dispatch.add',
-            'args': [2, 2]
-        })
+        result = self.tm.perform_work({'task': 'awx.main.tests.functional.test_dispatch.add', 'args': [2, 2]})
         assert result == 4
 
     def test_function_dispatch_must_be_decorated(self):
-        result = self.tm.perform_work({
-            'task': 'awx.main.tests.functional.test_dispatch.restricted',
-            'args': [2, 2]
-        })
+        result = self.tm.perform_work({'task': 'awx.main.tests.functional.test_dispatch.restricted', 'args': [2, 2]})
         assert isinstance(result, ValueError)
         assert str(result) == 'awx.main.tests.functional.test_dispatch.restricted is not decorated with @task()'  # noqa
 
     def test_method_dispatch(self):
-        result = self.tm.perform_work({
-            'task': 'awx.main.tests.functional.test_dispatch.Adder',
-            'args': [2, 2]
-        })
+        result = self.tm.perform_work({'task': 'awx.main.tests.functional.test_dispatch.Adder', 'args': [2, 2]})
         assert result == 4
 
     def test_method_dispatch_must_be_decorated(self):
-        result = self.tm.perform_work({
-            'task': 'awx.main.tests.functional.test_dispatch.Restricted',
-            'args': [2, 2]
-        })
+        result = self.tm.perform_work({'task': 'awx.main.tests.functional.test_dispatch.Restricted', 'args': [2, 2]})
         assert isinstance(result, ValueError)
         assert str(result) == 'awx.main.tests.functional.test_dispatch.Restricted is not decorated with @task()'  # noqa
 
     def test_python_function_cannot_be_imported(self):
-        result = self.tm.perform_work({
-            'task': 'os.system',
-            'args': ['ls'],
-        })
+        result = self.tm.perform_work(
+            {
+                'task': 'os.system',
+                'args': ['ls'],
+            }
+        )
         assert isinstance(result, ValueError)
         assert str(result) == 'os.system is not a valid awx task'  # noqa
 
     def test_undefined_function_cannot_be_imported(self):
-        result = self.tm.perform_work({
-            'task': 'awx.foo.bar'
-        })
+        result = self.tm.perform_work({'task': 'awx.foo.bar'})
         assert isinstance(result, ModuleNotFoundError)
         assert str(result) == "No module named 'awx.foo'"  # noqa
 
 
 class TestTaskPublisher:
-
     def test_function_callable(self):
         assert add(2, 2) == 4
 
@@ -371,17 +344,19 @@ yesterday = tz_now() - datetime.timedelta(days=1)
 
 @pytest.mark.django_db
 class TestJobReaper(object):
-
-    @pytest.mark.parametrize('status, execution_node, controller_node, modified, fail', [
-        ('running', '', '', None, False),        # running, not assigned to the instance
-        ('running', 'awx', '', None, True),      # running, has the instance as its execution_node
-        ('running', '', 'awx', None, True),      # running, has the instance as its controller_node
-        ('waiting', '', '', None, False),        # waiting, not assigned to the instance
-        ('waiting', 'awx', '', None, False),     # waiting, was edited less than a minute ago
-        ('waiting', '', 'awx', None, False),     # waiting, was edited less than a minute ago
-        ('waiting', 'awx', '', yesterday, True), # waiting, assigned to the execution_node, stale
-        ('waiting', '', 'awx', yesterday, True), # waiting, assigned to the controller_node, stale
-    ])
+    @pytest.mark.parametrize(
+        'status, execution_node, controller_node, modified, fail',
+        [
+            ('running', '', '', None, False),  # running, not assigned to the instance
+            ('running', 'awx', '', None, True),  # running, has the instance as its execution_node
+            ('running', '', 'awx', None, True),  # running, has the instance as its controller_node
+            ('waiting', '', '', None, False),  # waiting, not assigned to the instance
+            ('waiting', 'awx', '', None, False),  # waiting, was edited less than a minute ago
+            ('waiting', '', 'awx', None, False),  # waiting, was edited less than a minute ago
+            ('waiting', 'awx', '', yesterday, True),  # waiting, assigned to the execution_node, stale
+            ('waiting', '', 'awx', yesterday, True),  # waiting, assigned to the controller_node, stale
+        ],
+    )
     def test_should_reap(self, status, fail, execution_node, controller_node, modified):
         i = Instance(hostname='awx')
         i.save()
@@ -405,10 +380,13 @@ class TestJobReaper(object):
         else:
             assert job.status == status
 
-    @pytest.mark.parametrize('excluded_uuids, fail', [
-        (['abc123'], False),
-        ([], True),
-    ])
+    @pytest.mark.parametrize(
+        'excluded_uuids, fail',
+        [
+            (['abc123'], False),
+            ([], True),
+        ],
+    )
     def test_do_not_reap_excluded_uuids(self, excluded_uuids, fail):
         i = Instance(hostname='awx')
         i.save()
@@ -434,10 +412,7 @@ class TestJobReaper(object):
     def test_workflow_does_not_reap(self):
         i = Instance(hostname='awx')
         i.save()
-        j = WorkflowJob(
-            status='running',
-            execution_node='awx'
-        )
+        j = WorkflowJob(status='running', execution_node='awx')
         j.save()
         reaper.reap(i)
 

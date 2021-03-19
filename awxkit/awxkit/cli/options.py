@@ -21,10 +21,7 @@ UNIQUENESS_RULES = {
 
 
 def pk_or_name_list(v2, model_name, value, page=None):
-    return [
-        pk_or_name(v2, model_name, v.strip(), page=page)
-        for v in value.split(',')
-    ]
+    return [pk_or_name(v2, model_name, v.strip(), page=page) for v in value.split(',')]
 
 
 def pk_or_name(v2, model_name, value, page=None):
@@ -58,17 +55,9 @@ def pk_or_name(v2, model_name, value, page=None):
             return int(results.results[0].id)
         if results.count > 1:
             raise argparse.ArgumentTypeError(
-                'Multiple {0} exist with that {1}. '
-                'To look up an ID, run:\n'
-                'awx {0} list --{1} "{2}" -f human'.format(
-                    model_name, identity, value
-                )
+                'Multiple {0} exist with that {1}. ' 'To look up an ID, run:\n' 'awx {0} list --{1} "{2}" -f human'.format(model_name, identity, value)
             )
-        raise argparse.ArgumentTypeError(
-            'Could not find any {0} with that {1}.'.format(
-                model_name, identity
-            )
-        )
+        raise argparse.ArgumentTypeError('Could not find any {0} with that {1}.'.format(model_name, identity))
 
     return value
 
@@ -90,9 +79,7 @@ class ResourceOptionsParser(object):
         self.page = page
         self.resource = resource
         self.parser = parser
-        self.options = getattr(
-            self.page.options().json, 'actions', {'GET': {}}
-        )
+        self.options = getattr(self.page.options().json, 'actions', {'GET': {}})
         self.get_allowed_options()
         if self.resource != 'settings':
             # /api/v2/settings is a special resource that doesn't have
@@ -103,9 +90,7 @@ class ResourceOptionsParser(object):
         self.handle_custom_actions()
 
     def get_allowed_options(self):
-        options = self.page.connection.options(
-            self.page.endpoint + '1/'
-        )
+        options = self.page.connection.options(self.page.endpoint + '1/')
         warning = options.headers.get('Warning', '')
         if '299' in warning and 'deprecated' in warning:
             self.deprecated = True
@@ -121,11 +106,10 @@ class ResourceOptionsParser(object):
             parser = self.parser.add_parser(method, help='')
             if method == 'list':
                 parser.add_argument(
-                    '--all', dest='all_pages', action='store_true',
-                    help=(
-                        'fetch all pages of content from the API when '
-                        'returning results (instead of just the first page)'
-                    )
+                    '--all',
+                    dest='all_pages',
+                    action='store_true',
+                    help=('fetch all pages of content from the API when ' 'returning results (instead of just the first page)'),
                 )
                 add_output_formatting_arguments(parser, {})
 
@@ -138,9 +122,7 @@ class ResourceOptionsParser(object):
         for method in allowed:
             parser = self.parser.add_parser(method, help='')
             self.parser.choices[method].add_argument(
-                'id',
-                type=functools.partial(pk_or_name, self.v2, self.resource),
-                help='the ID (or unique name) of the resource'
+                'id', type=functools.partial(pk_or_name, self.v2, self.resource), help='the ID (or unique name) of the resource'
             )
             if method == 'get':
                 add_output_formatting_arguments(parser, {})
@@ -148,10 +130,7 @@ class ResourceOptionsParser(object):
     def build_query_arguments(self, method, http_method):
         required_group = None
         for k, param in self.options.get(http_method, {}).items():
-            required = (
-                method == 'create' and
-                param.get('required', False) is True
-            )
+            required = method == 'create' and param.get('required', False) is True
             help_text = param.get('help_text', '')
 
             if method == 'list':
@@ -159,10 +138,7 @@ class ResourceOptionsParser(object):
                     # don't allow `awx <resource> list` to filter on `--id`
                     # it's weird, and that's what awx <resource> get is for
                     continue
-                help_text = 'only list {} with the specified {}'.format(
-                    self.resource,
-                    k
-                )
+                help_text = 'only list {} with the specified {}'.format(self.resource, k)
 
             if method == 'list' and param.get('filterable') is False:
                 continue
@@ -256,9 +232,8 @@ class ResourceOptionsParser(object):
             # unlike *other* actual JSON fields in the API, inventory and JT
             # variables *actually* want json.dumps() strings (ugh)
             # see: https://github.com/ansible/awx/issues/2371
-            if (
-                (self.resource in ('job_templates', 'workflow_job_templates') and k == 'extra_vars') or
-                (self.resource in ('inventory', 'groups', 'hosts') and k == 'variables')
+            if (self.resource in ('job_templates', 'workflow_job_templates') and k == 'extra_vars') or (
+                self.resource in ('inventory', 'groups', 'hosts') and k == 'variables'
             ):
                 kwargs['type'] = jsonstr
 
@@ -267,15 +242,9 @@ class ResourceOptionsParser(object):
                     required_group = self.parser.choices[method].add_argument_group('required arguments')
                     # put the required group first (before the optional args group)
                     self.parser.choices[method]._action_groups.reverse()
-                required_group.add_argument(
-                    '--{}'.format(k),
-                    **kwargs
-                )
+                required_group.add_argument('--{}'.format(k), **kwargs)
             else:
-                self.parser.choices[method].add_argument(
-                    '--{}'.format(k),
-                    **kwargs
-                )
+                self.parser.choices[method].add_argument('--{}'.format(k), **kwargs)
 
     def handle_custom_actions(self):
         for _, action in CustomAction.registry.items():

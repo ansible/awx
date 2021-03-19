@@ -11,7 +11,6 @@ from rest_framework.utils import encoders
 
 
 class SurrogateEncoder(encoders.JSONEncoder):
-
     def encode(self, obj):
         ret = super(SurrogateEncoder, self).encode(obj)
         try:
@@ -28,9 +27,9 @@ class DefaultJSONRenderer(renderers.JSONRenderer):
 
 
 class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
-    '''
+    """
     Customizations to the default browsable API renderer.
-    '''
+    """
 
     def get_default_renderer(self, view):
         renderer = super(BrowsableAPIRenderer, self).get_default_renderer(view)
@@ -48,9 +47,7 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
             # see: https://github.com/ansible/awx/issues/3108
             # https://code.djangoproject.com/ticket/28121
             return data
-        return super(BrowsableAPIRenderer, self).get_content(renderer, data,
-                                                             accepted_media_type,
-                                                             renderer_context)
+        return super(BrowsableAPIRenderer, self).get_content(renderer, data, accepted_media_type, renderer_context)
 
     def get_context(self, data, accepted_media_type, renderer_context):
         # Store the associated response status to know how to populate the raw
@@ -125,18 +122,13 @@ class AnsiDownloadRenderer(PlainTextRenderer):
 
 
 class PrometheusJSONRenderer(renderers.JSONRenderer):
-
     def render(self, data, accepted_media_type=None, renderer_context=None):
         if isinstance(data, dict):
             # HTTP errors are {'detail': ErrorDetail(string='...', code=...)}
-            return super(PrometheusJSONRenderer, self).render(
-                data, accepted_media_type, renderer_context
-            )
+            return super(PrometheusJSONRenderer, self).render(data, accepted_media_type, renderer_context)
         parsed_metrics = text_string_to_metric_families(data)
         data = {}
         for family in parsed_metrics:
             for sample in family.samples:
                 data[sample[0]] = {"labels": sample[1], "value": sample[2]}
-        return super(PrometheusJSONRenderer, self).render(
-            data, accepted_media_type, renderer_context
-        )
+        return super(PrometheusJSONRenderer, self).render(data, accepted_media_type, renderer_context)

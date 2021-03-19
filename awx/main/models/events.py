@@ -24,8 +24,7 @@ analytics_logger = logging.getLogger('awx.analytics.job_events')
 logger = logging.getLogger('awx.main.models.events')
 
 
-__all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent',
-           'InventoryUpdateEvent', 'SystemJobEvent']
+__all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent', 'InventoryUpdateEvent', 'SystemJobEvent']
 
 
 def sanitize_event_keys(kwargs, valid_keys):
@@ -35,9 +34,7 @@ def sanitize_event_keys(kwargs, valid_keys):
             kwargs.pop(key)
 
     # Truncate certain values over 1k
-    for key in [
-        'play', 'role', 'task', 'playbook'
-    ]:
+    for key in ['play', 'role', 'task', 'playbook']:
         if isinstance(kwargs.get('event_data', {}).get(key), str):
             if len(kwargs['event_data'][key]) > 1024:
                 kwargs['event_data'][key] = Truncator(kwargs['event_data'][key]).chars(1024)
@@ -59,17 +56,11 @@ def create_host_status_counts(event_data):
     return dict(host_status_counts)
 
 
-MINIMAL_EVENTS = set([
-    'playbook_on_play_start', 'playbook_on_task_start',
-    'playbook_on_stats', 'EOF'
-])
+MINIMAL_EVENTS = set(['playbook_on_play_start', 'playbook_on_task_start', 'playbook_on_stats', 'EOF'])
 
 
 def emit_event_detail(event):
-    if (
-        settings.UI_LIVE_UPDATES_ENABLED is False and
-        event.event not in MINIMAL_EVENTS
-    ):
+    if settings.UI_LIVE_UPDATES_ENABLED is False and event.event not in MINIMAL_EVENTS:
         return
     cls = event.__class__
     relation = {
@@ -109,21 +100,32 @@ def emit_event_detail(event):
             'play': getattr(event, 'play', ''),
             'role': getattr(event, 'role', ''),
             'task': getattr(event, 'task', ''),
-        }
+        },
     )
 
 
-
-
 class BasePlaybookEvent(CreatedModifiedModel):
-    '''
+    """
     An event/message logged from a playbook callback for each host.
-    '''
+    """
 
     VALID_KEYS = [
-        'event', 'event_data', 'playbook', 'play', 'role', 'task', 'created',
-        'counter', 'uuid', 'stdout', 'parent_uuid', 'start_line', 'end_line',
-        'host_id', 'host_name', 'verbosity',
+        'event',
+        'event_data',
+        'playbook',
+        'play',
+        'role',
+        'task',
+        'created',
+        'counter',
+        'uuid',
+        'stdout',
+        'parent_uuid',
+        'start_line',
+        'end_line',
+        'host_id',
+        'host_name',
+        'verbosity',
     ]
 
     class Meta:
@@ -191,7 +193,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
         (2, 'playbook_on_not_import_for_host', _('internal: on Not Import for Host'), False),
         (1, 'playbook_on_play_start', _('Play Started'), False),
         (1, 'playbook_on_stats', _('Playbook Complete'), False),
-
         # Additional event types for captured stdout not directly related to
         # playbook or runner events.
         (0, 'debug', _('Debug'), False),
@@ -342,8 +343,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
             try:
                 failures_dict = event_data.get('failures', {})
                 dark_dict = event_data.get('dark', {})
-                self.failed = bool(sum(failures_dict.values()) +
-                                   sum(dark_dict.values()))
+                self.failed = bool(sum(failures_dict.values()) + sum(dark_dict.values()))
                 changed_dict = event_data.get('changed', {})
                 self.changed = bool(sum(changed_dict.values()))
             except (AttributeError, TypeError):
@@ -364,33 +364,30 @@ class BasePlaybookEvent(CreatedModifiedModel):
                             logger.exception('Computed fields database error saving event {}'.format(self.pk))
 
                     # find parent links and progagate changed=T and failed=T
-                    changed = job.job_events.filter(changed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()  # noqa
-                    failed = job.job_events.filter(failed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()  # noqa
+                    changed = (
+                        job.job_events.filter(changed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()
+                    )  # noqa
+                    failed = (
+                        job.job_events.filter(failed=True).exclude(parent_uuid=None).only('parent_uuid').values_list('parent_uuid', flat=True).distinct()
+                    )  # noqa
 
-                    JobEvent.objects.filter(
-                        job_id=self.job_id, uuid__in=changed
-                    ).update(changed=True)
-                    JobEvent.objects.filter(
-                        job_id=self.job_id, uuid__in=failed
-                    ).update(failed=True)
+                    JobEvent.objects.filter(job_id=self.job_id, uuid__in=changed).update(changed=True)
+                    JobEvent.objects.filter(job_id=self.job_id, uuid__in=failed).update(failed=True)
 
                     # send success/failure notifications when we've finished handling the playbook_on_stats event
                     from awx.main.tasks import handle_success_and_failure_notifications  # circular import
 
                     def _send_notifications():
                         handle_success_and_failure_notifications.apply_async([job.id])
-                    connection.on_commit(_send_notifications)
 
+                    connection.on_commit(_send_notifications)
 
         for field in ('playbook', 'play', 'task', 'role'):
             value = force_text(event_data.get(field, '')).strip()
             if value != getattr(self, field):
                 setattr(self, field, value)
         if settings.LOG_AGGREGATOR_ENABLED:
-            analytics_logger.info(
-                'Event data saved.',
-                extra=dict(python_objects=dict(job_event=self))
-            )
+            analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=self)))
 
     @classmethod
     def create_from_data(cls, **kwargs):
@@ -443,9 +440,9 @@ class BasePlaybookEvent(CreatedModifiedModel):
 
 
 class JobEvent(BasePlaybookEvent):
-    '''
+    """
     An event/message logged from the callback when running a job.
-    '''
+    """
 
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id']
 
@@ -513,9 +510,8 @@ class JobEvent(BasePlaybookEvent):
             job = self.job
 
             from awx.main.models import Host, JobHostSummary  # circular import
-            all_hosts = Host.objects.filter(
-                pk__in=self.host_map.values()
-            ).only('id')
+
+            all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id')
             existing_host_ids = set(h.id for h in all_hosts)
 
             summaries = dict()
@@ -529,9 +525,7 @@ class JobEvent(BasePlaybookEvent):
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
                     except AttributeError:  # in case event_data[stat] isn't a dict.
                         pass
-                summary = JobHostSummary(
-                    created=now(), modified=now(), job_id=job.id, host_id=host_id, host_name=host, **host_stats
-                )
+                summary = JobHostSummary(created=now(), modified=now(), job_id=job.id, host_id=host_id, host_name=host, **host_stats)
                 summary.failed = bool(summary.dark or summary.failures)
                 summaries[(host_id, host)] = summary
 
@@ -539,10 +533,7 @@ class JobEvent(BasePlaybookEvent):
 
             # update the last_job_id and last_job_host_summary_id
             # in single queries
-            host_mapping = dict(
-                (summary['host_id'], summary['id'])
-                for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host_id')
-            )
+            host_mapping = dict((summary['host_id'], summary['id']) for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host_id'))
             updated_hosts = set()
             for h in all_hosts:
                 # if the hostname *shows up* in the playbook_on_stats event
@@ -553,12 +544,7 @@ class JobEvent(BasePlaybookEvent):
                     h.last_job_host_summary_id = host_mapping[h.id]
                     updated_hosts.add(h)
 
-            Host.objects.bulk_update(
-                list(updated_hosts),
-                ['last_job_id', 'last_job_host_summary_id'],
-                batch_size=100
-            )
-
+            Host.objects.bulk_update(list(updated_hosts), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
 
     @property
     def job_verbosity(self):
@@ -593,14 +579,11 @@ class ProjectUpdateEvent(BasePlaybookEvent):
 
 
 class BaseCommandEvent(CreatedModifiedModel):
-    '''
+    """
     An event/message logged from a command for each host.
-    '''
+    """
 
-    VALID_KEYS = [
-        'event_data', 'created', 'counter', 'uuid', 'stdout', 'start_line',
-        'end_line', 'verbosity'
-    ]
+    VALID_KEYS = ['event_data', 'created', 'counter', 'uuid', 'stdout', 'start_line', 'end_line', 'verbosity']
 
     class Meta:
         abstract = True
@@ -671,9 +654,9 @@ class BaseCommandEvent(CreatedModifiedModel):
         return event
 
     def get_event_display(self):
-        '''
+        """
         Needed for __unicode__
-        '''
+        """
         return self.event
 
     def get_event_display2(self):
@@ -688,9 +671,7 @@ class BaseCommandEvent(CreatedModifiedModel):
 
 class AdHocCommandEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + [
-        'ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id'
-    ]
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id']
 
     class Meta:
         app_label = 'main'
@@ -718,7 +699,6 @@ class AdHocCommandEvent(BaseCommandEvent):
         # ('runner_on_async_failed', _('Host Async Failure'), True),
         # Tower does not yet support --diff mode.
         # ('runner_on_file_diff', _('File Difference'), False),
-
         # Additional event types for captured stdout not directly related to
         # runner events.
         ('debug', _('Debug'), False),
@@ -775,10 +755,7 @@ class AdHocCommandEvent(BaseCommandEvent):
         if isinstance(res, dict) and res.get('changed', False):
             self.changed = True
 
-        analytics_logger.info(
-            'Event data saved.',
-            extra=dict(python_objects=dict(job_event=self))
-        )
+        analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=self)))
 
 
 class InventoryUpdateEvent(BaseCommandEvent):

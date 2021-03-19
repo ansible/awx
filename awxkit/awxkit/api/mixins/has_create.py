@@ -24,7 +24,7 @@ def dependency_graph(page, *provided_dependencies):
     return graph
 
 
-def optional_dependency_graph(page,  *provided_dependencies):
+def optional_dependency_graph(page, *provided_dependencies):
     """Creates a dependency graph for a page including all dependencies and optional_dependencies
     Any optional provided_dependencies will be included as if they were dependencies,
     without affecting the value of each keyed page.
@@ -104,8 +104,7 @@ def all_instantiated_dependencies(*potential_parents):
     """
     scope_provided_dependencies = []
 
-    instantiated = set([x for x in potential_parents
-                        if not isinstance(x, type) and not isinstance(x, tuple)])
+    instantiated = set([x for x in potential_parents if not isinstance(x, type) and not isinstance(x, tuple)])
 
     for potential_parent in [x for x in instantiated if hasattr(x, '_dependency_store')]:
         for dependency in potential_parent._dependency_store.values():
@@ -178,7 +177,6 @@ class DSAdapter(object):
 # Hijack json.dumps and simplejson.dumps (used by requests)
 # to allow HasCreate.create_payload() serialization without impacting payload.ds access
 def filter_ds_from_payload(dumps):
-
     def _filter_ds_from_payload(obj, *a, **kw):
         if hasattr(obj, 'get') and isinstance(obj.get('ds'), DSAdapter):
             filtered = obj.copy()
@@ -191,10 +189,12 @@ def filter_ds_from_payload(dumps):
 
 
 import json  # noqa
+
 json.dumps = filter_ds_from_payload(json.dumps)
 
 try:
     import simplejson  # noqa
+
     simplejson.dumps = filter_ds_from_payload(simplejson.dumps)
 except ImportError:
     pass
@@ -299,8 +299,7 @@ class HasCreate(object):
         # remove falsy values
         provided_and_desired_dependencies = [x for x in provided_and_desired_dependencies if x]
         # (HasCreate(), True) tells HasCreate._update_dependencies to link
-        provided_dependencies = [(x, True) for x in provided_and_desired_dependencies
-                                 if not isinstance(x, type) and not isinstance(x, tuple)]
+        provided_dependencies = [(x, True) for x in provided_and_desired_dependencies if not isinstance(x, type) and not isinstance(x, tuple)]
 
         # Since dependencies are often declared at runtime, we need to use some introspection
         # to determine previously created ones for proper dependency store linking.
@@ -374,12 +373,7 @@ class HasCreate(object):
         to_teardown = all_instantiated_dependencies(self)
         to_teardown_types = set(map(get_class_if_instance, to_teardown))
         order = [
-            set(
-                [
-                    potential for potential in (
-                        get_class_if_instance(x) for x in group) if potential in to_teardown_types
-                ]
-            )
+            set([potential for potential in (get_class_if_instance(x) for x in group) if potential in to_teardown_types])
             for group in page_creation_order(self, *to_teardown)
         ]
         order.reverse()

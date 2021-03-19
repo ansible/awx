@@ -14,6 +14,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='installed_collections',
-            field=awx.main.fields.JSONBField(blank=True, default=dict, editable=False, help_text='The Collections names and versions installed in the execution environment.'),
+            field=awx.main.fields.JSONBField(
+                blank=True, default=dict, editable=False, help_text='The Collections names and versions installed in the execution environment.'
+            ),
         ),
     ]

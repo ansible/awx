@@ -21,12 +21,7 @@ def container_group():
 
 @pytest.fixture
 def job(container_group):
-    return Job(pk=1,
-               id=1,
-               project=Project(),
-               instance_group=container_group,
-               inventory=Inventory(),
-               job_template=JobTemplate(id=1, name='foo'))
+    return Job(pk=1, id=1, project=Project(), instance_group=container_group, inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
 
 
 def test_default_pod_spec(job):

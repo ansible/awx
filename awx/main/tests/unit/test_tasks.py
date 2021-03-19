@@ -31,7 +31,7 @@ from awx.main.models import (
     UnifiedJob,
     User,
     CustomInventoryScript,
-    build_safe_env
+    build_safe_env,
 )
 from awx.main.models.credential import ManagedCredentialType
 
@@ -65,22 +65,21 @@ def patch_Job():
 @pytest.fixture
 def patch_Organization():
     _credentials = []
-    credentials_mock = mock.Mock(**{
-        'all': lambda: _credentials,
-        'add': _credentials.append,
-        'exists': lambda: len(_credentials) > 0,
-        'spec_set': ['all', 'add', 'exists'],
-    })
+    credentials_mock = mock.Mock(
+        **{
+            'all': lambda: _credentials,
+            'add': _credentials.append,
+            'exists': lambda: len(_credentials) > 0,
+            'spec_set': ['all', 'add', 'exists'],
+        }
+    )
     with mock.patch.object(Organization, 'galaxy_credentials', credentials_mock):
         yield
 
 
 @pytest.fixture
 def job():
-    return Job(
-        pk=1, id=1,
-        project=Project(local_path='/projects/_23_foo'),
-        inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
+    return Job(pk=1, id=1, project=Project(local_path='/projects/_23_foo'), inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
 
 
 @pytest.fixture
@@ -94,6 +93,7 @@ def update_model_wrapper(job):
         for k, v in kwargs.items():
             setattr(job, k, v)
         return job
+
     return fn
 
 
@@ -103,6 +103,7 @@ def adhoc_update_model_wrapper(adhoc_job):
         for k, v in kwargs.items():
             setattr(adhoc_job, k, v)
         return adhoc_job
+
     return fn
 
 
@@ -133,7 +134,7 @@ def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker
     mock_notifications = [mocker.MagicMock(spec=Notification, subject="test", body={'hello': 'world'})]
     mock_notifications_filter.return_value = mock_notifications
 
-    tasks.send_notifications([1,2], job_id=1)
+    tasks.send_notifications([1, 2], job_id=1)
     assert Notification.objects.filter.call_count == 1
     assert mock_notifications[0].status == "successful"
     assert mock_notifications[0].save.called
@@ -142,13 +143,16 @@ def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker
     assert mock_job.notifications.add.called_with(*mock_notifications)
 
 
-@pytest.mark.parametrize("key,value", [
-    ('REST_API_TOKEN', 'SECRET'),
-    ('SECRET_KEY', 'SECRET'),
-    ('VMWARE_PASSWORD', 'SECRET'),
-    ('API_SECRET', 'SECRET'),
-    ('ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_TOKEN', 'SECRET'),
-])
+@pytest.mark.parametrize(
+    "key,value",
+    [
+        ('REST_API_TOKEN', 'SECRET'),
+        ('SECRET_KEY', 'SECRET'),
+        ('VMWARE_PASSWORD', 'SECRET'),
+        ('API_SECRET', 'SECRET'),
+        ('ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_TOKEN', 'SECRET'),
+    ],
+)
 def test_safe_env_filtering(key, value):
     assert build_safe_env({key: value})[key] == tasks.HIDDEN_PASSWORD
 
@@ -158,9 +162,7 @@ def test_safe_env_returns_new_copy():
     assert build_safe_env(env) is not env
 
 
-@pytest.mark.parametrize("source,expected", [
-    (None, True), (False, False), (True, True)
-])
+@pytest.mark.parametrize("source,expected", [(None, True), (False, False), (True, True)])
 def test_openstack_client_config_generation(mocker, source, expected, private_data_dir):
     update = tasks.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
@@ -169,23 +171,23 @@ def test_openstack_client_config_generation(mocker, source, expected, private_da
         'username': 'demo',
         'password': 'secrete',
         'project': 'demo-project',
-        'domain': 'my-demo-domain'
+        'domain': 'my-demo-domain',
     }
     if source is not None:
         inputs['verify_ssl'] = source
     credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
 
-    inventory_update = mocker.Mock(**{
-        'source': 'openstack',
-        'source_vars_dict': {},
-        'get_cloud_credential': mocker.Mock(return_value=credential),
-        'get_extra_credentials': lambda x: [],
-        'ansible_virtualenv_path': '/var/lib/awx/venv/foo'
-    })
-    cloud_config = update.build_private_data(inventory_update, private_data_dir)
-    cloud_credential = yaml.safe_load(
-        cloud_config.get('credentials')[credential]
+    inventory_update = mocker.Mock(
+        **{
+            'source': 'openstack',
+            'source_vars_dict': {},
+            'get_cloud_credential': mocker.Mock(return_value=credential),
+            'get_extra_credentials': lambda x: [],
+            'ansible_virtualenv_path': '/var/lib/awx/venv/foo',
+        }
     )
+    cloud_config = update.build_private_data(inventory_update, private_data_dir)
+    cloud_credential = yaml.safe_load(cloud_config.get('credentials')[credential])
     assert cloud_credential['clouds'] == {
         'devstack': {
             'auth': {
@@ -201,9 +203,7 @@ def test_openstack_client_config_generation(mocker, source, expected, private_da
     }
 
 
-@pytest.mark.parametrize("source,expected", [
-    (None, True), (False, False), (True, True)
-])
+@pytest.mark.parametrize("source,expected", [(None, True), (False, False), (True, True)])
 def test_openstack_client_config_generation_with_project_domain_name(mocker, source, expected, private_data_dir):
     update = tasks.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
@@ -219,17 +219,17 @@ def test_openstack_client_config_generation_with_project_domain_name(mocker, sou
         inputs['verify_ssl'] = source
     credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
 
-    inventory_update = mocker.Mock(**{
-        'source': 'openstack',
-        'source_vars_dict': {},
-        'get_cloud_credential': mocker.Mock(return_value=credential),
-        'get_extra_credentials': lambda x: [],
-        'ansible_virtualenv_path': '/var/lib/awx/venv/foo'
-    })
-    cloud_config = update.build_private_data(inventory_update, private_data_dir)
-    cloud_credential = yaml.safe_load(
-        cloud_config.get('credentials')[credential]
+    inventory_update = mocker.Mock(
+        **{
+            'source': 'openstack',
+            'source_vars_dict': {},
+            'get_cloud_credential': mocker.Mock(return_value=credential),
+            'get_extra_credentials': lambda x: [],
+            'ansible_virtualenv_path': '/var/lib/awx/venv/foo',
+        }
     )
+    cloud_config = update.build_private_data(inventory_update, private_data_dir)
+    cloud_credential = yaml.safe_load(cloud_config.get('credentials')[credential])
     assert cloud_credential['clouds'] == {
         'devstack': {
             'auth': {
@@ -246,9 +246,7 @@ def test_openstack_client_config_generation_with_project_domain_name(mocker, sou
     }
 
 
-@pytest.mark.parametrize("source,expected", [
-    (None, True), (False, False), (True, True)
-])
+@pytest.mark.parametrize("source,expected", [(None, True), (False, False), (True, True)])
 def test_openstack_client_config_generation_with_region(mocker, source, expected, private_data_dir):
     update = tasks.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
@@ -265,17 +263,17 @@ def test_openstack_client_config_generation_with_region(mocker, source, expected
         inputs['verify_ssl'] = source
     credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
 
-    inventory_update = mocker.Mock(**{
-        'source': 'openstack',
-        'source_vars_dict': {}, 
-        'get_cloud_credential': mocker.Mock(return_value=credential),
-        'get_extra_credentials': lambda x: [],
-        'ansible_virtualenv_path': '/venv/foo'
-    })
-    cloud_config = update.build_private_data(inventory_update, private_data_dir)
-    cloud_credential = yaml.safe_load(
-        cloud_config.get('credentials')[credential]
+    inventory_update = mocker.Mock(
+        **{
+            'source': 'openstack',
+            'source_vars_dict': {},
+            'get_cloud_credential': mocker.Mock(return_value=credential),
+            'get_extra_credentials': lambda x: [],
+            'ansible_virtualenv_path': '/venv/foo',
+        }
     )
+    cloud_config = update.build_private_data(inventory_update, private_data_dir)
+    cloud_credential = yaml.safe_load(cloud_config.get('credentials')[credential])
     assert cloud_credential['clouds'] == {
         'devstack': {
             'auth': {
@@ -293,9 +291,7 @@ def test_openstack_client_config_generation_with_region(mocker, source, expected
     }
 
 
-@pytest.mark.parametrize("source,expected", [
-    (False, False), (True, True)
-])
+@pytest.mark.parametrize("source,expected", [(False, False), (True, True)])
 def test_openstack_client_config_generation_with_private_source_vars(mocker, source, expected, private_data_dir):
     update = tasks.RunInventoryUpdate()
     credential_type = CredentialType.defaults['openstack']()
@@ -309,27 +305,22 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
     }
     credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
 
-    inventory_update = mocker.Mock(**{
-        'source': 'openstack',
-        'source_vars_dict': {'private': source},
-        'get_cloud_credential': mocker.Mock(return_value=credential),
-        'get_extra_credentials': lambda x: [],
-        'ansible_virtualenv_path': '/var/lib/awx/venv/foo'
-    })
-    cloud_config = update.build_private_data(inventory_update, private_data_dir)
-    cloud_credential = yaml.load(
-        cloud_config.get('credentials')[credential], Loader=SafeLoader
+    inventory_update = mocker.Mock(
+        **{
+            'source': 'openstack',
+            'source_vars_dict': {'private': source},
+            'get_cloud_credential': mocker.Mock(return_value=credential),
+            'get_extra_credentials': lambda x: [],
+            'ansible_virtualenv_path': '/var/lib/awx/venv/foo',
+        }
     )
+    cloud_config = update.build_private_data(inventory_update, private_data_dir)
+    cloud_credential = yaml.load(cloud_config.get('credentials')[credential], Loader=SafeLoader)
     assert cloud_credential['clouds'] == {
         'devstack': {
-            'auth': {
-                'auth_url': 'https://keystone.openstack.example.org',
-                'password': 'secrete',
-                'project_name': 'demo-project',
-                'username': 'demo'
-            },
+            'auth': {'auth_url': 'https://keystone.openstack.example.org', 'password': 'secrete', 'project_name': 'demo-project', 'username': 'demo'},
             'verify': True,
-            'private': expected
+            'private': expected,
         }
     }
 
@@ -341,10 +332,7 @@ def pytest_generate_tests(metafunc):
         funcarglist = metafunc.cls.parametrize.get(metafunc.function.__name__)
         if funcarglist:
             argnames = sorted(funcarglist[0])
-            metafunc.parametrize(
-                argnames,
-                [[funcargs[name] for name in argnames] for funcargs in funcarglist]
-            )
+            metafunc.parametrize(argnames, [[funcargs[name] for name in argnames] for funcargs in funcarglist])
 
 
 def parse_extra_vars(args, private_data_dir):
@@ -363,7 +351,7 @@ class TestExtraVarSanitation(TestJobExecution):
     # are deemed trustable, because they can only be added by users w/ enough
     # privilege to add/modify a Job Template)
 
-    UNSAFE = '{{ lookup(''pipe'',''ls -la'') }}'
+    UNSAFE = '{{ lookup(' 'pipe' ',' 'ls -la' ') }}'
 
     def test_vars_unsafe_by_default(self, job, private_data_dir):
         job.created_by = User(pk=123, username='angry-spud')
@@ -376,20 +364,32 @@ class TestExtraVarSanitation(TestJobExecution):
         extra_vars = yaml.load(fd, Loader=SafeLoader)
 
         # ensure that strings are marked as unsafe
-        for unsafe in ['awx_job_template_name', 'tower_job_template_name',
-                       'awx_user_name', 'tower_job_launch_type',
-                       'awx_project_revision',
-                       'tower_project_revision', 'tower_user_name',
-                       'awx_job_launch_type',
-                       'awx_inventory_name', 'tower_inventory_name']:
+        for unsafe in [
+            'awx_job_template_name',
+            'tower_job_template_name',
+            'awx_user_name',
+            'tower_job_launch_type',
+            'awx_project_revision',
+            'tower_project_revision',
+            'tower_user_name',
+            'awx_job_launch_type',
+            'awx_inventory_name',
+            'tower_inventory_name',
+        ]:
             assert hasattr(extra_vars[unsafe], '__UNSAFE__')
 
         # ensure that non-strings are marked as safe
-        for safe in ['awx_job_template_id', 'awx_job_id', 'awx_user_id',
-                     'tower_user_id', 'tower_job_template_id',
-                     'tower_job_id', 'awx_inventory_id', 'tower_inventory_id']:
+        for safe in [
+            'awx_job_template_id',
+            'awx_job_id',
+            'awx_user_id',
+            'tower_user_id',
+            'tower_job_template_id',
+            'tower_job_id',
+            'awx_inventory_id',
+            'tower_inventory_id',
+        ]:
             assert not hasattr(extra_vars[safe], '__UNSAFE__')
-
 
     def test_launchtime_vars_unsafe(self, job, private_data_dir):
         job.extra_vars = json.dumps({'msg': self.UNSAFE})
@@ -440,10 +440,7 @@ class TestExtraVarSanitation(TestJobExecution):
         # JT defines `msg=SENSITIVE`, the job *should not* be able to do
         # `other_var=SENSITIVE`
         job.job_template.extra_vars = json.dumps({'msg': self.UNSAFE})
-        job.extra_vars = json.dumps({
-            'msg': 'other-value',
-            'other_var': self.UNSAFE
-        })
+        job.extra_vars = json.dumps({'msg': 'other-value', 'other_var': self.UNSAFE})
         task = tasks.RunJob()
 
         task.build_extra_vars_file(job, private_data_dir)
@@ -469,12 +466,9 @@ class TestExtraVarSanitation(TestJobExecution):
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
 
-class TestGenericRun():
-
+class TestGenericRun:
     def test_generic_failure(self, patch_Job):
-        job = Job(
-            status='running', inventory=Inventory(),
-            project=Project(local_path='/projects/_23_foo'))
+        job = Job(status='running', inventory=Inventory(), project=Project(local_path='/projects/_23_foo'))
         job.websocket_emit_status = mock.Mock()
 
         task = tasks.RunJob()
@@ -506,10 +500,7 @@ class TestGenericRun():
             with pytest.raises(Exception):
                 task.run(1)
 
-        for c in [
-            mock.call(1, status='running', start_args=''),
-            mock.call(1, status='canceled')
-        ]:
+        for c in [mock.call(1, status='running', start_args=''), mock.call(1, status='canceled')]:
             assert c in task.update_model.call_args_list
 
     def test_event_count(self):
@@ -531,8 +522,9 @@ class TestGenericRun():
         task.dispatcher.dispatch.assert_called_with({'event': 'EOF', 'final_counter': 17, 'job_id': 1, 'guid': None})
 
     def test_save_job_metadata(self, job, update_model_wrapper):
-        class MockMe():
+        class MockMe:
             pass
+
         task = tasks.RunJob()
         task.instance = job
         task.safe_env = {'secret_key': 'redacted_value'}
@@ -543,9 +535,9 @@ class TestGenericRun():
         runner_config.env = {'switch': 'blade', 'foot': 'ball', 'secret_key': 'secret_value'}
         task.status_handler({'status': 'starting'}, runner_config)
 
-        task.update_model.assert_called_with(1, job_args=json.dumps({'foo': 'bar'}),
-                                             job_cwd='/foobar', job_env={'switch': 'blade', 'foot': 'ball', 'secret_key': 'redacted_value'})
-
+        task.update_model.assert_called_with(
+            1, job_args=json.dumps({'foo': 'bar'}), job_cwd='/foobar', job_env={'switch': 'blade', 'foot': 'ball', 'secret_key': 'redacted_value'}
+        )
 
     @mock.patch('os.makedirs')
     def test_build_params_resource_profiling(self, os_makedirs):
@@ -562,10 +554,7 @@ class TestGenericRun():
         assert resource_profiling_params['resource_profiling_pid_poll_interval'] == '0.25'
         assert resource_profiling_params['resource_profiling_results_dir'] == '/runner/artifacts/playbook_profiling'
 
-
-    @pytest.mark.parametrize("scenario, profiling_enabled", [
-                             ('global_setting', True),
-                             ('default', False)])
+    @pytest.mark.parametrize("scenario, profiling_enabled", [('global_setting', True), ('default', False)])
     def test_should_use_resource_profiling(self, scenario, profiling_enabled, settings):
         job = Job(project=Project(), inventory=Inventory())
         task = tasks.RunJob()
@@ -593,12 +582,8 @@ class TestGenericRun():
 
     def test_survey_extra_vars(self):
         job = Job()
-        job.extra_vars = json.dumps({
-            'super_secret': encrypt_value('CLASSIFIED', pk=None)
-        })
-        job.survey_passwords = {
-            'super_secret': '$encrypted$'
-        }
+        job.extra_vars = json.dumps({'super_secret': encrypt_value('CLASSIFIED', pk=None)})
+        job.survey_passwords = {'super_secret': '$encrypted$'}
 
         task = tasks.RunJob()
         task._write_extra_vars_file = mock.Mock()
@@ -622,7 +607,6 @@ class TestGenericRun():
 
 @pytest.mark.django_db
 class TestAdhocRun(TestJobExecution):
-
     def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper):
         ExecutionEnvironment.objects.create(name='test EE', managed_by_tower=True)
 
@@ -697,15 +681,7 @@ class TestIsolatedExecution(TestJobExecution):
 
     def test_with_ssh_credentials(self, job):
         ssh = CredentialType.defaults['ssh']()
-        credential = Credential(
-            pk=1,
-            credential_type=ssh,
-            inputs = {
-                'username': 'bob',
-                'password': 'secret',
-                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
-            }
-        )
+        credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'bob', 'password': 'secret', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY})
         credential.inputs['password'] = encrypt_field(credential, 'password')
         job.credentials.add(credential)
 
@@ -725,15 +701,26 @@ class TestIsolatedExecution(TestJobExecution):
                     with open(os.path.join(artifacts, filename), 'w') as f:
                         f.write(data)
             return ('successful', 0)
+
         self.run_pexpect.side_effect = _mock_job_artifacts
         self.task.run(self.pk)
 
         playbook_run = self.run_pexpect.call_args_list[0][0]
-        assert ' '.join(playbook_run[0]).startswith(' '.join([
-            'ansible-playbook', 'run_isolated.yml', '-u', settings.AWX_ISOLATED_USERNAME,
-            '-T', str(settings.AWX_ISOLATED_CONNECTION_TIMEOUT), '-i', self.ISOLATED_HOST + ',',
-            '-e',
-        ]))
+        assert ' '.join(playbook_run[0]).startswith(
+            ' '.join(
+                [
+                    'ansible-playbook',
+                    'run_isolated.yml',
+                    '-u',
+                    settings.AWX_ISOLATED_USERNAME,
+                    '-T',
+                    str(settings.AWX_ISOLATED_CONNECTION_TIMEOUT),
+                    '-i',
+                    self.ISOLATED_HOST + ',',
+                    '-e',
+                ]
+            )
+        )
         extra_vars = playbook_run[0][playbook_run[0].index('-e') + 1]
         extra_vars = json.loads(extra_vars)
         assert extra_vars['dest'] == '/tmp'
@@ -747,7 +734,9 @@ class TestIsolatedExecution(TestJobExecution):
         credential = Credential(
             pk=1,
             credential_type=ssh,
-            inputs = {'username': 'bob',}
+            inputs={
+                'username': 'bob',
+            },
         )
         self.instance.credentials.add(credential)
 
@@ -760,12 +749,11 @@ class TestIsolatedExecution(TestJobExecution):
             if not os.path.exists(artifacts):
                 os.makedirs(artifacts)
             if 'run_isolated.yml' in args[0]:
-                for filename, data in (
-                    ['daemon.log', 'ERROR IN RUN.PY'],
-                ):
+                for filename, data in (['daemon.log', 'ERROR IN RUN.PY'],):
                     with open(os.path.join(artifacts, filename), 'w') as f:
                         f.write(data)
             return ('successful', 0)
+
         self.run_pexpect.side_effect = _mock_job_artifacts
 
         with mock.patch('time.sleep'):
@@ -786,18 +774,17 @@ class TestJobCredentials(TestJobExecution):
             creds = job._credentials
             if credential_type__kind:
                 creds = [c for c in creds if c.credential_type.kind == credential_type__kind]
-            return mock.Mock(
-                __iter__ = lambda *args: iter(creds),
-                first = lambda: creds[0] if len(creds) else None
-            )
+            return mock.Mock(__iter__=lambda *args: iter(creds), first=lambda: creds[0] if len(creds) else None)
 
-        credentials_mock = mock.Mock(**{
-            'all': lambda: job._credentials,
-            'add': job._credentials.append,
-            'filter.side_effect': _credentials_filter,
-            'prefetch_related': lambda _: credentials_mock,
-            'spec_set': ['all', 'add', 'filter', 'prefetch_related'],
-        })
+        credentials_mock = mock.Mock(
+            **{
+                'all': lambda: job._credentials,
+                'add': job._credentials.append,
+                'filter.side_effect': _credentials_filter,
+                'prefetch_related': lambda _: credentials_mock,
+                'spec_set': ['all', 'add', 'filter', 'prefetch_related'],
+            }
+        )
 
         with mock.patch.object(UnifiedJob, 'credentials', credentials_mock):
             yield job
@@ -808,6 +795,7 @@ class TestJobCredentials(TestJobExecution):
             for k, v in kwargs.items():
                 setattr(job, k, v)
             return job
+
         return fn
 
     parametrize = {
@@ -821,11 +809,7 @@ class TestJobCredentials(TestJobExecution):
     def test_username_jinja_usage(self, job, private_data_dir):
         task = tasks.RunJob()
         ssh = CredentialType.defaults['ssh']()
-        credential = Credential(
-            pk=1,
-            credential_type=ssh,
-            inputs = {'username': '{{ ansible_ssh_pass }}'}
-        )
+        credential = Credential(pk=1, credential_type=ssh, inputs={'username': '{{ ansible_ssh_pass }}'})
         job.credentials.add(credential)
         with pytest.raises(ValueError) as e:
             task.build_args(job, private_data_dir, {})
@@ -836,11 +820,7 @@ class TestJobCredentials(TestJobExecution):
     def test_become_jinja_usage(self, job, private_data_dir, flag):
         task = tasks.RunJob()
         ssh = CredentialType.defaults['ssh']()
-        credential = Credential(
-            pk=1,
-            credential_type=ssh,
-            inputs = {'username': 'joe', flag: '{{ ansible_ssh_pass }}'}
-        )
+        credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'joe', flag: '{{ ansible_ssh_pass }}'})
         job.credentials.add(credential)
 
         with pytest.raises(ValueError) as e:
@@ -851,11 +831,7 @@ class TestJobCredentials(TestJobExecution):
     def test_ssh_passwords(self, job, private_data_dir, field, password_name, expected_flag):
         task = tasks.RunJob()
         ssh = CredentialType.defaults['ssh']()
-        credential = Credential(
-            pk=1,
-            credential_type=ssh,
-            inputs = {'username': 'bob', field: 'secret'}
-        )
+        credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'bob', field: 'secret'})
         credential.inputs[field] = encrypt_field(credential, field)
         job.credentials.add(credential)
 
@@ -872,11 +848,7 @@ class TestJobCredentials(TestJobExecution):
     def test_net_ssh_key_unlock(self, job):
         task = tasks.RunJob()
         net = CredentialType.defaults['net']()
-        credential = Credential(
-            pk=1,
-            credential_type=net,
-            inputs = {'ssh_key_unlock': 'secret'}
-        )
+        credential = Credential(pk=1, credential_type=net, inputs={'ssh_key_unlock': 'secret'})
         credential.inputs['ssh_key_unlock'] = encrypt_field(credential, 'ssh_key_unlock')
         job.credentials.add(credential)
 
@@ -890,11 +862,7 @@ class TestJobCredentials(TestJobExecution):
         task = tasks.RunJob()
         for i in range(3):
             net = CredentialType.defaults['net']()
-            credential = Credential(
-                pk=i,
-                credential_type=net,
-                inputs = {'ssh_key_unlock': 'secret{}'.format(i)}
-            )
+            credential = Credential(pk=i, credential_type=net, inputs={'ssh_key_unlock': 'secret{}'.format(i)})
             credential.inputs['ssh_key_unlock'] = encrypt_field(credential, 'ssh_key_unlock')
             job.credentials.add(credential)
 
@@ -907,19 +875,11 @@ class TestJobCredentials(TestJobExecution):
     def test_prefer_ssh_over_net_ssh_key_unlock(self, job):
         task = tasks.RunJob()
         net = CredentialType.defaults['net']()
-        net_credential = Credential(
-            pk=1,
-            credential_type=net,
-            inputs = {'ssh_key_unlock': 'net_secret'}
-        )
+        net_credential = Credential(pk=1, credential_type=net, inputs={'ssh_key_unlock': 'net_secret'})
         net_credential.inputs['ssh_key_unlock'] = encrypt_field(net_credential, 'ssh_key_unlock')
 
         ssh = CredentialType.defaults['ssh']()
-        ssh_credential = Credential(
-            pk=2,
-            credential_type=ssh,
-            inputs = {'ssh_key_unlock': 'ssh_secret'}
-        )
+        ssh_credential = Credential(pk=2, credential_type=ssh, inputs={'ssh_key_unlock': 'ssh_secret'})
         ssh_credential.inputs['ssh_key_unlock'] = encrypt_field(ssh_credential, 'ssh_key_unlock')
 
         job.credentials.add(net_credential)
@@ -934,11 +894,7 @@ class TestJobCredentials(TestJobExecution):
     def test_vault_password(self, private_data_dir, job):
         task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
-        credential = Credential(
-            pk=1,
-            credential_type=vault,
-            inputs={'vault_password': 'vault-me'}
-        )
+        credential = Credential(pk=1, credential_type=vault, inputs={'vault_password': 'vault-me'})
         credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
         job.credentials.add(credential)
 
@@ -947,17 +903,13 @@ class TestJobCredentials(TestJobExecution):
         password_prompts = task.get_password_prompts(passwords)
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert expect_passwords['Vault password:\s*?$'] == 'vault-me' # noqa
+        assert expect_passwords['Vault password:\s*?$'] == 'vault-me'  # noqa
         assert '--ask-vault-pass' in ' '.join(args)
 
     def test_vault_password_ask(self, private_data_dir, job):
         task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
-        credential = Credential(
-            pk=1,
-            credential_type=vault,
-            inputs={'vault_password': 'ASK'}
-        )
+        credential = Credential(pk=1, credential_type=vault, inputs={'vault_password': 'ASK'})
         credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
         job.credentials.add(credential)
 
@@ -966,18 +918,14 @@ class TestJobCredentials(TestJobExecution):
         password_prompts = task.get_password_prompts(passwords)
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        assert expect_passwords['Vault password:\s*?$'] == 'provided-at-launch' # noqa
+        assert expect_passwords['Vault password:\s*?$'] == 'provided-at-launch'  # noqa
         assert '--ask-vault-pass' in ' '.join(args)
 
     def test_multi_vault_password(self, private_data_dir, job):
         task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
         for i, label in enumerate(['dev', 'prod', 'dotted.name']):
-            credential = Credential(
-                pk=i,
-                credential_type=vault,
-                inputs={'vault_password': 'pass@{}'.format(label), 'vault_id': label}
-            )
+            credential = Credential(pk=i, credential_type=vault, inputs={'vault_password': 'pass@{}'.format(label), 'vault_id': label})
             credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
             job.credentials.add(credential)
 
@@ -986,10 +934,7 @@ class TestJobCredentials(TestJobExecution):
         password_prompts = task.get_password_prompts(passwords)
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        vault_passwords = dict(
-            (k, v) for k, v in expect_passwords.items()
-            if 'Vault' in k
-        )
+        vault_passwords = dict((k, v) for k, v in expect_passwords.items() if 'Vault' in k)
         assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'pass@prod'  # noqa
         assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'pass@dev'  # noqa
         assert vault_passwords['Vault password \(dotted.name\):\\s*?$'] == 'pass@dotted.name'  # noqa
@@ -1003,11 +948,7 @@ class TestJobCredentials(TestJobExecution):
         task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
         for i in range(2):
-            credential = Credential(
-                pk=i,
-                credential_type=vault,
-                inputs={'vault_password': 'some-pass', 'vault_id': 'conflict'}
-            )
+            credential = Credential(pk=i, credential_type=vault, inputs={'vault_password': 'some-pass', 'vault_id': 'conflict'})
             credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
             job.credentials.add(credential)
 
@@ -1020,25 +961,15 @@ class TestJobCredentials(TestJobExecution):
         task = tasks.RunJob()
         vault = CredentialType.defaults['vault']()
         for i, label in enumerate(['dev', 'prod']):
-            credential = Credential(
-                pk=i,
-                credential_type=vault,
-                inputs={'vault_password': 'ASK', 'vault_id': label}
-            )
+            credential = Credential(pk=i, credential_type=vault, inputs={'vault_password': 'ASK', 'vault_id': label})
             credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
             job.credentials.add(credential)
-        passwords = task.build_passwords(job, {
-            'vault_password.dev': 'provided-at-launch@dev',
-            'vault_password.prod': 'provided-at-launch@prod'
-        })
+        passwords = task.build_passwords(job, {'vault_password.dev': 'provided-at-launch@dev', 'vault_password.prod': 'provided-at-launch@prod'})
         args = task.build_args(job, private_data_dir, passwords)
         password_prompts = task.get_password_prompts(passwords)
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
 
-        vault_passwords = dict(
-            (k, v) for k, v in expect_passwords.items()
-            if 'Vault' in k
-        )
+        vault_passwords = dict((k, v) for k, v in expect_passwords.items() if 'Vault' in k)
         assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'provided-at-launch@prod'  # noqa
         assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'provided-at-launch@dev'  # noqa
         assert vault_passwords['Vault password:\\s*?$'] == ''  # noqa
@@ -1059,16 +990,14 @@ class TestJobCredentials(TestJobExecution):
         credential = Credential(
             pk=1,
             credential_type=k8s,
-            inputs = inputs,
+            inputs=inputs,
         )
         credential.inputs['bearer_token'] = encrypt_field(credential, 'bearer_token')
         job.credentials.add(credential)
 
         env = {}
         safe_env = {}
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['K8S_AUTH_HOST'] == 'https://example.org/'
         assert env['K8S_AUTH_API_KEY'] == 'token123'
@@ -1085,19 +1014,13 @@ class TestJobCredentials(TestJobExecution):
 
     def test_aws_cloud_credential(self, job, private_data_dir):
         aws = CredentialType.defaults['aws']()
-        credential = Credential(
-            pk=1,
-            credential_type=aws,
-            inputs = {'username': 'bob', 'password': 'secret'}
-        )
+        credential = Credential(pk=1, credential_type=aws, inputs={'username': 'bob', 'password': 'secret'})
         credential.inputs['password'] = encrypt_field(credential, 'password')
         job.credentials.add(credential)
 
         env = {}
         safe_env = {}
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
@@ -1106,20 +1029,14 @@ class TestJobCredentials(TestJobExecution):
 
     def test_aws_cloud_credential_with_sts_token(self, private_data_dir, job):
         aws = CredentialType.defaults['aws']()
-        credential = Credential(
-            pk=1,
-            credential_type=aws,
-            inputs = {'username': 'bob', 'password': 'secret', 'security_token': 'token'}
-        )
+        credential = Credential(pk=1, credential_type=aws, inputs={'username': 'bob', 'password': 'secret', 'security_token': 'token'})
         for key in ('password', 'security_token'):
             credential.inputs[key] = encrypt_field(credential, key)
         job.credentials.add(credential)
 
         env = {}
         safe_env = {}
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
@@ -1128,23 +1045,13 @@ class TestJobCredentials(TestJobExecution):
 
     def test_gce_credentials(self, private_data_dir, job):
         gce = CredentialType.defaults['gce']()
-        credential = Credential(
-            pk=1,
-            credential_type=gce,
-            inputs = {
-                'username': 'bob',
-                'project': 'some-project',
-                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
-            }
-        )
+        credential = Credential(pk=1, credential_type=gce, inputs={'username': 'bob', 'project': 'some-project', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY})
         credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
         job.credentials.add(credential)
 
         env = {}
         safe_env = {}
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
         runner_path = env['GCE_CREDENTIALS_FILE_PATH']
         local_path = os.path.join(private_data_dir, os.path.basename(runner_path))
         json_data = json.load(open(local_path, 'rb'))
@@ -1156,23 +1063,14 @@ class TestJobCredentials(TestJobExecution):
     def test_azure_rm_with_tenant(self, private_data_dir, job):
         azure = CredentialType.defaults['azure_rm']()
         credential = Credential(
-            pk=1,
-            credential_type=azure,
-            inputs = {
-                'client': 'some-client',
-                'secret': 'some-secret',
-                'tenant': 'some-tenant',
-                'subscription': 'some-subscription'
-            }
+            pk=1, credential_type=azure, inputs={'client': 'some-client', 'secret': 'some-secret', 'tenant': 'some-tenant', 'subscription': 'some-subscription'}
         )
         credential.inputs['secret'] = encrypt_field(credential, 'secret')
         job.credentials.add(credential)
 
         env = {}
         safe_env = {}
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['AZURE_CLIENT_ID'] == 'some-client'
         assert env['AZURE_SECRET'] == 'some-secret'
@@ -1183,23 +1081,14 @@ class TestJobCredentials(TestJobExecution):
     def test_azure_rm_with_password(self, private_data_dir, job):
         azure = CredentialType.defaults['azure_rm']()
         credential = Credential(
-            pk=1,
-            credential_type=azure,
-            inputs = {
-                'subscription': 'some-subscription',
-                'username': 'bob',
-                'password': 'secret',
-                'cloud_environment': 'foobar'
-            }
+            pk=1, credential_type=azure, inputs={'subscription': 'some-subscription', 'username': 'bob', 'password': 'secret', 'cloud_environment': 'foobar'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
         job.credentials.add(credential)
 
         env = {}
         safe_env = {}
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_AD_USER'] == 'bob'
@@ -1209,19 +1098,13 @@ class TestJobCredentials(TestJobExecution):
 
     def test_vmware_credentials(self, private_data_dir, job):
         vmware = CredentialType.defaults['vmware']()
-        credential = Credential(
-            pk=1,
-            credential_type=vmware,
-            inputs = {'username': 'bob', 'password': 'secret', 'host': 'https://example.org'}
-        )
+        credential = Credential(pk=1, credential_type=vmware, inputs={'username': 'bob', 'password': 'secret', 'host': 'https://example.org'})
         credential.inputs['password'] = encrypt_field(credential, 'password')
         job.credentials.add(credential)
 
         env = {}
         safe_env = {}
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['VMWARE_USER'] == 'bob'
         assert env['VMWARE_PASSWORD'] == 'secret'
@@ -1232,40 +1115,31 @@ class TestJobCredentials(TestJobExecution):
         task = tasks.RunJob()
         openstack = CredentialType.defaults['openstack']()
         credential = Credential(
-            pk=1,
-            credential_type=openstack,
-            inputs = {
-                'username': 'bob',
-                'password': 'secret',
-                'project': 'tenant-name',
-                'host': 'https://keystone.example.org'
-            }
+            pk=1, credential_type=openstack, inputs={'username': 'bob', 'password': 'secret', 'project': 'tenant-name', 'host': 'https://keystone.example.org'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
         job.credentials.add(credential)
 
         private_data_files = task.build_private_data_files(job, private_data_dir)
         env = task.build_env(job, private_data_dir, private_data_files=private_data_files)
-        credential.credential_type.inject_credential(
-            credential, env, {}, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         # convert container path to host machine path
-        config_loc = os.path.join(
-            private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE'])
-        )
+        config_loc = os.path.join(private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE']))
         shade_config = open(config_loc, 'r').read()
-        assert shade_config == '\n'.join([
-            'clouds:',
-            '  devstack:',
-            '    auth:',
-            '      auth_url: https://keystone.example.org',
-            '      password: secret',
-            '      project_name: tenant-name',
-            '      username: bob',
-            '    verify: true',
-            ''
-        ])
+        assert shade_config == '\n'.join(
+            [
+                'clouds:',
+                '  devstack:',
+                '    auth:',
+                '      auth_url: https://keystone.example.org',
+                '      password: secret',
+                '      project_name: tenant-name',
+                '      username: bob',
+                '    verify: true',
+                '',
+            ]
+        )
 
     @pytest.mark.parametrize("ca_file", [None, '/path/to/some/file'])
     def test_rhv_credentials(self, private_data_dir, job, ca_file):
@@ -1277,19 +1151,13 @@ class TestJobCredentials(TestJobExecution):
         }
         if ca_file:
             inputs['ca_file'] = ca_file
-        credential = Credential(
-            pk=1,
-            credential_type=rhv,
-            inputs=inputs
-        )
+        credential = Credential(pk=1, credential_type=rhv, inputs=inputs)
         credential.inputs['password'] = encrypt_field(credential, 'password')
         job.credentials.add(credential)
 
         env = {}
         safe_env = {}
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         config = configparser.ConfigParser()
         config.read(os.path.join(private_data_dir, os.path.basename(env['OVIRT_INI_PATH'])))
@@ -1302,20 +1170,18 @@ class TestJobCredentials(TestJobExecution):
             with pytest.raises(configparser.NoOptionError):
                 config.get('ovirt', 'ovirt_ca_file')
 
-    @pytest.mark.parametrize('authorize, expected_authorize', [
-        [True, '1'],
-        [False, '0'],
-        [None, '0'],
-    ])
+    @pytest.mark.parametrize(
+        'authorize, expected_authorize',
+        [
+            [True, '1'],
+            [False, '0'],
+            [None, '0'],
+        ],
+    )
     def test_net_credentials(self, authorize, expected_authorize, job, private_data_dir):
         task = tasks.RunJob()
         net = CredentialType.defaults['net']()
-        inputs = {
-            'username': 'bob',
-            'password': 'secret',
-            'ssh_key_data': self.EXAMPLE_PRIVATE_KEY,
-            'authorize_password': 'authorizeme'
-        }
+        inputs = {'username': 'bob', 'password': 'secret', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY, 'authorize_password': 'authorizeme'}
         if authorize is not None:
             inputs['authorize'] = authorize
         credential = Credential(pk=1, credential_type=net, inputs=inputs)
@@ -1326,9 +1192,7 @@ class TestJobCredentials(TestJobExecution):
         private_data_files = task.build_private_data_files(job, private_data_dir)
         env = task.build_env(job, private_data_dir, private_data_files=private_data_files)
         safe_env = build_safe_env(env)
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['ANSIBLE_NET_USERNAME'] == 'bob'
         assert env['ANSIBLE_NET_PASSWORD'] == 'secret'
@@ -1343,58 +1207,26 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'api_token',
-                    'label': 'API Token',
-                    'type': 'string'
-                }]
-            },
-            injectors={
-                'env': {
-                    'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'
-                }
-            }
+            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
+            injectors={'env': {'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs = {'api_token': 'ABC123'}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
 
         with pytest.raises(jinja2.exceptions.UndefinedError):
-            credential.credential_type.inject_credential(
-                credential, {}, {}, [], private_data_dir
-            )
+            credential.credential_type.inject_credential(credential, {}, {}, [], private_data_dir)
 
     def test_custom_environment_injectors(self, private_data_dir):
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'api_token',
-                    'label': 'API Token',
-                    'type': 'string'
-                }]
-            },
-            injectors={
-                'env': {
-                    'MY_CLOUD_API_TOKEN': '{{api_token}}'
-                }
-            }
+            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
+            injectors={'env': {'MY_CLOUD_API_TOKEN': '{{api_token}}'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs = {'api_token': 'ABC123'}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
 
         env = {}
-        credential.credential_type.inject_credential(
-            credential, env, {}, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         assert env['MY_CLOUD_API_TOKEN'] == 'ABC123'
 
@@ -1403,29 +1235,13 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'turbo_button',
-                    'label': 'Turbo Button',
-                    'type': 'boolean'
-                }]
-            },
-            injectors={
-                'env': {
-                    'TURBO_BUTTON': '{{turbo_button}}'
-                }
-            }
+            inputs={'fields': [{'id': 'turbo_button', 'label': 'Turbo Button', 'type': 'boolean'}]},
+            injectors={'env': {'TURBO_BUTTON': '{{turbo_button}}'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs={'turbo_button': True}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'turbo_button': True})
 
         env = {}
-        credential.credential_type.inject_credential(
-            credential, env, {}, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         assert env['TURBO_BUTTON'] == str(True)
 
@@ -1435,24 +1251,10 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'api_token',
-                    'label': 'API Token',
-                    'type': 'string'
-                }]
-            },
-            injectors={
-                'env': {
-                    'JOB_ID': 'reserved'
-                }
-            }
+            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
+            injectors={'env': {'JOB_ID': 'reserved'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs = {'api_token': 'ABC123'}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
         job.credentials.add(credential)
 
         env = task.build_env(job, private_data_dir)
@@ -1464,32 +1266,15 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'password',
-                    'label': 'Password',
-                    'type': 'string',
-                    'secret': True
-                }]
-            },
-            injectors={
-                'env': {
-                    'MY_CLOUD_PRIVATE_VAR': '{{password}}'
-                }
-            }
+            inputs={'fields': [{'id': 'password', 'label': 'Password', 'type': 'string', 'secret': True}]},
+            injectors={'env': {'MY_CLOUD_PRIVATE_VAR': '{{password}}'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs = {'password': 'SUPER-SECRET-123'}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'password': 'SUPER-SECRET-123'})
         credential.inputs['password'] = encrypt_field(credential, 'password')
 
         env = {}
         safe_env = {}
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['MY_CLOUD_PRIVATE_VAR'] == 'SUPER-SECRET-123'
         assert 'SUPER-SECRET-123' not in safe_env.values()
@@ -1501,30 +1286,14 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'api_token',
-                    'label': 'API Token',
-                    'type': 'string'
-                }]
-            },
-            injectors={
-                'extra_vars': {
-                    'api_token': '{{api_token}}'
-                }
-            }
+            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
+            injectors={'extra_vars': {'api_token': '{{api_token}}'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs = {'api_token': 'ABC123'}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
         job.credentials.add(credential)
 
         args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(
-            credential, {}, {}, args, private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
         extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["api_token"] == "ABC123"
@@ -1536,30 +1305,14 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'turbo_button',
-                    'label': 'Turbo Button',
-                    'type': 'boolean'
-                }]
-            },
-            injectors={
-                'extra_vars': {
-                    'turbo_button': '{{turbo_button}}'
-                }
-            }
+            inputs={'fields': [{'id': 'turbo_button', 'label': 'Turbo Button', 'type': 'boolean'}]},
+            injectors={'extra_vars': {'turbo_button': '{{turbo_button}}'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs={'turbo_button': True}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'turbo_button': True})
         job.credentials.add(credential)
 
         args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(
-            credential, {}, {}, args, private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
         extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["turbo_button"] == "True"
@@ -1571,30 +1324,14 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'turbo_button',
-                    'label': 'Turbo Button',
-                    'type': 'boolean'
-                }]
-            },
-            injectors={
-                'extra_vars': {
-                    'turbo_button': '{% if turbo_button %}FAST!{% else %}SLOW!{% endif %}'
-                }
-            }
+            inputs={'fields': [{'id': 'turbo_button', 'label': 'Turbo Button', 'type': 'boolean'}]},
+            injectors={'extra_vars': {'turbo_button': '{% if turbo_button %}FAST!{% else %}SLOW!{% endif %}'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs={'turbo_button': True}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'turbo_button': True})
         job.credentials.add(credential)
 
         args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(
-            credential, {}, {}, args, private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
         extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["turbo_button"] == "FAST!"
@@ -1608,32 +1345,15 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'password',
-                    'label': 'Password',
-                    'type': 'string',
-                    'secret': True
-                }]
-            },
-            injectors={
-                'extra_vars': {
-                    'password': '{{password}}'
-                }
-            }
+            inputs={'fields': [{'id': 'password', 'label': 'Password', 'type': 'string', 'secret': True}]},
+            injectors={'extra_vars': {'password': '{{password}}'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs = {'password': 'SUPER-SECRET-123'}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'password': 'SUPER-SECRET-123'})
         credential.inputs['password'] = encrypt_field(credential, 'password')
         job.credentials.add(credential)
 
         args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(
-            credential, {}, {}, args, private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
 
         extra_vars = parse_extra_vars(args, private_data_dir)
         assert extra_vars["password"] == "SUPER-SECRET-123"
@@ -1643,32 +1363,13 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'api_token',
-                    'label': 'API Token',
-                    'type': 'string'
-                }]
-            },
-            injectors={
-                'file': {
-                    'template': '[mycloud]\n{{api_token}}'
-                },
-                'env': {
-                    'MY_CLOUD_INI_FILE': '{{tower.filename}}'
-                }
-            }
+            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
+            injectors={'file': {'template': '[mycloud]\n{{api_token}}'}, 'env': {'MY_CLOUD_INI_FILE': '{{tower.filename}}'}},
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs = {'api_token': 'ABC123'}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
 
         env = {}
-        credential.credential_type.inject_credential(
-            credential, env, {}, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         path = os.path.join(private_data_dir, os.path.basename(env['MY_CLOUD_INI_FILE']))
         assert open(path, 'r').read() == '[mycloud]\nABC123'
@@ -1680,10 +1381,7 @@ class TestJobCredentials(TestJobExecution):
             name='SomeCloud',
             managed_by_tower=False,
             inputs={'fields': []},
-            injectors={
-                'file': {'template': value},
-                'env': {'MY_CLOUD_INI_FILE': '{{tower.filename}}'}
-            }
+            injectors={'file': {'template': value}, 'env': {'MY_CLOUD_INI_FILE': '{{tower.filename}}'}},
         )
         credential = Credential(
             pk=1,
@@ -1691,9 +1389,7 @@ class TestJobCredentials(TestJobExecution):
         )
 
         env = {}
-        credential.credential_type.inject_credential(
-            credential, env, {}, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         path = os.path.join(private_data_dir, os.path.basename(env['MY_CLOUD_INI_FILE']))
         assert open(path, 'r').read() == value
@@ -1703,38 +1399,16 @@ class TestJobCredentials(TestJobExecution):
             kind='cloud',
             name='SomeCloud',
             managed_by_tower=False,
-            inputs={
-                'fields': [{
-                    'id': 'cert',
-                    'label': 'Certificate',
-                    'type': 'string'
-                }, {
-                    'id': 'key',
-                    'label': 'Key',
-                    'type': 'string'
-                }]
-            },
+            inputs={'fields': [{'id': 'cert', 'label': 'Certificate', 'type': 'string'}, {'id': 'key', 'label': 'Key', 'type': 'string'}]},
             injectors={
-                'file': {
-                    'template.cert': '[mycert]\n{{cert}}',
-                    'template.key': '[mykey]\n{{key}}'
-                },
-                'env': {
-                    'MY_CERT_INI_FILE': '{{tower.filename.cert}}',
-                    'MY_KEY_INI_FILE': '{{tower.filename.key}}'
-                }
-            }
+                'file': {'template.cert': '[mycert]\n{{cert}}', 'template.key': '[mykey]\n{{key}}'},
+                'env': {'MY_CERT_INI_FILE': '{{tower.filename.cert}}', 'MY_KEY_INI_FILE': '{{tower.filename.key}}'},
+            },
         )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-            inputs = {'cert': 'CERT123', 'key': 'KEY123'}
-        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'cert': 'CERT123', 'key': 'KEY123'})
 
         env = {}
-        credential.credential_type.inject_credential(
-            credential, env, {}, [], private_data_dir
-        )
+        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         cert_path = os.path.join(private_data_dir, os.path.basename(env['MY_CERT_INI_FILE']))
         key_path = os.path.join(private_data_dir, os.path.basename(env['MY_KEY_INI_FILE']))
@@ -1743,36 +1417,18 @@ class TestJobCredentials(TestJobExecution):
 
     def test_multi_cloud(self, private_data_dir):
         gce = CredentialType.defaults['gce']()
-        gce_credential = Credential(
-            pk=1,
-            credential_type=gce,
-            inputs = {
-                'username': 'bob',
-                'project': 'some-project',
-                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
-            }
-        )
+        gce_credential = Credential(pk=1, credential_type=gce, inputs={'username': 'bob', 'project': 'some-project', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY})
         gce_credential.inputs['ssh_key_data'] = encrypt_field(gce_credential, 'ssh_key_data')
 
         azure_rm = CredentialType.defaults['azure_rm']()
-        azure_rm_credential = Credential(
-            pk=2,
-            credential_type=azure_rm,
-            inputs = {
-                'subscription': 'some-subscription',
-                'username': 'bob',
-                'password': 'secret'
-            }
-        )
+        azure_rm_credential = Credential(pk=2, credential_type=azure_rm, inputs={'subscription': 'some-subscription', 'username': 'bob', 'password': 'secret'})
         azure_rm_credential.inputs['secret'] = ''
         azure_rm_credential.inputs['secret'] = encrypt_field(azure_rm_credential, 'secret')
 
         env = {}
         safe_env = {}
         for credential in [gce_credential, azure_rm_credential]:
-            credential.credential_type.inject_credential(
-                credential, env, safe_env, [], private_data_dir
-            )
+            credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_AD_USER'] == 'bob'
@@ -1797,7 +1453,6 @@ class TestJobCredentials(TestJobExecution):
 
 @pytest.mark.usefixtures("patch_Organization")
 class TestProjectUpdateGalaxyCredentials(TestJobExecution):
-
     @pytest.fixture
     def project_update(self):
         org = Organization(pk=1)
@@ -1823,7 +1478,6 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
             assert 'ANSIBLE_GALAXY_IGNORE' not in env
 
     def test_galaxy_credentials_empty(self, private_data_dir, project_update):
-
         class RunProjectUpdate(tasks.RunProjectUpdate):
             __vars__ = {}
 
@@ -1849,9 +1503,13 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
                 self.__vars__ = extra_vars
 
         credential_type = CredentialType.defaults['galaxy_api_token']()
-        public_galaxy = Credential(pk=1, credential_type=credential_type, inputs={
-            'url': 'https://galaxy.ansible.com/',
-        })
+        public_galaxy = Credential(
+            pk=1,
+            credential_type=credential_type,
+            inputs={
+                'url': 'https://galaxy.ansible.com/',
+            },
+        )
         project_update.project.organization.galaxy_credentials.add(public_galaxy)
         task = RunProjectUpdate()
         env = task.build_env(project_update, private_data_dir)
@@ -1861,32 +1519,34 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
 
         assert task.__vars__['roles_enabled'] is True
         assert task.__vars__['collections_enabled'] is True
-        assert sorted([
-            (k, v) for k, v in env.items()
-            if k.startswith('ANSIBLE_GALAXY')
-        ]) == [
+        assert sorted([(k, v) for k, v in env.items() if k.startswith('ANSIBLE_GALAXY')]) == [
             ('ANSIBLE_GALAXY_SERVER_LIST', 'server0'),
             ('ANSIBLE_GALAXY_SERVER_SERVER0_URL', 'https://galaxy.ansible.com/'),
         ]
 
     def test_multiple_galaxy_endpoints(self, private_data_dir, project_update):
         credential_type = CredentialType.defaults['galaxy_api_token']()
-        public_galaxy = Credential(pk=1, credential_type=credential_type, inputs={
-            'url': 'https://galaxy.ansible.com/',
-        })
-        rh = Credential(pk=2, credential_type=credential_type, inputs={
-            'url': 'https://cloud.redhat.com/api/automation-hub/',
-            'auth_url': 'https://sso.redhat.com/example/openid-connect/token/',
-            'token': 'secret123'
-        })
+        public_galaxy = Credential(
+            pk=1,
+            credential_type=credential_type,
+            inputs={
+                'url': 'https://galaxy.ansible.com/',
+            },
+        )
+        rh = Credential(
+            pk=2,
+            credential_type=credential_type,
+            inputs={
+                'url': 'https://cloud.redhat.com/api/automation-hub/',
+                'auth_url': 'https://sso.redhat.com/example/openid-connect/token/',
+                'token': 'secret123',
+            },
+        )
         project_update.project.organization.galaxy_credentials.add(public_galaxy)
         project_update.project.organization.galaxy_credentials.add(rh)
         task = tasks.RunProjectUpdate()
         env = task.build_env(project_update, private_data_dir)
-        assert sorted([
-            (k, v) for k, v in env.items()
-            if k.startswith('ANSIBLE_GALAXY')
-        ]) == [
+        assert sorted([(k, v) for k, v in env.items() if k.startswith('ANSIBLE_GALAXY')]) == [
             ('ANSIBLE_GALAXY_SERVER_LIST', 'server0,server1'),
             ('ANSIBLE_GALAXY_SERVER_SERVER0_URL', 'https://galaxy.ansible.com/'),
             ('ANSIBLE_GALAXY_SERVER_SERVER1_AUTH_URL', 'https://sso.redhat.com/example/openid-connect/token/'),  # noqa
@@ -1921,21 +1581,15 @@ class TestProjectUpdateCredentials(TestJobExecution):
             dict(scm_type='git'),
             dict(scm_type='svn'),
             dict(scm_type='archive'),
-        ]
+        ],
     }
 
     def test_username_and_password_auth(self, project_update, scm_type):
         task = tasks.RunProjectUpdate()
         ssh = CredentialType.defaults['ssh']()
         project_update.scm_type = scm_type
-        project_update.credential = Credential(
-            pk=1,
-            credential_type=ssh,
-            inputs = {'username': 'bob', 'password': 'secret'}
-        )
-        project_update.credential.inputs['password'] = encrypt_field(
-            project_update.credential, 'password'
-        )
+        project_update.credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'bob', 'password': 'secret'})
+        project_update.credential.inputs['password'] = encrypt_field(project_update.credential, 'password')
 
         passwords = task.build_passwords(project_update, {})
         password_prompts = task.get_password_prompts(passwords)
@@ -1948,17 +1602,8 @@ class TestProjectUpdateCredentials(TestJobExecution):
         task = tasks.RunProjectUpdate()
         ssh = CredentialType.defaults['ssh']()
         project_update.scm_type = scm_type
-        project_update.credential = Credential(
-            pk=1,
-            credential_type=ssh,
-            inputs = {
-                'username': 'bob',
-                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
-            }
-        )
-        project_update.credential.inputs['ssh_key_data'] = encrypt_field(
-            project_update.credential, 'ssh_key_data'
-        )
+        project_update.credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'bob', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY})
+        project_update.credential.inputs['ssh_key_data'] = encrypt_field(project_update.credential, 'ssh_key_data')
 
         passwords = task.build_passwords(project_update, {})
         password_prompts = task.get_password_prompts(passwords)
@@ -1978,13 +1623,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
 class TestInventoryUpdateCredentials(TestJobExecution):
     @pytest.fixture
     def inventory_update(self):
-        return InventoryUpdate(
-            pk=1,
-            inventory_source=InventorySource(
-                pk=1,
-                inventory=Inventory(pk=1)
-            )
-        )
+        return InventoryUpdate(pk=1, inventory_source=InventorySource(pk=1, inventory=Inventory(pk=1)))
 
     def test_source_without_credential(self, mocker, inventory_update, private_data_dir):
         task = tasks.RunInventoryUpdate()
@@ -2003,7 +1642,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         inventory_update.source = 'custom'
         inventory_update.source_vars = '{"FOO": "BAR"}'
-        inventory_update.source_script= CustomInventoryScript(script='#!/bin/sh\necho "Hello, World!"')
+        inventory_update.source_script = CustomInventoryScript(script='#!/bin/sh\necho "Hello, World!"')
 
         if with_credential:
             azure_rm = CredentialType.defaults['azure_rm']()
@@ -2012,14 +1651,15 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                 cred = Credential(
                     pk=1,
                     credential_type=azure_rm,
-                    inputs = {
+                    inputs={
                         'client': 'some-client',
                         'secret': 'some-secret',
                         'tenant': 'some-tenant',
                         'subscription': 'some-subscription',
-                    }
+                    },
                 )
                 return [cred]
+
             inventory_update.get_extra_credentials = get_creds
         else:
             inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
@@ -2031,9 +1671,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         credentials = task.build_credentials_list(inventory_update)
         for credential in credentials:
             if credential:
-                credential.credential_type.inject_credential(
-                    credential, env, {}, [], private_data_dir
-                )
+                credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         assert '-i' in ' '.join(args)
         script = args[args.index('-i') + 1]
@@ -2053,13 +1691,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.source = 'ec2'
 
         def get_cred():
-            cred = Credential(
-                pk=1,
-                credential_type=aws,
-                inputs = {'username': 'bob', 'password': 'secret'}
-            )
+            cred = Credential(pk=1, credential_type=aws, inputs={'username': 'bob', 'password': 'secret'})
             cred.inputs['password'] = encrypt_field(cred, 'password')
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
@@ -2079,13 +1714,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.source = 'vmware'
 
         def get_cred():
-            cred = Credential(
-                pk=1,
-                credential_type=vmware,
-                inputs = {'username': 'bob', 'password': 'secret', 'host': 'https://example.org'}
-            )
+            cred = Credential(pk=1, credential_type=vmware, inputs={'username': 'bob', 'password': 'secret', 'host': 'https://example.org'})
             cred.inputs['password'] = encrypt_field(cred, 'password')
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
@@ -2096,9 +1728,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         credentials = task.build_credentials_list(inventory_update)
         for credential in credentials:
             if credential:
-                credential.credential_type.inject_credential(
-                    credential, env, safe_env, [], private_data_dir
-                )
+                credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         env["VMWARE_USER"] == "bob",
         env["VMWARE_PASSWORD"] == "secret",
@@ -2114,15 +1744,16 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             cred = Credential(
                 pk=1,
                 credential_type=azure_rm,
-                inputs = {
+                inputs={
                     'client': 'some-client',
                     'secret': 'some-secret',
                     'tenant': 'some-tenant',
                     'subscription': 'some-subscription',
-                    'cloud_environment': 'foobar'
-                }
+                    'cloud_environment': 'foobar',
+                },
             )
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
@@ -2148,14 +1779,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             cred = Credential(
                 pk=1,
                 credential_type=azure_rm,
-                inputs = {
-                    'subscription': 'some-subscription',
-                    'username': 'bob',
-                    'password': 'secret',
-                    'cloud_environment': 'foobar'
-                }
+                inputs={'subscription': 'some-subscription', 'username': 'bob', 'password': 'secret', 'cloud_environment': 'foobar'},
             )
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
@@ -2177,19 +1804,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.source = 'gce'
 
         def get_cred():
-            cred = Credential(
-                pk=1,
-                credential_type=gce,
-                inputs = {
-                    'username': 'bob',
-                    'project': 'some-project',
-                    'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
-                }
-            )
-            cred.inputs['ssh_key_data'] = encrypt_field(
-                cred, 'ssh_key_data'
-            )
+            cred = Credential(pk=1, credential_type=gce, inputs={'username': 'bob', 'project': 'some-project', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY})
+            cred.inputs['ssh_key_data'] = encrypt_field(cred, 'ssh_key_data')
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
@@ -2200,9 +1818,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             credentials = task.build_credentials_list(inventory_update)
             for credential in credentials:
                 if credential:
-                    credential.credential_type.inject_credential(
-                        credential, env, safe_env, [], private_data_dir
-                    )
+                    credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
             assert env['GCE_ZONE'] == expected_gce_zone
             json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
@@ -2220,18 +1836,12 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             cred = Credential(
                 pk=1,
                 credential_type=openstack,
-                inputs = {
-                    'username': 'bob',
-                    'password': 'secret',
-                    'project': 'tenant-name',
-                    'host': 'https://keystone.example.org'
-                }
+                inputs={'username': 'bob', 'password': 'secret', 'project': 'tenant-name', 'host': 'https://keystone.example.org'},
             )
             cred.inputs['ssh_key_data'] = ''
-            cred.inputs['ssh_key_data'] = encrypt_field(
-                cred, 'ssh_key_data'
-            )
+            cred.inputs['ssh_key_data'] = encrypt_field(cred, 'ssh_key_data')
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
@@ -2240,16 +1850,21 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         path = os.path.join(private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE']))
         shade_config = open(path, 'r').read()
-        assert '\n'.join([
-            'clouds:',
-            '  devstack:',
-            '    auth:',
-            '      auth_url: https://keystone.example.org',
-            '      password: secret',
-            '      project_name: tenant-name',
-            '      username: bob',
-            ''
-        ]) in shade_config
+        assert (
+            '\n'.join(
+                [
+                    'clouds:',
+                    '  devstack:',
+                    '    auth:',
+                    '      auth_url: https://keystone.example.org',
+                    '      password: secret',
+                    '      project_name: tenant-name',
+                    '      username: bob',
+                    '',
+                ]
+            )
+            in shade_config
+        )
 
     def test_satellite6_source(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
@@ -2257,19 +1872,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.source = 'satellite6'
 
         def get_cred():
-            cred = Credential(
-                pk=1,
-                credential_type=satellite6,
-                inputs = {
-                    'username': 'bob',
-                    'password': 'secret',
-                    'host': 'https://example.org'
-                }
-            )
-            cred.inputs['password'] = encrypt_field(
-                cred, 'password'
-            )
+            cred = Credential(pk=1, credential_type=satellite6, inputs={'username': 'bob', 'password': 'secret', 'host': 'https://example.org'})
+            cred.inputs['password'] = encrypt_field(cred, 'password')
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
@@ -2287,17 +1893,13 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         tower = CredentialType.defaults['tower']()
         inventory_update.source = 'tower'
-        inputs = {
-            'host': 'https://tower.example.org',
-            'username': 'bob',
-            'password': 'secret',
-            'verify_ssl': verify
-        }
+        inputs = {'host': 'https://tower.example.org', 'username': 'bob', 'password': 'secret', 'verify_ssl': verify}
 
         def get_cred():
-            cred = Credential(pk=1, credential_type=tower, inputs = inputs)
+            cred = Credential(pk=1, credential_type=tower, inputs=inputs)
             cred.inputs['password'] = encrypt_field(cred, 'password')
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
@@ -2325,9 +1927,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         }
 
         def get_cred():
-            cred = Credential(pk=1, credential_type=tower, inputs = inputs)
+            cred = Credential(pk=1, credential_type=tower, inputs=inputs)
             cred.inputs['password'] = encrypt_field(cred, 'password')
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
@@ -2336,9 +1939,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         credentials = task.build_credentials_list(inventory_update)
         for credential in credentials:
             if credential:
-                credential.credential_type.inject_credential(
-                    credential, env, safe_env, [], private_data_dir
-                )
+                credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         assert env['TOWER_VERIFY_SSL'] == 'False'
 
@@ -2351,12 +1952,13 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             cred = Credential(
                 pk=1,
                 credential_type=gce,
-                inputs = {
+                inputs={
                     'username': 'bob',
                     'project': 'some-project',
-                }
+                },
             )
             return cred
+
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
@@ -2426,9 +2028,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_lockf, logging_getLogger, os_
     assert logger.err.called_with("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))
 
 
-@pytest.mark.parametrize('injector_cls', [
-    cls for cls in ManagedCredentialType.registry.values() if cls.injectors
-])
+@pytest.mark.parametrize('injector_cls', [cls for cls in ManagedCredentialType.registry.values() if cls.injectors])
 def test_managed_injector_redaction(injector_cls):
     """See awx.main.models.inventory.PluginFileInjector._get_shared_env
     The ordering within awx.main.tasks.BaseTask and contract with build_env

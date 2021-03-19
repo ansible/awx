@@ -37,24 +37,24 @@ class UriCleaner(object):
                 # replace the first occurance of username and the first and second
                 # occurance of password
 
-                uri_str = redactedtext[match.start():match.end()]
+                uri_str = redactedtext[match.start() : match.end()]
                 if username:
                     uri_str = uri_str.replace(username, UriCleaner.REPLACE_STR, 1)
                 # 2, just in case the password is $encrypted$
                 if password:
                     uri_str = uri_str.replace(password, UriCleaner.REPLACE_STR, 2)
 
-                t = redactedtext[:match.start()] + uri_str
+                t = redactedtext[: match.start()] + uri_str
                 text_index = len(t)
-                if (match.end() < len(redactedtext)):
-                    t += redactedtext[match.end():]
+                if match.end() < len(redactedtext):
+                    t += redactedtext[match.end() :]
 
                 redactedtext = t
                 if text_index >= len(redactedtext):
                     text_index = len(redactedtext) - 1
             except ValueError:
                 # Invalid URI, redact the whole URI to be safe
-                redactedtext = redactedtext[:match.start()] + UriCleaner.REPLACE_STR + redactedtext[match.end():]
+                redactedtext = redactedtext[: match.start()] + UriCleaner.REPLACE_STR + redactedtext[match.end() :]
                 text_index = match.start() + len(UriCleaner.REPLACE_STR)
 
         return redactedtext

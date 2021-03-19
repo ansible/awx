@@ -16,11 +16,9 @@ logger = logging.getLogger('awx.main.notifications.rocketchat_backend')
 
 class RocketChatBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
-    init_parameters = {"rocketchat_url": {"label": "Target URL", "type": "string"},
-                       "rocketchat_no_verify_ssl": {"label": "Verify SSL", "type": "bool"}}
+    init_parameters = {"rocketchat_url": {"label": "Target URL", "type": "string"}, "rocketchat_no_verify_ssl": {"label": "Verify SSL", "type": "bool"}}
     recipient_parameter = "rocketchat_url"
     sender_parameter = None
-
 
     def __init__(self, rocketchat_no_verify_ssl=False, rocketchat_username=None, rocketchat_icon_url=None, fail_silently=False, **kwargs):
         super(RocketChatBackend, self).__init__(fail_silently=fail_silently)
@@ -35,20 +33,16 @@ class RocketChatBackend(AWXBaseEmailBackend, CustomNotificationBase):
         sent_messages = 0
         for m in messages:
             payload = {"text": m.subject}
-            for opt, optval in {'rocketchat_icon_url': 'icon_url',
-                                'rocketchat_username': 'username'}.items():
+            for opt, optval in {'rocketchat_icon_url': 'icon_url', 'rocketchat_username': 'username'}.items():
                 optvalue = getattr(self, opt)
                 if optvalue is not None:
                     payload[optval] = optvalue.strip()
 
-            r = requests.post("{}".format(m.recipients()[0]),
-                              data=json.dumps(payload), verify=(not self.rocketchat_no_verify_ssl))
+            r = requests.post("{}".format(m.recipients()[0]), data=json.dumps(payload), verify=(not self.rocketchat_no_verify_ssl))
 
             if r.status_code >= 400:
-                logger.error(smart_text(
-                    _("Error sending notification rocket.chat: {}").format(r.status_code)))
+                logger.error(smart_text(_("Error sending notification rocket.chat: {}").format(r.status_code)))
                 if not self.fail_silently:
-                    raise Exception(smart_text(
-                        _("Error sending notification rocket.chat: {}").format(r.status_code)))
+                    raise Exception(smart_text(_("Error sending notification rocket.chat: {}").format(r.status_code)))
             sent_messages += 1
         return sent_messages

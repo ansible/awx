@@ -57,8 +57,7 @@ settings_files = os.path.join(settings_dir, '*.py')
 
 # Load remaining settings from the global settings file specified in the
 # environment, defaulting to /etc/tower/settings.py.
-settings_file = os.environ.get('AWX_SETTINGS_FILE',
-                               '/etc/tower/settings.py')
+settings_file = os.environ.get('AWX_SETTINGS_FILE', '/etc/tower/settings.py')
 
 # Attempt to load settings from /etc/tower/settings.py first, followed by
 # /etc/tower/conf.d/*.py.
@@ -69,8 +68,9 @@ except ImportError:
     sys.exit(1)
 except IOError:
     from django.core.exceptions import ImproperlyConfigured
+
     included_file = locals().get('__included_file__', '')
-    if (not included_file or included_file == settings_file):
+    if not included_file or included_file == settings_file:
         # The import doesn't always give permission denied, so try to open the
         # settings file directly.
         try:
@@ -91,12 +91,14 @@ except IOError:
 
 # The below runs AFTER all of the custom settings are imported.
 
-CELERYBEAT_SCHEDULE.update({  # noqa
-    'isolated_heartbeat': {
-        'task': 'awx.main.tasks.awx_isolated_heartbeat',
-        'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),  # noqa
-        'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},  # noqa
+CELERYBEAT_SCHEDULE.update(
+    {  # noqa
+        'isolated_heartbeat': {
+            'task': 'awx.main.tasks.awx_isolated_heartbeat',
+            'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),  # noqa
+            'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},  # noqa
+        }
     }
-})
+)
 
-DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63]) # noqa
+DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63])  # noqa

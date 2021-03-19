@@ -6,10 +6,8 @@ from django.contrib.sessions.models import Session
 
 
 class Command(BaseCommand):
-
     def init_logging(self):
-        log_levels = dict(enumerate([logging.ERROR, logging.INFO,
-                                     logging.DEBUG, 0]))
+        log_levels = dict(enumerate([logging.ERROR, logging.INFO, logging.DEBUG, 0]))
         self.logger = logging.getLogger('awx.main.commands.cleanup_sessions')
         self.logger.setLevel(log_levels.get(self.verbosity, 0))
         handler = logging.StreamHandler()

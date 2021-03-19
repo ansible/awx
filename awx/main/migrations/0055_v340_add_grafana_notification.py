@@ -15,11 +15,39 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='notification',
             name='notification_type',
-            field=models.CharField(choices=[('email', 'Email'), ('slack', 'Slack'), ('twilio', 'Twilio'), ('pagerduty', 'Pagerduty'), ('grafana', 'Grafana'), ('hipchat', 'HipChat'), ('webhook', 'Webhook'), ('mattermost', 'Mattermost'), ('rocketchat', 'Rocket.Chat'), ('irc', 'IRC')], max_length=32),
+            field=models.CharField(
+                choices=[
+                    ('email', 'Email'),
+                    ('slack', 'Slack'),
+                    ('twilio', 'Twilio'),
+                    ('pagerduty', 'Pagerduty'),
+                    ('grafana', 'Grafana'),
+                    ('hipchat', 'HipChat'),
+                    ('webhook', 'Webhook'),
+                    ('mattermost', 'Mattermost'),
+                    ('rocketchat', 'Rocket.Chat'),
+                    ('irc', 'IRC'),
+                ],
+                max_length=32,
+            ),
         ),
         migrations.AlterField(
             model_name='notificationtemplate',
             name='notification_type',
-            field=models.CharField(choices=[('email', 'Email'), ('slack', 'Slack'), ('twilio', 'Twilio'), ('pagerduty', 'Pagerduty'), ('grafana', 'Grafana'), ('hipchat', 'HipChat'), ('webhook', 'Webhook'), ('mattermost', 'Mattermost'), ('rocketchat', 'Rocket.Chat'), ('irc', 'IRC')], max_length=32),
+            field=models.CharField(
+                choices=[
+                    ('email', 'Email'),
+                    ('slack', 'Slack'),
+                    ('twilio', 'Twilio'),
+                    ('pagerduty', 'Pagerduty'),
+                    ('grafana', 'Grafana'),
+                    ('hipchat', 'HipChat'),
+                    ('webhook', 'Webhook'),
+                    ('mattermost', 'Mattermost'),
+                    ('rocketchat', 'Rocket.Chat'),
+                    ('irc', 'IRC'),
+                ],
+                max_length=32,
+            ),
         ),
     ]

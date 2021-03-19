@@ -22,12 +22,7 @@ from rest_framework import serializers
 from rest_framework import status
 
 # Tower
-from awx.api.generics import (
-    APIView,
-    GenericAPIView,
-    ListAPIView,
-    RetrieveUpdateDestroyAPIView,
-)
+from awx.api.generics import APIView, GenericAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from awx.api.permissions import IsSuperUser
 from awx.api.versioning import reverse
 from awx.main.utils import camelcase_to_underscore
@@ -81,9 +76,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         if self.category_slug not in category_slugs:
             raise PermissionDenied()
 
-        registered_settings = settings_registry.get_registered_settings(
-            category_slug=self.category_slug, read_only=False,
-        )
+        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug, read_only=False)
         if self.category_slug == 'user':
             return Setting.objects.filter(key__in=registered_settings, user=self.request.user)
         else:
@@ -91,9 +84,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         settings_qs = self.get_queryset()
-        registered_settings = settings_registry.get_registered_settings(
-            category_slug=self.category_slug,
-        )
+        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug)
         all_settings = {}
         for setting in settings_qs:
             all_settings[setting.key] = setting.value
@@ -117,9 +108,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         for key, value in serializer.validated_data.items():
             if key == 'LICENSE' or settings_registry.is_setting_read_only(key):
                 continue
-            if settings_registry.is_setting_encrypted(key) and \
-                    isinstance(value, str) and \
-                    value.startswith('$encrypted$'):
+            if settings_registry.is_setting_encrypted(key) and isinstance(value, str) and value.startswith('$encrypted$'):
                 continue
             setattr(serializer.instance, key, value)
             setting = settings_qs.filter(key=key).order_by('pk').first()
@@ -132,7 +121,6 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
                 settings_change_list.append(key)
         if settings_change_list:
             connection.on_commit(lambda: handle_setting_changes.delay(settings_change_list))
-
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -170,7 +158,7 @@ class SettingLoggingTest(GenericAPIView):
         enabled = getattr(settings, 'LOG_AGGREGATOR_ENABLED', False)
         if not enabled:
             return Response({'error': 'Logging not enabled'}, status=status.HTTP_409_CONFLICT)
-        
+
         # Send test message to configured logger based on db settings
         try:
             default_logger = settings.LOG_AGGREGATOR_LOGGERS[0]
@@ -179,18 +167,15 @@ class SettingLoggingTest(GenericAPIView):
         except IndexError:
             default_logger = 'awx'
         logging.getLogger(default_logger).error('AWX Connection Test Message')
-        
+
         hostname = getattr(settings, 'LOG_AGGREGATOR_HOST', None)
         protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', None)
 
         try:
-            subprocess.check_output(
-                ['rsyslogd', '-N1', '-f', '/var/lib/awx/rsyslog/rsyslog.conf'],
-                stderr=subprocess.STDOUT
-            )
+            subprocess.check_output(['rsyslogd', '-N1', '-f', '/var/lib/awx/rsyslog/rsyslog.conf'], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as exc:
             return Response({'error': exc.output}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         # Check to ensure port is open at host
         if protocol in ['udp', 'tcp']:
             port = getattr(settings, 'LOG_AGGREGATOR_PORT', None)
@@ -206,7 +191,7 @@ class SettingLoggingTest(GenericAPIView):
         else:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            s.settimeout(.5)
+            s.settimeout(0.5)
             s.connect((hostname, int(port)))
             s.shutdown(SHUT_RDWR)
             s.close()

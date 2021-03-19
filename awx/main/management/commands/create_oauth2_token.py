@@ -9,7 +9,8 @@ from awx.api.serializers import OAuth2TokenSerializer
 
 class Command(BaseCommand):
     """Command that creates an OAuth2 token for a certain user. Returns the value of created token."""
-    help='Creates an OAuth2 token for a user.'
+
+    help = 'Creates an OAuth2 token for a user.'
 
     def add_arguments(self, parser):
         parser.add_argument('--user', dest='user', type=str)
@@ -22,7 +23,7 @@ class Command(BaseCommand):
             user = User.objects.get(username=options['user'])
         except ObjectDoesNotExist:
             raise CommandError('The user does not exist.')
-        config = {'user': user, 'scope':'write'}
+        config = {'user': user, 'scope': 'write'}
         serializer_obj = OAuth2TokenSerializer()
 
         class FakeRequest(object):

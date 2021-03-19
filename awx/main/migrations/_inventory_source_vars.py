@@ -47,21 +47,21 @@ class azure_rm(PluginFileInjector):
             'security_group': {'prefix': '', 'separator': '', 'key': 'security_group'},
             'resource_group': {'prefix': '', 'separator': '', 'key': 'resource_group'},
             # Note, os_family was not documented correctly in script, but defaulted to grouping by it
-            'os_family': {'prefix': '', 'separator': '', 'key': 'os_disk.operating_system_type'}
+            'os_family': {'prefix': '', 'separator': '', 'key': 'os_disk.operating_system_type'},
         }
         # by default group by everything
         # always respect user setting, if they gave it
-        group_by = [
-            grouping_name for grouping_name in group_by_hostvar
-            if source_vars.get('group_by_{}'.format(grouping_name), True)
-        ]
+        group_by = [grouping_name for grouping_name in group_by_hostvar if source_vars.get('group_by_{}'.format(grouping_name), True)]
         ret['keyed_groups'] = [group_by_hostvar[grouping_name] for grouping_name in group_by]
         if 'tag' in group_by:
             # Nasty syntax to reproduce "key_value" group names in addition to "key"
-            ret['keyed_groups'].append({
-                'prefix': '', 'separator': '',
-                'key': r'dict(tags.keys() | map("regex_replace", "^(.*)$", "\1_") | list | zip(tags.values() | list)) if tags else []'
-            })
+            ret['keyed_groups'].append(
+                {
+                    'prefix': '',
+                    'separator': '',
+                    'key': r'dict(tags.keys() | map("regex_replace", "^(.*)$", "\1_") | list | zip(tags.values() | list)) if tags else []',
+                }
+            )
 
         # Compatibility content
         # TODO: add proper support for instance_filters non-specific to compatibility
@@ -99,9 +99,7 @@ class azure_rm(PluginFileInjector):
                         if len(kv) > 1:
                             user_filters.append('tags["{}"] != "{}"'.format(kv[0].strip(), kv[1].strip()))
                 else:
-                    user_filters.append('{} not in {}'.format(
-                        loc, value.split(',')
-                    ))
+                    user_filters.append('{} not in {}'.format(loc, value.split(',')))
         if user_filters:
             ret.setdefault('exclude_host_filters', [])
             ret['exclude_host_filters'].extend(user_filters)
@@ -115,7 +113,7 @@ class azure_rm(PluginFileInjector):
             'public_ip': 'public_ipv4_addresses[0] if public_ipv4_addresses else None',
             'public_ip_name': 'public_ip_name if public_ip_name is defined else None',
             'public_ip_id': 'public_ip_id if public_ip_id is defined else None',
-            'tags': 'tags if tags else None'
+            'tags': 'tags if tags else None',
         }
         # Special functionality from script
         if source_vars.get('use_private_ip', False):
@@ -139,7 +137,6 @@ class ec2(PluginFileInjector):
     namespace = 'amazon'
     collection = 'aws'
 
-
     def _get_ec2_group_by_choices(self):
         return [
             ('ami_id', _('Image ID')),
@@ -161,15 +158,14 @@ class ec2(PluginFileInjector):
         return {
             # vars that change
             'ec2_block_devices': (
-                "dict(block_device_mappings | map(attribute='device_name') | list | zip(block_device_mappings "
-                "| map(attribute='ebs.volume_id') | list))"
+                "dict(block_device_mappings | map(attribute='device_name') | list | zip(block_device_mappings " "| map(attribute='ebs.volume_id') | list))"
             ),
             'ec2_dns_name': 'public_dns_name',
             'ec2_group_name': 'placement.group_name',
             'ec2_instance_profile': 'iam_instance_profile | default("")',
             'ec2_ip_address': 'public_ip_address',
             'ec2_kernel': 'kernel_id | default("")',
-            'ec2_monitored':  "monitoring.state in ['enabled', 'pending']",
+            'ec2_monitored': "monitoring.state in ['enabled', 'pending']",
             'ec2_monitoring_state': 'monitoring.state',
             'ec2_placement': 'placement.availability_zone',
             'ec2_ramdisk': 'ramdisk_id | default("")',
@@ -209,7 +205,7 @@ class ec2(PluginFileInjector):
             # new with https://github.com/ansible/ansible/pull/53645
             'ec2_eventsSet': 'events | default("")',
             'ec2_persistent': 'persistent | default(false)',
-            'ec2_requester_id': 'requester_id | default("")'
+            'ec2_requester_id': 'requester_id | default("")',
         }
 
     def inventory_as_dict(self, inventory_source, private_data_dir):
@@ -232,10 +228,7 @@ class ec2(PluginFileInjector):
             'security_group': {'prefix': 'security_group', 'key': 'security_groups | map(attribute="group_name")', 'parent_group': 'security_groups'},
             # tags cannot be parented in exactly the same way as the script due to
             # https://github.com/ansible/ansible/pull/53812
-            'tag_keys': [
-                {'prefix': 'tag', 'key': 'tags', 'parent_group': 'tags'},
-                {'prefix': 'tag', 'key': 'tags.keys()', 'parent_group': 'tags'}
-            ],
+            'tag_keys': [{'prefix': 'tag', 'key': 'tags', 'parent_group': 'tags'}, {'prefix': 'tag', 'key': 'tags.keys()', 'parent_group': 'tags'}],
             # 'tag_none': None,  # grouping by no tags isn't a different thing with plugin
             # naming is redundant, like vpc_id_vpc_8c412cea, but intended
             'vpc_id': {'prefix': 'vpc_id', 'key': 'vpc_id', 'parent_group': 'vpcs'},
@@ -262,10 +255,7 @@ class ec2(PluginFileInjector):
         # if true, it replaces dashes, but not in region / loc names
         replace_dash = bool(source_vars.get('replace_dash_in_groups', True))
         # Compatibility content
-        legacy_regex = {
-            True: r"[^A-Za-z0-9\_]",
-            False: r"[^A-Za-z0-9\_\-]"  # do not replace dash, dash is allowed
-        }[replace_dash]
+        legacy_regex = {True: r"[^A-Za-z0-9\_]", False: r"[^A-Za-z0-9\_\-]"}[replace_dash]  # do not replace dash, dash is allowed
         list_replacer = 'map("regex_replace", "{rx}", "_") | list'.format(rx=legacy_regex)
         # this option, a plugin option, will allow dashes, but not unicode
         # when set to False, unicode will be allowed, but it was not allowed by script
@@ -278,9 +268,7 @@ class ec2(PluginFileInjector):
                 continue
             if grouping_data['key'] == 'tags':
                 # dict jinja2 transformation
-                grouping_data['key'] = 'dict(tags.keys() | {replacer} | zip(tags.values() | {replacer}))'.format(
-                    replacer=list_replacer
-                )
+                grouping_data['key'] = 'dict(tags.keys() | {replacer} | zip(tags.values() | {replacer}))'.format(replacer=list_replacer)
             elif grouping_data['key'] == 'tags.keys()' or grouping_data['prefix'] == 'security_group':
                 # list jinja2 transformation
                 grouping_data['key'] += ' | {replacer}'.format(replacer=list_replacer)
@@ -327,11 +315,7 @@ class ec2(PluginFileInjector):
             ret['hostnames'] = hnames
         else:
             # public_ip as hostname is non-default plugin behavior, script behavior
-            ret['hostnames'] = [
-                'network-interface.addresses.association.public-ip',
-                'dns-name',
-                'private-dns-name'
-            ]
+            ret['hostnames'] = ['network-interface.addresses.association.public-ip', 'dns-name', 'private-dns-name']
         # The script returned only running state by default, the plugin does not
         # https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html#options
         # options: pending | running | shutting-down | terminated | stopping | stopped
@@ -394,7 +378,7 @@ class gce(PluginFileInjector):
             'gce_image': 'image',
             # We need this as long as hostnames is non-default, otherwise hosts
             # will not be addressed correctly, was returned in script
-            'ansible_ssh_host': 'networkInterfaces[0].accessConfigs[0].natIP | default(networkInterfaces[0].networkIP)'
+            'ansible_ssh_host': 'networkInterfaces[0].accessConfigs[0].natIP | default(networkInterfaces[0].networkIP)',
         }
 
     def inventory_as_dict(self, inventory_source, private_data_dir):
@@ -476,7 +460,7 @@ class vmware(PluginFileInjector):
             "rootSnapshot",
             "snapshot",  # optional
             "triggeredAlarmState",
-            "value"
+            "value",
         ]
         NESTED_PROPS = [
             "capability",
@@ -537,17 +521,11 @@ class vmware(PluginFileInjector):
         if groupby_patterns:
             for pattern in groupby_patterns.split(','):
                 stripped_pattern = pattern.replace('{', '').replace('}', '').strip()  # make best effort
-                ret['keyed_groups'].append({
-                    'prefix': '', 'separator': '',
-                    'key': stripped_pattern
-                })
+                ret['keyed_groups'].append({'prefix': '', 'separator': '', 'key': stripped_pattern})
         else:
             # default groups from script
             for entry in ('config.guestId', '"templates" if config.template else "guests"'):
-                ret['keyed_groups'].append({
-                    'prefix': '', 'separator': '',
-                    'key': entry
-                })
+                ret['keyed_groups'].append({'prefix': '', 'separator': '', 'key': entry})
 
         return ret
 
@@ -593,8 +571,8 @@ class openstack(PluginFileInjector):
 
 
 class rhv(PluginFileInjector):
-    """ovirt uses the custom credential templating, and that is all
-    """
+    """ovirt uses the custom credential templating, and that is all"""
+
     plugin_name = 'ovirt'
     initial_version = '2.9'
     namespace = 'ovirt'
@@ -604,9 +582,7 @@ class rhv(PluginFileInjector):
         ret = super(rhv, self).inventory_as_dict(inventory_source, private_data_dir)
         ret['ovirt_insecure'] = False  # Default changed from script
         # TODO: process strict option upstream
-        ret['compose'] = {
-            'ansible_host': '(devices.values() | list)[0][0] if devices else None'
-        }
+        ret['compose'] = {'ansible_host': '(devices.values() | list)[0][0] if devices else None'}
         ret['keyed_groups'] = []
         for key in ('cluster', 'status'):
             ret['keyed_groups'].append({'prefix': key, 'separator': '_', 'key': key})
@@ -656,24 +632,32 @@ class satellite6(PluginFileInjector):
 
         # Compatibility content
         group_by_hostvar = {
-            "environment":           {"prefix": "{}environment_".format(group_prefix),
-                                      "separator": "",
-                                      "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | "
-                                             "regex_replace('[^A-Za-z0-9_]', '_') | regex_replace('none', '')"},
-            "location":              {"prefix": "{}location_".format(group_prefix),
-                                      "separator": "",
-                                      "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
-            "organization":          {"prefix": "{}organization_".format(group_prefix),
-                                      "separator": "",
-                                      "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
-            "lifecycle_environment": {"prefix": "{}lifecycle_environment_".format(group_prefix),
-                                      "separator": "",
-                                      "key": "foreman['content_facet_attributes']['lifecycle_environment_name'] | "
-                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
-            "content_view":          {"prefix": "{}content_view_".format(group_prefix),
-                                      "separator": "",
-                                      "key": "foreman['content_facet_attributes']['content_view_name'] | "
-                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"}
+            "environment": {
+                "prefix": "{}environment_".format(group_prefix),
+                "separator": "",
+                "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | " "regex_replace('[^A-Za-z0-9_]', '_') | regex_replace('none', '')",
+            },
+            "location": {
+                "prefix": "{}location_".format(group_prefix),
+                "separator": "",
+                "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')",
+            },
+            "organization": {
+                "prefix": "{}organization_".format(group_prefix),
+                "separator": "",
+                "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')",
+            },
+            "lifecycle_environment": {
+                "prefix": "{}lifecycle_environment_".format(group_prefix),
+                "separator": "",
+                "key": "foreman['content_facet_attributes']['lifecycle_environment_name'] | "
+                "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')",
+            },
+            "content_view": {
+                "prefix": "{}content_view_".format(group_prefix),
+                "separator": "",
+                "key": "foreman['content_facet_attributes']['content_view_name'] | " "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')",
+            },
         }
 
         ret['legacy_hostvars'] = True  # convert hostvar structure to the form used by the script
@@ -715,8 +699,7 @@ class satellite6(PluginFileInjector):
             # apply jinja filter to key
             key = '"{}" | format({})'.format(key, ', '.join(param_names))
 
-            keyed_group = {'key': key,
-                           'separator': ''}
+            keyed_group = {'key': key, 'separator': ''}
             return keyed_group
 
         try:
@@ -728,8 +711,7 @@ class satellite6(PluginFileInjector):
                     if keyed_group:
                         ret['keyed_groups'].append(keyed_group)
         except json.JSONDecodeError:
-            logger.warning('Could not parse group_patterns. Expected JSON-formatted string, found: {}'
-                           .format(group_patterns))
+            logger.warning('Could not parse group_patterns. Expected JSON-formatted string, found: {}'.format(group_patterns))
 
         return ret
 

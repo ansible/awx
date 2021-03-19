@@ -10,7 +10,7 @@ logger = logging.getLogger('rbac_migrations')
 
 
 def create_roles(apps, schema_editor):
-    '''
+    """
     Implicit role creation happens in our post_save hook for all of our
     resources. Here we iterate through all of our resource types and call
     .save() to ensure all that happens for every object in the system.
@@ -18,10 +18,11 @@ def create_roles(apps, schema_editor):
     This can be used whenever new roles are introduced in a migration to
     create those roles for pre-existing objects that did not previously
     have them created via signals.
-    '''
+    """
 
     models = [
-        apps.get_model('main', m) for m in [
+        apps.get_model('main', m)
+        for m in [
             'Organization',
             'Team',
             'Inventory',
@@ -66,7 +67,7 @@ UNIFIED_ORG_LOOKUPS = {
     # Sliced jobs are a special case, but old data is not given special treatment for simplicity
     'workflowjob': 'workflow_job_template',
     # AdHocCommands do not have a template, but still migrate them
-    'adhoccommand': 'inventory'
+    'adhoccommand': 'inventory',
 }
 
 
@@ -90,12 +91,18 @@ def implicit_org_subquery(UnifiedClass, cls, backward=False):
         intermediary_field = cls._meta.get_field(source_field)
         intermediary_model = intermediary_field.related_model
         intermediary_reverse_rel = intermediary_field.remote_field.name
-        qs = intermediary_model.objects.filter(**{
-            # this filter leverages the fact that the Unified models have same pk as subclasses.
-            # For instance... filters projects used in job template, where that job template
-            # has same id same as UJT from the outer reference (which it does)
-            intermediary_reverse_rel: OuterRef('id')}
-        ).order_by().values_list('organization')[:1]
+        qs = (
+            intermediary_model.objects.filter(
+                **{
+                    # this filter leverages the fact that the Unified models have same pk as subclasses.
+                    # For instance... filters projects used in job template, where that job template
+                    # has same id same as UJT from the outer reference (which it does)
+                    intermediary_reverse_rel: OuterRef('id')
+                }
+            )
+            .order_by()
+            .values_list('organization')[:1]
+        )
     return Subquery(qs)
 
 
@@ -160,9 +167,15 @@ def _restore_inventory_admins(apps, schema_editor, backward=False):
     for jt in jt_qs.iterator():
         org = jt.inventory.organization
         for jt_role, org_roles in (
-                ('admin_role', ('admin_role', 'job_template_admin_role',)),
-                ('execute_role', ('execute_role',))
-            ):
+            (
+                'admin_role',
+                (
+                    'admin_role',
+                    'job_template_admin_role',
+                ),
+            ),
+            ('execute_role', ('execute_role',)),
+        ):
             role_id = getattr(jt, '{}_id'.format(jt_role))
 
             user_qs = User.objects
@@ -172,9 +185,7 @@ def _restore_inventory_admins(apps, schema_editor, backward=False):
                 user_qs = user_qs.filter(roles__in=org_role_ids)
                 # bizarre migration behavior - ancestors / descendents of
                 # migration version of Role model is reversed, using current model briefly
-                ancestor_ids = list(
-                    Role.objects.filter(descendents=role_id).values_list('id', flat=True)
-                )
+                ancestor_ids = list(Role.objects.filter(descendents=role_id).values_list('id', flat=True))
                 # same as Role.__contains__, filter for "user in jt.admin_role"
                 user_qs = user_qs.exclude(roles__in=ancestor_ids)
             else:
@@ -189,10 +200,9 @@ def _restore_inventory_admins(apps, schema_editor, backward=False):
                 continue
 
             role = getattr(jt, jt_role)
-            logger.debug('{} {} on jt {} for users {} via inventory.organization {}'.format(
-                'Removing' if backward else 'Setting',
-                jt_role, jt.pk, user_ids, org.pk
-            ))
+            logger.debug(
+                '{} {} on jt {} for users {} via inventory.organization {}'.format('Removing' if backward else 'Setting', jt_role, jt.pk, user_ids, org.pk)
+            )
             if not backward:
                 # in reverse, explit role becomes redundant
                 role.members.add(*user_ids)
@@ -201,10 +211,7 @@ def _restore_inventory_admins(apps, schema_editor, backward=False):
             changed_ct += len(user_ids)
 
     if changed_ct:
-        logger.info('{} explicit JT permission for {} users in {:.4f} seconds'.format(
-            'Removed' if backward else 'Added',
-            changed_ct, time() - start
-        ))
+        logger.info('{} explicit JT permission for {} users in {:.4f} seconds'.format('Removed' if backward else 'Added', changed_ct, time() - start))
 
 
 def restore_inventory_admins(apps, schema_editor):
@@ -216,16 +223,14 @@ def restore_inventory_admins_backward(apps, schema_editor):
 
 
 def rebuild_role_hierarchy(apps, schema_editor):
-    '''
+    """
     This should be called in any migration when ownerships are changed.
     Ex. I remove a user from the admin_role of a credential.
     Ancestors are cached from parents for performance, this re-computes ancestors.
-    '''
+    """
     logger.info('Computing role roots..')
     start = time()
-    roots = Role.objects \
-                .all() \
-                .values_list('id', flat=True)
+    roots = Role.objects.all().values_list('id', flat=True)
     stop = time()
     logger.info('Found %d roots in %f seconds, rebuilding ancestry map' % (len(roots), stop - start))
     start = time()
@@ -236,7 +241,7 @@ def rebuild_role_hierarchy(apps, schema_editor):
 
 
 def rebuild_role_parentage(apps, schema_editor, models=None):
-    '''
+    """
     This should be called in any migration when any parent_role entry
     is modified so that the cached parent fields will be updated. Ex:
         foo_role = ImplicitRoleField(
@@ -245,7 +250,7 @@ def rebuild_role_parentage(apps, schema_editor, models=None):
 
     This is like rebuild_role_hierarchy, but that method updates ancestors,
     whereas this method updates parents.
-    '''
+    """
     start = time()
     seen_models = set()
     model_ct = 0
@@ -258,9 +263,7 @@ def rebuild_role_parentage(apps, schema_editor, models=None):
     if models:
         # update_role_parentage_for_instance is expensive
         # if the models have been downselected, ignore those which are not in the list
-        ct_ids = list(ContentType.objects.filter(
-            model__in=[name.lower() for name in models]
-        ).values_list('id', flat=True))
+        ct_ids = list(ContentType.objects.filter(model__in=[name.lower() for name in models]).values_list('id', flat=True))
         role_qs = role_qs.filter(content_type__in=ct_ids)
 
     for role in role_qs.iterator():

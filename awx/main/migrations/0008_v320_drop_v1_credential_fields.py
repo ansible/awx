@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 # Django
 from django.db import migrations
 from django.db import models
+
 # AWX
 import awx.main.fields
 
@@ -103,12 +104,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='credential_type',
-            field=models.ForeignKey(related_name='credentials', to='main.CredentialType', on_delete=models.CASCADE, null=False, help_text='Specify the type of credential you want to create. Refer to the Ansible Tower documentation for details on each type.')
+            field=models.ForeignKey(
+                related_name='credentials',
+                to='main.CredentialType',
+                on_delete=models.CASCADE,
+                null=False,
+                help_text='Specify the type of credential you want to create. Refer to the Ansible Tower documentation for details on each type.',
+            ),
         ),
         migrations.AlterField(
             model_name='credential',
             name='inputs',
-            field=awx.main.fields.CredentialInputField(default=dict, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.', blank=True),
+            field=awx.main.fields.CredentialInputField(
+                default=dict,
+                help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.',
+                blank=True,
+            ),
         ),
         migrations.RemoveField(
             model_name='job',

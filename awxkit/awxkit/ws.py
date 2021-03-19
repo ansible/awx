@@ -84,12 +84,9 @@ class WSClient(object):
             auth_cookie = ''
         pref = 'wss://' if self._use_ssl else 'ws://'
         url = '{0}{1.hostname}:{1.port}/websocket/'.format(pref, self)
-        self.ws = websocket.WebSocketApp(url,
-                                         on_open=self._on_open,
-                                         on_message=self._on_message,
-                                         on_error=self._on_error,
-                                         on_close=self._on_close,
-                                         cookie=auth_cookie)
+        self.ws = websocket.WebSocketApp(
+            url, on_open=self._on_open, on_message=self._on_message, on_error=self._on_error, on_close=self._on_close, cookie=auth_cookie
+        )
         self._message_cache = []
         self._should_subscribe_to_pending_job = False
         self._pending_unsubscribe = threading.Event()
@@ -199,12 +196,8 @@ class WSClient(object):
         message = json.loads(message)
         log.debug('received message: {}'.format(message))
 
-        if all([message.get('group_name') == 'jobs',
-                message.get('status') == 'pending',
-                message.get('unified_job_id'),
-                self._should_subscribe_to_pending_job]):
-            if bool(message.get('project_id')) == (
-                    self._should_subscribe_to_pending_job['events'] == 'project_update_events'):
+        if all([message.get('group_name') == 'jobs', message.get('status') == 'pending', message.get('unified_job_id'), self._should_subscribe_to_pending_job]):
+            if bool(message.get('project_id')) == (self._should_subscribe_to_pending_job['events'] == 'project_update_events'):
                 self._update_subscription(message['unified_job_id'])
 
         ret = self._recv_queue.put(message)

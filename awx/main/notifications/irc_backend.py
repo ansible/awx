@@ -18,12 +18,14 @@ logger = logging.getLogger('awx.main.notifications.irc_backend')
 
 class IrcBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
-    init_parameters = {"server": {"label": "IRC Server Address", "type": "string"},
-                       "port": {"label": "IRC Server Port", "type": "int"},
-                       "nickname": {"label": "IRC Nick", "type": "string"},
-                       "password": {"label": "IRC Server Password", "type": "password"},
-                       "use_ssl": {"label": "SSL Connection", "type": "bool"},
-                       "targets": {"label": "Destination Channels or Users", "type": "list"}}
+    init_parameters = {
+        "server": {"label": "IRC Server Address", "type": "string"},
+        "port": {"label": "IRC Server Port", "type": "int"},
+        "nickname": {"label": "IRC Nick", "type": "string"},
+        "password": {"label": "IRC Server Password", "type": "password"},
+        "use_ssl": {"label": "SSL Connection", "type": "bool"},
+        "targets": {"label": "Destination Channels or Users", "type": "list"},
+    }
     recipient_parameter = "targets"
     sender_parameter = None
 

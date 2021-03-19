@@ -1,4 +1,3 @@
-
 class Resources(object):
 
     _activity = r'activity_stream/\d+/'

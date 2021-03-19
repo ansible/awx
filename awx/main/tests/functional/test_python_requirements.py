@@ -1,4 +1,3 @@
-
 import os
 import re
 import pytest
@@ -18,9 +17,11 @@ def test_env_matches_requirements_txt():
 
     def skip_line(line):
         return (
-            line == '' or line.strip().startswith('#') or
-            line.strip().startswith('git') or line.startswith('-e') or
-            '## The following requirements were added by pip freeze' in line
+            line == ''
+            or line.strip().startswith('#')
+            or line.strip().startswith('git')
+            or line.startswith('-e')
+            or '## The following requirements were added by pip freeze' in line
         )
 
     base_dir = settings.BASE_DIR
@@ -60,5 +61,3 @@ def test_env_matches_requirements_txt():
 
     if len(not_found) > 0:
         raise RuntimeError("%s not found in \n\n%s" % (not_found, reqs_actual))
-
-

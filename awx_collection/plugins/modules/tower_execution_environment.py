@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -81,7 +80,7 @@ def main():
         organization=dict(),
         credential=dict(default=''),
         state=dict(choices=['present', 'absent'], default='present'),
-        pull=dict(choices=['always', 'missing', 'never'], default='missing')
+        pull=dict(choices=['always', 'missing', 'never'], default='missing'),
     )
 
     # Create a module for ourselves
@@ -118,11 +117,7 @@ def main():
     if credential:
         new_fields['credential'] = module.resolve_name_to_id('credentials', credential)
 
-    module.create_or_update_if_needed(
-        existing_item, new_fields,
-        endpoint='execution_environments',
-        item_type='execution_environment'
-    )
+    module.create_or_update_if_needed(existing_item, new_fields, endpoint='execution_environments', item_type='execution_environment')
 
 
 if __name__ == '__main__':

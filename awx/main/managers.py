@@ -40,24 +40,24 @@ class HostManager(models.Manager):
          - Only consider results that are unique
          - Return the count of this query
         """
-        return self.order_by().exclude(
-            inventory_sources__source='tower'
-        ).filter(inventory__organization=org_id).values('name').distinct().count()
+        return self.order_by().exclude(inventory_sources__source='tower').filter(inventory__organization=org_id).values('name').distinct().count()
 
     def get_queryset(self):
         """When the parent instance of the host query set has a `kind=smart` and a `host_filter`
         set. Use the `host_filter` to generate the queryset for the hosts.
         """
-        qs = super(HostManager, self).get_queryset().defer(
-            'last_job__extra_vars',
-            'last_job_host_summary__job__extra_vars',
-            'last_job__artifacts',
-            'last_job_host_summary__job__artifacts',
+        qs = (
+            super(HostManager, self)
+            .get_queryset()
+            .defer(
+                'last_job__extra_vars',
+                'last_job_host_summary__job__extra_vars',
+                'last_job__artifacts',
+                'last_job_host_summary__job__artifacts',
+            )
         )
 
-        if (hasattr(self, 'instance') and
-           hasattr(self.instance, 'host_filter') and
-           hasattr(self.instance, 'kind')):
+        if hasattr(self, 'instance') and hasattr(self.instance, 'host_filter') and hasattr(self.instance, 'kind'):
             if self.instance.kind == 'smart' and self.instance.host_filter is not None:
                 q = SmartFilter.query_from_string(self.instance.host_filter)
                 if self.instance.organization_id:
@@ -94,13 +94,12 @@ class InstanceManager(models.Manager):
     Provides "table-level" methods including getting the currently active
     instance or role.
     """
+
     def me(self):
         """Return the currently active instance."""
         # If we are running unit tests, return a stub record.
         if settings.IS_TESTING(sys.argv) or hasattr(sys, '_called_from_test'):
-            return self.model(id=1,
-                              hostname='localhost',
-                              uuid='00000000-0000-0000-0000-000000000000')
+            return self.model(id=1, hostname='localhost', uuid='00000000-0000-0000-0000-000000000000')
 
         node = self.filter(hostname=settings.CLUSTER_HOST_ID)
         if node.exists():
@@ -133,15 +132,13 @@ class InstanceManager(models.Manager):
                     return (True, instance)
                 else:
                     return (False, instance)
-            instance = self.create(uuid=uuid,
-                                   hostname=hostname,
-                                   ip_address=ip_address,
-                                   capacity=0)
+            instance = self.create(uuid=uuid, hostname=hostname, ip_address=ip_address, capacity=0)
         return (True, instance)
 
     def get_or_register(self):
         if settings.AWX_AUTO_DEPROVISION_INSTANCES:
             from awx.main.management.commands.register_queue import RegisterQueue
+
             pod_ip = os.environ.get('MY_POD_IP')
             registered = self.register(ip_address=pod_ip)
             is_container_group = settings.IS_K8S
@@ -178,10 +175,7 @@ class InstanceGroupManager(models.Manager):
         ig_instance_mapping = {}
         # Create dictionaries that represent basic m2m memberships
         for group in qs:
-            ig_instance_mapping[group.name] = set(
-                instance.hostname for instance in group.instances.all() if
-                instance.capacity != 0
-            )
+            ig_instance_mapping[group.name] = set(instance.hostname for instance in group.instances.all() if instance.capacity != 0)
             for inst in group.instances.all():
                 if inst.capacity == 0:
                     continue
@@ -210,8 +204,7 @@ class InstanceGroupManager(models.Manager):
         instance_ig_mapping, ig_ig_mapping = self.capacity_mapping(qs=qs)
 
         if tasks is None:
-            tasks = self.model.unifiedjob_set.related.related_model.objects.filter(
-                status__in=('running', 'waiting'))
+            tasks = self.model.unifiedjob_set.related.related_model.objects.filter(status__in=('running', 'waiting'))
 
         if graph is None:
             graph = {group.name: {} for group in qs}
@@ -239,8 +232,7 @@ class InstanceGroupManager(models.Manager):
                 # Subtract capacity from all groups that contain the instance
                 if t.execution_node not in instance_ig_mapping:
                     if not t.is_container_group_task:
-                        logger.warning('Detected %s running inside lost instance, '
-                                       'may still be waiting for reaper.', t.log_format)
+                        logger.warning('Detected %s running inside lost instance, ' 'may still be waiting for reaper.', t.log_format)
                     if t.instance_group:
                         impacted_groups = [t.instance_group.name]
                     else:

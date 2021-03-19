@@ -4,7 +4,6 @@ from django.core.management.commands.makemigrations import Command as MakeMigrat
 
 
 class Command(MakeMigrations):
-
     def execute(self, *args, **options):
         settings = connections['default'].settings_dict.copy()
         settings['ENGINE'] = 'sqlite3'

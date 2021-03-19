@@ -30,7 +30,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='schedule',
             name='inventory',
-            field=models.ForeignKey(related_name='schedules', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Inventory', null=True),
+            field=models.ForeignKey(
+                related_name='schedules', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Inventory', null=True
+            ),
         ),
         migrations.AddField(
             model_name='schedule',
@@ -87,7 +89,12 @@ class Migration(migrations.Migration):
                 ('survey_passwords', awx.main.fields.JSONField(blank=True, default=dict, editable=False)),
                 ('char_prompts', awx.main.fields.JSONField(blank=True, default=dict)),
                 ('credentials', models.ManyToManyField(related_name='joblaunchconfigs', to='main.Credential')),
-                ('inventory', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='joblaunchconfigs', to='main.Inventory')),
+                (
+                    'inventory',
+                    models.ForeignKey(
+                        blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='joblaunchconfigs', to='main.Inventory'
+                    ),
+                ),
                 ('job', models.OneToOneField(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='launch_config', to='main.UnifiedJob')),
             ],
         ),

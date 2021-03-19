@@ -112,19 +112,22 @@ class RegisterQueue:
 
 
 class Command(BaseCommand):
-
     def add_arguments(self, parser):
-        parser.add_argument('--queuename', dest='queuename', type=str,
-                            help='Queue to create/update')
-        parser.add_argument('--hostnames', dest='hostnames', type=str,
-                            help='Comma-Delimited Hosts to add to the Queue (will not remove already assigned instances)')
-        parser.add_argument('--controller', dest='controller', type=str,
-                            default='', help='The controlling group (makes this an isolated group)')
-        parser.add_argument('--instance_percent', dest='instance_percent', type=int, default=0,
-                            help='The percentage of active instances that will be assigned to this group'),
-        parser.add_argument('--instance_minimum', dest='instance_minimum', type=int, default=0,
-                            help='The minimum number of instance that will be retained for this group from available instances')
-
+        parser.add_argument('--queuename', dest='queuename', type=str, help='Queue to create/update')
+        parser.add_argument(
+            '--hostnames', dest='hostnames', type=str, help='Comma-Delimited Hosts to add to the Queue (will not remove already assigned instances)'
+        )
+        parser.add_argument('--controller', dest='controller', type=str, default='', help='The controlling group (makes this an isolated group)')
+        parser.add_argument(
+            '--instance_percent', dest='instance_percent', type=int, default=0, help='The percentage of active instances that will be assigned to this group'
+        ),
+        parser.add_argument(
+            '--instance_minimum',
+            dest='instance_minimum',
+            type=int,
+            default=0,
+            help='The minimum number of instance that will be retained for this group from available instances',
+        )
 
     def handle(self, **options):
         queuename = options.get('queuename')

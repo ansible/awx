@@ -10,8 +10,8 @@ from awx.api.versioning import reverse
 def ec2_source(inventory, project):
     with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
         return inventory.inventory_sources.create(
-            name='some_source', update_on_project_update=True, source='ec2',
-            source_project=project, scm_last_revision=project.scm_revision)
+            name='some_source', update_on_project_update=True, source='ec2', source_project=project, scm_last_revision=project.scm_revision
+        )
 
 
 @pytest.fixture
@@ -26,10 +26,7 @@ def job_template(job_template, project, inventory):
 
 @pytest.mark.django_db
 def test_prevent_multiple_machine_creds(get, post, job_template, admin, machine_credential):
-    url = reverse(
-        'api:job_template_credentials_list',
-        kwargs={'pk': job_template.pk}
-    )
+    url = reverse('api:job_template_credentials_list', kwargs={'pk': job_template.pk})
 
     def _new_cred(name):
         return {
@@ -38,7 +35,7 @@ def test_prevent_multiple_machine_creds(get, post, job_template, admin, machine_
             'inputs': {
                 'username': 'bob',
                 'password': 'secret',
-            }
+            },
         }
 
     post(url, _new_cred('First Cred'), admin, expect=201)
@@ -59,7 +56,7 @@ def test_invalid_credential_type_at_launch(get, post, job_template, admin, kind)
         inputs={
             'username': 'bob',
             'password': 'secret',
-        }
+        },
     )
     cred.save()
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
@@ -71,8 +68,7 @@ def test_invalid_credential_type_at_launch(get, post, job_template, admin, kind)
 
 @pytest.mark.django_db
 def test_prevent_multiple_machine_creds_at_launch(get, post, job_template, admin, machine_credential):
-    other_cred = Credential(credential_type=machine_credential.credential_type, name="Second",
-                            inputs={'username': 'bob'})
+    other_cred = Credential(credential_type=machine_credential.credential_type, name="Second", inputs={'username': 'bob'})
     other_cred.save()
     creds = [machine_credential.pk, other_cred.pk]
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
@@ -94,8 +90,7 @@ def test_ssh_password_prompted_at_launch(get, post, job_template, admin, machine
 def test_prompted_credential_replaced_on_launch(get, post, job_template, admin, machine_credential):
     # If a JT has a credential that needs a password, but the launch POST
     # specifies credential that does not require any passwords
-    cred2 = Credential(name='second-cred', inputs=machine_credential.inputs,
-                       credential_type=machine_credential.credential_type)
+    cred2 = Credential(name='second-cred', inputs=machine_credential.inputs, credential_type=machine_credential.credential_type)
     cred2.inputs['password'] = 'ASK'
     cred2.save()
     job_template.credentials.add(cred2)
@@ -114,10 +109,7 @@ def test_ssh_credential_with_password_at_launch(get, post, job_template, admin, 
     assert resp.data['passwords_needed_to_start'] == ['ssh_password']
 
     with mock.patch.object(Job, 'signal_start') as signal_start:
-        resp = post(url, {
-            'credentials': [machine_credential.pk],
-            'ssh_password': 'testing123'
-        }, admin, expect=201)
+        resp = post(url, {'credentials': [machine_credential.pk], 'ssh_password': 'testing123'}, admin, expect=201)
         signal_start.assert_called_with(ssh_password='testing123')
 
 
@@ -141,10 +133,7 @@ def test_vault_credential_with_password_at_launch(get, post, job_template, admin
     assert resp.data['passwords_needed_to_start'] == ['vault_password']
 
     with mock.patch.object(Job, 'signal_start') as signal_start:
-        resp = post(url, {
-            'credentials': [vault_credential.pk],
-            'vault_password': 'testing123'
-        }, admin, expect=201)
+        resp = post(url, {'credentials': [vault_credential.pk], 'vault_password': 'testing123'}, admin, expect=201)
         signal_start.assert_called_with(vault_password='testing123')
 
 
@@ -153,36 +142,24 @@ def test_deprecated_credential_activity_stream(patch, admin_user, machine_creden
     job_template.credentials.add(machine_credential)
     starting_entries = job_template.activitystream_set.count()
     # no-op patch
-    patch(
-        job_template.get_absolute_url(),
-        admin_user,
-        data={'credential': machine_credential.pk},
-        expect=200
-    )
+    patch(job_template.get_absolute_url(), admin_user, data={'credential': machine_credential.pk}, expect=200)
     # no-op should not produce activity stream entries
     assert starting_entries == job_template.activitystream_set.count()
 
 
 @pytest.mark.django_db
 def test_multi_vault_preserved_on_put(get, put, admin_user, job_template, vault_credential):
-    '''
+    """
     A PUT request will necessarily specify deprecated fields, but if the deprecated
     field is a singleton while the `credentials` relation has many, that makes
     it very easy to drop those credentials not specified in the PUT data
-    '''
+    """
     vault2 = Credential.objects.create(
-        name='second-vault',
-        credential_type=vault_credential.credential_type,
-        inputs={'vault_password': 'foo', 'vault_id': 'foo'}
+        name='second-vault', credential_type=vault_credential.credential_type, inputs={'vault_password': 'foo', 'vault_id': 'foo'}
     )
     job_template.credentials.add(vault_credential, vault2)
     assert job_template.credentials.count() == 2  # sanity check
     r = get(job_template.get_absolute_url(), admin_user, expect=200)
     # should be a no-op PUT request
-    put(
-        job_template.get_absolute_url(),
-        admin_user,
-        data=r.data,
-        expect=200
-    )
+    put(job_template.get_absolute_url(), admin_user, data=r.data, expect=200)
     assert job_template.credentials.count() == 2

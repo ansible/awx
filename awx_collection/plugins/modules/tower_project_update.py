@@ -4,11 +4,10 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.0',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.0', 'status': ['preview'], 'supported_by': 'community'}
 
 DOCUMENTATION = '''
 ---
@@ -127,12 +126,7 @@ def main():
     start = time.time()
 
     # Invoke wait function
-    module.wait_on_url(
-        url=result['json']['url'],
-        object_name=module.get_item_name(project),
-        object_type='Project Update',
-        timeout=timeout, interval=interval
-    )
+    module.wait_on_url(url=result['json']['url'], object_name=module.get_item_name(project), object_type='Project Update', timeout=timeout, interval=interval)
 
     module.exit_json(**module.json_output)
 

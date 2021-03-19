@@ -18,20 +18,9 @@ __all__ = ['Setting']
 
 class Setting(CreatedModifiedModel):
 
-    key = models.CharField(
-        max_length=255,
-    )
-    value = JSONField(
-        null=True,
-    )
-    user = prevent_search(models.ForeignKey(
-        'auth.User',
-        related_name='settings',
-        default=None,
-        null=True,
-        editable=False,
-        on_delete=models.CASCADE,
-    ))
+    key = models.CharField(max_length=255)
+    value = JSONField(null=True)
+    user = prevent_search(models.ForeignKey('auth.User', related_name='settings', default=None, null=True, editable=False, on_delete=models.CASCADE))
 
     def __str__(self):
         try:
@@ -66,6 +55,7 @@ class Setting(CreatedModifiedModel):
         # field and save again.
         if encrypted and new_instance:
             from awx.main.signals import disable_activity_stream
+
             with disable_activity_stream():
                 self.value = self._saved_value
                 self.save(update_fields=['value'])
@@ -82,6 +72,7 @@ class Setting(CreatedModifiedModel):
 import awx.conf.signals  # noqa
 
 from awx.main.registrar import activity_stream_registrar  # noqa
+
 activity_stream_registrar.connect(Setting)
 
 import awx.conf.access  # noqa

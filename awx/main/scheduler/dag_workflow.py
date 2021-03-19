@@ -1,4 +1,3 @@
-
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_text
 
@@ -21,18 +20,14 @@ class WorkflowDAG(SimpleDAG):
     def _init_graph(self, workflow_job_or_jt):
         if hasattr(workflow_job_or_jt, 'workflow_job_template_nodes'):
             vals = ['from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id']
-            filters = {
-                'from_workflowjobtemplatenode__workflow_job_template_id': workflow_job_or_jt.id
-            }
+            filters = {'from_workflowjobtemplatenode__workflow_job_template_id': workflow_job_or_jt.id}
             workflow_nodes = workflow_job_or_jt.workflow_job_template_nodes
             success_nodes = WorkflowJobTemplateNode.success_nodes.through.objects.filter(**filters).values_list(*vals)
             failure_nodes = WorkflowJobTemplateNode.failure_nodes.through.objects.filter(**filters).values_list(*vals)
             always_nodes = WorkflowJobTemplateNode.always_nodes.through.objects.filter(**filters).values_list(*vals)
         elif hasattr(workflow_job_or_jt, 'workflow_job_nodes'):
             vals = ['from_workflowjobnode_id', 'to_workflowjobnode_id']
-            filters = {
-                'from_workflowjobnode__workflow_job_id': workflow_job_or_jt.id
-            }
+            filters = {'from_workflowjobnode__workflow_job_id': workflow_job_or_jt.id}
             workflow_nodes = workflow_job_or_jt.workflow_job_nodes
             success_nodes = WorkflowJobNode.success_nodes.through.objects.filter(**filters).values_list(*vals)
             failure_nodes = WorkflowJobNode.failure_nodes.through.objects.filter(**filters).values_list(*vals)
@@ -76,15 +71,16 @@ class WorkflowDAG(SimpleDAG):
         obj = node['node_object']
         parent_nodes = [p['node_object'] for p in self.get_parents(obj)]
         for p in parent_nodes:
-            #node has a status
+            # node has a status
             if p.job and p.job.status in ["successful", "failed"]:
                 if p.job and p.job.status == "successful":
                     status = "success_nodes"
                 elif p.job and p.job.status == "failed":
                     status = "failure_nodes"
-                #check that the nodes status matches either a pathway of the same status or is an always path.
-                if (p not in [node['node_object'] for node in self.get_parents(obj, status)] and
-                        p not in [node['node_object'] for node in self.get_parents(obj, "always_nodes")]):
+                # check that the nodes status matches either a pathway of the same status or is an always path.
+                if p not in [node['node_object'] for node in self.get_parents(obj, status)] and p not in [
+                    node['node_object'] for node in self.get_parents(obj, "always_nodes")
+                ]:
                     return False
         return True
 
@@ -101,14 +97,11 @@ class WorkflowDAG(SimpleDAG):
                 continue
             elif obj.job:
                 if obj.job.status in ['failed', 'error', 'canceled']:
-                    nodes.extend(self.get_children(obj, 'failure_nodes') +
-                                 self.get_children(obj, 'always_nodes'))
+                    nodes.extend(self.get_children(obj, 'failure_nodes') + self.get_children(obj, 'always_nodes'))
                 elif obj.job.status == 'successful':
-                    nodes.extend(self.get_children(obj, 'success_nodes') +
-                                 self.get_children(obj, 'always_nodes'))
+                    nodes.extend(self.get_children(obj, 'success_nodes') + self.get_children(obj, 'always_nodes'))
             elif obj.unified_job_template is None:
-                nodes.extend(self.get_children(obj, 'failure_nodes') +
-                             self.get_children(obj, 'always_nodes'))
+                nodes.extend(self.get_children(obj, 'failure_nodes') + self.get_children(obj, 'always_nodes'))
             else:
                 # This catches root nodes or ANY convergence nodes
                 if not obj.all_parents_must_converge and self._are_relevant_parents_finished(n):
@@ -157,8 +150,7 @@ class WorkflowDAG(SimpleDAG):
 
         for node in failed_nodes:
             obj = node['node_object']
-            if (len(self.get_children(obj, 'failure_nodes')) +
-                    len(self.get_children(obj, 'always_nodes'))) == 0:
+            if (len(self.get_children(obj, 'failure_nodes')) + len(self.get_children(obj, 'always_nodes'))) == 0:
                 if obj.unified_job_template is None:
                     res = True
                     failed_unified_job_template_node_ids.append(str(obj.id))
@@ -167,8 +159,10 @@ class WorkflowDAG(SimpleDAG):
                     failed_path_nodes_id_status.append((str(obj.id), obj.job.status))
 
         if res is True:
-            s = _("No error handling path for workflow job node(s) [{node_status}]. Workflow job "
-                  "node(s) missing unified job template and error handling path [{no_ufjt}].")
+            s = _(
+                "No error handling path for workflow job node(s) [{node_status}]. Workflow job "
+                "node(s) missing unified job template and error handling path [{no_ufjt}]."
+            )
             parms = {
                 'node_status': '',
                 'no_ufjt': '',
@@ -190,12 +184,12 @@ class WorkflowDAG(SimpleDAG):
 
     Return a boolean
     '''
+
     def _are_all_nodes_dnr_decided(self, workflow_nodes):
         for n in workflow_nodes:
             if n.do_not_run is False and not n.job and n.unified_job_template:
                 return False
         return True
-
 
     r'''
     Determine if a node (1) is ready to be marked do_not_run and (2) should
@@ -206,29 +200,26 @@ class WorkflowDAG(SimpleDAG):
 
     Return a boolean
     '''
+
     def _should_mark_node_dnr(self, node, parent_nodes):
         for p in parent_nodes:
             if p.do_not_run is True:
                 pass
             elif p.job:
                 if p.job.status == 'successful':
-                    if node in (self.get_children(p, 'success_nodes') +
-                                self.get_children(p, 'always_nodes')):
+                    if node in (self.get_children(p, 'success_nodes') + self.get_children(p, 'always_nodes')):
                         return False
                 elif p.job.status in ['failed', 'error', 'canceled']:
-                    if node in (self.get_children(p, 'failure_nodes') +
-                                self.get_children(p, 'always_nodes')):
+                    if node in (self.get_children(p, 'failure_nodes') + self.get_children(p, 'always_nodes')):
                         return False
                 else:
                     return False
             elif not p.do_not_run and p.unified_job_template is None:
-                if node in (self.get_children(p, 'failure_nodes') +
-                            self.get_children(p, 'always_nodes')):
+                if node in (self.get_children(p, 'failure_nodes') + self.get_children(p, 'always_nodes')):
                     return False
             else:
                 return False
         return True
-
 
     r'''
     determine if the current node is a convergence node by checking if all the
@@ -238,6 +229,7 @@ class WorkflowDAG(SimpleDAG):
 
     Return a list object
     '''
+
     def mark_dnr_nodes(self):
         root_nodes = self.get_root_nodes()
         nodes_marked_do_not_run = []

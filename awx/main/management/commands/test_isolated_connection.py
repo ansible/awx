@@ -13,11 +13,11 @@ from awx.main.isolated.manager import set_pythonpath
 
 class Command(BaseCommand):
     """Tests SSH connectivity between a controller and target isolated node"""
+
     help = 'Tests SSH connectivity between a controller and target isolated node'
 
     def add_arguments(self, parser):
-        parser.add_argument('--hostname', dest='hostname', type=str,
-                            help='Hostname of an isolated node')
+        parser.add_argument('--hostname', dest='hostname', type=str, help='Hostname of an isolated node')
 
     def handle(self, *args, **options):
         hostname = options.get('hostname')
@@ -27,10 +27,7 @@ class Command(BaseCommand):
         try:
             path = tempfile.mkdtemp(prefix='awx_isolated_ssh', dir=settings.AWX_PROOT_BASE_PATH)
             ssh_key = None
-            if all([
-                getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True,
-                getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None)
-            ]):
+            if all([getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True, getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None)]):
                 ssh_key = settings.AWX_ISOLATED_PRIVATE_KEY
             env = dict(os.environ.items())
             env['ANSIBLE_HOST_KEY_CHECKING'] = str(settings.AWX_ISOLATED_HOST_KEY_CHECKING)

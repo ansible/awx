@@ -58,9 +58,10 @@ def test_decrypt_field_with_undefined_attr_raises_expected_exception():
 
 
 class TestSurveyReversibilityValue:
-    '''
+    """
     Tests to enforce the contract with survey password question encrypted values
-    '''
+    """
+
     _key = encryption.get_encryption_key('value', None)
 
     def test_encrypt_empty_string(self):

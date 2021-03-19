@@ -6,7 +6,6 @@ from awx.main.access import ActivityStreamAccess
 from awx.conf.models import Setting
 
 
-
 @pytest.fixture
 def activity_stream_entry(organization, org_admin):
     return ActivityStream.objects.filter(organization__pk=organization.pk, user=org_admin, operation='associate').first()
@@ -92,9 +91,21 @@ def test_stream_access_cant_change(activity_stream_entry, organization, org_admi
 @pytest.mark.django_db
 @pytest.mark.activity_stream_access
 def test_stream_queryset_hides_shows_items(
-        activity_stream_entry, organization, user, org_admin,
-        project, org_credential, inventory, label, deploy_jobtemplate,
-        notification_template, group, host, team, settings):
+    activity_stream_entry,
+    organization,
+    user,
+    org_admin,
+    project,
+    org_credential,
+    inventory,
+    label,
+    deploy_jobtemplate,
+    notification_template,
+    group,
+    host,
+    team,
+    settings,
+):
     settings.ACTIVITY_STREAM_ENABLED = True
     # this user is not in any organizations and should not see any resource activity
     no_access_user = user('no-access-user', False)
@@ -126,18 +137,14 @@ def test_stream_queryset_hides_shows_items(
 
 @pytest.mark.django_db
 def test_stream_user_direct_role_updates(get, post, organization_factory):
-    objects = organization_factory('test_org',
-                                   superusers=['admin'],
-                                   users=['test'],
-                                   inventories=['inv1'])
+    objects = organization_factory('test_org', superusers=['admin'], users=['test'], inventories=['inv1'])
 
     url = reverse('api:user_roles_list', kwargs={'pk': objects.users.test.pk})
     post(url, dict(id=objects.inventories.inv1.read_role.pk), objects.superusers.admin)
 
     activity_stream = ActivityStream.objects.filter(
-        inventory__pk=objects.inventories.inv1.pk,
-        user__pk=objects.users.test.pk,
-        role__pk=objects.inventories.inv1.read_role.pk).first()
+        inventory__pk=objects.inventories.inv1.pk, user__pk=objects.users.test.pk, role__pk=objects.inventories.inv1.read_role.pk
+    ).first()
     url = reverse('api:activity_stream_detail', kwargs={'pk': activity_stream.pk})
     response = get(url, objects.users.test)
 

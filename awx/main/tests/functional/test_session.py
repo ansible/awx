@@ -25,41 +25,28 @@ class AlwaysPassBackend(object):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('accept, status', [
-    ['*/*', 200],
-    ['text/html', 200],
-    ['application/json', 406]
-])
+@pytest.mark.parametrize('accept, status', [['*/*', 200], ['text/html', 200], ['application/json', 406]])
 def test_login_json_not_allowed(get, accept, status):
-    get(
-        '/api/login/',
-        HTTP_ACCEPT=accept,
-        expect=status
-    )
+    get('/api/login/', HTTP_ACCEPT=accept, expect=status)
 
 
 @pytest.mark.skip(reason="Needs Update - CA")
 @pytest.mark.django_db
 def test_session_create_delete(admin, post, get):
     AlwaysPassBackend.user = admin
-    with override_settings(
-        AUTHENTICATION_BACKENDS=(AlwaysPassBackend.get_backend_path(),),
-        SESSION_COOKIE_NAME='session_id'
-    ):
+    with override_settings(AUTHENTICATION_BACKENDS=(AlwaysPassBackend.get_backend_path(),), SESSION_COOKIE_NAME='session_id'):
         response = post(
             '/api/login/',
             data={'username': admin.username, 'password': admin.password, 'next': '/api/'},
-            expect=302, middleware=SessionMiddleware(), format='multipart'
+            expect=302,
+            middleware=SessionMiddleware(),
+            format='multipart',
         )
         assert 'session_id' in response.cookies
-        session_key = re.findall(r'session_id=[a-zA-z0-9]+',
-                                 str(response.cookies['session_id']))[0][len('session_id=') :]
+        session_key = re.findall(r'session_id=[a-zA-z0-9]+', str(response.cookies['session_id']))[0][len('session_id=') :]
         session = Session.objects.get(session_key=session_key)
         assert int(session.get_decoded()[SESSION_KEY]) == admin.pk
-        response = get(
-            '/api/logout/', middleware=SessionMiddleware(),
-            cookies={'session_id': session_key}, expect=302
-        )
+        response = get('/api/logout/', middleware=SessionMiddleware(), cookies={'session_id': session_key}, expect=302)
         assert not Session.objects.filter(session_key=session_key).exists()
 
 
@@ -88,10 +75,7 @@ def test_session_overlimit(emit, admin, alice):
             created.append(session.session_key)
     assert [s.pk for s in Session.objects.all()] == created[-3:]
     assert emit.call_count == 2  # 2 of 5 sessions were evicted
-    emit.assert_called_with(
-        'control-limit_reached_{}'.format(admin.pk),
-        {'reason': 'limit_reached', 'group_name': 'control'}
-    )
+    emit.assert_called_with('control-limit_reached_{}'.format(admin.pk), {'reason': 'limit_reached', 'group_name': 'control'})
 
     # Allow sessions for a different user to be saved
     store = import_module(settings.SESSION_ENGINE).SessionStore()
@@ -103,22 +87,15 @@ def test_session_overlimit(emit, admin, alice):
 @pytest.mark.django_db
 def test_password_update_clears_sessions(admin, alice, post, patch):
     AlwaysPassBackend.user = alice
-    with override_settings(
-        AUTHENTICATION_BACKENDS=(AlwaysPassBackend.get_backend_path(),),
-        SESSION_COOKIE_NAME='session_id'
-    ):
+    with override_settings(AUTHENTICATION_BACKENDS=(AlwaysPassBackend.get_backend_path(),), SESSION_COOKIE_NAME='session_id'):
         response = post(
             '/api/login/',
             data={'username': alice.username, 'password': alice.password, 'next': '/api/'},
-            expect=302, middleware=SessionMiddleware(), format='multipart'
+            expect=302,
+            middleware=SessionMiddleware(),
+            format='multipart',
         )
-        session_key = re.findall(
-            r'session_id=[a-zA-z0-9]+',
-            str(response.cookies['session_id'])
-        )[0][len('session_id=') :]
+        session_key = re.findall(r'session_id=[a-zA-z0-9]+', str(response.cookies['session_id']))[0][len('session_id=') :]
         assert Session.objects.filter(session_key=session_key).exists()
-        patch(
-            reverse('api:user_detail', kwargs={'pk': alice.pk}), admin,
-            data={'password': 'new_password'}, expect=200
-        )
+        patch(reverse('api:user_detail', kwargs={'pk': alice.pk}), admin, data={'password': 'new_password'}, expect=200)
         assert not Session.objects.filter(session_key=session_key).exists()

@@ -18,16 +18,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jobtemplate',
             name='custom_virtualenv',
-            field=models.CharField(blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True),
+            field=models.CharField(
+                blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True
+            ),
         ),
         migrations.AlterField(
             model_name='organization',
             name='custom_virtualenv',
-            field=models.CharField(blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True),
+            field=models.CharField(
+                blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True
+            ),
         ),
         migrations.AlterField(
             model_name='project',
             name='custom_virtualenv',
-            field=models.CharField(blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True),
+            field=models.CharField(
+                blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True
+            ),
         ),
     ]
