@@ -10,15 +10,6 @@ def migrate_event_data(apps, schema_editor):
     # that have a bigint primary key (because the old usage of an integer
     # numeric isn't enough, as its range is about 2.1B, see:
     # https://www.postgresql.org/docs/9.1/datatype-numeric.html)
-
-    # unfortunately, we can't do this with a simple ALTER TABLE, because
-    # for tables with hundreds of millions or billions of rows, the ALTER TABLE
-    # can take *hours* on modest hardware.
-    #
-    # the approach in this migration means that post-migration, event data will
-    # *not* immediately show up, but will be repopulated over time progressively
-    # the trade-off here is not having to wait hours for the full data migration
-    # before you can start and run AWX again (including new playbook runs)
     for tblname in ('main_jobevent', 'main_inventoryupdateevent', 'main_projectupdateevent', 'main_adhoccommandevent', 'main_systemjobevent'):
         with connection.cursor() as cursor:
             # rename the current event table
@@ -35,30 +26,7 @@ def migrate_event_data(apps, schema_editor):
             cursor.execute(f'CREATE SEQUENCE "{tblname}_id_seq";')
             cursor.execute(f'ALTER TABLE "{tblname}" ALTER COLUMN "id" ' f"SET DEFAULT nextval('{tblname}_id_seq');")
             cursor.execute(f"SELECT setval('{tblname}_id_seq', (SELECT MAX(id) FROM _old_{tblname}), true);")
-
-            # replace the BTREE index on main_jobevent.job_id with
-            # a BRIN index to drastically improve per-UJ lookup performance
-            # see: https://info.crunchydata.com/blog/postgresql-brin-indexes-big-data-performance-with-minimal-storage
-            if tblname == 'main_jobevent':
-                cursor.execute("SELECT indexname FROM pg_indexes WHERE tablename='main_jobevent' AND indexdef LIKE '%USING btree (job_id)';")
-                old_index = cursor.fetchone()[0]
-                cursor.execute(f'DROP INDEX {old_index}')
-                cursor.execute('CREATE INDEX main_jobevent_job_id_brin_idx ON main_jobevent USING brin (job_id);')
-
-            # remove all of the indexes and constraints from the old table
-            # (they just slow down the data migration)
-            cursor.execute(f"SELECT indexname, indexdef FROM pg_indexes WHERE tablename='_old_{tblname}' AND indexname != '{tblname}_pkey';")
-            indexes = cursor.fetchall()
-
-            cursor.execute(
-                f"SELECT conname, contype, pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = '_old_{tblname}'::regclass AND conname != '{tblname}_pkey';"
-            )
-            constraints = cursor.fetchall()
-
-            for indexname, indexdef in indexes:
-                cursor.execute(f'DROP INDEX IF EXISTS {indexname}')
-            for conname, contype, condef in constraints:
-                cursor.execute(f'ALTER TABLE _old_{tblname} DROP CONSTRAINT IF EXISTS {conname}')
+            cursor.execute(f'DROP TABLE _old_{tblname};')
 
 
 class FakeAlterField(migrations.AlterField):
