@@ -52,6 +52,7 @@ function HostListItem({
           tooltip={i18n._(t`Edit Host`)}
         >
           <Button
+            ouiaId={`${host.id}-edit-button}`}
             aria-label={i18n._(t`Edit Host`)}
             variant="plain"
             component={Link}

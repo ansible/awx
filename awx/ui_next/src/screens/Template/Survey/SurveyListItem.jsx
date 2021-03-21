@@ -66,6 +66,7 @@ function SurveyListItem({
           <Stack>
             <StackItem>
               <Button
+                ouiaId={`${question.variable}-move-up-button`}
                 variant="plain"
                 aria-label={i18n._(t`move up`)}
                 isDisabled={isFirst || !canEdit}
@@ -76,6 +77,7 @@ function SurveyListItem({
             </StackItem>
             <StackItem>
               <Button
+                ouiaId={`${question.variable}-move-down-button`}
                 variant="plain"
                 aria-label={i18n._(t`move down`)}
                 isDisabled={isLast || !canEdit}

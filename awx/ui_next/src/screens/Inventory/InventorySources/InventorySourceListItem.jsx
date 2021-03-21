@@ -122,6 +122,7 @@ function InventorySourceListItem({
             )}
             {source.summary_fields.user_capabilities.edit && (
               <Button
+                ouiaId={`${source.id}-edit-button`}
                 aria-label={i18n._(t`Edit Source`)}
                 variant="plain"
                 component={Link}

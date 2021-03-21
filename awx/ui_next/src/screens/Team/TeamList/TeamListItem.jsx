@@ -57,6 +57,7 @@ function TeamListItem({
           tooltip={i18n._(t`Edit Team`)}
         >
           <Button
+            ouiaId={`${team.id}-edit-button`}
             aria-label={i18n._(t`Edit Team`)}
             variant="plain"
             component={Link}

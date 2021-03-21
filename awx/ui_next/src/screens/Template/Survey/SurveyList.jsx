@@ -98,6 +98,7 @@ function SurveyList({
       }}
       actions={[
         <Button
+          ouiaId="delete-confirm-button"
           key="delete"
           variant="danger"
           aria-label={i18n._(t`confirm delete`)}
@@ -106,6 +107,7 @@ function SurveyList({
           {i18n._(t`Delete`)}
         </Button>,
         <Button
+          ouiaId="delete-cancel-button"
           key="cancel"
           variant="link"
           aria-label={i18n._(t`cancel delete`)}

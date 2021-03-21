@@ -265,6 +265,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
       <CardActionsRow>
         {user_capabilities?.edit && (
           <Button
+            ouiaId="inventory-source-detail-edit-button"
             component={Link}
             aria-label={i18n._(t`edit`)}
             to={`/inventories/inventory/${inventory.id}/sources/${id}/edit`}

@@ -247,6 +247,7 @@ function HostFilterLookup({
   const renderLookup = () => (
     <InputGroup onBlur={onBlur}>
       <Button
+        ouiaId="host-filter-search-button"
         aria-label={i18n._(t`Search`)}
         id="host-filter"
         isDisabled={isDisabled}
@@ -311,6 +312,7 @@ function HostFilterLookup({
         variant="large"
         actions={[
           <Button
+            ouiaId="host-filter-modal-select-button"
             isDisabled={!location.search}
             key="select"
             onClick={save}
@@ -318,7 +320,12 @@ function HostFilterLookup({
           >
             {i18n._(t`Select`)}
           </Button>,
-          <Button key="cancel" variant="link" onClick={handleClose}>
+          <Button
+            ouiaId="host-filter-modal-cancel-button"
+            key="cancel"
+            variant="link"
+            onClick={handleClose}
+          >
             {i18n._(t`Cancel`)}
           </Button>,
         ]}

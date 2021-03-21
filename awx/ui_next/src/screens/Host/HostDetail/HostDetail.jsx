@@ -109,6 +109,7 @@ function HostDetail({ i18n, host }) {
       <CardActionsRow>
         {user_capabilities?.edit && (
           <Button
+            ouiaId="host-detail-edit-button"
             aria-label={i18n._(t`edit`)}
             component={Link}
             to={`/hosts/${id}/edit`}

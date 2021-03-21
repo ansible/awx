@@ -46,6 +46,7 @@ class ClipboardCopyButton extends React.Component {
       exitDelay,
       copiedSuccessTip,
       isDisabled,
+      ouiaId,
     } = this.props;
     const { copied } = this.state;
 
@@ -57,6 +58,7 @@ class ClipboardCopyButton extends React.Component {
         content={copied ? copiedSuccessTip : copyTip}
       >
         <Button
+          ouiaId={ouiaId}
           isDisabled={isDisabled}
           variant="plain"
           onClick={this.handleCopyClick}

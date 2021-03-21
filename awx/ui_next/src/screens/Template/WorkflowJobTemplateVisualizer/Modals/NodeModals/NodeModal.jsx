@@ -134,6 +134,7 @@ function NodeModalForm({
             />
             {activeStep && activeStep.id !== promptSteps[0]?.id && (
               <Button
+                ouiaId="node-modal-back-button"
                 id="back-node-modal"
                 variant="secondary"
                 aria-label={i18n._(t`Back`)}
@@ -143,6 +144,7 @@ function NodeModalForm({
               </Button>
             )}
             <Button
+              ouiaId="node-modal-cancel-button"
               id="cancel-node-modal"
               variant="link"
               aria-label={i18n._(t`Cancel`)}

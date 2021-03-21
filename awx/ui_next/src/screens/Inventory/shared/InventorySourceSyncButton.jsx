@@ -57,6 +57,7 @@ function InventorySourceSyncButton({ source, icon, i18n }) {
       {['running', 'pending', 'updating'].includes(source.status) ? (
         <Tooltip content={i18n._(t`Cancel sync process`)} position="top">
           <Button
+            ouiaId={`${source}-cancel-sync-button`}
             isDisabled={cancelSyncLoading || startSyncLoading}
             aria-label={i18n._(t`Cancel sync source`)}
             variant={icon ? 'plain' : 'secondary'}
@@ -68,6 +69,7 @@ function InventorySourceSyncButton({ source, icon, i18n }) {
       ) : (
         <Tooltip content={i18n._(t`Start sync process`)} position="top">
           <Button
+            ouiaId={`${source}-sync-button`}
             isDisabled={cancelSyncLoading || startSyncLoading}
             aria-label={i18n._(t`Start sync source`)}
             variant={icon ? 'plain' : 'secondary'}

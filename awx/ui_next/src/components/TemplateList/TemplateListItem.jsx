@@ -159,6 +159,7 @@ function TemplateListItem({
             tooltip={i18n._(t`Visualizer`)}
           >
             <Button
+              ouiaId={`${template.id}-visualizer-button`}
               id={`template-action-visualizer-${template.id}`}
               isDisabled={isDisabled}
               aria-label={i18n._(t`Visualizer`)}
@@ -176,6 +177,7 @@ function TemplateListItem({
             <LaunchButton resource={template}>
               {({ handleLaunch }) => (
                 <Button
+                  ouiaId={`${template.id}-launch-button`}
                   id={`template-action-launch-${template.id}`}
                   isDisabled={isDisabled}
                   aria-label={i18n._(t`Launch template`)}
@@ -192,6 +194,7 @@ function TemplateListItem({
             tooltip={i18n._(t`Edit Template`)}
           >
             <Button
+              ouiaId={`${template.id}-edit-button`}
               id={`template-action-edit-${template.id}`}
               isDisabled={isDisabled}
               aria-label={i18n._(t`Edit Template`)}

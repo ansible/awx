@@ -154,6 +154,7 @@ function ProjectDetail({ project, i18n }) {
       <CardActionsRow>
         {summary_fields.user_capabilities?.edit && (
           <Button
+            ouiaId="project-detail-edit-button"
             aria-label={i18n._(t`edit`)}
             component={Link}
             to={`/projects/${id}/edit`}

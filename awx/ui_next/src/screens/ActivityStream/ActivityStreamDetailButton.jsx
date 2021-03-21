@@ -21,6 +21,7 @@ function ActivityStreamDetailButton({ i18n, streamItem, user, description }) {
   return (
     <>
       <Button
+        ouiaId={`${streamItem.id}-view-details-button`}
         aria-label={i18n._(t`View event details`)}
         variant="plain"
         component="button"

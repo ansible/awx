@@ -372,6 +372,7 @@ function JobTemplateDetail({ i18n, template }) {
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="job-template-detail-edit-button"
               component={Link}
               to={`/templates/job_template/${templateId}/edit`}
               aria-label={i18n._(t`Edit`)}
@@ -382,7 +383,12 @@ function JobTemplateDetail({ i18n, template }) {
         {canLaunch && (
           <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
             {({ handleLaunch }) => (
-              <Button variant="secondary" type="submit" onClick={handleLaunch}>
+              <Button
+                ouiaId="job-template-detail-launch-button"
+                variant="secondary"
+                type="submit"
+                onClick={handleLaunch}
+              >
                 {i18n._(t`Launch`)}
               </Button>
             )}

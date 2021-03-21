@@ -45,6 +45,7 @@ function CredentialPluginInput(props) {
           credential={inputField?.value?.credential}
           onClearPlugin={() => helpers.setValue('')}
           onEditPlugin={() => setShowPluginWizard(true)}
+          fieldId={fieldOptions.id}
         />
       ) : (
         <InputGroup>
@@ -63,6 +64,7 @@ function CredentialPluginInput(props) {
             )}
           >
             <Button
+              ouiaId={`credential-field-${fieldOptions.id}-external-button`}
               id={`credential-${fieldOptions.id}-external-button`}
               variant={ButtonVariant.control}
               aria-label={i18n._(

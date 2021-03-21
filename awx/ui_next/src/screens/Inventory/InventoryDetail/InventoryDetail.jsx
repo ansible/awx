@@ -114,6 +114,7 @@ function InventoryDetail({ inventory, i18n }) {
       <CardActionsRow>
         {userCapabilities.edit && (
           <Button
+            ouiaId="inventory-detail-edit-button"
             component={Link}
             to={`/inventories/inventory/${inventory.id}/edit`}
           >

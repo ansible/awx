@@ -81,6 +81,7 @@ function ExternalTestModal({
             variant="small"
             actions={[
               <Button
+                ouiaId="external-test-modal-run-button"
                 id="run-external-credential-test"
                 key="confirm"
                 variant="primary"
@@ -89,6 +90,7 @@ function ExternalTestModal({
                 {i18n._(t`Run`)}
               </Button>,
               <Button
+                ouiaId="external-test-modal-cancel-button"
                 id="cancel-external-credential-test"
                 key="cancel"
                 variant="link"

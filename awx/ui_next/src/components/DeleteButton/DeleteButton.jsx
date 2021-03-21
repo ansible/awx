@@ -35,6 +35,7 @@ function DeleteButton({
         onClose={() => setIsOpen(false)}
         actions={[
           <Button
+            ouiaId="delete-modal-confirm"
             key="delete"
             variant="danger"
             aria-label={i18n._(t`Delete`)}
@@ -44,6 +45,7 @@ function DeleteButton({
             {i18n._(t`Delete`)}
           </Button>,
           <Button
+            ouiaId="delete-modal-cancel"
             key="cancel"
             variant="link"
             aria-label={i18n._(t`Cancel`)}

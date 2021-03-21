@@ -200,6 +200,7 @@ function WebhookSubForm({ i18n, templateType }) {
               value={webhookKeyField.value}
             />
             <Button
+              ouiaId="update-webhook-key-button"
               isDisabled={isUpdateKeyDisabled}
               variant="tertiary"
               aria-label={i18n._(t`Update webhook key`)}
