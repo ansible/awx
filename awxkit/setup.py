@@ -70,7 +70,7 @@ setup(
     python_requires=">=3.6",
     extras_require={
         'formatting': ['jq'],
-        'websockets': ['websocket-client>0.54.0'],
+        'websockets': ['websocket-client==0.57.0'],
         'crypto': ['cryptography']
     },
     license='Apache 2.0',

@@ -482,6 +482,7 @@ def main():
         existing_item = module.copy_item(
             existing_item, copy_from, name,
             endpoint='workflow_job_templates', item_type='workflow_job_template',
+            copy_lookup_data={},
         )
 
     if state == 'absent':

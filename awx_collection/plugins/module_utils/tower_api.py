@@ -410,7 +410,7 @@ class TowerAPIModule(TowerModule):
             else:
                 self.fail_json(msg="Failed to associate item {0}".format(response['json'].get('detail', response['json'])))
 
-    def copy_item(self, existing_item, copy_from_name_or_id, new_item_name, endpoint=None, item_type='unknown', copy_lookup_data={}):
+    def copy_item(self, existing_item, copy_from_name_or_id, new_item_name, endpoint=None, item_type='unknown', copy_lookup_data=None):
 
         if existing_item is not None:
             self.warn(msg="A {0} with the name {1} already exists.".format(item_type, new_item_name))

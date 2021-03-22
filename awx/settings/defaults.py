@@ -1063,6 +1063,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False
         },
+        'awx.analytics.performance': {
+            'handlers': ['console', 'file', 'tower_warnings', 'external_logger'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
         'awx.analytics.job_lifecycle': {
             'handlers': ['console', 'job_lifecycle'],
             'level': 'DEBUG',

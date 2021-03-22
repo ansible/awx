@@ -411,7 +411,7 @@ def main():
         credential = module.copy_item(
             credential, copy_from, name,
             endpoint='credentials', item_type='credential',
-            copy_lookup_data=copy_lookup_data
+            copy_lookup_data=copy_lookup_data,
         )
 
     if state == 'absent':
