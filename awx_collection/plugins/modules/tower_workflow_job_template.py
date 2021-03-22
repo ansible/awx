@@ -214,7 +214,6 @@ options:
           choices: ["present", "absent"]
           default: "present"
           type: str
-
         unified_job_template:
           description:
             - Name of unified job template to run in the workflow.
@@ -226,6 +225,7 @@ options:
               description:
                 - Name of key for use in model for organizational reference
                 - Only Valid and used if referencing a job template or project sync
+                - This parameter is mutually exclusive with suboption C(inventory).
               type: dict
               suboptions:
                 name:
@@ -237,6 +237,7 @@ options:
               description:
                 - Name of key for use in model for organizational reference
                 - Only Valid and used if referencing an inventory sync
+                - This parameter is mutually exclusive with suboption C(organization).
               type: dict
               suboptions:
                 organization:
@@ -249,6 +250,22 @@ options:
                         - The organization of the inventory the node exists in.
                         - Used for looking up the job template or project, not a direct model field.
                       type: str
+            name:
+              description:
+                - Name of unified job template to run in the workflow.
+                - Can be a job template, project, inventory source, etc.
+              type: str
+            type:
+              description:
+                - Name of unified job template type to run in the workflow.
+                - Can be a job_template, project, inventory_source, workflow_approval.
+              type: str
+            timeout:
+              description:
+                - The amount of time (in seconds) to wait before Approval is canceled. A value of 0 means no timeout.
+                - Only Valid and used if referencing an Approval Node
+              default: 0
+              type: int
         related:
           description:
             - Related items to this workflow node.
@@ -325,6 +342,7 @@ EXAMPLES = '''
           inventory:
             organization:
               name: Default
+          type: inventory_source
         related:
           success_nodes: []
           failure_nodes:
@@ -336,6 +354,7 @@ EXAMPLES = '''
           organization:
             name: Default
           name: job template 1
+          type: job_template
         credentials: []
         related:
           success_nodes:
@@ -348,17 +367,19 @@ EXAMPLES = '''
           organization:
             name: Default
           name: example-project
+          type: project
         related:
           success_nodes: []
           failure_nodes: []
           always_nodes: []
           credentials: []
-      - all_parents_must_converge: false
-        identifier: node301
+      - identifier: node301
+        all_parents_must_converge: false
         unified_job_template:
           organization:
             name: Default
           name: job template 2
+          type: job_template
         related:
           success_nodes: []
           failure_nodes: []
