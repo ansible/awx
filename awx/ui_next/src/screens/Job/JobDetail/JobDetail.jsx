@@ -80,7 +80,10 @@ function JobDetail({ job, i18n }) {
   const jobTypes = {
     project_update: i18n._(t`Source Control Update`),
     inventory_update: i18n._(t`Inventory Sync`),
-    job: i18n._(t`Playbook Run`),
+    job:
+      job.job_type === 'check'
+        ? i18n._(t`Playbook Check`)
+        : i18n._(t`Playbook Run`),
     ad_hoc_command: i18n._(t`Command`),
     management_job: i18n._(t`Management Job`),
     workflow_job: i18n._(t`Workflow Job`),

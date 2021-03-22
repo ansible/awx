@@ -65,8 +65,8 @@ function Inventory({ i18n, setBreadcrumb }) {
     { name: i18n._(t`Hosts`), link: `${match.url}/hosts`, id: 3 },
     { name: i18n._(t`Sources`), link: `${match.url}/sources`, id: 4 },
     {
-      name: i18n._(t`Completed Jobs`),
-      link: `${match.url}/completed_jobs`,
+      name: i18n._(t`Jobs`),
+      link: `${match.url}/jobs`,
       id: 5,
     },
   ];
@@ -160,10 +160,7 @@ function Inventory({ i18n, setBreadcrumb }) {
                 setBreadcrumb={setBreadcrumb}
               />
             </Route>,
-            <Route
-              path="/inventories/inventory/:id/completed_jobs"
-              key="completed_jobs"
-            >
+            <Route path="/inventories/inventory/:id/jobs" key="jobs">
               <JobList
                 defaultParams={{
                   or__job__inventory: inventory.id,

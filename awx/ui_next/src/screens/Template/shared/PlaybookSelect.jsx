@@ -58,6 +58,7 @@ function PlaybookSelect({
       placeholderText={i18n._(t`Select a playbook`)}
       isCreateable={false}
       onSelect={(event, value) => {
+        setIsOpen(false);
         onChange(value);
       }}
       id="template-playbook"

@@ -49,7 +49,7 @@ describe('<InventoryHost />', () => {
       'Details',
       'Facts',
       'Groups',
-      'Completed Jobs',
+      'Jobs',
     ];
     wrapper.find('RoutedTabs li').forEach((tab, index) => {
       expect(tab.text()).toEqual(expectedTabs[index]);
