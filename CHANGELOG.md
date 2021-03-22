@@ -2,7 +2,7 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-# (March 19, 2021)
+# (March 22, 2021)
 
 **IMPORTANT INSTALL AND UPGRADE NOTES**
 
@@ -34,6 +34,7 @@ To learn more about Ansible Builder and Execution Environments, see: https://www
 - Added user interface for the activity stream: https://github.com/ansible/awx/pull/9083
 - Converted many of the top-level list views (Jobs, Teams, Hosts, Inventories, Projects, and more) to a new, permanent table component for substantially increased responsiveness, usability, maintainability, and other 'ility's: https://github.com/ansible/awx/pull/8970, https://github.com/ansible/awx/pull/9182 and many others!
 - Added click-to-expand details for job tables
+- Added search filtering to job output https://github.com/ansible/awx/pull/9208
 - Added the new migration, update, and "installation in progress" page https://github.com/ansible/awx/pull/9123
 - Added the user interface for job settings https://github.com/ansible/awx/pull/8661
 - Runtime errors from jobs are now displayed, along with an explanation for what went wrong, on the output page https://github.com/ansible/awx/pull/9264
@@ -48,7 +49,7 @@ To learn more about Ansible Builder and Execution Environments, see: https://www
 - Added support for filtering and pagination on job output https://github.com/ansible/awx/pull/9208
 - Added support for html in custom login text https://github.com/ansible/awx/pull/9519
 
-# 17.1.0 (March 9th, 2021)
+# 17.1.0 (March 9, 2021)
 - Addressed a security issue in AWX (CVE-2021-20253)
 - Fixed a bug permissions error related to redis in K8S-based deployments: https://github.com/ansible/awx/issues/9401
 
