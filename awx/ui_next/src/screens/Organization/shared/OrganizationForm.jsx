@@ -20,7 +20,12 @@ import { required, minMaxValue } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 
-function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
+function OrganizationFormFields({
+  i18n,
+  instanceGroups,
+  setInstanceGroups,
+  organizationId,
+}) {
   const { license_info = {}, me = {} } = useConfig();
 
   const { setFieldValue } = useFormikContext();
@@ -97,6 +102,7 @@ function OrganizationFormFields({ i18n, instanceGroups, setInstanceGroups }) {
           t`Select the default execution environment for this organization.`
         )}
         globallyAvailable
+        organizationId={organizationId}
         isDefaultEnvironment
       />
       <CredentialLookup
@@ -194,6 +200,7 @@ function OrganizationForm({
             <OrganizationFormFields
               instanceGroups={instanceGroups}
               setInstanceGroups={setInstanceGroups}
+              organizationId={organization?.id || null}
               {...rest}
             />
             <FormSubmitError error={submitError} />
@@ -217,6 +224,7 @@ OrganizationForm.propTypes = {
 
 OrganizationForm.defaultProps = {
   organization: {
+    id: '',
     name: '',
     description: '',
     max_hosts: '0',
