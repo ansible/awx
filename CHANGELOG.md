@@ -2,7 +2,7 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-# (March 22, 2021)
+# 18.0.0 (March 22, 2021)
 
 **IMPORTANT INSTALL AND UPGRADE NOTES**
 
