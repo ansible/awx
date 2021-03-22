@@ -750,10 +750,12 @@ class TowerAPIModule(TowerModule):
             # Lookup Job Template ID
             if workflow_node['unified_job_template']['name']:
                 search_fields = {'name': workflow_node['unified_job_template']['name']}
-                if "inventory" in workflow_node['unified_job_template']:
+                if workflow_node['unified_job_template']['type'] == 'inventory_source':
                     # workflow_node['unified_job_template']['inventory']:
                     organization_id = self.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
                     search_fields['organization'] = organization_id
+                elif workflow_node['unified_job_template']['type'] == 'workflow_approval':
+                    pass
                 else:
                     # workflow_node['unified_job_template']['organization']:
                     organization_id = self.resolve_name_to_id('organizations', workflow_node['unified_job_template']['organization']['name'])
@@ -762,8 +764,9 @@ class TowerAPIModule(TowerModule):
                 if unified_job_template:
                     workflow_node_fields['unified_job_template'] = unified_job_template['id']
                 else:
-                    self.fail_json(msg="Unable to Find unified_job_template: {0}".format(search_fields))
-
+                    if workflow_node['unified_job_template']['type'] != 'workflow_approval':
+                        self.fail_json(msg="Unable to Find unified_job_template: {0}".format(search_fields))
+                
             # Lookup Values for other fields
 
             for field_name in (
@@ -786,7 +789,6 @@ class TowerAPIModule(TowerModule):
             if 'state' in workflow_node:
                 if workflow_node['state'] == 'absent':
                     state = False
-
             if state:
                 response.append(
                     self.create_or_update_if_needed(
@@ -800,6 +802,31 @@ class TowerAPIModule(TowerModule):
                     self.delete_if_needed(
                         existing_item, auto_exit=False,
                     )
+                )
+            
+            # Start Approval Node creation process 
+            if workflow_node['unified_job_template']['type'] == 'workflow_approval':
+                new_fields = {}
+
+                for field_name in (
+                        'name', 'description', 'timeout',):
+                    field_val = workflow_node['unified_job_template'].get(field_name)
+                    if field_val:
+                        workflow_node_fields[field_name] = field_val
+
+                # Attempt to look up an existing item just created
+                workflow_job_template_node = self.get_one('workflow_job_template_nodes', **{'data': search_fields})
+                workflow_job_template_node_id = workflow_job_template_node['id']
+                existing_item = None
+                # Due to not able to lookup workflow_approval_templates, find the existing item in another place
+                if workflow_job_template_node['related'].get('unified_job_template') is not None:
+                    existing_item = self.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
+                approval_endpoint = 'workflow_job_template_nodes/{0}/create_approval_template/'.format(workflow_job_template_node_id)
+
+                self.create_or_update_if_needed(
+                    existing_item, workflow_node_fields,
+                    endpoint=approval_endpoint, item_type='workflow_job_template_approval_node',
+                    associations=association_fields, auto_exit=False,
                 )
 
     def create_schema_nodes_association(self, response, schema, workflow_id):
@@ -848,12 +875,10 @@ class TowerAPIModule(TowerModule):
                         if id_list:
                             association_fields[association] = id_list
 
-                        response.append(
-                            self.create_or_update_if_needed(
-                                existing_item, workflow_node_fields,
-                                endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
-                                associations=association_fields,
-                            )
+                        self.create_or_update_if_needed(
+                            existing_item, workflow_node_fields,
+                            endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=False,
+                            associations=association_fields,
                         )
 
     def destroy_schema_nodes(self, response, workflow_id):
