@@ -34,6 +34,7 @@ To learn more about Ansible Builder and Execution Environments, see: https://www
 - Added user interface for the activity stream: https://github.com/ansible/awx/pull/9083
 - Converted many of the top-level list views (Jobs, Teams, Hosts, Inventories, Projects, and more) to a new, permanent table component for substantially increased responsiveness, usability, maintainability, and other 'ility's: https://github.com/ansible/awx/pull/8970, https://github.com/ansible/awx/pull/9182 and many others!
 - Added click-to-expand details for job tables
+- Added search filtering to job output https://github.com/ansible/awx/pull/9208
 - Added the new migration, update, and "installation in progress" page https://github.com/ansible/awx/pull/9123
 - Added the user interface for job settings https://github.com/ansible/awx/pull/8661
 - Runtime errors from jobs are now displayed, along with an explanation for what went wrong, on the output page https://github.com/ansible/awx/pull/9264
