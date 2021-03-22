@@ -10,6 +10,7 @@ import tarfile
 import tempfile
 
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.timezone import now, timedelta
 from rest_framework.exceptions import PermissionDenied
 import requests
@@ -178,8 +179,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             key = func.__awx_analytics_key__
             filename = f'{key}.json'
             try:
-                results = (func(last_run, collection_type=collection_type, until=until),
-                           func.__awx_analytics_version__)
+                results = (func(last_run, collection_type=collection_type, until=until), func.__awx_analytics_version__)
                 json.dumps(results)  # throwaway check to see if the data is json-serializable
                 data[filename] = results
             except Exception:
@@ -197,7 +197,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     with disable_activity_stream():
                         for filename in data:
                             last_entries[filename.replace('.json', '')] = until
-                        settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries)
+                        settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
 
         for func in csv_collectors:
             key = func.__awx_analytics_key__
@@ -213,7 +213,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                         if collection_type != 'dry-run':
                             with disable_activity_stream():
                                 last_entries[key] = end
-                                settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries)
+                                settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
                         continue
                     for fpath in files:
                         payload = {filename: (fpath, func.__awx_analytics_version__)}
@@ -231,7 +231,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                                 ship(tgzfile)
                                 with disable_activity_stream():
                                     last_entries[key] = end
-                                    settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries)
+                                    settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
             except Exception:
                 logger.exception("Could not generate metric {}".format(filename))
 
