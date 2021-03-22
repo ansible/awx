@@ -18,11 +18,12 @@ Table of Contents
 :warning: NOTE |
 --- |
 If you're installing an older release of AWX (prior to 18.0), these instructions have changed.  Take a look at your version specific instructions, e.g., for AWX 17.0.1, see: [https://github.com/ansible/awx/blob/17.0.1/INSTALL.md](https://github.com/ansible/awx/blob/17.0.1/INSTALL.md)
+If you're attempting to migrate an old kubernetes or openshift installation, see: [Migrating data from an old AWX instance](https://github.com/ansible/awx-operator#migrating-data-from-an-old-awx-instance)|
 If you're attempting to migrate an older Docker-based AWX installation, see: [Migrating Data from Local Docker](https://github.com/ansible/awx/blob/devel/tools/docker-compose/docs/data_migration.md) |
 
 ## The AWX Operator
 
-Starting in version 18.0, the [AWX Operator](https://github.com/ansible/awx-operator) is the preferred way to install AWX.
+Starting in version 18.0, the [AWX Operator](https://github.com/ansible/awx-operator) is the preferred way to install AWX.  If you want to deploy AWX to Openshift or Kubernetes (not locally), please see the [README.md](https://github.com/ansible/awx-operator#README.md) in the awx-operator repo.  
 
 AWX can also alternatively be installed and [run in Docker](./tools/docker-compose/README.md), but this install path is only recommended for development/test-oriented deployments, and has no official published release.
 
