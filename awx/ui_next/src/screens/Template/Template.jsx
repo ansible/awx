@@ -32,7 +32,13 @@ function Template({ i18n, setBreadcrumb }) {
   const { me = {} } = useConfig();
 
   const {
-    result: { isNotifAdmin, template, surveyConfig, launchConfig },
+    result: {
+      isNotifAdmin,
+      template,
+      surveyConfig,
+      launchConfig,
+      resourceDefaultCredentials,
+    },
     isLoading,
     error: contentError,
     request: loadTemplateAndRoles,
@@ -40,11 +46,17 @@ function Template({ i18n, setBreadcrumb }) {
     useCallback(async () => {
       const [
         { data },
+        {
+          data: { results: defaultCredentials },
+        },
         actions,
         notifAdminRes,
         { data: launchConfiguration },
       ] = await Promise.all([
         JobTemplatesAPI.readDetail(templateId),
+        JobTemplatesAPI.readCredentials(templateId, {
+          page_size: 200,
+        }),
         JobTemplatesAPI.readTemplateOptions(templateId),
         OrganizationsAPI.read({
           page_size: 1,
@@ -52,7 +64,7 @@ function Template({ i18n, setBreadcrumb }) {
         }),
         JobTemplatesAPI.readLaunch(templateId),
       ]);
-      let surveyConfiguration = null;
+      let surveyConfiguration = {};
 
       if (data.survey_enabled) {
         const { data: survey } = await JobTemplatesAPI.readSurvey(templateId);
@@ -86,9 +98,10 @@ function Template({ i18n, setBreadcrumb }) {
         isNotifAdmin: notifAdminRes.data.results.length > 0,
         surveyConfig: surveyConfiguration,
         launchConfig: launchConfiguration,
+        resourceDefaultCredentials: defaultCredentials,
       };
     }, [templateId]),
-    { isNotifAdmin: false, template: null }
+    { isNotifAdmin: false, template: null, resourceDefaultCredentials: [] }
   );
 
   useEffect(() => {
@@ -148,8 +161,8 @@ function Template({ i18n, setBreadcrumb }) {
 
   tabsArray.push(
     {
-      name: i18n._(t`Completed Jobs`),
-      link: `${match.url}/completed_jobs`,
+      name: i18n._(t`Jobs`),
+      link: `${match.url}/jobs`,
     },
     {
       name: canAddAndEditSurvey ? i18n._(t`Survey`) : i18n._(t`View Survey`),
@@ -221,6 +234,7 @@ function Template({ i18n, setBreadcrumb }) {
                 loadScheduleOptions={loadScheduleOptions}
                 surveyConfig={surveyConfig}
                 launchConfig={launchConfig}
+                resourceDefaultCredentials={resourceDefaultCredentials}
               />
             </Route>
             {canSeeNotificationsTab && (
@@ -232,7 +246,7 @@ function Template({ i18n, setBreadcrumb }) {
                 />
               </Route>
             )}
-            <Route path="/templates/:templateType/:id/completed_jobs">
+            <Route path="/templates/:templateType/:id/jobs">
               <JobList defaultParams={{ job__job_template: template.id }} />
             </Route>
             <Route path="/templates/:templateType/:id/survey">

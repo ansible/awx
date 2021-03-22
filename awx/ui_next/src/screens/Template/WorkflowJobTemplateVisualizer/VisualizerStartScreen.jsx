@@ -44,6 +44,7 @@ function VisualizerStartScreen({ i18n, readOnly }) {
             <>
               <p>{i18n._(t`Please click the Start button to begin.`)}</p>
               <Button
+                ouiaId="visualizer-start-button"
                 id="visualizer-start"
                 aria-label={i18n._(t`Start`)}
                 onClick={() =>

@@ -17,10 +17,10 @@ function SchedulePromptableFields({
   onSave,
   credentials,
   resource,
+  resourceDefaultCredentials,
   i18n,
 }) {
   const {
-    validateForm,
     setFieldTouched,
     values,
     initialValues,
@@ -39,12 +39,12 @@ function SchedulePromptableFields({
     schedule,
     resource,
     i18n,
-    credentials
+    credentials,
+    resourceDefaultCredentials
   );
 
   const { error, dismissError } = useDismissableError(contentError);
   const cancelPromptableValues = async () => {
-    const hasErrors = await validateForm();
     resetForm({
       values: {
         ...initialValues,
@@ -66,7 +66,7 @@ function SchedulePromptableFields({
         timezone: values.timezone,
       },
     });
-    onCloseWizard(Object.keys(hasErrors).length > 0);
+    onCloseWizard();
   };
 
   if (error) {
@@ -89,13 +89,16 @@ function SchedulePromptableFields({
       isOpen
       onClose={cancelPromptableValues}
       onSave={onSave}
+      onBack={async nextStep => {
+        validateStep(nextStep.id);
+      }}
       onNext={async (nextStep, prevStep) => {
         if (nextStep.id === 'preview') {
           visitAllSteps(setFieldTouched);
         } else {
           visitStep(prevStep.prevId, setFieldTouched);
+          validateStep(nextStep.id);
         }
-        await validateForm();
       }}
       onGoToStep={async (nextStep, prevStep) => {
         if (nextStep.id === 'preview') {
@@ -104,7 +107,6 @@ function SchedulePromptableFields({
           visitStep(prevStep.prevId, setFieldTouched);
           validateStep(nextStep.id);
         }
-        await validateForm();
       }}
       title={i18n._(t`Prompts`)}
       steps={

@@ -63,6 +63,7 @@ function InventoryRelatedGroupListItem({
           {group.summary_fields.user_capabilities?.edit && (
             <Tooltip content={i18n._(t`Edit Group`)} position="top">
               <Button
+                ouiaId={`${group.id}-edit-button`}
                 aria-label={i18n._(t`Edit Group`)}
                 css="grid-column: 2"
                 variant="plain"

@@ -63,6 +63,7 @@ function CredentialListItem({
       <ActionsTd dataLabel={i18n._(t`Actions`)}>
         <ActionItem visible={canEdit} tooltip={i18n._(t`Edit Credential`)}>
           <Button
+            ouiaId={`${credential.id}-edit-button`}
             isDisabled={isDisabled}
             aria-label={i18n._(t`Edit Credential`)}
             variant="plain"

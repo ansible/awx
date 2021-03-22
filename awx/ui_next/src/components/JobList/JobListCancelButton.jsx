@@ -115,6 +115,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
         <Tooltip content={renderTooltip()} position="top">
           <div>
             <Button
+              ouiaId="cancel-job-button"
               variant="secondary"
               aria-label={cancelJobText}
               onClick={toggleModal}
@@ -133,6 +134,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
           onClose={toggleModal}
           actions={[
             <Button
+              ouiaId="cancel-job-confirm-button"
               id="cancel-job-confirm-button"
               key="delete"
               variant="danger"
@@ -142,6 +144,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
               {cancelJobText}
             </Button>,
             <Button
+              ouiaId="cancel-job-return-button"
               id="cancel-job-return-button"
               key="cancel"
               variant="secondary"

@@ -76,9 +76,9 @@ function AzureADDetail({ i18n }) {
         {me?.is_superuser && (
           <CardActionsRow>
             <Button
+              ouiaId="azure-detail-edit-button"
               aria-label={i18n._(t`Edit`)}
               component={Link}
-              ouiaId="edit-button"
               to="/settings/azure/edit"
             >
               {i18n._(t`Edit`)}

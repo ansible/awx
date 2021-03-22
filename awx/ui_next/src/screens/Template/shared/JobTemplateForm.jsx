@@ -154,7 +154,7 @@ function JobTemplateForm({
 
   const handleProjectUpdate = useCallback(
     value => {
-      setFieldValue('playbook', 0);
+      setFieldValue('playbook', '');
       setFieldValue('scm_branch', '');
       setFieldValue('project', value);
     },
@@ -271,7 +271,9 @@ function JobTemplateForm({
           onBlur={() => projectHelpers.setTouched()}
           tooltip={i18n._(t`Select the project containing the playbook
                   you want this job to execute.`)}
-          isValid={!projectMeta.touched || !projectMeta.error}
+          isValid={
+            !projectMeta.touched || !projectMeta.error || projectField.value
+          }
           helperTextInvalid={projectMeta.error}
           onChange={handleProjectUpdate}
           required

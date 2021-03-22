@@ -64,8 +64,8 @@ function Host({ i18n, setBreadcrumb }) {
       id: 2,
     },
     {
-      name: i18n._(t`Completed Jobs`),
-      link: `${match.url}/completed_jobs`,
+      name: i18n._(t`Jobs`),
+      link: `${match.url}/jobs`,
       id: 3,
     },
   ];
@@ -122,7 +122,7 @@ function Host({ i18n, setBreadcrumb }) {
             <Route path="/hosts/:id/groups" key="groups">
               <HostGroups host={host} />
             </Route>,
-            <Route path="/hosts/:id/completed_jobs" key="completed-jobs">
+            <Route path="/hosts/:id/jobs" key="jobs">
               <JobList defaultParams={{ job__hosts: host.id }} />
             </Route>,
           ]}

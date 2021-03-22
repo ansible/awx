@@ -95,6 +95,7 @@ function ManagementJobListItem({
                     position="top"
                   >
                     <Button
+                      ouiaId={`${id}-launch-button`}
                       aria-label={i18n._(t`Launch management job`)}
                       variant="plain"
                       onClick={handleLaunch}

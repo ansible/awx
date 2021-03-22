@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 import styled from 'styled-components';
 import { useField } from 'formik';
-import { Form, FormGroup, TextInput } from '@patternfly/react-core';
+import { Alert, Form, FormGroup, TextInput } from '@patternfly/react-core';
 import { required } from '../../../../../../util/validators';
 
 import { FormFullWidthLayout } from '../../../../../../components/FormLayout';
@@ -14,6 +14,10 @@ import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';
 import WorkflowJobTemplatesList from './WorkflowJobTemplatesList';
 import FormField from '../../../../../../components/FormField';
+
+const NodeTypeErrorAlert = styled(Alert)`
+  margin-bottom: 20px;
+`;
 
 const TimeoutInput = styled(TextInput)`
   width: 200px;
@@ -29,7 +33,9 @@ const TimeoutLabel = styled.p`
 
 function NodeTypeStep({ i18n }) {
   const [nodeTypeField, , nodeTypeHelpers] = useField('nodeType');
-  const [nodeResourceField, , nodeResourceHelpers] = useField('nodeResource');
+  const [nodeResourceField, nodeResourceMeta, nodeResourceHelpers] = useField(
+    'nodeResource'
+  );
   const [, approvalNameMeta, approvalNameHelpers] = useField('approvalName');
   const [, , approvalDescriptionHelpers] = useField('approvalDescription');
   const [timeoutMinutesField, , timeoutMinutesHelpers] = useField(
@@ -42,6 +48,13 @@ function NodeTypeStep({ i18n }) {
   const isValid = !approvalNameMeta.touched || !approvalNameMeta.error;
   return (
     <>
+      {nodeResourceMeta.error && (
+        <NodeTypeErrorAlert
+          variant="danger"
+          isInline
+          title={nodeResourceMeta.error}
+        />
+      )}
       <div css="display: flex; align-items: center; margin-bottom: 20px;">
         <b css="margin-right: 24px">{i18n._(t`Node Type`)}</b>
         <div>

@@ -178,7 +178,7 @@ function CredentialEdit({ credential }) {
     return <ContentError error={error} />;
   }
 
-  if (isLoading && !credentialTypes) {
+  if (isLoading) {
     return <ContentLoading />;
   }
 

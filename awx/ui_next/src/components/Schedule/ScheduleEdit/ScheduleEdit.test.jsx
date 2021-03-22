@@ -30,8 +30,20 @@ SchedulesAPI.readZoneInfo.mockResolvedValue({
 SchedulesAPI.readCredentials.mockResolvedValue({
   data: {
     results: [
-      { name: 'schedule credential 1', id: 1, kind: 'vault' },
-      { name: 'schedule credential 2', id: 2, kind: 'aws' },
+      {
+        name: 'schedule credential 1',
+        id: 1,
+        kind: 'vault',
+        credential_type: 3,
+        inputs: {},
+      },
+      {
+        name: 'schedule credential 2',
+        id: 2,
+        kind: 'aws',
+        credential_type: 4,
+        inputs: {},
+      },
     ],
     count: 2,
   },
@@ -45,9 +57,9 @@ CredentialsAPI.read.mockResolvedValue({
   data: {
     count: 3,
     results: [
-      { id: 1, name: 'Credential 1', kind: 'ssh', url: '' },
-      { id: 2, name: 'Credential 2', kind: 'ssh', url: '' },
-      { id: 3, name: 'Credential 3', kind: 'ssh', url: '' },
+      { id: 1, name: 'Credential 1', kind: 'ssh', url: '', credential_type: 1 },
+      { id: 2, name: 'Credential 2', kind: 'ssh', url: '', credential_type: 1 },
+      { id: 3, name: 'Credential 3', kind: 'ssh', url: '', credential_type: 1 },
     ],
   },
 });
@@ -115,6 +127,7 @@ describe('<ScheduleEdit />', () => {
               ],
             },
           }}
+          resourceDefaultCredentials={[]}
           launchConfig={{
             can_start_without_user_input: false,
             passwords_needed_to_start: [],
@@ -150,6 +163,7 @@ describe('<ScheduleEdit />', () => {
                 id: null,
               },
               scm_branch: '',
+              credentials: [],
             },
           }}
           surveyConfig={{}}
@@ -466,7 +480,7 @@ describe('<ScheduleEdit />', () => {
         .prop('isCurrent')
     ).toBe(true);
 
-    expect(wrapper.find('CredentialChip').length).toBe(3);
+    expect(wrapper.find('CredentialChip').length).toBe(2);
 
     wrapper.update();
 

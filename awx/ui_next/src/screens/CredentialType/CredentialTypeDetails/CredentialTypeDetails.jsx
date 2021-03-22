@@ -68,6 +68,7 @@ function CredentialTypeDetails({ credentialType, i18n }) {
         {credentialType.summary_fields.user_capabilities &&
           credentialType.summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="credential-type-detail-edit-button"
               aria-label={i18n._(t`edit`)}
               component={Link}
               to={`/credential_types/${id}/edit`}

@@ -1,5 +1,6 @@
 import { useContext, useState, useEffect } from 'react';
 import { useFormikContext } from 'formik';
+import { t } from '@lingui/macro';
 import useInventoryStep from '../../../../../components/LaunchPrompt/steps/useInventoryStep';
 import useCredentialsStep from '../../../../../components/LaunchPrompt/steps/useCredentialsStep';
 import useOtherPromptsStep from '../../../../../components/LaunchPrompt/steps/useOtherPromptsStep';
@@ -29,7 +30,12 @@ function showPreviewStep(nodeType, launchConfig) {
   );
 }
 
-const getNodeToEditDefaultValues = (launchConfig, surveyConfig, nodeToEdit) => {
+const getNodeToEditDefaultValues = (
+  launchConfig,
+  surveyConfig,
+  nodeToEdit,
+  resourceDefaultCredentials
+) => {
   const initialValues = {
     nodeResource: nodeToEdit?.fullUnifiedJobTemplate || null,
     nodeType: nodeToEdit?.fullUnifiedJobTemplate?.type || 'job_template',
@@ -70,35 +76,34 @@ const getNodeToEditDefaultValues = (launchConfig, surveyConfig, nodeToEdit) => {
     } else if (nodeToEdit?.originalNodeCredentials) {
       const defaultCredsWithoutOverrides = [];
 
-      const credentialHasScheduleOverride = templateDefaultCred => {
-        let credentialHasOverride = false;
-        nodeToEdit.originalNodeCredentials.forEach(scheduleCred => {
+      const credentialHasOverride = templateDefaultCred => {
+        let hasOverride = false;
+        nodeToEdit.originalNodeCredentials.forEach(nodeCredential => {
           if (
-            templateDefaultCred.credential_type === scheduleCred.credential_type
+            templateDefaultCred.credential_type ===
+            nodeCredential.credential_type
           ) {
             if (
               (!templateDefaultCred.vault_id &&
-                !scheduleCred.inputs.vault_id) ||
+                !nodeCredential.inputs.vault_id) ||
               (templateDefaultCred.vault_id &&
-                scheduleCred.inputs.vault_id &&
-                templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
+                nodeCredential.inputs.vault_id &&
+                templateDefaultCred.vault_id === nodeCredential.inputs.vault_id)
             ) {
-              credentialHasOverride = true;
+              hasOverride = true;
             }
           }
         });
 
-        return credentialHasOverride;
+        return hasOverride;
       };
 
-      if (nodeToEdit?.fullUnifiedJobTemplate?.summary_fields?.credentials) {
-        nodeToEdit.fullUnifiedJobTemplate.summary_fields.credentials.forEach(
-          defaultCred => {
-            if (!credentialHasScheduleOverride(defaultCred)) {
-              defaultCredsWithoutOverrides.push(defaultCred);
-            }
+      if (resourceDefaultCredentials) {
+        resourceDefaultCredentials.forEach(defaultCred => {
+          if (!credentialHasOverride(defaultCred)) {
+            defaultCredsWithoutOverrides.push(defaultCred);
           }
-        );
+        });
       }
 
       initialValues.credentials = nodeToEdit.originalNodeCredentials.concat(
@@ -179,17 +184,27 @@ export default function useWorkflowNodeSteps(
   surveyConfig,
   i18n,
   resource,
-  askLinkType
+  askLinkType,
+  resourceDefaultCredentials
 ) {
   const { nodeToEdit } = useContext(WorkflowStateContext);
-  const { resetForm, values: formikValues } = useFormikContext();
+  const {
+    resetForm,
+    values: formikValues,
+    errors: formikErrors,
+  } = useFormikContext();
   const [visited, setVisited] = useState({});
 
   const steps = [
     useRunTypeStep(i18n, askLinkType),
-    useNodeTypeStep(i18n),
+    useNodeTypeStep(launchConfig, i18n),
     useInventoryStep(launchConfig, resource, i18n, visited),
-    useCredentialsStep(launchConfig, resource, i18n),
+    useCredentialsStep(
+      launchConfig,
+      resource,
+      resourceDefaultCredentials,
+      i18n
+    ),
     useOtherPromptsStep(launchConfig, resource, i18n),
     useSurveyStep(launchConfig, surveyConfig, resource, i18n, visited),
   ];
@@ -222,7 +237,8 @@ export default function useWorkflowNodeSteps(
         initialValues = getNodeToEditDefaultValues(
           launchConfig,
           surveyConfig,
-          nodeToEdit
+          nodeToEdit,
+          resourceDefaultCredentials
         );
       } else {
         initialValues = steps.reduce((acc, cur) => {
@@ -233,7 +249,23 @@ export default function useWorkflowNodeSteps(
         }, {});
       }
 
+      const errors = formikErrors.nodeResource
+        ? {
+            nodeResource: formikErrors.nodeResource,
+          }
+        : {};
+
+      if (
+        !launchConfig?.ask_credential_on_launch &&
+        launchConfig?.passwords_needed_to_start?.length > 0
+      ) {
+        errors.nodeResource = i18n._(
+          t`Job Templates with credentials that prompt for passwords cannot be selected when creating or editing nodes`
+        );
+      }
+
       resetForm({
+        errors,
         values: {
           ...initialValues,
           nodeResource: formikValues.nodeResource,

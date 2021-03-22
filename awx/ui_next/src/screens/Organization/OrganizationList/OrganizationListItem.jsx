@@ -74,6 +74,7 @@ function OrganizationListItem({
           tooltip={i18n._(t`Edit Organization`)}
         >
           <Button
+            ouiaId={`${organization.id}-edit-button`}
             aria-label={i18n._(t`Edit Organization`)}
             variant="plain"
             component={Link}

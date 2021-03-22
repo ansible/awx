@@ -50,6 +50,7 @@ function WorkflowApprovalListDenyButton({ onDeny, selectedItems, i18n }) {
         <Tooltip content={renderTooltip()} position="top">
           <div>
             <Button
+              ouiaId="workflow-approval-deny-button"
               isDisabled={isDisabled}
               aria-label={i18n._(t`Deny`)}
               variant="danger"

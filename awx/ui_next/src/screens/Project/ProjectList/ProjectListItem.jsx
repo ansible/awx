@@ -146,6 +146,7 @@ function ProjectListItem({
           stringToCopy={project.scm_revision}
           copyTip={i18n._(t`Copy full revision to clipboard.`)}
           copiedSuccessTip={i18n._(t`Successfully copied to clipboard!`)}
+          ouiaId="copy-revision-button"
         />
       </Td>
       <ActionsTd dataLabel={i18n._(t`Actions`)}>
@@ -160,6 +161,7 @@ function ProjectListItem({
           tooltip={i18n._(t`Edit Project`)}
         >
           <Button
+            ouiaId={`${project.id}-edit-button`}
             isDisabled={isDisabled}
             aria-label={i18n._(t`Edit Project`)}
             variant="plain"

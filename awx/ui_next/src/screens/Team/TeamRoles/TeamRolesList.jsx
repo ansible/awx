@@ -196,6 +196,7 @@ function TeamRolesList({ i18n, me, team }) {
           onClose={() => setRoleToDisassociate(null)}
           actions={[
             <Button
+              ouiaId="disassociate-confirm-button"
               key="disassociate"
               variant="danger"
               aria-label={i18n._(t`confirm disassociate`)}
@@ -204,6 +205,7 @@ function TeamRolesList({ i18n, me, team }) {
               {i18n._(t`Disassociate`)}
             </Button>,
             <Button
+              ouiaId="disassociate-cancel-button"
               key="cancel"
               variant="link"
               aria-label={i18n._(t`Cancel`)}

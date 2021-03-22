@@ -142,8 +142,8 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
       link: `${match.url}/visualizer`,
     },
     {
-      name: i18n._(t`Completed Jobs`),
-      link: `${match.url}/completed_jobs`,
+      name: i18n._(t`Jobs`),
+      link: `${match.url}/jobs`,
     },
     {
       name: canAddAndEditSurvey ? i18n._(t`Survey`) : i18n._(t`View Survey`),
@@ -253,7 +253,7 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
             </Route>
           )}
           {template?.id && (
-            <Route path="/templates/:templateType/:id/completed_jobs">
+            <Route path="/templates/:templateType/:id/jobs">
               <JobList
                 defaultParams={{
                   workflow_job__workflow_job_template: template.id,

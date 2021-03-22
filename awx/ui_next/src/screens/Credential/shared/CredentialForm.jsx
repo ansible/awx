@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { func, shape } from 'prop-types';
+import { shape } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -165,7 +165,11 @@ function CredentialFormFields({ i18n, credentialTypes }) {
           width="100%"
         >
           {credentialTypeOptions.map(credType => (
-            <SelectOption key={credType.value} value={credType.value}>
+            <SelectOption
+              key={credType.value}
+              value={credType.value}
+              dataCy={`${credType.id}-credential-type-select-option`}
+            >
               {credType.label}
             </SelectOption>
           ))}
@@ -265,6 +269,7 @@ function CredentialForm({
               <FormFullWidthLayout>
                 <ActionGroup>
                   <Button
+                    ouiaId="credential-form-save-button"
                     id="credential-form-save-button"
                     aria-label={i18n._(t`Save`)}
                     variant="primary"
@@ -277,6 +282,7 @@ function CredentialForm({
                     credentialTypes[formik.values.credential_type]?.kind ===
                       'external' && (
                       <Button
+                        ouiaId="credential-form-test-button"
                         id="credential-form-test-button"
                         aria-label={i18n._(t`Test`)}
                         variant="secondary"
@@ -288,6 +294,7 @@ function CredentialForm({
                       </Button>
                     )}
                   <Button
+                    ouiaId="credential-form-cancel-button"
                     id="credential-form-cancel-button"
                     aria-label={i18n._(t`Cancel`)}
                     variant="link"
@@ -315,8 +322,6 @@ function CredentialForm({
 }
 
 CredentialForm.propTypes = {
-  handleSubmit: func.isRequired,
-  handleCancel: func.isRequired,
   credentialTypes: shape({}).isRequired,
   credential: shape({}),
   inputSources: shape({}),

@@ -104,6 +104,7 @@ function CredentialDetail({ i18n, credential }) {
       return (
         <Fragment key={id}>
           <Detail
+            dataCy={`credential-${id}-detail`}
             id={`credential-${id}-detail`}
             fullWidth
             label={<span>{label} *</span>}
@@ -117,6 +118,7 @@ function CredentialDetail({ i18n, credential }) {
             }
           />
           <PluginInputMetadata
+            dataCy={`credential-${id}-detail`}
             id={`credential-${id}-metadata`}
             mode="javascript"
             readOnly
@@ -132,6 +134,7 @@ function CredentialDetail({ i18n, credential }) {
     if (type === 'boolean') {
       return (
         <Detail
+          dataCy={`credential-${id}-detail`}
           id={`credential-${id}-detail`}
           key={id}
           label={i18n._(t`Options`)}
@@ -143,6 +146,7 @@ function CredentialDetail({ i18n, credential }) {
     if (inputs[id] === '$encrypted$') {
       return (
         <Detail
+          dataCy={`credential-${id}-detail`}
           id={`credential-${id}-detail`}
           key={id}
           label={label}
@@ -155,6 +159,7 @@ function CredentialDetail({ i18n, credential }) {
     if (ask_at_runtime && inputs[id] === 'ASK') {
       return (
         <Detail
+          dataCy={`credential-${id}-detail`}
           id={`credential-${id}-detail`}
           key={id}
           label={label}
@@ -165,6 +170,7 @@ function CredentialDetail({ i18n, credential }) {
 
     return (
       <Detail
+        dataCy={`credential-${id}-detail`}
         id={`credential-${id}-detail`}
         key={id}
         label={label}
@@ -189,17 +195,20 @@ function CredentialDetail({ i18n, credential }) {
     <CardBody>
       <DetailList>
         <Detail
+          dataCy="credential-name-detail"
           id="credential-name-detail"
           label={i18n._(t`Name`)}
           value={name}
         />
         <Detail
+          dataCy="credential-description-detail"
           id="credential-description-detail"
           label={i18n._(t`Description`)}
           value={description}
         />
         {organization && (
           <Detail
+            dataCy="credential-organization-detail"
             id="credential-organization-detail"
             label={i18n._(t`Organization`)}
             value={
@@ -210,6 +219,7 @@ function CredentialDetail({ i18n, credential }) {
           />
         )}
         <Detail
+          dataCy="credential-credential_type-detail"
           id="credential-credential_type-detail"
           label={i18n._(t`Credential Type`)}
           value={
@@ -226,12 +236,14 @@ function CredentialDetail({ i18n, credential }) {
         {fields.map(field => renderDetail(field))}
 
         <UserDateDetail
+          dataCy="credential-created-detail"
           id="credential-created-detail"
           label={i18n._(t`Created`)}
           date={created}
           user={created_by}
         />
         <UserDateDetail
+          dataCy="credential-last_modified-detail"
           id="credential-last_modified-detail"
           label={i18n._(t`Last Modified`)}
           date={modified}
@@ -247,7 +259,11 @@ function CredentialDetail({ i18n, credential }) {
       )}
       <CardActionsRow>
         {user_capabilities.edit && (
-          <Button component={Link} to={`/credentials/${credentialId}/edit`}>
+          <Button
+            ouiaId="credential-detail-edit-button"
+            component={Link}
+            to={`/credentials/${credentialId}/edit`}
+          >
             {i18n._(t`Edit`)}
           </Button>
         )}

@@ -85,8 +85,8 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
       id: 3,
     },
     {
-      name: i18n._(t`Completed Jobs`),
-      link: `${match.url}/completed_jobs`,
+      name: i18n._(t`Jobs`),
+      link: `${match.url}/jobs`,
       id: 4,
     },
   ];
@@ -151,8 +151,8 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
             <InventoryHostGroups />
           </Route>
           <Route
-            key="completed-jobs"
-            path="/inventories/inventory/:id/hosts/:hostId/completed_jobs"
+            key="jobs"
+            path="/inventories/inventory/:id/hosts/:hostId/jobs"
           >
             <JobList defaultParams={{ job__hosts: host.id }} />
           </Route>

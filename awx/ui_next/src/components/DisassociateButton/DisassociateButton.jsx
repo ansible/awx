@@ -90,6 +90,7 @@ function DisassociateButton({
         <Tooltip content={renderTooltip()} position="top">
           <div>
             <Button
+              ouiaId="disassociate-button"
               variant="secondary"
               aria-label={i18n._(t`Disassociate`)}
               onClick={() => setIsOpen(true)}
@@ -109,6 +110,7 @@ function DisassociateButton({
           onClose={() => setIsOpen(false)}
           actions={[
             <Button
+              ouiaId="disassociate-modal-confirm"
               key="disassociate"
               variant="danger"
               aria-label={i18n._(t`confirm disassociate`)}
@@ -117,6 +119,7 @@ function DisassociateButton({
               {i18n._(t`Disassociate`)}
             </Button>,
             <Button
+              ouiaId="disassociate-modal-cancel"
               key="cancel"
               variant="link"
               aria-label={i18n._(t`Cancel`)}

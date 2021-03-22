@@ -107,10 +107,10 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
       {!managedByTower && (
         <CardActionsRow>
           <Button
+            ouiaId="execution-environment-detail-edit-button"
             aria-label={i18n._(t`edit`)}
             component={Link}
             to={`/execution_environments/${id}/edit`}
-            ouiaId="edit-button"
           >
             {i18n._(t`Edit`)}
           </Button>

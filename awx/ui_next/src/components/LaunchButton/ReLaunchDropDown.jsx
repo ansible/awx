@@ -54,6 +54,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
   if (isPrimary) {
     return (
       <Dropdown
+        ouiaId={ouiaId}
         position={DropdownPosition.left}
         direction={DropdownDirection.up}
         isOpen={isOpen}

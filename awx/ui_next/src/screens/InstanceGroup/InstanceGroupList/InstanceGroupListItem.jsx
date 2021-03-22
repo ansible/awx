@@ -105,6 +105,7 @@ function InstanceGroupListItem({
           tooltip={i18n._(t`Edit instance group`)}
         >
           <Button
+            ouiaId={`${instanceGroup.id}-edit-button`}
             aria-label={i18n._(t`Edit instance group`)}
             variant="plain"
             component={Link}

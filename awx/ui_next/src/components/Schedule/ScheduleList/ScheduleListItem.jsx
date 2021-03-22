@@ -116,6 +116,7 @@ function ScheduleListItem({
           tooltip={i18n._(t`Edit Schedule`)}
         >
           <Button
+            ouiaId={`${schedule.id}-edit-button`}
             aria-label={i18n._(t`Edit Schedule`)}
             css="grid-column: 2"
             variant="plain"
