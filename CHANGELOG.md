@@ -2,7 +2,7 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-# (March 19, 2021)
+# (March 22, 2021)
 
 **IMPORTANT INSTALL AND UPGRADE NOTES**
 
@@ -49,7 +49,7 @@ To learn more about Ansible Builder and Execution Environments, see: https://www
 - Added support for filtering and pagination on job output https://github.com/ansible/awx/pull/9208
 - Added support for html in custom login text https://github.com/ansible/awx/pull/9519
 
-# 17.1.0 (March 9th, 2021)
+# 17.1.0 (March 9, 2021)
 - Addressed a security issue in AWX (CVE-2021-20253)
 - Fixed a bug permissions error related to redis in K8S-based deployments: https://github.com/ansible/awx/issues/9401
 
