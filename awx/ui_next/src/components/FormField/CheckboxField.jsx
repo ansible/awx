@@ -22,7 +22,7 @@ function CheckboxField({
         <span>
           {label}
           &nbsp;
-          {tooltip && <Popover content={tooltip} />}
+          {tooltip && <Popover ouiaId="checkbox-tooltip" content={tooltip} />}
         </span>
       }
       id={id}
