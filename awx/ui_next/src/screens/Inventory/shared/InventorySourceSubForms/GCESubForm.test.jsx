@@ -5,7 +5,7 @@ import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import GCESubForm from './GCESubForm';
 import { CredentialsAPI } from '../../../../api';
 
-jest.mock('../../../../api/models/Credentials');
+jest.mock('../../../../api');
 
 const initialValues = {
   credential: null,
@@ -29,11 +29,11 @@ const mockSourceOptions = {
 
 describe('<GCESubForm />', () => {
   let wrapper;
-  CredentialsAPI.read.mockResolvedValue({
-    data: { count: 0, results: [] },
-  });
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    CredentialsAPI.read.mockResolvedValue({
+      data: { count: 0, results: [] },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik initialValues={initialValues}>
@@ -45,7 +45,6 @@ describe('<GCESubForm />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should render subform fields', () => {

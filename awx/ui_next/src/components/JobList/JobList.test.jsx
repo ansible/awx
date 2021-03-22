@@ -116,20 +116,6 @@ const mockResults = [
   },
 ];
 
-UnifiedJobsAPI.read.mockResolvedValue({
-  data: { count: 6, results: mockResults },
-});
-
-UnifiedJobsAPI.readOptions.mockResolvedValue({
-  data: {
-    actions: {
-      GET: {},
-      POST: {},
-    },
-    related_search_fields: [],
-  },
-});
-
 function waitForLoaded(wrapper) {
   return waitForElement(
     wrapper,
@@ -142,7 +128,17 @@ describe('<JobList />', () => {
   let debug;
   beforeEach(() => {
     UnifiedJobsAPI.read.mockResolvedValue({
-      data: { count: 6, results: mockResults },
+      data: { count: 3, results: mockResults },
+    });
+
+    UnifiedJobsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
     });
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
     global.console.debug = () => {};
@@ -150,9 +146,10 @@ describe('<JobList />', () => {
 
   afterEach(() => {
     global.console.debug = debug;
+    jest.clearAllMocks();
   });
 
-  test('initially renders succesfully', async () => {
+  test('initially renders successfully', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<JobList />);

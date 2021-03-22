@@ -5,7 +5,7 @@ import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import TowerSubForm from './TowerSubForm';
 import { CredentialsAPI } from '../../../../api';
 
-jest.mock('../../../../api/models/Credentials');
+jest.mock('../../../../api');
 
 const initialValues = {
   credential: null,
@@ -23,11 +23,11 @@ const initialValues = {
 
 describe('<TowerSubForm />', () => {
   let wrapper;
-  CredentialsAPI.read.mockResolvedValue({
-    data: { count: 0, results: [] },
-  });
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    CredentialsAPI.read.mockResolvedValue({
+      data: { count: 0, results: [] },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik initialValues={initialValues}>
@@ -39,7 +39,6 @@ describe('<TowerSubForm />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should render subform fields', () => {

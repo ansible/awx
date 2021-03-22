@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
+exports[`<ResourceAccessListItem /> initially renders successfully 1`] = `
 <ResourceAccessListItem
   accessRecord={
     Object {
@@ -2954,12 +2954,12 @@ message. For more information, refer to the",
           <ResourceAccessListItem__DataListItemCells
             dataListCells={
               Array [
-                <ForwardRef(Styled(PFDataListCell))>
+                <DataListCell>
                   <TextContent>
                     <Text
                       component="h6"
                     >
-                      <ForwardRef(ResourceAccessListItem___StyledLink)
+                      <ResourceAccessListItem___StyledLink
                         to={
                           Object {
                             "pathname": "/users/2/details",
@@ -2967,10 +2967,10 @@ message. For more information, refer to the",
                         }
                       >
                         jane
-                      </ForwardRef(ResourceAccessListItem___StyledLink)>
+                      </ResourceAccessListItem___StyledLink>
                     </Text>
                   </TextContent>
-                  <ForwardRef(Styled(DetailList))
+                  <Styled(DetailList)
                     stacked={true}
                   >
                     <Detail
@@ -2980,10 +2980,10 @@ message. For more information, refer to the",
                       label="Name"
                       value="jane brown"
                     />
-                  </ForwardRef(Styled(DetailList))>
-                </ForwardRef(Styled(PFDataListCell))>,
-                <ForwardRef(Styled(PFDataListCell))>
-                  <ForwardRef(Styled(DetailList))
+                  </Styled(DetailList)>
+                </DataListCell>,
+                <DataListCell>
+                  <Styled(DetailList)
                     stacked={true}
                   >
                     <Detail
@@ -3011,8 +3011,8 @@ message. For more information, refer to the",
                         </Unknown>
                       }
                     />
-                  </ForwardRef(Styled(DetailList))>
-                </ForwardRef(Styled(PFDataListCell))>,
+                  </Styled(DetailList)>
+                </DataListCell>,
               ]
             }
             key=".0"
@@ -3021,12 +3021,12 @@ message. For more information, refer to the",
             <StyledComponent
               dataListCells={
                 Array [
-                  <ForwardRef(Styled(PFDataListCell))>
+                  <DataListCell>
                     <TextContent>
                       <Text
                         component="h6"
                       >
-                        <ForwardRef(ResourceAccessListItem___StyledLink)
+                        <ResourceAccessListItem___StyledLink
                           to={
                             Object {
                               "pathname": "/users/2/details",
@@ -3034,10 +3034,10 @@ message. For more information, refer to the",
                           }
                         >
                           jane
-                        </ForwardRef(ResourceAccessListItem___StyledLink)>
+                        </ResourceAccessListItem___StyledLink>
                       </Text>
                     </TextContent>
-                    <ForwardRef(Styled(DetailList))
+                    <Styled(DetailList)
                       stacked={true}
                     >
                       <Detail
@@ -3047,10 +3047,10 @@ message. For more information, refer to the",
                         label="Name"
                         value="jane brown"
                       />
-                    </ForwardRef(Styled(DetailList))>
-                  </ForwardRef(Styled(PFDataListCell))>,
-                  <ForwardRef(Styled(PFDataListCell))>
-                    <ForwardRef(Styled(DetailList))
+                    </Styled(DetailList)>
+                  </DataListCell>,
+                  <DataListCell>
+                    <Styled(DetailList)
                       stacked={true}
                     >
                       <Detail
@@ -3078,8 +3078,8 @@ message. For more information, refer to the",
                           </Unknown>
                         }
                       />
-                    </ForwardRef(Styled(DetailList))>
-                  </ForwardRef(Styled(PFDataListCell))>,
+                    </Styled(DetailList)>
+                  </DataListCell>,
                 ]
               }
               forwardedComponent={
@@ -3111,12 +3111,12 @@ message. For more information, refer to the",
                 className="ResourceAccessListItem__DataListItemCells-sc-658iqk-0 jCdAGK"
                 dataListCells={
                   Array [
-                    <ForwardRef(Styled(PFDataListCell))>
+                    <DataListCell>
                       <TextContent>
                         <Text
                           component="h6"
                         >
-                          <ForwardRef(ResourceAccessListItem___StyledLink)
+                          <ResourceAccessListItem___StyledLink
                             to={
                               Object {
                                 "pathname": "/users/2/details",
@@ -3124,10 +3124,10 @@ message. For more information, refer to the",
                             }
                           >
                             jane
-                          </ForwardRef(ResourceAccessListItem___StyledLink)>
+                          </ResourceAccessListItem___StyledLink>
                         </Text>
                       </TextContent>
-                      <ForwardRef(Styled(DetailList))
+                      <Styled(DetailList)
                         stacked={true}
                       >
                         <Detail
@@ -3137,10 +3137,10 @@ message. For more information, refer to the",
                           label="Name"
                           value="jane brown"
                         />
-                      </ForwardRef(Styled(DetailList))>
-                    </ForwardRef(Styled(PFDataListCell))>,
-                    <ForwardRef(Styled(PFDataListCell))>
-                      <ForwardRef(Styled(DetailList))
+                      </Styled(DetailList)>
+                    </DataListCell>,
+                    <DataListCell>
+                      <Styled(DetailList)
                         stacked={true}
                       >
                         <Detail
@@ -3168,8 +3168,8 @@ message. For more information, refer to the",
                             </Unknown>
                           }
                         />
-                      </ForwardRef(Styled(DetailList))>
-                    </ForwardRef(Styled(PFDataListCell))>,
+                      </Styled(DetailList)>
+                    </DataListCell>,
                   ]
                 }
                 rowid="access-list-item"

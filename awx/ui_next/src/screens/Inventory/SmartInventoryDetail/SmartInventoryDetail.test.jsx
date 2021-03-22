@@ -9,32 +9,30 @@ import { InventoriesAPI, UnifiedJobsAPI } from '../../../api';
 
 import mockSmartInventory from '../shared/data.smart_inventory.json';
 
-jest.mock('../../../api/models/UnifiedJobs');
-jest.mock('../../../api/models/Inventories');
-
-UnifiedJobsAPI.read.mockResolvedValue({
-  data: {
-    results: [
-      {
-        id: 1,
-        name: 'job 1',
-        type: 'job',
-        status: 'successful',
-      },
-    ],
-  },
-});
-InventoriesAPI.readInstanceGroups.mockResolvedValue({
-  data: {
-    results: [{ id: 1, name: 'mock instance group' }],
-  },
-});
+jest.mock('../../../api');
 
 describe('<SmartInventoryDetail />', () => {
   let wrapper;
 
   describe('User has edit permissions', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
+      UnifiedJobsAPI.read.mockResolvedValue({
+        data: {
+          results: [
+            {
+              id: 1,
+              name: 'job 1',
+              type: 'job',
+              status: 'successful',
+            },
+          ],
+        },
+      });
+      InventoriesAPI.readInstanceGroups.mockResolvedValue({
+        data: {
+          results: [{ id: 1, name: 'mock instance group' }],
+        },
+      });
       await act(async () => {
         wrapper = mountWithContexts(
           <SmartInventoryDetail inventory={mockSmartInventory} />
@@ -44,7 +42,6 @@ describe('<SmartInventoryDetail />', () => {
     });
 
     afterAll(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -118,7 +115,6 @@ describe('<SmartInventoryDetail />', () => {
 
   describe('User has read-only permissions', () => {
     afterEach(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 

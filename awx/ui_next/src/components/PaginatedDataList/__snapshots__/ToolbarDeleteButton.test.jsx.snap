@@ -2969,9 +2969,7 @@ message. For more information, refer to the",
         }
       }
       trigger={
-        <div
-          aria-describedby="pf-tooltip-1"
-        >
+        <div>
           <Button
             aria-label="Delete"
             isDisabled={true}
@@ -2988,9 +2986,7 @@ message. For more information, refer to the",
       <FindRefWrapper
         onFoundRef={[Function]}
       >
-        <div
-          aria-describedby="pf-tooltip-1"
-        >
+        <div>
           <Button
             aria-label="Delete"
             isDisabled={true}

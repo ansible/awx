@@ -29,7 +29,7 @@ const accessRecord = {
 };
 
 describe('<ResourceAccessListItem />', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     const wrapper = mountWithContexts(
       <ResourceAccessListItem
         accessRecord={accessRecord}

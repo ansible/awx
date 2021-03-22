@@ -116,7 +116,7 @@ const mockCredential = {
   kubernetes: false,
 };
 
-UsersAPI.readAdminOfOrganizations.mockResolvedValue({
+const mockOrgAdmins = {
   data: {
     count: 1,
     results: [
@@ -126,16 +126,16 @@ UsersAPI.readAdminOfOrganizations.mockResolvedValue({
       },
     ],
   },
-});
+};
 
-OrganizationsAPI.read.mockResolvedValue({
+const mockOrganizations = {
   data: {
     results: [{ id: 1 }],
     count: 1,
   },
-});
+};
 
-CredentialTypesAPI.read.mockResolvedValue({
+const mockCredentialResults = {
   data: {
     results: [
       {
@@ -272,10 +272,9 @@ CredentialTypesAPI.read.mockResolvedValue({
       },
     ],
   },
-});
+};
 
-CredentialsAPI.update.mockResolvedValue({ data: { id: 3 } });
-CredentialsAPI.readInputSources.mockResolvedValue({
+const mockInputSources = {
   data: {
     results: [
       {
@@ -318,7 +317,7 @@ CredentialsAPI.readInputSources.mockResolvedValue({
       },
     ],
   },
-});
+};
 
 describe('<CredentialEdit />', () => {
   let wrapper;
@@ -326,6 +325,15 @@ describe('<CredentialEdit />', () => {
 
   describe('Initial GET request succeeds', () => {
     beforeEach(async () => {
+      [
+        [UsersAPI.readAdminOfOrganizations, mockOrgAdmins],
+        [OrganizationsAPI.read, mockOrganizations],
+        [CredentialsAPI.read, mockCredentialResults],
+        [CredentialsAPI.update, { data: { id: 3 } }],
+        [CredentialsAPI.readInputSources, mockInputSources],
+      ].forEach(([apiMethod, mockData]) => {
+        apiMethod.mockResolvedValue(mockData);
+      });
       history = createMemoryHistory({ initialEntries: ['/credentials'] });
       await act(async () => {
         wrapper = mountWithContexts(

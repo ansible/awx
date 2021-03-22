@@ -32,11 +32,6 @@ const initialValues = {
 describe('<AdHocDetailsStep />', () => {
   let wrapper;
 
-  afterEach(() => {
-    jest.clearAllMocks();
-    wrapper.unmount();
-  });
-
   test('should mount properly', async () => {
     await act(async () => {
       wrapper = mountWithContexts(

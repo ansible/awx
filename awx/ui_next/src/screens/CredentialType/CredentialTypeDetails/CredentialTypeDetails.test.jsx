@@ -67,7 +67,6 @@ function expectDetailToMatch(wrapper, label, value) {
 describe('<CredentialTypeDetails/>', () => {
   let wrapper;
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
   test('should render details properly', async () => {

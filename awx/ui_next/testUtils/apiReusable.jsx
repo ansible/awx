@@ -1,11 +1,16 @@
 // eslint-disable-next-line import/prefer-default-export
 export function describeNotificationMixin (Model, name) {
   describe(name, () => {
-    const mockHttp = ({ post: jest.fn(() => Promise.resolve()) });
-    const ModelAPI = new Model(mockHttp);
+
+    let mockHttp;
+    let ModelAPI;
+    beforeEach(() => {
+      mockHttp = ({ post: jest.fn(() => Promise.resolve()) });
+      ModelAPI = new Model(mockHttp);
+    })
 
     afterEach(() => {
-      jest.clearAllMocks();
+      jest.resetAllMocks();
     });
 
     const parameters = ['success', 'error'];
@@ -14,7 +19,7 @@ export function describeNotificationMixin (Model, name) {
       const label = `[notificationType=${type}, associationState=true`;
       const testName = `associateNotificationTemplate ${label} makes expected http calls`;
 
-      test(testName, async (done) => {
+      test(testName, async () => {
         await ModelAPI.associateNotificationTemplate(1, 21, type);
 
         const expectedPath = `${ModelAPI.baseUrl}1/notification_templates_${type}/`;
@@ -23,7 +28,6 @@ export function describeNotificationMixin (Model, name) {
         const expectedParams = { id: 21 };
         expect(mockHttp.post.mock.calls.pop()).toEqual([expectedPath, expectedParams]);
 
-        done();
       });
     });
 
@@ -31,7 +35,7 @@ export function describeNotificationMixin (Model, name) {
       const label = `[notificationType=${type}, associationState=false`;
       const testName = `disassociateNotificationTemplate ${label} makes expected http calls`;
 
-      test(testName, async (done) => {
+      test(testName, async () => {
         await ModelAPI.disassociateNotificationTemplate(1, 21, type);
 
         const expectedPath = `${ModelAPI.baseUrl}1/notification_templates_${type}/`;
@@ -40,7 +44,6 @@ export function describeNotificationMixin (Model, name) {
         const expectedParams = { id: 21, disassociate: true };
         expect(mockHttp.post.mock.calls.pop()).toEqual([expectedPath, expectedParams]);
 
-        done();
       });
     });
   });

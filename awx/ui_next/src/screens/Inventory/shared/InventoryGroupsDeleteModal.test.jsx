@@ -29,7 +29,6 @@ describe('<InventoryGroupsDeleteModal />', () => {
     });
   });
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
   test('should mount properly', async () => {

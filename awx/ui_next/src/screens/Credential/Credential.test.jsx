@@ -19,14 +19,16 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-CredentialsAPI.readDetail.mockResolvedValueOnce({
-  data: mockCredential,
-});
-
 describe('<Credential />', () => {
   let wrapper;
 
-  test('initially renders user-based credential succesfully', async () => {
+  beforeEach(() => {
+    CredentialsAPI.readDetail.mockResolvedValueOnce({
+      data: mockCredential,
+    });
+  });
+
+  test('initially renders user-based credential successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
@@ -34,7 +36,7 @@ describe('<Credential />', () => {
     await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 3);
   });
 
-  test('initially renders org-based credential succesfully', async () => {
+  test('initially renders org-based credential successfully', async () => {
     CredentialsAPI.readDetail.mockResolvedValueOnce({
       data: mockOrgCredential,
     });

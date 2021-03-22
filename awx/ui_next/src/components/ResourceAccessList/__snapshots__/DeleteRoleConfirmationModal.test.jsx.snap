@@ -5895,8 +5895,8 @@ message. For more information, refer to the",
         className=""
         hasNoBodyWrapper={false}
         header={
-          <ForwardRef(AlertModal__Header)>
-            <ForwardRef(AlertModal___StyledExclamationCircleIcon)
+          <AlertModal__Header>
+            <AlertModal___StyledExclamationCircleIcon
               size="lg"
             />
             <Title
@@ -5906,7 +5906,7 @@ message. For more information, refer to the",
             >
               Remove Team Access
             </Title>
-          </ForwardRef(AlertModal__Header)>
+          </AlertModal__Header>
         }
         isOpen={true}
         onClose={[Function]}
@@ -6057,8 +6057,8 @@ message. For more information, refer to the",
             descriptorId="pf-modal-part-2"
             hasNoBodyWrapper={false}
             header={
-              <ForwardRef(AlertModal__Header)>
-                <ForwardRef(AlertModal___StyledExclamationCircleIcon)
+              <AlertModal__Header>
+                <AlertModal___StyledExclamationCircleIcon
                   size="lg"
                 />
                 <Title
@@ -6068,7 +6068,7 @@ message. For more information, refer to the",
                 >
                   Remove Team Access
                 </Title>
-              </ForwardRef(AlertModal__Header)>
+              </AlertModal__Header>
             }
             isOpen={true}
             labelId="pf-modal-part-1"

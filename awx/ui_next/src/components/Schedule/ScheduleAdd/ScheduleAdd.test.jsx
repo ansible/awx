@@ -1,24 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { RRule } from 'rrule';
-import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { SchedulesAPI, JobTemplatesAPI, InventoriesAPI } from '../../../api';
 import ScheduleAdd from './ScheduleAdd';
 
-jest.mock('../../../api/models/Schedules');
-jest.mock('../../../api/models/JobTemplates');
-jest.mock('../../../api/models/Inventories');
-
-SchedulesAPI.readZoneInfo.mockResolvedValue({
-  data: [
-    {
-      name: 'America/New_York',
-    },
-  ],
-});
+jest.mock('../../../api');
 
 const launchConfig = {
   can_start_without_user_input: false,
@@ -58,12 +45,18 @@ const launchConfig = {
   },
 };
 
-JobTemplatesAPI.createSchedule.mockResolvedValue({ data: { id: 3 } });
-
 let wrapper;
 
 describe('<ScheduleAdd />', () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
+    SchedulesAPI.readZoneInfo.mockResolvedValue({
+      data: [
+        {
+          name: 'America/New_York',
+        },
+      ],
+    });
+    JobTemplatesAPI.createSchedule.mockResolvedValue({ data: { id: 3 } });
     await act(async () => {
       wrapper = mountWithContexts(
         <ScheduleAdd
@@ -78,10 +71,6 @@ describe('<ScheduleAdd />', () => {
         />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-  });
-  afterEach(() => {
-    jest.clearAllMocks();
   });
   test('Successfully creates a schedule with repeat frequency: None (run once)', async () => {
     await act(async () => {

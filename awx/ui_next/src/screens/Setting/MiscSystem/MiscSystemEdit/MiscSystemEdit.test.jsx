@@ -11,13 +11,7 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI, ExecutionEnvironmentsAPI } from '../../../../api';
 import MiscSystemEdit from './MiscSystemEdit';
 
-jest.mock('../../../../api/models/Settings');
-jest.mock('../../../../api/models/ExecutionEnvironments');
-
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: mockAllSettings,
-});
+jest.mock('../../../../api');
 
 const mockExecutionEnvironment = [
   {
@@ -27,13 +21,6 @@ const mockExecutionEnvironment = [
     image: 'quay.io/ansible/awx-ee',
   },
 ];
-
-ExecutionEnvironmentsAPI.read.mockResolvedValue({
-  data: {
-    results: mockExecutionEnvironment,
-    count: 1,
-  },
-});
 
 const systemData = {
   ALLOW_OAUTH2_FOR_EXTERNAL_USERS: false,
@@ -57,16 +44,26 @@ const systemData = {
   SESSION_COOKIE_AGE: 1800,
   TOWER_URL_BASE: 'https://localhost:3000',
 };
+
 describe('<MiscSystemEdit />', () => {
   let wrapper;
   let history;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 
   beforeEach(async () => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: mockAllSettings,
+    });
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: {
+        results: mockExecutionEnvironment,
+        count: 1,
+      },
+    });
     history = createMemoryHistory({
       initialEntries: ['/settings/miscellaneous_system/edit'],
     });

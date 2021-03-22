@@ -5,7 +5,7 @@ import ActivityStreamListItem from './ActivityStreamListItem';
 jest.mock('../../api/models/ActivityStream');
 
 describe('<ActivityStreamListItem />', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(
       <table>
         <tbody>

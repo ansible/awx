@@ -10,26 +10,28 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import GitHubTeamEdit from './GitHubTeamEdit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    SOCIAL_AUTH_GITHUB_TEAM_CALLBACK_URL:
-      'https://towerhost/sso/complete/github-team/',
-    SOCIAL_AUTH_GITHUB_TEAM_KEY: 'OAuth2 key (Client ID)',
-    SOCIAL_AUTH_GITHUB_TEAM_SECRET: '$encrypted$',
-    SOCIAL_AUTH_GITHUB_TEAM_ID: 'team_id',
-    SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP: {},
-    SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP: {},
-  },
-});
+jest.mock('../../../../api');
 
 describe('<GitHubTeamEdit />', () => {
   let wrapper;
   let history;
 
+  beforeEach(() => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        SOCIAL_AUTH_GITHUB_TEAM_CALLBACK_URL:
+          'https://towerhost/sso/complete/github-team/',
+        SOCIAL_AUTH_GITHUB_TEAM_KEY: 'OAuth2 key (Client ID)',
+        SOCIAL_AUTH_GITHUB_TEAM_SECRET: '$encrypted$',
+        SOCIAL_AUTH_GITHUB_TEAM_ID: 'team_id',
+        SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP: {},
+        SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP: {},
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

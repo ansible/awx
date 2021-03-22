@@ -53,43 +53,39 @@ const mockInventory = {
   pending_deletion: false,
 };
 
-CredentialTypesAPI.read.mockResolvedValue({
-  data: {
-    results: [
-      {
-        id: 14,
-        name: 'insights',
-      },
-    ],
-  },
-});
 const associatedInstanceGroups = [
   {
     id: 1,
     name: 'Foo',
   },
 ];
-InventoriesAPI.readInstanceGroups.mockResolvedValue({
-  data: {
-    results: associatedInstanceGroups,
-  },
-});
 
 describe('<InventoryEdit />', () => {
   let wrapper;
   let history;
 
   beforeEach(async () => {
+    CredentialTypesAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 14,
+            name: 'insights',
+          },
+        ],
+      },
+    });
+    InventoriesAPI.readInstanceGroups.mockResolvedValue({
+      data: {
+        results: associatedInstanceGroups,
+      },
+    });
     history = createMemoryHistory({ initialEntries: ['/inventories'] });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryEdit inventory={mockInventory} />, {
         context: { router: { history } },
       });
     });
-  });
-
-  afterEach(() => {
-    wrapper.unmount();
   });
 
   test('initially renders successfully', async () => {

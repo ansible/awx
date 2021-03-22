@@ -11,44 +11,47 @@ import {
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../../../api';
 import NodeViewModal from './NodeViewModal';
 
-jest.mock('../../../../../api/models/JobTemplates');
-jest.mock('../../../../../api/models/WorkflowJobTemplates');
-WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({});
-WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
-  data: {
-    id: 1,
-    type: 'workflow_job_template',
-    related: {
-      webhook_receiver: '/api/v2/job_templates/7/gitlab/',
-    },
-  },
-});
-WorkflowJobTemplatesAPI.readWebhookKey.mockResolvedValue({
-  data: {
-    webhook_key: 'Pim3mRXT0',
-  },
-});
-JobTemplatesAPI.readLaunch.mockResolvedValue({});
-JobTemplatesAPI.readInstanceGroups.mockResolvedValue({});
-JobTemplatesAPI.readWebhookKey.mockResolvedValue({});
-JobTemplatesAPI.readDetail.mockResolvedValue({
-  data: {
-    id: 1,
-    type: 'job_template',
-  },
-});
+jest.mock('../../../../../api');
 
-const dispatch = jest.fn();
-
-function waitForLoaded(wrapper) {
+const waitForLoaded = async wrapper => {
   return waitForElement(
     wrapper,
     'NodeViewModal',
     el => el.find('ContentLoading').length === 0
   );
-}
+};
 
 describe('NodeViewModal', () => {
+  let dispatch;
+
+  beforeEach(() => {
+    dispatch = jest.fn();
+    WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({});
+    WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
+      data: {
+        id: 1,
+        type: 'workflow_job_template',
+        related: {
+          webhook_receiver: '/api/v2/job_templates/7/gitlab/',
+        },
+      },
+    });
+    WorkflowJobTemplatesAPI.readWebhookKey.mockResolvedValue({
+      data: {
+        webhook_key: 'Pim3mRXT0',
+      },
+    });
+    JobTemplatesAPI.readLaunch.mockResolvedValue({});
+    JobTemplatesAPI.readInstanceGroups.mockResolvedValue({});
+    JobTemplatesAPI.readWebhookKey.mockResolvedValue({});
+    JobTemplatesAPI.readDetail.mockResolvedValue({
+      data: {
+        id: 1,
+        type: 'job_template',
+      },
+    });
+  });
+
   describe('Workflow job template node', () => {
     let wrapper;
     const workflowContext = {
@@ -67,7 +70,7 @@ describe('NodeViewModal', () => {
       },
     };
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       await act(async () => {
         wrapper = mountWithContexts(
           <WorkflowDispatchContext.Provider value={dispatch}>
@@ -81,7 +84,7 @@ describe('NodeViewModal', () => {
     });
 
     afterAll(() => {
-      jest.clearAllMocks();
+      jest.resetAllMocks();
       wrapper.unmount();
     });
 
@@ -170,7 +173,7 @@ describe('NodeViewModal', () => {
       jest.clearAllMocks();
     });
 
-    test('edit button shoud be shown when readOnly prop is false', async () => {
+    test('edit button should be shown when readOnly prop is false', async () => {
       let wrapper;
       await act(async () => {
         wrapper = mountWithContexts(
@@ -187,7 +190,7 @@ describe('NodeViewModal', () => {
       jest.clearAllMocks();
     });
 
-    test('edit button shoud be hidden when readOnly prop is true', async () => {
+    test('edit button should be hidden when readOnly prop is true', async () => {
       let wrapper;
       await act(async () => {
         wrapper = mountWithContexts(

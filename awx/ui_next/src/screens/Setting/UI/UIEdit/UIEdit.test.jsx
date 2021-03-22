@@ -10,19 +10,22 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import UIEdit from './UIEdit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    CUSTOM_LOGIN_INFO: 'mock info',
-    CUSTOM_LOGO: 'data:mock/jpeg;',
-    PENDO_TRACKING_STATE: 'detailed',
-  },
-});
+jest.mock('../../../../api');
 
 describe('<UIEdit />', () => {
   let wrapper;
   let history;
+
+  beforeEach(() => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        CUSTOM_LOGIN_INFO: 'mock info',
+        CUSTOM_LOGO: 'data:mock/jpeg;',
+        PENDO_TRACKING_STATE: 'detailed',
+      },
+    });
+  });
 
   afterEach(() => {
     wrapper.unmount();

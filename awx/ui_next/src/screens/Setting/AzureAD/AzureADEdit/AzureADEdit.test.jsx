@@ -10,29 +10,31 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import AzureADEdit from './AzureADEdit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL:
-      'https://towerhost/sso/complete/azuread-oauth2/',
-    SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: 'mock key',
-    SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET: '$encrypted$',
-    SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: {},
-    SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP: {
-      'My Team': {
-        organization: 'foo',
-      },
-    },
-  },
-});
+jest.mock('../../../../api');
 
 describe('<AzureADEdit />', () => {
   let wrapper;
   let history;
 
+  beforeEach(() => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL:
+          'https://towerhost/sso/complete/azuread-oauth2/',
+        SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: 'mock key',
+        SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET: '$encrypted$',
+        SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: {},
+        SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP: {
+          'My Team': {
+            organization: 'foo',
+          },
+        },
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

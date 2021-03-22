@@ -1,5 +1,4 @@
 import React from 'react';
-import { mount } from 'enzyme';
 import { Formik } from 'formik';
 import { I18nProvider } from '@lingui/react';
 import { act } from 'react-dom/test-utils';
@@ -18,12 +17,10 @@ import en from '../../../locales/en/messages';
 
 describe('Setting form fields', () => {
   test('BooleanField renders the expected content', async () => {
-    const outerNode = document.createElement('div');
-    document.body.appendChild(outerNode);
     i18n.loadLocaleData({ en: { plurals: en } });
     i18n.load({ en });
     i18n.activate('en');
-    const wrapper = mount(
+    const wrapper = mountWithContexts(
       <I18nProvider i18n={i18n}>
         <Formik
           initialValues={{
@@ -40,19 +37,13 @@ describe('Setting form fields', () => {
             />
           )}
         </Formik>
-      </I18nProvider>,
-      {
-        attachTo: outerNode,
-      }
+      </I18nProvider>
     );
     expect(wrapper.find('Switch')).toHaveLength(1);
     expect(wrapper.find('Switch').prop('isChecked')).toBe(true);
     expect(wrapper.find('Switch').prop('isDisabled')).toBe(false);
     await act(async () => {
-      wrapper
-        .find('Switch label')
-        .instance()
-        .dispatchEvent(new Event('click'));
+      wrapper.find('Switch').invoke('onChange')();
     });
     wrapper.update();
     expect(wrapper.find('Switch').prop('isChecked')).toBe(false);

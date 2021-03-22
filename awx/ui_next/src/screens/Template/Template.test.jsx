@@ -65,9 +65,8 @@ describe('<Template />', () => {
   });
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
-  test('initially renders succesfully', async () => {
+  test('initially renders successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Template setBreadcrumb={() => {}} me={mockMe} />
@@ -83,7 +82,7 @@ describe('<Template />', () => {
     expect(JobTemplatesAPI.readDetail).toBeCalled();
     expect(OrganizationsAPI.read).toBeCalled();
   });
-  test('notifications tab shown for admins', async done => {
+  test('notifications tab shown for admins', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Template setBreadcrumb={() => {}} me={mockMe} />
@@ -96,9 +95,8 @@ describe('<Template />', () => {
       el => el.length === 7
     );
     expect(tabs.at(3).text()).toEqual('Notifications');
-    done();
   });
-  test('notifications tab hidden with reduced permissions', async done => {
+  test('notifications tab hidden with reduced permissions', async () => {
     OrganizationsAPI.read.mockResolvedValue({
       data: {
         count: 0,
@@ -119,7 +117,6 @@ describe('<Template />', () => {
       el => el.length === 6
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
-    done();
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

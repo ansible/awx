@@ -37,18 +37,6 @@ const instanceGroupCreateData = {
     'apiVersion: v1\nkind: Pod\nmetadata:\n  namespace: default\nspec:\n  containers:\n    - image: ansible/ansible-runner\n      tty: true\n      stdin: true\n      imagePullPolicy: Always\n      args:\n        - sleep\n        - infinity\n        - test',
 };
 
-InstanceGroupsAPI.create.mockResolvedValue({
-  data: {
-    id: 123,
-  },
-});
-
-InstanceGroupsAPI.readOptions.mockResolvedValue({
-  data: {
-    results: initialPodSpec,
-  },
-});
-
 describe('<ContainerGroupAdd/>', () => {
   let wrapper;
   let history;
@@ -56,6 +44,18 @@ describe('<ContainerGroupAdd/>', () => {
   beforeEach(async () => {
     history = createMemoryHistory({
       initialEntries: ['/instance_groups'],
+    });
+
+    InstanceGroupsAPI.create.mockResolvedValue({
+      data: {
+        id: 123,
+      },
+    });
+
+    InstanceGroupsAPI.readOptions.mockResolvedValue({
+      data: {
+        results: initialPodSpec,
+      },
     });
 
     await act(async () => {

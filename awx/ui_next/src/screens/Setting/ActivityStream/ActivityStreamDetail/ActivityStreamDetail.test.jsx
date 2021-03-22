@@ -10,18 +10,18 @@ import { assertDetail } from '../../shared/settingTestUtils';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import ActivityStreamDetail from './ActivityStreamDetail';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    ACTIVITY_STREAM_ENABLED: true,
-    ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: false,
-  },
-});
+jest.mock('../../../../api');
 
 describe('<ActivityStreamDetail />', () => {
   let wrapper;
 
   beforeAll(async () => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        ACTIVITY_STREAM_ENABLED: true,
+        ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: false,
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>

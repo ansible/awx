@@ -95,7 +95,7 @@ const BooleanField = ({ ariaLabel = '', name, config, disabled = false }) => {
         isDisabled={disabled}
         label={i18n._(t`On`)}
         labelOff={i18n._(t`Off`)}
-        onChange={checked => helpers.setValue(checked)}
+        onChange={() => helpers.setValue(!field.value)}
         aria-label={ariaLabel || config.label}
       />
     </SettingGroup>

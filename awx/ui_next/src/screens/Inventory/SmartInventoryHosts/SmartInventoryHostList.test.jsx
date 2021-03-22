@@ -23,7 +23,7 @@ describe('<SmartInventoryHostList />', () => {
     },
   };
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     InventoriesAPI.readHosts.mockResolvedValue({
       data: mockHosts,
     });

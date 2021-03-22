@@ -8,9 +8,7 @@ import {
 import InventorySourceEdit from './InventorySourceEdit';
 import { CredentialsAPI, InventorySourcesAPI, ProjectsAPI } from '../../../api';
 
-jest.mock('../../../api/models/Projects');
-jest.mock('../../../api/models/Credentials');
-jest.mock('../../../api/models/InventorySources');
+jest.mock('../../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
@@ -20,7 +18,6 @@ jest.mock('react-router-dom', () => ({
 
 describe('<InventorySourceEdit />', () => {
   let wrapper;
-  let history;
   const mockInvSrc = {
     id: 23,
     description: 'bar',
@@ -42,57 +39,58 @@ describe('<InventorySourceEdit />', () => {
     name: 'Foo',
     organization: 1,
   };
-  InventorySourcesAPI.readOptions.mockResolvedValue({
-    data: {
-      actions: {
-        GET: {
-          source: {
-            choices: [
-              ['file', 'File, Directory or Script'],
-              ['scm', 'Sourced from a Project'],
-              ['ec2', 'Amazon EC2'],
-              ['gce', 'Google Compute Engine'],
-              ['azure_rm', 'Microsoft Azure Resource Manager'],
-              ['vmware', 'VMware vCenter'],
-              ['satellite6', 'Red Hat Satellite 6'],
-              ['openstack', 'OpenStack'],
-              ['rhv', 'Red Hat Virtualization'],
-              ['tower', 'Ansible Tower'],
-            ],
+  const history = createMemoryHistory();
+
+  beforeEach(async () => {
+    InventorySourcesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            source: {
+              choices: [
+                ['file', 'File, Directory or Script'],
+                ['scm', 'Sourced from a Project'],
+                ['ec2', 'Amazon EC2'],
+                ['gce', 'Google Compute Engine'],
+                ['azure_rm', 'Microsoft Azure Resource Manager'],
+                ['vmware', 'VMware vCenter'],
+                ['satellite6', 'Red Hat Satellite 6'],
+                ['openstack', 'OpenStack'],
+                ['rhv', 'Red Hat Virtualization'],
+                ['tower', 'Ansible Tower'],
+              ],
+            },
           },
         },
       },
-    },
-  });
-  InventorySourcesAPI.replace.mockResolvedValue({
-    data: {
-      ...mockInvSrc,
-    },
-  });
-  ProjectsAPI.readInventories.mockResolvedValue({
-    data: [],
-  });
-  CredentialsAPI.read.mockResolvedValue({
-    data: { count: 0, results: [] },
-  });
-  ProjectsAPI.read.mockResolvedValue({
-    data: {
-      count: 2,
-      results: [
-        {
-          id: 1,
-          name: 'mock proj one',
-        },
-        {
-          id: 2,
-          name: 'mock proj two',
-        },
-      ],
-    },
-  });
+    });
+    InventorySourcesAPI.replace.mockResolvedValue({
+      data: {
+        ...mockInvSrc,
+      },
+    });
+    ProjectsAPI.readInventories.mockResolvedValue({
+      data: [],
+    });
+    CredentialsAPI.read.mockResolvedValue({
+      data: { count: 0, results: [] },
+    });
+    ProjectsAPI.read.mockResolvedValue({
+      data: {
+        count: 2,
+        results: [
+          {
+            id: 1,
+            name: 'mock proj one',
+          },
+          {
+            id: 2,
+            name: 'mock proj two',
+          },
+        ],
+      },
+    });
 
-  beforeAll(async () => {
-    history = createMemoryHistory();
     await act(async () => {
       wrapper = mountWithContexts(
         <InventorySourceEdit inventory={mockInventory} source={mockInvSrc} />,
@@ -106,7 +104,6 @@ describe('<InventorySourceEdit />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('handleSubmit should call api update', async () => {

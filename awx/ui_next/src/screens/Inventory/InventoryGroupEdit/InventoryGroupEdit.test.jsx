@@ -8,17 +8,18 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import InventoryGroupEdit from './InventoryGroupEdit';
 
 jest.mock('../../../api');
-GroupsAPI.readDetail.mockResolvedValue({
-  data: {
-    name: 'Foo',
-    description: 'Bar',
-    variables: 'bizz: buzz',
-  },
-});
+
 describe('<InventoryGroupEdit />', () => {
   let wrapper;
   let history;
   beforeEach(async () => {
+    GroupsAPI.readDetail.mockResolvedValue({
+      data: {
+        name: 'Foo',
+        description: 'Bar',
+        variables: 'bizz: buzz',
+      },
+    });
     history = createMemoryHistory({
       initialEntries: ['/inventories/inventory/1/groups/2/edit'],
     });
@@ -37,9 +38,7 @@ describe('<InventoryGroupEdit />', () => {
       );
     });
   });
-  afterEach(() => {
-    wrapper.unmount();
-  });
+
   test('InventoryGroupEdit renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });

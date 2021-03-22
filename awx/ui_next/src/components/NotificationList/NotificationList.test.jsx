@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import { NotificationTemplatesAPI } from '../../api';
+import { NotificationTemplatesAPI, JobTemplatesAPI } from '../../api';
 import NotificationList from './NotificationList';
 
 jest.mock('../../api');
@@ -32,67 +32,51 @@ describe('<NotificationList />', () => {
     ],
   };
 
-  const MockModel = jest.fn().mockImplementation(() => {
-    return {
-      readNotificationTemplatesSuccess: jest.fn(),
-      readNotificationTemplatesError: jest.fn(),
-      readNotificationTemplatesStarted: jest.fn(),
-      associateNotificationTemplate: jest.fn(),
-      disassociateNotificationTemplate: jest.fn(),
-    };
-  });
-
-  const MockModelAPI = new MockModel();
-
-  NotificationTemplatesAPI.readOptions.mockReturnValue({
-    data: {
-      actions: {
-        GET: {
-          notification_type: {
-            choices: [['email', 'Email']],
+  beforeEach(async () => {
+    NotificationTemplatesAPI.readOptions.mockReturnValue({
+      data: {
+        actions: {
+          GET: {
+            notification_type: {
+              choices: [['email', 'Email']],
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  NotificationTemplatesAPI.read.mockReturnValue({ data });
+    NotificationTemplatesAPI.read.mockReturnValue({ data });
 
-  MockModelAPI.readNotificationTemplatesSuccess.mockReturnValue({
-    data: { results: [{ id: 1 }] },
-  });
+    JobTemplatesAPI.readNotificationTemplatesSuccess.mockReturnValue({
+      data: { results: [{ id: 1 }] },
+    });
 
-  MockModelAPI.readNotificationTemplatesError.mockReturnValue({
-    data: { results: [{ id: 2 }] },
-  });
+    JobTemplatesAPI.readNotificationTemplatesError.mockReturnValue({
+      data: { results: [{ id: 2 }] },
+    });
 
-  MockModelAPI.readNotificationTemplatesStarted.mockReturnValue({
-    data: { results: [{ id: 3 }] },
-  });
+    JobTemplatesAPI.readNotificationTemplatesStarted.mockReturnValue({
+      data: { results: [{ id: 3 }] },
+    });
 
-  beforeEach(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <NotificationList
           id={1}
           canToggleNotifications
-          apiModel={MockModelAPI}
+          apiModel={JobTemplatesAPI}
         />
       );
     });
     wrapper.update();
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('should render list fetched of items', () => {
     expect(NotificationTemplatesAPI.read).toHaveBeenCalled();
     expect(NotificationTemplatesAPI.readOptions).toHaveBeenCalled();
-    expect(MockModelAPI.readNotificationTemplatesSuccess).toHaveBeenCalled();
-    expect(MockModelAPI.readNotificationTemplatesError).toHaveBeenCalled();
-    expect(MockModelAPI.readNotificationTemplatesStarted).toHaveBeenCalled();
+    expect(JobTemplatesAPI.readNotificationTemplatesSuccess).toHaveBeenCalled();
+    expect(JobTemplatesAPI.readNotificationTemplatesError).toHaveBeenCalled();
+    expect(JobTemplatesAPI.readNotificationTemplatesStarted).toHaveBeenCalled();
     expect(wrapper.find('NotificationListItem').length).toBe(3);
     expect(
       wrapper.find('input#notification-1-success-toggle').props().checked
@@ -131,7 +115,7 @@ describe('<NotificationList />', () => {
       wrapper.find('Switch#notification-2-success-toggle').prop('onChange')();
     });
     wrapper.update();
-    expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+    expect(JobTemplatesAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       2,
       'success'
@@ -149,7 +133,7 @@ describe('<NotificationList />', () => {
       wrapper.find('Switch#notification-1-error-toggle').prop('onChange')();
     });
     wrapper.update();
-    expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+    expect(JobTemplatesAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       1,
       'error'
@@ -167,7 +151,7 @@ describe('<NotificationList />', () => {
       wrapper.find('Switch#notification-1-started-toggle').prop('onChange')();
     });
     wrapper.update();
-    expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+    expect(JobTemplatesAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       1,
       'started'
@@ -185,11 +169,9 @@ describe('<NotificationList />', () => {
       wrapper.find('Switch#notification-1-success-toggle').prop('onChange')();
     });
     wrapper.update();
-    expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
-      1,
-      1,
-      'success'
-    );
+    expect(
+      JobTemplatesAPI.disassociateNotificationTemplate
+    ).toHaveBeenCalledWith(1, 1, 'success');
     expect(
       wrapper.find('input#notification-1-success-toggle').props().checked
     ).toBe(false);
@@ -203,11 +185,9 @@ describe('<NotificationList />', () => {
       wrapper.find('Switch#notification-2-error-toggle').prop('onChange')();
     });
     wrapper.update();
-    expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
-      1,
-      2,
-      'error'
-    );
+    expect(
+      JobTemplatesAPI.disassociateNotificationTemplate
+    ).toHaveBeenCalledWith(1, 2, 'error');
     expect(
       wrapper.find('input#notification-2-error-toggle').props().checked
     ).toBe(false);
@@ -221,18 +201,16 @@ describe('<NotificationList />', () => {
       wrapper.find('Switch#notification-3-started-toggle').prop('onChange')();
     });
     wrapper.update();
-    expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
-      1,
-      3,
-      'started'
-    );
+    expect(
+      JobTemplatesAPI.disassociateNotificationTemplate
+    ).toHaveBeenCalledWith(1, 3, 'started');
     expect(
       wrapper.find('input#notification-3-started-toggle').props().checked
     ).toBe(false);
   });
 
   test('should throw toggle error', async () => {
-    MockModelAPI.associateNotificationTemplate.mockRejectedValue(
+    JobTemplatesAPI.associateNotificationTemplate.mockRejectedValue(
       new Error({
         response: {
           config: {
@@ -248,7 +226,7 @@ describe('<NotificationList />', () => {
       wrapper.find('Switch#notification-1-started-toggle').prop('onChange')();
     });
     wrapper.update();
-    expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+    expect(JobTemplatesAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       1,
       'started'

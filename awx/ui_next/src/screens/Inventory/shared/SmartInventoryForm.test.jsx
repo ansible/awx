@@ -12,14 +12,7 @@ import {
   InstanceGroupsAPI,
 } from '../../../api';
 
-jest.mock('../../../api/models/Inventories');
-jest.mock('../../../api/models/Organizations');
-jest.mock('../../../api/models/InstanceGroups');
-OrganizationsAPI.read.mockResolvedValue({ data: { results: [], count: 0 } });
-InstanceGroupsAPI.read.mockResolvedValue({ data: { results: [], count: 0 } });
-InventoriesAPI.readOptions.mockResolvedValue({
-  data: { actions: { POST: true } },
-});
+jest.mock('../../../api');
 
 const mockFormValues = {
   kind: 'smart',
@@ -33,24 +26,32 @@ const mockFormValues = {
 };
 
 describe('<SmartInventoryForm />', () => {
+  let wrapper;
+  const onSubmit = jest.fn();
+
+  beforeAll(async () => {
+    OrganizationsAPI.read.mockResolvedValue({
+      data: { results: [], count: 0 },
+    });
+    InstanceGroupsAPI.read.mockResolvedValue({
+      data: { results: [], count: 0 },
+    });
+    InventoriesAPI.readOptions.mockResolvedValue({
+      data: { actions: { POST: true } },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <SmartInventoryForm onCancel={() => {}} onSubmit={onSubmit} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
   describe('when initialized by users with POST capability', () => {
-    let wrapper;
-    const onSubmit = jest.fn();
-
-    beforeAll(async () => {
-      await act(async () => {
-        wrapper = mountWithContexts(
-          <SmartInventoryForm onCancel={() => {}} onSubmit={onSubmit} />
-        );
-      });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    });
-
-    afterAll(() => {
-      jest.clearAllMocks();
-      wrapper.unmount();
-    });
-
     test('should enable save button', () => {
       expect(wrapper.find('Button[aria-label="Save"]').prop('isDisabled')).toBe(
         false
@@ -137,54 +138,56 @@ describe('<SmartInventoryForm />', () => {
   });
 
   test('should pre-fill the host filter when query param present and not editing', async () => {
-    let wrapper;
+    InventoriesAPI.readOptions.mockResolvedValue({
+      data: { actions: { POST: true } },
+    });
+    let newWrapper;
     const history = createMemoryHistory({
       initialEntries: [
         '/inventories/smart_inventory/add?host_filter=name__icontains%3Dfoo',
       ],
     });
     await act(async () => {
-      wrapper = mountWithContexts(
+      newWrapper = mountWithContexts(
         <SmartInventoryForm onCancel={() => {}} onSubmit={() => {}} />,
         {
           context: { router: { history } },
         }
       );
     });
-    wrapper.update();
-    const nameChipGroup = wrapper.find(
+    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+    newWrapper.update();
+    const nameChipGroup = newWrapper.find(
       'HostFilterLookup ChipGroup[categoryName="Name"]'
     );
     expect(nameChipGroup.find('Chip').length).toBe(1);
-    wrapper.unmount();
   });
 
   test('should throw content error when option request fails', async () => {
-    let wrapper;
+    let newWrapper;
     InventoriesAPI.readOptions.mockImplementationOnce(() =>
       Promise.reject(new Error())
     );
     await act(async () => {
-      wrapper = mountWithContexts(
+      newWrapper = mountWithContexts(
         <SmartInventoryForm onCancel={() => {}} onSubmit={() => {}} />
       );
     });
-    expect(wrapper.find('ContentError').length).toBe(0);
-    wrapper.update();
-    expect(wrapper.find('ContentError').length).toBe(1);
-    wrapper.unmount();
+    expect(newWrapper.find('ContentError').length).toBe(0);
+    newWrapper.update();
+    expect(newWrapper.find('ContentError').length).toBe(1);
     jest.clearAllMocks();
   });
 
   test('should throw content error when option request fails', async () => {
-    let wrapper;
+    let newWrapper;
     const error = {
       response: {
         data: { detail: 'An error occurred' },
       },
     };
     await act(async () => {
-      wrapper = mountWithContexts(
+      newWrapper = mountWithContexts(
         <SmartInventoryForm
           submitError={error}
           onCancel={() => {}}
@@ -192,11 +195,10 @@ describe('<SmartInventoryForm />', () => {
         />
       );
     });
-    expect(wrapper.find('FormSubmitError').length).toBe(1);
-    expect(wrapper.find('SmartInventoryForm').prop('submitError')).toEqual(
+    expect(newWrapper.find('FormSubmitError').length).toBe(1);
+    expect(newWrapper.find('SmartInventoryForm').prop('submitError')).toEqual(
       error
     );
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 });

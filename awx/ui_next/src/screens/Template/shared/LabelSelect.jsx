@@ -58,6 +58,14 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
     ));
   };
 
+  const onFilter = event => {
+    if (event) {
+      const str = event.target.value.toLowerCase();
+      const matches = options.filter(o => o.name.toLowerCase().includes(str));
+      return renderOptions(matches);
+    }
+    return null;
+  };
   return (
     <Select
       variant={SelectVariant.typeaheadMulti}
@@ -69,11 +77,7 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
         onSelect(e, item);
       }}
       onClear={() => onChange([])}
-      onFilter={event => {
-        const str = event.target.value.toLowerCase();
-        const matches = options.filter(o => o.name.toLowerCase().includes(str));
-        return renderOptions(matches);
-      }}
+      onFilter={onFilter}
       isCreatable
       onCreateOption={label => {
         label = label.trim();

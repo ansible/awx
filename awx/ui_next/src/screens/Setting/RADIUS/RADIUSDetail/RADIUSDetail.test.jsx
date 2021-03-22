@@ -10,19 +10,22 @@ import { assertDetail } from '../../shared/settingTestUtils';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import RADIUSDetail from './RADIUSDetail';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    RADIUS_SERVER: 'example.org',
-    RADIUS_PORT: 1812,
-    RADIUS_SECRET: '$encrypted$',
-  },
-});
+jest.mock('../../../../api');
 
 describe('<RADIUSDetail />', () => {
   let wrapper;
 
-  beforeAll(async () => {
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        RADIUS_SERVER: 'example.org',
+        RADIUS_PORT: 1812,
+        RADIUS_SECRET: '$encrypted$',
+      },
+    });
+  });
+
+  beforeEach(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
@@ -33,8 +36,7 @@ describe('<RADIUSDetail />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
 
-  afterAll(() => {
-    wrapper.unmount();
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

@@ -79,8 +79,7 @@ describe('<CredentialTypeForm/>', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    wrapper.unmount();
+    jest.resetAllMocks();
   });
 
   test('Initially renders successfully', () => {
@@ -106,7 +105,7 @@ describe('<CredentialTypeForm/>', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  test('should update form values', () => {
+  test('should update form values', async () => {
     act(() => {
       wrapper.find('input#credential-type-name').simulate('change', {
         target: { value: 'Foo', name: 'name' },
@@ -115,7 +114,7 @@ describe('<CredentialTypeForm/>', () => {
         target: { value: 'New description', name: 'description' },
       });
     });
-    wrapper.update();
+    await act(async () => wrapper.update());
     expect(wrapper.find('input#credential-type-name').prop('value')).toEqual(
       'Foo'
     );

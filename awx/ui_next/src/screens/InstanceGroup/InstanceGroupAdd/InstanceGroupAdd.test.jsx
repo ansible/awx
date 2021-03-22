@@ -41,12 +41,6 @@ const instanceGroupData = {
   },
 };
 
-InstanceGroupsAPI.create.mockResolvedValue({
-  data: {
-    id: 42,
-  },
-});
-
 describe('<InstanceGroupAdd/>', () => {
   let wrapper;
   let history;
@@ -54,6 +48,11 @@ describe('<InstanceGroupAdd/>', () => {
   beforeEach(async () => {
     history = createMemoryHistory({
       initialEntries: ['/instance_groups'],
+    });
+    InstanceGroupsAPI.create.mockResolvedValue({
+      data: {
+        id: 42,
+      },
     });
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupAdd />, {

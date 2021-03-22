@@ -19,11 +19,7 @@ jest.mock('react-router-dom', () => ({
     id: 2,
   }),
 }));
-jest.mock('../../../api/models/Inventories');
-jest.mock('../../../api/models/Organizations');
-jest.mock('../../../api/models/InstanceGroups');
-OrganizationsAPI.read.mockResolvedValue({ data: { results: [], count: 0 } });
-InstanceGroupsAPI.read.mockResolvedValue({ data: { results: [], count: 0 } });
+jest.mock('../../../api');
 
 const mockSmartInv = Object.assign(
   {},
@@ -36,10 +32,19 @@ const mockSmartInv = Object.assign(
 );
 
 describe('<SmartInventoryEdit />', () => {
-  let history;
   let wrapper;
 
-  beforeAll(async () => {
+  const history = createMemoryHistory({
+    initialEntries: [`/inventories/smart_inventory/${mockSmartInv.id}/edit`],
+  });
+
+  beforeEach(async () => {
+    OrganizationsAPI.read.mockResolvedValue({
+      data: { results: [], count: 0 },
+    });
+    InstanceGroupsAPI.read.mockResolvedValue({
+      data: { results: [], count: 0 },
+    });
     InventoriesAPI.associateInstanceGroup.mockResolvedValue();
     InventoriesAPI.disassociateInstanceGroup.mockResolvedValue();
     InventoriesAPI.update.mockResolvedValue({ data: mockSmartInv });
@@ -55,9 +60,7 @@ describe('<SmartInventoryEdit />', () => {
         ],
       },
     });
-    history = createMemoryHistory({
-      initialEntries: [`/inventories/smart_inventory/${mockSmartInv.id}/edit`],
-    });
+
     await act(async () => {
       wrapper = mountWithContexts(
         <SmartInventoryEdit inventory={{ ...mockSmartInv }} />,
@@ -71,7 +74,6 @@ describe('<SmartInventoryEdit />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should render CodeEditor field', () => {

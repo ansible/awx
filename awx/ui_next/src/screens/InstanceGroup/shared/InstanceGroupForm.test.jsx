@@ -85,7 +85,7 @@ describe('<InstanceGroupForm/>', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  test('should update form values', () => {
+  test('should update form values', async () => {
     act(() => {
       wrapper.find('input#instance-group-name').simulate('change', {
         target: { value: 'Foo', name: 'name' },
@@ -96,7 +96,9 @@ describe('<InstanceGroupForm/>', () => {
           target: { value: 10, name: 'policy_instance_minimum' },
         });
     });
-    wrapper.update();
+    await act(async () => {
+      wrapper.update();
+    });
     expect(wrapper.find('input#instance-group-name').prop('value')).toEqual(
       'Foo'
     );

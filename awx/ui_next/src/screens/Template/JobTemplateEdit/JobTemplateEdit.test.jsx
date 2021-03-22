@@ -1,7 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { sleep } from '../../../../testUtils/testUtils';
 import {
   mountWithContexts,
   waitForElement,
@@ -191,36 +190,35 @@ const mockExecutionEnvironment = [
   },
 ];
 
-JobTemplatesAPI.readCredentials.mockResolvedValue({
-  data: mockRelatedCredentials,
-});
-ProjectsAPI.readPlaybooks.mockResolvedValue({
-  data: mockRelatedProjectPlaybooks,
-});
-InventoriesAPI.readOptions.mockResolvedValue({
-  data: { actions: { GET: {}, POST: {} } },
-});
-ProjectsAPI.readOptions.mockResolvedValue({
-  data: { actions: { GET: {}, POST: {} } },
-});
-LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
-CredentialsAPI.read.mockResolvedValue({
-  data: {
-    results: [],
-    count: 0,
-  },
-});
-CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
-
-ExecutionEnvironmentsAPI.read.mockResolvedValue({
-  data: {
-    results: mockExecutionEnvironment,
-    count: 1,
-  },
-});
-
 describe('<JobTemplateEdit />', () => {
   beforeEach(() => {
+    JobTemplatesAPI.readCredentials.mockResolvedValue({
+      data: mockRelatedCredentials,
+    });
+    ProjectsAPI.readPlaybooks.mockResolvedValue({
+      data: mockRelatedProjectPlaybooks,
+    });
+    InventoriesAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+    ProjectsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+    LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+    CredentialsAPI.read.mockResolvedValue({
+      data: {
+        results: [],
+        count: 0,
+      },
+    });
+    CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
+
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: {
+        results: mockExecutionEnvironment,
+        count: 1,
+      },
+    });
     LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
     JobTemplatesAPI.readCredentials.mockResolvedValue({
       data: mockRelatedCredentials,
@@ -236,7 +234,7 @@ describe('<JobTemplateEdit />', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('initially renders successfully', async () => {
@@ -245,8 +243,8 @@ describe('<JobTemplateEdit />', () => {
       wrapper = mountWithContexts(
         <JobTemplateEdit template={mockJobTemplate} />
       );
+      await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(wrapper.find('FormGroup[label="Host Config Key"]').length).toBe(1);
     expect(
       wrapper.find('FormGroup[label="Host Config Key"]').prop('isRequired')
@@ -259,6 +257,7 @@ describe('<JobTemplateEdit />', () => {
       wrapper = mountWithContexts(
         <JobTemplateEdit template={mockJobTemplate} />
       );
+      await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     });
     const updatedTemplateData = {
       job_type: 'check',
@@ -271,18 +270,18 @@ describe('<JobTemplateEdit />', () => {
       { id: 5, name: 'Maple' },
       { id: 6, name: 'Tree' },
     ];
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
+    await waitForElement(wrapper, 'LabelSelect', el => el.length > 0);
     act(() => {
-      wrapper.find('input#template-name').simulate('change', {
-        target: { value: 'new name', name: 'name' },
-      });
+      wrapper.find('LabelSelect').invoke('onChange')(labels);
+      wrapper.update();
+    });
+    act(() => {
       wrapper.find('AnsibleSelect#template-job-type').prop('onChange')(
         null,
         'check'
       );
-      wrapper.find('LabelSelect').invoke('onChange')(labels);
+      wrapper.update();
     });
-    wrapper.update();
     act(() => {
       wrapper.find('InventoryLookup').invoke('onChange')({
         id: 1,
@@ -290,12 +289,15 @@ describe('<JobTemplateEdit />', () => {
       });
 
       wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')(null);
+      wrapper.update();
     });
-    wrapper.update();
+    wrapper.find('input#template-name').simulate('change', {
+      target: { value: 'new name', name: 'name' },
+    });
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').simulate('click');
+      wrapper.update();
     });
-    await sleep(0);
 
     const expected = {
       ...mockJobTemplate,
@@ -317,17 +319,18 @@ describe('<JobTemplateEdit />', () => {
   test('should navigate to job template detail when cancel is clicked', async () => {
     const history = createMemoryHistory({});
     let wrapper;
+    let cancelButton;
     await act(async () => {
       wrapper = mountWithContexts(
         <JobTemplateEdit template={mockJobTemplate} />,
         { context: { router: { history } } }
       );
+      cancelButton = await waitForElement(
+        wrapper,
+        'button[aria-label="Cancel"]',
+        e => e.length === 1
+      );
     });
-    const cancelButton = await waitForElement(
-      wrapper,
-      'button[aria-label="Cancel"]',
-      e => e.length === 1
-    );
     await act(async () => {
       cancelButton.prop('onClick')();
     });

@@ -17,10 +17,6 @@ describe('PromptWFJobTemplateDetail', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('should render successfully', () => {
     expect(wrapper.find('PromptWFJobTemplateDetail')).toHaveLength(1);
   });

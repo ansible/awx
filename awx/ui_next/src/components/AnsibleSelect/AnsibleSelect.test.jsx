@@ -17,7 +17,7 @@ const mockData = [
 
 describe('<AnsibleSelect />', () => {
   const onChange = jest.fn();
-  test('initially renders succesfully', async () => {
+  test('initially renders successfully', async () => {
     mountWithContexts(
       <AnsibleSelect
         id="bar"

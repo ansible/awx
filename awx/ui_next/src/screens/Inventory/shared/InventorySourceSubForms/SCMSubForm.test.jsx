@@ -5,8 +5,7 @@ import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import SCMSubForm from './SCMSubForm';
 import { ProjectsAPI, CredentialsAPI } from '../../../../api';
 
-jest.mock('../../../../api/models/Projects');
-jest.mock('../../../../api/models/Credentials');
+jest.mock('../../../../api');
 
 const initialValues = {
   credential: null,
@@ -24,29 +23,30 @@ const initialValues = {
 
 describe('<SCMSubForm />', () => {
   let wrapper;
-  CredentialsAPI.read.mockResolvedValue({
-    data: { count: 0, results: [] },
-  });
-  ProjectsAPI.readInventories.mockResolvedValue({
-    data: ['foo', 'bar'],
-  });
-  ProjectsAPI.read.mockResolvedValue({
-    data: {
-      count: 2,
-      results: [
-        {
-          id: 1,
-          name: 'mock proj one',
-        },
-        {
-          id: 2,
-          name: 'mock proj two',
-        },
-      ],
-    },
-  });
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    CredentialsAPI.read.mockResolvedValue({
+      data: { count: 0, results: [] },
+    });
+    ProjectsAPI.readInventories.mockResolvedValue({
+      data: ['foo', 'bar'],
+    });
+    ProjectsAPI.read.mockResolvedValue({
+      data: {
+        count: 2,
+        results: [
+          {
+            id: 1,
+            name: 'mock proj one',
+          },
+          {
+            id: 2,
+            name: 'mock proj two',
+          },
+        ],
+      },
+    });
+
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik initialValues={initialValues}>
@@ -58,7 +58,6 @@ describe('<SCMSubForm />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should render subform fields', () => {

@@ -18,14 +18,16 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-InventoriesAPI.readDetail.mockResolvedValue({
-  data: mockInventory,
-});
-
 describe('<Inventory />', () => {
   let wrapper;
 
-  test('initially renders succesfully', async () => {
+  beforeEach(async () => {
+    InventoriesAPI.readDetail.mockResolvedValue({
+      data: mockInventory,
+    });
+  });
+
+  test('initially renders successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<Inventory setBreadcrumb={() => {}} />);
     });

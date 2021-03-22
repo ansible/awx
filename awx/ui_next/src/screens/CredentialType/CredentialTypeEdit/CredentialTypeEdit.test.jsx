@@ -83,7 +83,6 @@ describe('<CredentialTypeEdit>', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('handleSubmit should call the api and redirect to details page', async () => {

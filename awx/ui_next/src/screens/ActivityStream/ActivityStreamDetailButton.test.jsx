@@ -7,7 +7,7 @@ import ActivityStreamDetailButton from './ActivityStreamDetailButton';
 jest.mock('../../api/models/ActivityStream');
 
 describe('<ActivityStreamDetailButton />', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(
       <ActivityStreamDetailButton
         streamItem={{

@@ -12,20 +12,24 @@ jest.mock('../../api');
 
 describe('<AssociateModal />', () => {
   let wrapper;
-  const onClose = jest.fn();
-  const onAssociate = jest.fn().mockResolvedValue();
-  const fetchRequest = jest.fn().mockReturnValue({ data: { ...mockHosts } });
-  const optionsRequest = jest.fn().mockResolvedValue({
-    data: {
-      actions: {
-        GET: {},
-        POST: {},
-      },
-      related_search_fields: [],
-    },
-  });
+  let onClose;
+  let onAssociate;
+  let fetchRequest;
+  let optionsRequest;
 
   beforeEach(async () => {
+    onClose = jest.fn();
+    onAssociate = jest.fn().mockResolvedValue();
+    fetchRequest = jest.fn().mockReturnValue({ data: { ...mockHosts } });
+    optionsRequest = jest.fn().mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <AssociateModal
@@ -41,7 +45,6 @@ describe('<AssociateModal />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

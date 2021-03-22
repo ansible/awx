@@ -26,7 +26,6 @@ describe('CredentialLookup', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('should render successfully', async () => {
@@ -89,27 +88,6 @@ describe('CredentialLookup', () => {
     expect(_CredentialLookup.defaultProps.onBlur).not.toThrow();
   });
 
-  test('should auto-select credential when only one available and autoPopulate prop is true', async () => {
-    CredentialsAPI.read.mockReturnValue({
-      data: {
-        results: [{ id: 1 }],
-        count: 1,
-      },
-    });
-    const onChange = jest.fn();
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <CredentialLookup
-          autoPopulate
-          credentialTypeId={1}
-          label="Foo"
-          onChange={onChange}
-        />
-      );
-    });
-    expect(onChange).toHaveBeenCalledWith({ id: 1 });
-  });
-
   test('should not auto-select credential when autoPopulate prop is false', async () => {
     CredentialsAPI.read.mockReturnValue({
       data: {
@@ -149,5 +127,28 @@ describe('CredentialLookup', () => {
       );
     });
     expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+describe('CredentialLookup auto select', () => {
+  test('should auto-select credential when only one available and autoPopulate prop is true', async () => {
+    CredentialsAPI.read.mockResolvedValue({
+      data: {
+        results: [{ id: 1 }],
+        count: 1,
+      },
+    });
+    const onChange = jest.fn();
+    await act(async () => {
+      mountWithContexts(
+        <CredentialLookup
+          autoPopulate
+          credentialTypeId={1}
+          label="Foo"
+          onChange={onChange}
+        />
+      );
+    });
+    expect(onChange).toHaveBeenCalledWith({ id: 1 });
   });
 });

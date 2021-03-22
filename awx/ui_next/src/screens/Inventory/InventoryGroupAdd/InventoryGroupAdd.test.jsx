@@ -30,9 +30,6 @@ describe('<InventoryGroupAdd />', () => {
       );
     });
   });
-  afterEach(() => {
-    wrapper.unmount();
-  });
   test('InventoryGroupAdd renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });

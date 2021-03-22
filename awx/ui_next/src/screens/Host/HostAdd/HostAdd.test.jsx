@@ -14,13 +14,6 @@ const hostData = {
   variables: '---\nfoo: bar',
 };
 
-HostsAPI.create.mockResolvedValue({
-  data: {
-    ...hostData,
-    id: 5,
-  },
-});
-
 describe('<HostAdd />', () => {
   let wrapper;
   let history;
@@ -29,6 +22,12 @@ describe('<HostAdd />', () => {
     history = createMemoryHistory({
       initialEntries: ['/templates/job_templates/1/survey/edit/foo'],
       state: { some: 'state' },
+    });
+    HostsAPI.create.mockResolvedValue({
+      data: {
+        ...hostData,
+        id: 5,
+      },
     });
     await act(async () => {
       wrapper = mountWithContexts(<HostAdd />, {
@@ -39,7 +38,6 @@ describe('<HostAdd />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('handleSubmit should post to api', async () => {

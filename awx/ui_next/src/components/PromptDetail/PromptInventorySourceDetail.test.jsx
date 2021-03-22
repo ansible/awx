@@ -17,10 +17,6 @@ describe('PromptInventorySourceDetail', () => {
     );
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('should render successfully', () => {
     expect(wrapper.find('PromptInventorySourceDetail')).toHaveLength(1);
   });

@@ -35,6 +35,14 @@ describe('<OrganizationForm />', () => {
     { id: 1, name: 'EE', image: 'quay.io/ansible/awx-ee' },
   ];
 
+  beforeEach(() => {
+    OrganizationsAPI.readInstanceGroups.mockReturnValue({
+      data: {
+        results: mockInstanceGroups,
+      },
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -59,11 +67,6 @@ describe('<OrganizationForm />', () => {
   });
 
   test('componentDidMount should set instanceGroups to state', async () => {
-    OrganizationsAPI.readInstanceGroups.mockReturnValue({
-      data: {
-        results: mockInstanceGroups,
-      },
-    });
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(

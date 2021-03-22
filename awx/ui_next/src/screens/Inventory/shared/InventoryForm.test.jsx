@@ -77,7 +77,6 @@ describe('<InventoryForm />', () => {
   });
 
   afterAll(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

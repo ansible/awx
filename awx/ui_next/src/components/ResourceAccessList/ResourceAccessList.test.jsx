@@ -92,6 +92,10 @@ describe('<ResourceAccessList />', () => {
     ],
   };
 
+  const history = createMemoryHistory({
+    initialEntries: ['/organizations/1/access'],
+  });
+
   beforeEach(async () => {
     OrganizationsAPI.readAccessList.mockResolvedValue({ data });
     OrganizationsAPI.readAccessOptions.mockResolvedValue({
@@ -113,9 +117,7 @@ describe('<ResourceAccessList />', () => {
         ],
       },
     });
-    const history = createMemoryHistory({
-      initialEntries: ['/organizations/1/access'],
-    });
+
     await act(async () => {
       wrapper = mountWithContexts(
         <ResourceAccessList
@@ -125,6 +127,8 @@ describe('<ResourceAccessList />', () => {
         { context: { router: { history } } }
       );
     });
+
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     wrapper.update();
   });
 
@@ -133,18 +137,17 @@ describe('<ResourceAccessList />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     expect(wrapper.find('PaginatedDataList')).toHaveLength(1);
   });
 
-  test('should fetch and display access records on mount', async done => {
+  test('should fetch and display access records on mount', async () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(OrganizationsAPI.readAccessList).toHaveBeenCalled();
     expect(wrapper.find('ResourceAccessListItem').length).toBe(2);
-    done();
   });
 
-  test('should open and close confirmation dialog when deleting role', async done => {
+  test('should open and close confirmation dialog when deleting role', async () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('DeleteRoleConfirmationModal')).toHaveLength(0);
     const button = wrapper.find('Chip Button').at(0);
@@ -160,10 +163,9 @@ describe('<ResourceAccessList />', () => {
     expect(wrapper.find('DeleteRoleConfirmationModal')).toHaveLength(0);
     expect(TeamsAPI.disassociateRole).not.toHaveBeenCalled();
     expect(UsersAPI.disassociateRole).not.toHaveBeenCalled();
-    done();
   });
 
-  it('should delete user role', async done => {
+  test('should delete user role', async () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const button = wrapper.find('Chip Button').at(0);
     await act(async () => {
@@ -178,10 +180,9 @@ describe('<ResourceAccessList />', () => {
     expect(TeamsAPI.disassociateRole).not.toHaveBeenCalled();
     expect(UsersAPI.disassociateRole).toHaveBeenCalledWith(1, 1);
     expect(OrganizationsAPI.readAccessList).toHaveBeenCalledTimes(2);
-    done();
   });
 
-  it('should delete team role', async done => {
+  test('should delete team role', async () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const button = wrapper.find('Chip Button').at(1);
     await act(async () => {
@@ -196,8 +197,8 @@ describe('<ResourceAccessList />', () => {
     expect(TeamsAPI.disassociateRole).toHaveBeenCalledWith(5, 3);
     expect(UsersAPI.disassociateRole).not.toHaveBeenCalled();
     expect(OrganizationsAPI.readAccessList).toHaveBeenCalledTimes(2);
-    done();
   });
+
   test('should call api to get org details', async () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
 

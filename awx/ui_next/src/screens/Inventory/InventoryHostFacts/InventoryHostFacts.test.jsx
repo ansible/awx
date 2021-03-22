@@ -9,7 +9,7 @@ import { HostsAPI } from '../../../api';
 import mockHost from '../shared/data.host.json';
 import mockHostFacts from '../shared/data.hostFacts.json';
 
-jest.mock('../../../api/models/Hosts');
+jest.mock('../../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
@@ -31,7 +31,6 @@ describe('<InventoryHostFacts />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('initially renders successfully ', () => {

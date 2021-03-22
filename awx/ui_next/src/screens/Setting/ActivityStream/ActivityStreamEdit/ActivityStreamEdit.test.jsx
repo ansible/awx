@@ -10,14 +10,8 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import ActivityStreamEdit from './ActivityStreamEdit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    ACTIVITY_STREAM_ENABLED: false,
-    ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: true,
-  },
-});
-SettingsAPI.updateAll.mockResolvedValue({});
+jest.mock('../../../../api');
+
 describe('<ActivityStreamEdit />', () => {
   let wrapper;
   let history;
@@ -31,6 +25,13 @@ describe('<ActivityStreamEdit />', () => {
     history = createMemoryHistory({
       initialEntries: ['/settings/activity_stream/edit'],
     });
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        ACTIVITY_STREAM_ENABLED: false,
+        ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: true,
+      },
+    });
+    SettingsAPI.updateAll.mockResolvedValue({});
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>

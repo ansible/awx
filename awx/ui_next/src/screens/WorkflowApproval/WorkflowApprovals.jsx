@@ -14,6 +14,9 @@ function WorkflowApprovals({ i18n }) {
 
   const updateBreadcrumbConfig = useCallback(
     workflowApproval => {
+      if (!workflowApproval) {
+        return;
+      }
       const { id } = workflowApproval;
       setBreadcrumbConfig({
         '/workflow_approvals': i18n._(t`Workflow Approvals`),

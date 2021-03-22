@@ -17,18 +17,6 @@ import {
 jest.mock('../../api');
 
 describe('LaunchButton', () => {
-  JobTemplatesAPI.readLaunch.mockResolvedValue({
-    data: {
-      can_start_without_user_input: true,
-      ask_inventory_on_launch: false,
-      ask_variables_on_launch: false,
-      ask_limit_on_launch: false,
-      ask_scm_branch_on_launch: false,
-      survey_enabled: false,
-      variables_needed_to_start: [],
-    },
-  });
-
   const launchButton = ({ handleLaunch }) => (
     <button type="submit" onClick={() => handleLaunch()} />
   );
@@ -41,6 +29,20 @@ describe('LaunchButton', () => {
     id: 1,
     type: 'job_template',
   };
+
+  beforeEach(() => {
+    JobTemplatesAPI.readLaunch.mockResolvedValue({
+      data: {
+        can_start_without_user_input: true,
+        ask_inventory_on_launch: false,
+        ask_variables_on_launch: false,
+        ask_limit_on_launch: false,
+        ask_scm_branch_on_launch: false,
+        survey_enabled: false,
+        variables_needed_to_start: [],
+      },
+    });
+  });
 
   afterEach(() => jest.clearAllMocks());
 

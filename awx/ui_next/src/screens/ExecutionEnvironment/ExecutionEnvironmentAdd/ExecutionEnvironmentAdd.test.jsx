@@ -80,6 +80,12 @@ describe('<ExecutionEnvironmentAdd/>', () => {
     history = createMemoryHistory({
       initialEntries: ['/execution_environments'],
     });
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
+    ExecutionEnvironmentsAPI.create.mockResolvedValue({
+      data: {
+        id: 42,
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(<ExecutionEnvironmentAdd me={mockMe} />, {
         context: { router: { history } },

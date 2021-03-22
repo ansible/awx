@@ -10,21 +10,24 @@ import { assertDetail } from '../../shared/settingTestUtils';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import TACACSDetail from './TACACSDetail';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    TACACSPLUS_HOST: 'mockhost',
-    TACACSPLUS_PORT: 49,
-    TACACSPLUS_SECRET: '$encrypted$',
-    TACACSPLUS_SESSION_TIMEOUT: 5,
-    TACACSPLUS_AUTH_PROTOCOL: 'ascii',
-  },
-});
+jest.mock('../../../../api');
 
 describe('<TACACSDetail />', () => {
   let wrapper;
 
-  beforeAll(async () => {
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        TACACSPLUS_HOST: 'mockhost',
+        TACACSPLUS_PORT: 49,
+        TACACSPLUS_SECRET: '$encrypted$',
+        TACACSPLUS_SESSION_TIMEOUT: 5,
+        TACACSPLUS_AUTH_PROTOCOL: 'ascii',
+      },
+    });
+  });
+
+  beforeEach(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>

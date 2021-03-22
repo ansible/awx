@@ -89,7 +89,6 @@ describe('<GitHub />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

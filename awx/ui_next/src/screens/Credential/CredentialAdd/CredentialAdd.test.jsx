@@ -15,7 +15,7 @@ import CredentialAdd from './CredentialAdd';
 
 jest.mock('../../../api');
 
-CredentialTypesAPI.read.mockResolvedValue({
+const mockCredentialResults = {
   data: {
     results: [
       {
@@ -100,9 +100,7 @@ CredentialTypesAPI.read.mockResolvedValue({
       },
     ],
   },
-});
-
-CredentialsAPI.create.mockResolvedValue({ data: { id: 13 } });
+};
 
 describe('<CredentialAdd />', () => {
   let wrapper;
@@ -110,16 +108,14 @@ describe('<CredentialAdd />', () => {
 
   describe('Initial GET request succeeds', () => {
     beforeEach(async () => {
+      CredentialsAPI.read.mockResolvedValue(mockCredentialResults);
+      CredentialsAPI.create.mockResolvedValue({ data: { id: 13 } });
       history = createMemoryHistory({ initialEntries: ['/credentials'] });
       await act(async () => {
         wrapper = mountWithContexts(<CredentialAdd />, {
           context: { router: { history } },
         });
       });
-    });
-
-    afterEach(() => {
-      wrapper.unmount();
     });
 
     test('handleSubmit should call the api and redirect to details page', async () => {

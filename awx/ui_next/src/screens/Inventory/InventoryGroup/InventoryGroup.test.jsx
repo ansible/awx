@@ -19,28 +19,27 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-GroupsAPI.readDetail.mockResolvedValue({
-  data: {
-    id: 1,
-    name: 'Foo',
-    description: 'Bar',
-    variables: 'bizz: buzz',
-    summary_fields: {
-      inventory: { id: 1 },
-      created_by: { id: 1, username: 'Athena' },
-      modified_by: { id: 1, username: 'Apollo' },
-    },
-    created: '2020-04-25T01:23:45.678901Z',
-    modified: '2020-04-25T01:23:45.678901Z',
-  },
-});
-
 describe('<InventoryGroup />', () => {
   let wrapper;
   let history;
   const inventory = { id: 1, name: 'Foo' };
 
   beforeEach(async () => {
+    GroupsAPI.readDetail.mockResolvedValue({
+      data: {
+        id: 1,
+        name: 'Foo',
+        description: 'Bar',
+        variables: 'bizz: buzz',
+        summary_fields: {
+          inventory: { id: 1 },
+          created_by: { id: 1, username: 'Athena' },
+          modified_by: { id: 1, username: 'Apollo' },
+        },
+        created: '2020-04-25T01:23:45.678901Z',
+        modified: '2020-04-25T01:23:45.678901Z',
+      },
+    });
     history = createMemoryHistory({
       initialEntries: ['/inventories/inventory/1/groups/1/details'],
     });
@@ -53,10 +52,6 @@ describe('<InventoryGroup />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-  });
-
-  afterEach(() => {
-    wrapper.unmount();
   });
 
   test('renders successfully', async () => {

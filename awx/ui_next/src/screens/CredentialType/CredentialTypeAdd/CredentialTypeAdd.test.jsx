@@ -36,12 +36,6 @@ const credentialTypeData = {
   }),
 };
 
-CredentialTypesAPI.create.mockResolvedValue({
-  data: {
-    id: 42,
-  },
-});
-
 describe('<CredentialTypeAdd/>', () => {
   let wrapper;
   let history;
@@ -49,6 +43,11 @@ describe('<CredentialTypeAdd/>', () => {
   beforeEach(async () => {
     history = createMemoryHistory({
       initialEntries: ['/credential_types'],
+    });
+    CredentialTypesAPI.create.mockResolvedValue({
+      data: {
+        id: 42,
+      },
     });
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeAdd />, {
@@ -59,7 +58,6 @@ describe('<CredentialTypeAdd/>', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('handleSubmit should call the api and redirect to details page', async () => {

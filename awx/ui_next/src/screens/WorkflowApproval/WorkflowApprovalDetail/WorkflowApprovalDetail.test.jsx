@@ -14,7 +14,7 @@ const workflowApproval = mockWorkflowApprovals.results[0];
 jest.mock('../../../api');
 
 describe('<WorkflowApprovalDetail />', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(
       <WorkflowApprovalDetail workflowApproval={workflowApproval} />
     );

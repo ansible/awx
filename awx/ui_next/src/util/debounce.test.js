@@ -1,9 +1,8 @@
 import debounce from './debounce';
 
-jest.useFakeTimers();
-
 describe('debounce', () => {
   test('it debounces', () => {
+    jest.useFakeTimers();
     let count = 0;
     const func = increment => {
       count += increment;

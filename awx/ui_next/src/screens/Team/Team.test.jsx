@@ -45,7 +45,7 @@ describe('<Team />', () => {
     TeamsAPI.read.mockImplementation(getTeams);
   });
 
-  test('initially renders succesfully', async () => {
+  test('initially renders successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Team setBreadcrumb={() => {}} me={mockMe} />

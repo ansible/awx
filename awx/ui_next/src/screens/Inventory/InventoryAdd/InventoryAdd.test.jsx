@@ -12,33 +12,28 @@ import InventoryAdd from './InventoryAdd';
 
 jest.mock('../../../api');
 
-CredentialTypesAPI.read.mockResolvedValue({
-  data: {
-    results: [
-      {
-        id: 14,
-        name: 'insights',
-      },
-    ],
-  },
-});
-InventoriesAPI.create.mockResolvedValue({ data: { id: 13 } });
-
 describe('<InventoryAdd />', () => {
   let wrapper;
   let history;
 
   beforeEach(async () => {
     history = createMemoryHistory({ initialEntries: ['/inventories'] });
+    CredentialTypesAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 14,
+            name: 'insights',
+          },
+        ],
+      },
+    });
+    InventoriesAPI.create.mockResolvedValue({ data: { id: 13 } });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryAdd />, {
         context: { router: { history } },
       });
     });
-  });
-
-  afterEach(() => {
-    wrapper.unmount();
   });
 
   test('Initially renders successfully', () => {

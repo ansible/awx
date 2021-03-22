@@ -47,16 +47,6 @@ const mockInventory = {
   pending_deletion: false,
 };
 
-CredentialTypesAPI.read.mockResolvedValue({
-  data: {
-    results: [
-      {
-        id: 14,
-        name: 'insights',
-      },
-    ],
-  },
-});
 const associatedInstanceGroups = [
   {
     id: 1,
@@ -71,6 +61,18 @@ function expectDetailToMatch(wrapper, label, value) {
 }
 
 describe('<InventoryDetail />', () => {
+  beforeEach(async () => {
+    CredentialTypesAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 14,
+            name: 'insights',
+          },
+        ],
+      },
+    });
+  });
   test('should render details', async () => {
     InventoriesAPI.readInstanceGroups.mockResolvedValue({
       data: {
@@ -90,11 +92,11 @@ describe('<InventoryDetail />', () => {
     expectDetailToMatch(wrapper, 'Type', 'Inventory');
     const org = wrapper.find('Detail[label="Organization"]');
     expect(org.prop('value')).toMatchInlineSnapshot(`
-      <ForwardRef
+      <Link
         to="/organizations/1/details"
       >
         The Organization
-      </ForwardRef>
+      </Link>
     `);
     const vars = wrapper.find('VariablesDetail');
     expect(vars).toHaveLength(1);

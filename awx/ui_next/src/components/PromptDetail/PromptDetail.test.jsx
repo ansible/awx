@@ -53,10 +53,6 @@ describe('PromptDetail', () => {
       );
     });
 
-    afterAll(() => {
-      wrapper.unmount();
-    });
-
     test('should render successfully', () => {
       expect(wrapper.find('PromptDetail').length).toBe(1);
     });
@@ -109,10 +105,6 @@ describe('PromptDetail', () => {
     let wrapper;
     beforeAll(() => {
       wrapper = mountWithContexts(<PromptDetail resource={mockTemplate} />);
-    });
-
-    afterAll(() => {
-      wrapper.unmount();
     });
 
     test('should render basic detail values', () => {
@@ -172,10 +164,6 @@ describe('PromptDetail', () => {
           overrides={overrides}
         />
       );
-    });
-
-    afterAll(() => {
-      wrapper.unmount();
     });
 
     test('should render overridden details', () => {

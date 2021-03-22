@@ -4,15 +4,6 @@ import WS from 'jest-websocket-mock';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import useWsWorkflowApprovals from './useWsWorkflowApprovals';
 
-/*
-  Jest mock timers don’t play well with jest-websocket-mock,
-  so we'll stub out throttling to resolve immediately
-*/
-jest.mock('../../../util/useThrottle', () => ({
-  __esModule: true,
-  default: jest.fn(val => val),
-}));
-
 function TestInner() {
   return <div />;
 }
@@ -30,6 +21,14 @@ describe('useWsWorkflowApprovals hook', () => {
   beforeEach(() => {
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
     global.console.debug = () => {};
+    /*
+    Jest mock timers don’t play well with jest-websocket-mock,
+    so we'll stub out throttling to resolve immediately
+    */
+    jest.mock('../../../util/useThrottle', () => ({
+      __esModule: true,
+      default: jest.fn(val => val),
+    }));
   });
 
   afterEach(() => {

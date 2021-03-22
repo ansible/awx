@@ -89,15 +89,11 @@ describe('<JobTemplateForm />', () => {
     { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
   ];
 
-  beforeAll(() => {
-    jest.setTimeout(5000 * 4);
-  });
-
-  afterAll(() => {
-    jest.setTimeout(5000);
-  });
+  let consoleError;
 
   beforeEach(() => {
+    consoleError = global.console.error;
+    global.console.error = jest.fn();
     LabelsAPI.read.mockReturnValue({
       data: mockData.summary_fields.labels,
     });
@@ -131,7 +127,8 @@ describe('<JobTemplateForm />', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    global.console.error = consoleError;
+    jest.resetAllMocks();
   });
 
   test('should render LabelsSelect', async () => {
@@ -165,8 +162,8 @@ describe('<JobTemplateForm />', () => {
           handleCancel={jest.fn()}
         />
       );
+      await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'new foo', name: 'name' },

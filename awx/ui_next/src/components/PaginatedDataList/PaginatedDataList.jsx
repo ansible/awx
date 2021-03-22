@@ -210,7 +210,9 @@ PaginatedDataList.defaultProps = {
   toolbarSortColumns: [],
   pluralizedItemName: 'Items',
   showPageSizeOptions: true,
-  renderItem: item => <PaginatedDataListItem key={item.id} item={item} />,
+  renderItem: ({ id, ...rest }) => (
+    <PaginatedDataListItem key={id} item={{ id, ...rest }} />
+  ),
   renderToolbar: props => <DataListToolbar {...props} />,
   onRowClick: () => null,
 };

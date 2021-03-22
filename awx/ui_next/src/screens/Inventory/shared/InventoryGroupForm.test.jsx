@@ -19,9 +19,6 @@ describe('<InventoryGroupForm />', () => {
       />
     );
   });
-  afterEach(() => {
-    wrapper.unmount();
-  });
   test('initially renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });

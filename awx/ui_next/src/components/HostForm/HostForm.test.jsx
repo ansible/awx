@@ -39,7 +39,6 @@ describe('<HostForm />', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('changing inputs should update form values', async () => {

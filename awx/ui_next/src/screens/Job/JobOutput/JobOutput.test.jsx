@@ -105,7 +105,7 @@ describe('<JobOutput />', () => {
     wrapper.unmount();
   });
 
-  test('initially renders succesfully', async () => {
+  test('initially renders successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });

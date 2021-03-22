@@ -18,7 +18,7 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: jest.fn(),
 }));
-jest.mock('../../../../api/models/Settings');
+jest.mock('../../../../api');
 
 const mockDefault = {
   data: {
@@ -94,7 +94,7 @@ describe('<GitHubDetail />', () => {
   describe('Default', () => {
     let wrapper;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       SettingsAPI.readCategory.mockResolvedValueOnce(mockDefault);
       SettingsAPI.readCategory.mockResolvedValueOnce(mockOrg);
       SettingsAPI.readCategory.mockResolvedValueOnce(mockTeam);
@@ -117,7 +117,6 @@ describe('<GitHubDetail />', () => {
     });
 
     afterAll(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -212,7 +211,6 @@ describe('<GitHubDetail />', () => {
     });
 
     afterAll(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -264,7 +262,6 @@ describe('<GitHubDetail />', () => {
     });
 
     afterAll(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -312,7 +309,6 @@ describe('<GitHubDetail />', () => {
     });
 
     afterAll(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -369,7 +365,6 @@ describe('<GitHubDetail />', () => {
     });
 
     afterAll(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
@@ -439,7 +434,6 @@ describe('<GitHubDetail />', () => {
     });
 
     afterAll(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
 
