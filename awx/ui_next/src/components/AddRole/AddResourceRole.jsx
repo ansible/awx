@@ -1,5 +1,6 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import SelectableCard from '../SelectableCard';
@@ -17,7 +18,9 @@ const readTeams = async queryParams => TeamsAPI.read(queryParams);
 
 const readTeamsOptions = async () => TeamsAPI.readOptions();
 
-function AddResourceRole({ onSave, onClose, roles, i18n, resource }) {
+function AddResourceRole({ onSave, onClose, roles, i18n, resource, onError }) {
+  const history = useHistory();
+
   const [selectedResource, setSelectedResource] = useState(null);
   const [selectedResourceRows, setSelectedResourceRows] = useState([]);
   const [selectedRoleRows, setSelectedRoleRows] = useState([]);
@@ -38,6 +41,12 @@ function AddResourceRole({ onSave, onClose, roles, i18n, resource }) {
       setSelectedResourceRows([...selectedResourceRows, user]);
     }
   };
+
+  useEffect(() => {
+    if (currentStepId === 1 && maxEnabledStep > 1) {
+      history.push(history.location.pathname);
+    }
+  }, [currentStepId, history, maxEnabledStep]);
 
   const handleRoleCheckboxClick = role => {
     const selectedIndex = selectedRoleRows.findIndex(
@@ -94,7 +103,8 @@ function AddResourceRole({ onSave, onClose, roles, i18n, resource }) {
       await Promise.all(roleRequests);
       onSave();
     } catch (err) {
-      // TODO: handle this error
+      onError(err);
+      onClose();
     }
   };
 
