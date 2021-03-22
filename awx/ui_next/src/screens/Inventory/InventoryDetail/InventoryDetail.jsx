@@ -10,7 +10,7 @@ import {
   Detail,
   UserDateDetail,
 } from '../../../components/DetailList';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
 import ContentError from '../../../components/ContentError';
@@ -114,6 +114,7 @@ function InventoryDetail({ inventory, i18n }) {
       <CardActionsRow>
         {userCapabilities.edit && (
           <Button
+            ouiaId="inventory-detail-edit-button"
             component={Link}
             to={`/inventories/inventory/${inventory.id}/edit`}
           >

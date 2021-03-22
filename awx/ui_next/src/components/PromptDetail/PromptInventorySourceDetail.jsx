@@ -5,9 +5,10 @@ import { Link } from 'react-router-dom';
 
 import { Chip, List, ListItem } from '@patternfly/react-core';
 import { Detail, DeletedDetail } from '../DetailList';
-import { VariablesDetail } from '../CodeMirrorInput';
+import { VariablesDetail } from '../CodeEditor';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
+import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 
 function PromptInventorySourceDetail({ i18n, resource }) {
   const {
@@ -83,10 +84,6 @@ function PromptInventorySourceDetail({ i18n, resource }) {
         />
       )}
       <Detail label={i18n._(t`Source`)} value={source} />
-      <Detail
-        label={i18n._(t`Ansible Environment`)}
-        value={custom_virtualenv}
-      />
       {summary_fields?.source_project && (
         <Detail
           label={i18n._(t`Project`)}
@@ -97,6 +94,10 @@ function PromptInventorySourceDetail({ i18n, resource }) {
           }
         />
       )}
+      <ExecutionEnvironmentDetail
+        virtualEnvironment={custom_virtualenv}
+        executionEnvironment={summary_fields?.execution_environment}
+      />
       <Detail label={i18n._(t`Inventory File`)} value={source_path} />
       <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[verbosity]} />
       <Detail

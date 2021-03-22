@@ -74,6 +74,10 @@ describe('<SmartInventoryEdit />', () => {
     wrapper.unmount();
   });
 
+  test('should render CodeEditor field', () => {
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual('---');
+  });
+
   test('should fetch related instance groups on initial render', async () => {
     expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
   });

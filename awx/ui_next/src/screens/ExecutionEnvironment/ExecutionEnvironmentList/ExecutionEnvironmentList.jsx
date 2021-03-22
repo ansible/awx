@@ -111,6 +111,7 @@ function ExecutionEnvironmentList({ i18n }) {
       <PageSection>
         <Card>
           <PaginatedTable
+            ouiaId="execution-environment-table"
             contentError={contentError}
             hasContentLoading={isLoading || deleteLoading}
             items={executionEnvironments}
@@ -194,6 +195,7 @@ function ExecutionEnvironmentList({ i18n }) {
                 isSelected={selected.some(
                   row => row.id === executionEnvironment.id
                 )}
+                fetchExecutionEnvironments={fetchExecutionEnvironments}
               />
             )}
             emptyStateControls={

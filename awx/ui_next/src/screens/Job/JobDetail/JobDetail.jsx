@@ -16,7 +16,7 @@ import {
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ChipGroup from '../../../components/ChipGroup';
 import CredentialChip from '../../../components/CredentialChip';
-import { VariablesInput as _VariablesInput } from '../../../components/CodeMirrorInput';
+import { VariablesInput as _VariablesInput } from '../../../components/CodeEditor';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
 import {
@@ -24,6 +24,7 @@ import {
   ReLaunchDropDown,
 } from '../../../components/LaunchButton';
 import StatusIcon from '../../../components/StatusIcon';
+import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import { toTitleCase } from '../../../util/strings';
 import { formatDateString } from '../../../util/dates';
 import { Job } from '../../../types';
@@ -71,6 +72,7 @@ function JobDetail({ job, i18n }) {
     labels,
     project,
     source_workflow_job,
+    execution_environment: executionEnvironment,
   } = job.summary_fields;
   const [errorMsg, setErrorMsg] = useState();
   const history = useHistory();
@@ -78,7 +80,10 @@ function JobDetail({ job, i18n }) {
   const jobTypes = {
     project_update: i18n._(t`Source Control Update`),
     inventory_update: i18n._(t`Inventory Sync`),
-    job: i18n._(t`Playbook Run`),
+    job:
+      job.job_type === 'check'
+        ? i18n._(t`Playbook Check`)
+        : i18n._(t`Playbook Run`),
     ad_hoc_command: i18n._(t`Command`),
     management_job: i18n._(t`Management Job`),
     workflow_job: i18n._(t`Workflow Job`),
@@ -250,7 +255,10 @@ function JobDetail({ job, i18n }) {
         <Detail label={i18n._(t`Playbook`)} value={job.playbook} />
         <Detail label={i18n._(t`Limit`)} value={job.limit} />
         <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[job.verbosity]} />
-        <Detail label={i18n._(t`Environment`)} value={job.custom_virtualenv} />
+        <ExecutionEnvironmentDetail
+          virtualEnvironment={job.custom_virtualenv}
+          executionEnvironment={executionEnvironment}
+        />
         <Detail label={i18n._(t`Execution Node`)} value={job.execution_node} />
         {instanceGroup && !instanceGroup?.is_container_group && (
           <Detail
@@ -382,13 +390,21 @@ function JobDetail({ job, i18n }) {
           (job.status === 'failed' && job.type === 'job' ? (
             <LaunchButton resource={job}>
               {({ handleRelaunch }) => (
-                <ReLaunchDropDown isPrimary handleRelaunch={handleRelaunch} />
+                <ReLaunchDropDown
+                  ouiaId="job-detail-relaunch-dropdown"
+                  isPrimary
+                  handleRelaunch={handleRelaunch}
+                />
               )}
             </LaunchButton>
           ) : (
             <LaunchButton resource={job} aria-label={i18n._(t`Relaunch`)}>
               {({ handleRelaunch }) => (
-                <Button type="submit" onClick={handleRelaunch}>
+                <Button
+                  ouiaId="job-detail-relaunch-button"
+                  type="submit"
+                  onClick={handleRelaunch}
+                >
                   {i18n._(t`Relaunch`)}
                 </Button>
               )}

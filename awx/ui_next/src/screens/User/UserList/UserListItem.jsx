@@ -82,6 +82,7 @@ function UserListItem({
           tooltip={i18n._(t`Edit User`)}
         >
           <Button
+            ouiaId={`${user.id}-edit-button`}
             aria-label={i18n._(t`Edit User`)}
             variant="plain"
             component={Link}

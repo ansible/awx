@@ -16,6 +16,7 @@ function UnsavedChangesModal({ i18n, onSaveAndExit, onExit }) {
       onClose={() => dispatch({ type: 'TOGGLE_UNSAVED_CHANGES_MODAL' })}
       actions={[
         <Button
+          ouiaId="unsaved-changes-exit-button"
           id="confirm-exit-without-saving"
           key="exit"
           variant="danger"
@@ -25,6 +26,7 @@ function UnsavedChangesModal({ i18n, onSaveAndExit, onExit }) {
           {i18n._(t`Exit Without Saving`)}
         </Button>,
         <Button
+          ouiaId="unsaved-changes-save-exit-button"
           id="confirm-save-and-exit"
           key="save"
           variant="primary"

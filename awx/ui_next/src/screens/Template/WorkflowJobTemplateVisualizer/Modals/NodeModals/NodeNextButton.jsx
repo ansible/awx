@@ -19,6 +19,7 @@ function NodeNextButton({
 
   return (
     <Button
+      ouiaId="node-modal-next-button"
       id="next-node-modal"
       variant="primary"
       type="submit"

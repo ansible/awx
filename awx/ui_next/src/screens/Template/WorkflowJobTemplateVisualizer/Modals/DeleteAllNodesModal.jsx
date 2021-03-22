@@ -11,6 +11,7 @@ function DeleteAllNodesModal({ i18n }) {
     <AlertModal
       actions={[
         <Button
+          ouiaId="delete-all-confirm-button"
           id="confirm-delete-all-nodes"
           key="remove"
           variant="danger"
@@ -20,6 +21,7 @@ function DeleteAllNodesModal({ i18n }) {
           {i18n._(t`Remove`)}
         </Button>,
         <Button
+          ouiaId="delete-all-cancel-button"
           id="cancel-delete-all-nodes"
           key="cancel"
           variant="link"

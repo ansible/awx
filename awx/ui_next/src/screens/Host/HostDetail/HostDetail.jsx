@@ -13,7 +13,7 @@ import {
   Detail,
   UserDateDetail,
 } from '../../../components/DetailList';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import Sparkline from '../../../components/Sparkline';
 import DeleteButton from '../../../components/DeleteButton';
 import { HostsAPI } from '../../../api';
@@ -109,6 +109,7 @@ function HostDetail({ i18n, host }) {
       <CardActionsRow>
         {user_capabilities?.edit && (
           <Button
+            ouiaId="host-detail-edit-button"
             aria-label={i18n._(t`edit`)}
             component={Link}
             to={`/hosts/${id}/edit`}

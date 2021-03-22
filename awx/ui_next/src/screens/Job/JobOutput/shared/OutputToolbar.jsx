@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { shape, func } from 'prop-types';
+import { bool, shape, func } from 'prop-types';
 import {
   MinusCircleIcon,
   DownloadIcon,
@@ -62,7 +62,14 @@ const OUTPUT_NO_COUNT_JOB_TYPES = [
   'inventory_update',
 ];
 
-const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
+const OutputToolbar = ({
+  i18n,
+  job,
+  onDelete,
+  onCancel,
+  isDeleteDisabled,
+  jobStatus,
+}) => {
   const hideCounts = OUTPUT_NO_COUNT_JOB_TYPES.includes(job.type);
 
   const playCount = job?.playbook_counts?.play_count;
@@ -138,13 +145,17 @@ const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
             {job.status === 'failed' && job.type === 'job' ? (
               <LaunchButton resource={job}>
                 {({ handleRelaunch }) => (
-                  <ReLaunchDropDown handleRelaunch={handleRelaunch} />
+                  <ReLaunchDropDown
+                    handleRelaunch={handleRelaunch}
+                    ouiaId="job-output-relaunch-dropdown"
+                  />
                 )}
               </LaunchButton>
             ) : (
               <LaunchButton resource={job}>
                 {({ handleRelaunch }) => (
                   <Button
+                    ouiaId="job-output-relaunch-button"
                     variant="plain"
                     onClick={handleRelaunch}
                     aria-label={i18n._(t`Relaunch`)}
@@ -160,7 +171,11 @@ const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
       {job.related?.stdout && (
         <Tooltip content={i18n._(t`Download Output`)}>
           <a href={`${job.related.stdout}?format=txt_download`}>
-            <Button variant="plain" aria-label={i18n._(t`Download Output`)}>
+            <Button
+              ouiaId="job-output-download-button"
+              variant="plain"
+              aria-label={i18n._(t`Download Output`)}
+            >
               <DownloadIcon />
             </Button>
           </a>
@@ -170,6 +185,7 @@ const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
         ['pending', 'waiting', 'running'].includes(jobStatus) && (
           <Tooltip content={i18n._(t`Cancel Job`)}>
             <Button
+              ouiaId="job-output-cancel-button"
               variant="plain"
               aria-label={i18n._(t`Cancel Job`)}
               onClick={onCancel}
@@ -178,17 +194,18 @@ const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
             </Button>
           </Tooltip>
         )}
-
       {job.summary_fields.user_capabilities.delete &&
         ['new', 'successful', 'failed', 'error', 'canceled'].includes(
           jobStatus
         ) && (
           <Tooltip content={i18n._(t`Delete Job`)}>
             <DeleteButton
+              ouiaId="job-output-delete-button"
               name={job.name}
               modalTitle={i18n._(t`Delete Job`)}
               onConfirm={onDelete}
               variant="plain"
+              isDisabled={isDeleteDisabled}
             >
               <TrashAltIcon />
             </DeleteButton>
@@ -199,8 +216,13 @@ const OutputToolbar = ({ i18n, job, jobStatus, onDelete, onCancel }) => {
 };
 
 OutputToolbar.propTypes = {
+  isDeleteDisabled: bool,
   job: shape({}).isRequired,
   onDelete: func.isRequired,
+};
+
+OutputToolbar.defaultProps = {
+  isDeleteDisabled: false,
 };
 
 export default withI18n()(OutputToolbar);

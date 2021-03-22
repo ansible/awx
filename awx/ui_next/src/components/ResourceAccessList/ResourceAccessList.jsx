@@ -11,6 +11,7 @@ import { getQSConfig, parseQueryString } from '../../util/qs';
 import useRequest, { useDeleteItems } from '../../util/useRequest';
 import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';
 import ResourceAccessListItem from './ResourceAccessListItem';
+import ErrorDetail from '../ErrorDetail';
 
 const QS_CONFIG = getQSConfig('access', {
   page: 1,
@@ -19,6 +20,7 @@ const QS_CONFIG = getQSConfig('access', {
 });
 
 function ResourceAccessList({ i18n, apiModel, resource }) {
+  const [submitError, setSubmitError] = useState(null);
   const [deletionRecord, setDeletionRecord] = useState(null);
   const [deletionRole, setDeletionRole] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -206,6 +208,7 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
             setShowAddModal(false);
             fetchAccessRecords();
           }}
+          onError={err => setSubmitError(err)}
           roles={resource.summary_fields.object_roles}
           resource={resource}
         />
@@ -226,6 +229,17 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
             setDeletionRole(null);
           }}
         />
+      )}
+      {submitError && (
+        <AlertModal
+          variant="error"
+          title={i18n._(t`Error!`)}
+          isOpen={submitError}
+          onClose={() => setSubmitError(null)}
+        >
+          {i18n._(t`Failed to assign roles properly`)}
+          <ErrorDetail error={submitError} />
+        </AlertModal>
       )}
       {deletionError && (
         <AlertModal

@@ -36,6 +36,7 @@ function ExpandCollapse({ isCompact, onCompact, onExpand, i18n }) {
     <Fragment>
       <ToolbarItem>
         <Button
+          ouiaId="toolbar-collapse-button"
           variant="plain"
           aria-label={i18n._(t`Collapse`)}
           onClick={onCompact}
@@ -46,6 +47,7 @@ function ExpandCollapse({ isCompact, onCompact, onExpand, i18n }) {
       </ToolbarItem>
       <ToolbarItem>
         <Button
+          ouiaId="toolbar-expand-button"
           variant="plain"
           aria-label={i18n._(t`Expand`)}
           onClick={onExpand}

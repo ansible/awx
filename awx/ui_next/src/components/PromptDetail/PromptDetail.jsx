@@ -11,7 +11,7 @@ import { toTitleCase } from '../../util/strings';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import { DetailList, Detail, UserDateDetail } from '../DetailList';
-import { VariablesDetail } from '../CodeMirrorInput';
+import { VariablesDetail } from '../CodeEditor';
 
 import PromptProjectDetail from './PromptProjectDetail';
 import PromptInventorySourceDetail from './PromptInventorySourceDetail';

@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
+import styled from 'styled-components';
 import { Alert } from '@patternfly/react-core';
 import { InventoriesAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
@@ -11,13 +12,17 @@ import OptionsList from '../../OptionsList';
 import ContentLoading from '../../ContentLoading';
 import ContentError from '../../ContentError';
 
+const InventoryErrorAlert = styled(Alert)`
+  margin-bottom: 20px;
+`;
+
 const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
   page_size: 5,
   order_by: 'name',
 });
 
-function InventoryStep({ i18n }) {
+function InventoryStep({ i18n, warningMessage = null }) {
   const [field, meta, helpers] = useField({
     name: 'inventory',
   });
@@ -68,6 +73,10 @@ function InventoryStep({ i18n }) {
 
   return (
     <>
+      {meta.touched && meta.error && (
+        <InventoryErrorAlert variant="danger" isInline title={meta.error} />
+      )}
+      {warningMessage}
       <OptionsList
         value={field.value ? [field.value] : []}
         options={inventories}
@@ -102,9 +111,6 @@ function InventoryStep({ i18n }) {
         selectItem={helpers.setValue}
         deselectItem={() => field.onChange(null)}
       />
-      {meta.touched && meta.error && (
-        <Alert variant="danger" isInline title={meta.error} />
-      )}
     </>
   );
 }

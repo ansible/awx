@@ -8,7 +8,7 @@ import { Split, SplitItem } from '@patternfly/react-core';
 import { CheckboxField } from '../FormField';
 import MultiButtonToggle from '../MultiButtonToggle';
 import { yamlToJson, jsonToYaml, isJsonString } from '../../util/yaml';
-import CodeMirrorInput from './CodeMirrorInput';
+import CodeEditor from './CodeEditor';
 import Popover from '../Popover';
 import { JSON_MODE, YAML_MODE } from './constants';
 
@@ -76,7 +76,7 @@ function VariablesField({
           />
         )}
       </FieldHeader>
-      <CodeMirrorInput
+      <CodeEditor
         mode={mode}
         readOnly={readOnly}
         {...field}

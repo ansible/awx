@@ -4,18 +4,18 @@ import { t } from '@lingui/macro';
 import { arrayOf, func } from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { KebabifiedContext } from '../../contexts/Kebabified';
+import isJobRunning from '../../util/jobs';
 import AlertModal from '../AlertModal';
 import { Job } from '../../types';
 
 function cannotCancelBecausePermissions(job) {
   return (
-    !job.summary_fields.user_capabilities.start &&
-    ['pending', 'waiting', 'running'].includes(job.status)
+    !job.summary_fields.user_capabilities.start && isJobRunning(job.status)
   );
 }
 
 function cannotCancelBecauseNotRunning(job) {
-  return !['pending', 'waiting', 'running'].includes(job.status);
+  return !isJobRunning(job.status);
 }
 
 function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
@@ -115,6 +115,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
         <Tooltip content={renderTooltip()} position="top">
           <div>
             <Button
+              ouiaId="cancel-job-button"
               variant="secondary"
               aria-label={cancelJobText}
               onClick={toggleModal}
@@ -133,6 +134,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
           onClose={toggleModal}
           actions={[
             <Button
+              ouiaId="cancel-job-confirm-button"
               id="cancel-job-confirm-button"
               key="delete"
               variant="danger"
@@ -142,6 +144,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
               {cancelJobText}
             </Button>,
             <Button
+              ouiaId="cancel-job-return-button"
               id="cancel-job-return-button"
               key="cancel"
               variant="secondary"

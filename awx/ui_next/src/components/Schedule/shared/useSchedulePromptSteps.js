@@ -13,29 +13,28 @@ export default function useSchedulePromptSteps(
   schedule,
   resource,
   i18n,
-  scheduleCredentials
+  scheduleCredentials,
+  resourceDefaultCredentials
 ) {
-  const {
-    summary_fields: { credentials: resourceCredentials },
-  } = resource;
   const sourceOfValues =
     (Object.keys(schedule).length > 0 && schedule) || resource;
-
-  sourceOfValues.summary_fields = {
-    credentials: [...(resourceCredentials || []), ...scheduleCredentials],
-    ...sourceOfValues.summary_fields,
-  };
   const { resetForm, values } = useFormikContext();
   const [visited, setVisited] = useState({});
 
   const steps = [
     useInventoryStep(launchConfig, sourceOfValues, i18n, visited),
-    useCredentialsStep(launchConfig, sourceOfValues, i18n),
+    useCredentialsStep(
+      launchConfig,
+      sourceOfValues,
+      resourceDefaultCredentials,
+      i18n
+    ),
     useOtherPromptsStep(launchConfig, sourceOfValues, i18n),
     useSurveyStep(launchConfig, surveyConfig, sourceOfValues, i18n, visited),
   ];
 
   const hasErrors = steps.some(step => step.hasError);
+
   steps.push(
     usePreviewStep(
       launchConfig,
@@ -52,21 +51,61 @@ export default function useSchedulePromptSteps(
   const isReady = !steps.some(s => !s.isReady);
 
   useEffect(() => {
-    let initialValues = {};
     if (launchConfig && surveyConfig && isReady) {
+      let initialValues = {};
       initialValues = steps.reduce((acc, cur) => {
         return {
           ...acc,
           ...cur.initialValues,
         };
       }, {});
+
+      if (launchConfig.ask_credential_on_launch) {
+        const defaultCredsWithoutOverrides = [];
+
+        const credentialHasOverride = templateDefaultCred => {
+          let hasOverride = false;
+          scheduleCredentials.forEach(scheduleCredential => {
+            if (
+              templateDefaultCred.credential_type ===
+              scheduleCredential.credential_type
+            ) {
+              if (
+                (!templateDefaultCred.inputs.vault_id &&
+                  !scheduleCredential.inputs.vault_id) ||
+                (templateDefaultCred.inputs.vault_id &&
+                  scheduleCredential.inputs.vault_id &&
+                  templateDefaultCred.inputs.vault_id ===
+                    scheduleCredential.inputs.vault_id)
+              ) {
+                hasOverride = true;
+              }
+            }
+          });
+
+          return hasOverride;
+        };
+
+        if (resourceDefaultCredentials) {
+          resourceDefaultCredentials.forEach(defaultCred => {
+            if (!credentialHasOverride(defaultCred)) {
+              defaultCredsWithoutOverrides.push(defaultCred);
+            }
+          });
+        }
+
+        initialValues.credentials = scheduleCredentials.concat(
+          defaultCredsWithoutOverrides
+        );
+      }
+
+      resetForm({
+        values: {
+          ...initialValues,
+          ...values,
+        },
+      });
     }
-    resetForm({
-      values: {
-        ...initialValues,
-        ...values,
-      },
-    });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [launchConfig, surveyConfig, isReady]);

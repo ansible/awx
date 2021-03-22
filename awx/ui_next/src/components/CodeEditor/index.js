@@ -1,7 +1,7 @@
-import CodeMirrorInput from './CodeMirrorInput';
+import CodeEditor from './CodeEditor';
 
-export default CodeMirrorInput;
-export { default as CodeMirrorField } from './CodeMirrorField';
+export default CodeEditor;
+export { default as CodeEditorField } from './CodeEditorField';
 export { default as VariablesDetail } from './VariablesDetail';
 export { default as VariablesInput } from './VariablesInput';
 export { default as VariablesField } from './VariablesField';

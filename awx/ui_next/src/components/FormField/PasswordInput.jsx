@@ -36,6 +36,7 @@ function PasswordInput(props) {
         content={inputType === 'password' ? i18n._(t`Show`) : i18n._(t`Hide`)}
       >
         <Button
+          ouiaId={`${id}-toggle`}
           variant={ButtonVariant.control}
           aria-label={i18n._(t`Toggle Password`)}
           onClick={handlePasswordToggle}

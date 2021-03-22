@@ -41,10 +41,17 @@ describe('PromptProjectDetail', () => {
     assertDetail(wrapper, 'Source Control Branch', 'foo');
     assertDetail(wrapper, 'Source Control Refspec', 'refs/');
     assertDetail(wrapper, 'Cache Timeout', '3 Seconds');
-    assertDetail(wrapper, 'Ansible Environment', 'mock virtual env');
     assertDetail(wrapper, 'Project Base Path', 'dir/foo/bar');
     assertDetail(wrapper, 'Playbook Directory', '_6__demo_project');
     assertDetail(wrapper, 'Source Control Credential', 'Scm: mock scm');
+    const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
+    expect(executionEnvironment).toHaveLength(1);
+    expect(executionEnvironment.find('dt').text()).toEqual(
+      'Default Execution Environment'
+    );
+    expect(executionEnvironment.find('dd').text()).toEqual(
+      mockProject.summary_fields.default_environment.name
+    );
     expect(
       wrapper
         .find('Detail[label="Options"]')

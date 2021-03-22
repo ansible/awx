@@ -46,15 +46,9 @@ describe('<InventorySourceForm />', () => {
     const onSubmit = jest.fn();
 
     beforeAll(async () => {
-      const config = {
-        custom_virtualenvs: ['venv/foo', 'venv/bar'],
-      };
       await act(async () => {
         wrapper = mountWithContexts(
-          <InventorySourceForm onCancel={() => {}} onSubmit={onSubmit} />,
-          {
-            context: { config },
-          }
+          <InventorySourceForm onCancel={() => {}} onSubmit={onSubmit} />
         );
       });
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -71,7 +65,7 @@ describe('<InventorySourceForm />', () => {
       expect(wrapper.find('FormGroup[label="Source"]')).toHaveLength(1);
       expect(
         wrapper.find('FormGroup[label="Ansible Environment"]')
-      ).toHaveLength(1);
+      ).toHaveLength(0);
       expect(wrapper.find('ExecutionEnvironmentLookup')).toHaveLength(1);
     });
 

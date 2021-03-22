@@ -25,7 +25,7 @@ import {
 import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
-import { VariablesDetail } from '../../CodeMirrorInput';
+import { VariablesDetail } from '../../CodeEditor';
 import { parseVariableField } from '../../../util/yaml';
 
 const PromptDivider = styled(Divider)`
@@ -393,6 +393,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, i18n, surveyConfig }) {
       <CardActionsRow>
         {summary_fields?.user_capabilities?.edit && (
           <Button
+            ouiaId="schedule-detail-edit-button"
             aria-label={i18n._(t`Edit`)}
             component={Link}
             to={pathname.replace('details', 'edit')}

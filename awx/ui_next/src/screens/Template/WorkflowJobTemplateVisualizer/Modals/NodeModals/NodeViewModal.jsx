@@ -199,6 +199,7 @@ function NodeViewModal({ i18n, readOnly }) {
           ? []
           : [
               <Button
+                ouiaId="node-view-edit-button"
                 id="node-view-edit-button"
                 key="edit"
                 aria-label={i18n._(t`Edit Node`)}

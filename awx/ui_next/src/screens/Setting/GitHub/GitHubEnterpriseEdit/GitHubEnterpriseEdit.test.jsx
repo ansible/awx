@@ -122,7 +122,7 @@ describe('<GitHubEnterpriseEdit />', () => {
           },
         });
       wrapper
-        .find('CodeMirrorInput#SOCIAL_AUTH_GITHUB_ENTERPRISE_ORGANIZATION_MAP')
+        .find('CodeEditor#SOCIAL_AUTH_GITHUB_ENTERPRISE_ORGANIZATION_MAP')
         .invoke('onChange')('{\n"Default":{\n"users":\nfalse\n}\n}');
     });
     wrapper.update();

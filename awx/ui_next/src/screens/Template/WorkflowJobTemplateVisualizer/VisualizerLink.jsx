@@ -94,7 +94,8 @@ function VisualizerLink({
         ];
 
   const handleLinkMouseEnter = () => {
-    ref.current.parentNode.appendChild(ref.current);
+    const startNode = document.getElementById('node-1');
+    ref.current.parentNode.insertBefore(ref.current, startNode);
     setHovering(true);
   };
 

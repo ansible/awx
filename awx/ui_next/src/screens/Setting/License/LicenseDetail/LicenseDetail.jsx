@@ -11,9 +11,9 @@ function LicenseDetail({ i18n }) {
       {i18n._(t`Detail coming soon :)`)}
       <CardActionsRow>
         <Button
+          ouiaId="license-detail-edit-button"
           aria-label={i18n._(t`Edit`)}
           component={Link}
-          ouiaId="edit-button"
           to="/settings/license/edit"
         >
           {i18n._(t`Edit`)}

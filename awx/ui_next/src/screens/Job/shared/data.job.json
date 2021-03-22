@@ -36,6 +36,12 @@
           "organization_id": 1,
           "kind": ""
       },
+      "execution_environment": {
+        "id": 1,
+        "name": "Default EE",
+        "description": "",
+        "image": "quay.io/ansible/awx-ee"
+        },
       "project": {
           "id": 6,
           "name": "Demo Project",
@@ -184,5 +190,6 @@
       "play_count": 1,
       "task_count": 1
   },
-  "custom_virtualenv": "/var/lib/awx/venv/ansible"
+  "custom_virtualenv": "/var/lib/awx/venv/ansible",
+  "execution_environment": 1
 }

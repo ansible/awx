@@ -7,7 +7,7 @@ import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 import FormField, { FormSubmitError } from '../FormField';
 import FormActionGroup from '../FormActionGroup/FormActionGroup';
-import { VariablesField } from '../CodeMirrorInput';
+import { VariablesField } from '../CodeEditor';
 import { InventoryLookup } from '../Lookup';
 import { FormColumnLayout, FormFullWidthLayout } from '../FormLayout';
 import Popover from '../Popover';

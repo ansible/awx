@@ -53,6 +53,16 @@ class Jobs extends RelaunchMixin(Base) {
     }
     return this.http.get(endpoint, { params });
   }
+
+  readEventOptions(id, type = 'playbook') {
+    let endpoint;
+    if (type === 'playbook') {
+      endpoint = `/api/v2${getBaseURL(type)}${id}/job_events/`;
+    } else {
+      endpoint = `/api/v2${getBaseURL(type)}${id}/events/`;
+    }
+    return this.http.options(endpoint);
+  }
 }
 
 export default Jobs;

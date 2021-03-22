@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Host } from '../../../types';
 import { CardBody } from '../../../components/Card';
 import { DetailList } from '../../../components/DetailList';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import useRequest from '../../../util/useRequest';

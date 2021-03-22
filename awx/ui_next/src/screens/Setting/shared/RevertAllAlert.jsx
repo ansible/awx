@@ -14,20 +14,20 @@ function RevertAllAlert({ i18n, onClose, onRevertAll }) {
       ouiaId="revert-all-modal"
       actions={[
         <Button
+          ouiaId="revert-all-confirm-button"
           key="revert"
           variant="primary"
           aria-label={i18n._(t`Confirm revert all`)}
           onClick={onRevertAll}
-          ouiaId="confirm-revert-all-button"
         >
           {i18n._(t`Revert all`)}
         </Button>,
         <Button
+          ouiaId="revert-all-cancel-button"
           key="cancel"
           variant="link"
           aria-label={i18n._(t`Cancel revert`)}
           onClick={onClose}
-          ouiaId="cancel-revert-all-button"
         >
           {i18n._(t`Cancel`)}
         </Button>,

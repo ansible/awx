@@ -100,11 +100,15 @@ describe('<ProjectDetail />', () => {
       'Cache Timeout',
       `${mockProject.scm_update_cache_timeout} Seconds`
     );
-    assertDetail('Ansible Environment', mockProject.custom_virtualenv);
-    assertDetail(
-      'Execution Environment',
+    const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
+    expect(executionEnvironment).toHaveLength(1);
+    expect(executionEnvironment.find('dt').text()).toEqual(
+      'Default Execution Environment'
+    );
+    expect(executionEnvironment.find('dd').text()).toEqual(
       mockProject.summary_fields.default_environment.name
     );
+
     const dateDetails = wrapper.find('UserDateDetail');
     expect(dateDetails).toHaveLength(2);
     expect(dateDetails.at(0).prop('label')).toEqual('Created');

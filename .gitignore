@@ -91,6 +91,9 @@ awx/awx_test.sqlite3-journal
 # Mac OS X
 *.DS_Store
 
+# VSCode
+.vscode/
+
 # Editors
 *.sw[poj]
 *~

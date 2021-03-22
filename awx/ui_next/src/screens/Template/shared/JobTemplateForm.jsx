@@ -29,7 +29,7 @@ import {
   FormCheckboxLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import { VariablesField } from '../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../components/CodeEditor';
 import { required } from '../../../util/validators';
 import { JobTemplate } from '../../../types';
 import {
@@ -154,7 +154,7 @@ function JobTemplateForm({
 
   const handleProjectUpdate = useCallback(
     value => {
-      setFieldValue('playbook', 0);
+      setFieldValue('playbook', '');
       setFieldValue('scm_branch', '');
       setFieldValue('project', value);
     },
@@ -271,7 +271,9 @@ function JobTemplateForm({
           onBlur={() => projectHelpers.setTouched()}
           tooltip={i18n._(t`Select the project containing the playbook
                   you want this job to execute.`)}
-          isValid={!projectMeta.touched || !projectMeta.error}
+          isValid={
+            !projectMeta.touched || !projectMeta.error || projectField.value
+          }
           helperTextInvalid={projectMeta.error}
           onChange={handleProjectUpdate}
           required
@@ -732,7 +734,7 @@ const FormikApp = withFormik({
         i18n._(t`a new webhook key will be generated on save.`).toUpperCase(),
       webhook_credential: template?.summary_fields?.webhook_credential || null,
       execution_environment:
-        template.summary_fields?.execution_environment || '',
+        template.summary_fields?.execution_environment || null,
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {

@@ -2,10 +2,11 @@ import React, { useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 import { useField } from 'formik';
+import { Link } from 'react-router-dom';
 import { FormGroup } from '@patternfly/react-core';
 import { minMaxValue, regExp } from '../../../../util/validators';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
-import { VariablesField } from '../../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../../components/CodeEditor';
 import FormField, { CheckboxField } from '../../../../components/FormField';
 import {
   FormFullWidthLayout,
@@ -108,6 +109,8 @@ export const OptionsField = withI18n()(
   ({ i18n, showProjectUpdate = false }) => {
     const [updateOnLaunchField] = useField('update_on_launch');
     const [, , updateCacheTimeoutHelper] = useField('update_cache_timeout');
+    const [updatedOnProjectUpdateField] = useField('update_on_project_update');
+    const [projectField] = useField('source_project');
 
     useEffect(() => {
       if (!updateOnLaunchField.value) {
@@ -162,22 +165,62 @@ export const OptionsField = withI18n()(
                 }
               />
               <CheckboxField
+                isDisabled={updatedOnProjectUpdateField.value}
                 id="update_on_launch"
                 name="update_on_launch"
                 label={i18n._(t`Update on launch`)}
-                tooltip={i18n._(t`Each time a job runs using this inventory,
+                tooltip={
+                  <>
+                    <div>
+                      {i18n._(t`Each time a job runs using this inventory,
             refresh the inventory from the selected source before
             executing job tasks.`)}
+                    </div>
+                    <br />
+                    {projectField?.value && (
+                      <div>
+                        {i18n._(t`If you want the Inventory Source to update on
+                      launch and on project update, click on Update on launch, and also go to`)}
+                        <Link to={`/projects/${projectField.value.id}/details`}>
+                          {' '}
+                          {projectField.value.name}{' '}
+                        </Link>
+                        {i18n._(t`and click on Update Revision on Launch`)}
+                      </div>
+                    )}
+                  </>
+                }
               />
               {showProjectUpdate && (
                 <CheckboxField
+                  isDisabled={updateOnLaunchField.value}
                   id="update_on_project_update"
                   name="update_on_project_update"
                   label={i18n._(t`Update on project update`)}
-                  tooltip={i18n._(t`After every project update where the SCM revision
+                  tooltip={
+                    <>
+                      <div>
+                        {i18n._(t`After every project update where the SCM revision
               changes, refresh the inventory from the selected source
               before executing job tasks. This is intended for static content,
               like the Ansible inventory .ini file format.`)}
+                      </div>
+                      <br />
+                      {projectField?.value && (
+                        <div>
+                          {i18n._(t`If you want the Inventory Source to update on
+                      launch and on project update, click on Update on launch, and also go to`)}
+                          <Link
+                            to={`/projects/${projectField.value.id}/details`}
+                          >
+                            {' '}
+                            {projectField.value.name}{' '}
+                          </Link>
+                          {i18n._(t`and click on Update Revision on Launch`)}
+                        </div>
+                      )}
+                    </>
+                  }
                 />
               )}
             </FormCheckboxLayout>

@@ -50,6 +50,7 @@ function WorkflowApprovalListApproveButton({ onApprove, selectedItems, i18n }) {
         <Tooltip content={renderTooltip()} position="top">
           <div>
             <Button
+              ouiaId="workflow-approval-approve-button"
               isDisabled={isDisabled}
               aria-label={i18n._(t`Approve`)}
               variant="primary"

@@ -112,6 +112,7 @@ function ApplicationDetails({
         {application.summary_fields.user_capabilities &&
           application.summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="application-details-edit-button"
               component={Link}
               to={`/applications/${application.id}/edit`}
               aria-label={i18n._(t`Edit`)}

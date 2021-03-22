@@ -29,6 +29,7 @@ function AdvancedSearch({
   onSearch,
   searchableKeys,
   relatedSearchableKeys,
+  maxSelectHeight,
 }) {
   // TODO: blocked by pf bug, eventually separate these into two groups in the select
   // for now, I'm spreading set to get rid of duplicate keys...when they are grouped
@@ -91,7 +92,7 @@ function AdvancedSearch({
         selections={prefixSelection}
         isOpen={isPrefixDropdownOpen}
         placeholderText={i18n._(t`Set type`)}
-        maxHeight="500px"
+        maxHeight={maxSelectHeight}
         noResultsFoundText={i18n._(t`No results found`)}
       >
         <SelectOption
@@ -129,7 +130,7 @@ function AdvancedSearch({
         placeholderText={i18n._(t`Key`)}
         isCreatable
         onCreateOption={setKeySelection}
-        maxHeight="500px"
+        maxHeight={maxSelectHeight}
         noResultsFoundText={i18n._(t`No results found`)}
       >
         {allKeys.map(optionKey => (
@@ -149,7 +150,7 @@ function AdvancedSearch({
         selections={lookupSelection}
         isOpen={isLookupDropdownOpen}
         placeholderText={i18n._(t`Lookup type`)}
-        maxHeight="500px"
+        maxHeight={maxSelectHeight}
         noResultsFoundText={i18n._(t`No results found`)}
       >
         <SelectOption
@@ -269,11 +270,13 @@ AdvancedSearch.propTypes = {
   onSearch: PropTypes.func.isRequired,
   searchableKeys: PropTypes.arrayOf(PropTypes.string),
   relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
+  maxSelectHeight: PropTypes.string,
 };
 
 AdvancedSearch.defaultProps = {
   searchableKeys: [],
   relatedSearchableKeys: [],
+  maxSelectHeight: '300px',
 };
 
 export default withI18n()(AdvancedSearch);

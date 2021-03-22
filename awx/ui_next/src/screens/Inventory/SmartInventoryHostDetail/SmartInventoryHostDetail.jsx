@@ -10,7 +10,7 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import Sparkline from '../../../components/Sparkline';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 
 function SmartInventoryHostDetail({ host, i18n }) {
   const {

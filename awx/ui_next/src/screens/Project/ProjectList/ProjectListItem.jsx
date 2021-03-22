@@ -6,7 +6,10 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import { PencilAltIcon } from '@patternfly/react-icons';
+import {
+  PencilAltIcon,
+  ExclamationTriangleIcon as PFExclamationTriangleIcon,
+} from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { formatDateString, timeOfDay } from '../../../util/dates';
@@ -20,6 +23,11 @@ import { Project } from '../../../types';
 
 const Label = styled.span`
   color: var(--pf-global--disabled-color--100);
+`;
+
+const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
+  color: var(--pf-global--warning-color--100);
+  margin-left: 18px;
 `;
 
 function ProjectListItem({
@@ -75,6 +83,9 @@ function ProjectListItem({
 
   const labelId = `check-action-${project.id}`;
 
+  const missingExecutionEnvironment =
+    project.custom_virtualenv && !project.default_environment;
+
   return (
     <Tr id={`${project.id}`}>
       <Td
@@ -86,9 +97,24 @@ function ProjectListItem({
         dataLabel={i18n._(t`Selected`)}
       />
       <Td id={labelId} dataLabel={i18n._(t`Name`)}>
-        <Link id={labelId} to={`${detailUrl}`}>
-          <b>{project.name}</b>
-        </Link>
+        <span>
+          <Link id={labelId} to={`${detailUrl}`}>
+            <b>{project.name}</b>
+          </Link>
+        </span>
+        {missingExecutionEnvironment && (
+          <span>
+            <Tooltip
+              content={i18n._(
+                t`Custom virtual environment ${project.custom_virtualenv} must be replaced by an execution environment.`
+              )}
+              position="right"
+              className="missing-execution-environment"
+            >
+              <ExclamationTriangleIcon />
+            </Tooltip>
+          </span>
+        )}
       </Td>
       <Td dataLabel={i18n._(t`Status`)}>
         {project.summary_fields.last_job && (
@@ -120,6 +146,7 @@ function ProjectListItem({
           stringToCopy={project.scm_revision}
           copyTip={i18n._(t`Copy full revision to clipboard.`)}
           copiedSuccessTip={i18n._(t`Successfully copied to clipboard!`)}
+          ouiaId="copy-revision-button"
         />
       </Td>
       <ActionsTd dataLabel={i18n._(t`Actions`)}>
@@ -134,6 +161,7 @@ function ProjectListItem({
           tooltip={i18n._(t`Edit Project`)}
         >
           <Button
+            ouiaId={`${project.id}-edit-button`}
             isDisabled={isDisabled}
             aria-label={i18n._(t`Edit Project`)}
             variant="plain"

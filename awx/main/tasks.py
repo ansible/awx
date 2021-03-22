@@ -930,10 +930,17 @@ class BaseTask(object):
         '''
         Create a temporary directory for job-related files.
         '''
-        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk, dir=settings.AWX_PROOT_BASE_PATH)
-        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+        pdd_wrapper_path = tempfile.mkdtemp(
+            prefix=f'pdd_wrapper_{instance.pk}_',
+            dir=settings.AWX_PROOT_BASE_PATH
+        )
+        os.chmod(pdd_wrapper_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         if settings.AWX_CLEANUP_PATHS:
-            self.cleanup_paths.append(path)
+            self.cleanup_paths.append(pdd_wrapper_path)
+
+        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk,
+                                dir=pdd_wrapper_path)
+        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         runner_project_folder = os.path.join(path, 'project')
         if not os.path.exists(runner_project_folder):
             # Ansible Runner requires that this directory exists.
@@ -1185,6 +1192,7 @@ class BaseTask(object):
         job_profiling_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
         awx_profiling_dir = '/var/log/tower/playbook_profiling/'
         collections_info = os.path.join(private_data_dir, 'artifacts/', 'collections.json')
+        ansible_version_file = os.path.join(private_data_dir, 'artifacts/', 'ansible_version.txt')
 
         if not os.path.exists(awx_profiling_dir):
             os.mkdir(awx_profiling_dir)
@@ -1195,6 +1203,11 @@ class BaseTask(object):
                 ee_collections_info = json.loads(ee_json_info.read())
                 instance.installed_collections = ee_collections_info
                 instance.save(update_fields=['installed_collections'])
+        if os.path.exists(ansible_version_file):
+            with open(ansible_version_file) as ee_ansible_info:
+                ansible_version_info = ee_ansible_info.readline()
+                instance.ansible_version = ansible_version_info
+                instance.save(update_fields=['ansible_version'])
 
     def event_handler(self, event_data):
         #

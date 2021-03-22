@@ -26,6 +26,7 @@ function Schedule({
   launchConfig,
   surveyConfig,
   hasDaysToKeepField,
+  resourceDefaultCredentials,
 }) {
   const { scheduleId } = useParams();
 
@@ -114,6 +115,7 @@ function Schedule({
               resource={resource}
               launchConfig={launchConfig}
               surveyConfig={surveyConfig}
+              resourceDefaultCredentials={resourceDefaultCredentials}
             />
           </Route>,
           <Route

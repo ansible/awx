@@ -99,6 +99,7 @@ function JobListItem({
               <LaunchButton resource={job}>
                 {({ handleRelaunch }) => (
                   <Button
+                    ouiaId={`${job.id}-relaunch-button`}
                     variant="plain"
                     onClick={handleRelaunch}
                     aria-label={i18n._(t`Relaunch`)}

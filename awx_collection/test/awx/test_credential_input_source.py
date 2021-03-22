@@ -332,3 +332,52 @@ def test_aim_credential_source(run_module, admin_user, organization, source_cred
     assert cis.source_credential.name == source_cred_aim_alt.name
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
+
+
+# Test Centrify Vault secret credential source
+@pytest.fixture
+def source_cred_centrify_secret(organization):
+    # Make a credential type which will be used by the credential
+    ct = CredentialType.defaults['centrify_vault_kv']()
+    ct.save()
+    return Credential.objects.create(
+        name='Centrify vault secret Cred',
+        credential_type=ct,
+        inputs={
+            "url": "https://tenant_id.my.centrify-dev.net",
+            "client_id": "secretuser@tenant",
+            "client_password": "secretuserpassword",
+        }
+    )
+
+
+@pytest.mark.django_db
+def test_centrify_vault_credential_source(run_module, admin_user, organization, source_cred_centrify_secret, silence_deprecation):
+    ct = CredentialType.defaults['ssh']()
+    ct.save()
+    tgt_cred = Credential.objects.create(
+        name='Test Machine Credential',
+        organization=organization,
+        credential_type=ct,
+        inputs={'username': 'bob'}
+    )
+
+    result = run_module('tower_credential_input_source', dict(
+        source_credential=source_cred_centrify_secret.name,
+        target_credential=tgt_cred.name,
+        input_field_name='password',
+        metadata={"system-name": "systemname", "account-name": "accountname"},
+        state='present'
+    ), admin_user)
+
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed'), result
+    assert CredentialInputSource.objects.count() == 1
+    cis = CredentialInputSource.objects.first()
+
+    assert cis.metadata['system-name'] == "systemname"
+    assert cis.metadata['account-name'] == "accountname"
+    assert cis.source_credential.name == source_cred_centrify_secret.name
+    assert cis.target_credential.name == tgt_cred.name
+    assert cis.input_field_name == 'password'
+    assert result['id'] == cis.pk

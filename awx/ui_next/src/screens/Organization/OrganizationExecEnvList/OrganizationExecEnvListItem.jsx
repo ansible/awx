@@ -23,7 +23,7 @@ function OrganizationExecEnvListItem({
     <DataListItem
       key={executionEnvironment.id}
       aria-labelledby={labelId}
-      id={`${executionEnvironment.id} `}
+      id={`${executionEnvironment.id}`}
     >
       <DataListItemRow>
         <DataListItemCells

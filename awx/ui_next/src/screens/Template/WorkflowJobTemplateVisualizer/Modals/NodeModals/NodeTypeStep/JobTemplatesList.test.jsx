@@ -61,21 +61,14 @@ describe('JobTemplatesList', () => {
       );
     });
     wrapper.update();
+    // expect(wrapper.debug()).toBe(false);
     expect(
       wrapper.find('CheckboxListItem[name="Test Job Template"]').props()
         .isSelected
     ).toBe(true);
     expect(
-      wrapper.find('CheckboxListItem[name="Test Job Template"]').props()
-        .isDisabled
-    ).toBe(false);
-    expect(
       wrapper.find('CheckboxListItem[name="Test Job Template 2"]').props()
         .isSelected
-    ).toBe(false);
-    expect(
-      wrapper.find('CheckboxListItem[name="Test Job Template 2"]').props()
-        .isDisabled
     ).toBe(false);
     wrapper
       .find('CheckboxListItem[name="Test Job Template 2"]')
@@ -88,71 +81,6 @@ describe('JobTemplatesList', () => {
       inventory: 1,
       project: 2,
     });
-  });
-  test('Row disabled when job template missing inventory or project', async () => {
-    JobTemplatesAPI.read.mockResolvedValueOnce({
-      data: {
-        count: 2,
-        results: [
-          {
-            id: 1,
-            name: 'Test Job Template',
-            type: 'job_template',
-            url: '/api/v2/job_templates/1',
-            inventory: 1,
-            project: null,
-            ask_inventory_on_launch: false,
-          },
-          {
-            id: 2,
-            name: 'Test Job Template 2',
-            type: 'job_template',
-            url: '/api/v2/job_templates/2',
-            inventory: null,
-            project: 2,
-            ask_inventory_on_launch: false,
-          },
-        ],
-      },
-    });
-    JobTemplatesAPI.readOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: {},
-          POST: {},
-        },
-        related_search_fields: [],
-      },
-    });
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <JobTemplatesList
-          nodeResource={nodeResource}
-          onUpdateNodeResource={onUpdateNodeResource}
-        />
-      );
-    });
-    wrapper.update();
-    expect(
-      wrapper.find('CheckboxListItem[name="Test Job Template"]').props()
-        .isSelected
-    ).toBe(true);
-    expect(
-      wrapper.find('CheckboxListItem[name="Test Job Template"]').props()
-        .isDisabled
-    ).toBe(true);
-    expect(
-      wrapper.find('CheckboxListItem[name="Test Job Template 2"]').props()
-        .isSelected
-    ).toBe(false);
-    expect(
-      wrapper.find('CheckboxListItem[name="Test Job Template 2"]').props()
-        .isDisabled
-    ).toBe(true);
-    wrapper
-      .find('CheckboxListItem[name="Test Job Template 2"]')
-      .simulate('click');
-    expect(onUpdateNodeResource).not.toHaveBeenCalled();
   });
   test('Error shown when read() request errors', async () => {
     JobTemplatesAPI.read.mockRejectedValue(new Error());

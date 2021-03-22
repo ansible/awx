@@ -8,6 +8,7 @@ import { Config } from '../../contexts/Config';
 import { Detail, DeletedDetail } from '../DetailList';
 import CredentialChip from '../CredentialChip';
 import { toTitleCase } from '../../util/strings';
+import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 
 function PromptProjectDetail({ i18n, resource }) {
   const {
@@ -64,6 +65,11 @@ function PromptProjectDetail({ i18n, resource }) {
       ) : (
         <DeletedDetail label={i18n._(t`Organization`)} />
       )}
+      <ExecutionEnvironmentDetail
+        virtualEnvironment={custom_virtualenv}
+        executionEnvironment={summary_fields?.default_environment}
+        isDefaultEnvironment
+      />
       <Detail
         label={i18n._(t`Source Control Type`)}
         value={scm_type === '' ? i18n._(t`Manual`) : toTitleCase(scm_type)}
@@ -87,10 +93,6 @@ function PromptProjectDetail({ i18n, resource }) {
       <Detail
         label={i18n._(t`Cache Timeout`)}
         value={`${scm_update_cache_timeout} ${i18n._(t`Seconds`)}`}
-      />
-      <Detail
-        label={i18n._(t`Ansible Environment`)}
-        value={custom_virtualenv}
       />
       <Config>
         {({ project_base_dir }) => (

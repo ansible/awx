@@ -94,7 +94,7 @@ function UIDetail({ i18n }) {
               aria-label={i18n._(t`Edit`)}
               component={Link}
               to="/settings/ui/edit"
-              ouiaId="edit-button"
+              ouiaId="ui-detail-edit-button"
             >
               {i18n._(t`Edit`)}
             </Button>

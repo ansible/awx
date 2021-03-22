@@ -350,6 +350,7 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="notification-template-detail-edit-button"
               component={Link}
               to={`/notification_templates/${template.id}/edit`}
               aria-label={i18n._(t`Edit`)}

@@ -27,6 +27,7 @@ function ProjectSyncButton({ i18n, projectId }) {
   return (
     <>
       <Button
+        ouiaId={`${projectId}-sync-button`}
         aria-label={i18n._(t`Sync Project`)}
         variant={isDetailsView ? 'secondary' : 'plain'}
         onClick={handleSync}

@@ -40,6 +40,7 @@ function CredentialTypeListItem({
           tooltip={i18n._(t`Edit credential type`)}
         >
           <Button
+            ouiaId={`${credentialType.id}-edit-button`}
             aria-label={i18n._(t`Edit credential type`)}
             variant="plain"
             component={Link}

@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { useHistory, useParams } from 'react-router-dom';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
@@ -56,6 +56,7 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
       <CardActionsRow>
         {user_capabilities?.edit && (
           <Button
+            ouiaId="inventory-group-detail-edit-button"
             variant="primary"
             aria-label={i18n._(t`Edit`)}
             onClick={() =>

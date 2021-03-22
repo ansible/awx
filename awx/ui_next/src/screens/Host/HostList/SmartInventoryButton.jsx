@@ -35,6 +35,7 @@ function SmartInventoryButton({ onClick, i18n, isDisabled }) {
     >
       <div>
         <Button
+          ouiaId="smart-inventory-button"
           onClick={onClick}
           aria-label={i18n._(t`Smart Inventory`)}
           variant="secondary"

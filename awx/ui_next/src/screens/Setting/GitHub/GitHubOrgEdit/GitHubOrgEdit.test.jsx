@@ -113,7 +113,7 @@ describe('<GitHubOrgEdit />', () => {
         target: { value: 'new org', name: 'SOCIAL_AUTH_GITHUB_ORG_NAME' },
       });
       wrapper
-        .find('CodeMirrorInput#SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP')
+        .find('CodeEditor#SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP')
         .invoke('onChange')('{\n"Default":{\n"users":\nfalse\n}\n}');
     });
     wrapper.update();

@@ -1,11 +1,10 @@
-import React, { useEffect, useCallback, useContext } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
 import { func, shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
 import { InventorySourcesAPI } from '../../../api';
-import { ConfigContext } from '../../../contexts/Config';
 import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
 
@@ -18,7 +17,6 @@ import {
   FormColumnLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import Popover from '../../../components/Popover';
 
 import {
   AzureSubForm,
@@ -64,13 +62,6 @@ const InventorySourceFormFields = ({
   ] = useField({
     name: 'execution_environment',
   });
-  const { custom_virtualenvs } = useContext(ConfigContext);
-  const [venvField] = useField('custom_virtualenv');
-  const defaultVenv = {
-    label: i18n._(t`Use Default Ansible Environment`),
-    value: '/var/lib/awx/venv/ansible/',
-    key: 'default',
-  };
 
   const resetSubFormFields = sourceType => {
     if (sourceType === initialValues.source) {
@@ -79,7 +70,6 @@ const InventorySourceFormFields = ({
           ...initialValues,
           name: values.name,
           description: values.description,
-          custom_virtualenv: values.custom_virtualenv,
           source: sourceType,
         },
       });
@@ -161,30 +151,6 @@ const InventorySourceFormFields = ({
           }}
         />
       </FormGroup>
-      {custom_virtualenvs && custom_virtualenvs.length > 1 && (
-        <FormGroup
-          fieldId="custom-virtualenv"
-          label={i18n._(t`Ansible Environment`)}
-          labelIcon={
-            <Popover
-              content={i18n._(t`Select the custom
-            Python virtual environment for this
-            inventory source sync to run on.`)}
-            />
-          }
-        >
-          <AnsibleSelect
-            id="custom-virtualenv"
-            data={[
-              defaultVenv,
-              ...custom_virtualenvs
-                .filter(value => value !== defaultVenv.value)
-                .map(value => ({ value, label: value, key: value })),
-            ]}
-            {...venvField}
-          />
-        </FormGroup>
-      )}
       {!['', 'custom'].includes(sourceField.value) && (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
@@ -272,7 +238,6 @@ const InventorySourceForm = ({
 }) => {
   const initialValues = {
     credential: source?.summary_fields?.credential || null,
-    custom_virtualenv: source?.custom_virtualenv || '',
     description: source?.description || '',
     name: source?.name || '',
     overwrite: source?.overwrite || false,

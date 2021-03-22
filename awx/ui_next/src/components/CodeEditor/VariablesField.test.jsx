@@ -9,7 +9,7 @@ describe('VariablesField', () => {
     document.body.createTextRange = jest.fn();
   });
 
-  it('should render code mirror input', () => {
+  it('should render code editor', () => {
     const value = '---\n';
     const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }}>
@@ -18,12 +18,12 @@ describe('VariablesField', () => {
         )}
       </Formik>
     );
-    const codemirror = wrapper.find('Controlled');
-    expect(codemirror.prop('value')).toEqual(value);
+    const codeEditor = wrapper.find('CodeEditor');
+    expect(codeEditor.prop('value')).toEqual(value);
   });
 
-  it('should render yaml/json toggles', async () => {
-    const value = '---\n';
+  it('should toggle between yaml/json', async () => {
+    const value = '---\nfoo: bar\nbaz: 3';
     const wrapper = mountWithContexts(
       <Formik initialValues={{ variables: value }}>
         {() => (
@@ -39,7 +39,10 @@ describe('VariablesField', () => {
       buttons.at(1).simulate('click');
     });
     wrapper.update();
-    expect(wrapper.find('CodeMirrorInput').prop('mode')).toEqual('javascript');
+    expect(wrapper.find('CodeEditor').prop('mode')).toEqual('javascript');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(
+      '{\n  "foo": "bar",\n  "baz": 3\n}'
+    );
     const buttons2 = wrapper.find('Button');
     expect(buttons2.at(0).prop('variant')).toEqual('secondary');
     expect(buttons2.at(1).prop('variant')).toEqual('primary');
@@ -47,7 +50,10 @@ describe('VariablesField', () => {
       buttons2.at(0).simulate('click');
     });
     wrapper.update();
-    expect(wrapper.find('CodeMirrorInput').prop('mode')).toEqual('yaml');
+    expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(
+      'foo: bar\nbaz: 3\n'
+    );
   });
 
   it('should set Formik error if yaml is invalid', async () => {
@@ -65,10 +71,11 @@ describe('VariablesField', () => {
       .simulate('click');
     wrapper.update();
 
-    const field = wrapper.find('CodeMirrorInput');
+    const field = wrapper.find('CodeEditor');
     expect(field.prop('hasErrors')).toEqual(true);
     expect(wrapper.find('.pf-m-error')).toHaveLength(1);
   });
+
   it('should render tooltip', () => {
     const value = '---\n';
     const wrapper = mountWithContexts(
@@ -102,9 +109,7 @@ describe('VariablesField', () => {
       </Formik>
     );
     await act(async () => {
-      wrapper.find('CodeMirrorInput').invoke('onChange')(
-        '---\nnewval: changed'
-      );
+      wrapper.find('CodeEditor').invoke('onChange')('---\nnewval: changed');
       wrapper.find('form').simulate('submit');
     });
 
@@ -129,6 +134,6 @@ describe('VariablesField', () => {
       </Formik>
     );
 
-    expect(wrapper.find('CodeMirrorInput').prop('mode')).toEqual('javascript');
+    expect(wrapper.find('CodeEditor').prop('mode')).toEqual('javascript');
   });
 });

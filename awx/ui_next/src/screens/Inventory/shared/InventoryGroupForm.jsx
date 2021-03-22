@@ -7,7 +7,7 @@ import { t } from '@lingui/macro';
 import { CardBody } from '../../../components/Card';
 import FormField, { FormSubmitError } from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
-import { VariablesField } from '../../../components/CodeMirrorInput';
+import { VariablesField } from '../../../components/CodeEditor';
 import { required } from '../../../util/validators';
 import {
   FormColumnLayout,
