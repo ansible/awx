@@ -22,6 +22,7 @@ function ScheduleAdd({
   launchConfig,
   surveyConfig,
   hasDaysToKeepField,
+  resourceDefaultCredentials,
 }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
@@ -117,6 +118,7 @@ function ScheduleAdd({
           launchConfig={launchConfig}
           surveyConfig={surveyConfig}
           resource={resource}
+          resourceDefaultCredentials={resourceDefaultCredentials}
         />
       </CardBody>
     </Card>

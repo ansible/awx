@@ -9,17 +9,95 @@ jest.mock('../../../api/models/CredentialTypes');
 jest.mock('../../../api/models/Credentials');
 
 const types = [
-  { id: 1, kind: 'ssh', name: 'SSH' },
-  { id: 2, kind: 'cloud', name: 'Ansible Tower' },
-  { id: 3, kind: 'vault', name: 'Vault' },
+  { id: 1, kind: 'ssh', name: 'SSH', url: '/api/v2/credential_types/1/' },
+  { id: 3, kind: 'vault', name: 'Vault', url: '/api/v2/credential_types/3/' },
+  {
+    id: 5,
+    name: 'Amazon Web Services',
+    kind: 'cloud',
+    url: '/api/v2/credential_types/5/',
+  },
+  {
+    id: 9,
+    name: 'Google Compute Engine',
+    kind: 'cloud',
+    url: '/api/v2/credential_types/9/',
+  },
 ];
 
 const credentials = [
-  { id: 1, kind: 'cloud', name: 'Cred 1', url: 'www.google.com' },
-  { id: 2, kind: 'ssh', name: 'Cred 2', url: 'www.google.com' },
-  { id: 3, kind: 'Ansible', name: 'Cred 3', url: 'www.google.com' },
-  { id: 4, kind: 'Machine', name: 'Cred 4', url: 'www.google.com' },
-  { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
+  {
+    id: 1,
+    kind: 'aws',
+    name: 'Cred 1',
+    credential_type: 5,
+    url: '/api/v2/credentials/1/',
+    inputs: {},
+  },
+  {
+    id: 2,
+    kind: 'ssh',
+    name: 'Cred 2',
+    credential_type: 1,
+    url: '/api/v2/credentials/2/',
+    inputs: {
+      password: 'ASK',
+    },
+  },
+  {
+    id: 3,
+    kind: 'gce',
+    name: 'Cred 3',
+    credential_type: 9,
+    url: '/api/v2/credentials/3/',
+    inputs: {},
+  },
+  {
+    id: 4,
+    kind: 'ssh',
+    name: 'Cred 4',
+    credential_type: 1,
+    url: '/api/v2/credentials/4/',
+    inputs: {},
+  },
+  {
+    id: 5,
+    kind: 'ssh',
+    name: 'Cred 5',
+    credential_type: 1,
+    url: '/api/v2/credentials/5/',
+    inputs: {},
+  },
+  {
+    id: 33,
+    kind: 'vault',
+    name: 'Cred 33',
+    credential_type: 3,
+    url: '/api/v2/credentials/33/',
+    inputs: {
+      vault_id: 'foo',
+    },
+    summary_fields: {
+      credential_type: {
+        name: 'Vault',
+      },
+    },
+  },
+  {
+    id: 34,
+    kind: 'vault',
+    name: 'Cred 34',
+    credential_type: 3,
+    url: '/api/v2/credentials/34/',
+    inputs: {
+      vault_id: 'bar',
+    },
+    summary_fields: {
+      credential_type: {
+        name: 'Vault',
+      },
+    },
+  },
 ];
 
 describe('CredentialsStep', () => {
@@ -47,7 +125,7 @@ describe('CredentialsStep', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik>
-          <CredentialsStep />
+          <CredentialsStep allowCredentialsWithPasswords />
         </Formik>
       );
     });
@@ -62,7 +140,7 @@ describe('CredentialsStep', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik>
-          <CredentialsStep />
+          <CredentialsStep allowCredentialsWithPasswords />
         </Formik>
       );
     });
@@ -76,13 +154,173 @@ describe('CredentialsStep', () => {
     });
 
     await act(async () => {
-      wrapper.find('AnsibleSelect').invoke('onChange')({}, 2);
+      wrapper.find('AnsibleSelect').invoke('onChange')({}, 3);
     });
     expect(CredentialsAPI.read).toHaveBeenCalledWith({
-      credential_type: 2,
+      credential_type: 3,
       order_by: 'name',
       page: 1,
       page_size: 5,
     });
+  });
+
+  test("error should be shown when a credential that prompts for passwords is selected on a step that doesn't allow it", async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik
+          initialValues={{
+            credentials: [],
+          }}
+        >
+          <CredentialsStep allowCredentialsWithPasswords={false} />
+        </Formik>
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('Alert').length).toBe(0);
+    await act(async () => {
+      wrapper
+        .find('input[aria-labelledby="check-action-item-2"]')
+        .simulate('change', { target: { checked: true } });
+    });
+    wrapper.update();
+    expect(wrapper.find('Alert').length).toBe(1);
+    expect(
+      wrapper
+        .find('Alert')
+        .text()
+        .includes('Cred 2')
+    ).toBe(true);
+  });
+
+  test('error should be toggled when default machine credential is removed and then replaced', async () => {
+    let wrapper;
+    const selectedCredentials = [
+      {
+        id: 5,
+        kind: 'ssh',
+        name: 'Cred 5',
+        credential_type: 1,
+        url: '/api/v2/credentials/5/',
+        inputs: {},
+        summary_fields: {
+          credential_type: {
+            name: 'Machine',
+          },
+        },
+      },
+    ];
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik
+          initialValues={{
+            credentials: selectedCredentials,
+          }}
+        >
+          <CredentialsStep
+            allowCredentialsWithPasswords={false}
+            defaultCredentials={selectedCredentials}
+          />
+        </Formik>
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('Alert').length).toBe(0);
+    expect(wrapper.find('CredentialChip').length).toBe(1);
+    await act(async () => {
+      wrapper.find('button#remove_credential-chip-5').simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('Alert').length).toBe(1);
+    expect(
+      wrapper
+        .find('Alert')
+        .text()
+        .includes('Machine')
+    ).toBe(true);
+    await act(async () => {
+      wrapper
+        .find('input[aria-labelledby="check-action-item-5"]')
+        .simulate('change', { target: { checked: true } });
+    });
+    wrapper.update();
+    expect(wrapper.find('Alert').length).toBe(0);
+  });
+
+  test('error should be toggled when default vault credential is removed and then replaced', async () => {
+    let wrapper;
+    const selectedCredentials = [
+      {
+        id: 33,
+        kind: 'vault',
+        name: 'Cred 33',
+        credential_type: 3,
+        url: '/api/v2/credentials/33/',
+        inputs: {
+          vault_id: 'foo',
+        },
+        summary_fields: {
+          credential_type: {
+            name: 'Vault',
+          },
+        },
+      },
+      {
+        id: 34,
+        kind: 'vault',
+        name: 'Cred 34',
+        credential_type: 3,
+        url: '/api/v2/credentials/34/',
+        inputs: {
+          vault_id: 'bar',
+        },
+        summary_fields: {
+          credential_type: {
+            name: 'Vault',
+          },
+        },
+      },
+    ];
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik
+          initialValues={{
+            credentials: selectedCredentials,
+          }}
+        >
+          <CredentialsStep
+            allowCredentialsWithPasswords={false}
+            defaultCredentials={selectedCredentials}
+          />
+        </Formik>
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('Alert').length).toBe(0);
+    expect(wrapper.find('CredentialChip').length).toBe(2);
+    await act(async () => {
+      wrapper.find('button#remove_credential-chip-33').simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('CredentialChip').length).toBe(1);
+    expect(wrapper.find('Alert').length).toBe(1);
+    expect(
+      wrapper
+        .find('Alert')
+        .text()
+        .includes('Vault | foo')
+    ).toBe(true);
+    await act(async () => {
+      wrapper.find('AnsibleSelect').invoke('onChange')({}, 3);
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper
+        .find('input[aria-labelledby="check-action-item-33"]')
+        .simulate('change', { target: { checked: true } });
+    });
+    wrapper.update();
+    expect(wrapper.find('Alert').length).toBe(0);
   });
 });

@@ -6,31 +6,62 @@ import StepName from '../../../../../../components/LaunchPrompt/steps/StepName';
 
 const STEP_ID = 'nodeType';
 
-export default function useNodeTypeStep(i18n) {
+export default function useNodeTypeStep(launchConfig, i18n) {
   const [, meta] = useField('nodeType');
   const [approvalNameField] = useField('approvalName');
   const [nodeTypeField, ,] = useField('nodeType');
-  const [nodeResourceField] = useField('nodeResource');
+  const [nodeResourceField, nodeResourceMeta] = useField({
+    name: 'nodeResource',
+    validate: value => {
+      if (
+        value?.type === 'job_template' &&
+        (!value?.project ||
+          value?.project === null ||
+          ((!value?.inventory || value?.inventory === null) &&
+            !value?.ask_inventory_on_launch))
+      ) {
+        return i18n._(
+          t`Job Templates with a missing inventory or project cannot be selected when creating or editing nodes.  Select another template or fix the missing fields to proceed.`
+        );
+      }
+      return undefined;
+    },
+  });
+
+  const formError = !!meta.error || !!nodeResourceMeta.error;
 
   return {
-    step: getStep(i18n, nodeTypeField, approvalNameField, nodeResourceField),
+    step: getStep(
+      i18n,
+      nodeTypeField,
+      approvalNameField,
+      nodeResourceField,
+      formError
+    ),
     initialValues: getInitialValues(),
     isReady: true,
     contentError: null,
-    hasError: !!meta.error,
+    hasError: formError,
     setTouched: setFieldTouched => {
       setFieldTouched('nodeType', true, false);
     },
     validate: () => {},
   };
 }
-function getStep(i18n, nodeTypeField, approvalNameField, nodeResourceField) {
+function getStep(
+  i18n,
+  nodeTypeField,
+  approvalNameField,
+  nodeResourceField,
+  formError
+) {
   const isEnabled = () => {
     if (
       (nodeTypeField.value !== 'workflow_approval_template' &&
         nodeResourceField.value === null) ||
       (nodeTypeField.value === 'workflow_approval_template' &&
-        approvalNameField.value === undefined)
+        approvalNameField.value === undefined) ||
+      formError
     ) {
       return false;
     }
@@ -39,7 +70,7 @@ function getStep(i18n, nodeTypeField, approvalNameField, nodeResourceField) {
   return {
     id: STEP_ID,
     name: (
-      <StepName hasErrors={false} id="node-type-step">
+      <StepName hasErrors={formError} id="node-type-step">
         {i18n._(t`Node type`)}
       </StepName>
     ),
