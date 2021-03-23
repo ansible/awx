@@ -272,7 +272,7 @@ reports:
 	mkdir -p $@
 
 black: reports
-	(set -o pipefail && $@ $(BLACK_ARGS) --skip-string-normalization --fast --line-length 160 awx awxkit awx_collection | tee reports/$@.report)
+	(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
 
 genschema: reports
 	$(MAKE) swagger PYTEST_ARGS="--genschema --create-db "
