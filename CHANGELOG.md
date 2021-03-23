@@ -27,7 +27,7 @@ To learn more about Ansible Builder and Execution Environments, see: https://www
 ### Other Notable Changes
 
 - Removed `installer` directory.
-  - The Kubernetes installer has been removed in favor of [AWX Operator](https://github.com/ansible/awx-operator).
+  - The Kubernetes installer has been removed in favor of [AWX Operator](https://github.com/ansible/awx-operator).  Official images for Operator-based installs are no longer hosted on Docker Hub, but are instead available on [Quay](https://quay.io/repository/ansible/awx?tab=tags).
   - The "Local Docker" install method has been removed in favor of the development environment. Details can be found at: https://github.com/ansible/awx/blob/devel/tools/docker-compose/README.md
 - Removal of custom virtual environments https://github.com/ansible/awx/pull/9498
   - Custom virtual environments have been replaced by Execution Environments https://github.com/ansible/awx/pull/9570
