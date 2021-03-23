@@ -13,7 +13,6 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
 
-
 logger = logging.getLogger('awx.main.consumers')
 XRF_KEY = '_auth_user_xrf'
 
