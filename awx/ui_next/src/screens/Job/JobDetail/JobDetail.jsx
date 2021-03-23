@@ -25,19 +25,11 @@ import {
 } from '../../../components/LaunchButton';
 import StatusIcon from '../../../components/StatusIcon';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
-import isJobRunning from '../../../util/jobs';
+import { getJobModel, isJobRunning } from '../../../util/jobs';
 import { toTitleCase } from '../../../util/strings';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { formatDateString } from '../../../util/dates';
 import { Job } from '../../../types';
-import {
-  JobsAPI,
-  ProjectUpdatesAPI,
-  SystemJobsAPI,
-  WorkflowJobsAPI,
-  InventoriesAPI,
-  AdHocCommandsAPI,
-} from '../../../api';
 
 const VariablesInput = styled(_VariablesInput)`
   .pf-c-form__label {
@@ -58,16 +50,6 @@ const VERBOSITY = {
   2: '2 (More Verbose)',
   3: '3 (Debug)',
   4: '4 (Connection Debug)',
-};
-
-const getJobModel = type => {
-  if (type === 'ad_hoc_command') return AdHocCommandsAPI;
-  if (type === 'inventory_update') return InventoriesAPI;
-  if (type === 'project_update') return ProjectUpdatesAPI;
-  if (type === 'system_job') return SystemJobsAPI;
-  if (type === 'workflow_job') return WorkflowJobsAPI;
-
-  return JobsAPI;
 };
 
 function JobDetail({ job, i18n }) {

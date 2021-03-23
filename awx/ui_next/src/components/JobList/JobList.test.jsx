@@ -319,13 +319,12 @@ describe('<JobList />', () => {
       wrapper.find('JobListCancelButton').invoke('onCancel')();
     });
 
-    expect(JobsAPI.cancel).toHaveBeenCalledTimes(6);
-    expect(JobsAPI.cancel).toHaveBeenCalledWith(1, 'project_update');
-    expect(JobsAPI.cancel).toHaveBeenCalledWith(2, 'job');
-    expect(JobsAPI.cancel).toHaveBeenCalledWith(3, 'inventory_update');
-    expect(JobsAPI.cancel).toHaveBeenCalledWith(4, 'workflow_job');
-    expect(JobsAPI.cancel).toHaveBeenCalledWith(5, 'system_job');
-    expect(JobsAPI.cancel).toHaveBeenCalledWith(6, 'ad_hoc_command');
+    expect(ProjectUpdatesAPI.cancel).toHaveBeenCalledWith(1);
+    expect(JobsAPI.cancel).toHaveBeenCalledWith(2);
+    expect(InventoryUpdatesAPI.cancel).toHaveBeenCalledWith(3);
+    expect(WorkflowJobsAPI.cancel).toHaveBeenCalledWith(4);
+    expect(SystemJobsAPI.cancel).toHaveBeenCalledWith(5);
+    expect(AdHocCommandsAPI.cancel).toHaveBeenCalledWith(6);
 
     jest.restoreAllMocks();
   });

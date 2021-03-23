@@ -268,7 +268,7 @@ describe('<JobOutput />', () => {
       wrapper.find(searchBtn).simulate('click');
     });
     wrapper.update();
-    expect(JobsAPI.readEvents).toHaveBeenCalledWith(2, undefined, {
+    expect(JobsAPI.readEvents).toHaveBeenCalledWith(2, {
       order_by: 'start_line',
       page: 1,
       page_size: 50,

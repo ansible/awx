@@ -37,7 +37,7 @@ import PageControls from './PageControls';
 import HostEventModal from './HostEventModal';
 import { HostStatusBar, OutputToolbar } from './shared';
 import getRowRangePageSize from './shared/jobOutputUtils';
-import isJobRunning from '../../../util/jobs';
+import { getJobModel, isJobRunning } from '../../../util/jobs';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import {
   encodeNonDefaultQueryString,
@@ -47,14 +47,6 @@ import {
   removeParams,
   getQSConfig,
 } from '../../../util/qs';
-import {
-  JobsAPI,
-  ProjectUpdatesAPI,
-  SystemJobsAPI,
-  WorkflowJobsAPI,
-  InventoriesAPI,
-  AdHocCommandsAPI,
-} from '../../../api';
 
 const QS_CONFIG = getQSConfig('job_output', {
   order_by: 'start_line',
@@ -280,12 +272,7 @@ const cache = new CellMeasurerCache({
   defaultHeight: 25,
 });
 
-function JobOutput({
-  job,
-  type,
-  eventRelatedSearchableKeys,
-  eventSearchableKeys,
-}) {
+function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const location = useLocation();
   const listRef = useRef(null);
   const isMounted = useRef(false);
@@ -348,8 +335,8 @@ function JobOutput({
     request: cancelJob,
   } = useRequest(
     useCallback(async () => {
-      await JobsAPI.cancel(job.id, type);
-    }, [job.id, type]),
+      await getJobModel(job.type).cancel(job.id);
+    }, [job.id, job.type]),
     {}
   );
 
@@ -364,27 +351,10 @@ function JobOutput({
     error: deleteError,
   } = useRequest(
     useCallback(async () => {
-      switch (job.type) {
-        case 'project_update':
-          await ProjectUpdatesAPI.destroy(job.id);
-          break;
-        case 'system_job':
-          await SystemJobsAPI.destroy(job.id);
-          break;
-        case 'workflow_job':
-          await WorkflowJobsAPI.destroy(job.id);
-          break;
-        case 'ad_hoc_command':
-          await AdHocCommandsAPI.destroy(job.id);
-          break;
-        case 'inventory_update':
-          await InventoriesAPI.destroy(job.id);
-          break;
-        default:
-          await JobsAPI.destroy(job.id);
-      }
+      await getJobModel(job.type).destroy(job.id);
+
       history.push('/jobs');
-    }, [job, history])
+    }, [job.type, job.id, history])
   );
 
   const {
@@ -417,7 +387,7 @@ function JobOutput({
     try {
       const {
         data: { results: fetchedEvents = [], count },
-      } = await JobsAPI.readEvents(job.id, type, {
+      } = await getJobModel(job.type).readEvents(job.id, {
         page: 1,
         page_size: 50,
         ...parseQueryString(QS_CONFIG, location.search),
@@ -557,31 +527,33 @@ function JobOutput({
       ...parseQueryString(QS_CONFIG, location.search),
     };
 
-    return JobsAPI.readEvents(job.id, type, params).then(response => {
-      if (isMounted.current) {
-        const newResults = {};
-        let newResultsCssMap = {};
-        response.data.results.forEach((jobEvent, index) => {
-          newResults[firstIndex + index] = jobEvent;
-          const { lineCssMap } = getLineTextHtml(jobEvent);
-          newResultsCssMap = { ...newResultsCssMap, ...lineCssMap };
-        });
-        setResults(prevResults => ({
-          ...prevResults,
-          ...newResults,
-        }));
-        setCssMap(prevCssMap => ({
-          ...prevCssMap,
-          ...newResultsCssMap,
-        }));
-        setCurrentlyLoading(prevCurrentlyLoading =>
-          prevCurrentlyLoading.filter(n => !loadRange.includes(n))
-        );
-        loadRange.forEach(n => {
-          cache.clear(n);
-        });
-      }
-    });
+    return getJobModel(job.type)
+      .readEvents(job.id, params)
+      .then(response => {
+        if (isMounted.current) {
+          const newResults = {};
+          let newResultsCssMap = {};
+          response.data.results.forEach((jobEvent, index) => {
+            newResults[firstIndex + index] = jobEvent;
+            const { lineCssMap } = getLineTextHtml(jobEvent);
+            newResultsCssMap = { ...newResultsCssMap, ...lineCssMap };
+          });
+          setResults(prevResults => ({
+            ...prevResults,
+            ...newResults,
+          }));
+          setCssMap(prevCssMap => ({
+            ...prevCssMap,
+            ...newResultsCssMap,
+          }));
+          setCurrentlyLoading(prevCurrentlyLoading =>
+            prevCurrentlyLoading.filter(n => !loadRange.includes(n))
+          );
+          loadRange.forEach(n => {
+            cache.clear(n);
+          });
+        }
+      });
   };
 
   const scrollToRow = rowIndex => {
