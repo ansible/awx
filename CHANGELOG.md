@@ -2,7 +2,7 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-# 18.0.0 (March 22, 2021)
+# 18.0.0 (March 23, 2021)
 
 **IMPORTANT INSTALL AND UPGRADE NOTES**
 
@@ -31,6 +31,7 @@ To learn more about Ansible Builder and Execution Environments, see: https://www
   - The "Local Docker" install method has been removed in favor of the development environment. Details can be found at: https://github.com/ansible/awx/blob/devel/tools/docker-compose/README.md
 - Removal of custom virtual environments https://github.com/ansible/awx/pull/9498
   - Custom virtual environments have been replaced by Execution Environments https://github.com/ansible/awx/pull/9570
+- The default Container Group Pod definition has changed. All custom Pod specs have been reset. https://github.com/ansible/awx/commit/05ef51f710dad8f8036bc5acee4097db4adc0d71
 - Added user interface for the activity stream: https://github.com/ansible/awx/pull/9083
 - Converted many of the top-level list views (Jobs, Teams, Hosts, Inventories, Projects, and more) to a new, permanent table component for substantially increased responsiveness, usability, maintainability, and other 'ility's: https://github.com/ansible/awx/pull/8970, https://github.com/ansible/awx/pull/9182 and many others!
 - Added click-to-expand details for job tables
