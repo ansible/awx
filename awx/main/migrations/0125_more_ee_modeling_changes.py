@@ -26,18 +26,43 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='execution_environment_admin_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role='admin_role', related_name='+', to='main.Role'),
+            field=awx.main.fields.ImplicitRoleField(
+                editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role='admin_role', related_name='+', to='main.Role'
+            ),
             preserve_default='True',
         ),
         migrations.AddField(
             model_name='project',
             name='default_environment',
-            field=models.ForeignKey(blank=True, default=None, help_text='The default execution environment for jobs run using this project.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='main.ExecutionEnvironment'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                help_text='The default execution environment for jobs run using this project.',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='+',
+                to='main.ExecutionEnvironment',
+            ),
         ),
         migrations.AlterField(
             model_name='credentialtype',
             name='kind',
-            field=models.CharField(choices=[('ssh', 'Machine'), ('vault', 'Vault'), ('net', 'Network'), ('scm', 'Source Control'), ('cloud', 'Cloud'), ('registry', 'Container Registry'), ('token', 'Personal Access Token'), ('insights', 'Insights'), ('external', 'External'), ('kubernetes', 'Kubernetes'), ('galaxy', 'Galaxy/Automation Hub')], max_length=32),
+            field=models.CharField(
+                choices=[
+                    ('ssh', 'Machine'),
+                    ('vault', 'Vault'),
+                    ('net', 'Network'),
+                    ('scm', 'Source Control'),
+                    ('cloud', 'Cloud'),
+                    ('registry', 'Container Registry'),
+                    ('token', 'Personal Access Token'),
+                    ('insights', 'Insights'),
+                    ('external', 'External'),
+                    ('kubernetes', 'Kubernetes'),
+                    ('galaxy', 'Galaxy/Automation Hub'),
+                ],
+                max_length=32,
+            ),
         ),
         migrations.AlterUniqueTogether(
             name='executionenvironment',

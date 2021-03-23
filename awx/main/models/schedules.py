@@ -35,7 +35,6 @@ UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
 
 
 class ScheduleFilterMethods(object):
-
     def enabled(self, enabled=True):
         return self.filter(enabled=enabled)
 
@@ -62,7 +61,6 @@ class ScheduleManager(ScheduleFilterMethods, models.Manager):
 
 
 class Schedule(PrimordialModel, LaunchTimeConfig):
-
     class Meta:
         app_label = 'main'
         ordering = ['-next_run']
@@ -78,32 +76,13 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     name = models.CharField(
         max_length=512,
     )
-    enabled = models.BooleanField(
-        default=True,
-        help_text=_("Enables processing of this schedule.")
-    )
-    dtstart = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
-        help_text=_("The first occurrence of the schedule occurs on or after this time.")
-    )
+    enabled = models.BooleanField(default=True, help_text=_("Enables processing of this schedule."))
+    dtstart = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The first occurrence of the schedule occurs on or after this time."))
     dtend = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
-        help_text=_("The last occurrence of the schedule occurs before this time, aftewards the schedule expires.")
+        null=True, default=None, editable=False, help_text=_("The last occurrence of the schedule occurs before this time, aftewards the schedule expires.")
     )
-    rrule = models.CharField(
-        max_length=255,
-        help_text=_("A value representing the schedules iCal recurrence rule.")
-    )
-    next_run = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
-        help_text=_("The next time that the scheduled action will run.")
-    )
+    rrule = models.CharField(max_length=255, help_text=_("A value representing the schedules iCal recurrence rule."))
+    next_run = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The next time that the scheduled action will run."))
 
     @classmethod
     def get_zoneinfo(self):
@@ -113,7 +92,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     def timezone(self):
         utc = tzutc()
         all_zones = Schedule.get_zoneinfo()
-        all_zones.sort(key = lambda x: -len(x))
+        all_zones.sort(key=lambda x: -len(x))
         for r in Schedule.rrulestr(self.rrule)._rrule:
             if r._dtstart:
                 tzinfo = r._dtstart.tzinfo
@@ -169,17 +148,11 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                 # What is the DTSTART timezone for:
                 # DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000Z
                 # local_tz = tzfile('/usr/share/zoneinfo/America/New_York')
-                local_tz = dateutil.rrule.rrulestr(
-                    rrule.replace(naive_until, naive_until + 'Z'),
-                    tzinfos=UTC_TIMEZONES
-                )._dtstart.tzinfo
+                local_tz = dateutil.rrule.rrulestr(rrule.replace(naive_until, naive_until + 'Z'), tzinfos=UTC_TIMEZONES)._dtstart.tzinfo
 
                 # Make a datetime object with tzinfo=<the DTSTART timezone>
                 # localized_until = datetime.datetime(2020, 6, 1, 17, 0, tzinfo=tzfile('/usr/share/zoneinfo/America/New_York'))
-                localized_until = make_aware(
-                    datetime.datetime.strptime(re.sub('^UNTIL=', '', naive_until), "%Y%m%dT%H%M%S"),
-                    local_tz
-                )
+                localized_until = make_aware(datetime.datetime.strptime(re.sub('^UNTIL=', '', naive_until), "%Y%m%dT%H%M%S"), local_tz)
 
                 # Coerce the datetime to UTC and format it as a string w/ Zulu format
                 # utc_until = UNTIL=20200601T220000Z
@@ -201,15 +174,9 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
 
         for r in x._rrule:
             if r._dtstart and r._dtstart.tzinfo is None:
-                raise ValueError(
-                    'A valid TZID must be provided (e.g., America/New_York)'
-                )
+                raise ValueError('A valid TZID must be provided (e.g., America/New_York)')
 
-        if (
-            fast_forward and
-            ('MINUTELY' in rrule or 'HOURLY' in rrule) and
-            'COUNT=' not in rrule
-        ):
+        if fast_forward and ('MINUTELY' in rrule or 'HOURLY' in rrule) and 'COUNT=' not in rrule:
             try:
                 first_event = x[0]
                 # If the first event was over a week ago...

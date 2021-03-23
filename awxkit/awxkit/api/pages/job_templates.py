@@ -1,13 +1,6 @@
 import json
 
-from awxkit.utils import (
-    filter_by_class,
-    not_provided,
-    random_title,
-    suppress,
-    update_payload,
-    set_payload_foreign_key_args,
-    PseudoNamespace)
+from awxkit.utils import filter_by_class, not_provided, random_title, suppress, update_payload, set_payload_foreign_key_args, PseudoNamespace
 from awxkit.api.pages import Credential, Inventory, Project, UnifiedJobTemplate
 from awxkit.api.mixins import HasCreate, HasInstanceGroups, HasNotifications, HasSurvey, HasCopy, DSAdapter
 from awxkit.api.resources import resources
@@ -16,13 +9,7 @@ from . import base
 from . import page
 
 
-class JobTemplate(
-        HasCopy,
-        HasCreate,
-        HasInstanceGroups,
-        HasNotifications,
-        HasSurvey,
-        UnifiedJobTemplate):
+class JobTemplate(HasCopy, HasCreate, HasInstanceGroups, HasNotifications, HasSurvey, UnifiedJobTemplate):
 
     optional_dependencies = [Inventory, Credential, Project]
     NATURAL_KEY = ('organization', 'name')
@@ -38,16 +25,13 @@ class JobTemplate(
         # return job
         if result.json['type'] == 'job':
             jobs_pg = self.get_related('jobs', id=result.json['job'])
-            assert jobs_pg.count == 1, \
-                "job_template launched (id:%s) but job not found in response at %s/jobs/" % \
-                (result.json['job'], self.url)
+            assert jobs_pg.count == 1, "job_template launched (id:%s) but job not found in response at %s/jobs/" % (result.json['job'], self.url)
             return jobs_pg.results[0]
         elif result.json['type'] == 'workflow_job':
-            slice_workflow_jobs = self.get_related(
-                'slice_workflow_jobs', id=result.json['id'])
-            assert slice_workflow_jobs.count == 1, (
-                "job_template launched sliced job (id:%s) but not found in related %s/slice_workflow_jobs/" %
-                (result.json['id'], self.url)
+            slice_workflow_jobs = self.get_related('slice_workflow_jobs', id=result.json['id'])
+            assert slice_workflow_jobs.count == 1, "job_template launched sliced job (id:%s) but not found in related %s/slice_workflow_jobs/" % (
+                result.json['id'],
+                self.url,
             )
             return slice_workflow_jobs.results[0]
         else:
@@ -56,10 +40,7 @@ class JobTemplate(
     def payload(self, job_type='run', playbook='ping.yml', **kwargs):
         name = kwargs.get('name') or 'JobTemplate - {}'.format(random_title())
         description = kwargs.get('description') or random_title(10)
-        payload = PseudoNamespace(
-            name=name,
-            description=description,
-            job_type=job_type)
+        payload = PseudoNamespace(name=name, description=description, job_type=job_type)
 
         optional_fields = (
             'ask_scm_branch_on_launch',
@@ -90,7 +71,8 @@ class JobTemplate(
             'job_slice_count',
             'webhook_service',
             'webhook_credential',
-            'scm_branch')
+            'scm_branch',
+        )
 
         update_payload(payload, optional_fields, kwargs)
 
@@ -113,94 +95,53 @@ class JobTemplate(
         with suppress(exc.NoContent):
             self.related.labels.post(label)
 
-    def create_payload(
-            self,
-            name='',
-            description='',
-            job_type='run',
-            playbook='ping.yml',
-            credential=Credential,
-            inventory=Inventory,
-            project=None,
-            **kwargs):
+    def create_payload(self, name='', description='', job_type='run', playbook='ping.yml', credential=Credential, inventory=Inventory, project=None, **kwargs):
         if not project:
             project = Project
         if not inventory and not kwargs.get('ask_inventory_on_launch', False):
             inventory = Inventory
 
-        self.create_and_update_dependencies(
-            *
-            filter_by_class(
-                (credential,
-                 Credential),
-                (inventory,
-                 Inventory),
-                (project,
-                 Project)))
+        self.create_and_update_dependencies(*filter_by_class((credential, Credential), (inventory, Inventory), (project, Project)))
         project = self.ds.project if project else None
         inventory = self.ds.inventory if inventory else None
         credential = self.ds.credential if credential else None
 
         payload = self.payload(
-            name=name,
-            description=description,
-            job_type=job_type,
-            playbook=playbook,
-            credential=credential,
-            inventory=inventory,
-            project=project,
-            **kwargs)
+            name=name, description=description, job_type=job_type, playbook=playbook, credential=credential, inventory=inventory, project=project, **kwargs
+        )
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload, credential
 
-    def create(
-            self,
-            name='',
-            description='',
-            job_type='run',
-            playbook='ping.yml',
-            credential=Credential,
-            inventory=Inventory,
-            project=None,
-            **kwargs):
-        payload, credential = self.create_payload(name=name, description=description, job_type=job_type,
-                                                  playbook=playbook, credential=credential, inventory=inventory,
-                                                  project=project, **kwargs)
-        ret = self.update_identity(
-            JobTemplates(
-                self.connection).post(payload))
+    def create(self, name='', description='', job_type='run', playbook='ping.yml', credential=Credential, inventory=Inventory, project=None, **kwargs):
+        payload, credential = self.create_payload(
+            name=name, description=description, job_type=job_type, playbook=playbook, credential=credential, inventory=inventory, project=project, **kwargs
+        )
+        ret = self.update_identity(JobTemplates(self.connection).post(payload))
         if credential:
             with suppress(exc.NoContent):
                 self.related.credentials.post(dict(id=credential.id))
         if 'vault_credential' in kwargs:
             with suppress(exc.NoContent):
                 if not isinstance(kwargs['vault_credential'], int):
-                    raise ValueError(
-                        "Expected 'vault_credential' value to be an integer, the id of the desired vault credential")
-                self.related.credentials.post(
-                    dict(id=kwargs['vault_credential']))
+                    raise ValueError("Expected 'vault_credential' value to be an integer, the id of the desired vault credential")
+                self.related.credentials.post(dict(id=kwargs['vault_credential']))
         return ret
 
     def add_credential(self, credential):
         with suppress(exc.NoContent):
-            self.related.credentials.post(
-                dict(id=credential.id, associate=True))
+            self.related.credentials.post(dict(id=credential.id, associate=True))
 
     def remove_credential(self, credential):
         with suppress(exc.NoContent):
-            self.related.credentials.post(
-                dict(id=credential.id, disassociate=True))
+            self.related.credentials.post(dict(id=credential.id, disassociate=True))
 
     def remove_all_credentials(self):
         for cred in self.related.credentials.get().results:
             with suppress(exc.NoContent):
-                self.related.credentials.post(
-                    dict(id=cred.id, disassociate=True))
+                self.related.credentials.post(dict(id=cred.id, disassociate=True))
 
 
-page.register_page([resources.job_template,
-                    (resources.job_templates, 'post'),
-                    (resources.job_template_copy, 'post')], JobTemplate)
+page.register_page([resources.job_template, (resources.job_templates, 'post'), (resources.job_template_copy, 'post')], JobTemplate)
 
 
 class JobTemplates(page.PageList, JobTemplate):
@@ -208,8 +149,7 @@ class JobTemplates(page.PageList, JobTemplate):
     pass
 
 
-page.register_page([resources.job_templates,
-                    resources.related_job_templates], JobTemplates)
+page.register_page([resources.job_templates, resources.related_job_templates], JobTemplates)
 
 
 class JobTemplateCallback(base.Base):

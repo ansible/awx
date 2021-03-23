@@ -16,7 +16,4 @@ class ActiveJobConflict(ValidationError):
         # turn everything in self.detail into string by using force_text.
         # Declare detail afterwards circumvent this behavior.
         super(ActiveJobConflict, self).__init__()
-        self.detail = {
-            "error": _("Resource is being used by running jobs."),
-            "active_jobs": active_jobs
-        }
+        self.detail = {"error": _("Resource is being used by running jobs."), "active_jobs": active_jobs}

@@ -16,7 +16,6 @@ def handle_custom_actions(resource, action, page):
 
 
 class CustomActionRegistryMeta(CustomRegistryMeta):
-
     @property
     def name(self):
         return ' '.join([self.resource, self.action])
@@ -45,33 +44,16 @@ class CustomAction(metaclass=CustomActionRegistryMeta):
 
 
 class Launchable(object):
-
     def add_arguments(self, parser, resource_options_parser, with_pk=True):
         from .options import pk_or_name
-        if with_pk:
-            parser.choices[self.action].add_argument(
-                'id',
-                type=functools.partial(
-                    pk_or_name, None, self.resource, page=self.page
-                ),
-                help=''
-            )
-        parser.choices[self.action].add_argument(
-            '--monitor', action='store_true',
-            help='If set, prints stdout of the launched job until it finishes.'
-        )
-        parser.choices[self.action].add_argument(
-            '--timeout', type=int,
-            help='If set with --monitor or --wait, time out waiting on job completion.'  # noqa
-        )
-        parser.choices[self.action].add_argument(
-            '--wait', action='store_true',
-            help='If set, waits until the launched job finishes.'
-        )
 
-        launch_time_options = self.page.connection.options(
-            self.page.endpoint + '1/{}/'.format(self.action)
-        )
+        if with_pk:
+            parser.choices[self.action].add_argument('id', type=functools.partial(pk_or_name, None, self.resource, page=self.page), help='')
+        parser.choices[self.action].add_argument('--monitor', action='store_true', help='If set, prints stdout of the launched job until it finishes.')
+        parser.choices[self.action].add_argument('--timeout', type=int, help='If set with --monitor or --wait, time out waiting on job completion.')  # noqa
+        parser.choices[self.action].add_argument('--wait', action='store_true', help='If set, waits until the launched job finishes.')
+
+        launch_time_options = self.page.connection.options(self.page.endpoint + '1/{}/'.format(self.action))
         if launch_time_options.ok:
             launch_time_options = launch_time_options.json()['actions']['POST']
             resource_options_parser.options['LAUNCH'] = launch_time_options
@@ -118,24 +100,15 @@ class ProjectCreate(CustomAction):
     resource = 'projects'
 
     def add_arguments(self, parser, resource_options_parser):
-        parser.choices[self.action].add_argument(
-            '--monitor', action='store_true',
-            help=('If set, prints stdout of the project update until '
-                  'it finishes.')
-        )
-        parser.choices[self.action].add_argument(
-            '--wait', action='store_true',
-            help='If set, waits until the new project has updated.'
-        )
+        parser.choices[self.action].add_argument('--monitor', action='store_true', help=('If set, prints stdout of the project update until ' 'it finishes.'))
+        parser.choices[self.action].add_argument('--wait', action='store_true', help='If set, waits until the new project has updated.')
 
     def post(self, kwargs):
         should_monitor = kwargs.pop('monitor', False)
         wait = kwargs.pop('wait', False)
         response = self.page.post(kwargs)
         if should_monitor or wait:
-            update = response.related.project_updates.get(
-                order_by='-created'
-            ).results[0]
+            update = response.related.project_updates.get(order_by='-created').results[0]
             monitor(
                 update,
                 self.page.connection.session,
@@ -154,9 +127,7 @@ class AdhocCommandLaunch(Launchable, CustomAction):
     resource = 'ad_hoc_commands'
 
     def add_arguments(self, parser, resource_options_parser):
-        Launchable.add_arguments(
-            self, parser, resource_options_parser, with_pk=False
-        )
+        Launchable.add_arguments(self, parser, resource_options_parser, with_pk=False)
 
     def perform(self, **kwargs):
         monitor_kwargs = {
@@ -182,22 +153,14 @@ class HasStdout(object):
 
     def add_arguments(self, parser, resource_options_parser):
         from .options import pk_or_name
-        parser.choices['stdout'].add_argument(
-            'id',
-            type=functools.partial(
-                pk_or_name, None, self.resource, page=self.page
-            ),
-            help=''
-        )
+
+        parser.choices['stdout'].add_argument('id', type=functools.partial(pk_or_name, None, self.resource, page=self.page), help='')
 
     def perform(self):
         fmt = 'txt_download'
         if color_enabled():
             fmt = 'ansi_download'
-        return self.page.connection.get(
-            self.page.get().related.stdout,
-            query_parameters=dict(format=fmt)
-        ).content.decode('utf-8')
+        return self.page.connection.get(self.page.get().related.stdout, query_parameters=dict(format=fmt)).content.decode('utf-8')
 
 
 class JobStdout(HasStdout, CustomAction):
@@ -222,13 +185,8 @@ class AssociationMixin(object):
 
     def add_arguments(self, parser, resource_options_parser):
         from .options import pk_or_name
-        parser.choices[self.action].add_argument(
-            'id',
-            type=functools.partial(
-                pk_or_name, None, self.resource, page=self.page
-            ),
-            help=''
-        )
+
+        parser.choices[self.action].add_argument('id', type=functools.partial(pk_or_name, None, self.resource, page=self.page), help='')
         group = parser.choices[self.action].add_mutually_exclusive_group(required=True)
         for param, endpoint in self.targets.items():
             field, model_name = endpoint
@@ -237,7 +195,6 @@ class AssociationMixin(object):
             help_text = 'The ID (or name) of the {} to {}'.format(model_name, self.action)
 
             class related_page(object):
-
                 def __init__(self, connection, resource):
                     self.conn = connection
                     self.resource = {
@@ -256,20 +213,15 @@ class AssociationMixin(object):
             group.add_argument(
                 '--{}'.format(param),
                 metavar='',
-                type=functools.partial(
-                    pk_or_name, None, param,
-                    page=related_page(self.page.connection, param)
-                ),
-                help=help_text
+                type=functools.partial(pk_or_name, None, param, page=related_page(self.page.connection, param)),
+                help=help_text,
             )
 
     def perform(self, **kwargs):
         for k, v in kwargs.items():
             endpoint, _ = self.targets[k]
             try:
-                self.page.get().related[endpoint].post(
-                    {'id': v, self.action: True}
-                )
+                self.page.get().related[endpoint].post({'id': v, self.action: True})
             except NoContent:
                 # we expect to enter this block because these endpoints return
                 # HTTP 204 on success
@@ -279,18 +231,9 @@ class AssociationMixin(object):
 
 class NotificationAssociateMixin(AssociationMixin):
     targets = {
-        'start_notification': [
-            'notification_templates_started',
-            'notification_template'
-        ],
-        'success_notification': [
-            'notification_templates_success',
-            'notification_template'
-        ],
-        'failure_notification': [
-            'notification_templates_error',
-            'notification_template'
-        ],
+        'start_notification': ['notification_templates_started', 'notification_template'],
+        'success_notification': ['notification_templates_success', 'notification_template'],
+        'failure_notification': ['notification_templates_error', 'notification_template'],
     }
 
 
@@ -306,12 +249,16 @@ class JobTemplateNotificationDisAssociation(NotificationAssociateMixin, CustomAc
     targets = NotificationAssociateMixin.targets.copy()
 
 
-JobTemplateNotificationAssociation.targets.update({
-    'credential': ['credentials', None],
-})
-JobTemplateNotificationDisAssociation.targets.update({
-    'credential': ['credentials', None],
-})
+JobTemplateNotificationAssociation.targets.update(
+    {
+        'credential': ['credentials', None],
+    }
+)
+JobTemplateNotificationDisAssociation.targets.update(
+    {
+        'credential': ['credentials', None],
+    }
+)
 
 
 class WorkflowJobTemplateNotificationAssociation(NotificationAssociateMixin, CustomAction):
@@ -326,12 +273,16 @@ class WorkflowJobTemplateNotificationDisAssociation(NotificationAssociateMixin, 
     targets = NotificationAssociateMixin.targets.copy()
 
 
-WorkflowJobTemplateNotificationAssociation.targets.update({
-    'approval_notification': ['notification_templates_approvals', 'notification_template'],
-})
-WorkflowJobTemplateNotificationDisAssociation.targets.update({
-    'approval_notification': ['notification_templates_approvals', 'notification_template'],
-})
+WorkflowJobTemplateNotificationAssociation.targets.update(
+    {
+        'approval_notification': ['notification_templates_approvals', 'notification_template'],
+    }
+)
+WorkflowJobTemplateNotificationDisAssociation.targets.update(
+    {
+        'approval_notification': ['notification_templates_approvals', 'notification_template'],
+    }
+)
 
 
 class ProjectNotificationAssociation(NotificationAssociateMixin, CustomAction):
@@ -366,14 +317,18 @@ class OrganizationNotificationDisAssociation(NotificationAssociateMixin, CustomA
     targets = NotificationAssociateMixin.targets.copy()
 
 
-OrganizationNotificationAssociation.targets.update({
-    'approval_notification': ['notification_templates_approvals', 'notification_template'],
-    'galaxy_credential': ['galaxy_credentials', 'credential'],
-})
-OrganizationNotificationDisAssociation.targets.update({
-    'approval_notification': ['notification_templates_approvals', 'notification_template'],
-    'galaxy_credential': ['galaxy_credentials', 'credential'],
-})
+OrganizationNotificationAssociation.targets.update(
+    {
+        'approval_notification': ['notification_templates_approvals', 'notification_template'],
+        'galaxy_credential': ['galaxy_credentials', 'credential'],
+    }
+)
+OrganizationNotificationDisAssociation.targets.update(
+    {
+        'approval_notification': ['notification_templates_approvals', 'notification_template'],
+        'galaxy_credential': ['galaxy_credentials', 'credential'],
+    }
+)
 
 
 class SettingsList(CustomAction):
@@ -381,9 +336,7 @@ class SettingsList(CustomAction):
     resource = 'settings'
 
     def add_arguments(self, parser, resource_options_parser):
-        parser.choices['list'].add_argument(
-            '--slug', help='optional setting category/slug', default='all'
-        )
+        parser.choices['list'].add_argument('--slug', help='optional setting category/slug', default='all')
 
     def perform(self, slug):
         self.page.endpoint = self.page.endpoint + '{}/'.format(slug)
@@ -409,30 +362,18 @@ class RoleMixin(object):
 
         if not RoleMixin.roles:
             for resource, flag in self.has_roles:
-                options = self.page.__class__(
-                    self.page.endpoint.replace(self.resource, resource),
-                    self.page.connection
-                ).options()
-                RoleMixin.roles[flag] = [
-                    role.replace('_role', '')
-                    for role in options.json.get('object_roles', [])
-                ]
+                options = self.page.__class__(self.page.endpoint.replace(self.resource, resource), self.page.connection).options()
+                RoleMixin.roles[flag] = [role.replace('_role', '') for role in options.json.get('object_roles', [])]
 
         possible_roles = set()
         for v in RoleMixin.roles.values():
             possible_roles.update(v)
 
-        resource_group = parser.choices[self.action].add_mutually_exclusive_group(
-            required=True
-        )
+        resource_group = parser.choices[self.action].add_mutually_exclusive_group(required=True)
         parser.choices[self.action].add_argument(
             'id',
-            type=functools.partial(
-                pk_or_name, None, self.resource, page=self.page
-            ),
-            help='The ID (or name) of the {} to {} access to/from'.format(
-                self.resource, self.action
-            )
+            type=functools.partial(pk_or_name, None, self.resource, page=self.page),
+            help='The ID (or name) of the {} to {} access to/from'.format(self.resource, self.action),
         )
         for _type in RoleMixin.roles.keys():
             if _type == 'team' and self.resource == 'team':
@@ -440,7 +381,6 @@ class RoleMixin(object):
                 continue
 
             class related_page(object):
-
                 def __init__(self, connection, resource):
                     self.conn = connection
                     if resource == 'inventories':
@@ -453,19 +393,12 @@ class RoleMixin(object):
 
             resource_group.add_argument(
                 '--{}'.format(_type),
-                type=functools.partial(
-                    pk_or_name, None, _type,
-                    page=related_page(
-                        self.page.connection,
-                        dict((v, k) for k, v in self.has_roles)[_type]
-                    )
-                ),
+                type=functools.partial(pk_or_name, None, _type, page=related_page(self.page.connection, dict((v, k) for k, v in self.has_roles)[_type])),
                 metavar='ID',
                 help='The ID (or name) of the target {}'.format(_type),
             )
         parser.choices[self.action].add_argument(
-            '--role', type=str, choices=possible_roles, required=True,
-            help='The name of the role to {}'.format(self.action)
+            '--role', type=str, choices=possible_roles, required=True, help='The name of the role to {}'.format(self.action)
         )
 
     def perform(self, **kwargs):
@@ -474,17 +407,10 @@ class RoleMixin(object):
                 role = kwargs['role']
                 if role not in RoleMixin.roles[flag]:
                     options = ', '.join(RoleMixin.roles[flag])
-                    raise ValueError(
-                        "invalid choice: '{}' must be one of {}".format(
-                            role, options
-                        )
-                    )
+                    raise ValueError("invalid choice: '{}' must be one of {}".format(role, options))
                 value = kwargs[flag]
                 target = '/api/v2/{}/{}'.format(resource, value)
-                detail = self.page.__class__(
-                    target,
-                    self.page.connection
-                ).get()
+                detail = self.page.__class__(target, self.page.connection).get()
                 object_roles = detail['summary_fields']['object_roles']
                 actual_role = object_roles[role + '_role']
                 params = {'id': actual_role['id']}
@@ -530,15 +456,8 @@ class SettingsModify(CustomAction):
     resource = 'settings'
 
     def add_arguments(self, parser, resource_options_parser):
-        options = self.page.__class__(
-            self.page.endpoint + 'all/', self.page.connection
-        ).options()
-        parser.choices['modify'].add_argument(
-            'key',
-            choices=sorted(options['actions']['PUT'].keys()),
-            metavar='key',
-            help=''
-        )
+        options = self.page.__class__(self.page.endpoint + 'all/', self.page.connection).options()
+        parser.choices['modify'].add_argument('key', choices=sorted(options['actions']['PUT'].keys()), metavar='key', help='')
         parser.choices['modify'].add_argument('value', help='')
 
     def perform(self, key, value):
@@ -563,13 +482,8 @@ class HasMonitor(object):
 
     def add_arguments(self, parser, resource_options_parser):
         from .options import pk_or_name
-        parser.choices[self.action].add_argument(
-            'id',
-            type=functools.partial(
-                pk_or_name, None, self.resource, page=self.page
-            ),
-            help=''
-        )
+
+        parser.choices[self.action].add_argument('id', type=functools.partial(pk_or_name, None, self.resource, page=self.page), help='')
 
     def perform(self, **kwargs):
         response = self.page.get()

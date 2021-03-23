@@ -8,6 +8,7 @@ import django.db.models.deletion
 import oauth2_provider
 import re
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -21,15 +22,28 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-
         migrations.CreateModel(
             name='OAuth2Application',
             fields=[
                 ('id', models.BigAutoField(primary_key=True, serialize=False)),
                 ('client_id', models.CharField(db_index=True, default=oauth2_provider.generators.generate_client_id, max_length=100, unique=True)),
-                ('redirect_uris', models.TextField(blank=True, help_text='Allowed URIs list, space separated', validators=[oauth2_provider.validators.validate_uris])),
+                (
+                    'redirect_uris',
+                    models.TextField(blank=True, help_text='Allowed URIs list, space separated', validators=[oauth2_provider.validators.validate_uris]),
+                ),
                 ('client_type', models.CharField(choices=[('confidential', 'Confidential'), ('public', 'Public')], max_length=32)),
-                ('authorization_grant_type', models.CharField(choices=[('authorization-code', 'Authorization code'), ('implicit', 'Implicit'), ('password', 'Resource owner password-based'), ('client-credentials', 'Client credentials')], max_length=32)),
+                (
+                    'authorization_grant_type',
+                    models.CharField(
+                        choices=[
+                            ('authorization-code', 'Authorization code'),
+                            ('implicit', 'Implicit'),
+                            ('password', 'Resource owner password-based'),
+                            ('client-credentials', 'Client credentials'),
+                        ],
+                        max_length=32,
+                    ),
+                ),
                 ('client_secret', models.CharField(blank=True, db_index=True, default=oauth2_provider.generators.generate_client_secret, max_length=255)),
                 ('name', models.CharField(blank=True, max_length=255)),
                 ('skip_authorization', models.BooleanField(default=False)),
@@ -37,7 +51,12 @@ class Migration(migrations.Migration):
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('description', models.TextField(blank=True, default='')),
                 ('logo_data', models.TextField(default='', editable=False, validators=[django.core.validators.RegexValidator(re.compile('.*'))])),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='main_oauth2application', to=settings.AUTH_USER_MODEL)),
+                (
+                    'user',
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='main_oauth2application', to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'application',
@@ -54,8 +73,16 @@ class Migration(migrations.Migration):
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('description', models.CharField(blank=True, default='', max_length=200)),
                 ('last_used', models.DateTimeField(default=None, editable=False, null=True)),
-                ('application', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='main_oauth2accesstoken', to=settings.AUTH_USER_MODEL)),
+                (
+                    'application',
+                    models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL),
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='main_oauth2accesstoken', to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'access token',
@@ -71,5 +98,4 @@ class Migration(migrations.Migration):
             name='o_auth2_application',
             field=models.ManyToManyField(to='main.OAuth2Application', blank=True),
         ),
-
     ]

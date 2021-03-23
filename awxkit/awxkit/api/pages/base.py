@@ -3,11 +3,7 @@ import logging
 
 from requests.auth import HTTPBasicAuth
 
-from awxkit.api.pages import (
-    Page,
-    get_registered_page,
-    exception_from_status_code
-)
+from awxkit.api.pages import Page, get_registered_page, exception_from_status_code
 from awxkit.config import config
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
@@ -17,7 +13,6 @@ log = logging.getLogger(__name__)
 
 
 class Base(Page):
-
     def silent_delete(self):
         """Delete the object. If it's already deleted, ignore the error"""
         try:
@@ -129,14 +124,14 @@ class Base(Page):
     @property
     def object_roles(self):
         from awxkit.api.pages import Roles, Role
+
         url = self.get().json.related.object_roles
         for obj_role in Roles(self.connection, endpoint=url).get().json.results:
             yield Role(self.connection, endpoint=obj_role.url).get()
 
     def get_authtoken(self, username='', password=''):
         default_cred = config.credentials.default
-        payload = dict(username=username or default_cred.username,
-                       password=password or default_cred.password)
+        payload = dict(username=username or default_cred.username, password=password or default_cred.password)
         auth_url = resources.authtoken
         return get_registered_page(auth_url)(self.connection, endpoint=auth_url).post(payload).token
 
@@ -146,9 +141,7 @@ class Base(Page):
 
     load_default_authtoken = load_authtoken
 
-    def get_oauth2_token(self, username='', password='', client_id=None,
-                         description='AWX CLI',
-                         client_secret=None, scope='write'):
+    def get_oauth2_token(self, username='', password='', client_id=None, description='AWX CLI', client_secret=None, scope='write'):
         default_cred = config.credentials.default
         username = username or default_cred.username
         password = password or default_cred.password
@@ -157,38 +150,21 @@ class Base(Page):
             HTTPBasicAuth(client_id, client_secret)(req)
             req.headers['Content-Type'] = 'application/x-www-form-urlencoded'
             resp = self.connection.post(
-                '/api/o/token/',
-                data={
-                    "grant_type": "password",
-                    "username": username,
-                    "password": password,
-                    "scope": scope
-                },
-                headers=req.headers
+                '/api/o/token/', data={"grant_type": "password", "username": username, "password": password, "scope": scope}, headers=req.headers
             )
         elif client_id:
             req.headers['Content-Type'] = 'application/x-www-form-urlencoded'
             resp = self.connection.post(
                 '/api/o/token/',
-                data={
-                    "grant_type": "password",
-                    "username": username,
-                    "password": password,
-                    "client_id": client_id,
-                    "scope": scope
-                },
-                headers=req.headers
+                data={"grant_type": "password", "username": username, "password": password, "client_id": client_id, "scope": scope},
+                headers=req.headers,
             )
         else:
             HTTPBasicAuth(username, password)(req)
             resp = self.connection.post(
                 '/api/v2/users/{}/personal_tokens/'.format(username),
-                json={
-                    "description": description,
-                    "application": None,
-                    "scope": scope
-                },
-                headers=req.headers
+                json={"description": description, "application": None, "scope": scope},
+                headers=req.headers,
             )
         if resp.ok:
             result = resp.json()
@@ -201,9 +177,9 @@ class Base(Page):
 
     def load_session(self, username='', password=''):
         default_cred = config.credentials.default
-        self.connection.login(username=username or default_cred.username,
-                              password=password or default_cred.password,
-                              **self.connection.get_session_requirements())
+        self.connection.login(
+            username=username or default_cred.username, password=password or default_cred.password, **self.connection.get_session_requirements()
+        )
         return self
 
     def cleanup(self):

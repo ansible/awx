@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -447,8 +446,11 @@ def main():
     if copy_from:
         # a new existing item is formed when copying and is returned.
         existing_item = module.copy_item(
-            existing_item, copy_from, name,
-            endpoint='job_templates', item_type='job_template',
+            existing_item,
+            copy_from,
+            name,
+            endpoint='job_templates',
+            item_type='job_template',
             copy_lookup_data={},
         )
 
@@ -459,12 +461,36 @@ def main():
     # Create the data that gets sent for create and update
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
     for field_name in (
-        'description', 'job_type', 'playbook', 'scm_branch', 'forks', 'limit', 'verbosity',
-        'job_tags', 'force_handlers', 'skip_tags', 'start_at_task', 'timeout', 'use_fact_cache',
-        'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch', 'ask_variables_on_launch',
-        'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch',
-        'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
-        'become_enabled', 'diff_mode', 'allow_simultaneous', 'job_slice_count', 'webhook_service',
+        'description',
+        'job_type',
+        'playbook',
+        'scm_branch',
+        'forks',
+        'limit',
+        'verbosity',
+        'job_tags',
+        'force_handlers',
+        'skip_tags',
+        'start_at_task',
+        'timeout',
+        'use_fact_cache',
+        'host_config_key',
+        'ask_scm_branch_on_launch',
+        'ask_diff_mode_on_launch',
+        'ask_variables_on_launch',
+        'ask_limit_on_launch',
+        'ask_tags_on_launch',
+        'ask_skip_tags_on_launch',
+        'ask_job_type_on_launch',
+        'ask_verbosity_on_launch',
+        'ask_inventory_on_launch',
+        'ask_credential_on_launch',
+        'survey_enabled',
+        'become_enabled',
+        'diff_mode',
+        'allow_simultaneous',
+        'job_slice_count',
+        'webhook_service',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:
@@ -484,15 +510,17 @@ def main():
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
     if project is not None:
         if organization_id is not None:
-            project_data = module.get_one('projects', name_or_id=project, **{
-                'data': {
-                    'organization': organization_id,
+            project_data = module.get_one(
+                'projects',
+                name_or_id=project,
+                **{
+                    'data': {
+                        'organization': organization_id,
+                    }
                 }
-            })
+            )
             if project_data is None:
-                module.fail_json(msg="The project {0} in organization {1} was not found on the Tower server".format(
-                    project, organization
-                ))
+                module.fail_json(msg="The project {0} in organization {1} was not found on the Tower server".format(project, organization))
             new_fields['project'] = project_data['id']
         else:
             new_fields['project'] = module.resolve_name_to_id('projects', project)
@@ -511,12 +539,12 @@ def main():
         association_fields['labels'] = []
         for item in labels:
             association_fields['labels'].append(module.resolve_name_to_id('labels', item))
-# Code to use once Issue #7567 is resolved
-#            search_fields = {'name': item}
-#            if organization:
-#                search_fields['organization'] = organization_id
-#            label_id = module.get_one('labels', **{'data': search_fields})
-#            association_fields['labels'].append(label_id)
+    # Code to use once Issue #7567 is resolved
+    #            search_fields = {'name': item}
+    #            if organization:
+    #                search_fields['organization'] = organization_id
+    #            label_id = module.get_one('labels', **{'data': search_fields})
+    #            association_fields['labels'].append(label_id)
 
     notifications_start = module.params.get('notification_templates_started')
     if notifications_start is not None:
@@ -551,10 +579,13 @@ def main():
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
-        existing_item, new_fields,
-        endpoint='job_templates', item_type='job_template',
+        existing_item,
+        new_fields,
+        endpoint='job_templates',
+        item_type='job_template',
         associations=association_fields,
-        on_create=on_change, on_update=on_change,
+        on_create=on_change,
+        on_update=on_change,
     )
 
 

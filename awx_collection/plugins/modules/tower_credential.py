@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -318,12 +317,25 @@ KIND_CHOICES = {
 
 
 OLD_INPUT_NAMES = (
-    'authorize', 'authorize_password', 'client',
-    'security_token', 'secret', 'tenant', 'subscription',
-    'domain', 'become_method', 'become_username',
-    'become_password', 'vault_password', 'project', 'host',
-    'username', 'password', 'ssh_key_data', 'vault_id',
-    'ssh_key_unlock'
+    'authorize',
+    'authorize_password',
+    'client',
+    'security_token',
+    'secret',
+    'tenant',
+    'subscription',
+    'domain',
+    'become_method',
+    'become_username',
+    'become_password',
+    'vault_password',
+    'project',
+    'host',
+    'username',
+    'password',
+    'ssh_key_data',
+    'vault_id',
+    'ssh_key_unlock',
 )
 
 
@@ -409,8 +421,11 @@ def main():
     if copy_from:
         # a new existing item is formed when copying and is returned.
         credential = module.copy_item(
-            credential, copy_from, name,
-            endpoint='credentials', item_type='credential',
+            credential,
+            copy_from,
+            name,
+            endpoint='credentials',
+            item_type='credential',
             copy_lookup_data=copy_lookup_data,
         )
 
@@ -459,9 +474,7 @@ def main():
             credential_fields['team'] = team_id
 
     # If the state was present we can let the module build or update the existing group, this will return on its own
-    module.create_or_update_if_needed(
-        credential, credential_fields, endpoint='credentials', item_type='credential'
-    )
+    module.create_or_update_if_needed(credential, credential_fields, endpoint='credentials', item_type='credential')
 
 
 if __name__ == '__main__':

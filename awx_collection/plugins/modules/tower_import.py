@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -58,15 +57,14 @@ import logging
 # In this module we don't use EXPORTABLE_RESOURCES, we just want to validate that our installed awxkit has import/export
 try:
     from awxkit.api.pages.api import EXPORTABLE_RESOURCES
+
     HAS_EXPORTABLE_RESOURCES = True
 except ImportError:
     HAS_EXPORTABLE_RESOURCES = False
 
 
 def main():
-    argument_spec = dict(
-        assets=dict(type='dict', required=True)
-    )
+    argument_spec = dict(assets=dict(type='dict', required=True))
 
     module = TowerAWXKitModule(argument_spec=argument_spec, supports_check_mode=False)
 

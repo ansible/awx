@@ -18,13 +18,16 @@ def test_default_tower_instance_group(default_instance_group, job_factory):
 class TestPolicyTaskScheduling:
     """Tests make assertions about when the policy task gets scheduled"""
 
-    @pytest.mark.parametrize('field, value, expect', [
-        ('name', 'foo-bar-foo-bar', False),
-        ('policy_instance_percentage', 35, True),
-        ('policy_instance_minimum', 3, True),
-        ('policy_instance_list', ['bar?'], True),
-        ('modified', now(), False)
-    ])
+    @pytest.mark.parametrize(
+        'field, value, expect',
+        [
+            ('name', 'foo-bar-foo-bar', False),
+            ('policy_instance_percentage', 35, True),
+            ('policy_instance_minimum', 3, True),
+            ('policy_instance_list', ['bar?'], True),
+            ('modified', now(), False),
+        ],
+    )
     def test_policy_task_ran_for_ig_when_needed(self, instance_group_factory, field, value, expect):
         # always run on instance group creation
         with mock.patch('awx.main.models.ha.schedule_policy_task') as mock_policy:
@@ -39,13 +42,16 @@ class TestPolicyTaskScheduling:
         else:
             mock_policy.assert_not_called()
 
-    @pytest.mark.parametrize('field, value, expect', [
-        ('hostname', 'foo-bar-foo-bar', True),
-        ('managed_by_policy', False, True),
-        ('enabled', False, False),
-        ('capacity_adjustment', 0.42, True),
-        ('capacity', 42, False)
-    ])
+    @pytest.mark.parametrize(
+        'field, value, expect',
+        [
+            ('hostname', 'foo-bar-foo-bar', True),
+            ('managed_by_policy', False, True),
+            ('enabled', False, False),
+            ('capacity_adjustment', 0.42, True),
+            ('capacity', 42, False),
+        ],
+    )
     def test_policy_task_ran_for_instance_when_needed(self, instance_group_factory, field, value, expect):
         # always run on instance group creation
         with mock.patch('awx.main.models.ha.schedule_policy_task') as mock_policy:
@@ -285,7 +291,6 @@ def test_instance_group_capacity(instance_factory, instance_group_factory):
 
 @pytest.mark.django_db
 class TestInstanceGroupOrdering:
-
     def test_ad_hoc_instance_groups(self, instance_group_factory, inventory, default_instance_group):
         ad_hoc = AdHocCommand.objects.create(inventory=inventory)
         assert ad_hoc.preferred_instance_groups == [default_instance_group]
@@ -297,10 +302,7 @@ class TestInstanceGroupOrdering:
         assert ad_hoc.preferred_instance_groups == [ig_inv, ig_org]
 
     def test_inventory_update_instance_groups(self, instance_group_factory, inventory_source, default_instance_group):
-        iu = InventoryUpdate.objects.create(
-            inventory_source=inventory_source,
-            source=inventory_source.source
-        )
+        iu = InventoryUpdate.objects.create(inventory_source=inventory_source, source=inventory_source.source)
         assert iu.preferred_instance_groups == [default_instance_group]
         ig_org = instance_group_factory("OrgIstGrp", [default_instance_group.instances.first()])
         ig_inv = instance_group_factory("InvIstGrp", [default_instance_group.instances.first()])

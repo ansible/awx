@@ -16,8 +16,7 @@ WEBSOCKET_TIMEOUT = 30
 
 class SlackBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
-    init_parameters = {"token": {"label": "Token", "type": "password"},
-                       "channels": {"label": "Destination Channels", "type": "list"}}
+    init_parameters = {"token": {"label": "Token", "type": "password"}, "channels": {"label": "Destination Channels", "type": "list"}}
     recipient_parameter = "channels"
     sender_parameter = None
 
@@ -37,18 +36,9 @@ class SlackBackend(AWXBaseEmailBackend, CustomNotificationBase):
                     if r.startswith('#'):
                         r = r[1:]
                     if self.color:
-                        ret = connection.api_call("chat.postMessage",
-                                                  channel=r,
-                                                  as_user=True,
-                                                  attachments=[{
-                                                      "color": self.color,
-                                                      "text": m.subject
-                                                  }])
+                        ret = connection.api_call("chat.postMessage", channel=r, as_user=True, attachments=[{"color": self.color, "text": m.subject}])
                     else:
-                        ret = connection.api_call("chat.postMessage",
-                                                  channel=r,
-                                                  as_user=True,
-                                                  text=m.subject)
+                        ret = connection.api_call("chat.postMessage", channel=r, as_user=True, text=m.subject)
                     logger.debug(ret)
                     if ret['ok']:
                         sent_messages += 1

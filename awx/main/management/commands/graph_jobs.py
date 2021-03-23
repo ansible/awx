@@ -9,10 +9,7 @@ from django.db.models import Count
 from django.core.management.base import BaseCommand
 
 # AWX
-from awx.main.models import (
-    Job,
-    Instance
-)
+from awx.main.models import Job, Instance
 
 
 DEFAULT_WIDTH = 100
@@ -27,7 +24,7 @@ def clear_screen():
     print(chr(27) + "[2J")
 
 
-class JobStatus():
+class JobStatus:
     def __init__(self, status, color, width):
         self.status = status
         self.color = color
@@ -44,16 +41,12 @@ class JobStatusController:
     RESET = chart_color_lookup('reset')
 
     def __init__(self, width):
-        self.plots = [
-            JobStatus('pending', 'red', width),
-            JobStatus('waiting', 'blue', width),
-            JobStatus('running', 'green', width)
-        ]
+        self.plots = [JobStatus('pending', 'red', width), JobStatus('waiting', 'blue', width), JobStatus('running', 'green', width)]
         self.ts_start = int(time.time())
 
     def tick(self):
         ts = int(time.time()) - self.ts_start
-        q = Job.objects.filter(status__in=['pending','waiting','running']).values_list('status').order_by().annotate(Count('status'))
+        q = Job.objects.filter(status__in=['pending', 'waiting', 'running']).values_list('status').order_by().annotate(Count('status'))
         status_count = dict(pending=0, waiting=0, running=0)
         for status, count in q:
             status_count[status] = count
@@ -86,12 +79,11 @@ class Command(BaseCommand):
     help = "Plot pending, waiting, running jobs over time on the terminal"
 
     def add_arguments(self, parser):
-        parser.add_argument('--refresh', dest='refresh', type=float, default=1.0,
-                            help='Time between refreshes of the graph and data in seconds (defaults to 1.0)')
-        parser.add_argument('--width', dest='width', type=int, default=DEFAULT_WIDTH,
-                            help=f'Width of the graph (defaults to {DEFAULT_WIDTH})')
-        parser.add_argument('--height', dest='height', type=int, default=DEFAULT_HEIGHT,
-                            help=f'Height of the graph (defaults to {DEFAULT_HEIGHT})')
+        parser.add_argument(
+            '--refresh', dest='refresh', type=float, default=1.0, help='Time between refreshes of the graph and data in seconds (defaults to 1.0)'
+        )
+        parser.add_argument('--width', dest='width', type=int, default=DEFAULT_WIDTH, help=f'Width of the graph (defaults to {DEFAULT_WIDTH})')
+        parser.add_argument('--height', dest='height', type=int, default=DEFAULT_HEIGHT, help=f'Height of the graph (defaults to {DEFAULT_HEIGHT})')
 
     def handle(self, *args, **options):
         refresh_seconds = options['refresh']
@@ -114,4 +106,3 @@ class Command(BaseCommand):
             print(draw)
             sys.stdout.write(status_line)
             time.sleep(refresh_seconds)
-

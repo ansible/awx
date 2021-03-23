@@ -5,10 +5,7 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 from awx.main.migrations import _migration_utils as migration_utils
-from awx.main.migrations._multi_cred import (
-    migrate_inventory_source_cred,
-    migrate_inventory_source_cred_reverse
-)
+from awx.main.migrations._multi_cred import migrate_inventory_source_cred, migrate_inventory_source_cred_reverse
 
 
 class Migration(migrations.Migration):

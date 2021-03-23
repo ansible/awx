@@ -17,7 +17,6 @@ from social_django.middleware import SocialAuthExceptionMiddleware
 
 
 class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
-
     def process_request(self, request):
         if request.path.startswith('/sso'):
             # See upgrade blocker note in requirements/README.md

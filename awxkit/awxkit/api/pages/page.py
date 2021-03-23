@@ -6,15 +6,7 @@ import re
 from requests import Response
 import http.client as http
 
-from awxkit.utils import (
-    PseudoNamespace,
-    is_relative_endpoint,
-    are_same_endpoint,
-    super_dir_set,
-    suppress,
-    is_list_or_tuple,
-    to_str
-)
+from awxkit.utils import PseudoNamespace, is_relative_endpoint, are_same_endpoint, super_dir_set, suppress, is_list_or_tuple, to_str
 from awxkit.api import utils
 from awxkit.api.client import Connection
 from awxkit.api.registry import URLRegistry
@@ -41,17 +33,11 @@ def is_license_invalid(response):
 
 
 def is_license_exceeded(response):
-    if re.match(
-        r".*license range of.*instances has been exceeded.*",
-            response.text):
+    if re.match(r".*license range of.*instances has been exceeded.*", response.text):
         return True
-    if re.match(
-        r".*License count of.*instances has been reached.*",
-            response.text):
+    if re.match(r".*License count of.*instances has been reached.*", response.text):
         return True
-    if re.match(
-        r".*License count of.*instances has been exceeded.*",
-            response.text):
+    if re.match(r".*License count of.*instances has been exceeded.*", response.text):
         return True
     if re.match(r".*License has expired.*", response.text):
         return True
@@ -67,6 +53,7 @@ def is_duplicate_error(response):
 def register_page(urls, page_cls):
     if not _page_registry.default:
         from awxkit.api.pages import Base
+
         _page_registry.setdefault(Base)
 
     if not is_list_or_tuple(urls):
@@ -108,32 +95,23 @@ class Page(object):
         if 'endpoint' in kw:
             self.endpoint = kw['endpoint']
 
-        self.connection = connection or Connection(
-            config.base_url, kw.get(
-                'verify', not config.assume_untrusted))
+        self.connection = connection or Connection(config.base_url, kw.get('verify', not config.assume_untrusted))
 
         self.r = kw.get('r', None)
-        self.json = kw.get(
-            'json', objectify_response_json(
-                self.r) if self.r else {})
+        self.json = kw.get('json', objectify_response_json(self.r) if self.r else {})
         self.last_elapsed = kw.get('last_elapsed', None)
 
     def __getattr__(self, name):
         if 'json' in self.__dict__ and name in self.json:
             value = self.json[name]
-            if not isinstance(
-                    value,
-                    TentativePage) and is_relative_endpoint(value):
+            if not isinstance(value, TentativePage) and is_relative_endpoint(value):
                 value = TentativePage(value, self.connection)
             elif isinstance(value, dict):
                 for key, item in value.items():
-                    if not isinstance(
-                            item, TentativePage) and is_relative_endpoint(item):
+                    if not isinstance(item, TentativePage) and is_relative_endpoint(item):
                         value[key] = TentativePage(item, self.connection)
             return value
-        raise AttributeError(
-            "{!r} object has no attribute {!r}".format(
-                self.__class__.__name__, name))
+        raise AttributeError("{!r} object has no attribute {!r}".format(self.__class__.__name__, name))
 
     def __setattr__(self, name, value):
         if 'json' in self.__dict__ and name in self.json:
@@ -200,20 +178,15 @@ class Page(object):
                 text = response.text
                 if len(text) > 1024:
                     text = text[:1024] + '... <<< Truncated >>> ...'
-                log.debug(
-                    "Unable to parse JSON response ({0.status_code}): {1} - '{2}'".format(response, e, text))
+                log.debug("Unable to parse JSON response ({0.status_code}): {1} - '{2}'".format(response, e, text))
 
-        exc_str = "%s (%s) received" % (
-            http.responses[response.status_code], response.status_code)
+        exc_str = "%s (%s) received" % (http.responses[response.status_code], response.status_code)
 
         exception = exception_from_status_code(response.status_code)
         if exception:
             raise exception(exc_str, data)
 
-        if response.status_code in (
-                http.OK,
-                http.CREATED,
-                http.ACCEPTED):
+        if response.status_code in (http.OK, http.CREATED, http.ACCEPTED):
 
             # Not all JSON responses include a URL.  Grab it from the request
             # object, if needed.
@@ -232,13 +205,7 @@ class Page(object):
                     return self
 
             registered_type = get_registered_page(request_path, request_method)
-            return registered_type(
-                self.connection,
-                endpoint=endpoint,
-                json=data,
-                last_elapsed=response.elapsed,
-                r=response,
-                ds=ds)
+            return registered_type(self.connection, endpoint=endpoint, json=data, last_elapsed=response.elapsed, r=response, ds=ds)
 
         elif response.status_code == http.FORBIDDEN:
             if is_license_invalid(response):
@@ -341,14 +308,16 @@ class Page(object):
         return natural_key
 
 
-_exception_map = {http.NO_CONTENT: exc.NoContent,
-                  http.NOT_FOUND: exc.NotFound,
-                  http.INTERNAL_SERVER_ERROR: exc.InternalServerError,
-                  http.BAD_GATEWAY: exc.BadGateway,
-                  http.METHOD_NOT_ALLOWED: exc.MethodNotAllowed,
-                  http.UNAUTHORIZED: exc.Unauthorized,
-                  http.PAYMENT_REQUIRED: exc.PaymentRequired,
-                  http.CONFLICT: exc.Conflict}
+_exception_map = {
+    http.NO_CONTENT: exc.NoContent,
+    http.NOT_FOUND: exc.NotFound,
+    http.INTERNAL_SERVER_ERROR: exc.InternalServerError,
+    http.BAD_GATEWAY: exc.BadGateway,
+    http.METHOD_NOT_ALLOWED: exc.MethodNotAllowed,
+    http.UNAUTHORIZED: exc.Unauthorized,
+    http.PAYMENT_REQUIRED: exc.PaymentRequired,
+    http.CONFLICT: exc.Conflict,
+}
 
 
 def exception_from_status_code(status_code):
@@ -380,12 +349,7 @@ class PageList(object):
                 registered_type = self.__item_class__
             else:
                 registered_type = get_registered_page(endpoint)
-            items.append(
-                registered_type(
-                    self.connection,
-                    endpoint=endpoint,
-                    json=item,
-                    r=self.r))
+            items.append(registered_type(self.connection, endpoint=endpoint, json=item, r=self.r))
         return items
 
     def go_to_next(self):
@@ -407,7 +371,6 @@ class PageList(object):
 
 
 class TentativePage(str):
-
     def __new__(cls, endpoint, connection):
         return super(TentativePage, cls).__new__(cls, to_str(endpoint))
 
@@ -416,10 +379,7 @@ class TentativePage(str):
         self.connection = connection
 
     def _create(self):
-        return get_registered_page(
-            self.endpoint)(
-            self.connection,
-            endpoint=self.endpoint)
+        return get_registered_page(self.endpoint)(self.connection, endpoint=self.endpoint)
 
     def get(self, **params):
         return self._create().get(**params)
@@ -436,21 +396,15 @@ class TentativePage(str):
         page = None
         # look up users by username not name
         if 'users' in self:
-            assert query_parameters.get(
-                'username'), 'For this resource, you must call this method with a "username" to look up the object by'
+            assert query_parameters.get('username'), 'For this resource, you must call this method with a "username" to look up the object by'
             page = self.get(username=query_parameters['username'])
         else:
-            assert query_parameters.get(
-                'name'), 'For this resource, you must call this method with a "name" to look up the object by'
+            assert query_parameters.get('name'), 'For this resource, you must call this method with a "name" to look up the object by'
             if query_parameters.get('organization'):
                 if isinstance(query_parameters.get('organization'), int):
-                    page = self.get(
-                        name=query_parameters['name'],
-                        organization=query_parameters.get('organization'))
+                    page = self.get(name=query_parameters['name'], organization=query_parameters.get('organization'))
                 else:
-                    page = self.get(
-                        name=query_parameters['name'],
-                        organization=query_parameters.get('organization').id)
+                    page = self.get(name=query_parameters['name'], organization=query_parameters.get('organization').id)
             else:
                 page = self.get(name=query_parameters['name'])
         if page and page.results:
@@ -476,13 +430,9 @@ class TentativePage(str):
         if query_parameters.get('name'):
             if query_parameters.get('organization'):
                 if isinstance(query_parameters.get('organization'), int):
-                    page = self.get(
-                        name=query_parameters['name'],
-                        organization=query_parameters.get('organization'))
+                    page = self.get(name=query_parameters['name'], organization=query_parameters.get('organization'))
                 else:
-                    page = self.get(
-                        name=query_parameters['name'],
-                        organization=query_parameters.get('organization').id)
+                    page = self.get(name=query_parameters['name'], organization=query_parameters.get('organization').id)
             else:
                 page = self.get(name=query_parameters['name'])
 

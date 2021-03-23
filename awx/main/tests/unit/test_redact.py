@@ -33,9 +33,11 @@ TEST_CLEARTEXT = []
 # Arguably, this is a regression test given the below data.
 # regression data https://trello.com/c/cdUELgVY/
 uri = URI(scheme="https", username="myusername", password="mypasswordwith%40", host="nonexistant.ansible.com/ansible.git/")
-TEST_CLEARTEXT.append({
-    'uri' : uri,
-    'text' : textwrap.dedent("""\
+TEST_CLEARTEXT.append(
+    {
+        'uri': uri,
+        'text': textwrap.dedent(
+            """\
         PLAY [all] ********************************************************************
 
         TASK: [delete project directory before update] ********************************
@@ -57,14 +59,19 @@ TEST_CLEARTEXT.append({
 
         localhost                  : ok=0    changed=0    unreachable=0    failed=1
 
-        """ % (uri.username, uri.password, str(uri), str(uri))),
-    'host_occurrences' : 2
-})
+        """
+            % (uri.username, uri.password, str(uri), str(uri))
+        ),
+        'host_occurrences': 2,
+    }
+)
 
 uri = URI(scheme="https", username="Dhh3U47nmC26xk9PKscV", password="PXPfWW8YzYrgS@E5NbQ2H@", host="github.ginger.com/theirrepo.git/info/refs")
-TEST_CLEARTEXT.append({
-    'uri' : uri,
-    'text' : textwrap.dedent("""\
+TEST_CLEARTEXT.append(
+    {
+        'uri': uri,
+        'text': textwrap.dedent(
+            """\
         TASK: [update project using git] **
                     failed: [localhost] => {"cmd": "/usr/bin/git ls-remote https://REDACTED:********", "failed": true, "rc": 128}
                     stderr: error: Couldn't resolve host '@%s' while accessing %s
@@ -74,17 +81,23 @@ TEST_CLEARTEXT.append({
                     msg: error: Couldn't resolve host '@%s' while accessing %s
 
                     fatal: HTTP request failed
-        """ % (uri.host, str(uri), uri.host, str(uri))),
-    'host_occurrences' : 4
-})
+        """
+            % (uri.host, str(uri), uri.host, str(uri))
+        ),
+        'host_occurrences': 4,
+    }
+)
 
 
-@pytest.mark.parametrize('username, password, not_uri, expected', [
-    ('', '', 'www.famfamfam.com](http://www.famfamfam.com/fijdlfd', 'www.famfamfam.com](http://www.famfamfam.com/fijdlfd'),
-    ('', '', 'https://www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
-    ('root', 'gigity', 'https://root@gigity@www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
-    ('root', 'gigity@', 'https://root:gigity@@@www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
-])
+@pytest.mark.parametrize(
+    'username, password, not_uri, expected',
+    [
+        ('', '', 'www.famfamfam.com](http://www.famfamfam.com/fijdlfd', 'www.famfamfam.com](http://www.famfamfam.com/fijdlfd'),
+        ('', '', 'https://www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
+        ('root', 'gigity', 'https://root@gigity@www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
+        ('root', 'gigity@', 'https://root:gigity@@@www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
+    ],
+)
 # should redact sensitive usernames and passwords
 def test_non_uri_redact(username, password, not_uri, expected):
     redacted_str = UriCleaner.remove_sensitive(not_uri)
@@ -158,4 +171,3 @@ def test_large_string_performance():
     length = 100000
     redacted = UriCleaner.remove_sensitive('x' * length)
     assert len(redacted) == length
-

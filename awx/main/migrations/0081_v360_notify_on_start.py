@@ -12,6 +12,7 @@ def forwards_split_unified_job_template_any(apps, schema_editor):
             ujt.notification_templates_success.add(ujt_notification)
             ujt.notification_templates_error.add(ujt_notification)
 
+
 def forwards_split_organization_any(apps, schema_editor):
     Organization = apps.get_model('main', 'organization')
     for org in Organization.objects.all():

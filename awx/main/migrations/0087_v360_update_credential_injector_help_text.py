@@ -14,16 +14,28 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='inputs',
-            field=awx.main.fields.CredentialInputField(blank=True, default=dict, help_text='Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.'),
+            field=awx.main.fields.CredentialInputField(
+                blank=True,
+                default=dict,
+                help_text='Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.',
+            ),
         ),
         migrations.AlterField(
             model_name='credentialtype',
             name='injectors',
-            field=awx.main.fields.CredentialTypeInjectorField(blank=True, default=dict, help_text='Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.'),
+            field=awx.main.fields.CredentialTypeInjectorField(
+                blank=True,
+                default=dict,
+                help_text='Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.',
+            ),
         ),
         migrations.AlterField(
             model_name='credentialtype',
             name='inputs',
-            field=awx.main.fields.CredentialTypeInputField(blank=True, default=dict, help_text='Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.'),
+            field=awx.main.fields.CredentialTypeInputField(
+                blank=True,
+                default=dict,
+                help_text='Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.',
+            ),
         ),
     ]

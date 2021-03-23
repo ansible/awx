@@ -1,4 +1,3 @@
-
 from awx.main.models import Job, JobEvent
 
 from awx.main.utils.formatters import LogstashFormatter
@@ -9,8 +8,7 @@ def test_log_from_job_event_object():
     event = JobEvent(job_id=job.id)
     formatter = LogstashFormatter()
 
-    data_for_log = formatter.reformat_data_for_log(
-        dict(python_objects=dict(job_event=event)), kind='job_events')
+    data_for_log = formatter.reformat_data_for_log(dict(python_objects=dict(job_event=event)), kind='job_events')
 
     # Check entire body of data for any exceptions from getattr on event object
     for fd in data_for_log:

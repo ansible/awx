@@ -7,9 +7,20 @@ from django.conf import settings
 from awx.api.versioning import reverse
 from awx.main.middleware import URLModificationMiddleware
 from awx.main.models import (  # noqa
-    Credential, CustomInventoryScript, Group, Host, Instance, InstanceGroup,
-    Inventory, InventorySource, JobTemplate, NotificationTemplate,
-    Organization, Project, User, WorkflowJobTemplate,
+    Credential,
+    CustomInventoryScript,
+    Group,
+    Host,
+    Instance,
+    InstanceGroup,
+    Inventory,
+    InventorySource,
+    JobTemplate,
+    NotificationTemplate,
+    Organization,
+    Project,
+    User,
+    WorkflowJobTemplate,
 )
 from awx.conf import settings_registry
 
@@ -118,8 +129,7 @@ def test_project(get, admin_user):
 @pytest.mark.django_db
 def test_notification_template(get, admin_user):
     test_notification_template = NotificationTemplate.objects.create(
-        name='test_note', notification_type='slack',
-        notification_configuration=dict(channels=["Foo", "Bar"], token="token")
+        name='test_note', notification_type='slack', notification_configuration=dict(channels=["Foo", "Bar"], token="token")
     )
     url = reverse('api:notification_template_detail', kwargs={'pk': test_notification_template.pk})
     response = get(url, user=admin_user, expect=200)
@@ -133,9 +143,7 @@ def test_notification_template(get, admin_user):
 
 @pytest.mark.django_db
 def test_instance(get, admin_user):
-    test_instance = Instance.objects.create(
-        uuid=settings.SYSTEM_UUID, hostname="localhost", capacity=100
-    )
+    test_instance = Instance.objects.create(uuid=settings.SYSTEM_UUID, hostname="localhost", capacity=100)
     url = reverse('api:instance_detail', kwargs={'pk': test_instance.pk})
     response = get(url, user=admin_user, expect=200)
     assert response.data['related']['named_url'].endswith('/localhost/')
@@ -186,11 +194,7 @@ def test_group(get, admin_user):
 def test_inventory_source(get, admin_user):
     test_org = Organization.objects.create(name='test_org')
     test_inv = Inventory.objects.create(name='test_inv', organization=test_org)
-    test_source = InventorySource.objects.create(
-        name='test_source',
-        inventory=test_inv,
-        source='ec2'
-    )
+    test_source = InventorySource.objects.create(name='test_source', inventory=test_inv, source='ec2')
     url = reverse('api:inventory_source_detail', kwargs={'pk': test_source.pk})
     response = get(url, user=admin_user, expect=200)
     assert response.data['related']['named_url'].endswith('/test_source++test_inv++test_org/')
@@ -223,16 +227,8 @@ def test_credential(get, admin_user, credentialtype_ssh):
 
 @pytest.mark.django_db
 def test_403_vs_404(get):
-    cindy = User.objects.create(
-        username='cindy',
-        password='test_user',
-        is_superuser=False
-    )
-    bob = User.objects.create(
-        username='bob',
-        password='test_user',
-        is_superuser=False
-    )
+    cindy = User.objects.create(username='cindy', password='test_user', is_superuser=False)
+    bob = User.objects.create(username='bob', password='test_user', is_superuser=False)
 
     # bob cannot see cindy, pk lookup should be a 403
     url = reverse('api:user_detail', kwargs={'pk': cindy.pk})

@@ -8,10 +8,14 @@ import ldap
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-__all__ = ['validate_ldap_dn', 'validate_ldap_dn_with_user',
-           'validate_ldap_bind_dn', 'validate_ldap_filter',
-           'validate_ldap_filter_with_user',
-           'validate_tacacsplus_disallow_nonascii']
+__all__ = [
+    'validate_ldap_dn',
+    'validate_ldap_dn_with_user',
+    'validate_ldap_bind_dn',
+    'validate_ldap_filter',
+    'validate_ldap_filter_with_user',
+    'validate_tacacsplus_disallow_nonascii',
+]
 
 
 def validate_ldap_dn(value, with_user=False):
@@ -32,8 +36,9 @@ def validate_ldap_dn_with_user(value):
 
 
 def validate_ldap_bind_dn(value):
-    if not re.match(r'^[A-Za-z][A-Za-z0-9._-]*?\\[A-Za-z0-9 ._-]+?$', value.strip()) and \
-            not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', value.strip()):
+    if not re.match(r'^[A-Za-z][A-Za-z0-9._-]*?\\[A-Za-z0-9 ._-]+?$', value.strip()) and not re.match(
+        r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', value.strip()
+    ):
         validate_ldap_dn(value)
 
 

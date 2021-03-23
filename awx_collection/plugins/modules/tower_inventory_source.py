@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -163,9 +162,7 @@ def main():
         #
         # How do we handle manual and file? Tower does not seem to be able to activate them
         #
-        source=dict(choices=["scm", "ec2", "gce",
-                             "azure_rm", "vmware", "satellite6",
-                             "openstack", "rhv", "tower", "custom"]),
+        source=dict(choices=["scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower", "custom"]),
         source_path=dict(),
         source_script=dict(),
         source_vars=dict(type='dict'),
@@ -211,11 +208,15 @@ def main():
     if not inventory_object:
         module.fail_json(msg='The specified inventory, {0}, was not found.'.format(lookup_data))
 
-    inventory_source_object = module.get_one('inventory_sources', name_or_id=name, **{
-        'data': {
-            'inventory': inventory_object['id'],
+    inventory_source_object = module.get_one(
+        'inventory_sources',
+        name_or_id=name,
+        **{
+            'data': {
+                'inventory': inventory_object['id'],
+            }
         }
-    })
+    )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -259,10 +260,20 @@ def main():
         inventory_source_fields['source_script'] = module.resolve_name_to_id('inventory_scripts', source_script)
 
     OPTIONAL_VARS = (
-        'description', 'source', 'source_path', 'source_vars',
-        'overwrite', 'overwrite_vars',
-        'timeout', 'verbosity', 'update_on_launch', 'update_cache_timeout',
-        'update_on_project_update', 'enabled_var', 'enabled_value', 'host_filter',
+        'description',
+        'source',
+        'source_path',
+        'source_vars',
+        'overwrite',
+        'overwrite_vars',
+        'timeout',
+        'verbosity',
+        'update_on_launch',
+        'update_cache_timeout',
+        'update_on_project_update',
+        'enabled_var',
+        'enabled_value',
+        'host_filter',
     )
 
     # Layer in all remaining optional information
@@ -281,9 +292,7 @@ def main():
 
     # If the state was present we can let the module build or update the existing inventory_source_object, this will return on its own
     module.create_or_update_if_needed(
-        inventory_source_object, inventory_source_fields,
-        endpoint='inventory_sources', item_type='inventory source',
-        associations=association_fields
+        inventory_source_object, inventory_source_fields, endpoint='inventory_sources', item_type='inventory source', associations=association_fields
     )
 
 

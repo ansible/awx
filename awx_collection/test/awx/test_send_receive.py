@@ -1,18 +1,11 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import pytest
 import json
 
-from awx.main.models import (
-    Organization,
-    Project,
-    Inventory,
-    Host,
-    CredentialType,
-    Credential,
-    JobTemplate
-)
+from awx.main.models import Organization, Project, Inventory, Host, CredentialType, Credential, JobTemplate
 
 
 # warns based on password_management param, but not security issue
@@ -25,23 +18,14 @@ def test_receive_send_jt(run_module, admin_user, mocker, silence_deprecation):
         scm_type='git',
         scm_url='https://github.com/ansible/test-playbooks.git',
         organization=org,
-        allow_override=True  # so we do not require playbooks populated
+        allow_override=True,  # so we do not require playbooks populated
     )
     inv = Inventory.objects.create(name='SRtest', organization=org)
     Host.objects.create(name='SRtest', inventory=inv)
     ct = CredentialType.defaults['ssh']()
     ct.save()
-    cred = Credential.objects.create(
-        name='SRtest',
-        credential_type=ct,
-        organization=org
-    )
-    jt = JobTemplate.objects.create(
-        name='SRtest',
-        project=proj,
-        inventory=inv,
-        playbook='helloworld.yml'
-    )
+    cred = Credential.objects.create(name='SRtest', credential_type=ct, organization=org)
+    jt = JobTemplate.objects.create(name='SRtest', project=proj, inventory=inv, playbook='helloworld.yml')
     jt.credentials.add(cred)
     jt.admin_role.members.add(admin_user)  # work around send/receive bug
 
@@ -51,10 +35,7 @@ def test_receive_send_jt(run_module, admin_user, mocker, silence_deprecation):
     assert 'assets' in result, result
     assets = result['assets']
     assert not result.get('changed', True)
-    assert set(a['asset_type'] for a in assets) == set((
-        'organization', 'inventory', 'job_template', 'credential', 'project',
-        'user'
-    ))
+    assert set(a['asset_type'] for a in assets) == set(('organization', 'inventory', 'job_template', 'credential', 'project', 'user'))
 
     # delete everything
     for obj in (jt, inv, proj, cred, org):

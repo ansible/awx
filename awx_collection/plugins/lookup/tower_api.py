@@ -1,6 +1,7 @@
 # (c) 2020 Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 DOCUMENTATION = """
@@ -145,10 +146,7 @@ class LookupModule(LookupBase):
                 module_params[module_param] = opt_val
 
         # Create our module
-        module = TowerAPIModule(
-            argument_spec={}, direct_params=module_params,
-            error_callback=self.handle_error, warn_callback=self.warn_callback
-        )
+        module = TowerAPIModule(argument_spec={}, direct_params=module_params, error_callback=self.handle_error, warn_callback=self.warn_callback)
 
         response = module.get_endpoint(terms[0], data=self.get_option('query_params', {}))
 
@@ -162,17 +160,11 @@ class LookupModule(LookupBase):
 
         if self.get_option('expect_objects') or self.get_option('expect_one'):
             if ('id' not in return_data) and ('results' not in return_data):
-                raise AnsibleError(
-                    'Did not obtain a list or detail view at {0}, and '
-                    'expect_objects or expect_one is set to True'.format(terms[0])
-                )
+                raise AnsibleError('Did not obtain a list or detail view at {0}, and ' 'expect_objects or expect_one is set to True'.format(terms[0]))
 
         if self.get_option('expect_one'):
             if 'results' in return_data and len(return_data['results']) != 1:
-                raise AnsibleError(
-                    'Expected one object from endpoint {0}, '
-                    'but obtained {1} from API'.format(terms[0], len(return_data['results']))
-                )
+                raise AnsibleError('Expected one object from endpoint {0}, ' 'but obtained {1} from API'.format(terms[0], len(return_data['results'])))
 
         if self.get_option('return_all') and 'results' in return_data:
             if return_data['count'] > self.get_option('max_objects'):

@@ -43,7 +43,7 @@ def all_collectors():
             key = func.__awx_analytics_key__
             desc = func.__awx_analytics_description__ or ''
             version = func.__awx_analytics_version__
-            collector_dict[key] = { 'name': key, 'version': version, 'description': desc}
+            collector_dict[key] = {'name': key, 'version': version, 'description': desc}
     return collector_dict
 
 
@@ -82,7 +82,7 @@ def register(key, version, description=None, format='json', expensive=False):
     return decorate
 
 
-def gather(dest=None, module=None, subset = None, since = None, until = now(), collection_type='scheduled'):
+def gather(dest=None, module=None, subset=None, since=None, until=now(), collection_type='scheduled'):
     """
     Gather all defined metrics and write them as JSON files in a .tgz
 
@@ -90,6 +90,7 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
     :param module: the module to search for registered analytic collector
                     functions; defaults to awx.main.analytics.collectors
     """
+
     def _write_manifest(destdir, manifest):
         path = os.path.join(destdir, 'manifest.json')
         with open(path, 'w', encoding='utf-8') as f:
@@ -116,13 +117,10 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
         collector_module = module
     else:
         from awx.main.analytics import collectors
+
         collector_module = collectors
     for name, func in inspect.getmembers(collector_module):
-        if (
-            inspect.isfunction(func) and
-            hasattr(func, '__awx_analytics_key__') and
-            (not subset or name in subset)
-        ):
+        if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__') and (not subset or name in subset):
             collector_list.append((name, func))
 
     manifest = dict()
@@ -162,6 +160,7 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
     # Always include config.json if we're using our collectors
     if 'config.json' not in manifest.keys() and not module:
         from awx.main.analytics import collectors
+
         config = collectors.config
         path = '{}.json'.format(os.path.join(gather_dir, config.__awx_analytics_key__))
         with open(path, 'w', encoding='utf-8') as f:
@@ -204,22 +203,14 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
         for i in range(0, len(stage_dirs)):
             stage_dir = stage_dirs[i]
             # can't use isoformat() since it has colons, which GNU tar doesn't like
-            tarname = '_'.join([
-                settings.SYSTEM_UUID,
-                until.strftime('%Y-%m-%d-%H%M%S%z'),
-                str(i)
-            ])
-            tgz = shutil.make_archive(
-                os.path.join(os.path.dirname(dest), tarname),
-                'gztar',
-                stage_dir
-            )
+            tarname = '_'.join([settings.SYSTEM_UUID, until.strftime('%Y-%m-%d-%H%M%S%z'), str(i)])
+            tgz = shutil.make_archive(os.path.join(os.path.dirname(dest), tarname), 'gztar', stage_dir)
             tarfiles.append(tgz)
     except Exception:
-        shutil.rmtree(stage_dir, ignore_errors = True)
+        shutil.rmtree(stage_dir, ignore_errors=True)
         logger.exception("Failed to write analytics archive file")
     finally:
-        shutil.rmtree(dest, ignore_errors = True)
+        shutil.rmtree(dest, ignore_errors=True)
     return tarfiles
 
 
@@ -253,16 +244,17 @@ def ship(path):
             s.headers = get_awx_http_client_headers()
             s.headers.pop('Content-Type')
             with set_environ(**settings.AWX_TASK_ENV):
-                response = s.post(url,
-                                  files=files,
-                                  verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
-                                  auth=(rh_user, rh_password),
-                                  headers=s.headers,
-                                  timeout=(31, 31))
+                response = s.post(
+                    url,
+                    files=files,
+                    verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
+                    auth=(rh_user, rh_password),
+                    headers=s.headers,
+                    timeout=(31, 31),
+                )
             # Accept 2XX status_codes
             if response.status_code >= 300:
-                return logger.exception('Upload failed with status {}, {}'.format(response.status_code,
-                                                                                  response.text))
+                return logger.exception('Upload failed with status {}, {}'.format(response.status_code, response.text))
     finally:
         # cleanup tar.gz
         if os.path.exists(path):

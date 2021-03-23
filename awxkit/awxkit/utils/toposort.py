@@ -42,18 +42,19 @@ class CircularDependencyError(ValueError):
     def __init__(self, data):
         # Sort the data just to make the output consistent, for use in
         #  error messages.  That's convenient for doctests.
-        s = 'Circular dependencies exist among these items: {{{}}}'.format(', '.join('{!r}:{!r}'.format(key, value) for key, value in sorted(data.items())))  # noqa
+        s = 'Circular dependencies exist among these items: {{{}}}'.format(
+            ', '.join('{!r}:{!r}'.format(key, value) for key, value in sorted(data.items()))
+        )  # noqa
         super(CircularDependencyError, self).__init__(s)
         self.data = data
 
 
 def toposort(data):
     """Dependencies are expressed as a dictionary whose keys are items
-and whose values are a set of dependent items. Output is a list of
-sets in topological order. The first set consists of items with no
-dependences, each subsequent set consists of items that depend upon
-items in the preceeding sets.
-"""
+    and whose values are a set of dependent items. Output is a list of
+    sets in topological order. The first set consists of items with no
+    dependences, each subsequent set consists of items that depend upon
+    items in the preceeding sets."""
 
     # Special case empty input.
     if len(data) == 0:
@@ -74,9 +75,6 @@ items in the preceeding sets.
         if not ordered:
             break
         yield ordered
-        data = {
-            item: (dep - ordered)
-            for item, dep in data.items() if item not in ordered
-        }
+        data = {item: (dep - ordered) for item, dep in data.items() if item not in ordered}
     if len(data) != 0:
         raise CircularDependencyError(data)

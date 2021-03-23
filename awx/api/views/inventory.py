@@ -28,14 +28,7 @@ from awx.main.models import (
     InventorySource,
     CustomInventoryScript,
 )
-from awx.api.generics import (
-    ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView,
-    SubListAPIView,
-    SubListAttachDetachAPIView,
-    ResourceAccessList,
-    CopyAPIView,
-)
+from awx.api.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, SubListAPIView, SubListAttachDetachAPIView, ResourceAccessList, CopyAPIView
 
 from awx.api.serializers import (
     InventorySerializer,
@@ -46,10 +39,7 @@ from awx.api.serializers import (
     CustomInventoryScriptSerializer,
     JobTemplateSerializer,
 )
-from awx.api.views.mixin import (
-    RelatedJobsPreventDeleteMixin,
-    ControlledByScmMixin,
-)
+from awx.api.views.mixin import RelatedJobsPreventDeleteMixin, ControlledByScmMixin
 
 logger = logging.getLogger('awx.api.views.organization')
 
@@ -101,7 +91,7 @@ class InventoryScriptObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
     parent_model = CustomInventoryScript
-    search_fields = ('role_field', 'content_type__model',)
+    search_fields = ('role_field', 'content_type__model')
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -134,8 +124,7 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, Retri
 
         # Do not allow changes to an Inventory kind.
         if kind is not None and obj.kind != kind:
-            return Response(dict(error=_('You cannot turn a regular inventory into a "smart" inventory.')),
-                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response(dict(error=_('You cannot turn a regular inventory into a "smart" inventory.')), status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super(InventoryDetail, self).update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
@@ -175,7 +164,7 @@ class InventoryInstanceGroupsList(SubListAttachDetachAPIView):
 
 class InventoryAccessList(ResourceAccessList):
 
-    model = User # needs to be User for AccessLists's
+    model = User  # needs to be User for AccessLists's
     parent_model = Inventory
 
 
@@ -184,7 +173,7 @@ class InventoryObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
     parent_model = Inventory
-    search_fields = ('role_field', 'content_type__model',)
+    search_fields = ('role_field', 'content_type__model')
 
     def get_queryset(self):
         po = self.get_parent_object()

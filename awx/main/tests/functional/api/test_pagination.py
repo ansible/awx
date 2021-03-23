@@ -19,6 +19,7 @@ def host(inventory):
         h.save()
         h = Host.objects.get(name=name, inventory=inventory)
         return h
+
     return handler
 
 
@@ -29,6 +30,7 @@ def group(inventory):
         g.save()
         g = Group.objects.get(name=name, inventory=inventory)
         return g
+
     return handler
 
 

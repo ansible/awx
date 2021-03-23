@@ -19,6 +19,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unifiedjobtemplate',
             name='next_schedule',
-            field=models.ForeignKey(default=None, editable=False, null=True, on_delete=awx.main.utils.polymorphic.SET_NULL, related_name='unifiedjobtemplate_as_next_schedule+', to='main.Schedule'),
+            field=models.ForeignKey(
+                default=None,
+                editable=False,
+                null=True,
+                on_delete=awx.main.utils.polymorphic.SET_NULL,
+                related_name='unifiedjobtemplate_as_next_schedule+',
+                to='main.Schedule',
+            ),
         ),
     ]

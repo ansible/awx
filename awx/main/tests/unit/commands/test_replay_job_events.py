@@ -19,8 +19,7 @@ from awx.main.management.commands.replay_job_events import (
 )
 
 
-class TestReplayJobEvents():
-
+class TestReplayJobEvents:
     @pytest.fixture
     def epoch(self):
         return timezone.now()
@@ -39,14 +38,14 @@ class TestReplayJobEvents():
 
     @pytest.fixture
     def mock_serializer_fn(self):
-        class MockSerializer():
+        class MockSerializer:
             data = dict()
-
 
         def fn(job_event):
             serialized = MockSerializer()
             serialized.data['group_name'] = 'foobar'
             return serialized
+
         return fn
 
     @pytest.fixture
@@ -65,28 +64,32 @@ class TestReplayJobEvents():
         replayer.run(3, 1)
 
         assert replayer.sleep.call_count == 6
-        replayer.sleep.assert_has_calls([
-            mock.call(10.0),
-            mock.call(10.0),
-            mock.call(10.0),
-            mock.call(1.0),
-            mock.call(0.001),
-            mock.call(0.000001),
-        ])
+        replayer.sleep.assert_has_calls(
+            [
+                mock.call(10.0),
+                mock.call(10.0),
+                mock.call(10.0),
+                mock.call(1.0),
+                mock.call(0.001),
+                mock.call(0.000001),
+            ]
+        )
 
     @mock.patch('awx.main.management.commands.replay_job_events.emit_event_detail', lambda *a, **kw: None)
     def test_speed(self, mocker, replayer):
         replayer.run(3, 2)
 
         assert replayer.sleep.call_count == 6
-        replayer.sleep.assert_has_calls([
-            mock.call(5.0),
-            mock.call(5.0),
-            mock.call(5.0),
-            mock.call(0.5),
-            mock.call(0.0005),
-            mock.call(0.0000005),
-        ])
+        replayer.sleep.assert_has_calls(
+            [
+                mock.call(5.0),
+                mock.call(5.0),
+                mock.call(5.0),
+                mock.call(0.5),
+                mock.call(0.0005),
+                mock.call(0.0000005),
+            ]
+        )
 
     # TODO: Test replay_offset()
     # TODO: Test stat generation

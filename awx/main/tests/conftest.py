@@ -1,4 +1,3 @@
-
 # Python
 import pytest
 from unittest import mock
@@ -19,18 +18,18 @@ from django.core.cache import cache
 
 
 def pytest_addoption(parser):
-    parser.addoption(
-        "--genschema", action="store_true", default=False, help="execute schema validator"
-    )
+    parser.addoption("--genschema", action="store_true", default=False, help="execute schema validator")
 
 
 def pytest_configure(config):
     import sys
+
     sys._called_from_test = True
 
 
 def pytest_unconfigure(config):
     import sys
+
     del sys._called_from_test
 
 
@@ -41,12 +40,12 @@ def mock_access():
         try:
             mock_instance = mock.MagicMock(__name__='foobar')
             MockAccess = mock.MagicMock(return_value=mock_instance)
-            the_patch = mock.patch.dict('awx.main.access.access_registry',
-                                        {TowerClass: MockAccess}, clear=False)
+            the_patch = mock.patch.dict('awx.main.access.access_registry', {TowerClass: MockAccess}, clear=False)
             the_patch.__enter__()
             yield mock_instance
         finally:
             the_patch.__exit__()
+
     return access_given_class
 
 
@@ -89,11 +88,18 @@ def default_instance_group(instance_factory, instance_group_factory):
 def job_template_with_survey_passwords_factory(job_template_factory):
     def rf(persisted):
         "Returns job with linked JT survey with password survey questions"
-        objects = job_template_factory('jt', organization='org1', survey=[
-            {'variable': 'submitter_email', 'type': 'text', 'default': 'foobar@redhat.com'},
-            {'variable': 'secret_key', 'default': '6kQngg3h8lgiSTvIEb21', 'type': 'password'},
-            {'variable': 'SSN', 'type': 'password'}], persisted=persisted)
+        objects = job_template_factory(
+            'jt',
+            organization='org1',
+            survey=[
+                {'variable': 'submitter_email', 'type': 'text', 'default': 'foobar@redhat.com'},
+                {'variable': 'secret_key', 'default': '6kQngg3h8lgiSTvIEb21', 'type': 'password'},
+                {'variable': 'SSN', 'type': 'password'},
+            ],
+            persisted=persisted,
+        )
         return objects.job_template
+
     return rf
 
 

@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
@@ -14,6 +15,7 @@ from distutils.util import strtobool
 
 try:
     import yaml
+
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
@@ -139,15 +141,14 @@ class TowerModule(AnsibleModule):
 
         # If we have a specified  tower config, load it
         if self.params.get('tower_config_file'):
-            duplicated_params = [
-                fn for fn in self.AUTH_ARGSPEC
-                if fn != 'tower_config_file' and self.params.get(fn) is not None
-            ]
+            duplicated_params = [fn for fn in self.AUTH_ARGSPEC if fn != 'tower_config_file' and self.params.get(fn) is not None]
             if duplicated_params:
-                self.warn((
-                    'The parameter(s) {0} were provided at the same time as tower_config_file. '
-                    'Precedence may be unstable, we suggest either using config file or params.'
-                ).format(', '.join(duplicated_params)))
+                self.warn(
+                    (
+                        'The parameter(s) {0} were provided at the same time as tower_config_file. '
+                        'Precedence may be unstable, we suggest either using config file or params.'
+                    ).format(', '.join(duplicated_params))
+                )
             try:
                 # TODO: warn if there are conflicts with other params
                 self.load_config(self.params.get('tower_config_file'))
@@ -186,7 +187,7 @@ class TowerModule(AnsibleModule):
                         raise AssertionError("The yaml config file is not properly formatted as a dict.")
                     try_config_parsing = False
 
-                except(AttributeError, yaml.YAMLError, AssertionError):
+                except (AttributeError, yaml.YAMLError, AssertionError):
                     try_config_parsing = True
 
             if try_config_parsing:

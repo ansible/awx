@@ -9,60 +9,68 @@ from awxkit import utils
 from awxkit import exceptions as exc
 
 
-@pytest.mark.parametrize('inp, out',
-                         [[True, True],
-                          [False, False],
-                          [1, True],
-                          [0, False],
-                          [1.0, True],
-                          [0.0, False],
-                          ['TrUe', True],
-                          ['FalSe', False],
-                          ['yEs', True],
-                          ['No', False],
-                          ['oN', True],
-                          ['oFf', False],
-                          ['asdf', True],
-                          ['0', False],
-                          ['', False],
-                          [{1: 1}, True],
-                          [{}, False],
-                          [(0,), True],
-                          [(), False],
-                          [[1], True],
-                          [[], False]])
+@pytest.mark.parametrize(
+    'inp, out',
+    [
+        [True, True],
+        [False, False],
+        [1, True],
+        [0, False],
+        [1.0, True],
+        [0.0, False],
+        ['TrUe', True],
+        ['FalSe', False],
+        ['yEs', True],
+        ['No', False],
+        ['oN', True],
+        ['oFf', False],
+        ['asdf', True],
+        ['0', False],
+        ['', False],
+        [{1: 1}, True],
+        [{}, False],
+        [(0,), True],
+        [(), False],
+        [[1], True],
+        [[], False],
+    ],
+)
 def test_to_bool(inp, out):
     assert utils.to_bool(inp) == out
 
 
-@pytest.mark.parametrize('inp, out',
-                         [["{}", {}],
-                          ["{'null': null}", {"null": None}],
-                          ["{'bool': true}", {"bool": True}],
-                          ["{'bool': false}", {"bool": False}],
-                          ["{'int': 0}", {"int": 0}],
-                          ["{'float': 1.0}", {"float": 1.0}],
-                          ["{'str': 'abc'}", {"str": "abc"}],
-                          ["{'obj': {}}", {"obj": {}}],
-                          ["{'list': []}", {"list": []}],
-                          ["---", None],
-                          ["---\n'null': null", {'null': None}],
-                          ["---\n'bool': true", {'bool': True}],
-                          ["---\n'bool': false", {'bool': False}],
-                          ["---\n'int': 0", {'int': 0}],
-                          ["---\n'float': 1.0", {'float': 1.0}],
-                          ["---\n'string': 'abc'", {'string': 'abc'}],
-                          ["---\n'obj': {}", {'obj': {}}],
-                          ["---\n'list': []", {'list': []}],
-                          ["", None],
-                          ["'null': null", {'null': None}],
-                          ["'bool': true", {'bool': True}],
-                          ["'bool': false", {'bool': False}],
-                          ["'int': 0", {'int': 0}],
-                          ["'float': 1.0", {'float': 1.0}],
-                          ["'string': 'abc'", {'string': 'abc'}],
-                          ["'obj': {}", {'obj': {}}],
-                          ["'list': []", {'list': []}]])
+@pytest.mark.parametrize(
+    'inp, out',
+    [
+        ["{}", {}],
+        ["{'null': null}", {"null": None}],
+        ["{'bool': true}", {"bool": True}],
+        ["{'bool': false}", {"bool": False}],
+        ["{'int': 0}", {"int": 0}],
+        ["{'float': 1.0}", {"float": 1.0}],
+        ["{'str': 'abc'}", {"str": "abc"}],
+        ["{'obj': {}}", {"obj": {}}],
+        ["{'list': []}", {"list": []}],
+        ["---", None],
+        ["---\n'null': null", {'null': None}],
+        ["---\n'bool': true", {'bool': True}],
+        ["---\n'bool': false", {'bool': False}],
+        ["---\n'int': 0", {'int': 0}],
+        ["---\n'float': 1.0", {'float': 1.0}],
+        ["---\n'string': 'abc'", {'string': 'abc'}],
+        ["---\n'obj': {}", {'obj': {}}],
+        ["---\n'list': []", {'list': []}],
+        ["", None],
+        ["'null': null", {'null': None}],
+        ["'bool': true", {'bool': True}],
+        ["'bool': false", {'bool': False}],
+        ["'int': 0", {'int': 0}],
+        ["'float': 1.0", {'float': 1.0}],
+        ["'string': 'abc'", {'string': 'abc'}],
+        ["'obj': {}", {'obj': {}}],
+        ["'list': []", {'list': []}],
+    ],
+)
 def test_load_valid_json_or_yaml(inp, out):
     assert utils.load_json_or_yaml(inp) == out
 
@@ -74,19 +82,13 @@ def test_load_invalid_json_or_yaml(inp):
 
 
 @pytest.mark.parametrize('non_ascii', [True, False])
-@pytest.mark.skipif(
-    sys.version_info < (3, 6),
-    reason='this is only intended to be used in py3, not the CLI'
-)
+@pytest.mark.skipif(sys.version_info < (3, 6), reason='this is only intended to be used in py3, not the CLI')
 def test_random_titles_are_unicode(non_ascii):
     assert isinstance(utils.random_title(non_ascii=non_ascii), str)
 
 
 @pytest.mark.parametrize('non_ascii', [True, False])
-@pytest.mark.skipif(
-    sys.version_info < (3, 6),
-    reason='this is only intended to be used in py3, not the CLI'
-)
+@pytest.mark.skipif(sys.version_info < (3, 6), reason='this is only intended to be used in py3, not the CLI')
 def test_random_titles_generates_correct_characters(non_ascii):
     title = utils.random_title(non_ascii=non_ascii)
     if non_ascii:
@@ -98,34 +100,39 @@ def test_random_titles_generates_correct_characters(non_ascii):
         title.encode('utf-8')
 
 
-@pytest.mark.parametrize('inp, out',
-                         [['ClassNameShouldChange', 'class_name_should_change'],
-                          ['classnameshouldntchange', 'classnameshouldntchange'],
-                          ['Classspacingshouldntchange', 'classspacingshouldntchange'],
-                          ['Class1Name2Should3Change', 'class_1_name_2_should_3_change'],
-                          ['Class123name234should345change456', 'class_123_name_234_should_345_change_456']])
+@pytest.mark.parametrize(
+    'inp, out',
+    [
+        ['ClassNameShouldChange', 'class_name_should_change'],
+        ['classnameshouldntchange', 'classnameshouldntchange'],
+        ['Classspacingshouldntchange', 'classspacingshouldntchange'],
+        ['Class1Name2Should3Change', 'class_1_name_2_should_3_change'],
+        ['Class123name234should345change456', 'class_123_name_234_should_345_change_456'],
+    ],
+)
 def test_class_name_to_kw_arg(inp, out):
     assert utils.class_name_to_kw_arg(inp) == out
 
 
-@pytest.mark.parametrize('first, second, expected',
-                         [['/api/v2/resources/', '/api/v2/resources/', True],
-                          ['/api/v2/resources/', '/api/v2/resources/?test=ignored', True],
-                          ['/api/v2/resources/?one=ignored', '/api/v2/resources/?two=ignored', True],
-                          ['http://one.com', 'http://one.com', True],
-                          ['http://one.com', 'http://www.one.com', True],
-                          ['http://one.com', 'http://one.com?test=ignored', True],
-                          ['http://one.com', 'http://www.one.com?test=ignored', True],
-                          ['http://one.com', 'https://one.com', False],
-                          ['http://one.com', 'https://one.com?test=ignored', False]])
+@pytest.mark.parametrize(
+    'first, second, expected',
+    [
+        ['/api/v2/resources/', '/api/v2/resources/', True],
+        ['/api/v2/resources/', '/api/v2/resources/?test=ignored', True],
+        ['/api/v2/resources/?one=ignored', '/api/v2/resources/?two=ignored', True],
+        ['http://one.com', 'http://one.com', True],
+        ['http://one.com', 'http://www.one.com', True],
+        ['http://one.com', 'http://one.com?test=ignored', True],
+        ['http://one.com', 'http://www.one.com?test=ignored', True],
+        ['http://one.com', 'https://one.com', False],
+        ['http://one.com', 'https://one.com?test=ignored', False],
+    ],
+)
 def test_are_same_endpoint(first, second, expected):
     assert utils.are_same_endpoint(first, second) == expected
 
 
-@pytest.mark.parametrize('endpoint, expected',
-                         [['/api/v2/resources/', 'v2'],
-                          ['/api/v2000/resources/', 'v2000'],
-                          ['/api/', 'common']])
+@pytest.mark.parametrize('endpoint, expected', [['/api/v2/resources/', 'v2'], ['/api/v2000/resources/', 'v2000'], ['/api/', 'common']])
 def test_version_from_endpoint(endpoint, expected):
     assert utils.version_from_endpoint(endpoint) == expected
 
@@ -133,18 +140,23 @@ def test_version_from_endpoint(endpoint, expected):
 class OneClass:
     pass
 
+
 class TwoClass:
     pass
+
 
 class ThreeClass:
     pass
 
+
 class FourClass(ThreeClass):
     pass
+
 
 def test_filter_by_class_with_subclass_class():
     filtered = utils.filter_by_class((OneClass, OneClass), (FourClass, ThreeClass))
     assert filtered == [OneClass, FourClass]
+
 
 def test_filter_by_class_with_subclass_instance():
     one = OneClass()
@@ -152,10 +164,12 @@ def test_filter_by_class_with_subclass_instance():
     filtered = utils.filter_by_class((one, OneClass), (four, ThreeClass))
     assert filtered == [one, four]
 
+
 def test_filter_by_class_no_arg_tuples():
     three = ThreeClass()
     filtered = utils.filter_by_class((True, OneClass), (False, TwoClass), (three, ThreeClass))
     assert filtered == [OneClass, None, three]
+
 
 def test_filter_by_class_with_arg_tuples_containing_class():
     one = OneClass()
@@ -163,11 +177,13 @@ def test_filter_by_class_with_arg_tuples_containing_class():
     filtered = utils.filter_by_class((one, OneClass), (False, TwoClass), (three, ThreeClass))
     assert filtered == [one, None, three]
 
+
 def test_filter_by_class_with_arg_tuples_containing_subclass():
     one = OneClass()
     three = (FourClass, dict(one=1, two=2))
     filtered = utils.filter_by_class((one, OneClass), (False, TwoClass), (three, ThreeClass))
     assert filtered == [one, None, three]
+
 
 @pytest.mark.parametrize('truthy', (True, 123, 'yes'))
 def test_filter_by_class_with_arg_tuples_containing_truthy(truthy):
@@ -177,18 +193,20 @@ def test_filter_by_class_with_arg_tuples_containing_truthy(truthy):
     assert filtered == [one, None, (ThreeClass, dict(one=1, two=2))]
 
 
-@pytest.mark.parametrize('date_string,now,expected', [
-    ('2017-12-20T00:00:01.5Z', datetime(2017, 12, 20, 0, 0, 2, 750000), 1.25),
-    ('2017-12-20T00:00:01.5Z', datetime(2017, 12, 20, 0, 0, 1, 500000), 0.00),
-    ('2017-12-20T00:00:01.5Z', datetime(2017, 12, 20, 0, 0, 0, 500000), -1.00),
-])
+@pytest.mark.parametrize(
+    'date_string,now,expected',
+    [
+        ('2017-12-20T00:00:01.5Z', datetime(2017, 12, 20, 0, 0, 2, 750000), 1.25),
+        ('2017-12-20T00:00:01.5Z', datetime(2017, 12, 20, 0, 0, 1, 500000), 0.00),
+        ('2017-12-20T00:00:01.5Z', datetime(2017, 12, 20, 0, 0, 0, 500000), -1.00),
+    ],
+)
 def test_seconds_since_date_string(date_string, now, expected):
     with mock.patch('awxkit.utils.utcnow', return_value=now):
         assert utils.seconds_since_date_string(date_string) == expected
 
 
 class RecordingCallback(object):
-
     def __init__(self, value=True):
         self.call_count = 0
         self.value = value
@@ -225,7 +243,6 @@ def test_suppress():
 
 
 class TestPollUntil(object):
-
     @pytest.mark.parametrize('timeout', [0, 0.0, -0.5, -1, -9999999])
     def test_callback_called_once_for_non_positive_timeout(self, timeout):
         with mock.patch('awxkit.utils.logged_sleep') as sleep:
@@ -246,7 +263,6 @@ class TestPollUntil(object):
 
 
 class TestPseudoNamespace(object):
-
     def test_set_item_check_item(self):
         pn = utils.PseudoNamespace()
         pn['key'] = 'value'
@@ -319,10 +335,7 @@ class TestPseudoNamespace(object):
         assert pn == dict(one=[dict(two=2), dict(three=3)])
 
     def test_instantiation_via_nested_dict_with_lists(self):
-        pn = utils.PseudoNamespace(dict(one=[dict(two=2),
-                                             dict(three=dict(four=4,
-                                                             five=[dict(six=6),
-                                                                   dict(seven=7)]))]))
+        pn = utils.PseudoNamespace(dict(one=[dict(two=2), dict(three=dict(four=4, five=[dict(six=6), dict(seven=7)]))]))
         assert pn.one[1].three.five[1].seven == 7
 
     def test_instantiation_via_nested_dict_with_tuple(self):
@@ -332,10 +345,7 @@ class TestPseudoNamespace(object):
         assert pn == dict(one=(dict(two=2), dict(three=3)))
 
     def test_instantiation_via_nested_dict_with_tuples(self):
-        pn = utils.PseudoNamespace(dict(one=(dict(two=2),
-                                             dict(three=dict(four=4,
-                                                             five=(dict(six=6),
-                                                                   dict(seven=7)))))))
+        pn = utils.PseudoNamespace(dict(one=(dict(two=2), dict(three=dict(four=4, five=(dict(six=6), dict(seven=7)))))))
         assert pn.one[1].three.five[1].seven == 7
 
     def test_update_with_nested_dict(self):
@@ -348,23 +358,16 @@ class TestPseudoNamespace(object):
 
     def test_update_with_nested_dict_with_lists(self):
         pn = utils.PseudoNamespace()
-        pn.update(dict(one=[dict(two=2),
-                            dict(three=dict(four=4,
-                                            five=[dict(six=6),
-                                                  dict(seven=7)]))]))
+        pn.update(dict(one=[dict(two=2), dict(three=dict(four=4, five=[dict(six=6), dict(seven=7)]))]))
         assert pn.one[1].three.five[1].seven == 7
 
     def test_update_with_nested_dict_with_tuples(self):
         pn = utils.PseudoNamespace()
-        pn.update(dict(one=(dict(two=2),
-                            dict(three=dict(four=4,
-                                            five=(dict(six=6),
-                                                  dict(seven=7)))))))
+        pn.update(dict(one=(dict(two=2), dict(three=dict(four=4, five=(dict(six=6), dict(seven=7)))))))
         assert pn.one[1].three.five[1].seven == 7
 
 
 class TestUpdatePayload(object):
-
     def test_empty_payload(self):
         fields = ('one', 'two', 'three', 'four')
         kwargs = dict(two=2, four=4)

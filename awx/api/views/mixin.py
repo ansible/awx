@@ -16,14 +16,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from awx.main.constants import ACTIVE_STATES
-from awx.main.utils import (
-    get_object_or_400,
-    parse_yaml_or_json,
-)
-from awx.main.models.ha import (
-    Instance,
-    InstanceGroup,
-)
+from awx.main.utils import get_object_or_400, parse_yaml_or_json
+from awx.main.models.ha import Instance, InstanceGroup
 from awx.main.models.organization import Team
 from awx.main.models.projects import Project
 from awx.main.models.inventory import Inventory
@@ -34,9 +28,10 @@ logger = logging.getLogger('awx.api.views.mixin')
 
 
 class UnifiedJobDeletionMixin(object):
-    '''
+    """
     Special handling when deleting a running unified job object.
-    '''
+    """
+
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
@@ -53,22 +48,21 @@ class UnifiedJobDeletionMixin(object):
             # Prohibit deletion if job events are still coming in
             if obj.finished and now() < obj.finished + dateutil.relativedelta.relativedelta(minutes=1):
                 # less than 1 minute has passed since job finished and events are not in
-                return Response({"error": _("Job has not finished processing events.")},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": _("Job has not finished processing events.")}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 # if it has been > 1 minute, events are probably lost
-                logger.warning('Allowing deletion of {} through the API without all events '
-                               'processed.'.format(obj.log_format))
+                logger.warning('Allowing deletion of {} through the API without all events ' 'processed.'.format(obj.log_format))
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class InstanceGroupMembershipMixin(object):
-    '''
+    """
     This mixin overloads attach/detach so that it calls InstanceGroup.save(),
     triggering a background recalculation of policy-based instance group
     membership.
-    '''
+    """
+
     def attach(self, request, *args, **kwargs):
         response = super(InstanceGroupMembershipMixin, self).attach(request, *args, **kwargs)
         sub_id, res = self.attach_validate(request)
@@ -84,9 +78,7 @@ class InstanceGroupMembershipMixin(object):
                     ig_obj = get_object_or_400(ig_qs, pk=sub_id)
                 else:
                     # similar to get_parent_object, but selected for update
-                    parent_filter = {
-                        self.lookup_field: self.kwargs.get(self.lookup_field, None),
-                    }
+                    parent_filter = {self.lookup_field: self.kwargs.get(self.lookup_field, None)}
                     ig_obj = get_object_or_404(ig_qs, **parent_filter)
                 if inst_name not in ig_obj.policy_instance_list:
                     ig_obj.policy_instance_list.append(inst_name)
@@ -126,9 +118,7 @@ class InstanceGroupMembershipMixin(object):
                     ig_obj = get_object_or_400(ig_qs, pk=sub_id)
                 else:
                     # similar to get_parent_object, but selected for update
-                    parent_filter = {
-                        self.lookup_field: self.kwargs.get(self.lookup_field, None),
-                    }
+                    parent_filter = {self.lookup_field: self.kwargs.get(self.lookup_field, None)}
                     ig_obj = get_object_or_404(ig_qs, **parent_filter)
                 if inst_name in ig_obj.policy_instance_list:
                     ig_obj.policy_instance_list.pop(ig_obj.policy_instance_list.index(inst_name))
@@ -146,16 +136,13 @@ class RelatedJobsPreventDeleteMixin(object):
         if len(active_jobs) > 0:
             raise ActiveJobConflict(active_jobs)
         time_cutoff = now() - dateutil.relativedelta.relativedelta(minutes=1)
-        recent_jobs = obj._get_related_jobs().filter(finished__gte = time_cutoff)
+        recent_jobs = obj._get_related_jobs().filter(finished__gte=time_cutoff)
         for unified_job in recent_jobs.get_real_instances():
             if not unified_job.event_processing_finished:
-                raise PermissionDenied(_(
-                    'Related job {} is still processing events.'
-                ).format(unified_job.log_format))
+                raise PermissionDenied(_('Related job {} is still processing events.').format(unified_job.log_format))
 
 
 class OrganizationCountsMixin(object):
-
     def get_serializer_context(self, *args, **kwargs):
         full_context = super(OrganizationCountsMixin, self).get_serializer_context(*args, **kwargs)
 
@@ -177,26 +164,23 @@ class OrganizationCountsMixin(object):
         # Produce counts of Foreign Key relationships
         db_results['inventories'] = inv_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
-        db_results['teams'] = Team.accessible_objects(
-            self.request.user, 'read_role').values('organization').annotate(
-            Count('organization')).order_by('organization')
+        db_results['teams'] = (
+            Team.accessible_objects(self.request.user, 'read_role').values('organization').annotate(Count('organization')).order_by('organization')
+        )
 
         db_results['job_templates'] = jt_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
         db_results['projects'] = project_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
         # Other members and admins of organization are always viewable
-        db_results['users'] = org_qs.annotate(
-            users=Count('member_role__members', distinct=True),
-            admins=Count('admin_role__members', distinct=True)
-        ).values('id', 'users', 'admins')
+        db_results['users'] = org_qs.annotate(users=Count('member_role__members', distinct=True), admins=Count('admin_role__members', distinct=True)).values(
+            'id', 'users', 'admins'
+        )
 
         count_context = {}
         for org in org_id_list:
             org_id = org['id']
-            count_context[org_id] = {
-                'inventories': 0, 'teams': 0, 'users': 0, 'job_templates': 0,
-                'admins': 0, 'projects': 0}
+            count_context[org_id] = {'inventories': 0, 'teams': 0, 'users': 0, 'job_templates': 0, 'admins': 0, 'projects': 0}
 
         for res, count_qs in db_results.items():
             if res == 'users':
@@ -218,21 +202,20 @@ class OrganizationCountsMixin(object):
 
 
 class ControlledByScmMixin(object):
-    '''
+    """
     Special method to reset SCM inventory commit hash
     if anything that it manages changes.
-    '''
+    """
 
     def _reset_inv_src_rev(self, obj):
         if self.request.method in SAFE_METHODS or not obj:
             return
-        project_following_sources = obj.inventory_sources.filter(
-            update_on_project_update=True, source='scm')
+        project_following_sources = obj.inventory_sources.filter(update_on_project_update=True, source='scm')
         if project_following_sources:
             # Allow inventory changes unrelated to variables
             if self.model == Inventory and (
-                    not self.request or not self.request.data or
-                    parse_yaml_or_json(self.request.data.get('variables', '')) == parse_yaml_or_json(obj.variables)):
+                not self.request or not self.request.data or parse_yaml_or_json(self.request.data.get('variables', '')) == parse_yaml_or_json(obj.variables)
+            ):
                 return
             project_following_sources.update(scm_last_revision='')
 

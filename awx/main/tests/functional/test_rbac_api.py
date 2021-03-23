@@ -1,10 +1,9 @@
-from unittest import mock # noqa
+from unittest import mock  # noqa
 import pytest
 
 from django.db import transaction
 from awx.api.versioning import reverse
 from awx.main.models.rbac import Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
-
 
 
 @pytest.fixture
@@ -40,7 +39,7 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
     assert response.status_code == 200
     roles = response.data
     assert roles['count'] > 0
-    assert roles['count'] == len(roles['results']) # just to make sure the tests below are valid
+    assert roles['count'] == len(roles['results'])  # just to make sure the tests below are valid
 
     role_hash = {}
 
@@ -77,7 +76,7 @@ def test_roles_filter_visibility(get, organization, project, admin, alice, bob):
     organization.auditor_role.members.add(bob)
     assert get(reverse('api:user_roles_list', kwargs={'pk': admin.id}) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
     organization.auditor_role.members.remove(bob)
-    project.use_role.members.add(bob) # sibling role should still grant visibility
+    project.use_role.members.add(bob)  # sibling role should still grant visibility
     assert get(reverse('api:user_roles_list', kwargs={'pk': admin.id}) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
 
 
@@ -112,7 +111,7 @@ def test_get_user_roles_list(get, admin):
     response = get(url, admin)
     assert response.status_code == 200
     roles = response.data
-    assert roles['count'] > 0 # 'system_administrator' role if nothing else
+    assert roles['count'] > 0  # 'system_administrator' role if nothing else
 
 
 @pytest.mark.django_db
@@ -134,17 +133,17 @@ def test_user_view_other_user_roles(organization, inventory, team, get, alice, b
     assert response.status_code == 200
     roles = response.data
     assert roles['count'] > 0
-    assert roles['count'] == len(roles['results']) # just to make sure the tests below are valid
+    assert roles['count'] == len(roles['results'])  # just to make sure the tests below are valid
 
     role_hash = {}
     for r in roles['results']:
         role_hash[r['id']] = r['name']
 
     assert organization.admin_role.id in role_hash
-    assert custom_role.id not in role_hash # doesn't show up in the user roles list, not an explicit grant
+    assert custom_role.id not in role_hash  # doesn't show up in the user roles list, not an explicit grant
     assert Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).id not in role_hash
     assert inventory.admin_role.id not in role_hash
-    assert team.member_role.id not in role_hash # alice can't see this
+    assert team.member_role.id not in role_hash  # alice can't see this
 
     # again but this time alice is part of the team, and should be able to see the team role
     team.member_role.members.add(alice)
@@ -152,13 +151,13 @@ def test_user_view_other_user_roles(organization, inventory, team, get, alice, b
     assert response.status_code == 200
     roles = response.data
     assert roles['count'] > 0
-    assert roles['count'] == len(roles['results']) # just to make sure the tests below are valid
+    assert roles['count'] == len(roles['results'])  # just to make sure the tests below are valid
 
     role_hash = {}
     for r in roles['results']:
         role_hash[r['id']] = r['name']
 
-    assert team.member_role.id in role_hash # Alice can now see this
+    assert team.member_role.id in role_hash  # Alice can now see this
 
 
 @pytest.mark.django_db
@@ -258,8 +257,8 @@ def test_put_role_405(put, admin, role):
     url = reverse('api:role_detail', kwargs={'pk': role.id})
     response = put(url, {'name': 'Some new name'}, admin)
     assert response.status_code == 405
-    #r = Role.objects.get(id=role.id)
-    #assert r.name == 'Some new name'
+    # r = Role.objects.get(id=role.id)
+    # assert r.name == 'Some new name'
 
 
 @pytest.mark.django_db

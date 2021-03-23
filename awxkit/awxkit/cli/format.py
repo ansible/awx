@@ -48,24 +48,21 @@ def add_output_formatting_arguments(parser, env):
         dest='conf.format',
         choices=FORMATTERS.keys(),
         default=env.get('TOWER_FORMAT', 'json'),
-        help=(
-            'specify a format for the input and output'
-        ),
+        help=('specify a format for the input and output'),
     )
     formatting.add_argument(
         '--filter',
         dest='conf.filter',
         default='.',
         metavar='TEXT',
-        help=(
-            'specify an output filter (only valid with jq or human format)'
-        ),
+        help=('specify an output filter (only valid with jq or human format)'),
     )
     formatting.add_argument(
         '--conf.color',
         metavar='BOOLEAN',
         help='Display colorized output.  Defaults to True',
-        default=env.get('TOWER_COLOR', 't'), type=strtobool,
+        default=env.get('TOWER_COLOR', 't'),
+        type=strtobool,
     )
     formatting.add_argument(
         '-v',
@@ -73,7 +70,7 @@ def add_output_formatting_arguments(parser, env):
         dest='conf.verbose',
         help='print debug-level logs, including requests made',
         default=strtobool(env.get('TOWER_VERBOSE', 'f')),
-        action="store_true"
+        action="store_true",
     )
 
 
@@ -105,11 +102,10 @@ def format_jq(output, fmt):
         if fmt == '.':
             return output
         raise ImportError(
-            'To use `-f jq`, you must install the optional jq dependency.\n'
-            '`pip install jq`\n',
+            'To use `-f jq`, you must install the optional jq dependency.\n' '`pip install jq`\n',
             'Note that some platforms may require additional programs to '
             'build jq from source (like `libtool`).\n'
-            'See https://pypi.org/project/jq/ for instructions.'
+            'See https://pypi.org/project/jq/ for instructions.',
         )
     results = []
     for x in jq.jq(fmt).transform(output, multiple_output=True):
@@ -127,11 +123,7 @@ def format_json(output, fmt):
 
 def format_yaml(output, fmt):
     output = json.loads(json.dumps(output))
-    return yaml.safe_dump(
-        output,
-        default_flow_style=False,
-        allow_unicode=True
-    )
+    return yaml.safe_dump(output, default_flow_style=False, allow_unicode=True)
 
 
 def format_human(output, fmt):
@@ -151,10 +143,7 @@ def format_human(output, fmt):
                 column_names.remove(k)
 
     table = [column_names]
-    table.extend([
-        [record.get(col, '') for col in column_names]
-        for record in output
-    ])
+    table.extend([[record.get(col, '') for col in column_names] for record in output])
     col_paddings = []
 
     def format_num(v):
@@ -184,9 +173,4 @@ def format_human(output, fmt):
     return '\n'.join(lines)
 
 
-FORMATTERS = {
-    'json': format_json,
-    'yaml': format_yaml,
-    'jq': format_jq,
-    'human': format_human
-}
+FORMATTERS = {'json': format_json, 'yaml': format_yaml, 'jq': format_jq, 'human': format_human}

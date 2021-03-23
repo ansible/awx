@@ -1,6 +1,4 @@
-
 class Common(Exception):
-
     def __init__(self, status_string='', message=''):
         if isinstance(status_string, Exception):
             self.status_string = ''

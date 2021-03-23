@@ -34,12 +34,13 @@ def run_command(name, *args, **options):
 
 
 @pytest.mark.parametrize(
-    "username,password,expected,changed", [
+    "username,password,expected,changed",
+    [
         ('admin', 'dingleberry', 'Password updated', True),
         ('admin', 'admin', 'Password not updated', False),
         (None, 'foo', 'username required', False),
         ('admin', None, 'password required', False),
-    ]
+    ],
 )
 def test_update_password_command(mocker, username, password, expected, changed):
     with mocker.patch.object(UpdatePassword, 'update_password', return_value=changed):

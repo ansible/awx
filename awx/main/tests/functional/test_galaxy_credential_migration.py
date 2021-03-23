@@ -91,14 +91,16 @@ def test_fallback_galaxies():
     Setting.objects.create(key='PRIMARY_GALAXY_AUTH_URL', value='https://auth.example.org/')
     Setting.objects.create(key='PRIMARY_GALAXY_TOKEN', value='secret123')
     try:
-        settings.FALLBACK_GALAXY_SERVERS = [{
-            'id': 'abc123',
-            'url': 'https://some-other-galaxy.example.org/',
-            'auth_url': 'https://some-other-galaxy.sso.example.org/',
-            'username': 'user',
-            'password': 'pass',
-            'token': 'fallback123',
-        }]
+        settings.FALLBACK_GALAXY_SERVERS = [
+            {
+                'id': 'abc123',
+                'url': 'https://some-other-galaxy.example.org/',
+                'auth_url': 'https://some-other-galaxy.sso.example.org/',
+                'username': 'user',
+                'password': 'pass',
+                'token': 'fallback123',
+            }
+        ]
         galaxy.migrate_galaxy_settings(apps, None)
     finally:
         settings.FALLBACK_GALAXY_SERVERS = []

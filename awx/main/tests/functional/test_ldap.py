@@ -1,4 +1,3 @@
-
 import ldap
 import ldif
 import pytest
@@ -26,7 +25,7 @@ def ldap_generator():
         conn = ldap.initialize('ldap://{}/'.format(host))
 
         return conn
-        #mockldap.stop()
+        # mockldap.stop()
 
     return fn
 
@@ -40,42 +39,16 @@ def ldap_settings_generator():
             'AUTH_LDAP_SERVER_URI': 'ldap://{}'.format(host),
             'AUTH_LDAP_BIND_DN': 'cn=eng_user1,ou=people,dc={},dc=com'.format(dc),
             'AUTH_LDAP_BIND_PASSWORD': 'password',
-            "AUTH_LDAP_USER_SEARCH": [
-                "ou=people,dc={},dc=com".format(dc),
-                "SCOPE_SUBTREE",
-                "(cn=%(user)s)"
-            ],
+            "AUTH_LDAP_USER_SEARCH": ["ou=people,dc={},dc=com".format(dc), "SCOPE_SUBTREE", "(cn=%(user)s)"],
             "AUTH_LDAP_TEAM_MAP": {
-                "LDAP Sales": {
-                    "organization": "LDAP Organization",
-                    "users": "cn=sales,ou=groups,dc={},dc=com".format(dc),
-                    "remove": True
-                },
-                "LDAP IT": {
-                    "organization": "LDAP Organization",
-                    "users": "cn=it,ou=groups,dc={},dc=com".format(dc),
-                    "remove": True
-                },
-                "LDAP Engineering": {
-                    "organization": "LDAP Organization",
-                    "users": "cn=engineering,ou=groups,dc={},dc=com".format(dc),
-                    "remove": True
-                }
+                "LDAP Sales": {"organization": "LDAP Organization", "users": "cn=sales,ou=groups,dc={},dc=com".format(dc), "remove": True},
+                "LDAP IT": {"organization": "LDAP Organization", "users": "cn=it,ou=groups,dc={},dc=com".format(dc), "remove": True},
+                "LDAP Engineering": {"organization": "LDAP Organization", "users": "cn=engineering,ou=groups,dc={},dc=com".format(dc), "remove": True},
             },
             "AUTH_LDAP_REQUIRE_GROUP": None,
-            "AUTH_LDAP_USER_ATTR_MAP": {
-                "first_name": "givenName",
-                "last_name": "sn",
-                "email": "mail"
-            },
-            "AUTH_LDAP_GROUP_SEARCH": [
-                "dc={},dc=com".format(dc),
-                "SCOPE_SUBTREE",
-                "(objectClass=groupOfNames)"
-            ],
-            "AUTH_LDAP_USER_FLAGS_BY_GROUP": {
-                "is_superuser": "cn=superusers,ou=groups,dc={},dc=com".format(dc)
-            },
+            "AUTH_LDAP_USER_ATTR_MAP": {"first_name": "givenName", "last_name": "sn", "email": "mail"},
+            "AUTH_LDAP_GROUP_SEARCH": ["dc={},dc=com".format(dc), "SCOPE_SUBTREE", "(objectClass=groupOfNames)"],
+            "AUTH_LDAP_USER_FLAGS_BY_GROUP": {"is_superuser": "cn=superusers,ou=groups,dc={},dc=com".format(dc)},
             "AUTH_LDAP_ORGANIZATION_MAP": {
                 "LDAP Organization": {
                     "admins": "cn=engineering_admins,ou=groups,dc={},dc=com".format(dc),
@@ -83,22 +56,23 @@ def ldap_settings_generator():
                     "users": [
                         "cn=engineering,ou=groups,dc={},dc=com".format(dc),
                         "cn=sales,ou=groups,dc={},dc=com".format(dc),
-                        "cn=it,ou=groups,dc={},dc=com".format(dc)
+                        "cn=it,ou=groups,dc={},dc=com".format(dc),
                     ],
-                    "remove_users": False
+                    "remove_users": False,
                 }
             },
         }
 
         if prefix:
             data_new = dict()
-            for k,v in data.items():
+            for k, v in data.items():
                 k_new = k.replace('AUTH_LDAP', 'AUTH_LDAP{}'.format(prefix))
                 data_new[k_new] = v
         else:
             data_new = data
 
         return data_new
+
     return fn
 
 
@@ -128,4 +102,3 @@ def test_login(ldap_generator, patch, post, admin, ldap_settings_generator):
     patch(ldap_settings_url, user=admin, data=ldap_settings_redhat, expect=200)
 
     post(auth_url, data={'username': 'eng_user1', 'password': 'password'}, expect=200)
-

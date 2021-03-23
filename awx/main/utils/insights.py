@@ -16,12 +16,7 @@
 
 
 def filter_insights_api_response(platform_info, reports, remediations):
-    severity_mapping = {
-        1: 'INFO',
-        2: 'WARN',
-        3: 'ERROR',
-        4: 'CRITICAL'
-    }
+    severity_mapping = {1: 'INFO', 2: 'WARN', 3: 'ERROR', 4: 'CRITICAL'}
 
     new_json = {
         'platform_id': platform_info['id'],
@@ -29,10 +24,7 @@ def filter_insights_api_response(platform_info, reports, remediations):
         'reports': [],
     }
     for rep in reports:
-        new_report = {
-            'rule': {},
-            'maintenance_actions': remediations
-        }
+        new_report = {'rule': {}, 'maintenance_actions': remediations}
         rule = rep.get('rule') or {}
         for k in ['description', 'summary']:
             if k in rule:

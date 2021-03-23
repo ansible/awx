@@ -42,7 +42,9 @@ SQUASHED_30 = {
         migrations.AlterField(
             model_name='credential',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['singleton:system_administrator', 'organization.admin_role'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+', parent_role=['singleton:system_administrator', 'organization.admin_role'], to='main.Role', null='True'
+            ),
         ),
         migrations.AlterField(
             model_name='credential',

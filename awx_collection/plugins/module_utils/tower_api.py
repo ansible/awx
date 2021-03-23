@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-from . tower_module import TowerModule
+from .tower_module import TowerModule
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
 from ansible.module_utils.six import PY2
 from ansible.module_utils.six.moves.urllib.error import HTTPError
@@ -22,18 +23,15 @@ class TowerAPIModule(TowerModule):
         'tower': 'Red Hat Ansible Tower',
     }
     session = None
-    IDENTITY_FIELDS = {
-        'users': 'username',
-        'workflow_job_template_nodes': 'identifier',
-        'instances': 'hostname'
-    }
+    IDENTITY_FIELDS = {'users': 'username', 'workflow_job_template_nodes': 'identifier', 'instances': 'hostname'}
     ENCRYPTED_STRING = "$encrypted$"
 
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
 
-        super(TowerAPIModule, self).__init__(argument_spec=argument_spec, direct_params=direct_params,
-                                             error_callback=error_callback, warn_callback=warn_callback, **kwargs)
+        super(TowerAPIModule, self).__init__(
+            argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs
+        )
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
 
         if 'update_secrets' in self.params:
@@ -43,11 +41,7 @@ class TowerAPIModule(TowerModule):
 
     @staticmethod
     def param_to_endpoint(name):
-        exceptions = {
-            'inventory': 'inventories',
-            'target_team': 'teams',
-            'workflow': 'workflow_job_templates'
-        }
+        exceptions = {'inventory': 'inventories', 'target_team': 'teams', 'workflow': 'workflow_job_templates'}
         return exceptions.get(name, '{0}s'.format(name))
 
     @staticmethod
@@ -168,14 +162,12 @@ class TowerAPIModule(TowerModule):
         if len(sample['json']['results']) > 1:
             sample['json']['results'] = sample['json']['results'][:2] + ['...more results snipped...']
         url = self.build_url(endpoint, query_params)
-        display_endpoint = url.geturl()[len(self.host):]  # truncate to not include the base URL
+        display_endpoint = url.geturl()[len(self.host) :]  # truncate to not include the base URL
         self.fail_json(
-            msg="Request to {0} returned {1} items, expected 1".format(
-                display_endpoint, response['json']['count']
-            ),
+            msg="Request to {0} returned {1} items, expected 1".format(display_endpoint, response['json']['count']),
             query=query_params,
             response=sample,
-            total_results=response['json']['count']
+            total_results=response['json']['count'],
         )
 
     def get_exactly_one(self, endpoint, name_or_id=None, **kwargs):
@@ -215,11 +207,11 @@ class TowerAPIModule(TowerModule):
 
         try:
             response = self.session.open(method, url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)
-        except(SSLValidationError) as ssl_err:
+        except (SSLValidationError) as ssl_err:
             self.fail_json(msg="Could not establish a secure connection to your host ({1}): {0}.".format(url.netloc, ssl_err))
-        except(ConnectionError) as con_err:
+        except (ConnectionError) as con_err:
             self.fail_json(msg="There was a network error of some kind trying to connect to your host ({1}): {0}.".format(url.netloc, con_err))
-        except(HTTPError) as he:
+        except (HTTPError) as he:
             # Sanity check: Did the server send back some kind of internal error?
             if he.code >= 500:
                 self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(url.path, he))
@@ -254,7 +246,7 @@ class TowerAPIModule(TowerModule):
                 pass
             else:
                 self.fail_json(msg="Unexpected return code when calling {0}: {1}".format(url.geturl(), he))
-        except(Exception) as e:
+        except (Exception) as e:
             self.fail_json(msg="There was an unknown error when trying to connect to {2}: {0} {1}".format(type(e).__name__, e, url.geturl()))
 
         if not self.version_checked:
@@ -268,26 +260,22 @@ class TowerAPIModule(TowerModule):
                 tower_version = response.info().getheader('X-API-Product-Version', None)
 
             if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
-                self.warn("You are using the {0} version of this collection but connecting to {1}".format(
-                    self._COLLECTION_TYPE, tower_type
-                ))
+                self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, tower_type))
             elif self._COLLECTION_VERSION != tower_version:
-                self.warn("You are running collection version {0} but connecting to tower version {1}".format(
-                    self._COLLECTION_VERSION, tower_version
-                ))
+                self.warn("You are running collection version {0} but connecting to tower version {1}".format(self._COLLECTION_VERSION, tower_version))
             self.version_checked = True
 
         response_body = ''
         try:
             response_body = response.read()
-        except(Exception) as e:
+        except (Exception) as e:
             self.fail_json(msg="Failed to read response body: {0}".format(e))
 
         response_json = {}
         if response_body and response_body != '':
             try:
                 response_json = loads(response_body)
-            except(Exception) as e:
+            except (Exception) as e:
                 self.fail_json(msg="Failed to parse the response json: {0}".format(e))
 
         if PY2:
@@ -310,10 +298,15 @@ class TowerAPIModule(TowerModule):
 
             try:
                 response = self.session.open(
-                    'POST', api_token_url,
-                    validate_certs=self.verify_ssl, follow_redirects=True,
-                    force_basic_auth=True, url_username=self.username, url_password=self.password,
-                    data=dumps(login_data), headers={'Content-Type': 'application/json'}
+                    'POST',
+                    api_token_url,
+                    validate_certs=self.verify_ssl,
+                    follow_redirects=True,
+                    force_basic_auth=True,
+                    url_username=self.username,
+                    url_password=self.password,
+                    data=dumps(login_data),
+                    headers={'Content-Type': 'application/json'},
                 )
             except HTTPError as he:
                 try:
@@ -321,7 +314,7 @@ class TowerAPIModule(TowerModule):
                 except Exception as e:
                     resp = 'unknown {0}'.format(e)
                 self.fail_json(msg='Failed to get token: {0}'.format(he), response=resp)
-            except(Exception) as e:
+            except (Exception) as e:
                 # Sanity check: Did the server send back some kind of internal error?
                 self.fail_json(msg='Failed to get token: {0}'.format(e))
 
@@ -331,7 +324,7 @@ class TowerAPIModule(TowerModule):
                 response_json = loads(token_response)
                 self.oauth_token_id = response_json['id']
                 self.oauth_token = response_json['token']
-            except(Exception) as e:
+            except (Exception) as e:
                 self.fail_json(msg="Failed to extract token information from login response: {0}".format(e), **{'response': token_response})
 
         # If we have neither of these, then we can try un-authenticated access
@@ -429,9 +422,13 @@ class TowerAPIModule(TowerModule):
         if item_type == 'workflow_job_template':
             copy_get_check = self.get_endpoint(copy_from_lookup['related']['copy'])
             if copy_get_check['status_code'] in [200]:
-                if (copy_get_check['json']['can_copy'] and copy_get_check['json']['can_copy_without_user_input'] and not
-                    copy_get_check['json']['templates_unable_to_copy'] and not copy_get_check['json']['credentials_unable_to_copy'] and not
-                        copy_get_check['json']['inventories_unable_to_copy']):
+                if (
+                    copy_get_check['json']['can_copy']
+                    and copy_get_check['json']['can_copy_without_user_input']
+                    and not copy_get_check['json']['templates_unable_to_copy']
+                    and not copy_get_check['json']['credentials_unable_to_copy']
+                    and not copy_get_check['json']['inventories_unable_to_copy']
+                ):
                     # Because checks have passed
                     self.json_output['copy_checks'] = 'passed'
                 else:
@@ -521,7 +518,8 @@ class TowerAPIModule(TowerModule):
         self.warn(
             'The field {0} of {1} {2} has encrypted data and may inaccurately report task is changed.'.format(
                 field, old.get('type', 'unknown'), old.get('id', 'unknown')
-            ))
+            )
+        )
 
     @staticmethod
     def has_encrypted_values(obj):
@@ -612,8 +610,7 @@ class TowerAPIModule(TowerModule):
                 if response['status_code'] == 200:
                     # compare apples-to-apples, old API data to new API data
                     # but do so considering the fields given in parameters
-                    self.json_output['changed'] = self.objects_could_be_different(
-                        existing_item, response['json'], field_set=new_item.keys(), warning=True)
+                    self.json_output['changed'] = self.objects_could_be_different(existing_item, response['json'], field_set=new_item.keys(), warning=True)
                 elif 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg=response['json']['__all__'])
                 else:
@@ -651,7 +648,8 @@ class TowerAPIModule(TowerModule):
             return self.update_if_needed(existing_item, new_item, on_update=on_update, auto_exit=auto_exit, associations=associations)
         else:
             return self.create_if_needed(
-                existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, auto_exit=auto_exit, associations=associations)
+                existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, auto_exit=auto_exit, associations=associations
+            )
 
     def logout(self):
         if self.authenticated and self.oauth_token_id:
@@ -659,8 +657,7 @@ class TowerAPIModule(TowerModule):
             # Post to the tokens endpoint with baisc auth to try and get a token
             api_token_url = (
                 self.url._replace(
-                    path='/api/v2/tokens/{0}/'.format(self.oauth_token_id),
-                    query=None  # in error cases, fail_json exists before exception handling
+                    path='/api/v2/tokens/{0}/'.format(self.oauth_token_id), query=None  # in error cases, fail_json exists before exception handling
                 )
             ).geturl()
 
@@ -672,7 +669,7 @@ class TowerAPIModule(TowerModule):
                     follow_redirects=True,
                     force_basic_auth=True,
                     url_username=self.username,
-                    url_password=self.password
+                    url_password=self.password,
                 )
                 self.oauth_token_id = None
                 self.authenticated = False
@@ -682,7 +679,7 @@ class TowerAPIModule(TowerModule):
                 except Exception as e:
                     resp = 'unknown {0}'.format(e)
                 self.warn('Failed to release tower token: {0}, response: {1}'.format(he, resp))
-            except(Exception) as e:
+            except (Exception) as e:
                 # Sanity check: Did the server send back some kind of internal error?
                 self.warn('Failed to release tower token {0}: {1}'.format(self.oauth_token_id, e))
 

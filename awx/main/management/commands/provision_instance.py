@@ -16,16 +16,11 @@ class Command(BaseCommand):
     Register this instance with the database for HA tracking.
     """
 
-    help = (
-        'Add instance to the database. '
-        'Specify `--hostname` to use this command.'
-    )
+    help = 'Add instance to the database. ' 'Specify `--hostname` to use this command.'
 
     def add_arguments(self, parser):
-        parser.add_argument('--hostname', dest='hostname', type=str,
-                            help='Hostname used during provisioning')
-        parser.add_argument('--is-isolated', dest='is_isolated', action='store_true',
-                            help='Specify whether the instance is isolated')
+        parser.add_argument('--hostname', dest='hostname', type=str, help='Hostname used during provisioning')
+        parser.add_argument('--is-isolated', dest='is_isolated', action='store_true', help='Specify whether the instance is isolated')
 
     def _register_hostname(self, hostname):
         if not hostname:

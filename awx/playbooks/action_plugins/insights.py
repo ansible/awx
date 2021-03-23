@@ -1,4 +1,5 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import os
@@ -10,7 +11,6 @@ from ansible.plugins.action import ActionBase
 
 
 class ActionModule(ActionBase):
-
     def save_playbook(self, proj_path, remediation, content):
         name = remediation.get('name', None) or 'insights-remediation'
         name = re.sub(r'[^\w\s-]', '', name).strip().lower()
@@ -50,11 +50,7 @@ class ActionModule(ActionBase):
         session.auth = requests.auth.HTTPBasicAuth(username, password)
         headers = {
             'Content-Type': 'application/json',
-            'User-Agent': '{} {} ({})'.format(
-                'AWX' if license == 'open' else 'Red Hat Ansible Tower',
-                awx_version,
-                license
-            )
+            'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Tower', awx_version, license),
         }
         url = '/api/remediations/v1/remediations'
         while url:
@@ -62,9 +58,8 @@ class ActionModule(ActionBase):
 
             if res.status_code != 200:
                 result['failed'] = True
-                result['msg'] = (
-                    'Expected {} to return a status code of 200 but returned status '
-                    'code "{}" instead with content "{}".'.format(url, res.status_code, res.content)
+                result['msg'] = 'Expected {} to return a status code of 200 but returned status ' 'code "{}" instead with content "{}".'.format(
+                    url, res.status_code, res.content
                 )
                 return result
 
@@ -86,17 +81,14 @@ class ActionModule(ActionBase):
             url = res.json()['links']['next']  # will be None if we're on the last page
 
             for item in res.json()['data']:
-                playbook_url = '{}/api/remediations/v1/remediations/{}/playbook'.format(
-                    insights_url, item['id'])
+                playbook_url = '{}/api/remediations/v1/remediations/{}/playbook'.format(insights_url, item['id'])
                 res = session.get(playbook_url, timeout=120)
                 if res.status_code == 204:
                     continue
                 elif res.status_code != 200:
                     result['failed'] = True
-                    result['msg'] = (
-                        'Expected {} to return a status code of 200 but returned status '
-                        'code "{}" instead with content "{}".'.format(
-                            playbook_url, res.status_code, res.content)
+                    result['msg'] = 'Expected {} to return a status code of 200 but returned status ' 'code "{}" instead with content "{}".'.format(
+                        playbook_url, res.status_code, res.content
                     )
                     return result
                 self.save_playbook(proj_path, item, res.content)

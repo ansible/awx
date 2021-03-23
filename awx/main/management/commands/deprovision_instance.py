@@ -13,14 +13,10 @@ class Command(BaseCommand):
     Deprovision a Tower cluster node
     """
 
-    help = (
-        'Remove instance from the database. '
-        'Specify `--hostname` to use this command.'
-    )
+    help = 'Remove instance from the database. ' 'Specify `--hostname` to use this command.'
 
     def add_arguments(self, parser):
-        parser.add_argument('--hostname', dest='hostname', type=str,
-                            help='Hostname used during provisioning')
+        parser.add_argument('--hostname', dest='hostname', type=str, help='Hostname used during provisioning')
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -37,4 +33,3 @@ class Command(BaseCommand):
                 print('(changed: True)')
             else:
                 print('No instance found matching name {}'.format(hostname))
-

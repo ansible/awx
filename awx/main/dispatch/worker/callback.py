@@ -16,9 +16,7 @@ import psutil
 import redis
 
 from awx.main.consumers import emit_channel_notification
-from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
-                             InventoryUpdateEvent, SystemJobEvent, UnifiedJob,
-                             Job)
+from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob, Job
 from awx.main.tasks import handle_success_and_failure_notifications
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
@@ -29,13 +27,13 @@ logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 
 class CallbackBrokerWorker(BaseWorker):
-    '''
+    """
     A worker implementation that deserializes callback event data and persists
     it into the database.
 
     The code that *generates* these types of messages is found in the
     ansible-runner display callback plugin.
-    '''
+    """
 
     MAX_RETRIES = 2
     last_stats = time.time()
@@ -83,9 +81,7 @@ class CallbackBrokerWorker(BaseWorker):
 
     @property
     def mb(self):
-        return '{:0.3f}'.format(
-            psutil.Process(self.pid).memory_info().rss / 1024.0 / 1024.0
-        )
+        return '{:0.3f}'.format(psutil.Process(self.pid).memory_info().rss / 1024.0 / 1024.0)
 
     def toggle_profiling(self, *args):
         if not self.prof.is_started():
@@ -102,11 +98,7 @@ class CallbackBrokerWorker(BaseWorker):
 
     def flush(self, force=False):
         now = tz_now()
-        if (
-            force or
-            (time.time() - self.last_flush) > settings.JOB_EVENT_BUFFER_SECONDS or
-            any([len(events) >= 1000 for events in self.buff.values()])
-        ):
+        if force or (time.time() - self.last_flush) > settings.JOB_EVENT_BUFFER_SECONDS or any([len(events) >= 1000 for events in self.buff.values()]):
             for cls, events in self.buff.items():
                 logger.debug(f'{cls.__name__}.objects.bulk_create({len(events)})')
                 for e in events:
@@ -161,10 +153,7 @@ class CallbackBrokerWorker(BaseWorker):
                         # closed. don't actually persist them to the database; we
                         # just use them to report `summary` websocket events as an
                         # approximation for when a job is "done"
-                        emit_channel_notification(
-                            'jobs-summary',
-                            dict(group_name='jobs', unified_job_id=job_identifier, final_counter=final_counter)
-                        )
+                        emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job_identifier, final_counter=final_counter))
                         # Additionally, when we've processed all events, we should
                         # have all the data we need to send out success/failure
                         # notification templates
@@ -196,10 +185,7 @@ class CallbackBrokerWorker(BaseWorker):
                         logger.exception('Worker could not re-establish database connectivity, giving up on one or more events.')
                         return
                     delay = 60 * retries
-                    logger.exception('Database Error Saving Job Event, retry #{i} in {delay} seconds:'.format(
-                        i=retries + 1,
-                        delay=delay
-                    ))
+                    logger.exception('Database Error Saving Job Event, retry #{i} in {delay} seconds:'.format(i=retries + 1, delay=delay))
                     django_connection.close()
                     time.sleep(delay)
                     retries += 1

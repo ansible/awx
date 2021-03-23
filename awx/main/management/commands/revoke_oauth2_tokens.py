@@ -16,7 +16,8 @@ def revoke_tokens(token_list):
 
 class Command(BaseCommand):
     """Command that revokes OAuth2 access tokens."""
-    help='Revokes OAuth2 access tokens.  Use --all to revoke access and refresh tokens.'
+
+    help = 'Revokes OAuth2 access tokens.  Use --all to revoke access and refresh tokens.'
 
     def add_arguments(self, parser):
         parser.add_argument('--user', dest='user', type=str, help='revoke OAuth2 tokens for a specific username')

@@ -16,6 +16,7 @@ def create_job_factory(job_factory, project):
         j.project = project
         j.save()
         return j
+
     return fn
 
 
@@ -27,19 +28,18 @@ def create_project_update_factory(organization, project):
         pu.organization = organization
         pu.save()
         return pu
+
     return fn
 
 
 @pytest.fixture
 def organization_jobs_successful(create_job_factory, create_project_update_factory):
-    return [create_job_factory(status='successful') for i in range(0, 2)] + \
-        [create_project_update_factory(status='successful') for i in range(0, 2)]
+    return [create_job_factory(status='successful') for i in range(0, 2)] + [create_project_update_factory(status='successful') for i in range(0, 2)]
 
 
 @pytest.fixture
 def organization_jobs_running(create_job_factory, create_project_update_factory):
-    return [create_job_factory(status='running') for i in range(0, 2)] + \
-        [create_project_update_factory(status='running') for i in range(0, 2)]
+    return [create_job_factory(status='running') for i in range(0, 2)] + [create_project_update_factory(status='running') for i in range(0, 2)]
 
 
 @pytest.mark.django_db
@@ -129,10 +129,7 @@ def test_organization_inventory_list(organization, inventory_factory, get, alice
 
 @pytest.mark.django_db
 def test_create_organization(post, admin, alice):
-    new_org = {
-        'name': 'new org',
-        'description': 'my description'
-    }
+    new_org = {'name': 'new org', 'description': 'my description'}
     res = post(reverse('api:organization_list'), new_org, user=admin, expect=201)
     assert res.data['name'] == new_org['name']
     res = post(reverse('api:organization_list'), new_org, user=admin, expect=400)
@@ -140,10 +137,7 @@ def test_create_organization(post, admin, alice):
 
 @pytest.mark.django_db
 def test_create_organization_xfail(post, alice):
-    new_org = {
-        'name': 'new org',
-        'description': 'my description'
-    }
+    new_org = {'name': 'new org', 'description': 'my description'}
     post(reverse('api:organization_list'), new_org, user=alice, expect=403)
 
 
@@ -152,7 +146,7 @@ def test_add_user_to_organization(post, organization, alice, bob):
     organization.admin_role.members.add(alice)
     post(reverse('api:organization_users_list', kwargs={'pk': organization.id}), {'id': bob.id}, user=alice, expect=204)
     assert bob in organization.member_role
-    post(reverse('api:organization_users_list', kwargs={'pk': organization.id}), {'id': bob.id, 'disassociate': True} , user=alice, expect=204)
+    post(reverse('api:organization_users_list', kwargs={'pk': organization.id}), {'id': bob.id, 'disassociate': True}, user=alice, expect=204)
     assert bob not in organization.member_role
 
 
@@ -168,7 +162,7 @@ def test_add_admin_to_organization(post, organization, alice, bob):
     post(reverse('api:organization_admins_list', kwargs={'pk': organization.id}), {'id': bob.id}, user=alice, expect=204)
     assert bob in organization.admin_role
     assert bob in organization.member_role
-    post(reverse('api:organization_admins_list', kwargs={'pk': organization.id}), {'id': bob.id, 'disassociate': True} , user=alice, expect=204)
+    post(reverse('api:organization_admins_list', kwargs={'pk': organization.id}), {'id': bob.id, 'disassociate': True}, user=alice, expect=204)
     assert bob not in organization.admin_role
     assert bob not in organization.member_role
 
@@ -264,21 +258,9 @@ def test_galaxy_credential_association_forbidden(alice, organization, post):
     galaxy = CredentialType.defaults['galaxy_api_token']()
     galaxy.save()
 
-    cred = Credential.objects.create(
-        credential_type=galaxy,
-        name='Public Galaxy',
-        organization=organization,
-        inputs={
-            'url': 'https://galaxy.ansible.com/'
-        }
-    )
+    cred = Credential.objects.create(credential_type=galaxy, name='Public Galaxy', organization=organization, inputs={'url': 'https://galaxy.ansible.com/'})
     url = reverse('api:organization_galaxy_credentials_list', kwargs={'pk': organization.id})
-    post(
-        url,
-        {'associate': True, 'id': cred.pk},
-        user=alice,
-        expect=403
-    )
+    post(url, {'associate': True, 'id': cred.pk}, user=alice, expect=403)
 
 
 @pytest.mark.django_db
@@ -292,12 +274,7 @@ def test_galaxy_credential_type_enforcement(admin, organization, post):
         organization=organization,
     )
     url = reverse('api:organization_galaxy_credentials_list', kwargs={'pk': organization.id})
-    resp = post(
-        url,
-        {'associate': True, 'id': cred.pk},
-        user=admin,
-        expect=400
-    )
+    resp = post(url, {'associate': True, 'id': cred.pk}, user=admin, expect=400)
     assert resp.data['msg'] == 'Credential must be a Galaxy credential, not Machine.'
 
 
@@ -308,20 +285,10 @@ def test_galaxy_credential_association(alice, admin, organization, post, get):
 
     for i in range(5):
         cred = Credential.objects.create(
-            credential_type=galaxy,
-            name=f'Public Galaxy {i + 1}',
-            organization=organization,
-            inputs={
-                'url': 'https://galaxy.ansible.com/'
-            }
+            credential_type=galaxy, name=f'Public Galaxy {i + 1}', organization=organization, inputs={'url': 'https://galaxy.ansible.com/'}
         )
         url = reverse('api:organization_galaxy_credentials_list', kwargs={'pk': organization.id})
-        post(
-            url,
-            {'associate': True, 'id': cred.pk},
-            user=admin,
-            expect=204
-        )
+        post(url, {'associate': True, 'id': cred.pk}, user=admin, expect=204)
     resp = get(url, user=admin)
     assert [cred['name'] for cred in resp.data['results']] == [
         'Public Galaxy 1',
@@ -331,12 +298,7 @@ def test_galaxy_credential_association(alice, admin, organization, post, get):
         'Public Galaxy 5',
     ]
 
-    post(
-        url,
-        {'disassociate': True, 'id': Credential.objects.get(name='Public Galaxy 3').pk},
-        user=admin,
-        expect=204
-    )
+    post(url, {'disassociate': True, 'id': Credential.objects.get(name='Public Galaxy 3').pk}, user=admin, expect=204)
     resp = get(url, user=admin)
     assert [cred['name'] for cred in resp.data['results']] == [
         'Public Galaxy 1',

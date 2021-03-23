@@ -27,9 +27,9 @@ from awx.main.utils.db import get_all_field_names
 
 
 class TypeFilterBackend(BaseFilterBackend):
-    '''
+    """
     Filter on type field now returned with all objects.
-    '''
+    """
 
     def filter_queryset(self, request, queryset, view):
         try:
@@ -64,7 +64,7 @@ class TypeFilterBackend(BaseFilterBackend):
 
 
 def get_fields_from_path(model, path):
-    '''
+    """
     Given a Django ORM lookup path (possibly over multiple models)
     Returns the fields in the line, and also the revised lookup path
     ex., given
@@ -73,7 +73,7 @@ def get_fields_from_path(model, path):
     returns tuple of fields traversed as well and a corrected path,
     for special cases we do substitutions
         ([<IntegerField for timeout>], 'project__timeout')
-    '''
+    """
     # Store of all the fields used to detect repeats
     field_list = []
     new_parts = []
@@ -82,12 +82,9 @@ def get_fields_from_path(model, path):
             raise ParseError(_('No related model for field {}.').format(name))
         # HACK: Make project and inventory source filtering by old field names work for backwards compatibility.
         if model._meta.object_name in ('Project', 'InventorySource'):
-            name = {
-                'current_update': 'current_job',
-                'last_update': 'last_job',
-                'last_update_failed': 'last_job_failed',
-                'last_updated': 'last_job_run',
-            }.get(name, name)
+            name = {'current_update': 'current_job', 'last_update': 'last_job', 'last_update_failed': 'last_job_failed', 'last_updated': 'last_job_run'}.get(
+                name, name
+            )
 
         if name == 'type' and 'polymorphic_ctype' in get_all_field_names(model):
             name = 'polymorphic_ctype'
@@ -121,28 +118,42 @@ def get_fields_from_path(model, path):
 
 
 def get_field_from_path(model, path):
-    '''
+    """
     Given a Django ORM lookup path (possibly over multiple models)
     Returns the last field in the line, and the revised lookup path
     ex.
         (<IntegerField for timeout>, 'project__timeout')
-    '''
+    """
     field_list, new_path = get_fields_from_path(model, path)
     return (field_list[-1], new_path)
 
 
 class FieldLookupBackend(BaseFilterBackend):
-    '''
+    """
     Filter using field lookups provided via query string parameters.
-    '''
+    """
 
-    RESERVED_NAMES = ('page', 'page_size', 'format', 'order', 'order_by',
-                      'search', 'type', 'host_filter', 'count_disabled', 'no_truncate')
+    RESERVED_NAMES = ('page', 'page_size', 'format', 'order', 'order_by', 'search', 'type', 'host_filter', 'count_disabled', 'no_truncate')
 
-    SUPPORTED_LOOKUPS = ('exact', 'iexact', 'contains', 'icontains',
-                         'startswith', 'istartswith', 'endswith', 'iendswith',
-                         'regex', 'iregex', 'gt', 'gte', 'lt', 'lte', 'in',
-                         'isnull', 'search')
+    SUPPORTED_LOOKUPS = (
+        'exact',
+        'iexact',
+        'contains',
+        'icontains',
+        'startswith',
+        'istartswith',
+        'endswith',
+        'iendswith',
+        'regex',
+        'iregex',
+        'gt',
+        'gte',
+        'lt',
+        'lte',
+        'in',
+        'isnull',
+        'search',
+    )
 
     # A list of fields that we know can be filtered on without the possiblity
     # of introducing duplicates
@@ -189,10 +200,7 @@ class FieldLookupBackend(BaseFilterBackend):
             try:
                 return self.to_python_related(value)
             except ValueError:
-                raise ParseError(_('Invalid {field_name} id: {field_id}').format(
-                    field_name=getattr(field, 'name', 'related field'),
-                    field_id=value)
-                )
+                raise ParseError(_('Invalid {field_name} id: {field_id}').format(field_name=getattr(field, 'name', 'related field'), field_id=value))
         else:
             return field.to_python(value)
 
@@ -205,13 +213,13 @@ class FieldLookupBackend(BaseFilterBackend):
         field_list, new_lookup = self.get_fields_from_lookup(model, lookup)
         field = field_list[-1]
 
-        needs_distinct = (not all(isinstance(f, self.NO_DUPLICATES_ALLOW_LIST) for f in field_list))
+        needs_distinct = not all(isinstance(f, self.NO_DUPLICATES_ALLOW_LIST) for f in field_list)
 
         # Type names are stored without underscores internally, but are presented and
         # and serialized over the API containing underscores so we remove `_`
         # for polymorphic_ctype__model lookups.
         if new_lookup.startswith('polymorphic_ctype__model'):
-            value = value.replace('_','')
+            value = value.replace('_', '')
         elif new_lookup.endswith('__isnull'):
             value = to_python_boolean(value)
         elif new_lookup.endswith('__in'):
@@ -329,24 +337,20 @@ class FieldLookupBackend(BaseFilterBackend):
                 args = []
                 for n, k, v in and_filters:
                     if n:
-                        args.append(~Q(**{k:v}))
+                        args.append(~Q(**{k: v}))
                     else:
-                        args.append(Q(**{k:v}))
+                        args.append(Q(**{k: v}))
                 for role_name in role_filters:
                     if not hasattr(queryset.model, 'accessible_pk_qs'):
-                        raise ParseError(_(
-                            'Cannot apply role_level filter to this list because its model '
-                            'does not use roles for access control.'))
-                    args.append(
-                        Q(pk__in=queryset.model.accessible_pk_qs(request.user, role_name))
-                    )
+                        raise ParseError(_('Cannot apply role_level filter to this list because its model ' 'does not use roles for access control.'))
+                    args.append(Q(pk__in=queryset.model.accessible_pk_qs(request.user, role_name)))
                 if or_filters:
                     q = Q()
-                    for n,k,v in or_filters:
+                    for n, k, v in or_filters:
                         if n:
-                            q |= ~Q(**{k:v})
+                            q |= ~Q(**{k: v})
                         else:
-                            q |= Q(**{k:v})
+                            q |= Q(**{k: v})
                     args.append(q)
                 if search_filters and search_filter_relation == 'OR':
                     q = Q()
@@ -360,11 +364,11 @@ class FieldLookupBackend(BaseFilterBackend):
                         for constrain in constrains:
                             q_chain |= Q(**{constrain: term})
                         queryset = queryset.filter(q_chain)
-                for n,k,v in chain_filters:
+                for n, k, v in chain_filters:
                     if n:
-                        q = ~Q(**{k:v})
+                        q = ~Q(**{k: v})
                     else:
-                        q = Q(**{k:v})
+                        q = Q(**{k: v})
                     queryset = queryset.filter(q)
                 queryset = queryset.filter(*args)
                 if needs_distinct:
@@ -377,9 +381,9 @@ class FieldLookupBackend(BaseFilterBackend):
 
 
 class OrderByBackend(BaseFilterBackend):
-    '''
+    """
     Filter to apply ordering based on query string parameters.
-    '''
+    """
 
     def filter_queryset(self, request, queryset, view):
         try:

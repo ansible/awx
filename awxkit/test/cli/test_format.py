@@ -11,18 +11,16 @@ from awxkit.cli.resource import Import
 
 
 def test_json_empty_list():
-    page = Page.from_json({
-        'results': []
-    })
+    page = Page.from_json({'results': []})
     formatted = format_response(page)
     assert json.loads(formatted) == {'results': []}
 
+
 def test_yaml_empty_list():
-    page = Page.from_json({
-        'results': []
-    })
+    page = Page.from_json({'results': []})
     formatted = format_response(page, fmt='yaml')
     assert yaml.safe_load(formatted) == {'results': []}
+
 
 def test_json_list():
     users = {
@@ -35,6 +33,7 @@ def test_json_list():
     page = Users.from_json(users)
     formatted = format_response(page)
     assert json.loads(formatted) == users
+
 
 def test_yaml_list():
     users = {

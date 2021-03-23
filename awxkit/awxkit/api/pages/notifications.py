@@ -6,10 +6,8 @@ from . import page
 
 
 class Notification(HasStatus, base.Base):
-
     def __str__(self):
-        items = ['id', 'notification_type', 'status', 'error', 'notifications_sent',
-                 'subject', 'recipients']
+        items = ['id', 'notification_type', 'status', 'error', 'notifications_sent', 'subject', 'recipients']
         info = []
         for item in [x for x in items if hasattr(self, x)]:
             info.append('{0}:{1}'.format(item, getattr(self, item)))
@@ -40,13 +38,10 @@ page.register_page(resources.notification, Notification)
 
 
 class Notifications(page.PageList, Notification):
-
     def wait_until_count(self, count, interval=10, timeout=60, **kw):
         """Poll notifications page until it is populated with `count` number of notifications."""
-        poll_until(lambda: getattr(self.get(), 'count') == count,
-                   interval=interval, timeout=timeout, **kw)
+        poll_until(lambda: getattr(self.get(), 'count') == count, interval=interval, timeout=timeout, **kw)
         return self
 
 
-page.register_page([resources.notifications,
-                    resources.related_notifications], Notifications)
+page.register_page([resources.notifications, resources.related_notifications], Notifications)

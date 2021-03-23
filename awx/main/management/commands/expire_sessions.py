@@ -12,7 +12,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class Command(BaseCommand):
     """Expire Django auth sessions for a user/all users"""
-    help='Expire Django auth sessions. Will expire all auth sessions if --user option is not supplied.'
+
+    help = 'Expire Django auth sessions. Will expire all auth sessions if --user option is not supplied.'
 
     def add_arguments(self, parser):
         parser.add_argument('--user', dest='user', type=str)

@@ -13,10 +13,13 @@ def test_list_as_unauthorized_xfail(get):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('method, valid', [
-    ('GET', sorted(dict(CredentialType.KIND_CHOICES).keys())),
-    ('POST', ['cloud', 'net']),
-])
+@pytest.mark.parametrize(
+    'method, valid',
+    [
+        ('GET', sorted(dict(CredentialType.KIND_CHOICES).keys())),
+        ('POST', ['cloud', 'net']),
+    ],
+)
 def test_options_valid_kinds(method, valid, options, admin):
     response = options(reverse('api:credential_type_list'), admin)
     choices = sorted(dict(response.data['actions'][method]['kind']['choices']).keys())
@@ -52,9 +55,12 @@ def test_list_as_admin(get, admin):
 
 @pytest.mark.django_db
 def test_create_as_unauthorized_xfail(get, post):
-    response = post(reverse('api:credential_type_list'), {
-        'name': 'Custom Credential Type',
-    })
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'name': 'Custom Credential Type',
+        },
+    )
     assert response.status_code == 401
 
 
@@ -97,15 +103,8 @@ def test_update_credential_type_in_use_xfail(patch, delete, admin):
 
 @pytest.mark.django_db
 def test_update_credential_type_unvalidated_inputs(post, patch, admin):
-    simple_inputs = {'fields': [
-        {'id': 'api_token', 'label': 'fooo'}
-    ]}
-    response = post(
-        url=reverse('api:credential_type_list'),
-        data={'name': 'foo', 'kind': 'cloud', 'inputs': simple_inputs},
-        user=admin,
-        expect=201
-    )
+    simple_inputs = {'fields': [{'id': 'api_token', 'label': 'fooo'}]}
+    response = post(url=reverse('api:credential_type_list'), data={'name': 'foo', 'kind': 'cloud', 'inputs': simple_inputs}, user=admin, expect=201)
     # validation adds the type field to the input
     _type = CredentialType.objects.get(pk=response.data['id'])
     Credential(credential_type=_type, name='My Custom Cred').save()
@@ -141,21 +140,20 @@ def test_delete_as_unauthorized_xfail(delete):
 
 @pytest.mark.django_db
 def test_create_as_normal_user_xfail(get, post, alice):
-    response = post(reverse('api:credential_type_list'), {
-        'name': 'Custom Credential Type',
-    }, alice)
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'name': 'Custom Credential Type',
+        },
+        alice,
+    )
     assert response.status_code == 403
     assert get(reverse('api:credential_type_list'), alice).data['count'] == 0
 
 
 @pytest.mark.django_db
 def test_create_as_admin(get, post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'Custom Credential Type',
-        'inputs': {},
-        'injectors': {}
-    }, admin)
+    response = post(reverse('api:credential_type_list'), {'kind': 'cloud', 'name': 'Custom Credential Type', 'inputs': {}, 'injectors': {}}, admin)
     assert response.status_code == 201
 
     response = get(reverse('api:credential_type_list'), admin)
@@ -168,13 +166,9 @@ def test_create_as_admin(get, post, admin):
 
 @pytest.mark.django_db
 def test_create_managed_by_tower_readonly(get, post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'Custom Credential Type',
-        'inputs': {},
-        'injectors': {},
-        'managed_by_tower': True
-    }, admin)
+    response = post(
+        reverse('api:credential_type_list'), {'kind': 'cloud', 'name': 'Custom Credential Type', 'inputs': {}, 'injectors': {}, 'managed_by_tower': True}, admin
+    )
     assert response.status_code == 201
 
     response = get(reverse('api:credential_type_list'), admin)
@@ -184,12 +178,16 @@ def test_create_managed_by_tower_readonly(get, post, admin):
 
 @pytest.mark.django_db
 def test_create_dependencies_not_supported(get, post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'Custom Credential Type',
-        'inputs': {'dependencies': {'foo': ['bar']}},
-        'injectors': {},
-    }, admin)
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': 'cloud',
+            'name': 'Custom Credential Type',
+            'inputs': {'dependencies': {'foo': ['bar']}},
+            'injectors': {},
+        },
+        admin,
+    )
     assert response.status_code == 400
     assert response.data['inputs'] == ["'dependencies' is not supported for custom credentials."]
 
@@ -200,19 +198,16 @@ def test_create_dependencies_not_supported(get, post, admin):
 @pytest.mark.django_db
 @pytest.mark.parametrize('kind', ['cloud', 'net'])
 def test_create_valid_kind(kind, get, post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': kind,
-        'name': 'My Custom Type',
-        'inputs': {
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'string',
-                'secret': True
-            }]
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': kind,
+            'name': 'My Custom Type',
+            'inputs': {'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True}]},
+            'injectors': {},
         },
-        'injectors': {}
-    }, admin)
+        admin,
+    )
     assert response.status_code == 201
 
     response = get(reverse('api:credential_type_list'), admin)
@@ -222,19 +217,16 @@ def test_create_valid_kind(kind, get, post, admin):
 @pytest.mark.django_db
 @pytest.mark.parametrize('kind', ['ssh', 'vault', 'scm', 'insights', 'kubernetes', 'galaxy'])
 def test_create_invalid_kind(kind, get, post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': kind,
-        'name': 'My Custom Type',
-        'inputs': {
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'string',
-                'secret': True
-            }]
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': kind,
+            'name': 'My Custom Type',
+            'inputs': {'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True}]},
+            'injectors': {},
         },
-        'injectors': {}
-    }, admin)
+        admin,
+    )
     assert response.status_code == 400
 
     response = get(reverse('api:credential_type_list'), admin)
@@ -243,19 +235,16 @@ def test_create_invalid_kind(kind, get, post, admin):
 
 @pytest.mark.django_db
 def test_create_with_valid_inputs(get, post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': {
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'string',
-                'secret': True
-            }]
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': 'cloud',
+            'name': 'MyCloud',
+            'inputs': {'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True}]},
+            'injectors': {},
         },
-        'injectors': {}
-    }, admin)
+        admin,
+    )
     assert response.status_code == 201
 
     response = get(reverse('api:credential_type_list'), admin)
@@ -270,20 +259,19 @@ def test_create_with_valid_inputs(get, post, admin):
 
 @pytest.mark.django_db
 def test_create_with_required_inputs(get, post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': {
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'string',
-                'secret': True
-            }],
-            'required': ['api_token'],
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': 'cloud',
+            'name': 'MyCloud',
+            'inputs': {
+                'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True}],
+                'required': ['api_token'],
+            },
+            'injectors': {},
         },
-        'injectors': {}
-    }, admin)
+        admin,
+    )
     assert response.status_code == 201
 
     response = get(reverse('api:credential_type_list'), admin)
@@ -293,140 +281,149 @@ def test_create_with_required_inputs(get, post, admin):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('default, status_code', [
-    ['some default string', 201],
-    [None, 400],
-    [True, 400],
-    [False, 400],
-])
+@pytest.mark.parametrize(
+    'default, status_code',
+    [
+        ['some default string', 201],
+        [None, 400],
+        [True, 400],
+        [False, 400],
+    ],
+)
 @pytest.mark.parametrize('secret', [True, False])
 def test_create_with_default_string(get, post, admin, default, status_code, secret):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': {
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'string',
-                'secret': secret,
-                'default': default,
-            }],
-            'required': ['api_token'],
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': 'cloud',
+            'name': 'MyCloud',
+            'inputs': {
+                'fields': [
+                    {
+                        'id': 'api_token',
+                        'label': 'API Token',
+                        'type': 'string',
+                        'secret': secret,
+                        'default': default,
+                    }
+                ],
+                'required': ['api_token'],
+            },
+            'injectors': {},
         },
-        'injectors': {}
-    }, admin)
+        admin,
+    )
     assert response.status_code == status_code
     if status_code == 201:
-        cred = Credential(
-            credential_type=CredentialType.objects.get(pk=response.data['id']),
-            name='My Custom Cred'
-        )
+        cred = Credential(credential_type=CredentialType.objects.get(pk=response.data['id']), name='My Custom Cred')
         assert cred.get_input('api_token') == default
     elif status_code == 400:
         assert "{} is not a string".format(default) in json.dumps(response.data)
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('default, status_code', [
-    ['some default string', 400],
-    [None, 400],
-    [True, 201],
-    [False, 201],
-])
+@pytest.mark.parametrize(
+    'default, status_code',
+    [
+        ['some default string', 400],
+        [None, 400],
+        [True, 201],
+        [False, 201],
+    ],
+)
 def test_create_with_default_bool(get, post, admin, default, status_code):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': {
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'boolean',
-                'default': default,
-            }],
-            'required': ['api_token'],
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': 'cloud',
+            'name': 'MyCloud',
+            'inputs': {
+                'fields': [
+                    {
+                        'id': 'api_token',
+                        'label': 'API Token',
+                        'type': 'boolean',
+                        'default': default,
+                    }
+                ],
+                'required': ['api_token'],
+            },
+            'injectors': {},
         },
-        'injectors': {}
-    }, admin)
+        admin,
+    )
     assert response.status_code == status_code
     if status_code == 201:
-        cred = Credential(
-            credential_type=CredentialType.objects.get(pk=response.data['id']),
-            name='My Custom Cred'
-        )
+        cred = Credential(credential_type=CredentialType.objects.get(pk=response.data['id']), name='My Custom Cred')
         assert cred.get_input('api_token') == default
     elif status_code == 400:
         assert "{} is not a boolean".format(default) in json.dumps(response.data)
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('inputs', [
-    True,
-    100,
-    [1, 2, 3, 4],
-    'malformed',
-    {'feelds': {}},
-    {'fields': [123, 234, 345]},
-    {'fields': [{'id':'one', 'label':'One'}, 234]},
-    {'feelds': {}, 'fields': [{'id':'one', 'label':'One'}, 234]}
-])
+@pytest.mark.parametrize(
+    'inputs',
+    [
+        True,
+        100,
+        [1, 2, 3, 4],
+        'malformed',
+        {'feelds': {}},
+        {'fields': [123, 234, 345]},
+        {'fields': [{'id': 'one', 'label': 'One'}, 234]},
+        {'feelds': {}, 'fields': [{'id': 'one', 'label': 'One'}, 234]},
+    ],
+)
 def test_create_with_invalid_inputs_xfail(post, admin, inputs):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': inputs,
-        'injectors': {}
-    }, admin)
+    response = post(reverse('api:credential_type_list'), {'kind': 'cloud', 'name': 'MyCloud', 'inputs': inputs, 'injectors': {}}, admin)
     assert response.status_code == 400
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('injectors', [
-    True,
-    100,
-    [1, 2, 3, 4],
-    'malformed',
-    {'mal': 'formed'},
-    {'env': {'ENV_VAR': 123}, 'mal': 'formed'},
-    {'env': True},
-    {'env': [1, 2, 3]},
-    {'file': True},
-    {'file': [1, 2, 3]},
-    {'extra_vars': True},
-    {'extra_vars': [1, 2, 3]},
-])
+@pytest.mark.parametrize(
+    'injectors',
+    [
+        True,
+        100,
+        [1, 2, 3, 4],
+        'malformed',
+        {'mal': 'formed'},
+        {'env': {'ENV_VAR': 123}, 'mal': 'formed'},
+        {'env': True},
+        {'env': [1, 2, 3]},
+        {'file': True},
+        {'file': [1, 2, 3]},
+        {'extra_vars': True},
+        {'extra_vars': [1, 2, 3]},
+    ],
+)
 def test_create_with_invalid_injectors_xfail(post, admin, injectors):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': {},
-        'injectors': injectors,
-    }, admin)
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': 'cloud',
+            'name': 'MyCloud',
+            'inputs': {},
+            'injectors': injectors,
+        },
+        admin,
+    )
     assert response.status_code == 400
 
 
 @pytest.mark.django_db
 def test_ask_at_runtime_xfail(get, post, admin):
     # ask_at_runtime is only supported by the built-in SSH and Vault types
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': {
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'string',
-                'secret': True,
-                'ask_at_runtime': True
-            }]
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': 'cloud',
+            'name': 'MyCloud',
+            'inputs': {'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True, 'ask_at_runtime': True}]},
+            'injectors': {'env': {'ANSIBLE_MY_CLOUD_TOKEN': '{{api_token}}'}},
         },
-        'injectors': {
-            'env': {
-                'ANSIBLE_MY_CLOUD_TOKEN': '{{api_token}}'
-            }
-        }
-    }, admin)
+        admin,
+    )
     assert response.status_code == 400
 
     response = get(reverse('api:credential_type_list'), admin)
@@ -435,50 +432,37 @@ def test_ask_at_runtime_xfail(get, post, admin):
 
 @pytest.mark.django_db
 def test_create_with_valid_injectors(get, post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': {
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'string',
-                'secret': True
-            }]
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': 'cloud',
+            'name': 'MyCloud',
+            'inputs': {'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True}]},
+            'injectors': {'env': {'AWX_MY_CLOUD_TOKEN': '{{api_token}}'}},
         },
-        'injectors': {
-            'env': {
-                'AWX_MY_CLOUD_TOKEN': '{{api_token}}'
-            }
-        }
-    }, admin, expect=201)
+        admin,
+        expect=201,
+    )
 
     response = get(reverse('api:credential_type_list'), admin)
     assert response.data['count'] == 1
     injectors = response.data['results'][0]['injectors']
     assert len(injectors) == 1
-    assert injectors['env'] == {
-        'AWX_MY_CLOUD_TOKEN': '{{api_token}}'
-    }
+    assert injectors['env'] == {'AWX_MY_CLOUD_TOKEN': '{{api_token}}'}
 
 
 @pytest.mark.django_db
 def test_create_with_undefined_template_variable_xfail(post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': {
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'string',
-                'secret': True
-            }]
+    response = post(
+        reverse('api:credential_type_list'),
+        {
+            'kind': 'cloud',
+            'name': 'MyCloud',
+            'inputs': {'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True}]},
+            'injectors': {'env': {'AWX_MY_CLOUD_TOKEN': '{{api_tolkien}}'}},
         },
-        'injectors': {
-            'env': {'AWX_MY_CLOUD_TOKEN': '{{api_tolkien}}'}
-        }
-    }, admin)
+        admin,
+    )
     assert response.status_code == 400
     assert "'api_tolkien' is undefined" in json.dumps(response.data)
 

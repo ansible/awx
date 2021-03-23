@@ -14,11 +14,11 @@ class Command(BaseCommand):
     help = (
         "Remove specified queue (instance group) from database.\n"
         "Instances inside of queue will continue to exist, \n"
-        "but jobs will no longer be processed by queue.")
+        "but jobs will no longer be processed by queue."
+    )
 
     def add_arguments(self, parser):
-        parser.add_argument('--queuename', dest='queuename', type=str,
-                            help='Queue to create/update')
+        parser.add_argument('--queuename', dest='queuename', type=str, help='Queue to create/update')
 
     @transaction.atomic
     def handle(self, *args, **options):

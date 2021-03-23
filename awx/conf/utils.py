@@ -7,7 +7,4 @@ __all__ = ['conf_to_dict']
 
 
 def conf_to_dict(obj):
-    return {
-        'category': settings_registry.get_setting_category(obj.key),
-        'name': obj.key,
-    }
+    return {'category': settings_registry.get_setting_category(obj.key), 'name': obj.key}

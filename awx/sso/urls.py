@@ -2,12 +2,7 @@
 # All Rights Reserved.
 
 from django.conf.urls import url
-from awx.sso.views import (
-    sso_complete,
-    sso_error,
-    sso_inactive,
-    saml_metadata,
-)
+from awx.sso.views import sso_complete, sso_error, sso_inactive, saml_metadata
 
 
 app_name = 'sso'

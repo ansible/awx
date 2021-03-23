@@ -13,6 +13,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='ansible_version',
-            field=models.CharField(blank=True, default='', editable=False, help_text='The version of Ansible Core installed in the execution environment.', max_length=255),
+            field=models.CharField(
+                blank=True, default='', editable=False, help_text='The version of Ansible Core installed in the execution environment.', max_length=255
+            ),
         ),
     ]

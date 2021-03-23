@@ -13,7 +13,8 @@ from django.db import connection, models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
-#from django import settings as tower_settings
+
+# from django import settings as tower_settings
 
 # Django-CRUM
 from crum import get_current_user
@@ -23,17 +24,10 @@ from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models import (prevent_search, accepts_json, UnifiedJobTemplate,
-                             UnifiedJob)
-from awx.main.models.notifications import (
-    NotificationTemplate,
-    JobNotificationMixin
-)
+from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, UnifiedJob
+from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
-from awx.main.models.rbac import (
-    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
-    ROLE_SINGLETON_SYSTEM_AUDITOR
-)
+from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 from awx.main.fields import ImplicitRoleField, AskForField
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -50,8 +44,15 @@ from awx.main.fields import JSONField
 from awx.main.utils import schedule_task_manager
 
 
-__all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode',
-           'WorkflowJobTemplateNode', 'WorkflowApprovalTemplate', 'WorkflowApproval']
+__all__ = [
+    'WorkflowJobTemplate',
+    'WorkflowJob',
+    'WorkflowJobOptions',
+    'WorkflowJobNode',
+    'WorkflowJobTemplateNode',
+    'WorkflowApprovalTemplate',
+    'WorkflowApproval',
+]
 
 
 logger = logging.getLogger('awx.main.models.workflow')
@@ -81,9 +82,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         related_name='%(class)ss_always',
     )
     all_parents_must_converge = models.BooleanField(
-        default=False,
-        help_text=_("If enabled then the node will only run if all of the parent nodes "
-                    "have met the criteria to reach this node")
+        default=False, help_text=_("If enabled then the node will only run if all of the parent nodes " "have met the criteria to reach this node")
     )
     unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
@@ -103,17 +102,24 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
 
     @classmethod
     def _get_workflow_job_field_names(cls):
-        '''
+        """
         Return field names that should be copied from template node to job node.
-        '''
-        return ['workflow_job', 'unified_job_template',
-                'extra_data', 'survey_passwords',
-                'inventory', 'credentials', 'char_prompts', 'all_parents_must_converge']
+        """
+        return [
+            'workflow_job',
+            'unified_job_template',
+            'extra_data',
+            'survey_passwords',
+            'inventory',
+            'credentials',
+            'char_prompts',
+            'all_parents_must_converge',
+        ]
 
     def create_workflow_job_node(self, **kwargs):
-        '''
+        """
         Create a new workflow job node based on this workflow node.
-        '''
+        """
         create_kwargs = {}
         for field_name in self._get_workflow_job_field_names():
             if field_name == 'credentials':
@@ -135,9 +141,18 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
 
 class WorkflowJobTemplateNode(WorkflowNodeBase):
     FIELDS_TO_PRESERVE_AT_COPY = [
-        'unified_job_template', 'workflow_job_template', 'success_nodes', 'failure_nodes',
-        'always_nodes', 'credentials', 'inventory', 'extra_data', 'survey_passwords',
-        'char_prompts', 'all_parents_must_converge', 'identifier'
+        'unified_job_template',
+        'workflow_job_template',
+        'success_nodes',
+        'failure_nodes',
+        'always_nodes',
+        'credentials',
+        'inventory',
+        'extra_data',
+        'survey_passwords',
+        'char_prompts',
+        'all_parents_must_converge',
+        'identifier',
     ]
     REENCRYPTION_BLOCKLIST_AT_COPY = ['extra_data', 'survey_passwords']
 
@@ -150,9 +165,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         max_length=512,
         default=uuid4,
         blank=False,
-        help_text=_(
-            'An identifier for this node that is unique within its workflow. '
-            'It is copied to workflow job nodes corresponding to this node.'),
+        help_text=_('An identifier for this node that is unique within its workflow. ' 'It is copied to workflow job nodes corresponding to this node.'),
     )
 
     class Meta:
@@ -166,10 +179,10 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         return reverse('api:workflow_job_template_node_detail', kwargs={'pk': self.pk}, request=request)
 
     def create_wfjt_node_copy(self, user, workflow_job_template=None):
-        '''
+        """
         Copy this node to a new WFJT, leaving out related fields the user
         is not allowed to access
-        '''
+        """
         create_kwargs = {}
         allowed_creds = []
         for field_name in self._get_workflow_job_field_names():
@@ -226,9 +239,11 @@ class WorkflowJobNode(WorkflowNodeBase):
     )
     do_not_run = models.BooleanField(
         default=False,
-        help_text=_("Indicates that a job will not be created when True. Workflow runtime "
-                    "semantics will mark this True if the node is in a path that will "
-                    "decidedly not be ran. A value of False means the node may not run."),
+        help_text=_(
+            "Indicates that a job will not be created when True. Workflow runtime "
+            "semantics will mark this True if the node is in a path that will "
+            "decidedly not be ran. A value of False means the node may not run."
+        ),
     )
     identifier = models.CharField(
         max_length=512,
@@ -260,12 +275,12 @@ class WorkflowJobNode(WorkflowNodeBase):
         return r
 
     def get_job_kwargs(self):
-        '''
+        """
         In advance of creating a new unified job as part of a workflow,
         this method builds the attributes to use
         It alters the node by saving its updated version of
         ancestor_artifacts, making it available to subsequent nodes.
-        '''
+        """
         # reject/accept prompted fields
         data = {}
         ujt_obj = self.unified_job_template
@@ -279,11 +294,11 @@ class WorkflowJobNode(WorkflowNodeBase):
                     prompts_data['extra_vars'].update(self.workflow_job.extra_vars_dict)
             accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**prompts_data)
             if errors:
-                logger.info(_('Bad launch configuration starting template {template_pk} as part of '
-                              'workflow {workflow_pk}. Errors:\n{error_text}').format(
-                                  template_pk=ujt_obj.pk,
-                                  workflow_pk=self.pk,
-                                  error_text=errors))
+                logger.info(
+                    _('Bad launch configuration starting template {template_pk} as part of ' 'workflow {workflow_pk}. Errors:\n{error_text}').format(
+                        template_pk=ujt_obj.pk, workflow_pk=self.pk, error_text=errors
+                    )
+                )
             data.update(accepted_fields)  # missing fields are handled in the scheduler
             try:
                 # config saved on the workflow job itself
@@ -347,13 +362,15 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
     class Meta:
         abstract = True
 
-    extra_vars = accepts_json(prevent_search(models.TextField(
-        blank=True,
-        default='',
-    )))
-    allow_simultaneous = models.BooleanField(
-        default=False
+    extra_vars = accepts_json(
+        prevent_search(
+            models.TextField(
+                blank=True,
+                default='',
+            )
+        )
     )
+    allow_simultaneous = models.BooleanField(default=False)
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -404,9 +421,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin, WebhookTemplateMixin):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
-    FIELDS_TO_PRESERVE_AT_COPY = [
-        'labels', 'organization', 'instance_groups', 'workflow_job_template_nodes', 'credentials', 'survey_spec'
-    ]
+    FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'organization', 'instance_groups', 'workflow_job_template_nodes', 'credentials', 'survey_spec']
 
     class Meta:
         app_label = 'main'
@@ -423,28 +438,30 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         blank=True,
         default=False,
     )
-    notification_templates_approvals = models.ManyToManyField(
-        "NotificationTemplate",
-        blank=True,
-        related_name='%(class)s_notification_templates_for_approvals'
-    )
+    notification_templates_approvals = models.ManyToManyField("NotificationTemplate", blank=True, related_name='%(class)s_notification_templates_for_approvals')
 
-    admin_role = ImplicitRoleField(parent_role=[
-        'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
-        'organization.workflow_admin_role'
-    ])
-    execute_role = ImplicitRoleField(parent_role=[
-        'admin_role',
-        'organization.execute_role',
-    ])
-    read_role = ImplicitRoleField(parent_role=[
-        'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
-        'organization.auditor_role', 'execute_role', 'admin_role',
-        'approval_role',
-    ])
-    approval_role = ImplicitRoleField(parent_role=[
-        'organization.approval_role', 'admin_role',
-    ])
+    admin_role = ImplicitRoleField(parent_role=['singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, 'organization.workflow_admin_role'])
+    execute_role = ImplicitRoleField(
+        parent_role=[
+            'admin_role',
+            'organization.execute_role',
+        ]
+    )
+    read_role = ImplicitRoleField(
+        parent_role=[
+            'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+            'organization.auditor_role',
+            'execute_role',
+            'admin_role',
+            'approval_role',
+        ]
+    )
+    approval_role = ImplicitRoleField(
+        parent_role=[
+            'organization.approval_role',
+            'admin_role',
+        ]
+    )
 
     @property
     def workflow_nodes(self):
@@ -458,46 +475,50 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     def _get_unified_jt_copy_names(cls):
         base_list = super(WorkflowJobTemplate, cls)._get_unified_jt_copy_names()
         base_list.remove('labels')
-        return (base_list |
-                set(['survey_spec', 'survey_enabled', 'ask_variables_on_launch', 'organization']))
+        return base_list | set(['survey_spec', 'survey_enabled', 'ask_variables_on_launch', 'organization'])
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_template_detail', kwargs={'pk': self.pk}, request=request)
 
     @property
     def cache_timeout_blocked(self):
-        if WorkflowJob.objects.filter(workflow_job_template=self,
-                                      status__in=['pending', 'waiting', 'running']).count() >= getattr(settings, 'SCHEDULE_MAX_JOBS', 10):
-            logger.error("Workflow Job template %s could not be started because there are more than %s other jobs from that template waiting to run" %
-                         (self.name, getattr(settings, 'SCHEDULE_MAX_JOBS', 10)))
+        if WorkflowJob.objects.filter(workflow_job_template=self, status__in=['pending', 'waiting', 'running']).count() >= getattr(
+            settings, 'SCHEDULE_MAX_JOBS', 10
+        ):
+            logger.error(
+                "Workflow Job template %s could not be started because there are more than %s other jobs from that template waiting to run"
+                % (self.name, getattr(settings, 'SCHEDULE_MAX_JOBS', 10))
+            )
             return True
         return False
 
     @property
     def notification_templates(self):
         base_notification_templates = NotificationTemplate.objects.all()
-        error_notification_templates = list(base_notification_templates
-                                            .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
-        started_notification_templates = list(base_notification_templates
-                                              .filter(unifiedjobtemplate_notification_templates_for_started__in=[self]))
-        success_notification_templates = list(base_notification_templates
-                                              .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
-        approval_notification_templates = list(base_notification_templates
-                                               .filter(workflowjobtemplate_notification_templates_for_approvals__in=[self]))
+        error_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
+        started_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_started__in=[self]))
+        success_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
+        approval_notification_templates = list(base_notification_templates.filter(workflowjobtemplate_notification_templates_for_approvals__in=[self]))
         # Get Organization NotificationTemplates
         if self.organization is not None:
-            error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_errors=self.organization)))
-            started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_started=self.organization)))
-            success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_success=self.organization)))
-            approval_notification_templates = set(approval_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_approvals=self.organization)))
-        return dict(error=list(error_notification_templates),
-                    started=list(started_notification_templates),
-                    success=list(success_notification_templates),
-                    approvals=list(approval_notification_templates))
+            error_notification_templates = set(
+                error_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_errors=self.organization))
+            )
+            started_notification_templates = set(
+                started_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_started=self.organization))
+            )
+            success_notification_templates = set(
+                success_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_success=self.organization))
+            )
+            approval_notification_templates = set(
+                approval_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_approvals=self.organization))
+            )
+        return dict(
+            error=list(error_notification_templates),
+            started=list(started_notification_templates),
+            success=list(success_notification_templates),
+            approvals=list(approval_notification_templates),
+        )
 
     def create_unified_job(self, **kwargs):
         workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
@@ -516,9 +537,8 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
             if field_name == 'extra_vars':
                 accepted_vars, rejected_vars, vars_errors = self.accept_or_ignore_variables(
-                    kwargs.get('extra_vars', {}),
-                    _exclude_errors=exclude_errors,
-                    extra_passwords=kwargs.get('survey_passwords', {}))
+                    kwargs.get('extra_vars', {}), _exclude_errors=exclude_errors, extra_passwords=kwargs.get('survey_passwords', {})
+                )
                 if accepted_vars:
                     prompted_data['extra_vars'] = accepted_vars
                 if rejected_vars:
@@ -550,8 +570,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return not bool(self.variables_needed_to_start)
 
     def node_templates_missing(self):
-        return [node.pk for node in self.workflow_job_template_nodes.filter(
-                unified_job_template__isnull=True).all()]
+        return [node.pk for node in self.workflow_job_template_nodes.filter(unified_job_template__isnull=True).all()]
 
     def node_prompts_rejected(self):
         node_list = []
@@ -568,6 +587,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     '''
     RelatedJobsMixin
     '''
+
     def _get_related_jobs(self):
         return WorkflowJob.objects.filter(workflow_job_template=self)
 
@@ -592,12 +612,9 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         null=True,
         default=None,
         on_delete=models.SET_NULL,
-        help_text=_("If automatically created for a sliced job run, the job template "
-                    "the workflow job was created from."),
+        help_text=_("If automatically created for a sliced job run, the job template " "the workflow job was created from."),
     )
-    is_sliced_job = models.BooleanField(
-        default=False
-    )
+    is_sliced_job = models.BooleanField(default=False)
 
     @property
     def workflow_nodes(self):
@@ -629,8 +646,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             if node.job is None:
                 node_job_description = 'no job.'
             else:
-                node_job_description = ('job #{0}, "{1}", which finished with status {2}.'
-                                        .format(node.job.id, node.job.name, node.job.status))
+                node_job_description = 'job #{0}, "{1}", which finished with status {2}.'.format(node.job.id, node.job.name, node.job.status)
             str_arr.append("- node #{0} spawns {1}".format(node.id, node_job_description))
         result['body'] = '\n'.join(str_arr)
         return result
@@ -649,8 +665,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         wj = self.get_workflow_job()
         while wj and wj.workflow_job_template_id:
             if wj.pk in wj_ids:
-                logger.critical('Cycles detected in the workflow jobs graph, '
-                                'this is not normal and suggests task manager degeneracy.')
+                logger.critical('Cycles detected in the workflow jobs graph, ' 'this is not normal and suggests task manager degeneracy.')
                 break
             wj_ids.add(wj.pk)
             ancestors.append(wj.workflow_job_template)
@@ -676,7 +691,10 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
 class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
 
-    FIELDS_TO_PRESERVE_AT_COPY = ['description', 'timeout',]
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'description',
+        'timeout',
+    ]
 
     class Meta:
         app_label = 'main'
@@ -705,6 +723,7 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
     '''
     RelatedJobsMixin
     '''
+
     def _get_related_jobs(self):
         return UnifiedJob.objects.filter(unified_job_template=self)
 
@@ -726,10 +745,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         default=0,
         help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
     )
-    timed_out = models.BooleanField(
-        default=False,
-        help_text=_("Shows when an approval node (with a timeout assigned to it) has timed out.")
-    )
+    timed_out = models.BooleanField(default=False, help_text=_("Shows when an approval node (with a timeout assigned to it) has timed out."))
     approved_or_denied_by = models.ForeignKey(
         'auth.User',
         related_name='%s(class)s_approved+',
@@ -738,7 +754,6 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         editable=False,
         on_delete=models.SET_NULL,
     )
-
 
     @classmethod
     def _get_unified_job_template_class(cls):
@@ -788,6 +803,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
     def send_approval_notification(self, approval_status):
         from awx.main.tasks import send_notifications  # avoid circular import
+
         if self.workflow_job_template is None:
             return
         for nt in self.workflow_job_template.notification_templates["approvals"]:
@@ -800,9 +816,10 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
             # https://stackoverflow.com/a/3431699/10669572
             def send_it(local_nt=nt, local_subject=notification_subject, local_body=notification_body):
                 def _func():
-                    send_notifications.delay([local_nt.generate_notification(local_subject, local_body).id],
-                                             job_id=self.id)
+                    send_notifications.delay([local_nt.generate_notification(local_subject, local_body).id], job_id=self.id)
+
                 return _func
+
             connection.on_commit(send_it())
 
     def build_approval_notification_message(self, nt, approval_status):
@@ -841,10 +858,12 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
     def context(self, approval_status):
         workflow_url = urljoin(settings.TOWER_URL_BASE, '/#/jobs/workflow/{}'.format(self.workflow_job.id))
-        return {'approval_status': approval_status,
-                'approval_node_name': self.workflow_approval_template.name,
-                'workflow_url': workflow_url,
-                'job_metadata': json.dumps(self.notification_data(), indent=4)}
+        return {
+            'approval_status': approval_status,
+            'approval_node_name': self.workflow_approval_template.name,
+            'workflow_url': workflow_url,
+            'job_metadata': json.dumps(self.notification_data(), indent=4),
+        }
 
     @property
     def workflow_job_template(self):

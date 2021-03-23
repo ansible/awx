@@ -13,28 +13,55 @@ SQUASHED_31 = {
         migrations.DeleteModel(
             name='TowerSettings',
         ),
-
         migrations.AlterField(
             model_name='project',
             name='scm_type',
-            field=models.CharField(default='', choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
+            field=models.CharField(
+                default='',
+                choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights')],
+                max_length=8,
+                blank=True,
+                help_text='Specifies the source control system used to store the project.',
+                verbose_name='SCM Type',
+            ),
         ),
         migrations.AlterField(
             model_name='projectupdate',
             name='scm_type',
-            field=models.CharField(default='', choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
+            field=models.CharField(
+                default='',
+                choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights')],
+                max_length=8,
+                blank=True,
+                help_text='Specifies the source control system used to store the project.',
+                verbose_name='SCM Type',
+            ),
         ),
     ],
     '0036_v311_insights': [
         migrations.AlterField(
             model_name='project',
             name='scm_type',
-            field=models.CharField(default='', choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
+            field=models.CharField(
+                default='',
+                choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights')],
+                max_length=8,
+                blank=True,
+                help_text='Specifies the source control system used to store the project.',
+                verbose_name='SCM Type',
+            ),
         ),
         migrations.AlterField(
             model_name='projectupdate',
             name='scm_type',
-            field=models.CharField(default='', choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
+            field=models.CharField(
+                default='',
+                choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights')],
+                max_length=8,
+                blank=True,
+                help_text='Specifies the source control system used to store the project.',
+                verbose_name='SCM Type',
+            ),
         ),
     ],
     '0037_v313_instance_version': [

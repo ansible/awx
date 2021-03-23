@@ -16,7 +16,6 @@ __all__ = ['DatabaseWrapper']
 
 
 class RecordedQueryLog(object):
-
     def __init__(self, log, db, dest='/var/log/tower/profile'):
         self.log = log
         self.db = db
@@ -70,10 +69,7 @@ class RecordedQueryLog(object):
                     break
             else:
                 progname = os.path.basename(sys.argv[0])
-            filepath = os.path.join(
-                self.dest,
-                '{}.sqlite'.format(progname)
-            )
+            filepath = os.path.join(self.dest, '{}.sqlite'.format(progname))
             version = pkg_resources.get_distribution('awx').version
             log = sqlite3.connect(filepath, timeout=3)
             log.execute(
@@ -91,9 +87,8 @@ class RecordedQueryLog(object):
             )
             log.commit()
             log.execute(
-                'INSERT INTO queries (pid, version, argv, time, sql, explain, bt) '
-                'VALUES (?, ?, ?, ?, ?, ?, ?);',
-                (os.getpid(), version, ' ' .join(sys.argv), seconds, sql, explain, bt)
+                'INSERT INTO queries (pid, version, argv, time, sql, explain, bt) ' 'VALUES (?, ?, ?, ?, ?, ?, ?);',
+                (os.getpid(), version, ' '.join(sys.argv), seconds, sql, explain, bt),
             )
             log.commit()
 

@@ -5,7 +5,6 @@ from awxkit.api.resources import resources
 
 
 class SurveySpec(base.Base):
-
     def get_variable_default(self, var):
         for item in self.spec:
             if item.get('variable') == var:
@@ -26,5 +25,4 @@ class SurveySpec(base.Base):
         return required_vars
 
 
-page.register_page([resources.job_template_survey_spec,
-                    resources.workflow_job_template_survey_spec], SurveySpec)
+page.register_page([resources.job_template_survey_spec, resources.workflow_job_template_survey_spec], SurveySpec)

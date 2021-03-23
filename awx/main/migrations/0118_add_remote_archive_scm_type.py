@@ -13,11 +13,39 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='project',
             name='scm_type',
-            field=models.CharField(blank=True, choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights'), ('archive', 'Remote Archive')], default='', help_text='Specifies the source control system used to store the project.', max_length=8, verbose_name='SCM Type'),
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ('', 'Manual'),
+                    ('git', 'Git'),
+                    ('hg', 'Mercurial'),
+                    ('svn', 'Subversion'),
+                    ('insights', 'Red Hat Insights'),
+                    ('archive', 'Remote Archive'),
+                ],
+                default='',
+                help_text='Specifies the source control system used to store the project.',
+                max_length=8,
+                verbose_name='SCM Type',
+            ),
         ),
         migrations.AlterField(
             model_name='projectupdate',
             name='scm_type',
-            field=models.CharField(blank=True, choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion'), ('insights', 'Red Hat Insights'), ('archive', 'Remote Archive')], default='', help_text='Specifies the source control system used to store the project.', max_length=8, verbose_name='SCM Type'),
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ('', 'Manual'),
+                    ('git', 'Git'),
+                    ('hg', 'Mercurial'),
+                    ('svn', 'Subversion'),
+                    ('insights', 'Red Hat Insights'),
+                    ('archive', 'Remote Archive'),
+                ],
+                default='',
+                help_text='Specifies the source control system used to store the project.',
+                max_length=8,
+                verbose_name='SCM Type',
+            ),
         ),
     ]

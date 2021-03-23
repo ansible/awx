@@ -19,12 +19,7 @@ def gce(cred, env, private_data_dir):
     project = cred.get_input('project', default='')
     username = cred.get_input('username', default='')
 
-    json_cred = {
-        'type': 'service_account',
-        'private_key': cred.get_input('ssh_key_data', default=''),
-        'client_email': username,
-        'project_id': project
-    }
+    json_cred = {'type': 'service_account', 'private_key': cred.get_input('ssh_key_data', default=''), 'client_email': username, 'project_id': project}
     if 'INVENTORY_UPDATE_ID' not in env:
         env['GCE_EMAIL'] = username
         env['GCE_PROJECT'] = project
@@ -73,10 +68,12 @@ def vmware(cred, env, private_data_dir):
 
 
 def _openstack_data(cred):
-    openstack_auth = dict(auth_url=cred.get_input('host', default=''),
-                          username=cred.get_input('username', default=''),
-                          password=cred.get_input('password', default=''),
-                          project_name=cred.get_input('project', default=''))
+    openstack_auth = dict(
+        auth_url=cred.get_input('host', default=''),
+        username=cred.get_input('username', default=''),
+        password=cred.get_input('password', default=''),
+        project_name=cred.get_input('project', default=''),
+    )
     if cred.has_input('project_domain_name'):
         openstack_auth['project_domain_name'] = cred.get_input('project_domain_name', default='')
     if cred.has_input('domain'):

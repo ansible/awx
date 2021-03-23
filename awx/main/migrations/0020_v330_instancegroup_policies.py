@@ -16,8 +16,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='instancegroup',
             name='policy_instance_list',
-            field=awx.main.fields.JSONField(default=[], help_text='List of exact-match Instances that will always be automatically assigned to this group',
-                                            blank=True),
+            field=awx.main.fields.JSONField(
+                default=[], help_text='List of exact-match Instances that will always be automatically assigned to this group', blank=True
+            ),
         ),
         migrations.AddField(
             model_name='instancegroup',
@@ -34,29 +35,9 @@ class Migration(migrations.Migration):
             name='capacity_adjustment',
             field=models.DecimalField(decimal_places=2, default=Decimal('1.0'), max_digits=3),
         ),
-        migrations.AddField(
-            model_name='instance',
-            name='cpu',
-            field=models.IntegerField(default=0, editable=False)
-        ),
-        migrations.AddField(
-            model_name='instance',
-            name='memory',
-            field=models.BigIntegerField(default=0, editable=False)
-        ),
-        migrations.AddField(
-            model_name='instance',
-            name='cpu_capacity',
-            field=models.IntegerField(default=0, editable=False)
-        ),
-        migrations.AddField(
-            model_name='instance',
-            name='mem_capacity',
-            field=models.IntegerField(default=0, editable=False)
-        ),
-        migrations.AddField(
-            model_name='instance',
-            name='enabled',
-            field=models.BooleanField(default=True)
-        )
+        migrations.AddField(model_name='instance', name='cpu', field=models.IntegerField(default=0, editable=False)),
+        migrations.AddField(model_name='instance', name='memory', field=models.BigIntegerField(default=0, editable=False)),
+        migrations.AddField(model_name='instance', name='cpu_capacity', field=models.IntegerField(default=0, editable=False)),
+        migrations.AddField(model_name='instance', name='mem_capacity', field=models.IntegerField(default=0, editable=False)),
+        migrations.AddField(model_name='instance', name='enabled', field=models.BooleanField(default=True)),
     ]

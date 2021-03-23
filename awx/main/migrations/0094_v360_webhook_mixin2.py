@@ -14,7 +14,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='webhook_credential',
-            field=models.ForeignKey(blank=True, help_text='Personal Access Token for posting back the status to the service API', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='jobs', to='main.Credential'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='Personal Access Token for posting back the status to the service API',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='jobs',
+                to='main.Credential',
+            ),
         ),
         migrations.AddField(
             model_name='job',
@@ -24,12 +31,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='webhook_service',
-            field=models.CharField(blank=True, choices=[('github', 'GitHub'), ('gitlab', 'GitLab')], help_text='Service that webhook requests will be accepted from', max_length=16),
+            field=models.CharField(
+                blank=True, choices=[('github', 'GitHub'), ('gitlab', 'GitLab')], help_text='Service that webhook requests will be accepted from', max_length=16
+            ),
         ),
         migrations.AddField(
             model_name='workflowjob',
             name='webhook_credential',
-            field=models.ForeignKey(blank=True, help_text='Personal Access Token for posting back the status to the service API', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='workflowjobs', to='main.Credential'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='Personal Access Token for posting back the status to the service API',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='workflowjobs',
+                to='main.Credential',
+            ),
         ),
         migrations.AddField(
             model_name='workflowjob',
@@ -39,6 +55,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjob',
             name='webhook_service',
-            field=models.CharField(blank=True, choices=[('github', 'GitHub'), ('gitlab', 'GitLab')], help_text='Service that webhook requests will be accepted from', max_length=16),
+            field=models.CharField(
+                blank=True, choices=[('github', 'GitHub'), ('gitlab', 'GitLab')], help_text='Service that webhook requests will be accepted from', max_length=16
+            ),
         ),
     ]

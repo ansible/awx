@@ -13,7 +13,7 @@ class IndexView(TemplateView):
 class MigrationsNotran(TemplateView):
 
     template_name = 'installing.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         product_name = get_licenser().validate()['product_name']
@@ -27,7 +27,4 @@ class MigrationsNotran(TemplateView):
 
 app_name = 'ui_next'
 
-urlpatterns = [
-    url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^migrations_notran/$', MigrationsNotran.as_view(), name='migrations_notran'),
-]
+urlpatterns = [url(r'^$', IndexView.as_view(), name='index'), url(r'^migrations_notran/$', MigrationsNotran.as_view(), name='migrations_notran')]

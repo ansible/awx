@@ -14,6 +14,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='organization',
             name='default_environment',
-            field=models.ForeignKey(blank=True, default=None, help_text='The default execution environment for jobs run by this organization.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='main.ExecutionEnvironment'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                help_text='The default execution environment for jobs run by this organization.',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='+',
+                to='main.ExecutionEnvironment',
+            ),
         ),
     ]

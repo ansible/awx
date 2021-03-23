@@ -16,6 +16,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inventoryupdate',
             name='inventory',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='inventory_updates', to='main.Inventory'),
+            field=models.ForeignKey(
+                default=None, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='inventory_updates', to='main.Inventory'
+            ),
         ),
     ]

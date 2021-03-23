@@ -12,9 +12,7 @@ from awx.main.models import WorkflowJobTemplate, JobTemplate, Job
 @pytest.mark.django_db
 def test_single_job_scheduler_launch(default_instance_group, job_template_factory, mocker):
     instance = default_instance_group.instances.all()[0]
-    objects = job_template_factory('jt', organization='org1', project='proj',
-                                   inventory='inv', credential='cred',
-                                   jobs=["job_should_start"])
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start"])
     j = objects.jobs["job_should_start"]
     j.status = 'pending'
     j.save()
@@ -25,7 +23,6 @@ def test_single_job_scheduler_launch(default_instance_group, job_template_factor
 
 @pytest.mark.django_db
 class TestJobLifeCycle:
-
     def run_tm(self, tm, expect_channel=None, expect_schedule=None, expect_commit=None):
         """Test helper method that takes parameters to assert against
         expect_channel - list of expected websocket emit channel message calls
@@ -50,17 +47,10 @@ class TestJobLifeCycle:
                         assert mock_commit.mock_calls == expect_commit
 
     def test_task_manager_workflow_rescheduling(self, job_template_factory, inventory, project, default_instance_group):
-        jt = JobTemplate.objects.create(
-            allow_simultaneous=True,
-            inventory=inventory,
-            project=project,
-            playbook='helloworld.yml'
-        )
+        jt = JobTemplate.objects.create(allow_simultaneous=True, inventory=inventory, project=project, playbook='helloworld.yml')
         wfjt = WorkflowJobTemplate.objects.create(name='foo')
         for i in range(2):
-            wfjt.workflow_nodes.create(
-                unified_job_template=jt
-            )
+            wfjt.workflow_nodes.create(unified_job_template=jt)
         wj = wfjt.create_unified_job()
         assert wj.workflow_nodes.count() == 2
         wj.signal_start()
@@ -93,9 +83,7 @@ class TestJobLifeCycle:
         wfjts = [WorkflowJobTemplate.objects.create(name='foo')]
         for i in range(5):
             wfjt = WorkflowJobTemplate.objects.create(name='foo{}'.format(i))
-            wfjts[-1].workflow_nodes.create(
-                unified_job_template=wfjt
-            )
+            wfjts[-1].workflow_nodes.create(unified_job_template=wfjt)
             wfjts.append(wfjt)
 
         wj = wfjts[0].create_unified_job()
@@ -115,9 +103,9 @@ class TestJobLifeCycle:
 @pytest.mark.django_db
 def test_single_jt_multi_job_launch_blocks_last(default_instance_group, job_template_factory, mocker):
     instance = default_instance_group.instances.all()[0]
-    objects = job_template_factory('jt', organization='org1', project='proj',
-                                   inventory='inv', credential='cred',
-                                   jobs=["job_should_start", "job_should_not_start"])
+    objects = job_template_factory(
+        'jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start", "job_should_not_start"]
+    )
     j1 = objects.jobs["job_should_start"]
     j1.status = 'pending'
     j1.save()
@@ -137,9 +125,9 @@ def test_single_jt_multi_job_launch_blocks_last(default_instance_group, job_temp
 @pytest.mark.django_db
 def test_single_jt_multi_job_launch_allow_simul_allowed(default_instance_group, job_template_factory, mocker):
     instance = default_instance_group.instances.all()[0]
-    objects = job_template_factory('jt', organization='org1', project='proj',
-                                   inventory='inv', credential='cred',
-                                   jobs=["job_should_start", "job_should_not_start"])
+    objects = job_template_factory(
+        'jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start", "job_should_not_start"]
+    )
     jt = objects.job_template
     jt.save()
 
@@ -153,19 +141,14 @@ def test_single_jt_multi_job_launch_allow_simul_allowed(default_instance_group, 
     j2.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_has_calls([mock.call(j1, default_instance_group, [], instance),
-                                                 mock.call(j2, default_instance_group, [], instance)])
+        TaskManager.start_task.assert_has_calls([mock.call(j1, default_instance_group, [], instance), mock.call(j2, default_instance_group, [], instance)])
 
 
 @pytest.mark.django_db
 def test_multi_jt_capacity_blocking(default_instance_group, job_template_factory, mocker):
     instance = default_instance_group.instances.all()[0]
-    objects1 = job_template_factory('jt1', organization='org1', project='proj1',
-                                    inventory='inv1', credential='cred1',
-                                    jobs=["job_should_start"])
-    objects2 = job_template_factory('jt2', organization='org2', project='proj2',
-                                    inventory='inv2', credential='cred2',
-                                    jobs=["job_should_not_start"])
+    objects1 = job_template_factory('jt1', organization='org1', project='proj1', inventory='inv1', credential='cred1', jobs=["job_should_start"])
+    objects2 = job_template_factory('jt2', organization='org2', project='proj2', inventory='inv2', credential='cred2', jobs=["job_should_not_start"])
     j1 = objects1.jobs["job_should_start"]
     j1.status = 'pending'
     j1.save()
@@ -187,9 +170,7 @@ def test_multi_jt_capacity_blocking(default_instance_group, job_template_factory
 
 @pytest.mark.django_db
 def test_single_job_dependencies_project_launch(default_instance_group, job_template_factory, mocker):
-    objects = job_template_factory('jt', organization='org1', project='proj',
-                                   inventory='inv', credential='cred',
-                                   jobs=["job_should_start"])
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start"])
     instance = default_instance_group.instances.all()[0]
     j = objects.jobs["job_should_start"]
     j.status = 'pending'
@@ -217,9 +198,7 @@ def test_single_job_dependencies_project_launch(default_instance_group, job_temp
 
 @pytest.mark.django_db
 def test_single_job_dependencies_inventory_update_launch(default_instance_group, job_template_factory, mocker, inventory_source_factory):
-    objects = job_template_factory('jt', organization='org1', project='proj',
-                                   inventory='inv', credential='cred',
-                                   jobs=["job_should_start"])
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start"])
     instance = default_instance_group.instances.all()[0]
     j = objects.jobs["job_should_start"]
     j.status = 'pending'
@@ -248,9 +227,7 @@ def test_single_job_dependencies_inventory_update_launch(default_instance_group,
 
 @pytest.mark.django_db
 def test_job_dependency_with_already_updated(default_instance_group, job_template_factory, mocker, inventory_source_factory):
-    objects = job_template_factory('jt', organization='org1', project='proj',
-                                   inventory='inv', credential='cred',
-                                   jobs=["job_should_start"])
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job_should_start"])
     instance = default_instance_group.instances.all()[0]
     j = objects.jobs["job_should_start"]
     j.status = 'pending'
@@ -279,9 +256,7 @@ def test_job_dependency_with_already_updated(default_instance_group, job_templat
 @pytest.mark.django_db
 def test_shared_dependencies_launch(default_instance_group, job_template_factory, mocker, inventory_source_factory):
     instance = default_instance_group.instances.all()[0]
-    objects = job_template_factory('jt', organization='org1', project='proj',
-                                   inventory='inv', credential='cred',
-                                   jobs=["first_job", "second_job"])
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["first_job", "second_job"])
     j1 = objects.jobs["first_job"]
     j1.status = 'pending'
     j1.save()
@@ -307,8 +282,9 @@ def test_shared_dependencies_launch(default_instance_group, job_template_factory
         TaskManager().schedule()
         pu = p.project_updates.first()
         iu = ii.inventory_updates.first()
-        TaskManager.start_task.assert_has_calls([mock.call(iu, default_instance_group, [j1, j2, pu], instance),
-                                                mock.call(pu, default_instance_group, [j1, j2, iu], instance)])
+        TaskManager.start_task.assert_has_calls(
+            [mock.call(iu, default_instance_group, [j1, j2, pu], instance), mock.call(pu, default_instance_group, [j1, j2, iu], instance)]
+        )
         pu.status = "successful"
         pu.finished = pu.created + timedelta(seconds=1)
         pu.save()
@@ -331,9 +307,7 @@ def test_shared_dependencies_launch(default_instance_group, job_template_factory
 
 @pytest.mark.django_db
 def test_job_not_blocking_project_update(default_instance_group, job_template_factory):
-    objects = job_template_factory('jt', organization='org1', project='proj',
-                                   inventory='inv', credential='cred',
-                                   jobs=["job"])
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job"])
     job = objects.jobs["job"]
     job.instance_group = default_instance_group
     job.status = "running"
@@ -357,9 +331,7 @@ def test_job_not_blocking_project_update(default_instance_group, job_template_fa
 
 @pytest.mark.django_db
 def test_job_not_blocking_inventory_update(default_instance_group, job_template_factory, inventory_source_factory):
-    objects = job_template_factory('jt', organization='org1', project='proj',
-                                   inventory='inv', credential='cred',
-                                   jobs=["job"])
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred', jobs=["job"])
     job = objects.jobs["job"]
     job.instance_group = default_instance_group
     job.status = "running"
@@ -393,7 +365,6 @@ def test_generate_dependencies_only_once(job_template_factory):
     job.status = "pending"
     job.name = "job_gen_dep"
     job.save()
-
 
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         # job starts with dependencies_processed as False

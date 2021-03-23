@@ -13,26 +13,18 @@ from rest_framework.exceptions import ParseError
 
 from awx.main.utils import common
 
-from awx.main.models import (
-    Job,
-    AdHocCommand,
-    InventoryUpdate,
-    ProjectUpdate,
-    SystemJob,
-    WorkflowJob,
-    Inventory,
-    JobTemplate,
-    UnifiedJobTemplate,
-    UnifiedJob
+from awx.main.models import Job, AdHocCommand, InventoryUpdate, ProjectUpdate, SystemJob, WorkflowJob, Inventory, JobTemplate, UnifiedJobTemplate, UnifiedJob
+
+
+@pytest.mark.parametrize(
+    'input_, output',
+    [
+        ({"foo": "bar"}, {"foo": "bar"}),
+        ('{"foo": "bar"}', {"foo": "bar"}),
+        ('---\nfoo: bar', {"foo": "bar"}),
+        (4399, {}),
+    ],
 )
-
-
-@pytest.mark.parametrize('input_, output', [
-    ({"foo": "bar"}, {"foo": "bar"}),
-    ('{"foo": "bar"}', {"foo": "bar"}),
-    ('---\nfoo: bar', {"foo": "bar"}),
-    (4399, {}),
-])
 def test_parse_yaml_or_json(input_, output):
     assert common.parse_yaml_or_json(input_) == output
 
@@ -48,7 +40,6 @@ def test_recursive_vars_not_allowed():
 
 
 class TestParserExceptions:
-
     @staticmethod
     def json_error(data):
         try:
@@ -103,7 +94,7 @@ TEST_MODELS = [
     (UnifiedJob, 'unified_job'),
     (Inventory, 'inventory'),
     (JobTemplate, 'job_template'),
-    (UnifiedJobTemplate, 'unified_job_template')
+    (UnifiedJobTemplate, 'unified_job_template'),
 ]
 
 
@@ -120,9 +111,7 @@ def test_get_model_for_invalid_type():
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("model_type,model_class", [
-    (name, cls) for cls, name in TEST_MODELS
-])
+@pytest.mark.parametrize("model_type,model_class", [(name, cls) for cls, name in TEST_MODELS])
 def test_get_model_for_valid_type(model_type, model_class):
     assert common.get_model_for_type(model_type) == model_class
 
@@ -130,6 +119,7 @@ def test_get_model_for_valid_type(model_type, model_class):
 @pytest.fixture
 def memoized_function(mocker, mock_cache):
     with mock.patch('awx.main.utils.common.get_memoize_cache', return_value=mock_cache):
+
         @common.memoize(track_function=True)
         def myfunction(key, value):
             if key not in myfunction.calls:
@@ -141,6 +131,7 @@ def memoized_function(mocker, mock_cache):
                 return value
             else:
                 return '%s called %s times' % (value, myfunction.calls[key])
+
         myfunction.calls = dict()
         return myfunction
 
@@ -178,16 +169,14 @@ def test_memoize_delete(memoized_function, mock_cache):
 def test_memoize_parameter_error():
 
     with pytest.raises(common.IllegalArgumentError):
+
         @common.memoize(cache_key='foo', track_function=True)
         def fn():
             return
 
 
 def test_extract_ansible_vars():
-    my_dict = {
-        "foobar": "baz",
-        "ansible_connetion_setting": "1928"
-    }
+    my_dict = {"foobar": "baz", "ansible_connetion_setting": "1928"}
     redacted, var_list = common.extract_ansible_vars(json.dumps(my_dict))
     assert var_list == set(['ansible_connetion_setting'])
     assert redacted == {"foobar": "baz"}

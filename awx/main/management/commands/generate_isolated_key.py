@@ -14,6 +14,7 @@ from awx.conf.models import Setting
 
 class Command(BaseCommand):
     """Generate and store a randomized RSA key for SSH traffic to isolated instances"""
+
     help = 'Generates and stores a randomized RSA key for SSH traffic to isolated instances'
 
     def handle(self, *args, **kwargs):
@@ -21,25 +22,17 @@ class Command(BaseCommand):
             print(settings.AWX_ISOLATED_PUBLIC_KEY)
             return
 
-        key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=4096,
-            backend=default_backend()
-        )
+        key = rsa.generate_private_key(public_exponent=65537, key_size=4096, backend=default_backend())
         Setting.objects.create(
             key='AWX_ISOLATED_PRIVATE_KEY',
             value=key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
-            )
+                encoding=serialization.Encoding.PEM, format=serialization.PrivateFormat.TraditionalOpenSSL, encryption_algorithm=serialization.NoEncryption()
+            ),
         ).save()
         pemfile = Setting.objects.create(
             key='AWX_ISOLATED_PUBLIC_KEY',
-            value=smart_str(key.public_key().public_bytes(
-                encoding=serialization.Encoding.OpenSSH,
-                format=serialization.PublicFormat.OpenSSH
-            )) + " generated-by-awx@%s" % datetime.datetime.utcnow().isoformat()
+            value=smart_str(key.public_key().public_bytes(encoding=serialization.Encoding.OpenSSH, format=serialization.PublicFormat.OpenSSH))
+            + " generated-by-awx@%s" % datetime.datetime.utcnow().isoformat(),
         )
         pemfile.save()
         print(pemfile.value)

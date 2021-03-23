@@ -15,7 +15,7 @@ class ExecutionEnvironment(CommonModel):
     PULL_CHOICES = [
         ('always', _("Always pull container before running.")),
         ('missing', _("No pull option has been selected.")),
-        ('never', _("Never pull container before running."))
+        ('never', _("Never pull container before running.")),
     ]
 
     organization = models.ForeignKey(
