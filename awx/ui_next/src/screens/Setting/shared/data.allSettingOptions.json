@@ -166,15 +166,7 @@
                   ]
               ]
           },
-          "AWX_PROOT_ENABLED": {
-              "type": "boolean",
-              "label": "Enable job isolation",
-              "help_text": "Isolates an Ansible job from protected parts of the system to prevent exposing sensitive information.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_PROOT_BASE_PATH": {
+          "AWX_ISOLATION_BASE_PATH": {
               "type": "string",
               "label": "Job execution path",
               "help_text": "The directory in which Tower will create new temporary directories for job execution and isolation (such as credential files and custom inventory scripts).",
@@ -182,18 +174,7 @@
               "category_slug": "jobs",
               "defined_in_file": false
           },
-          "AWX_PROOT_HIDE_PATHS": {
-              "type": "list",
-              "label": "Paths to hide from isolated jobs",
-              "help_text": "Additional paths to hide from isolated processes. Enter one path per line.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false,
-              "child": {
-                  "type": "string"
-              }
-          },
-          "AWX_PROOT_SHOW_PATHS": {
+          "AWX_ISOLATION_SHOW_PATHS": {
               "type": "list",
               "label": "Paths to expose to isolated jobs",
               "help_text": "List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.",
@@ -3158,16 +3139,7 @@
                   ]
               ]
           },
-          "AWX_PROOT_ENABLED": {
-              "type": "boolean",
-              "required": true,
-              "label": "Enable job isolation",
-              "help_text": "Isolates an Ansible job from protected parts of the system to prevent exposing sensitive information.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": true
-          },
-          "AWX_PROOT_BASE_PATH": {
+          "AWX_ISOLATION_BASE_PATH": {
               "type": "string",
               "required": true,
               "label": "Job execution path",
@@ -3176,21 +3148,7 @@
               "category_slug": "jobs",
               "default": "/tmp"
           },
-          "AWX_PROOT_HIDE_PATHS": {
-              "type": "list",
-              "required": false,
-              "label": "Paths to hide from isolated jobs",
-              "help_text": "Additional paths to hide from isolated processes. Enter one path per line.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": [],
-              "child": {
-                  "type": "string",
-                  "required": true,
-                  "read_only": false
-              }
-          },
-          "AWX_PROOT_SHOW_PATHS": {
+          "AWX_ISOLATION_SHOW_PATHS": {
               "type": "list",
               "required": false,
               "label": "Paths to expose to isolated jobs",

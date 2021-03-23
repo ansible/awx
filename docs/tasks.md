@@ -187,7 +187,7 @@ This task spawns an `ansible` process, which then runs a command using Ansible. 
 - Build a dictionary of passwords for the SSH private key, SSH user and sudo/su.
 - Build an environment dictionary for Ansible.
 - Build a command line argument list for running Ansible, optionally using `ssh-agent` for public/private key authentication.
-- Return whether the task should use `bwrap`.
+- Return whether the task should use process isolation.
 
 For more information on ad hoc commands, read the [Running Ad Hoc Commands section](https://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#running-ad-hoc-commands) of the Inventories page of the Ansible Tower User Guide.
 
