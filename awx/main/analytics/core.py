@@ -172,6 +172,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         gather_dir = dest.joinpath('stage')
         gather_dir.mkdir(mode=0o700)
         tarfiles = []
+        succeeded = True
 
         # These json collectors are pretty compact, so collect all of them before shipping to analytics.
         data = {}
@@ -193,7 +194,8 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             if tgzfile is not None:
                 tarfiles.append(tgzfile)
                 if collection_type != 'dry-run':
-                    ship(tgzfile)
+                    if not ship(tgzfile):
+                        succeeded = False
                     with disable_activity_stream():
                         for filename in data:
                             last_entries[filename.replace('.json', '')] = until
@@ -228,15 +230,21 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                             tarfiles.append(tgzfile)
 
                             if collection_type != 'dry-run':
-                                ship(tgzfile)
+                                if not ship(tgzfile):
+                                    succeeded = False
                                 with disable_activity_stream():
                                     last_entries[key] = end
                                     settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
             except Exception:
                 logger.exception("Could not generate metric {}".format(filename))
 
-        with disable_activity_stream():
-            settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
+        if collection_type != 'dry-run':
+            if succeeded:
+                for fpath in tarfiles:
+                    if os.path.exists(fpath):
+                        os.remove(fpath)
+            with disable_activity_stream():
+                settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
 
         shutil.rmtree(dest, ignore_errors=True)  # clean up individual artifact files
         if not tarfiles:
@@ -253,42 +261,38 @@ def ship(path):
     """
     if not path:
         logger.error('Automation Analytics TAR not found')
-        return
+        return False
     if not os.path.exists(path):
         logger.error('Automation Analytics TAR {} not found'.format(path))
-        return
+        return False
     if "Error:" in str(path):
-        return
-    try:
-        logger.debug('shipping analytics file: {}'.format(path))
-        url = getattr(settings, 'AUTOMATION_ANALYTICS_URL', None)
-        if not url:
-            logger.error('AUTOMATION_ANALYTICS_URL is not set')
-            return
-        rh_user = getattr(settings, 'REDHAT_USERNAME', None)
-        rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
-        if not rh_user:
-            return logger.error('REDHAT_USERNAME is not set')
-        if not rh_password:
-            return logger.error('REDHAT_PASSWORD is not set')
-        with open(path, 'rb') as f:
-            files = {'file': (os.path.basename(path), f, settings.INSIGHTS_AGENT_MIME)}
-            s = requests.Session()
-            s.headers = get_awx_http_client_headers()
-            s.headers.pop('Content-Type')
-            with set_environ(**settings.AWX_TASK_ENV):
-                response = s.post(
-                    url,
-                    files=files,
-                    verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
-                    auth=(rh_user, rh_password),
-                    headers=s.headers,
-                    timeout=(31, 31),
-                )
-            # Accept 2XX status_codes
-            if response.status_code >= 300:
-                return logger.exception('Upload failed with status {}, {}'.format(response.status_code, response.text))
-    finally:
-        # cleanup tar.gz
-        if os.path.exists(path):
-            os.remove(path)
+        return False
+
+    logger.debug('shipping analytics file: {}'.format(path))
+    url = getattr(settings, 'AUTOMATION_ANALYTICS_URL', None)
+    if not url:
+        logger.error('AUTOMATION_ANALYTICS_URL is not set')
+        return False
+    rh_user = getattr(settings, 'REDHAT_USERNAME', None)
+    rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
+    if not rh_user:
+        logger.error('REDHAT_USERNAME is not set')
+        return False
+    if not rh_password:
+        logger.error('REDHAT_PASSWORD is not set')
+        return False
+    with open(path, 'rb') as f:
+        files = {'file': (os.path.basename(path), f, settings.INSIGHTS_AGENT_MIME)}
+        s = requests.Session()
+        s.headers = get_awx_http_client_headers()
+        s.headers.pop('Content-Type')
+        with set_environ(**settings.AWX_TASK_ENV):
+            response = s.post(
+                url, files=files, verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem", auth=(rh_user, rh_password), headers=s.headers, timeout=(31, 31)
+            )
+        # Accept 2XX status_codes
+        if response.status_code >= 300:
+            logger.error('Upload failed with status {}, {}'.format(response.status_code, response.text))
+            return False
+
+        return True
