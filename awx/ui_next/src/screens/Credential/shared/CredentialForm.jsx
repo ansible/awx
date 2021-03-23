@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { shape } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
@@ -35,7 +35,7 @@ const SelectOption = styled(PFSelectOption)`
   overflow: hidden;
 `;
 
-function CredentialFormFields({ i18n, credentialTypes }) {
+function CredentialFormFields({ i18n, initialTypeId, credentialTypes }) {
   const { setFieldValue, initialValues, setFieldTouched } = useFormikContext();
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
@@ -43,9 +43,10 @@ function CredentialFormFields({ i18n, credentialTypes }) {
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
 
+  const [credentialTypeId, setCredentialTypeId] = useState(initialTypeId);
+
   const isGalaxyCredential =
-    !!credTypeField.value &&
-    credentialTypes[credTypeField.value]?.kind === 'galaxy';
+    !!credentialTypeId && credentialTypes[credentialTypeId]?.kind === 'galaxy';
 
   const [orgField, orgMeta, orgHelpers] = useField({
     name: 'organization',
@@ -67,42 +68,58 @@ function CredentialFormFields({ i18n, credentialTypes }) {
     })
     .sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
 
-  const resetSubFormFields = newCredentialType => {
-    const fields = credentialTypes[newCredentialType].inputs.fields || [];
-    fields.forEach(
-      ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
-        if (parseInt(newCredentialType, 10) === initialValues.credential_type) {
-          setFieldValue(`inputs.${id}`, initialValues.inputs[id]);
-          if (ask_at_runtime) {
-            setFieldValue(
-              `passwordPrompts.${id}`,
-              initialValues.passwordPrompts[id]
-            );
-          }
-        } else {
-          switch (type) {
-            case 'string':
-              setFieldValue(`inputs.${id}`, defaultValue || '');
-              break;
-            case 'boolean':
-              setFieldValue(`inputs.${id}`, defaultValue || false);
-              break;
-            default:
-              break;
-          }
+  const resetSubFormFields = useCallback(
+    newCredentialTypeId => {
+      const fields = credentialTypes[newCredentialTypeId].inputs.fields || [];
+      fields.forEach(
+        ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
+          if (parseInt(newCredentialTypeId, 10) === initialTypeId) {
+            setFieldValue(`inputs.${id}`, initialValues.inputs[id]);
+            if (ask_at_runtime) {
+              setFieldValue(
+                `passwordPrompts.${id}`,
+                initialValues.passwordPrompts[id]
+              );
+            }
+          } else {
+            switch (type) {
+              case 'string':
+                setFieldValue(`inputs.${id}`, defaultValue || '');
+                break;
+              case 'boolean':
+                setFieldValue(`inputs.${id}`, defaultValue || false);
+                break;
+              default:
+                break;
+            }
 
-          if (choices) {
-            setFieldValue(`inputs.${id}`, defaultValue);
-          }
+            if (choices) {
+              setFieldValue(`inputs.${id}`, defaultValue);
+            }
 
-          if (ask_at_runtime) {
-            setFieldValue(`passwordPrompts.${id}`, false);
+            if (ask_at_runtime) {
+              setFieldValue(`passwordPrompts.${id}`, false);
+            }
           }
+          setFieldTouched(`inputs.${id}`, false);
         }
-        setFieldTouched(`inputs.${id}`, false);
-      }
-    );
-  };
+      );
+    },
+    [
+      credentialTypes,
+      initialTypeId,
+      initialValues.inputs,
+      initialValues.passwordPrompts,
+      setFieldTouched,
+      setFieldValue,
+    ]
+  );
+
+  useEffect(() => {
+    if (credentialTypeId) {
+      resetSubFormFields(credentialTypeId);
+    }
+  }, [resetSubFormFields, credentialTypeId]);
 
   const onOrganizationChange = useCallback(
     value => {
@@ -154,8 +171,8 @@ function CredentialFormFields({ i18n, credentialTypes }) {
           variant={SelectVariant.typeahead}
           onToggle={setIsSelectOpen}
           onSelect={(event, value) => {
+            setCredentialTypeId(value);
             credTypeHelpers.setValue(value);
-            resetSubFormFields(value);
             setIsSelectOpen(false);
           }}
           selections={credTypeField.value}
@@ -175,11 +192,11 @@ function CredentialFormFields({ i18n, credentialTypes }) {
           ))}
         </Select>
       </FormGroup>
-      {credTypeField.value !== undefined &&
-        credTypeField.value !== '' &&
-        credentialTypes[credTypeField.value]?.inputs?.fields && (
+      {credentialTypeId !== undefined &&
+        credentialTypeId !== '' &&
+        credentialTypes[credentialTypeId]?.inputs?.fields && (
           <TypeInputsSubForm
-            credentialType={credentialTypes[credTypeField.value]}
+            credentialType={credentialTypes[credentialTypeId]}
           />
         )}
     </>
@@ -197,12 +214,14 @@ function CredentialForm({
   isOrgLookupDisabled,
   ...rest
 }) {
+  const initialTypeId = credential?.credential_type;
+
   const [showExternalTestModal, setShowExternalTestModal] = useState(false);
   const initialValues = {
     name: credential.name || '',
     description: credential.description || '',
     organization: credential?.summary_fields?.organization || null,
-    credential_type: credential?.credential_type || '',
+    credential_type: credentialTypes[initialTypeId]?.name || '',
     inputs: credential?.inputs || {},
     passwordPrompts: {},
     isOrgLookupDisabled: isOrgLookupDisabled || false,
@@ -253,7 +272,14 @@ function CredentialForm({
     <Formik
       initialValues={initialValues}
       onSubmit={values => {
-        onSubmit(values);
+        const { credential_type, ...actualValues } = values;
+        // credential_type could be the raw id or the displayed name value.
+        // If it's the name, replace it with the id before making the request.
+        actualValues.credential_type =
+          Object.keys(credentialTypes).find(
+            key => credentialTypes[key].name === credential_type
+          ) || credential_type;
+        onSubmit(actualValues);
       }}
     >
       {formik => (
@@ -261,6 +287,7 @@ function CredentialForm({
           <Form autoComplete="off" onSubmit={formik.handleSubmit}>
             <FormColumnLayout>
               <CredentialFormFields
+                initialTypeId={initialTypeId}
                 credentialTypes={credentialTypes}
                 i18n={i18n}
                 {...rest}

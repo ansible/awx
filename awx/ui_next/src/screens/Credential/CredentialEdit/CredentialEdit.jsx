@@ -158,7 +158,7 @@ function CredentialEdit({ credential }) {
       }, {});
       return { credentialTypes: creds, loadedInputSources: inputSources };
     }, [credId, me.id]),
-    { credentialTypes: {}, loadedInputSources: {} }
+    {}
   );
 
   useEffect(() => {
@@ -178,7 +178,7 @@ function CredentialEdit({ credential }) {
     return <ContentError error={error} />;
   }
 
-  if (isLoading) {
+  if (isLoading || !credentialTypes) {
     return <ContentLoading />;
   }
 
