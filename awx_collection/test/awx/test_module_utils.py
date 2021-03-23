@@ -38,11 +38,25 @@ def test_version_warning(collection_import, silence_warning):
     with mock.patch.object(sys, 'argv', testargs):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_ping_response):
             my_module = TowerAPIModule(argument_spec=dict())
+            my_module._COLLECTION_VERSION = "2.0.0"
+            my_module._COLLECTION_TYPE = "not-junk"
+            my_module.collection_to_version['not-junk'] = 'not-junk'
+            my_module.get_endpoint('ping')
+    silence_warning.assert_called_once_with('You are running collection version 2.0.0 but connecting to tower version 1.2.3')
+
+
+def test_version_warning_strictness(collection_import, silence_warning):
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
+    cli_data = {'ANSIBLE_MODULE_ARGS': {}}
+    testargs = ['module_file2.py', json.dumps(cli_data)]
+    with mock.patch.object(sys, 'argv', testargs):
+        with mock.patch('ansible.module_utils.urls.Request.open', new=mock_ping_response):
+            my_module = TowerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "1.0.0"
             my_module._COLLECTION_TYPE = "not-junk"
             my_module.collection_to_version['not-junk'] = 'not-junk'
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with('You are running collection version 1.0.0 but connecting to tower version 1.2.3')
+    silence_warning.assert_not_called()
 
 
 def test_type_warning(collection_import, silence_warning):
