@@ -194,12 +194,14 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             if tgzfile is not None:
                 tarfiles.append(tgzfile)
                 if collection_type != 'dry-run':
-                    if not ship(tgzfile):
+                    if ship(tgzfile):
+                        with disable_activity_stream():
+                            for filename in data:
+                                key = filename.replace('.json', '')
+                                last_entries[key] = max(last_entries[key], until) if last_entries.get(key) else until
+                            settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
+                    else:
                         succeeded = False
-                    with disable_activity_stream():
-                        for filename in data:
-                            last_entries[filename.replace('.json', '')] = until
-                        settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
 
         for func in csv_collectors:
             key = func.__awx_analytics_key__
@@ -214,9 +216,11 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     if not files:
                         if collection_type != 'dry-run':
                             with disable_activity_stream():
-                                last_entries[key] = end
+                                last_entries[key] = max(last_entries[key], end) if last_entries.get(key) else end
                                 settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
                         continue
+
+                    slice_succeeded = True
                     for fpath in files:
                         payload = {filename: (fpath, func.__awx_analytics_version__)}
 
@@ -228,14 +232,16 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                         tgzfile = package(dest.parent, payload, until)
                         if tgzfile is not None:
                             tarfiles.append(tgzfile)
+                            if not ship(tgzfile):
+                                slice_succeeded, succeeded = False, False
+                                break
 
-                            if collection_type != 'dry-run':
-                                if not ship(tgzfile):
-                                    succeeded = False
-                                with disable_activity_stream():
-                                    last_entries[key] = end
-                                    settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
+                    if slice_succeeded and collection_type != 'dry-run':
+                        with disable_activity_stream():
+                            last_entries[key] = max(last_entries[key], end) if last_entries.get(key) else end
+                            settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
             except Exception:
+                succeeded = False
                 logger.exception("Could not generate metric {}".format(filename))
 
         if collection_type != 'dry-run':
@@ -244,7 +250,8 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     if os.path.exists(fpath):
                         os.remove(fpath)
             with disable_activity_stream():
-                settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
+                if not settings.AUTOMATION_ANALYTICS_LAST_GATHER or until > settings.AUTOMATION_ANALYTICS_LAST_GATHER:
+                    settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
 
         shutil.rmtree(dest, ignore_errors=True)  # clean up individual artifact files
         if not tarfiles:
