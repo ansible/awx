@@ -153,6 +153,10 @@ options:
                 - Name of unified job template to run in the workflow.
                 - Can be a job template, project, inventory source, workflow approval.
               type: str
+            description:
+              description:
+                - Optional description of this workflow approval template.
+              type: str
             type:
               description:
                 - Name of unified job template type to run in the workflow.
