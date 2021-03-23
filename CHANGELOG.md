@@ -16,7 +16,7 @@ If you have a pre-existing installation of AWX that utilizes the Docker-based in
 
 ### Introducing Execution Environments
 
-After a hurculean effort from a number of contributors, we're excited to announce that AWX 18.0.0 introduces a new concept called Execution Environments.
+After a herculean effort from a number of contributors, we're excited to announce that AWX 18.0.0 introduces a new concept called Execution Environments.
 
 Execution Environments are container images which consist of everything necessary to run a playbook within AWX, and which drive the entire management and lifecycle of playbook execution runtime in AWX: https://github.com/ansible/awx/issues/5157.  This means that going forward, AWX no longer utilizes the [bubblewrap](https://github.com/containers/bubblewrap) project for playbook isolation, but instead utilizes a container per playbook run.
 
@@ -30,14 +30,14 @@ To learn more about Ansible Builder and Execution Environments, see: https://www
   - The Kubernetes installer has been removed in favor of [AWX Operator](https://github.com/ansible/awx-operator).
   - The "Local Docker" install method has been removed in favor of the development environment. Details can be found at: https://github.com/ansible/awx/blob/devel/tools/docker-compose/README.md
 - Removal of custom virtual environments https://github.com/ansible/awx/pull/9498
-  - Custom virtual environments have been replaced by Execution Environments
+  - Custom virtual environments have been replaced by Execution Environments https://github.com/ansible/awx/pull/9570
 - Added user interface for the activity stream: https://github.com/ansible/awx/pull/9083
 - Converted many of the top-level list views (Jobs, Teams, Hosts, Inventories, Projects, and more) to a new, permanent table component for substantially increased responsiveness, usability, maintainability, and other 'ility's: https://github.com/ansible/awx/pull/8970, https://github.com/ansible/awx/pull/9182 and many others!
 - Added click-to-expand details for job tables
 - Added search filtering to job output https://github.com/ansible/awx/pull/9208
 - Added the new migration, update, and "installation in progress" page https://github.com/ansible/awx/pull/9123
 - Added the user interface for job settings https://github.com/ansible/awx/pull/8661
-- Runtime errors from jobs are now displayed, along with an explanation for what went wrong, on the output page https://github.com/ansible/awx/pull/9264
+- Runtime errors from jobs are now displayed, along with an explanation for what went wrong, on the output page https://github.com/ansible/awx/pull/8726
 - You can now cancel a running job from its output and details panel https://github.com/ansible/awx/pull/9199
 - Fixed a bug where launch prompt inputs were unexpectedly deposited in the url: https://github.com/ansible/awx/pull/9231
 - Playbook, credential type, and inventory file inputs now support type-ahead and manual type-in! https://github.com/ansible/awx/pull/9120
