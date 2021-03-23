@@ -184,7 +184,7 @@ function ActivityStream({ i18n }) {
               {i18n._(t`Teams`)}
             </SelectOption>
           </SelectGroup>
-          <SelectGroup label={i18n._(t`Adminisration`)} key="administration">
+          <SelectGroup label={i18n._(t`Administration`)} key="administration">
             <SelectOption key="credential_types" value="credential_type">
               {i18n._(t`Credential Types`)}
             </SelectOption>
@@ -202,6 +202,12 @@ function ActivityStream({ i18n }) {
               value="o_auth2_application,o_auth2_access_token"
             >
               {i18n._(t`Applications & Tokens`)}
+            </SelectOption>
+            <SelectOption
+              key="execution_environments"
+              value="execution_environment"
+            >
+              {i18n._(t`Execution Environments`)}
             </SelectOption>
           </SelectGroup>
           <SelectGroup label={i18n._(t`Settings`)} key="settings">
