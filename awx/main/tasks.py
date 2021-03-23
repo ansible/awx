@@ -924,16 +924,12 @@ class BaseTask(object):
         """
         Create a temporary directory for job-related files.
         """
-        pdd_wrapper_path = tempfile.mkdtemp(
-            prefix=f'pdd_wrapper_{instance.pk}_',
-            dir=settings.AWX_PROOT_BASE_PATH
-        )
+        pdd_wrapper_path = tempfile.mkdtemp(prefix=f'pdd_wrapper_{instance.pk}_', dir=settings.AWX_PROOT_BASE_PATH)
         os.chmod(pdd_wrapper_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         if settings.AWX_CLEANUP_PATHS:
             self.cleanup_paths.append(pdd_wrapper_path)
 
-        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk,
-                                dir=pdd_wrapper_path)
+        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk, dir=pdd_wrapper_path)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         runner_project_folder = os.path.join(path, 'project')
         if not os.path.exists(runner_project_folder):
