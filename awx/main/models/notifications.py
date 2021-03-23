@@ -345,6 +345,7 @@ class JobNotificationMixin(object):
                 'launch_type': 'workflow',
                 'limit': 'bar_limit',
                 'modified': datetime.datetime(2018, 12, 13, 6, 4, 0, 0, tzinfo=datetime.timezone.utc),
+                'extra_vars': {'foo': 'bar'},
                 'name': 'Stub JobTemplate',
                 'playbook': 'ping.yml',
                 'scm_branch': '',
@@ -434,12 +435,18 @@ class JobNotificationMixin(object):
                 if event:
                     summary = event.get_host_status_counts()
         job_context['host_status_counts'] = summary
+        notification_data = self.notification_data()
         context = {
             'job': job_context,
             'job_friendly_name': self.get_notification_friendly_name(),
             'url': self.get_ui_url(),
-            'job_metadata': json.dumps(self.notification_data(), ensure_ascii=False, indent=4),
+            'job_metadata': json.dumps(notification_data, ensure_ascii=False, indent=4),
         }
+        # if notification_data includes extra_vars, associate that with the job field as well
+        # Note: self.notification_data() uses LaunchTimeConfig.display_extra_vars to filter
+        # out fields marked as passwords in a survery.
+        if 'extra_vars' in notification_data:
+            context['job']['extra_vars'] = notification_data['extra_vars']
 
         def build_context(node, fields, allowed_fields):
             for safe_field in allowed_fields:

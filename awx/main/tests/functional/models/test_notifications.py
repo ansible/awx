@@ -35,6 +35,7 @@ class TestJobNotificationMixin(object):
             'launch_type': str,
             'limit': str,
             'modified': datetime.datetime,
+            'extra_vars': dict,
             'name': str,
             'playbook': str,
             'scm_branch': str,
@@ -102,6 +103,8 @@ class TestJobNotificationMixin(object):
         """The Jinja context defines all of the fields that can be used by a template. Ensure that the context generated
         for each job type has the expected structure."""
         kwargs = {}
+        if JobClass in (AdHocCommand, Job, SystemJob, WorkflowJob):
+            kwargs['extra_vars'] = {'foo': 'bar'}
         if JobClass is InventoryUpdate:
             kwargs['inventory_source'] = inventory_source
             kwargs['source'] = inventory_source.source
@@ -117,7 +120,8 @@ class TestJobNotificationMixin(object):
     @pytest.mark.django_db
     def test_schedule_context(self, job_template, admin_user):
         schedule = Schedule.objects.create(name='job-schedule', rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY', unified_job_template=job_template)
-        job = Job.objects.create(name='fake-job', launch_type='workflow', schedule=schedule, job_template=job_template)
+        kwargs = {}
+        job = Job.objects.create(name='fake-job', launch_type='workflow', schedule=schedule, job_template=job_template, extra_vars={'foo': 'bar'})
 
         job_serialization = UnifiedJobSerializer(job).to_representation(job)
 
