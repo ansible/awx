@@ -6,7 +6,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { ExecutionEnvironmentsAPI } from '../../../api';
+import { ExecutionEnvironmentsAPI, CredentialTypesAPI } from '../../../api';
 import ExecutionEnvironmentAdd from './ExecutionEnvironmentAdd';
 
 jest.mock('../../../api');
@@ -22,6 +22,17 @@ const executionEnvironmentData = {
   description: 'A simple EE',
   image: 'https://registry.com/image/container',
   pull: 'one',
+  summary_fields: {
+    credential: {
+      id: 4,
+      name: 'Container Registry',
+      description: '',
+      kind: 'registry',
+      cloud: false,
+      kubernetes: false,
+      credential_type_id: 17,
+    },
+  },
 };
 
 const mockOptions = {
@@ -40,18 +51,32 @@ const mockOptions = {
   },
 };
 
-ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
-ExecutionEnvironmentsAPI.create.mockResolvedValue({
+const containerRegistryCredentialResolve = {
   data: {
-    id: 42,
+    results: [
+      {
+        id: 4,
+        name: 'Container Registry',
+        kind: 'registry',
+      },
+    ],
   },
-});
+};
 
 describe('<ExecutionEnvironmentAdd/>', () => {
   let wrapper;
   let history;
 
   beforeEach(async () => {
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
+    ExecutionEnvironmentsAPI.create.mockResolvedValue({
+      data: {
+        id: 42,
+      },
+    });
+    CredentialTypesAPI.read.mockResolvedValue(
+      containerRegistryCredentialResolve
+    );
     history = createMemoryHistory({
       initialEntries: ['/execution_environments'],
     });

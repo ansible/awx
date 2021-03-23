@@ -4,7 +4,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { ExecutionEnvironmentsAPI } from '../../../api';
+import { ExecutionEnvironmentsAPI, CredentialTypesAPI } from '../../../api';
 
 import ExecutionEnvironmentForm from './ExecutionEnvironmentForm';
 
@@ -33,6 +33,11 @@ const executionEnvironment = {
     credential: {
       id: 4,
       name: 'Container Registry',
+      description: '',
+      kind: 'registry',
+      cloud: false,
+      kubernetes: false,
+      credential_type_id: 17,
     },
   },
   created: '2020-09-17T16:06:57.346128Z',
@@ -60,6 +65,18 @@ const mockOptions = {
   },
 };
 
+const containerRegistryCredentialResolve = {
+  data: {
+    results: [
+      {
+        id: 4,
+        name: 'Container Registry',
+        kind: 'registry',
+      },
+    ],
+  },
+};
+
 describe('<ExecutionEnvironmentForm/>', () => {
   let wrapper;
   let onCancel;
@@ -69,6 +86,9 @@ describe('<ExecutionEnvironmentForm/>', () => {
     onCancel = jest.fn();
     onSubmit = jest.fn();
     ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
+    CredentialTypesAPI.read.mockResolvedValue(
+      containerRegistryCredentialResolve
+    );
     await act(async () => {
       wrapper = mountWithContexts(
         <ExecutionEnvironmentForm
