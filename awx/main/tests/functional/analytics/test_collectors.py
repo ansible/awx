@@ -73,26 +73,20 @@ def sqlite_copy_expert(request):
 
 
 @pytest.mark.django_db
-def test_copy_tables_unified_job_query(
-    sqlite_copy_expert, project, inventory, job_template
-):
+def test_copy_tables_unified_job_query(sqlite_copy_expert, project, inventory, job_template):
     """
     Ensure that various unified job types are in the output of the query.
     """
 
     time_start = now() - timedelta(hours=9)
-    inv_src = InventorySource.objects.create(
-        name="inventory_update1", inventory=inventory, source="gce"
-    )
+    inv_src = InventorySource.objects.create(name="inventory_update1", inventory=inventory, source="gce")
 
-    project_update_name = ProjectUpdate.objects.create(
-        project=project, name="project_update1"
-    ).name
+    project_update_name = ProjectUpdate.objects.create(project=project, name="project_update1").name
     inventory_update_name = inv_src.create_unified_job().name
     job_name = job_template.create_unified_job().name
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        collectors.unified_jobs_table(time_start, tmpdir, until = now() + timedelta(seconds=1))
+        collectors.unified_jobs_table(time_start, tmpdir, until=now() + timedelta(seconds=1))
         with open(os.path.join(tmpdir, "unified_jobs_table.csv")) as f:
             lines = "".join([line for line in f])
 
@@ -117,10 +111,7 @@ def workflow_job(states=["new", "new", "new", "new", "new"]):
     """
     wfj = WorkflowJob.objects.create()
     jt = JobTemplate.objects.create(name="test-jt")
-    nodes = [
-        WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=jt)
-        for i in range(0, 6)
-    ]
+    nodes = [WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=jt) for i in range(0, 6)]
     for node, state in zip(nodes, states):
         if state:
             node.job = jt.create_job()
@@ -140,7 +131,7 @@ def test_copy_tables_workflow_job_node_query(sqlite_copy_expert, workflow_job):
     time_start = now() - timedelta(hours=9)
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        collectors.workflow_job_node_table(time_start, tmpdir, until = now() + timedelta(seconds=1))
+        collectors.workflow_job_node_table(time_start, tmpdir, until=now() + timedelta(seconds=1))
         with open(os.path.join(tmpdir, "workflow_job_node_table.csv")) as f:
             reader = csv.reader(f)
             # Pop the headers
@@ -149,19 +140,11 @@ def test_copy_tables_workflow_job_node_query(sqlite_copy_expert, workflow_job):
 
             ids = [int(line[0]) for line in lines]
 
-            assert ids == list(
-                workflow_job.workflow_nodes.all().values_list("id", flat=True)
-            )
+            assert ids == list(workflow_job.workflow_nodes.all().values_list("id", flat=True))
 
-            for index, relationship in zip(
-                [7, 8, 9], ["success_nodes", "failure_nodes", "always_nodes"]
-            ):
+            for index, relationship in zip([7, 8, 9], ["success_nodes", "failure_nodes", "always_nodes"]):
                 for i, l in enumerate(lines):
-                    related_nodes = (
-                        [int(e) for e in l[index].split(",")] if l[index] else []
-                    )
+                    related_nodes = [int(e) for e in l[index].split(",")] if l[index] else []
                     assert related_nodes == list(
-                        getattr(workflow_job.workflow_nodes.all()[i], relationship)
-                        .all()
-                        .values_list("id", flat=True)
+                        getattr(workflow_job.workflow_nodes.all()[i], relationship).all().values_list("id", flat=True)
                     ), f"(right side) workflow_nodes.all()[{i}].{relationship}.all()"

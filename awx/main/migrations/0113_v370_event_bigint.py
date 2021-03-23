@@ -19,37 +19,22 @@ def migrate_event_data(apps, schema_editor):
     # *not* immediately show up, but will be repopulated over time progressively
     # the trade-off here is not having to wait hours for the full data migration
     # before you can start and run AWX again (including new playbook runs)
-    for tblname in (
-        'main_jobevent', 'main_inventoryupdateevent',
-        'main_projectupdateevent', 'main_adhoccommandevent',
-        'main_systemjobevent'
-    ):
+    for tblname in ('main_jobevent', 'main_inventoryupdateevent', 'main_projectupdateevent', 'main_adhoccommandevent', 'main_systemjobevent'):
         with connection.cursor() as cursor:
             # rename the current event table
-            cursor.execute(
-                f'ALTER TABLE {tblname} RENAME TO _old_{tblname};'
-            )
+            cursor.execute(f'ALTER TABLE {tblname} RENAME TO _old_{tblname};')
             # create a *new* table with the same schema
-            cursor.execute(
-                f'CREATE TABLE {tblname} (LIKE _old_{tblname} INCLUDING ALL);'
-            )
+            cursor.execute(f'CREATE TABLE {tblname} (LIKE _old_{tblname} INCLUDING ALL);')
             # alter the *new* table so that the primary key is a big int
-            cursor.execute(
-                f'ALTER TABLE {tblname} ALTER COLUMN id TYPE bigint USING id::bigint;'
-            )
+            cursor.execute(f'ALTER TABLE {tblname} ALTER COLUMN id TYPE bigint USING id::bigint;')
 
             # recreate counter for the new table's primary key to
             # start where the *old* table left off (we have to do this because the
             # counter changed from an int to a bigint)
             cursor.execute(f'DROP SEQUENCE IF EXISTS "{tblname}_id_seq" CASCADE;')
             cursor.execute(f'CREATE SEQUENCE "{tblname}_id_seq";')
-            cursor.execute(
-                f'ALTER TABLE "{tblname}" ALTER COLUMN "id" '
-                f"SET DEFAULT nextval('{tblname}_id_seq');"
-            )
-            cursor.execute(
-                f"SELECT setval('{tblname}_id_seq', (SELECT MAX(id) FROM _old_{tblname}), true);"
-            )
+            cursor.execute(f'ALTER TABLE "{tblname}" ALTER COLUMN "id" ' f"SET DEFAULT nextval('{tblname}_id_seq');")
+            cursor.execute(f"SELECT setval('{tblname}_id_seq', (SELECT MAX(id) FROM _old_{tblname}), true);")
 
             # replace the BTREE index on main_jobevent.job_id with
             # a BRIN index to drastically improve per-UJ lookup performance
@@ -65,7 +50,9 @@ def migrate_event_data(apps, schema_editor):
             cursor.execute(f"SELECT indexname, indexdef FROM pg_indexes WHERE tablename='_old_{tblname}' AND indexname != '{tblname}_pkey';")
             indexes = cursor.fetchall()
 
-            cursor.execute(f"SELECT conname, contype, pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = '_old_{tblname}'::regclass AND conname != '{tblname}_pkey';")
+            cursor.execute(
+                f"SELECT conname, contype, pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = '_old_{tblname}'::regclass AND conname != '{tblname}_pkey';"
+            )
             constraints = cursor.fetchall()
 
             for indexname, indexdef in indexes:
@@ -75,7 +62,6 @@ def migrate_event_data(apps, schema_editor):
 
 
 class FakeAlterField(migrations.AlterField):
-
     def database_forwards(self, *args):
         # this is intentionally left blank, because we're
         # going to accomplish the migration with some custom raw SQL

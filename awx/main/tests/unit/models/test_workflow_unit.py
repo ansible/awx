@@ -2,26 +2,18 @@ import pytest
 
 from awx.main.models.jobs import JobTemplate
 from awx.main.models import Inventory, CredentialType, Credential, Project
-from awx.main.models.workflow import (
-    WorkflowJobTemplate, WorkflowJobTemplateNode,
-    WorkflowJob, WorkflowJobNode
-)
+from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowJob, WorkflowJobNode
 from unittest import mock
 
 
 @pytest.fixture
 def credential():
     ssh_type = CredentialType.defaults['ssh']()
-    return Credential(
-        id=43,
-        name='example-cred',
-        credential_type=ssh_type,
-        inputs={'username': 'asdf', 'password': 'asdf'}
-    )
+    return Credential(id=43, name='example-cred', credential_type=ssh_type, inputs={'username': 'asdf', 'password': 'asdf'})
 
 
-class TestWorkflowJobInheritNodesMixin():
-    class TestCreateWorkflowJobNodes():
+class TestWorkflowJobInheritNodesMixin:
+    class TestCreateWorkflowJobNodes:
         @pytest.fixture
         def job_templates(self):
             return [JobTemplate() for i in range(0, 10)]
@@ -39,7 +31,7 @@ class TestWorkflowJobInheritNodesMixin():
             for job_template_node in job_template_nodes:
                 workflow_job_node_create.assert_any_call(workflow_job=workflow_job)
 
-    class TestMapWorkflowJobNodes():
+    class TestMapWorkflowJobNodes:
         @pytest.fixture
         def job_template_nodes(self):
             return [WorkflowJobTemplateNode(id=i) for i in range(0, 20)]
@@ -51,8 +43,7 @@ class TestWorkflowJobInheritNodesMixin():
         def test__map_workflow_job_nodes(self, job_template_nodes, job_nodes, mocker):
             mixin = WorkflowJob()
             wj_node = WorkflowJobNode()
-            mocker.patch('awx.main.models.workflow.WorkflowJobTemplateNode.create_workflow_job_node',
-                         return_value=wj_node)
+            mocker.patch('awx.main.models.workflow.WorkflowJobTemplateNode.create_workflow_job_node', return_value=wj_node)
 
             node_ids_map = mixin._create_workflow_nodes(job_template_nodes, user=None)
             assert len(node_ids_map) == len(job_template_nodes)
@@ -60,14 +51,13 @@ class TestWorkflowJobInheritNodesMixin():
             for i, job_template_node in enumerate(job_template_nodes):
                 assert node_ids_map[job_template_node.id] == wj_node
 
-    class TestInheritRelationship():
+    class TestInheritRelationship:
         @pytest.fixture
         def job_template_nodes(self, mocker):
             nodes = [mocker.MagicMock(id=i, pk=i) for i in range(0, 10)]
 
             for i in range(0, 9):
-                nodes[i].success_nodes = mocker.MagicMock(
-                    all=mocker.MagicMock(return_value=[mocker.MagicMock(id=i + 1, pk=i + 1)]))
+                nodes[i].success_nodes = mocker.MagicMock(all=mocker.MagicMock(return_value=[mocker.MagicMock(id=i + 1, pk=i + 1)]))
                 nodes[i].always_nodes = mocker.MagicMock(all=mocker.MagicMock(return_value=[]))
                 nodes[i].failure_nodes = mocker.MagicMock(all=mocker.MagicMock(return_value=[]))
                 new_wj_node = mocker.MagicMock(success_nodes=mocker.MagicMock())
@@ -86,7 +76,6 @@ class TestWorkflowJobInheritNodesMixin():
             for n in job_nodes:
                 _map[n.id] = n
             return _map
-
 
         def test__inherit_relationship(self, mocker, job_template_nodes, job_nodes, job_nodes_dict):
             wj = WorkflowJob()
@@ -144,10 +133,7 @@ def job_node_with_prompts(job_node_no_prompts, mocker):
 
 @pytest.fixture
 def wfjt_node_no_prompts(workflow_job_template_unit, jt_ask):
-    node = WorkflowJobTemplateNode(
-        workflow_job_template=workflow_job_template_unit,
-        unified_job_template=jt_ask
-    )
+    node = WorkflowJobTemplateNode(workflow_job_template=workflow_job_template_unit, unified_job_template=jt_ask)
     return node
 
 
@@ -178,14 +164,13 @@ class TestWorkflowJobCreate:
                 inventory=None,
                 unified_job_template=wfjt_node_no_prompts.unified_job_template,
                 workflow_job=workflow_job_unit,
-                identifier=mocker.ANY)
+                identifier=mocker.ANY,
+            )
 
     def test_create_with_prompts(self, wfjt_node_with_prompts, workflow_job_unit, credential, mocker):
         mock_create = mocker.MagicMock()
         with mocker.patch('awx.main.models.WorkflowJobNode.objects.create', mock_create):
-            wfjt_node_with_prompts.create_workflow_job_node(
-                workflow_job=workflow_job_unit
-            )
+            wfjt_node_with_prompts.create_workflow_job_node(workflow_job=workflow_job_unit)
             mock_create.assert_called_once_with(
                 all_parents_must_converge=False,
                 extra_data={},
@@ -194,7 +179,8 @@ class TestWorkflowJobCreate:
                 inventory=wfjt_node_with_prompts.inventory,
                 unified_job_template=wfjt_node_with_prompts.unified_job_template,
                 workflow_job=workflow_job_unit,
-                identifier=mocker.ANY)
+                identifier=mocker.ANY,
+            )
 
 
 @mock.patch('awx.main.models.workflow.WorkflowNodeBase.get_parent_nodes', lambda self: [])
@@ -203,6 +189,7 @@ class TestWorkflowJobNodeJobKWARGS:
     Tests for building the keyword arguments that go into creating and
     launching a new job that corresponds to a workflow node.
     """
+
     kwargs_base = {'_eager_fields': {'launch_type': 'workflow'}}
 
     def test_null_kwargs(self, job_node_no_prompts):
@@ -212,14 +199,11 @@ class TestWorkflowJobNodeJobKWARGS:
         job_node_no_prompts.extra_data = {"b": 98}
         workflow_job = job_node_no_prompts.workflow_job
         workflow_job.extra_vars = '{"a": 84}'
-        assert job_node_no_prompts.get_job_kwargs() == dict(
-            extra_vars={'a': 84, 'b': 98}, **self.kwargs_base)
+        assert job_node_no_prompts.get_job_kwargs() == dict(extra_vars={'a': 84, 'b': 98}, **self.kwargs_base)
 
     def test_char_prompts_and_res_node_prompts(self, job_node_with_prompts):
         # TBD: properly handle multicred credential assignment
-        expect_kwargs = dict(
-            inventory=job_node_with_prompts.inventory,
-            **example_prompts)
+        expect_kwargs = dict(inventory=job_node_with_prompts.inventory, **example_prompts)
         expect_kwargs.update(self.kwargs_base)
         assert job_node_with_prompts.get_job_kwargs() == expect_kwargs
 
@@ -227,8 +211,7 @@ class TestWorkflowJobNodeJobKWARGS:
         # TBD: properly handle multicred credential assignment
         job_node_with_prompts.unified_job_template.ask_inventory_on_launch = False
         job_node_with_prompts.unified_job_template.ask_job_type_on_launch = False
-        expect_kwargs = dict(inventory=job_node_with_prompts.inventory,
-                             **example_prompts)
+        expect_kwargs = dict(inventory=job_node_with_prompts.inventory, **example_prompts)
         expect_kwargs.update(self.kwargs_base)
         expect_kwargs.pop('inventory')
         expect_kwargs.pop('job_type')

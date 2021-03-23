@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -127,18 +126,17 @@ def main():
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up inventory based on the provided name and org ID
-    inventory = module.get_one('inventories', name_or_id=name, **{
-        'data': {
-            'organization': org_id
-        }
-    })
+    inventory = module.get_one('inventories', name_or_id=name, **{'data': {'organization': org_id}})
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
         # a new existing item is formed when copying and is returned.
         inventory = module.copy_item(
-            inventory, copy_from, name,
-            endpoint='inventories', item_type='inventory',
+            inventory,
+            copy_from,
+            name,
+            endpoint='inventories',
+            item_type='inventory',
             copy_lookup_data={},
         )
 

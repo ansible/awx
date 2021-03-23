@@ -14,7 +14,6 @@ from awx.conf import fields, register
 
 
 class PendoTrackingStateField(fields.ChoiceField):
-
     def to_internal_value(self, data):
         # Any false/null values get converted to 'off'.
         if data in fields.NullBooleanField.FALSE_VALUES or data in fields.NullBooleanField.NULL_VALUES:
@@ -42,4 +41,3 @@ class CustomLogoField(fields.CharField):
         except (TypeError, binascii.Error):
             self.fail('invalid_data')
         return data
-

@@ -11,8 +11,7 @@ class Command(BaseCommand):
     """Returns license type, e.g., 'enterprise', 'open', 'none'"""
 
     def add_arguments(self, parser):
-        parser.add_argument('--data', dest='data', action='store_true',
-                            help='verbose, prints the actual (sanitized) license')
+        parser.add_argument('--data', dest='data', action='store_true', help='verbose, prints the actual (sanitized) license')
 
     def handle(self, *args, **options):
         super(Command, self).__init__()

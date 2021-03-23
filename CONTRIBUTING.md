@@ -127,7 +127,7 @@ Fixes and Features for AWX will go through the Github pull request process. Subm
 Here are a few things you can do to help the visibility of your change, and increase the likelihood that it will be accepted:
 
 * No issues when running linters/code checkers
-  * Python: flake8: `(container)/awx_devel$ make flake8`
+  * Python: black: `(container)/awx_devel$ make black`
   * Javascript: JsHint: `(container)/awx_devel$ make jshint`
 * No issues from unit tests
   * Python: py.test: `(container)/awx_devel$ make test`

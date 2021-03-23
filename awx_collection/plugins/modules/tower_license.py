@@ -5,11 +5,10 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -62,9 +61,7 @@ def main():
         module.fail_json(msg='You must accept the EULA by passing in the param eula_accepted as True')
 
     try:
-        manifest = base64.b64encode(
-            open(module.params.get('manifest'), 'rb').read()
-        )
+        manifest = base64.b64encode(open(module.params.get('manifest'), 'rb').read())
     except OSError as e:
         module.fail_json(msg=str(e))
 
@@ -72,10 +69,7 @@ def main():
     if module.check_mode:
         module.exit_json(**json_output)
 
-    module.post_endpoint('config', data={
-        'eula_accepted': True,
-        'manifest': manifest.decode()
-    })
+    module.post_endpoint('config', data={'eula_accepted': True, 'manifest': manifest.decode()})
 
     module.exit_json(**json_output)
 

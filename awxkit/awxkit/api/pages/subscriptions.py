@@ -3,7 +3,6 @@ from . import page
 
 
 class Subscriptions(page.Page):
-
     def get_possible_licenses(self, **kwargs):
         return self.post(json=kwargs).json
 

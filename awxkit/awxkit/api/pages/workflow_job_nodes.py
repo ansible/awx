@@ -5,7 +5,6 @@ from . import page
 
 
 class WorkflowJobNode(base.Base):
-
     def wait_for_job(self, interval=5, timeout=60, **kw):
         """Waits until node's job exists"""
         adjusted_timeout = timeout - seconds_since_date_string(self.created)
@@ -30,8 +29,13 @@ class WorkflowJobNodes(page.PageList, WorkflowJobNode):
     pass
 
 
-page.register_page([resources.workflow_job_nodes,
-                    resources.workflow_job_workflow_nodes,
-                    resources.workflow_job_node_always_nodes,
-                    resources.workflow_job_node_failure_nodes,
-                    resources.workflow_job_node_success_nodes], WorkflowJobNodes)
+page.register_page(
+    [
+        resources.workflow_job_nodes,
+        resources.workflow_job_workflow_nodes,
+        resources.workflow_job_node_always_nodes,
+        resources.workflow_job_node_failure_nodes,
+        resources.workflow_job_node_success_nodes,
+    ],
+    WorkflowJobNodes,
+)

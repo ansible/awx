@@ -13,23 +13,12 @@ def test_aliased_forward_reverse_field_searches(instance, options, get, admin):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('model', (
-    'Project',
-    'JobTemplate',
-    'WorkflowJobTemplate'
-))
+@pytest.mark.parametrize('model', ('Project', 'JobTemplate', 'WorkflowJobTemplate'))
 class TestUnifiedOrganization:
-
     def data_for_model(self, model, orm_style=False):
-        data = {
-            'name': 'foo',
-            'organization': None
-        }
+        data = {'name': 'foo', 'organization': None}
         if model == 'JobTemplate':
-            proj = models.Project.objects.create(
-                name="test-proj",
-                playbook_files=['helloworld.yml']
-            )
+            proj = models.Project.objects.create(name="test-proj", playbook_files=['helloworld.yml'])
             if orm_style:
                 data['project_id'] = proj.id
             else:
@@ -42,12 +31,7 @@ class TestUnifiedOrganization:
         cls = getattr(models, model)
         data = self.data_for_model(model, orm_style=True)
         obj = cls.objects.create(**data)
-        patch(
-            url=obj.get_absolute_url(),
-            data={'name': 'foooooo'},
-            user=admin_user,
-            expect=200
-        )
+        patch(url=obj.get_absolute_url(), data={'name': 'foooooo'}, user=admin_user, expect=200)
         obj.refresh_from_db()
         assert obj.name == 'foooooo'
 
@@ -61,12 +45,7 @@ class TestUnifiedOrganization:
         if model == 'JobTemplate':
             obj.project.admin_role.members.add(rando)
         obj.admin_role.members.add(rando)
-        patch(
-            url=obj.get_absolute_url(),
-            data={'name': 'foooooo'},
-            user=rando,
-            expect=200
-        )
+        patch(url=obj.get_absolute_url(), data={'name': 'foooooo'}, user=rando, expect=200)
         obj.refresh_from_db()
         assert obj.name == 'foooooo'
 
@@ -75,11 +54,6 @@ class TestUnifiedOrganization:
         data = self.data_for_model(model, orm_style=True)
         data['organization'] = organization
         obj = cls.objects.create(**data)
-        patch(
-            url=obj.get_absolute_url(),
-            data={'name': 'foooooo'},
-            user=admin_user,
-            expect=200
-        )
+        patch(url=obj.get_absolute_url(), data={'name': 'foooooo'}, user=admin_user, expect=200)
         obj.refresh_from_db()
         assert obj.name == 'foooooo'

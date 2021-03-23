@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -105,7 +104,7 @@ def main():
         organization=dict(required=True),
         redirect_uris=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
-        skip_authorization=dict(type='bool')
+        skip_authorization=dict(type='bool'),
     )
 
     # Create a module for ourselves
@@ -124,11 +123,7 @@ def main():
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up application based on the provided name and org ID
-    application = module.get_one('applications', name_or_id=name, **{
-        'data': {
-            'organization': org_id
-        }
-    })
+    application = module.get_one('applications', name_or_id=name, **{'data': {'organization': org_id}})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -152,10 +147,7 @@ def main():
         application_fields['redirect_uris'] = ' '.join(redirect_uris)
 
     # If the state was present and we can let the module build or update the existing application, this will return on its own
-    module.create_or_update_if_needed(
-        application, application_fields,
-        endpoint='applications', item_type='application'
-    )
+    module.create_or_update_if_needed(application, application_fields, endpoint='applications', item_type='application')
 
 
 if __name__ == '__main__':

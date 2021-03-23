@@ -10,6 +10,12 @@ def test_produce_supervisor_command(mocker):
     with mocker.patch.object(reload.subprocess, 'Popen', Popen_mock):
         reload.supervisor_service_command("restart")
         reload.subprocess.Popen.assert_called_once_with(
-            ['supervisorctl', 'restart', 'tower-processes:*',],
-            stderr=-1, stdin=-1, stdout=-1)
-
+            [
+                'supervisorctl',
+                'restart',
+                'tower-processes:*',
+            ],
+            stderr=-1,
+            stdin=-1,
+            stdout=-1,
+        )

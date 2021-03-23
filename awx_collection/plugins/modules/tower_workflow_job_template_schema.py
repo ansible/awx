@@ -6,12 +6,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 DOCUMENTATION = '''
 ---
@@ -353,9 +352,7 @@ def main():
             wfjt_search_fields['organization'] = organization_id
         wfjt_data = module.get_one('workflow_job_templates', **{'data': wfjt_search_fields})
         if wfjt_data is None:
-            module.fail_json(msg="The workflow {0} in organization {1} was not found on the Tower server".format(
-                workflow_job_template, organization
-            ))
+            module.fail_json(msg="The workflow {0} in organization {1} was not found on the Tower server".format(workflow_job_template, organization))
         workflow_job_template_id = wfjt_data['id']
 
     # Work thorugh and lookup value for schema fields

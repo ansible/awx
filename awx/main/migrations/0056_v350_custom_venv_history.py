@@ -15,11 +15,15 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inventoryupdate',
             name='custom_virtualenv',
-            field=models.CharField(blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True),
+            field=models.CharField(
+                blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True
+            ),
         ),
         migrations.AddField(
             model_name='job',
             name='custom_virtualenv',
-            field=models.CharField(blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True),
+            field=models.CharField(
+                blank=True, default=None, help_text='Local absolute file path containing a custom Python virtualenv to use', max_length=100, null=True
+            ),
         ),
     ]

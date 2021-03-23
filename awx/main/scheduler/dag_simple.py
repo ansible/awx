@@ -85,10 +85,7 @@ class SimpleDAG(object):
                 color = 'red'
             elif obj.do_not_run is True:
                 color = 'gray'
-            doc += "%s [color = %s]\n" % (
-                run_status(n['node_object']),
-                color
-            )
+            doc += "%s [color = %s]\n" % (run_status(n['node_object']), color)
         for label, edges in self.node_from_edges_by_label.items():
             for from_node, to_nodes in edges.items():
                 for to_node in to_nodes:
@@ -104,9 +101,9 @@ class SimpleDAG(object):
 
     def add_node(self, obj, metadata=None):
         if self.find_ord(obj) is None:
-            '''
+            """
             Assume node is a root node until a child is added
-            '''
+            """
             node_index = len(self.nodes)
             self.root_nodes.add(node_index)
             self.node_obj_to_node_index[obj] = node_index
@@ -129,10 +126,8 @@ class SimpleDAG(object):
         elif to_obj_ord is None:
             raise LookupError("To object not found {}".format(to_obj))
 
-        self.node_from_edges_by_label.setdefault(label, dict()) \
-                                     .setdefault(from_obj_ord, [])
-        self.node_to_edges_by_label.setdefault(label, dict()) \
-                                   .setdefault(to_obj_ord, [])
+        self.node_from_edges_by_label.setdefault(label, dict()).setdefault(from_obj_ord, [])
+        self.node_to_edges_by_label.setdefault(label, dict()).setdefault(to_obj_ord, [])
 
         self.node_from_edges_by_label[label][from_obj_ord].append(to_obj_ord)
         self.node_to_edges_by_label[label][to_obj_ord].append(from_obj_ord)
@@ -141,9 +136,7 @@ class SimpleDAG(object):
         return self.node_obj_to_node_index.get(obj, None)
 
     def _get_children_by_label(self, node_index, label):
-        return [self.nodes[index] for index in
-                self.node_from_edges_by_label.get(label, {})
-                                             .get(node_index, [])]
+        return [self.nodes[index] for index in self.node_from_edges_by_label.get(label, {}).get(node_index, [])]
 
     def get_children(self, obj, label=None):
         this_ord = self.find_ord(obj)
@@ -157,9 +150,7 @@ class SimpleDAG(object):
             return nodes
 
     def _get_parents_by_label(self, node_index, label):
-        return [self.nodes[index] for index in
-                self.node_to_edges_by_label.get(label, {})
-                                           .get(node_index, [])]
+        return [self.nodes[index] for index in self.node_to_edges_by_label.get(label, {}).get(node_index, [])]
 
     def get_parents(self, obj, label=None):
         this_ord = self.find_ord(obj)

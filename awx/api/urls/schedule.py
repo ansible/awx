@@ -3,12 +3,7 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    ScheduleList,
-    ScheduleDetail,
-    ScheduleUnifiedJobsList,
-    ScheduleCredentialsList,
-)
+from awx.api.views import ScheduleList, ScheduleDetail, ScheduleUnifiedJobsList, ScheduleCredentialsList
 
 
 urls = [

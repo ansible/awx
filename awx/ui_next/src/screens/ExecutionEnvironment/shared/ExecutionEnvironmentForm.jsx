@@ -23,7 +23,9 @@ function ExecutionEnvironmentFormFields({
   options,
   executionEnvironment,
 }) {
-  const [credentialField] = useField('credential');
+  const [credentialField, credentialMeta, credentialHelpers] = useField(
+    'credential'
+  );
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
     validate:
@@ -124,8 +126,15 @@ function ExecutionEnvironmentFormFields({
 
       <CredentialLookup
         label={i18n._(t`Registry credential`)}
+        credentialTypeKind="registry"
+        helperTextInvalid={credentialMeta.error}
+        isValid={!credentialMeta.touched || !credentialMeta.error}
+        onBlur={() => credentialHelpers.setTouched()}
         onChange={onCredentialChange}
         value={credentialField.value}
+        tooltip={i18n._(
+          t`Credential to authenticate with a protected container registry.`
+        )}
       />
     </>
   );

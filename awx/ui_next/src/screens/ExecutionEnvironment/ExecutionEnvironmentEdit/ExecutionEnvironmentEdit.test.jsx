@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import { ExecutionEnvironmentsAPI } from '../../../api';
+import { ExecutionEnvironmentsAPI, CredentialTypesAPI } from '../../../api';
 
 import ExecutionEnvironmentEdit from './ExecutionEnvironmentEdit';
 
@@ -44,13 +44,27 @@ const mockOptions = {
   },
 };
 
-ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
+const containerRegistryCredentialResolve = {
+  data: {
+    results: [
+      {
+        id: 4,
+        name: 'Container Registry',
+        kind: 'registry',
+      },
+    ],
+  },
+};
 
 describe('<ExecutionEnvironmentEdit/>', () => {
   let wrapper;
   let history;
 
   beforeAll(async () => {
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(mockOptions);
+    CredentialTypesAPI.read.mockResolvedValue(
+      containerRegistryCredentialResolve
+    );
     history = createMemoryHistory();
     await act(async () => {
       wrapper = mountWithContexts(

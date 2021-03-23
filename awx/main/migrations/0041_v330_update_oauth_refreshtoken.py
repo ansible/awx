@@ -18,6 +18,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='oauth2accesstoken',
             name='source_refresh_token',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='refreshed_access_token', to=settings.OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL),
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='refreshed_access_token',
+                to=settings.OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL,
+            ),
         ),
     ]

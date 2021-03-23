@@ -23,10 +23,7 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
-from django.db.models.fields.related_descriptors import (
-    ForwardManyToOneDescriptor,
-    ManyToManyDescriptor
-)
+from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
 from django.db.models import Q
 
@@ -42,30 +39,65 @@ from awx.conf.license import get_license
 logger = logging.getLogger('awx.main.utils')
 
 __all__ = [
-    'get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelcase', 'memoize',
-    'memoize_delete', 'get_ansible_version', 'get_licenser', 'get_awx_http_client_headers',
-    'get_awx_version', 'update_scm_url', 'get_type_for_model', 'get_model_for_type',
-    'copy_model_by_class', 'copy_m2m_relationships',
-    'prefetch_page_capabilities', 'to_python_boolean', 'ignore_inventory_computed_fields',
-    'ignore_inventory_group_removal', '_inventory_updates', 'get_pk_from_dict', 'getattrd',
-    'getattr_dne', 'NoDefaultProvided', 'get_current_apps', 'set_current_apps',
-    'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity',
-    'get_cpu_capacity', 'get_mem_capacity', 'wrap_args_with_proot', 'build_proot_temp_dir',
-    'check_proot_installed', 'model_to_dict', 'NullablePromptPseudoField',
-    'model_instance_diff', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-    'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',
-    'get_custom_venv_choices', 'get_external_account', 'task_manager_bulk_reschedule',
-    'schedule_task_manager', 'classproperty', 'create_temporary_fifo', 'truncate_stdout',
-    'deepmerge'
+    'get_object_or_400',
+    'camelcase_to_underscore',
+    'underscore_to_camelcase',
+    'memoize',
+    'memoize_delete',
+    'get_ansible_version',
+    'get_licenser',
+    'get_awx_http_client_headers',
+    'get_awx_version',
+    'update_scm_url',
+    'get_type_for_model',
+    'get_model_for_type',
+    'copy_model_by_class',
+    'copy_m2m_relationships',
+    'prefetch_page_capabilities',
+    'to_python_boolean',
+    'ignore_inventory_computed_fields',
+    'ignore_inventory_group_removal',
+    '_inventory_updates',
+    'get_pk_from_dict',
+    'getattrd',
+    'getattr_dne',
+    'NoDefaultProvided',
+    'get_current_apps',
+    'set_current_apps',
+    'extract_ansible_vars',
+    'get_search_fields',
+    'get_system_task_capacity',
+    'get_cpu_capacity',
+    'get_mem_capacity',
+    'wrap_args_with_proot',
+    'build_proot_temp_dir',
+    'check_proot_installed',
+    'model_to_dict',
+    'NullablePromptPseudoField',
+    'model_instance_diff',
+    'parse_yaml_or_json',
+    'RequireDebugTrueOrTest',
+    'has_model_field_prefetched',
+    'set_environ',
+    'IllegalArgumentError',
+    'get_custom_venv_choices',
+    'get_external_account',
+    'task_manager_bulk_reschedule',
+    'schedule_task_manager',
+    'classproperty',
+    'create_temporary_fifo',
+    'truncate_stdout',
+    'deepmerge',
 ]
 
 
 def get_object_or_400(klass, *args, **kwargs):
-    '''
+    """
     Return a single object from the given model or queryset based on the query
     params, otherwise raise an exception that will return in a 400 response.
-    '''
+    """
     from django.shortcuts import _get_queryset
+
     queryset = _get_queryset(klass)
     try:
         return queryset.get(*args, **kwargs)
@@ -88,28 +120,28 @@ def to_python_boolean(value, allow_none=False):
 
 
 def camelcase_to_underscore(s):
-    '''
+    """
     Convert CamelCase names to lowercase_with_underscore.
-    '''
+    """
     s = re.sub(r'(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))', '_\\1', s)
     return s.lower().strip('_')
 
 
 def underscore_to_camelcase(s):
-    '''
+    """
     Convert lowercase_with_underscore names to CamelCase.
-    '''
+    """
     return ''.join(x.capitalize() or '_' for x in s.split('_'))
 
 
-
 class RequireDebugTrueOrTest(logging.Filter):
-    '''
+    """
     Logging filter to output when in DEBUG mode or running tests.
-    '''
+    """
 
     def filter(self, record):
         from django.conf import settings
+
         return settings.DEBUG or settings.IS_TESTING()
 
 
@@ -119,13 +151,14 @@ class IllegalArgumentError(ValueError):
 
 def get_memoize_cache():
     from django.core.cache import cache
+
     return cache
 
 
 def memoize(ttl=60, cache_key=None, track_function=False, cache=None):
-    '''
+    """
     Decorator to wrap a function and cache its result.
-    '''
+    """
     if cache_key and track_function:
         raise IllegalArgumentError("Can not specify cache_key when track_function is True")
     cache = cache or get_memoize_cache()
@@ -164,13 +197,12 @@ def memoize_delete(function_name):
 
 @memoize()
 def get_ansible_version():
-    '''
+    """
     Return Ansible version installed.
     Ansible path needs to be provided to account for custom virtual environments
-    '''
+    """
     try:
-        proc = subprocess.Popen(['ansible', '--version'],
-                                stdout=subprocess.PIPE)
+        proc = subprocess.Popen(['ansible', '--version'], stdout=subprocess.PIPE)
         result = smart_str(proc.communicate()[0])
         return result.split('\n')[0].replace('ansible', '').strip()
     except Exception:
@@ -178,12 +210,14 @@ def get_ansible_version():
 
 
 def get_awx_version():
-    '''
+    """
     Return AWX version as reported by setuptools.
-    '''
+    """
     from awx import __version__
+
     try:
         import pkg_resources
+
         return pkg_resources.require('awx')[0].version
     except Exception:
         return __version__
@@ -193,17 +227,14 @@ def get_awx_http_client_headers():
     license = get_license().get('license_type', 'UNLICENSED')
     headers = {
         'Content-Type': 'application/json',
-        'User-Agent': '{} {} ({})'.format(
-            'AWX' if license == 'open' else 'Red Hat Ansible Tower',
-            get_awx_version(),
-            license
-        )
+        'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Tower', get_awx_version(), license),
     }
     return headers
 
 
 def get_licenser(*args, **kwargs):
     from awx.main.utils.licensing import Licenser, OpenLicense
+
     try:
         if os.path.exists('/var/lib/awx/.tower_version'):
             return Licenser(*args, **kwargs)
@@ -213,14 +244,13 @@ def get_licenser(*args, **kwargs):
         raise ValueError(_('Error importing Tower License: %s') % e)
 
 
-def update_scm_url(scm_type, url, username=True, password=True,
-                   check_special_cases=True, scp_format=False):
-    '''
+def update_scm_url(scm_type, url, username=True, password=True, check_special_cases=True, scp_format=False):
+    """
     Update the given SCM URL to add/replace/remove the username/password. When
     username/password is True, preserve existing username/password, when
     False (None, '', etc.), remove any existing username/password, otherwise
     replace username/password. Also validates the given URL.
-    '''
+    """
     # Handle all of the URL formats supported by the SCM systems:
     # git: https://www.kernel.org/pub/software/scm/git/docs/git-clone.html#URLS
     # svn: http://svnbook.red-bean.com/en/1.7/svn-book.html#svn.advanced.reposurls
@@ -246,9 +276,9 @@ def update_scm_url(scm_type, url, username=True, password=True,
             if hostpath.count(':') > 1:
                 raise ValueError(_('Invalid %s URL') % scm_type)
             host, path = hostpath.split(':', 1)
-            #if not path.startswith('/') and not path.startswith('~/'):
+            # if not path.startswith('/') and not path.startswith('~/'):
             #    path = '~/%s' % path
-            #if path.startswith('/'):
+            # if path.startswith('/'):
             #    path = path.lstrip('/')
             hostpath = '/'.join([host, path])
             modified_url = '@'.join(filter(None, [userpass, hostpath]))
@@ -297,18 +327,17 @@ def update_scm_url(scm_type, url, username=True, password=True,
         if scm_type == 'git' and parts.scheme.endswith('ssh') and parts.hostname in special_git_hosts and netloc_username != 'git':
             raise ValueError(_('Username must be "git" for SSH access to %s.') % parts.hostname)
         if scm_type == 'git' and parts.scheme.endswith('ssh') and parts.hostname in special_git_hosts and netloc_password:
-            #raise ValueError('Password not allowed for SSH access to %s.' % parts.hostname)
+            # raise ValueError('Password not allowed for SSH access to %s.' % parts.hostname)
             netloc_password = ''
 
     if netloc_username and parts.scheme != 'file' and scm_type not in ("insights", "archive"):
-        netloc = u':'.join([urllib.parse.quote(x,safe='') for x in (netloc_username, netloc_password) if x])
+        netloc = u':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
     else:
         netloc = u''
     netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
     if parts.port:
         netloc = u':'.join([netloc, str(parts.port)])
-    new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path,
-                                       parts.query, parts.fragment])
+    new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path, parts.query, parts.fragment])
     if scp_format and parts.scheme == 'git+ssh':
         new_url = new_url.replace('git+ssh://', '', 1).replace('/', ':', 1)
     return new_url
@@ -322,11 +351,7 @@ def get_allowed_fields(obj, serializer_mapping):
     else:
         allowed_fields = [x.name for x in obj._meta.fields]
 
-    ACTIVITY_STREAM_FIELD_EXCLUSIONS = {
-        'user': ['last_login'],
-        'oauth2accesstoken': ['last_used'],
-        'oauth2application': ['client_secret']
-    }
+    ACTIVITY_STREAM_FIELD_EXCLUSIONS = {'user': ['last_login'], 'oauth2accesstoken': ['last_used'], 'oauth2application': ['client_secret']}
     model_name = obj._meta.model_name
     fields_excluded = ACTIVITY_STREAM_FIELD_EXCLUSIONS.get(model_name, [])
     # see definition of from_db for CredentialType
@@ -347,10 +372,7 @@ def _convert_model_field_for_display(obj, field_name, password_fields=None):
         return '<missing {}>-{}'.format(obj._meta.verbose_name, getattr(obj, '{}_id'.format(field_name)))
     if password_fields is None:
         password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
-    if field_name in password_fields or (
-        isinstance(field_val, str) and
-        field_val.startswith('$encrypted$')
-    ):
+    if field_name in password_fields or (isinstance(field_val, str) and field_val.startswith('$encrypted$')):
         return u'hidden'
     if hasattr(obj, 'display_%s' % field_name):
         field_val = getattr(obj, 'display_%s' % field_name)()
@@ -373,9 +395,9 @@ def model_instance_diff(old, new, serializer_mapping=None):
     """
     from django.db.models import Model
 
-    if not(old is None or isinstance(old, Model)):
+    if not (old is None or isinstance(old, Model)):
         raise TypeError('The supplied old instance is not a valid model instance.')
-    if not(new is None or isinstance(new, Model)):
+    if not (new is None or isinstance(new, Model)):
         raise TypeError('The supplied new instance is not a valid model instance.')
     old_password_fields = set(getattr(type(old), 'PASSWORD_FIELDS', [])) | set(['password'])
     new_password_fields = set(getattr(type(new), 'PASSWORD_FIELDS', [])) | set(['password'])
@@ -417,6 +439,7 @@ class CharPromptDescriptor:
     """Class used for identifying nullable launch config fields from class
     ex. Schedule.limit
     """
+
     def __init__(self, field):
         self.field = field
 
@@ -426,6 +449,7 @@ class NullablePromptPseudoField:
     Interface for pseudo-property stored in `char_prompts` dict
     Used in LaunchTimeConfig and submodels, defined here to avoid circular imports
     """
+
     def __init__(self, field_name):
         self.field_name = field_name
 
@@ -447,10 +471,10 @@ class NullablePromptPseudoField:
 
 
 def copy_model_by_class(obj1, Class2, fields, kwargs):
-    '''
+    """
     Creates a new unsaved object of type Class2 using the fields from obj1
     values in kwargs can override obj1
-    '''
+    """
     create_kwargs = {}
     for field_name in fields:
         descriptor = getattr(Class2, field_name)
@@ -500,11 +524,11 @@ def copy_model_by_class(obj1, Class2, fields, kwargs):
 
 
 def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
-    '''
+    """
     In-place operation.
     Given two saved objects, copies related objects from obj1
     to obj2 to field of same name, if field occurs in `fields`
-    '''
+    """
     for field_name in fields:
         if hasattr(obj1, field_name):
             try:
@@ -526,17 +550,17 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
 
 
 def get_type_for_model(model):
-    '''
+    """
     Return type name for a given model class.
-    '''
+    """
     opts = model._meta.concrete_model._meta
     return camelcase_to_underscore(opts.object_name)
 
 
 def get_model_for_type(type_name):
-    '''
+    """
     Return model class for a given type name.
-    '''
+    """
     model_str = underscore_to_camelcase(type_name)
     if model_str == 'User':
         use_app = 'auth'
@@ -546,7 +570,7 @@ def get_model_for_type(type_name):
 
 
 def prefetch_page_capabilities(model, page, prefetch_list, user):
-    '''
+    """
     Given a `page` list of objects, a nested dictionary of user_capabilities
     are returned by id, ex.
     {
@@ -565,7 +589,7 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
     prefetch_list = [{'copy': ['inventory.admin', 'project.admin']}]
       --> prefetch logical combination of admin permission to inventory AND
           project, put into cache dictionary as "copy"
-    '''
+    """
     page_ids = [obj.id for obj in page]
     mapping = {}
     for obj in page:
@@ -592,9 +616,9 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
                 parent_model = model
                 for subpath in role_path.split('.')[:-1]:
                     parent_model = parent_model._meta.get_field(subpath).related_model
-                filter_args.append(Q(
-                    Q(**{'%s__pk__in' % res_path: parent_model.accessible_pk_qs(user, '%s_role' % role_type)}) |
-                    Q(**{'%s__isnull' % res_path: True})))
+                filter_args.append(
+                    Q(Q(**{'%s__pk__in' % res_path: parent_model.accessible_pk_qs(user, '%s_role' % role_type)}) | Q(**{'%s__isnull' % res_path: True}))
+                )
             else:
                 role_type = role_path
                 filter_args.append(Q(**{'pk__in': model.accessible_pk_qs(user, '%s_role' % role_type)}))
@@ -625,19 +649,16 @@ def validate_vars_type(vars_obj):
             data_type = vars_type.__name__
         else:
             data_type = str(vars_type)
-        raise AssertionError(
-            _('Input type `{data_type}` is not a dictionary').format(
-                data_type=data_type)
-        )
+        raise AssertionError(_('Input type `{data_type}` is not a dictionary').format(data_type=data_type))
 
 
 def parse_yaml_or_json(vars_str, silent_failure=True):
-    '''
+    """
     Attempt to parse a string of variables.
     First, with JSON parser, if that fails, then with PyYAML.
     If both attempts fail, return an empty dictionary if `silent_failure`
     is True, re-raise combination error if `silent_failure` if False.
-    '''
+    """
     if isinstance(vars_str, dict):
         return vars_str
     elif isinstance(vars_str, str) and vars_str == '""':
@@ -658,21 +679,19 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
                 try:
                     json.dumps(vars_dict)
                 except (ValueError, TypeError, AssertionError) as json_err2:
-                    raise ParseError(_(
-                        'Variables not compatible with JSON standard (error: {json_error})').format(
-                            json_error=str(json_err2)))
+                    raise ParseError(_('Variables not compatible with JSON standard (error: {json_error})').format(json_error=str(json_err2)))
         except (yaml.YAMLError, TypeError, AttributeError, AssertionError) as yaml_err:
             if silent_failure:
                 return {}
-            raise ParseError(_(
-                'Cannot parse as JSON (error: {json_error}) or '
-                'YAML (error: {yaml_error}).').format(
-                    json_error=str(json_err), yaml_error=str(yaml_err)))
+            raise ParseError(
+                _('Cannot parse as JSON (error: {json_error}) or ' 'YAML (error: {yaml_error}).').format(json_error=str(json_err), yaml_error=str(yaml_err))
+            )
     return vars_dict
 
 
 def get_cpu_capacity():
     from django.conf import settings
+
     settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
     env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
 
@@ -697,6 +716,7 @@ def get_cpu_capacity():
 
 def get_mem_capacity():
     from django.conf import settings
+
     settings_forkmem = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_forkmem = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
 
@@ -720,10 +740,11 @@ def get_mem_capacity():
 
 
 def get_system_task_capacity(scale=Decimal(1.0), cpu_capacity=None, mem_capacity=None):
-    '''
+    """
     Measure system memory and use it as a baseline for determining the system's capacity
-    '''
+    """
     from django.conf import settings
+
     settings_forks = getattr(settings, 'SYSTEM_TASK_FORKS_CAPACITY', None)
     env_forks = os.getenv('SYSTEM_TASK_FORKS_CAPACITY', None)
 
@@ -749,9 +770,9 @@ _task_manager = threading.local()
 
 @contextlib.contextmanager
 def ignore_inventory_computed_fields():
-    '''
+    """
     Context manager to ignore updating inventory computed fields.
-    '''
+    """
     try:
         previous_value = getattr(_inventory_updates, 'is_updating', False)
         _inventory_updates.is_updating = True
@@ -763,14 +784,14 @@ def ignore_inventory_computed_fields():
 def _schedule_task_manager():
     from awx.main.scheduler.tasks import run_task_manager
     from django.db import connection
+
     # runs right away if not in transaction
     connection.on_commit(lambda: run_task_manager.delay())
 
 
 @contextlib.contextmanager
 def task_manager_bulk_reschedule():
-    """Context manager to avoid submitting task multiple times.
-    """
+    """Context manager to avoid submitting task multiple times."""
     try:
         previous_flag = getattr(_task_manager, 'bulk_reschedule', False)
         previous_value = getattr(_task_manager, 'needs_scheduling', False)
@@ -793,9 +814,9 @@ def schedule_task_manager():
 
 @contextlib.contextmanager
 def ignore_inventory_group_removal():
-    '''
+    """
     Context manager to ignore moving groups/hosts when group is deleted.
-    '''
+    """
     try:
         previous_value = getattr(_inventory_updates, 'is_removing', False)
         _inventory_updates.is_removing = True
@@ -806,12 +827,12 @@ def ignore_inventory_group_removal():
 
 @contextlib.contextmanager
 def set_environ(**environ):
-    '''
+    """
     Temporarily set the process environment variables.
 
     >>> with set_environ(FOO='BAR'):
     ...   assert os.environ['FOO'] == 'BAR'
-    '''
+    """
     old_environ = os.environ.copy()
     try:
         os.environ.update(environ)
@@ -823,14 +844,14 @@ def set_environ(**environ):
 
 @memoize()
 def check_proot_installed():
-    '''
+    """
     Check that proot is installed.
-    '''
+    """
     from django.conf import settings
+
     cmd = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--version']
     try:
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         proc.communicate()
         return bool(proc.returncode == 0)
     except (OSError, ValueError) as e:
@@ -840,17 +861,18 @@ def check_proot_installed():
 
 
 def build_proot_temp_dir():
-    '''
+    """
     Create a temporary directory for proot to use.
-    '''
+    """
     from django.conf import settings
+
     path = tempfile.mkdtemp(prefix='awx_proot_', dir=settings.AWX_PROOT_BASE_PATH)
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     return path
 
 
 def wrap_args_with_proot(args, cwd, **kwargs):
-    '''
+    """
     Wrap existing command line with proot to restrict access to:
      - AWX_PROOT_BASE_PATH (generally, /tmp) (except for own /tmp files)
     For non-isolated nodes:
@@ -858,14 +880,14 @@ def wrap_args_with_proot(args, cwd, **kwargs):
      - /var/lib/awx (except for current project)
      - /var/log/tower
      - /var/log/supervisor
-    '''
+    """
     from django.conf import settings
+
     cwd = os.path.realpath(cwd)
     new_args = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--unshare-pid', '--dev-bind', '/', '/', '--proc', '/proc']
     hide_paths = [settings.AWX_PROOT_BASE_PATH]
     if not kwargs.get('isolated'):
-        hide_paths.extend(['/etc/tower', '/var/lib/awx', '/var/log', '/etc/ssh',
-                           settings.PROJECTS_ROOT, settings.JOBOUTPUT_ROOT])
+        hide_paths.extend(['/etc/tower', '/var/lib/awx', '/var/log', '/etc/ssh', settings.PROJECTS_ROOT, settings.JOBOUTPUT_ROOT])
     hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
     for path in sorted(set(hide_paths)):
         if not os.path.exists(path):
@@ -878,18 +900,14 @@ def wrap_args_with_proot(args, cwd, **kwargs):
             handle, new_path = tempfile.mkstemp(dir=kwargs['proot_temp_dir'])
             os.close(handle)
             os.chmod(new_path, stat.S_IRUSR | stat.S_IWUSR)
-        new_args.extend(['--bind', '%s' %(new_path,), '%s' % (path,)])
+        new_args.extend(['--bind', '%s' % (new_path,), '%s' % (path,)])
     if kwargs.get('isolated'):
         show_paths = [kwargs['private_data_dir']]
     elif 'private_data_dir' in kwargs:
         show_paths = [cwd, kwargs['private_data_dir']]
     else:
         show_paths = [cwd]
-    for venv in (
-        settings.ANSIBLE_VENV_PATH,
-        settings.AWX_VENV_PATH,
-        kwargs.get('proot_custom_virtualenv')
-    ):
+    for venv in (settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH, kwargs.get('proot_custom_virtualenv')):
         if venv:
             new_args.extend(['--ro-bind', venv, venv])
     show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
@@ -913,9 +931,9 @@ def wrap_args_with_proot(args, cwd, **kwargs):
 
 
 def get_pk_from_dict(_dict, key):
-    '''
+    """
     Helper for obtaining a pk from user data dict or None if not present.
-    '''
+    """
     try:
         val = _dict[key]
         if isinstance(val, object) and hasattr(val, 'id'):
@@ -966,6 +984,7 @@ def get_current_apps():
 
 def get_custom_venv_choices(custom_paths=None):
     from django.conf import settings
+
     custom_paths = custom_paths or settings.CUSTOM_VENV_PATHS
     all_venv_paths = [settings.BASE_VENV_PATH] + custom_paths
     custom_venv_choices = []
@@ -973,13 +992,15 @@ def get_custom_venv_choices(custom_paths=None):
     for custom_venv_path in all_venv_paths:
         try:
             if os.path.exists(custom_venv_path):
-                custom_venv_choices.extend([
-                    os.path.join(custom_venv_path, x, '')
-                    for x in os.listdir(custom_venv_path)
-                    if x != 'awx' and
-                    os.path.isdir(os.path.join(custom_venv_path, x)) and
-                    os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
-                ])
+                custom_venv_choices.extend(
+                    [
+                        os.path.join(custom_venv_path, x, '')
+                        for x in os.listdir(custom_venv_path)
+                        if x != 'awx'
+                        and os.path.isdir(os.path.join(custom_venv_path, x))
+                        and os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
+                    ]
+                )
         except Exception:
             logger.exception("Encountered an error while discovering custom virtual environments.")
     return custom_venv_choices
@@ -1002,20 +1023,19 @@ def extract_ansible_vars(extra_vars):
 def get_search_fields(model):
     fields = []
     for field in model._meta.fields:
-        if field.name in ('username', 'first_name', 'last_name', 'email',
-                          'name', 'description'):
+        if field.name in ('username', 'first_name', 'last_name', 'email', 'name', 'description'):
             fields.append(field.name)
     return fields
 
 
 def has_model_field_prefetched(model_obj, field_name):
     # NOTE: Update this function if django internal implementation changes.
-    return getattr(getattr(model_obj, field_name, None),
-                   'prefetch_cache_name', '') in getattr(model_obj, '_prefetched_objects_cache', {})
+    return getattr(getattr(model_obj, field_name, None), 'prefetch_cache_name', '') in getattr(model_obj, '_prefetched_objects_cache', {})
 
 
 def get_external_account(user):
     from django.conf import settings
+
     account_type = None
     if getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
         try:
@@ -1023,20 +1043,20 @@ def get_external_account(user):
                 account_type = "ldap"
         except AttributeError:
             pass
-    if (getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None) or
-            getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None) or
-            getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None) or
-            getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
-            getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and user.social_auth.all():
+    if (
+        getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None)
+        or getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None)
+        or getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None)
+        or getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None)
+        or getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)
+    ) and user.social_auth.all():
         account_type = "social"
-    if (getattr(settings, 'RADIUS_SERVER', None) or
-            getattr(settings, 'TACACSPLUS_HOST', None)) and user.enterprise_auth.all():
+    if (getattr(settings, 'RADIUS_SERVER', None) or getattr(settings, 'TACACSPLUS_HOST', None)) and user.enterprise_auth.all():
         account_type = "enterprise"
     return account_type
 
 
 class classproperty:
-
     def __init__(self, fget=None, fset=None, fdel=None, doc=None):
         self.fget = fget
         self.fset = fset
@@ -1058,10 +1078,7 @@ def create_temporary_fifo(data):
     path = os.path.join(tempfile.mkdtemp(), next(tempfile._get_candidate_names()))
     os.mkfifo(path, stat.S_IRUSR | stat.S_IWUSR)
 
-    threading.Thread(
-        target=lambda p, d: open(p, 'wb').write(d),
-        args=(path, data)
-    ).start()
+    threading.Thread(target=lambda p, d: open(p, 'wb').write(d), args=(path, data)).start()
     return path
 
 
@@ -1071,7 +1088,7 @@ def truncate_stdout(stdout, size):
     if size <= 0 or len(stdout) <= size:
         return stdout
 
-    stdout = stdout[:(size - 1)] + u'\u2026'
+    stdout = stdout[: (size - 1)] + u'\u2026'
     set_count, reset_count = 0, 0
     for m in ANSI_SGR_PATTERN.finditer(stdout):
         if m.group() == u'\u001b[0m':
@@ -1092,8 +1109,7 @@ def deepmerge(a, b):
     {'first': {'all_rows': {'fail': 'cat', 'number': '5', 'pass': 'dog'}}}
     """
     if isinstance(a, dict) and isinstance(b, dict):
-        return dict([(k, deepmerge(a.get(k), b.get(k)))
-                     for k in set(a.keys()).union(b.keys())])
+        return dict([(k, deepmerge(a.get(k), b.get(k))) for k in set(a.keys()).union(b.keys())])
     elif b is None:
         return a
     else:

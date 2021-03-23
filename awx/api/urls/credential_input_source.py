@@ -3,10 +3,7 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    CredentialInputSourceDetail,
-    CredentialInputSourceList,
-)
+from awx.api.views import CredentialInputSourceDetail, CredentialInputSourceList
 
 
 urls = [

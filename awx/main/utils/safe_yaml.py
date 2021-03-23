@@ -6,7 +6,6 @@ __all__ = ['safe_dump', 'SafeLoader']
 
 
 class SafeStringDumper(yaml.SafeDumper):
-
     def represent_data(self, value):
         if isinstance(value, str):
             return self.represent_scalar('!unsafe', value)
@@ -14,18 +13,15 @@ class SafeStringDumper(yaml.SafeDumper):
 
 
 class SafeLoader(yaml.Loader):
-
     def construct_yaml_unsafe(self, node):
         class UnsafeText(str):
             __UNSAFE__ = True
+
         node = UnsafeText(self.construct_scalar(node))
         return node
 
 
-SafeLoader.add_constructor(
-    u'!unsafe',
-    SafeLoader.construct_yaml_unsafe
-)
+SafeLoader.add_constructor(u'!unsafe', SafeLoader.construct_yaml_unsafe)
 
 
 def safe_dump(x, safe_dict=None):
@@ -41,7 +37,7 @@ def safe_dump(x, safe_dict=None):
     resulting YAML.  Anything _not_ in this dict will automatically be
     `!unsafe`.
 
-    safe_dump({'a': 'b', 'c': 'd'}) -> 
+    safe_dump({'a': 'b', 'c': 'd'}) ->
     !unsafe 'a': !unsafe 'b'
     !unsafe 'c': !unsafe 'd'
 
@@ -59,12 +55,14 @@ def safe_dump(x, safe_dict=None):
             dumper = yaml.SafeDumper
             if k not in safe_dict or safe_dict.get(k) != v:
                 dumper = SafeStringDumper
-            yamls.append(yaml.dump_all(
-                [{k: v}],
-                None,
-                Dumper=dumper,
-                default_flow_style=False,
-            ))
+            yamls.append(
+                yaml.dump_all(
+                    [{k: v}],
+                    None,
+                    Dumper=dumper,
+                    default_flow_style=False,
+                )
+            )
         return ''.join(yamls)
     else:
         return yaml.dump_all([x], None, Dumper=SafeStringDumper, default_flow_style=False)

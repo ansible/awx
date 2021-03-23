@@ -15,6 +15,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unifiedjob',
             name='status',
-            field=models.CharField(choices=[('new', 'New'), ('pending', 'Pending'), ('waiting', 'Waiting'), ('running', 'Running'), ('successful', 'Successful'), ('failed', 'Failed'), ('error', 'Error'), ('canceled', 'Canceled')], db_index=True, default='new', editable=False, max_length=20),
+            field=models.CharField(
+                choices=[
+                    ('new', 'New'),
+                    ('pending', 'Pending'),
+                    ('waiting', 'Waiting'),
+                    ('running', 'Running'),
+                    ('successful', 'Successful'),
+                    ('failed', 'Failed'),
+                    ('error', 'Error'),
+                    ('canceled', 'Canceled'),
+                ],
+                db_index=True,
+                default='new',
+                editable=False,
+                max_length=20,
+            ),
         ),
     ]

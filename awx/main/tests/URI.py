@@ -5,10 +5,10 @@
 
 class URI(object):
     DEFAULTS = {
-        'scheme' : 'http',
-        'username' : 'MYUSERNAME',
-        'password' : 'MYPASSWORD',
-        'host' : 'host.com',
+        'scheme': 'http',
+        'username': 'MYUSERNAME',
+        'password': 'MYPASSWORD',
+        'host': 'host.com',
     }
 
     def __init__(self, description='N/A', scheme=DEFAULTS['scheme'], username=DEFAULTS['username'], password=DEFAULTS['password'], host=DEFAULTS['host']):

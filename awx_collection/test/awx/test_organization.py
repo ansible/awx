@@ -1,4 +1,5 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import pytest
@@ -26,13 +27,6 @@ def test_create_organization(run_module, admin_user):
     assert result.get('changed'), result
 
     org = Organization.objects.get(name='foo')
-    assert result == {
-        "name": "foo",
-        "changed": True,
-        "id": org.id,
-        "invocation": {
-            "module_args": module_args
-        }
-    }
+    assert result == {"name": "foo", "changed": True, "id": org.id, "invocation": {"module_args": module_args}}
 
     assert org.description == 'barfoo'

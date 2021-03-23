@@ -20,7 +20,6 @@ class Job(FakeObject):
 @pytest.fixture
 def sample_cluster():
     def stand_up_cluster():
-
         class Instances(FakeObject):
             def add(self, *args):
                 for instance in args:
@@ -30,7 +29,6 @@ def sample_cluster():
                 return self.obj.instance_list
 
         class InstanceGroup(FakeObject):
-
             def __init__(self, **kwargs):
                 super(InstanceGroup, self).__init__(**kwargs)
                 self.instance_list = []
@@ -40,10 +38,8 @@ def sample_cluster():
                 mgr = Instances(obj=self)
                 return mgr
 
-
         class Instance(FakeObject):
             pass
-
 
         ig_small = InstanceGroup(name='ig_small')
         ig_large = InstanceGroup(name='ig_large')
@@ -55,19 +51,14 @@ def sample_cluster():
         ig_large.instances.add(i2, i3)
         tower.instances.add(i2)
         return [tower, ig_large, ig_small]
+
     return stand_up_cluster
 
 
 def test_committed_capacity(sample_cluster):
     tower, ig_large, ig_small = sample_cluster()
-    tasks = [
-        Job(status='waiting', instance_group=tower),
-        Job(status='waiting', instance_group=ig_large),
-        Job(status='waiting', instance_group=ig_small)
-    ]
-    capacities = InstanceGroup.objects.capacity_values(
-        qs=[tower, ig_large, ig_small], tasks=tasks, breakdown=True
-    )
+    tasks = [Job(status='waiting', instance_group=tower), Job(status='waiting', instance_group=ig_large), Job(status='waiting', instance_group=ig_small)]
+    capacities = InstanceGroup.objects.capacity_values(qs=[tower, ig_large, ig_small], tasks=tasks, breakdown=True)
     # Jobs submitted to either tower or ig_larg must count toward both
     assert capacities['tower']['committed_capacity'] == 43 * 2
     assert capacities['ig_large']['committed_capacity'] == 43 * 2
@@ -76,14 +67,8 @@ def test_committed_capacity(sample_cluster):
 
 def test_running_capacity(sample_cluster):
     tower, ig_large, ig_small = sample_cluster()
-    tasks = [
-        Job(status='running', execution_node='i1'),
-        Job(status='running', execution_node='i2'),
-        Job(status='running', execution_node='i3')
-    ]
-    capacities = InstanceGroup.objects.capacity_values(
-        qs=[tower, ig_large, ig_small], tasks=tasks, breakdown=True
-    )
+    tasks = [Job(status='running', execution_node='i1'), Job(status='running', execution_node='i2'), Job(status='running', execution_node='i3')]
+    capacities = InstanceGroup.objects.capacity_values(qs=[tower, ig_large, ig_small], tasks=tasks, breakdown=True)
     # Tower is only given 1 instance
     assert capacities['tower']['running_capacity'] == 43
     # Large IG has 2 instances
@@ -99,8 +84,7 @@ def test_offline_node_running(sample_cluster):
     tower, ig_large, ig_small = sample_cluster()
     ig_small.instance_list[0].capacity = 0
     tasks = [Job(status='running', execution_node='i1', instance_group=ig_small)]
-    capacities = InstanceGroup.objects.capacity_values(
-        qs=[tower, ig_large, ig_small], tasks=tasks)
+    capacities = InstanceGroup.objects.capacity_values(qs=[tower, ig_large, ig_small], tasks=tasks)
     assert capacities['ig_small']['consumed_capacity'] == 43
 
 
@@ -111,8 +95,7 @@ def test_offline_node_waiting(sample_cluster):
     tower, ig_large, ig_small = sample_cluster()
     ig_small.instance_list[0].capacity = 0
     tasks = [Job(status='waiting', instance_group=ig_small)]
-    capacities = InstanceGroup.objects.capacity_values(
-        qs=[tower, ig_large, ig_small], tasks=tasks)
+    capacities = InstanceGroup.objects.capacity_values(qs=[tower, ig_large, ig_small], tasks=tasks)
     assert capacities['ig_small']['consumed_capacity'] == 43
 
 
@@ -123,14 +106,8 @@ def test_RBAC_reduced_filter(sample_cluster):
     Verify that this does not blow everything up.
     """
     tower, ig_large, ig_small = sample_cluster()
-    tasks = [
-        Job(status='waiting', instance_group=tower),
-        Job(status='waiting', instance_group=ig_large),
-        Job(status='waiting', instance_group=ig_small)
-    ]
-    capacities = InstanceGroup.objects.capacity_values(
-        qs=[tower], tasks=tasks, breakdown=True
-    )
+    tasks = [Job(status='waiting', instance_group=tower), Job(status='waiting', instance_group=ig_large), Job(status='waiting', instance_group=ig_small)]
+    capacities = InstanceGroup.objects.capacity_values(qs=[tower], tasks=tasks, breakdown=True)
     # Cross-links between groups not visible to current user,
     # so a naieve accounting of capacities is returned instead
     assert capacities['tower']['committed_capacity'] == 43

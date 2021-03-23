@@ -40,11 +40,9 @@ DEPRECATED_RESOURCES = {
     'teams': 'team',
     'workflow_job_templates': 'workflow',
     'workflow_jobs': 'workflow_job',
-    'users': 'user'
+    'users': 'user',
 }
-DEPRECATED_RESOURCES_REVERSE = dict(
-    (v, k) for k, v in DEPRECATED_RESOURCES.items()
-)
+DEPRECATED_RESOURCES_REVERSE = dict((v, k) for k, v in DEPRECATED_RESOURCES.items())
 
 
 class CustomCommand(metaclass=CustomRegistryMeta):
@@ -81,9 +79,7 @@ class Login(CustomCommand):
         auth.add_argument('--description', help='description of the generated OAuth2.0 token', metavar='TEXT')
         auth.add_argument('--conf.client_id', metavar='TEXT')
         auth.add_argument('--conf.client_secret', metavar='TEXT')
-        auth.add_argument(
-            '--conf.scope', choices=['read', 'write'], default='write'
-        )
+        auth.add_argument('--conf.scope', choices=['read', 'write'], default='write')
         if client.help:
             self.print_help(parser)
             raise SystemExit()
@@ -99,10 +95,7 @@ class Login(CustomCommand):
             token = api.Api().get_oauth2_token(**kwargs)
         except Exception as e:
             self.print_help(parser)
-            cprint(
-                'Error retrieving an OAuth2.0 token ({}).'.format(e.__class__),
-                'red'
-            )
+            cprint('Error retrieving an OAuth2.0 token ({}).'.format(e.__class__), 'red')
         else:
             fmt = client.get_config('format')
             if fmt == 'human':
@@ -186,9 +179,7 @@ def parse_resource(client, skip_deprecated=False):
 
     # check if the user is running a custom command
     for command in CustomCommand.__subclasses__():
-        client.subparsers[command.name] = subparsers.add_parser(
-            command.name, help=command.help_text
-        )
+        client.subparsers[command.name] = subparsers.add_parser(command.name, help=command.help_text)
 
     if hasattr(client, 'v2'):
         for k in client.v2.json.keys():
@@ -202,15 +193,11 @@ def parse_resource(client, skip_deprecated=False):
                 if k in DEPRECATED_RESOURCES:
                     kwargs['aliases'] = [DEPRECATED_RESOURCES[k]]
 
-            client.subparsers[k] = subparsers.add_parser(
-                k, help='', **kwargs
-            )
+            client.subparsers[k] = subparsers.add_parser(k, help='', **kwargs)
 
     resource = client.parser.parse_known_args()[0].resource
     if resource in DEPRECATED_RESOURCES.values():
-        client.argv[
-            client.argv.index(resource)
-        ] = DEPRECATED_RESOURCES_REVERSE[resource]
+        client.argv[client.argv.index(resource)] = DEPRECATED_RESOURCES_REVERSE[resource]
         resource = DEPRECATED_RESOURCES_REVERSE[resource]
 
     if resource in CustomCommand.registry:
@@ -219,27 +206,14 @@ def parse_resource(client, skip_deprecated=False):
         response = command.handle(client, parser)
         if response:
             _filter = client.get_config('filter')
-            if (
-                resource == 'config' and
-                client.get_config('format') == 'human'
-            ):
-                response = {
-                    'count': len(response),
-                    'results': [
-                        {'key': k, 'value': v}
-                        for k, v in response.items()
-                    ]
-                }
+            if resource == 'config' and client.get_config('format') == 'human':
+                response = {'count': len(response), 'results': [{'key': k, 'value': v} for k, v in response.items()]}
                 _filter = 'key, value'
             try:
                 connection = client.root.connection
             except AttributeError:
                 connection = None
-            formatted = format_response(
-                Page.from_json(response, connection=connection),
-                fmt=client.get_config('format'),
-                filter=_filter
-            )
+            formatted = format_response(Page.from_json(response, connection=connection), fmt=client.get_config('format'), filter=_filter)
             print(formatted)
         raise SystemExit()
     else:

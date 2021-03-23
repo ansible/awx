@@ -21,7 +21,6 @@ class MockHasCreate(has_create.HasCreate):
 
 
 class A(MockHasCreate):
-
     def create(self, **kw):
         return self
 
@@ -87,13 +86,12 @@ class H(MockHasCreate):
 
     optional_dependencies = [E, A]
 
-    def create(self,  a=None, e=None, **kw):
+    def create(self, a=None, e=None, **kw):
         self.create_and_update_dependencies(*filter_by_class((a, A), (e, E)))
         return self
 
 
 class MultipleWordClassName(MockHasCreate):
-
     def create(self, **kw):
         return self
 
@@ -102,7 +100,7 @@ class AnotherMultipleWordClassName(MockHasCreate):
 
     optional_dependencies = [MultipleWordClassName]
 
-    def create(self,  multiple_word_class_name=None, **kw):
+    def create(self, multiple_word_class_name=None, **kw):
         self.create_and_update_dependencies(*filter_by_class((multiple_word_class_name, MultipleWordClassName)))
         return self
 
@@ -183,19 +181,17 @@ def test_optional_dependency_graph_with_additional():
 
 def test_creation_order():
     """confirms that `has_create.creation_order()` returns a valid creation order in the desired list of sets format"""
-    dependency_graph = dict(eight=set(['seven', 'six']),
-                            seven=set(['five']),
-                            six=set(),
-                            five=set(['two', 'one']),
-                            four=set(['one']),
-                            three=set(['two']),
-                            two=set(['one']),
-                            one=set())
-    desired = [set(['one', 'six']),
-               set(['two', 'four']),
-               set(['three', 'five']),
-               set(['seven']),
-               set(['eight'])]
+    dependency_graph = dict(
+        eight=set(['seven', 'six']),
+        seven=set(['five']),
+        six=set(),
+        five=set(['two', 'one']),
+        four=set(['one']),
+        three=set(['two']),
+        two=set(['one']),
+        one=set(),
+    )
+    desired = [set(['one', 'six']), set(['two', 'four']), set(['three', 'five']), set(['seven']), set(['eight'])]
     assert has_create.creation_order(dependency_graph) == desired
 
 
@@ -203,14 +199,16 @@ def test_creation_order_with_loop():
     """confirms that `has_create.creation_order()` raises toposort.CircularDependencyError when evaluating
     a cyclic dependency graph
     """
-    dependency_graph = dict(eight=set(['seven', 'six']),
-                            seven=set(['five']),
-                            six=set(),
-                            five=set(['two', 'one']),
-                            four=set(['one']),
-                            three=set(['two']),
-                            two=set(['one']),
-                            one=set(['eight']))
+    dependency_graph = dict(
+        eight=set(['seven', 'six']),
+        seven=set(['five']),
+        six=set(),
+        five=set(['two', 'one']),
+        four=set(['one']),
+        three=set(['two']),
+        two=set(['one']),
+        one=set(['eight']),
+    )
     with pytest.raises(CircularDependencyError):
         assert has_create.creation_order(dependency_graph)
 
@@ -239,8 +237,10 @@ class Five(MockHasCreate):
 class IsntAHasCreate(object):
     pass
 
+
 class Six(MockHasCreate, IsntAHasCreate):
     dependencies = [Two]
+
 
 class Seven(MockHasCreate):
     dependencies = [IsntAHasCreate]
@@ -265,8 +265,7 @@ def test_separate_async_optionals_three_exist():
     the class that has shared item as a dependency occurs first in a separate creation group
     """
     order = has_create.creation_order(has_create.optional_dependency_graph(Five, Four, Three))
-    assert has_create.separate_async_optionals(order) == [set([One]), set([Two]), set([Three]),
-                                                          set([Five]), set([Four])]
+    assert has_create.separate_async_optionals(order) == [set([One]), set([Two]), set([Three]), set([Five]), set([Four])]
 
 
 def test_separate_async_optionals_not_has_create():
@@ -345,8 +344,7 @@ def test_dependency_resolution_complete():
 
     for item in (h, a, e, d, c, b):
         if item._dependency_store:
-            assert all(item._dependency_store.values()
-                   ), "{0} missing dependency: {0._dependency_store}".format(item)
+            assert all(item._dependency_store.values()), "{0} missing dependency: {0._dependency_store}".format(item)
 
     assert a == b._dependency_store[A], "Duplicate dependency detected"
     assert a == c._dependency_store[A], "Duplicate dependency detected"
@@ -468,7 +466,6 @@ def test_teardown_ds_cleared():
 
 
 class OneWithArgs(MockHasCreate):
-
     def create(self, **kw):
         self.kw = kw
         return self
@@ -492,18 +489,17 @@ class ThreeWithArgs(MockHasCreate):
     optional_dependencies = [TwoWithArgs]
 
     def create(self, one_with_args=OneWithArgs, two_with_args=None, **kw):
-        self.create_and_update_dependencies(*filter_by_class((one_with_args, OneWithArgs),
-                                                             (two_with_args, TwoWithArgs)))
+        self.create_and_update_dependencies(*filter_by_class((one_with_args, OneWithArgs), (two_with_args, TwoWithArgs)))
         self.kw = kw
         return self
+
 
 class FourWithArgs(MockHasCreate):
 
     dependencies = [TwoWithArgs, ThreeWithArgs]
 
     def create(self, two_with_args=TwoWithArgs, three_with_args=ThreeWithArgs, **kw):
-        self.create_and_update_dependencies(*filter_by_class((two_with_args, TwoWithArgs),
-                                                             (three_with_args, ThreeWithArgs)))
+        self.create_and_update_dependencies(*filter_by_class((two_with_args, TwoWithArgs), (three_with_args, ThreeWithArgs)))
         self.kw = kw
         return self
 
@@ -536,10 +532,9 @@ def test_no_tuple_for_class_arg_causes_shared_dependencies_nested_staggering():
 
 def test_tuple_for_class_arg_causes_unshared_dependencies_when_downstream():
     """Confirms that provided arg-tuple for dependency type is applied instead of chained dependency"""
-    three_wa = ThreeWithArgs().create(two_with_args=(TwoWithArgs, dict(one_with_args=False,
-                                                                       make_one_with_args=True,
-                                                                       two_with_args_kw_arg=234)),
-                                      three_with_args_kw_arg=345)
+    three_wa = ThreeWithArgs().create(
+        two_with_args=(TwoWithArgs, dict(one_with_args=False, make_one_with_args=True, two_with_args_kw_arg=234)), three_with_args_kw_arg=345
+    )
     assert isinstance(three_wa.ds.one_with_args, OneWithArgs)
     assert isinstance(three_wa.ds.two_with_args, TwoWithArgs)
     assert isinstance(three_wa.ds.two_with_args.ds.one_with_args, OneWithArgs)
@@ -552,13 +547,12 @@ def test_tuple_for_class_arg_causes_unshared_dependencies_when_downstream():
 
 def test_tuples_for_class_arg_cause_unshared_dependencies_when_downstream():
     """Confirms that provided arg-tuple for dependency type is applied instead of chained dependency"""
-    four_wa = FourWithArgs().create(two_with_args=(TwoWithArgs, dict(one_with_args=False,
-                                                                     make_one_with_args=True,
-                                                                     two_with_args_kw_arg=456)),
-                                    # No shared dependencies with four_wa.ds.two_with_args
-                                    three_with_args=(ThreeWithArgs, dict(one_with_args=(OneWithArgs, {}),
-                                                                         two_with_args=False)),
-                                    four_with_args_kw=567)
+    four_wa = FourWithArgs().create(
+        two_with_args=(TwoWithArgs, dict(one_with_args=False, make_one_with_args=True, two_with_args_kw_arg=456)),
+        # No shared dependencies with four_wa.ds.two_with_args
+        three_with_args=(ThreeWithArgs, dict(one_with_args=(OneWithArgs, {}), two_with_args=False)),
+        four_with_args_kw=567,
+    )
     assert isinstance(four_wa.ds.two_with_args, TwoWithArgs)
     assert isinstance(four_wa.ds.three_with_args, ThreeWithArgs)
     assert isinstance(four_wa.ds.two_with_args.ds.one_with_args, OneWithArgs)
@@ -575,25 +569,21 @@ class NotHasCreate(object):
 
 
 class MixinUserA(MockHasCreate, NotHasCreate):
-
     def create(self, **kw):
         return self
 
 
 class MixinUserB(MockHasCreate, NotHasCreate):
-
     def create(self, **kw):
         return self
 
 
 class MixinUserC(MixinUserB):
-
     def create(self, **kw):
         return self
 
 
 class MixinUserD(MixinUserC):
-
     def create(self, **kw):
         return self
 
@@ -646,17 +636,12 @@ class DynamicallyDeclaresNotHasCreateDependency(MockHasCreate):
     dependencies = [NotHasCreate]
 
     def create(self, not_has_create=MixinUserA):
-        dynamic_dependency = dict(mixinusera=MixinUserA,
-                                  mixinuserb=MixinUserB,
-                                  mixinuserc=MixinUserC)
+        dynamic_dependency = dict(mixinusera=MixinUserA, mixinuserb=MixinUserB, mixinuserc=MixinUserC)
         self.create_and_update_dependencies(dynamic_dependency[not_has_create])
         return self
 
 
-@pytest.mark.parametrize('dependency,dependency_class',
-                         [('mixinusera', MixinUserA),
-                          ('mixinuserb', MixinUserB),
-                          ('mixinuserc', MixinUserC)])
+@pytest.mark.parametrize('dependency,dependency_class', [('mixinusera', MixinUserA), ('mixinuserb', MixinUserB), ('mixinuserc', MixinUserC)])
 def test_subclass_or_parent_dynamic_not_has_create_dependency_declaration(dependency, dependency_class):
     """Confirms that dependencies that dynamically declare dependencies subclassed from not HasCreate
     are properly linked
@@ -670,17 +655,12 @@ class DynamicallyDeclaresHasCreateDependency(MockHasCreate):
     dependencies = [MixinUserB]
 
     def create(self, mixin_user_b=MixinUserB):
-        dynamic_dependency = dict(mixinuserb=MixinUserB,
-                                  mixinuserc=MixinUserC,
-                                  mixinuserd=MixinUserD)
+        dynamic_dependency = dict(mixinuserb=MixinUserB, mixinuserc=MixinUserC, mixinuserd=MixinUserD)
         self.create_and_update_dependencies(dynamic_dependency[mixin_user_b])
         return self
 
 
-@pytest.mark.parametrize('dependency,dependency_class',
-                         [('mixinuserb', MixinUserB),
-                          ('mixinuserc', MixinUserC),
-                          ('mixinuserd', MixinUserD)])
+@pytest.mark.parametrize('dependency,dependency_class', [('mixinuserb', MixinUserB), ('mixinuserc', MixinUserC), ('mixinuserd', MixinUserD)])
 def test_subclass_or_parent_dynamic_has_create_dependency_declaration(dependency, dependency_class):
     """Confirms that dependencies that dynamically declare dependencies subclassed from not HasCreate
     are properly linked

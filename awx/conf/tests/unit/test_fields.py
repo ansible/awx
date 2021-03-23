@@ -4,7 +4,7 @@ from rest_framework.fields import ValidationError
 from awx.conf.fields import StringListBooleanField, StringListPathField, ListTuplesField, URLField
 
 
-class TestStringListBooleanField():
+class TestStringListBooleanField:
 
     FIELD_VALUES = [
         ("hello", "hello"),
@@ -23,10 +23,7 @@ class TestStringListBooleanField():
         ("NULL", None),
     ]
 
-    FIELD_VALUES_INVALID = [
-        1.245,
-        {"a": "b"},
-    ]
+    FIELD_VALUES_INVALID = [1.245, {"a": "b"}]
 
     @pytest.mark.parametrize("value_in, value_known", FIELD_VALUES)
     def test_to_internal_value_valid(self, value_in, value_known):
@@ -39,8 +36,7 @@ class TestStringListBooleanField():
         field = StringListBooleanField()
         with pytest.raises(ValidationError) as e:
             field.to_internal_value(value)
-        assert e.value.detail[0] == "Expected None, True, False, a string or list " \
-            "of strings but got {} instead.".format(type(value))
+        assert e.value.detail[0] == "Expected None, True, False, a string or list " "of strings but got {} instead.".format(type(value))
 
     @pytest.mark.parametrize("value_in, value_known", FIELD_VALUES)
     def test_to_representation_valid(self, value_in, value_known):
@@ -53,22 +49,14 @@ class TestStringListBooleanField():
         field = StringListBooleanField()
         with pytest.raises(ValidationError) as e:
             field.to_representation(value)
-        assert e.value.detail[0] == "Expected None, True, False, a string or list " \
-            "of strings but got {} instead.".format(type(value))
+        assert e.value.detail[0] == "Expected None, True, False, a string or list " "of strings but got {} instead.".format(type(value))
 
 
-class TestListTuplesField():
+class TestListTuplesField:
 
-    FIELD_VALUES = [
-        ([('a', 'b'), ('abc', '123')], [("a", "b"), ("abc", "123")]),
-    ]
+    FIELD_VALUES = [([('a', 'b'), ('abc', '123')], [("a", "b"), ("abc", "123")])]
 
-    FIELD_VALUES_INVALID = [
-        ("abc", type("abc")),
-        ([('a', 'b', 'c'), ('abc', '123', '456')], type(('a',))),
-        (['a', 'b'], type('a')),
-        (123, type(123)),
-    ]
+    FIELD_VALUES_INVALID = [("abc", type("abc")), ([('a', 'b', 'c'), ('abc', '123', '456')], type(('a',))), (['a', 'b'], type('a')), (123, type(123))]
 
     @pytest.mark.parametrize("value_in, value_known", FIELD_VALUES)
     def test_to_internal_value_valid(self, value_in, value_known):
@@ -81,11 +69,10 @@ class TestListTuplesField():
         field = ListTuplesField()
         with pytest.raises(ValidationError) as e:
             field.to_internal_value(value)
-        assert e.value.detail[0] == "Expected a list of tuples of max length 2 " \
-            "but got {} instead.".format(t)
+        assert e.value.detail[0] == "Expected a list of tuples of max length 2 " "but got {} instead.".format(t)
 
 
-class TestStringListPathField():
+class TestStringListPathField:
 
     FIELD_VALUES = [
         ((".", "..", "/"), [".", "..", "/"]),
@@ -93,22 +80,12 @@ class TestStringListPathField():
         (("///home///",), ["/home"]),
         (("/home/././././",), ["/home"]),
         (("/home", "/home", "/home/"), ["/home"]),
-        (["/home/", "/home/", "/opt/", "/opt/", "/var/"], ["/home", "/opt", "/var"])
+        (["/home/", "/home/", "/opt/", "/opt/", "/var/"], ["/home", "/opt", "/var"]),
     ]
 
-    FIELD_VALUES_INVALID_TYPE = [
-        1.245,
-        {"a": "b"},
-        ("/home"),
-    ]
+    FIELD_VALUES_INVALID_TYPE = [1.245, {"a": "b"}, ("/home")]
 
-    FIELD_VALUES_INVALID_PATH = [
-        "",
-        "~/",
-        "home",
-        "/invalid_path",
-        "/home/invalid_path",
-    ]
+    FIELD_VALUES_INVALID_PATH = ["", "~/", "home", "/invalid_path", "/home/invalid_path"]
 
     @pytest.mark.parametrize("value_in, value_known", FIELD_VALUES)
     def test_to_internal_value_valid(self, value_in, value_known):
@@ -131,16 +108,19 @@ class TestStringListPathField():
         assert e.value.detail[0] == "{} is not a valid path choice.".format(value)
 
 
-class TestURLField():
+class TestURLField:
     regex = "^https://www.example.org$"
 
-    @pytest.mark.parametrize("url,schemes,regex, allow_numbers_in_top_level_domain, expect_no_error",[
-        ("ldap://www.example.org42", "ldap", None, True, True),
-        ("https://www.example.org42", "https", None, False, False),
-        ("https://www.example.org", None,  regex, None, True),
-        ("https://www.example3.org", None, regex, None, False),
-        ("ftp://www.example.org", "https", None, None, False)
-    ])
+    @pytest.mark.parametrize(
+        "url,schemes,regex, allow_numbers_in_top_level_domain, expect_no_error",
+        [
+            ("ldap://www.example.org42", "ldap", None, True, True),
+            ("https://www.example.org42", "https", None, False, False),
+            ("https://www.example.org", None, regex, None, True),
+            ("https://www.example3.org", None, regex, None, False),
+            ("ftp://www.example.org", "https", None, None, False),
+        ],
+    )
     def test_urls(self, url, schemes, regex, allow_numbers_in_top_level_domain, expect_no_error):
         kwargs = {}
         kwargs.setdefault("allow_numbers_in_top_level_domain", allow_numbers_in_top_level_domain)

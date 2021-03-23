@@ -24,7 +24,7 @@ logger = logging.getLogger('awx.analytics.broadcast_websocket')
 
 
 def dt_to_seconds(dt):
-    return int((dt - datetime.datetime(1970,1,1)).total_seconds())
+    return int((dt - datetime.datetime(1970, 1, 1)).total_seconds())
 
 
 def now_seconds():
@@ -37,7 +37,7 @@ def safe_name(s):
 
 
 # Second granularity; Per-minute
-class FixedSlidingWindow():
+class FixedSlidingWindow:
     def __init__(self, start_time=None):
         self.buckets = dict()
         self.start_time = start_time or now_seconds()
@@ -65,7 +65,7 @@ class FixedSlidingWindow():
         return sum(self.buckets.values()) or 0
 
 
-class BroadcastWebsocketStatsManager():
+class BroadcastWebsocketStatsManager:
     def __init__(self, event_loop, local_hostname):
         self._local_hostname = local_hostname
 
@@ -74,8 +74,7 @@ class BroadcastWebsocketStatsManager():
         self._redis_key = BROADCAST_WEBSOCKET_REDIS_KEY_NAME
 
     def new_remote_host_stats(self, remote_hostname):
-        self._stats[remote_hostname] = BroadcastWebsocketStats(self._local_hostname,
-                                                               remote_hostname)
+        self._stats[remote_hostname] = BroadcastWebsocketStats(self._local_hostname, remote_hostname)
         return self._stats[remote_hostname]
 
     def delete_remote_host_stats(self, remote_hostname):
@@ -100,15 +99,15 @@ class BroadcastWebsocketStatsManager():
 
     @classmethod
     def get_stats_sync(cls):
-        '''
+        """
         Stringified verion of all the stats
-        '''
+        """
         redis_conn = redis.Redis.from_url(settings.BROKER_URL)
         stats_str = redis_conn.get(BROADCAST_WEBSOCKET_REDIS_KEY_NAME) or b''
         return parser.text_string_to_metric_families(stats_str.decode('UTF-8'))
 
 
-class BroadcastWebsocketStats():
+class BroadcastWebsocketStats:
     def __init__(self, local_hostname, remote_hostname):
         self._local_hostname = local_hostname
         self._remote_hostname = remote_hostname
@@ -118,24 +117,25 @@ class BroadcastWebsocketStats():
         self.name = safe_name(self._local_hostname)
         self.remote_name = safe_name(self._remote_hostname)
 
-        self._messages_received_total = Counter(f'awx_{self.remote_name}_messages_received_total',
-                                                'Number of messages received, to be forwarded, by the broadcast websocket system',
-                                                registry=self._registry)
-        self._messages_received = Gauge(f'awx_{self.remote_name}_messages_received',
-                                        'Number forwarded messages received by the broadcast websocket system, for the duration of the current connection',
-                                        registry=self._registry)
-        self._connection = Enum(f'awx_{self.remote_name}_connection',
-                                'Websocket broadcast connection',
-                                states=['disconnected', 'connected'],
-                                registry=self._registry)
+        self._messages_received_total = Counter(
+            f'awx_{self.remote_name}_messages_received_total',
+            'Number of messages received, to be forwarded, by the broadcast websocket system',
+            registry=self._registry,
+        )
+        self._messages_received = Gauge(
+            f'awx_{self.remote_name}_messages_received',
+            'Number forwarded messages received by the broadcast websocket system, for the duration of the current connection',
+            registry=self._registry,
+        )
+        self._connection = Enum(
+            f'awx_{self.remote_name}_connection', 'Websocket broadcast connection', states=['disconnected', 'connected'], registry=self._registry
+        )
         self._connection.state('disconnected')
-        self._connection_start = Gauge(f'awx_{self.remote_name}_connection_start',
-                                       'Time the connection was established',
-                                       registry=self._registry)
+        self._connection_start = Gauge(f'awx_{self.remote_name}_connection_start', 'Time the connection was established', registry=self._registry)
 
-        self._messages_received_per_minute = Gauge(f'awx_{self.remote_name}_messages_received_per_minute',
-                                                   'Messages received per minute',
-                                                   registry=self._registry)
+        self._messages_received_per_minute = Gauge(
+            f'awx_{self.remote_name}_messages_received_per_minute', 'Messages received per minute', registry=self._registry
+        )
         self._internal_messages_received_per_minute = FixedSlidingWindow()
 
     def unregister(self):

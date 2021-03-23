@@ -5,10 +5,7 @@ import pytest
 from django.urls import resolve
 from django.contrib.auth.models import User
 
-from rest_framework.test import (
-    APIRequestFactory,
-    force_authenticate,
-)
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 
 @pytest.fixture
@@ -41,4 +38,5 @@ def api_request(admin):
         response = view(request, *view_args, **view_kwargs)
         response.render()
         return response
+
     return rf

@@ -20,12 +20,14 @@ class Migration(migrations.Migration):
         # Using SeparateDatabaseAndState here allows us to update the migration
         # state so that Django thinks the UnifiedJob.result_stdout_text field
         # is gone _without_ actually deleting the underlying column/data
-        migrations.SeparateDatabaseAndState(state_operations=[
-            migrations.RemoveField(
-                model_name='unifiedjob',
-                name='result_stdout_text',
-            ),
-        ]),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='unifiedjob',
+                    name='result_stdout_text',
+                ),
+            ]
+        ),
         # On other side of the equation, this migration introduces a new model
         # which is *unmanaged* (meaning, a new table is not created for it);
         # instead, this sort of "virtual" model is used to maintain an ORM
@@ -34,7 +36,7 @@ class Migration(migrations.Migration):
             name='UnifiedJobDeprecatedStdout',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('result_stdout_text', models.TextField(editable=False, null=True))
+                ('result_stdout_text', models.TextField(editable=False, null=True)),
             ],
             options={
                 'db_table': 'main_unifiedjob',

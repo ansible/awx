@@ -25,11 +25,57 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(blank=True, default='')),
                 ('image', models.CharField(help_text='The registry location where the container is stored.', max_length=1024, verbose_name='image location')),
                 ('managed_by_tower', models.BooleanField(default=False, editable=False)),
-                ('created_by', models.ForeignKey(default=None, editable=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="{'class': 'executionenvironment', 'model_name': 'executionenvironment', 'app_label': 'main'}(class)s_created+", to=settings.AUTH_USER_MODEL)),
-                ('credential', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='executionenvironments', to='main.Credential')),
-                ('modified_by', models.ForeignKey(default=None, editable=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="{'class': 'executionenvironment', 'model_name': 'executionenvironment', 'app_label': 'main'}(class)s_modified+", to=settings.AUTH_USER_MODEL)),
-                ('organization', models.ForeignKey(blank=True, default=None, help_text='The organization used to determine access to this execution environment.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='executionenvironments', to='main.Organization')),
-                ('tags', taggit.managers.TaggableManager(blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags')),
+                (
+                    'created_by',
+                    models.ForeignKey(
+                        default=None,
+                        editable=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="{'class': 'executionenvironment', 'model_name': 'executionenvironment', 'app_label': 'main'}(class)s_created+",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    'credential',
+                    models.ForeignKey(
+                        blank=True,
+                        default=None,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name='executionenvironments',
+                        to='main.Credential',
+                    ),
+                ),
+                (
+                    'modified_by',
+                    models.ForeignKey(
+                        default=None,
+                        editable=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="{'class': 'executionenvironment', 'model_name': 'executionenvironment', 'app_label': 'main'}(class)s_modified+",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    'organization',
+                    models.ForeignKey(
+                        blank=True,
+                        default=None,
+                        help_text='The organization used to determine access to this execution environment.',
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='executionenvironments',
+                        to='main.Organization',
+                    ),
+                ),
+                (
+                    'tags',
+                    taggit.managers.TaggableManager(
+                        blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags'
+                    ),
+                ),
             ],
             options={
                 'ordering': (django.db.models.expressions.OrderBy(django.db.models.expressions.F('organization_id'), nulls_first=True), 'image'),
@@ -44,16 +90,40 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='default_environment',
-            field=models.ForeignKey(blank=True, default=None, help_text='The default execution environment for jobs run by this organization.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='main.ExecutionEnvironment'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                help_text='The default execution environment for jobs run by this organization.',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='+',
+                to='main.ExecutionEnvironment',
+            ),
         ),
         migrations.AddField(
             model_name='unifiedjob',
             name='execution_environment',
-            field=models.ForeignKey(blank=True, default=None, help_text='The container image to be used for execution.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unifiedjobs', to='main.ExecutionEnvironment'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                help_text='The container image to be used for execution.',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='unifiedjobs',
+                to='main.ExecutionEnvironment',
+            ),
         ),
         migrations.AddField(
             model_name='unifiedjobtemplate',
             name='execution_environment',
-            field=models.ForeignKey(blank=True, default=None, help_text='The container image to be used for execution.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unifiedjobtemplates', to='main.ExecutionEnvironment'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                help_text='The container image to be used for execution.',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='unifiedjobtemplates',
+                to='main.ExecutionEnvironment',
+            ),
         ),
     ]

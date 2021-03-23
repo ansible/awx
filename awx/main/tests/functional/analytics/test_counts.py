@@ -32,9 +32,7 @@ def test_empty():
 
 
 @pytest.mark.django_db
-def test_database_counts(
-    organization_factory, job_template_factory, workflow_job_template_factory
-):
+def test_database_counts(organization_factory, job_template_factory, workflow_job_template_factory):
     objs = organization_factory("org", superusers=["admin"])
     jt = job_template_factory(
         "test",

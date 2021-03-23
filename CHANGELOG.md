@@ -2,7 +2,7 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-# 18.0.0 (March 22, 2021)
+# 18.0.0 (March 23, 2021)
 
 **IMPORTANT INSTALL AND UPGRADE NOTES**
 
@@ -20,19 +20,22 @@ After a herculean effort from a number of contributors, we're excited to announc
 
 Execution Environments are container images which consist of everything necessary to run a playbook within AWX, and which drive the entire management and lifecycle of playbook execution runtime in AWX: https://github.com/ansible/awx/issues/5157.  This means that going forward, AWX no longer utilizes the [bubblewrap](https://github.com/containers/bubblewrap) project for playbook isolation, but instead utilizes a container per playbook run.
 
-Much like custom virtualenvs, custom Execution Environments can be crafted to specify additional Python or system-level dependencies.  Ansible Builder outputs images you can upload to your registry which can *then* be defined in AWX and utilized for playbook runs.
+Much like custom virtualenvs, custom Execution Environments can be crafted to specify additional Python or system-level dependencies.  [Ansible Builder](https://github.com/ansible/ansible-builder) outputs images you can upload to your registry which can *then* be defined in AWX and utilized for playbook runs.
 
 To learn more about Ansible Builder and Execution Environments, see: https://www.ansible.com/blog/introduction-to-ansible-builder
 
 ### Other Notable Changes
 
 - Removed `installer` directory.
-  - The Kubernetes installer has been removed in favor of [AWX Operator](https://github.com/ansible/awx-operator).
+  - The Kubernetes installer has been removed in favor of [AWX Operator](https://github.com/ansible/awx-operator).  Official images for Operator-based installs are no longer hosted on Docker Hub, but are instead available on [Quay](https://quay.io/repository/ansible/awx?tab=tags).
   - The "Local Docker" install method has been removed in favor of the development environment. Details can be found at: https://github.com/ansible/awx/blob/devel/tools/docker-compose/README.md
 - Removal of custom virtual environments https://github.com/ansible/awx/pull/9498
   - Custom virtual environments have been replaced by Execution Environments https://github.com/ansible/awx/pull/9570
+- The default Container Group Pod definition has changed. All custom Pod specs have been reset. https://github.com/ansible/awx/commit/05ef51f710dad8f8036bc5acee4097db4adc0d71
 - Added user interface for the activity stream: https://github.com/ansible/awx/pull/9083
 - Converted many of the top-level list views (Jobs, Teams, Hosts, Inventories, Projects, and more) to a new, permanent table component for substantially increased responsiveness, usability, maintainability, and other 'ility's: https://github.com/ansible/awx/pull/8970, https://github.com/ansible/awx/pull/9182 and many others!
+- Added support for Centrify Vault (https://www.centrify.com) as a credential lookup plugin (https://github.com/ansible/awx/pull/9542)
+- Added support for namespaces in Hashicorp Vault credential plugin (https://github.com/ansible/awx/pull/9590)
 - Added click-to-expand details for job tables
 - Added search filtering to job output https://github.com/ansible/awx/pull/9208
 - Added the new migration, update, and "installation in progress" page https://github.com/ansible/awx/pull/9123

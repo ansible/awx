@@ -6,51 +6,55 @@ from django.utils.translation import ugettext_lazy as _
 import requests
 
 aim_inputs = {
-    'fields': [{
-        'id': 'url',
-        'label': _('CyberArk AIM URL'),
-        'type': 'string',
-        'format': 'url',
-    }, {
-        'id': 'app_id',
-        'label': _('Application ID'),
-        'type': 'string',
-        'secret': True,
-    }, {
-        'id': 'client_key',
-        'label': _('Client Key'),
-        'type': 'string',
-        'secret': True,
-        'multiline': True,
-    }, {
-        'id': 'client_cert',
-        'label': _('Client Certificate'),
-        'type': 'string',
-        'secret': True,
-        'multiline': True,
-    }, {
-        'id': 'verify',
-        'label': _('Verify SSL Certificates'),
-        'type': 'boolean',
-        'default': True,
-    }],
-    'metadata': [{
-        'id': 'object_query',
-        'label': _('Object Query'),
-        'type': 'string',
-        'help_text': _('Lookup query for the object. Ex: Safe=TestSafe;Object=testAccountName123'),
-    }, {
-        'id': 'object_query_format',
-        'label': _('Object Query Format'),
-        'type': 'string',
-        'default': 'Exact',
-        'choices': ['Exact', 'Regexp']
-    }, {
-        'id': 'reason',
-        'label': _('Reason'),
-        'type': 'string',
-        'help_text': _('Object request reason. This is only needed if it is required by the object\'s policy.')
-    }],
+    'fields': [
+        {
+            'id': 'url',
+            'label': _('CyberArk AIM URL'),
+            'type': 'string',
+            'format': 'url',
+        },
+        {
+            'id': 'app_id',
+            'label': _('Application ID'),
+            'type': 'string',
+            'secret': True,
+        },
+        {
+            'id': 'client_key',
+            'label': _('Client Key'),
+            'type': 'string',
+            'secret': True,
+            'multiline': True,
+        },
+        {
+            'id': 'client_cert',
+            'label': _('Client Certificate'),
+            'type': 'string',
+            'secret': True,
+            'multiline': True,
+        },
+        {
+            'id': 'verify',
+            'label': _('Verify SSL Certificates'),
+            'type': 'boolean',
+            'default': True,
+        },
+    ],
+    'metadata': [
+        {
+            'id': 'object_query',
+            'label': _('Object Query'),
+            'type': 'string',
+            'help_text': _('Lookup query for the object. Ex: Safe=TestSafe;Object=testAccountName123'),
+        },
+        {'id': 'object_query_format', 'label': _('Object Query Format'), 'type': 'string', 'default': 'Exact', 'choices': ['Exact', 'Regexp']},
+        {
+            'id': 'reason',
+            'label': _('Reason'),
+            'type': 'string',
+            'help_text': _('Object request reason. This is only needed if it is required by the object\'s policy.'),
+        },
+    ],
     'required': ['url', 'app_id', 'object_query'],
 }
 
@@ -88,8 +92,4 @@ def aim_backend(**kwargs):
     return res.json()['Content']
 
 
-aim_plugin = CredentialPlugin(
-    'CyberArk AIM Central Credential Provider Lookup',
-    inputs=aim_inputs,
-    backend=aim_backend
-)
+aim_plugin = CredentialPlugin('CyberArk AIM Central Credential Provider Lookup', inputs=aim_inputs, backend=aim_backend)

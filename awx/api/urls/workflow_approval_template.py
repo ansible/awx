@@ -3,10 +3,7 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    WorkflowApprovalTemplateDetail,
-    WorkflowApprovalTemplateJobsList,
-)
+from awx.api.views import WorkflowApprovalTemplateDetail, WorkflowApprovalTemplateJobsList
 
 
 urls = [

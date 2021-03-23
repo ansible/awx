@@ -40,11 +40,7 @@ logger = logging.getLogger('awx.sso.backends')
 
 class LDAPSettings(BaseLDAPSettings):
 
-    defaults = dict(list(BaseLDAPSettings.defaults.items()) + list({
-        'ORGANIZATION_MAP': {},
-        'TEAM_MAP': {},
-        'GROUP_TYPE_PARAMS': {},
-    }.items()))
+    defaults = dict(list(BaseLDAPSettings.defaults.items()) + list({'ORGANIZATION_MAP': {}, 'TEAM_MAP': {}, 'GROUP_TYPE_PARAMS': {}}.items()))
 
     def __init__(self, prefix='AUTH_LDAP_', defaults={}):
         super(LDAPSettings, self).__init__(prefix, defaults)
@@ -72,9 +68,9 @@ class LDAPSettings(BaseLDAPSettings):
 
 
 class LDAPBackend(BaseLDAPBackend):
-    '''
+    """
     Custom LDAP backend for AWX.
-    '''
+    """
 
     settings_prefix = 'AUTH_LDAP_'
 
@@ -117,14 +113,9 @@ class LDAPBackend(BaseLDAPBackend):
             pass
 
         try:
-            for setting_name, type_ in [
-                ('GROUP_SEARCH', 'LDAPSearch'),
-                ('GROUP_TYPE', 'LDAPGroupType'),
-            ]:
+            for setting_name, type_ in [('GROUP_SEARCH', 'LDAPSearch'), ('GROUP_TYPE', 'LDAPGroupType')]:
                 if getattr(self.settings, setting_name) is None:
-                    raise ImproperlyConfigured(
-                        "{} must be an {} instance.".format(setting_name, type_)
-                    )
+                    raise ImproperlyConfigured("{} must be an {} instance.".format(setting_name, type_))
             return super(LDAPBackend, self).authenticate(request, username, password)
         except Exception:
             logger.exception("Encountered an error authenticating to LDAP")
@@ -184,8 +175,7 @@ def _get_or_set_enterprise_user(username, password, provider):
     except User.DoesNotExist:
         user = User(username=username)
         enterprise_auth = _decorate_enterprise_user(user, provider)
-        logger.debug("Created enterprise user %s via %s backend." %
-                     (username, enterprise_auth.get_provider_display()))
+        logger.debug("Created enterprise user %s via %s backend." % (username, enterprise_auth.get_provider_display()))
         created = True
     if created or user.is_in_enterprise_category(provider):
         return user
@@ -193,9 +183,9 @@ def _get_or_set_enterprise_user(username, password, provider):
 
 
 class RADIUSBackend(BaseRADIUSBackend):
-    '''
+    """
     Custom Radius backend to verify license status
-    '''
+    """
 
     def authenticate(self, request, username, password):
         if not django_settings.RADIUS_SERVER:
@@ -214,9 +204,9 @@ class RADIUSBackend(BaseRADIUSBackend):
 
 
 class TACACSPlusBackend(object):
-    '''
+    """
     Custom TACACS+ auth backend for AWX
-    '''
+    """
 
     def authenticate(self, request, username, password):
         if not django_settings.TACACSPLUS_HOST:
@@ -228,10 +218,7 @@ class TACACSPlusBackend(object):
                 django_settings.TACACSPLUS_PORT,
                 django_settings.TACACSPLUS_SECRET,
                 timeout=django_settings.TACACSPLUS_SESSION_TIMEOUT,
-            ).authenticate(
-                username, password,
-                authen_type=tacacs_plus.TAC_PLUS_AUTHEN_TYPES[django_settings.TACACSPLUS_AUTH_PROTOCOL],
-            )
+            ).authenticate(username, password, authen_type=tacacs_plus.TAC_PLUS_AUTHEN_TYPES[django_settings.TACACSPLUS_AUTH_PROTOCOL])
         except Exception as e:
             logger.exception("TACACS+ Authentication Error: %s" % str(e))
             return None
@@ -248,9 +235,9 @@ class TACACSPlusBackend(object):
 
 
 class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
-    '''
+    """
     Custom Identity Provider to make attributes to what we expect.
-    '''
+    """
 
     def get_user_permanent_id(self, attributes):
         uid = attributes[self.conf.get('attr_user_permanent_id', OID_USERID)]
@@ -270,26 +257,37 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
         if isinstance(value, (list, tuple)):
             value = value[0]
         if conf_key in ('attr_first_name', 'attr_last_name', 'attr_username', 'attr_email') and value is None:
-            logger.warn("Could not map user detail '%s' from SAML attribute '%s'; "
-                        "update SOCIAL_AUTH_SAML_ENABLED_IDPS['%s']['%s'] with the correct SAML attribute.",
-                        conf_key[5:], key, self.name, conf_key)
+            logger.warn(
+                "Could not map user detail '%s' from SAML attribute '%s'; " "update SOCIAL_AUTH_SAML_ENABLED_IDPS['%s']['%s'] with the correct SAML attribute.",
+                conf_key[5:],
+                key,
+                self.name,
+                conf_key,
+            )
         return str(value) if value is not None else value
 
 
 class SAMLAuth(BaseSAMLAuth):
-    '''
+    """
     Custom SAMLAuth backend to verify license status
-    '''
+    """
 
     def get_idp(self, idp_name):
         idp_config = self.setting('ENABLED_IDPS')[idp_name]
         return TowerSAMLIdentityProvider(idp_name, **idp_config)
 
     def authenticate(self, request, *args, **kwargs):
-        if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
-                    django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
-                    django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
-                    django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
+        if not all(
+            [
+                django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID,
+                django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
+                django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY,
+                django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
+                django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT,
+                django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
+                django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS,
+            ]
+        ):
             return None
         user = super(SAMLAuth, self).authenticate(request, *args, **kwargs)
         # Comes from https://github.com/omab/python-social-auth/blob/v0.2.21/social/backends/base.py#L91
@@ -300,18 +298,25 @@ class SAMLAuth(BaseSAMLAuth):
         return user
 
     def get_user(self, user_id):
-        if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
-                    django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY, django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
-                    django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT, django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
-                    django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS]):
+        if not all(
+            [
+                django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID,
+                django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
+                django_settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY,
+                django_settings.SOCIAL_AUTH_SAML_ORG_INFO,
+                django_settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT,
+                django_settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT,
+                django_settings.SOCIAL_AUTH_SAML_ENABLED_IDPS,
+            ]
+        ):
             return None
         return super(SAMLAuth, self).get_user(user_id)
 
 
 def _update_m2m_from_groups(user, ldap_user, related, opts, remove=True):
-    '''
+    """
     Hepler function to update m2m relationship based on LDAP group membership.
-    '''
+    """
     should_add = False
     if opts is None:
         return
@@ -337,11 +342,12 @@ def _update_m2m_from_groups(user, ldap_user, related, opts, remove=True):
 
 @receiver(populate_user, dispatch_uid='populate-ldap-user')
 def on_populate_user(sender, **kwargs):
-    '''
+    """
     Handle signal from LDAP backend to populate the user object.  Update user
     organization/team memberships according to their LDAP groups.
-    '''
+    """
     from awx.main.models import Organization, Team
+
     user = kwargs['user']
     ldap_user = kwargs['ldap_user']
     backend = ldap_user.backend
@@ -356,9 +362,7 @@ def on_populate_user(sender, **kwargs):
         field_len = len(getattr(user, field))
         if field_len > max_len:
             setattr(user, field, getattr(user, field)[:max_len])
-            logger.warn(
-                'LDAP user {} has {} > max {} characters'.format(user.username, field, max_len)
-            )
+            logger.warn('LDAP user {} has {} > max {} characters'.format(user.username, field, max_len))
 
     # Update organization membership based on group memberships.
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
@@ -367,16 +371,13 @@ def on_populate_user(sender, **kwargs):
         remove = bool(org_opts.get('remove', True))
         admins_opts = org_opts.get('admins', None)
         remove_admins = bool(org_opts.get('remove_admins', remove))
-        _update_m2m_from_groups(user, ldap_user, org.admin_role.members, admins_opts,
-                                remove_admins)
+        _update_m2m_from_groups(user, ldap_user, org.admin_role.members, admins_opts, remove_admins)
         auditors_opts = org_opts.get('auditors', None)
         remove_auditors = bool(org_opts.get('remove_auditors', remove))
-        _update_m2m_from_groups(user, ldap_user, org.auditor_role.members, auditors_opts,
-                                remove_auditors)
+        _update_m2m_from_groups(user, ldap_user, org.auditor_role.members, auditors_opts, remove_auditors)
         users_opts = org_opts.get('users', None)
         remove_users = bool(org_opts.get('remove_users', remove))
-        _update_m2m_from_groups(user, ldap_user, org.member_role.members, users_opts,
-                                remove_users)
+        _update_m2m_from_groups(user, ldap_user, org.member_role.members, users_opts, remove_users)
 
     # Update team membership based on group memberships.
     team_map = getattr(backend.settings, 'TEAM_MAP', {})
@@ -387,8 +388,7 @@ def on_populate_user(sender, **kwargs):
         team, created = Team.objects.get_or_create(name=team_name, organization=org)
         users_opts = team_opts.get('users', None)
         remove = bool(team_opts.get('remove', True))
-        _update_m2m_from_groups(user, ldap_user, team.member_role.members, users_opts,
-                                remove)
+        _update_m2m_from_groups(user, ldap_user, team.member_role.members, users_opts, remove)
 
     # Update user profile to store LDAP DN.
     user.save()

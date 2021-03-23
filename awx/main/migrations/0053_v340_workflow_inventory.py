@@ -22,7 +22,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjob',
             name='inventory',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='workflowjobs', to='main.Inventory'),
+            field=models.ForeignKey(
+                blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='workflowjobs', to='main.Inventory'
+            ),
         ),
         migrations.AddField(
             model_name='workflowjobtemplate',
@@ -32,6 +34,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplate',
             name='inventory',
-            field=models.ForeignKey(blank=True, default=None, help_text='Inventory applied to all job templates in workflow that prompt for inventory.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='workflowjobtemplates', to='main.Inventory'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                help_text='Inventory applied to all job templates in workflow that prompt for inventory.',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='workflowjobtemplates',
+                to='main.Inventory',
+            ),
         ),
     ]

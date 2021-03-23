@@ -63,11 +63,7 @@ def test_kv_unsafe_deep_nesting():
 
 
 def test_kv_unsafe_multiple():
-    assert safe_dump({'a': 'b', 'c': 'd'}) == '\n'.join([
-        "!unsafe 'a': !unsafe 'b'",
-        "!unsafe 'c': !unsafe 'd'",
-        ""
-    ])
+    assert safe_dump({'a': 'b', 'c': 'd'}) == '\n'.join(["!unsafe 'a': !unsafe 'b'", "!unsafe 'c': !unsafe 'd'", ""])
 
 
 def test_safe_marking():
@@ -75,11 +71,7 @@ def test_safe_marking():
 
 
 def test_safe_marking_mixed():
-    assert safe_dump({'a': 'b', 'c': 'd'}, safe_dict={'a': 'b'}) == '\n'.join([
-        "a: b",
-        "!unsafe 'c': !unsafe 'd'",
-        ""
-    ])
+    assert safe_dump({'a': 'b', 'c': 'd'}, safe_dict={'a': 'b'}) == '\n'.join(["a: b", "!unsafe 'c': !unsafe 'd'", ""])
 
 
 def test_safe_marking_deep_nesting():

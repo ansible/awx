@@ -4,15 +4,8 @@ import os
 
 from django.utils.timezone import now, timedelta
 
-from awx.main.tasks import (
-    RunProjectUpdate, RunInventoryUpdate,
-    awx_isolated_heartbeat,
-    isolated_manager
-)
-from awx.main.models import (
-    ProjectUpdate, InventoryUpdate, InventorySource,
-    Instance, InstanceGroup
-)
+from awx.main.tasks import RunProjectUpdate, RunInventoryUpdate, awx_isolated_heartbeat, isolated_manager
+from awx.main.models import ProjectUpdate, InventoryUpdate, InventorySource, Instance, InstanceGroup
 
 
 @pytest.fixture
@@ -26,7 +19,6 @@ def scm_revision_file(tmpdir_factory):
 
 @pytest.mark.django_db
 class TestDependentInventoryUpdate:
-
     def test_dependent_inventory_updates_is_called(self, scm_inventory_source, scm_revision_file):
         task = RunProjectUpdate()
         task.revision_path = scm_revision_file
@@ -57,20 +49,14 @@ class TestDependentInventoryUpdate:
             assert inv_update.source_project_update_id == proj_update.pk
 
     def test_dependent_inventory_project_cancel(self, project, inventory):
-        '''
+        """
         Test that dependent inventory updates exhibit good behavior on cancel
         of the source project update
-        '''
+        """
         task = RunProjectUpdate()
         proj_update = ProjectUpdate.objects.create(project=project)
 
-        kwargs = dict(
-            source_project=project,
-            source='scm',
-            source_path='inventory_file',
-            update_on_project_update=True,
-            inventory=inventory
-        )
+        kwargs = dict(source_project=project, source='scm', source_path='inventory_file', update_on_project_update=True, inventory=inventory)
 
         is1 = InventorySource.objects.create(name="test-scm-inv", **kwargs)
         is2 = InventorySource.objects.create(name="test-scm-inv2", **kwargs)
@@ -86,7 +72,6 @@ class TestDependentInventoryUpdate:
             iu_run_mock.assert_called_once()
 
 
-
 class MockSettings:
     AWX_ISOLATED_PERIODIC_CHECK = 60
     CLUSTER_HOST_ID = 'tower_1'
@@ -94,7 +79,6 @@ class MockSettings:
 
 @pytest.mark.django_db
 class TestIsolatedManagementTask:
-
     @pytest.fixture
     def control_group(self):
         return InstanceGroup.objects.create(name='alpha')
@@ -107,7 +91,7 @@ class TestIsolatedManagementTask:
     def needs_updating(self, control_group):
         ig = InstanceGroup.objects.create(name='thepentagon', controller=control_group)
         inst = ig.instances.create(hostname='isolated', capacity=103)
-        inst.last_isolated_check=now() - timedelta(seconds=MockSettings.AWX_ISOLATED_PERIODIC_CHECK)
+        inst.last_isolated_check = now() - timedelta(seconds=MockSettings.AWX_ISOLATED_PERIODIC_CHECK)
         inst.save()
         return ig
 
@@ -115,7 +99,7 @@ class TestIsolatedManagementTask:
     def just_updated(self, control_group):
         ig = InstanceGroup.objects.create(name='thepentagon', controller=control_group)
         inst = ig.instances.create(hostname='isolated', capacity=103)
-        inst.last_isolated_check=now()
+        inst.last_isolated_check = now()
         inst.save()
         return inst
 

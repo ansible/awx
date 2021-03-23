@@ -26,7 +26,7 @@ from django.db.models.fields.related_descriptors import (
     ForwardManyToOneDescriptor,
     ManyToManyDescriptor,
     ReverseManyToOneDescriptor,
-    create_forward_many_to_many_manager
+    create_forward_many_to_many_manager,
 )
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -46,34 +46,32 @@ from rest_framework import serializers
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
-from awx.main.models.rbac import (
-    batch_role_ancestor_rebuilding, Role,
-    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
-)
+from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 from awx.main.constants import ENV_BLOCKLIST
 from awx.main import utils
 
 
-__all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField',
-           'SmartFilterField', 'OrderedManyToManyField',
-           'update_role_parentage_for_instance',
-           'is_implicit_parent']
+__all__ = [
+    'AutoOneToOneField',
+    'ImplicitRoleField',
+    'JSONField',
+    'SmartFilterField',
+    'OrderedManyToManyField',
+    'update_role_parentage_for_instance',
+    'is_implicit_parent',
+]
 
 
 # Provide a (better) custom error message for enum jsonschema validation
 def __enum_validate__(validator, enums, instance, schema):
     if instance not in enums:
-        yield jsonschema.exceptions.ValidationError(
-            _("'{value}' is not one of ['{allowed_values}']").format(
-                value=instance, allowed_values="', '".join(enums))
-        )
+        yield jsonschema.exceptions.ValidationError(_("'{value}' is not one of ['{allowed_values}']").format(value=instance, allowed_values="', '".join(enums)))
 
 
 Draft4Validator.VALIDATORS['enum'] = __enum_validate__
 
 
 class JSONField(upstream_JSONField):
-
     def db_type(self, connection):
         return 'text'
 
@@ -93,9 +91,7 @@ class JSONBField(upstream_JSONBField):
         if connection.vendor == 'sqlite':
             # sqlite (which we use for tests) does not support jsonb;
             return json.dumps(value, cls=DjangoJSONEncoder)
-        return super(JSONBField, self).get_db_prep_value(
-            value, connection, prepared
-        )
+        return super(JSONBField, self).get_db_prep_value(value, connection, prepared)
 
     def from_db_value(self, value, expression, connection):
         # Work around a bug in django-jsonfield
@@ -103,6 +99,7 @@ class JSONBField(upstream_JSONBField):
         if isinstance(value, str):
             return json.loads(value)
         return value
+
 
 # Based on AutoOneToOneField from django-annoying:
 # https://bitbucket.org/offline/django-annoying/src/a0de8b294db3/annoying/fields.py
@@ -124,8 +121,7 @@ class AutoOneToOneField(models.OneToOneField):
     """OneToOneField that creates related object if it doesn't exist."""
 
     def contribute_to_related_class(self, cls, related):
-        setattr(cls, related.get_accessor_name(),
-                AutoSingleRelatedObjectDescriptor(related))
+        setattr(cls, related.get_accessor_name(), AutoSingleRelatedObjectDescriptor(related))
 
 
 def resolve_role_field(obj, field):
@@ -157,22 +153,17 @@ def resolve_role_field(obj, field):
 
 
 def is_implicit_parent(parent_role, child_role):
-    '''
+    """
     Determine if the parent_role is an implicit parent as defined by
     the model definition. This does not include any role parents that
     might have been set by the user.
-    '''
+    """
     if child_role.content_object is None:
         # The only singleton implicit parent is the system admin being
         # a parent of the system auditor role
-        return bool(
-            child_role.singleton_name == ROLE_SINGLETON_SYSTEM_AUDITOR and
-            parent_role.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
-        )
+        return bool(child_role.singleton_name == ROLE_SINGLETON_SYSTEM_AUDITOR and parent_role.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR)
     # Get the list of implicit parents that were defined at the class level.
-    implicit_parents = getattr(
-        child_role.content_object.__class__, child_role.role_field
-    ).field.parent_role
+    implicit_parents = getattr(child_role.content_object.__class__, child_role.role_field).field.parent_role
     if type(implicit_parents) != list:
         implicit_parents = [implicit_parents]
 
@@ -195,10 +186,10 @@ def is_implicit_parent(parent_role, child_role):
 
 
 def update_role_parentage_for_instance(instance):
-    '''update_role_parentage_for_instance
+    """update_role_parentage_for_instance
     updates the parents listing for all the roles
     of a given instance if they have changed
-    '''
+    """
     parents_removed = set()
     parents_added = set()
     for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
@@ -278,8 +269,7 @@ class ImplicitRoleField(models.ForeignKey):
             # consistency is assured by unit test awx.main.tests.functional
             field = getattr(cls, field_name, None)
 
-            if field and type(field) is ReverseManyToOneDescriptor or \
-               type(field) is ManyToManyDescriptor:
+            if field and type(field) is ReverseManyToOneDescriptor or type(field) is ManyToManyDescriptor:
 
                 if '.' in field_attr:
                     raise Exception('Referencing deep roles through ManyToMany fields is unsupported.')
@@ -313,8 +303,8 @@ class ImplicitRoleField(models.ForeignKey):
                             getattr(instance, self.name).parents.add(getattr(obj, field_attr))
                         if action == 'pre_remove':
                             getattr(instance, self.name).parents.remove(getattr(obj, field_attr))
-        return _m2m_update
 
+        return _m2m_update
 
     def _post_save(self, instance, created, *args, **kwargs):
         Role_ = utils.get_current_apps().get_model('main', 'Role')
@@ -330,13 +320,7 @@ class ImplicitRoleField(models.ForeignKey):
             for implicit_role_field in getattr(latest_instance.__class__, '__implicit_role_fields'):
                 cur_role = getattr(latest_instance, implicit_role_field.name, None)
                 if cur_role is None:
-                    missing_roles.append(
-                        Role_(
-                            role_field=implicit_role_field.name,
-                            content_type_id=ct_id,
-                            object_id=latest_instance.id
-                        )
-                    )
+                    missing_roles.append(Role_(role_field=implicit_role_field.name, content_type_id=ct_id, object_id=latest_instance.id))
 
             if len(missing_roles) > 0:
                 Role_.objects.bulk_create(missing_roles)
@@ -351,7 +335,6 @@ class ImplicitRoleField(models.ForeignKey):
 
             update_role_parentage_for_instance(latest_instance)
             instance.refresh_from_db()
-
 
     def _resolve_parent_roles(self, instance):
         if not self.parent_role:
@@ -424,10 +407,7 @@ class JSONSchemaField(JSONBField):
     def validate(self, value, model_instance):
         super(JSONSchemaField, self).validate(value, model_instance)
         errors = []
-        for error in Draft4Validator(
-            self.schema(model_instance),
-            format_checker=self.format_checker
-        ).iter_errors(value):
+        for error in Draft4Validator(self.schema(model_instance), format_checker=self.format_checker).iter_errors(value):
             if error.validator == 'pattern' and 'error' in error.schema:
                 error.message = error.schema['error'].format(instance=error.instance)
             elif error.validator == 'type':
@@ -435,19 +415,15 @@ class JSONSchemaField(JSONBField):
                 if expected_type == 'object':
                     expected_type = 'dict'
                 if error.path:
-                    error.message = _(
-                        '{type} provided in relative path {path}, expected {expected_type}'
-                    ).format(path=list(error.path), type=type(error.instance).__name__,
-                             expected_type=expected_type)
+                    error.message = _('{type} provided in relative path {path}, expected {expected_type}').format(
+                        path=list(error.path), type=type(error.instance).__name__, expected_type=expected_type
+                    )
                 else:
-                    error.message = _(
-                        '{type} provided, expected {expected_type}'
-                    ).format(path=list(error.path), type=type(error.instance).__name__,
-                             expected_type=expected_type)
+                    error.message = _('{type} provided, expected {expected_type}').format(
+                        path=list(error.path), type=type(error.instance).__name__, expected_type=expected_type
+                    )
             elif error.validator == 'additionalProperties' and hasattr(error, 'path'):
-                error.message = _(
-                    'Schema validation error in relative path {path} ({error})'
-                ).format(path=list(error.path), error=error.message)
+                error.message = _('Schema validation error in relative path {path} ({error})').format(path=list(error.path), error=error.message)
             errors.append(error)
 
         if errors:
@@ -492,13 +468,9 @@ def format_url(value):
     except Exception as e:
         raise jsonschema.exceptions.FormatError(str(e))
     if parsed.scheme == '':
-        raise jsonschema.exceptions.FormatError(
-            'Invalid URL: Missing url scheme (http, https, etc.)'
-        )
+        raise jsonschema.exceptions.FormatError('Invalid URL: Missing url scheme (http, https, etc.)')
     if parsed.netloc == '':
-        raise jsonschema.exceptions.FormatError(
-            'Invalid URL: {}'.format(value)
-        )
+        raise jsonschema.exceptions.FormatError('Invalid URL: {}'.format(value))
     return True
 
 
@@ -536,10 +508,7 @@ class DynamicCredentialInputField(JSONSchemaField):
         super(JSONSchemaField, self).validate(value, model_instance)
         credential_type = model_instance.source_credential.credential_type
         errors = {}
-        for error in Draft4Validator(
-            self.schema(credential_type),
-            format_checker=self.format_checker
-        ).iter_errors(value):
+        for error in Draft4Validator(self.schema(credential_type), format_checker=self.format_checker).iter_errors(value):
             if error.validator == 'pattern' and 'error' in error.schema:
                 error.message = error.schema['error'].format(instance=error.instance)
             if 'id' not in error.schema:
@@ -555,14 +524,10 @@ class DynamicCredentialInputField(JSONSchemaField):
         defined_metadata = [field.get('id') for field in credential_type.inputs.get('metadata', [])]
         for field in credential_type.inputs.get('required', []):
             if field in defined_metadata and not value.get(field, None):
-                errors[field] = [_('required for %s') % (
-                    credential_type.name
-                )]
+                errors[field] = [_('required for %s') % (credential_type.name)]
 
         if errors:
-            raise serializers.ValidationError({
-                'metadata': errors
-            })
+            raise serializers.ValidationError({'metadata': errors})
 
 
 class CredentialInputField(JSONSchemaField):
@@ -610,8 +575,7 @@ class CredentialInputField(JSONSchemaField):
         # ssh_key_data format)
 
         if not isinstance(value, dict):
-            return super(CredentialInputField, self).validate(value,
-                                                              model_instance)
+            return super(CredentialInputField, self).validate(value, model_instance)
 
         # Backwards compatability: in prior versions, if you submit `null` for
         # a credential field value, it just considers the value an empty string
@@ -622,11 +586,7 @@ class CredentialInputField(JSONSchemaField):
 
         decrypted_values = {}
         for k, v in value.items():
-            if all([
-                k in model_instance.credential_type.secret_fields,
-                v != '$encrypted$',
-                model_instance.pk
-            ]):
+            if all([k in model_instance.credential_type.secret_fields, v != '$encrypted$', model_instance.pk]):
                 if not isinstance(model_instance.inputs.get(k), str):
                     raise django_exceptions.ValidationError(
                         _('secret values must be of type string, not {}').format(type(v).__name__),
@@ -641,16 +601,11 @@ class CredentialInputField(JSONSchemaField):
         if not model_instance.pk:
             for field in model_instance.credential_type.secret_fields:
                 if value.get(field) == '$encrypted$':
-                    raise serializers.ValidationError({
-                        self.name: [f'$encrypted$ is a reserved keyword, and cannot be used for {field}.']
-                    })
+                    raise serializers.ValidationError({self.name: [f'$encrypted$ is a reserved keyword, and cannot be used for {field}.']})
 
         super(JSONSchemaField, self).validate(decrypted_values, model_instance)
         errors = {}
-        for error in Draft4Validator(
-            self.schema(model_instance),
-            format_checker=self.format_checker
-        ).iter_errors(decrypted_values):
+        for error in Draft4Validator(self.schema(model_instance), format_checker=self.format_checker).iter_errors(decrypted_values):
             if error.validator == 'pattern' and 'error' in error.schema:
                 error.message = error.schema['error'].format(instance=error.instance)
             if error.validator == 'dependencies':
@@ -661,8 +616,8 @@ class CredentialInputField(JSONSchemaField):
                 # string)
                 match = re.search(
                     # 'foo' is a dependency of 'bar'
-                    r"'"         # apostrophe
-                    r"([^']+)"   # one or more non-apostrophes (first group)
+                    r"'"  # apostrophe
+                    r"([^']+)"  # one or more non-apostrophes (first group)
                     r"'[\w ]+'"  # one or more words/spaces
                     r"([^']+)",  # second group
                     error.message,
@@ -671,9 +626,7 @@ class CredentialInputField(JSONSchemaField):
                     label, extraneous = match.groups()
                     if error.schema['properties'].get(label):
                         label = error.schema['properties'][label]['label']
-                    errors[extraneous] = [
-                        _('cannot be set unless "%s" is set') % label
-                    ]
+                    errors[extraneous] = [_('cannot be set unless "%s" is set') % label]
                     continue
             if 'id' not in error.schema:
                 # If the error is not for a specific field, it's specific to
@@ -689,10 +642,7 @@ class CredentialInputField(JSONSchemaField):
 
         # `ssh_key_unlock` requirements are very specific and can't be
         # represented without complicated JSON schema
-        if (
-                model_instance.credential_type.managed_by_tower is True and
-                'ssh_key_unlock' in defined_fields
-        ):
+        if model_instance.credential_type.managed_by_tower is True and 'ssh_key_unlock' in defined_fields:
 
             # in order to properly test the necessity of `ssh_key_unlock`, we
             # need to know the real value of `ssh_key_data`; for a payload like:
@@ -702,25 +652,23 @@ class CredentialInputField(JSONSchemaField):
             # }
             # ...we have to fetch the actual key value from the database
             if model_instance.pk and model_instance.inputs.get('ssh_key_data') == '$encrypted$':
-                model_instance.inputs['ssh_key_data'] = model_instance.__class__.objects.get(
-                    pk=model_instance.pk
-                ).inputs.get('ssh_key_data')
+                model_instance.inputs['ssh_key_data'] = model_instance.__class__.objects.get(pk=model_instance.pk).inputs.get('ssh_key_data')
 
             if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
                 errors['ssh_key_unlock'] = [_('must be set when SSH key is encrypted.')]
-            
-            if all([
-                model_instance.inputs.get('ssh_key_data'),
-                value.get('ssh_key_unlock'),
-                not model_instance.has_encrypted_ssh_key_data,
-                'ssh_key_data' not in errors
-            ]):
+
+            if all(
+                [
+                    model_instance.inputs.get('ssh_key_data'),
+                    value.get('ssh_key_unlock'),
+                    not model_instance.has_encrypted_ssh_key_data,
+                    'ssh_key_data' not in errors,
+                ]
+            ):
                 errors['ssh_key_unlock'] = [_('should not be set when SSH key is not encrypted.')]
 
         if errors:
-            raise serializers.ValidationError({
-                'inputs': errors
-            })
+            raise serializers.ValidationError({'inputs': errors})
 
 
 class CredentialTypeInputField(JSONSchemaField):
@@ -734,23 +682,15 @@ class CredentialTypeInputField(JSONSchemaField):
             'type': 'object',
             'additionalProperties': False,
             'properties': {
-                'required': {
-                    'type': 'array',
-                    'items': {'type': 'string'}
-                },
-                'fields':  {
+                'required': {'type': 'array', 'items': {'type': 'string'}},
+                'fields': {
                     'type': 'array',
                     'items': {
                         'type': 'object',
                         'properties': {
                             'type': {'enum': ['string', 'boolean']},
                             'format': {'enum': ['ssh_private_key', 'url']},
-                            'choices': {
-                                'type': 'array',
-                                'minItems': 1,
-                                'items': {'type': 'string'},
-                                'uniqueItems': True
-                            },
+                            'choices': {'type': 'array', 'minItems': 1, 'items': {'type': 'string'}, 'uniqueItems': True},
                             'id': {
                                 'type': 'string',
                                 'pattern': '^[a-zA-Z_]+[a-zA-Z0-9_]*$',
@@ -765,23 +705,20 @@ class CredentialTypeInputField(JSONSchemaField):
                         },
                         'additionalProperties': False,
                         'required': ['id', 'label'],
-                    }
-                }
-            }
+                    },
+                },
+            },
         }
 
     def validate(self, value, model_instance):
-        if isinstance(value, dict) and 'dependencies' in value and \
-                not model_instance.managed_by_tower:
+        if isinstance(value, dict) and 'dependencies' in value and not model_instance.managed_by_tower:
             raise django_exceptions.ValidationError(
                 _("'dependencies' is not supported for custom credentials."),
                 code='invalid',
                 params={'value': value},
             )
 
-        super(CredentialTypeInputField, self).validate(
-            value, model_instance
-        )
+        super(CredentialTypeInputField, self).validate(value, model_instance)
 
         ids = {}
         for field in value.get('fields', []):
@@ -809,19 +746,24 @@ class CredentialTypeInputField(JSONSchemaField):
                 default = field['default']
                 _type = {'string': str, 'boolean': bool}[field['type']]
                 if type(default) != _type:
-                    raise django_exceptions.ValidationError(
-                        _('{} is not a {}').format(default, field['type'])
-                    )
+                    raise django_exceptions.ValidationError(_('{} is not a {}').format(default, field['type']))
 
-            for key in ('choices', 'multiline', 'format', 'secret',):
+            for key in (
+                'choices',
+                'multiline',
+                'format',
+                'secret',
+            ):
                 if key in field and field['type'] != 'string':
                     raise django_exceptions.ValidationError(
-                        _('{sub_key} not allowed for {element_type} type ({element_id})'.format(
-                            sub_key=key, element_type=field['type'], element_id=field['id'])),
+                        _(
+                            '{sub_key} not allowed for {element_type} type ({element_id})'.format(
+                                sub_key=key, element_type=field['type'], element_id=field['id']
+                            )
+                        ),
                         code='invalid',
                         params={'value': value},
                     )
-
 
 
 class CredentialTypeInjectorField(JSONSchemaField):
@@ -854,7 +796,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
                             'type': 'string',
                             # The environment variable _value_ can be any ascii,
                             # but pexpect will choke on any unicode
-                            'pattern': '^[\x00-\x7F]*$'
+                            'pattern': '^[\x00-\x7F]*$',
                         },
                     },
                     'additionalProperties': False,
@@ -868,26 +810,25 @@ class CredentialTypeInjectorField(JSONSchemaField):
                     'additionalProperties': False,
                 },
             },
-            'additionalProperties': False
+            'additionalProperties': False,
         }
 
     def validate_env_var_allowed(self, env_var):
         if env_var.startswith('ANSIBLE_'):
             raise django_exceptions.ValidationError(
-                _('Environment variable {} may affect Ansible configuration so its '
-                  'use is not allowed in credentials.').format(env_var),
-                code='invalid', params={'value': env_var},
+                _('Environment variable {} may affect Ansible configuration so its ' 'use is not allowed in credentials.').format(env_var),
+                code='invalid',
+                params={'value': env_var},
             )
         if env_var in ENV_BLOCKLIST:
             raise django_exceptions.ValidationError(
                 _('Environment variable {} is not allowed to be used in credentials.').format(env_var),
-                code='invalid', params={'value': env_var},
+                code='invalid',
+                params={'value': env_var},
             )
 
     def validate(self, value, model_instance):
-        super(CredentialTypeInjectorField, self).validate(
-            value, model_instance
-        )
+        super(CredentialTypeInjectorField, self).validate(value, model_instance)
 
         # make sure the inputs are valid first
         try:
@@ -901,10 +842,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
         # In addition to basic schema validation, search the injector fields
         # for template variables and make sure they match the fields defined in
         # the inputs
-        valid_namespace = dict(
-            (field, 'EXAMPLE')
-            for field in model_instance.defined_fields
-        )
+        valid_namespace = dict((field, 'EXAMPLE') for field in model_instance.defined_fields)
 
         class ExplodingNamespace:
             def __str__(self):
@@ -940,24 +878,18 @@ class CredentialTypeInjectorField(JSONSchemaField):
                     self.validate_env_var_allowed(key)
             for key, tmpl in injector.items():
                 try:
-                    sandbox.ImmutableSandboxedEnvironment(
-                        undefined=StrictUndefined
-                    ).from_string(tmpl).render(valid_namespace)
+                    sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
                 except UndefinedError as e:
                     raise django_exceptions.ValidationError(
-                        _('{sub_key} uses an undefined field ({error_msg})').format(
-                            sub_key=key, error_msg=e),
+                        _('{sub_key} uses an undefined field ({error_msg})').format(sub_key=key, error_msg=e),
                         code='invalid',
                         params={'value': value},
                     )
                 except SecurityError as e:
-                    raise django_exceptions.ValidationError(
-                        _('Encountered unsafe code execution: {}').format(e)
-                    )
+                    raise django_exceptions.ValidationError(_('Encountered unsafe code execution: {}').format(e))
                 except TemplateSyntaxError as e:
                     raise django_exceptions.ValidationError(
-                        _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(
-                            sub_key=key, type=type_, error_msg=e),
+                        _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=e),
                         code='invalid',
                         params={'value': value},
                     )
@@ -967,6 +899,7 @@ class AskForField(models.BooleanField):
     """
     Denotes whether to prompt on launch for another field on the same template
     """
+
     def __init__(self, allows_field=None, **kwargs):
         super(AskForField, self).__init__(**kwargs)
         self._allows_field = allows_field
@@ -975,7 +908,7 @@ class AskForField(models.BooleanField):
     def allows_field(self):
         if self._allows_field is None:
             try:
-                return self.name[len('ask_'):-len('_on_launch')]
+                return self.name[len('ask_') : -len('_on_launch')]
             except AttributeError:
                 # self.name will be set by the model metaclass, not this field
                 raise Exception('Corresponding allows_field cannot be accessed until model is initialized.')
@@ -983,11 +916,8 @@ class AskForField(models.BooleanField):
 
 
 class OAuth2ClientSecretField(models.CharField):
-
     def get_db_prep_value(self, value, connection, prepared=False):
-        return super(OAuth2ClientSecretField, self).get_db_prep_value(
-            encrypt_value(value), connection, prepared
-        )
+        return super(OAuth2ClientSecretField, self).get_db_prep_value(encrypt_value(value), connection, prepared)
 
     def from_db_value(self, value, expression, connection):
         if value and value.startswith('$encrypted$'):
@@ -1021,9 +951,7 @@ class OrderedManyToManyDescriptor(ManyToManyDescriptor):
         def add_custom_queryset_to_many_related_manager(many_related_manage_cls):
             class OrderedManyRelatedManager(many_related_manage_cls):
                 def get_queryset(self):
-                    return super(OrderedManyRelatedManager, self).get_queryset().order_by(
-                        '%s__position' % self.through._meta.model_name
-                    )
+                    return super(OrderedManyRelatedManager, self).get_queryset().order_by('%s__position' % self.through._meta.model_name)
 
             return OrderedManyRelatedManager
 
@@ -1046,30 +974,19 @@ class OrderedManyToManyField(models.ManyToManyField):
         if kwargs.get('action') in ('post_add', 'post_remove'):
             order_with_respect_to = None
             for field in sender._meta.local_fields:
-                if (
-                    isinstance(field, models.ForeignKey) and
-                    isinstance(kwargs['instance'], field.related_model)
-                ):
+                if isinstance(field, models.ForeignKey) and isinstance(kwargs['instance'], field.related_model):
                     order_with_respect_to = field.name
-            for i, ig in enumerate(sender.objects.filter(**{
-                order_with_respect_to: kwargs['instance'].pk}
-            )):
+            for i, ig in enumerate(sender.objects.filter(**{order_with_respect_to: kwargs['instance'].pk})):
                 if ig.position != i:
                     ig.position = i
                     ig.save()
 
     def contribute_to_class(self, cls, name, **kwargs):
         super(OrderedManyToManyField, self).contribute_to_class(cls, name, **kwargs)
-        setattr(
-            cls, name,
-            OrderedManyToManyDescriptor(self.remote_field, reverse=False)
-        )
+        setattr(cls, name, OrderedManyToManyDescriptor(self.remote_field, reverse=False))
 
         through = getattr(cls, name).through
         if isinstance(through, str) and "." not in through:
             # support lazy loading of string model names
             through = '.'.join([cls._meta.app_label, through])
-        m2m_changed.connect(
-            self._update_m2m_position,
-            sender=through
-        )
+        m2m_changed.connect(self._update_m2m_position, sender=through)

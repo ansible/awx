@@ -6,12 +6,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 DOCUMENTATION = '''
 ---
@@ -401,6 +400,7 @@ EXAMPLES = '''
 from ..module_utils.tower_api import TowerAPIModule
 
 import json
+
 response = []
 
 
@@ -484,8 +484,11 @@ def main():
     if copy_from:
         # a new existing item is formed when copying and is returned.
         existing_item = module.copy_item(
-            existing_item, copy_from, name,
-            endpoint='workflow_job_templates', item_type='workflow_job_template',
+            existing_item,
+            copy_from,
+            name,
+            endpoint='workflow_job_templates',
+            item_type='workflow_job_template',
             copy_lookup_data={},
         )
 
@@ -504,10 +507,18 @@ def main():
     # Create the data that gets sent for create and update
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
     for field_name in (
-            'description', 'survey_enabled', 'allow_simultaneous',
-            'limit', 'scm_branch', 'extra_vars',
-            'ask_inventory_on_launch', 'ask_scm_branch_on_launch', 'ask_limit_on_launch', 'ask_variables_on_launch',
-            'webhook_service',):
+        'description',
+        'survey_enabled',
+        'allow_simultaneous',
+        'limit',
+        'scm_branch',
+        'extra_vars',
+        'ask_inventory_on_launch',
+        'ask_scm_branch_on_launch',
+        'ask_limit_on_launch',
+        'ask_variables_on_launch',
+        'webhook_service',
+    ):
         field_val = module.params.get(field_name)
         if field_val:
             new_fields[field_name] = field_val
@@ -546,12 +557,12 @@ def main():
         association_fields['labels'] = []
         for item in labels:
             association_fields['labels'].append(module.resolve_name_to_id('labels', item))
-# Code to use once Issue #7567 is resolved
-#            search_fields = {'name': item}
-#            if organization:
-#                search_fields['organization'] = organization_id
-#            label_id = module.get_one('labels', **{'data': search_fields})
-#            association_fields['labels'].append(label_id)
+    # Code to use once Issue #7567 is resolved
+    #            search_fields = {'name': item}
+    #            if organization:
+    #                search_fields['organization'] = organization_id
+    #            label_id = module.get_one('labels', **{'data': search_fields})
+    #            association_fields['labels'].append(label_id)
 
     on_change = None
     new_spec = module.params.get('survey_spec')
@@ -568,10 +579,14 @@ def main():
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
-        existing_item, new_fields,
-        endpoint='workflow_job_templates', item_type='workflow_job_template',
+        existing_item,
+        new_fields,
+        endpoint='workflow_job_templates',
+        item_type='workflow_job_template',
         associations=association_fields,
-        on_create=on_change, on_update=on_change, auto_exit=False,
+        on_create=on_change,
+        on_update=on_change,
+        auto_exit=False,
     )
 
     # Get Workflow information in case one was just created.

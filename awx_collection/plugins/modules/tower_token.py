@@ -6,12 +6,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 DOCUMENTATION = '''
 ---
@@ -150,7 +149,12 @@ def main():
         ],
         # If we are state absent make sure one of existing_token or existing_token_id are present
         required_if=[
-            ['state', 'absent', ('existing_token', 'existing_token_id'), True, ],
+            [
+                'state',
+                'absent',
+                ('existing_token', 'existing_token_id'),
+                True,
+            ],
         ],
     )
 
@@ -164,11 +168,14 @@ def main():
 
     if state == 'absent':
         if not existing_token:
-            existing_token = module.get_one('tokens', **{
-                'data': {
-                    'id': existing_token_id,
+            existing_token = module.get_one(
+                'tokens',
+                **{
+                    'data': {
+                        'id': existing_token_id,
+                    }
                 }
-            })
+            )
 
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_token)
@@ -189,10 +196,11 @@ def main():
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
-        None, new_fields,
-        endpoint='tokens', item_type='token',
-        associations={
-        },
+        None,
+        new_fields,
+        endpoint='tokens',
+        item_type='token',
+        associations={},
         on_create=return_token,
     )
 

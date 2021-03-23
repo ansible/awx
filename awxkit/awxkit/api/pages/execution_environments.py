@@ -46,14 +46,13 @@ class ExecutionEnvironment(HasCreate, HasCopy, base.Base):
         return payload
 
 
-page.register_page([resources.execution_environment,
-                    (resources.execution_environments, 'post'),
-                    (resources.organization_execution_environments, 'post')], ExecutionEnvironment)
+page.register_page(
+    [resources.execution_environment, (resources.execution_environments, 'post'), (resources.organization_execution_environments, 'post')], ExecutionEnvironment
+)
 
 
 class ExecutionEnvironments(page.PageList, ExecutionEnvironment):
     pass
 
 
-page.register_page([resources.execution_environments,
-                    resources.organization_execution_environments], ExecutionEnvironments)
+page.register_page([resources.execution_environments, resources.organization_execution_environments], ExecutionEnvironments)

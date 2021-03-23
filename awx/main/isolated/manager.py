@@ -12,9 +12,7 @@ from django.conf import settings
 import ansible_runner
 
 import awx
-from awx.main.utils import (
-    get_system_task_capacity
-)
+from awx.main.utils import get_system_task_capacity
 
 logger = logging.getLogger('awx.isolated.manager')
 playbook_logger = logging.getLogger('awx.isolated.manager.playbooks')
@@ -30,7 +28,6 @@ def set_pythonpath(venv_libdir, env):
 
 
 class IsolatedManager(object):
-
     def __init__(self, event_handler, canceled_callback=None, check_callback=None):
         """
         :param event_handler: a callable used to persist event data from isolated nodes
@@ -46,10 +43,7 @@ class IsolatedManager(object):
         self.instance = None
 
     def build_inventory(self, hosts):
-        inventory = '\n'.join([
-            '{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME)
-            for host in hosts
-        ])
+        inventory = '\n'.join(['{} ansible_ssh_user={}'.format(host, settings.AWX_ISOLATED_USERNAME) for host in hosts])
 
         return inventory
 
@@ -83,10 +77,7 @@ class IsolatedManager(object):
                 playbook_logger.info(runner_obj.stdout.read())
 
         return {
-            'project_dir': os.path.abspath(os.path.join(
-                os.path.dirname(awx.__file__),
-                'playbooks'
-            )),
+            'project_dir': os.path.abspath(os.path.join(os.path.dirname(awx.__file__), 'playbooks')),
             'inventory': self.build_inventory(hosts),
             'envvars': env,
             'finished_callback': finished_callback,
@@ -102,10 +93,7 @@ class IsolatedManager(object):
         return os.path.join(self.private_data_dir, *args)
 
     def run_management_playbook(self, playbook, private_data_dir, idle_timeout=None, **kw):
-        iso_dir = tempfile.mkdtemp(
-            prefix=playbook,
-            dir=private_data_dir
-        )
+        iso_dir = tempfile.mkdtemp(prefix=playbook, dir=private_data_dir)
         params = self.runner_params.copy()
         params.get('envvars', dict())['ANSIBLE_CALLBACK_WHITELIST'] = 'profile_tasks'
         params['playbook'] = playbook
@@ -115,17 +103,14 @@ class IsolatedManager(object):
         else:
             params['settings'].pop('idle_timeout', None)
         params.update(**kw)
-        if all([
-            getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True,
-            getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None)
-        ]):
+        if all([getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True, getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None)]):
             params['ssh_key'] = settings.AWX_ISOLATED_PRIVATE_KEY
         return ansible_runner.interface.run(**params)
 
     def dispatch(self, playbook=None, module=None, module_args=None):
-        '''
+        """
         Ship the runner payload to a remote host for isolated execution.
-        '''
+        """
         self.handled_events = set()
         self.started_at = time.time()
 
@@ -139,12 +124,10 @@ class IsolatedManager(object):
             # don't rsync the ssh_key FIFO
             '- /env/ssh_key',
             # don't rsync kube config files
-            '- .kubeconfig*'
+            '- .kubeconfig*',
         ]
 
-        for filename, data in (
-            ['.rsync-filter', '\n'.join(rsync_exclude)],
-        ):
+        for filename, data in (['.rsync-filter', '\n'.join(rsync_exclude)],):
             path = self.path_to(filename)
             with open(path, 'w') as f:
                 f.write(data)
@@ -163,10 +146,9 @@ class IsolatedManager(object):
             extravars['module_args'] = module_args
 
         logger.debug('Starting job {} on isolated host with `run_isolated.yml` playbook.'.format(self.instance.id))
-        runner_obj = self.run_management_playbook('run_isolated.yml',
-                                                  self.private_data_dir,
-                                                  idle_timeout=max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT),
-                                                  extravars=extravars)
+        runner_obj = self.run_management_playbook(
+            'run_isolated.yml', self.private_data_dir, idle_timeout=max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT), extravars=extravars
+        )
 
         if runner_obj.status == 'failed':
             self.instance.result_traceback = runner_obj.stdout.read()
@@ -190,10 +172,7 @@ class IsolatedManager(object):
         :param interval: an interval (in seconds) to wait between status polls
         """
         interval = interval if interval is not None else settings.AWX_ISOLATED_CHECK_INTERVAL
-        extravars = {
-            'src': self.private_data_dir,
-            'job_id': self.instance.id
-        }
+        extravars = {'src': self.private_data_dir, 'job_id': self.instance.id}
         status = 'failed'
         rc = None
         last_check = time.time()
@@ -210,9 +189,7 @@ class IsolatedManager(object):
 
             logger.debug('Checking on isolated job {} with `check_isolated.yml`.'.format(self.instance.id))
             time_start = datetime.datetime.now()
-            runner_obj = self.run_management_playbook('check_isolated.yml',
-                                                      self.private_data_dir,
-                                                      extravars=extravars)
+            runner_obj = self.run_management_playbook('check_isolated.yml', self.private_data_dir, extravars=extravars)
             time_end = datetime.datetime.now()
             time_diff = time_end - time_start
             logger.debug('Finished checking on isolated job {} with `check_isolated.yml` took {} seconds.'.format(self.instance.id, time_diff.total_seconds()))
@@ -274,9 +251,7 @@ class IsolatedManager(object):
                 path = os.path.join(events_path, event)
                 if os.path.exists(path) and os.path.isfile(path):
                     try:
-                        event_data = json.load(
-                            open(os.path.join(events_path, event), 'r')
-                        )
+                        event_data = json.load(open(os.path.join(events_path, event), 'r'))
                     except json.decoder.JSONDecodeError:
                         # This means the event we got back isn't valid JSON
                         # that can happen if runner is still partially
@@ -290,7 +265,6 @@ class IsolatedManager(object):
                     self.event_handler(event_data)
                     self.handled_events.add(event)
 
-
     def cleanup(self):
         extravars = {
             'private_data_dir': self.private_data_dir,
@@ -299,11 +273,7 @@ class IsolatedManager(object):
             ],
         }
         logger.debug('Cleaning up job {} on isolated host with `clean_isolated.yml` playbook.'.format(self.instance.id))
-        self.run_management_playbook(
-            'clean_isolated.yml',
-            self.private_data_dir,
-            extravars=extravars
-        )
+        self.run_management_playbook('clean_isolated.yml', self.private_data_dir, extravars=extravars)
 
     @classmethod
     def update_capacity(cls, instance, task_result):
@@ -315,13 +285,13 @@ class IsolatedManager(object):
         instance.memory = int(task_result['mem'])
         instance.cpu_capacity = int(task_result['capacity_cpu'])
         instance.mem_capacity = int(task_result['capacity_mem'])
-        instance.capacity = get_system_task_capacity(scale=instance.capacity_adjustment,
-                                                     cpu_capacity=int(task_result['capacity_cpu']),
-                                                     mem_capacity=int(task_result['capacity_mem']))
+        instance.capacity = get_system_task_capacity(
+            scale=instance.capacity_adjustment, cpu_capacity=int(task_result['capacity_cpu']), mem_capacity=int(task_result['capacity_mem'])
+        )
         instance.save(update_fields=['cpu', 'memory', 'cpu_capacity', 'mem_capacity', 'capacity', 'version', 'modified'])
 
     def health_check(self, instance_qs):
-        '''
+        """
         :param instance_qs:         List of Django objects representing the
                                     isolated instances to manage
         Runs playbook that will
@@ -329,24 +299,16 @@ class IsolatedManager(object):
          - find the instance capacity
          - clean up orphaned private files
         Performs save on each instance to update its capacity.
-        '''
+        """
         instance_qs = [i for i in instance_qs if i.enabled]
         if not len(instance_qs):
             return
         try:
-            private_data_dir = tempfile.mkdtemp(
-                prefix='awx_iso_heartbeat_',
-                dir=settings.AWX_PROOT_BASE_PATH
-            )
-            self.runner_params = self.build_runner_params([
-                instance.hostname for instance in instance_qs
-            ])
+            private_data_dir = tempfile.mkdtemp(prefix='awx_iso_heartbeat_', dir=settings.AWX_PROOT_BASE_PATH)
+            self.runner_params = self.build_runner_params([instance.hostname for instance in instance_qs])
             self.runner_params['private_data_dir'] = private_data_dir
             self.runner_params['forks'] = len(instance_qs)
-            runner_obj = self.run_management_playbook(
-                'heartbeat_isolated.yml',
-                private_data_dir
-            )
+            runner_obj = self.run_management_playbook('heartbeat_isolated.yml', private_data_dir)
 
             for instance in instance_qs:
                 task_result = {}
@@ -360,20 +322,18 @@ class IsolatedManager(object):
                         'mem': task_result['awx_mem'],
                         'capacity_cpu': task_result['awx_capacity_cpu'],
                         'capacity_mem': task_result['awx_capacity_mem'],
-                        'version': task_result['awx_capacity_version']
+                        'version': task_result['awx_capacity_version'],
                     }
                     IsolatedManager.update_capacity(instance, task_result)
                     logger.debug('Isolated instance {} successful heartbeat'.format(instance.hostname))
                 elif instance.capacity == 0:
-                    logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
-                        instance.hostname))
+                    logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(instance.hostname))
                 else:
                     logger.warning('Could not update status of isolated instance {}'.format(instance.hostname))
                     if instance.is_lost(isolated=True):
                         instance.capacity = 0
                         instance.save(update_fields=['capacity'])
-                        logger.error('Isolated instance {} last checked in at {}, marked as lost.'.format(
-                            instance.hostname, instance.modified))
+                        logger.error('Isolated instance {} last checked in at {}, marked as lost.'.format(instance.hostname, instance.modified))
         finally:
             if os.path.exists(private_data_dir):
                 shutil.rmtree(private_data_dir)
@@ -397,10 +357,7 @@ class IsolatedManager(object):
         self.ident = ident
         self.instance = instance
         self.private_data_dir = private_data_dir
-        self.runner_params = self.build_runner_params(
-            [instance.execution_node],
-            verbosity=min(5, self.instance.verbosity)
-        )
+        self.runner_params = self.build_runner_params([instance.execution_node], verbosity=min(5, self.instance.verbosity))
 
         status, rc = self.dispatch(playbook, module, module_args)
         if status == 'successful':

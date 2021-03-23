@@ -12,7 +12,6 @@ file_path_cache = {}
 
 
 class Loader(yaml.SafeLoader):
-
     def __init__(self, stream):
         self._root = os.path.split(stream.name)[0]
         super(Loader, self).__init__(stream)
@@ -82,6 +81,7 @@ def load_file(filename):
       random_thing: "{random_string:24}"
     """
     from py.path import local
+
     if filename is None:
         this_file = os.path.abspath(__file__)
         path = local(this_file).new(basename='../data.yaml')

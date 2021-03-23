@@ -4,17 +4,7 @@ from unittest import mock
 import json
 
 # AWX models
-from awx.main.models import (
-    ActivityStream,
-    Organization,
-    JobTemplate,
-    Credential,
-    CredentialType,
-    Inventory,
-    InventorySource,
-    Project,
-    User
-)
+from awx.main.models import ActivityStream, Organization, JobTemplate, Credential, CredentialType, Inventory, InventorySource, Project, User
 
 # other AWX
 from awx.main.utils import model_to_dict, model_instance_diff
@@ -29,12 +19,12 @@ from crum import impersonate
 
 
 class TestImplicitRolesOmitted:
-    '''
+    """
     Test that there is exactly 1 "create" entry in the activity stream for
     common items in the system.
     These tests will fail if `rbac_activity_stream` creates
     false-positive entries.
-    '''
+    """
 
     @pytest.mark.django_db
     def test_activity_stream_create_organization(self):
@@ -79,12 +69,12 @@ class TestImplicitRolesOmitted:
 
 @pytest.mark.django_db
 class TestRolesAssociationEntries:
-    '''
+    """
     Test that non-implicit role associations have a corresponding
     activity stream entry.
     These tests will fail if `rbac_activity_stream` skipping logic
     in signals is wrong.
-    '''
+    """
 
     def test_non_implicit_associations_are_recorded(self, project):
         org2 = Organization.objects.create(name='test-organization2')
@@ -93,11 +83,7 @@ class TestRolesAssociationEntries:
             # Not supported, should not be possible via API
             # org2.admin_role.children.add(project.admin_role)
             project.admin_role.parents.add(org2.admin_role)
-            assert ActivityStream.objects.filter(
-                role=org2.admin_role,
-                organization=org2,
-                project=project
-            ).count() == 1, 'In loop %s' % i
+            assert ActivityStream.objects.filter(role=org2.admin_role, organization=org2, project=project).count() == 1, 'In loop %s' % i
 
     def test_model_associations_are_recorded(self, organization):
         proj1 = Project.objects.create(name='proj1', organization=organization)
@@ -136,27 +122,16 @@ def somecloud_type():
         kind='cloud',
         name='SomeCloud',
         managed_by_tower=False,
-        inputs={
-            'fields': [{
-                'id': 'api_token',
-                'label': 'API Token',
-                'type': 'string',
-                'secret': True
-            }]
-        },
-        injectors={
-            'env': {
-                'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'
-            }
-        }
+        inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True}]},
+        injectors={'env': {'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'}},
     )
 
 
 @pytest.mark.django_db
 class TestCredentialModels:
-    '''
+    """
     Assure that core elements of activity stream feature are working
-    '''
+    """
 
     def test_create_credential_type(self, somecloud_type):
         assert ActivityStream.objects.filter(credential_type=somecloud_type).count() == 1
@@ -164,10 +139,7 @@ class TestCredentialModels:
         assert entry.operation == 'create'
 
     def test_credential_hidden_information(self, somecloud_type):
-        cred = Credential.objects.create(
-            credential_type=somecloud_type,
-            inputs = {'api_token': 'ABC123'}
-        )
+        cred = Credential.objects.create(credential_type=somecloud_type, inputs={'api_token': 'ABC123'})
         entry = ActivityStream.objects.filter(credential=cred)[0]
         assert entry.operation == 'create'
         assert json.loads(entry.changes)['inputs'] == 'hidden'
@@ -175,7 +147,6 @@ class TestCredentialModels:
 
 @pytest.mark.django_db
 class TestUserModels:
-
     def test_user_hidden_information(self, alice):
         entry = ActivityStream.objects.filter(user=alice)[0]
         assert entry.operation == 'create'
@@ -235,14 +206,14 @@ def test_activity_stream_deleted_actor(alice, bob):
 
 @pytest.mark.django_db
 def test_modified_not_allowed_field(somecloud_type):
-    '''
+    """
     If this test fails, that means that read-only fields are showing
     up in the activity stream serialization of an instance.
 
     That _probably_ means that you just connected a new model to the
     activity_stream_registrar, but did not add its serializer to
     the model->serializer mapping.
-    '''
+    """
     from awx.main.registrar import activity_stream_registrar
 
     for Model in activity_stream_registrar.models:
@@ -269,9 +240,7 @@ def test_survey_create_diff(job_template, survey_spec_factory):
 @pytest.mark.django_db
 def test_saved_passwords_hidden_activity(workflow_job_template, job_template_with_survey_passwords):
     node_with_passwords = workflow_job_template.workflow_nodes.create(
-        unified_job_template=job_template_with_survey_passwords,
-        extra_data={'bbbb': '$encrypted$fooooo'},
-        survey_passwords={'bbbb': '$encrypted$'}
+        unified_job_template=job_template_with_survey_passwords, extra_data={'bbbb': '$encrypted$fooooo'}, survey_passwords={'bbbb': '$encrypted$'}
     )
     node_with_passwords.delete()
     entry = ActivityStream.objects.order_by('timestamp').last()

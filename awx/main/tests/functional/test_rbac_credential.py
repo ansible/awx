@@ -41,9 +41,7 @@ def test_credential_access_org_user(org_member, org_admin, ext_auth):
 
 @pytest.mark.django_db
 def test_credential_access_auditor(credential, organization_factory):
-    objects = organization_factory("org_cred_auditor",
-                                   users=["user1"],
-                                   roles=['org_cred_auditor.auditor_role:user1'])
+    objects = organization_factory("org_cred_auditor", users=["user1"], roles=['org_cred_auditor.auditor_role:user1'])
     credential.organization = objects.organization
     credential.save()
 
@@ -55,9 +53,7 @@ def test_credential_access_auditor(credential, organization_factory):
 def test_credential_access_member(alice, credential):
     credential.admin_role.members.add(alice)
     access = CredentialAccess(alice)
-    assert access.can_change(credential, {
-        'description': 'New description.',
-        'organization': None})
+    assert access.can_change(credential, {'description': 'New description.', 'organization': None})
 
 
 @pytest.mark.django_db
@@ -69,9 +65,7 @@ def test_org_credential_access_admin(role_name, alice, org_credential):
     access = CredentialAccess(alice)
 
     # Alice should be able to PATCH if organization is not changed
-    assert access.can_change(org_credential, {
-        'description': 'New description.',
-        'organization': org_credential.organization.pk})
+    assert access.can_change(org_credential, {'description': 'New description.', 'organization': org_credential.organization.pk})
 
 
 @pytest.mark.django_db
@@ -80,11 +74,7 @@ def test_org_and_user_credential_access(alice, organization):
     in another org without any permissions to that org
     """
     # Owner is both user and org, but org permission should still be checked
-    assert not CredentialAccess(alice).can_add({
-        'name': 'New credential.',
-        'user': alice.pk,
-        'organization': organization.pk
-    })
+    assert not CredentialAccess(alice).can_add({'name': 'New credential.', 'user': alice.pk, 'organization': organization.pk})
 
 
 @pytest.mark.django_db
@@ -94,11 +84,8 @@ def test_org_credential_access_member(alice, org_credential):
     access = CredentialAccess(alice)
 
     # Alice should be able to PATCH if organization is not changed
-    assert access.can_change(org_credential, {
-        'description': 'New description.',
-        'organization': org_credential.organization.pk})
-    assert access.can_change(org_credential, {
-        'description': 'New description.'})
+    assert access.can_change(org_credential, {'description': 'New description.', 'organization': org_credential.organization.pk})
+    assert access.can_change(org_credential, {'description': 'New description.'})
 
 
 @pytest.mark.django_db

@@ -7,4 +7,3 @@ class UINextConfig(AppConfig):
 
     name = 'awx.ui_next'
     verbose_name = _('UI_Next')
-

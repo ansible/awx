@@ -3,12 +3,7 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    WorkflowApprovalList,
-    WorkflowApprovalDetail,
-    WorkflowApprovalApprove,
-    WorkflowApprovalDeny,
-)
+from awx.api.views import WorkflowApprovalList, WorkflowApprovalDetail, WorkflowApprovalApprove, WorkflowApprovalDeny
 
 
 urls = [

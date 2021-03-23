@@ -7,7 +7,6 @@ from awxkit.cli import run, CLI
 
 
 class MockedCLI(CLI):
-
     def fetch_version_root(self):
         pass
 
@@ -17,9 +16,7 @@ class MockedCLI(CLI):
 
     @property
     def json(self):
-        return {
-            'users': None
-        }
+        return {'users': None}
 
 
 @pytest.mark.parametrize('help_param', ['-h', '--help'])
@@ -29,10 +26,7 @@ def test_help(capfd, help_param):
     out, err = capfd.readouterr()
 
     assert "usage:" in out
-    for snippet in (
-        '--conf.host https://example.awx.org]',
-        '-v, --verbose'
-    ):
+    for snippet in ('--conf.host https://example.awx.org]', '-v, --verbose'):
         assert snippet in out
 
 
@@ -59,8 +53,5 @@ def test_list_resources(capfd, resource):
         _, out = capfd.readouterr()
 
     assert "usage:" in out
-    for snippet in (
-        '--conf.host https://example.awx.org]',
-        '-v, --verbose'
-    ):
+    for snippet in ('--conf.host https://example.awx.org]', '-v, --verbose'):
         assert snippet in out

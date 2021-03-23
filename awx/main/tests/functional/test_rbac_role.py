@@ -36,9 +36,9 @@ def test_user_access_attach(rando, inventory):
 
 @pytest.mark.django_db
 def test_visible_roles(admin_user, system_auditor, rando, organization, project):
-    '''
+    """
     system admin & system auditor fixtures needed to create system roles
-    '''
+    """
     organization.auditor_role.members.add(rando)
     access = RoleAccess(rando)
 
@@ -54,10 +54,10 @@ def test_visible_roles(admin_user, system_auditor, rando, organization, project)
 # Permissions when adding users to org member/admin
 @pytest.mark.django_db
 def test_org_user_role_attach(user, organization, inventory):
-    '''
+    """
     Org admins must not be able to add arbitrary users to their
     organization, because that would give them admin permission to that user
-    '''
+    """
     admin = user('admin')
     nonmember = user('nonmember')
     other_org = Organization.objects.create(name="other_org")
@@ -77,54 +77,40 @@ def test_org_user_role_attach(user, organization, inventory):
 # Permissions when adding users/teams to org special-purpose roles
 @pytest.mark.django_db
 def test_user_org_object_roles(organization, org_admin, org_member):
-    '''
+    """
     Unlike admin & member roles, the special-purpose organization roles do not
     confer any permissions related to user management,
     Normal rules about role delegation should apply, only admin to org needed.
-    '''
-    assert RoleAccess(org_admin).can_attach(
-        organization.notification_admin_role, org_member, 'members', None
-    )
-    assert OrganizationAccess(org_admin).can_attach(
-        organization, org_member, 'notification_admin_role.members', None
-    )
-    assert not RoleAccess(org_member).can_attach(
-        organization.notification_admin_role, org_member, 'members', None
-    )
-    assert not OrganizationAccess(org_member).can_attach(
-        organization, org_member, 'notification_admin_role.members', None
-    )
+    """
+    assert RoleAccess(org_admin).can_attach(organization.notification_admin_role, org_member, 'members', None)
+    assert OrganizationAccess(org_admin).can_attach(organization, org_member, 'notification_admin_role.members', None)
+    assert not RoleAccess(org_member).can_attach(organization.notification_admin_role, org_member, 'members', None)
+    assert not OrganizationAccess(org_member).can_attach(organization, org_member, 'notification_admin_role.members', None)
 
 
 @pytest.mark.django_db
 def test_team_org_object_roles(organization, team, org_admin, org_member):
-    '''
+    """
     the special-purpose organization roles are not ancestors of any
     team roles, and can be delegated en masse through teams,
     following normal admin rules
-    '''
-    assert RoleAccess(org_admin).can_attach(
-        organization.notification_admin_role, team, 'member_role.parents', {'id': 68}
-    )
+    """
+    assert RoleAccess(org_admin).can_attach(organization.notification_admin_role, team, 'member_role.parents', {'id': 68})
     # Obviously team admin isn't enough to assign organization roles to the team
     team.admin_role.members.add(org_member)
-    assert not RoleAccess(org_member).can_attach(
-        organization.notification_admin_role, team, 'member_role.parents', {'id': 68}
-    )
+    assert not RoleAccess(org_member).can_attach(organization.notification_admin_role, team, 'member_role.parents', {'id': 68})
     # Cannot make a team member of an org
-    assert not RoleAccess(org_admin).can_attach(
-        organization.member_role, team, 'member_role.parents', {'id': 68}
-    )
+    assert not RoleAccess(org_admin).can_attach(organization.member_role, team, 'member_role.parents', {'id': 68})
 
 
 # Singleton user editing restrictions
 @pytest.mark.django_db
 def test_org_superuser_role_attach(admin_user, org_admin, organization):
-    '''
+    """
     Ideally, you would not add superusers to roles (particularly member_role)
     but it has historically been possible
     this checks that the situation does not grant unexpected permissions
-    '''
+    """
     organization.member_role.members.add(admin_user)
 
     role_access = RoleAccess(org_admin)
@@ -153,12 +139,12 @@ def test_org_object_role_not_sufficient(user, organization):
 # Org admin user editing permission ANY to ALL change
 @pytest.mark.django_db
 def test_need_all_orgs_to_admin_user(user):
-    '''
+    """
     Old behavior - org admin to ANY organization that a user is member of
         grants permission to admin that user
     New behavior enforced here - org admin to ALL organizations that a
         user is member of grants permission to admin that user
-    '''
+    """
     org1 = Organization.objects.create(name='org1')
     org2 = Organization.objects.create(name='org2')
 
@@ -189,12 +175,12 @@ def test_need_all_orgs_to_admin_user(user):
 # Orphaned user can be added to member role, only in special cases
 @pytest.mark.django_db
 def test_orphaned_user_allowed(org_admin, rando, organization, org_credential):
-    '''
+    """
     We still allow adoption of orphaned* users by assigning them to
     organization member role, but only in the situation where the
     org admin already posesses indirect access to all of the user's roles
     *orphaned means user is not a member of any organization
-    '''
+    """
     # give a descendent role to rando, to trigger the conditional
     # where all ancestor roles of rando should be in the set of
     # org_admin roles.

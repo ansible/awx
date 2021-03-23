@@ -49,8 +49,7 @@ class Connection(object):
             _next = kwargs.get('next')
             if _next:
                 headers = self.session.headers.copy()
-                self.post('/api/login/', headers=headers,
-                          data=dict(username=username, password=password, next=_next))
+                self.post('/api/login/', headers=headers, data=dict(username=username, password=password, next=_next))
                 self.session_id = self.session.cookies.get('sessionid')
                 self.uses_session_cookie = True
             else:
@@ -79,8 +78,7 @@ class Connection(object):
             use_endpoint = use_endpoint[1:]
         url = '/'.join([self.server, use_endpoint])
 
-        kwargs = dict(verify=self.verify, params=query_parameters, json=json, data=data,
-                      hooks=dict(response=log_elapsed))
+        kwargs = dict(verify=self.verify, params=query_parameters, json=json, data=data, hooks=dict(response=log_elapsed))
 
         if headers is not None:
             kwargs['headers'] = headers

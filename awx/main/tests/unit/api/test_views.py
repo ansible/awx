@@ -5,12 +5,7 @@ from unittest import mock
 
 from collections import namedtuple
 
-from awx.api.views import (
-    ApiVersionRootView,
-    JobTemplateLabelList,
-    InventoryInventorySourcesUpdate,
-    JobTemplateSurveySpec
-)
+from awx.api.views import ApiVersionRootView, JobTemplateLabelList, InventoryInventorySourcesUpdate, JobTemplateSurveySpec
 
 from awx.main.views import handle_error
 
@@ -74,12 +69,14 @@ class TestJobTemplateLabelList:
 
 
 class TestInventoryInventorySourcesUpdate:
-
-    @pytest.mark.parametrize("can_update, can_access, is_source, is_up_on_proj, expected", [
-        (True, True, "ec2", False, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
-        (False, True, "gce", False, [{'status': 'Could not start because `can_update` returned False', 'inventory_source': 1}]),
-        (True, False, "scm", True, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
-    ])
+    @pytest.mark.parametrize(
+        "can_update, can_access, is_source, is_up_on_proj, expected",
+        [
+            (True, True, "ec2", False, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
+            (False, True, "gce", False, [{'status': 'Could not start because `can_update` returned False', 'inventory_source': 1}]),
+            (True, False, "scm", True, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
+        ],
+    )
     def test_post(self, mocker, can_update, can_access, is_source, is_up_on_proj, expected):
         class InventoryUpdate:
             id = 1
@@ -87,14 +84,20 @@ class TestInventoryInventorySourcesUpdate:
         class Project:
             name = 'project'
 
-        InventorySource = namedtuple('InventorySource', ['source', 'update_on_project_update', 'pk', 'can_update',
-                                                         'update', 'source_project'])
+        InventorySource = namedtuple('InventorySource', ['source', 'update_on_project_update', 'pk', 'can_update', 'update', 'source_project'])
 
         class InventorySources(object):
             def all(self):
-                return [InventorySource(pk=1, source=is_source, source_project=Project,
-                                        update_on_project_update=is_up_on_proj,
-                                        can_update=can_update, update=lambda:InventoryUpdate)]
+                return [
+                    InventorySource(
+                        pk=1,
+                        source=is_source,
+                        source_project=Project,
+                        update_on_project_update=is_up_on_proj,
+                        can_update=can_update,
+                        update=lambda: InventoryUpdate,
+                    )
+                ]
 
             def exclude(self, **kwargs):
                 return self.all()
@@ -117,26 +120,28 @@ class TestInventoryInventorySourcesUpdate:
 
 
 class TestSurveySpecValidation:
-
     def test_create_text_encrypted(self):
         view = JobTemplateSurveySpec()
-        resp = view._validate_spec_data({
-            "name": "new survey",
-            "description": "foobar",
-            "spec": [
-                {
-                    "question_description": "",
-                    "min": 0,
-                    "default": "$encrypted$",
-                    "max": 1024,
-                    "required": True,
-                    "choices": "",
-                    "variable": "openshift_username",
-                    "question_name": "OpenShift Username",
-                    "type": "text"
-                }
-            ]
-        }, {})
+        resp = view._validate_spec_data(
+            {
+                "name": "new survey",
+                "description": "foobar",
+                "spec": [
+                    {
+                        "question_description": "",
+                        "min": 0,
+                        "default": "$encrypted$",
+                        "max": 1024,
+                        "required": True,
+                        "choices": "",
+                        "variable": "openshift_username",
+                        "question_name": "OpenShift Username",
+                        "type": "text",
+                    }
+                ],
+            },
+            {},
+        )
         assert resp.status_code == 400
         assert '$encrypted$ is a reserved keyword for password question defaults' in str(resp.data['error'])
 
@@ -155,9 +160,9 @@ class TestSurveySpecValidation:
                     "choices": "",
                     "variable": "openshift_username",
                     "question_name": "OpenShift Username",
-                    "type": "password"
+                    "type": "password",
                 }
-            ]
+            ],
         }
         new = deepcopy(old)
         new['spec'][0]['variable'] = 'openstack_username'
@@ -166,9 +171,9 @@ class TestSurveySpecValidation:
         assert 'may not be used for new default' in str(resp.data['error'])
 
     def test_use_saved_encrypted_default(self):
-        '''
+        """
         Save is allowed, the $encrypted$ replacement is done
-        '''
+        """
         view = JobTemplateSurveySpec()
         old = {
             "name": "old survey",
@@ -183,9 +188,9 @@ class TestSurveySpecValidation:
                     "choices": "",
                     "variable": "openshift_username",
                     "question_name": "OpenShift Username",
-                    "type": "password"
+                    "type": "password",
                 }
-            ]
+            ],
         }
         new = deepcopy(old)
         new['spec'][0]['default'] = '$encrypted$'
@@ -205,17 +210,17 @@ class TestSurveySpecValidation:
                     "choices": "",
                     "variable": "openshift_username",
                     "question_name": "OpenShift Username",
-                    "type": "password"
+                    "type": "password",
                 }
-            ]
+            ],
         }
 
     def test_use_saved_empty_string_default(self):
-        '''
+        """
         Save is allowed, the $encrypted$ replacement is done with empty string
         The empty string value for default is unencrypted,
         unlike all other password questions
-        '''
+        """
         view = JobTemplateSurveySpec()
         old = {
             "name": "old survey",
@@ -230,9 +235,9 @@ class TestSurveySpecValidation:
                     "choices": "",
                     "variable": "openshift_username",
                     "question_name": "OpenShift Username",
-                    "type": "password"
+                    "type": "password",
                 }
-            ]
+            ],
         }
         new = deepcopy(old)
         new['spec'][0]['default'] = '$encrypted$'
@@ -251,11 +256,10 @@ class TestSurveySpecValidation:
                     "choices": "",
                     "variable": "openshift_username",
                     "question_name": "OpenShift Username",
-                    "type": "password"
+                    "type": "password",
                 }
-            ]
+            ],
         }
-
 
     @staticmethod
     def spec_from_element(survey_item):
@@ -264,25 +268,23 @@ class TestSurveySpecValidation:
         survey_item.setdefault('required', False)
         survey_item.setdefault('question_name', 'foo')
         survey_item.setdefault('type', 'text')
-        spec = {
-            'name': 'test survey',
-            'description': 'foo',
-            'spec': [survey_item]
-        }
+        spec = {'name': 'test survey', 'description': 'foo', 'spec': [survey_item]}
         return spec
 
-
-    @pytest.mark.parametrize("survey_item, error_text", [
-        ({'type': 'password', 'default': ['some', 'invalid', 'list']}, 'expected to be string'),
-        ({'type': 'password', 'default': False}, 'expected to be string'),
-        ({'type': 'integer', 'default': 'foo'}, 'expected to be int'),
-        ({'type': 'integer', 'default': u'🐉'}, 'expected to be int'),
-        ({'type': 'foo'}, 'allowed question types'),
-        ({'type': u'🐉'}, 'allowed question types'),
-        ({'type': 'multiplechoice'}, 'multiplechoice must specify choices'),
-        ({'type': 'integer', 'min': 'foo'}, 'min limit in survey question 0 expected to be integer'),
-        ({'question_name': 42}, "'question_name' in survey question 0 expected to be string.")
-    ])
+    @pytest.mark.parametrize(
+        "survey_item, error_text",
+        [
+            ({'type': 'password', 'default': ['some', 'invalid', 'list']}, 'expected to be string'),
+            ({'type': 'password', 'default': False}, 'expected to be string'),
+            ({'type': 'integer', 'default': 'foo'}, 'expected to be int'),
+            ({'type': 'integer', 'default': u'🐉'}, 'expected to be int'),
+            ({'type': 'foo'}, 'allowed question types'),
+            ({'type': u'🐉'}, 'allowed question types'),
+            ({'type': 'multiplechoice'}, 'multiplechoice must specify choices'),
+            ({'type': 'integer', 'min': 'foo'}, 'min limit in survey question 0 expected to be integer'),
+            ({'question_name': 42}, "'question_name' in survey question 0 expected to be string."),
+        ],
+    )
     def test_survey_question_element_validation(self, survey_item, error_text):
         spec = self.spec_from_element(survey_item)
         r = JobTemplateSurveySpec._validate_spec_data(spec, {})
@@ -290,13 +292,11 @@ class TestSurveySpecValidation:
         assert 'error' in r.data
         assert error_text in r.data['error']
 
-
     def test_survey_spec_non_dict_error(self):
         spec = self.spec_from_element({})
         spec['spec'][0] = 'foo'
         r = JobTemplateSurveySpec._validate_spec_data(spec, {})
         assert 'Survey question 0 is not a json object' in r.data['error']
-
 
     def test_survey_spec_dual_names_error(self):
         spec = self.spec_from_element({})
@@ -304,13 +304,11 @@ class TestSurveySpecValidation:
         r = JobTemplateSurveySpec._validate_spec_data(spec, {})
         assert "'variable' 'foo' duplicated in survey question 1." in r.data['error']
 
-
     def test_survey_spec_element_missing_property(self):
         spec = self.spec_from_element({})
         spec['spec'][0].pop('type')
         r = JobTemplateSurveySpec._validate_spec_data(spec, {})
         assert "'type' missing from survey question 0" in r.data['error']
-
 
     @pytest.mark.parametrize('_type', ['integer', 'float'])
     def test_survey_spec_element_number_empty_default(self, _type):

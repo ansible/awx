@@ -56,14 +56,7 @@ def run(stdout=sys.stdout, stderr=sys.stderr, argv=[]):
             json.dump(e.msg, sys.stdout)
             print('')
         elif cli.get_config('format') == 'yaml':
-            sys.stdout.write(to_str(
-                yaml.safe_dump(
-                    e.msg,
-                    default_flow_style=False,
-                    encoding='utf-8',
-                    allow_unicode=True
-                )
-            ))
+            sys.stdout.write(to_str(yaml.safe_dump(e.msg, default_flow_style=False, encoding='utf-8', allow_unicode=True)))
         elif cli.get_config('format') == 'human':
             sys.stdout.write(e.__class__.__name__)
             print('')

@@ -6,11 +6,11 @@ from django.conf import settings
 
 logger = logging.getLogger('awx.conf.settings')
 
-__all__ = ['rename_setting']    
-    
-    
+__all__ = ['rename_setting']
+
+
 def rename_setting(apps, schema_editor, old_key, new_key):
-    
+
     old_setting = None
     Setting = apps.get_model('conf', 'Setting')
     if Setting.objects.filter(key=new_key).exists() or hasattr(settings, new_key):
@@ -24,9 +24,4 @@ def rename_setting(apps, schema_editor, old_key, new_key):
     if hasattr(settings, old_key):
         old_setting = getattr(settings, old_key)
     if old_setting is not None:
-        Setting.objects.create(key=new_key, 
-                               value=old_setting, 
-                               created=now(),
-                               modified=now()
-                               )
-        
+        Setting.objects.create(key=new_key, value=old_setting, created=now(), modified=now())

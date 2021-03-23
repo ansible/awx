@@ -90,18 +90,14 @@ class ApiV2(base.Base):
             return None
 
         # Note: doing _page[key] automatically parses json blob strings, which can be a problem.
-        fields = {
-            key: _page.json[key] for key in post_fields
-            if key in _page.json and key not in _page.related and key != 'id'
-        }
+        fields = {key: _page.json[key] for key in post_fields if key in _page.json and key not in _page.related and key != 'id'}
 
         for key in post_fields:
             if key in _page.related:
                 related = _page.related[key]
             else:
                 if post_fields[key]['type'] == 'id' and _page.json.get(key) is not None:
-                    log.warning("Related link %r missing from %s, attempting to reconstruct endpoint.",
-                                key, _page.endpoint)
+                    log.warning("Related link %r missing from %s, attempting to reconstruct endpoint.", key, _page.endpoint)
                     resource = getattr(self, key, None)
                     if resource is None:
                         log.error("Unable to infer endpoint for %r on %s.", key, _page.endpoint)
@@ -119,8 +115,7 @@ class ApiV2(base.Base):
                 continue
             rel_natural_key = rel_endpoint.get_natural_key(self._cache)
             if rel_natural_key is None:
-                log.error("Unable to construct a natural key for foreign key %r of object %s.",
-                          key, _page.endpoint)
+                log.error("Unable to construct a natural key for foreign key %r of object %s.", key, _page.endpoint)
                 return None  # This foreign key has unresolvable dependencies
             fields[key] = rel_natural_key
 
@@ -154,10 +149,7 @@ class ApiV2(base.Base):
                 continue
 
             if 'results' in rel_page:
-                results = (
-                    x.get_natural_key(self._cache) if by_natural_key else self._export(x, rel_post_fields)
-                    for x in rel_page.results
-                )
+                results = (x.get_natural_key(self._cache) if by_natural_key else self._export(x, rel_post_fields) for x in rel_page.results)
                 related[key] = [x for x in results if x is not None]
             else:
                 related[key] = rel_page.json
@@ -190,8 +182,7 @@ class ApiV2(base.Base):
         if isinstance(value, int) or value.isdecimal():
             return endpoint.get(id=int(value))
         options = self._cache.get_options(endpoint)
-        identifier = next(field for field in options['search_fields']
-                          if field in ('name', 'username', 'hostname'))
+        identifier = next(field for field in options['search_fields'] if field in ('name', 'username', 'hostname'))
         return endpoint.get(**{identifier: value})
 
     def export_assets(self, **kwargs):
@@ -214,8 +205,7 @@ class ApiV2(base.Base):
     # Import methods
 
     def _dependent_resources(self, data):
-        page_resource = {getattr(self, resource)._create().__item_class__: resource
-                         for resource in self.json}
+        page_resource = {getattr(self, resource)._create().__item_class__: resource for resource in self.json}
         data_pages = [getattr(self, resource)._create().__item_class__ for resource in EXPORTABLE_RESOURCES]
 
         for page_cls in itertools.chain(*has_create.page_creation_order(*data_pages)):

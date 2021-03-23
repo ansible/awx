@@ -3,12 +3,7 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    InventoryScriptList,
-    InventoryScriptDetail,
-    InventoryScriptObjectRolesList,
-    InventoryScriptCopy,
-)
+from awx.api.views import InventoryScriptList, InventoryScriptDetail, InventoryScriptObjectRolesList, InventoryScriptCopy
 
 
 urls = [

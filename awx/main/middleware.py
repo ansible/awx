@@ -47,7 +47,7 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
             response['X-API-Profile-File'] = self.prof.stop()
         perf_logger.info(
             f'request: {request}, response_time: {response["X-API-Total-Time"]}',
-            extra=dict(python_objects=dict(request=request, response=response, X_API_TOTAL_TIME=response["X-API-Total-Time"]))
+            extra=dict(python_objects=dict(request=request, response=response, X_API_TOTAL_TIME=response["X-API-Total-Time"])),
         )
         return response
 
@@ -73,6 +73,7 @@ class SessionTimeoutMiddleware(MiddlewareMixin):
 
 def _customize_graph():
     from awx.main.models import Instance, Schedule, UnifiedJobTemplate
+
     for model in [Schedule, UnifiedJobTemplate]:
         if model in settings.NAMED_URL_GRAPH:
             settings.NAMED_URL_GRAPH[model].remove_bindings()
@@ -86,7 +87,6 @@ def _customize_graph():
 
 
 class URLModificationMiddleware(MiddlewareMixin):
-
     def __init__(self, get_response=None):
         models = [m for m in apps.get_app_config('main').get_models() if hasattr(m, 'get_absolute_url')]
         generate_graph(models)
@@ -96,8 +96,7 @@ class URLModificationMiddleware(MiddlewareMixin):
             field_class=fields.DictField,
             read_only=True,
             label=_('Formats of all available named urls'),
-            help_text=_('Read-only list of key-value pairs that shows the standard format of all '
-                        'available named URLs.'),
+            help_text=_('Read-only list of key-value pairs that shows the standard format of all ' 'available named URLs.'),
             category=_('Named URL'),
             category_slug='named-url',
         )
@@ -106,8 +105,10 @@ class URLModificationMiddleware(MiddlewareMixin):
             field_class=fields.DictField,
             read_only=True,
             label=_('List of all named url graph nodes.'),
-            help_text=_('Read-only list of key-value pairs that exposes named URL graph topology.'
-                        ' Use this list to programmatically generate named URLs for resources'),
+            help_text=_(
+                'Read-only list of key-value pairs that exposes named URL graph topology.'
+                ' Use this list to programmatically generate named URLs for resources'
+            ),
             category=_('Named URL'),
             category_slug='named-url',
         )
@@ -159,15 +160,13 @@ class URLModificationMiddleware(MiddlewareMixin):
             return url_path
         resource = url_units[3]
         if resource in settings.NAMED_URL_MAPPINGS:
-            url_units[4] = cls._named_url_to_pk(
-                settings.NAMED_URL_GRAPH[settings.NAMED_URL_MAPPINGS[resource]],
-                resource, url_units[4])
+            url_units[4] = cls._named_url_to_pk(settings.NAMED_URL_GRAPH[settings.NAMED_URL_MAPPINGS[resource]], resource, url_units[4])
         return '/'.join(url_units)
 
     def process_request(self, request):
         if hasattr(request, 'environ') and 'REQUEST_URI' in request.environ:
             old_path = urllib.parse.urlsplit(request.environ['REQUEST_URI']).path
-            old_path = old_path[request.path.find(request.path_info):]
+            old_path = old_path[request.path.find(request.path_info) :]
         else:
             old_path = request.path_info
         new_path = self._convert_named_url(old_path)
@@ -178,10 +177,8 @@ class URLModificationMiddleware(MiddlewareMixin):
 
 
 class MigrationRanCheckMiddleware(MiddlewareMixin):
-
     def process_request(self, request):
         executor = MigrationExecutor(connection)
         plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
-        if bool(plan) and \
-                getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
+        if bool(plan) and getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
             return redirect(reverse("ui_next:migrations_notran"))

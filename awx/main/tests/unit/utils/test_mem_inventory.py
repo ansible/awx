@@ -1,8 +1,5 @@
 # AWX utils
-from awx.main.utils.mem_inventory import (
-    MemInventory,
-    mem_data_to_dict, dict_to_mem_data
-)
+from awx.main.utils.mem_inventory import MemInventory, mem_data_to_dict, dict_to_mem_data
 
 import pytest
 import json
@@ -24,18 +21,10 @@ def memory_inventory():
 def JSON_of_inv():
     # Implemented as fixture becuase it may be change inside of tests
     return {
-        "_meta": {
-            "hostvars": {
-                "group_host": {},
-                "my_host": {"foo": "bar"}
-            }
-        }, 
-        "all": {"children": ["my_group",  "ungrouped"]},
-        "my_group": {
-            "hosts": ["group_host"],
-            "vars": {"foobar": "barfoo"}
-        },
-        "ungrouped": {"hosts": ["my_host"]}
+        "_meta": {"hostvars": {"group_host": {}, "my_host": {"foo": "bar"}}},
+        "all": {"children": ["my_group", "ungrouped"]},
+        "my_group": {"hosts": ["group_host"], "vars": {"foobar": "barfoo"}},
+        "ungrouped": {"hosts": ["my_host"]},
     }
 
 
@@ -65,6 +54,7 @@ def JSON_with_lists():
 
 
 # MemObject basic operations tests
+
 
 @pytest.mark.inventory_import
 def test_inventory_create_all_group():
@@ -97,6 +87,7 @@ def test_ungrouped_mechanics():
 
 # MemObject --> JSON tests
 
+
 @pytest.mark.inventory_import
 def test_convert_memory_to_JSON_with_vars(memory_inventory):
     data = mem_data_to_dict(memory_inventory)
@@ -108,6 +99,7 @@ def test_convert_memory_to_JSON_with_vars(memory_inventory):
 
 
 # JSON --> MemObject tests
+
 
 @pytest.mark.inventory_import
 def test_convert_JSON_to_memory_with_vars(JSON_of_inv):

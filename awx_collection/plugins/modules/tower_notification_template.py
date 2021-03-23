@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -317,13 +316,31 @@ RETURN = ''' # '''
 from ..module_utils.tower_api import TowerAPIModule
 
 OLD_INPUT_NAMES = (
-    'username', 'sender', 'recipients', 'use_tls',
-    'host', 'use_ssl', 'password', 'port',
-    'channels', 'token', 'account_token', 'from_number',
-    'to_numbers', 'account_sid', 'subdomain', 'service_key',
-    'client_name', 'message_from', 'color',
-    'notify', 'url', 'headers', 'server',
-    'nickname', 'targets',
+    'username',
+    'sender',
+    'recipients',
+    'use_tls',
+    'host',
+    'use_ssl',
+    'password',
+    'port',
+    'channels',
+    'token',
+    'account_token',
+    'from_number',
+    'to_numbers',
+    'account_sid',
+    'subdomain',
+    'service_key',
+    'client_name',
+    'message_from',
+    'color',
+    'notify',
+    'url',
+    'headers',
+    'server',
+    'nickname',
+    'targets',
 )
 
 
@@ -335,10 +352,7 @@ def main():
         copy_from=dict(),
         description=dict(),
         organization=dict(),
-        notification_type=dict(choices=[
-            'email', 'grafana', 'irc', 'mattermost',
-            'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook'
-        ]),
+        notification_type=dict(choices=['email', 'grafana', 'irc', 'mattermost', 'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook']),
         notification_configuration=dict(type='dict'),
         messages=dict(type='dict'),
         username=dict(),
@@ -387,8 +401,8 @@ def main():
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
             module.deprecate(
-                msg='{0} parameter has been deprecated, please use notification_configuration instead'.format(legacy_input),
-                version="ansible.tower:4.0.0")
+                msg='{0} parameter has been deprecated, please use notification_configuration instead'.format(legacy_input), version="ansible.tower:4.0.0"
+            )
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
@@ -396,18 +410,25 @@ def main():
         organization_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('notification_templates', name_or_id=name, **{
-        'data': {
-            'organization': organization_id,
+    existing_item = module.get_one(
+        'notification_templates',
+        name_or_id=name,
+        **{
+            'data': {
+                'organization': organization_id,
+            }
         }
-    })
+    )
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
         # a new existing item is formed when copying and is returned.
         existing_item = module.copy_item(
-            existing_item, copy_from, name,
-            endpoint='notification_templates', item_type='notification_template',
+            existing_item,
+            copy_from,
+            name,
+            endpoint='notification_templates',
+            item_type='notification_template',
             copy_lookup_data={},
         )
 
@@ -439,12 +460,7 @@ def main():
         new_fields['messages'] = messages
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
-    module.create_or_update_if_needed(
-        existing_item, new_fields,
-        endpoint='notification_templates', item_type='notification_template',
-        associations={
-        }
-    )
+    module.create_or_update_if_needed(existing_item, new_fields, endpoint='notification_templates', item_type='notification_template', associations={})
 
 
 if __name__ == '__main__':

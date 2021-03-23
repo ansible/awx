@@ -16,7 +16,7 @@ def raise_for_status(resp):
         raise exc
 
 
-class CertFiles():
+class CertFiles:
     """
     A context manager used for writing a certificate and (optional) key
     to $TMPDIR, and cleaning up afterwards.

@@ -12,7 +12,6 @@ from django_auth_ldap.config import LDAPGroupType
 
 
 class PosixUIDGroupType(LDAPGroupType):
-
     def __init__(self, name_attr='cn', ldap_group_user_attr='uid'):
         self.ldap_group_user_attr = ldap_group_user_attr
         super(PosixUIDGroupType, self).__init__(name_attr)
@@ -20,6 +19,7 @@ class PosixUIDGroupType(LDAPGroupType):
     """
     An LDAPGroupType subclass that handles non-standard DS.
     """
+
     def user_groups(self, ldap_user, group_search):
         """
         Searches for any group that is either the user's primary or contains the
@@ -34,12 +34,10 @@ class PosixUIDGroupType(LDAPGroupType):
                 user_gid = ldap_user.attrs['gidNumber'][0]
                 filterstr = u'(|(gidNumber=%s)(memberUid=%s))' % (
                     self.ldap.filter.escape_filter_chars(user_gid),
-                    self.ldap.filter.escape_filter_chars(user_uid)
-                )
-            else:
-                filterstr = u'(memberUid=%s)' % (
                     self.ldap.filter.escape_filter_chars(user_uid),
                 )
+            else:
+                filterstr = u'(memberUid=%s)' % (self.ldap.filter.escape_filter_chars(user_uid),)
 
             search = group_search.search_with_additional_term_string(filterstr)
             search.attrlist = [str(self.name_attr)]

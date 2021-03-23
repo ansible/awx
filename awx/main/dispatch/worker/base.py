@@ -25,14 +25,10 @@ else:
 
 
 def signame(sig):
-    return dict(
-        (k, v) for v, k in signal.__dict__.items()
-        if v.startswith('SIG') and not v.startswith('SIG_')
-    )[sig]
+    return dict((k, v) for v, k in signal.__dict__.items() if v.startswith('SIG') and not v.startswith('SIG_'))[sig]
 
 
 class WorkerSignalHandler:
-
     def __init__(self):
         self.kill_now = False
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
@@ -162,7 +158,6 @@ class AWXConsumerPG(AWXConsumerBase):
 
 
 class BaseWorker(object):
-
     def read(self, queue):
         return queue.get(block=True, timeout=1)
 

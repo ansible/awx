@@ -48,8 +48,7 @@ class Control(object):
 
         with pg_bus_conn() as conn:
             conn.listen(reply_queue)
-            conn.notify(self.queuename,
-                        json.dumps({'control': command, 'reply_to': reply_queue}))
+            conn.notify(self.queuename, json.dumps({'control': command, 'reply_to': reply_queue}))
 
             for reply in conn.events(select_timeout=timeout, yield_timeouts=True):
                 if reply is None:
