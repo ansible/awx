@@ -274,6 +274,10 @@ reports:
 black: reports
 	(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
 
+.git/hooks/pre-commit:
+	echo "black --check \`git diff --cached --name-only | grep -E '\.py$\'\` || (echo 'To fix this, run \`make black\` to auto-format your code prior to commit.' && exit 1)" > .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit
+
 genschema: reports
 	$(MAKE) swagger PYTEST_ARGS="--genschema --create-db "
 	mv swagger.json schema.json
@@ -461,7 +465,7 @@ awx/projects:
 COMPOSE_UP_OPTS ?=
 CLUSTER_NODE_COUNT ?= 1
 
-docker-compose-sources:
+docker-compose-sources: .git/hooks/pre-commit
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
