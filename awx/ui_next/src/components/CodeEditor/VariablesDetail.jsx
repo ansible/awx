@@ -115,6 +115,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
             key="select"
             variant="primary"
             onClick={() => setIsExpanded(false)}
+            ouiaId={`${dataCy}-unexpand`}
           >
             {i18n._(t`Done`)}
           </Button>,
@@ -212,6 +213,7 @@ function ModeToggle({
             variant="plain"
             aria-label={i18n._(t`Expand input`)}
             onClick={onExpand}
+            ouiaId={`${dataCy}-expand`}
           >
             <ExpandArrowsAltIcon />
           </Button>

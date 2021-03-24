@@ -64,6 +64,7 @@ function VariablesField({
             key="select"
             variant="primary"
             onClick={() => setIsExpanded(false)}
+            ouiaId={`${id}-variables-unexpand`}
           >
             {i18n._(t`Done`)}
           </Button>,
@@ -163,6 +164,7 @@ function VariablesFieldInternals({
             variant="plain"
             aria-label={i18n._(t`Expand input`)}
             onClick={onExpand}
+            ouiaId={`${id}-variables-expand`}
           >
             <ExpandArrowsAltIcon />
           </Button>
