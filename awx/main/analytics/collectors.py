@@ -2,6 +2,7 @@ import io
 import os
 import os.path
 import platform
+import distro
 
 from django.db import connection
 from django.db.models import Count
@@ -43,7 +44,7 @@ def config(since, **kwargs):
     return {
         'platform': {
             'system': platform.system(),
-            'dist': platform.dist(),
+            'dist': distro.linux_distribution(),
             'release': platform.release(),
             'type': install_type,
         },
