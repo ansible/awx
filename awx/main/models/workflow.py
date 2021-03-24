@@ -258,6 +258,10 @@ class WorkflowJobNode(WorkflowNodeBase):
             models.Index(fields=['identifier']),
         ]
 
+    @property
+    def event_processing_finished(self):
+        return True
+
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_node_detail', kwargs={'pk': self.pk}, request=request)
 
@@ -619,6 +623,10 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     @property
     def workflow_nodes(self):
         return self.workflow_job_nodes
+
+    @property
+    def event_processing_finished(self):
+        return True
 
     def _get_parent_field_name(self):
         if self.job_template_id:
