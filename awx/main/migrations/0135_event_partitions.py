@@ -100,4 +100,54 @@ class Migration(migrations.Migration):
             name='job',
             field=models.ForeignKey(editable=False, null=True, on_delete=models.deletion.SET_NULL, related_name='job_events', to='main.Job'),
         ),
+        migrations.CreateModel(
+            name='UnpartitionedAdHocCommandEvent',
+            fields=[],
+            options={
+                'proxy': True,
+                'indexes': [],
+                'constraints': [],
+            },
+            bases=('main.adhoccommandevent',),
+        ),
+        migrations.CreateModel(
+            name='UnpartitionedInventoryUpdateEvent',
+            fields=[],
+            options={
+                'proxy': True,
+                'indexes': [],
+                'constraints': [],
+            },
+            bases=('main.inventoryupdateevent',),
+        ),
+        migrations.CreateModel(
+            name='UnpartitionedJobEvent',
+            fields=[],
+            options={
+                'proxy': True,
+                'indexes': [],
+                'constraints': [],
+            },
+            bases=('main.jobevent',),
+        ),
+        migrations.CreateModel(
+            name='UnpartitionedProjectUpdateEvent',
+            fields=[],
+            options={
+                'proxy': True,
+                'indexes': [],
+                'constraints': [],
+            },
+            bases=('main.projectupdateevent',),
+        ),
+        migrations.CreateModel(
+            name='UnpartitionedSystemJobEvent',
+            fields=[],
+            options={
+                'proxy': True,
+                'indexes': [],
+                'constraints': [],
+            },
+            bases=('main.systemjobevent',),
+        ),
     ]
