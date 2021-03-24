@@ -55,9 +55,7 @@ def test_list_views_use_list_serializers(all_views):
     """
     list_serializers = tuple(getattr(serializers, '{}ListSerializer'.format(cls.__name__)) for cls in (UnifiedJob.__subclasses__() + [UnifiedJob]))
     for View in all_views:
-        if type(View.model) is property:
-            continue  # special case for JobEventChildrenList
-        if hasattr(View, 'model') and issubclass(getattr(View, 'model'), UnifiedJob):
+        if hasattr(View, 'model') and type(View.model) is not property and issubclass(getattr(View, 'model'), UnifiedJob):
             if issubclass(View, ListAPIView):
                 assert issubclass(View.serializer_class, list_serializers), 'View {} serializer {} is not a list serializer'.format(View, View.serializer_class)
             else:
