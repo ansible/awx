@@ -501,10 +501,7 @@ class JobEvent(BasePlaybookEvent):
         default='',
         editable=False,
     )
-    job_created = models.DateTimeField(
-        null=True,
-        editable=False
-    )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_event_detail', kwargs={'pk': self.pk}, request=request)
@@ -577,6 +574,8 @@ class JobEvent(BasePlaybookEvent):
 class UnpartitionedJobEvent(JobEvent):
     class Meta:
         proxy = True
+
+
 UnpartitionedJobEvent._meta.db_table = '_unpartitioned_' + JobEvent._meta.db_table  # noqa
 
 
@@ -603,10 +602,7 @@ class ProjectUpdateEvent(BasePlaybookEvent):
         on_delete=models.CASCADE,
         editable=False,
     )
-    job_created = models.DateTimeField(
-        null=True,
-        editable=False
-    )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     @property
     def host_name(self):
@@ -616,6 +612,8 @@ class ProjectUpdateEvent(BasePlaybookEvent):
 class UnpartitionedProjectUpdateEvent(ProjectUpdateEvent):
     class Meta:
         proxy = True
+
+
 UnpartitionedProjectUpdateEvent._meta.db_table = '_unpartitioned_' + ProjectUpdateEvent._meta.db_table  # noqa
 
 
@@ -786,10 +784,7 @@ class AdHocCommandEvent(BaseCommandEvent):
         default='',
         editable=False,
     )
-    job_created = models.DateTimeField(
-        null=True,
-        editable=False
-    )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     def get_absolute_url(self, request=None):
         return reverse('api:ad_hoc_command_event_detail', kwargs={'pk': self.pk}, request=request)
@@ -808,6 +803,8 @@ class AdHocCommandEvent(BaseCommandEvent):
 class UnpartitionedAdHocCommandEvent(AdHocCommandEvent):
     class Meta:
         proxy = True
+
+
 UnpartitionedAdHocCommandEvent._meta.db_table = '_unpartitioned_' + AdHocCommandEvent._meta.db_table  # noqa
 
 
@@ -833,10 +830,7 @@ class InventoryUpdateEvent(BaseCommandEvent):
         on_delete=models.CASCADE,
         editable=False,
     )
-    job_created = models.DateTimeField(
-        null=True,
-        editable=False
-    )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     @property
     def event(self):
@@ -854,6 +848,8 @@ class InventoryUpdateEvent(BaseCommandEvent):
 class UnpartitionedInventoryUpdateEvent(InventoryUpdateEvent):
     class Meta:
         proxy = True
+
+
 UnpartitionedInventoryUpdateEvent._meta.db_table = '_unpartitioned_' + InventoryUpdateEvent._meta.db_table  # noqa
 
 
@@ -879,10 +875,7 @@ class SystemJobEvent(BaseCommandEvent):
         on_delete=models.CASCADE,
         editable=False,
     )
-    job_created = models.DateTimeField(
-        null=True,
-        editable=False
-    )
+    job_created = models.DateTimeField(null=True, editable=False)
 
     @property
     def event(self):
@@ -900,4 +893,6 @@ class SystemJobEvent(BaseCommandEvent):
 class UnpartitionedSystemJobEvent(SystemJobEvent):
     class Meta:
         proxy = True
+
+
 UnpartitionedSystemJobEvent._meta.db_table = '_unpartitioned_' + SystemJobEvent._meta.db_table  # noqa

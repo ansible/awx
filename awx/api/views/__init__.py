@@ -3806,9 +3806,7 @@ class JobEventChildrenList(NoTruncateMixin, SubListAPIView):
     def get_queryset(self):
         parent_event = self.get_parent_object()
         self.check_parent_access(parent_event)
-        return parent_event.job.get_event_queryset().filter(
-            parent_uuid=parent_event.uuid
-        )
+        return parent_event.job.get_event_queryset().filter(parent_uuid=parent_event.uuid)
 
 
 class BaseJobEventsList(NoTruncateMixin, SubListAPIView):
