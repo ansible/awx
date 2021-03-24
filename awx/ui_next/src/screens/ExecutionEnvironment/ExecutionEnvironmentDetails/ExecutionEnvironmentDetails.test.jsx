@@ -2,7 +2,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import { ExecutionEnvironmentsAPI } from '../../../api';
 
 import ExecutionEnvironmentDetails from './ExecutionEnvironmentDetails';
@@ -22,6 +25,11 @@ const executionEnvironment = {
     credential: '/api/v2/credentials/4/',
   },
   summary_fields: {
+    user_capabilities: {
+      edit: true,
+      delete: true,
+      copy: true,
+    },
     credential: {
       id: 4,
       name: 'Container Registry',
@@ -175,6 +183,7 @@ describe('<ExecutionEnvironmentDetails/>', () => {
 
     expect(wrapper.find('Button[aria-label="Delete"]')).toHaveLength(0);
   });
+
   test('should have proper number of delete detail requests', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/execution_environments/42/details'],
@@ -192,5 +201,72 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(
       wrapper.find('DeleteButton').prop('deleteDetailsRequests')
     ).toHaveLength(4);
+  });
+
+  test('should show edit button for users with edit permission', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ExecutionEnvironmentDetails
+          executionEnvironment={executionEnvironment}
+        />
+      );
+    });
+    const editButton = await waitForElement(
+      wrapper,
+      'ExecutionEnvironmentDetails Button[aria-label="edit"]'
+    );
+    expect(editButton.text()).toEqual('Edit');
+    expect(editButton.prop('to')).toBe('/execution_environments/17/edit');
+  });
+
+  test('should hide edit button for users without edit permission', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ExecutionEnvironmentDetails
+          executionEnvironment={{
+            ...executionEnvironment,
+            summary_fields: { user_capabilities: { edit: false } },
+          }}
+        />
+      );
+    });
+    await waitForElement(wrapper, 'ExecutionEnvironmentDetails');
+    expect(
+      wrapper.find('ExecutionEnvironmentDetails Button[aria-label="edit"]')
+        .length
+    ).toBe(0);
+  });
+
+  test('should show delete button for users with delete permission', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ExecutionEnvironmentDetails
+          executionEnvironment={executionEnvironment}
+        />
+      );
+    });
+    const deleteButton = await waitForElement(
+      wrapper,
+      'ExecutionEnvironmentDetails Button[aria-label="Delete"]'
+    );
+    expect(deleteButton.text()).toEqual('Delete');
+  });
+
+  test('should hide delete button for users without delete permission', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ExecutionEnvironmentDetails
+          executionEnvironment={{
+            ...executionEnvironment,
+            summary_fields: { user_capabilities: { delete: false } },
+          }}
+        />
+      );
+    });
+    await waitForElement(wrapper, 'ExecutionEnvironmentDetails');
+    expect(
+      wrapper.find('ExecutionEnvironmentDetails Button[aria-label="Delete"]')
+        .length
+    ).toBe(0);
   });
 });
