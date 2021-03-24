@@ -73,6 +73,9 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(
       wrapper.find('Detail[label="Credential"]').prop('value').props.children
     ).toEqual(executionEnvironment.summary_fields.credential.name);
+    expect(
+      wrapper.find('Detail[label="Managed by Tower"]').prop('value')
+    ).toEqual('False');
     const dates = wrapper.find('UserDateDetail');
     expect(dates).toHaveLength(2);
     expect(dates.at(0).prop('date')).toEqual(executionEnvironment.created);
@@ -167,6 +170,9 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     expect(
       wrapper.find('Detail[label="Credential"]').prop('value').props.children
     ).toEqual(executionEnvironment.summary_fields.credential.name);
+    expect(
+      wrapper.find('Detail[label="Managed by Tower"]').prop('value')
+    ).toEqual('True');
     const dates = wrapper.find('UserDateDetail');
     expect(dates).toHaveLength(2);
     expect(dates.at(0).prop('date')).toEqual(executionEnvironment.created);

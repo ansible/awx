@@ -65,6 +65,11 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           dataCy="execution-environment-detail-description"
         />
         <Detail
+          label={i18n._(t`Managed by Tower`)}
+          value={managedByTower ? i18n._(t`True`) : i18n._(t`False`)}
+          dataCy="execution-environment-managed-by-tower"
+        />
+        <Detail
           label={i18n._(t`Organization`)}
           value={
             organization ? (
@@ -79,6 +84,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           }
           dataCy="execution-environment-detail-organization"
         />
+
         <Detail
           label={i18n._(t`Pull`)}
           value={pull === '' ? i18n._(t`Missing`) : toTitleCase(pull)}
