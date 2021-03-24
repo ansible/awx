@@ -214,15 +214,15 @@ describe('Setting form fields', () => {
         )}
       </Formik>
     );
-    expect(wrapper.find('CodeMirrorInput')).toHaveLength(1);
-    expect(wrapper.find('CodeMirrorInput').prop('value')).toBe(
+    expect(wrapper.find('CodeEditor')).toHaveLength(1);
+    expect(wrapper.find('CodeEditor').prop('value')).toBe(
       '["one", "two", "three"]'
     );
     await act(async () => {
-      wrapper.find('CodeMirrorInput').invoke('onChange')('[]');
+      wrapper.find('CodeEditor').invoke('onChange')('[]');
     });
     wrapper.update();
-    expect(wrapper.find('CodeMirrorInput').prop('value')).toBe('[]');
+    expect(wrapper.find('CodeEditor').prop('value')).toBe('[]');
   });
 
   test('FileUploadField renders the expected content', async () => {

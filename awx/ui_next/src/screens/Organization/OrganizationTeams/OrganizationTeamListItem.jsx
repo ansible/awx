@@ -39,6 +39,7 @@ function OrganizationTeamListItem({ i18n, team, detailUrl }) {
           {team.summary_fields.user_capabilities.edit && (
             <Tooltip content={i18n._(t`Edit Team`)} position="top">
               <Button
+                ouiaId={`${team.id}-edit-button`}
                 aria-label={i18n._(t`Edit Team`)}
                 css="grid-column: 2"
                 variant="plain"

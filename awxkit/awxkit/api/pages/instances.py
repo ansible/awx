@@ -16,5 +16,4 @@ class Instances(page.PageList, Instance):
     pass
 
 
-page.register_page([resources.instances,
-                    resources.related_instances], Instances)
+page.register_page([resources.instances, resources.related_instances], Instances)

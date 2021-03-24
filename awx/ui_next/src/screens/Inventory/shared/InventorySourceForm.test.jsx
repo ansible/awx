@@ -46,15 +46,9 @@ describe('<InventorySourceForm />', () => {
     const onSubmit = jest.fn();
 
     beforeAll(async () => {
-      const config = {
-        custom_virtualenvs: ['venv/foo', 'venv/bar'],
-      };
       await act(async () => {
         wrapper = mountWithContexts(
-          <InventorySourceForm onCancel={() => {}} onSubmit={onSubmit} />,
-          {
-            context: { config },
-          }
+          <InventorySourceForm onCancel={() => {}} onSubmit={onSubmit} />
         );
       });
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -71,7 +65,8 @@ describe('<InventorySourceForm />', () => {
       expect(wrapper.find('FormGroup[label="Source"]')).toHaveLength(1);
       expect(
         wrapper.find('FormGroup[label="Ansible Environment"]')
-      ).toHaveLength(1);
+      ).toHaveLength(0);
+      expect(wrapper.find('ExecutionEnvironmentLookup')).toHaveLength(1);
     });
 
     test('should display subform when source dropdown has a value', async () => {
@@ -93,7 +88,8 @@ describe('<InventorySourceForm />', () => {
           id: 2,
           name: 'mock proj',
         });
-        wrapper.find('AnsibleSelect#source_path').prop('onChange')(null, 'foo');
+        wrapper.find('Select#source_path').prop('onToggle')();
+        wrapper.find('Select#source_path').prop('onSelect')(null, 'foo');
         wrapper.find('AnsibleSelect#verbosity').prop('onChange')(null, '2');
         wrapper.find('button[aria-label="Save"]').simulate('click');
       });

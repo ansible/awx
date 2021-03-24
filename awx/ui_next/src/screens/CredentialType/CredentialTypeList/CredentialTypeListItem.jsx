@@ -3,82 +3,54 @@ import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
-import {
-  Button,
-  DataListAction as _DataListAction,
-  DataListCheck,
-  DataListItem,
-  DataListItemRow,
-  DataListItemCells,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
+import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
-
-import DataListCell from '../../../components/DataListCell';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { CredentialType } from '../../../types';
-
-const DataListAction = styled(_DataListAction)`
-  align-items: center;
-  display: grid;
-  grid-gap: 16px;
-  grid-template-columns: 40px;
-`;
 
 function CredentialTypeListItem({
   credentialType,
   detailUrl,
   isSelected,
   onSelect,
+  rowIndex,
   i18n,
 }) {
   const labelId = `check-action-${credentialType.id}`;
 
   return (
-    <DataListItem
-      key={credentialType.id}
-      aria-labelledby={labelId}
-      id={`${credentialType.id} `}
-    >
-      <DataListItemRow>
-        <DataListCheck
-          id={`select-credential-types-${credentialType.id}`}
-          checked={isSelected}
-          onChange={onSelect}
-          aria-labelledby={labelId}
-        />
-        <DataListItemCells
-          dataListCells={[
-            <DataListCell
-              key="name"
-              aria-label={i18n._(t`credential type name`)}
-            >
-              <Link to={`${detailUrl}`}>
-                <b>{credentialType.name}</b>
-              </Link>
-            </DataListCell>,
-          ]}
-        />
-        <DataListAction
-          aria-label={i18n._(t`actions`)}
-          aria-labelledby={labelId}
-          id={labelId}
+    <Tr id={`credential-type-row-${credentialType.id}`}>
+      <Td
+        select={{
+          rowIndex,
+          isSelected,
+          onSelect,
+        }}
+        dataLabel={i18n._(t`Selected`)}
+      />
+      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <Link to={`${detailUrl}`}>
+          <b>{credentialType.name}</b>
+        </Link>
+      </Td>
+      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionItem
+          visible={credentialType.summary_fields.user_capabilities.edit}
+          tooltip={i18n._(t`Edit credential type`)}
         >
-          {credentialType.summary_fields.user_capabilities.edit && (
-            <Tooltip content={i18n._(t`Edit credential type`)} position="top">
-              <Button
-                aria-label={i18n._(t`Edit credential type`)}
-                variant="plain"
-                component={Link}
-                to={`/credential_types/${credentialType.id}/edit`}
-              >
-                <PencilAltIcon />
-              </Button>
-            </Tooltip>
-          )}
-        </DataListAction>
-      </DataListItemRow>
-    </DataListItem>
+          <Button
+            ouiaId={`${credentialType.id}-edit-button`}
+            aria-label={i18n._(t`Edit credential type`)}
+            variant="plain"
+            component={Link}
+            to={`/credential_types/${credentialType.id}/edit`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
+      </ActionsTd>
+    </Tr>
   );
 }
 

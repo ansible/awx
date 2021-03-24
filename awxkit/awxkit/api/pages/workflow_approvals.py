@@ -5,7 +5,6 @@ from awxkit import exceptions
 
 
 class WorkflowApproval(UnifiedJob):
-
     def approve(self):
         try:
             self.related.approve.post()

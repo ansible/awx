@@ -28,7 +28,10 @@ function OrganizationEdit({ organization }) {
       const addedCredentialIds = addedCredentials.map(({ id }) => id);
       const removedCredentialIds = removedCredentials.map(({ id }) => id);
 
-      await OrganizationsAPI.update(organization.id, values);
+      await OrganizationsAPI.update(organization.id, {
+        ...values,
+        default_environment: values.default_environment?.id || null,
+      });
       await Promise.all(
         groupsToAssociate
           .map(id =>
@@ -75,10 +78,6 @@ function OrganizationEdit({ organization }) {
 
 OrganizationEdit.propTypes = {
   organization: PropTypes.shape().isRequired,
-};
-
-OrganizationEdit.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
 };
 
 export { OrganizationEdit as _OrganizationEdit };

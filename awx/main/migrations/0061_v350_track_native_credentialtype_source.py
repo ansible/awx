@@ -25,5 +25,5 @@ class Migration(migrations.Migration):
             name='namespace',
             field=models.CharField(default=None, editable=False, max_length=1024, null=True),
         ),
-        migrations.RunPython(migrate_to_static_inputs)
+        migrations.RunPython(migrate_to_static_inputs),
     ]

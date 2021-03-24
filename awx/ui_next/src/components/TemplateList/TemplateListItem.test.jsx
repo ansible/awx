@@ -320,4 +320,61 @@ describe('<TemplateListItem />', () => {
     );
     expect(wrapper.find('ProjectDiagramIcon').length).toBe(0);
   });
+
+  test('should render warning about missing execution environment', () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <TemplateListItem
+            isSelected={false}
+            template={{
+              id: 1,
+              name: 'Template 1',
+              url: '/templates/job_template/1',
+              type: 'job_template',
+              summary_fields: {
+                inventory: {
+                  id: 1,
+                  name: 'Demo Inventory',
+                  description: '',
+                  has_active_failures: false,
+                  total_hosts: 0,
+                  hosts_with_active_failures: 0,
+                  total_groups: 0,
+                  has_inventory_sources: false,
+                  total_inventory_sources: 0,
+                  inventory_sources_with_failures: 0,
+                  organization_id: 1,
+                  kind: '',
+                },
+                project: {
+                  id: 6,
+                  name: 'Demo Project',
+                  description: '',
+                  status: 'never updated',
+                  scm_type: 'git',
+                },
+                user_capabilities: {
+                  edit: true,
+                  delete: true,
+                  start: true,
+                  schedule: true,
+                  copy: true,
+                },
+              },
+              custom_virtualenv: '/var/lib/awx/env',
+              execution_environment: null,
+              project: 6,
+              inventory: 1,
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    expect(
+      wrapper.find('.missing-execution-environment').prop('content')
+    ).toEqual(
+      'Custom virtual environment /var/lib/awx/env must be replaced by an execution environment.'
+    );
+  });
 });

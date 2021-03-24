@@ -37,7 +37,6 @@ function MiscSystemDetail({ i18n }) {
         'AUTH_BASIC_ENABLED',
         'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
         'AUTOMATION_ANALYTICS_URL',
-        'CUSTOM_VENV_PATHS',
         'INSIGHTS_TRACKING_STATE',
         'LOGIN_REDIRECT_OVERRIDE',
         'MANAGE_ORGANIZATION_AUTH',
@@ -138,9 +137,9 @@ function MiscSystemDetail({ i18n }) {
         {me?.is_superuser && (
           <CardActionsRow>
             <Button
+              ouiaId="system-detail-edit-button"
               aria-label={i18n._(t`Edit`)}
               component={Link}
-              ouiaId="edit-button"
               to="/settings/miscellaneous_system/edit"
             >
               {i18n._(t`Edit`)}

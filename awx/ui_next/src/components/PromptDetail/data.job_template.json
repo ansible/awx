@@ -45,6 +45,12 @@
           "organization_id": 1,
           "kind": ""
       },
+      "execution_environment": {
+        "id": 1,
+        "name": "Default EE",
+        "description": "",
+        "image": "quay.io/ansible/awx-ee"
+        },
       "project": {
           "id": 6,
           "name": "Mock Project",
@@ -192,5 +198,6 @@
   "custom_virtualenv": null,
   "job_slice_count": 1,
   "webhook_service": "github",
-  "webhook_credential": 8
+  "webhook_credential": 8,
+  "execution_environment": 1
 }

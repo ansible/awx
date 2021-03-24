@@ -1,11 +1,10 @@
-import React, { useEffect, useCallback, useContext } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
 import { func, shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
 import { InventorySourcesAPI } from '../../../api';
-import { ConfigContext } from '../../../contexts/Config';
 import useRequest from '../../../util/useRequest';
 import { required } from '../../../util/validators';
 
@@ -18,7 +17,6 @@ import {
   FormColumnLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import Popover from '../../../components/Popover';
 
 import {
   AzureSubForm,
@@ -31,6 +29,7 @@ import {
   VMwareSubForm,
   VirtualizationSubForm,
 } from './InventorySourceSubForms';
+import { ExecutionEnvironmentLookup } from '../../../components/Lookup';
 
 const buildSourceChoiceOptions = options => {
   const sourceChoices = options.actions.GET.source.choices.map(
@@ -39,7 +38,12 @@ const buildSourceChoiceOptions = options => {
   return sourceChoices.filter(({ key }) => key !== 'file');
 };
 
-const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
+const InventorySourceFormFields = ({
+  source,
+  sourceOptions,
+  organizationId,
+  i18n,
+}) => {
   const {
     values,
     initialValues,
@@ -51,13 +55,13 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
     name: 'source',
     validate: required(i18n._(t`Set a value for this field`), i18n),
   });
-  const { custom_virtualenvs } = useContext(ConfigContext);
-  const [venvField] = useField('custom_virtualenv');
-  const defaultVenv = {
-    label: i18n._(t`Use Default Ansible Environment`),
-    value: '/var/lib/awx/venv/ansible/',
-    key: 'default',
-  };
+  const [
+    executionEnvironmentField,
+    executionEnvironmentMeta,
+    executionEnvironmentHelpers,
+  ] = useField({
+    name: 'execution_environment',
+  });
 
   const resetSubFormFields = sourceType => {
     if (sourceType === initialValues.source) {
@@ -66,7 +70,6 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
           ...initialValues,
           name: values.name,
           description: values.description,
-          custom_virtualenv: values.custom_virtualenv,
           source: sourceType,
         },
       });
@@ -111,6 +114,17 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
         name="description"
         type="text"
       />
+      <ExecutionEnvironmentLookup
+        helperTextInvalid={executionEnvironmentMeta.error}
+        isValid={
+          !executionEnvironmentMeta.touched || !executionEnvironmentMeta.error
+        }
+        onBlur={() => executionEnvironmentHelpers.setTouched()}
+        value={executionEnvironmentField.value}
+        onChange={value => executionEnvironmentHelpers.setValue(value)}
+        globallyAvailable
+        organizationId={organizationId}
+      />
       <FormGroup
         fieldId="source"
         helperTextInvalid={sourceMeta.error}
@@ -137,31 +151,7 @@ const InventorySourceFormFields = ({ source, sourceOptions, i18n }) => {
           }}
         />
       </FormGroup>
-      {custom_virtualenvs && custom_virtualenvs.length > 1 && (
-        <FormGroup
-          fieldId="custom-virtualenv"
-          label={i18n._(t`Ansible Environment`)}
-          labelIcon={
-            <Popover
-              content={i18n._(t`Select the custom
-            Python virtual environment for this
-            inventory source sync to run on.`)}
-            />
-          }
-        >
-          <AnsibleSelect
-            id="custom-virtualenv"
-            data={[
-              defaultVenv,
-              ...custom_virtualenvs
-                .filter(value => value !== defaultVenv.value)
-                .map(value => ({ value, label: value, key: value })),
-            ]}
-            {...venvField}
-          />
-        </FormGroup>
-      )}
-      {sourceField.value !== '' && (
+      {!['', 'custom'].includes(sourceField.value) && (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
             {i18n._(t`Source details`)}
@@ -244,10 +234,10 @@ const InventorySourceForm = ({
   onSubmit,
   source,
   submitError = null,
+  organizationId,
 }) => {
   const initialValues = {
     credential: source?.summary_fields?.credential || null,
-    custom_virtualenv: source?.custom_virtualenv || '',
     description: source?.description || '',
     name: source?.name || '',
     overwrite: source?.overwrite || false,
@@ -264,6 +254,8 @@ const InventorySourceForm = ({
     enabled_var: source?.enabled_var || '',
     enabled_value: source?.enabled_value || '',
     host_filter: source?.host_filter || '',
+    execution_environment:
+      source?.summary_fields?.execution_environment || null,
   };
 
   const {
@@ -306,6 +298,7 @@ const InventorySourceForm = ({
               i18n={i18n}
               source={source}
               sourceOptions={sourceOptions}
+              organizationId={organizationId}
             />
             {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup

@@ -20,10 +20,12 @@ import DataListCell from '../../../components/DataListCell';
 import ChipGroup from '../../../components/ChipGroup';
 
 const DataListAction = styled(_DataListAction)`
-  margin-left: 0;
-  margin-right: 20px;
-  padding-top: 15px;
-  padding-bottom: 15px;
+  && {
+    margin-left: 0;
+    margin-right: 20px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 `;
 const Button = styled(_Button)`
   padding-top: 0;
@@ -64,6 +66,7 @@ function SurveyListItem({
           <Stack>
             <StackItem>
               <Button
+                ouiaId={`${question.variable}-move-up-button`}
                 variant="plain"
                 aria-label={i18n._(t`move up`)}
                 isDisabled={isFirst || !canEdit}
@@ -74,6 +77,7 @@ function SurveyListItem({
             </StackItem>
             <StackItem>
               <Button
+                ouiaId={`${question.variable}-move-down-button`}
                 variant="plain"
                 aria-label={i18n._(t`move down`)}
                 isDisabled={isLast || !canEdit}

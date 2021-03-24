@@ -41,6 +41,7 @@ function NodeModalForm({
   launchConfig,
   surveyConfig,
   isLaunchLoading,
+  resourceDefaultCredentials,
 }) {
   const history = useHistory();
   const dispatch = useContext(WorkflowDispatchContext);
@@ -69,7 +70,8 @@ function NodeModalForm({
     surveyConfig,
     i18n,
     values.nodeResource,
-    askLinkType
+    askLinkType,
+    resourceDefaultCredentials
   );
 
   const handleSaveNode = () => {
@@ -134,6 +136,7 @@ function NodeModalForm({
             />
             {activeStep && activeStep.id !== promptSteps[0]?.id && (
               <Button
+                ouiaId="node-modal-back-button"
                 id="back-node-modal"
                 variant="secondary"
                 aria-label={i18n._(t`Back`)}
@@ -143,6 +146,7 @@ function NodeModalForm({
               </Button>
             )}
             <Button
+              ouiaId="node-modal-cancel-button"
               id="cancel-node-modal"
               variant="link"
               aria-label={i18n._(t`Cancel`)}
@@ -229,7 +233,7 @@ const NodeModalInner = ({ i18n, title, ...rest }) => {
   const {
     request: readLaunchConfigs,
     error: launchConfigError,
-    result: { launchConfig, surveyConfig },
+    result: { launchConfig, surveyConfig, resourceDefaultCredentials },
     isLoading,
   } = useRequest(
     useCallback(async () => {
@@ -247,6 +251,7 @@ const NodeModalInner = ({ i18n, title, ...rest }) => {
         return {
           launchConfig: {},
           surveyConfig: {},
+          resourceDefaultCredentials: [],
         };
       }
 
@@ -267,9 +272,21 @@ const NodeModalInner = ({ i18n, title, ...rest }) => {
         survey = data;
       }
 
+      let defaultCredentials = [];
+
+      if (launch.ask_credential_on_launch) {
+        const {
+          data: { results },
+        } = await JobTemplatesAPI.readCredentials(values?.nodeResource?.id, {
+          page_size: 200,
+        });
+        defaultCredentials = results;
+      }
+
       return {
         launchConfig: launch,
         surveyConfig: survey,
+        resourceDefaultCredentials: defaultCredentials,
       };
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -319,6 +336,7 @@ const NodeModalInner = ({ i18n, title, ...rest }) => {
       {...rest}
       launchConfig={launchConfig}
       surveyConfig={surveyConfig}
+      resourceDefaultCredentials={resourceDefaultCredentials}
       isLaunchLoading={isLoading}
       title={wizardTitle}
       i18n={i18n}

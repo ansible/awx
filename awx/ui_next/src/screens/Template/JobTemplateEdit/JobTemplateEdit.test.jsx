@@ -13,6 +13,7 @@ import {
   LabelsAPI,
   ProjectsAPI,
   InventoriesAPI,
+  ExecutionEnvironmentsAPI,
 } from '../../../api';
 import JobTemplateEdit from './JobTemplateEdit';
 
@@ -49,6 +50,12 @@ const mockJobTemplate = {
   scm_branch: '',
   skip_tags: '',
   summary_fields: {
+    execution_environment: {
+      id: 1,
+      name: 'Default EE',
+      description: '',
+      image: 'quay.io/ansible/awx-ee',
+    },
     user_capabilities: {
       edit: true,
     },
@@ -81,6 +88,7 @@ const mockJobTemplate = {
   related: {
     webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/',
   },
+  execution_environment: 1,
 };
 
 const mockRelatedCredentials = {
@@ -176,6 +184,15 @@ const mockInstanceGroups = [
   },
 ];
 
+const mockExecutionEnvironment = [
+  {
+    id: 1,
+    name: 'Default EE',
+    description: '',
+    image: 'quay.io/ansible/awx-ee',
+  },
+];
+
 JobTemplatesAPI.readCredentials.mockResolvedValue({
   data: mockRelatedCredentials,
 });
@@ -196,6 +213,13 @@ CredentialsAPI.read.mockResolvedValue({
   },
 });
 CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
+
+ExecutionEnvironmentsAPI.read.mockResolvedValue({
+  data: {
+    results: mockExecutionEnvironment,
+    count: 1,
+  },
+});
 
 describe('<JobTemplateEdit />', () => {
   beforeEach(() => {
@@ -266,6 +290,8 @@ describe('<JobTemplateEdit />', () => {
         id: 1,
         organization: 1,
       });
+
+      wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')(null);
     });
     wrapper.update();
     await act(async () => {
@@ -277,6 +303,7 @@ describe('<JobTemplateEdit />', () => {
       ...mockJobTemplate,
       project: mockJobTemplate.project,
       ...updatedTemplateData,
+      execution_environment: null,
     };
     delete expected.summary_fields;
     delete expected.id;

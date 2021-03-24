@@ -10,15 +10,11 @@ import awx
 from awx.main.db.profiled_pg.base import RecordedQueryLog
 
 
-QUERY = {
-    'sql': 'SELECT * FROM main_job',
-    'time': '.01'
-}
+QUERY = {'sql': 'SELECT * FROM main_job', 'time': '.01'}
 EXPLAIN = 'Seq Scan on public.main_job  (cost=0.00..1.18 rows=18 width=86)'
 
 
-class FakeDatabase():
-
+class FakeDatabase:
     def __init__(self):
         self._cursor = unittest.mock.Mock(spec_sec=['execute', 'fetchall'])
         self._cursor.fetchall.return_value = [(EXPLAIN,)]
@@ -129,18 +125,16 @@ def test_sql_above_threshold(tmpdir):
         args, kw = _call
         assert args == ('EXPLAIN VERBOSE {}'.format(QUERY['sql']),)
 
-    path = os.path.join(
-        tmpdir,
-        '{}.sqlite'.format(os.path.basename(sys.argv[0]))
-    )
+    path = os.path.join(tmpdir, '{}.sqlite'.format(os.path.basename(sys.argv[0])))
     assert os.path.exists(path)
 
     # verify the results
     def dict_factory(cursor, row):
         d = {}
-        for idx,col in enumerate(cursor.description):
+        for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]
         return d
+
     cursor = sqlite3.connect(path)
     cursor.row_factory = dict_factory
     queries_logged = cursor.execute('SELECT * FROM queries').fetchall()

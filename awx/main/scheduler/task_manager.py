@@ -31,7 +31,7 @@ from awx.main.models import (
     UnifiedJob,
     WorkflowApproval,
     WorkflowJob,
-    WorkflowJobTemplate
+    WorkflowJobTemplate,
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
@@ -44,10 +44,9 @@ from awx.main.utils import decrypt_field
 logger = logging.getLogger('awx.main.scheduler')
 
 
-class TaskManager():
-
+class TaskManager:
     def __init__(self):
-        '''
+        """
         Do NOT put database queries or other potentially expensive operations
         in the task manager init. The task manager object is created every time a
         job is created, transitions state, and every 30 seconds on each tower node.
@@ -55,7 +54,7 @@ class TaskManager():
 
         The NOOP case is short-circuit logic. If the task manager realizes that another instance
         of the task manager is already running, then it short-circuits and decides not to run.
-        '''
+        """
         self.graph = dict()
         # start task limit indicates how many pending jobs can be started on this
         # .schedule() run. Starting jobs is expensive, and there is code in place to reap
@@ -67,26 +66,28 @@ class TaskManager():
         self.time_delta_job_explanation = timedelta(seconds=30)
 
     def after_lock_init(self):
-        '''
+        """
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
-        '''
-        instances = Instance.objects.filter(~Q(hostname=None), capacity__gt=0, enabled=True)
+        """
+        instances = Instance.objects.filter(~Q(hostname=None), enabled=True)
         self.real_instances = {i.hostname: i for i in instances}
 
-        instances_partial = [SimpleNamespace(obj=instance,
-                                             remaining_capacity=instance.remaining_capacity,
-                                             capacity=instance.capacity,
-                                             jobs_running=instance.jobs_running,
-                                             hostname=instance.hostname) for instance in instances]
+        instances_partial = [
+            SimpleNamespace(
+                obj=instance,
+                remaining_capacity=instance.remaining_capacity,
+                capacity=instance.capacity,
+                jobs_running=instance.jobs_running,
+                hostname=instance.hostname,
+            )
+            for instance in instances
+        ]
 
         instances_by_hostname = {i.hostname: i for i in instances_partial}
 
         for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
-            self.graph[rampart_group.name] = dict(graph=DependencyGraph(),
-                                                  capacity_total=rampart_group.capacity,
-                                                  consumed_capacity=0,
-                                                  instances=[])
-            for instance in rampart_group.instances.filter(capacity__gt=0, enabled=True).order_by('hostname'):
+            self.graph[rampart_group.name] = dict(graph=DependencyGraph(), capacity_total=rampart_group.capacity, consumed_capacity=0, instances=[])
+            for instance in rampart_group.instances.filter(enabled=True).order_by('hostname'):
                 if instance.hostname in instances_by_hostname:
                     self.graph[rampart_group.name]['instances'].append(instances_by_hostname[instance.hostname])
 
@@ -108,21 +109,20 @@ class TaskManager():
 
     def get_tasks(self, status_list=('pending', 'waiting', 'running')):
         jobs = [j for j in Job.objects.filter(status__in=status_list).prefetch_related('instance_group')]
-        inventory_updates_qs = InventoryUpdate.objects.filter(
-            status__in=status_list).exclude(source='file').prefetch_related('inventory_source', 'instance_group')
+        inventory_updates_qs = (
+            InventoryUpdate.objects.filter(status__in=status_list).exclude(source='file').prefetch_related('inventory_source', 'instance_group')
+        )
         inventory_updates = [i for i in inventory_updates_qs]
         # Notice the job_type='check': we want to prevent implicit project updates from blocking our jobs.
         project_updates = [p for p in ProjectUpdate.objects.filter(status__in=status_list, job_type='check').prefetch_related('instance_group')]
         system_jobs = [s for s in SystemJob.objects.filter(status__in=status_list).prefetch_related('instance_group')]
         ad_hoc_commands = [a for a in AdHocCommand.objects.filter(status__in=status_list).prefetch_related('instance_group')]
         workflow_jobs = [w for w in WorkflowJob.objects.filter(status__in=status_list)]
-        all_tasks = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands + workflow_jobs,
-                           key=lambda task: task.created)
+        all_tasks = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands + workflow_jobs, key=lambda task: task.created)
         return all_tasks
 
     def get_running_workflow_jobs(self):
-        graph_workflow_jobs = [wf for wf in
-                               WorkflowJob.objects.filter(status='running')]
+        graph_workflow_jobs = [wf for wf in WorkflowJob.objects.filter(status='running')]
         return graph_workflow_jobs
 
     def get_inventory_source_tasks(self, all_sorted_tasks):
@@ -156,20 +156,26 @@ class TaskManager():
                     workflow_ancestors = job.get_ancestor_workflows()
                     if spawn_node.unified_job_template in set(workflow_ancestors):
                         can_start = False
-                        logger.info('Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
-                            job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]))
+                        logger.info(
+                            'Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                                job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
+                            )
+                        )
                         display_list = [spawn_node.unified_job_template] + workflow_ancestors
                         job.job_explanation = gettext_noop(
-                            "Workflow Job spawned from workflow could not start because it "
-                            "would result in recursion (spawn order, most recent first: {})"
+                            "Workflow Job spawned from workflow could not start because it " "would result in recursion (spawn order, most recent first: {})"
                         ).format(', '.join(['<{}>'.format(tmp) for tmp in display_list]))
                     else:
-                        logger.debug('Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
-                            job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]))
+                        logger.debug(
+                            'Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                                job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
+                            )
+                        )
                 if not job._resources_sufficient_for_launch():
                     can_start = False
-                    job.job_explanation = gettext_noop("Job spawned from workflow could not start because it "
-                                                       "was missing a related resource such as project or inventory")
+                    job.job_explanation = gettext_noop(
+                        "Job spawned from workflow could not start because it " "was missing a related resource such as project or inventory"
+                    )
                 if can_start:
                     if workflow_job.start_args:
                         start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
@@ -177,15 +183,16 @@ class TaskManager():
                         start_args = {}
                     can_start = job.signal_start(**start_args)
                     if not can_start:
-                        job.job_explanation = gettext_noop("Job spawned from workflow could not start because it "
-                                                           "was not in the right state or required manual credentials")
+                        job.job_explanation = gettext_noop(
+                            "Job spawned from workflow could not start because it " "was not in the right state or required manual credentials"
+                        )
                 if not can_start:
                     job.status = 'failed'
                     job.save(update_fields=['status', 'job_explanation'])
                     job.websocket_emit_status('failed')
 
                 # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
-                #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
+                # emit_websocket_notification('/socket.io/jobs', '', dict(id=))
 
     def process_finished_workflow_jobs(self, workflow_jobs):
         result = []
@@ -251,8 +258,7 @@ class TaskManager():
             try:
                 controller_node = rampart_group.choose_online_controller_node()
             except IndexError:
-                logger.debug("No controllers available in group {} to run {}".format(
-                             rampart_group.name, task.log_format))
+                logger.debug("No controllers available in group {} to run {}".format(rampart_group.name, task.log_format))
                 return
 
         task.status = 'waiting'
@@ -275,29 +281,25 @@ class TaskManager():
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
                 task.execution_node = random.choice(list(rampart_group.controller.instances.all().values_list('hostname', flat=True)))
-                logger.debug('Submitting isolated {} to queue {} on node {}.'.format(
-                             task.log_format, task.instance_group.name, task.execution_node))
+                logger.debug('Submitting isolated {} to queue {} on node {}.'.format(task.log_format, task.instance_group.name, task.execution_node))
             elif controller_node:
                 task.instance_group = rampart_group
                 task.execution_node = instance.hostname
                 task.controller_node = controller_node
-                logger.debug('Submitting isolated {} to queue {} controlled by {}.'.format(
-                             task.log_format, task.execution_node, controller_node))
-            elif rampart_group.is_containerized:
+                logger.debug('Submitting isolated {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, controller_node))
+            elif rampart_group.is_container_group:
                 # find one real, non-containerized instance with capacity to
                 # act as the controller for k8s API interaction
                 match = None
                 for group in InstanceGroup.objects.all():
-                    if group.is_containerized or group.controller_id:
+                    if group.is_container_group or group.controller_id:
                         continue
                     match = group.fit_task_to_most_remaining_capacity_instance(task, group.instances.all())
                     if match:
                         break
                 task.instance_group = rampart_group
                 if match is None:
-                    logger.warn(
-                        'No available capacity to run containerized <{}>.'.format(task.log_format)
-                    )
+                    logger.warn('No available capacity to run containerized <{}>.'.format(task.log_format))
                 else:
                     if task.supports_isolation():
                         task.controller_node = match.hostname
@@ -306,14 +308,12 @@ class TaskManager():
                         # so just pick *any* non-isolated, non-containerized host and use it
                         # as the execution node
                         task.execution_node = match.hostname
-                        logger.debug('Submitting containerized {} to queue {}.'.format(
-                                     task.log_format, task.execution_node))
+                        logger.debug('Submitting containerized {} to queue {}.'.format(task.log_format, task.execution_node))
             else:
                 task.instance_group = rampart_group
                 if instance is not None:
                     task.execution_node = instance.hostname
-                logger.debug('Submitting {} to <instance group, instance> <{},{}>.'.format(
-                             task.log_format, task.instance_group_id, task.execution_node))
+                logger.debug('Submitting {} to <instance group, instance> <{},{}>.'.format(task.log_format, task.instance_group_id, task.execution_node))
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()
@@ -330,15 +330,8 @@ class TaskManager():
                     opts,
                     queue=task.get_queue_name(),
                     uuid=task.celery_task_id,
-                    callbacks=[{
-                        'task': handle_work_success.name,
-                        'kwargs': {'task_actual': task_actual}
-                    }],
-                    errbacks=[{
-                        'task': handle_work_error.name,
-                        'args': [task.celery_task_id],
-                        'kwargs': {'subtasks': [task_actual] + dependencies}
-                    }],
+                    callbacks=[{'task': handle_work_success.name, 'kwargs': {'task_actual': task_actual}}],
+                    errbacks=[{'task': handle_work_error.name, 'args': [task.celery_task_id], 'kwargs': {'subtasks': [task_actual] + dependencies}}],
                 )
 
         task.websocket_emit_status(task.status)  # adds to on_commit
@@ -350,32 +343,22 @@ class TaskManager():
                 self.graph[task.instance_group.name]['graph'].add_job(task)
 
     def create_project_update(self, task):
-        project_task = Project.objects.get(id=task.project_id).create_project_update(
-            _eager_fields=dict(launch_type='dependency'))
+        project_task = Project.objects.get(id=task.project_id).create_project_update(_eager_fields=dict(launch_type='dependency'))
 
         # Project created 1 seconds behind
         project_task.created = task.created - timedelta(seconds=1)
         project_task.status = 'pending'
         project_task.save()
-        logger.debug(
-            'Spawned {} as dependency of {}'.format(
-                project_task.log_format, task.log_format
-            )
-        )
+        logger.debug('Spawned {} as dependency of {}'.format(project_task.log_format, task.log_format))
         return project_task
 
     def create_inventory_update(self, task, inventory_source_task):
-        inventory_task = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(
-            _eager_fields=dict(launch_type='dependency'))
+        inventory_task = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(_eager_fields=dict(launch_type='dependency'))
 
         inventory_task.created = task.created - timedelta(seconds=2)
         inventory_task.status = 'pending'
         inventory_task.save()
-        logger.debug(
-            'Spawned {} as dependency of {}'.format(
-                inventory_task.log_format, task.log_format
-            )
-        )
+        logger.debug('Spawned {} as dependency of {}'.format(inventory_task.log_format, task.log_format))
         # inventory_sources = self.get_inventory_source_tasks([task])
         # self.process_inventory_sources(inventory_sources)
         return inventory_task
@@ -409,8 +392,7 @@ class TaskManager():
         timeout_seconds = timedelta(seconds=latest_inventory_update.inventory_source.update_cache_timeout)
         if (latest_inventory_update.finished + timeout_seconds) < now:
             return True
-        if latest_inventory_update.inventory_source.update_on_launch is True and \
-                latest_inventory_update.status in ['failed', 'canceled', 'error']:
+        if latest_inventory_update.inventory_source.update_on_launch is True and latest_inventory_update.status in ['failed', 'canceled', 'error']:
             return True
         return False
 
@@ -441,9 +423,11 @@ class TaskManager():
         then consider the project update found. This is so we don't enter an infinite loop
         of updating the project when cache timeout is 0.
         '''
-        if latest_project_update.project.scm_update_cache_timeout == 0 and \
-           latest_project_update.launch_type == 'dependency' and \
-           latest_project_update.created == job.created - timedelta(seconds=1):
+        if (
+            latest_project_update.project.scm_update_cache_timeout == 0
+            and latest_project_update.launch_type == 'dependency'
+            and latest_project_update.created == job.created - timedelta(seconds=1)
+        ):
             return False
         '''
         Normal Cache Timeout Logic
@@ -491,7 +475,7 @@ class TaskManager():
             if len(dependencies) > 0:
                 self.capture_chain_failure_dependencies(task, dependencies)
 
-        UnifiedJob.objects.filter(pk__in = [task.pk for task in undeped_tasks]).update(dependencies_processed=True)
+        UnifiedJob.objects.filter(pk__in=[task.pk for task in undeped_tasks]).update(dependencies_processed=True)
         return created_dependencies
 
     def process_pending_tasks(self, pending_tasks):
@@ -506,7 +490,7 @@ class TaskManager():
                 job_explanation = gettext_noop(f"waiting for {blocked_by._meta.model_name}-{blocked_by.id} to finish")
                 if task.job_explanation != job_explanation:
                     if task.created < (tz_now() - self.time_delta_job_explanation):
-                        task.job_explanation  = job_explanation
+                        task.job_explanation = job_explanation
                         tasks_to_update_job_explanation.append(task)
                 continue
             preferred_instance_groups = task.preferred_instance_groups
@@ -521,27 +505,34 @@ class TaskManager():
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
             for rampart_group in preferred_instance_groups:
-                if task.can_run_containerized and rampart_group.is_containerized:
+                if task.can_run_containerized and rampart_group.is_container_group:
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
                     break
 
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name)
-                if not rampart_group.is_containerized and self.get_remaining_capacity(rampart_group.name) <= 0:
-                    logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(
-                                 rampart_group.name, remaining_capacity))
+                if (
+                    task.task_impact > 0
+                    and not rampart_group.is_container_group  # project updates have a cost of zero
+                    and self.get_remaining_capacity(rampart_group.name) <= 0
+                ):
+                    logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(rampart_group.name, remaining_capacity))
                     continue
 
-                execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(task, self.graph[rampart_group.name]['instances']) or \
-                    InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'])
+                execution_instance = InstanceGroup.fit_task_to_most_remaining_capacity_instance(
+                    task, self.graph[rampart_group.name]['instances']
+                ) or InstanceGroup.find_largest_idle_instance(self.graph[rampart_group.name]['instances'])
 
-                if execution_instance or rampart_group.is_containerized:
-                    if not rampart_group.is_containerized:
+                if execution_instance or rampart_group.is_container_group:
+                    if not rampart_group.is_container_group:
                         execution_instance.remaining_capacity = max(0, execution_instance.remaining_capacity - task.task_impact)
                         execution_instance.jobs_running += 1
-                        logger.debug("Starting {} in group {} instance {} (remaining_capacity={})".format(
-                                     task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity))
+                        logger.debug(
+                            "Starting {} in group {} instance {} (remaining_capacity={})".format(
+                                task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity
+                            )
+                        )
 
                     if execution_instance:
                         execution_instance = self.real_instances[execution_instance.hostname]
@@ -550,8 +541,11 @@ class TaskManager():
                     found_acceptable_queue = True
                     break
                 else:
-                    logger.debug("No instance available in group {} to run job {} w/ capacity requirement {}".format(
-                                 rampart_group.name, task.log_format, task.task_impact))
+                    logger.debug(
+                        "No instance available in group {} to run job {} w/ capacity requirement {}".format(
+                            rampart_group.name, task.log_format, task.task_impact
+                        )
+                    )
             if not found_acceptable_queue:
                 task.log_lifecycle("needs_capacity")
                 job_explanation = gettext_noop("This job is not ready to start because there is not enough available capacity.")
@@ -573,9 +567,9 @@ class TaskManager():
             if task.timeout == 0:
                 continue
             if (now - task.created) >= approval_timeout_seconds:
-                timeout_message = _(
-                    "The approval node {name} ({pk}) has expired after {timeout} seconds."
-                ).format(name=task.name, pk=task.pk, timeout=task.timeout)
+                timeout_message = _("The approval node {name} ({pk}) has expired after {timeout} seconds.").format(
+                    name=task.name, pk=task.pk, timeout=task.timeout
+                )
                 logger.warn(timeout_message)
                 task.timed_out = True
                 task.status = 'failed'
@@ -591,10 +585,8 @@ class TaskManager():
         # elsewhere
         for j in UnifiedJob.objects.filter(
             status__in=['pending', 'waiting', 'running'],
-        ).exclude(
-            execution_node__in=Instance.objects.values_list('hostname', flat=True)
-        ):
-            if j.execution_node and not j.is_containerized:
+        ).exclude(execution_node__in=Instance.objects.values_list('hostname', flat=True)):
+            if j.execution_node and not j.is_container_group_task:
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')
 
@@ -602,13 +594,15 @@ class TaskManager():
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
 
     def consume_capacity(self, task, instance_group):
-        logger.debug('{} consumed {} capacity units from {} with prior total of {}'.format(
-                     task.log_format, task.task_impact, instance_group,
-                     self.graph[instance_group]['consumed_capacity']))
+        logger.debug(
+            '{} consumed {} capacity units from {} with prior total of {}'.format(
+                task.log_format, task.task_impact, instance_group, self.graph[instance_group]['consumed_capacity']
+            )
+        )
         self.graph[instance_group]['consumed_capacity'] += task.task_impact
 
     def get_remaining_capacity(self, instance_group):
-        return (self.graph[instance_group]['capacity_total'] - self.graph[instance_group]['consumed_capacity'])
+        return self.graph[instance_group]['capacity_total'] - self.graph[instance_group]['consumed_capacity']
 
     def process_tasks(self, all_sorted_tasks):
         running_tasks = [t for t in all_sorted_tasks if t.status in ['waiting', 'running']]

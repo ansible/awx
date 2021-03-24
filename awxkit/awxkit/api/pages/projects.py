@@ -1,7 +1,7 @@
 import json
 
 from awxkit.api.pages import Credential, Organization, UnifiedJob, UnifiedJobTemplate
-from awxkit.utils import filter_by_class, random_title, update_payload, PseudoNamespace
+from awxkit.utils import filter_by_class, random_title, update_payload, set_payload_foreign_key_args, PseudoNamespace
 from awxkit.api.mixins import HasCreate, HasNotifications, HasCopy, DSAdapter
 from awxkit.api.resources import resources
 from awxkit.config import config
@@ -18,13 +18,11 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
 
     def payload(self, organization, scm_type='git', **kwargs):
         payload = PseudoNamespace(
-            name=kwargs.get('name') or 'Project - {}'.format(
-                random_title()),
+            name=kwargs.get('name') or 'Project - {}'.format(random_title()),
             description=kwargs.get('description') or random_title(10),
             scm_type=scm_type,
-            scm_url=kwargs.get('scm_url') or config.project_urls.get(
-                scm_type,
-                ''))
+            scm_url=kwargs.get('scm_url') or config.project_urls.get(scm_type, ''),
+        )
 
         if organization is not None:
             payload.organization = organization.id
@@ -40,41 +38,25 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
             'scm_update_cache_timeout',
             'scm_update_on_launch',
             'scm_refspec',
-            'allow_override')
+            'allow_override',
+        )
         update_payload(payload, fields, kwargs)
+
+        payload = set_payload_foreign_key_args(payload, ('execution_environment', 'default_environment'), kwargs)
 
         return payload
 
-    def create_payload(
-            self,
-            name='',
-            description='',
-            scm_type='git',
-            scm_url='',
-            scm_branch='',
-            organization=Organization,
-            credential=None,
-            **kwargs):
+    def create_payload(self, name='', description='', scm_type='git', scm_url='', scm_branch='', organization=Organization, credential=None, **kwargs):
         if credential:
             if isinstance(credential, Credential):
-                if credential.ds.credential_type.namespace not in (
-                        'scm', 'insights'):
+                if credential.ds.credential_type.namespace not in ('scm', 'insights'):
                     credential = None  # ignore incompatible credential from HasCreate dependency injection
             elif credential in (Credential,):
-                credential = (
-                    Credential, dict(
-                        credential_type=(
-                            True, dict(
-                                kind='scm'))))
+                credential = (Credential, dict(credential_type=(True, dict(kind='scm'))))
             elif credential is True:
-                credential = (
-                    Credential, dict(
-                        credential_type=(
-                            True, dict(
-                                kind='scm'))))
+                credential = (Credential, dict(credential_type=(True, dict(kind='scm'))))
 
-        self.create_and_update_dependencies(
-            *filter_by_class((credential, Credential), (organization, Organization)))
+        self.create_and_update_dependencies(*filter_by_class((credential, Credential), (organization, Organization)))
 
         credential = self.ds.credential if credential else None
         organization = self.ds.organization if organization else None
@@ -87,20 +69,12 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
             scm_url=scm_url,
             scm_branch=scm_branch,
             credential=credential,
-            **kwargs)
+            **kwargs
+        )
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload
 
-    def create(
-            self,
-            name='',
-            description='',
-            scm_type='git',
-            scm_url='',
-            scm_branch='',
-            organization=Organization,
-            credential=None,
-            **kwargs):
+    def create(self, name='', description='', scm_type='git', scm_url='', scm_branch='', organization=Organization, credential=None, **kwargs):
         payload = self.create_payload(
             name=name,
             description=description,
@@ -109,7 +83,8 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
             scm_branch=scm_branch,
             organization=organization,
             credential=credential,
-            **kwargs)
+            **kwargs
+        )
         self.update_identity(Projects(self.connection).post(payload))
 
         if kwargs.get('wait', True):
@@ -125,25 +100,20 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
         update_pg = self.get_related('update')
 
         # assert can_update == True
-        assert update_pg.can_update, \
-            "The specified project (id:%s) is not able to update (can_update:%s)" % \
-            (self.id, update_pg.can_update)
+        assert update_pg.can_update, "The specified project (id:%s) is not able to update (can_update:%s)" % (self.id, update_pg.can_update)
 
         # start the update
         result = update_pg.post()
 
         # assert JSON response
-        assert 'project_update' in result.json, \
-            "Unexpected JSON response when starting an project_update.\n%s" % \
-            json.dumps(result.json, indent=2)
+        assert 'project_update' in result.json, "Unexpected JSON response when starting an project_update.\n%s" % json.dumps(result.json, indent=2)
 
         # locate and return the specific update
-        jobs_pg = self.get_related(
-            'project_updates',
-            id=result.json['project_update'])
-        assert jobs_pg.count == 1, \
-            "An project_update started (id:%s) but job not found in response at %s/inventory_updates/" % \
-            (result.json['project_update'], self.url)
+        jobs_pg = self.get_related('project_updates', id=result.json['project_update'])
+        assert jobs_pg.count == 1, "An project_update started (id:%s) but job not found in response at %s/inventory_updates/" % (
+            result.json['project_update'],
+            self.url,
+        )
         return jobs_pg.results[0]
 
     @property
@@ -152,13 +122,10 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
         0) scm_type != ""
         1) unified_job_template.is_successful
         """
-        return self.scm_type != "" and \
-            super(Project, self).is_successful
+        return self.scm_type != "" and super(Project, self).is_successful
 
 
-page.register_page([resources.project,
-                    (resources.projects, 'post'),
-                    (resources.project_copy, 'post')], Project)
+page.register_page([resources.project, (resources.projects, 'post'), (resources.project_copy, 'post')], Project)
 
 
 class Projects(page.PageList, Project):
@@ -166,8 +133,7 @@ class Projects(page.PageList, Project):
     pass
 
 
-page.register_page([resources.projects,
-                    resources.related_projects], Projects)
+page.register_page([resources.projects, resources.related_projects], Projects)
 
 
 class ProjectUpdate(UnifiedJob):
@@ -183,8 +149,7 @@ class ProjectUpdates(page.PageList, ProjectUpdate):
     pass
 
 
-page.register_page([resources.project_updates,
-                    resources.project_project_updates], ProjectUpdates)
+page.register_page([resources.project_updates, resources.project_project_updates], ProjectUpdates)
 
 
 class ProjectUpdateLaunch(base.Base):

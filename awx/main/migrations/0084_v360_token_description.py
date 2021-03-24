@@ -4,6 +4,7 @@ from django.db import migrations, models
 
 import awx
 
+
 class Migration(migrations.Migration):
 
     dependencies = [

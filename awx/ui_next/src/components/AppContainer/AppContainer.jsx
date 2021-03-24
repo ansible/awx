@@ -219,6 +219,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
         <ErrorDetail error={configError} />
       </AlertModal>
       <AlertModal
+        ouiaId="session-expiration-modal"
         title={i18n._(t`Your session is about to expire`)}
         isOpen={timeoutWarning && sessionTimeout > 0 && timeRemaining !== null}
         onClose={handleLogout}
@@ -226,13 +227,19 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
         variant="warning"
         actions={[
           <Button
+            ouiaId="session-expiration-continue-button"
             key="confirm"
             variant="primary"
             onClick={handleSessionContinue}
           >
             {i18n._(t`Continue`)}
           </Button>,
-          <Button key="logout" variant="secondary" onClick={handleLogout}>
+          <Button
+            ouiaId="session-expiration-logout-button"
+            key="logout"
+            variant="secondary"
+            onClick={handleLogout}
+          >
             {i18n._(t`Logout`)}
           </Button>,
         ]}

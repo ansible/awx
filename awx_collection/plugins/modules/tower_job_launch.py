@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -248,25 +247,24 @@ def main():
         module.fail_json(msg="Failed to launch job, see response for details", **{'response': results})
 
     if not wait:
-        module.exit_json(**{
+        module.exit_json(
+            **{
+                'changed': True,
+                'id': results['json']['id'],
+                'status': results['json']['status'],
+            }
+        )
+
+    # Invoke wait function
+    results = module.wait_on_url(url=results['json']['url'], object_name=name, object_type='Job', timeout=timeout, interval=interval)
+
+    module.exit_json(
+        **{
             'changed': True,
             'id': results['json']['id'],
             'status': results['json']['status'],
-        })
-
-    # Invoke wait function
-    results = module.wait_on_url(
-        url=results['json']['url'],
-        object_name=name,
-        object_type='Job',
-        timeout=timeout, interval=interval
+        }
     )
-
-    module.exit_json(**{
-        'changed': True,
-        'id': results['json']['id'],
-        'status': results['json']['status'],
-    })
 
 
 if __name__ == '__main__':

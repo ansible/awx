@@ -17,11 +17,13 @@ function WorkflowJobTemplateEdit({ template }) {
       organization,
       webhook_credential,
       webhook_key,
+      execution_environment,
       ...templatePayload
     } = values;
     templatePayload.inventory = inventory?.id || null;
-    templatePayload.organization = organization?.id;
+    templatePayload.organization = organization?.id || null;
     templatePayload.webhook_credential = webhook_credential?.id || null;
+    templatePayload.execution_environment = execution_environment?.id || null;
 
     const formOrgId =
       organization?.id || inventory?.summary_fields?.organization.id || null;

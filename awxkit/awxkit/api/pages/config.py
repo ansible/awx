@@ -4,22 +4,17 @@ from . import page
 
 
 class Config(base.Base):
-
     @property
     def is_aws_license(self):
-        return self.license_info.get('is_aws', False) or \
-            'ami-id' in self.license_info or \
-            'instance-id' in self.license_info
+        return self.license_info.get('is_aws', False) or 'ami-id' in self.license_info or 'instance-id' in self.license_info
 
     @property
     def is_valid_license(self):
-        return self.license_info.get('valid_key', False) and \
-            'instance_count' in self.license_info
+        return self.license_info.get('valid_key', False) and 'instance_count' in self.license_info
 
     @property
     def is_trial_license(self):
-        return self.is_valid_license and \
-            self.license_info.get('trial', False)
+        return self.is_valid_license and self.license_info.get('trial', False)
 
     @property
     def is_awx_license(self):
@@ -27,8 +22,7 @@ class Config(base.Base):
 
     @property
     def is_enterprise_license(self):
-        return self.is_valid_license and \
-            self.license_info.get('license_type', None) == 'enterprise'
+        return self.is_valid_license and self.license_info.get('license_type', None) == 'enterprise'
 
     @property
     def features(self):
@@ -37,7 +31,6 @@ class Config(base.Base):
 
 
 class ConfigAttach(page.Page):
-
     def attach(self, **kwargs):
         return self.post(json=kwargs).json
 

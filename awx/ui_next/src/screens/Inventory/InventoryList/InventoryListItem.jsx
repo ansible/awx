@@ -115,6 +115,7 @@ function InventoryListItem({
             tooltip={i18n._(t`Edit Inventory`)}
           >
             <Button
+              ouiaId={`${inventory.id}-edit-button`}
               isDisabled={isCopying}
               aria-label={i18n._(t`Edit Inventory`)}
               variant="plain"

@@ -3,9 +3,7 @@ django-rest-swagger
 pprofile
 ipython==5.2.1
 unittest2
-pep8
-flake8
-pyflakes
+black
 pytest
 pytest-cov
 pytest-django
@@ -20,5 +18,6 @@ matplotlib
 backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirectory
 mockldap
 sdb
+remote-pdb
 gprof2dot
 atomicwrites==1.4.0

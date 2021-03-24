@@ -4,7 +4,8 @@ import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { ToolbarItem } from '@patternfly/react-core';
+import styled from 'styled-components';
+import { Alert, ToolbarItem } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
 import AnsibleSelect from '../../AnsibleSelect';
 import OptionsList from '../../OptionsList';
@@ -13,7 +14,11 @@ import CredentialChip from '../../CredentialChip';
 import ContentError from '../../ContentError';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest from '../../../util/useRequest';
-import { required } from '../../../util/validators';
+import credentialsValidator from './credentialsValidator';
+
+const CredentialErrorAlert = styled(Alert)`
+  margin-bottom: 20px;
+`;
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,
@@ -21,10 +26,21 @@ const QS_CONFIG = getQSConfig('credential', {
   order_by: 'name',
 });
 
-function CredentialsStep({ i18n }) {
-  const [field, , helpers] = useField({
+function CredentialsStep({
+  i18n,
+  allowCredentialsWithPasswords,
+  defaultCredentials = [],
+}) {
+  const [field, meta, helpers] = useField({
     name: 'credentials',
-    validate: required(null, i18n),
+    validate: val => {
+      return credentialsValidator(
+        i18n,
+        defaultCredentials,
+        allowCredentialsWithPasswords,
+        val
+      );
+    },
   });
   const [selectedType, setSelectedType] = useState(null);
   const history = useHistory();
@@ -87,6 +103,18 @@ function CredentialsStep({ i18n }) {
     fetchCredentials();
   }, [fetchCredentials]);
 
+  useEffect(() => {
+    helpers.setError(
+      credentialsValidator(
+        i18n,
+        defaultCredentials,
+        allowCredentialsWithPasswords,
+        field.value
+      )
+    );
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
+
   if (isTypesLoading) {
     return <ContentLoading />;
   }
@@ -97,17 +125,23 @@ function CredentialsStep({ i18n }) {
 
   const isVault = selectedType?.kind === 'vault';
 
-  const renderChip = ({ item, removeItem, canDelete }) => (
-    <CredentialChip
-      key={item.id}
-      onClick={() => removeItem(item)}
-      isReadOnly={!canDelete}
-      credential={item}
-    />
-  );
+  const renderChip = ({ item, removeItem, canDelete }) => {
+    return (
+      <CredentialChip
+        id={`credential-chip-${item.id}`}
+        key={item.id}
+        onClick={() => removeItem(item)}
+        isReadOnly={!canDelete}
+        credential={item}
+      />
+    );
+  };
 
   return (
     <>
+      {meta.error && (
+        <CredentialErrorAlert variant="danger" isInline title={meta.error} />
+      )}
       {types && types.length > 0 && (
         <ToolbarItem css=" display: flex; align-items: center;">
           <div css="flex: 0 0 25%; margin-right: 32px">
@@ -130,56 +164,56 @@ function CredentialsStep({ i18n }) {
           />
         </ToolbarItem>
       )}
-      {!isCredentialsLoading && (
-        <OptionsList
-          value={field.value || []}
-          options={credentials}
-          optionCount={count}
-          searchColumns={[
-            {
-              name: i18n._(t`Name`),
-              key: 'name__icontains',
-              isDefault: true,
-            },
-            {
-              name: i18n._(t`Created By (Username)`),
-              key: 'created_by__username__icontains',
-            },
-            {
-              name: i18n._(t`Modified By (Username)`),
-              key: 'modified_by__username__icontains',
-            },
-          ]}
-          sortColumns={[
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-            },
-          ]}
-          searchableKeys={searchableKeys}
-          relatedSearchableKeys={relatedSearchableKeys}
-          multiple={isVault}
-          header={i18n._(t`Credentials`)}
-          name="credentials"
-          qsConfig={QS_CONFIG}
-          readOnly={false}
-          selectItem={item => {
-            const hasSameVaultID = val =>
-              val?.inputs?.vault_id !== undefined &&
-              val?.inputs?.vault_id === item?.inputs?.vault_id;
-            const hasSameKind = val => val.kind === item.kind;
-            const newItems = field.value.filter(i =>
-              isVault ? !hasSameVaultID(i) : !hasSameKind(i)
-            );
-            newItems.push(item);
-            helpers.setValue(newItems);
-          }}
-          deselectItem={item => {
-            helpers.setValue(field.value.filter(i => i.id !== item.id));
-          }}
-          renderItemChip={renderChip}
-        />
-      )}
+      <OptionsList
+        isLoading={isCredentialsLoading}
+        value={field.value || []}
+        options={credentials}
+        optionCount={count}
+        searchColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name__icontains',
+            isDefault: true,
+          },
+          {
+            name: i18n._(t`Created By (Username)`),
+            key: 'created_by__username__icontains',
+          },
+          {
+            name: i18n._(t`Modified By (Username)`),
+            key: 'modified_by__username__icontains',
+          },
+        ]}
+        sortColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name',
+          },
+        ]}
+        searchableKeys={searchableKeys}
+        relatedSearchableKeys={relatedSearchableKeys}
+        multiple={isVault}
+        header={i18n._(t`Credentials`)}
+        name="credentials"
+        qsConfig={QS_CONFIG}
+        readOnly={false}
+        selectItem={item => {
+          const hasSameVaultID = val =>
+            val?.inputs?.vault_id !== undefined &&
+            val?.inputs?.vault_id === item?.inputs?.vault_id;
+          const hasSameCredentialType = val =>
+            val.credential_type === item.credential_type;
+          const newItems = field.value.filter(i =>
+            isVault ? !hasSameVaultID(i) : !hasSameCredentialType(i)
+          );
+          newItems.push(item);
+          helpers.setValue(newItems);
+        }}
+        deselectItem={item => {
+          helpers.setValue(field.value.filter(i => i.id !== item.id));
+        }}
+        renderItemChip={renderChip}
+      />
     </>
   );
 }

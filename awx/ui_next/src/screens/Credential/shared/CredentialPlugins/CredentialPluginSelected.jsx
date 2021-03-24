@@ -28,6 +28,7 @@ function CredentialPluginSelected({
   credential,
   onEditPlugin,
   onClearPlugin,
+  fieldId,
 }) {
   return (
     <>
@@ -38,6 +39,7 @@ function CredentialPluginSelected({
           position="top"
         >
           <Button
+            ouiaId={`credential-field-${fieldId}-edit-plugin-button`}
             aria-label={i18n._(t`Edit Credential Plugin Configuration`)}
             onClick={onEditPlugin}
             variant={ButtonVariant.control}

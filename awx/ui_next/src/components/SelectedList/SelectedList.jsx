@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import ChipGroup from '../ChipGroup';
 
 const Split = styled(PFSplit)`
-  margin: 20px 0px;
+  margin: 20px 0 5px 0 !important;
   align-items: baseline;
 `;
 

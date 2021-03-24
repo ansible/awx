@@ -12,8 +12,7 @@ from collections import OrderedDict
 logger = logging.getLogger('awx.main.commands.inventory_import')
 
 
-__all__ = ['MemHost', 'MemGroup', 'MemInventory',
-           'mem_data_to_dict', 'dict_to_mem_data']
+__all__ = ['MemHost', 'MemGroup', 'MemInventory', 'mem_data_to_dict', 'dict_to_mem_data']
 
 
 ipv6_port_re = re.compile(r'^\[([A-Fa-f0-9:]{3,})\]:(\d+?)$')
@@ -23,9 +22,9 @@ ipv6_port_re = re.compile(r'^\[([A-Fa-f0-9:]{3,})\]:(\d+?)$')
 
 
 class MemObject(object):
-    '''
+    """
     Common code shared between in-memory groups and hosts.
-    '''
+    """
 
     def __init__(self, name):
         assert name, 'no name'
@@ -33,9 +32,9 @@ class MemObject(object):
 
 
 class MemGroup(MemObject):
-    '''
+    """
     In-memory representation of an inventory group.
-    '''
+    """
 
     def __init__(self, name):
         super(MemGroup, self).__init__(name)
@@ -75,7 +74,7 @@ class MemGroup(MemObject):
         logger.debug('Dumping tree for group "%s":', self.name)
         logger.debug('- Vars: %r', self.variables)
         for h in self.hosts:
-            logger.debug('- Host: %s, %r',  h.name, h.variables)
+            logger.debug('- Host: %s, %r', h.name, h.variables)
         for g in self.children:
             logger.debug('- Child: %s', g.name)
         logger.debug('----')
@@ -85,9 +84,9 @@ class MemGroup(MemObject):
 
 
 class MemHost(MemObject):
-    '''
+    """
     In-memory representation of an inventory host.
-    '''
+    """
 
     def __init__(self, name, port=None):
         super(MemHost, self).__init__(name)
@@ -104,9 +103,10 @@ class MemHost(MemObject):
 
 
 class MemInventory(object):
-    '''
+    """
     Common functions for an inventory loader from a given source.
-    '''
+    """
+
     def __init__(self, all_group=None, group_filter_re=None, host_filter_re=None):
         if all_group:
             assert isinstance(all_group, MemGroup), '{} is not MemGroup instance'.format(all_group)
@@ -122,10 +122,10 @@ class MemInventory(object):
         return host
 
     def get_host(self, name):
-        '''
+        """
         Return a MemHost instance from host name, creating if needed.  If name
         contains brackets, they will NOT be interpreted as a host pattern.
-        '''
+        """
         m = ipv6_port_re.match(name)
         if m:
             host_name = m.groups()[0]
@@ -135,8 +135,7 @@ class MemInventory(object):
             try:
                 port = int(name.split(':')[1])
             except (ValueError, UnicodeDecodeError):
-                logger.warning(u'Invalid port "%s" for host "%s"',
-                               name.split(':')[1], host_name)
+                logger.warning(u'Invalid port "%s" for host "%s"', name.split(':')[1], host_name)
                 port = None
         else:
             host_name = name
@@ -155,9 +154,9 @@ class MemInventory(object):
         return group
 
     def get_group(self, name, all_group=None, child=False):
-        '''
+        """
         Return a MemGroup instance from group name, creating if needed.
-        '''
+        """
         all_group = all_group or self.all_group
         if name in ['all', 'ungrouped']:
             return all_group
@@ -182,13 +181,14 @@ class MemInventory(object):
 
 # Conversion utilities
 
+
 def mem_data_to_dict(inventory):
-    '''
+    """
     Given an in-memory construct of an inventory, returns a dictionary that
     follows Ansible guidelines on the structure of dynamic inventory sources
 
     May be replaced by removing in-memory constructs within this file later
-    '''
+    """
     all_group = inventory.all_group
     inventory_data = OrderedDict([])
     # Save hostvars to _meta
@@ -225,18 +225,18 @@ def mem_data_to_dict(inventory):
 
 
 def dict_to_mem_data(data, inventory=None):
-    '''
+    """
     In-place operation on `inventory`, adds contents from `data` to the
     in-memory representation of memory.
     May be destructive on `data`
-    '''
+    """
     assert isinstance(data, dict), 'Expected dict, received {}'.format(type(data))
     if inventory is None:
         inventory = MemInventory()
 
     _meta = data.pop('_meta', {})
 
-    for k,v in data.items():
+    for k, v in data.items():
         group = inventory.get_group(k)
         if not group:
             continue
@@ -253,9 +253,7 @@ def dict_to_mem_data(data, inventory=None):
                     if isinstance(hv, dict):
                         host.variables.update(hv)
                     else:
-                        logger.warning('Expected dict of vars for '
-                                       'host "%s", got %s instead',
-                                       hk, str(type(hv)))
+                        logger.warning('Expected dict of vars for ' 'host "%s", got %s instead', hk, str(type(hv)))
                     group.add_host(host)
             elif isinstance(hosts, (list, tuple)):
                 for hk in hosts:
@@ -264,17 +262,13 @@ def dict_to_mem_data(data, inventory=None):
                         continue
                     group.add_host(host)
             else:
-                logger.warning('Expected dict or list of "hosts" for '
-                               'group "%s", got %s instead', k,
-                               str(type(hosts)))
+                logger.warning('Expected dict or list of "hosts" for ' 'group "%s", got %s instead', k, str(type(hosts)))
             # Process group variables.
             vars = v.get('vars', {})
             if isinstance(vars, dict):
                 group.variables.update(vars)
             else:
-                logger.warning('Expected dict of vars for '
-                               'group "%s", got %s instead',
-                               k, str(type(vars)))
+                logger.warning('Expected dict of vars for ' 'group "%s", got %s instead', k, str(type(vars)))
             # Process child groups.
             children = v.get('children', [])
             if isinstance(children, (list, tuple)):
@@ -283,9 +277,7 @@ def dict_to_mem_data(data, inventory=None):
                     if child and c != 'ungrouped':
                         group.add_child_group(child)
             else:
-                logger.warning('Expected list of children for '
-                               'group "%s", got %s instead',
-                               k, str(type(children)))
+                logger.warning('Expected list of children for ' 'group "%s", got %s instead', k, str(type(children)))
 
         # Load host names from a list.
         elif isinstance(v, (list, tuple)):
@@ -296,20 +288,17 @@ def dict_to_mem_data(data, inventory=None):
                 group.add_host(host)
         else:
             logger.warning('')
-            logger.warning('Expected dict or list for group "%s", '
-                           'got %s instead', k, str(type(v)))
+            logger.warning('Expected dict or list for group "%s", ' 'got %s instead', k, str(type(v)))
 
         if k not in ['all', 'ungrouped']:
             inventory.all_group.add_child_group(group)
 
     if _meta:
-        for k,v in inventory.all_group.all_hosts.items():
+        for k, v in inventory.all_group.all_hosts.items():
             meta_hostvars = _meta['hostvars'].get(k, {})
             if isinstance(meta_hostvars, dict):
                 v.variables.update(meta_hostvars)
             else:
-                logger.warning('Expected dict of vars for '
-                               'host "%s", got %s instead',
-                               k, str(type(meta_hostvars)))
+                logger.warning('Expected dict of vars for ' 'host "%s", got %s instead', k, str(type(meta_hostvars)))
 
     return inventory

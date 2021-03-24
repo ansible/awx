@@ -12,4 +12,3 @@ def test_clean_credential_insights():
         proj.clean_credential()
 
     assert json.dumps(str(e.value)) == json.dumps(str([u'Insights Credential is required for an Insights Project.']))
-

@@ -9,8 +9,8 @@ const getBaseURL = type => {
     case 'project':
     case 'project_update':
       return '/project_updates/';
-    case 'system':
-    case 'system_job':
+    case 'management':
+    case 'management_job':
       return '/system_jobs/';
     case 'inventory':
     case 'inventory_update':
@@ -52,6 +52,16 @@ class Jobs extends RelaunchMixin(Base) {
       endpoint = `/api/v2${getBaseURL(type)}${id}/events/`;
     }
     return this.http.get(endpoint, { params });
+  }
+
+  readEventOptions(id, type = 'playbook') {
+    let endpoint;
+    if (type === 'playbook') {
+      endpoint = `/api/v2${getBaseURL(type)}${id}/job_events/`;
+    } else {
+      endpoint = `/api/v2${getBaseURL(type)}${id}/events/`;
+    }
+    return this.http.options(endpoint);
   }
 }
 

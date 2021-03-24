@@ -94,6 +94,7 @@ const mockJobTemplate = {
   },
   related: { webhook_receiver: '' },
   inventory: 1,
+  project: 5,
 };
 
 describe('NodeModal', () => {
@@ -114,6 +115,11 @@ describe('NodeModal', () => {
       },
     });
     JobTemplatesAPI.readLaunch.mockResolvedValue({ data: jtLaunchConfig });
+    JobTemplatesAPI.readCredentials.mockResolvedValue({
+      data: {
+        results: [],
+      },
+    });
     JobTemplatesAPI.readSurvey.mockResolvedValue({
       data: {
         name: '',
@@ -238,7 +244,12 @@ describe('NodeModal', () => {
                 nodeToEdit: null,
               }}
             >
-              <NodeModal askLinkType onSave={onSave} title="Add Node" />
+              <NodeModal
+                askLinkType
+                onSave={onSave}
+                title="Add Node"
+                resourceDefaultCredentials={[]}
+              />
             </WorkflowStateContext.Provider>
           </WorkflowDispatchContext.Provider>
         );
@@ -253,8 +264,9 @@ describe('NodeModal', () => {
 
     test('Can successfully create a new job template node', async () => {
       act(() => {
-        wrapper.find('#link-type-always').simulate('click');
+        wrapper.find('SelectableCard#link-type-always').simulate('click');
       });
+      wrapper.update();
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
@@ -270,6 +282,9 @@ describe('NodeModal', () => {
       wrapper.update();
 
       expect(JobTemplatesAPI.readLaunch).toBeCalledWith(1);
+      expect(JobTemplatesAPI.readCredentials).toBeCalledWith(1, {
+        page_size: 200,
+      });
       expect(JobTemplatesAPI.readSurvey).toBeCalledWith(25);
       wrapper.update();
       expect(wrapper.find('NodeNextButton').prop('buttonText')).toBe('Next');
@@ -280,11 +295,6 @@ describe('NodeModal', () => {
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
-
-      wrapper.update();
-
-      expect(JobTemplatesAPI.readLaunch).toBeCalledWith(1);
-      expect(JobTemplatesAPI.readSurvey).toBeCalledWith(25);
       wrapper.update();
       expect(wrapper.find('NodeNextButton').prop('buttonText')).toBe('Save');
       act(() => {
@@ -316,7 +326,7 @@ describe('NodeModal', () => {
 
     test('Can successfully create a new project sync node', async () => {
       act(() => {
-        wrapper.find('#link-type-failure').simulate('click');
+        wrapper.find('SelectableCard#link-type-failure').simulate('click');
       });
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
@@ -351,7 +361,7 @@ describe('NodeModal', () => {
 
     test('Can successfully create a new inventory source sync node', async () => {
       act(() => {
-        wrapper.find('#link-type-failure').simulate('click');
+        wrapper.find('SelectableCard#link-type-failure').simulate('click');
       });
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
@@ -445,7 +455,7 @@ describe('NodeModal', () => {
 
     test('Can successfully create a new approval template node', async () => {
       act(() => {
-        wrapper.find('#link-type-always').simulate('click');
+        wrapper.find('SelectableCard#link-type-always').simulate('click');
       });
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
@@ -542,6 +552,7 @@ describe('NodeModal', () => {
                 askLinkType={false}
                 onSave={onSave}
                 title="Edit Node"
+                resourceDefaultCredentials={[]}
               />
             </WorkflowStateContext.Provider>
           </WorkflowDispatchContext.Provider>
@@ -628,6 +639,7 @@ describe('NodeModal', () => {
                 askLinkType={false}
                 onSave={onSave}
                 title="Edit Node"
+                resourceDefaultCredentials={[]}
               />
             </WorkflowStateContext.Provider>
           </WorkflowDispatchContext.Provider>

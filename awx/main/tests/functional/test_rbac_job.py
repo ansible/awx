@@ -2,24 +2,8 @@ import pytest
 
 from rest_framework.exceptions import PermissionDenied
 
-from awx.main.access import (
-    JobAccess,
-    JobLaunchConfigAccess,
-    AdHocCommandAccess,
-    InventoryUpdateAccess,
-    ProjectUpdateAccess
-)
-from awx.main.models import (
-    Job,
-    JobLaunchConfig,
-    JobTemplate,
-    AdHocCommand,
-    InventoryUpdate,
-    InventorySource,
-    ProjectUpdate,
-    User,
-    Credential
-)
+from awx.main.access import JobAccess, JobLaunchConfigAccess, AdHocCommandAccess, InventoryUpdateAccess, ProjectUpdateAccess
+from awx.main.models import Job, JobLaunchConfig, JobTemplate, AdHocCommand, InventoryUpdate, InventorySource, ProjectUpdate, User, Credential
 
 from crum import impersonate
 
@@ -30,7 +14,7 @@ def normal_job(deploy_jobtemplate):
         job_template=deploy_jobtemplate,
         project=deploy_jobtemplate.project,
         inventory=deploy_jobtemplate.inventory,
-        organization=deploy_jobtemplate.organization
+        organization=deploy_jobtemplate.organization,
     )
 
 
@@ -71,8 +55,7 @@ def test_superuser_superauditor_sees_orphans(normal_job, superuser, admin_user, 
     normal_job.project = None
     normal_job.inventory = None
     access = JobAccess(u)
-    assert access.can_read(normal_job), "User sys auditor: {}, sys admin: {}".format(
-        u.is_system_auditor, u.is_superuser)
+    assert access.can_read(normal_job), "User sys auditor: {}, sys admin: {}".format(u.is_system_auditor, u.is_superuser)
 
 
 @pytest.mark.django_db
@@ -130,37 +113,32 @@ def test_delete_job_with_orphan_proj(normal_job, rando):
 
 @pytest.mark.django_db
 def test_inventory_org_admin_delete_allowed(normal_job, org_admin):
-    normal_job.project = None # do this so we test job->inventory->org->admin connection
+    normal_job.project = None  # do this so we test job->inventory->org->admin connection
     access = JobAccess(org_admin)
     assert access.can_delete(normal_job)
 
 
 @pytest.mark.django_db
 def test_project_org_admin_delete_allowed(normal_job, org_admin):
-    normal_job.inventory = None # do this so we test job->project->org->admin connection
+    normal_job.inventory = None  # do this so we test job->project->org->admin connection
     access = JobAccess(org_admin)
     assert access.can_delete(normal_job)
 
 
 @pytest.mark.django_db
 class TestJobRelaunchAccess:
-
-    @pytest.mark.parametrize("inv_access,cred_access,can_start", [
-        (True, True, True),  # Confirm that a user with inventory & credential access can launch
-        (False, True, False),  # Confirm that a user with credential access alone cannot launch
-        (True, False, False),  # Confirm that a user with inventory access alone cannot launch
-    ])
-    def test_job_relaunch_resource_access(self, user, inventory, machine_credential,
-                                          inv_access, cred_access, can_start):
-        job_template = JobTemplate.objects.create(
-            ask_inventory_on_launch=True,
-            ask_credential_on_launch=True
-        )
+    @pytest.mark.parametrize(
+        "inv_access,cred_access,can_start",
+        [
+            (True, True, True),  # Confirm that a user with inventory & credential access can launch
+            (False, True, False),  # Confirm that a user with credential access alone cannot launch
+            (True, False, False),  # Confirm that a user with inventory access alone cannot launch
+        ],
+    )
+    def test_job_relaunch_resource_access(self, user, inventory, machine_credential, inv_access, cred_access, can_start):
+        job_template = JobTemplate.objects.create(ask_inventory_on_launch=True, ask_credential_on_launch=True)
         u = user('user1', False)
-        job_with_links = Job.objects.create(
-            name='existing-job', inventory=inventory, job_template=job_template,
-            created_by=u
-        )
+        job_with_links = Job.objects.create(name='existing-job', inventory=inventory, job_template=job_template, created_by=u)
         job_with_links.credentials.add(machine_credential)
         JobLaunchConfig.objects.create(job=job_with_links, inventory=inventory)
         job_with_links.launch_config.credentials.add(machine_credential)  # credential was prompted
@@ -177,8 +155,7 @@ class TestJobRelaunchAccess:
             with pytest.raises(PermissionDenied):
                 access.can_start(job_with_links, validate_license=False)
 
-    def test_job_relaunch_credential_access(
-            self, inventory, project, credential, net_credential):
+    def test_job_relaunch_credential_access(self, inventory, project, credential, net_credential):
         jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
         jt.credentials.add(credential)
         job = jt.create_unified_job()
@@ -193,11 +170,8 @@ class TestJobRelaunchAccess:
         with pytest.raises(PermissionDenied):
             jt_user.can_access(Job, 'start', job, validate_license=False)
 
-    def test_prompted_credential_relaunch_denied(
-            self, inventory, project, net_credential, rando):
-        jt = JobTemplate.objects.create(
-            name='testjt', inventory=inventory, project=project,
-            ask_credential_on_launch=True)
+    def test_prompted_credential_relaunch_denied(self, inventory, project, net_credential, rando):
+        jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project, ask_credential_on_launch=True)
         job = jt.create_unified_job()
         jt.execute_role.members.add(rando)
         assert rando.can_access(Job, 'start', job, validate_license=False)
@@ -207,11 +181,8 @@ class TestJobRelaunchAccess:
         with pytest.raises(PermissionDenied):
             rando.can_access(Job, 'start', job, validate_license=False)
 
-    def test_prompted_credential_relaunch_allowed(
-            self, inventory, project, net_credential, rando):
-        jt = JobTemplate.objects.create(
-            name='testjt', inventory=inventory, project=project,
-            ask_credential_on_launch=True)
+    def test_prompted_credential_relaunch_allowed(self, inventory, project, net_credential, rando):
+        jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project, ask_credential_on_launch=True)
         job = jt.create_unified_job()
         jt.execute_role.members.add(rando)
 
@@ -220,11 +191,8 @@ class TestJobRelaunchAccess:
         job.credentials.add(net_credential)
         assert rando.can_access(Job, 'start', job, validate_license=False)
 
-    def test_credential_relaunch_recreation_permission(
-            self, inventory, project, net_credential, credential, rando):
-        jt = JobTemplate.objects.create(
-            name='testjt', inventory=inventory, project=project,
-            ask_credential_on_launch=True)
+    def test_credential_relaunch_recreation_permission(self, inventory, project, net_credential, credential, rando):
+        jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project, ask_credential_on_launch=True)
         job = jt.create_unified_job()
         project.admin_role.members.add(rando)
         inventory.admin_role.members.add(rando)
@@ -238,20 +206,14 @@ class TestJobRelaunchAccess:
     @pytest.mark.job_runtime_vars
     def test_callback_relaunchable_by_user(self, job_template, rando):
         with impersonate(rando):
-            job = job_template.create_unified_job(
-                _eager_fields={'launch_type': 'callback'},
-                limit='host2'
-            )
+            job = job_template.create_unified_job(_eager_fields={'launch_type': 'callback'}, limit='host2')
         assert 'limit' in job.launch_config.prompts_dict()  # sanity assertion
         job_template.execute_role.members.add(rando)
         can_access, messages = rando.can_access_with_errors(Job, 'start', job, validate_license=False)
         assert can_access, messages
 
     def test_other_user_prompts(self, inventory, project, alice, bob):
-        jt = JobTemplate.objects.create(
-            name='testjt', inventory=inventory, project=project,
-            ask_credential_on_launch=True,
-            ask_variables_on_launch=True)
+        jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project, ask_credential_on_launch=True, ask_variables_on_launch=True)
         jt.execute_role.members.add(alice, bob)
 
         with impersonate(bob):
@@ -295,16 +257,12 @@ class TestJobAndUpdateCancels:
 
     # used in view: inventory_source_update_view
     def test_inventory_self_cancel(self, inventory, inv_updater):
-        inventory_update = InventoryUpdate(inventory_source=InventorySource(
-            name=inventory.name, inventory=inventory, source='gce'
-        ), created_by=inv_updater)
+        inventory_update = InventoryUpdate(inventory_source=InventorySource(name=inventory.name, inventory=inventory, source='gce'), created_by=inv_updater)
         access = InventoryUpdateAccess(inv_updater)
         assert access.can_cancel(inventory_update)
 
     def test_inventory_friend_cancel(self, inventory, admin_user, inv_updater):
-        inventory_update = InventoryUpdate(inventory_source=InventorySource(
-            name=inventory.name, inventory=inventory, source='gce'
-        ), created_by=admin_user)
+        inventory_update = InventoryUpdate(inventory_source=InventorySource(name=inventory.name, inventory=inventory, source='gce'), created_by=admin_user)
         access = InventoryUpdateAccess(inv_updater)
         assert not access.can_cancel(inventory_update)
 
@@ -322,15 +280,10 @@ class TestJobAndUpdateCancels:
 
 @pytest.mark.django_db
 class TestLaunchConfigAccess:
-
     def _make_two_credentials(self, cred_type):
         return (
-            Credential.objects.create(
-                credential_type=cred_type, name='machine-cred-1',
-                inputs={'username': 'test_user', 'password': 'pas4word'}),
-            Credential.objects.create(
-                credential_type=cred_type, name='machine-cred-2',
-                inputs={'username': 'test_user', 'password': 'pas4word'})
+            Credential.objects.create(credential_type=cred_type, name='machine-cred-1', inputs={'username': 'test_user', 'password': 'pas4word'}),
+            Credential.objects.create(credential_type=cred_type, name='machine-cred-2', inputs={'username': 'test_user', 'password': 'pas4word'}),
         )
 
     def test_new_credentials_access(self, credentialtype_ssh, rando):

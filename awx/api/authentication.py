@@ -18,7 +18,6 @@ logger = logging.getLogger('awx.api.authentication')
 
 
 class LoggedBasicAuthentication(authentication.BasicAuthentication):
-
     def authenticate(self, request):
         if not settings.AUTH_BASIC_ENABLED:
             return
@@ -35,22 +34,18 @@ class LoggedBasicAuthentication(authentication.BasicAuthentication):
 
 
 class SessionAuthentication(authentication.SessionAuthentication):
-    
     def authenticate_header(self, request):
         return 'Session'
 
 
 class LoggedOAuth2Authentication(OAuth2Authentication):
-
     def authenticate(self, request):
         ret = super(LoggedOAuth2Authentication, self).authenticate(request)
         if ret:
             user, token = ret
             username = user.username if user else '<none>'
-            logger.info(smart_text(
-                u"User {} performed a {} to {} through the API using OAuth 2 token {}.".format(
-                    username, request.method, request.path, token.pk
-                )
-            ))
+            logger.info(
+                smart_text(u"User {} performed a {} to {} through the API using OAuth 2 token {}.".format(username, request.method, request.path, token.pk))
+            )
             setattr(user, 'oauth_scopes', [x for x in token.scope.split() if x])
         return ret

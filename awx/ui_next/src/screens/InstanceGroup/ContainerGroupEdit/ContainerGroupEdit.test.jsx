@@ -31,7 +31,7 @@ const instanceGroup = {
   controller: null,
   is_controller: false,
   is_isolated: false,
-  is_containerized: true,
+  is_container_group: true,
   credential: 71,
   policy_instance_percentage: 0,
   policy_instance_minimum: 0,
@@ -147,6 +147,7 @@ describe('<ContainerGroupEdit/>', () => {
       ...updatedInstanceGroup,
       credential: 12,
       pod_spec_override: null,
+      is_container_group: true,
     });
     expect(history.location.pathname).toEqual(
       '/instance_groups/container_group/123/details'

@@ -48,9 +48,14 @@ def test_start_job_fact_cache(hosts, job, inventory, tmpdir):
 
 
 def test_fact_cache_with_invalid_path_traversal(job, inventory, tmpdir, mocker):
-    job._get_inventory_hosts = mocker.Mock(return_value=[
-        Host(name='../foo', ansible_facts={"a": 1, "b": 2},),
-    ])
+    job._get_inventory_hosts = mocker.Mock(
+        return_value=[
+            Host(
+                name='../foo',
+                ansible_facts={"a": 1, "b": 2},
+            ),
+        ]
+    )
 
     fact_cache = os.path.join(tmpdir, 'facts')
     job.start_job_fact_cache(fact_cache, {}, 0)

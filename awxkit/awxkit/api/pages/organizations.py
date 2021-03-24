@@ -1,5 +1,5 @@
 from awxkit.api.mixins import HasCreate, HasInstanceGroups, HasNotifications, DSAdapter
-from awxkit.utils import random_title, suppress, PseudoNamespace
+from awxkit.utils import random_title, suppress, set_payload_foreign_key_args, PseudoNamespace
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
 from . import base
@@ -26,23 +26,30 @@ class Organization(HasCreate, HasInstanceGroups, HasNotifications, base.Base):
         if isinstance(credential, page.Page):
             credential = credential.json
         with suppress(exc.NoContent):
-            self.related.galaxy_credentials.post({
-                "id": credential.id,
-            })
+            self.related.galaxy_credentials.post(
+                {
+                    "id": credential.id,
+                }
+            )
 
     def remove_galaxy_credential(self, credential):
         if isinstance(credential, page.Page):
             credential = credential.json
         with suppress(exc.NoContent):
-            self.related.galaxy_credentials.post({
-                "id": credential.id,
-                "disassociate": True,
-            })
-
+            self.related.galaxy_credentials.post(
+                {
+                    "id": credential.id,
+                    "disassociate": True,
+                }
+            )
 
     def payload(self, **kwargs):
-        payload = PseudoNamespace(name=kwargs.get('name') or 'Organization - {}'.format(random_title()),
-                                  description=kwargs.get('description') or random_title(10))
+        payload = PseudoNamespace(
+            name=kwargs.get('name') or 'Organization - {}'.format(random_title()), description=kwargs.get('description') or random_title(10)
+        )
+
+        payload = set_payload_foreign_key_args(payload, ('default_environment',), kwargs)
+
         return payload
 
     def create_payload(self, name='', description='', **kwargs):
@@ -55,8 +62,7 @@ class Organization(HasCreate, HasInstanceGroups, HasNotifications, base.Base):
         return self.update_identity(Organizations(self.connection).post(payload))
 
 
-page.register_page([resources.organization,
-                    (resources.organizations, 'post')], Organization)
+page.register_page([resources.organization, (resources.organizations, 'post')], Organization)
 
 
 class Organizations(page.PageList, Organization):
@@ -64,6 +70,4 @@ class Organizations(page.PageList, Organization):
     pass
 
 
-page.register_page([resources.organizations,
-                    resources.user_organizations,
-                    resources.project_organizations], Organizations)
+page.register_page([resources.organizations, resources.user_organizations, resources.project_organizations], Organizations)

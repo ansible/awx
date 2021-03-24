@@ -10,12 +10,12 @@ from awx.conf.models import Setting
 
 
 class SettingAccess(BaseAccess):
-    '''
+    """
     - I can see settings when I am a super user or system auditor.
     - I can edit settings when I am a super user.
     - I can clear settings when I am a super user.
     - I can always see/edit/clear my own user settings.
-    '''
+    """
 
     model = Setting
 

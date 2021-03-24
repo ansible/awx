@@ -1,10 +1,16 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { OrganizationsAPI } from '../../../api';
+import {
+  NotificationsAPI,
+  NotificationTemplatesAPI,
+  OrganizationsAPI,
+} from '../../../api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import NotificationTemplateList from './NotificationTemplateList';
 
 jest.mock('../../../api');
+
+jest.useFakeTimers();
 
 const mockTemplates = {
   data: {
@@ -89,21 +95,33 @@ describe('<NotificationTemplateList />', () => {
   });
 
   test('should select item', async () => {
-    const itemCheckboxInput = 'input#select-template-1';
     await act(async () => {
       wrapper = mountWithContexts(<NotificationTemplateList />);
     });
     wrapper.update();
-    expect(wrapper.find(itemCheckboxInput).prop('checked')).toEqual(false);
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
+    ).toEqual(false);
     await act(async () => {
       wrapper
-        .find(itemCheckboxInput)
-        .closest('DataListCheck')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .props()
         .onChange();
     });
     wrapper.update();
-    expect(wrapper.find(itemCheckboxInput).prop('checked')).toEqual(true);
+    expect(
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .prop('checked')
+    ).toEqual(true);
   });
 
   test('should delete notifications', async () => {
@@ -135,7 +153,6 @@ describe('<NotificationTemplateList />', () => {
   });
 
   test('should show error dialog shown for failed deletion', async () => {
-    const itemCheckboxInput = 'input#select-template-1';
     OrganizationsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -153,8 +170,9 @@ describe('<NotificationTemplateList />', () => {
     wrapper.update();
     await act(async () => {
       wrapper
-        .find(itemCheckboxInput)
-        .closest('DataListCheck')
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
         .props()
         .onChange();
     });
@@ -183,6 +201,43 @@ describe('<NotificationTemplateList />', () => {
     });
     wrapper.update();
     expect(wrapper.find('ToolbarAddButton').length).toBe(1);
+  });
+
+  test('should show toast after test resolves', async () => {
+    NotificationTemplatesAPI.test.mockResolvedValueOnce({
+      data: {
+        notification: 9182,
+      },
+    });
+    NotificationsAPI.readDetail.mockResolvedValueOnce({
+      data: {
+        id: 9182,
+        status: 'failed',
+        error: 'There was an error with the notification',
+        summary_fields: {
+          notification_template: {
+            name: 'foobar',
+          },
+        },
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<NotificationTemplateList />);
+    });
+    wrapper.update();
+    expect(wrapper.find('Alert').length).toBe(0);
+    await act(async () => {
+      wrapper
+        .find('button[aria-label="Test Notification"]')
+        .at(0)
+        .simulate('click');
+    });
+    wrapper.update();
+    await act(async () => {
+      jest.runAllTimers();
+    });
+    wrapper.update();
+    expect(wrapper.find('Alert').length).toBe(1);
   });
 
   test('should hide add button (rbac)', async () => {

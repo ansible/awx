@@ -20,11 +20,12 @@ describe('<ProjectAdd />', () => {
     scm_clean: true,
     credential: 100,
     local_path: '',
-    organization: 2,
+    organization: { id: 2, name: 'Bar' },
     scm_update_on_launch: true,
     scm_update_cache_timeout: 3,
     allow_override: false,
     custom_virtualenv: '/var/lib/awx/venv/custom-env',
+    default_environment: { id: 1, name: 'Foo' },
   };
 
   const projectOptionsResolve = {
@@ -102,6 +103,11 @@ describe('<ProjectAdd />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     wrapper.find('ProjectForm').invoke('handleSubmit')(projectData);
     expect(ProjectsAPI.create).toHaveBeenCalledTimes(1);
+    expect(ProjectsAPI.create).toHaveBeenCalledWith({
+      ...projectData,
+      organization: 2,
+      default_environment: 1,
+    });
   });
 
   test('handleSubmit should throw an error', async () => {

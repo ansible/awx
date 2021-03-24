@@ -30,12 +30,7 @@ def handle_setting_change(key, for_delete=False):
 
     # Send setting_changed signal with new value for each setting.
     for setting_key in setting_keys:
-        setting_changed.send(
-            sender=Setting,
-            setting=setting_key,
-            value=getattr(settings, setting_key, None),
-            enter=not bool(for_delete),
-        )
+        setting_changed.send(sender=Setting, setting=setting_key, value=getattr(settings, setting_key, None), enter=not bool(for_delete))
 
 
 @receiver(post_save, sender=Setting)

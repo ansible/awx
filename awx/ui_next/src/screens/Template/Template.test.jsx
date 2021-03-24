@@ -21,7 +21,7 @@ describe('<Template />', () => {
   let wrapper;
   beforeEach(() => {
     JobTemplatesAPI.readDetail.mockResolvedValue({
-      data: mockJobTemplateData,
+      data: { ...mockJobTemplateData, survey_enabled: false },
     });
     JobTemplatesAPI.readTemplateOptions.mockResolvedValue({
       data: {
@@ -56,6 +56,7 @@ describe('<Template />', () => {
         ],
       },
     });
+    JobTemplatesAPI.readLaunch.mockResolvedValue({ data: {} });
     JobTemplatesAPI.readWebhookKey.mockResolvedValue({
       data: {
         webhook_key: 'key',

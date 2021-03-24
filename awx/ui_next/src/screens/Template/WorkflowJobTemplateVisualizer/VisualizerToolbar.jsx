@@ -156,6 +156,7 @@ function VisualizerToolbar({
                 </ActionButton>
               </Tooltip>
               <Button
+                ouiaId="visualizer-save-button"
                 id="visualizer-save"
                 css="margin: 0 32px"
                 aria-label={i18n._(t`Save`)}
@@ -167,6 +168,7 @@ function VisualizerToolbar({
             </>
           )}
           <Button
+            ouiaId="visualizer-close-button"
             id="visualizer-close"
             aria-label={i18n._(t`Close`)}
             onClick={onClose}

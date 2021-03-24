@@ -38,21 +38,22 @@ class TestLabelFilterMocked:
         Label.objects.filter.assert_called_with(id=37, unifiedjob_labels__isnull=True, unifiedjobtemplate_labels__isnull=True)
         mock_query_set.count.assert_called_with()
 
-    @pytest.mark.parametrize("jt_count,j_count,expected", [
-        (1, 0, True),
-        (0, 1, True),
-        (1, 1, False),
-    ])
+    @pytest.mark.parametrize(
+        "jt_count,j_count,expected",
+        [
+            (1, 0, True),
+            (0, 1, True),
+            (1, 1, False),
+        ],
+    )
     def test_is_candidate_for_detach(self, mocker, jt_count, j_count, expected):
         mock_job_qs = mocker.MagicMock()
         mock_job_qs.count = mocker.MagicMock(return_value=j_count)
-        mocker.patch.object(UnifiedJob, 'objects', mocker.MagicMock(
-            filter=mocker.MagicMock(return_value=mock_job_qs)))
+        mocker.patch.object(UnifiedJob, 'objects', mocker.MagicMock(filter=mocker.MagicMock(return_value=mock_job_qs)))
 
         mock_jt_qs = mocker.MagicMock()
         mock_jt_qs.count = mocker.MagicMock(return_value=jt_count)
-        mocker.patch.object(UnifiedJobTemplate, 'objects', mocker.MagicMock(
-            filter=mocker.MagicMock(return_value=mock_jt_qs)))
+        mocker.patch.object(UnifiedJobTemplate, 'objects', mocker.MagicMock(filter=mocker.MagicMock(return_value=mock_jt_qs)))
 
         label = Label(id=37)
         ret = label.is_candidate_for_detach()

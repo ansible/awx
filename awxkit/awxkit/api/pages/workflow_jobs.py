@@ -4,7 +4,6 @@ from . import page
 
 
 class WorkflowJob(UnifiedJob):
-
     def __str__(self):
         # TODO: Update after endpoint's fields are finished filling out
         return super(UnifiedJob, self).__str__()
@@ -56,7 +55,4 @@ class WorkflowJobs(page.PageList, WorkflowJob):
     pass
 
 
-page.register_page([resources.workflow_jobs,
-                    resources.workflow_job_template_jobs,
-                    resources.job_template_slice_workflow_jobs],
-                   WorkflowJobs)
+page.register_page([resources.workflow_jobs, resources.workflow_job_template_jobs, resources.job_template_slice_workflow_jobs], WorkflowJobs)

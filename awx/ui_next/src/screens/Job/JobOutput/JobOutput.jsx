@@ -1,5 +1,5 @@
-import React, { Component, Fragment } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useHistory, useLocation, withRouter } from 'react-router-dom';
 import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -10,16 +10,25 @@ import {
   InfiniteLoader,
   List,
 } from 'react-virtualized';
-import { Button } from '@patternfly/react-core';
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
 import { AllHtmlEntities } from 'html-entities';
+import {
+  Button,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
+  ToolbarToggleGroup,
+  Tooltip,
+} from '@patternfly/react-core';
+import { SearchIcon } from '@patternfly/react-icons';
 
 import AlertModal from '../../../components/AlertModal';
-import { CardBody } from '../../../components/Card';
+import { CardBody as _CardBody } from '../../../components/Card';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import ErrorDetail from '../../../components/ErrorDetail';
+import Search from '../../../components/Search';
 import StatusIcon from '../../../components/StatusIcon';
 
 import JobEvent from './JobEvent';
@@ -27,6 +36,17 @@ import JobEventSkeleton from './JobEventSkeleton';
 import PageControls from './PageControls';
 import HostEventModal from './HostEventModal';
 import { HostStatusBar, OutputToolbar } from './shared';
+import getRowRangePageSize from './shared/jobOutputUtils';
+import isJobRunning from '../../../util/jobs';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
+import {
+  encodeNonDefaultQueryString,
+  parseQueryString,
+  mergeParams,
+  replaceParams,
+  removeParams,
+  getQSConfig,
+} from '../../../util/qs';
 import {
   JobsAPI,
   ProjectUpdatesAPI,
@@ -35,6 +55,10 @@ import {
   InventoriesAPI,
   AdHocCommandsAPI,
 } from '../../../api';
+
+const QS_CONFIG = getQSConfig('job_output', {
+  order_by: 'start_line',
+});
 
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
@@ -136,6 +160,12 @@ function getLineTextHtml({ created, event, start_line, stdout }) {
   };
 }
 
+const CardBody = styled(_CardBody)`
+  display: flex;
+  flex-flow: column;
+  height: calc(100vh - 267px);
+`;
+
 const HeaderTitle = styled.div`
   display: inline-flex;
   align-items: center;
@@ -154,9 +184,9 @@ const OutputWrapper = styled.div`
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   font-family: monospace;
   font-size: 15px;
-  height: calc(100vh - 350px);
   outline: 1px solid #d7d7d7;
   ${({ cssMap }) =>
     Object.keys(cssMap).map(className => `.${className}{${cssMap[className]}}`)}
@@ -167,6 +197,15 @@ const OutputFooter = styled.div`
   border-right: 1px solid #d7d7d7;
   width: 75px;
   flex: 1;
+`;
+
+const SearchToolbar = styled(Toolbar)`
+  position: inherit !important;
+`;
+
+const SearchToolbarContent = styled(ToolbarContent)`
+  padding-left: 0px !important;
+  padding-right: 0px !important;
 `;
 
 let ws;
@@ -219,194 +258,112 @@ function range(low, high) {
   return numbers;
 }
 
-class JobOutput extends Component {
-  constructor(props) {
-    super(props);
-    this.listRef = React.createRef();
-    this.state = {
-      contentError: null,
-      deletionError: null,
-      cancelError: null,
-      hasContentLoading: true,
-      results: {},
-      currentlyLoading: [],
-      remoteRowCount: 0,
-      isHostModalOpen: false,
-      hostEvent: {},
-      cssMap: {},
-      jobStatus: props.job.status ?? 'waiting',
-      showCancelPrompt: false,
-      cancelInProgress: false,
-    };
-
-    this.cache = new CellMeasurerCache({
-      fixedWidth: true,
-      defaultHeight: 25,
-    });
-
-    this._isMounted = false;
-    this.loadJobEvents = this.loadJobEvents.bind(this);
-    this.handleDeleteJob = this.handleDeleteJob.bind(this);
-    this.handleCancelOpen = this.handleCancelOpen.bind(this);
-    this.handleCancelConfirm = this.handleCancelConfirm.bind(this);
-    this.handleCancelClose = this.handleCancelClose.bind(this);
-    this.rowRenderer = this.rowRenderer.bind(this);
-    this.handleHostEventClick = this.handleHostEventClick.bind(this);
-    this.handleHostModalClose = this.handleHostModalClose.bind(this);
-    this.handleScrollFirst = this.handleScrollFirst.bind(this);
-    this.handleScrollLast = this.handleScrollLast.bind(this);
-    this.handleScrollNext = this.handleScrollNext.bind(this);
-    this.handleScrollPrevious = this.handleScrollPrevious.bind(this);
-    this.handleResize = this.handleResize.bind(this);
-    this.isRowLoaded = this.isRowLoaded.bind(this);
-    this.loadMoreRows = this.loadMoreRows.bind(this);
-    this.scrollToRow = this.scrollToRow.bind(this);
-    this.monitorJobSocketCounter = this.monitorJobSocketCounter.bind(this);
+function isHostEvent(jobEvent) {
+  const { event, event_data, host, type } = jobEvent;
+  let isHost;
+  if (typeof host === 'number' || (event_data && event_data.res)) {
+    isHost = true;
+  } else if (
+    type === 'project_update_event' &&
+    event !== 'runner_on_skipped' &&
+    event_data.host
+  ) {
+    isHost = true;
+  } else {
+    isHost = false;
   }
+  return isHost;
+}
 
-  componentDidMount() {
-    const { job } = this.props;
-    this._isMounted = true;
-    this.loadJobEvents();
+const cache = new CellMeasurerCache({
+  fixedWidth: true,
+  defaultHeight: 25,
+});
 
-    if (job.result_traceback) return;
+function JobOutput({
+  job,
+  type,
+  eventRelatedSearchableKeys,
+  eventSearchableKeys,
+}) {
+  const location = useLocation();
+  const listRef = useRef(null);
+  const isMounted = useRef(false);
+  const previousWidth = useRef(0);
+  const jobSocketCounter = useRef(0);
+  const interval = useRef(null);
+  const history = useHistory();
+  const [contentError, setContentError] = useState(null);
+  const [cssMap, setCssMap] = useState({});
+  const [currentlyLoading, setCurrentlyLoading] = useState([]);
+  const [hasContentLoading, setHasContentLoading] = useState(true);
+  const [hostEvent, setHostEvent] = useState({});
+  const [isHostModalOpen, setIsHostModalOpen] = useState(false);
+  const [jobStatus, setJobStatus] = useState(job.status ?? 'waiting');
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [remoteRowCount, setRemoteRowCount] = useState(0);
+  const [results, setResults] = useState({});
 
-    connectJobSocket(job, data => {
-      if (data.group_name === 'job_events') {
-        if (data.counter && data.counter > this.jobSocketCounter) {
-          this.jobSocketCounter = data.counter;
-        }
-      }
-      if (data.group_name === 'jobs' && data.unified_job_id === job.id) {
-        if (data.final_counter) {
-          this.jobSocketCounter = data.final_counter;
-        }
-        if (data.status) {
-          this.setState({ jobStatus: data.status });
-        }
-      }
-    });
-    this.interval = setInterval(() => this.monitorJobSocketCounter(), 5000);
-  }
+  useEffect(() => {
+    isMounted.current = true;
+    loadJobEvents();
 
-  componentDidUpdate(prevProps, prevState) {
-    // recompute row heights for any job events that have transitioned
-    // from loading to loaded
-    const { currentlyLoading, cssMap } = this.state;
-    let shouldRecomputeRowHeights = false;
-    prevState.currentlyLoading
-      .filter(n => !currentlyLoading.includes(n))
-      .forEach(n => {
-        shouldRecomputeRowHeights = true;
-        this.cache.clear(n);
-      });
-    if (Object.keys(cssMap).length !== Object.keys(prevState.cssMap).length) {
-      shouldRecomputeRowHeights = true;
-    }
-    if (shouldRecomputeRowHeights) {
-      if (this.listRef.recomputeRowHeights) {
-        this.listRef.recomputeRowHeights();
-      }
-    }
-  }
-
-  componentWillUnmount() {
-    if (ws) {
-      ws.close();
-    }
-    clearInterval(this.interval);
-    this._isMounted = false;
-  }
-
-  monitorJobSocketCounter() {
-    const { remoteRowCount } = this.state;
-    if (this.jobSocketCounter >= remoteRowCount) {
-      this._isMounted &&
-        this.setState({ remoteRowCount: this.jobSocketCounter + 1 });
-    }
-  }
-
-  async loadJobEvents() {
-    const { job, type } = this.props;
-
-    const loadRange = range(1, 50);
-    this._isMounted &&
-      this.setState(({ currentlyLoading }) => ({
-        hasContentLoading: true,
-        currentlyLoading: currentlyLoading.concat(loadRange),
-      }));
-    try {
-      const {
-        data: { results: newResults = [], count },
-      } = await JobsAPI.readEvents(job.id, type, {
-        page_size: 50,
-        order_by: 'start_line',
-      });
-      this._isMounted &&
-        this.setState(({ results }) => {
-          let countOffset = 1;
-          if (job?.result_traceback) {
-            const tracebackEvent = {
-              counter: 1,
-              created: null,
-              event: null,
-              type: null,
-              stdout: job?.result_traceback,
-              start_line: 0,
-            };
-            const firstIndex = newResults.findIndex(
-              jobEvent => jobEvent.counter === 1
-            );
-            if (firstIndex && newResults[firstIndex]?.stdout) {
-              const stdoutLines = newResults[firstIndex].stdout.split('\r\n');
-              stdoutLines[0] = tracebackEvent.stdout;
-              newResults[firstIndex].stdout = stdoutLines.join('\r\n');
-            } else {
-              countOffset += 1;
-              newResults.unshift(tracebackEvent);
-            }
+    if (isJobRunning(job.status)) {
+      connectJobSocket(job, data => {
+        if (data.group_name === 'job_events') {
+          if (data.counter && data.counter > jobSocketCounter.current) {
+            jobSocketCounter.current = data.counter;
           }
-          newResults.forEach(jobEvent => {
-            results[jobEvent.counter] = jobEvent;
-          });
-          return { results, remoteRowCount: count + countOffset };
-        });
-    } catch (err) {
-      this.setState({ contentError: err });
-    } finally {
-      this._isMounted &&
-        this.setState(({ currentlyLoading }) => ({
-          hasContentLoading: false,
-          currentlyLoading: currentlyLoading.filter(
-            n => !loadRange.includes(n)
-          ),
-        }));
+        }
+        if (data.group_name === 'jobs' && data.unified_job_id === job.id) {
+          if (data.final_counter) {
+            jobSocketCounter.current = data.final_counter;
+          }
+          if (data.status) {
+            setJobStatus(data.status);
+          }
+        }
+      });
+      interval.current = setInterval(() => monitorJobSocketCounter(), 5000);
     }
-  }
 
-  handleCancelOpen() {
-    this.setState({ showCancelPrompt: true });
-  }
+    return function cleanup() {
+      if (ws) {
+        ws.close();
+      }
+      clearInterval(interval.current);
+      isMounted.current = false;
+    };
+  }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  handleCancelClose() {
-    this.setState({ showCancelPrompt: false });
-  }
+  useEffect(() => {
+    if (listRef.current?.recomputeRowHeights) {
+      listRef.current.recomputeRowHeights();
+    }
+  }, [currentlyLoading, cssMap, remoteRowCount]);
 
-  async handleCancelConfirm() {
-    const { job, type } = this.props;
-    this.setState({ cancelInProgress: true });
-    try {
+  const {
+    error: cancelError,
+    isLoading: isCancelling,
+    request: cancelJob,
+  } = useRequest(
+    useCallback(async () => {
       await JobsAPI.cancel(job.id, type);
-    } catch (cancelError) {
-      this.setState({ cancelError });
-    } finally {
-      this.setState({ showCancelPrompt: false, cancelInProgress: false });
-    }
-  }
+    }, [job.id, type]),
+    {}
+  );
 
-  async handleDeleteJob() {
-    const { job, history } = this.props;
-    try {
+  const {
+    error: dismissableCancelError,
+    dismissError: dismissCancelError,
+  } = useDismissableError(cancelError);
+
+  const {
+    request: deleteJob,
+    isLoading: isDeleting,
+    error: deleteError,
+  } = useRequest(
+    useCallback(async () => {
       switch (job.type) {
         case 'project_update':
           await ProjectUpdatesAPI.destroy(job.id);
@@ -427,63 +384,122 @@ class JobOutput extends Component {
           await JobsAPI.destroy(job.id);
       }
       history.push('/jobs');
-    } catch (err) {
-      this.setState({ deletionError: err });
-    }
-  }
+    }, [job, history])
+  );
 
-  isRowLoaded({ index }) {
-    const { results, currentlyLoading } = this.state;
+  const {
+    error: dismissableDeleteError,
+    dismissError: dismissDeleteError,
+  } = useDismissableError(deleteError);
+
+  const monitorJobSocketCounter = () => {
+    if (
+      jobSocketCounter.current === remoteRowCount &&
+      !isJobRunning(job.status)
+    ) {
+      clearInterval(interval.current);
+    }
+    if (jobSocketCounter.current > remoteRowCount && isMounted.current) {
+      setRemoteRowCount(jobSocketCounter.current);
+    }
+  };
+
+  const loadJobEvents = async () => {
+    const loadRange = range(1, 50);
+
+    if (isMounted.current) {
+      setHasContentLoading(true);
+      setCurrentlyLoading(prevCurrentlyLoading =>
+        prevCurrentlyLoading.concat(loadRange)
+      );
+    }
+
+    try {
+      const {
+        data: { results: fetchedEvents = [], count },
+      } = await JobsAPI.readEvents(job.id, type, {
+        page: 1,
+        page_size: 50,
+        ...parseQueryString(QS_CONFIG, location.search),
+      });
+
+      if (isMounted.current) {
+        let countOffset = 0;
+        if (job?.result_traceback) {
+          const tracebackEvent = {
+            counter: 1,
+            created: null,
+            event: null,
+            type: null,
+            stdout: job?.result_traceback,
+            start_line: 0,
+          };
+          const firstIndex = fetchedEvents.findIndex(
+            jobEvent => jobEvent.counter === 1
+          );
+          if (firstIndex && fetchedEvents[firstIndex]?.stdout) {
+            const stdoutLines = fetchedEvents[firstIndex].stdout.split('\r\n');
+            stdoutLines[0] = tracebackEvent.stdout;
+            fetchedEvents[firstIndex].stdout = stdoutLines.join('\r\n');
+          } else {
+            countOffset += 1;
+            fetchedEvents.unshift(tracebackEvent);
+          }
+        }
+
+        const newResults = {};
+        let newResultsCssMap = {};
+        fetchedEvents.forEach((jobEvent, index) => {
+          newResults[index] = jobEvent;
+          const { lineCssMap } = getLineTextHtml(jobEvent);
+          newResultsCssMap = { ...newResultsCssMap, ...lineCssMap };
+        });
+        setResults(newResults);
+        setRemoteRowCount(count + countOffset);
+        setCssMap(newResultsCssMap);
+      }
+    } catch (err) {
+      setContentError(err);
+    } finally {
+      if (isMounted.current) {
+        setHasContentLoading(false);
+        setCurrentlyLoading(prevCurrentlyLoading =>
+          prevCurrentlyLoading.filter(n => !loadRange.includes(n))
+        );
+        loadRange.forEach(n => {
+          cache.clear(n);
+        });
+      }
+    }
+  };
+
+  const isRowLoaded = ({ index }) => {
     if (results[index]) {
       return true;
     }
     return currentlyLoading.includes(index);
-  }
+  };
 
-  handleHostEventClick(hostEvent) {
-    this.setState({
-      isHostModalOpen: true,
-      hostEvent,
-    });
-  }
+  const handleHostEventClick = hostEventToOpen => {
+    setHostEvent(hostEventToOpen);
+    setIsHostModalOpen(true);
+  };
 
-  handleHostModalClose() {
-    this.setState({
-      isHostModalOpen: false,
-    });
-  }
+  const handleHostModalClose = () => {
+    setIsHostModalOpen(false);
+  };
 
-  rowRenderer({ index, parent, key, style }) {
-    const { results } = this.state;
-
-    const isHostEvent = jobEvent => {
-      const { event, event_data, host, type } = jobEvent;
-      let isHost;
-      if (typeof host === 'number' || (event_data && event_data.res)) {
-        isHost = true;
-      } else if (
-        type === 'project_update_event' &&
-        event !== 'runner_on_skipped' &&
-        event_data.host
-      ) {
-        isHost = true;
-      } else {
-        isHost = false;
-      }
-      return isHost;
-    };
-
+  const rowRenderer = ({ index, parent, key, style }) => {
     let actualLineTextHtml = [];
     if (results[index]) {
-      const { lineTextHtml, lineCssMap } = getLineTextHtml(results[index]);
-      this.setState(({ cssMap }) => ({ cssMap: { ...cssMap, ...lineCssMap } }));
+      const { lineTextHtml } = getLineTextHtml(results[index]);
       actualLineTextHtml = lineTextHtml;
     }
 
     return (
       <CellMeasurer
         key={key}
-        cache={this.cache}
+        cache={cache}
         parent={parent}
         rowIndex={index}
         columnIndex={0}
@@ -491,10 +507,11 @@ class JobOutput extends Component {
         {results[index] ? (
           <JobEvent
             isClickable={isHostEvent(results[index])}
-            onJobEventClick={() => this.handleHostEventClick(results[index])}
+            onJobEventClick={() => handleHostEventClick(results[index])}
             className="row"
             style={style}
             lineTextHtml={actualLineTextHtml}
+            index={index}
             {...results[index]}
           />
         ) : (
@@ -507,235 +524,351 @@ class JobOutput extends Component {
         )}
       </CellMeasurer>
     );
-  }
+  };
 
-  loadMoreRows({ startIndex, stopIndex }) {
+  const loadMoreRows = ({ startIndex, stopIndex }) => {
     if (startIndex === 0 && stopIndex === 0) {
       return Promise.resolve(null);
     }
-    const { job, type } = this.props;
 
-    const loadRange = range(startIndex, stopIndex);
-    this._isMounted &&
-      this.setState(({ currentlyLoading }) => ({
-        currentlyLoading: currentlyLoading.concat(loadRange),
-      }));
+    if (stopIndex > startIndex + 50) {
+      stopIndex = startIndex + 50;
+    }
+
+    const { page, pageSize, firstIndex } = getRowRangePageSize(
+      startIndex,
+      stopIndex
+    );
+
+    const loadRange = range(
+      firstIndex,
+      Math.min(firstIndex + pageSize, remoteRowCount)
+    );
+
+    if (isMounted.current) {
+      setCurrentlyLoading(prevCurrentlyLoading =>
+        prevCurrentlyLoading.concat(loadRange)
+      );
+    }
+
     const params = {
-      counter__gte: startIndex,
-      counter__lte: stopIndex,
-      order_by: 'start_line',
+      page,
+      page_size: pageSize,
+      ...parseQueryString(QS_CONFIG, location.search),
     };
 
     return JobsAPI.readEvents(job.id, type, params).then(response => {
-      this._isMounted &&
-        this.setState(({ results, currentlyLoading }) => {
-          response.data.results.forEach(jobEvent => {
-            results[jobEvent.counter] = jobEvent;
-          });
-          return {
-            results,
-            currentlyLoading: currentlyLoading.filter(
-              n => !loadRange.includes(n)
-            ),
-          };
+      if (isMounted.current) {
+        const newResults = {};
+        let newResultsCssMap = {};
+        response.data.results.forEach((jobEvent, index) => {
+          newResults[firstIndex + index] = jobEvent;
+          const { lineCssMap } = getLineTextHtml(jobEvent);
+          newResultsCssMap = { ...newResultsCssMap, ...lineCssMap };
         });
+        setResults(prevResults => ({
+          ...prevResults,
+          ...newResults,
+        }));
+        setCssMap(prevCssMap => ({
+          ...prevCssMap,
+          ...newResultsCssMap,
+        }));
+        setCurrentlyLoading(prevCurrentlyLoading =>
+          prevCurrentlyLoading.filter(n => !loadRange.includes(n))
+        );
+        loadRange.forEach(n => {
+          cache.clear(n);
+        });
+      }
     });
-  }
+  };
 
-  scrollToRow(rowIndex) {
-    this.listRef.scrollToRow(rowIndex);
-  }
+  const scrollToRow = rowIndex => {
+    listRef.current.scrollToRow(rowIndex);
+  };
 
-  handleScrollPrevious() {
-    const startIndex = this.listRef.Grid._renderedRowStartIndex;
-    const stopIndex = this.listRef.Grid._renderedRowStopIndex;
+  const handleScrollPrevious = () => {
+    const startIndex = listRef.current.Grid._renderedRowStartIndex;
+    const stopIndex = listRef.current.Grid._renderedRowStopIndex;
     const scrollRange = stopIndex - startIndex + 1;
-    this.scrollToRow(Math.max(0, startIndex - scrollRange));
-  }
+    scrollToRow(Math.max(0, startIndex - scrollRange));
+  };
 
-  handleScrollNext() {
-    const stopIndex = this.listRef.Grid._renderedRowStopIndex;
-    this.scrollToRow(stopIndex - 1);
-  }
+  const handleScrollNext = () => {
+    const stopIndex = listRef.current.Grid._renderedRowStopIndex;
+    scrollToRow(stopIndex - 1);
+  };
 
-  handleScrollFirst() {
-    this.scrollToRow(0);
-  }
+  const handleScrollFirst = () => {
+    scrollToRow(0);
+  };
 
-  handleScrollLast() {
-    const { remoteRowCount } = this.state;
-    this.scrollToRow(remoteRowCount - 1);
-  }
+  const handleScrollLast = () => {
+    scrollToRow(remoteRowCount);
+  };
 
-  handleResize({ width }) {
-    if (width !== this._previousWidth) {
-      this.cache.clearAll();
-      if (this.listRef?.recomputeRowHeights) {
-        this.listRef.recomputeRowHeights();
+  const handleResize = ({ width }) => {
+    if (width !== previousWidth) {
+      cache.clearAll();
+      if (listRef.current?.recomputeRowHeights) {
+        listRef.current.recomputeRowHeights();
       }
     }
-    this._previousWidth = width;
+    previousWidth.current = width;
+  };
+
+  const handleSearch = (key, value) => {
+    let params = parseQueryString(QS_CONFIG, location.search);
+    params = mergeParams(params, { [key]: value });
+    pushHistoryState(params);
+  };
+
+  const handleReplaceSearch = (key, value) => {
+    const oldParams = parseQueryString(QS_CONFIG, location.search);
+    pushHistoryState(replaceParams(oldParams, { [key]: value }));
+  };
+
+  const handleRemoveSearchTerm = (key, value) => {
+    let oldParams = parseQueryString(QS_CONFIG, location.search);
+    if (parseInt(value, 10)) {
+      oldParams = removeParams(QS_CONFIG, oldParams, {
+        [key]: parseInt(value, 10),
+      });
+    }
+    pushHistoryState(removeParams(QS_CONFIG, oldParams, { [key]: value }));
+  };
+
+  const handleRemoveAllSearchTerms = () => {
+    const oldParams = parseQueryString(QS_CONFIG, location.search);
+    pushHistoryState(removeParams(QS_CONFIG, oldParams, { ...oldParams }));
+  };
+
+  const pushHistoryState = params => {
+    const { pathname } = history.location;
+    const encodedParams = encodeNonDefaultQueryString(QS_CONFIG, params);
+    history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
+  };
+
+  const renderSearchComponent = i18n => (
+    <Search
+      qsConfig={QS_CONFIG}
+      columns={[
+        {
+          name: i18n._(t`Stdout`),
+          key: 'stdout__icontains',
+          isDefault: true,
+        },
+        {
+          name: i18n._(t`Event`),
+          key: 'event',
+          options: [
+            ['runner_on_failed', i18n._(t`Host Failed`)],
+            ['runner_on_start', i18n._(t`Host Started`)],
+            ['runner_on_ok', i18n._(t`Host OK`)],
+            ['runner_on_error', i18n._(t`Host Failure`)],
+            ['runner_on_skipped', i18n._(t`Host Skipped`)],
+            ['runner_on_unreachable', i18n._(t`Host Unreachable`)],
+            ['runner_on_no_hosts', i18n._(t`No Hosts Remaining`)],
+            ['runner_on_async_poll', i18n._(t`Host Polling`)],
+            ['runner_on_async_ok', i18n._(t`Host Async OK`)],
+            ['runner_on_async_failed', i18n._(t`Host Async Failure`)],
+            ['runner_item_on_ok', i18n._(t`Item OK`)],
+            ['runner_item_on_failed', i18n._(t`Item Failed`)],
+            ['runner_item_on_skipped', i18n._(t`Item Skipped`)],
+            ['runner_retry', i18n._(t`Host Retry`)],
+            ['runner_on_file_diff', i18n._(t`File Difference`)],
+            ['playbook_on_start', i18n._(t`Playbook Started`)],
+            ['playbook_on_notify', i18n._(t`Running Handlers`)],
+            ['playbook_on_include', i18n._(t`Including File`)],
+            ['playbook_on_no_hosts_matched', i18n._(t`No Hosts Matched`)],
+            ['playbook_on_no_hosts_remaining', i18n._(t`No Hosts Remaining`)],
+            ['playbook_on_task_start', i18n._(t`Task Started`)],
+            ['playbook_on_vars_prompt', i18n._(t`Variables Prompted`)],
+            ['playbook_on_setup', i18n._(t`Gathering Facts`)],
+            ['playbook_on_play_start', i18n._(t`Play Started`)],
+            ['playbook_on_stats', i18n._(t`Playbook Complete`)],
+            ['debug', i18n._(t`Debug`)],
+            ['verbose', i18n._(t`Verbose`)],
+            ['deprecated', i18n._(t`Deprecated`)],
+            ['warning', i18n._(t`Warning`)],
+            ['system_warning', i18n._(t`System Warning`)],
+            ['error', i18n._(t`Error`)],
+          ],
+        },
+        { name: i18n._(t`Advanced`), key: 'advanced' },
+      ]}
+      searchableKeys={eventSearchableKeys}
+      relatedSearchableKeys={eventRelatedSearchableKeys}
+      onSearch={handleSearch}
+      onReplaceSearch={handleReplaceSearch}
+      onShowAdvancedSearch={() => {}}
+      onRemove={handleRemoveSearchTerm}
+      isDisabled={isJobRunning(job.status)}
+    />
+  );
+
+  if (contentError) {
+    return <ContentError error={contentError} />;
   }
 
-  render() {
-    const { job } = this.props;
-
-    const {
-      contentError,
-      deletionError,
-      hasContentLoading,
-      hostEvent,
-      isHostModalOpen,
-      remoteRowCount,
-      cssMap,
-      jobStatus,
-      showCancelPrompt,
-      cancelError,
-      cancelInProgress,
-    } = this.state;
-
-    if (hasContentLoading) {
-      return <ContentLoading />;
-    }
-
-    if (contentError) {
-      return <ContentError error={contentError} />;
-    }
-
-    return (
-      <Fragment>
-        <CardBody>
-          {isHostModalOpen && (
-            <HostEventModal
-              onClose={this.handleHostModalClose}
-              isOpen={isHostModalOpen}
-              hostEvent={hostEvent}
-            />
-          )}
-          <OutputHeader>
-            <HeaderTitle>
-              <StatusIcon status={job.status} />
-              <h1>{job.name}</h1>
-            </HeaderTitle>
-            <OutputToolbar
-              job={job}
-              jobStatus={jobStatus}
-              onDelete={this.handleDeleteJob}
-              onCancel={this.handleCancelOpen}
-            />
-          </OutputHeader>
-          <HostStatusBar counts={job.host_status_counts} />
-          <PageControls
-            onScrollFirst={this.handleScrollFirst}
-            onScrollLast={this.handleScrollLast}
-            onScrollNext={this.handleScrollNext}
-            onScrollPrevious={this.handleScrollPrevious}
-          />
-          <OutputWrapper cssMap={cssMap}>
-            <InfiniteLoader
-              isRowLoaded={this.isRowLoaded}
-              loadMoreRows={this.loadMoreRows}
-              rowCount={remoteRowCount}
+  return (
+    <I18n>
+      {({ i18n }) => (
+        <>
+          <CardBody>
+            {isHostModalOpen && (
+              <HostEventModal
+                onClose={handleHostModalClose}
+                isOpen={isHostModalOpen}
+                hostEvent={hostEvent}
+              />
+            )}
+            <OutputHeader>
+              <HeaderTitle>
+                <StatusIcon status={job.status} />
+                <h1>{job.name}</h1>
+              </HeaderTitle>
+              <OutputToolbar
+                job={job}
+                jobStatus={jobStatus}
+                onCancel={() => setShowCancelModal(true)}
+                onDelete={deleteJob}
+                isDeleteDisabled={isDeleting}
+              />
+            </OutputHeader>
+            <HostStatusBar counts={job.host_status_counts} />
+            <SearchToolbar
+              id="job_output-toolbar"
+              clearAllFilters={handleRemoveAllSearchTerms}
+              collapseListedFiltersBreakpoint="lg"
+              clearFiltersButtonText={i18n._(t`Clear all filters`)}
             >
-              {({ onRowsRendered, registerChild }) => (
-                <AutoSizer nonce={window.NONCE_ID} onResize={this.handleResize}>
-                  {({ width, height }) => {
-                    return (
-                      <List
-                        ref={ref => {
-                          this.listRef = ref;
-                          registerChild(ref);
-                        }}
-                        deferredMeasurementCache={this.cache}
-                        height={height || 1}
-                        onRowsRendered={onRowsRendered}
-                        rowCount={remoteRowCount}
-                        rowHeight={this.cache.rowHeight}
-                        rowRenderer={this.rowRenderer}
-                        scrollToAlignment="start"
-                        width={width || 1}
-                        overscanRowCount={20}
-                      />
-                    );
-                  }}
-                </AutoSizer>
-              )}
-            </InfiniteLoader>
-            <OutputFooter />
-          </OutputWrapper>
-        </CardBody>
-        {showCancelPrompt &&
-          ['pending', 'waiting', 'running'].includes(jobStatus) && (
-            <I18n>
-              {({ i18n }) => (
-                <AlertModal
-                  isOpen={showCancelPrompt}
+              <SearchToolbarContent>
+                <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
+                  <ToolbarItem variant="search-filter">
+                    {isJobRunning(job.status) ? (
+                      <Tooltip
+                        content={i18n._(
+                          t`Search is disabled while the job is running`
+                        )}
+                      >
+                        {renderSearchComponent(i18n)}
+                      </Tooltip>
+                    ) : (
+                      renderSearchComponent(i18n)
+                    )}
+                  </ToolbarItem>
+                </ToolbarToggleGroup>
+              </SearchToolbarContent>
+            </SearchToolbar>
+            <PageControls
+              onScrollFirst={handleScrollFirst}
+              onScrollLast={handleScrollLast}
+              onScrollNext={handleScrollNext}
+              onScrollPrevious={handleScrollPrevious}
+            />
+            <OutputWrapper cssMap={cssMap}>
+              <InfiniteLoader
+                isRowLoaded={isRowLoaded}
+                loadMoreRows={loadMoreRows}
+                rowCount={remoteRowCount}
+              >
+                {({ onRowsRendered, registerChild }) => (
+                  <AutoSizer nonce={window.NONCE_ID} onResize={handleResize}>
+                    {({ width, height }) => {
+                      return (
+                        <>
+                          {hasContentLoading ? (
+                            <div style={{ width }}>
+                              <ContentLoading />
+                            </div>
+                          ) : (
+                            <List
+                              ref={ref => {
+                                registerChild(ref);
+                                listRef.current = ref;
+                              }}
+                              deferredMeasurementCache={cache}
+                              height={height || 1}
+                              onRowsRendered={onRowsRendered}
+                              rowCount={remoteRowCount}
+                              rowHeight={cache.rowHeight}
+                              rowRenderer={rowRenderer}
+                              scrollToAlignment="start"
+                              width={width || 1}
+                              overscanRowCount={20}
+                            />
+                          )}
+                        </>
+                      );
+                    }}
+                  </AutoSizer>
+                )}
+              </InfiniteLoader>
+              <OutputFooter />
+            </OutputWrapper>
+          </CardBody>
+          {showCancelModal && isJobRunning(job.status) && (
+            <AlertModal
+              isOpen={showCancelModal}
+              variant="danger"
+              onClose={() => setShowCancelModal(false)}
+              title={i18n._(t`Cancel Job`)}
+              label={i18n._(t`Cancel Job`)}
+              actions={[
+                <Button
+                  id="cancel-job-confirm-button"
+                  key="delete"
                   variant="danger"
-                  onClose={this.handleCancelClose}
-                  title={i18n._(t`Cancel Job`)}
-                  label={i18n._(t`Cancel Job`)}
-                  actions={[
-                    <Button
-                      id="cancel-job-confirm-button"
-                      key="delete"
-                      variant="danger"
-                      isDisabled={cancelInProgress}
-                      aria-label={i18n._(t`Cancel job`)}
-                      onClick={this.handleCancelConfirm}
-                    >
-                      {i18n._(t`Cancel job`)}
-                    </Button>,
-                    <Button
-                      id="cancel-job-return-button"
-                      key="cancel"
-                      variant="secondary"
-                      aria-label={i18n._(t`Return`)}
-                      onClick={this.handleCancelClose}
-                    >
-                      {i18n._(t`Return`)}
-                    </Button>,
-                  ]}
+                  isDisabled={isCancelling}
+                  aria-label={i18n._(t`Cancel job`)}
+                  onClick={cancelJob}
                 >
-                  {i18n._(
-                    t`Are you sure you want to submit the request to cancel this job?`
-                  )}
-                </AlertModal>
+                  {i18n._(t`Cancel job`)}
+                </Button>,
+                <Button
+                  id="cancel-job-return-button"
+                  key="cancel"
+                  variant="secondary"
+                  aria-label={i18n._(t`Return`)}
+                  onClick={() => setShowCancelModal(false)}
+                >
+                  {i18n._(t`Return`)}
+                </Button>,
+              ]}
+            >
+              {i18n._(
+                t`Are you sure you want to submit the request to cancel this job?`
               )}
-            </I18n>
+            </AlertModal>
           )}
-        {cancelError && (
-          <I18n>
-            {({ i18n }) => (
-              <AlertModal
-                isOpen={cancelError}
-                variant="danger"
-                onClose={() => this.setState({ cancelError: null })}
-                title={i18n._(t`Job Cancel Error`)}
-                label={i18n._(t`Job Cancel Error`)}
-              >
-                <ErrorDetail error={cancelError} />
-              </AlertModal>
-            )}
-          </I18n>
-        )}
-        {deletionError && (
-          <I18n>
-            {({ i18n }) => (
-              <AlertModal
-                isOpen={deletionError}
-                variant="danger"
-                onClose={() => this.setState({ deletionError: null })}
-                title={i18n._(t`Job Delete Error`)}
-                label={i18n._(t`Job Delete Error`)}
-              >
-                <ErrorDetail error={deletionError} />
-              </AlertModal>
-            )}
-          </I18n>
-        )}
-      </Fragment>
-    );
-  }
+          {dismissableDeleteError && (
+            <AlertModal
+              isOpen={dismissableDeleteError}
+              variant="danger"
+              onClose={dismissDeleteError}
+              title={i18n._(t`Job Delete Error`)}
+              label={i18n._(t`Job Delete Error`)}
+            >
+              <ErrorDetail error={dismissableDeleteError} />
+            </AlertModal>
+          )}
+          {dismissableCancelError && (
+            <AlertModal
+              isOpen={dismissableCancelError}
+              variant="danger"
+              onClose={dismissCancelError}
+              title={i18n._(t`Job Cancel Error`)}
+              label={i18n._(t`Job Cancel Error`)}
+            >
+              <ErrorDetail error={dismissableCancelError} />
+            </AlertModal>
+          )}
+        </>
+      )}
+    </I18n>
+  );
 }
 
 export { JobOutput as _JobOutput };

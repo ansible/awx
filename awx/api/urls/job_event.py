@@ -3,12 +3,7 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    JobEventList,
-    JobEventDetail,
-    JobEventChildrenList,
-    JobEventHostsList,
-)
+from awx.api.views import JobEventList, JobEventDetail, JobEventChildrenList, JobEventHostsList
 
 
 urls = [

@@ -70,20 +70,12 @@ class task:
                 task_id = uuid or str(uuid4())
                 args = args or []
                 kwargs = kwargs or {}
-                queue = (
-                    queue or
-                    getattr(cls.queue, 'im_func', cls.queue)
-                )
+                queue = queue or getattr(cls.queue, 'im_func', cls.queue)
                 if not queue:
                     msg = f'{cls.name}: Queue value required and may not be None'
                     logger.error(msg)
                     raise ValueError(msg)
-                obj = {
-                    'uuid': task_id,
-                    'args': args,
-                    'kwargs': kwargs,
-                    'task': cls.name
-                }
+                obj = {'uuid': task_id, 'args': args, 'kwargs': kwargs, 'task': cls.name}
                 guid = GuidMiddleware.get_guid()
                 if guid:
                     obj['guid'] = guid
@@ -105,11 +97,7 @@ class task:
         if inspect.isclass(fn):
             bases = list(fn.__bases__)
             ns.update(fn.__dict__)
-        cls = type(
-            fn.__name__,
-            tuple(bases + [PublisherMixin]),
-            ns
-        )
+        cls = type(fn.__name__, tuple(bases + [PublisherMixin]), ns)
         if inspect.isclass(fn):
             return cls
 

@@ -25,9 +25,10 @@ class JobLifeCycleFormatter(json_log_formatter.JSONFormatter):
 
 
 class TimeFormatter(logging.Formatter):
-    '''
+    """
     Custom log formatter used for inventory imports
-    '''
+    """
+
     def __init__(self, start_time=None, **kwargs):
         if start_time is None:
             self.job_start = now()
@@ -81,10 +82,31 @@ class LogstashFormatterBase(logging.Formatter):
         # The list contains all the attributes listed in
         # http://docs.python.org/library/logging.html#logrecord-attributes
         skip_list = (
-            'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
-            'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
-            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
-            'processName', 'relativeCreated', 'thread', 'threadName', 'extra')
+            'args',
+            'asctime',
+            'created',
+            'exc_info',
+            'exc_text',
+            'filename',
+            'funcName',
+            'id',
+            'levelname',
+            'levelno',
+            'lineno',
+            'module',
+            'msecs',
+            'msecs',
+            'message',
+            'msg',
+            'name',
+            'pathname',
+            'process',
+            'processName',
+            'relativeCreated',
+            'thread',
+            'threadName',
+            'extra',
+        )
 
         easy_types = (str, bool, dict, float, int, list, type(None))
 
@@ -119,25 +141,21 @@ class LogstashFormatterBase(logging.Formatter):
 
 
 class LogstashFormatter(LogstashFormatterBase):
-
     def __init__(self, *args, **kwargs):
         self.cluster_host_id = settings.CLUSTER_HOST_ID
         self.tower_uuid = None
-        uuid = (
-            getattr(settings, 'LOG_AGGREGATOR_TOWER_UUID', None) or
-            getattr(settings, 'INSTALL_UUID', None)
-        )
+        uuid = getattr(settings, 'LOG_AGGREGATOR_TOWER_UUID', None) or getattr(settings, 'INSTALL_UUID', None)
         if uuid:
             self.tower_uuid = uuid
         super(LogstashFormatter, self).__init__(*args, **kwargs)
 
     def reformat_data_for_log(self, raw_data, kind=None):
-        '''
+        """
         Process dictionaries from various contexts (job events, activity stream
         changes, etc.) to give meaningful information
         Output a dictionary which will be passed in logstash or syslog format
         to the logging receiver
-        '''
+        """
         if kind == 'activity_stream':
             try:
                 raw_data['changes'] = json.loads(raw_data.get('changes', '{}'))
@@ -191,6 +209,7 @@ class LogstashFormatter(LogstashFormatterBase):
             data_for_log['host_name'] = raw_data.get('host_name')
             data_for_log['job_id'] = raw_data.get('job_id')
         elif kind == 'performance':
+
             def convert_to_type(t, val):
                 if t is float:
                     val = val[:-1] if val.endswith('s') else val
@@ -216,7 +235,7 @@ class LogstashFormatter(LogstashFormatterBase):
                 (float, 'X-API-Time'),  # may end with an 's' "0.33s"
                 (float, 'X-API-Total-Time'),
                 (int, 'X-API-Query-Count'),
-                (float, 'X-API-Query-Time'), # may also end with an 's'
+                (float, 'X-API-Query-Time'),  # may also end with an 's'
                 (str, 'X-API-Node'),
             ]
             data_for_log['x_api'] = {k: convert_to_type(t, response[k]) for (t, k) in headers if k in response}
@@ -236,7 +255,7 @@ class LogstashFormatter(LogstashFormatterBase):
     def get_extra_fields(self, record):
         fields = super(LogstashFormatter, self).get_extra_fields(record)
         if record.name.startswith('awx.analytics'):
-            log_kind = record.name[len('awx.analytics.'):]
+            log_kind = record.name[len('awx.analytics.') :]
             fields = self.reformat_data_for_log(fields, kind=log_kind)
         # General AWX metadata
         fields['cluster_host_id'] = self.cluster_host_id
@@ -252,7 +271,6 @@ class LogstashFormatter(LogstashFormatterBase):
             '@timestamp': stamp,
             'message': record.getMessage(),
             'host': self.host,
-
             # Extra Fields
             'level': record.levelname,
             'logger_name': record.name,

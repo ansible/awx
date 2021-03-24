@@ -19,12 +19,7 @@ def gce(cred, env, private_data_dir):
     project = cred.get_input('project', default='')
     username = cred.get_input('username', default='')
 
-    json_cred = {
-        'type': 'service_account',
-        'private_key': cred.get_input('ssh_key_data', default=''),
-        'client_email': username,
-        'project_id': project
-    }
+    json_cred = {'type': 'service_account', 'private_key': cred.get_input('ssh_key_data', default=''), 'client_email': username, 'project_id': project}
     if 'INVENTORY_UPDATE_ID' not in env:
         env['GCE_EMAIL'] = username
         env['GCE_PROJECT'] = project
@@ -35,8 +30,8 @@ def gce(cred, env, private_data_dir):
     json.dump(json_cred, f, indent=2)
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-    env['GCE_CREDENTIALS_FILE_PATH'] = path
-    env['GCP_SERVICE_ACCOUNT_FILE'] = path
+    env['GCE_CREDENTIALS_FILE_PATH'] = os.path.join('/runner', os.path.basename(path))
+    env['GCP_SERVICE_ACCOUNT_FILE'] = os.path.join('/runner', os.path.basename(path))
 
     # Handle env variables for new module types.
     # This includes gcp_compute inventory plugin and
@@ -73,10 +68,12 @@ def vmware(cred, env, private_data_dir):
 
 
 def _openstack_data(cred):
-    openstack_auth = dict(auth_url=cred.get_input('host', default=''),
-                          username=cred.get_input('username', default=''),
-                          password=cred.get_input('password', default=''),
-                          project_name=cred.get_input('project', default=''))
+    openstack_auth = dict(
+        auth_url=cred.get_input('host', default=''),
+        username=cred.get_input('username', default=''),
+        password=cred.get_input('password', default=''),
+        project_name=cred.get_input('project', default=''),
+    )
     if cred.has_input('project_domain_name'):
         openstack_auth['project_domain_name'] = cred.get_input('project_domain_name', default='')
     if cred.has_input('domain'):
@@ -105,7 +102,8 @@ def openstack(cred, env, private_data_dir):
     yaml.safe_dump(openstack_data, f, default_flow_style=False, allow_unicode=True)
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-    env['OS_CLIENT_CONFIG_FILE'] = path
+    # TODO: constant for container base path
+    env['OS_CLIENT_CONFIG_FILE'] = os.path.join('/runner', os.path.basename(path))
 
 
 def kubernetes_bearer_token(cred, env, private_data_dir):

@@ -56,7 +56,7 @@ function Inventories({ i18n }) {
         ...initScreenHeader.current,
         [inventoryPath]: `${inventory.name}`,
         [`${inventoryPath}/access`]: i18n._(t`Access`),
-        [`${inventoryPath}/completed_jobs`]: i18n._(t`Completed jobs`),
+        [`${inventoryPath}/jobs`]: i18n._(t`Jobs`),
         [`${inventoryPath}/details`]: i18n._(t`Details`),
         [`${inventoryPath}/edit`]: i18n._(t`Edit details`),
 
@@ -69,9 +69,7 @@ function Inventories({ i18n }) {
         [`${inventoryHostsPath}/${nestedObject?.id}/details`]: i18n._(
           t`Host details`
         ),
-        [`${inventoryHostsPath}/${nestedObject?.id}/completed_jobs`]: i18n._(
-          t`Completed jobs`
-        ),
+        [`${inventoryHostsPath}/${nestedObject?.id}/jobs`]: i18n._(t`Jobs`),
         [`${inventoryHostsPath}/${nestedObject?.id}/facts`]: i18n._(t`Facts`),
         [`${inventoryHostsPath}/${nestedObject?.id}/groups`]: i18n._(t`Groups`),
 
@@ -117,7 +115,7 @@ function Inventories({ i18n }) {
           t`Schedule details`
         ),
         [`${inventorySourcesPath}/${nestedObject?.id}/notifications`]: i18n._(
-          t`Notifcations`
+          t`Notifications`
         ),
       });
     },

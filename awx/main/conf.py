@@ -10,6 +10,7 @@ from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
+from awx.main.models import ExecutionEnvironment
 
 
 logger = logging.getLogger('awx.main.conf')
@@ -36,8 +37,7 @@ register(
     'ORG_ADMINS_CAN_SEE_ALL_USERS',
     field_class=fields.BooleanField,
     label=_('All Users Visible to Organization Admins'),
-    help_text=_('Controls whether any Organization Admin can view all users and teams, '
-                'even those not associated with their Organization.'),
+    help_text=_('Controls whether any Organization Admin can view all users and teams, ' 'even those not associated with their Organization.'),
     category=_('System'),
     category_slug='system',
 )
@@ -46,8 +46,10 @@ register(
     'MANAGE_ORGANIZATION_AUTH',
     field_class=fields.BooleanField,
     label=_('Organization Admins Can Manage Users and Teams'),
-    help_text=_('Controls whether any Organization Admin has the privileges to create and manage users and teams. '
-                'You may want to disable this ability if you are using an LDAP or SAML integration.'),
+    help_text=_(
+        'Controls whether any Organization Admin has the privileges to create and manage users and teams. '
+        'You may want to disable this ability if you are using an LDAP or SAML integration.'
+    ),
     category=_('System'),
     category_slug='system',
 )
@@ -58,8 +60,7 @@ register(
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
     label=_('Base URL of the Tower host'),
-    help_text=_('This setting is used by services like notifications to render '
-                'a valid url to the Tower host.'),
+    help_text=_('This setting is used by services like notifications to render ' 'a valid url to the Tower host.'),
     category=_('System'),
     category_slug='system',
 )
@@ -68,11 +69,13 @@ register(
     'REMOTE_HOST_HEADERS',
     field_class=fields.StringListField,
     label=_('Remote Host Headers'),
-    help_text=_('HTTP headers and meta keys to search to determine remote host '
-                'name or IP. Add additional items to this list, such as '
-                '"HTTP_X_FORWARDED_FOR", if behind a reverse proxy. '
-                'See the "Proxy Support" section of the Adminstrator guide for '
-                'more details.'),
+    help_text=_(
+        'HTTP headers and meta keys to search to determine remote host '
+        'name or IP. Add additional items to this list, such as '
+        '"HTTP_X_FORWARDED_FOR", if behind a reverse proxy. '
+        'See the "Proxy Support" section of the Adminstrator guide for '
+        'more details.'
+    ),
     category=_('System'),
     category_slug='system',
 )
@@ -81,11 +84,13 @@ register(
     'PROXY_IP_ALLOWED_LIST',
     field_class=fields.StringListField,
     label=_('Proxy IP Allowed List'),
-    help_text=_("If Tower is behind a reverse proxy/load balancer, use this setting "
-                "to configure the proxy IP addresses from which Tower should trust "
-                "custom REMOTE_HOST_HEADERS header values. "
-                "If this setting is an empty list (the default), the headers specified by "
-                "REMOTE_HOST_HEADERS will be trusted unconditionally')"),
+    help_text=_(
+        "If Tower is behind a reverse proxy/load balancer, use this setting "
+        "to configure the proxy IP addresses from which Tower should trust "
+        "custom REMOTE_HOST_HEADERS header values. "
+        "If this setting is an empty list (the default), the headers specified by "
+        "REMOTE_HOST_HEADERS will be trusted unconditionally')"
+    ),
     category=_('System'),
     category_slug='system',
 )
@@ -96,9 +101,7 @@ register(
     field_class=fields.DictField,
     default=lambda: {},
     label=_('License'),
-    help_text=_('The license controls which features and functionality are '
-                'enabled. Use /api/v2/config/ to update or change '
-                'the license.'),
+    help_text=_('The license controls which features and functionality are ' 'enabled. Use /api/v2/config/ to update or change ' 'the license.'),
     category=_('System'),
     category_slug='system',
 )
@@ -177,11 +180,22 @@ register(
 )
 
 register(
+    'DEFAULT_EXECUTION_ENVIRONMENT',
+    field_class=fields.PrimaryKeyRelatedField,
+    allow_null=True,
+    default=None,
+    queryset=ExecutionEnvironment.objects.all(),
+    label=_('Global default execution environment'),
+    help_text=_('.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'CUSTOM_VENV_PATHS',
     field_class=fields.StringListPathField,
     label=_('Custom virtual environment paths'),
-    help_text=_('Paths where Tower will look for custom virtual environments '
-                '(in addition to /var/lib/awx/venv/). Enter one path per line.'),
+    help_text=_('Paths where Tower will look for custom virtual environments ' '(in addition to /var/lib/awx/venv/). Enter one path per line.'),
     category=_('System'),
     category_slug='system',
     default=[],
@@ -231,9 +245,11 @@ register(
     'AWX_PROOT_BASE_PATH',
     field_class=fields.CharField,
     label=_('Job execution path'),
-    help_text=_('The directory in which Tower will create new temporary '
-                'directories for job execution and isolation '
-                '(such as credential files and custom inventory scripts).'),
+    help_text=_(
+        'The directory in which Tower will create new temporary '
+        'directories for job execution and isolation '
+        '(such as credential files and custom inventory scripts).'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -274,8 +290,10 @@ register(
     field_class=fields.IntegerField,
     min_value=0,
     label=_('Isolated launch timeout'),
-    help_text=_('The timeout (in seconds) for launching jobs on isolated instances.  '
-                'This includes the time needed to copy source control files (playbooks) to the isolated instance.'),
+    help_text=_(
+        'The timeout (in seconds) for launching jobs on isolated instances.  '
+        'This includes the time needed to copy source control files (playbooks) to the isolated instance.'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
     unit=_('seconds'),
@@ -287,8 +305,10 @@ register(
     min_value=0,
     default=10,
     label=_('Isolated connection timeout'),
-    help_text=_('Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. '
-                'Value should be substantially greater than expected network latency.'),
+    help_text=_(
+        'Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. '
+        'Value should be substantially greater than expected network latency.'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
     unit=_('seconds'),
@@ -301,7 +321,7 @@ register(
     help_text=_('When set to True, AWX will enforce strict host key checking for communication with isolated nodes.'),
     category=_('Jobs'),
     category_slug='jobs',
-    default=False
+    default=False,
 )
 
 register(
@@ -309,9 +329,11 @@ register(
     field_class=fields.BooleanField,
     default=True,
     label=_('Generate RSA keys for isolated instances'),
-    help_text=_('If set, a random RSA key will be generated and distributed to '
-                'isolated instances.  To disable this behavior and manage authentication '
-                'for isolated instances outside of Tower, disable this setting.'),  # noqa
+    help_text=_(
+        'If set, a random RSA key will be generated and distributed to '
+        'isolated instances.  To disable this behavior and manage authentication '
+        'for isolated instances outside of Tower, disable this setting.'
+    ),  # noqa
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -346,8 +368,7 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Enable detailed resource profiling on all playbook runs'),
-    help_text=_('If set, detailed resource profiling data will be collected on all jobs. '
-                'This data can be gathered with `sosreport`.'),  # noqa
+    help_text=_('If set, detailed resource profiling data will be collected on all jobs. ' 'This data can be gathered with `sosreport`.'),  # noqa
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -357,8 +378,7 @@ register(
     field_class=FloatField,
     default='0.25',
     label=_('Interval (in seconds) between polls for cpu usage.'),
-    help_text=_('Interval (in seconds) between polls for cpu usage. '
-                'Setting this lower than the default will affect playbook performance.'),
+    help_text=_('Interval (in seconds) between polls for cpu usage. ' 'Setting this lower than the default will affect playbook performance.'),
     category=_('Jobs'),
     category_slug='jobs',
     required=False,
@@ -369,8 +389,7 @@ register(
     field_class=FloatField,
     default='0.25',
     label=_('Interval (in seconds) between polls for memory usage.'),
-    help_text=_('Interval (in seconds) between polls for memory usage. '
-                'Setting this lower than the default will affect playbook performance.'),
+    help_text=_('Interval (in seconds) between polls for memory usage. ' 'Setting this lower than the default will affect playbook performance.'),
     category=_('Jobs'),
     category_slug='jobs',
     required=False,
@@ -381,8 +400,7 @@ register(
     field_class=FloatField,
     default='0.25',
     label=_('Interval (in seconds) between polls for PID count.'),
-    help_text=_('Interval (in seconds) between polls for PID count. '
-                'Setting this lower than the default will affect playbook performance.'),
+    help_text=_('Interval (in seconds) between polls for PID count. ' 'Setting this lower than the default will affect playbook performance.'),
     category=_('Jobs'),
     category_slug='jobs',
     required=False,
@@ -456,10 +474,9 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Ignore Ansible Galaxy SSL Certificate Verification'),
-    help_text=_('If set to true, certificate validation will not be done when '
-                'installing content from any Galaxy server.'),
+    help_text=_('If set to true, certificate validation will not be done when ' 'installing content from any Galaxy server.'),
     category=_('Jobs'),
-    category_slug='jobs'
+    category_slug='jobs',
 )
 
 register(
@@ -478,7 +495,8 @@ register(
     min_value=0,
     label=_('Job Event Standard Output Maximum Display Size'),
     help_text=_(
-        u'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'),
+        u'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -509,8 +527,10 @@ register(
     min_value=0,
     default=0,
     label=_('Default Job Timeout'),
-    help_text=_('Maximum time in seconds to allow jobs to run. Use value of 0 to indicate that no '
-                'timeout should be imposed. A timeout set on an individual job template will override this.'),
+    help_text=_(
+        'Maximum time in seconds to allow jobs to run. Use value of 0 to indicate that no '
+        'timeout should be imposed. A timeout set on an individual job template will override this.'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
     unit=_('seconds'),
@@ -522,8 +542,10 @@ register(
     min_value=0,
     default=0,
     label=_('Default Inventory Update Timeout'),
-    help_text=_('Maximum time in seconds to allow inventory updates to run. Use value of 0 to indicate that no '
-                'timeout should be imposed. A timeout set on an individual inventory source will override this.'),
+    help_text=_(
+        'Maximum time in seconds to allow inventory updates to run. Use value of 0 to indicate that no '
+        'timeout should be imposed. A timeout set on an individual inventory source will override this.'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
     unit=_('seconds'),
@@ -535,8 +557,10 @@ register(
     min_value=0,
     default=0,
     label=_('Default Project Update Timeout'),
-    help_text=_('Maximum time in seconds to allow project updates to run. Use value of 0 to indicate that no '
-                'timeout should be imposed. A timeout set on an individual project will override this.'),
+    help_text=_(
+        'Maximum time in seconds to allow project updates to run. Use value of 0 to indicate that no '
+        'timeout should be imposed. A timeout set on an individual project will override this.'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
     unit=_('seconds'),
@@ -548,10 +572,12 @@ register(
     min_value=0,
     default=0,
     label=_('Per-Host Ansible Fact Cache Timeout'),
-    help_text=_('Maximum time, in seconds, that stored Ansible facts are considered valid since '
-                'the last time they were modified. Only valid, non-stale, facts will be accessible by '
-                'a playbook. Note, this does not influence the deletion of ansible_facts from the database. '
-                'Use a value of 0 to indicate that no timeout should be imposed.'),
+    help_text=_(
+        'Maximum time, in seconds, that stored Ansible facts are considered valid since '
+        'the last time they were modified. Only valid, non-stale, facts will be accessible by '
+        'a playbook. Note, this does not influence the deletion of ansible_facts from the database. '
+        'Use a value of 0 to indicate that no timeout should be imposed.'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
     unit=_('seconds'),
@@ -563,8 +589,7 @@ register(
     allow_null=False,
     default=200,
     label=_('Maximum number of forks per job'),
-    help_text=_('Saving a Job Template with more than this number of forks will result in an error. '
-                'When set to 0, no limit is applied.'),
+    help_text=_('Saving a Job Template with more than this number of forks will result in an error. ' 'When set to 0, no limit is applied.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -585,11 +610,10 @@ register(
     allow_null=True,
     default=None,
     label=_('Logging Aggregator Port'),
-    help_text=_('Port on Logging Aggregator to send logs to (if required and not'
-                ' provided in Logging Aggregator).'),
+    help_text=_('Port on Logging Aggregator to send logs to (if required and not' ' provided in Logging Aggregator).'),
     category=_('Logging'),
     category_slug='logging',
-    required=False
+    required=False,
 )
 register(
     'LOG_AGGREGATOR_TYPE',
@@ -630,12 +654,14 @@ register(
     field_class=fields.StringListField,
     default=['awx', 'activity_stream', 'job_events', 'system_tracking'],
     label=_('Loggers Sending Data to Log Aggregator Form'),
-    help_text=_('List of loggers that will send HTTP logs to the collector, these can '
-                'include any or all of: \n'
-                'awx - service logs\n'
-                'activity_stream - activity stream records\n'
-                'job_events - callback data from Ansible job events\n'
-                'system_tracking - facts gathered from scan jobs.'),
+    help_text=_(
+        'List of loggers that will send HTTP logs to the collector, these can '
+        'include any or all of: \n'
+        'awx - service logs\n'
+        'activity_stream - activity stream records\n'
+        'job_events - callback data from Ansible job events\n'
+        'system_tracking - facts gathered from scan jobs.'
+    ),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -644,10 +670,12 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Log System Tracking Facts Individually'),
-    help_text=_('If set, system tracking facts will be sent for each package, service, or '
-                'other item found in a scan, allowing for greater search query granularity. '
-                'If unset, facts will be sent as a single dictionary, allowing for greater '
-                'efficiency in fact processing.'),
+    help_text=_(
+        'If set, system tracking facts will be sent for each package, service, or '
+        'other item found in a scan, allowing for greater search query granularity. '
+        'If unset, facts will be sent as a single dictionary, allowing for greater '
+        'efficiency in fact processing.'
+    ),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -676,9 +704,11 @@ register(
     choices=[('https', 'HTTPS/HTTP'), ('tcp', 'TCP'), ('udp', 'UDP')],
     default='https',
     label=_('Logging Aggregator Protocol'),
-    help_text=_('Protocol used to communicate with log aggregator.  '
-                'HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in '
-                'the Logging Aggregator hostname.'),
+    help_text=_(
+        'Protocol used to communicate with log aggregator.  '
+        'HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in '
+        'the Logging Aggregator hostname.'
+    ),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -687,9 +717,7 @@ register(
     field_class=fields.IntegerField,
     default=5,
     label=_('TCP Connection Timeout'),
-    help_text=_('Number of seconds for a TCP connection to external log '
-                'aggregator to timeout. Applies to HTTPS and TCP log '
-                'aggregator protocols.'),
+    help_text=_('Number of seconds for a TCP connection to external log ' 'aggregator to timeout. Applies to HTTPS and TCP log ' 'aggregator protocols.'),
     category=_('Logging'),
     category_slug='logging',
     unit=_('seconds'),
@@ -699,10 +727,12 @@ register(
     field_class=fields.BooleanField,
     default=True,
     label=_('Enable/disable HTTPS certificate verification'),
-    help_text=_('Flag to control enable/disable of certificate verification'
-                ' when LOG_AGGREGATOR_PROTOCOL is "https". If enabled, Tower\'s'
-                ' log handler will verify certificate sent by external log aggregator'
-                ' before establishing connection.'),
+    help_text=_(
+        'Flag to control enable/disable of certificate verification'
+        ' when LOG_AGGREGATOR_PROTOCOL is "https". If enabled, Tower\'s'
+        ' log handler will verify certificate sent by external log aggregator'
+        ' before establishing connection.'
+    ),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -712,10 +742,12 @@ register(
     choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
     default='WARNING',
     label=_('Logging Aggregator Level Threshold'),
-    help_text=_('Level threshold used by log handler. Severities from lowest to highest'
-                ' are DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe '
-                'than the threshold will be ignored by log handler. (messages under category '
-                'awx.anlytics ignore this setting)'),
+    help_text=_(
+        'Level threshold used by log handler. Severities from lowest to highest'
+        ' are DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe '
+        'than the threshold will be ignored by log handler. (messages under category '
+        'awx.anlytics ignore this setting)'
+    ),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -725,9 +757,11 @@ register(
     default=1,
     min_value=1,
     label=_('Maximum disk persistance for external log aggregation (in GB)'),
-    help_text=_('Amount of data to store (in gigabytes) during an outage of '
-                'the external log aggregator (defaults to 1). '
-                'Equivalent to the rsyslogd queue.maxdiskspace setting.'),
+    help_text=_(
+        'Amount of data to store (in gigabytes) during an outage of '
+        'the external log aggregator (defaults to 1). '
+        'Equivalent to the rsyslogd queue.maxdiskspace setting.'
+    ),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -736,9 +770,11 @@ register(
     field_class=fields.CharField,
     default='/var/lib/awx',
     label=_('File system location for rsyslogd disk persistence'),
-    help_text=_('Location to persist logs that should be retried after an outage '
-                'of the external log aggregator (defaults to /var/lib/awx). '
-                'Equivalent to the rsyslogd queue.spoolDirectory setting.'),
+    help_text=_(
+        'Location to persist logs that should be retried after an outage '
+        'of the external log aggregator (defaults to /var/lib/awx). '
+        'Equivalent to the rsyslogd queue.spoolDirectory setting.'
+    ),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -747,12 +783,10 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Enable rsyslogd debugging'),
-    help_text=_('Enabled high verbosity debugging for rsyslogd.  '
-                'Useful for debugging connection issues for external log aggregation.'),
+    help_text=_('Enabled high verbosity debugging for rsyslogd.  ' 'Useful for debugging connection issues for external log aggregation.'),
     category=_('Logging'),
     category_slug='logging',
 )
-
 
 
 register(
@@ -761,7 +795,7 @@ register(
     label=_('Last gather date for Automation Analytics.'),
     allow_null=True,
     category=_('System'),
-    category_slug='system'
+    category_slug='system',
 )
 
 
@@ -770,8 +804,8 @@ register(
     field_class=fields.IntegerField,
     label=_('Automation Analytics Gather Interval'),
     help_text=_('Interval (in seconds) between data gathering.'),
-    default=14400,	# every 4 hours
-    min_value=1800,	# every 30 minutes
+    default=14400,  # every 4 hours
+    min_value=1800,  # every 30 minutes
     category=_('System'),
     category_slug='system',
     unit=_('seconds'),
@@ -779,17 +813,23 @@ register(
 
 
 def logging_validate(serializer, attrs):
-    if not serializer.instance or \
-            not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or \
-            not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):
+    if not serializer.instance or not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):
         return attrs
     errors = []
     if attrs.get('LOG_AGGREGATOR_ENABLED', False):
-        if not serializer.instance.LOG_AGGREGATOR_HOST and not attrs.get('LOG_AGGREGATOR_HOST', None) or\
-                serializer.instance.LOG_AGGREGATOR_HOST and not attrs.get('LOG_AGGREGATOR_HOST', True):
+        if (
+            not serializer.instance.LOG_AGGREGATOR_HOST
+            and not attrs.get('LOG_AGGREGATOR_HOST', None)
+            or serializer.instance.LOG_AGGREGATOR_HOST
+            and not attrs.get('LOG_AGGREGATOR_HOST', True)
+        ):
             errors.append('Cannot enable log aggregator without providing host.')
-        if not serializer.instance.LOG_AGGREGATOR_TYPE and not attrs.get('LOG_AGGREGATOR_TYPE', None) or\
-                serializer.instance.LOG_AGGREGATOR_TYPE and not attrs.get('LOG_AGGREGATOR_TYPE', True):
+        if (
+            not serializer.instance.LOG_AGGREGATOR_TYPE
+            and not attrs.get('LOG_AGGREGATOR_TYPE', None)
+            or serializer.instance.LOG_AGGREGATOR_TYPE
+            and not attrs.get('LOG_AGGREGATOR_TYPE', True)
+        ):
             errors.append('Cannot enable log aggregator without providing type.')
     if errors:
         raise serializers.ValidationError(_('\n'.join(errors)))

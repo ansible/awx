@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 class URLRegistry(object):
-
     def __init__(self):
         self.store = defaultdict(dict)
         self.default = {}
@@ -81,8 +80,7 @@ class URLRegistry(object):
                 if method_pattern.pattern == not_provided:
                     exc_msg = '"{0.pattern}" already has methodless registration.'.format(url_pattern)
                 else:
-                    exc_msg = ('"{0.pattern}" already has registered method "{1.pattern}"'
-                               .format(url_pattern, method_pattern))
+                    exc_msg = '"{0.pattern}" already has registered method "{1.pattern}"'.format(url_pattern, method_pattern)
                 raise TypeError(exc_msg)
             self.store[url_pattern][method_pattern] = resource
 

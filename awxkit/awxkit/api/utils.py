@@ -15,12 +15,11 @@ def freeze(key):
 
 def parse_description(desc):
     options = {}
-    for line in desc[desc.index('POST'):].splitlines():
+    for line in desc[desc.index('POST') :].splitlines():
         match = descRE.match(line)
         if not match:
             continue
-        options[match.group(1)] = {'type': match.group(2),
-                                   'required': match.group(3) == 'required'}
+        options[match.group(1)] = {'type': match.group(2), 'required': match.group(3) == 'required'}
     return options
 
 
@@ -45,6 +44,5 @@ def get_post_fields(page, cache):
     if 'POST' in options_page.json['actions']:
         return options_page.json['actions']['POST']
     else:
-        log.warning(
-            "Insufficient privileges on %s, inferring POST fields from description.", options_page.endpoint)
+        log.warning("Insufficient privileges on %s, inferring POST fields from description.", options_page.endpoint)
         return parse_description(options_page.json['description'])

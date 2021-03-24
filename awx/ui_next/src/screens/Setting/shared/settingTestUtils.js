@@ -8,6 +8,6 @@ export function assertVariableDetail(wrapper, label, value) {
     wrapper.find(`CodeDetail[label="${label}"] .pf-c-form__label`).text()
   ).toBe(label);
   expect(
-    wrapper.find(`CodeDetail[label="${label}"] CodeMirrorInput`).prop('value')
+    wrapper.find(`CodeDetail[label="${label}"] CodeEditor`).prop('value')
   ).toBe(value);
 }

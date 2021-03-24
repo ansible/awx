@@ -3,7 +3,8 @@
 
 # Python
 import logging
-import os.path
+import sys
+import traceback
 
 # Django
 from django.conf import settings
@@ -21,27 +22,31 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
         super(RSysLogHandler, self)._connect_unixsocket(address)
         self.socket.setblocking(False)
 
+    def handleError(self, record):
+        # for any number of reasons, rsyslogd has gone to lunch;
+        # this usually means that it's just been restarted (due to
+        # a configuration change) unfortunately, we can't log that
+        # because...rsyslogd is down (and would just put us back down this
+        # code path)
+        # as a fallback, it makes the most sense to just write the
+        # messages to sys.stderr (which will end up in supervisord logs,
+        # and in containerized installs, cascaded down to pod logs)
+        # because the alternative is blocking the
+        # socket.send() in the Python process, which we definitely don't
+        # want to do)
+        msg = f'{record.asctime} ERROR rsyslogd was unresponsive: '
+        exc = traceback.format_exc()
+        try:
+            msg += exc.splitlines()[-1]
+        except Exception:
+            msg += exc
+        msg = '\n'.join([msg, record.msg, ''])
+        sys.stderr.write(msg)
+
     def emit(self, msg):
         if not settings.LOG_AGGREGATOR_ENABLED:
             return
-        if not os.path.exists(settings.LOGGING['handlers']['external_logger']['address']):
-            return
-        try:
-            return super(RSysLogHandler, self).emit(msg)
-        except ConnectionRefusedError:
-            # rsyslogd has gone to lunch; this generally means that it's just
-            # been restarted (due to a configuration change)
-            # unfortunately, we can't log that because...rsyslogd is down (and
-            # would just us back ddown this code path)
-            pass
-        except BlockingIOError:
-            # for <some reason>, rsyslogd is no longer reading from the domain socket, and
-            # we're unable to write any more to it without blocking (we've seen this behavior
-            # from time to time when logging is totally misconfigured;
-            # in this scenario, it also makes more sense to just drop the messages,
-            # because the alternative is blocking the socket.send() in the
-            # Python process, which we definitely don't want to do)
-            pass
+        return super(RSysLogHandler, self).emit(msg)
 
 
 class SpecialInventoryHandler(logging.Handler):
@@ -51,8 +56,7 @@ class SpecialInventoryHandler(logging.Handler):
     as opposed to ansible-runner
     """
 
-    def __init__(self, event_handler, cancel_callback, job_timeout, verbosity,
-                 start_time=None, counter=0, initial_line=0, **kwargs):
+    def __init__(self, event_handler, cancel_callback, job_timeout, verbosity, start_time=None, counter=0, initial_line=0, **kwargs):
         self.event_handler = event_handler
         self.cancel_callback = cancel_callback
         self.job_timeout = job_timeout
@@ -84,12 +88,7 @@ class SpecialInventoryHandler(logging.Handler):
         msg = self.format(record)
         n_lines = len(msg.strip().split('\n'))  # don't count line breaks at boundry of text
         dispatch_data = dict(
-            created=now().isoformat(),
-            event='verbose',
-            counter=self.counter,
-            stdout=msg,
-            start_line=self._current_line,
-            end_line=self._current_line + n_lines
+            created=now().isoformat(), event='verbose', counter=self.counter, stdout=msg, start_line=self._current_line, end_line=self._current_line + n_lines
         )
         self._current_line += n_lines
 
@@ -115,10 +114,7 @@ if settings.COLOR_LOGS is True:
 
             def format(self, record):
                 message = logging.StreamHandler.format(self, record)
-                return '\n'.join([
-                    self.colorize(line, record)
-                    for line in message.splitlines()
-                ])
+                return '\n'.join([self.colorize(line, record) for line in message.splitlines()])
 
             level_map = {
                 logging.DEBUG: (None, 'green', True),
@@ -127,6 +123,7 @@ if settings.COLOR_LOGS is True:
                 logging.ERROR: (None, 'red', True),
                 logging.CRITICAL: (None, 'red', True),
             }
+
     except ImportError:
         # logutils is only used for colored logs in the dev environment
         pass

@@ -14,21 +14,17 @@ TEST_STATES.remove('new')
 
 TEST_STDOUTS = []
 uri = URI(scheme="https", username="Dhh3U47nmC26xk9PKscV", password="PXPfWW8YzYrgS@E5NbQ2H@", host="github.ginger.com/theirrepo.git/info/refs")
-TEST_STDOUTS.append({
-    'description': 'uri in a plain text document',
-    'uri' : uri,
-    'text' : 'hello world %s goodbye world' % uri,
-    'occurrences' : 1
-})
+TEST_STDOUTS.append({'description': 'uri in a plain text document', 'uri': uri, 'text': 'hello world %s goodbye world' % uri, 'occurrences': 1})
 
 uri = URI(scheme="https", username="applepie@@@", password="thatyouknow@@@@", host="github.ginger.com/theirrepo.git/info/refs")
-TEST_STDOUTS.append({
-    'description': 'uri appears twice in a multiline plain text document',
-    'uri' : uri,
-    'text' : 'hello world %s \n\nyoyo\n\nhello\n%s' % (uri, uri),
-    'occurrences' : 2
-})
-
+TEST_STDOUTS.append(
+    {
+        'description': 'uri appears twice in a multiline plain text document',
+        'uri': uri,
+        'text': 'hello world %s \n\nyoyo\n\nhello\n%s' % (uri, uri),
+        'occurrences': 2,
+    }
+)
 
 
 @pytest.fixture
@@ -123,11 +119,7 @@ def test_delete_project_update_in_active_state(project, delete, admin, status):
 @pytest.mark.parametrize("status", list(TEST_STATES))
 @pytest.mark.django_db
 def test_delete_inventory_update_in_active_state(inventory_source, delete, admin, status):
-    i = InventoryUpdate.objects.create(
-        inventory_source=inventory_source,
-        status=status,
-        source=inventory_source.source
-    )
+    i = InventoryUpdate.objects.create(inventory_source=inventory_source, status=status, source=inventory_source.source)
     url = reverse('api:inventory_update_detail', kwargs={'pk': i.pk})
     delete(url, None, admin, expect=403)
 

@@ -12,10 +12,12 @@ class OAuth2Application(HasCreate, base.Base):
     dependencies = [Organization]
 
     def payload(self, **kwargs):
-        payload = PseudoNamespace(name=kwargs.get('name') or 'OAuth2Application - {}'.format(random_title()),
-                                  description=kwargs.get('description') or random_title(10),
-                                  client_type=kwargs.get('client_type', 'public'),
-                                  authorization_grant_type=kwargs.get('authorization_grant_type', 'password'))
+        payload = PseudoNamespace(
+            name=kwargs.get('name') or 'OAuth2Application - {}'.format(random_title()),
+            description=kwargs.get('description') or random_title(10),
+            client_type=kwargs.get('client_type', 'public'),
+            authorization_grant_type=kwargs.get('authorization_grant_type', 'password'),
+        )
         if kwargs.get('organization'):
             payload.organization = kwargs['organization'].id
 
@@ -35,8 +37,7 @@ class OAuth2Application(HasCreate, base.Base):
         return self.update_identity(OAuth2Applications(self.connection).post(payload))
 
 
-page.register_page((resources.application,
-                   (resources.applications, 'post')), OAuth2Application)
+page.register_page((resources.application, (resources.applications, 'post')), OAuth2Application)
 
 
 class OAuth2Applications(page.PageList, OAuth2Application):
@@ -51,8 +52,7 @@ class OAuth2AccessToken(HasCreate, base.Base):
     optional_dependencies = [OAuth2Application]
 
     def payload(self, **kwargs):
-        payload = PseudoNamespace(description=kwargs.get('description') or random_title(10),
-                                  scope=kwargs.get('scope', 'write'))
+        payload = PseudoNamespace(description=kwargs.get('description') or random_title(10), scope=kwargs.get('scope', 'write'))
 
         if kwargs.get('oauth_2_application'):
             payload.application = kwargs['oauth_2_application'].id
@@ -73,8 +73,7 @@ class OAuth2AccessToken(HasCreate, base.Base):
         return self.update_identity(OAuth2AccessTokens(self.connection).post(payload))
 
 
-page.register_page((resources.token,
-                   (resources.tokens, 'post')), OAuth2AccessToken)
+page.register_page((resources.token, (resources.tokens, 'post')), OAuth2AccessToken)
 
 
 class OAuth2AccessTokens(page.PageList, OAuth2AccessToken):

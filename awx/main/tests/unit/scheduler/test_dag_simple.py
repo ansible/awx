@@ -7,6 +7,7 @@ from awx.main.scheduler.dag_simple import SimpleDAG
 def node_generator():
     def fn():
         return object()
+
     return fn
 
 

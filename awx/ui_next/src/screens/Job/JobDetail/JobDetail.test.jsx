@@ -10,16 +10,15 @@ jest.mock('../../../api');
 
 describe('<JobDetail />', () => {
   let wrapper;
+  function assertDetail(label, value) {
+    expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+    expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+  }
   afterEach(() => {
     wrapper.unmount();
   });
 
   test('should display details', () => {
-    function assertDetail(label, value) {
-      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
-    }
-
     wrapper = mountWithContexts(
       <JobDetail
         job={{
@@ -60,7 +59,6 @@ describe('<JobDetail />', () => {
     assertDetail('Revision', mockJobData.scm_revision);
     assertDetail('Playbook', mockJobData.playbook);
     assertDetail('Verbosity', '0 (Normal)');
-    assertDetail('Environment', mockJobData.custom_virtualenv);
     assertDetail('Execution Node', mockJobData.execution_node);
     assertDetail(
       'Instance Group',
@@ -69,6 +67,15 @@ describe('<JobDetail />', () => {
     assertDetail('Job Slice', '0/1');
     assertDetail('Credentials', 'SSH: Demo Credential');
     assertDetail('Machine Credential', 'SSH: Machine cred');
+
+    const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
+    expect(executionEnvironment).toHaveLength(1);
+    expect(executionEnvironment.find('dt').text()).toEqual(
+      'Execution Environment'
+    );
+    expect(executionEnvironment.find('dd').text()).toEqual(
+      mockJobData.summary_fields.execution_environment.name
+    );
 
     const credentialChip = wrapper.find(
       `Detail[label="Credentials"] CredentialChip`
@@ -161,5 +168,16 @@ describe('<JobDetail />', () => {
     }
     assertMissingDetail('Project');
     assertMissingDetail('Inventory');
+  });
+  test('should display Playbook Check detail', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          job_type: 'check',
+        }}
+      />
+    );
+    assertDetail('Job Type', 'Playbook Check');
   });
 });

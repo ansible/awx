@@ -133,6 +133,28 @@
     that:
       - result is changed
 
+- name: Copy email notification
+  tower_notification_template:
+    name: "copy_{{ email_not }}"
+    copy_from: "{{ email_not }}"
+    organization: Default
+  register: result
+
+- assert:
+    that:
+      - result.copied
+
+- name: Delete copied email notification
+  tower_notification_template:
+    name: "copy_{{ email_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
 - name: Delete email notification
   tower_notification_template:
     name: "{{ email_not }}"

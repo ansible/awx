@@ -79,6 +79,7 @@ def test_default_cred_types():
         'aws',
         'azure_kv',
         'azure_rm',
+        'centrify_vault_kv',
         'conjur',
         'galaxy_api_token',
         'gce',
@@ -90,6 +91,7 @@ def test_default_cred_types():
         'kubernetes_bearer_token',
         'net',
         'openstack',
+        'registry',
         'rhv',
         'satellite6',
         'scm',
@@ -106,21 +108,11 @@ def test_default_cred_types():
 def test_credential_creation(organization_factory):
     org = organization_factory('test').organization
     type_ = CredentialType(
-        kind='cloud',
-        name='SomeCloud',
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': 'Username for SomeCloud',
-                'type': 'string'
-            }]
-        }
+        kind='cloud', name='SomeCloud', managed_by_tower=True, inputs={'fields': [{'id': 'username', 'label': 'Username for SomeCloud', 'type': 'string'}]}
     )
     type_.save()
 
-    cred = Credential(credential_type=type_, name="Bob's Credential",
-                      inputs={'username': 'bob'}, organization=org)
+    cred = Credential(credential_type=type_, name="Bob's Credential", inputs={'username': 'bob'}, organization=org)
     cred.save()
     cred.full_clean()
     assert isinstance(cred, Credential)
@@ -129,20 +121,23 @@ def test_credential_creation(organization_factory):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('kind',  ['ssh', 'net', 'scm'])
-@pytest.mark.parametrize('ssh_key_data, ssh_key_unlock, valid', [
-    [EXAMPLE_PRIVATE_KEY, None, True],  # unencrypted key, no unlock pass
-    [EXAMPLE_PRIVATE_KEY, 'super-secret', False],  # unencrypted key, unlock pass
-    [EXAMPLE_ENCRYPTED_PRIVATE_KEY, 'super-secret', True],  # encrypted key, unlock pass
-    [EXAMPLE_ENCRYPTED_PRIVATE_KEY, None, False],  # encrypted key, no unlock pass
-    [PKCS8_ENCRYPTED_PRIVATE_KEY, 'passme', True],  # encrypted PKCS8 key, unlock pass
-    [PKCS8_ENCRYPTED_PRIVATE_KEY, None, False],  # encrypted PKCS8 key, no unlock pass
-    [PKCS8_PRIVATE_KEY, None, True],  # unencrypted PKCS8 key, no unlock pass
-    [PKCS8_PRIVATE_KEY, 'passme', False],  # unencrypted PKCS8 key, unlock pass
-    [None, None, True],  # no key, no unlock pass
-    ['INVALID-KEY-DATA', None, False],  # invalid key data
-    [EXAMPLE_PRIVATE_KEY.replace('=', '\u003d'), None, True],  # automatically fix JSON-encoded GCE keys
-])
+@pytest.mark.parametrize('kind', ['ssh', 'net', 'scm'])
+@pytest.mark.parametrize(
+    'ssh_key_data, ssh_key_unlock, valid',
+    [
+        [EXAMPLE_PRIVATE_KEY, None, True],  # unencrypted key, no unlock pass
+        [EXAMPLE_PRIVATE_KEY, 'super-secret', False],  # unencrypted key, unlock pass
+        [EXAMPLE_ENCRYPTED_PRIVATE_KEY, 'super-secret', True],  # encrypted key, unlock pass
+        [EXAMPLE_ENCRYPTED_PRIVATE_KEY, None, False],  # encrypted key, no unlock pass
+        [PKCS8_ENCRYPTED_PRIVATE_KEY, 'passme', True],  # encrypted PKCS8 key, unlock pass
+        [PKCS8_ENCRYPTED_PRIVATE_KEY, None, False],  # encrypted PKCS8 key, no unlock pass
+        [PKCS8_PRIVATE_KEY, None, True],  # unencrypted PKCS8 key, no unlock pass
+        [PKCS8_PRIVATE_KEY, 'passme', False],  # unencrypted PKCS8 key, unlock pass
+        [None, None, True],  # no key, no unlock pass
+        ['INVALID-KEY-DATA', None, False],  # invalid key data
+        [EXAMPLE_PRIVATE_KEY.replace('=', '\u003d'), None, True],  # automatically fix JSON-encoded GCE keys
+    ],
+)
 def test_ssh_key_data_validation(organization, kind, ssh_key_data, ssh_key_unlock, valid):
     inputs = {'username': 'joe-user'}
     if ssh_key_data:
@@ -151,12 +146,7 @@ def test_ssh_key_data_validation(organization, kind, ssh_key_data, ssh_key_unloc
         inputs['ssh_key_unlock'] = ssh_key_unlock
     cred_type = CredentialType.defaults[kind]()
     cred_type.save()
-    cred = Credential(
-        credential_type=cred_type,
-        name="Best credential ever",
-        inputs=inputs,
-        organization=organization
-    )
+    cred = Credential(credential_type=cred_type, name="Best credential ever", inputs=inputs, organization=organization)
     cred.save()
     if valid:
         cred.full_clean()
@@ -167,21 +157,19 @@ def test_ssh_key_data_validation(organization, kind, ssh_key_data, ssh_key_unloc
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('inputs, valid', [
-    ({'vault_password': 'some-pass'}, True),
-    ({}, True),
-    ({'vault_password': 'dev-pass', 'vault_id': 'dev'}, True),
-    ({'vault_password': 'dev-pass', 'vault_id': 'dev@prompt'}, False),  # @ not allowed
-])
+@pytest.mark.parametrize(
+    'inputs, valid',
+    [
+        ({'vault_password': 'some-pass'}, True),
+        ({}, True),
+        ({'vault_password': 'dev-pass', 'vault_id': 'dev'}, True),
+        ({'vault_password': 'dev-pass', 'vault_id': 'dev@prompt'}, False),  # @ not allowed
+    ],
+)
 def test_vault_validation(organization, inputs, valid):
     cred_type = CredentialType.defaults['vault']()
     cred_type.save()
-    cred = Credential(
-        credential_type=cred_type,
-        name="Best credential ever",
-        inputs=inputs,
-        organization=organization
-    )
+    cred = Credential(credential_type=cred_type, name="Best credential ever", inputs=inputs, organization=organization)
     cred.save()
     if valid:
         cred.full_clean()
@@ -192,21 +180,19 @@ def test_vault_validation(organization, inputs, valid):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('become_method, valid', [
-    ('', True),
-    ('sudo', True),
-    ('custom-plugin', True),
-])
+@pytest.mark.parametrize(
+    'become_method, valid',
+    [
+        ('', True),
+        ('sudo', True),
+        ('custom-plugin', True),
+    ],
+)
 def test_choices_validity(become_method, valid, organization):
     inputs = {'become_method': become_method}
     cred_type = CredentialType.defaults['ssh']()
     cred_type.save()
-    cred = Credential(
-        credential_type=cred_type,
-        name="Best credential ever",
-        inputs=inputs,
-        organization=organization
-    )
+    cred = Credential(credential_type=cred_type, name="Best credential ever", inputs=inputs, organization=organization)
     cred.save()
 
     if valid:
@@ -220,12 +206,7 @@ def test_choices_validity(become_method, valid, organization):
 @pytest.mark.django_db
 def test_credential_encryption(organization_factory, credentialtype_ssh):
     org = organization_factory('test').organization
-    cred = Credential(
-        credential_type=credentialtype_ssh,
-        name="Bob's Credential",
-        inputs={'password': 'testing123'},
-        organization=org
-    )
+    cred = Credential(credential_type=credentialtype_ssh, name="Bob's Credential", inputs={'password': 'testing123'}, organization=org)
     cred.save()
 
     assert Credential.objects.count() == 1
@@ -237,12 +218,7 @@ def test_credential_encryption(organization_factory, credentialtype_ssh):
 @pytest.mark.django_db
 def test_credential_encryption_with_ask(organization_factory, credentialtype_ssh):
     org = organization_factory('test').organization
-    cred = Credential(
-        credential_type=credentialtype_ssh,
-        name="Bob's Credential",
-        inputs={'password': 'ASK'},
-        organization=org
-    )
+    cred = Credential(credential_type=credentialtype_ssh, name="Bob's Credential", inputs={'password': 'ASK'}, organization=org)
     cred.save()
 
     assert Credential.objects.count() == 1
@@ -254,10 +230,7 @@ def test_credential_encryption_with_ask(organization_factory, credentialtype_ssh
 def test_credential_with_multiple_secrets(organization_factory, credentialtype_ssh):
     org = organization_factory('test').organization
     cred = Credential(
-        credential_type=credentialtype_ssh,
-        name="Bob's Credential",
-        inputs={'ssh_key_data': 'SOMEKEY', 'ssh_key_unlock': 'testing123'},
-        organization=org
+        credential_type=credentialtype_ssh, name="Bob's Credential", inputs={'ssh_key_data': 'SOMEKEY', 'ssh_key_unlock': 'testing123'}, organization=org
     )
     cred.save()
 
@@ -273,12 +246,7 @@ def test_credential_with_multiple_secrets(organization_factory, credentialtype_s
 @pytest.mark.django_db
 def test_credential_update(organization_factory, credentialtype_ssh):
     org = organization_factory('test').organization
-    cred = Credential(
-        credential_type=credentialtype_ssh,
-        name="Bob's Credential",
-        inputs={'password': 'testing123'},
-        organization=org
-    )
+    cred = Credential(credential_type=credentialtype_ssh, name="Bob's Credential", inputs={'password': 'testing123'}, organization=org)
     cred.save()
 
     assert Credential.objects.count() == 1
@@ -295,12 +263,7 @@ def test_credential_update(organization_factory, credentialtype_ssh):
 @pytest.mark.django_db
 def test_credential_update_with_prior(organization_factory, credentialtype_ssh):
     org = organization_factory('test').organization
-    cred = Credential(
-        credential_type=credentialtype_ssh,
-        name="Bob's Credential",
-        inputs={'password': 'testing123'},
-        organization=org
-    )
+    cred = Credential(credential_type=credentialtype_ssh, name="Bob's Credential", inputs={'password': 'testing123'}, organization=org)
     cred.save()
 
     assert Credential.objects.count() == 1
@@ -324,29 +287,24 @@ def test_credential_get_input(organization_factory):
         name='somevault',
         managed_by_tower=True,
         inputs={
-            'fields': [{
-                'id': 'vault_password',
-                'type': 'string',
-                'secret': True,
-            }, {
-                'id': 'vault_id',
-                'type': 'string',
-                'secret': False
-            }, {
-                'id': 'secret',
-                'type': 'string',
-                'secret': True,
-            }]
-        }
+            'fields': [
+                {
+                    'id': 'vault_password',
+                    'type': 'string',
+                    'secret': True,
+                },
+                {'id': 'vault_id', 'type': 'string', 'secret': False},
+                {
+                    'id': 'secret',
+                    'type': 'string',
+                    'secret': True,
+                },
+            ]
+        },
     )
     type_.save()
 
-    cred = Credential(
-        organization=organization,
-        credential_type=type_,
-        name="Bob's Credential",
-        inputs={'vault_password': 'testing321'}
-    )
+    cred = Credential(organization=organization, credential_type=type_, name="Bob's Credential", inputs={'vault_password': 'testing321'})
     cred.save()
     cred.full_clean()
 

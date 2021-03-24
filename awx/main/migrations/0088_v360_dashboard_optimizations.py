@@ -18,7 +18,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unifiedjob',
             name='launch_type',
-            field=models.CharField(choices=[('manual', 'Manual'), ('relaunch', 'Relaunch'), ('callback', 'Callback'), ('scheduled', 'Scheduled'), ('dependency', 'Dependency'), ('workflow', 'Workflow'), ('sync', 'Sync'), ('scm', 'SCM Update')], db_index=True, default='manual', editable=False, max_length=20),
+            field=models.CharField(
+                choices=[
+                    ('manual', 'Manual'),
+                    ('relaunch', 'Relaunch'),
+                    ('callback', 'Callback'),
+                    ('scheduled', 'Scheduled'),
+                    ('dependency', 'Dependency'),
+                    ('workflow', 'Workflow'),
+                    ('sync', 'Sync'),
+                    ('scm', 'SCM Update'),
+                ],
+                db_index=True,
+                default='manual',
+                editable=False,
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
             model_name='unifiedjob',

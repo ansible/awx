@@ -49,6 +49,7 @@ def isolated_instance_group(instance_group, instance):
 def containerized_instance_group(instance_group, kube_credential):
     ig = InstanceGroup(name="container")
     ig.credential = kube_credential
+    ig.is_container_group = True
     ig.save()
     return ig
 
@@ -61,6 +62,7 @@ def create_job_factory(job_factory, instance_group):
         j.instance_group = instance_group
         j.save()
         return j
+
     return fn
 
 
@@ -72,6 +74,7 @@ def create_project_update_factory(instance_group, project):
         pu.instance_group = instance_group
         pu.save()
         return pu
+
     return fn
 
 
@@ -194,8 +197,7 @@ def test_prevent_isolated_instance_removal_from_isolated_instance_group(post, ad
 
 
 @pytest.mark.django_db
-def test_prevent_non_isolated_instance_added_to_isolated_instance_group(
-        post, admin, non_iso_instance, isolated_instance_group):
+def test_prevent_non_isolated_instance_added_to_isolated_instance_group(post, admin, non_iso_instance, isolated_instance_group):
     url = reverse("api:instance_group_instance_list", kwargs={'pk': isolated_instance_group.pk})
 
     assert False is non_iso_instance.is_isolated()
@@ -204,8 +206,7 @@ def test_prevent_non_isolated_instance_added_to_isolated_instance_group(
 
 
 @pytest.mark.django_db
-def test_prevent_non_isolated_instance_added_to_isolated_instance_group_via_policy_list(
-        patch, admin, non_iso_instance, isolated_instance_group):
+def test_prevent_non_isolated_instance_added_to_isolated_instance_group_via_policy_list(patch, admin, non_iso_instance, isolated_instance_group):
     url = reverse("api:instance_group_detail", kwargs={'pk': isolated_instance_group.pk})
 
     assert False is non_iso_instance.is_isolated()
@@ -215,9 +216,7 @@ def test_prevent_non_isolated_instance_added_to_isolated_instance_group_via_poli
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    'source_model', ['job_template', 'inventory', 'organization'], indirect=True
-)
+@pytest.mark.parametrize('source_model', ['job_template', 'inventory', 'organization'], indirect=True)
 def test_instance_group_order_persistence(get, post, admin, source_model):
     # create several instance groups in random order
     total = 5
@@ -225,10 +224,7 @@ def test_instance_group_order_persistence(get, post, admin, source_model):
     random.shuffle(pks)
     instances = [InstanceGroup.objects.create(name='iso-%d' % i) for i in pks]
     view_name = camelcase_to_underscore(source_model.__class__.__name__)
-    url = reverse(
-        'api:{}_instance_groups_list'.format(view_name),
-        kwargs={'pk': source_model.pk}
-    )
+    url = reverse('api:{}_instance_groups_list'.format(view_name), kwargs={'pk': source_model.pk})
 
     # associate them all
     for instance in instances:
@@ -255,24 +251,24 @@ def test_instance_group_update_fields(patch, instance, instance_group, admin, co
     # policy_instance_ variables can only be updated in instance groups that are NOT containerized
     # instance group (not containerized)
     ig_url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
-    assert not instance_group.is_containerized
+    assert not instance_group.is_container_group
     assert not containerized_instance_group.is_isolated
-    resp = patch(ig_url, {'policy_instance_percentage':15}, admin, expect=200)
+    resp = patch(ig_url, {'policy_instance_percentage': 15}, admin, expect=200)
     assert 15 == resp.data['policy_instance_percentage']
-    resp = patch(ig_url, {'policy_instance_minimum':15}, admin, expect=200)
+    resp = patch(ig_url, {'policy_instance_minimum': 15}, admin, expect=200)
     assert 15 == resp.data['policy_instance_minimum']
-    resp = patch(ig_url, {'policy_instance_list':[instance.hostname]}, admin)
+    resp = patch(ig_url, {'policy_instance_list': [instance.hostname]}, admin)
     assert [instance.hostname] == resp.data['policy_instance_list']
 
     # containerized instance group
     cg_url = reverse("api:instance_group_detail", kwargs={'pk': containerized_instance_group.pk})
-    assert containerized_instance_group.is_containerized
+    assert containerized_instance_group.is_container_group
     assert not containerized_instance_group.is_isolated
-    resp = patch(cg_url, {'policy_instance_percentage':15}, admin, expect=400)
+    resp = patch(cg_url, {'policy_instance_percentage': 15}, admin, expect=400)
     assert ["Containerized instances may not be managed via the API"] == resp.data['policy_instance_percentage']
-    resp = patch(cg_url, {'policy_instance_minimum':15}, admin, expect=400)
+    resp = patch(cg_url, {'policy_instance_minimum': 15}, admin, expect=400)
     assert ["Containerized instances may not be managed via the API"] == resp.data['policy_instance_minimum']
-    resp = patch(cg_url, {'policy_instance_list':[instance.hostname]}, admin)
+    resp = patch(cg_url, {'policy_instance_list': [instance.hostname]}, admin)
     assert ["Containerized instances may not be managed via the API"] == resp.data['policy_instance_list']
 
 
@@ -287,8 +283,8 @@ def test_containerized_group_default_fields(instance_group, kube_credential):
     assert ig.policy_instance_minimum == 5
     assert ig.policy_instance_percentage == 5
     ig.credential = kube_credential
+    ig.is_container_group = True
     ig.save()
     assert ig.policy_instance_list == []
     assert ig.policy_instance_minimum == 0
     assert ig.policy_instance_percentage == 0
-    

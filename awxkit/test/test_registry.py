@@ -169,8 +169,7 @@ def test_wildcard_and_specific_method_registration_acts_as_default(reg):
 def test_multiple_method_registrations_disallowed_for_single_path_single_registration(reg, method):
     with pytest.raises(TypeError) as e:
         reg.register((('some_path', method), ('some_path', method)), One)
-    assert str(e.value) == ('"{0.pattern}" already has registered method "{1}"'
-                          .format(reg.url_pattern('some_path'), method))
+    assert str(e.value) == ('"{0.pattern}" already has registered method "{1}"'.format(reg.url_pattern('some_path'), method))
 
 
 @pytest.mark.parametrize('method', ('method', '.*'))
@@ -178,8 +177,7 @@ def test_multiple_method_registrations_disallowed_for_single_path_multiple_regis
     reg.register('some_path', method, One)
     with pytest.raises(TypeError) as e:
         reg.register('some_path', method, One)
-    assert str(e.value) == ('"{0.pattern}" already has registered method "{1}"'
-                          .format(reg.url_pattern('some_path'), method))
+    assert str(e.value) == ('"{0.pattern}" already has registered method "{1}"'.format(reg.url_pattern('some_path'), method))
 
 
 def test_paths_can_be_patterns(reg):
@@ -188,10 +186,9 @@ def test_paths_can_be_patterns(reg):
 
 
 def test_mixed_form_single_registration(reg):
-    reg.register([('some_path_one', 'method_one'),
-                  'some_path_two',
-                  ('some_path_three', ('method_two', 'method_three')),
-                  'some_path_four', 'some_path_five'], One)
+    reg.register(
+        [('some_path_one', 'method_one'), 'some_path_two', ('some_path_three', ('method_two', 'method_three')), 'some_path_four', 'some_path_five'], One
+    )
     assert reg.get('some_path_one', 'method_one') is One
     assert reg.get('some_path_one') is None
     assert reg.get('some_path_one', 'nonexistent') is None
@@ -209,10 +206,9 @@ def test_mixed_form_single_registration(reg):
 
 def test_mixed_form_single_registration_with_methodless_default(reg):
     reg.setdefault(One)
-    reg.register([('some_path_one', 'method_one'),
-                  'some_path_two',
-                  ('some_path_three', ('method_two', 'method_three')),
-                  'some_path_four', 'some_path_five'], Two)
+    reg.register(
+        [('some_path_one', 'method_one'), 'some_path_two', ('some_path_three', ('method_two', 'method_three')), 'some_path_four', 'some_path_five'], Two
+    )
     assert reg.get('some_path_one', 'method_one') is Two
     assert reg.get('some_path_one') is One
     assert reg.get('some_path_one', 'nonexistent') is One
@@ -230,10 +226,9 @@ def test_mixed_form_single_registration_with_methodless_default(reg):
 
 def test_mixed_form_single_registration_with_method_default(reg):
     reg.setdefault('existent', One)
-    reg.register([('some_path_one', 'method_one'),
-                  'some_path_two',
-                  ('some_path_three', ('method_two', 'method_three')),
-                  'some_path_four', 'some_path_five'], Two)
+    reg.register(
+        [('some_path_one', 'method_one'), 'some_path_two', ('some_path_three', ('method_two', 'method_three')), 'some_path_four', 'some_path_five'], Two
+    )
     assert reg.get('some_path_one', 'method_one') is Two
     assert reg.get('some_path_one') is None
     assert reg.get('some_path_one', 'existent') is One

@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -26,6 +25,14 @@ options:
       description:
         - Name to use for the project.
       required: True
+      type: str
+    copy_from:
+      description:
+        - Name or id to copy the project from.
+        - This will copy an existing project and change any parameters supplied.
+        - The new project name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple projects share the same name.
       type: str
     description:
       description:
@@ -97,11 +104,10 @@ options:
       type: int
       aliases:
         - job_timeout
-    custom_virtualenv:
+    default_environment:
       description:
-        - Local absolute file path containing a custom Python virtualenv to use
+        - Default Execution Environment to use for jobs relating to the project.
       type: str
-      default: ''
     organization:
       description:
         - Name of organization for project.
@@ -161,16 +167,23 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Add Tower Project with cache timeout and custom virtualenv
+- name: Add Tower Project with cache timeout
   tower_project:
     name: "Foo"
     description: "Foo bar project"
     organization: "test"
     scm_update_on_launch: True
     scm_update_cache_timeout: 60
-    custom_virtualenv: "/var/lib/awx/var/lib/awx/venv/ansible-2.2"
     state: present
     tower_config_file: "~/tower_cli.cfg"
+
+- name: Copy tower project
+  tower_project:
+    name: copy
+    copy_from: test
+    description: Foo copy project
+    organization: Foo
+    state: present
 '''
 
 import time
@@ -212,10 +225,7 @@ def wait_for_project_update(module, last_request):
 
         # Invoke wait function
         module.wait_on_url(
-            url=result['json']['url'],
-            object_name=module.get_item_name(last_request),
-            object_type='Project Update',
-            timeout=timeout, interval=interval
+            url=result['json']['url'], object_name=module.get_item_name(last_request), object_type='Project Update', timeout=timeout, interval=interval
         )
 
     module.exit_json(**module.json_output)
@@ -225,6 +235,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        copy_from=dict(),
         description=dict(),
         scm_type=dict(choices=['manual', 'git', 'svn', 'insights'], default='manual'),
         scm_url=dict(),
@@ -238,7 +249,7 @@ def main():
         scm_update_cache_timeout=dict(type='int', default=0),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
         timeout=dict(type='int', default=0, aliases=['job_timeout']),
-        custom_virtualenv=dict(),
+        default_environment=dict(),
         organization=dict(),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
@@ -254,22 +265,15 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
-    description = module.params.get('description')
+    copy_from = module.params.get('copy_from')
     scm_type = module.params.get('scm_type')
     if scm_type == "manual":
         scm_type = ""
-    scm_url = module.params.get('scm_url')
     local_path = module.params.get('local_path')
-    scm_branch = module.params.get('scm_branch')
-    scm_refspec = module.params.get('scm_refspec')
     credential = module.params.get('credential')
-    scm_clean = module.params.get('scm_clean')
-    scm_delete_on_update = module.params.get('scm_delete_on_update')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
-    allow_override = module.params.get('allow_override')
-    timeout = module.params.get('timeout')
-    custom_virtualenv = module.params.get('custom_virtualenv')
+    default_ee = module.params.get('default_environment')
     organization = module.params.get('organization')
     state = module.params.get('state')
     wait = module.params.get('wait')
@@ -285,6 +289,18 @@ def main():
 
     # Attempt to look up project based on the provided name and org ID
     project = module.get_one('projects', name_or_id=name, data=lookup_data)
+
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        project = module.copy_item(
+            project,
+            copy_from,
+            name,
+            endpoint='projects',
+            item_type='project',
+            copy_lookup_data={},
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -318,25 +334,34 @@ def main():
     project_fields = {
         'name': module.get_item_name(project) if project else name,
         'scm_type': scm_type,
-        'scm_url': scm_url,
-        'scm_branch': scm_branch,
-        'scm_refspec': scm_refspec,
-        'scm_clean': scm_clean,
-        'scm_delete_on_update': scm_delete_on_update,
-        'timeout': timeout,
         'organization': org_id,
         'scm_update_on_launch': scm_update_on_launch,
         'scm_update_cache_timeout': scm_update_cache_timeout,
-        'custom_virtualenv': custom_virtualenv,
     }
-    if description is not None:
-        project_fields['description'] = description
+
+    for field_name in (
+        'scm_url',
+        'scm_branch',
+        'scm_refspec',
+        'scm_clean',
+        'scm_delete_on_update',
+        'timeout',
+        'scm_update_cache_timeout',
+        'custom_virtualenv',
+        'description',
+        'allow_override',
+    ):
+        field_val = module.params.get(field_name)
+        if field_val is not None:
+            project_fields[field_name] = field_val
+
     if credential is not None:
         project_fields['credential'] = credential
-    if allow_override is not None:
-        project_fields['allow_override'] = allow_override
+    if default_ee is not None:
+        project_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
     if scm_type == '':
-        project_fields['local_path'] = local_path
+        if local_path is not None:
+            project_fields['local_path'] = local_path
 
     if scm_update_cache_timeout != 0 and scm_update_on_launch is not True:
         module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
@@ -349,10 +374,7 @@ def main():
 
     # If the state was present and we can let the module build or update the existing project, this will return on its own
     module.create_or_update_if_needed(
-        project, project_fields,
-        endpoint='projects', item_type='project',
-        associations=association_fields,
-        on_create=on_change, on_update=on_change
+        project, project_fields, endpoint='projects', item_type='project', associations=association_fields, on_create=on_change, on_update=on_change
     )
 
 

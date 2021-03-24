@@ -7,21 +7,19 @@ from django.utils.timezone import now
 
 
 class Command(BaseCommand):
-    '''
+    """
     Gather AWX analytics data
-    '''
+    """
 
     help = 'Gather AWX analytics data'
 
     def add_arguments(self, parser):
-        parser.add_argument('--dry-run', dest='dry-run', action='store_true',
-                            help='Gather analytics without shipping. Works even if analytics are disabled in settings.')
-        parser.add_argument('--ship', dest='ship', action='store_true',
-                            help='Enable to ship metrics to the Red Hat Cloud')
-        parser.add_argument('--since', dest='since', action='store',
-                            help='Start date for collection')
-        parser.add_argument('--until', dest='until', action='store',
-                            help='End date for collection')
+        parser.add_argument(
+            '--dry-run', dest='dry-run', action='store_true', help='Gather analytics without shipping. Works even if analytics are disabled in settings.'
+        )
+        parser.add_argument('--ship', dest='ship', action='store_true', help='Enable to ship metrics to the Red Hat Cloud')
+        parser.add_argument('--since', dest='since', action='store', help='Start date for collection')
+        parser.add_argument('--until', dest='until', action='store', help='End date for collection')
 
     def init_logging(self):
         self.logger = logging.getLogger('awx.main.analytics')
@@ -50,7 +48,7 @@ class Command(BaseCommand):
         if opt_ship and opt_dry_run:
             self.logger.error('Both --ship and --dry-run cannot be processed at the same time.')
             return
-        tgzfiles = gather(collection_type='manual' if not opt_dry_run else 'dry-run', since = since, until = until)
+        tgzfiles = gather(collection_type='manual' if not opt_dry_run else 'dry-run', since=since, until=until)
         if tgzfiles:
             for tgz in tgzfiles:
                 self.logger.info(tgz)

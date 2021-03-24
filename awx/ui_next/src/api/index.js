@@ -7,6 +7,7 @@ import CredentialInputSources from './models/CredentialInputSources';
 import CredentialTypes from './models/CredentialTypes';
 import Credentials from './models/Credentials';
 import Dashboard from './models/Dashboard';
+import ExecutionEnvironments from './models/ExecutionEnvironments';
 import Groups from './models/Groups';
 import Hosts from './models/Hosts';
 import InstanceGroups from './models/InstanceGroups';
@@ -29,6 +30,7 @@ import Root from './models/Root';
 import Schedules from './models/Schedules';
 import Settings from './models/Settings';
 import SystemJobs from './models/SystemJobs';
+import SystemJobTemplates from './models/SystemJobTemplates';
 import Teams from './models/Teams';
 import Tokens from './models/Tokens';
 import UnifiedJobTemplates from './models/UnifiedJobTemplates';
@@ -49,6 +51,7 @@ const CredentialInputSourcesAPI = new CredentialInputSources();
 const CredentialTypesAPI = new CredentialTypes();
 const CredentialsAPI = new Credentials();
 const DashboardAPI = new Dashboard();
+const ExecutionEnvironmentsAPI = new ExecutionEnvironments();
 const GroupsAPI = new Groups();
 const HostsAPI = new Hosts();
 const InstanceGroupsAPI = new InstanceGroups();
@@ -71,6 +74,7 @@ const RootAPI = new Root();
 const SchedulesAPI = new Schedules();
 const SettingsAPI = new Settings();
 const SystemJobsAPI = new SystemJobs();
+const SystemJobTemplatesAPI = new SystemJobTemplates();
 const TeamsAPI = new Teams();
 const TokensAPI = new Tokens();
 const UnifiedJobTemplatesAPI = new UnifiedJobTemplates();
@@ -92,6 +96,7 @@ export {
   CredentialTypesAPI,
   CredentialsAPI,
   DashboardAPI,
+  ExecutionEnvironmentsAPI,
   GroupsAPI,
   HostsAPI,
   InstanceGroupsAPI,
@@ -114,6 +119,7 @@ export {
   SchedulesAPI,
   SettingsAPI,
   SystemJobsAPI,
+  SystemJobTemplatesAPI,
   TeamsAPI,
   TokensAPI,
   UnifiedJobTemplatesAPI,

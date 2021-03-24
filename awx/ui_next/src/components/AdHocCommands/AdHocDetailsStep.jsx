@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { BrandName } from '../../variables';
 import AnsibleSelect from '../AnsibleSelect';
 import FormField from '../FormField';
-import { VariablesField } from '../CodeMirrorInput';
+import { VariablesField } from '../CodeEditor';
 import {
   FormColumnLayout,
   FormFullWidthLayout,

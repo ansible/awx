@@ -64,16 +64,18 @@ def timing(name, *init_args, **init_kwargs):
             res = func(*args, **kwargs)
             timing.stop()
             return res
+
         return wrapper_profile
+
     return decorator_profile
 
 
 class AWXProfiler(AWXProfileBase):
     def __init__(self, name, dest='/var/log/tower/profile', dot_enabled=True):
-        '''
+        """
         Try to do as little as possible in init. Instead, do the init
         only when the profiling is started.
-        '''
+        """
         super().__init__(name, dest)
         self.started = False
         self.dot_enabled = dot_enabled
@@ -101,18 +103,13 @@ class AWXProfiler(AWXProfileBase):
                 dot_filepath = os.path.join(self.dest, f"{filename_base}.dot")
 
                 pstats.Stats(self.prof).dump_stats(raw_filepath)
-                generate_dot([
-                    '-n', '2.5', '-f', 'pstats', '-o',
-                    dot_filepath,
-                    raw_filepath
-                ])
+                generate_dot(['-n', '2.5', '-f', 'pstats', '-o', dot_filepath, raw_filepath])
                 os.remove(raw_filepath)
 
         with open(pstats_filepath, 'w') as f:
             print(f"{self.name}, {extra_data}", file=f)
             pstats.Stats(self.prof, stream=f).sort_stats('cumulative').print_stats()
         return pstats_filepath
-
 
     def start(self):
         self.prof = cProfile.Profile()
@@ -146,6 +143,7 @@ def profile(name, *init_args, **init_kwargs):
             res = func(*args, **kwargs)
             prof.stop()
             return res
-        return wrapper_profile
-    return decorator_profile
 
+        return wrapper_profile
+
+    return decorator_profile

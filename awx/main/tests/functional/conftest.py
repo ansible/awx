@@ -26,22 +26,13 @@ from rest_framework.test import (
 
 from awx.main.models.credential import CredentialType, Credential
 from awx.main.models.jobs import JobTemplate, SystemJobTemplate
-from awx.main.models.inventory import (
-    Group,
-    Inventory,
-    InventoryUpdate,
-    InventorySource,
-    CustomInventoryScript
-)
+from awx.main.models.inventory import Group, Inventory, InventoryUpdate, InventorySource, CustomInventoryScript
 from awx.main.models.organization import (
     Organization,
     Team,
 )
 from awx.main.models.rbac import Role
-from awx.main.models.notifications import (
-    NotificationTemplate,
-    Notification
-)
+from awx.main.models.notifications import NotificationTemplate, Notification
 from awx.main.models.events import (
     JobEvent,
     AdHocCommandEvent,
@@ -52,6 +43,7 @@ from awx.main.models.events import (
 from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
 from awx.main.models.oauth import OAuth2Application as Application
+from awx.main.models.execution_environments import ExecutionEnvironment
 
 __SWAGGER_REQUESTS__ = {}
 
@@ -71,29 +63,20 @@ def user():
             user.set_password(name)
             user.save()
         return user
+
     return u
 
 
 @pytest.fixture
 def check_jobtemplate(project, inventory, credential):
-    jt = JobTemplate.objects.create(
-        job_type='check',
-        project=project,
-        inventory=inventory,
-        name='check-job-template'
-    )
+    jt = JobTemplate.objects.create(job_type='check', project=project, inventory=inventory, name='check-job-template')
     jt.credentials.add(credential)
     return jt
 
 
 @pytest.fixture
 def deploy_jobtemplate(project, inventory, credential):
-    jt = JobTemplate.objects.create(
-        job_type='run',
-        project=project,
-        inventory=inventory,
-        name='deploy-job-template'
-    )
+    jt = JobTemplate.objects.create(job_type='run', project=project, inventory=inventory, name='deploy-job-template')
     jt.credentials.add(credential)
     return jt
 
@@ -112,27 +95,25 @@ def team_member(user, team):
 
 @pytest.fixture(scope="session", autouse=True)
 def project_playbooks():
-    '''
+    """
     Return playbook_files as playbooks for manual projects when testing.
-    '''
+    """
+
     class PlaybooksMock(mock.PropertyMock):
         def __get__(self, obj, obj_type):
             return obj.playbook_files
+
     mocked = mock.patch.object(Project, 'playbooks', new_callable=PlaybooksMock)
     mocked.start()
 
 
 @pytest.fixture
 def run_computed_fields_right_away(request):
-
     def run_me(inventory_id):
         i = Inventory.objects.get(id=inventory_id)
         i.update_computed_fields()
 
-    mocked = mock.patch(
-        'awx.main.signals.update_inventory_computed_fields.delay',
-        new=run_me
-    )
+    mocked = mock.patch('awx.main.signals.update_inventory_computed_fields.delay', new=run_me)
     mocked.start()
 
     request.addfinalizer(mocked.stop)
@@ -141,26 +122,28 @@ def run_computed_fields_right_away(request):
 @pytest.fixture
 @mock.patch.object(Project, "update", lambda self, **kwargs: None)
 def project(instance, organization):
-    prj = Project.objects.create(name="test-proj",
-                                 description="test-proj-desc",
-                                 organization=organization,
-                                 playbook_files=['helloworld.yml', 'alt-helloworld.yml'],
-                                 scm_revision='1234567890123456789012345678901234567890',
-                                 scm_url='localhost',
-                                 scm_type='git'
-                                 )
+    prj = Project.objects.create(
+        name="test-proj",
+        description="test-proj-desc",
+        organization=organization,
+        playbook_files=['helloworld.yml', 'alt-helloworld.yml'],
+        scm_revision='1234567890123456789012345678901234567890',
+        scm_url='localhost',
+        scm_type='git',
+    )
     return prj
 
 
 @pytest.fixture
 @mock.patch.object(Project, "update", lambda self, **kwargs: None)
 def manual_project(instance, organization):
-    prj = Project.objects.create(name="test-manual-proj",
-                                 description="manual-proj-desc",
-                                 organization=organization,
-                                 playbook_files=['helloworld.yml', 'alt-helloworld.yml'],
-                                 local_path='_92__test_proj'
-                                 )
+    prj = Project.objects.create(
+        name="test-manual-proj",
+        description="manual-proj-desc",
+        organization=organization,
+        playbook_files=['helloworld.yml', 'alt-helloworld.yml'],
+        local_path='_92__test_proj',
+    )
     return prj
 
 
@@ -170,19 +153,17 @@ def project_factory(organization):
         try:
             prj = Project.objects.get(name=name)
         except Project.DoesNotExist:
-            prj = Project.objects.create(name=name,
-                                         description="description for " + name,
-                                         organization=organization
-                                         )
+            prj = Project.objects.create(name=name, description="description for " + name, organization=organization)
         return prj
+
     return factory
 
 
 @pytest.fixture
 def job_factory(jt_linked, admin):
     def factory(job_template=jt_linked, initial_state='new', created_by=admin):
-        return job_template.create_unified_job(_eager_fields={
-            'status': initial_state, 'created_by': created_by})
+        return job_template.create_unified_job(_eager_fields={'status': initial_state, 'created_by': created_by})
+
     return factory
 
 
@@ -192,10 +173,9 @@ def team_factory(organization):
         try:
             t = Team.objects.get(name=name)
         except Team.DoesNotExist:
-            t = Team.objects.create(name=name,
-                                    description="description for " + name,
-                                    organization=organization)
+            t = Team.objects.create(name=name, description="description for " + name, organization=organization)
         return t
+
     return factory
 
 
@@ -272,27 +252,11 @@ def credentialtype_insights():
 @pytest.fixture
 def credentialtype_external():
     external_type_inputs = {
-        'fields': [{
-            'id': 'url',
-            'label': 'Server URL',
-            'type': 'string',
-            'help_text': 'The server url.'
-        }, {
-            'id': 'token',
-            'label': 'Token',
-            'type': 'string',
-            'secret': True,
-            'help_text': 'An access token for the server.'
-        }],
-        'metadata': [{
-            'id': 'key',
-            'label': 'Key',
-            'type': 'string'
-        }, {
-            'id': 'version',
-            'label': 'Version',
-            'type': 'string'
-        }],
+        'fields': [
+            {'id': 'url', 'label': 'Server URL', 'type': 'string', 'help_text': 'The server url.'},
+            {'id': 'token', 'label': 'Token', 'type': 'string', 'secret': True, 'help_text': 'An access token for the server.'},
+        ],
+        'metadata': [{'id': 'key', 'label': 'Key', 'type': 'string'}, {'id': 'version', 'label': 'Version', 'type': 'string'}],
         'required': ['url', 'token', 'key'],
     }
 
@@ -302,75 +266,67 @@ def credentialtype_external():
 
     with mock.patch('awx.main.models.credential.CredentialType.plugin', new_callable=PropertyMock) as mock_plugin:
         mock_plugin.return_value = MockPlugin()
-        external_type = CredentialType(
-            kind='external',
-            managed_by_tower=True,
-            name='External Service',
-            inputs=external_type_inputs
-        )
+        external_type = CredentialType(kind='external', managed_by_tower=True, name='External Service', inputs=external_type_inputs)
         external_type.save()
         yield external_type
 
 
 @pytest.fixture
 def credential(credentialtype_aws):
-    return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred',
-                                     inputs={'username': 'something', 'password': 'secret'})
+    return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred', inputs={'username': 'something', 'password': 'secret'})
 
 
 @pytest.fixture
 def net_credential(credentialtype_net):
-    return Credential.objects.create(credential_type=credentialtype_net, name='test-cred',
-                                     inputs={'username': 'something', 'password': 'secret'})
+    return Credential.objects.create(credential_type=credentialtype_net, name='test-cred', inputs={'username': 'something', 'password': 'secret'})
 
 
 @pytest.fixture
 def vault_credential(credentialtype_vault):
-    return Credential.objects.create(credential_type=credentialtype_vault, name='test-cred',
-                                     inputs={'vault_password': 'secret'})
+    return Credential.objects.create(credential_type=credentialtype_vault, name='test-cred', inputs={'vault_password': 'secret'})
 
 
 @pytest.fixture
 def machine_credential(credentialtype_ssh):
-    return Credential.objects.create(credential_type=credentialtype_ssh, name='machine-cred',
-                                     inputs={'username': 'test_user', 'password': 'pas4word'})
+    return Credential.objects.create(credential_type=credentialtype_ssh, name='machine-cred', inputs={'username': 'test_user', 'password': 'pas4word'})
 
 
 @pytest.fixture
 def scm_credential(credentialtype_scm):
-    return Credential.objects.create(credential_type=credentialtype_scm, name='scm-cred',
-                                     inputs={'username': 'optimus', 'password': 'prime'})
+    return Credential.objects.create(credential_type=credentialtype_scm, name='scm-cred', inputs={'username': 'optimus', 'password': 'prime'})
 
 
 @pytest.fixture
 def insights_credential(credentialtype_insights):
-    return Credential.objects.create(credential_type=credentialtype_insights, name='insights-cred',
-                                     inputs={'username': 'morocco_mole', 'password': 'secret_squirrel'})
+    return Credential.objects.create(
+        credential_type=credentialtype_insights, name='insights-cred', inputs={'username': 'morocco_mole', 'password': 'secret_squirrel'}
+    )
 
 
 @pytest.fixture
 def org_credential(organization, credentialtype_aws):
-    return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred',
-                                     inputs={'username': 'something', 'password': 'secret'},
-                                     organization=organization)
+    return Credential.objects.create(
+        credential_type=credentialtype_aws, name='test-cred', inputs={'username': 'something', 'password': 'secret'}, organization=organization
+    )
 
 
 @pytest.fixture
 def external_credential(credentialtype_external):
-    return Credential.objects.create(credential_type=credentialtype_external, name='external-cred',
-                                     inputs={'url': 'http://testhost.com', 'token': 'secret1'})
+    return Credential.objects.create(credential_type=credentialtype_external, name='external-cred', inputs={'url': 'http://testhost.com', 'token': 'secret1'})
 
 
 @pytest.fixture
 def other_external_credential(credentialtype_external):
-    return Credential.objects.create(credential_type=credentialtype_external, name='other-external-cred',
-                                     inputs={'url': 'http://testhost.com', 'token': 'secret2'})
+    return Credential.objects.create(
+        credential_type=credentialtype_external, name='other-external-cred', inputs={'url': 'http://testhost.com', 'token': 'secret2'}
+    )
 
 
 @pytest.fixture
 def kube_credential(credentialtype_kube):
-    return Credential.objects.create(credential_type=credentialtype_kube, name='kube-cred',
-                                     inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False})
+    return Credential.objects.create(
+        credential_type=credentialtype_kube, name='kube-cred', inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False}
+    )
 
 
 @pytest.fixture
@@ -394,7 +350,8 @@ def scm_inventory_source(inventory, project):
         source_path='inventory_file',
         update_on_project_update=True,
         inventory=inventory,
-        scm_last_revision=project.scm_revision)
+        scm_last_revision=project.scm_revision,
+    )
     with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
         inv_src.save()
     return inv_src
@@ -408,6 +365,7 @@ def inventory_factory(organization):
         except Inventory.DoesNotExist:
             inv = Inventory.objects.create(name=name, organization=org)
         return inv
+
     return factory
 
 
@@ -418,32 +376,41 @@ def label(organization):
 
 @pytest.fixture
 def notification_template(organization):
-    return NotificationTemplate.objects.create(name='test-notification_template',
-                                               organization=organization,
-                                               notification_type="webhook",
-                                               notification_configuration=dict(url="http://localhost",
-                                                                               username="",
-                                                                               password="",
-                                                                               headers={"Test": "Header",}))
+    return NotificationTemplate.objects.create(
+        name='test-notification_template',
+        organization=organization,
+        notification_type="webhook",
+        notification_configuration=dict(
+            url="http://localhost",
+            username="",
+            password="",
+            headers={
+                "Test": "Header",
+            },
+        ),
+    )
 
 
 @pytest.fixture
 def notification_template_with_encrypt(organization):
-    return NotificationTemplate.objects.create(name='test-notification_template_with_encrypt',
-                                               organization=organization,
-                                               notification_type="slack",
-                                               notification_configuration=dict(channels=["Foo", "Bar"],
-                                                                               token="token"))
+    return NotificationTemplate.objects.create(
+        name='test-notification_template_with_encrypt',
+        organization=organization,
+        notification_type="slack",
+        notification_configuration=dict(channels=["Foo", "Bar"], token="token"),
+    )
 
 
 @pytest.fixture
 def notification(notification_template):
-    return Notification.objects.create(notification_template=notification_template,
-                                       status='successful',
-                                       notifications_sent=1,
-                                       notification_type='email',
-                                       recipients='admin@redhat.com',
-                                       subject='email subject')
+    return Notification.objects.create(
+        notification_template=notification_template,
+        status='successful',
+        notifications_sent=1,
+        notification_type='email',
+        recipients='admin@redhat.com',
+        subject='email subject',
+    )
 
 
 @pytest.fixture
@@ -510,6 +477,7 @@ def organizations(instance):
             o = Organization.objects.create(name="test-org-%d" % i, description="test-org-desc")
             orgs.append(o)
         return orgs
+
     return rf
 
 
@@ -520,6 +488,7 @@ def group_factory(inventory):
             return Group.objects.get(name=name, inventory=inventory)
         except Exception:
             return Group.objects.create(inventory=inventory, name=name)
+
     return g
 
 
@@ -536,6 +505,7 @@ def hosts(group_factory):
                 group1.hosts.add(host)
             hosts.append(host)
         return hosts
+
     return rf
 
 
@@ -547,8 +517,7 @@ def group(inventory):
 @pytest.fixture
 def inventory_source(inventory):
     # by making it ec2, the credential is not required
-    return InventorySource.objects.create(name='single-inv-src',
-                                          inventory=inventory, source='ec2')
+    return InventorySource.objects.create(name='single-inv-src', inventory=inventory, source='ec2')
 
 
 @pytest.fixture
@@ -562,22 +531,18 @@ def inventory_source_factory(inventory_factory):
             return inventory.inventory_sources.get(name=name)
         except Exception:
             return inventory.inventory_sources.create(name=name, source=source)
+
     return invsrc
 
 
 @pytest.fixture
 def inventory_update(inventory_source):
-    return InventoryUpdate.objects.create(
-        inventory_source=inventory_source,
-        source=inventory_source.source
-    )
+    return InventoryUpdate.objects.create(inventory_source=inventory_source, source=inventory_source.source)
 
 
 @pytest.fixture
 def inventory_script(organization):
-    return CustomInventoryScript.objects.create(name='test inv script',
-                                                organization=organization,
-                                                script='#!/usr/bin/python')
+    return CustomInventoryScript.objects.create(name='test inv script', organization=organization, script='#!/usr/bin/python')
 
 
 @pytest.fixture
@@ -588,14 +553,36 @@ def host(group, inventory):
 @pytest.fixture
 def permissions():
     return {
-        'admin':{'create':True, 'read':True, 'write':True,
-                 'update':True, 'delete':True, 'scm_update':True, 'execute':True, 'use':True,},
-
-        'auditor':{'read':True, 'create':False, 'write':False,
-                   'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':False,},
-
-        'usage':{'read':False, 'create':False, 'write':False,
-                 'update':False, 'delete':False, 'scm_update':False, 'execute':False, 'use':True,},
+        'admin': {
+            'create': True,
+            'read': True,
+            'write': True,
+            'update': True,
+            'delete': True,
+            'scm_update': True,
+            'execute': True,
+            'use': True,
+        },
+        'auditor': {
+            'read': True,
+            'create': False,
+            'write': False,
+            'update': False,
+            'delete': False,
+            'scm_update': False,
+            'execute': False,
+            'use': False,
+        },
+        'usage': {
+            'read': False,
+            'create': False,
+            'write': False,
+            'update': False,
+            'delete': False,
+            'scm_update': False,
+            'execute': False,
+            'use': True,
+        },
     }
 
 
@@ -643,15 +630,16 @@ def _request(verb):
                                 response.data[key] = str(value)
                     except Exception:
                         response.data = data_copy
-            assert response.status_code == expect, 'Response data: {}'.format(
-                getattr(response, 'data', None)
-            )
+            assert response.status_code == expect, 'Response data: {}'.format(getattr(response, 'data', None))
         if hasattr(response, 'render'):
             response.render()
-        __SWAGGER_REQUESTS__.setdefault(request.path, {})[
-            (request.method.lower(), response.status_code)
-        ] = (response.get('Content-Type', None), response.content, kwargs.get('data'))
+        __SWAGGER_REQUESTS__.setdefault(request.path, {})[(request.method.lower(), response.status_code)] = (
+            response.get('Content-Type', None),
+            response.content,
+            kwargs.get('data'),
+        )
         return response
+
     return rf
 
 
@@ -693,12 +681,10 @@ def options():
 @pytest.fixture
 def ad_hoc_command_factory(inventory, machine_credential, admin):
     def factory(inventory=inventory, credential=machine_credential, initial_state='new', created_by=admin):
-        adhoc = AdHocCommand(
-            name='test-adhoc', inventory=inventory, credential=credential,
-            status=initial_state, created_by=created_by
-        )
+        adhoc = AdHocCommand(name='test-adhoc', inventory=inventory, credential=credential, status=initial_state, created_by=created_by)
         adhoc.save()
         return adhoc
+
     return factory
 
 
@@ -717,14 +703,11 @@ def job_template_labels(organization, job_template):
 
 @pytest.fixture
 def jt_linked(organization, project, inventory, machine_credential, credential, net_credential, vault_credential):
-    '''
+    """
     A job template with a reasonably complete set of related objects to
     test RBAC and other functionality affected by related objects
-    '''
-    jt = JobTemplate.objects.create(
-        project=project, inventory=inventory, playbook='helloworld.yml',
-        organization=organization
-    )
+    """
+    jt = JobTemplate.objects.create(project=project, inventory=inventory, playbook='helloworld.yml', organization=organization)
     jt.credentials.add(machine_credential, vault_credential, credential, net_credential)
     return jt
 
@@ -740,8 +723,8 @@ def workflow_job_template(organization):
 @pytest.fixture
 def workflow_job_factory(workflow_job_template, admin):
     def factory(workflow_job_template=workflow_job_template, initial_state='new', created_by=admin):
-        return workflow_job_template.create_unified_job(_eager_fields={
-            'status': initial_state, 'created_by': created_by})
+        return workflow_job_template.create_unified_job(_eager_fields={'status': initial_state, 'created_by': created_by})
+
     return factory
 
 
@@ -755,8 +738,8 @@ def system_job_template():
 @pytest.fixture
 def system_job_factory(system_job_template, admin):
     def factory(system_job_template=system_job_template, initial_state='new', created_by=admin):
-        return system_job_template.create_unified_job(_eager_fields={
-            'status': initial_state, 'created_by': created_by})
+        return system_job_template.create_unified_job(_eager_fields={'status': initial_state, 'created_by': created_by})
+
     return factory
 
 
@@ -784,10 +767,7 @@ def monkeypatch_jsonbfield_get_db_prep_save(mocker):
 
 @pytest.fixture
 def oauth_application(admin):
-    return Application.objects.create(
-        name='test app', user=admin, client_type='confidential',
-        authorization_grant_type='password'
-    )
+    return Application.objects.create(name='test app', user=admin, client_type='confidential', authorization_grant_type='password')
 
 
 @pytest.fixture
@@ -800,8 +780,7 @@ def sqlite_copy_expert(request):
         # simulate postgres copy_expert support with ORM code
         parts = sql.split(' ')
         tablename = parts[parts.index('from') + 1]
-        for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
-                    InventoryUpdateEvent, SystemJobEvent):
+        for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent):
             if cls._meta.db_table == tablename:
                 for event in cls.objects.order_by('start_line').all():
                     fd.write(event.stdout)
@@ -825,12 +804,8 @@ def slice_jt_factory(inventory):
             inventory.hosts.create(name='foo{}'.format(i))
         if not jt_kwargs:
             jt_kwargs = {}
-        return JobTemplate.objects.create(
-            name='slice-jt-from-factory',
-            job_slice_count=N,
-            inventory=inventory,
-            **jt_kwargs
-        )
+        return JobTemplate.objects.create(name='slice-jt-from-factory', job_slice_count=N, inventory=inventory, **jt_kwargs)
+
     return r
 
 
@@ -849,4 +824,10 @@ def slice_job_factory(slice_jt_factory):
                 node.job = job
                 node.save()
         return slice_job
+
     return r
+
+
+@pytest.fixture
+def execution_environment(organization):
+    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", organization=organization)

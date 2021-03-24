@@ -13,4 +13,3 @@ from development import *  # NOQA
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 SQL_DEBUG = DEBUG
-

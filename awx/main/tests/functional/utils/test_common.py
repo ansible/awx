@@ -3,10 +3,7 @@ import pytest
 import copy
 import json
 
-from awx.main.utils.common import (
-    model_instance_diff,
-    model_to_dict
-)
+from awx.main.utils.common import model_instance_diff, model_to_dict
 
 
 @pytest.mark.django_db

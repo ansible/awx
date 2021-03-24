@@ -2,11 +2,7 @@ from unittest import mock
 import pytest
 
 from awx.api.versioning import reverse
-from awx.main.access import (
-    BaseAccess,
-    JobTemplateAccess,
-    ScheduleAccess
-)
+from awx.main.access import BaseAccess, JobTemplateAccess, ScheduleAccess
 from awx.main.models.jobs import JobTemplate
 from awx.main.models import Project, Organization, Inventory, Schedule, User
 
@@ -72,7 +68,9 @@ def test_project_use_access(project, rando):
     assert access.can_add(None)
     assert access.can_add({'project': project.id, 'ask_inventory_on_launch': True})
     project2 = Project.objects.create(
-        name='second-project', scm_type=project.scm_type, playbook_files=project.playbook_files,
+        name='second-project',
+        scm_type=project.scm_type,
+        playbook_files=project.playbook_files,
         organization=project.organization,
     )
     project2.use_role.members.add(rando)
@@ -128,45 +126,30 @@ def test_job_template_access_admin(role_names, jt_linked, rando):
 
 
 @pytest.mark.django_db
-def test_job_template_credentials_prompts_access(
-        rando, post, inventory, project, machine_credential, vault_credential):
-    jt = JobTemplate.objects.create(
-        name = 'test-jt',
-        project = project,
-        playbook = 'helloworld.yml',
-        inventory = inventory,
-        ask_credential_on_launch = True
-    )
+def test_job_template_credentials_prompts_access(rando, post, inventory, project, machine_credential, vault_credential):
+    jt = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory, ask_credential_on_launch=True)
     jt.credentials.add(machine_credential)
     jt.execute_role.members.add(rando)
-    post(
-        reverse('api:job_template_launch', kwargs={'pk': jt.id}),
-        {'credentials': [machine_credential.pk, vault_credential.pk]}, rando,
-        expect=403
-    )
+    post(reverse('api:job_template_launch', kwargs={'pk': jt.id}), {'credentials': [machine_credential.pk, vault_credential.pk]}, rando, expect=403)
 
 
 @pytest.mark.django_db
 class TestJobTemplateCredentials:
-
     def test_job_template_cannot_add_credentials(self, job_template, credential, rando):
         job_template.admin_role.members.add(rando)
         credential.read_role.members.add(rando)
         # without permission to credential, user can not attach it
-        assert not JobTemplateAccess(rando).can_attach(
-            job_template, credential, 'credentials', {})
+        assert not JobTemplateAccess(rando).can_attach(job_template, credential, 'credentials', {})
 
     def test_job_template_can_add_credentials(self, job_template, credential, rando):
         job_template.admin_role.members.add(rando)
         credential.use_role.members.add(rando)
         # user has permission to apply credential
-        assert JobTemplateAccess(rando).can_attach(
-            job_template, credential, 'credentials', {})
+        assert JobTemplateAccess(rando).can_attach(job_template, credential, 'credentials', {})
 
 
 @pytest.mark.django_db
 class TestOrphanJobTemplate:
-
     def test_orphan_JT_readable_by_system_auditor(self, job_template, system_auditor):
         assert system_auditor.is_system_auditor
         assert job_template.project is None
@@ -184,12 +167,12 @@ class TestOrphanJobTemplate:
 @pytest.mark.job_permissions
 def test_job_template_creator_access(project, organization, rando, post):
     project.use_role.members.add(rando)
-    response = post(url=reverse('api:job_template_list'), data=dict(
-        name='newly-created-jt',
-        ask_inventory_on_launch=True,
-        project=project.pk,
-        playbook='helloworld.yml'
-    ), user=rando, expect=201)
+    response = post(
+        url=reverse('api:job_template_list'),
+        data=dict(name='newly-created-jt', ask_inventory_on_launch=True, project=project.pk, playbook='helloworld.yml'),
+        user=rando,
+        expect=201,
+    )
 
     jt_pk = response.data['id']
     jt_obj = JobTemplate.objects.get(pk=jt_pk)
@@ -209,12 +192,12 @@ def test_job_template_insufficient_creator_permissions(lacking, project, invento
         inventory.use_role.members.add(rando)
     else:
         inventory.read_role.members.add(rando)
-    post(url=reverse('api:job_template_list'), data=dict(
-        name='newly-created-jt',
-        inventory=inventory.id,
-        project=project.pk,
-        playbook='helloworld.yml'
-    ), user=rando, expect=403)
+    post(
+        url=reverse('api:job_template_list'),
+        data=dict(name='newly-created-jt', inventory=inventory.id, project=project.pk, playbook='helloworld.yml'),
+        user=rando,
+        expect=403,
+    )
 
 
 @pytest.mark.django_db
@@ -241,19 +224,16 @@ class TestJobTemplateSchedules:
         access = ScheduleAccess(rando)
         assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
 
-
     def test_move_schedule_from_JT_no_access(self, job_template, rando, jt2):
         schedule = Schedule.objects.create(unified_job_template=job_template, rrule=self.rrule)
         jt2.admin_role.members.add(rando)
         access = ScheduleAccess(rando)
         assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
 
-
     def test_can_create_schedule_with_execute(self, job_template, rando):
         job_template.execute_role.members.add(rando)
         access = ScheduleAccess(rando)
         assert access.can_add({'unified_job_template': job_template})
-
 
     def test_can_modify_ones_own_schedule(self, job_template, rando):
         job_template.execute_role.members.add(rando)
@@ -264,13 +244,7 @@ class TestJobTemplateSchedules:
     def test_prompts_access_checked(self, job_template, inventory, credential, rando):
         job_template.execute_role.members.add(rando)
         access = ScheduleAccess(rando)
-        data = dict(
-            unified_job_template=job_template,
-            rrule=self.rrule,
-            created_by=rando,
-            inventory=inventory,
-            credentials=[credential]
-        )
+        data = dict(unified_job_template=job_template, rrule=self.rrule, created_by=rando, inventory=inventory, credentials=[credential])
         with mock.patch('awx.main.access.JobLaunchConfigAccess.can_add') as mock_add:
             mock_add.return_value = True
             assert access.can_add(data)
@@ -291,48 +265,24 @@ class TestProjectOrganization:
 
     def test_new_project_org_change(self, project, patch, admin_user):
         org2 = Organization.objects.create(name='bar')
-        patch(
-            url=project.get_absolute_url(),
-            data={'organization': org2.id},
-            user=admin_user,
-            expect=200
-        )
+        patch(url=project.get_absolute_url(), data={'organization': org2.id}, user=admin_user, expect=200)
         assert Project.objects.get(pk=project.id).organization_id == org2.id
 
     def test_jt_org_cannot_change(self, project, post, patch, admin_user):
         post(
             url=reverse('api:job_template_list'),
-            data={
-                'name': 'foo_template',
-                'project': project.id,
-                'playbook': 'helloworld.yml',
-                'ask_inventory_on_launch': True
-            },
+            data={'name': 'foo_template', 'project': project.id, 'playbook': 'helloworld.yml', 'ask_inventory_on_launch': True},
             user=admin_user,
-            expect=201
+            expect=201,
         )
         org2 = Organization.objects.create(name='bar')
-        r = patch(
-            url=project.get_absolute_url(),
-            data={'organization': org2.id},
-            user=admin_user,
-            expect=400
-        )
+        r = patch(url=project.get_absolute_url(), data={'organization': org2.id}, user=admin_user, expect=400)
         assert 'Organization cannot be changed' in str(r.data)
 
     def test_orphan_JT_adoption(self, project, patch, admin_user, org_admin):
-        jt = JobTemplate.objects.create(
-            name='bar',
-            ask_inventory_on_launch=True,
-            playbook='helloworld.yml'
-        )
+        jt = JobTemplate.objects.create(name='bar', ask_inventory_on_launch=True, playbook='helloworld.yml')
         assert org_admin not in jt.admin_role
-        patch(
-            url=jt.get_absolute_url(),
-            data={'project': project.id},
-            user=admin_user,
-            expect=200
-        )
+        patch(url=jt.get_absolute_url(), data={'project': project.id}, user=admin_user, expect=200)
         assert org_admin in jt.admin_role
 
     def test_inventory_read_transfer_direct(self, patch):
@@ -342,10 +292,7 @@ class TestProjectOrganization:
         for i in range(2):
             org = Organization.objects.create(name='org{}'.format(i))
             org_admin = User.objects.create(username='user{}'.format(i))
-            inv = Inventory.objects.create(
-                organization=org,
-                name='inv{}'.format(i)
-            )
+            inv = Inventory.objects.create(organization=org, name='inv{}'.format(i))
             org.auditor_role.members.add(org_admin)
 
             orgs.append(org)
@@ -372,10 +319,7 @@ class TestProjectOrganization:
             orgs.append(org)
             admins.append(org_admin)
 
-        inv = Inventory.objects.create(
-            organization=orgs[0],
-            name='inv{}'.format(i)
-        )
+        inv = Inventory.objects.create(organization=orgs[0], name='inv{}'.format(i))
 
         jt = JobTemplate.objects.create(name='foo', inventory=inv)
         assert admins[0] in jt.read_role

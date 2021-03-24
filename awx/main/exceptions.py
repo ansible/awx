@@ -2,8 +2,7 @@
 # All Rights Reserved.
 
 
-
-class _AwxTaskError():
+class _AwxTaskError:
     def build_exception(self, task, message=None):
         if message is None:
             message = "Execution error running {}".format(task.log_format)
@@ -14,7 +13,7 @@ class _AwxTaskError():
 
     def TaskCancel(self, task, rc):
         """Canceled flag caused run_pexpect to kill the job run"""
-        message="{} was canceled (rc={})".format(task.log_format, rc)
+        message = "{} was canceled (rc={})".format(task.log_format, rc)
         e = self.build_exception(task, message)
         e.rc = rc
         e.awx_task_error_type = "TaskCancel"

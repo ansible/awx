@@ -32,11 +32,13 @@ def unwrap_broadcast_msg(payload: dict):
 
 def get_broadcast_hosts():
     Instance = apps.get_model('main', 'Instance')
-    instances = Instance.objects.filter(rampart_groups__controller__isnull=True) \
-                                .exclude(hostname=Instance.objects.me().hostname) \
-                                .order_by('hostname') \
-                                .values('hostname', 'ip_address') \
-                                .distinct()
+    instances = (
+        Instance.objects.filter(rampart_groups__controller__isnull=True)
+        .exclude(hostname=Instance.objects.me().hostname)
+        .order_by('hostname')
+        .values('hostname', 'ip_address')
+        .distinct()
+    )
     return {i['hostname']: i['ip_address'] or i['hostname'] for i in instances}
 
 
@@ -45,16 +47,18 @@ def get_local_host():
     return Instance.objects.me().hostname
 
 
-class WebsocketTask():
-    def __init__(self,
-                 name,
-                 event_loop,
-                 stats: BroadcastWebsocketStats,
-                 remote_host: str,
-                 remote_port: int = settings.BROADCAST_WEBSOCKET_PORT,
-                 protocol: str = settings.BROADCAST_WEBSOCKET_PROTOCOL,
-                 verify_ssl: bool = settings.BROADCAST_WEBSOCKET_VERIFY_CERT,
-                 endpoint: str = 'broadcast'):
+class WebsocketTask:
+    def __init__(
+        self,
+        name,
+        event_loop,
+        stats: BroadcastWebsocketStats,
+        remote_host: str,
+        remote_port: int = settings.BROADCAST_WEBSOCKET_PORT,
+        protocol: str = settings.BROADCAST_WEBSOCKET_PROTOCOL,
+        verify_ssl: bool = settings.BROADCAST_WEBSOCKET_VERIFY_CERT,
+        endpoint: str = 'broadcast',
+    ):
         self.name = name
         self.event_loop = event_loop
         self.stats = stats
@@ -69,7 +73,8 @@ class WebsocketTask():
         raise RuntimeError("Implement me")
 
     async def connect(self, attempt):
-        from awx.main.consumers import WebsocketSecretAuthHelper # noqa
+        from awx.main.consumers import WebsocketSecretAuthHelper  # noqa
+
         logger.debug(f"Connection from {self.name} to {self.remote_host} attempt number {attempt}.")
 
         '''
@@ -91,8 +96,7 @@ class WebsocketTask():
 
         secret_val = WebsocketSecretAuthHelper.construct_secret()
         try:
-            async with aiohttp.ClientSession(headers={'secret': secret_val},
-                                             timeout=timeout) as session:
+            async with aiohttp.ClientSession(headers={'secret': secret_val}, timeout=timeout) as session:
                 async with session.ws_connect(uri, ssl=self.verify_ssl, heartbeat=20) as websocket:
                     logger.info(f"Connection from {self.name} to {self.remote_host} established.")
                     self.stats.record_connection_established()
@@ -171,8 +175,7 @@ class BroadcastWebsocketManager(object):
 
             remote_addresses = {k: v.remote_host for k, v in self.broadcast_tasks.items()}
             for hostname, address in known_hosts.items():
-                if hostname in self.broadcast_tasks and \
-                        address != remote_addresses[hostname]:
+                if hostname in self.broadcast_tasks and address != remote_addresses[hostname]:
                     deleted_remote_hosts.add(hostname)
                     new_remote_hosts.add(hostname)
 
@@ -188,10 +191,7 @@ class BroadcastWebsocketManager(object):
 
             for h in new_remote_hosts:
                 stats = self.stats_mgr.new_remote_host_stats(h)
-                broadcast_task = BroadcastWebsocketTask(name=self.local_hostname,
-                                                        event_loop=self.event_loop,
-                                                        stats=stats,
-                                                        remote_host=known_hosts[h])
+                broadcast_task = BroadcastWebsocketTask(name=self.local_hostname, event_loop=self.event_loop, stats=stats, remote_host=known_hosts[h])
                 broadcast_task.start()
                 self.broadcast_tasks[h] = broadcast_task
 

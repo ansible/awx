@@ -1,6 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.deletion import (
-    DO_NOTHING, Collector, get_candidate_relations_to_delete,
+    DO_NOTHING,
+    Collector,
+    get_candidate_relations_to_delete,
 )
 from collections import Counter, OrderedDict
 from django.db import transaction
@@ -12,17 +14,18 @@ def bulk_related_objects(field, objs, using):
     """
     Return all objects related to ``objs`` via this ``GenericRelation``.
     """
-    return field.remote_field.model._base_manager.db_manager(using).filter(**{
-        "%s__pk" % field.content_type_field_name: ContentType.objects.db_manager(using).get_for_model(
-            field.model, for_concrete_model=field.for_concrete_model).pk,
-        "%s__in" % field.object_id_field_name: list(objs.values_list('pk', flat=True))
-    })
+    return field.remote_field.model._base_manager.db_manager(using).filter(
+        **{
+            "%s__pk"
+            % field.content_type_field_name: ContentType.objects.db_manager(using).get_for_model(field.model, for_concrete_model=field.for_concrete_model).pk,
+            "%s__in" % field.object_id_field_name: list(objs.values_list('pk', flat=True)),
+        }
+    )
 
 
 def pre_delete(qs):
     # taken from .delete method in django.db.models.query.py
-    assert qs.query.can_filter(), \
-        "Cannot use 'limit' or 'offset' with delete."
+    assert qs.query.can_filter(), "Cannot use 'limit' or 'offset' with delete."
 
     if qs._fields is not None:
         raise TypeError("Cannot call delete() after .values() or .values_list()")
@@ -42,7 +45,6 @@ def pre_delete(qs):
 
 
 class AWXCollector(Collector):
-
     def add(self, objs, source=None, nullable=False, reverse_dependency=False):
         """
         Add 'objs' to the collection of objects to be deleted.  If the call is
@@ -62,8 +64,7 @@ class AWXCollector(Collector):
         if source is not None and not nullable:
             if reverse_dependency:
                 source, model = model, source
-            self.dependencies.setdefault(
-                source._meta.concrete_model, set()).add(model._meta.concrete_model)
+            self.dependencies.setdefault(source._meta.concrete_model, set()).add(model._meta.concrete_model)
         return objs
 
     def add_field_update(self, field, value, objs):
@@ -78,8 +79,7 @@ class AWXCollector(Collector):
         self.field_updates[model].setdefault((field, value), [])
         self.field_updates[model][(field, value)].append(objs)
 
-    def collect(self, objs, source=None, nullable=False, collect_related=True,
-                source_attr=None, reverse_dependency=False, keep_parents=False):
+    def collect(self, objs, source=None, nullable=False, collect_related=True, source_attr=None, reverse_dependency=False, keep_parents=False):
         """
         Add 'objs' to the collection of objects to be deleted as well as all
         parent instances.  'objs' must be a homogeneous iterable collection of
@@ -104,8 +104,7 @@ class AWXCollector(Collector):
         if self.can_fast_delete(objs):
             self.fast_deletes.append(objs)
             return
-        new_objs = self.add(objs, source, nullable,
-                            reverse_dependency=reverse_dependency)
+        new_objs = self.add(objs, source, nullable, reverse_dependency=reverse_dependency)
         if not new_objs.exists():
             return
 
@@ -117,10 +116,8 @@ class AWXCollector(Collector):
             concrete_model = model._meta.concrete_model
             for ptr in concrete_model._meta.parents.keys():
                 if ptr:
-                    parent_objs = ptr.objects.filter(pk__in = new_objs.values_list('pk', flat=True))
-                    self.collect(parent_objs, source=model,
-                                 collect_related=False,
-                                 reverse_dependency=True)
+                    parent_objs = ptr.objects.filter(pk__in=new_objs.values_list('pk', flat=True))
+                    self.collect(parent_objs, source=model, collect_related=False, reverse_dependency=True)
         if collect_related:
             parents = model._meta.parents
             for related in get_candidate_relations_to_delete(model._meta):
@@ -161,8 +158,7 @@ class AWXCollector(Collector):
                 for (field, value), instances in instances_for_fieldvalues.items():
                     for inst in instances:
                         query = sql.UpdateQuery(model)
-                        query.update_batch(inst.values_list('pk', flat=True),
-                                           {field.name: value}, self.using)
+                        query.update_batch(inst.values_list('pk', flat=True), {field.name: value}, self.using)
             # fast deletes
             for qs in self.fast_deletes:
                 count = qs._raw_delete(using=self.using)

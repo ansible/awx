@@ -21,22 +21,9 @@ from split_settings.tools import optional, include
 # Load default settings.
 from .defaults import *  # NOQA
 
-if "pytest" in sys.modules:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-{}'.format(str(uuid.uuid4())),
-        },
-    }
 
 # awx-manage shell_plus --notebook
-NOTEBOOK_ARGUMENTS = [
-    '--NotebookApp.token=',
-    '--ip', '0.0.0.0',
-    '--port', '8888',
-    '--allow-root',
-    '--no-browser',
-]
+NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '8888', '--allow-root', '--no-browser']
 
 # print SQL queries in shell_plus
 SHELL_PLUS_PRINT_SQL = False
@@ -53,6 +40,10 @@ LOGGING['loggers']['awx.isolated.manager.playbooks']['propagate'] = True  # noqa
 
 # celery is annoyingly loud when docker containers start
 LOGGING['loggers'].pop('celery', None)  # noqa
+# avoid awx.main.dispatch WARNING-level scaling worker up/down messages
+LOGGING['loggers']['awx.main.dispatch']['level'] = 'ERROR'  # noqa
+# suppress the spamminess of the awx.main.scheduler and .tasks loggers
+LOGGING['loggers']['awx']['level'] = 'INFO'  # noqa
 
 ALLOWED_HOSTS = ['*']
 
@@ -66,11 +57,8 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
 # Override django.template.loaders.cached.Loader in defaults.py
-template = next((tpl_backend for tpl_backend in TEMPLATES if tpl_backend['NAME'] == 'default'), None) # noqa
-template['OPTIONS']['loaders'] = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
+template = next((tpl_backend for tpl_backend in TEMPLATES if tpl_backend['NAME'] == 'default'), None)  # noqa
+template['OPTIONS']['loaders'] = ('django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader')
 
 CALLBACK_QUEUE = "callback_tasks"
 
@@ -92,43 +80,13 @@ AWX_ISOLATED_PERIODIC_CHECK = 30
 PENDO_TRACKING_STATE = "off"
 INSIGHTS_TRACKING_STATE = False
 
-# Use Django-Jenkins if installed. Only run tests for awx.main app.
-try:
-    import django_jenkins
-    INSTALLED_APPS += [django_jenkins.__name__,] # noqa
-    PROJECT_APPS = ('awx.main.tests', 'awx.api.tests',)
-except ImportError:
-    pass
-
-if 'django_jenkins' in INSTALLED_APPS:
-    JENKINS_TASKS = (
-        # 'django_jenkins.tasks.run_pylint',
-        # 'django_jenkins.tasks.run_flake8',
-        # The following are not needed when including run_flake8
-        # 'django_jenkins.tasks.run_pep8',
-        # 'django_jenkins.tasks.run_pyflakes',
-        # The following are handled by various grunt tasks and no longer required
-        # 'django_jenkins.tasks.run_jshint',
-        # 'django_jenkins.tasks.run_csslint',
-    )
-    PEP8_RCFILE = "setup.cfg"
-    PYLINT_RCFILE = ".pylintrc"
-
-
 # debug toolbar and swagger assume that requirements/requirements_dev.txt are installed
 
-INSTALLED_APPS += [   # NOQA
-    'rest_framework_swagger',
-    'debug_toolbar',
-]
+INSTALLED_APPS += ['rest_framework_swagger', 'debug_toolbar']  # NOQA
 
-MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-] + MIDDLEWARE  # NOQA
+MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE  # NOQA
 
-DEBUG_TOOLBAR_CONFIG = {
-    'ENABLE_STACKTRACES' : True,
-}
+DEBUG_TOOLBAR_CONFIG = {'ENABLE_STACKTRACES': True}
 
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
@@ -166,27 +124,36 @@ except ImportError:
     traceback.print_exc()
     sys.exit(1)
 
-
-CELERYBEAT_SCHEDULE.update({  # noqa
-    'isolated_heartbeat': {
-        'task': 'awx.main.tasks.awx_isolated_heartbeat',
-        'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),  # noqa
-        'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},  # noqa
+# Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
+# commented out, Django will create the test_awx-dev database in PostgreSQL to
+# run unit tests.
+if "pytest" in sys.modules:
+    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-{}'.format(str(uuid.uuid4()))}}
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),  # noqa
+            'TEST': {
+                # Test database cannot be :memory: for inventory tests.
+                'NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3')  # noqa
+            },
+        }
     }
-})
+
+
+CELERYBEAT_SCHEDULE.update(
+    {  # noqa
+        'isolated_heartbeat': {
+            'task': 'awx.main.tasks.awx_isolated_heartbeat',
+            'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),  # noqa
+            'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},  # noqa
+        }
+    }
+)
 
 CLUSTER_HOST_ID = socket.gethostname()
 
-
-if 'Docker Desktop' in os.getenv('OS', ''):
-    os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.host.internal'
-else:
-    try:
-        os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
-    except Exception:
-        pass
-
 AWX_CALLBACK_PROFILE = True
 
-if 'sqlite3' not in DATABASES['default']['ENGINE']: # noqa
-    DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63]) # noqa
+if 'sqlite3' not in DATABASES['default']['ENGINE']:  # noqa
+    DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63])  # noqa

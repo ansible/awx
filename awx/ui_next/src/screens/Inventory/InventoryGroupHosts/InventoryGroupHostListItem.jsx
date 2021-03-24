@@ -74,6 +74,7 @@ function InventoryGroupHostListItem({
           {host.summary_fields.user_capabilities?.edit && (
             <Tooltip content={i18n._(t`Edit Host`)} position="top">
               <Button
+                ouiaId={`${host.id}-edit-button`}
                 aria-label={i18n._(t`Edit Host`)}
                 css="grid-column: 2"
                 variant="plain"

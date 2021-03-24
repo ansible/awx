@@ -12,9 +12,19 @@ import {
   DataListAction,
   Tooltip,
 } from '@patternfly/react-core';
-import { PencilAltIcon } from '@patternfly/react-icons';
+import {
+  ExclamationTriangleIcon as PFExclamationTriangleIcon,
+  PencilAltIcon,
+} from '@patternfly/react-icons';
+import styled from 'styled-components';
+
 import StatusIcon from '../../../components/StatusIcon';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
+
+const ExclamationTriangleIcon = styled(PFExclamationTriangleIcon)`
+  color: var(--pf-global--warning-color--100);
+  margin-left: 18px;
+`;
 
 function InventorySourceListItem({
   source,
@@ -42,6 +52,10 @@ function InventorySourceListItem({
       </>
     );
   };
+
+  const missingExecutionEnvironment =
+    source.custom_virtualenv && !source.execution_environment;
+
   return (
     <>
       <DataListItem aria-labelledby={`check-action-${source.id}`}>
@@ -79,6 +93,19 @@ function InventorySourceListItem({
                     <b>{source.name}</b>
                   </Link>
                 </span>
+                {missingExecutionEnvironment && (
+                  <span>
+                    <Tooltip
+                      className="missing-execution-environment"
+                      content={i18n._(
+                        t`Custom virtual environment ${source.custom_virtualenv} must be replaced by an execution environment.`
+                      )}
+                      position="right"
+                    >
+                      <ExclamationTriangleIcon />
+                    </Tooltip>
+                  </span>
+                )}
               </DataListCell>,
               <DataListCell aria-label={i18n._(t`type`)} key="type">
                 {label}
@@ -95,6 +122,7 @@ function InventorySourceListItem({
             )}
             {source.summary_fields.user_capabilities.edit && (
               <Button
+                ouiaId={`${source.id}-edit-button`}
                 aria-label={i18n._(t`Edit Source`)}
                 variant="plain"
                 component={Link}

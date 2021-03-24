@@ -66,7 +66,12 @@ function InventoryHostItem(props) {
           <HostToggle host={host} />
           {host.summary_fields.user_capabilities?.edit && (
             <Tooltip content={i18n._(t`Edit Host`)} position="top">
-              <Button variant="plain" component={Link} to={`${editUrl}`}>
+              <Button
+                ouiaId={`${host.id}-edit-button`}
+                variant="plain"
+                component={Link}
+                to={`${editUrl}`}
+              >
                 <PencilAltIcon />
               </Button>
             </Tooltip>

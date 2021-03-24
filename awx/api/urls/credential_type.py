@@ -3,13 +3,7 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    CredentialTypeList,
-    CredentialTypeDetail,
-    CredentialTypeCredentialList,
-    CredentialTypeActivityStreamList,
-    CredentialTypeExternalTest,
-)
+from awx.api.views import CredentialTypeList, CredentialTypeDetail, CredentialTypeCredentialList, CredentialTypeActivityStreamList, CredentialTypeExternalTest
 
 
 urls = [

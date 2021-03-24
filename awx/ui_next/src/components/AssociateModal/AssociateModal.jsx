@@ -101,6 +101,7 @@ function AssociateModal({
         onClose={handleClose}
         actions={[
           <Button
+            ouiaId="associate-modal-save"
             aria-label={i18n._(t`Save`)}
             key="select"
             variant="primary"
@@ -110,6 +111,7 @@ function AssociateModal({
             {i18n._(t`Save`)}
           </Button>,
           <Button
+            ouiaId="associate-modal-cancel"
             aria-label={i18n._(t`Cancel`)}
             key="cancel"
             variant="link"

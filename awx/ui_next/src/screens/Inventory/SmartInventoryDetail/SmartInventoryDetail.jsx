@@ -12,7 +12,7 @@ import useRequest, { useDismissableError } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ChipGroup from '../../../components/ChipGroup';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import DeleteButton from '../../../components/DeleteButton';
@@ -151,6 +151,7 @@ function SmartInventoryDetail({ inventory, i18n }) {
         <CardActionsRow>
           {user_capabilities?.edit && (
             <Button
+              ouiaId="smart-inventory-detail-edit-button"
               component={Link}
               aria-label={i18n._(t`edit`)}
               to={`/inventories/smart_inventory/${id}/edit`}

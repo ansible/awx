@@ -21,8 +21,7 @@ class UnifiedJob(HasStatus, base.Base):
         # NOTE: I use .replace('%', '%%') to workaround an odd string
         # formatting issue where result_stdout contained '%s'.  This later caused
         # a python traceback when attempting to display output from this method.
-        items = ['id', 'name', 'status', 'failed', 'result_stdout', 'result_traceback',
-                 'job_explanation', 'job_args']
+        items = ['id', 'name', 'status', 'failed', 'result_stdout', 'result_traceback', 'job_explanation', 'job_args']
         info = []
         for item in [x for x in items if hasattr(self, x)]:
             info.append('{0}:{1}'.format(item, getattr(self, item)))
@@ -32,9 +31,7 @@ class UnifiedJob(HasStatus, base.Base):
     @property
     def result_stdout(self):
         if 'result_stdout' not in self.json and 'stdout' in self.related:
-            return self.connection.get(
-                self.related.stdout, query_parameters=dict(format='txt_download')
-            ).content.decode()
+            return self.connection.get(self.related.stdout, query_parameters=dict(format='txt_download')).content.decode()
         return self.json.result_stdout.decode()
 
     def assert_text_in_stdout(self, expected_text, replace_spaces=None, replace_newlines=' '):
@@ -55,9 +52,7 @@ class UnifiedJob(HasStatus, base.Base):
             stdout = stdout.replace(' ', replace_spaces)
         if expected_text not in stdout:
             pretty_stdout = pformat(stdout)
-            raise AssertionError(
-                'Expected "{}", but it was not found in stdout. Full stdout:\n {}'.format(expected_text, pretty_stdout)
-            )
+            raise AssertionError('Expected "{}", but it was not found in stdout. Full stdout:\n {}'.format(expected_text, pretty_stdout))
 
     @property
     def is_successful(self):
@@ -103,7 +98,7 @@ class UnifiedJob(HasStatus, base.Base):
             # Race condition where job finishes between can_cancel
             # check and post.
             if not any("not allowed" in field for field in e.msg.values()):
-                raise(e)
+                raise (e)
         return self.get()
 
     @property
@@ -114,6 +109,7 @@ class UnifiedJob(HasStatus, base.Base):
         ```assert dict(extra_var=extra_var_val) in unified_job.job_args```
         If you need to ensure the job_args are of awx-provided format use raw unified_job.json.job_args.
         """
+
         def attempt_yaml_load(arg):
             try:
                 return yaml.safe_load(arg)
@@ -135,13 +131,29 @@ class UnifiedJob(HasStatus, base.Base):
                     raise
         return args
 
+    @property
+    def controller_dir(self):
+        """Returns the path to the private_data_dir on the controller node for the job
+        This can be used if trying to shell in and inspect the files used by the job
+        Cannot use job_cwd, because that is path inside EE container
+        """
+        self.get()
+        job_args = self.job_args
+        expected_prefix = '/tmp/awx_{}'.format(self.id)
+        for arg1, arg2 in zip(job_args[:-1], job_args[1:]):
+            if arg1 == '-v':
+                if ':' in arg2:
+                    host_loc = arg2.split(':')[0]
+                    if host_loc.startswith(expected_prefix):
+                        return host_loc
+        raise RuntimeError(
+            'Could not find a controller private_data_dir for this job. ' 'Searched for volume mount to {} inside of args {}'.format(expected_prefix, job_args)
+        )
+
 
 class UnifiedJobs(page.PageList, UnifiedJob):
 
     pass
 
 
-page.register_page([resources.unified_jobs,
-                    resources.instance_related_jobs,
-                    resources.instance_group_related_jobs,
-                    resources.schedules_jobs], UnifiedJobs)
+page.register_page([resources.unified_jobs, resources.instance_related_jobs, resources.instance_group_related_jobs, resources.schedules_jobs], UnifiedJobs)

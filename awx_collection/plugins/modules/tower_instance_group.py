@@ -6,12 +6,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 DOCUMENTATION = '''
 ---
@@ -37,6 +36,11 @@ options:
         - Credential to authenticate with Kubernetes or OpenShift.  Must be of type "Kubernetes/OpenShift API Bearer Token".
       required: False
       type: str
+    is_container_group:
+      description:
+        - Signifies that this InstanceGroup should act as a ContainerGroup. If no credential is specified, the underlying Pod's ServiceAccount will be used.
+      required: False
+      type: bool
     policy_instance_percentage:
       description:
         - Minimum percentage of all instances that will be automatically assigned to this group when new instances come online.
@@ -85,6 +89,7 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         credential=dict(),
+        is_container_group=dict(type='bool', default=False),
         policy_instance_percentage=dict(type='int', default='0'),
         policy_instance_minimum=dict(type='int', default='0'),
         policy_instance_list=dict(type='list'),
@@ -100,6 +105,7 @@ def main():
     name = module.params.get('name')
     new_name = module.params.get("new_name")
     credential = module.params.get('credential')
+    is_container_group = module.params.get('is_container_group')
     policy_instance_percentage = module.params.get('policy_instance_percentage')
     policy_instance_minimum = module.params.get('policy_instance_minimum')
     policy_instance_list = module.params.get('policy_instance_list')
@@ -129,6 +135,8 @@ def main():
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
     if credential is not None:
         new_fields['credential'] = credential_id
+    if is_container_group is not None:
+        new_fields['is_container_group'] = is_container_group
     if policy_instance_percentage is not None:
         new_fields['policy_instance_percentage'] = policy_instance_percentage
     if policy_instance_minimum is not None:
@@ -140,11 +148,13 @@ def main():
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
-        existing_item, new_fields,
-        endpoint='instance_groups', item_type='instance_group',
+        existing_item,
+        new_fields,
+        endpoint='instance_groups',
+        item_type='instance_group',
         associations={
             'instances': instances_ids,
-        }
+        },
     )
 
 

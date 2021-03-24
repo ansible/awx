@@ -27,9 +27,10 @@ import {
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
 import { LaunchButton } from '../../../components/LaunchButton';
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import { JobTemplatesAPI } from '../../../api';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 
 function JobTemplateDetail({ i18n, template }) {
   const {
@@ -58,6 +59,7 @@ function JobTemplateDetail({ i18n, template }) {
     webhook_service,
     related: { webhook_receiver },
     webhook_key,
+    custom_virtualenv,
   } = template;
   const { id: templateId } = useParams();
   const history = useHistory();
@@ -206,6 +208,10 @@ function JobTemplateDetail({ i18n, template }) {
         ) : (
           <DeletedDetail label={i18n._(t`Project`)} />
         )}
+        <ExecutionEnvironmentDetail
+          virtualEnvironment={custom_virtualenv}
+          executionEnvironment={summary_fields?.execution_environment}
+        />
         <Detail
           label={i18n._(t`Source Control Branch`)}
           value={template.scm_branch}
@@ -366,6 +372,7 @@ function JobTemplateDetail({ i18n, template }) {
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="job-template-detail-edit-button"
               component={Link}
               to={`/templates/job_template/${templateId}/edit`}
               aria-label={i18n._(t`Edit`)}
@@ -376,7 +383,12 @@ function JobTemplateDetail({ i18n, template }) {
         {canLaunch && (
           <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
             {({ handleLaunch }) => (
-              <Button variant="secondary" type="submit" onClick={handleLaunch}>
+              <Button
+                ouiaId="job-template-detail-launch-button"
+                variant="secondary"
+                type="submit"
+                onClick={handleLaunch}
+              >
                 {i18n._(t`Launch`)}
               </Button>
             )}

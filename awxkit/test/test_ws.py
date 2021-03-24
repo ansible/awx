@@ -8,6 +8,7 @@ from awxkit.ws import WSClient
 
 ParseResult = namedtuple("ParseResult", ["port", "hostname", "secure"])
 
+
 def test_explicit_hostname():
     client = WSClient("token", "some-hostname", 556, False)
     assert client.port == 556
@@ -16,12 +17,15 @@ def test_explicit_hostname():
     assert client.token == "token"
 
 
-@pytest.mark.parametrize('url, result',
-                         [['https://somename:123', ParseResult(123, "somename", True)],
-                          ['http://othername:456', ParseResult(456, "othername", False)],
-                          ['http://othername', ParseResult(80, "othername", False)],
-                          ['https://othername', ParseResult(443, "othername", True)],
-])
+@pytest.mark.parametrize(
+    'url, result',
+    [
+        ['https://somename:123', ParseResult(123, "somename", True)],
+        ['http://othername:456', ParseResult(456, "othername", False)],
+        ['http://othername', ParseResult(80, "othername", False)],
+        ['https://othername', ParseResult(443, "othername", True)],
+    ],
+)
 def test_urlparsing(url, result):
     with patch("awxkit.ws.config") as mock_config:
         mock_config.base_url = url

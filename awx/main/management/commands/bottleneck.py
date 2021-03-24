@@ -8,12 +8,11 @@ class Command(BaseCommand):
     help = "Find the slowest tasks and hosts for a Job Template's most recent runs."
 
     def add_arguments(self, parser):
-        parser.add_argument('--template', dest='jt', type=int,
-                            help='ID of the Job Template to profile')
-        parser.add_argument('--threshold', dest='threshold', type=float, default=30,
-                            help='Only show tasks that took at least this many seconds (defaults to 30)')
-        parser.add_argument('--history', dest='history', type=float, default=25,
-                            help='The number of historic jobs to look at')
+        parser.add_argument('--template', dest='jt', type=int, help='ID of the Job Template to profile')
+        parser.add_argument(
+            '--threshold', dest='threshold', type=float, default=30, help='Only show tasks that took at least this many seconds (defaults to 30)'
+        )
+        parser.add_argument('--history', dest='history', type=float, default=25, help='The number of historic jobs to look at')
         parser.add_argument('--ignore', action='append', help='ignore a specific action (e.g., --ignore git)')
 
     def handle(self, *args, **options):

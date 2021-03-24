@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -31,11 +30,10 @@ options:
       description:
         - The description to use for the organization.
       type: str
-    custom_virtualenv:
+    default_environment:
       description:
-        - Local absolute file path containing a custom Python virtualenv to use.
+        - Default Execution Environment to use for jobs owned by the Organization.
       type: str
-      default: ''
     max_hosts:
       description:
         - The max hosts allowed in this organizations
@@ -88,7 +86,6 @@ EXAMPLES = '''
   tower_organization:
     name: "Foo"
     description: "Foo bar organization using foo-venv"
-    custom_virtualenv: "/var/lib/awx/venv/foo-venv/"
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
@@ -109,7 +106,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         description=dict(),
-        custom_virtualenv=dict(),
+        default_environment=dict(),
         max_hosts=dict(type='int', default="0"),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
@@ -125,7 +122,7 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     description = module.params.get('description')
-    custom_virtualenv = module.params.get('custom_virtualenv')
+    default_ee = module.params.get('default_environment')
     max_hosts = module.params.get('max_hosts')
     # instance_group_names = module.params.get('instance_groups')
     state = module.params.get('state')
@@ -173,15 +170,17 @@ def main():
     org_fields = {'name': module.get_item_name(organization) if organization else name}
     if description is not None:
         org_fields['description'] = description
-    if custom_virtualenv is not None:
-        org_fields['custom_virtualenv'] = custom_virtualenv
+    if default_ee is not None:
+        org_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
     if max_hosts is not None:
         org_fields['max_hosts'] = max_hosts
 
     # If the state was present and we can let the module build or update the existing organization, this will return on its own
     module.create_or_update_if_needed(
-        organization, org_fields,
-        endpoint='organizations', item_type='organization',
+        organization,
+        org_fields,
+        endpoint='organizations',
+        item_type='organization',
         associations=association_fields,
     )
 

@@ -70,8 +70,8 @@ function SmartInventory({ i18n, setBreadcrumb }) {
     { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
     { name: i18n._(t`Hosts`), link: `${match.url}/hosts`, id: 2 },
     {
-      name: i18n._(t`Completed jobs`),
-      link: `${match.url}/completed_jobs`,
+      name: i18n._(t`Jobs`),
+      link: `${match.url}/jobs`,
       id: 3,
     },
   ];
@@ -150,10 +150,7 @@ function SmartInventory({ i18n, setBreadcrumb }) {
                 setBreadcrumb={setBreadcrumb}
               />
             </Route>,
-            <Route
-              key="completed_jobs"
-              path="/inventories/smart_inventory/:id/completed_jobs"
-            >
+            <Route key="jobs" path="/inventories/smart_inventory/:id/jobs">
               <JobList
                 defaultParams={{
                   or__job__inventory: inventory.id,

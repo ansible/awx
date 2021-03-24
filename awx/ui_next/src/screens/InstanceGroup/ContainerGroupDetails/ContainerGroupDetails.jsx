@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button, Label } from '@patternfly/react-core';
 
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import DeleteButton from '../../../components/DeleteButton';
@@ -86,6 +86,7 @@ function ContainerGroupDetails({ instanceGroup, i18n }) {
         {instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="container-group-detail-edit-button"
               aria-label={i18n._(t`edit`)}
               component={Link}
               to={`/instance_groups/container_group/${id}/edit`}

@@ -14,6 +14,7 @@ from .teams import *  # NOQA
 from .credentials import *  # NOQA
 from .unified_jobs import *  # NOQA
 from .unified_job_templates import *  # NOQA
+from .execution_environments import *  # NOQA
 from .projects import *  # NOQA
 from .inventory import *  # NOQA
 from .system_job_templates import *  # NOQA
@@ -32,7 +33,7 @@ from .workflow_job_templates import *  # NOQA
 from .workflow_job_template_nodes import *  # NOQA
 from .workflow_jobs import *  # NOQA
 from .workflow_job_nodes import *  # NOQA
-from .workflow_approvals import * # NOQA
+from .workflow_approvals import *  # NOQA
 from .settings import *  # NOQA
 from .instances import *  # NOQA
 from .instance_groups import *  # NOQA

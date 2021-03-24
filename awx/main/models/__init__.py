@@ -2,76 +2,79 @@
 # All Rights Reserved.
 
 # Django
-from django.conf import settings # noqa
+from django.conf import settings  # noqa
 from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
 
 # AWX
-from awx.main.models.base import (  # noqa
-    BaseModel, PrimordialModel, prevent_search, accepts_json,
-    CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES
-)
-from awx.main.models.unified_jobs import (  # noqa
-    UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded
-)
-from awx.main.models.organization import (  # noqa
-    Organization, Profile, Team, UserSessionMembership
-)
-from awx.main.models.credential import (  # noqa
-    Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env
-)
+from awx.main.models.base import BaseModel, PrimordialModel, prevent_search, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
+from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded  # noqa
+from awx.main.models.organization import Organization, Profile, Team, UserSessionMembership  # noqa
+from awx.main.models.credential import Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env  # noqa
 from awx.main.models.projects import Project, ProjectUpdate  # noqa
-from awx.main.models.inventory import (  # noqa
-    CustomInventoryScript, Group, Host, Inventory, InventorySource,
-    InventoryUpdate, SmartInventoryMembership
-)
+from awx.main.models.inventory import CustomInventoryScript, Group, Host, Inventory, InventorySource, InventoryUpdate, SmartInventoryMembership  # noqa
 from awx.main.models.jobs import (  # noqa
-    Job, JobHostSummary, JobLaunchConfig, JobTemplate, SystemJob,
+    Job,
+    JobHostSummary,
+    JobLaunchConfig,
+    JobTemplate,
+    SystemJob,
     SystemJobTemplate,
 )
 from awx.main.models.events import (  # noqa
-    AdHocCommandEvent, InventoryUpdateEvent, JobEvent, ProjectUpdateEvent,
+    AdHocCommandEvent,
+    InventoryUpdateEvent,
+    JobEvent,
+    ProjectUpdateEvent,
     SystemJobEvent,
 )
-from awx.main.models.ad_hoc_commands import AdHocCommand # noqa
-from awx.main.models.schedules import Schedule # noqa
-from awx.main.models.activity_stream import ActivityStream # noqa
+from awx.main.models.ad_hoc_commands import AdHocCommand  # noqa
+from awx.main.models.schedules import Schedule  # noqa
+from awx.main.models.execution_environments import ExecutionEnvironment  # noqa
+from awx.main.models.activity_stream import ActivityStream  # noqa
 from awx.main.models.ha import (  # noqa
-    Instance, InstanceGroup, TowerScheduleState,
+    Instance,
+    InstanceGroup,
+    TowerScheduleState,
 )
 from awx.main.models.rbac import (  # noqa
-    Role, batch_role_ancestor_rebuilding, get_roles_on_resource,
-    role_summary_fields_generator, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    Role,
+    batch_role_ancestor_rebuilding,
+    get_roles_on_resource,
+    role_summary_fields_generator,
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.models.mixins import (  # noqa
-    CustomVirtualEnvMixin, ResourceMixin, SurveyJobMixin,
-    SurveyJobTemplateMixin, TaskManagerInventoryUpdateMixin,
-    TaskManagerJobMixin, TaskManagerProjectUpdateMixin,
+    CustomVirtualEnvMixin,
+    ExecutionEnvironmentMixin,
+    ResourceMixin,
+    SurveyJobMixin,
+    SurveyJobTemplateMixin,
+    TaskManagerInventoryUpdateMixin,
+    TaskManagerJobMixin,
+    TaskManagerProjectUpdateMixin,
     TaskManagerUnifiedJobMixin,
 )
-from awx.main.models.notifications import (  # noqa
-    Notification, NotificationTemplate,
-    JobNotificationMixin
-)
-from awx.main.models.label import Label # noqa
+from awx.main.models.notifications import Notification, NotificationTemplate, JobNotificationMixin  # noqa
+from awx.main.models.label import Label  # noqa
 from awx.main.models.workflow import (  # noqa
-    WorkflowJob, WorkflowJobNode, WorkflowJobOptions, WorkflowJobTemplate,
-    WorkflowJobTemplateNode, WorkflowApproval, WorkflowApprovalTemplate,
+    WorkflowJob,
+    WorkflowJobNode,
+    WorkflowJobOptions,
+    WorkflowJobTemplate,
+    WorkflowJobTemplateNode,
+    WorkflowApproval,
+    WorkflowApprovalTemplate,
 )
 from awx.api.versioning import reverse
-from awx.main.models.oauth import ( # noqa
-    OAuth2AccessToken, OAuth2Application
-)
-from oauth2_provider.models import Grant, RefreshToken # noqa -- needed django-oauth-toolkit model migrations
+from awx.main.models.oauth import OAuth2AccessToken, OAuth2Application  # noqa
+from oauth2_provider.models import Grant, RefreshToken  # noqa -- needed django-oauth-toolkit model migrations
 
 
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User  # noqa
-from awx.main.access import (  # noqa
-    get_user_queryset, check_user_access, check_user_access_with_errors,
-    user_accessible_objects
-)
+from awx.main.access import get_user_queryset, check_user_access, check_user_access_with_errors, user_accessible_objects  # noqa
 
 
 User.add_to_class('get_queryset', get_user_queryset)
@@ -92,18 +95,12 @@ def enforce_bigint_pk_migration():
     # from the *old* int primary key table to the replacement bigint table
     # if not, attempt to migrate them in the background
     #
-    for tblname in (
-        'main_jobevent', 'main_inventoryupdateevent',
-        'main_projectupdateevent', 'main_adhoccommandevent',
-        'main_systemjobevent'
-    ):
+    for tblname in ('main_jobevent', 'main_inventoryupdateevent', 'main_projectupdateevent', 'main_adhoccommandevent', 'main_systemjobevent'):
         with connection.cursor() as cursor:
-            cursor.execute(
-                'SELECT 1 FROM information_schema.tables WHERE table_name=%s',
-                (f'_old_{tblname}',)
-            )
+            cursor.execute('SELECT 1 FROM information_schema.tables WHERE table_name=%s', (f'_old_{tblname}',))
             if bool(cursor.rowcount):
                 from awx.main.tasks import migrate_legacy_event_data
+
                 migrate_legacy_event_data.apply_async([tblname])
 
 
@@ -149,8 +146,7 @@ User.add_to_class('created', created)
 def user_is_system_auditor(user):
     if not hasattr(user, '_is_system_auditor'):
         if user.pk:
-            user._is_system_auditor = user.roles.filter(
-                singleton_name='system_auditor', role_field='system_auditor').exists()
+            user._is_system_auditor = user.roles.filter(singleton_name='system_auditor', role_field='system_auditor').exists()
         else:
             # Odd case where user is unsaved, this should never be relied on
             return False
@@ -194,8 +190,6 @@ def user_is_in_enterprise_category(user, category):
 User.add_to_class('is_in_enterprise_category', user_is_in_enterprise_category)
 
 
-
-
 def o_auth2_application_get_absolute_url(self, request=None):
     return reverse('api:o_auth2_application_detail', kwargs={'pk': self.pk}, request=request)
 
@@ -209,18 +203,20 @@ def o_auth2_token_get_absolute_url(self, request=None):
 
 OAuth2AccessToken.add_to_class('get_absolute_url', o_auth2_token_get_absolute_url)
 
-from awx.main.registrar import activity_stream_registrar # noqa
+from awx.main.registrar import activity_stream_registrar  # noqa
+
 activity_stream_registrar.connect(Organization)
 activity_stream_registrar.connect(Inventory)
 activity_stream_registrar.connect(Host)
 activity_stream_registrar.connect(Group)
 activity_stream_registrar.connect(InventorySource)
-#activity_stream_registrar.connect(InventoryUpdate)
+# activity_stream_registrar.connect(InventoryUpdate)
 activity_stream_registrar.connect(Credential)
 activity_stream_registrar.connect(CredentialType)
 activity_stream_registrar.connect(Team)
 activity_stream_registrar.connect(Project)
-#activity_stream_registrar.connect(ProjectUpdate)
+# activity_stream_registrar.connect(ProjectUpdate)
+activity_stream_registrar.connect(ExecutionEnvironment)
 activity_stream_registrar.connect(JobTemplate)
 activity_stream_registrar.connect(Job)
 activity_stream_registrar.connect(AdHocCommand)

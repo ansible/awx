@@ -24,22 +24,11 @@ from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
-from awx.main.utils import (
-    get_awx_version,
-    get_ansible_version,
-    get_custom_venv_choices,
-    to_python_boolean,
-)
+from awx.main.utils import get_awx_version, get_ansible_version, get_custom_venv_choices, to_python_boolean
 from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
-from awx.main.models import (
-    Project,
-    Organization,
-    Instance,
-    InstanceGroup,
-    JobTemplate,
-)
+from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ
 
 logger = logging.getLogger('awx.api.views.root')
@@ -60,7 +49,7 @@ class ApiRootView(APIView):
         data = OrderedDict()
         data['description'] = _('AWX REST API')
         data['current_version'] = v2
-        data['available_versions'] = dict(v2 = v2)
+        data['available_versions'] = dict(v2=v2)
         data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
@@ -100,6 +89,7 @@ class ApiVersionRootView(APIView):
         data['dashboard'] = reverse('api:dashboard_view', request=request)
         data['organizations'] = reverse('api:organization_list', request=request)
         data['users'] = reverse('api:user_list', request=request)
+        data['execution_environments'] = reverse('api:execution_environment_list', request=request)
         data['projects'] = reverse('api:project_list', request=request)
         data['project_updates'] = reverse('api:project_update_list', request=request)
         data['teams'] = reverse('api:team_list', request=request)
@@ -145,6 +135,7 @@ class ApiV2PingView(APIView):
     """A simple view that reports very basic information about this
     instance, which is acceptable to be public information.
     """
+
     permission_classes = (AllowAny,)
     authentication_classes = ()
     name = _('Ping')
@@ -156,23 +147,19 @@ class ApiV2PingView(APIView):
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
         """
-        response = {
-            'ha': is_ha_environment(),
-            'version': get_awx_version(),
-            'active_node': settings.CLUSTER_HOST_ID,
-            'install_uuid': settings.INSTALL_UUID,
-        }
+        response = {'ha': is_ha_environment(), 'version': get_awx_version(), 'active_node': settings.CLUSTER_HOST_ID, 'install_uuid': settings.INSTALL_UUID}
 
         response['instances'] = []
         for instance in Instance.objects.all():
-            response['instances'].append(dict(node=instance.hostname, uuid=instance.uuid, heartbeat=instance.modified,
-                                              capacity=instance.capacity, version=instance.version))
+            response['instances'].append(
+                dict(node=instance.hostname, uuid=instance.uuid, heartbeat=instance.modified, capacity=instance.capacity, version=instance.version)
+            )
             sorted(response['instances'], key=operator.itemgetter('node'))
         response['instance_groups'] = []
         for instance_group in InstanceGroup.objects.prefetch_related('instances'):
-            response['instance_groups'].append(dict(name=instance_group.name,
-                                                    capacity=instance_group.capacity,
-                                                    instances=[x.hostname for x in instance_group.instances.all()]))
+            response['instance_groups'].append(
+                dict(name=instance_group.name, capacity=instance_group.capacity, instances=[x.hostname for x in instance_group.instances.all()])
+            )
         return Response(response)
 
 
@@ -189,6 +176,7 @@ class ApiV2SubscriptionView(APIView):
 
     def post(self, request):
         from awx.main.utils.common import get_licenser
+
         data = request.data.copy()
         if data.get('subscriptions_password') == '$encrypted$':
             data['subscriptions_password'] = settings.SUBSCRIPTIONS_PASSWORD
@@ -202,10 +190,7 @@ class ApiV2SubscriptionView(APIView):
                 settings.SUBSCRIPTIONS_PASSWORD = data['subscriptions_password']
         except Exception as exc:
             msg = _("Invalid Subscription")
-            if (
-                isinstance(exc, requests.exceptions.HTTPError) and
-                getattr(getattr(exc, 'response', None), 'status_code', None) == 401
-            ):
+            if isinstance(exc, requests.exceptions.HTTPError) and getattr(getattr(exc, 'response', None), 'status_code', None) == 401:
                 msg = _("The provided credentials are invalid (HTTP 401).")
             elif isinstance(exc, requests.exceptions.ProxyError):
                 msg = _("Unable to connect to proxy server.")
@@ -214,8 +199,7 @@ class ApiV2SubscriptionView(APIView):
             elif isinstance(exc, (ValueError, OSError)) and exc.args:
                 msg = exc.args[0]
             else:
-                logger.exception(smart_text(u"Invalid subscription submitted."),
-                                 extra=dict(actor=request.user.username))
+                logger.exception(smart_text(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
             return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(validated)
@@ -241,16 +225,14 @@ class ApiV2AttachView(APIView):
         pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
         if pool_id and user and pw:
             from awx.main.utils.common import get_licenser
+
             data = request.data.copy()
             try:
                 with set_environ(**settings.AWX_TASK_ENV):
                     validated = get_licenser().validate_rh(user, pw)
             except Exception as exc:
                 msg = _("Invalid Subscription")
-                if (
-                    isinstance(exc, requests.exceptions.HTTPError) and
-                    getattr(getattr(exc, 'response', None), 'status_code', None) == 401
-                ):
+                if isinstance(exc, requests.exceptions.HTTPError) and getattr(getattr(exc, 'response', None), 'status_code', None) == 401:
                     msg = _("The provided credentials are invalid (HTTP 401).")
                 elif isinstance(exc, requests.exceptions.ProxyError):
                     msg = _("Unable to connect to proxy server.")
@@ -259,8 +241,7 @@ class ApiV2AttachView(APIView):
                 elif isinstance(exc, (ValueError, OSError)) and exc.args:
                     msg = exc.args[0]
                 else:
-                    logger.exception(smart_text(u"Invalid subscription submitted."),
-                                     extra=dict(actor=request.user.username))
+                    logger.exception(smart_text(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
         for sub in validated:
             if sub['pool_id'] == pool_id:
@@ -286,6 +267,7 @@ class ApiV2ConfigView(APIView):
         '''Return various sitewide configuration settings'''
 
         from awx.main.utils.common import get_licenser
+
         license_data = get_licenser().validate()
 
         if not license_data.get('valid_key', False):
@@ -313,21 +295,22 @@ class ApiV2ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser \
-                or request.user.is_system_auditor \
-                or Organization.accessible_objects(request.user, 'admin_role').exists() \
-                or Organization.accessible_objects(request.user, 'auditor_role').exists() \
-                or Organization.accessible_objects(request.user, 'project_admin_role').exists():
-            data.update(dict(
-                project_base_dir = settings.PROJECTS_ROOT,
-                project_local_paths = Project.get_local_path_choices(),
-                custom_virtualenvs = get_custom_venv_choices()
-            ))
+        if (
+            request.user.is_superuser
+            or request.user.is_system_auditor
+            or Organization.accessible_objects(request.user, 'admin_role').exists()
+            or Organization.accessible_objects(request.user, 'auditor_role').exists()
+            or Organization.accessible_objects(request.user, 'project_admin_role').exists()
+        ):
+            data.update(
+                dict(
+                    project_base_dir=settings.PROJECTS_ROOT, project_local_paths=Project.get_local_path_choices(), custom_virtualenvs=get_custom_venv_choices()
+                )
+            )
         elif JobTemplate.accessible_objects(request.user, 'admin_role').exists():
             data['custom_virtualenvs'] = get_custom_venv_choices()
 
         return Response(data)
-
 
     def post(self, request):
         if not isinstance(request.data, dict):
@@ -345,11 +328,11 @@ class ApiV2ConfigView(APIView):
         try:
             data_actual = json.dumps(request.data)
         except Exception:
-            logger.info(smart_text(u"Invalid JSON submitted for license."),
-                        extra=dict(actor=request.user.username))
+            logger.info(smart_text(u"Invalid JSON submitted for license."), extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
 
         from awx.main.utils.common import get_licenser
+
         license_data = json.loads(data_actual)
         if 'license_key' in license_data:
             return Response({"error": _('Legacy license submitted. A subscription manifest is now required.')}, status=status.HTTP_400_BAD_REQUEST)
@@ -357,10 +340,7 @@ class ApiV2ConfigView(APIView):
             try:
                 json_actual = json.loads(base64.b64decode(license_data['manifest']))
                 if 'license_key' in json_actual:
-                    return Response(
-                        {"error": _('Legacy license submitted. A subscription manifest is now required.')},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+                    return Response({"error": _('Legacy license submitted. A subscription manifest is now required.')}, status=status.HTTP_400_BAD_REQUEST)
             except Exception:
                 pass
             try:
@@ -374,8 +354,7 @@ class ApiV2ConfigView(APIView):
             try:
                 license_data_validated = get_licenser().license_from_manifest(license_data)
             except Exception:
-                logger.warning(smart_text(u"Invalid subscription submitted."),
-                               extra=dict(actor=request.user.username))
+                logger.warning(smart_text(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
         else:
             license_data_validated = get_licenser().validate()
@@ -386,8 +365,7 @@ class ApiV2ConfigView(APIView):
                 settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
 
-        logger.warning(smart_text(u"Invalid subscription submitted."),
-                       extra=dict(actor=request.user.username))
+        logger.warning(smart_text(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
         return Response({"error": _("Invalid subscription")}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):

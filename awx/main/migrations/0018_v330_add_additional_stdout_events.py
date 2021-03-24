@@ -27,7 +27,12 @@ class Migration(migrations.Migration):
                 ('verbosity', models.PositiveIntegerField(default=0, editable=False)),
                 ('start_line', models.PositiveIntegerField(default=0, editable=False)),
                 ('end_line', models.PositiveIntegerField(default=0, editable=False)),
-                ('inventory_update', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='inventory_update_events', to='main.InventoryUpdate')),
+                (
+                    'inventory_update',
+                    models.ForeignKey(
+                        editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='inventory_update_events', to='main.InventoryUpdate'
+                    ),
+                ),
             ],
             options={
                 'ordering': ('-pk',),
@@ -39,7 +44,46 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
-                ('event', models.CharField(choices=[('runner_on_failed', 'Host Failed'), ('runner_on_ok', 'Host OK'), ('runner_on_error', 'Host Failure'), ('runner_on_skipped', 'Host Skipped'), ('runner_on_unreachable', 'Host Unreachable'), ('runner_on_no_hosts', 'No Hosts Remaining'), ('runner_on_async_poll', 'Host Polling'), ('runner_on_async_ok', 'Host Async OK'), ('runner_on_async_failed', 'Host Async Failure'), ('runner_item_on_ok', 'Item OK'), ('runner_item_on_failed', 'Item Failed'), ('runner_item_on_skipped', 'Item Skipped'), ('runner_retry', 'Host Retry'), ('runner_on_file_diff', 'File Difference'), ('playbook_on_start', 'Playbook Started'), ('playbook_on_notify', 'Running Handlers'), ('playbook_on_include', 'Including File'), ('playbook_on_no_hosts_matched', 'No Hosts Matched'), ('playbook_on_no_hosts_remaining', 'No Hosts Remaining'), ('playbook_on_task_start', 'Task Started'), ('playbook_on_vars_prompt', 'Variables Prompted'), ('playbook_on_setup', 'Gathering Facts'), ('playbook_on_import_for_host', 'internal: on Import for Host'), ('playbook_on_not_import_for_host', 'internal: on Not Import for Host'), ('playbook_on_play_start', 'Play Started'), ('playbook_on_stats', 'Playbook Complete'), ('debug', 'Debug'), ('verbose', 'Verbose'), ('deprecated', 'Deprecated'), ('warning', 'Warning'), ('system_warning', 'System Warning'), ('error', 'Error')], max_length=100)),
+                (
+                    'event',
+                    models.CharField(
+                        choices=[
+                            ('runner_on_failed', 'Host Failed'),
+                            ('runner_on_ok', 'Host OK'),
+                            ('runner_on_error', 'Host Failure'),
+                            ('runner_on_skipped', 'Host Skipped'),
+                            ('runner_on_unreachable', 'Host Unreachable'),
+                            ('runner_on_no_hosts', 'No Hosts Remaining'),
+                            ('runner_on_async_poll', 'Host Polling'),
+                            ('runner_on_async_ok', 'Host Async OK'),
+                            ('runner_on_async_failed', 'Host Async Failure'),
+                            ('runner_item_on_ok', 'Item OK'),
+                            ('runner_item_on_failed', 'Item Failed'),
+                            ('runner_item_on_skipped', 'Item Skipped'),
+                            ('runner_retry', 'Host Retry'),
+                            ('runner_on_file_diff', 'File Difference'),
+                            ('playbook_on_start', 'Playbook Started'),
+                            ('playbook_on_notify', 'Running Handlers'),
+                            ('playbook_on_include', 'Including File'),
+                            ('playbook_on_no_hosts_matched', 'No Hosts Matched'),
+                            ('playbook_on_no_hosts_remaining', 'No Hosts Remaining'),
+                            ('playbook_on_task_start', 'Task Started'),
+                            ('playbook_on_vars_prompt', 'Variables Prompted'),
+                            ('playbook_on_setup', 'Gathering Facts'),
+                            ('playbook_on_import_for_host', 'internal: on Import for Host'),
+                            ('playbook_on_not_import_for_host', 'internal: on Not Import for Host'),
+                            ('playbook_on_play_start', 'Play Started'),
+                            ('playbook_on_stats', 'Playbook Complete'),
+                            ('debug', 'Debug'),
+                            ('verbose', 'Verbose'),
+                            ('deprecated', 'Deprecated'),
+                            ('warning', 'Warning'),
+                            ('system_warning', 'System Warning'),
+                            ('error', 'Error'),
+                        ],
+                        max_length=100,
+                    ),
+                ),
                 ('event_data', awx.main.fields.JSONField(blank=True, default=dict)),
                 ('failed', models.BooleanField(default=False, editable=False)),
                 ('changed', models.BooleanField(default=False, editable=False)),
@@ -53,7 +97,12 @@ class Migration(migrations.Migration):
                 ('verbosity', models.PositiveIntegerField(default=0, editable=False)),
                 ('start_line', models.PositiveIntegerField(default=0, editable=False)),
                 ('end_line', models.PositiveIntegerField(default=0, editable=False)),
-                ('project_update', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='project_update_events', to='main.ProjectUpdate')),
+                (
+                    'project_update',
+                    models.ForeignKey(
+                        editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='project_update_events', to='main.ProjectUpdate'
+                    ),
+                ),
             ],
             options={
                 'ordering': ('pk',),
@@ -72,7 +121,10 @@ class Migration(migrations.Migration):
                 ('verbosity', models.PositiveIntegerField(default=0, editable=False)),
                 ('start_line', models.PositiveIntegerField(default=0, editable=False)),
                 ('end_line', models.PositiveIntegerField(default=0, editable=False)),
-                ('system_job', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='system_job_events', to='main.SystemJob')),
+                (
+                    'system_job',
+                    models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='system_job_events', to='main.SystemJob'),
+                ),
             ],
             options={
                 'ordering': ('-pk',),

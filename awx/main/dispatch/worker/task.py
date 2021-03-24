@@ -6,6 +6,7 @@ import traceback
 
 from kubernetes.config import kube_config
 
+from django.conf import settings
 from django_guid.middleware import GuidMiddleware
 
 from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
@@ -16,22 +17,22 @@ logger = logging.getLogger('awx.main.dispatch')
 
 
 class TaskWorker(BaseWorker):
-    '''
+    """
     A worker implementation that deserializes task messages and runs native
     Python code.
 
     The code that *builds* these types of messages is found in
     `awx.main.dispatch.publish`.
-    '''
+    """
 
     @classmethod
     def resolve_callable(cls, task):
-        '''
+        """
         Transform a dotted notation task into an imported, callable function, e.g.,
 
         awx.main.tasks.delete_inventory
         awx.main.tasks.RunProjectUpdate
-        '''
+        """
         if not task.startswith('awx.'):
             raise ValueError('{} is not a valid awx task'.format(task))
         module, target = task.rsplit('.', 1)
@@ -39,17 +40,15 @@ class TaskWorker(BaseWorker):
         _call = None
         if hasattr(module, target):
             _call = getattr(module, target, None)
-        if not (
-            hasattr(_call, 'apply_async') and hasattr(_call, 'delay')
-        ):
+        if not (hasattr(_call, 'apply_async') and hasattr(_call, 'delay')):
             raise ValueError('{} is not decorated with @task()'.format(task))
 
         return _call
 
     def run_callable(self, body):
-        '''
+        """
         Given some AMQP message, import the correct Python code and run it.
-        '''
+        """
         task = body['task']
         uuid = body.get('uuid', '<unknown>')
         args = body.get('args', [])
@@ -66,7 +65,7 @@ class TaskWorker(BaseWorker):
         return _call(*args, **kwargs)
 
     def perform_work(self, body):
-        '''
+        """
         Import and run code for a task e.g.,
 
         body = {
@@ -84,7 +83,8 @@ class TaskWorker(BaseWorker):
             'kwargs': {},
             'task': u'awx.main.tasks.RunProjectUpdate'
         }
-        '''
+        """
+        settings.__clean_on_fork__()
         result = None
         try:
             result = self.run_callable(body)
@@ -99,9 +99,7 @@ class TaskWorker(BaseWorker):
                     task = body['task']
                     args = body.get('args', [])
                     kwargs = body.get('kwargs', {})
-                    logger.exception('Worker failed to run task {}(*{}, **{}'.format(
-                        task, args, kwargs
-                    ))
+                    logger.exception('Worker failed to run task {}(*{}, **{}'.format(task, args, kwargs))
             except Exception:
                 # It's fairly critical that this code _not_ raise exceptions on logging
                 # If you configure external logging in a way that _it_ fails, there's

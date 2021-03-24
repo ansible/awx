@@ -32,7 +32,7 @@ function JobListItem({
     inventory_update: i18n._(t`Inventory Sync`),
     job: i18n._(t`Playbook Run`),
     ad_hoc_command: i18n._(t`Command`),
-    management_job: i18n._(t`Management Job`),
+    system_job: i18n._(t`Management Job`),
     workflow_job: i18n._(t`Workflow Job`),
   };
 
@@ -99,6 +99,7 @@ function JobListItem({
               <LaunchButton resource={job}>
                 {({ handleRelaunch }) => (
                   <Button
+                    ouiaId={`${job.id}-relaunch-button`}
                     variant="plain"
                     onClick={handleRelaunch}
                     aria-label={i18n._(t`Relaunch`)}
@@ -158,6 +159,14 @@ function JobListItem({
                       {inventory.name}
                     </Link>
                   }
+                />
+              )}
+
+              {job.job_explanation && (
+                <Detail
+                  fullWidth
+                  label={i18n._(t`Explanation`)}
+                  value={job.job_explanation}
                 />
               )}
             </DetailList>

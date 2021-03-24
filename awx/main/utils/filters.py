@@ -107,7 +107,6 @@ class ExternalLoggerEnabled(Filter):
 
 
 class DynamicLevelFilter(Filter):
-
     def filter(self, record):
         """Filters out logs that have a level below the threshold defined
         by the databse setting LOG_AGGREGATOR_LEVEL
@@ -132,10 +131,10 @@ def string_to_type(t):
     elif t == u'false':
         return False
 
-    if re.search(r'^[-+]?[0-9]+$',t):
+    if re.search(r'^[-+]?[0-9]+$', t):
         return int(t)
 
-    if re.search(r'^[-+]?[0-9]+\.[0-9]+$',t):
+    if re.search(r'^[-+]?[0-9]+\.[0-9]+$', t):
         return float(t)
 
     return t
@@ -158,12 +157,13 @@ class SmartFilter(object):
             search_kwargs = self._expand_search(k, v)
             if search_kwargs:
                 kwargs.update(search_kwargs)
-                q = reduce(lambda x, y: x | y, [models.Q(**{u'%s__icontains' % _k:_v}) for _k, _v in kwargs.items()])
+                q = reduce(lambda x, y: x | y, [models.Q(**{u'%s__icontains' % _k: _v}) for _k, _v in kwargs.items()])
                 self.result = Host.objects.filter(q)
             else:
                 # detect loops and restrict access to sensitive fields
                 # this import is intentional here to avoid a circular import
                 from awx.api.filters import FieldLookupBackend
+
                 FieldLookupBackend().get_field_from_lookup(Host, k)
                 kwargs[k] = v
                 self.result = Host.objects.filter(**kwargs)
@@ -186,8 +186,10 @@ class SmartFilter(object):
               accomplished using an allowed list or introspecting the
               relationship refered to to see if it's a jsonb type.
         '''
+
         def _json_path_to_contains(self, k, v):
             from awx.main.fields import JSONBField  # avoid a circular import
+
             if not k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP):
                 v = self.strip_quotes_traditional_logic(v)
                 return (k, v)
@@ -198,14 +200,9 @@ class SmartFilter(object):
                     if match == '__exact':
                         # appending __exact is basically a no-op, because that's
                         # what the query means if you leave it off
-                        k = k[:-len(match)]
+                        k = k[: -len(match)]
                     else:
-                        logger.error(
-                            'host_filter:{} does not support searching with {}'.format(
-                                SmartFilter.SEARCHABLE_RELATIONSHIP,
-                                match
-                            )
-                        )
+                        logger.error('host_filter:{} does not support searching with {}'.format(SmartFilter.SEARCHABLE_RELATIONSHIP, match))
 
             # Strip off leading relationship key
             if k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP + '__'):
@@ -270,7 +267,7 @@ class SmartFilter(object):
             # ="something"
             if t_len > (v_offset + 2) and t[v_offset] == "\"" and t[v_offset + 2] == "\"":
                 v = u'"' + str(t[v_offset + 1]) + u'"'
-                #v = t[v_offset + 1]
+                # v = t[v_offset + 1]
             # empty ""
             elif t_len > (v_offset + 1):
                 v = u""
@@ -305,42 +302,38 @@ class SmartFilter(object):
                     search_kwargs[k] = v
             return search_kwargs
 
-
     class BoolBinOp(object):
         def __init__(self, t):
             self.result = None
             i = 2
             while i < len(t[0]):
-                '''
+                """
                 Do NOT observe self.result. It will cause the sql query to be executed.
                 We do not want that. We only want to build the query.
-                '''
+                """
                 if isinstance(self.result, type(None)):
                     self.result = t[0][0].result
                 right = t[0][i].result
                 self.result = self.execute_logic(self.result, right)
                 i += 2
 
-
     class BoolAnd(BoolBinOp):
         def execute_logic(self, left, right):
             return left & right
-
 
     class BoolOr(BoolBinOp):
         def execute_logic(self, left, right):
             return left | right
 
-
     @classmethod
     def query_from_string(cls, filter_string):
 
-        '''
+        """
         TODO:
         * handle values with " via: a.b.c.d="hello\"world"
         * handle keys with " via: a.\"b.c="yeah"
         * handle key with __ in it
-        '''
+        """
         filter_string_raw = filter_string
         filter_string = str(filter_string)
 
@@ -351,13 +344,16 @@ class SmartFilter(object):
         atom_quoted = Literal('"') + Optional(atom_inside_quotes) + Literal('"')
         EQUAL = Literal('=')
 
-        grammar = ((atom_quoted | atom) + EQUAL + Optional((atom_quoted | atom)))
+        grammar = (atom_quoted | atom) + EQUAL + Optional((atom_quoted | atom))
         grammar.setParseAction(cls.BoolOperand)
 
-        boolExpr = infixNotation(grammar, [
-            ("and", 2, opAssoc.LEFT, cls.BoolAnd),
-            ("or",  2, opAssoc.LEFT, cls.BoolOr),
-        ])
+        boolExpr = infixNotation(
+            grammar,
+            [
+                ("and", 2, opAssoc.LEFT, cls.BoolAnd),
+                ("or", 2, opAssoc.LEFT, cls.BoolOr),
+            ],
+        )
 
         try:
             res = boolExpr.parseString('(' + filter_string + ')')
@@ -370,9 +366,7 @@ class SmartFilter(object):
         raise RuntimeError("Parsing the filter_string %s went terribly wrong" % filter_string)
 
 
-
 class DefaultCorrelationId(CorrelationId):
-
     def filter(self, record):
         guid = GuidMiddleware.get_guid() or '-'
         if MODE == 'development':

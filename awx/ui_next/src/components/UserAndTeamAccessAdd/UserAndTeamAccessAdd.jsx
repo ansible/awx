@@ -156,6 +156,7 @@ function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
         </DropdownItem>
       ) : (
         <Button
+          ouiaId="access-add-button"
           variant="primary"
           aria-label={i18n._(t`Add`)}
           onClick={() => setIsWizardOpen(true)}

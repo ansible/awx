@@ -37,7 +37,7 @@ from .fixtures import (
 
 
 def apply_roles(roles, objects, persisted):
-    '''apply_roles evaluates a list of Role relationships represented as strings.
+    """apply_roles evaluates a list of Role relationships represented as strings.
     The format of this string is 'role:[user|role]'. When a user is provided, they will be
     made a member of the role on the LHS. When a role is provided that role will be added to
     the children of the role on the LHS.
@@ -59,7 +59,7 @@ def apply_roles(roles, objects, persisted):
         ---------------
         roles = ['org1.admin_role:team1.admin_role']
         objects = {'org1': Organization', 'user1': User} # Exception, no team1 entry
-    '''
+    """
     if roles is None:
         return None
 
@@ -92,7 +92,7 @@ def apply_roles(roles, objects, persisted):
 
 
 def generate_users(organization, teams, superuser, persisted, **kwargs):
-    '''generate_users evaluates a mixed list of User objects and strings.
+    """generate_users evaluates a mixed list of User objects and strings.
     If a string is encountered a user with that username is created and added to the lookup dict.
     If a User object is encountered the User.username is used as a key for the lookup dict.
 
@@ -100,7 +100,7 @@ def generate_users(organization, teams, superuser, persisted, **kwargs):
     If a string in that format is encounted an attempt to lookup the team by the key team_name from the teams
     argumnent is made, a KeyError will be thrown if the team does not exist in the dict. The teams argument should
     be a dict of {Team.name:Team}
-    '''
+    """
     users = {}
     key = 'superusers' if superuser else 'users'
     if key in kwargs and kwargs.get(key) is not None:
@@ -118,10 +118,10 @@ def generate_users(organization, teams, superuser, persisted, **kwargs):
 
 
 def generate_teams(organization, persisted, **kwargs):
-    '''generate_teams evalutes a mixed list of Team objects and strings.
+    """generate_teams evalutes a mixed list of Team objects and strings.
     If a string is encountered a team with that string name is created and added to the lookup dict.
     If a Team object is encounted the Team.name is used as a key for the lookup dict.
-    '''
+    """
     teams = {}
     if 'teams' in kwargs and kwargs.get('teams') is not None:
         for t in kwargs['teams']:
@@ -141,10 +141,10 @@ def create_instance_group(name, instances=None, minimum=0, percentage=0):
 
 
 def create_survey_spec(variables=None, default_type='integer', required=True, min=None, max=None):
-    '''
+    """
     Returns a valid survey spec for a job template, based on the input
     argument specifying variable name(s)
-    '''
+    """
     if isinstance(variables, list):
         vars_list = variables
     else:
@@ -198,13 +198,21 @@ def create_survey_spec(variables=None, default_type='integer', required=True, mi
 
 
 def create_job_template(name, roles=None, persisted=True, webhook_service='', **kwargs):
-    Objects = generate_objects(["job_template", "jobs",
-                                "organization",
-                                "inventory",
-                                "project",
-                                "credential", "cloud_credential", "network_credential",
-                                "job_type",
-                                "survey",], kwargs)
+    Objects = generate_objects(
+        [
+            "job_template",
+            "jobs",
+            "organization",
+            "inventory",
+            "project",
+            "credential",
+            "cloud_credential",
+            "network_credential",
+            "job_type",
+            "survey",
+        ],
+        kwargs,
+    )
 
     org = None
     proj = None
@@ -252,10 +260,19 @@ def create_job_template(name, roles=None, persisted=True, webhook_service='', **
     else:
         spec = None
 
-    jt = mk_job_template(name, project=proj, inventory=inv, credential=cred,
-                         network_credential=net_cred, cloud_credential=cloud_cred,
-                         job_type=job_type, spec=spec, extra_vars=extra_vars,
-                         persisted=persisted, webhook_service=webhook_service)
+    jt = mk_job_template(
+        name,
+        project=proj,
+        inventory=inv,
+        credential=cred,
+        network_credential=net_cred,
+        cloud_credential=cloud_cred,
+        job_type=job_type,
+        spec=spec,
+        extra_vars=extra_vars,
+        persisted=persisted,
+        webhook_service=webhook_service,
+    )
 
     if 'jobs' in kwargs:
         for i in kwargs['jobs']:
@@ -267,31 +284,41 @@ def create_job_template(name, roles=None, persisted=True, webhook_service='', **
                 if spec is not None:
                     for question in spec['spec']:
                         job_extra_vars[question['variable']] = question['default']
-                jobs[i] = mk_job(job_template=jt, project=proj, inventory=inv, credential=cred,
-                                 extra_vars=job_extra_vars,
-                                 job_type=job_type, persisted=persisted)
+                jobs[i] = mk_job(
+                    job_template=jt, project=proj, inventory=inv, credential=cred, extra_vars=job_extra_vars, job_type=job_type, persisted=persisted
+                )
 
     role_objects = generate_role_objects([org, proj, inv, cred])
     apply_roles(roles, role_objects, persisted)
 
-    return Objects(job_template=jt,
-                   jobs=jobs,
-                   project=proj,
-                   inventory=inv,
-                   credential=cred, cloud_credential=cloud_cred, network_credential=net_cred,
-                   job_type=job_type,
-                   organization=org,
-                   survey=spec,)
+    return Objects(
+        job_template=jt,
+        jobs=jobs,
+        project=proj,
+        inventory=inv,
+        credential=cred,
+        cloud_credential=cloud_cred,
+        network_credential=net_cred,
+        job_type=job_type,
+        organization=org,
+        survey=spec,
+    )
 
 
 def create_organization(name, roles=None, persisted=True, **kwargs):
-    Objects = generate_objects(["organization",
-                                "teams", "users",
-                                "superusers",
-                                "projects",
-                                "labels",
-                                "notification_templates",
-                                "inventories",], kwargs)
+    Objects = generate_objects(
+        [
+            "organization",
+            "teams",
+            "users",
+            "superusers",
+            "projects",
+            "labels",
+            "notification_templates",
+            "inventories",
+        ],
+        kwargs,
+    )
 
     projects = {}
     inventories = {}
@@ -334,22 +361,29 @@ def create_organization(name, roles=None, persisted=True, **kwargs):
 
     role_objects = generate_role_objects([org, superusers, users, teams, projects, labels, notification_templates])
     apply_roles(roles, role_objects, persisted)
-    return Objects(organization=org,
-                   superusers=_Mapped(superusers),
-                   users=_Mapped(users),
-                   teams=_Mapped(teams),
-                   projects=_Mapped(projects),
-                   labels=_Mapped(labels),
-                   notification_templates=_Mapped(notification_templates),
-                   inventories=_Mapped(inventories))
+    return Objects(
+        organization=org,
+        superusers=_Mapped(superusers),
+        users=_Mapped(users),
+        teams=_Mapped(teams),
+        projects=_Mapped(projects),
+        labels=_Mapped(labels),
+        notification_templates=_Mapped(notification_templates),
+        inventories=_Mapped(inventories),
+    )
 
 
 def create_notification_template(name, roles=None, persisted=True, **kwargs):
-    Objects = generate_objects(["notification_template",
-                                "organization",
-                                "users",
-                                "superusers",
-                                "teams",], kwargs)
+    Objects = generate_objects(
+        [
+            "notification_template",
+            "organization",
+            "users",
+            "superusers",
+            "teams",
+        ],
+        kwargs,
+    )
 
     organization = None
 
@@ -365,16 +399,10 @@ def create_notification_template(name, roles=None, persisted=True, **kwargs):
 
     role_objects = generate_role_objects([organization, notification_template])
     apply_roles(roles, role_objects, persisted)
-    return Objects(notification_template=notification_template,
-                   organization=organization,
-                   users=_Mapped(users),
-                   superusers=_Mapped(superusers),
-                   teams=teams)
+    return Objects(notification_template=notification_template, organization=organization, users=_Mapped(users), superusers=_Mapped(superusers), teams=teams)
 
 
-def generate_workflow_job_template_nodes(workflow_job_template,
-                                         persisted,
-                                         **kwargs):
+def generate_workflow_job_template_nodes(workflow_job_template, persisted, **kwargs):
 
     workflow_job_template_nodes = kwargs.get('workflow_job_template_nodes', [])
     if len(workflow_job_template_nodes) > 0 and not persisted:
@@ -383,9 +411,7 @@ def generate_workflow_job_template_nodes(workflow_job_template,
     new_nodes = []
 
     for i, node in enumerate(workflow_job_template_nodes):
-        new_node = WorkflowJobTemplateNode(workflow_job_template=workflow_job_template,
-                                           unified_job_template=node['unified_job_template'],
-                                           id=i)
+        new_node = WorkflowJobTemplateNode(workflow_job_template=workflow_job_template, unified_job_template=node['unified_job_template'], id=i)
         if persisted:
             new_node.save()
         new_nodes.append(new_node)
@@ -401,30 +427,26 @@ def generate_workflow_job_template_nodes(workflow_job_template,
 
 # TODO: Implement survey and jobs
 def create_workflow_job_template(name, organization=None, persisted=True, webhook_service='', **kwargs):
-    Objects = generate_objects(["workflow_job_template",
-                                "workflow_job_template_nodes",
-                                "survey",], kwargs)
+    Objects = generate_objects(
+        [
+            "workflow_job_template",
+            "workflow_job_template_nodes",
+            "survey",
+        ],
+        kwargs,
+    )
 
     spec = None
-    #jobs = None
+    # jobs = None
 
     extra_vars = kwargs.get('extra_vars', '')
 
     if 'survey' in kwargs:
         spec = create_survey_spec(kwargs['survey'])
 
-    wfjt = mk_workflow_job_template(name,
-                                    organization=organization,
-                                    spec=spec,
-                                    extra_vars=extra_vars,
-                                    persisted=persisted,
-                                    webhook_service=webhook_service)
+    wfjt = mk_workflow_job_template(name, organization=organization, spec=spec, extra_vars=extra_vars, persisted=persisted, webhook_service=webhook_service)
 
-
-
-    workflow_jt_nodes = generate_workflow_job_template_nodes(wfjt,
-                                                             persisted,
-                                                             workflow_job_template_nodes=kwargs.get('workflow_job_template_nodes', []))
+    workflow_jt_nodes = generate_workflow_job_template_nodes(wfjt, persisted, workflow_job_template_nodes=kwargs.get('workflow_job_template_nodes', []))
 
     '''
     if 'jobs' in kwargs:
@@ -435,7 +457,9 @@ def create_workflow_job_template(name, organization=None, persisted=True, webhoo
                 # TODO: Create the job
                 raise RuntimeError("Currently, only already created jobs are supported")
     '''
-    return Objects(workflow_job_template=wfjt,
-                   #jobs=jobs,
-                   workflow_job_template_nodes=workflow_jt_nodes,
-                   survey=spec,)
+    return Objects(
+        workflow_job_template=wfjt,
+        # jobs=jobs,
+        workflow_job_template_nodes=workflow_jt_nodes,
+        survey=spec,
+    )

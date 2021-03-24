@@ -12,53 +12,29 @@ from django.db import transaction
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import (
-    Job, AdHocCommand, ProjectUpdate, InventoryUpdate,
-    SystemJob, WorkflowJob, Notification
-)
-from awx.main.signals import (
-    disable_activity_stream,
-    disable_computed_fields
-)
+from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob, WorkflowJob, Notification
+from awx.main.signals import disable_activity_stream, disable_computed_fields
 
 from awx.main.utils.deletion import AWXCollector, pre_delete
 
 
 class Command(BaseCommand):
-    '''
+    """
     Management command to cleanup old jobs and project updates.
-    '''
+    """
 
     help = 'Remove old jobs, project and inventory updates from the database.'
 
     def add_arguments(self, parser):
-        parser.add_argument('--days', dest='days', type=int, default=90, metavar='N',
-                            help='Remove jobs/updates executed more than N days ago. Defaults to 90.')
-        parser.add_argument('--dry-run', dest='dry_run', action='store_true',
-                            default=False, help='Dry run mode (show items that would '
-                            'be removed)')
-        parser.add_argument('--jobs', dest='only_jobs', action='store_true',
-                            default=False,
-                            help='Remove jobs')
-        parser.add_argument('--ad-hoc-commands', dest='only_ad_hoc_commands',
-                            action='store_true', default=False,
-                            help='Remove ad hoc commands')
-        parser.add_argument('--project-updates', dest='only_project_updates',
-                            action='store_true', default=False,
-                            help='Remove project updates')
-        parser.add_argument('--inventory-updates', dest='only_inventory_updates',
-                            action='store_true', default=False,
-                            help='Remove inventory updates')
-        parser.add_argument('--management-jobs', default=False,
-                            action='store_true', dest='only_management_jobs',
-                            help='Remove management jobs')
-        parser.add_argument('--notifications', dest='only_notifications',
-                            action='store_true', default=False,
-                            help='Remove notifications')
-        parser.add_argument('--workflow-jobs', default=False,
-                            action='store_true', dest='only_workflow_jobs',
-                            help='Remove workflow jobs')
-
+        parser.add_argument('--days', dest='days', type=int, default=90, metavar='N', help='Remove jobs/updates executed more than N days ago. Defaults to 90.')
+        parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False, help='Dry run mode (show items that would ' 'be removed)')
+        parser.add_argument('--jobs', dest='only_jobs', action='store_true', default=False, help='Remove jobs')
+        parser.add_argument('--ad-hoc-commands', dest='only_ad_hoc_commands', action='store_true', default=False, help='Remove ad hoc commands')
+        parser.add_argument('--project-updates', dest='only_project_updates', action='store_true', default=False, help='Remove project updates')
+        parser.add_argument('--inventory-updates', dest='only_inventory_updates', action='store_true', default=False, help='Remove inventory updates')
+        parser.add_argument('--management-jobs', default=False, action='store_true', dest='only_management_jobs', help='Remove management jobs')
+        parser.add_argument('--notifications', dest='only_notifications', action='store_true', default=False, help='Remove notifications')
+        parser.add_argument('--workflow-jobs', default=False, action='store_true', dest='only_workflow_jobs', help='Remove workflow jobs')
 
     def cleanup_jobs(self):
         skipped, deleted = 0, 0
@@ -83,7 +59,7 @@ class Command(BaseCommand):
                     just_deleted = models_deleted['main.Job']
                 deleted += just_deleted
             else:
-                just_deleted = 0 # break from loop, this is dry run
+                just_deleted = 0  # break from loop, this is dry run
                 deleted = qs.count()
 
             if just_deleted == 0:
@@ -96,9 +72,7 @@ class Command(BaseCommand):
         skipped, deleted = 0, 0
         ad_hoc_commands = AdHocCommand.objects.filter(created__lt=self.cutoff)
         for ad_hoc_command in ad_hoc_commands.iterator():
-            ad_hoc_command_display = '"%s" (%d events)' % \
-                (str(ad_hoc_command),
-                 ad_hoc_command.ad_hoc_command_events.count())
+            ad_hoc_command_display = '"%s" (%d events)' % (str(ad_hoc_command), ad_hoc_command.ad_hoc_command_events.count())
             if ad_hoc_command.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s ad hoc command %s', action_text, ad_hoc_command.status, ad_hoc_command_display)
@@ -179,8 +153,7 @@ class Command(BaseCommand):
         return skipped, deleted
 
     def init_logging(self):
-        log_levels = dict(enumerate([logging.ERROR, logging.INFO,
-                                     logging.DEBUG, 0]))
+        log_levels = dict(enumerate([logging.ERROR, logging.INFO, logging.DEBUG, 0]))
         self.logger = logging.getLogger('awx.main.commands.cleanup_jobs')
         self.logger.setLevel(log_levels.get(self.verbosity, 0))
         handler = logging.StreamHandler()
@@ -192,9 +165,7 @@ class Command(BaseCommand):
         skipped, deleted = 0, 0
         workflow_jobs = WorkflowJob.objects.filter(created__lt=self.cutoff)
         for workflow_job in workflow_jobs.iterator():
-            workflow_job_display = '"{}" ({} nodes)'.format(
-                str(workflow_job),
-                workflow_job.workflow_nodes.count())
+            workflow_job_display = '"{}" ({} nodes)'.format(str(workflow_job), workflow_job.workflow_nodes.count())
             if workflow_job.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s job %s', action_text, workflow_job.status, workflow_job_display)
@@ -214,8 +185,8 @@ class Command(BaseCommand):
         notifications = Notification.objects.filter(created__lt=self.cutoff)
         for notification in notifications.iterator():
             notification_display = '"{}" (started {}, {} type, {} sent)'.format(
-                str(notification), str(notification.created),
-                notification.notification_type, notification.notifications_sent)
+                str(notification), str(notification.created), notification.notification_type, notification.notifications_sent
+            )
             if notification.status in ('pending',):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s notification %s', action_text, notification.status, notification_display)
@@ -240,8 +211,7 @@ class Command(BaseCommand):
             self.cutoff = now() - datetime.timedelta(days=self.days)
         except OverflowError:
             raise CommandError('--days specified is too large. Try something less than 99999 (about 270 years).')
-        model_names = ('jobs', 'ad_hoc_commands', 'project_updates', 'inventory_updates',
-                       'management_jobs', 'workflow_jobs', 'notifications')
+        model_names = ('jobs', 'ad_hoc_commands', 'project_updates', 'inventory_updates', 'management_jobs', 'workflow_jobs', 'notifications')
         models_to_cleanup = set()
         for m in model_names:
             if options.get('only_%s' % m, False):

@@ -58,6 +58,7 @@ const jobTemplateData = {
   timeout: 0,
   use_fact_cache: false,
   verbosity: '0',
+  execution_environment: { id: 1, name: 'Foo', image: 'localhost.com' },
 };
 
 describe('<JobTemplateAdd />', () => {
@@ -77,6 +78,12 @@ describe('<JobTemplateAdd />', () => {
 
   beforeEach(() => {
     LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+    ProjectsAPI.readDetail.mockReturnValue({
+      name: 'foo',
+      id: 1,
+      allow_override: true,
+      organization: 1,
+    });
   });
 
   afterEach(() => {
@@ -126,12 +133,13 @@ describe('<JobTemplateAdd />', () => {
         ...jobTemplateData,
       },
     });
+
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<JobTemplateAdd />);
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    act(() => {
+    await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'Bar', name: 'name' },
       });
@@ -144,13 +152,14 @@ describe('<JobTemplateAdd />', () => {
         name: 'project',
         summary_fields: { organization: { id: 1, name: 'Org Foo' } },
       });
+      wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')({
+        id: 1,
+        name: 'Foo',
+      });
       wrapper.update();
-      wrapper
-        .find('PlaybookSelect')
-        .prop('field')
-        .onChange({
-          target: { value: 'Baz', name: 'playbook' },
-        });
+      wrapper.find('Select#template-playbook').prop('onToggle')();
+      wrapper.update();
+      wrapper.find('Select#template-playbook').prop('onSelect')(null, 'Baz');
     });
     wrapper.update();
     act(() => {
@@ -173,6 +182,7 @@ describe('<JobTemplateAdd />', () => {
       inventory: 2,
       webhook_credential: undefined,
       webhook_service: '',
+      execution_environment: 1,
     });
   });
 
@@ -193,7 +203,7 @@ describe('<JobTemplateAdd />', () => {
       });
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    act(() => {
+    await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'Foo', name: 'name' },
       });
@@ -207,12 +217,9 @@ describe('<JobTemplateAdd />', () => {
         summary_fields: { organization: { id: 1, name: 'Org Foo' } },
       });
       wrapper.update();
-      wrapper
-        .find('PlaybookSelect')
-        .prop('field')
-        .onChange({
-          target: { value: 'Bar', name: 'playbook' },
-        });
+      wrapper.find('Select#template-playbook').prop('onToggle')();
+      wrapper.update();
+      wrapper.find('Select#template-playbook').prop('onSelect')(null, 'Bar');
     });
     wrapper.update();
     act(() => {

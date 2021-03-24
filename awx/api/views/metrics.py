@@ -17,9 +17,7 @@ from rest_framework.exceptions import PermissionDenied
 from awx.main.analytics.metrics import metrics
 from awx.api import renderers
 
-from awx.api.generics import (
-    APIView,
-)
+from awx.api.generics import APIView
 
 
 logger = logging.getLogger('awx.analytics')
@@ -30,13 +28,10 @@ class MetricsView(APIView):
     name = _('Metrics')
     swagger_topic = 'Metrics'
 
-    renderer_classes = [renderers.PlainTextRenderer,
-                        renderers.PrometheusJSONRenderer,
-                        renderers.BrowsableAPIRenderer,]
+    renderer_classes = [renderers.PlainTextRenderer, renderers.PrometheusJSONRenderer, renderers.BrowsableAPIRenderer]
 
     def get(self, request):
         ''' Show Metrics Details '''
-        if (request.user.is_superuser or request.user.is_system_auditor):
+        if request.user.is_superuser or request.user.is_system_auditor:
             return Response(metrics().decode('UTF-8'))
         raise PermissionDenied()
-

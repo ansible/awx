@@ -14,7 +14,7 @@ import {
 import FileUploadIcon from '@patternfly/react-icons/dist/js/icons/file-upload-icon';
 import styled from 'styled-components';
 import AnsibleSelect from '../../../components/AnsibleSelect';
-import CodeMirrorInput from '../../../components/CodeMirrorInput';
+import CodeEditor from '../../../components/CodeEditor';
 import { PasswordInput } from '../../../components/FormField';
 import { FormFullWidthLayout } from '../../../components/FormLayout';
 import Popover from '../../../components/Popover';
@@ -284,7 +284,7 @@ const ObjectField = withI18n()(({ i18n, name, config, isRequired = false }) => {
         popoverContent={config.help_text}
         validated={isValid ? 'default' : 'error'}
       >
-        <CodeMirrorInput
+        <CodeEditor
           {...field}
           fullHeight
           id={name}

@@ -1,4 +1,5 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import pytest
@@ -23,15 +24,26 @@ no_module_for_endpoint = []
 
 # Some modules work on the related fields of an endpoint. These modules will not have an auto-associated endpoint
 no_endpoint_for_module = [
-    'tower_import', 'tower_meta', 'tower_export', 'tower_inventory_source_update', 'tower_job_launch', 'tower_job_wait',
-    'tower_job_list', 'tower_license', 'tower_ping', 'tower_receive', 'tower_send', 'tower_workflow_launch',
-    'tower_job_cancel', 'tower_workflow_template', 'tower_ad_hoc_command_wait', 'tower_ad_hoc_command_cancel',
+    'tower_import',
+    'tower_meta',
+    'tower_export',
+    'tower_inventory_source_update',
+    'tower_job_launch',
+    'tower_job_wait',
+    'tower_job_list',
+    'tower_license',
+    'tower_ping',
+    'tower_receive',
+    'tower_send',
+    'tower_workflow_launch',
+    'tower_job_cancel',
+    'tower_workflow_template',
+    'tower_ad_hoc_command_wait',
+    'tower_ad_hoc_command_cancel',
 ]
 
 # Global module parameters we can ignore
-ignore_parameters = [
-    'state', 'new_name', 'update_secrets'
-]
+ignore_parameters = ['state', 'new_name', 'update_secrets', 'copy_from']
 
 # Some modules take additional parameters that do not appear in the API
 # Add the module name as the key with the value being the list of params to ignore
@@ -48,16 +60,16 @@ no_api_parameter_ok = {
     'tower_workflow_job_template_node': ['organization', 'approval_node'],
     # Survey is how we handle associations
     'tower_workflow_job_template': ['survey_spec'],
-    # ad hoc commands support interval and timeout since its more like tower_job_launc
+    # ad hoc commands support interval and timeout since its more like tower_job_launch
     'tower_ad_hoc_command': ['interval', 'timeout', 'wait'],
+    # tower_group parameters to perserve hosts and children.
+    'tower_group': ['preserve_existing_children', 'preserve_existing_hosts'],
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
 # that needs to be developed. If the module is found on the file system it will auto-detect that the
 # work is being done and will bypass this check. At some point this module should be removed from this list.
-needs_development = [
-    'tower_inventory_script', 'tower_workflow_approval'
-]
+needs_development = ['tower_inventory_script', 'tower_workflow_approval']
 needs_param_development = {
     'tower_host': ['instance_id'],
 }
@@ -138,6 +150,7 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
         if not api_option and module_option and module_option.get('type', 'str') == 'list':
             return "OK, Field appears to be relation"
             # TODO, at some point try and check the object model to confirm its actually a relation
+
         return cause_error('Failed, option mismatch')
 
     # We made it through all of the checks so we are ok
@@ -147,9 +160,7 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
 def test_completeness(collection_import, request, admin_user, job_template):
     option_comparison = {}
     # Load a list of existing module files from disk
-    base_folder = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
-    )
+    base_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     module_directory = os.path.join(base_folder, 'plugins', 'modules')
     for root, dirs, files in os.walk(module_directory):
         if root == module_directory:
@@ -163,10 +174,7 @@ def test_completeness(collection_import, request, admin_user, job_template):
                         'module_name': module_name,
                     }
                     resource_module = collection_import('plugins.modules.{0}'.format(module_name))
-                    option_comparison[module_name]['module_options'] = yaml.load(
-                        resource_module.DOCUMENTATION,
-                        Loader=yaml.SafeLoader
-                    )['options']
+                    option_comparison[module_name]['module_options'] = yaml.load(resource_module.DOCUMENTATION, Loader=yaml.SafeLoader)['options']
 
     endpoint_response = _request('get')(
         url='/api/v2/',
@@ -219,51 +227,86 @@ def test_completeness(collection_import, request, admin_user, job_template):
                 longest_option_name = len(option)
 
     # Print out some headers
-    print("".join([
-        "End Point", " " * (longest_endpoint - len("End Point")),
-        " | Module Name", " " * (longest_module_name - len("Module Name")),
-        " | Option", " " * (longest_option_name - len("Option")),
-        " | API | Module | State",
-    ]))
-    print("-|-".join([
-        "-" * longest_endpoint,
-        "-" * longest_module_name,
-        "-" * longest_option_name,
-        "---",
-        "------",
-        "---------------------------------------------",
-    ]))
+    print(
+        "".join(
+            [
+                "End Point",
+                " " * (longest_endpoint - len("End Point")),
+                " | Module Name",
+                " " * (longest_module_name - len("Module Name")),
+                " | Option",
+                " " * (longest_option_name - len("Option")),
+                " | API | Module | State",
+            ]
+        )
+    )
+    print(
+        "-|-".join(
+            [
+                "-" * longest_endpoint,
+                "-" * longest_module_name,
+                "-" * longest_option_name,
+                "---",
+                "------",
+                "---------------------------------------------",
+            ]
+        )
+    )
 
     # Print out all of our data
     for module in sorted(option_comparison):
         module_data = option_comparison[module]
         all_param_names = list(set(module_data['api_options']) | set(module_data['module_options']))
         for parameter in sorted(all_param_names):
-            print("".join([
-                module_data['endpoint'], " " * (longest_endpoint - len(module_data['endpoint'])), " | ",
-                module_data['module_name'], " " * (longest_module_name - len(module_data['module_name'])), " | ",
-                parameter, " " * (longest_option_name - len(parameter)), " | ",
-                " X " if (parameter in module_data['api_options']) else '   ', " | ",
-                '  X   ' if (parameter in module_data['module_options']) else '      ', " | ",
-                determine_state(
-                    module,
-                    module_data['endpoint'],
-                    module_data['module_name'],
-                    parameter,
-                    module_data['api_options'][parameter] if (parameter in module_data['api_options']) else None,
-                    module_data['module_options'][parameter] if (parameter in module_data['module_options']) else None,
-                ),
-            ]))
+            print(
+                "".join(
+                    [
+                        module_data['endpoint'],
+                        " " * (longest_endpoint - len(module_data['endpoint'])),
+                        " | ",
+                        module_data['module_name'],
+                        " " * (longest_module_name - len(module_data['module_name'])),
+                        " | ",
+                        parameter,
+                        " " * (longest_option_name - len(parameter)),
+                        " | ",
+                        " X " if (parameter in module_data['api_options']) else '   ',
+                        " | ",
+                        '  X   ' if (parameter in module_data['module_options']) else '      ',
+                        " | ",
+                        determine_state(
+                            module,
+                            module_data['endpoint'],
+                            module_data['module_name'],
+                            parameter,
+                            module_data['api_options'][parameter] if (parameter in module_data['api_options']) else None,
+                            module_data['module_options'][parameter] if (parameter in module_data['module_options']) else None,
+                        ),
+                    ]
+                )
+            )
         # This handles cases were we got no params from the options page nor from the modules
         if len(all_param_names) == 0:
-            print("".join([
-                module_data['endpoint'], " " * (longest_endpoint - len(module_data['endpoint'])), " | ",
-                module_data['module_name'], " " * (longest_module_name - len(module_data['module_name'])), " | ",
-                "N/A", " " * (longest_option_name - len("N/A")), " | ",
-                '   ', " | ",
-                '      ', " | ",
-                determine_state(module, module_data['endpoint'], module_data['module_name'], 'N/A', None, None),
-            ]))
+            print(
+                "".join(
+                    [
+                        module_data['endpoint'],
+                        " " * (longest_endpoint - len(module_data['endpoint'])),
+                        " | ",
+                        module_data['module_name'],
+                        " " * (longest_module_name - len(module_data['module_name'])),
+                        " | ",
+                        "N/A",
+                        " " * (longest_option_name - len("N/A")),
+                        " | ",
+                        '   ',
+                        " | ",
+                        '      ',
+                        " | ",
+                        determine_state(module, module_data['endpoint'], module_data['module_name'], 'N/A', None, None),
+                    ]
+                )
+            )
 
     if return_value != 0:
         raise Exception("One or more failures caused issues")

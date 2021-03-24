@@ -47,9 +47,11 @@ def handle_error(request, status=404, **kwargs):
     # browsable error page for browser clients or a simple JSON response for any
     # other clients.
     if request.path.startswith('/api/'):
+
         class APIException(exceptions.APIException):
             status_code = status
             default_detail = kwargs['content']
+
         api_error_view = ApiErrorView.as_view(exception_class=APIException)
         response = api_error_view(request)
         if hasattr(response, 'render'):

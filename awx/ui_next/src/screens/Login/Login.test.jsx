@@ -24,7 +24,6 @@ describe('<Login />', () => {
   async function findChildren(wrapper) {
     const [
       awxLogin,
-      loginPage,
       loginForm,
       usernameInput,
       passwordInput,
@@ -32,7 +31,6 @@ describe('<Login />', () => {
       loginHeaderLogo,
     ] = await Promise.all([
       waitForElement(wrapper, 'AWXLogin', el => el.length === 1),
-      waitForElement(wrapper, 'LoginPage', el => el.length === 1),
       waitForElement(wrapper, 'LoginForm', el => el.length === 1),
       waitForElement(
         wrapper,
@@ -49,7 +47,6 @@ describe('<Login />', () => {
     ]);
     return {
       awxLogin,
-      loginPage,
       loginForm,
       usernameInput,
       passwordInput,
@@ -61,7 +58,8 @@ describe('<Login />', () => {
   beforeEach(() => {
     RootAPI.read.mockResolvedValue({
       data: {
-        custom_login_info: '',
+        custom_login_info:
+          '<div id="custom-button" onmouseover="alert()">TEST</div>',
         custom_logo: 'images/foo.jpg',
       },
     });
@@ -111,6 +109,16 @@ describe('<Login />', () => {
     const { loginHeaderLogo } = await findChildren(wrapper);
     const { alt, src } = loginHeaderLogo.props();
     expect([alt, src]).toEqual(['AWX', '/static/media/logo-login.svg']);
+    done();
+  });
+
+  test('custom login info handled correctly', async done => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
+    });
+    await findChildren(wrapper);
+    expect(wrapper.find('footer').html()).toContain('<div>TEST</div>');
     done();
   });
 

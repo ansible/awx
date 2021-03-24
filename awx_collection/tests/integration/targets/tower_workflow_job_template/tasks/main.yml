@@ -78,7 +78,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: present
   register: result
@@ -93,7 +92,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: present
   register: result
@@ -108,7 +106,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: present
     survey_enabled: true
@@ -244,6 +241,52 @@
     that:
       - "result is changed"
 
+- name: Copy a workflow job template
+  tower_workflow_job_template:
+    name: "copy_{{ wfjt_name }}"
+    copy_from: "{{ wfjt_name }}"
+    organization: Default
+  register: result
+
+- assert:
+    that:
+      - result.copied
+
+- name: Fail Remove "on start" webhook notification from copied workflow job template
+  tower_workflow_job_template:
+    name: "copy_{{ wfjt_name }}"
+    notification_templates_started:
+      - "{{ email_not }}123"
+  register: remove_copied_workflow_node
+  ignore_errors: true
+
+- assert:
+    that:
+      - "remove_copied_workflow_node is failed"
+      - "remove_copied_workflow_node is not changed"
+      - "'returned 0 items' in remove_copied_workflow_node.msg"
+
+- name: Remove "on start" webhook notification from copied workflow job template
+  tower_workflow_job_template:
+    name: "copy_{{ wfjt_name }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete copied workflow job template
+  tower_workflow_job_template:
+    name: "copy_{{ wfjt_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Remove "on start" webhook notification from workflow job template
   tower_workflow_job_template:
     name: "{{ wfjt_name }}"
@@ -287,7 +330,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: absent
   register: result
@@ -302,7 +344,6 @@
     project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credential: Demo Credential
     job_type: run
     state: absent
   register: result

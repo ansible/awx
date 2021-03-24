@@ -6,6 +6,7 @@ import {
   WorkflowJobTemplatesAPI,
   OrganizationsAPI,
   LabelsAPI,
+  ExecutionEnvironmentsAPI,
 } from '../../../api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
@@ -14,12 +15,19 @@ jest.mock('../../../api/models/WorkflowJobTemplates');
 jest.mock('../../../api/models/Labels');
 jest.mock('../../../api/models/Organizations');
 jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/ExecutionEnvironments');
 
 const mockTemplate = {
   id: 6,
   name: 'Foo',
   description: 'Foo description',
   summary_fields: {
+    execution_environment: {
+      id: 1,
+      name: 'Default EE',
+      description: '',
+      image: 'quay.io/ansible/awx-ee',
+    },
     inventory: { id: 1, name: 'Inventory 1' },
     organization: { id: 1, name: 'Organization 1' },
     labels: {
@@ -32,7 +40,18 @@ const mockTemplate = {
   scm_branch: 'devel',
   limit: '5000',
   variables: '---',
+  execution_environment: 1,
 };
+
+const mockExecutionEnvironment = [
+  {
+    id: 1,
+    name: 'Default EE',
+    description: '',
+    image: 'quay.io/ansible/awx-ee',
+  },
+];
+
 describe('<WorkflowJobTemplateEdit/>', () => {
   let wrapper;
   let history;
@@ -48,6 +67,12 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       },
     });
     OrganizationsAPI.read.mockResolvedValue({ results: [{ id: 1 }] });
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: {
+        results: mockExecutionEnvironment,
+        count: 1,
+      },
+    });
 
     await act(async () => {
       history = createMemoryHistory({
@@ -100,6 +125,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         .find('LabelSelect')
         .find('SelectToggle')
         .simulate('click');
+      wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')(null);
     });
 
     wrapper.update();
@@ -142,6 +168,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       ask_limit_on_launch: false,
       ask_scm_branch_on_launch: false,
       ask_variables_on_launch: false,
+      execution_environment: null,
     });
     wrapper.update();
     await expect(WorkflowJobTemplatesAPI.disassociateLabel).toBeCalledWith(6, {

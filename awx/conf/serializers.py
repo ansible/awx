@@ -30,15 +30,9 @@ class SettingSerializer(BaseSerializer):
 class SettingCategorySerializer(serializers.Serializer):
     """Serialize setting category """
 
-    url = serializers.CharField(
-        read_only=True,
-    )
-    slug = serializers.CharField(
-        read_only=True,
-    )
-    name = serializers.CharField(
-        read_only=True,
-    )
+    url = serializers.CharField(read_only=True)
+    slug = serializers.CharField(read_only=True)
+    name = serializers.CharField(read_only=True)
 
 
 class SettingFieldMixin(object):

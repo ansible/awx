@@ -15,7 +15,7 @@ from awx.main.models import (
 )
 from rest_framework.test import APIRequestFactory
 
-#DRF
+# DRF
 from rest_framework import serializers
 
 
@@ -45,22 +45,25 @@ def jobs(mocker):
     return [Job(id=x, name='job-%d' % x) for x in range(0, 25)]
 
 
-@mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x,y: {})
-@mock.patch('awx.api.serializers.JobOptionsSerializer.get_related', lambda x,y: {})
-class TestJobTemplateSerializerGetRelated():
-    @pytest.mark.parametrize("related_resource_name", [
-        'jobs',
-        'schedules',
-        'activity_stream',
-        'launch',
-        'webhook_key',
-        'notification_templates_started',
-        'notification_templates_success',
-        'notification_templates_error',
-        'survey_spec',
-        'labels',
-        'callback',
-    ])
+@mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x, y: {})
+@mock.patch('awx.api.serializers.JobOptionsSerializer.get_related', lambda x, y: {})
+class TestJobTemplateSerializerGetRelated:
+    @pytest.mark.parametrize(
+        "related_resource_name",
+        [
+            'jobs',
+            'schedules',
+            'activity_stream',
+            'launch',
+            'webhook_key',
+            'notification_templates_started',
+            'notification_templates_success',
+            'notification_templates_error',
+            'survey_spec',
+            'labels',
+            'callback',
+        ],
+    )
     def test_get_related(self, test_get_related, job_template, related_resource_name):
         test_get_related(JobTemplateSerializer, job_template, 'job_templates', related_resource_name)
 
@@ -70,7 +73,7 @@ class TestJobTemplateSerializerGetRelated():
         assert 'callback' not in related
 
 
-class TestJobTemplateSerializerGetSummaryFields():
+class TestJobTemplateSerializerGetSummaryFields:
     def test_survey_spec_exists(self, test_get_summary_fields, mocker, job_template):
         job_template.survey_spec = {'name': 'blah', 'description': 'blah blah'}
         with mocker.patch.object(JobTemplateSerializer, '_recent_jobs') as mock_rj:

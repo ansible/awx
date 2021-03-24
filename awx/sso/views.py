@@ -37,7 +37,6 @@ sso_inactive = BaseRedirectView.as_view()
 
 
 class CompleteView(BaseRedirectView):
-
     def dispatch(self, request, *args, **kwargs):
         response = super(CompleteView, self).dispatch(request, *args, **kwargs)
         if self.request.user and self.request.user.is_authenticated:
@@ -54,16 +53,12 @@ sso_complete = CompleteView.as_view()
 
 
 class MetadataView(View):
-
     def get(self, request, *args, **kwargs):
         from social_django.utils import load_backend, load_strategy
-        complete_url = reverse('social:complete', args=('saml', ))
+
+        complete_url = reverse('social:complete', args=('saml',))
         try:
-            saml_backend = load_backend(
-                load_strategy(request),
-                'saml',
-                redirect_uri=complete_url,
-            )
+            saml_backend = load_backend(load_strategy(request), 'saml', redirect_uri=complete_url)
             metadata, errors = saml_backend.generate_metadata_xml()
         except Exception as e:
             logger.exception('unable to generate SAML metadata')

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 
@@ -13,7 +12,10 @@ function OrganizationAdd() {
 
   const handleSubmit = async (values, groupsToAssociate) => {
     try {
-      const { data: response } = await OrganizationsAPI.create(values);
+      const { data: response } = await OrganizationsAPI.create({
+        ...values,
+        default_environment: values.default_environment?.id,
+      });
       await Promise.all(
         groupsToAssociate
           .map(id => OrganizationsAPI.associateInstanceGroup(response.id, id))
@@ -47,10 +49,6 @@ function OrganizationAdd() {
     </PageSection>
   );
 }
-
-OrganizationAdd.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
-};
 
 export { OrganizationAdd as _OrganizationAdd };
 export default OrganizationAdd;

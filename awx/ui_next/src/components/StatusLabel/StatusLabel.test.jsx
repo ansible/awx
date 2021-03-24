@@ -9,6 +9,7 @@ describe('StatusLabel', () => {
     expect(wrapper.find('CheckCircleIcon')).toHaveLength(1);
     expect(wrapper.find('Label').prop('color')).toEqual('green');
     expect(wrapper.text()).toEqual('Success');
+    expect(wrapper.find('Tooltip')).toHaveLength(0);
   });
 
   test('should render failed', () => {
@@ -57,5 +58,17 @@ describe('StatusLabel', () => {
     expect(wrapper.find('ExclamationTriangleIcon')).toHaveLength(1);
     expect(wrapper.find('Label').prop('color')).toEqual('orange');
     expect(wrapper.text()).toEqual('Canceled');
+  });
+
+  test('should render tooltip', () => {
+    const wrapper = mount(
+      <StatusLabel tooltipContent="Foo" status="success" />
+    );
+    expect(wrapper).toHaveLength(1);
+    expect(wrapper.find('CheckCircleIcon')).toHaveLength(1);
+    expect(wrapper.find('Label').prop('color')).toEqual('green');
+    expect(wrapper.text()).toEqual('Success');
+    expect(wrapper.find('Tooltip')).toHaveLength(1);
+    expect(wrapper.find('Tooltip').prop('content')).toEqual('Foo');
   });
 });

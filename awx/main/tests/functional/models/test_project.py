@@ -37,12 +37,7 @@ def test_sensitive_change_triggers_update(project):
 @pytest.mark.django_db
 def test_local_path_autoset(organization):
     with mock.patch.object(Project, "update"):
-        p = Project.objects.create(
-            name="test-proj",
-            organization=organization,
-            scm_url='localhost',
-            scm_type='git'
-        )
+        p = Project.objects.create(name="test-proj", organization=organization, scm_url='localhost', scm_type='git')
     assert p.local_path == f'_{p.id}__test_proj'
 
 
@@ -66,19 +61,12 @@ def test_galaxy_credentials(project):
     galaxy.save()
     for i in range(5):
         cred = Credential.objects.create(
-            name=f'Ansible Galaxy {i + 1}',
-            organization=org,
-            credential_type=galaxy,
-            inputs={
-                'url': 'https://galaxy.ansible.com/'
-            }
+            name=f'Ansible Galaxy {i + 1}', organization=org, credential_type=galaxy, inputs={'url': 'https://galaxy.ansible.com/'}
         )
         cred.save()
         org.galaxy_credentials.add(cred)
 
-    assert [
-        cred.name for cred in org.galaxy_credentials.all()
-    ] == [
+    assert [cred.name for cred in org.galaxy_credentials.all()] == [
         'Ansible Galaxy 1',
         'Ansible Galaxy 2',
         'Ansible Galaxy 3',

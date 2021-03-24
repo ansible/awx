@@ -20,9 +20,11 @@ class Team(HasCreate, base.Base):
             self.related.users.post(user)
 
     def payload(self, organization, **kwargs):
-        payload = PseudoNamespace(name=kwargs.get('name') or 'Team - {}'.format(random_title()),
-                                  description=kwargs.get('description') or random_title(10),
-                                  organization=organization.id)
+        payload = PseudoNamespace(
+            name=kwargs.get('name') or 'Team - {}'.format(random_title()),
+            description=kwargs.get('description') or random_title(10),
+            organization=organization.id,
+        )
         return payload
 
     def create_payload(self, name='', description='', organization=Organization, **kwargs):
@@ -36,8 +38,7 @@ class Team(HasCreate, base.Base):
         return self.update_identity(Teams(self.connection).post(payload))
 
 
-page.register_page([resources.team,
-                    (resources.teams, 'post')], Team)
+page.register_page([resources.team, (resources.teams, 'post')], Team)
 
 
 class Teams(page.PageList, Team):
@@ -45,6 +46,4 @@ class Teams(page.PageList, Team):
     pass
 
 
-page.register_page([resources.teams,
-                    resources.credential_owner_teams,
-                    resources.related_teams], Teams)
+page.register_page([resources.teams, resources.credential_owner_teams, resources.related_teams], Teams)

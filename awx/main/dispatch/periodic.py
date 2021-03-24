@@ -14,12 +14,8 @@ logger = logging.getLogger('awx.main.dispatch.periodic')
 
 
 class Scheduler(Scheduler):
-
     def run_continuously(self):
-        idle_seconds = max(
-            1,
-            min(self.jobs).period.total_seconds() / 2
-        )
+        idle_seconds = max(1, min(self.jobs).period.total_seconds() / 2)
 
         def run():
             ppid = os.getppid()
@@ -39,9 +35,7 @@ class Scheduler(Scheduler):
                     GuidMiddleware.set_guid(GuidMiddleware._generate_guid())
                     self.run_pending()
                 except Exception:
-                    logger.exception(
-                        'encountered an error while scheduling periodic tasks'
-                    )
+                    logger.exception('encountered an error while scheduling periodic tasks')
                 time.sleep(idle_seconds)
 
         process = Process(target=run)

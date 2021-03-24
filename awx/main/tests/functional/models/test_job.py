@@ -1,19 +1,11 @@
 import pytest
 
-from awx.main.models import (
-    JobTemplate, Job, JobHostSummary,
-    WorkflowJob, Inventory, Project, Organization
-)
+from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob, Inventory, Project, Organization
 
 
 @pytest.mark.django_db
 def test_awx_virtualenv_from_settings(inventory, project, machine_credential):
-    jt = JobTemplate.objects.create(
-        name='my-jt',
-        inventory=inventory,
-        project=project,
-        playbook='helloworld.yml'
-    )
+    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
     jt.credentials.add(machine_credential)
     job = jt.create_unified_job()
     assert job.ansible_virtualenv_path == '/var/lib/awx/venv/ansible'
@@ -21,10 +13,7 @@ def test_awx_virtualenv_from_settings(inventory, project, machine_credential):
 
 @pytest.mark.django_db
 def test_prevent_slicing():
-    jt = JobTemplate.objects.create(
-        name='foo',
-        job_slice_count=4
-    )
+    jt = JobTemplate.objects.create(name='foo', job_slice_count=4)
     job = jt.create_unified_job(_prevent_slicing=True)
     assert job.job_slice_count == 1
     assert job.job_slice_number == 0
@@ -33,13 +22,7 @@ def test_prevent_slicing():
 
 @pytest.mark.django_db
 def test_awx_custom_virtualenv(inventory, project, machine_credential, organization):
-    jt = JobTemplate.objects.create(
-        name='my-jt',
-        inventory=inventory,
-        project=project,
-        playbook='helloworld.yml',
-        organization=organization
-    )
+    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml', organization=organization)
     jt.credentials.add(machine_credential)
     job = jt.create_unified_job()
 
@@ -70,10 +53,7 @@ def test_awx_custom_virtualenv_without_jt(project):
 @pytest.mark.django_db
 def test_job_host_summary_representation(host):
     job = Job.objects.create(name='foo')
-    jhs = JobHostSummary.objects.create(
-        host=host, job=job,
-        changed=1, dark=2, failures=3, ignored=4, ok=5, processed=6, rescued=7, skipped=8
-    )
+    jhs = JobHostSummary.objects.create(host=host, job=job, changed=1, dark=2, failures=3, ignored=4, ok=5, processed=6, rescued=7, skipped=8)
     assert 'single-host changed=1 dark=2 failures=3 ignored=4 ok=5 processed=6 rescued=7 skipped=8' == str(jhs)
 
     # Representation should be robust to deleted related items
@@ -88,10 +68,7 @@ def test_jt_organization_follows_project():
     org2 = Organization.objects.create(name='foo2')
     project1 = Project.objects.create(name='proj1', organization=org1)
     project2 = Project.objects.create(name='proj2', organization=org2)
-    jt = JobTemplate.objects.create(
-        name='foo', playbook='helloworld.yml',
-        project=project1
-    )
+    jt = JobTemplate.objects.create(name='foo', playbook='helloworld.yml', project=project1)
     assert jt.organization == org1
     jt.project = project2
     jt.save()
@@ -100,7 +77,6 @@ def test_jt_organization_follows_project():
 
 @pytest.mark.django_db
 class TestSlicingModels:
-
     def test_slice_workflow_spawn(self, slice_jt_factory):
         slice_jt = slice_jt_factory(3)
         job = slice_jt.create_unified_job()

@@ -23,12 +23,14 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
         <Button
           aria-label="Confirm delete"
           onClick={[Function]}
+          ouiaId="delete-role-modal-delete-button"
           variant="danger"
         >
           Delete
         </Button>,
         <Button
           onClick={[Function]}
+          ouiaId="delete-role-modal-cancel-button"
           variant="link"
         >
           Cancel
@@ -50,12 +52,14 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
             <Button
               aria-label="Confirm delete"
               onClick={[Function]}
+              ouiaId="delete-role-modal-delete-button"
               variant="danger"
             >
               Delete
             </Button>,
             <Button
               onClick={[Function]}
+              ouiaId="delete-role-modal-cancel-button"
               variant="link"
             >
               Cancel
@@ -74,12 +78,14 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               <Button
                 aria-label="Confirm delete"
                 onClick={[Function]}
+                ouiaId="delete-role-modal-delete-button"
                 variant="danger"
               >
                 Delete
               </Button>,
               <Button
                 onClick={[Function]}
+                ouiaId="delete-role-modal-cancel-button"
                 variant="link"
               >
                 Cancel
@@ -203,7 +209,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           aria-disabled="false"
                           aria-label="Confirm delete"
                           class="pf-c-button pf-m-danger"
-                          data-ouia-component-id="OUIA-Generated-Button-danger-1"
+                          data-ouia-component-id="delete-role-modal-delete-button"
                           data-ouia-component-type="PF4/Button"
                           data-ouia-safe="true"
                           type="button"
@@ -213,7 +219,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                         <button
                           aria-disabled="false"
                           class="pf-c-button pf-m-link"
-                          data-ouia-component-id="OUIA-Generated-Button-link-1"
+                          data-ouia-component-id="delete-role-modal-cancel-button"
                           data-ouia-component-type="PF4/Button"
                           data-ouia-safe="true"
                           type="button"
@@ -233,12 +239,14 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   <Button
                     aria-label="Confirm delete"
                     onClick={[Function]}
+                    ouiaId="delete-role-modal-delete-button"
                     variant="danger"
                   >
                     Delete
                   </Button>,
                   <Button
                     onClick={[Function]}
+                    ouiaId="delete-role-modal-cancel-button"
                     variant="link"
                   >
                     Cancel
@@ -498,13 +506,14 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                 aria-label="Confirm delete"
                                 key="delete"
                                 onClick={[Function]}
+                                ouiaId="delete-role-modal-delete-button"
                                 variant="danger"
                               >
                                 <button
                                   aria-disabled={false}
                                   aria-label="Confirm delete"
                                   className="pf-c-button pf-m-danger"
-                                  data-ouia-component-id="OUIA-Generated-Button-danger-1"
+                                  data-ouia-component-id="delete-role-modal-delete-button"
                                   data-ouia-component-type="PF4/Button"
                                   data-ouia-safe={true}
                                   disabled={false}
@@ -518,13 +527,14 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                               <Button
                                 key="cancel"
                                 onClick={[Function]}
+                                ouiaId="delete-role-modal-cancel-button"
                                 variant="link"
                               >
                                 <button
                                   aria-disabled={false}
                                   aria-label={null}
                                   className="pf-c-button pf-m-link"
-                                  data-ouia-component-id="OUIA-Generated-Button-link-1"
+                                  data-ouia-component-id="delete-role-modal-cancel-button"
                                   data-ouia-component-type="PF4/Button"
                                   data-ouia-safe={true}
                                   disabled={false}

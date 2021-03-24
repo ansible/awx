@@ -132,6 +132,7 @@ function Lookup(props) {
         onClose={closeModal}
         actions={[
           <Button
+            ouiaId="modal-select-button"
             key="select"
             variant="primary"
             onClick={save}
@@ -140,6 +141,7 @@ function Lookup(props) {
             {i18n._(t`Select`)}
           </Button>,
           <Button
+            ouiaId="modal-cancel-button"
             key="cancel"
             variant="link"
             onClick={closeModal}

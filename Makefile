@@ -20,11 +20,12 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 COMPOSE_HOST ?= $(shell hostname)
 
 VENV_BASE ?= /var/lib/awx/venv/
-COLLECTION_BASE ?= /var/lib/awx/vendor/awx_ansible_collections
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
 DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
+DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
+
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio,pycurl
@@ -60,11 +61,11 @@ WHEEL_FILE ?= $(WHEEL_NAME)-py2-none-any.whl
 I18N_FLAG_FILE = .i18n_built
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
-	develop refresh adduser migrate dbchange runserver \
+	develop refresh adduser migrate dbchange \
 	receiver test test_unit test_coverage coverage_html \
-	dev_build release_build release_clean sdist \
-	ui-docker-machine ui-docker ui-release ui-devel \
-	ui-test ui-deps ui-test-ci VERSION
+	dev_build release_build sdist \
+	ui-release ui-devel \
+	VERSION docker-compose-sources
 
 clean-tmp:
 	rm -rf tmp/
@@ -113,31 +114,7 @@ guard-%:
 	    exit 1; \
 	fi
 
-virtualenv: virtualenv_ansible virtualenv_awx
-
-# virtualenv_* targets do not use --system-site-packages to prevent bugs installing packages
-# but Ansible venvs are expected to have this, so that must be done after venv creation
-virtualenv_ansible:
-	if [ "$(VENV_BASE)" ]; then \
-		if [ ! -d "$(VENV_BASE)" ]; then \
-			mkdir $(VENV_BASE); \
-		fi; \
-		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv -p python $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
-		fi; \
-	fi
-
-virtualenv_ansible_py3:
-	if [ "$(VENV_BASE)" ]; then \
-		if [ ! -d "$(VENV_BASE)" ]; then \
-			mkdir $(VENV_BASE); \
-		fi; \
-		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv -p $(PYTHON) $(VENV_BASE)/ansible; \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
-		fi; \
-	fi
+virtualenv: virtualenv_awx
 
 # flit is needed for offline install of certain packages, specifically ptyprocess
 # it is needed for setup, but not always recognized as a setup dependency
@@ -153,32 +130,6 @@ virtualenv_awx:
 		fi; \
 	fi
 
-# --ignore-install flag is not used because *.txt files should specify exact versions
-requirements_ansible: virtualenv_ansible
-	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) -r /dev/stdin ; \
-	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
-	fi
-	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
-	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
-
-requirements_ansible_py3: virtualenv_ansible_py3
-	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) -r /dev/stdin ; \
-	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
-	fi
-	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
-	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
-
-requirements_ansible_dev:
-	if [ "$(VENV_BASE)" ]; then \
-		$(VENV_BASE)/ansible/bin/pip install pytest mock; \
-	fi
-
 # Install third-party requirements needed for AWX's environment.
 # this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
@@ -192,17 +143,9 @@ requirements_awx: virtualenv_awx
 requirements_awx_dev:
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt
 
-requirements_collections:
-	mkdir -p $(COLLECTION_BASE)
-	n=0; \
-	until [ "$$n" -ge 5 ]; do \
-	    ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE) && break; \
-	    n=$$((n+1)); \
-	done
+requirements: requirements_awx
 
-requirements: requirements_ansible requirements_awx requirements_collections
-
-requirements_dev: requirements_awx requirements_ansible_py3 requirements_awx_dev requirements_ansible_dev
+requirements_dev: requirements_awx requirements_awx_dev
 
 requirements_test: requirements
 
@@ -328,20 +271,13 @@ jupyter:
 reports:
 	mkdir -p $@
 
-pep8: reports
-	@(set -o pipefail && $@ | tee reports/$@.report)
+black: reports
+	command -v black >/dev/null 2>&1 || { echo "could not find black on your PATH, you may need to \`pip install black\`, or set AWX_IGNORE_BLACK=1" && exit 1; }
+	(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
 
-flake8: reports
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	(set -o pipefail && $@ | tee reports/$@.report)
-
-pyflakes: reports
-	@(set -o pipefail && $@ | tee reports/$@.report)
-
-pylint: reports
-	@(set -o pipefail && $@ | reports/$@.report)
+.git/hooks/pre-commit:
+	echo "[ -z \$$AWX_IGNORE_BLACK ] && (black --check \`git diff --cached --name-only | grep -E '\.py$\'\` || (echo 'To fix this, run \`make black\` to auto-format your code prior to commit, or set AWX_IGNORE_BLACK=1' && exit 1))" > .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit
 
 genschema: reports
 	$(MAKE) swagger PYTEST_ARGS="--genschema --create-db "
@@ -353,7 +289,7 @@ swagger: reports
 	fi; \
 	(set -o pipefail && py.test $(PYTEST_ARGS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
 
-check: flake8 pep8 # pyflakes pylint
+check: black
 
 awx-link:
 	[ -d "/awx_devel/awx.egg-info" ] || python3 /awx_devel/setup.py egg_info_dev
@@ -381,17 +317,15 @@ test_collection:
 	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
+	fi && \
+	pip install ansible && \
 	py.test $(COLLECTION_TEST_DIRS) -v
 	# The python path needs to be modified so that the tests can find Ansible within the container
 	# First we will use anything expility set as PYTHONPATH
 	# Second we will load any libraries out of the virtualenv (if it's unspecified that should be ok because python should not load out of an empty directory)
 	# Finally we will add the system path so that the tests can find the ansible libraries
 
-flake8_collection:
-	flake8 awx_collection/  # Different settings, in main exclude list
-
-test_collection_all: test_collection flake8_collection
+test_collection_all: test_collection
 
 # WARNING: symlinking a collection is fundamentally unstable
 # this is for rapid development iteration with playbooks, do not use with other test targets
@@ -443,39 +377,6 @@ bulk_data:
 	fi; \
 	$(PYTHON) tools/data_generators/rbac_dummy_data_generator.py --preset=$(DATA_GEN_PRESET)
 
-# l10n TASKS
-# --------------------------------------
-
-# check for UI po files
-HAVE_PO := $(shell ls awx/ui/po/*.po 2>/dev/null)
-check-po:
-ifdef HAVE_PO
-	# Should be 'Language: zh-CN' but not 'Language: zh_CN' in zh_CN.po
-	for po in awx/ui/po/*.po ; do \
-	    echo $$po; \
-	    mo="awx/ui/po/`basename $$po .po`.mo"; \
-	    msgfmt --check --verbose $$po -o $$mo; \
-	    if test "$$?" -ne 0 ; then \
-	        exit -1; \
-	    fi; \
-	    rm $$mo; \
-	    name=`echo "$$po" | grep '-'`; \
-	    if test "x$$name" != x ; then \
-	        right_name=`echo $$language | sed -e 's/-/_/'`; \
-	        echo "ERROR: WRONG $$name CORRECTION: $$right_name"; \
-	        exit -1; \
-	    fi; \
-	    language=`grep '^"Language:' "$$po" | grep '_'`; \
-	    if test "x$$language" != x ; then \
-	        right_language=`echo $$language | sed -e 's/_/-/'`; \
-	        echo "ERROR: WRONG $$language CORRECTION: $$right_language in $$po"; \
-	        exit -1; \
-	    fi; \
-	done;
-else
-	@echo No PO files
-endif
-
 
 # UI TASKS
 # --------------------------------------
@@ -488,16 +389,13 @@ clean-ui:
 	rm -rf awx/ui_next/build
 	rm -rf awx/ui_next/src/locales/_build
 	rm -rf $(UI_BUILD_FLAG_FILE)
-	git checkout awx/ui_next/src/locales
 
 awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn --ignore-scripts install
 
 $(UI_BUILD_FLAG_FILE):
-	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run build
-	git checkout awx/ui_next/src/locales
 	mkdir -p awx/public/static/css
 	mkdir -p awx/public/static/js
 	mkdir -p awx/public/static/media
@@ -510,6 +408,12 @@ ui-release: awx/ui_next/node_modules $(UI_BUILD_FLAG_FILE)
 
 ui-devel: awx/ui_next/node_modules
 	@$(MAKE) -B $(UI_BUILD_FLAG_FILE)
+
+ui-devel-instrumented: awx/ui_next/node_modules
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run start-instrumented
+
+ui-devel-test: awx/ui_next/node_modules
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run start
 
 ui-zuul-lint-and-test:
 	$(NPM_BIN) --prefix awx/ui_next install
@@ -559,31 +463,30 @@ docker-auth:
 awx/projects:
 	@mkdir -p $@
 
-# Docker isolated rampart
-docker-compose-isolated: awx/projects
-	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
-
 COMPOSE_UP_OPTS ?=
+CLUSTER_NODE_COUNT ?= 1
 
-# Docker Compose Development environment
-docker-compose: docker-auth awx/projects
-	CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml $(COMPOSE_UP_OPTS) up --no-recreate awx
+docker-compose-sources: .git/hooks/pre-commit
+	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
+	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
+	    -e awx_image_tag=$(COMPOSE_TAG) \
+	    -e cluster_node_count=$(CLUSTER_NODE_COUNT)
 
-docker-compose-cluster: docker-auth awx/projects
-	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml up
+docker-compose: docker-auth awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up
 
-docker-compose-credential-plugins: docker-auth awx/projects
+docker-compose-credential-plugins: docker-auth awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
-	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx_1
 
-docker-compose-test: docker-auth awx/projects
-	cd tools && CURRENT_UID=$(shell id -u) OS="$(shell docker info | grep 'Operating System')" TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /bin/bash
+docker-compose-test: docker-auth awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /bin/bash
 
-docker-compose-runtest: awx/projects
-	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh
+docker-compose-runtest: awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /start_tests.sh
 
-docker-compose-build-swagger: awx/projects
-	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports --no-deps awx /start_tests.sh swagger
+docker-compose-build-swagger: awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 /start_tests.sh swagger
 
 detect-schema-change: genschema
 	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
@@ -591,24 +494,14 @@ detect-schema-change: genschema
 	diff -u -b reference-schema.json schema.json
 
 docker-compose-clean: awx/projects
-	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose rm -sf
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml rm -sf
 
 # Base development image build
 docker-compose-build:
-	ansible-playbook installer/dockerfile.yml -e build_dev=True
-	docker build -t ansible/awx_devel \
+	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True
+	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
-	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
-	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
-
-# For use when developing on "isolated" AWX deployments
-docker-compose-isolated-build: docker-compose-build
-	docker build -t ansible/awx_isolated \
-	    --build-arg BUILDKIT_INLINE_CACHE=1 \
-	    -f tools/docker-isolated/Dockerfile .
-	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
-	#docker push $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 
 docker-clean:
 	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq),docker stop $(container_id); docker rm -f $(container_id);)
@@ -620,11 +513,11 @@ docker-clean-volumes: docker-compose-clean
 docker-refresh: docker-clean docker-compose
 
 # Docker Development Environment with Elastic Stack Connected
-docker-compose-elk: docker-auth awx/projects
-	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+docker-compose-elk: docker-auth awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
-docker-compose-cluster-elk: docker-auth awx/projects
-	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+docker-compose-cluster-elk: docker-auth awx/projects docker-compose-sources
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 prometheus:
 	docker run -u0 --net=tools_default --link=`docker ps | egrep -o "tools_awx(_run)?_([^ ]+)?"`:awxweb --volume `pwd`/tools/prometheus:/prometheus --name prometheus -d -p 0.0.0.0:9090:9090 prom/prometheus --web.enable-lifecycle --config.file=/prometheus/prometheus.yml
@@ -643,11 +536,11 @@ psql-container:
 VERSION:
 	@echo "awx: $(VERSION)"
 
-Dockerfile: installer/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook installer/dockerfile.yml
+Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
+	ansible-playbook tools/ansible/dockerfile.yml
 
-Dockerfile.kube-dev: installer/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook installer/dockerfile.yml \
+Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
+	ansible-playbook tools/ansible/dockerfile.yml \
 	    -e dockerfile_name=Dockerfile.kube-dev \
 	    -e kube_dev=True \
 	    -e template_dest=_build_kube_dev
@@ -656,3 +549,20 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	docker build -f Dockerfile.kube-dev \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
+
+
+# Translation TASKS
+# --------------------------------------
+
+# generate UI .pot
+pot: $(UI_BUILD_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-template
+
+# generate API django .pot .po
+LANG = "en-us"
+messages:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot

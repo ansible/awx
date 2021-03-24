@@ -26,28 +26,57 @@ function Job({ i18n, setBreadcrumb }) {
   const { id, type } = useParams();
   const match = useRouteMatch();
 
-  const { isLoading, error, request: fetchJob, result } = useRequest(
+  const {
+    isLoading,
+    error,
+    request: fetchJob,
+    result: { jobDetail, eventRelatedSearchableKeys, eventSearchableKeys },
+  } = useRequest(
     useCallback(async () => {
-      const { data } = await JobsAPI.readDetail(id, type);
+      let eventOptions = {};
+      const { data: jobDetailData } = await JobsAPI.readDetail(id, type);
+      if (jobDetailData.type !== 'workflow_job') {
+        const { data: jobEventOptions } = await JobsAPI.readEventOptions(
+          id,
+          type
+        );
+        eventOptions = jobEventOptions;
+      }
       if (
-        data?.summary_fields?.credentials?.find(cred => cred.kind === 'vault')
+        jobDetailData?.summary_fields?.credentials?.find(
+          cred => cred.kind === 'vault'
+        )
       ) {
         const {
           data: { results },
-        } = await JobsAPI.readCredentials(data.id, type);
+        } = await JobsAPI.readCredentials(jobDetailData.id, type);
 
-        data.summary_fields.credentials = results;
+        jobDetailData.summary_fields.credentials = results;
       }
-      setBreadcrumb(data);
-      return data;
-    }, [id, type, setBreadcrumb])
+      setBreadcrumb(jobDetailData);
+
+      return {
+        jobDetail: jobDetailData,
+        eventRelatedSearchableKeys: (
+          eventOptions?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        eventSearchableKeys: Object.keys(
+          eventOptions?.actions?.GET || {}
+        ).filter(key => eventOptions?.actions?.GET[key].filterable),
+      };
+    }, [id, type, setBreadcrumb]),
+    {
+      jobDetail: null,
+      eventRelatedSearchableKeys: [],
+      eventSearchableKeys: [],
+    }
   );
 
   useEffect(() => {
     fetchJob();
   }, [fetchJob]);
 
-  const job = useWsJob(result);
+  const job = useWsJob(jobDetail);
 
   const tabsArray = [
     {
@@ -112,7 +141,12 @@ function Job({ i18n, setBreadcrumb }) {
                 <JobDetail type={type} job={job} />
               </Route>,
               <Route key="output" path="/jobs/:type/:id/output">
-                <JobOutput type={type} job={job} />
+                <JobOutput
+                  type={type}
+                  job={job}
+                  eventRelatedSearchableKeys={eventRelatedSearchableKeys}
+                  eventSearchableKeys={eventSearchableKeys}
+                />
               </Route>,
               <Route key="not-found" path="*">
                 <ContentError isNotFound>

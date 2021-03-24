@@ -9,16 +9,16 @@ from awx.main.dispatch.worker import AWXConsumerRedis, CallbackBrokerWorker
 
 
 class Command(BaseCommand):
-    '''
+    """
     Save Job Callback receiver
     Runs as a management command and receives job save events.  It then hands
     them off to worker processors (see Worker) which writes them to the database
-    '''
+    """
+
     help = 'Launch the job callback receiver'
 
     def add_arguments(self, parser):
-        parser.add_argument('--status', dest='status', action='store_true',
-                            help='print the internal state of any running dispatchers')
+        parser.add_argument('--status', dest='status', action='store_true', help='print the internal state of any running dispatchers')
 
     def handle(self, *arg, **options):
         if options.get('status'):

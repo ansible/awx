@@ -15,6 +15,7 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
+import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import CredentialChip from '../../../components/CredentialChip';
 import { ProjectsAPI } from '../../../api';
 import { toTitleCase } from '../../../util/strings';
@@ -124,9 +125,10 @@ function ProjectDetail({ project, i18n }) {
           label={i18n._(t`Cache Timeout`)}
           value={`${scm_update_cache_timeout} ${i18n._(t`Seconds`)}`}
         />
-        <Detail
-          label={i18n._(t`Ansible Environment`)}
-          value={custom_virtualenv}
+        <ExecutionEnvironmentDetail
+          virtualEnvironment={custom_virtualenv}
+          executionEnvironment={summary_fields?.default_environment}
+          isDefaultEnvironment
         />
         <Config>
           {({ project_base_dir }) => (
@@ -137,6 +139,7 @@ function ProjectDetail({ project, i18n }) {
           )}
         </Config>
         <Detail label={i18n._(t`Playbook Directory`)} value={local_path} />
+
         <UserDateDetail
           label={i18n._(t`Created`)}
           date={created}
@@ -151,6 +154,7 @@ function ProjectDetail({ project, i18n }) {
       <CardActionsRow>
         {summary_fields.user_capabilities?.edit && (
           <Button
+            ouiaId="project-detail-edit-button"
             aria-label={i18n._(t`edit`)}
             component={Link}
             to={`/projects/${id}/edit`}

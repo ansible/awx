@@ -5,10 +5,7 @@ from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.conf.urls import include, url
 
-from awx.api.generics import (
-    LoggedLoginView,
-    LoggedLogoutView,
-)
+from awx.api.generics import LoggedLoginView, LoggedLogoutView
 from awx.api.views import (
     ApiRootView,
     ApiV2RootView,
@@ -33,15 +30,14 @@ from awx.api.views import (
     OAuth2ApplicationDetail,
 )
 
-from awx.api.views.metrics import (
-    MetricsView,
-)
+from awx.api.views.metrics import MetricsView
 
 from .organization import urls as organization_urls
 from .user import urls as user_urls
 from .project import urls as project_urls
 from .project_update import urls as project_update_urls
 from .inventory import urls as inventory_urls
+from .execution_environments import urls as execution_environment_urls
 from .team import urls as team_urls
 from .host import urls as host_urls
 from .group import urls as group_urls
@@ -106,6 +102,7 @@ v2_urls = [
     url(r'^schedules/', include(schedule_urls)),
     url(r'^organizations/', include(organization_urls)),
     url(r'^users/', include(user_urls)),
+    url(r'^execution_environments/', include(execution_environment_urls)),
     url(r'^projects/', include(project_urls)),
     url(r'^project_updates/', include(project_update_urls)),
     url(r'^teams/', include(team_urls)),
@@ -144,17 +141,11 @@ app_name = 'api'
 urlpatterns = [
     url(r'^$', ApiRootView.as_view(), name='api_root_view'),
     url(r'^(?P<version>(v2))/', include(v2_urls)),
-    url(r'^login/$', LoggedLoginView.as_view(
-        template_name='rest_framework/login.html',
-        extra_context={'inside_login_context': True}
-    ), name='login'),
-    url(r'^logout/$', LoggedLogoutView.as_view(
-        next_page='/api/', redirect_field_name='next'
-    ), name='logout'),
+    url(r'^login/$', LoggedLoginView.as_view(template_name='rest_framework/login.html', extra_context={'inside_login_context': True}), name='login'),
+    url(r'^logout/$', LoggedLogoutView.as_view(next_page='/api/', redirect_field_name='next'), name='logout'),
     url(r'^o/', include(oauth2_root_urls)),
 ]
 if settings.SETTINGS_MODULE == 'awx.settings.development':
     from awx.api.swagger import SwaggerSchemaView
-    urlpatterns += [
-        url(r'^swagger/$', SwaggerSchemaView.as_view(), name='swagger_view'),
-    ]
+
+    urlpatterns += [url(r'^swagger/$', SwaggerSchemaView.as_view(), name='swagger_view')]

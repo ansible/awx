@@ -1,3 +1,0 @@
----
-openshift_oc_config_file: "{{ kubernetes_base_path }}/.kube/config"
-openshift_oc_bin: "oc --kubeconfig={{ openshift_oc_config_file }}"

@@ -49,6 +49,7 @@ function JobTemplateEdit({ template }) {
       webhook_credential,
       webhook_key,
       webhook_url,
+      execution_environment,
       ...remainingValues
     } = values;
 
@@ -56,6 +57,7 @@ function JobTemplateEdit({ template }) {
     setIsLoading(true);
     remainingValues.project = values.project.id;
     remainingValues.webhook_credential = webhook_credential?.id || null;
+    remainingValues.execution_environment = execution_environment?.id || null;
     try {
       await JobTemplatesAPI.update(template.id, remainingValues);
       await Promise.all([

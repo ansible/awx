@@ -29,7 +29,7 @@ function Hosts({ i18n }) {
         [`/hosts/${host.id}/details`]: i18n._(t`Details`),
         [`/hosts/${host.id}/facts`]: i18n._(t`Facts`),
         [`/hosts/${host.id}/groups`]: i18n._(t`Groups`),
-        [`/hosts/${host.id}/completed_jobs`]: i18n._(t`Completed Jobs`),
+        [`/hosts/${host.id}/jobs`]: i18n._(t`Jobs`),
       });
     },
     [i18n]

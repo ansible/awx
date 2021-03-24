@@ -46,8 +46,4 @@ TeamEdit.propTypes = {
   team: PropTypes.shape().isRequired,
 };
 
-TeamEdit.contextTypes = {
-  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
-};
-
 export default TeamEdit;

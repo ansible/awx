@@ -65,8 +65,7 @@ def test_ig_associability(organization, default_instance_group, admin, system_au
     assert not auditor_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
     assert not omember_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
 
-    objects = job_template_factory('jt', organization=organization, project='p',
-                                   inventory='i', credential='c')
+    objects = job_template_factory('jt', organization=organization, project='p', inventory='i', credential='c')
     admin_access = InventoryAccess(admin)
     auditor_access = InventoryAccess(system_auditor)
     oadmin_access = InventoryAccess(org_admin)

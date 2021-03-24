@@ -68,7 +68,7 @@ function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
         <CheckboxListItem
           isSelected={!!(nodeResource && nodeResource.id === item.id)}
           itemId={item.id}
-          key={item.id}
+          key={`${item.id}-listItem`}
           name={item.name}
           label={item.name}
           onSelect={() => onUpdateNodeResource(item)}

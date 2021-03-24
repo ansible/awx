@@ -53,6 +53,7 @@ const ScreenHeader = ({ breadcrumbConfig, i18n, streamType }) => {
           <div>
             <Tooltip content={i18n._(t`View activity stream`)} position="top">
               <Button
+                ouiaId="activity-stream-button"
                 aria-label={i18n._(t`View activity stream`)}
                 variant="plain"
                 component={Link}

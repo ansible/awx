@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -117,9 +116,7 @@ def main():
     if not inventory_object:
         module.fail_json(msg='The specified inventory, {0}, was not found.'.format(lookup_data))
 
-    inventory_source_object = module.get_one('inventory_sources',
-                                             name_or_id=name,
-                                             data={'inventory': inventory_object['id']})
+    inventory_source_object = module.get_one('inventory_sources', name_or_id=name, data={'inventory': inventory_object['id']})
 
     if not inventory_source_object:
         module.fail_json(msg='The specified inventory source was not found.')
@@ -139,10 +136,7 @@ def main():
 
     # Invoke wait function
     module.wait_on_url(
-        url=inventory_source_update_results['json']['url'],
-        object_name=inventory_object,
-        object_type='inventory_update',
-        timeout=timeout, interval=interval
+        url=inventory_source_update_results['json']['url'], object_name=inventory_object, object_type='inventory_update', timeout=timeout, interval=interval
     )
 
     module.exit_json(**module.json_output)

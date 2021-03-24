@@ -11,7 +11,7 @@ import {
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
 
-function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n }) {
+function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
   const [isOpen, setIsOPen] = useState(false);
 
   const onToggle = () => {
@@ -54,6 +54,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n }) {
   if (isPrimary) {
     return (
       <Dropdown
+        ouiaId={ouiaId}
         position={DropdownPosition.left}
         direction={DropdownDirection.up}
         isOpen={isOpen}
@@ -62,7 +63,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n }) {
           <DropdownToggle
             toggleIndicator={null}
             onToggle={onToggle}
-            aria-label={i18n._(`relaunch jobs`)}
+            aria-label={i18n._(t`relaunch jobs`)}
             id="relaunch_jobs"
             isPrimary
           >
@@ -75,6 +76,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n }) {
 
   return (
     <Dropdown
+      ouiaId={ouiaId}
       isPlain
       position={DropdownPosition.right}
       isOpen={isOpen}
@@ -83,7 +85,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n }) {
         <DropdownToggle
           toggleIndicator={null}
           onToggle={onToggle}
-          aria-label={i18n._(`relaunch jobs`)}
+          aria-label={i18n._(t`relaunch jobs`)}
           id="relaunch_jobs"
         >
           <RocketIcon />

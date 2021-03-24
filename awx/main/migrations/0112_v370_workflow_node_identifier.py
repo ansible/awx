@@ -29,18 +29,29 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobnode',
             name='identifier',
-            field=models.CharField(blank=True, help_text='An identifier coresponding to the workflow job template node that this node was created from.', max_length=512),
+            field=models.CharField(
+                blank=True, help_text='An identifier coresponding to the workflow job template node that this node was created from.', max_length=512
+            ),
         ),
         migrations.AddField(
             model_name='workflowjobtemplatenode',
             name='identifier',
-            field=models.CharField(blank=True, null=True, help_text='An identifier for this node that is unique within its workflow. It is copied to workflow job nodes corresponding to this node.', max_length=512),
+            field=models.CharField(
+                blank=True,
+                null=True,
+                help_text='An identifier for this node that is unique within its workflow. It is copied to workflow job nodes corresponding to this node.',
+                max_length=512,
+            ),
         ),
         migrations.RunPython(create_uuid, migrations.RunPython.noop),  # this fixes the uuid4 issue
         migrations.AlterField(
             model_name='workflowjobtemplatenode',
             name='identifier',
-            field=models.CharField(default=uuid.uuid4, help_text='An identifier for this node that is unique within its workflow. It is copied to workflow job nodes corresponding to this node.', max_length=512),
+            field=models.CharField(
+                default=uuid.uuid4,
+                help_text='An identifier for this node that is unique within its workflow. It is copied to workflow job nodes corresponding to this node.',
+                max_length=512,
+            ),
         ),
         migrations.AlterUniqueTogether(
             name='workflowjobtemplatenode',

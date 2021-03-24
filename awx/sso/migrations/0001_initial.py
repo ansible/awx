@@ -7,9 +7,7 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
     operations = [
         migrations.CreateModel(
@@ -20,8 +18,5 @@ class Migration(migrations.Migration):
                 ('user', models.ForeignKey(related_name='enterprise_auth', on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
-        migrations.AlterUniqueTogether(
-            name='userenterpriseauth',
-            unique_together=set([('user', 'provider')]),
-        ),
+        migrations.AlterUniqueTogether(name='userenterpriseauth', unique_together=set([('user', 'provider')])),
     ]

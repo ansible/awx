@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -31,6 +30,14 @@ options:
       description:
         - Setting this option will change the existing name (looked up via the name field.
       required: False
+      type: str
+    copy_from:
+      description:
+        - Name or id to copy the credential from.
+        - This will copy an existing credential and change any parameters supplied.
+        - The new credential name will be the one provided in the name parameter.
+        - The organization parameter is not used in this, to facilitate copy from one organization to another.
+        - Provide the id or use the lookup plugin to provide the id if multiple credentials share the same name.
       type: str
     description:
       description:
@@ -274,6 +281,12 @@ EXAMPLES = '''
       vault_password: 'new_password'
       vault_id: 'My ID'
 
+- name: Copy Credential
+  tower_credential:
+    name: Copy password
+    copy_from: Example password
+    credential_type: Vault
+    organization: Foo
 '''
 
 from ..module_utils.tower_api import TowerAPIModule
@@ -304,12 +317,25 @@ KIND_CHOICES = {
 
 
 OLD_INPUT_NAMES = (
-    'authorize', 'authorize_password', 'client',
-    'security_token', 'secret', 'tenant', 'subscription',
-    'domain', 'become_method', 'become_username',
-    'become_password', 'vault_password', 'project', 'host',
-    'username', 'password', 'ssh_key_data', 'vault_id',
-    'ssh_key_unlock'
+    'authorize',
+    'authorize_password',
+    'client',
+    'security_token',
+    'secret',
+    'tenant',
+    'subscription',
+    'domain',
+    'become_method',
+    'become_username',
+    'become_password',
+    'vault_password',
+    'project',
+    'host',
+    'username',
+    'password',
+    'ssh_key_data',
+    'vault_id',
+    'ssh_key_unlock',
 )
 
 
@@ -318,6 +344,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(),
+        copy_from=dict(),
         description=dict(),
         organization=dict(),
         credential_type=dict(),
@@ -356,6 +383,7 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get('new_name')
+    copy_from = module.params.get('copy_from')
     description = module.params.get('description')
     organization = module.params.get('organization')
     credential_type = module.params.get('credential_type')
@@ -382,10 +410,24 @@ def main():
     lookup_data = {
         'credential_type': cred_type_id,
     }
+    # Create a copy of lookup data for copying without org.
+    copy_lookup_data = lookup_data
     if organization:
         lookup_data['organization'] = org_id
 
     credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
+
+    # Attempt to look up credential to copy based on the provided name
+    if copy_from:
+        # a new existing item is formed when copying and is returned.
+        credential = module.copy_item(
+            credential,
+            copy_from,
+            name,
+            endpoint='credentials',
+            item_type='credential',
+            copy_lookup_data=copy_lookup_data,
+        )
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -432,9 +474,7 @@ def main():
             credential_fields['team'] = team_id
 
     # If the state was present we can let the module build or update the existing group, this will return on its own
-    module.create_or_update_if_needed(
-        credential, credential_fields, endpoint='credentials', item_type='credential'
-    )
+    module.create_or_update_if_needed(credential, credential_fields, endpoint='credentials', item_type='credential')
 
 
 if __name__ == '__main__':

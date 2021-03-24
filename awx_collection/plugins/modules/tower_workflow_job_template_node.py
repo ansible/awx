@@ -6,12 +6,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 DOCUMENTATION = '''
 ---
@@ -234,13 +233,9 @@ def main():
         if organization:
             organization_id = module.resolve_name_to_id('organizations', organization)
             wfjt_search_fields['organization'] = organization_id
-        wfjt_data = module.get_one('workflow_job_templates', name_or_id=workflow_job_template, **{
-            'data': wfjt_search_fields
-        })
+        wfjt_data = module.get_one('workflow_job_templates', name_or_id=workflow_job_template, **{'data': wfjt_search_fields})
         if wfjt_data is None:
-            module.fail_json(msg="The workflow {0} in organization {1} was not found on the Tower server".format(
-                workflow_job_template, organization
-            ))
+            module.fail_json(msg="The workflow {0} in organization {1} was not found on the Tower server".format(workflow_job_template, organization))
         workflow_job_template_id = wfjt_data['id']
         search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
 
@@ -261,8 +256,17 @@ def main():
 
     # Create the data that gets sent for create and update
     for field_name in (
-            'identifier', 'extra_data', 'scm_branch', 'job_type', 'job_tags', 'skip_tags',
-            'limit', 'diff_mode', 'verbosity', 'all_parents_must_converge',):
+        'identifier',
+        'extra_data',
+        'scm_branch',
+        'job_type',
+        'job_tags',
+        'skip_tags',
+        'limit',
+        'diff_mode',
+        'verbosity',
+        'all_parents_must_converge',
+    ):
         field_val = module.params.get(field_name)
         if field_val:
             new_fields[field_name] = field_val
@@ -294,9 +298,12 @@ def main():
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
-        existing_item, new_fields,
-        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node', auto_exit=not approval_node,
-        associations=association_fields
+        existing_item,
+        new_fields,
+        endpoint='workflow_job_template_nodes',
+        item_type='workflow_job_template_node',
+        auto_exit=not approval_node,
+        associations=association_fields,
     )
 
     # Create approval node unified template or update existing
@@ -326,9 +333,7 @@ def main():
             existing_item = module.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
         approval_endpoint = 'workflow_job_template_nodes/{0}/create_approval_template/'.format(workflow_job_template_node_id)
         module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint=approval_endpoint, item_type='workflow_job_template_approval_node',
-            associations=association_fields
+            existing_item, new_fields, endpoint=approval_endpoint, item_type='workflow_job_template_approval_node', associations=association_fields
         )
     module.exit_json(**module.json_output)
 

@@ -17,18 +17,29 @@ from crum import get_current_user
 from awx.main.utils import encrypt_field, parse_yaml_or_json
 from awx.main.constants import CLOUD_PROVIDERS
 
-__all__ = ['prevent_search', 'VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
-           'PasswordFieldsModel', 'PrimordialModel', 'CommonModel',
-           'CommonModelNameNotUnique', 'NotificationFieldsModel',
-           'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_SCAN',
-           'PERM_INVENTORY_CHECK', 'JOB_TYPE_CHOICES',
-           'AD_HOC_JOB_TYPE_CHOICES', 'PROJECT_UPDATE_JOB_TYPE_CHOICES',
-           'CLOUD_INVENTORY_SOURCES',
-           'VERBOSITY_CHOICES']
+__all__ = [
+    'prevent_search',
+    'VarsDictProperty',
+    'BaseModel',
+    'CreatedModifiedModel',
+    'PasswordFieldsModel',
+    'PrimordialModel',
+    'CommonModel',
+    'CommonModelNameNotUnique',
+    'NotificationFieldsModel',
+    'PERM_INVENTORY_DEPLOY',
+    'PERM_INVENTORY_SCAN',
+    'PERM_INVENTORY_CHECK',
+    'JOB_TYPE_CHOICES',
+    'AD_HOC_JOB_TYPE_CHOICES',
+    'PROJECT_UPDATE_JOB_TYPE_CHOICES',
+    'CLOUD_INVENTORY_SOURCES',
+    'VERBOSITY_CHOICES',
+]
 
 PERM_INVENTORY_DEPLOY = 'run'
-PERM_INVENTORY_CHECK  = 'check'
-PERM_INVENTORY_SCAN   = 'scan'
+PERM_INVENTORY_CHECK = 'check'
+PERM_INVENTORY_SCAN = 'scan'
 
 JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_DEPLOY, _('Run')),
@@ -64,9 +75,9 @@ VERBOSITY_CHOICES = [
 
 
 class VarsDictProperty(object):
-    '''
+    """
     Retrieve a string of variables in YAML or JSON as a dictionary.
-    '''
+    """
 
     def __init__(self, field='variables', key_value=False):
         self.field = field
@@ -86,9 +97,9 @@ class VarsDictProperty(object):
 
 
 class BaseModel(models.Model):
-    '''
+    """
     Base model class with common methods for all models.
-    '''
+    """
 
     class Meta:
         abstract = True
@@ -100,10 +111,10 @@ class BaseModel(models.Model):
             return u'%s-%s' % (self._meta.verbose_name, self.pk)
 
     def clean_fields(self, exclude=None):
-        '''
+        """
         Override default clean_fields to support methods for cleaning
         individual model fields.
-        '''
+        """
         exclude = exclude or []
         errors = {}
         try:
@@ -134,11 +145,11 @@ class BaseModel(models.Model):
 
 
 class CreatedModifiedModel(BaseModel):
-    '''
+    """
     Common model with created/modified timestamp fields.  Allows explicitly
     specifying created/modified timestamps in certain cases (migrations, job
     events), calculates automatically if not specified.
-    '''
+    """
 
     class Meta:
         abstract = True
@@ -166,10 +177,10 @@ class CreatedModifiedModel(BaseModel):
 
 
 class PasswordFieldsModel(BaseModel):
-    '''
+    """
     Abstract base class for a model with password fields that should be stored
     as encrypted values.
-    '''
+    """
 
     PASSWORD_FIELDS = ()
 
@@ -177,7 +188,7 @@ class PasswordFieldsModel(BaseModel):
         abstract = True
 
     def _password_field_allows_ask(self, field):
-        return False # Override in subclasses if needed.
+        return False  # Override in subclasses if needed.
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
@@ -207,6 +218,7 @@ class PasswordFieldsModel(BaseModel):
                 self.mark_field_for_save(update_fields, field)
 
             from awx.main.signals import disable_activity_stream
+
             with disable_activity_stream():
                 # We've already got an activity stream record for the object
                 # creation, there's no need to have an extra one for the
@@ -255,18 +267,15 @@ class HasEditsMixin(BaseModel):
         return new_values
 
     def _values_have_edits(self, new_values):
-        return any(
-            new_values.get(fd_name, None) != self._prior_values_store.get(fd_name, None)
-            for fd_name in new_values.keys()
-        )
+        return any(new_values.get(fd_name, None) != self._prior_values_store.get(fd_name, None) for fd_name in new_values.keys())
 
 
 class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
-    '''
+    """
     Common model for all object types that have these standard fields
     must use a subclass CommonModel or CommonModelNameNotUnique though
     as this lacks a name field.
-    '''
+    """
 
     class Meta:
         abstract = True
@@ -339,12 +348,7 @@ class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
             except ObjectDoesNotExist:
                 continue
             if not (self.pk and self.pk == obj.pk):
-                errors.append(
-                    '%s with this (%s) combination already exists.' % (
-                        model.__name__,
-                        ', '.join(set(ut) - {'polymorphic_ctype'})
-                    )
-                )
+                errors.append('%s with this (%s) combination already exists.' % (model.__name__, ', '.join(set(ut) - {'polymorphic_ctype'})))
         if errors:
             raise ValidationError(errors)
 
@@ -374,27 +378,14 @@ class CommonModelNameNotUnique(PrimordialModel):
 
 
 class NotificationFieldsModel(BaseModel):
-
     class Meta:
         abstract = True
 
-    notification_templates_error = models.ManyToManyField(
-        "NotificationTemplate",
-        blank=True,
-        related_name='%(class)s_notification_templates_for_errors'
-    )
+    notification_templates_error = models.ManyToManyField("NotificationTemplate", blank=True, related_name='%(class)s_notification_templates_for_errors')
 
-    notification_templates_success = models.ManyToManyField(
-        "NotificationTemplate",
-        blank=True,
-        related_name='%(class)s_notification_templates_for_success'
-    )
+    notification_templates_success = models.ManyToManyField("NotificationTemplate", blank=True, related_name='%(class)s_notification_templates_for_success')
 
-    notification_templates_started = models.ManyToManyField(
-        "NotificationTemplate",
-        blank=True,
-        related_name='%(class)s_notification_templates_for_started'
-    )
+    notification_templates_started = models.ManyToManyField("NotificationTemplate", blank=True, related_name='%(class)s_notification_templates_for_started')
 
 
 def prevent_search(relation):

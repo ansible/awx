@@ -11,9 +11,9 @@
     "@patternfly/react-core": "^4.90.2",
     "@patternfly/react-icons": "4.7.22",
     "@patternfly/react-table": "^4.19.15",
+    "ace-builds": "^1.4.12",
     "ansi-to-html": "^0.6.11",
     "axios": "^0.21.1",
-    "codemirror": "^5.47.0",
     "d3": "^5.12.0",
     "dagre": "^0.8.4",
     "formik": "^2.1.2",
@@ -22,11 +22,12 @@
     "js-yaml": "^3.13.1",
     "prop-types": "^15.6.2",
     "react": "^16.13.1",
-    "react-codemirror2": "^6.0.0",
+    "react-ace": "^9.3.0",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
     "react-virtualized": "^9.21.1",
     "rrule": "^2.6.4",
+    "sanitize-html": "^2.3.2",
     "styled-components": "^4.2.0"
   },
   "devDependencies": {
@@ -55,6 +56,11 @@
     "react-scripts": "^3.4.4"
   },
   "scripts": {
+    "prelint": "lingui compile",
+    "prestart": "lingui compile",
+    "prestart-instrumented": "lingui compile",
+    "pretest": "lingui compile",
+    "pretest-watch": "lingui compile",
     "start": "PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",
     "start-instrumented": "DEBUG=instrument-cra PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts -r @cypress/instrument-cra start",
     "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",

@@ -45,7 +45,7 @@ function Templates({ i18n }) {
         [`${templatePath}/edit`]: i18n._(t`Edit Details`),
         [`${templatePath}/access`]: i18n._(t`Access`),
         [`${templatePath}/notifications`]: i18n._(t`Notifications`),
-        [`${templatePath}/completed_jobs`]: i18n._(t`Completed Jobs`),
+        [`${templatePath}/jobs`]: i18n._(t`Jobs`),
         [surveyPath]: i18n._(t`Survey`),
         [`${surveyPath}/add`]: i18n._(t`Add Question`),
         [`${surveyPath}/edit`]: i18n._(t`Edit Question`),

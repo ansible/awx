@@ -31,6 +31,11 @@ const DataListAction = styled(_DataListAction)`
   grid-template-columns: repeat(2, 40px);
 `;
 
+const ExclamationTriangleIconWarning = styled(ExclamationTriangleIcon)`
+  color: var(--pf-global--warning-color--100);
+  margin-left: 18px;
+`;
+
 function ProjectJobTemplateListItem({
   i18n,
   template,
@@ -46,6 +51,11 @@ function ProjectJobTemplateListItem({
     (!template.summary_fields.project ||
       (!template.summary_fields.inventory &&
         !template.ask_inventory_on_launch));
+
+  const missingExecutionEnvironment =
+    template.type === 'job_template' &&
+    template.custom_virtualenv &&
+    !template.execution_environment;
 
   return (
     <DataListItem aria-labelledby={labelId} id={`${template.id}`}>
@@ -76,6 +86,19 @@ function ProjectJobTemplateListItem({
                   </Tooltip>
                 </span>
               )}
+              {missingExecutionEnvironment && (
+                <span>
+                  <Tooltip
+                    content={i18n._(
+                      t`Custom virtual environment ${template.custom_virtualenv} must be replaced by an execution environment.`
+                    )}
+                    position="right"
+                    className="missing-execution-environment"
+                  >
+                    <ExclamationTriangleIconWarning />
+                  </Tooltip>
+                </span>
+              )}
             </DataListCell>,
             <DataListCell key="type">
               {toTitleCase(template.type)}
@@ -95,6 +118,7 @@ function ProjectJobTemplateListItem({
               <LaunchButton resource={template}>
                 {({ handleLaunch }) => (
                   <Button
+                    ouiaId={`${template.id}-launch-button`}
                     css="grid-column: 1"
                     variant="plain"
                     onClick={handleLaunch}
@@ -108,6 +132,7 @@ function ProjectJobTemplateListItem({
           {template.summary_fields.user_capabilities.edit && (
             <Tooltip content={i18n._(t`Edit Template`)} position="top">
               <Button
+                ouiaId={`${template.id}-edit-button`}
                 css="grid-column: 2"
                 variant="plain"
                 component={Link}

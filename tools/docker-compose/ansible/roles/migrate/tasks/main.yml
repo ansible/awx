@@ -1,0 +1,5 @@
+---
+
+# Migrate data from a bind-mount to a volume
+- import_tasks: migrate-from-local-docker.yml
+  when: migrate_local_docker

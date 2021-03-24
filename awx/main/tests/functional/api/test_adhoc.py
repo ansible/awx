@@ -1,4 +1,4 @@
-from unittest import mock # noqa
+from unittest import mock  # noqa
 import pytest
 
 from awx.api.versioning import reverse
@@ -43,6 +43,7 @@ def post_adhoc(post, inventory, machine_credential):
                 del data[k]
 
         return post(url, data, user, expect=expect)
+
     return f
 
 
@@ -89,7 +90,7 @@ def test_user_post_ad_hoc_command_list(alice, post_adhoc, inventory, machine_cre
 
 @pytest.mark.django_db
 def test_user_post_ad_hoc_command_list_xfail(alice, post_adhoc, inventory, machine_credential):
-    inventory.read_role.members.add(alice) # just read access? no dice.
+    inventory.read_role.members.add(alice)  # just read access? no dice.
     machine_credential.use_role.members.add(alice)
     post_adhoc(reverse('api:ad_hoc_command_list'), {}, alice, expect=403)
 

@@ -36,20 +36,36 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
   const { me = {} } = useConfig();
 
   const {
-    result: { isNotifAdmin, template },
+    result: { isNotifAdmin, template, surveyConfig, launchConfig },
     isLoading: hasRolesandTemplateLoading,
     error: rolesAndTemplateError,
     request: loadTemplateAndRoles,
   } = useRequest(
     useCallback(async () => {
-      const [{ data }, actions, notifAdminRes] = await Promise.all([
+      const [
+        { data },
+        actions,
+        notifAdminRes,
+        { data: launchConfiguration },
+      ] = await Promise.all([
         WorkflowJobTemplatesAPI.readDetail(templateId),
         WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions(templateId),
         OrganizationsAPI.read({
           page_size: 1,
           role_level: 'notification_admin_role',
         }),
+        WorkflowJobTemplatesAPI.readLaunch(templateId),
       ]);
+
+      let surveyConfiguration = null;
+
+      if (data.survey_enabled) {
+        const { data: survey } = await WorkflowJobTemplatesAPI.readSurvey(
+          templateId
+        );
+
+        surveyConfiguration = survey;
+      }
 
       if (actions.data.actions.PUT) {
         if (data.webhook_service && data?.related?.webhook_key) {
@@ -65,6 +81,8 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
       return {
         template: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
+        launchConfig: launchConfiguration,
+        surveyConfig: surveyConfiguration,
       };
     }, [setBreadcrumb, templateId]),
     { isNotifAdmin: false, template: null }
@@ -72,10 +90,6 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
   useEffect(() => {
     loadTemplateAndRoles();
   }, [loadTemplateAndRoles, location.pathname]);
-
-  const createSchedule = data => {
-    return WorkflowJobTemplatesAPI.createSchedule(templateId, data);
-  };
 
   const loadScheduleOptions = useCallback(() => {
     return WorkflowJobTemplatesAPI.readScheduleOptions(templateId);
@@ -128,8 +142,8 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
       link: `${match.url}/visualizer`,
     },
     {
-      name: i18n._(t`Completed Jobs`),
-      link: `${match.url}/completed_jobs`,
+      name: i18n._(t`Jobs`),
+      link: `${match.url}/jobs`,
     },
     {
       name: canAddAndEditSurvey ? i18n._(t`Survey`) : i18n._(t`View Survey`),
@@ -206,11 +220,13 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
               path="/templates/:templateType/:id/schedules"
             >
               <Schedules
-                createSchedule={createSchedule}
+                apiModel={WorkflowJobTemplatesAPI}
                 setBreadcrumb={setBreadcrumb}
-                unifiedJobTemplate={template}
+                resource={template}
                 loadSchedules={loadSchedules}
                 loadScheduleOptions={loadScheduleOptions}
+                surveyConfig={surveyConfig}
+                launchConfig={launchConfig}
               />
             </Route>
           )}
@@ -237,7 +253,7 @@ function WorkflowJobTemplate({ i18n, setBreadcrumb }) {
             </Route>
           )}
           {template?.id && (
-            <Route path="/templates/:templateType/:id/completed_jobs">
+            <Route path="/templates/:templateType/:id/jobs">
               <JobList
                 defaultParams={{
                   workflow_job__workflow_job_template: template.id,

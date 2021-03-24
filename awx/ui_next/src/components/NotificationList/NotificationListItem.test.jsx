@@ -30,13 +30,17 @@ describe('<NotificationListItem canToggleNotifications />', () => {
 
   test('initially renders succesfully and displays correct label', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('NotificationListItem')).toMatchSnapshot();
     expect(wrapper.find('Switch').length).toBe(3);
@@ -44,46 +48,55 @@ describe('<NotificationListItem canToggleNotifications />', () => {
 
   test('shows approvals toggle when configured', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-        showApprovalsToggle
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+            showApprovalsToggle
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('Switch').length).toBe(4);
   });
 
-  test('displays correct label in correct column', () => {
+  test('displays correct type', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+          />
+        </tbody>
+      </table>
     );
-    const typeCell = wrapper
-      .find('DataListCell')
-      .at(1)
-      .find('div');
+    const typeCell = wrapper.find('Td').at(1);
     expect(typeCell.text()).toContain('Slack');
   });
 
   test('handles approvals click when toggle is on', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        approvalsTurnedOn
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-        showApprovalsToggle
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            approvalsTurnedOn
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+            showApprovalsToggle
+          />
+        </tbody>
+      </table>
     );
     wrapper
       .find('Switch[aria-label="Toggle notification approvals"]')
@@ -95,15 +108,19 @@ describe('<NotificationListItem canToggleNotifications />', () => {
 
   test('handles approvals click when toggle is off', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        approvalsTurnedOn={false}
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-        showApprovalsToggle
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            approvalsTurnedOn={false}
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+            showApprovalsToggle
+          />
+        </tbody>
+      </table>
     );
     wrapper
       .find('Switch[aria-label="Toggle notification approvals"]')
@@ -114,14 +131,18 @@ describe('<NotificationListItem canToggleNotifications />', () => {
 
   test('handles started click when toggle is on', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        startedTurnedOn
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            startedTurnedOn
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+          />
+        </tbody>
+      </table>
     );
     wrapper
       .find('Switch[aria-label="Toggle notification start"]')
@@ -132,14 +153,18 @@ describe('<NotificationListItem canToggleNotifications />', () => {
 
   test('handles started click when toggle is off', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        startedTurnedOn={false}
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            startedTurnedOn={false}
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+          />
+        </tbody>
+      </table>
     );
     wrapper
       .find('Switch[aria-label="Toggle notification start"]')
@@ -150,14 +175,18 @@ describe('<NotificationListItem canToggleNotifications />', () => {
 
   test('handles success click when toggle is on', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        successTurnedOn
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            successTurnedOn
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+          />
+        </tbody>
+      </table>
     );
     wrapper
       .find('Switch[aria-label="Toggle notification success"]')
@@ -168,14 +197,18 @@ describe('<NotificationListItem canToggleNotifications />', () => {
 
   test('handles success click when toggle is off', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        successTurnedOn={false}
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            successTurnedOn={false}
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+          />
+        </tbody>
+      </table>
     );
     wrapper
       .find('Switch[aria-label="Toggle notification success"]')
@@ -186,14 +219,18 @@ describe('<NotificationListItem canToggleNotifications />', () => {
 
   test('handles error click when toggle is on', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        errorTurnedOn
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            errorTurnedOn
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+          />
+        </tbody>
+      </table>
     );
     wrapper
       .find('Switch[aria-label="Toggle notification failure"]')
@@ -204,14 +241,18 @@ describe('<NotificationListItem canToggleNotifications />', () => {
 
   test('handles error click when toggle is off', () => {
     wrapper = mountWithContexts(
-      <NotificationListItem
-        notification={mockNotif}
-        errorTurnedOn={false}
-        toggleNotification={toggleNotification}
-        detailUrl="/foo"
-        canToggleNotifications
-        typeLabels={typeLabels}
-      />
+      <table>
+        <tbody>
+          <NotificationListItem
+            notification={mockNotif}
+            errorTurnedOn={false}
+            toggleNotification={toggleNotification}
+            detailUrl="/foo"
+            canToggleNotifications
+            typeLabels={typeLabels}
+          />
+        </tbody>
+      </table>
     );
     wrapper
       .find('Switch[aria-label="Toggle notification failure"]')

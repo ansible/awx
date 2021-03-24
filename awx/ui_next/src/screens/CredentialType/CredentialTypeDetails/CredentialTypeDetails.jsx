@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 
-import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { VariablesDetail } from '../../../components/CodeEditor';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import DeleteButton from '../../../components/DeleteButton';
@@ -68,6 +68,7 @@ function CredentialTypeDetails({ credentialType, i18n }) {
         {credentialType.summary_fields.user_capabilities &&
           credentialType.summary_fields.user_capabilities.edit && (
             <Button
+              ouiaId="credential-type-detail-edit-button"
               aria-label={i18n._(t`edit`)}
               component={Link}
               to={`/credential_types/${id}/edit`}

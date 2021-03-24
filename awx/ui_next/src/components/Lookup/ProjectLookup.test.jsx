@@ -94,4 +94,56 @@ describe('<ProjectLookup />', () => {
     expect(wrapper.find('ProjectLookup')).toHaveLength(1);
     expect(wrapper.find('Lookup').prop('isDisabled')).toBe(true);
   });
+
+  test('should not show helper text', async () => {
+    let wrapper;
+
+    ProjectsAPI.readOptions.mockReturnValue({
+      data: {
+        actions: {
+          GET: {},
+        },
+        related_search_fields: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectLookup
+          isValid
+          helperTextInvalid="select value"
+          onChange={() => {}}
+        />
+      );
+    });
+    wrapper.update();
+
+    expect(wrapper.find('div#project-helper').length).toBe(0);
+  });
+
+  test('should not show helper text', async () => {
+    let wrapper;
+
+    ProjectsAPI.readOptions.mockReturnValue({
+      data: {
+        actions: {
+          GET: {},
+        },
+        related_search_fields: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ProjectLookup
+          isValid={false}
+          helperTextInvalid="select value"
+          onChange={() => {}}
+        />
+      );
+    });
+    wrapper.update();
+
+    expect(wrapper.find('div#project-helper').text('helperTextInvalid')).toBe(
+      'select value'
+    );
+  });
 });

@@ -58,6 +58,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
         {({ activeStep, onNext, onBack }) => (
           <>
             <Button
+              ouiaId="credential-plugin-prompt-next"
               id="credential-plugin-prompt-next"
               variant="primary"
               onClick={onNext}
@@ -74,6 +75,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
                   position="right"
                 >
                   <Button
+                    ouiaId="credential-plugin-prompt-test"
                     id="credential-plugin-prompt-test"
                     variant="secondary"
                     onClick={() => testPluginMetadata()}
@@ -83,6 +85,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
                 </Tooltip>
 
                 <Button
+                  ouiaId="credential-plugin-prompt-back"
                   id="credential-plugin-prompt-back"
                   variant="secondary"
                   onClick={onBack}
@@ -92,6 +95,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
               </>
             )}
             <Button
+              ouiaId="credential-plugin-prompt-cancel"
               id="credential-plugin-prompt-cancel"
               variant="link"
               onClick={onClose}

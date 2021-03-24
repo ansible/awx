@@ -26,38 +26,19 @@ class UnifiedJobTemplate(HasStatus, base.Base):
         # formatting issue where result_stdout contained '%s'.  This later caused
         # a python traceback when attempting to display output from this
         # method.
-        items = [
-            'id',
-            'name',
-            'status',
-            'source',
-            'last_update_failed',
-            'last_updated',
-            'result_traceback',
-            'job_explanation',
-            'job_args']
+        items = ['id', 'name', 'status', 'source', 'last_update_failed', 'last_updated', 'result_traceback', 'job_explanation', 'job_args']
         info = []
         for item in [x for x in items if hasattr(self, x)]:
             info.append('{0}:{1}'.format(item, getattr(self, item)))
         output = '<{0.__class__.__name__} {1}>'.format(self, ', '.join(info))
         return output.replace('%', '%%')
 
-    def add_schedule(
-            self,
-            name='',
-            description='',
-            enabled=True,
-            rrule=None,
-            **kwargs):
+    def add_schedule(self, name='', description='', enabled=True, rrule=None, **kwargs):
         if rrule is None:
             rrule = "DTSTART:30180101T000000Z RRULE:FREQ=YEARLY;INTERVAL=1"
         payload = dict(
-            name=name or "{0} Schedule {1}".format(
-                self.name,
-                random_title()),
-            description=description or random_title(10),
-            enabled=enabled,
-            rrule=str(rrule))
+            name=name or "{0} Schedule {1}".format(self.name, random_title()), description=description or random_title(10), enabled=enabled, rrule=str(rrule)
+        )
 
         update_payload(payload, self.optional_schedule_fields, kwargs)
 
@@ -70,9 +51,7 @@ class UnifiedJobTemplate(HasStatus, base.Base):
         2) not last_update_failed
         3) last_updated
         """
-        return super(
-            UnifiedJobTemplate,
-            self).is_successful and not self.last_update_failed and self.last_updated is not None
+        return super(UnifiedJobTemplate, self).is_successful and not self.last_update_failed and self.last_updated is not None
 
 
 page.register_page(resources.unified_job_template, UnifiedJobTemplate)

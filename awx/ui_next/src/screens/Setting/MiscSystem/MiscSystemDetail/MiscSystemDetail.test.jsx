@@ -110,7 +110,6 @@ describe('<MiscSystemDetail />', () => {
     assertDetail(wrapper, 'Red Hat customer username', 'mock name');
     assertDetail(wrapper, 'Refresh Token Expiration', '3 seconds');
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');
-    assertVariableDetail(wrapper, 'Custom virtual environment paths', '[]');
   });
 
   test('should hide edit button from non-superusers', async () => {

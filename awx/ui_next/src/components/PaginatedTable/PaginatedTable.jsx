@@ -37,6 +37,8 @@ function PaginatedTable({
   showPageSizeOptions,
   i18n,
   renderToolbar,
+  emptyContentMessage,
+  ouiaId,
 }) {
   const history = useHistory();
 
@@ -73,9 +75,6 @@ function PaginatedTable({
   const queryParams = parseQueryString(qsConfig, history.location.search);
 
   const dataListLabel = i18n._(t`${pluralizedItemName} List`);
-  const emptyContentMessage = i18n._(
-    t`Please add ${pluralizedItemName} to populate this list `
-  );
   const emptyContentTitle = i18n._(t`No ${pluralizedItemName} Found `);
 
   let Content;
@@ -85,13 +84,19 @@ function PaginatedTable({
     Content = <ContentError error={contentError} />;
   } else if (items.length <= 0) {
     Content = (
-      <ContentEmpty title={emptyContentTitle} message={emptyContentMessage} />
+      <ContentEmpty
+        title={emptyContentTitle}
+        message={
+          emptyContentMessage ||
+          i18n._(t`Please add ${pluralizedItemName} to populate this list `)
+        }
+      />
     );
   } else {
     Content = (
       <div css="overflow: auto">
         {hasContentLoading && <LoadingSpinner />}
-        <TableComposable aria-label={dataListLabel}>
+        <TableComposable aria-label={dataListLabel} ouiaId={ouiaId}>
           {headerRow}
           <Tbody>{items.map(renderRow)}</Tbody>
         </TableComposable>
@@ -177,6 +182,7 @@ PaginatedTable.propTypes = {
   renderToolbar: PropTypes.func,
   hasContentLoading: PropTypes.bool,
   contentError: PropTypes.shape(),
+  ouiaId: PropTypes.string,
 };
 
 PaginatedTable.defaultProps = {
@@ -188,6 +194,7 @@ PaginatedTable.defaultProps = {
   pluralizedItemName: 'Items',
   showPageSizeOptions: true,
   renderToolbar: props => <DataListToolbar {...props} />,
+  ouiaId: null,
 };
 
 export { PaginatedTable as _PaginatedTable };

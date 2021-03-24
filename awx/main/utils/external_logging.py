@@ -26,15 +26,17 @@ def construct_rsyslog_conf_template(settings=settings):
     max_bytes = settings.MAX_EVENT_RES_DATA
     if settings.LOG_AGGREGATOR_RSYSLOGD_DEBUG:
         parts.append('$DebugLevel 2')
-    parts.extend([
-        '$WorkDirectory /var/lib/awx/rsyslog',
-        f'$MaxMessageSize {max_bytes}',
-        '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
-        f'main_queue(queue.spoolDirectory="{spool_directory}" queue.maxdiskspace="{max_disk_space}g" queue.type="Disk" queue.filename="awx-external-logger-backlog")',  # noqa
-        'module(load="imuxsock" SysSock.Use="off")',
-        'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
-        'template(name="awx" type="string" string="%rawmsg-after-pri%")',
-    ])
+    parts.extend(
+        [
+            '$WorkDirectory /var/lib/awx/rsyslog',
+            f'$MaxMessageSize {max_bytes}',
+            '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
+            f'main_queue(queue.spoolDirectory="{spool_directory}" queue.maxdiskspace="{max_disk_space}g" queue.type="Disk" queue.filename="awx-external-logger-backlog")',  # noqa
+            'module(load="imuxsock" SysSock.Use="off")',
+            'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on" RateLimit.Burst="0")',
+            'template(name="awx" type="string" string="%rawmsg-after-pri%")',
+        ]
+    )
 
     def escape_quotes(x):
         return x.replace('"', '\\"')
@@ -43,7 +45,7 @@ def construct_rsyslog_conf_template(settings=settings):
         parts.append('action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
         tmpl = '\n'.join(parts)
         return tmpl
-        
+
     if protocol.startswith('http'):
         scheme = 'https'
         # urlparse requires '//' to be provided if scheme is not specified
@@ -75,7 +77,7 @@ def construct_rsyslog_conf_template(settings=settings):
             f'skipverifyhost="{skip_verify}"',
             'action.resumeRetryCount="-1"',
             'template="awx"',
-            f'action.resumeInterval="{timeout}"'
+            f'action.resumeInterval="{timeout}"',
         ]
         if error_log_file:
             params.append(f'errorfile="{error_log_file}"')
@@ -116,7 +118,7 @@ def construct_rsyslog_conf_template(settings=settings):
 def reconfigure_rsyslog():
     tmpl = construct_rsyslog_conf_template()
     # Write config to a temp file then move it to preserve atomicity
-    with tempfile.TemporaryDirectory(prefix='rsyslog-conf-') as temp_dir:
+    with tempfile.TemporaryDirectory(dir='/var/lib/awx/rsyslog/', prefix='rsyslog-conf-') as temp_dir:
         path = temp_dir + '/rsyslog.conf.temp'
         with open(path, 'w') as f:
             os.chmod(path, 0o640)

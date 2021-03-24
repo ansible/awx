@@ -1,4 +1,3 @@
-
 import glob
 import os
 
@@ -11,7 +10,6 @@ except ImportError:
 
 
 def test_python_and_js_licenses():
-
     def index_licenses(path):
         # Check for GPL (forbidden) and LGPL (need to ship source)
         # This is not meant to be an exhaustive check.
@@ -27,7 +25,7 @@ def test_python_and_js_licenses():
         def find_embedded_source_version(path, name):
             for entry in os.listdir(path):
                 # Check variations of '-' and '_' in filenames due to python
-                for fname in [name, name.replace('-','_')]:
+                for fname in [name, name.replace('-', '_')]:
                     if entry.startswith(fname) and entry.endswith('.tar.gz'):
                         v = entry.split(name + '-')[1].split('.tar.gz')[0]
                         return v
@@ -43,25 +41,25 @@ def test_python_and_js_licenses():
                 'filename': filename,
                 'gpl': is_gpl,
                 'source_required': (is_gpl or is_lgpl),
-                'source_version': find_embedded_source_version(path, name)
+                'source_version': find_embedded_source_version(path, name),
             }
         return list
 
     def read_api_requirements(path):
         ret = {}
-        for req_file in ['requirements.txt', 'requirements_ansible.txt', 'requirements_git.txt', 'requirements_ansible_git.txt']:
+        for req_file in ['requirements.txt', 'requirements_git.txt']:
             fname = '%s/%s' % (path, req_file)
 
             for reqt in parse_requirements(fname, session=''):
                 name = reqt.name
                 version = str(reqt.specifier)
                 if version.startswith('=='):
-                    version=version[2:]
+                    version = version[2:]
                 if reqt.link:
-                    (name, version) = reqt.link.filename.split('@',1)
+                    (name, version) = reqt.link.filename.split('@', 1)
                     if name.endswith('.git'):
                         name = name[:-4]
-                ret[name] = { 'name': name, 'version': version}
+                ret[name] = {'name': name, 'version': version}
         return ret
 
     def remediate_licenses_and_requirements(licenses, requirements):
@@ -80,12 +78,12 @@ def test_python_and_js_licenses():
                 if version != licenses[item]['source_version']:
                     errors.append(" embedded source for %s is %s instead of the required version %s" % (item, licenses[item]['source_version'], version))
             elif licenses[item]['source_version']:
-                errors.append(" embedded source version %s for %s is included despite not being needed" % (licenses[item]['source_version'],item))
+                errors.append(" embedded source version %s for %s is included despite not being needed" % (licenses[item]['source_version'], item))
         items = list(requirements.keys())
         items.sort()
         for item in items:
             if item.lower() not in licenses.keys():
-                errors.append(" license for requirement %s is missing" %(item,))
+                errors.append(" license for requirement %s is missing" % (item,))
         return errors
 
     base_dir = settings.BASE_DIR
@@ -95,5 +93,4 @@ def test_python_and_js_licenses():
     errors = []
     errors += remediate_licenses_and_requirements(api_licenses, api_requirements)
     if errors:
-        raise Exception('Included licenses not consistent with requirements:\n%s' %
-                        '\n'.join(errors))
+        raise Exception('Included licenses not consistent with requirements:\n%s' % '\n'.join(errors))
