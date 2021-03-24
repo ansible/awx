@@ -78,7 +78,7 @@ from awx.main.models import (
     InventoryUpdateEvent,
     AdHocCommandEvent,
     SystemJobEvent,
-    build_safe_env
+    build_safe_env,
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError, PostRunError

@@ -48,7 +48,7 @@ from awx.main.utils import (
     getattr_dne,
     polymorphic,
     schedule_task_manager,
-    get_event_partition_epoch
+    get_event_partition_epoch,
 )
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
