@@ -78,7 +78,8 @@
           "src",
           "theme",
           "gridColumns",
-          "rows"
+          "rows",
+          "href"
         ],
         "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg"],
         "ignoreComponent": [

@@ -11,9 +11,12 @@ import {
   SelectOption,
   SelectVariant,
   TextInput,
+  Tooltip,
 } from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
+import { SearchIcon, QuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
+import { useConfig } from '../../contexts/Config';
+import getDocsBaseUrl from '../../util/getDocsBaseUrl';
 
 const AdvancedGroup = styled.div`
   display: flex;
@@ -45,6 +48,7 @@ function AdvancedSearch({
   const [lookupSelection, setLookupSelection] = useState(null);
   const [keySelection, setKeySelection] = useState(null);
   const [searchValue, setSearchValue] = useState('');
+  const config = useConfig();
 
   const handleAdvancedSearch = e => {
     // keeps page from fully reloading
@@ -262,6 +266,19 @@ function AdvancedSearch({
           </Button>
         </div>
       </InputGroup>
+      <Tooltip
+        content={i18n._(t`Advanced search documentation`)}
+        position="bottom"
+      >
+        <Button
+          component="a"
+          variant="plain"
+          target="_blank"
+          href={`${getDocsBaseUrl(config)}/html/userguide/search_sort.html`}
+        >
+          <QuestionCircleIcon />
+        </Button>
+      </Tooltip>
     </AdvancedGroup>
   );
 }
