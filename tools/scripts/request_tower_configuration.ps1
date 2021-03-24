@@ -70,6 +70,7 @@ $invoke_params = @{
     Body = (ConvertTo-Json $data)
     Uri = "$tower_url/api/v2/job_templates/$job_template_id/callback/"
     UseBasicParsing = $true
+    ErrorAction = 'Stop'
 }
 
 $invoke_command = Get-Command -Name Invoke-WebRequest
