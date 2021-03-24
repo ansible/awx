@@ -17,6 +17,12 @@ import Background from './components/Background';
 import NotFound from './screens/NotFound';
 import Login from './screens/Login';
 
+import en from './locales/en/messages';
+import es from './locales/es/messages';
+import fr from './locales/fr/messages';
+import ja from './locales/ja/messages';
+import nl from './locales/nl/messages';
+import zh from './locales/zh/messages';
 import { isAuthenticated } from './util/auth';
 import { getLanguageWithoutRegionCode } from './util/language';
 import { dynamicActivate, locales } from './i18nLoader';
@@ -78,6 +84,7 @@ const ProtectedRoute = ({ children, ...rest }) =>
   );
 
 function App() {
+  const catalogs = { en, es, fr, ja, nl, zh };
   let language = getLanguageWithoutRegionCode(navigator);
   if (!Object.keys(locales).includes(language)) {
     // If there isn't a string catalog available for the browser's
