@@ -31,18 +31,18 @@ def _mk_project_update(created=None):
     kwargs = {}
     if created:
         kwargs['created'] = created
-    project = Project(**kwargs)
+    project = Project()
     project.save()
-    return ProjectUpdate(project=project)
+    return ProjectUpdate(project=project, **kwargs)
 
 
 def _mk_inventory_update(created=None):
     kwargs = {}
     if created:
         kwargs['created'] = created
-    source = InventorySource(source='ec2', **kwargs)
+    source = InventorySource(source='ec2')
     source.save()
-    iu = InventoryUpdate(inventory_source=source, source='e2')
+    iu = InventoryUpdate(inventory_source=source, source='e2', **kwargs)
     return iu
 
 
