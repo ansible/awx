@@ -210,9 +210,8 @@ def memoize_delete(function_name):
 @memoize(ttl=3600 * 24)  # in practice, we only need this to load once at process startup time
 def get_event_partition_epoch():
     from django.db.migrations.recorder import MigrationRecorder
-    return MigrationRecorder.Migration.objects.filter(
-        app='main', name='0132_event_partitions'
-    ).first().applied
+
+    return MigrationRecorder.Migration.objects.filter(app='main', name='0135_event_partitions').first().applied
 
 
 @memoize()
