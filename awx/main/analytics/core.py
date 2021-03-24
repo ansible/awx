@@ -148,12 +148,22 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         from awx.main.analytics import collectors
         from awx.main.signals import disable_activity_stream
 
-        if until is None:
-            until = now()
-        last_run = since or settings.AUTOMATION_ANALYTICS_LAST_GATHER or (until - timedelta(weeks=4))
+        _now = now()
+        until = _now if until is None else min(until, _now)  # Make sure the end isn't in the future.
+        horizon = until - timedelta(weeks=4)
+        if since is not None:
+            # Make sure the start isn't in the future or more than 4 weeks prior to `until`.
+            since = max(min(since, _now), horizon)
+        if since and since >= until:
+            logger.warning("Start of the collection interval is later than the end, ignoring request.")
+            return None
+
+        logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
+        # LAST_GATHER time should always get truncated to less than 4 weeks back.
+        last_gather = max(settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
+
         last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
         last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
-        logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
 
         collector_module = module if module else collectors
         collector_list = [
@@ -180,7 +190,8 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             key = func.__awx_analytics_key__
             filename = f'{key}.json'
             try:
-                results = (func(last_run, collection_type=collection_type, until=until), func.__awx_analytics_version__)
+                last_entry = max(last_entries.get(key) or last_gather, horizon)
+                results = (func(since or last_entry, collection_type=collection_type, until=until), func.__awx_analytics_version__)
                 json.dumps(results)  # throwaway check to see if the data is json-serializable
                 data[filename] = results
             except Exception:
@@ -207,9 +218,14 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             key = func.__awx_analytics_key__
             filename = f'{key}.csv'
             try:
-                slices = [(last_run, until)]
+                # These slicer functions may return a generator. The `since` parameter is
+                # allowed to be None, and will fall back to LAST_ENTRIES[key] or to
+                # LAST_GATHER (truncated appropriately to match the 4-week limit).
                 if func.__awx_expensive__:
-                    slices = func.__awx_expensive__(key, last_run, until)  # it's ok if this returns a generator
+                    slices = func.__awx_expensive__(key, since, until)
+                else:
+                    slices = collectors.trivial_slicing(key, since, until)
+
                 for start, end in slices:
                     files = func(start, full_path=gather_dir, until=end)
 
@@ -256,7 +272,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         shutil.rmtree(dest, ignore_errors=True)  # clean up individual artifact files
         if not tarfiles:
             # No data was collected
-            logger.warning("No data from {} to {}".format(last_run, until))
+            logger.warning("No data from {} to {}".format(since or last_gather, until))
             return None
 
         return tarfiles

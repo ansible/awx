@@ -34,12 +34,58 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 '''
 
 
+def trivial_slicing(key, since, until):
+    if since is not None:
+        return [(since, until)]
+
+    from awx.conf.models import Setting
+
+    horizon = until - timedelta(weeks=4)
+    last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
+    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
+    last_entry = max(last_entries.get(key) or settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
+    return [(last_entry, until)]
+
+
 def four_hour_slicing(key, since, until):
-    start, end = since, None
+    if since is not None:
+        last_entry = since
+    else:
+        from awx.conf.models import Setting
+
+        horizon = until - timedelta(weeks=4)
+        last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
+        last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
+        last_entry = max(last_entries.get(key) or settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
+
+    start, end = last_entry, None
     while start < until:
         end = min(start + timedelta(hours=4), until)
         yield (start, end)
         start = end
+
+
+def events_slicing(key, since, until):
+    from awx.conf.models import Setting
+
+    last_gather = settings.AUTOMATION_ANALYTICS_LAST_GATHER
+    last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
+    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
+    horizon = until - timedelta(weeks=4)
+
+    lower = since or last_gather or horizon
+    if last_entries.get(key):
+        lower = horizon
+    pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
+
+    previous_pk = pk_values['pk__min'] or 0
+    if last_entries.get(key):
+        previous_pk = max(last_entries[key] + 1, previous_pk)
+    final_pk = pk_values['pk__max'] or 0
+
+    step = 100000
+    for start in range(previous_pk, final_pk + 1, step):
+        yield (start, min(start + step, final_pk))
 
 
 @register('config', '1.3', description=_('General platform configuration.'))
@@ -294,21 +340,6 @@ def _copy_table(table, query, path):
     with connection.cursor() as cursor:
         cursor.copy_expert(query, file)
     return file.file_list()
-
-
-def events_slicing(key, since, until):
-    from awx.conf.models import Setting
-
-    pk_values = models.JobEvent.objects.filter(created__gte=since, created__lte=until).aggregate(Min('pk'), Max('pk'))
-
-    step = 100000
-    last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
-    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
-    previous_pk = last_entries.get(key) or pk_values['pk__min'] or 0
-    final_pk = pk_values['pk__max'] or 0
-
-    for start in range(previous_pk, final_pk + 1, step):
-        yield (start, min(start + step, final_pk))
 
 
 @register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing)
