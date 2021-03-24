@@ -60,12 +60,16 @@ def test_user_queryset(user):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('ext_auth,superuser,expect', [
-    (True, True, True),
-    (False, True, True),  # your setting can't touch me, I'm superuser
-    (True, False, True),  # org admin, managing my peeps
-    (False, False, False),  # setting blocks org admin
-], ids=['superuser', 'superuser-off', 'org', 'org-off'])
+@pytest.mark.parametrize(
+    'ext_auth,superuser,expect',
+    [
+        (True, True, True),
+        (False, True, True),  # your setting can't touch me, I'm superuser
+        (True, False, True),  # org admin, managing my peeps
+        (False, False, False),  # setting blocks org admin
+    ],
+    ids=['superuser', 'superuser-off', 'org', 'org-off'],
+)
 def test_manage_org_auth_setting(ext_auth, superuser, expect, organization, rando, user, team):
     u = user('foo-user', is_superuser=superuser)
     if not superuser:
@@ -108,22 +112,22 @@ def test_team_org_resource_role(ext_auth, organization, rando, org_admin, team):
             # use via /api/v2/teams/N/roles/
             TeamAccess(org_admin).can_attach(team, organization.workflow_admin_role, 'roles'),
             # use via /api/v2/roles/teams/
-            RoleAccess(org_admin).can_attach(organization.workflow_admin_role, team, 'member_role.parents')
+            RoleAccess(org_admin).can_attach(organization.workflow_admin_role, team, 'member_role.parents'),
         ] == [True for i in range(2)]
         assert [
             # use via /api/v2/teams/N/roles/
             TeamAccess(org_admin).can_unattach(team, organization.workflow_admin_role, 'roles'),
             # use via /api/v2/roles/teams/
-            RoleAccess(org_admin).can_unattach(organization.workflow_admin_role, team, 'member_role.parents')
+            RoleAccess(org_admin).can_unattach(organization.workflow_admin_role, team, 'member_role.parents'),
         ] == [True for i in range(2)]
 
 
 @pytest.mark.django_db
 def test_user_accessible_objects(user, organization):
-    '''
+    """
     We cannot directly use accessible_objects for User model because
     both editing and read permissions are obligated to complex business logic
-    '''
+    """
     admin = user('admin', False)
     u = user('john', False)
     access = UserAccess(admin)
@@ -140,9 +144,7 @@ def test_user_accessible_objects(user, organization):
 @pytest.mark.django_db
 def test_org_admin_create_sys_auditor(org_admin):
     access = UserAccess(org_admin)
-    assert not access.can_add(data=dict(
-        username='new_user', password="pa$$sowrd", email="asdf@redhat.com",
-        is_system_auditor='true'))
+    assert not access.can_add(data=dict(username='new_user', password="pa$$sowrd", email="asdf@redhat.com", is_system_auditor='true'))
 
 
 @pytest.mark.django_db

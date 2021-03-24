@@ -30,6 +30,4 @@ class Migration(migrations.Migration):
         ('main', '0069_v350_generate_unique_install_uuid'),
     ]
 
-    operations = [
-        migrations.RunPython(gce_id_forward, gce_id_backward)
-    ]
+    operations = [migrations.RunPython(gce_id_forward, gce_id_backward)]

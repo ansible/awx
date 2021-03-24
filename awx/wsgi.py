@@ -6,12 +6,13 @@ from awx import __version__ as tower_version
 
 # Prepare the AWX environment.
 from awx import prepare_env, MODE
+
 prepare_env()
 
 import django  # NOQA
 from django.conf import settings  # NOQA
 from django.urls import resolve  # NOQA
-from django.core.wsgi import get_wsgi_application # NOQA
+from django.core.wsgi import get_wsgi_application  # NOQA
 import social_django  # NOQA
 
 

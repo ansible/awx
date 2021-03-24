@@ -5,11 +5,7 @@ from rest_framework.exceptions import PermissionDenied
 from awx.main.models.inventory import Inventory
 from awx.main.models.credential import Credential
 from awx.main.models.jobs import JobTemplate, Job
-from awx.main.access import (
-    UnifiedJobAccess,
-    WorkflowJobAccess, WorkflowJobNodeAccess,
-    JobAccess
-)
+from awx.main.access import UnifiedJobAccess, WorkflowJobAccess, WorkflowJobNodeAccess, JobAccess
 
 
 @pytest.mark.django_db
@@ -99,19 +95,19 @@ class TestJobRelaunchAccess:
     @pytest.fixture
     def job_with_prompts(self, machine_credential, inventory, organization, credentialtype_ssh):
         jt = JobTemplate.objects.create(
-            name='test-job-template-prompts', inventory=inventory,
-            ask_tags_on_launch=True, ask_variables_on_launch=True, ask_skip_tags_on_launch=True,
-            ask_limit_on_launch=True, ask_job_type_on_launch=True, ask_verbosity_on_launch=True,
-            ask_inventory_on_launch=True, ask_credential_on_launch=True)
-        jt.credentials.add(machine_credential)
-        new_cred = Credential.objects.create(
-            name='new-cred',
-            credential_type=credentialtype_ssh,
-            inputs={
-                'username': 'test_user',
-                'password': 'pas4word'
-            }
+            name='test-job-template-prompts',
+            inventory=inventory,
+            ask_tags_on_launch=True,
+            ask_variables_on_launch=True,
+            ask_skip_tags_on_launch=True,
+            ask_limit_on_launch=True,
+            ask_job_type_on_launch=True,
+            ask_verbosity_on_launch=True,
+            ask_inventory_on_launch=True,
+            ask_credential_on_launch=True,
         )
+        jt.credentials.add(machine_credential)
+        new_cred = Credential.objects.create(name='new-cred', credential_type=credentialtype_ssh, inputs={'username': 'test_user', 'password': 'pas4word'})
         new_cred.save()
         new_inv = Inventory.objects.create(name='new-inv', organization=organization)
         return jt.create_unified_job(credentials=[new_cred], inventory=new_inv)

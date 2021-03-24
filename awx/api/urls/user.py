@@ -20,7 +20,7 @@ from awx.api.views import (
     UserAuthorizedTokenList,
 )
 
-urls = [ 
+urls = [
     url(r'^$', UserList.as_view(), name='user_list'),
     url(r'^(?P<pk>[0-9]+)/$', UserDetail.as_view(), name='user_detail'),
     url(r'^(?P<pk>[0-9]+)/teams/$', UserTeamsList.as_view(), name='user_teams_list'),
@@ -35,7 +35,6 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/tokens/$', OAuth2UserTokenList.as_view(), name='o_auth2_token_list'),
     url(r'^(?P<pk>[0-9]+)/authorized_tokens/$', UserAuthorizedTokenList.as_view(), name='user_authorized_token_list'),
     url(r'^(?P<pk>[0-9]+)/personal_tokens/$', UserPersonalTokenList.as_view(), name='user_personal_token_list'),
-    
-] 
+]
 
 __all__ = ['urls']

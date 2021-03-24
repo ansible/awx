@@ -17,10 +17,10 @@ import taggit.managers
 
 
 def create_system_job_templates(apps, schema_editor):
-    '''
+    """
     Create default system job templates if not present. Create default schedules
     only if new system job templates were created (i.e. new database).
-    '''
+    """
 
     SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
     Schedule = apps.get_model('main', 'Schedule')
@@ -104,24 +104,26 @@ def create_system_job_templates(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    replaces = [('main', '0002_v300_tower_settings_changes'),
-                ('main', '0003_v300_notification_changes'),
-                ('main', '0004_v300_fact_changes'),
-                ('main', '0005_v300_migrate_facts'),
-                ('main', '0006_v300_active_flag_cleanup'),
-                ('main', '0007_v300_active_flag_removal'),
-                ('main', '0008_v300_rbac_changes'),
-                ('main', '0009_v300_rbac_migrations'),
-                ('main', '0010_v300_create_system_job_templates'),
-                ('main', '0011_v300_credential_domain_field'),
-                ('main', '0012_v300_create_labels'),
-                ('main', '0013_v300_label_changes'),
-                ('main', '0014_v300_invsource_cred'),
-                ('main', '0015_v300_label_changes'),
-                ('main', '0016_v300_prompting_changes'),
-                ('main', '0017_v300_prompting_migrations'),
-                ('main', '0018_v300_host_ordering'),
-                ('main', '0019_v300_new_azure_credential'),]
+    replaces = [
+        ('main', '0002_v300_tower_settings_changes'),
+        ('main', '0003_v300_notification_changes'),
+        ('main', '0004_v300_fact_changes'),
+        ('main', '0005_v300_migrate_facts'),
+        ('main', '0006_v300_active_flag_cleanup'),
+        ('main', '0007_v300_active_flag_removal'),
+        ('main', '0008_v300_rbac_changes'),
+        ('main', '0009_v300_rbac_migrations'),
+        ('main', '0010_v300_create_system_job_templates'),
+        ('main', '0011_v300_credential_domain_field'),
+        ('main', '0012_v300_create_labels'),
+        ('main', '0013_v300_label_changes'),
+        ('main', '0014_v300_invsource_cred'),
+        ('main', '0015_v300_label_changes'),
+        ('main', '0016_v300_prompting_changes'),
+        ('main', '0017_v300_prompting_migrations'),
+        ('main', '0018_v300_host_ordering'),
+        ('main', '0019_v300_new_azure_credential'),
+    ]
 
     dependencies = [
         ('taggit', '0002_auto_20150616_2121'),
@@ -142,8 +144,25 @@ class Migration(migrations.Migration):
                 ('description', models.TextField()),
                 ('category', models.CharField(max_length=128)),
                 ('value', models.TextField(blank=True)),
-                ('value_type', models.CharField(max_length=12, choices=[('string', 'String'), ('int', 'Integer'), ('float', 'Decimal'), ('json', 'JSON'), ('bool', 'Boolean'), ('password', 'Password'), ('list', 'List')])),
-                ('user', models.ForeignKey(related_name='settings', default=None, editable=False, to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)),
+                (
+                    'value_type',
+                    models.CharField(
+                        max_length=12,
+                        choices=[
+                            ('string', 'String'),
+                            ('int', 'Integer'),
+                            ('float', 'Decimal'),
+                            ('json', 'JSON'),
+                            ('bool', 'Boolean'),
+                            ('password', 'Password'),
+                            ('list', 'List'),
+                        ],
+                    ),
+                ),
+                (
+                    'user',
+                    models.ForeignKey(related_name='settings', default=None, editable=False, to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True),
+                ),
             ],
         ),
         # Notification changes
@@ -153,10 +172,31 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
-                ('status', models.CharField(default='pending', max_length=20, editable=False, choices=[('pending', 'Pending'), ('successful', 'Successful'), ('failed', 'Failed')])),
+                (
+                    'status',
+                    models.CharField(
+                        default='pending', max_length=20, editable=False, choices=[('pending', 'Pending'), ('successful', 'Successful'), ('failed', 'Failed')]
+                    ),
+                ),
                 ('error', models.TextField(default='', editable=False, blank=True)),
                 ('notifications_sent', models.IntegerField(default=0, editable=False)),
-                ('notification_type', models.CharField(max_length=32, choices=[('email', 'Email'), ('slack', 'Slack'), ('twilio', 'Twilio'), ('pagerduty', 'Pagerduty'), ('hipchat', 'HipChat'), ('webhook', 'Webhook'), ('mattermost', 'Mattermost'), ('rocketchat', 'Rocket.Chat'), ('irc', 'IRC')])),
+                (
+                    'notification_type',
+                    models.CharField(
+                        max_length=32,
+                        choices=[
+                            ('email', 'Email'),
+                            ('slack', 'Slack'),
+                            ('twilio', 'Twilio'),
+                            ('pagerduty', 'Pagerduty'),
+                            ('hipchat', 'HipChat'),
+                            ('webhook', 'Webhook'),
+                            ('mattermost', 'Mattermost'),
+                            ('rocketchat', 'Rocket.Chat'),
+                            ('irc', 'IRC'),
+                        ],
+                    ),
+                ),
                 ('recipients', models.TextField(default='', editable=False, blank=True)),
                 ('subject', models.TextField(default='', editable=False, blank=True)),
                 ('body', jsonfield.fields.JSONField(default=dict, blank=True)),
@@ -173,12 +213,56 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('description', models.TextField(default='', blank=True)),
                 ('name', models.CharField(unique=True, max_length=512)),
-                ('notification_type', models.CharField(max_length=32, choices=[('email', 'Email'), ('slack', 'Slack'), ('twilio', 'Twilio'), ('pagerduty', 'Pagerduty'), ('hipchat', 'HipChat'), ('webhook', 'Webhook'), ('mattermost', 'Mattermost'), ('rocketchat', 'Rocket.Chat'), ('irc', 'IRC')])),
+                (
+                    'notification_type',
+                    models.CharField(
+                        max_length=32,
+                        choices=[
+                            ('email', 'Email'),
+                            ('slack', 'Slack'),
+                            ('twilio', 'Twilio'),
+                            ('pagerduty', 'Pagerduty'),
+                            ('hipchat', 'HipChat'),
+                            ('webhook', 'Webhook'),
+                            ('mattermost', 'Mattermost'),
+                            ('rocketchat', 'Rocket.Chat'),
+                            ('irc', 'IRC'),
+                        ],
+                    ),
+                ),
                 ('notification_configuration', jsonfield.fields.JSONField(default=dict)),
-                ('created_by', models.ForeignKey(related_name="{u'class': 'notificationtemplate', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name="{u'class': 'notificationtemplate', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('organization', models.ForeignKey(related_name='notification_templates', on_delete=django.db.models.deletion.SET_NULL, to='main.Organization', null=True)),
-                ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
+                (
+                    'created_by',
+                    models.ForeignKey(
+                        related_name="{u'class': 'notificationtemplate', u'app_label': 'main'}(class)s_created+",
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        default=None,
+                        editable=False,
+                        to=settings.AUTH_USER_MODEL,
+                        null=True,
+                    ),
+                ),
+                (
+                    'modified_by',
+                    models.ForeignKey(
+                        related_name="{u'class': 'notificationtemplate', u'app_label': 'main'}(class)s_modified+",
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        default=None,
+                        editable=False,
+                        to=settings.AUTH_USER_MODEL,
+                        null=True,
+                    ),
+                ),
+                (
+                    'organization',
+                    models.ForeignKey(related_name='notification_templates', on_delete=django.db.models.deletion.SET_NULL, to='main.Organization', null=True),
+                ),
+                (
+                    'tags',
+                    taggit.managers.TaggableManager(
+                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
@@ -238,8 +322,18 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('timestamp', models.DateTimeField(default=None, help_text='Date and time of the corresponding fact scan gathering time.', editable=False)),
                 ('module', models.CharField(max_length=128)),
-                ('facts', awx.main.fields.JSONBField(default=dict, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True)),
-                ('host', models.ForeignKey(related_name='facts', to='main.Host', on_delete=models.CASCADE, help_text='Host for the facts that the fact scan captured.')),
+                (
+                    'facts',
+                    awx.main.fields.JSONBField(
+                        default=dict, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True
+                    ),
+                ),
+                (
+                    'host',
+                    models.ForeignKey(
+                        related_name='facts', to='main.Host', on_delete=models.CASCADE, help_text='Host for the facts that the fact scan captured.'
+                    ),
+                ),
             ],
         ),
         migrations.AlterIndexTogether(
@@ -291,7 +385,6 @@ class Migration(migrations.Migration):
             model_name='unifiedjobtemplate',
             name='active',
         ),
-
         # RBAC Changes
         # ############
         migrations.RenameField(
@@ -368,7 +461,6 @@ class Migration(migrations.Migration):
             name='organization',
             field=models.ForeignKey(related_name='credentials', on_delete=models.CASCADE, default=None, blank=True, to='main.Organization', null=True),
         ),
-
         #
         # New RBAC models and fields
         #
@@ -383,7 +475,6 @@ class Migration(migrations.Migration):
                 ('implicit_parents', models.TextField(default='[]')),
                 ('content_type', models.ForeignKey(default=None, to='contenttypes.ContentType', on_delete=models.CASCADE, null=True)),
                 ('object_id', models.PositiveIntegerField(default=None, null=True)),
-
             ],
             options={
                 'db_table': 'main_rbac_roles',
@@ -431,7 +522,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='credential',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['singleton:system_auditor', 'organization.auditor_role', 'use_role', 'admin_role'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+', parent_role=['singleton:system_auditor', 'organization.auditor_role', 'use_role', 'admin_role'], to='main.Role', null='True'
+            ),
         ),
         migrations.AddField(
             model_name='custominventoryscript',
@@ -441,7 +534,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='custominventoryscript',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['organization.auditor_role', 'organization.member_role', 'admin_role'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+', parent_role=['organization.auditor_role', 'organization.member_role', 'admin_role'], to='main.Role', null='True'
+            ),
         ),
         migrations.AddField(
             model_name='inventory',
@@ -466,12 +561,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inventory',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['organization.auditor_role',  'update_role', 'use_role', 'admin_role'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+', parent_role=['organization.auditor_role', 'update_role', 'use_role', 'admin_role'], to='main.Role', null='True'
+            ),
         ),
         migrations.AddField(
             model_name='jobtemplate',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['project.organization.admin_role', 'inventory.organization.admin_role'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+', parent_role=['project.organization.admin_role', 'inventory.organization.admin_role'], to='main.Role', null='True'
+            ),
         ),
         migrations.AddField(
             model_name='jobtemplate',
@@ -481,7 +580,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobtemplate',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['project.organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+',
+                parent_role=['project.organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'],
+                to='main.Role',
+                null='True',
+            ),
         ),
         migrations.AddField(
             model_name='organization',
@@ -506,7 +610,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['organization.admin_role', 'singleton:system_administrator'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+', parent_role=['organization.admin_role', 'singleton:system_administrator'], to='main.Role', null='True'
+            ),
         ),
         migrations.AddField(
             model_name='project',
@@ -521,7 +627,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['organization.auditor_role', 'singleton:system_auditor', 'use_role', 'update_role'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+', parent_role=['organization.auditor_role', 'singleton:system_auditor', 'use_role', 'update_role'], to='main.Role', null='True'
+            ),
         ),
         migrations.AddField(
             model_name='team',
@@ -536,20 +644,39 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='team',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['admin_role', 'organization.auditor_role', 'member_role'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+', parent_role=['admin_role', 'organization.auditor_role', 'member_role'], to='main.Role', null='True'
+            ),
         ),
-
         # System Job Templates
         migrations.RunPython(create_system_job_templates, migrations.RunPython.noop),
         migrations.AlterField(
             model_name='systemjob',
             name='job_type',
-            field=models.CharField(default='', max_length=32, blank=True, choices=[('cleanup_jobs', 'Remove jobs older than a certain number of days'), ('cleanup_activitystream', 'Remove activity stream entries older than a certain number of days'), ('cleanup_facts', 'Purge and/or reduce the granularity of system tracking data')]),
+            field=models.CharField(
+                default='',
+                max_length=32,
+                blank=True,
+                choices=[
+                    ('cleanup_jobs', 'Remove jobs older than a certain number of days'),
+                    ('cleanup_activitystream', 'Remove activity stream entries older than a certain number of days'),
+                    ('cleanup_facts', 'Purge and/or reduce the granularity of system tracking data'),
+                ],
+            ),
         ),
         migrations.AlterField(
             model_name='systemjobtemplate',
             name='job_type',
-            field=models.CharField(default='', max_length=32, blank=True, choices=[('cleanup_jobs', 'Remove jobs older than a certain number of days'), ('cleanup_activitystream', 'Remove activity stream entries older than a certain number of days'), ('cleanup_facts', 'Purge and/or reduce the granularity of system tracking data')]),
+            field=models.CharField(
+                default='',
+                max_length=32,
+                blank=True,
+                choices=[
+                    ('cleanup_jobs', 'Remove jobs older than a certain number of days'),
+                    ('cleanup_activitystream', 'Remove activity stream entries older than a certain number of days'),
+                    ('cleanup_facts', 'Purge and/or reduce the granularity of system tracking data'),
+                ],
+            ),
         ),
         # Credential domain field
         migrations.AddField(
@@ -566,10 +693,43 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('description', models.TextField(default='', blank=True)),
                 ('name', models.CharField(max_length=512)),
-                ('created_by', models.ForeignKey(related_name="{u'class': 'label', u'app_label': 'main'}(class)s_created+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name="{u'class': 'label', u'app_label': 'main'}(class)s_modified+", on_delete=django.db.models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
-                ('organization', models.ForeignKey(related_name='labels', on_delete=django.db.models.deletion.CASCADE, to='main.Organization', help_text='Organization this label belongs to.')),
-                ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
+                (
+                    'created_by',
+                    models.ForeignKey(
+                        related_name="{u'class': 'label', u'app_label': 'main'}(class)s_created+",
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        default=None,
+                        editable=False,
+                        to=settings.AUTH_USER_MODEL,
+                        null=True,
+                    ),
+                ),
+                (
+                    'modified_by',
+                    models.ForeignKey(
+                        related_name="{u'class': 'label', u'app_label': 'main'}(class)s_modified+",
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        default=None,
+                        editable=False,
+                        to=settings.AUTH_USER_MODEL,
+                        null=True,
+                    ),
+                ),
+                (
+                    'organization',
+                    models.ForeignKey(
+                        related_name='labels',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='main.Organization',
+                        help_text='Organization this label belongs to.',
+                    ),
+                ),
+                (
+                    'tags',
+                    taggit.managers.TaggableManager(
+                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
+                    ),
+                ),
             ],
             options={
                 'ordering': ('organization', 'name'),
@@ -598,23 +758,47 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='label',
             name='organization',
-            field=models.ForeignKey(related_name='labels', on_delete=django.db.models.deletion.CASCADE, default=None, blank=True, to='main.Organization', help_text='Organization this label belongs to.', null=True),
+            field=models.ForeignKey(
+                related_name='labels',
+                on_delete=django.db.models.deletion.CASCADE,
+                default=None,
+                blank=True,
+                to='main.Organization',
+                help_text='Organization this label belongs to.',
+                null=True,
+            ),
         ),
         migrations.AlterField(
             model_name='label',
             name='organization',
-            field=models.ForeignKey(related_name='labels', on_delete=django.db.models.deletion.CASCADE, to='main.Organization', help_text='Organization this label belongs to.'),
+            field=models.ForeignKey(
+                related_name='labels', on_delete=django.db.models.deletion.CASCADE, to='main.Organization', help_text='Organization this label belongs to.'
+            ),
         ),
         # InventorySource Credential
         migrations.AddField(
             model_name='job',
             name='network_credential',
-            field=models.ForeignKey(related_name='jobs_as_network_credential+', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
+            field=models.ForeignKey(
+                related_name='jobs_as_network_credential+',
+                on_delete=django.db.models.deletion.SET_NULL,
+                default=None,
+                blank=True,
+                to='main.Credential',
+                null=True,
+            ),
         ),
         migrations.AddField(
             model_name='jobtemplate',
             name='network_credential',
-            field=models.ForeignKey(related_name='jobtemplates_as_network_credential+', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
+            field=models.ForeignKey(
+                related_name='jobtemplates_as_network_credential+',
+                on_delete=django.db.models.deletion.SET_NULL,
+                default=None,
+                blank=True,
+                to='main.Credential',
+                null=True,
+            ),
         ),
         migrations.AddField(
             model_name='credential',
@@ -629,27 +813,86 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='deprecated_team',
-            field=models.ForeignKey(related_name='deprecated_credentials', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Team', null=True),
+            field=models.ForeignKey(
+                related_name='deprecated_credentials', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Team', null=True
+            ),
         ),
         migrations.AlterField(
             model_name='credential',
             name='deprecated_user',
-            field=models.ForeignKey(related_name='deprecated_credentials', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(
+                related_name='deprecated_credentials',
+                on_delete=django.db.models.deletion.SET_NULL,
+                default=None,
+                blank=True,
+                to=settings.AUTH_USER_MODEL,
+                null=True,
+            ),
         ),
         migrations.AlterField(
             model_name='credential',
             name='kind',
-            field=models.CharField(default='ssh', max_length=32, choices=[('ssh', 'Machine'), ('net', 'Network'), ('scm', 'Source Control'), ('aws', 'Amazon Web Services'), ('rax', 'Rackspace'), ('vmware', 'VMware vCenter'), ('satellite6', 'Red Hat Satellite 6'), ('cloudforms', 'Red Hat CloudForms'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure'), ('openstack', 'OpenStack')]),
+            field=models.CharField(
+                default='ssh',
+                max_length=32,
+                choices=[
+                    ('ssh', 'Machine'),
+                    ('net', 'Network'),
+                    ('scm', 'Source Control'),
+                    ('aws', 'Amazon Web Services'),
+                    ('rax', 'Rackspace'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Red Hat Satellite 6'),
+                    ('cloudforms', 'Red Hat CloudForms'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure', 'Microsoft Azure'),
+                    ('openstack', 'OpenStack'),
+                ],
+            ),
         ),
         migrations.AlterField(
             model_name='inventorysource',
             name='source',
-            field=models.CharField(default='', max_length=32, blank=True, choices=[('', 'Manual'), ('file', 'Local File, Directory or Script'), ('rax', 'Rackspace Cloud Servers'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure'), ('vmware', 'VMware vCenter'), ('satellite6', 'Red Hat Satellite 6'), ('cloudforms', 'Red Hat CloudForms'), ('openstack', 'OpenStack'), ('custom', 'Custom Script')]),
+            field=models.CharField(
+                default='',
+                max_length=32,
+                blank=True,
+                choices=[
+                    ('', 'Manual'),
+                    ('file', 'Local File, Directory or Script'),
+                    ('rax', 'Rackspace Cloud Servers'),
+                    ('ec2', 'Amazon EC2'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure', 'Microsoft Azure'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Red Hat Satellite 6'),
+                    ('cloudforms', 'Red Hat CloudForms'),
+                    ('openstack', 'OpenStack'),
+                    ('custom', 'Custom Script'),
+                ],
+            ),
         ),
         migrations.AlterField(
             model_name='inventoryupdate',
             name='source',
-            field=models.CharField(default='', max_length=32, blank=True, choices=[('', 'Manual'), ('file', 'Local File, Directory or Script'), ('rax', 'Rackspace Cloud Servers'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure'), ('vmware', 'VMware vCenter'), ('satellite6', 'Red Hat Satellite 6'), ('cloudforms', 'Red Hat CloudForms'), ('openstack', 'OpenStack'), ('custom', 'Custom Script')]),
+            field=models.CharField(
+                default='',
+                max_length=32,
+                blank=True,
+                choices=[
+                    ('', 'Manual'),
+                    ('file', 'Local File, Directory or Script'),
+                    ('rax', 'Rackspace Cloud Servers'),
+                    ('ec2', 'Amazon EC2'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure', 'Microsoft Azure'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Red Hat Satellite 6'),
+                    ('cloudforms', 'Red Hat CloudForms'),
+                    ('openstack', 'OpenStack'),
+                    ('custom', 'Custom Script'),
+                ],
+            ),
         ),
         migrations.AlterField(
             model_name='team',
@@ -685,12 +928,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='job',
             name='inventory',
-            field=models.ForeignKey(related_name='jobs', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Inventory', null=True),
+            field=models.ForeignKey(
+                related_name='jobs', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Inventory', null=True
+            ),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='inventory',
-            field=models.ForeignKey(related_name='jobtemplates', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Inventory', null=True),
+            field=models.ForeignKey(
+                related_name='jobtemplates', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Inventory', null=True
+            ),
         ),
         # Host ordering
         migrations.AlterModelOptions(
@@ -721,7 +968,24 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='kind',
-            field=models.CharField(default='ssh', max_length=32, choices=[('ssh', 'Machine'), ('net', 'Network'), ('scm', 'Source Control'), ('aws', 'Amazon Web Services'), ('rax', 'Rackspace'), ('vmware', 'VMware vCenter'), ('satellite6', 'Satellite 6'), ('cloudforms', 'CloudForms'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure Classic (deprecated)'), ('azure_rm', 'Microsoft Azure Resource Manager'), ('openstack', 'OpenStack')]),
+            field=models.CharField(
+                default='ssh',
+                max_length=32,
+                choices=[
+                    ('ssh', 'Machine'),
+                    ('net', 'Network'),
+                    ('scm', 'Source Control'),
+                    ('aws', 'Amazon Web Services'),
+                    ('rax', 'Rackspace'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Satellite 6'),
+                    ('cloudforms', 'CloudForms'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure', 'Microsoft Azure Classic (deprecated)'),
+                    ('azure_rm', 'Microsoft Azure Resource Manager'),
+                    ('openstack', 'OpenStack'),
+                ],
+            ),
         ),
         migrations.AlterField(
             model_name='host',
@@ -731,11 +995,47 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='inventorysource',
             name='source',
-            field=models.CharField(default='', max_length=32, blank=True, choices=[('', 'Manual'), ('file', 'Local File, Directory or Script'), ('rax', 'Rackspace Cloud Servers'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure Classic (deprecated)'), ('azure_rm', 'Microsoft Azure Resource Manager'), ('vmware', 'VMware vCenter'), ('satellite6', 'Satellite 6'), ('cloudforms', 'CloudForms'), ('openstack', 'OpenStack'), ('custom', 'Custom Script')]),
+            field=models.CharField(
+                default='',
+                max_length=32,
+                blank=True,
+                choices=[
+                    ('', 'Manual'),
+                    ('file', 'Local File, Directory or Script'),
+                    ('rax', 'Rackspace Cloud Servers'),
+                    ('ec2', 'Amazon EC2'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure', 'Microsoft Azure Classic (deprecated)'),
+                    ('azure_rm', 'Microsoft Azure Resource Manager'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Satellite 6'),
+                    ('cloudforms', 'CloudForms'),
+                    ('openstack', 'OpenStack'),
+                    ('custom', 'Custom Script'),
+                ],
+            ),
         ),
         migrations.AlterField(
             model_name='inventoryupdate',
             name='source',
-            field=models.CharField(default='', max_length=32, blank=True, choices=[('', 'Manual'), ('file', 'Local File, Directory or Script'), ('rax', 'Rackspace Cloud Servers'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure Classic (deprecated)'), ('azure_rm', 'Microsoft Azure Resource Manager'), ('vmware', 'VMware vCenter'), ('satellite6', 'Satellite 6'), ('cloudforms', 'CloudForms'), ('openstack', 'OpenStack'), ('custom', 'Custom Script')]),
+            field=models.CharField(
+                default='',
+                max_length=32,
+                blank=True,
+                choices=[
+                    ('', 'Manual'),
+                    ('file', 'Local File, Directory or Script'),
+                    ('rax', 'Rackspace Cloud Servers'),
+                    ('ec2', 'Amazon EC2'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure', 'Microsoft Azure Classic (deprecated)'),
+                    ('azure_rm', 'Microsoft Azure Resource Manager'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Satellite 6'),
+                    ('cloudforms', 'CloudForms'),
+                    ('openstack', 'OpenStack'),
+                    ('custom', 'Custom Script'),
+                ],
+            ),
         ),
     ]

@@ -17,18 +17,27 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='scm_refspec',
-            field=models.CharField(blank=True, default='', help_text='For git projects, an additional refspec to fetch.', max_length=1024, verbose_name='SCM refspec'),
+            field=models.CharField(
+                blank=True, default='', help_text='For git projects, an additional refspec to fetch.', max_length=1024, verbose_name='SCM refspec'
+            ),
         ),
         migrations.AddField(
             model_name='projectupdate',
             name='scm_refspec',
-            field=models.CharField(blank=True, default='', help_text='For git projects, an additional refspec to fetch.', max_length=1024, verbose_name='SCM refspec'),
+            field=models.CharField(
+                blank=True, default='', help_text='For git projects, an additional refspec to fetch.', max_length=1024, verbose_name='SCM refspec'
+            ),
         ),
         # Add fields for job specification of project branch
         migrations.AddField(
             model_name='job',
             name='scm_branch',
-            field=models.CharField(blank=True, default='', help_text='Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.', max_length=1024),
+            field=models.CharField(
+                blank=True,
+                default='',
+                help_text='Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.',
+                max_length=1024,
+            ),
         ),
         migrations.AddField(
             model_name='jobtemplate',
@@ -38,7 +47,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobtemplate',
             name='scm_branch',
-            field=models.CharField(blank=True, default='', help_text='Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.', max_length=1024),
+            field=models.CharField(
+                blank=True,
+                default='',
+                help_text='Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.',
+                max_length=1024,
+            ),
         ),
         migrations.AddField(
             model_name='project',
@@ -49,12 +63,23 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='project',
             name='scm_update_cache_timeout',
-            field=models.PositiveIntegerField(blank=True, default=0, help_text='The number of seconds after the last project update ran that a new project update will be launched as a job dependency.'),
+            field=models.PositiveIntegerField(
+                blank=True,
+                default=0,
+                help_text='The number of seconds after the last project update ran that a new project update will be launched as a job dependency.',
+            ),
         ),
         # Start tracking the fetched revision on project update model
         migrations.AddField(
             model_name='projectupdate',
             name='scm_revision',
-            field=models.CharField(blank=True, default='', editable=False, help_text='The SCM Revision discovered by this update for the given project and branch.', max_length=1024, verbose_name='SCM Revision'),
+            field=models.CharField(
+                blank=True,
+                default='',
+                editable=False,
+                help_text='The SCM Revision discovered by this update for the given project and branch.',
+                max_length=1024,
+                verbose_name='SCM Revision',
+            ),
         ),
     ]

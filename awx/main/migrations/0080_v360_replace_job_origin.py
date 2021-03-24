@@ -31,5 +31,5 @@ class Migration(migrations.Migration):
         migrations.DeleteModel(
             name='JobOrigin',
         ),
-        migrations.RunPython(lambda apps, schema_editor: set_current_apps(apps), migrations.RunPython.noop)
+        migrations.RunPython(lambda apps, schema_editor: set_current_apps(apps), migrations.RunPython.noop),
     ]

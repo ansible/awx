@@ -4,12 +4,22 @@ import pytest
 
 from rest_framework.exceptions import PermissionDenied, ParseError
 from awx.api.filters import FieldLookupBackend, OrderByBackend, get_field_from_path
-from awx.main.models import (AdHocCommand, ActivityStream,
-                             CustomInventoryScript, Credential, Job,
-                             JobTemplate, SystemJob, UnifiedJob, User,
-                             WorkflowJob, WorkflowJobTemplate,
-                             WorkflowJobOptions, InventorySource,
-                             JobEvent)
+from awx.main.models import (
+    AdHocCommand,
+    ActivityStream,
+    CustomInventoryScript,
+    Credential,
+    Job,
+    JobTemplate,
+    SystemJob,
+    UnifiedJob,
+    User,
+    WorkflowJob,
+    WorkflowJobTemplate,
+    WorkflowJobOptions,
+    InventorySource,
+    JobEvent,
+)
 from awx.main.models.oauth import OAuth2Application
 from awx.main.models.jobs import JobOptions
 
@@ -79,25 +89,28 @@ def test_filter_on_password_field(password_field, lookup_suffix):
     assert 'not allowed' in str(excinfo.value)
 
 
-@pytest.mark.parametrize('model, query', [
-    (User, 'password__icontains'),
-    (User, 'settings__value__icontains'),
-    (User, 'main_oauth2accesstoken__token__gt'),
-    (UnifiedJob, 'job_args__icontains'),
-    (UnifiedJob, 'job_env__icontains'),
-    (UnifiedJob, 'start_args__icontains'),
-    (AdHocCommand, 'extra_vars__icontains'),
-    (JobOptions, 'extra_vars__icontains'),
-    (SystemJob, 'extra_vars__icontains'),
-    (WorkflowJobOptions, 'extra_vars__icontains'),
-    (Job, 'survey_passwords__icontains'),
-    (WorkflowJob, 'survey_passwords__icontains'),
-    (JobTemplate, 'survey_spec__icontains'),
-    (WorkflowJobTemplate, 'survey_spec__icontains'),
-    (CustomInventoryScript, 'script__icontains'),
-    (ActivityStream, 'o_auth2_application__client_secret__gt'),
-    (OAuth2Application, 'grant__code__gt')
-])
+@pytest.mark.parametrize(
+    'model, query',
+    [
+        (User, 'password__icontains'),
+        (User, 'settings__value__icontains'),
+        (User, 'main_oauth2accesstoken__token__gt'),
+        (UnifiedJob, 'job_args__icontains'),
+        (UnifiedJob, 'job_env__icontains'),
+        (UnifiedJob, 'start_args__icontains'),
+        (AdHocCommand, 'extra_vars__icontains'),
+        (JobOptions, 'extra_vars__icontains'),
+        (SystemJob, 'extra_vars__icontains'),
+        (WorkflowJobOptions, 'extra_vars__icontains'),
+        (Job, 'survey_passwords__icontains'),
+        (WorkflowJob, 'survey_passwords__icontains'),
+        (JobTemplate, 'survey_spec__icontains'),
+        (WorkflowJobTemplate, 'survey_spec__icontains'),
+        (CustomInventoryScript, 'script__icontains'),
+        (ActivityStream, 'o_auth2_application__client_secret__gt'),
+        (OAuth2Application, 'grant__code__gt'),
+    ],
+)
 def test_filter_sensitive_fields_and_relations(model, query):
     field_lookup = FieldLookupBackend()
     with pytest.raises(PermissionDenied) as excinfo:

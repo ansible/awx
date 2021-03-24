@@ -1,20 +1,10 @@
-
 import pytest
 import re
 from unittest import mock
 
-from awx.sso.pipeline import (
-    update_user_orgs,
-    update_user_teams,
-    update_user_orgs_by_saml_attr,
-    update_user_teams_by_saml_attr,
-)
+from awx.sso.pipeline import update_user_orgs, update_user_teams, update_user_orgs_by_saml_attr, update_user_teams_by_saml_attr
 
-from awx.main.models import (
-    User,
-    Team,
-    Organization
-)
+from awx.main.models import User, Team, Organization
 
 
 @pytest.fixture
@@ -26,33 +16,13 @@ def users():
 
 
 @pytest.mark.django_db
-class TestSAMLMap():
-
+class TestSAMLMap:
     @pytest.fixture
     def backend(self):
         class Backend:
             s = {
-                'ORGANIZATION_MAP': {
-                    'Default': {
-                        'remove': True,
-                        'admins': 'foobar',
-                        'remove_admins': True,
-                        'users': 'foo',
-                        'remove_users': True,
-                    }
-                },
-                'TEAM_MAP': {
-                    'Blue': {
-                        'organization': 'Default',
-                        'remove': True,
-                        'users': '',
-                    },
-                    'Red': {
-                        'organization': 'Default',
-                        'remove': True,
-                        'users': '',
-                    }
-                }
+                'ORGANIZATION_MAP': {'Default': {'remove': True, 'admins': 'foobar', 'remove_admins': True, 'users': 'foo', 'remove_users': True}},
+                'TEAM_MAP': {'Blue': {'organization': 'Default', 'remove': True, 'users': ''}, 'Red': {'organization': 'Default', 'remove': True, 'users': ''}},
             }
 
             def setting(self, key):
@@ -132,17 +102,13 @@ class TestSAMLMap():
 
 
 @pytest.mark.django_db
-class TestSAMLAttr():
-
+class TestSAMLAttr:
     @pytest.fixture
     def kwargs(self):
         return {
             'username': u'cmeyers@redhat.com',
             'uid': 'idp:cmeyers@redhat.com',
-            'request': {
-                u'SAMLResponse': [],
-                u'RelayState': [u'idp']
-            },
+            'request': {u'SAMLResponse': [], u'RelayState': [u'idp']},
             'is_new': False,
             'response': {
                 'session_index': '_0728f0e0-b766-0135-75fa-02842b07c044',
@@ -156,14 +122,14 @@ class TestSAMLAttr():
                     'User.LastName': ['Meyers'],
                     'name_id': 'cmeyers@redhat.com',
                     'User.FirstName': ['Chris'],
-                    'PersonImmutableID': []
-                }
+                    'PersonImmutableID': [],
+                },
             },
             #'social': <UserSocialAuth: cmeyers@redhat.com>,
             'social': None,
             #'strategy': <awx.sso.strategies.django_strategy.AWXDjangoStrategy object at 0x8523a10>,
             'strategy': None,
-            'new_association': False
+            'new_association': False,
         }
 
     @pytest.fixture
@@ -181,7 +147,7 @@ class TestSAMLAttr():
         else:
             autocreate = True
 
-        class MockSettings():
+        class MockSettings:
             SAML_AUTO_CREATE_OBJECTS = autocreate
             SOCIAL_AUTH_SAML_ORGANIZATION_ATTR = {
                 'saml_attr': 'memberOf',
@@ -200,12 +166,10 @@ class TestSAMLAttr():
                     {'team': 'Red', 'organization': 'Default1'},
                     {'team': 'Green', 'organization': 'Default1'},
                     {'team': 'Green', 'organization': 'Default3'},
-                    {
-                        'team': 'Yellow', 'team_alias': 'Yellow_Alias',
-                        'organization': 'Default4', 'organization_alias': 'Default4_Alias'
-                    },
-                ]
+                    {'team': 'Yellow', 'team_alias': 'Yellow_Alias', 'organization': 'Default4', 'organization_alias': 'Default4_Alias'},
+                ],
             }
+
         return MockSettings()
 
     def test_update_user_orgs_by_saml_attr(self, orgs, users, kwargs, mock_settings):
@@ -308,8 +272,7 @@ class TestSAMLAttr():
 
             assert Team.objects.filter(name='Yellow', organization__name='Default4').count() == 0
             assert Team.objects.filter(name='Yellow_Alias', organization__name='Default4_Alias').count() == 1
-            assert Team.objects.get(
-                name='Yellow_Alias', organization__name='Default4_Alias').member_role.members.count() == 1
+            assert Team.objects.get(name='Yellow_Alias', organization__name='Default4_Alias').member_role.members.count() == 1
 
     @pytest.mark.fixture_args(autocreate=False)
     def test_autocreate_disabled(self, users, kwargs, mock_settings):

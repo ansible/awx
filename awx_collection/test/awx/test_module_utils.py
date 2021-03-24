@@ -1,4 +1,5 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import json
@@ -41,9 +42,7 @@ def test_version_warning(collection_import, silence_warning):
             my_module._COLLECTION_TYPE = "not-junk"
             my_module.collection_to_version['not-junk'] = 'not-junk'
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with(
-        'You are running collection version 1.0.0 but connecting to tower version 1.2.3'
-    )
+    silence_warning.assert_called_once_with('You are running collection version 1.0.0 but connecting to tower version 1.2.3')
 
 
 def test_type_warning(collection_import, silence_warning):
@@ -57,20 +56,13 @@ def test_type_warning(collection_import, silence_warning):
             my_module._COLLECTION_TYPE = "junk"
             my_module.collection_to_version['junk'] = 'junk'
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with(
-        'You are using the junk version of this collection but connecting to not-junk'
-    )
+    silence_warning.assert_called_once_with('You are using the junk version of this collection but connecting to not-junk')
 
 
 def test_duplicate_config(collection_import, silence_warning):
     # imports done here because of PATH issues unique to this test suite
     TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
-    data = {
-        'name': 'zigzoom',
-        'zig': 'zoom',
-        'tower_username': 'bob',
-        'tower_config_file': 'my_config'
-    }
+    data = {'name': 'zigzoom', 'zig': 'zoom', 'tower_username': 'bob', 'tower_config_file': 'my_config'}
 
     with mock.patch.object(TowerAPIModule, 'load_config') as mock_load:
         argument_spec = dict(
@@ -95,13 +87,11 @@ def test_no_templated_values(collection_import):
     """
     TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
     assert TowerAPIModule._COLLECTION_VERSION == "0.0.1-devel", (
-        'The collection version is templated when the collection is built '
-        'and the code should retain the placeholder of "0.0.1-devel".'
+        'The collection version is templated when the collection is built ' 'and the code should retain the placeholder of "0.0.1-devel".'
     )
     InventoryModule = collection_import('plugins.inventory.tower').InventoryModule
     assert InventoryModule.NAME == 'awx.awx.tower', (
-        'The inventory plugin FQCN is templated when the collection is built '
-        'and the code should retain the default of awx.awx.'
+        'The inventory plugin FQCN is templated when the collection is built ' 'and the code should retain the default of awx.awx.'
     )
 
 
@@ -115,15 +105,10 @@ def test_conflicting_name_and_id(run_module, admin_user):
     org_by_id = Organization.objects.create(name='foo')
     slug = str(org_by_id.id)
     org_by_name = Organization.objects.create(name=slug)
-    result = run_module('tower_team', {
-        'name': 'foo_team', 'description': 'fooin around',
-        'organization': slug
-    }, admin_user)
+    result = run_module('tower_team', {'name': 'foo_team', 'description': 'fooin around', 'organization': slug}, admin_user)
     assert not result.get('failed', False), result.get('msg', result)
     team = Team.objects.filter(name='foo_team').first()
-    assert str(team.organization_id) == slug, (
-        'Lookup by id should be preferenced over name in cases of conflict.'
-    )
+    assert str(team.organization_id) == slug, 'Lookup by id should be preferenced over name in cases of conflict.'
     assert team.organization.name == 'foo'
 
 
@@ -131,11 +116,21 @@ def test_multiple_lookup(run_module, admin_user):
     org1 = Organization.objects.create(name='foo')
     org2 = Organization.objects.create(name='bar')
     inv = Inventory.objects.create(name='Foo Inv')
-    proj1 = Project.objects.create(name='foo', organization=org1, scm_type='git', scm_url="https://github.com/ansible/ansible-tower-samples",)
-    proj2 = Project.objects.create(name='foo', organization=org2, scm_type='git', scm_url="https://github.com/ansible/ansible-tower-samples",)
-    result = run_module('tower_job_template', {
-        'name': 'Demo Job Template', 'project': proj1.name, 'inventory': inv.id, 'playbook': 'hello_world.yml'
-    }, admin_user)
+    proj1 = Project.objects.create(
+        name='foo',
+        organization=org1,
+        scm_type='git',
+        scm_url="https://github.com/ansible/ansible-tower-samples",
+    )
+    proj2 = Project.objects.create(
+        name='foo',
+        organization=org2,
+        scm_type='git',
+        scm_url="https://github.com/ansible/ansible-tower-samples",
+    )
+    result = run_module(
+        'tower_job_template', {'name': 'Demo Job Template', 'project': proj1.name, 'inventory': inv.id, 'playbook': 'hello_world.yml'}, admin_user
+    )
     assert result.get('failed', False)
     assert 'projects' in result['msg']
     assert 'foo' in result['msg']

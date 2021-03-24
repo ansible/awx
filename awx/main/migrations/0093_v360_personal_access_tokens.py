@@ -21,7 +21,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credentialtype',
             name='kind',
-            field=models.CharField(choices=[('ssh', 'Machine'), ('vault', 'Vault'), ('net', 'Network'), ('scm', 'Source Control'), ('cloud', 'Cloud'), ('token', 'Personal Access Token'), ('insights', 'Insights'), ('external', 'External')], max_length=32),
+            field=models.CharField(
+                choices=[
+                    ('ssh', 'Machine'),
+                    ('vault', 'Vault'),
+                    ('net', 'Network'),
+                    ('scm', 'Source Control'),
+                    ('cloud', 'Cloud'),
+                    ('token', 'Personal Access Token'),
+                    ('insights', 'Insights'),
+                    ('external', 'External'),
+                ],
+                max_length=32,
+            ),
         ),
         migrations.RunPython(setup_tower_managed_defaults),
     ]

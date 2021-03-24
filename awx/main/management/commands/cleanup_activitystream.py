@@ -15,22 +15,18 @@ from awx.main.models import ActivityStream
 
 
 class Command(BaseCommand):
-    '''
+    """
     Management command to purge old activity stream events.
-    '''
+    """
 
     help = 'Remove old activity stream events from the database'
 
     def add_arguments(self, parser):
-        parser.add_argument('--days', dest='days', type=int, default=90, metavar='N',
-                            help='Remove activity stream events more than N days old')
-        parser.add_argument('--dry-run', dest='dry_run', action='store_true',
-                            default=False, help='Dry run mode (show items that would '
-                            'be removed)')
+        parser.add_argument('--days', dest='days', type=int, default=90, metavar='N', help='Remove activity stream events more than N days old')
+        parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False, help='Dry run mode (show items that would ' 'be removed)')
 
     def init_logging(self):
-        log_levels = dict(enumerate([logging.ERROR, logging.INFO,
-                                     logging.DEBUG, 0]))
+        log_levels = dict(enumerate([logging.ERROR, logging.INFO, logging.DEBUG, 0]))
         self.logger = logging.getLogger('awx.main.commands.cleanup_activitystream')
         self.logger.setLevel(log_levels.get(self.verbosity, 0))
         handler = logging.StreamHandler()

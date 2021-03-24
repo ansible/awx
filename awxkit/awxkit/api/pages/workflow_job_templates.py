@@ -26,15 +26,14 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
         # return job
         jobs_pg = self.related.workflow_jobs.get(id=result.workflow_job)
         if jobs_pg.count != 1:
-            msg = "workflow_job_template launched (id:{}) but job not found in response at {}/workflow_jobs/".format(
-                result.json['workflow_job'], self.url
-            )
+            msg = "workflow_job_template launched (id:{}) but job not found in response at {}/workflow_jobs/".format(result.json['workflow_job'], self.url)
             raise exc.UnexpectedAWXState(msg)
         return jobs_pg.results[0]
 
     def payload(self, **kwargs):
-        payload = PseudoNamespace(name=kwargs.get('name') or 'WorkflowJobTemplate - {}'.format(random_title()),
-                                  description=kwargs.get('description') or random_title(10))
+        payload = PseudoNamespace(
+            name=kwargs.get('name') or 'WorkflowJobTemplate - {}'.format(random_title()), description=kwargs.get('description') or random_title(10)
+        )
 
         optional_fields = (
             "allow_simultaneous",
@@ -91,9 +90,9 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
             self.related.labels.post(label)
 
 
-page.register_page([resources.workflow_job_template,
-                    (resources.workflow_job_templates, 'post'),
-                    (resources.workflow_job_template_copy, 'post')], WorkflowJobTemplate)
+page.register_page(
+    [resources.workflow_job_template, (resources.workflow_job_templates, 'post'), (resources.workflow_job_template_copy, 'post')], WorkflowJobTemplate
+)
 
 
 class WorkflowJobTemplates(page.PageList, WorkflowJobTemplate):
@@ -101,8 +100,7 @@ class WorkflowJobTemplates(page.PageList, WorkflowJobTemplate):
     pass
 
 
-page.register_page([resources.workflow_job_templates,
-                    resources.related_workflow_job_templates], WorkflowJobTemplates)
+page.register_page([resources.workflow_job_templates, resources.related_workflow_job_templates], WorkflowJobTemplates)
 
 
 class WorkflowJobTemplateLaunch(base.Base):

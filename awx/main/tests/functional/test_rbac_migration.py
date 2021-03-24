@@ -3,13 +3,7 @@ import pytest
 from django.apps import apps
 
 from awx.main.migrations import _rbac as rbac
-from awx.main.models import (
-    UnifiedJobTemplate,
-    InventorySource, Inventory,
-    JobTemplate, Project,
-    Organization,
-    User
-)
+from awx.main.models import UnifiedJobTemplate, InventorySource, Inventory, JobTemplate, Project, Organization, User
 
 
 @pytest.mark.django_db
@@ -24,14 +18,8 @@ def test_implied_organization_subquery_inventory():
             inventory = Inventory.objects.create(name='foo{}'.format(i))
         else:
             inventory = Inventory.objects.create(name='foo{}'.format(i), organization=org)
-        inv_src = InventorySource.objects.create(
-            name='foo{}'.format(i),
-            inventory=inventory,
-            source='ec2'
-        )
-    sources = UnifiedJobTemplate.objects.annotate(
-        test_field=rbac.implicit_org_subquery(UnifiedJobTemplate, InventorySource)
-    )
+        inv_src = InventorySource.objects.create(name='foo{}'.format(i), inventory=inventory, source='ec2')
+    sources = UnifiedJobTemplate.objects.annotate(test_field=rbac.implicit_org_subquery(UnifiedJobTemplate, InventorySource))
     for inv_src in sources:
         assert inv_src.test_field == inv_src.inventory.organization_id
 
@@ -45,22 +33,14 @@ def test_implied_organization_subquery_job_template():
         else:
             org = None
         if i <= 4:
-            proj = Project.objects.create(
-                name='foo{}'.format(i),
-                organization=org
-            )
+            proj = Project.objects.create(name='foo{}'.format(i), organization=org)
         else:
             proj = None
-        jts.append(JobTemplate.objects.create(
-            name='foo{}'.format(i),
-            project=proj
-        ))
+        jts.append(JobTemplate.objects.create(name='foo{}'.format(i), project=proj))
     # test case of sharing same org
     jts[2].project.organization = jts[3].project.organization
     jts[2].save()
-    ujts = UnifiedJobTemplate.objects.annotate(
-        test_field=rbac.implicit_org_subquery(UnifiedJobTemplate, JobTemplate)
-    )
+    ujts = UnifiedJobTemplate.objects.annotate(test_field=rbac.implicit_org_subquery(UnifiedJobTemplate, JobTemplate))
     for jt in ujts:
         if not isinstance(jt, JobTemplate):  # some are projects
             assert jt.test_field is None
@@ -81,20 +61,10 @@ def test_give_explicit_inventory_permission():
     inv_org.admin_role.members.add(inv_admin, dual_admin)
     proj_org.admin_role.members.add(dual_admin)
 
-    proj = Project.objects.create(
-        name="test-proj",
-        organization=proj_org
-    )
-    inv = Inventory.objects.create(
-        name='test-inv',
-        organization=inv_org
-    )
+    proj = Project.objects.create(name="test-proj", organization=proj_org)
+    inv = Inventory.objects.create(name='test-inv', organization=inv_org)
 
-    jt = JobTemplate.objects.create(
-        name='foo',
-        project=proj,
-        inventory=inv
-    )
+    jt = JobTemplate.objects.create(name='foo', project=proj, inventory=inv)
 
     assert dual_admin in jt.admin_role
 

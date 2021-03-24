@@ -5,6 +5,5 @@ from django.core.mail.backends.base import BaseEmailBackend
 
 
 class AWXBaseEmailBackend(BaseEmailBackend):
-
     def format_body(self, body):
         return body

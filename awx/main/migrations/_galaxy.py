@@ -36,14 +36,7 @@ def migrate_galaxy_settings(apps, schema_editor):
         public_galaxy_enabled = False
 
     public_galaxy_credential = Credential(
-        created=now(),
-        modified=now(),
-        name='Ansible Galaxy',
-        managed_by_tower=True,
-        credential_type=galaxy_type,
-        inputs = {
-            'url': 'https://galaxy.ansible.com/'
-        }
+        created=now(), modified=now(), name='Ansible Galaxy', managed_by_tower=True, credential_type=galaxy_type, inputs={'url': 'https://galaxy.ansible.com/'}
     )
     public_galaxy_credential.save()
 
@@ -59,9 +52,7 @@ def migrate_galaxy_settings(apps, schema_editor):
                     'Please provide an API token instead after your upgrade '
                     'has completed',
                 )
-            inputs = {
-                'url': private_galaxy_url.value
-            }
+            inputs = {'url': private_galaxy_url.value}
             token = Setting.objects.filter(key='PRIMARY_GALAXY_TOKEN').first()
             if token and token.value:
                 inputs['token'] = decrypt_field(token, 'value')
@@ -71,14 +62,7 @@ def migrate_galaxy_settings(apps, schema_editor):
             name = f'Private Galaxy ({private_galaxy_url.value})'
             if 'cloud.redhat.com' in inputs['url']:
                 name = f'Ansible Automation Hub ({private_galaxy_url.value})'
-            cred = Credential(
-                created=now(),
-                modified=now(),
-                name=name,
-                organization=org,
-                credential_type=galaxy_type,
-                inputs=inputs
-            )
+            cred = Credential(created=now(), modified=now(), name=name, organization=org, credential_type=galaxy_type, inputs=inputs)
             cred.save()
             if token and token.value:
                 # encrypt based on the primary key from the prior save
@@ -105,14 +89,7 @@ def migrate_galaxy_settings(apps, schema_editor):
                 inputs['token'] = token
             if auth_url:
                 inputs['auth_url'] = auth_url
-            cred = Credential(
-                created=now(),
-                modified=now(),
-                name=f'Ansible Galaxy ({url})',
-                organization=org,
-                credential_type=galaxy_type,
-                inputs=inputs
-            )
+            cred = Credential(created=now(), modified=now(), name=f'Ansible Galaxy ({url})', organization=org, credential_type=galaxy_type, inputs=inputs)
             cred.save()
             if token:
                 # encrypt based on the primary key from the prior save

@@ -3,7 +3,6 @@ from awxkit.utils import random_title
 
 
 class HasCopy(object):
-
     def can_copy(self):
         return self.get_related('copy').can_copy
 

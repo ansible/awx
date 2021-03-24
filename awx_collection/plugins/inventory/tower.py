@@ -1,7 +1,7 @@
 # Copyright (c) 2018 Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
@@ -109,10 +109,7 @@ class InventoryModule(BaseInventoryPlugin):
             if opt_val is not None:
                 module_params[module_param] = opt_val
 
-        module = TowerAPIModule(
-            argument_spec={}, direct_params=module_params,
-            error_callback=handle_error, warn_callback=self.warn_callback
-        )
+        module = TowerAPIModule(argument_spec={}, direct_params=module_params, error_callback=handle_error, warn_callback=self.warn_callback)
 
         # validate type of inventory_id because we allow two types as special case
         inventory_id = self.get_option('inventory_id')
@@ -123,15 +120,12 @@ class InventoryModule(BaseInventoryPlugin):
                 inventory_id = ensure_type(inventory_id, 'str')
             except ValueError as e:
                 raise AnsibleOptionsError(
-                    'Invalid type for configuration option inventory_id, '
-                    'not integer, and cannot convert to string: {err}'.format(err=to_native(e))
+                    'Invalid type for configuration option inventory_id, ' 'not integer, and cannot convert to string: {err}'.format(err=to_native(e))
                 )
         inventory_id = inventory_id.replace('/', '')
         inventory_url = '/api/v2/inventories/{inv_id}/script/'.format(inv_id=inventory_id)
 
-        inventory = module.get_endpoint(
-            inventory_url, data={'hostvars': '1', 'towervars': '1', 'all': '1'}
-        )['json']
+        inventory = module.get_endpoint(inventory_url, data={'hostvars': '1', 'towervars': '1', 'all': '1'})['json']
 
         # To start with, create all the groups.
         for group_name in inventory:

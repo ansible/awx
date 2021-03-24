@@ -9,110 +9,131 @@ import requests
 from django.utils.translation import ugettext_lazy as _
 
 base_inputs = {
-    'fields': [{
-        'id': 'url',
-        'label': _('Server URL'),
-        'type': 'string',
-        'format': 'url',
-        'help_text': _('The URL to the HashiCorp Vault'),
-    }, {
-        'id': 'token',
-        'label': _('Token'),
-        'type': 'string',
-        'secret': True,
-        'help_text': _('The access token used to authenticate to the Vault server'),
-    }, {
-        'id': 'cacert',
-        'label': _('CA Certificate'),
-        'type': 'string',
-        'multiline': True,
-        'help_text': _('The CA certificate used to verify the SSL certificate of the Vault server')
-    }, {
-        'id': 'role_id',
-        'label': _('AppRole role_id'),
-        'type': 'string',
-        'multiline': False,
-        'help_text': _('The Role ID for AppRole Authentication')
-    }, {
-        'id': 'secret_id',
-        'label': _('AppRole secret_id'),
-        'type': 'string',
-        'multiline': False,
-        'secret': True,
-        'help_text': _('The Secret ID for AppRole Authentication')
-    }, {
-        'id': 'namespace',
-        'label': _('Namespace name (Vault Enterprise only)'),
-        'type': 'string',
-        'multiline': False,
-        'help_text': _('Name of the namespace to use when authenticate and retrieve secrets')
-    }, {
-        'id': 'default_auth_path',
-        'label': _('Path to Approle Auth'),
-        'type': 'string',
-        'multiline': False,
-        'default': 'approle',
-        'help_text': _('The AppRole Authentication path to use if one isn\'t provided in the metadata when linking to an input field. Defaults to \'approle\'')
-    }
+    'fields': [
+        {
+            'id': 'url',
+            'label': _('Server URL'),
+            'type': 'string',
+            'format': 'url',
+            'help_text': _('The URL to the HashiCorp Vault'),
+        },
+        {
+            'id': 'token',
+            'label': _('Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': _('The access token used to authenticate to the Vault server'),
+        },
+        {
+            'id': 'cacert',
+            'label': _('CA Certificate'),
+            'type': 'string',
+            'multiline': True,
+            'help_text': _('The CA certificate used to verify the SSL certificate of the Vault server'),
+        },
+        {'id': 'role_id', 'label': _('AppRole role_id'), 'type': 'string', 'multiline': False, 'help_text': _('The Role ID for AppRole Authentication')},
+        {
+            'id': 'secret_id',
+            'label': _('AppRole secret_id'),
+            'type': 'string',
+            'multiline': False,
+            'secret': True,
+            'help_text': _('The Secret ID for AppRole Authentication'),
+        },
+        {
+            'id': 'namespace',
+            'label': _('Namespace name (Vault Enterprise only)'),
+            'type': 'string',
+            'multiline': False,
+            'help_text': _('Name of the namespace to use when authenticate and retrieve secrets'),
+        },
+        {
+            'id': 'default_auth_path',
+            'label': _('Path to Approle Auth'),
+            'type': 'string',
+            'multiline': False,
+            'default': 'approle',
+            'help_text': _(
+                'The AppRole Authentication path to use if one isn\'t provided in the metadata when linking to an input field. Defaults to \'approle\''
+            ),
+        },
     ],
-    'metadata': [{
-        'id': 'secret_path',
-        'label': _('Path to Secret'),
-        'type': 'string',
-        'help_text': _('The path to the secret stored in the secret backend e.g, /some/secret/')
-    }, {
-        'id': 'auth_path',
-        'label': _('Path to Auth'),
-        'type': 'string',
-        'multiline': False,
-        'help_text': _('The path where the Authentication method is mounted e.g, approle')
-    }],
+    'metadata': [
+        {
+            'id': 'secret_path',
+            'label': _('Path to Secret'),
+            'type': 'string',
+            'help_text': _('The path to the secret stored in the secret backend e.g, /some/secret/'),
+        },
+        {
+            'id': 'auth_path',
+            'label': _('Path to Auth'),
+            'type': 'string',
+            'multiline': False,
+            'help_text': _('The path where the Authentication method is mounted e.g, approle'),
+        },
+    ],
     'required': ['url', 'secret_path'],
 }
 
 hashi_kv_inputs = copy.deepcopy(base_inputs)
-hashi_kv_inputs['fields'].append({
-    'id': 'api_version',
-    'label': _('API Version'),
-    'choices': ['v1', 'v2'],
-    'help_text': _('API v1 is for static key/value lookups.  API v2 is for versioned key/value lookups.'),
-    'default': 'v1',
-})
-hashi_kv_inputs['metadata'] = [{
-    'id': 'secret_backend',
-    'label': _('Name of Secret Backend'),
-    'type': 'string',
-    'help_text': _('The name of the kv secret backend (if left empty, the first segment of the secret path will be used).')
-}] + hashi_kv_inputs['metadata'] + [{
-    'id': 'secret_key',
-    'label': _('Key Name'),
-    'type': 'string',
-    'help_text': _('The name of the key to look up in the secret.'),
-}, {
-    'id': 'secret_version',
-    'label': _('Secret Version (v2 only)'),
-    'type': 'string',
-    'help_text': _('Used to specify a specific secret version (if left empty, the latest version will be used).'),
-}]
+hashi_kv_inputs['fields'].append(
+    {
+        'id': 'api_version',
+        'label': _('API Version'),
+        'choices': ['v1', 'v2'],
+        'help_text': _('API v1 is for static key/value lookups.  API v2 is for versioned key/value lookups.'),
+        'default': 'v1',
+    }
+)
+hashi_kv_inputs['metadata'] = (
+    [
+        {
+            'id': 'secret_backend',
+            'label': _('Name of Secret Backend'),
+            'type': 'string',
+            'help_text': _('The name of the kv secret backend (if left empty, the first segment of the secret path will be used).'),
+        }
+    ]
+    + hashi_kv_inputs['metadata']
+    + [
+        {
+            'id': 'secret_key',
+            'label': _('Key Name'),
+            'type': 'string',
+            'help_text': _('The name of the key to look up in the secret.'),
+        },
+        {
+            'id': 'secret_version',
+            'label': _('Secret Version (v2 only)'),
+            'type': 'string',
+            'help_text': _('Used to specify a specific secret version (if left empty, the latest version will be used).'),
+        },
+    ]
+)
 hashi_kv_inputs['required'].extend(['api_version', 'secret_key'])
 
 hashi_ssh_inputs = copy.deepcopy(base_inputs)
-hashi_ssh_inputs['metadata'] = [{
-    'id': 'public_key',
-    'label': _('Unsigned Public Key'),
-    'type': 'string',
-    'multiline': True,
-}] + hashi_ssh_inputs['metadata'] + [{
-    'id': 'role',
-    'label': _('Role Name'),
-    'type': 'string',
-    'help_text': _('The name of the role used to sign.')
-}, {
-    'id': 'valid_principals',
-    'label': _('Valid Principals'),
-    'type': 'string',
-    'help_text': _('Valid principals (either usernames or hostnames) that the certificate should be signed for.'),
-}]
+hashi_ssh_inputs['metadata'] = (
+    [
+        {
+            'id': 'public_key',
+            'label': _('Unsigned Public Key'),
+            'type': 'string',
+            'multiline': True,
+        }
+    ]
+    + hashi_ssh_inputs['metadata']
+    + [
+        {'id': 'role', 'label': _('Role Name'), 'type': 'string', 'help_text': _('The name of the role used to sign.')},
+        {
+            'id': 'valid_principals',
+            'label': _('Valid Principals'),
+            'type': 'string',
+            'help_text': _('Valid principals (either usernames or hostnames) that the certificate should be signed for.'),
+        },
+    ]
+)
 hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 
 
@@ -209,9 +230,7 @@ def kv_backend(**kwargs):
         try:
             return json['data'][secret_key]
         except KeyError:
-            raise RuntimeError(
-                '{} is not present at {}'.format(secret_key, secret_path)
-            )
+            raise RuntimeError('{} is not present at {}'.format(secret_key, secret_path))
     return json['data']
 
 
@@ -248,14 +267,6 @@ def ssh_backend(**kwargs):
     return resp.json()['data']['signed_key']
 
 
-hashivault_kv_plugin = CredentialPlugin(
-    'HashiCorp Vault Secret Lookup',
-    inputs=hashi_kv_inputs,
-    backend=kv_backend
-)
+hashivault_kv_plugin = CredentialPlugin('HashiCorp Vault Secret Lookup', inputs=hashi_kv_inputs, backend=kv_backend)
 
-hashivault_ssh_plugin = CredentialPlugin(
-    'HashiCorp Vault Signed SSH',
-    inputs=hashi_ssh_inputs,
-    backend=ssh_backend
-)
+hashivault_ssh_plugin = CredentialPlugin('HashiCorp Vault Signed SSH', inputs=hashi_ssh_inputs, backend=ssh_backend)

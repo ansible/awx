@@ -22,7 +22,7 @@ class WebsocketSecretAuthHelper:
     """
     Middlewareish for websockets to verify node websocket broadcast interconnect.
 
-    Note: The "ish" is due to the channels routing interface. Routing occurs 
+    Note: The "ish" is due to the channels routing interface. Routing occurs
     _after_ authentication; making it hard to apply this auth to _only_ a subset of
     websocket endpoints.
     """
@@ -30,18 +30,12 @@ class WebsocketSecretAuthHelper:
     @classmethod
     def construct_secret(cls):
         nonce_serialized = f"{int(time.time())}"
-        payload_dict = {
-            'secret': settings.BROADCAST_WEBSOCKET_SECRET,
-            'nonce': nonce_serialized
-        }
+        payload_dict = {'secret': settings.BROADCAST_WEBSOCKET_SECRET, 'nonce': nonce_serialized}
         payload_serialized = json.dumps(payload_dict)
 
-        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKET_SECRET),
-                                     msg=force_bytes(payload_serialized),
-                                     digestmod='sha256').hexdigest()
+        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKET_SECRET), msg=force_bytes(payload_serialized), digestmod='sha256').hexdigest()
 
         return 'HMAC-SHA256 {}:{}'.format(nonce_serialized, secret_serialized)
-
 
     @classmethod
     def verify_secret(cls, s, nonce_tolerance=300):
@@ -62,9 +56,7 @@ class WebsocketSecretAuthHelper:
         except Exception:
             raise ValueError("Failed to create hash to compare to secret.")
 
-        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKET_SECRET),
-                                     msg=force_bytes(payload_serialized),
-                                     digestmod='sha256').hexdigest()
+        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKET_SECRET), msg=force_bytes(payload_serialized), digestmod='sha256').hexdigest()
 
         if secret_serialized != secret_parsed:
             raise ValueError("Invalid secret")
@@ -90,7 +82,6 @@ class WebsocketSecretAuthHelper:
 
 
 class BroadcastConsumer(AsyncJsonWebsocketConsumer):
-
     async def connect(self):
         try:
             WebsocketSecretAuthHelper.is_authorized(self.scope)
@@ -151,13 +142,10 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive_json(self, data):
         from awx.main.access import consumer_access
+
         user = self.scope['user']
         xrftoken = data.get('xrftoken')
-        if (
-            not xrftoken or
-            XRF_KEY not in self.scope["session"] or
-            xrftoken != self.scope["session"][XRF_KEY]
-        ):
+        if not xrftoken or XRF_KEY not in self.scope["session"] or xrftoken != self.scope["session"][XRF_KEY]:
             logger.error(f"access denied to channel, XRF mismatch for {user.username}")
             await self.send_json({"error": "access denied to channel"})
             return
@@ -166,7 +154,7 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             groups = data['groups']
             new_groups = set()
             current_groups = set(self.scope['session'].pop('groups') if 'groups' in self.scope['session'] else [])
-            for group_name,v in groups.items():
+            for group_name, v in groups.items():
                 if type(v) is list:
                     for oid in v:
                         name = '{}-{}'.format(group_name, oid)
@@ -191,16 +179,9 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
 
             new_groups_exclusive = new_groups - current_groups
             for group_name in new_groups_exclusive:
-                await self.channel_layer.group_add(
-                    group_name,
-                    self.channel_name
-                )
+                await self.channel_layer.group_add(group_name, self.channel_name)
             self.scope['session']['groups'] = new_groups
-            await self.send_json({
-                "groups_current": list(new_groups),
-                "groups_left": list(old_groups),
-                "groups_joined": list(new_groups_exclusive)
-            })
+            await self.send_json({"groups_current": list(new_groups), "groups_left": list(old_groups), "groups_joined": list(new_groups_exclusive)})
 
     async def internal_message(self, event):
         await self.send(event['text'])
@@ -221,7 +202,7 @@ def _dump_payload(payload):
 
 
 def emit_channel_notification(group, payload):
-    from awx.main.wsbroadcast import wrap_broadcast_msg # noqa
+    from awx.main.wsbroadcast import wrap_broadcast_msg  # noqa
 
     payload_dumped = _dump_payload(payload)
     if payload_dumped is None:
@@ -229,18 +210,19 @@ def emit_channel_notification(group, payload):
 
     channel_layer = get_channel_layer()
 
-    run_sync(channel_layer.group_send(
-        group,
-        {
-            "type": "internal.message",
-            "text": payload_dumped
-        },
-    ))
+    run_sync(
+        channel_layer.group_send(
+            group,
+            {"type": "internal.message", "text": payload_dumped},
+        )
+    )
 
-    run_sync(channel_layer.group_send(
-        settings.BROADCAST_WEBSOCKET_GROUP_NAME,
-        {
-            "type": "internal.message",
-            "text": wrap_broadcast_msg(group, payload_dumped),
-        },
-    ))
+    run_sync(
+        channel_layer.group_send(
+            settings.BROADCAST_WEBSOCKET_GROUP_NAME,
+            {
+                "type": "internal.message",
+                "text": wrap_broadcast_msg(group, payload_dumped),
+            },
+        )
+    )

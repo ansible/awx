@@ -22,7 +22,7 @@ def bad_json(since, **kwargs):
 @register('throws_error', '1.0')
 def throws_error(since, **kwargs):
     raise ValueError()
-    
+
 
 def _valid_license():
     pass
@@ -38,7 +38,7 @@ def mock_valid_license():
 @pytest.mark.django_db
 def test_gather(mock_valid_license):
     settings.INSIGHTS_TRACKING_STATE = True
-    
+
     tgzfiles = gather(module=importlib.import_module(__name__))
     files = {}
     with tarfile.open(tgzfiles[0], "r:gz") as archive:
@@ -57,4 +57,3 @@ def test_gather(mock_valid_license):
             os.remove(tgz)
     except Exception:
         pass
-        

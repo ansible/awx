@@ -8,9 +8,7 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
     operations = [
         migrations.CreateModel(
@@ -21,11 +19,11 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('key', models.CharField(max_length=255)),
                 ('value', jsonfield.fields.JSONField(null=True)),
-                ('user', models.ForeignKey(related_name='settings', default=None, editable=False,
-                                           to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)),
+                (
+                    'user',
+                    models.ForeignKey(related_name='settings', default=None, editable=False, to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True),
+                ),
             ],
-            options={
-                'abstract': False,
-            },
-        ),
+            options={'abstract': False},
+        )
     ]

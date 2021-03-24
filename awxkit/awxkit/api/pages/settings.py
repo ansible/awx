@@ -8,27 +8,31 @@ class Setting(base.Base):
     pass
 
 
-page.register_page([resources.setting,
-                    resources.settings_all,
-                    resources.settings_authentication,
-                    resources.settings_changed,
-                    resources.settings_github,
-                    resources.settings_github_org,
-                    resources.settings_github_team,
-                    resources.settings_google_oauth2,
-                    resources.settings_jobs,
-                    resources.settings_ldap,
-                    resources.settings_radius,
-                    resources.settings_saml,
-                    resources.settings_system,
-                    resources.settings_tacacsplus,
-                    resources.settings_ui,
-                    resources.settings_user,
-                    resources.settings_user_defaults], Setting)
+page.register_page(
+    [
+        resources.setting,
+        resources.settings_all,
+        resources.settings_authentication,
+        resources.settings_changed,
+        resources.settings_github,
+        resources.settings_github_org,
+        resources.settings_github_team,
+        resources.settings_google_oauth2,
+        resources.settings_jobs,
+        resources.settings_ldap,
+        resources.settings_radius,
+        resources.settings_saml,
+        resources.settings_system,
+        resources.settings_tacacsplus,
+        resources.settings_ui,
+        resources.settings_user,
+        resources.settings_user_defaults,
+    ],
+    Setting,
+)
 
 
 class Settings(page.PageList, Setting):
-
     def get_endpoint(self, endpoint):
         """Helper method used to navigate to a specific settings endpoint.
         (Pdb) settings_pg.get_endpoint('all')

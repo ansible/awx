@@ -10,10 +10,20 @@ from unittest import mock
 import pytest
 
 from awx.api.versioning import reverse
-from awx.main.models import (Job, JobEvent, AdHocCommand, AdHocCommandEvent,
-                             Project, ProjectUpdate, ProjectUpdateEvent,
-                             InventoryUpdate, InventorySource,
-                             InventoryUpdateEvent, SystemJob, SystemJobEvent)
+from awx.main.models import (
+    Job,
+    JobEvent,
+    AdHocCommand,
+    AdHocCommandEvent,
+    Project,
+    ProjectUpdate,
+    ProjectUpdateEvent,
+    InventoryUpdate,
+    InventorySource,
+    InventoryUpdateEvent,
+    SystemJob,
+    SystemJobEvent,
+)
 
 
 def _mk_project_update():
@@ -30,12 +40,15 @@ def _mk_inventory_update():
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('Parent, Child, relation, view', [
-    [Job, JobEvent, 'job', 'api:job_stdout'],
-    [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
-    [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
-    [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
-])
+@pytest.mark.parametrize(
+    'Parent, Child, relation, view',
+    [
+        [Job, JobEvent, 'job', 'api:job_stdout'],
+        [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
+        [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
+        [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
+    ],
+)
 def test_text_stdout(sqlite_copy_expert, Parent, Child, relation, view, get, admin):
     job = Parent()
     job.save()
@@ -48,23 +61,21 @@ def test_text_stdout(sqlite_copy_expert, Parent, Child, relation, view, get, adm
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('Parent, Child, relation, view', [
-    [Job, JobEvent, 'job', 'api:job_stdout'],
-    [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
-    [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
-    [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
-])
+@pytest.mark.parametrize(
+    'Parent, Child, relation, view',
+    [
+        [Job, JobEvent, 'job', 'api:job_stdout'],
+        [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
+        [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
+        [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
+    ],
+)
 @pytest.mark.parametrize('download', [True, False])
-def test_ansi_stdout_filtering(sqlite_copy_expert, Parent, Child, relation,
-                               view, download, get, admin):
+def test_ansi_stdout_filtering(sqlite_copy_expert, Parent, Child, relation, view, download, get, admin):
     job = Parent()
     job.save()
     for i in range(3):
-        Child(**{
-            relation: job,
-            'stdout': '\x1B[0;36mTesting {}\x1B[0m\n'.format(i),
-            'start_line': i
-        }).save()
+        Child(**{relation: job, 'stdout': '\x1B[0;36mTesting {}\x1B[0m\n'.format(i), 'start_line': i}).save()
     url = reverse(view, kwargs={'pk': job.pk})
 
     # ansi codes in ?format=txt should get filtered
@@ -83,21 +94,20 @@ def test_ansi_stdout_filtering(sqlite_copy_expert, Parent, Child, relation,
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('Parent, Child, relation, view', [
-    [Job, JobEvent, 'job', 'api:job_stdout'],
-    [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
-    [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
-    [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
-])
+@pytest.mark.parametrize(
+    'Parent, Child, relation, view',
+    [
+        [Job, JobEvent, 'job', 'api:job_stdout'],
+        [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
+        [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
+        [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
+    ],
+)
 def test_colorized_html_stdout(sqlite_copy_expert, Parent, Child, relation, view, get, admin):
     job = Parent()
     job.save()
     for i in range(3):
-        Child(**{
-            relation: job,
-            'stdout': '\x1B[0;36mTesting {}\x1B[0m\n'.format(i),
-            'start_line': i
-        }).save()
+        Child(**{relation: job, 'stdout': '\x1B[0;36mTesting {}\x1B[0m\n'.format(i), 'start_line': i}).save()
     url = reverse(view, kwargs={'pk': job.pk}) + '?format=html'
 
     response = get(url, user=admin, expect=200)
@@ -107,12 +117,15 @@ def test_colorized_html_stdout(sqlite_copy_expert, Parent, Child, relation, view
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('Parent, Child, relation, view', [
-    [Job, JobEvent, 'job', 'api:job_stdout'],
-    [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
-    [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
-    [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
-])
+@pytest.mark.parametrize(
+    'Parent, Child, relation, view',
+    [
+        [Job, JobEvent, 'job', 'api:job_stdout'],
+        [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
+        [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
+        [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
+    ],
+)
 def test_stdout_line_range(sqlite_copy_expert, Parent, Child, relation, view, get, admin):
     job = Parent()
     job.save()
@@ -146,20 +159,20 @@ def test_text_stdout_with_max_stdout(sqlite_copy_expert, get, admin):
     response = get(url, user=admin, expect=200)
     assert response.data['result_stdout'] == (
         'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes.'.format(
-            actual=total_bytes,
-            max=settings.STDOUT_MAX_BYTES_DISPLAY
-        )
+        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY)
     )
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('Parent, Child, relation, view', [
-    [Job, JobEvent, 'job', 'api:job_stdout'],
-    [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
-    [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
-    [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
-])
+@pytest.mark.parametrize(
+    'Parent, Child, relation, view',
+    [
+        [Job, JobEvent, 'job', 'api:job_stdout'],
+        [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
+        [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
+        [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
+    ],
+)
 @pytest.mark.parametrize('fmt', ['txt', 'ansi'])
 @mock.patch('awx.main.redact.UriCleaner.SENSITIVE_URI_PATTERN', mock.Mock(**{'search.return_value': None}))  # really slow for large strings
 def test_max_bytes_display(sqlite_copy_expert, Parent, Child, relation, view, fmt, get, admin):
@@ -173,10 +186,7 @@ def test_max_bytes_display(sqlite_copy_expert, Parent, Child, relation, view, fm
     response = get(url + '?format={}'.format(fmt), user=admin, expect=200)
     assert smart_str(response.content) == (
         'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes.'.format(
-            actual=total_bytes,
-            max=settings.STDOUT_MAX_BYTES_DISPLAY
-        )
+        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY)
     )
 
     response = get(url + '?format={}_download'.format(fmt), user=admin, expect=200)
@@ -184,10 +194,7 @@ def test_max_bytes_display(sqlite_copy_expert, Parent, Child, relation, view, fm
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('Cls, view', [
-    [_mk_project_update, 'api:project_update_stdout'],
-    [_mk_inventory_update, 'api:inventory_update_stdout']
-])
+@pytest.mark.parametrize('Cls, view', [[_mk_project_update, 'api:project_update_stdout'], [_mk_inventory_update, 'api:inventory_update_stdout']])
 @pytest.mark.parametrize('fmt', ['txt', 'ansi', 'txt_download', 'ansi_download'])
 def test_legacy_result_stdout_text_fallback(Cls, view, fmt, get, admin):
     # older versions of stored raw stdout in a raw text blob at
@@ -204,10 +211,7 @@ def test_legacy_result_stdout_text_fallback(Cls, view, fmt, get, admin):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('Cls, view', [
-    [_mk_project_update, 'api:project_update_stdout'],
-    [_mk_inventory_update, 'api:inventory_update_stdout']
-])
+@pytest.mark.parametrize('Cls, view', [[_mk_project_update, 'api:project_update_stdout'], [_mk_inventory_update, 'api:inventory_update_stdout']])
 @pytest.mark.parametrize('fmt', ['txt', 'ansi'])
 @mock.patch('awx.main.redact.UriCleaner.SENSITIVE_URI_PATTERN', mock.Mock(**{'search.return_value': None}))  # really slow for large strings
 def test_legacy_result_stdout_with_max_bytes(Cls, view, fmt, get, admin):
@@ -222,10 +226,7 @@ def test_legacy_result_stdout_with_max_bytes(Cls, view, fmt, get, admin):
     response = get(url + '?format={}'.format(fmt), user=admin, expect=200)
     assert smart_str(response.content) == (
         'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes.'.format(
-            actual=total_bytes,
-            max=settings.STDOUT_MAX_BYTES_DISPLAY
-        )
+        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY)
     )
 
     response = get(url + '?format={}'.format(fmt + '_download'), user=admin, expect=200)
@@ -233,15 +234,17 @@ def test_legacy_result_stdout_with_max_bytes(Cls, view, fmt, get, admin):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('Parent, Child, relation, view', [
-    [Job, JobEvent, 'job', 'api:job_stdout'],
-    [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
-    [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
-    [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
-])
+@pytest.mark.parametrize(
+    'Parent, Child, relation, view',
+    [
+        [Job, JobEvent, 'job', 'api:job_stdout'],
+        [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
+        [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
+        [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
+    ],
+)
 @pytest.mark.parametrize('fmt', ['txt', 'ansi', 'txt_download', 'ansi_download'])
-def test_text_with_unicode_stdout(sqlite_copy_expert, Parent, Child, relation,
-                                  view, get, admin, fmt):
+def test_text_with_unicode_stdout(sqlite_copy_expert, Parent, Child, relation, view, get, admin, fmt):
     job = Parent()
     job.save()
     for i in range(3):
@@ -258,10 +261,7 @@ def test_unicode_with_base64_ansi(sqlite_copy_expert, get, admin):
     job.save()
     for i in range(3):
         JobEvent(job=job, stdout='オ{}\n'.format(i), start_line=i).save()
-    url = reverse(
-        'api:job_stdout',
-        kwargs={'pk': job.pk}
-    ) + '?format=json&content_encoding=base64'
+    url = reverse('api:job_stdout', kwargs={'pk': job.pk}) + '?format=json&content_encoding=base64'
 
     response = get(url, user=admin, expect=200)
     content = base64.b64decode(json.loads(smart_str(response.content))['content'])

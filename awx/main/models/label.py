@@ -10,13 +10,13 @@ from awx.api.versioning import reverse
 from awx.main.models.base import CommonModelNameNotUnique
 from awx.main.models.unified_jobs import UnifiedJobTemplate, UnifiedJob
 
-__all__ = ('Label', )
+__all__ = ('Label',)
 
 
 class Label(CommonModelNameNotUnique):
-    '''
+    """
     Generic Tag. Designed for tagging Job Templates, but expandable to other models.
-    '''
+    """
 
     class Meta:
         app_label = 'main'
@@ -35,19 +35,10 @@ class Label(CommonModelNameNotUnique):
 
     @staticmethod
     def get_orphaned_labels():
-        return \
-            Label.objects.filter(
-                organization=None,
-                unifiedjobtemplate_labels__isnull=True
-            )
+        return Label.objects.filter(organization=None, unifiedjobtemplate_labels__isnull=True)
 
     def is_detached(self):
-        return bool(
-            Label.objects.filter(
-                id=self.id,
-                unifiedjob_labels__isnull=True,
-                unifiedjobtemplate_labels__isnull=True
-            ).count())
+        return bool(Label.objects.filter(id=self.id, unifiedjob_labels__isnull=True, unifiedjobtemplate_labels__isnull=True).count())
 
     def is_candidate_for_detach(self):
         c1 = UnifiedJob.objects.filter(labels__in=[self.id]).count()

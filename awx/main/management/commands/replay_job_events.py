@@ -10,17 +10,10 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 
 from awx.main.models.events import emit_event_detail
-from awx.main.models import (
-    UnifiedJob,
-    Job,
-    AdHocCommand,
-    ProjectUpdate,
-    InventoryUpdate,
-    SystemJob
-)
+from awx.main.models import UnifiedJob, Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob
 
 
-class JobStatusLifeCycle():
+class JobStatusLifeCycle:
     def emit_job_status(self, job, status):
         # {"status": "successful", "project_id": 13, "unified_job_id": 659, "group_name": "jobs"}
         job.websocket_emit_status(status)
@@ -65,10 +58,10 @@ class ReplayJobEvents(JobStatusLifeCycle):
         time.sleep(seconds)
 
     def replay_elapsed(self):
-        return (self.now() - self.replay_start)
+        return self.now() - self.replay_start
 
     def recording_elapsed(self, created):
-        return (created - self.recording_start)
+        return created - self.recording_start
 
     def replay_offset(self, created, speed):
         return self.replay_elapsed().total_seconds() - (self.recording_elapsed(created).total_seconds() * (1.0 / speed))
@@ -156,12 +149,12 @@ class ReplayJobEvents(JobStatusLifeCycle):
                     self.sleep(replay_diff)
                 else:
                     stats['events_late']['total'] += 1
-                    stats['events_late']['lateness_total'] += (replay_diff * -1)
+                    stats['events_late']['lateness_total'] += replay_diff * -1
                     if verbosity >= 3:
                         print("\treplay: too far behind to sleep {} seconds".format(replay_diff))
             else:
                 replay_offset = self.replay_offset(je_current.created, speed)
-                stats['events_late']['lateness_total'] += (replay_offset * -1)
+                stats['events_late']['lateness_total'] += replay_offset * -1
                 stats['events_late']['total'] += 1
                 if verbosity >= 3:
                     print("\treplay: behind by {} seconds".format(replay_offset))
@@ -211,18 +204,23 @@ class Command(BaseCommand):
         return range(start, stop, step)
 
     def add_arguments(self, parser):
-        parser.add_argument('--job_id', dest='job_id', type=int, metavar='j',
-                            help='Id of the job to replay (job or adhoc)')
-        parser.add_argument('--speed', dest='speed', type=float, metavar='s',
-                            help='Speedup factor.')
-        parser.add_argument('--skip-range', dest='skip_range', type=str, metavar='k',
-                            default='0:-1:1', help='Range of events to skip')
-        parser.add_argument('--random-seed', dest='random_seed', type=int, metavar='r',
-                            default=0, help='Random number generator seed to use when determining job_event index to emit final job status')
-        parser.add_argument('--final-status-delay', dest='final_status_delay', type=float, metavar='f',
-                            default=0, help='Delay between event and final status emit')
-        parser.add_argument('--debug', dest='debug', type=bool, metavar='d',
-                            default=False, help='Enable step mode to control emission of job events one at a time.')
+        parser.add_argument('--job_id', dest='job_id', type=int, metavar='j', help='Id of the job to replay (job or adhoc)')
+        parser.add_argument('--speed', dest='speed', type=float, metavar='s', help='Speedup factor.')
+        parser.add_argument('--skip-range', dest='skip_range', type=str, metavar='k', default='0:-1:1', help='Range of events to skip')
+        parser.add_argument(
+            '--random-seed',
+            dest='random_seed',
+            type=int,
+            metavar='r',
+            default=0,
+            help='Random number generator seed to use when determining job_event index to emit final job status',
+        )
+        parser.add_argument(
+            '--final-status-delay', dest='final_status_delay', type=float, metavar='f', default=0, help='Delay between event and final status emit'
+        )
+        parser.add_argument(
+            '--debug', dest='debug', type=bool, metavar='d', default=False, help='Enable step mode to control emission of job events one at a time.'
+        )
 
     def handle(self, *args, **options):
         job_id = options.get('job_id')
@@ -234,5 +232,4 @@ class Command(BaseCommand):
         skip = self._parse_slice_range(options.get('skip_range'))
 
         replayer = ReplayJobEvents()
-        replayer.run(job_id, speed=speed, verbosity=verbosity, skip_range=skip, random_seed=random_seed,
-                     final_status_delay=final_status_delay, debug=debug)
+        replayer.run(job_id, speed=speed, verbosity=verbosity, skip_range=skip, random_seed=random_seed, final_status_delay=final_status_delay, debug=debug)

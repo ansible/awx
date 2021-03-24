@@ -10,10 +10,7 @@ from django.core.validators import URLValidator, _lazy_re_compile
 from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
-from rest_framework.fields import (  # noqa
-    BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField,
-    IntegerField, ListField, NullBooleanField
-)
+from rest_framework.fields import BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField, IntegerField, ListField, NullBooleanField  # noqa
 from rest_framework.serializers import PrimaryKeyRelatedField  # noqa
 
 logger = logging.getLogger('awx.conf.fields')
@@ -27,7 +24,6 @@ logger = logging.getLogger('awx.conf.fields')
 
 
 class CharField(CharField):
-
     def to_representation(self, value):
         # django_rest_frameworks' default CharField implementation casts `None`
         # to a string `"None"`:
@@ -39,7 +35,6 @@ class CharField(CharField):
 
 
 class IntegerField(IntegerField):
-
     def get_value(self, dictionary):
         ret = super(IntegerField, self).get_value(dictionary)
         # Handle UI corner case
@@ -60,9 +55,7 @@ class StringListField(ListField):
 
 class StringListBooleanField(ListField):
 
-    default_error_messages = {
-        'type_error': _('Expected None, True, False, a string or list of strings but got {input_type} instead.'),
-    }
+    default_error_messages = {'type_error': _('Expected None, True, False, a string or list of strings but got {input_type} instead.')}
     child = CharField()
 
     def to_representation(self, value):
@@ -101,10 +94,7 @@ class StringListBooleanField(ListField):
 
 class StringListPathField(StringListField):
 
-    default_error_messages = {
-        'type_error': _('Expected list of strings but got {input_type} instead.'),
-        'path_error': _('{path} is not a valid path choice.'),
-    }
+    default_error_messages = {'type_error': _('Expected list of strings but got {input_type} instead.'), 'path_error': _('{path} is not a valid path choice.')}
 
     def to_internal_value(self, paths):
         if isinstance(paths, (list, tuple)):
@@ -123,12 +113,12 @@ class URLField(CharField):
     # these lines set up a custom regex that allow numbers in the
     # top-level domain
     tld_re = (
-        r'\.'                                              # dot
-        r'(?!-)'                                           # can't start with a dash
-        r'(?:[a-z' + URLValidator.ul + r'0-9' + '-]{2,63}' # domain label, this line was changed from the original URLValidator
-        r'|xn--[a-z0-9]{1,59})'                            # or punycode label
-        r'(?<!-)'                                          # can't end with a dash
-        r'\.?'                                             # may have a trailing dot
+        r'\.'  # dot
+        r'(?!-)'  # can't start with a dash
+        r'(?:[a-z' + URLValidator.ul + r'0-9' + '-]{2,63}'  # domain label, this line was changed from the original URLValidator
+        r'|xn--[a-z0-9]{1,59})'  # or punycode label
+        r'(?<!-)'  # can't end with a dash
+        r'\.?'  # may have a trailing dot
     )
 
     host_re = '(' + URLValidator.hostname_re + URLValidator.domain_re + tld_re + '|localhost)'
@@ -139,7 +129,9 @@ class URLField(CharField):
         r'(?:' + URLValidator.ipv4_re + '|' + URLValidator.ipv6_re + '|' + host_re + ')'
         r'(?::\d{2,5})?'  # port
         r'(?:[/?#][^\s]*)?'  # resource path
-        r'\Z', re.IGNORECASE)
+        r'\Z',
+        re.IGNORECASE,
+    )
 
     def __init__(self, **kwargs):
         schemes = kwargs.pop('schemes', None)
@@ -184,9 +176,7 @@ class URLField(CharField):
 
 class KeyValueField(DictField):
     child = CharField()
-    default_error_messages = {
-        'invalid_child': _('"{input}" is not a valid string.')
-    }
+    default_error_messages = {'invalid_child': _('"{input}" is not a valid string.')}
 
     def to_internal_value(self, data):
         ret = super(KeyValueField, self).to_internal_value(data)
@@ -199,9 +189,7 @@ class KeyValueField(DictField):
 
 
 class ListTuplesField(ListField):
-    default_error_messages = {
-        'type_error': _('Expected a list of tuples of max length 2 but got {input_type} instead.'),
-    }
+    default_error_messages = {'type_error': _('Expected a list of tuples of max length 2 but got {input_type} instead.')}
 
     def to_representation(self, value):
         if isinstance(value, (list, tuple)):

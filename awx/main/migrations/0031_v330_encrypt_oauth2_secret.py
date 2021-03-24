@@ -17,6 +17,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='oauth2application',
             name='client_secret',
-            field=awx.main.fields.OAuth2ClientSecretField(blank=True, db_index=True, default=oauth2_provider.generators.generate_client_secret, max_length=1024),
+            field=awx.main.fields.OAuth2ClientSecretField(
+                blank=True, db_index=True, default=oauth2_provider.generators.generate_client_secret, max_length=1024
+            ),
         ),
     ]

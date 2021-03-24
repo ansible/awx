@@ -23,6 +23,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='workflowjobnode',
             name='do_not_run',
-            field=models.BooleanField(default=False, help_text='Indicates that a job will not be created when True. Workflow runtime semantics will mark this True if the node is in a path that will decidedly not be ran. A value of False means the node may not run.'),
+            field=models.BooleanField(
+                default=False,
+                help_text='Indicates that a job will not be created when True. Workflow runtime semantics will mark this True if the node is in a path that will decidedly not be ran. A value of False means the node may not run.',
+            ),
         ),
     ]

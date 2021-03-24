@@ -131,29 +131,35 @@ def test_cert_with_key():
     assert not pem_objects[1]['key_enc']
 
 
-@pytest.mark.parametrize("var_str", [
-    '{"a": "b"}',
-    '---\na: b\nc: d',
-    '',
-    '""',
-])
+@pytest.mark.parametrize(
+    "var_str",
+    [
+        '{"a": "b"}',
+        '---\na: b\nc: d',
+        '',
+        '""',
+    ],
+)
 def test_valid_vars(var_str):
     vars_validate_or_raise(var_str)
 
 
-@pytest.mark.parametrize("var_str", [
-    '["a": "b"]',
-    '["a", "b"]',
-    "('a=4', 'c=5')",
-    '"',
-    "''",
-    "5",
-    "6.74",
-    "hello",
-    "OrderedDict([('a', 'b')])",
-    "True",
-    "False",
-])
+@pytest.mark.parametrize(
+    "var_str",
+    [
+        '["a": "b"]',
+        '["a", "b"]',
+        "('a=4', 'c=5')",
+        '"',
+        "''",
+        "5",
+        "6.74",
+        "hello",
+        "OrderedDict([('a', 'b')])",
+        "True",
+        "False",
+    ],
+)
 def test_invalid_vars(var_str):
     with pytest.raises(RestValidationError):
         vars_validate_or_raise(var_str)

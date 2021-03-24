@@ -7,7 +7,6 @@ from awx.main.models import (
 
 
 class TestCapacityMapping(TransactionTestCase):
-
     def sample_cluster(self):
         ig_small = InstanceGroup.objects.create(name='ig_small')
         ig_large = InstanceGroup.objects.create(name='ig_large')

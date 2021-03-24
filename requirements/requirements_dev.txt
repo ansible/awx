@@ -3,9 +3,7 @@ django-rest-swagger
 pprofile
 ipython==5.2.1
 unittest2
-pep8
-flake8
-pyflakes
+black
 pytest
 pytest-cov
 pytest-django

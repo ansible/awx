@@ -27,13 +27,12 @@ logger = logging.getLogger('awx.main.models.oauth')
 
 
 class OAuth2Application(AbstractApplication):
-
     class Meta:
         app_label = 'main'
         verbose_name = _('application')
         unique_together = (("name", "organization"),)
         ordering = ('organization', 'name')
-    
+
     CLIENT_CONFIDENTIAL = "confidential"
     CLIENT_PUBLIC = "public"
     CLIENT_TYPES = (
@@ -65,42 +64,34 @@ class OAuth2Application(AbstractApplication):
         null=True,
     )
     client_secret = OAuth2ClientSecretField(
-        max_length=1024, 
-        blank=True, 
-        default=generate_client_secret, 
+        max_length=1024,
+        blank=True,
+        default=generate_client_secret,
         db_index=True,
-        help_text=_('Used for more stringent verification of access to an application when creating a token.')
+        help_text=_('Used for more stringent verification of access to an application when creating a token.'),
     )
     client_type = models.CharField(
-        max_length=32, 
-        choices=CLIENT_TYPES,
-        help_text=_('Set to Public or Confidential depending on how secure the client device is.')
+        max_length=32, choices=CLIENT_TYPES, help_text=_('Set to Public or Confidential depending on how secure the client device is.')
     )
-    skip_authorization = models.BooleanField(
-        default=False,
-        help_text=_('Set True to skip authorization step for completely trusted applications.')
-    )
+    skip_authorization = models.BooleanField(default=False, help_text=_('Set True to skip authorization step for completely trusted applications.'))
     authorization_grant_type = models.CharField(
-        max_length=32, 
-        choices=GRANT_TYPES,
-        help_text=_('The Grant type the user must use for acquire tokens for this application.')
+        max_length=32, choices=GRANT_TYPES, help_text=_('The Grant type the user must use for acquire tokens for this application.')
     )
 
 
 class OAuth2AccessToken(AbstractAccessToken):
-
     class Meta:
         app_label = 'main'
         verbose_name = _('access token')
         ordering = ('id',)
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
-        blank=True, 
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        blank=True,
         null=True,
         related_name="%(app_label)s_%(class)s",
-        help_text=_('The user representing the token owner')
+        help_text=_('The user representing the token owner'),
     )
     description = models.TextField(
         default='',
@@ -114,12 +105,11 @@ class OAuth2AccessToken(AbstractAccessToken):
     scope = models.TextField(
         blank=True,
         default='write',
-        help_text=_('Allowed scopes, further restricts user\'s permissions. Must be a simple space-separated string with allowed scopes [\'read\', \'write\'].')
+        help_text=_(
+            'Allowed scopes, further restricts user\'s permissions. Must be a simple space-separated string with allowed scopes [\'read\', \'write\'].'
+        ),
     )
-    modified = models.DateTimeField(
-        editable=False,
-        auto_now=True
-    )
+    modified = models.DateTimeField(editable=False, auto_now=True)
 
     def is_valid(self, scopes=None):
         valid = super(OAuth2AccessToken, self).is_valid(scopes)
@@ -129,6 +119,7 @@ class OAuth2AccessToken(AbstractAccessToken):
             def _update_last_used():
                 if OAuth2AccessToken.objects.filter(pk=self.pk).exists():
                     self.save(update_fields=['last_used'])
+
             connection.on_commit(_update_last_used)
         return valid
 
@@ -136,9 +127,9 @@ class OAuth2AccessToken(AbstractAccessToken):
         if self.user and settings.ALLOW_OAUTH2_FOR_EXTERNAL_USERS is False:
             external_account = get_external_account(self.user)
             if external_account is not None:
-                raise oauth2.AccessDeniedError(_(
-                    'OAuth2 Tokens cannot be created by users associated with an external authentication provider ({})'
-                ).format(external_account))
+                raise oauth2.AccessDeniedError(
+                    _('OAuth2 Tokens cannot be created by users associated with an external authentication provider ({})').format(external_account)
+                )
 
     def save(self, *args, **kwargs):
         if not self.pk:

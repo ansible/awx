@@ -7,17 +7,16 @@ DEPRECATED_CRED_KIND = {
         'kind': 'cloud',
         'name': 'Rackspace',
         'inputs': {
-            'fields': [{
-                'id': 'username',
-                'label': 'Username',
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': 'Password',
-                'type': 'string',
-                'secret': True,
-            }],
-            'required': ['username', 'password']
+            'fields': [
+                {'id': 'username', 'label': 'Username', 'type': 'string'},
+                {
+                    'id': 'password',
+                    'label': 'Password',
+                    'type': 'string',
+                    'secret': True,
+                },
+            ],
+            'required': ['username', 'password'],
         },
         'injectors': {
             'env': {

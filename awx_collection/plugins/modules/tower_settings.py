@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -74,6 +73,7 @@ from ..module_utils.tower_api import TowerAPIModule
 
 try:
     import yaml
+
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
@@ -84,11 +84,7 @@ def coerce_type(module, value):
     if value is None:
         return value
 
-    yaml_ish = bool((
-        value.startswith('{') and value.endswith('}')
-    ) or (
-        value.startswith('[') and value.endswith(']'))
-    )
+    yaml_ish = bool((value.startswith('{') and value.endswith('}')) or (value.startswith('[') and value.endswith(']')))
     if yaml_ish:
         if not HAS_YAML:
             module.fail_json(msg="yaml is not installed, try 'pip install pyyaml'")
@@ -115,7 +111,7 @@ def main():
         argument_spec=argument_spec,
         required_one_of=[['name', 'settings']],
         mutually_exclusive=[['name', 'settings']],
-        required_if=[['name', 'present', ['value']]]
+        required_if=[['name', 'present', ['value']]],
     )
 
     # Extract our parameters
@@ -145,10 +141,7 @@ def main():
             json_output['new_values'][a_setting] = new_settings[a_setting]
 
     if module._diff:
-        json_output['diff'] = {
-            'before': json_output['old_values'],
-            'after': json_output['new_values']
-        }
+        json_output['diff'] = {'before': json_output['old_values'], 'after': json_output['new_values']}
 
     # If nothing needs an update we can simply exit with the response (as not changed)
     if not needs_update:

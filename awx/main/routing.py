@@ -31,8 +31,8 @@ websocket_urlpatterns = [
     url(r'websocket/broadcast/$', consumers.BroadcastConsumer),
 ]
 
-application = AWXProtocolTypeRouter({
-    'websocket': AuthMiddlewareStack(
-        URLRouter(websocket_urlpatterns)
-    ),
-})
+application = AWXProtocolTypeRouter(
+    {
+        'websocket': AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+    }
+)

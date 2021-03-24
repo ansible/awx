@@ -92,7 +92,7 @@ def test_auto_field_adjustments(organization, inventory, team, alice):
     inventory.organization = organization
     inventory.save()
     assert alice not in inventory.admin_role
-    #assert False
+    # assert False
 
 
 @pytest.mark.django_db

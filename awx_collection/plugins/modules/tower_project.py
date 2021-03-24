@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -226,10 +225,7 @@ def wait_for_project_update(module, last_request):
 
         # Invoke wait function
         module.wait_on_url(
-            url=result['json']['url'],
-            object_name=module.get_item_name(last_request),
-            object_type='Project Update',
-            timeout=timeout, interval=interval
+            url=result['json']['url'], object_name=module.get_item_name(last_request), object_type='Project Update', timeout=timeout, interval=interval
         )
 
     module.exit_json(**module.json_output)
@@ -298,8 +294,11 @@ def main():
     if copy_from:
         # a new existing item is formed when copying and is returned.
         project = module.copy_item(
-            project, copy_from, name,
-            endpoint='projects', item_type='project',
+            project,
+            copy_from,
+            name,
+            endpoint='projects',
+            item_type='project',
             copy_lookup_data={},
         )
 
@@ -341,9 +340,16 @@ def main():
     }
 
     for field_name in (
-        'scm_url', 'scm_branch', 'scm_refspec', 'scm_clean', 'scm_delete_on_update',
-        'timeout', 'scm_update_cache_timeout', 'custom_virtualenv',
-        'description', 'allow_override',
+        'scm_url',
+        'scm_branch',
+        'scm_refspec',
+        'scm_clean',
+        'scm_delete_on_update',
+        'timeout',
+        'scm_update_cache_timeout',
+        'custom_virtualenv',
+        'description',
+        'allow_override',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:
@@ -368,10 +374,7 @@ def main():
 
     # If the state was present and we can let the module build or update the existing project, this will return on its own
     module.create_or_update_if_needed(
-        project, project_fields,
-        endpoint='projects', item_type='project',
-        associations=association_fields,
-        on_create=on_change, on_update=on_change
+        project, project_fields, endpoint='projects', item_type='project', associations=association_fields, on_create=on_change, on_update=on_change
     )
 
 

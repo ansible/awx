@@ -1,6 +1,7 @@
 # Python
 import urllib.parse
 from collections import deque
+
 # Django
 from django.db import models
 from django.conf import settings
@@ -16,13 +17,10 @@ for c in ';/?:@=&[]':
 FK_NAME = 0
 NEXT_NODE = 1
 
-NAME_EXCEPTIONS = {
-    "custom_inventory_scripts": "inventory_scripts"
-}
+NAME_EXCEPTIONS = {"custom_inventory_scripts": "inventory_scripts"}
 
 
 class GraphNode(object):
-
     def __init__(self, model, fields, adj_list):
         self.model = model
         self.found = False
@@ -50,10 +48,7 @@ class GraphNode(object):
         current_fk_name = ''
         while stack:
             if stack[-1].counter == 0:
-                named_url_component = NAMED_URL_RES_INNER_DILIMITER.join(
-                    ["<%s>" % (current_fk_name + field)
-                     for field in stack[-1].fields]
-                )
+                named_url_component = NAMED_URL_RES_INNER_DILIMITER.join(["<%s>" % (current_fk_name + field) for field in stack[-1].fields])
                 named_url_components.append(named_url_component)
             if stack[-1].counter >= len(stack[-1].adj_list):
                 stack[-1].counter = 0
@@ -73,16 +68,15 @@ class GraphNode(object):
         return ret
 
     def _encode_uri(self, text):
-        '''
+        """
         Performance assured: http://stackoverflow.com/a/27086669
-        '''
+        """
         for c in URL_PATH_RESERVED_CHARSET:
             if not isinstance(text, str):
                 text = str(text)  # needed for WFJT node creation, identifier temporarily UUID4 type
             if c in text:
                 text = text.replace(c, URL_PATH_RESERVED_CHARSET[c])
-        text = text.replace(NAMED_URL_RES_INNER_DILIMITER,
-                            '[%s]' % NAMED_URL_RES_INNER_DILIMITER)
+        text = text.replace(NAMED_URL_RES_INNER_DILIMITER, '[%s]' % NAMED_URL_RES_INNER_DILIMITER)
         return text
 
     def generate_named_url(self, obj):
@@ -91,8 +85,7 @@ class GraphNode(object):
         stack = [self]
         while stack:
             if stack[-1].counter == 0:
-                named_url_item = [self._encode_uri(getattr(stack[-1].obj, field, ''))
-                                  for field in stack[-1].fields]
+                named_url_item = [self._encode_uri(getattr(stack[-1].obj, field, '')) for field in stack[-1].fields]
                 named_url.append(NAMED_URL_RES_INNER_DILIMITER.join(named_url_item))
             if stack[-1].counter >= len(stack[-1].adj_list):
                 stack[-1].counter = 0
@@ -108,7 +101,6 @@ class GraphNode(object):
                 else:
                     named_url.append('')
         return NAMED_URL_RES_DILIMITER.join(named_url)
-
 
     def _process_top_node(self, named_url_names, kwargs, prefixes, stack, idx):
         if stack[-1].counter == 0:
@@ -146,16 +138,13 @@ class GraphNode(object):
     def populate_named_url_query_kwargs(self, kwargs, named_url, ignore_digits=True):
         if ignore_digits and named_url.isdigit() and int(named_url) > 0:
             return False
-        named_url = named_url.replace('[%s]' % NAMED_URL_RES_INNER_DILIMITER,
-                                      NAMED_URL_RES_DILIMITER_ENCODE)
+        named_url = named_url.replace('[%s]' % NAMED_URL_RES_INNER_DILIMITER, NAMED_URL_RES_DILIMITER_ENCODE)
         named_url_names = named_url.split(NAMED_URL_RES_DILIMITER)
         prefixes = []
         stack = [self]
         idx = 0
         while stack:
-            idx, is_valid = self._process_top_node(
-                named_url_names, kwargs, prefixes, stack, idx
-            )
+            idx, is_valid = self._process_top_node(named_url_names, kwargs, prefixes, stack, idx)
             if not is_valid:
                 return False
         return idx == len(named_url_names)
@@ -192,10 +181,12 @@ def _get_all_unique_togethers(model):
         soft_uts = getattr(model_to_backtrack, 'SOFT_UNIQUE_TOGETHER', [])
         ret.extend(soft_uts)
         for parent_class in model_to_backtrack.__bases__:
-            if issubclass(parent_class, models.Model) and\
-                    hasattr(parent_class, '_meta') and\
-                    hasattr(parent_class._meta, 'unique_together') and\
-                    isinstance(parent_class._meta.unique_together, tuple):
+            if (
+                issubclass(parent_class, models.Model)
+                and hasattr(parent_class, '_meta')
+                and hasattr(parent_class._meta, 'unique_together')
+                and isinstance(parent_class._meta.unique_together, tuple)
+            ):
                 queue.append(parent_class)
     ret.sort(key=lambda x: len(x))
     return tuple(ret)
@@ -261,18 +252,11 @@ def _dfs(configuration, model, graph, dead_ends, new_deadends, parents):
         next_model = model._meta.get_field(fk_name).related_model
         if issubclass(next_model, ContentType):
             continue
-        if next_model not in configuration or\
-                next_model in dead_ends or\
-                next_model in new_deadends or\
-                next_model in parents:
+        if next_model not in configuration or next_model in dead_ends or next_model in new_deadends or next_model in parents:
             new_deadends.add(model)
             parents.remove(model)
             return False
-        if next_model not in graph and\
-                not _dfs(
-                    configuration, next_model, graph,
-                    dead_ends, new_deadends, parents
-                ):
+        if next_model not in graph and not _dfs(configuration, next_model, graph, dead_ends, new_deadends, parents):
             new_deadends.add(model)
             parents.remove(model)
             return False

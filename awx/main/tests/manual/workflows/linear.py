@@ -28,14 +28,14 @@ def do_init_workflow(job_template_success, job_template_fail, job_template_never
 
         nodes_fail[0].failure_nodes.add(nodes_success[1])
         nodes_fail[0].success_nodes.add(nodes_never[1])
-        
+
         nodes_success[1].failure_nodes.add(nodes_never[2])
 
 
 def do_init():
     jt_success = JobTemplate.objects.get(id=5)
-    jt_fail= JobTemplate.objects.get(id=6)
-    jt_never= JobTemplate.objects.get(id=7)
+    jt_fail = JobTemplate.objects.get(id=6)
+    jt_never = JobTemplate.objects.get(id=7)
     do_init_workflow(jt_success, jt_fail, jt_never)
 
 

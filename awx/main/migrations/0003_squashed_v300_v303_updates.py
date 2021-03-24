@@ -14,15 +14,17 @@ from ._squashed_30 import SQUASHED_30
 
 
 class Migration(migrations.Migration):
-    replaces = [('main', '0020_v300_labels_changes'),
-                ('main', '0021_v300_activity_stream'),
-                ('main', '0022_v300_adhoc_extravars'),
-                ('main', '0023_v300_activity_stream_ordering'),
-                ('main', '0024_v300_jobtemplate_allow_simul'),
-                ('main', '0025_v300_update_rbac_parents'),
-                ('main', '0026_v300_credential_unique'),
-                ('main', '0027_v300_team_migrations'),
-                ('main', '0028_v300_org_team_cascade')] + _squashed.replaces(SQUASHED_30, applied=True)
+    replaces = [
+        ('main', '0020_v300_labels_changes'),
+        ('main', '0021_v300_activity_stream'),
+        ('main', '0022_v300_adhoc_extravars'),
+        ('main', '0023_v300_activity_stream_ordering'),
+        ('main', '0024_v300_jobtemplate_allow_simul'),
+        ('main', '0025_v300_update_rbac_parents'),
+        ('main', '0026_v300_credential_unique'),
+        ('main', '0027_v300_team_migrations'),
+        ('main', '0028_v300_org_team_cascade'),
+    ] + _squashed.replaces(SQUASHED_30, applied=True)
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -68,17 +70,70 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='kind',
-            field=models.CharField(default='ssh', max_length=32, choices=[('ssh', 'Machine'), ('net', 'Network'), ('scm', 'Source Control'), ('aws', 'Amazon Web Services'), ('rax', 'Rackspace'), ('vmware', 'VMware vCenter'), ('satellite6', 'Red Hat Satellite 6'), ('cloudforms', 'Red Hat CloudForms'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure Classic (deprecated)'), ('azure_rm', 'Microsoft Azure Resource Manager'), ('openstack', 'OpenStack')]),
+            field=models.CharField(
+                default='ssh',
+                max_length=32,
+                choices=[
+                    ('ssh', 'Machine'),
+                    ('net', 'Network'),
+                    ('scm', 'Source Control'),
+                    ('aws', 'Amazon Web Services'),
+                    ('rax', 'Rackspace'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Red Hat Satellite 6'),
+                    ('cloudforms', 'Red Hat CloudForms'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure', 'Microsoft Azure Classic (deprecated)'),
+                    ('azure_rm', 'Microsoft Azure Resource Manager'),
+                    ('openstack', 'OpenStack'),
+                ],
+            ),
         ),
         migrations.AlterField(
             model_name='inventorysource',
             name='source',
-            field=models.CharField(default='', max_length=32, blank=True, choices=[('', 'Manual'), ('file', 'Local File, Directory or Script'), ('rax', 'Rackspace Cloud Servers'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure Classic (deprecated)'), ('azure_rm', 'Microsoft Azure Resource Manager'), ('vmware', 'VMware vCenter'), ('satellite6', 'Red Hat Satellite 6'), ('cloudforms', 'Red Hat CloudForms'), ('openstack', 'OpenStack'), ('custom', 'Custom Script')]),
+            field=models.CharField(
+                default='',
+                max_length=32,
+                blank=True,
+                choices=[
+                    ('', 'Manual'),
+                    ('file', 'Local File, Directory or Script'),
+                    ('rax', 'Rackspace Cloud Servers'),
+                    ('ec2', 'Amazon EC2'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure', 'Microsoft Azure Classic (deprecated)'),
+                    ('azure_rm', 'Microsoft Azure Resource Manager'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Red Hat Satellite 6'),
+                    ('cloudforms', 'Red Hat CloudForms'),
+                    ('openstack', 'OpenStack'),
+                    ('custom', 'Custom Script'),
+                ],
+            ),
         ),
         migrations.AlterField(
             model_name='inventoryupdate',
             name='source',
-            field=models.CharField(default='', max_length=32, blank=True, choices=[('', 'Manual'), ('file', 'Local File, Directory or Script'), ('rax', 'Rackspace Cloud Servers'), ('ec2', 'Amazon EC2'), ('gce', 'Google Compute Engine'), ('azure', 'Microsoft Azure Classic (deprecated)'), ('azure_rm', 'Microsoft Azure Resource Manager'), ('vmware', 'VMware vCenter'), ('satellite6', 'Red Hat Satellite 6'), ('cloudforms', 'Red Hat CloudForms'), ('openstack', 'OpenStack'), ('custom', 'Custom Script')]),
+            field=models.CharField(
+                default='',
+                max_length=32,
+                blank=True,
+                choices=[
+                    ('', 'Manual'),
+                    ('file', 'Local File, Directory or Script'),
+                    ('rax', 'Rackspace Cloud Servers'),
+                    ('ec2', 'Amazon EC2'),
+                    ('gce', 'Google Compute Engine'),
+                    ('azure', 'Microsoft Azure Classic (deprecated)'),
+                    ('azure_rm', 'Microsoft Azure Resource Manager'),
+                    ('vmware', 'VMware vCenter'),
+                    ('satellite6', 'Red Hat Satellite 6'),
+                    ('cloudforms', 'Red Hat CloudForms'),
+                    ('openstack', 'OpenStack'),
+                    ('custom', 'Custom Script'),
+                ],
+            ),
         ),
         # jobtemplate allow simul
         migrations.AddField(
@@ -110,7 +165,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['singleton:system_auditor', 'organization.auditor_role', 'use_role', 'admin_role'], to='main.Role', null='True'),
+            field=awx.main.fields.ImplicitRoleField(
+                related_name='+', parent_role=['singleton:system_auditor', 'organization.auditor_role', 'use_role', 'admin_role'], to='main.Role', null='True'
+            ),
         ),
         # Team cascade
         migrations.AlterField(

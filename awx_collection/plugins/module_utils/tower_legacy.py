@@ -26,7 +26,8 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import os
@@ -47,13 +48,13 @@ from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 
 
 def tower_auth_config(module):
-    '''
+    """
     `tower_auth_config` attempts to load the tower-cli.cfg file
     specified from the `tower_config_file` parameter. If found,
     if returns the contents of the file as a dictionary, else
     it will attempt to fetch values from the module params and
     only pass those values that have been set.
-    '''
+    """
     config_file = module.params.pop('tower_config_file', None)
     if config_file:
         if not os.path.exists(config_file):
@@ -103,15 +104,16 @@ class TowerLegacyModule(AnsibleModule):
         args.update(argument_spec)
 
         kwargs.setdefault('mutually_exclusive', [])
-        kwargs['mutually_exclusive'].extend((
-            ('tower_config_file', 'tower_host'),
-            ('tower_config_file', 'tower_username'),
-            ('tower_config_file', 'tower_password'),
-            ('tower_config_file', 'validate_certs'),
-        ))
+        kwargs['mutually_exclusive'].extend(
+            (
+                ('tower_config_file', 'tower_host'),
+                ('tower_config_file', 'tower_username'),
+                ('tower_config_file', 'tower_password'),
+                ('tower_config_file', 'validate_certs'),
+            )
+        )
 
         super(TowerLegacyModule, self).__init__(argument_spec=args, **kwargs)
 
         if not HAS_TOWER_CLI:
-            self.fail_json(msg=missing_required_lib('ansible-tower-cli'),
-                           exception=TOWER_CLI_IMP_ERR)
+            self.fail_json(msg=missing_required_lib('ansible-tower-cli'), exception=TOWER_CLI_IMP_ERR)

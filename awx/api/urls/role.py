@@ -3,14 +3,7 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    RoleList,
-    RoleDetail,
-    RoleUsersList,
-    RoleTeamsList,
-    RoleParentsList,
-    RoleChildrenList,
-)
+from awx.api.views import RoleList, RoleDetail, RoleUsersList, RoleTeamsList, RoleParentsList, RoleChildrenList
 
 
 urls = [

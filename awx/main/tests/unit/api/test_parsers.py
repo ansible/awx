@@ -9,11 +9,12 @@ from rest_framework.exceptions import ParseError
 
 
 @pytest.mark.parametrize(
-    'input_, output', [
+    'input_, output',
+    [
         ('{"foo": "bar"}', {'foo': 'bar'}),
         ('null', None),
         ('', {}),
-    ]
+    ],
 )
 def test_jsonparser_valid_input(input_, output):
     input_stream = StringIO(input_)

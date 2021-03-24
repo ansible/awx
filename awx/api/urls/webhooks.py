@@ -1,10 +1,6 @@
 from django.conf.urls import url
 
-from awx.api.views import (
-    WebhookKeyView,
-    GithubWebhookReceiver,
-    GitlabWebhookReceiver,
-)
+from awx.api.views import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver
 
 
 urlpatterns = [

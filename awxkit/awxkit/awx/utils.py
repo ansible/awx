@@ -31,9 +31,22 @@ def _delete_all(endpoint):
 
 
 def delete_all(v):
-    for endpoint in (v.unified_jobs, v.job_templates, v.workflow_job_templates, v.notification_templates,
-                     v.projects, v.inventory, v.hosts, v.inventory_scripts, v.labels, v.credentials,
-                     v.teams, v.users, v.organizations, v.schedules):
+    for endpoint in (
+        v.unified_jobs,
+        v.job_templates,
+        v.workflow_job_templates,
+        v.notification_templates,
+        v.projects,
+        v.inventory,
+        v.hosts,
+        v.inventory_scripts,
+        v.labels,
+        v.credentials,
+        v.teams,
+        v.users,
+        v.organizations,
+        v.schedules,
+    ):
         _delete_all(endpoint)
 
 

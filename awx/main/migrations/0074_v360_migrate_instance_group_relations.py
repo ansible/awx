@@ -24,11 +24,7 @@ def create_through_relations(apps, schema_editor):
         Target = apps.get_model('main', cls)
         for x in Target.objects.iterator():
             for i, instance_group in enumerate(x.instance_groups.all()):
-                Membership(
-                    instancegroup=instance_group,
-                    position=i,
-                    **{'%s' % cls.lower(): x}
-                ).save()
+                Membership(instancegroup=instance_group, position=i, **{'%s' % cls.lower(): x}).save()
 
 
 class Migration(migrations.Migration):
@@ -37,6 +33,4 @@ class Migration(migrations.Migration):
         ('main', '0073_v360_create_instance_group_m2m'),
     ]
 
-    operations = [
-        migrations.RunPython(create_through_relations)
-    ]
+    operations = [migrations.RunPython(create_through_relations)]

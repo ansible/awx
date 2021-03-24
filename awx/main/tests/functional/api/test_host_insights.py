@@ -38,9 +38,7 @@ class TestHostInsights:
         url = reverse('api:host_insights', kwargs={'pk': host.pk})
         response = get(url, user('admin', True))
 
-        assert response.data['error'] == (
-            'Could not translate Insights system ID 123e4567-e89b-12d3-a456-426655440000'
-            ' into an Insights platform ID.')
+        assert response.data['error'] == ('Could not translate Insights system ID 123e4567-e89b-12d3-a456-426655440000' ' into an Insights platform ID.')
         assert response.status_code == 404
 
     def test_insights_no_credential(self, get, hosts, user, mocker):
@@ -56,11 +54,24 @@ class TestHostInsights:
         assert response.data['error'] == 'The Insights Credential for "test-inv" was not found.'
         assert response.status_code == 404
 
-    @pytest.mark.parametrize("status_code, exception, error, message", [
-        (502, requests.exceptions.SSLError, 'SSLError while trying to connect to https://myexample.com/whocares/me/', None,),
-        (504, requests.exceptions.Timeout, 'Request to https://myexample.com/whocares/me/ timed out.', None,),
-        (502, requests.exceptions.RequestException, 'booo!', 'Unknown exception booo! while trying to GET https://myexample.com/whocares/me/'),
-    ])
+    @pytest.mark.parametrize(
+        "status_code, exception, error, message",
+        [
+            (
+                502,
+                requests.exceptions.SSLError,
+                'SSLError while trying to connect to https://myexample.com/whocares/me/',
+                None,
+            ),
+            (
+                504,
+                requests.exceptions.Timeout,
+                'Request to https://myexample.com/whocares/me/ timed out.',
+                None,
+            ),
+            (502, requests.exceptions.RequestException, 'booo!', 'Unknown exception booo! while trying to GET https://myexample.com/whocares/me/'),
+        ],
+    )
     def test_insights_exception(self, get, hosts, insights_credential, user, mocker, status_code, exception, error, message):
         mocker.patch.object(requests.Session, 'get', side_effect=exception(error))
 
@@ -89,8 +100,7 @@ class TestHostInsights:
         url = reverse('api:host_insights', kwargs={'pk': host.pk})
         response = get(url, user('admin', True))
 
-        assert response.data['error'] == (
-            "Unauthorized access. Please check your Insights Credential username and password.")
+        assert response.data['error'] == ("Unauthorized access. Please check your Insights Credential username and password.")
         assert response.status_code == 502
 
     def test_insights_bad_status(self, get, hosts, insights_credential, user, mocker):

@@ -21,7 +21,8 @@ def wfjt(workflow_job_template_factory, organization):
 @pytest.fixture
 def wfjt_with_nodes(workflow_job_template_factory, organization, job_template):
     objects = workflow_job_template_factory(
-        'test_workflow', organization=organization, workflow_job_template_nodes=[{'unified_job_template': job_template}], persisted=True)
+        'test_workflow', organization=organization, workflow_job_template_nodes=[{'unified_job_template': job_template}], persisted=True
+    )
     return objects.workflow_job_template
 
 
@@ -37,7 +38,6 @@ def workflow_job(wfjt):
 
 @pytest.mark.django_db
 class TestWorkflowJobTemplateAccess:
-
     def test_random_user_no_edit(self, wfjt, rando):
         access = WorkflowJobTemplateAccess(rando)
         assert not access.can_change(wfjt, {'name': 'new name'})
@@ -61,7 +61,6 @@ class TestWorkflowJobTemplateAccess:
 
 @pytest.mark.django_db
 class TestWorkflowJobTemplateNodeAccess:
-
     def test_no_jt_access_to_edit(self, wfjt_node, rando):
         # without access to the related job template, admin to the WFJT can
         # not change the prompted parameters
@@ -76,9 +75,7 @@ class TestWorkflowJobTemplateNodeAccess:
 
     def test_access_to_edit_non_JT(self, rando, workflow_job_template, organization, project):
         workflow_job_template.admin_role.members.add(rando)
-        node = workflow_job_template.workflow_job_template_nodes.create(
-            unified_job_template=project
-        )
+        node = workflow_job_template.workflow_job_template_nodes.create(unified_job_template=project)
         assert not WorkflowJobTemplateNodeAccess(rando).can_change(node, {'limit': ''})
 
         project.update_role.members.add(rando)
@@ -88,19 +85,14 @@ class TestWorkflowJobTemplateNodeAccess:
         wfjt.admin_role.members.add(rando)
         access = WorkflowJobTemplateNodeAccess(rando)
         job_template.read_role.members.add(rando)
-        assert not access.can_add({
-            'workflow_job_template': wfjt,
-            'unified_job_template': job_template})
+        assert not access.can_add({'workflow_job_template': wfjt, 'unified_job_template': job_template})
 
     def test_add_node_with_minimum_permissions(self, wfjt, job_template, inventory, rando):
         wfjt.admin_role.members.add(rando)
         access = WorkflowJobTemplateNodeAccess(rando)
         job_template.execute_role.members.add(rando)
         inventory.use_role.members.add(rando)
-        assert access.can_add({
-            'workflow_job_template': wfjt,
-            'inventory': inventory,
-            'unified_job_template': job_template})
+        assert access.can_add({'workflow_job_template': wfjt, 'inventory': inventory, 'unified_job_template': job_template})
 
     def test_remove_unwanted_foreign_node(self, wfjt_node, job_template, rando):
         wfjt = wfjt_node.workflow_job_template
@@ -112,7 +104,6 @@ class TestWorkflowJobTemplateNodeAccess:
 
 @pytest.mark.django_db
 class TestWorkflowJobAccess:
-
     @pytest.mark.parametrize("role_name", ["admin_role", "workflow_admin_role"])
     def test_org_admin_can_delete_workflow_job(self, role_name, workflow_job, org_member):
         role = getattr(workflow_job.workflow_job_template.organization, role_name)
@@ -155,10 +146,7 @@ class TestWorkflowJobAccess:
 
     def test_cannot_relaunch_friends_job(self, wfjt, rando, alice):
         workflow_job = wfjt.workflow_jobs.create(name='foo', created_by=alice)
-        JobLaunchConfig.objects.create(
-            job=workflow_job,
-            extra_data={'foo': 'fooforyou'}
-        )
+        JobLaunchConfig.objects.create(job=workflow_job, extra_data={'foo': 'fooforyou'})
         wfjt.execute_role.members.add(alice)
         assert not WorkflowJobAccess(rando).can_start(workflow_job)
 
@@ -180,7 +168,6 @@ class TestWorkflowJobAccess:
 
 @pytest.mark.django_db
 class TestWFJTCopyAccess:
-
     def test_copy_permissions_org_admin(self, wfjt, org_admin, org_member):
         admin_access = WorkflowJobTemplateAccess(org_admin)
         assert admin_access.can_copy(wfjt)
@@ -190,33 +177,28 @@ class TestWFJTCopyAccess:
         assert admin_access.can_copy(wfjt)
 
     def test_copy_permissions_user(self, wfjt, org_admin, org_member):
-        '''
+        """
         Only org admins and org workflow admins are able to add WFJTs, only org admins
         are able to copy them
-        '''
+        """
         wfjt.admin_role.members.add(org_member)
         member_access = WorkflowJobTemplateAccess(org_member)
         assert not member_access.can_copy(wfjt)
 
     def test_workflow_copy_warnings_inv(self, wfjt, rando, inventory):
-        '''
+        """
         The user `rando` does not have access to the prompted inventory in a
         node inside the workflow - test surfacing this information
-        '''
+        """
         wfjt.workflow_job_template_nodes.create(inventory=inventory)
         access = WorkflowJobTemplateAccess(rando, save_messages=True)
         assert not access.can_copy(wfjt)
         warnings = access.messages
         assert 'inventories_unable_to_copy' in warnings
 
-
     def test_workflow_copy_no_start(self, wfjt, inventory, admin_user):
         # Test that un-startable resource doesn't block copy
-        inv_src = InventorySource.objects.create(
-            inventory = inventory,
-            source = 'custom',
-            source_script = None
-        )
+        inv_src = InventorySource.objects.create(inventory=inventory, source='custom', source_script=None)
         assert not inv_src.can_update
         wfjt.workflow_job_template_nodes.create(unified_job_template=inv_src)
         access = WorkflowJobTemplateAccess(admin_user, save_messages=True)

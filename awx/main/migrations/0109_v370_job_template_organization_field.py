@@ -6,9 +6,12 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 from awx.main.migrations._rbac import (
-    rebuild_role_parentage, rebuild_role_hierarchy,
-    migrate_ujt_organization, migrate_ujt_organization_backward,
-    restore_inventory_admins, restore_inventory_admins_backward
+    rebuild_role_parentage,
+    rebuild_role_hierarchy,
+    migrate_ujt_organization,
+    migrate_ujt_organization_backward,
+    restore_inventory_admins,
+    restore_inventory_admins_backward,
 )
 
 
@@ -29,12 +32,26 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='tmp_organization',
-            field=models.ForeignKey(blank=True, help_text='The organization used to determine access to this unified job.', null=True, on_delete=awx.main.utils.polymorphic.SET_NULL, related_name='unifiedjobs', to='main.Organization'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The organization used to determine access to this unified job.',
+                null=True,
+                on_delete=awx.main.utils.polymorphic.SET_NULL,
+                related_name='unifiedjobs',
+                to='main.Organization',
+            ),
         ),
         migrations.AddField(
             model_name='unifiedjobtemplate',
             name='tmp_organization',
-            field=models.ForeignKey(blank=True, help_text='The organization used to determine access to this template.', null=True, on_delete=awx.main.utils.polymorphic.SET_NULL, related_name='unifiedjobtemplates', to='main.Organization'),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The organization used to determine access to this template.',
+                null=True,
+                on_delete=awx.main.utils.polymorphic.SET_NULL,
+                related_name='unifiedjobtemplates',
+                to='main.Organization',
+            ),
         ),
         # while new and old fields exist, copy the organization fields
         migrations.RunPython(migrate_ujt_organization, migrate_ujt_organization_backward),
@@ -62,17 +79,38 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jobtemplate',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['organization.job_template_admin_role'], related_name='+', to='main.Role'),
+            field=awx.main.fields.ImplicitRoleField(
+                editable=False,
+                null='True',
+                on_delete=django.db.models.deletion.CASCADE,
+                parent_role=['organization.job_template_admin_role'],
+                related_name='+',
+                to='main.Role',
+            ),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='execute_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['admin_role', 'organization.execute_role'], related_name='+', to='main.Role'),
+            field=awx.main.fields.ImplicitRoleField(
+                editable=False,
+                null='True',
+                on_delete=django.db.models.deletion.CASCADE,
+                parent_role=['admin_role', 'organization.execute_role'],
+                related_name='+',
+                to='main.Role',
+            ),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'], related_name='+', to='main.Role'),
+            field=awx.main.fields.ImplicitRoleField(
+                editable=False,
+                null='True',
+                on_delete=django.db.models.deletion.CASCADE,
+                parent_role=['organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'],
+                related_name='+',
+                to='main.Role',
+            ),
         ),
         # Re-compute the role parents and ancestors caching
         migrations.RunPython(rebuild_jt_parents, migrations.RunPython.noop),

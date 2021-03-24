@@ -59,5 +59,5 @@ class Migration(migrations.Migration):
             name='vault_credential',
         ),
         migrations.RunPython(migration_utils.set_current_apps_for_migrations, credentialtypes.remove_vault_id_field),
-        migrations.RunPython(credentialtypes.add_vault_id_field, migration_utils.set_current_apps_for_migrations)
+        migrations.RunPython(credentialtypes.add_vault_id_field, migration_utils.set_current_apps_for_migrations),
     ]

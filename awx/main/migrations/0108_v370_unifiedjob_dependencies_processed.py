@@ -13,6 +13,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='dependencies_processed',
-            field=models.BooleanField(default=False, editable=False, help_text='If True, the task manager has already processed potential dependencies for this job.'),
+            field=models.BooleanField(
+                default=False, editable=False, help_text='If True, the task manager has already processed potential dependencies for this job.'
+            ),
         ),
     ]

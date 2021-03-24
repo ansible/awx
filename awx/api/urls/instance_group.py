@@ -3,12 +3,7 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    InstanceGroupList,
-    InstanceGroupDetail,
-    InstanceGroupUnifiedJobsList,
-    InstanceGroupInstanceList,
-)
+from awx.api.views import InstanceGroupList, InstanceGroupDetail, InstanceGroupUnifiedJobsList, InstanceGroupInstanceList
 
 
 urls = [

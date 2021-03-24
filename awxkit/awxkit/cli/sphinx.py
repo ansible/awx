@@ -8,7 +8,6 @@ from .resource import is_control_resource, CustomCommand
 
 
 class CustomAutoprogramDirective(AutoprogramDirective):
-
     def run(self):
         nodes = super(CustomAutoprogramDirective, self).run()
 
@@ -23,12 +22,7 @@ class CustomAutoprogramDirective(AutoprogramDirective):
         nodes[0][0].children = [heading]
 
         # add a descriptive top synopsis of the reference guide
-        nodes[0].children.insert(1, paragraph(
-            text=(
-                'This is an exhaustive guide of every available command in '
-                'the awx CLI tool.'
-            )
-        ))
+        nodes[0].children.insert(1, paragraph(text=('This is an exhaustive guide of every available command in ' 'the awx CLI tool.')))
         disclaimer = (
             'The commands and parameters documented here can (and will) '
             'vary based on a variety of factors, such as the AWX API '
@@ -51,9 +45,7 @@ def render():
     # Sphinx document from.
     for e in ('TOWER_HOST', 'TOWER_USERNAME', 'TOWER_PASSWORD'):
         if not os.environ.get(e):
-            raise SystemExit(
-                'Please specify a valid {} for a real (running) Tower install.'.format(e)  # noqa
-            )
+            raise SystemExit('Please specify a valid {} for a real (running) Tower install.'.format(e))  # noqa
     cli = CLI()
     cli.parse_args(['awx', '--help'])
     cli.connect()

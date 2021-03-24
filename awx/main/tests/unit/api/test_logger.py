@@ -35,7 +35,8 @@ data_loggly = {
 # Test reconfigure logging settings function
 # name this whatever you want
 @pytest.mark.parametrize(
-    'enabled, log_type, host, port, protocol, errorfile, expected_config', [
+    'enabled, log_type, host, port, protocol, errorfile, expected_config',
+    [
         (
             True,
             'loggly',
@@ -43,10 +44,12 @@ data_loggly = {
             None,
             'https',
             '/var/log/tower/rsyslog.err',
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                'action(type="omhttp" server="logs-01.loggly.com" serverport="80" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
+                    'action(type="omhttp" server="logs-01.loggly.com" serverport="80" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/")',  # noqa
+                ]
+            ),
         ),
         (
             True,  # localhost w/ custom UDP port
@@ -55,10 +58,12 @@ data_loggly = {
             9000,
             'udp',
             '',  # empty errorfile
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")',
-                'action(type="omfwd" target="localhost" port="9000" protocol="udp" action.resumeRetryCount="-1" action.resumeInterval="5" template="awx")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")',
+                    'action(type="omfwd" target="localhost" port="9000" protocol="udp" action.resumeRetryCount="-1" action.resumeInterval="5" template="awx")',  # noqa
+                ]
+            ),
         ),
         (
             True,  # localhost w/ custom TCP port
@@ -67,10 +72,12 @@ data_loggly = {
             9000,
             'tcp',
             '/var/log/tower/rsyslog.err',
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")',
-                'action(type="omfwd" target="localhost" port="9000" protocol="tcp" action.resumeRetryCount="-1" action.resumeInterval="5" template="awx")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")',
+                    'action(type="omfwd" target="localhost" port="9000" protocol="tcp" action.resumeRetryCount="-1" action.resumeInterval="5" template="awx")',  # noqa
+                ]
+            ),
         ),
         (
             True,  # https, default port 443
@@ -79,10 +86,12 @@ data_loggly = {
             None,
             None,
             '/var/log/tower/rsyslog.err',
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                'action(type="omhttp" server="yoursplunk" serverport="443" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
+                    'action(type="omhttp" server="yoursplunk" serverport="443" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                ]
+            ),
         ),
         (
             True,  # http, default port 80
@@ -91,10 +100,12 @@ data_loggly = {
             None,
             None,
             '/var/log/tower/rsyslog.err',
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                'action(type="omhttp" server="yoursplunk" serverport="80" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
+                    'action(type="omhttp" server="yoursplunk" serverport="80" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                ]
+            ),
         ),
         (
             True,  # https, custom port in URL string
@@ -103,10 +114,12 @@ data_loggly = {
             None,
             None,
             '/var/log/tower/rsyslog.err',
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
+                    'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                ]
+            ),
         ),
         (
             True,  # https, custom port explicitly specified
@@ -115,10 +128,12 @@ data_loggly = {
             8088,
             None,
             '/var/log/tower/rsyslog.err',
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
+                    'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                ]
+            ),
         ),
         (
             True,  # no scheme specified in URL, default to https, respect custom port
@@ -127,10 +142,12 @@ data_loggly = {
             8088,
             'https',
             '/var/log/tower/rsyslog.err',
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
+                    'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                ]
+            ),
         ),
         (
             True,  # respect custom http-only port
@@ -139,29 +156,33 @@ data_loggly = {
             8088,
             None,
             '/var/log/tower/rsyslog.err',
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
+                    'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                ]
+            ),
         ),
         (
             True,  # valid sumologic config
             'sumologic',
-            'https://endpoint5.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV0qoiETY0MrM3wwLoDgO1jFgjOxE6-39qokkj3LGtOroZ8wNaN2M6DtgYrJZsmSi4-36_Up5TbbN_8hosYonLKHSSOSKY845LuLZBCBwStrHQ==', # noqa
+            'https://endpoint5.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV0qoiETY0MrM3wwLoDgO1jFgjOxE6-39qokkj3LGtOroZ8wNaN2M6DtgYrJZsmSi4-36_Up5TbbN_8hosYonLKHSSOSKY845LuLZBCBwStrHQ==',  # noqa
             None,
             'https',
             '/var/log/tower/rsyslog.err',
-            '\n'.join([
-                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                'action(type="omhttp" server="endpoint5.collection.us2.sumologic.com" serverport="443" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="receiver/v1/http/ZaVnC4dhaV0qoiETY0MrM3wwLoDgO1jFgjOxE6-39qokkj3LGtOroZ8wNaN2M6DtgYrJZsmSi4-36_Up5TbbN_8hosYonLKHSSOSKY845LuLZBCBwStrHQ==")',  # noqa
-            ])
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
+                    'action(type="omhttp" server="endpoint5.collection.us2.sumologic.com" serverport="443" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="receiver/v1/http/ZaVnC4dhaV0qoiETY0MrM3wwLoDgO1jFgjOxE6-39qokkj3LGtOroZ8wNaN2M6DtgYrJZsmSi4-36_Up5TbbN_8hosYonLKHSSOSKY845LuLZBCBwStrHQ==")',  # noqa
+                ]
+            ),
         ),
-    ]
+    ],
 )
 def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfile, expected_config):
-    
+
     mock_settings, _ = _mock_logging_defaults()
-    
+
     # Set test settings
     logging_defaults = getattr(settings, 'LOGGING')
     setattr(mock_settings, 'LOGGING', logging_defaults)
@@ -175,9 +196,9 @@ def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfil
     if protocol:
         setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', protocol)
 
-    # create rsyslog conf template 
+    # create rsyslog conf template
     tmpl = construct_rsyslog_conf_template(mock_settings)
-    
+
     # check validity of created template
     assert expected_config in tmpl
 

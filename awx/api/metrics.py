@@ -3,13 +3,9 @@
 
 from django.conf.urls import url
 
-from awx.api.views import (
-    MetricsView
-)
+from awx.api.views import MetricsView
 
 
-urls = [
-    url(r'^$', MetricsView.as_view(), name='metrics_view'),
-]
+urls = [url(r'^$', MetricsView.as_view(), name='metrics_view')]
 
 __all__ = ['urls']

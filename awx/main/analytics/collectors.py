@@ -10,8 +10,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from awx.conf.license import get_license
-from awx.main.utils import (get_awx_version, get_ansible_version,
-                            get_custom_venv_choices, camelcase_to_underscore)
+from awx.main.utils import get_awx_version, get_ansible_version, get_custom_venv_choices, camelcase_to_underscore
 from awx.main import models
 from django.contrib.sessions.models import Session
 from awx.main.analytics import register
@@ -68,96 +67,99 @@ def config(since, **kwargs):
 @register('counts', '1.0', description=_('Counts of objects such as organizations, inventories, and projects'))
 def counts(since, **kwargs):
     counts = {}
-    for cls in (models.Organization, models.Team, models.User,
-                models.Inventory, models.Credential, models.Project,
-                models.JobTemplate, models.WorkflowJobTemplate, 
-                models.Host, models.Schedule, models.CustomInventoryScript, 
-                models.NotificationTemplate):
+    for cls in (
+        models.Organization,
+        models.Team,
+        models.User,
+        models.Inventory,
+        models.Credential,
+        models.Project,
+        models.JobTemplate,
+        models.WorkflowJobTemplate,
+        models.Host,
+        models.Schedule,
+        models.CustomInventoryScript,
+        models.NotificationTemplate,
+    ):
         counts[camelcase_to_underscore(cls.__name__)] = cls.objects.count()
 
     venvs = get_custom_venv_choices()
-    counts['custom_virtualenvs'] = len([
-        v for v in venvs
-        if os.path.basename(v.rstrip('/')) != 'ansible'
-    ])
+    counts['custom_virtualenvs'] = len([v for v in venvs if os.path.basename(v.rstrip('/')) != 'ansible'])
 
     inv_counts = dict(models.Inventory.objects.order_by().values_list('kind').annotate(Count('kind')))
     inv_counts['normal'] = inv_counts.get('', 0)
     inv_counts.pop('', None)
     inv_counts['smart'] = inv_counts.get('smart', 0)
     counts['inventories'] = inv_counts
-    
-    counts['unified_job'] = models.UnifiedJob.objects.exclude(launch_type='sync').count() # excludes implicit project_updates
-    counts['active_host_count'] = models.Host.objects.active_count()   
+
+    counts['unified_job'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()  # excludes implicit project_updates
+    counts['active_host_count'] = models.Host.objects.active_count()
     active_sessions = Session.objects.filter(expire_date__gte=now()).count()
     active_user_sessions = models.UserSessionMembership.objects.select_related('session').filter(session__expire_date__gte=now()).count()
     active_anonymous_sessions = active_sessions - active_user_sessions
     counts['active_sessions'] = active_sessions
     counts['active_user_sessions'] = active_user_sessions
     counts['active_anonymous_sessions'] = active_anonymous_sessions
-    counts['running_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('running', 'waiting',)).count()
+    counts['running_jobs'] = (
+        models.UnifiedJob.objects.exclude(launch_type='sync')
+        .filter(
+            status__in=(
+                'running',
+                'waiting',
+            )
+        )
+        .count()
+    )
     counts['pending_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('pending',)).count()
     return counts
 
-    
+
 @register('org_counts', '1.0', description=_('Counts of users and teams by organization'))
 def org_counts(since, **kwargs):
     counts = {}
-    for org in models.Organization.objects.annotate(num_users=Count('member_role__members', distinct=True), 
-                                                    num_teams=Count('teams', distinct=True)).values('name', 'id', 'num_users', 'num_teams'):
-        counts[org['id']] = {'name': org['name'],
-                             'users': org['num_users'],
-                             'teams': org['num_teams']
-                             }
+    for org in models.Organization.objects.annotate(num_users=Count('member_role__members', distinct=True), num_teams=Count('teams', distinct=True)).values(
+        'name', 'id', 'num_users', 'num_teams'
+    ):
+        counts[org['id']] = {'name': org['name'], 'users': org['num_users'], 'teams': org['num_teams']}
     return counts
-    
-    
+
+
 @register('cred_type_counts', '1.0', description=_('Counts of credentials by credential type'))
 def cred_type_counts(since, **kwargs):
     counts = {}
-    for cred_type in models.CredentialType.objects.annotate(num_credentials=Count(
-                                                            'credentials', distinct=True)).values('name', 'id', 'managed_by_tower', 'num_credentials'):  
-        counts[cred_type['id']] = {'name': cred_type['name'],
-                                   'credential_count': cred_type['num_credentials'],
-                                   'managed_by_tower': cred_type['managed_by_tower']
-                                   }
+    for cred_type in models.CredentialType.objects.annotate(num_credentials=Count('credentials', distinct=True)).values(
+        'name', 'id', 'managed_by_tower', 'num_credentials'
+    ):
+        counts[cred_type['id']] = {
+            'name': cred_type['name'],
+            'credential_count': cred_type['num_credentials'],
+            'managed_by_tower': cred_type['managed_by_tower'],
+        }
     return counts
-    
-    
+
+
 @register('inventory_counts', '1.2', description=_('Inventories, their inventory sources, and host counts'))
 def inventory_counts(since, **kwargs):
     counts = {}
-    for inv in models.Inventory.objects.filter(kind='').annotate(num_sources=Count('inventory_sources', distinct=True), 
-                                                                 num_hosts=Count('hosts', distinct=True)).only('id', 'name', 'kind'):
+    for inv in (
+        models.Inventory.objects.filter(kind='')
+        .annotate(num_sources=Count('inventory_sources', distinct=True), num_hosts=Count('hosts', distinct=True))
+        .only('id', 'name', 'kind')
+    ):
         source_list = []
-        for source in inv.inventory_sources.filter().annotate(num_hosts=Count('hosts', distinct=True)).values('name','source', 'num_hosts'):
+        for source in inv.inventory_sources.filter().annotate(num_hosts=Count('hosts', distinct=True)).values('name', 'source', 'num_hosts'):
             source_list.append(source)
-        counts[inv.id] = {'name': inv.name,
-                          'kind': inv.kind,
-                          'hosts': inv.num_hosts,
-                          'sources': inv.num_sources,
-                          'source_list': source_list
-                          }
+        counts[inv.id] = {'name': inv.name, 'kind': inv.kind, 'hosts': inv.num_hosts, 'sources': inv.num_sources, 'source_list': source_list}
 
     for smart_inv in models.Inventory.objects.filter(kind='smart'):
-        counts[smart_inv.id] = {'name': smart_inv.name,
-                                'kind': smart_inv.kind,
-                                'hosts': smart_inv.hosts.count(),
-                                'sources': 0,
-                                'source_list': []
-                                }
+        counts[smart_inv.id] = {'name': smart_inv.name, 'kind': smart_inv.kind, 'hosts': smart_inv.hosts.count(), 'sources': 0, 'source_list': []}
     return counts
 
 
 @register('projects_by_scm_type', '1.0', description=_('Counts of projects by source control type'))
 def projects_by_scm_type(since, **kwargs):
-    counts = dict(
-        (t[0] or 'manual', 0)
-        for t in models.Project.SCM_TYPE_CHOICES
-    )
-    for result in models.Project.objects.values('scm_type').annotate(
-        count=Count('scm_type')
-    ).order_by('scm_type'):
+    counts = dict((t[0] or 'manual', 0) for t in models.Project.SCM_TYPE_CHOICES)
+    for result in models.Project.objects.values('scm_type').annotate(count=Count('scm_type')).order_by('scm_type'):
         counts[result['scm_type'] or 'manual'] = result['count']
     return counts
 
@@ -172,10 +174,10 @@ def _get_isolated_datetime(last_check):
 def instance_info(since, include_hostnames=False, **kwargs):
     info = {}
     instances = models.Instance.objects.values_list('hostname').values(
-        'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'last_isolated_check', 'enabled')
+        'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'last_isolated_check', 'enabled'
+    )
     for instance in instances:
-        consumed_capacity = sum(x.task_impact for x in models.UnifiedJob.objects.filter(execution_node=instance['hostname'],
-                                status__in=('running', 'waiting')))
+        consumed_capacity = sum(x.task_impact for x in models.UnifiedJob.objects.filter(execution_node=instance['hostname'], status__in=('running', 'waiting')))
         instance_info = {
             'uuid': instance['uuid'],
             'version': instance['version'],
@@ -186,7 +188,7 @@ def instance_info(since, include_hostnames=False, **kwargs):
             'last_isolated_check': _get_isolated_datetime(instance['last_isolated_check']),
             'enabled': instance['enabled'],
             'consumed_capacity': consumed_capacity,
-            'remaining_capacity': instance['capacity'] - consumed_capacity
+            'remaining_capacity': instance['capacity'] - consumed_capacity,
         }
         if include_hostnames is True:
             instance_info['hostname'] = instance['hostname']
@@ -198,20 +200,22 @@ def job_counts(since, **kwargs):
     counts = {}
     counts['total_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').count()
     counts['status'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list('status').annotate(Count('status')).order_by())
-    counts['launch_type'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
-        'launch_type').annotate(Count('launch_type')).order_by())
+    counts['launch_type'] = dict(models.UnifiedJob.objects.exclude(launch_type='sync').values_list('launch_type').annotate(Count('launch_type')).order_by())
     return counts
-    
-    
+
+
 def job_instance_counts(since, **kwargs):
     counts = {}
-    job_types = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
-        'execution_node', 'launch_type').annotate(job_launch_type=Count('launch_type')).order_by()
+    job_types = (
+        models.UnifiedJob.objects.exclude(launch_type='sync')
+        .values_list('execution_node', 'launch_type')
+        .annotate(job_launch_type=Count('launch_type'))
+        .order_by()
+    )
     for job in job_types:
         counts.setdefault(job[0], {}).setdefault('launch_type', {})[job[1]] = job[2]
-        
-    job_statuses = models.UnifiedJob.objects.exclude(launch_type='sync').values_list(
-        'execution_node', 'status').annotate(job_status=Count('status')).order_by()
+
+    job_statuses = models.UnifiedJob.objects.exclude(launch_type='sync').values_list('execution_node', 'status').annotate(job_status=Count('status')).order_by()
     for job in job_statuses:
         counts.setdefault(job[0], {}).setdefault('status', {})[job[1]] = job[2]
     return counts
@@ -261,12 +265,12 @@ class FileSplitter(io.StringIO):
             self.files = self.files[:-1]
         # If we only have one file, remove the suffix
         if len(self.files) == 1:
-            os.rename(self.files[0],self.files[0].replace('_split0',''))
+            os.rename(self.files[0], self.files[0].replace('_split0', ''))
         return self.files
 
     def write(self, s):
         if not self.header:
-            self.header = s[0:s.index('\n')]
+            self.header = s[0 : s.index('\n')]
         self.counter += self.currentfile.write(s)
         if self.counter >= MAX_TABLE_SIZE:
             self.cycle_file()
@@ -307,7 +311,9 @@ def events_table(since, full_path, until, **kwargs):
                               FROM main_jobevent 
                               WHERE (main_jobevent.created > '{}' AND main_jobevent.created <= '{}')
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER
-                   '''.format(since.isoformat(),until.isoformat())
+                   '''.format(
+        since.isoformat(), until.isoformat()
+    )
     return _copy_table(table='events', query=events_query, path=full_path)
 
 
@@ -346,7 +352,9 @@ def unified_jobs_table(since, full_path, until, **kwargs):
                                        OR (main_unifiedjob.finished > '{0}' AND main_unifiedjob.finished <= '{1}'))
                                        AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER
-                        '''.format(since.isoformat(),until.isoformat())
+                        '''.format(
+        since.isoformat(), until.isoformat()
+    )
     return _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
 
@@ -369,7 +377,7 @@ def unified_job_template_table(since, full_path, **kwargs):
                                  main_unifiedjobtemplate.status 
                                  FROM main_unifiedjobtemplate, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
-                                 ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''  
+                                 ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''
     return _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
 
 
@@ -405,7 +413,9 @@ def workflow_job_node_table(since, full_path, until, **kwargs):
                                  ) always_nodes ON main_workflowjobnode.id = always_nodes.from_workflowjobnode_id
                                  WHERE (main_workflowjobnode.modified > '{}' AND main_workflowjobnode.modified <= '{}')
                                  ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER
-                              '''.format(since.isoformat(),until.isoformat())
+                              '''.format(
+        since.isoformat(), until.isoformat()
+    )
     return _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
 
 
@@ -437,5 +447,5 @@ def workflow_job_template_node_table(since, full_path, **kwargs):
                                      FROM main_workflowjobtemplatenode_always_nodes
                                      GROUP BY from_workflowjobtemplatenode_id
                                  ) always_nodes ON main_workflowjobtemplatenode.id = always_nodes.from_workflowjobtemplatenode_id
-                                 ORDER BY main_workflowjobtemplatenode.id ASC) TO STDOUT WITH CSV HEADER'''   
+                                 ORDER BY main_workflowjobtemplatenode.id ASC) TO STDOUT WITH CSV HEADER'''
     return _copy_table(table='workflow_job_template_node', query=workflow_job_template_node_query, path=full_path)

@@ -17,7 +17,6 @@ from awx.api.versioning import reverse
 
 @pytest.mark.django_db
 class TestOAuth2RevokeCommand:
-
     def test_non_existing_user(self):
         out = StringIO()
         fake_username = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
@@ -30,22 +29,14 @@ class TestOAuth2RevokeCommand:
     def test_revoke_all_access_tokens(self, post, admin, alice):
         url = reverse('api:o_auth2_token_list')
         for user in (admin, alice):
-            post(
-                url,
-                {'description': 'test token', 'scope': 'read'},
-                user
-            )
+            post(url, {'description': 'test token', 'scope': 'read'}, user)
         assert OAuth2AccessToken.objects.count() == 2
         call_command('revoke_oauth2_tokens')
         assert OAuth2AccessToken.objects.count() == 0
 
     def test_revoke_access_token_for_user(self, post, admin, alice):
         url = reverse('api:o_auth2_token_list')
-        post(
-            url,
-            {'description': 'test token', 'scope': 'read'},
-            alice
-        )
+        post(url, {'description': 'test token', 'scope': 'read'}, alice)
         assert OAuth2AccessToken.objects.count() == 1
         call_command('revoke_oauth2_tokens', '--user=admin')
         assert OAuth2AccessToken.objects.count() == 1
@@ -54,15 +45,7 @@ class TestOAuth2RevokeCommand:
 
     def test_revoke_all_refresh_tokens(self, post, admin, oauth_application):
         url = reverse('api:o_auth2_token_list')
-        post(
-            url,
-            {
-                'description': 'test token for',
-                'scope': 'read',
-                'application': oauth_application.pk
-            },
-            admin
-        )
+        post(url, {'description': 'test token for', 'scope': 'read', 'application': oauth_application.pk}, admin)
         assert OAuth2AccessToken.objects.count() == 1
         assert RefreshToken.objects.count() == 1
 

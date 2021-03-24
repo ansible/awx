@@ -18,7 +18,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='oauth2application',
             name='organization',
-            field=models.ForeignKey(help_text='Organization containing this application.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='main.Organization'),
+            field=models.ForeignKey(
+                help_text='Organization containing this application.',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='applications',
+                to='main.Organization',
+            ),
         ),
         migrations.AlterUniqueTogether(
             name='oauth2application',

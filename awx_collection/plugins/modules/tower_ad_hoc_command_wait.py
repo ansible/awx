@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -103,22 +102,20 @@ def main():
     interval = module.params.get('interval')
 
     # Attempt to look up command based on the provided id
-    command = module.get_one('ad_hoc_commands', **{
-        'data': {
-            'id': command_id,
+    command = module.get_one(
+        'ad_hoc_commands',
+        **{
+            'data': {
+                'id': command_id,
+            }
         }
-    })
+    )
 
     if command is None:
         module.fail_json(msg='Unable to wait on ad hoc command {0}; that ID does not exist in Tower.'.format(command_id))
 
     # Invoke wait function
-    module.wait_on_url(
-        url=command['url'],
-        object_name=command_id,
-        object_type='ad hoc command',
-        timeout=timeout, interval=interval
-    )
+    module.wait_on_url(url=command['url'], object_name=command_id, object_type='ad hoc command', timeout=timeout, interval=interval)
 
     module.exit_json(**module.json_output)
 

@@ -17,35 +17,26 @@ def parse_args():
     parser.add_argument(
         '--base-url',
         dest='base_url',
-        default=os.getenv(
-            'AWXKIT_BASE_URL',
-            'http://127.0.0.1:8013'),
-        help='URL for AWX.  Defaults to env var AWXKIT_BASE_URL or http://127.0.0.1:8013')
+        default=os.getenv('AWXKIT_BASE_URL', 'http://127.0.0.1:8013'),
+        help='URL for AWX.  Defaults to env var AWXKIT_BASE_URL or http://127.0.0.1:8013',
+    )
     parser.add_argument(
         '-c',
         '--credential-file',
         dest='credential_file',
-        default=os.getenv(
-            'AWXKIT_CREDENTIAL_FILE',
-            utils.not_provided),
+        default=os.getenv('AWXKIT_CREDENTIAL_FILE', utils.not_provided),
         help='Path for yml credential file.  If not provided or set by AWXKIT_CREDENTIAL_FILE, set '
-        'AWXKIT_USER and AWXKIT_USER_PASSWORD env vars for awx user credentials.')
+        'AWXKIT_USER and AWXKIT_USER_PASSWORD env vars for awx user credentials.',
+    )
     parser.add_argument(
         '-p',
         '--project-file',
         dest='project_file',
-        default=os.getenv(
-            'AWXKIT_PROJECT_FILE'),
-        help='Path for yml project config file.'
-             'If not provided or set by AWXKIT_PROJECT_FILE, projects will not have default SCM_URL')
-    parser.add_argument('-f', '--file', dest='akit_script', default=False,
-                        help='akit script file to run in interactive session.')
-    parser.add_argument(
-        '-x',
-        '--non-interactive',
-        action='store_true',
-        dest='non_interactive',
-        help='Do not run in interactive mode.')
+        default=os.getenv('AWXKIT_PROJECT_FILE'),
+        help='Path for yml project config file.' 'If not provided or set by AWXKIT_PROJECT_FILE, projects will not have default SCM_URL',
+    )
+    parser.add_argument('-f', '--file', dest='akit_script', default=False, help='akit script file to run in interactive session.')
+    parser.add_argument('-x', '--non-interactive', action='store_true', dest='non_interactive', help='Do not run in interactive mode.')
     return parser.parse_known_args()[0]
 
 
@@ -57,19 +48,14 @@ def main():
         config.base_url = akit_args.base_url
 
         if akit_args.credential_file != utils.not_provided:
-            config.credentials = utils.load_credentials(
-                akit_args.credential_file)
+            config.credentials = utils.load_credentials(akit_args.credential_file)
         else:
-            config.credentials = utils.PseudoNamespace({
-                'default': {
-                    'username': os.getenv('AWXKIT_USER', 'admin'),
-                    'password': os.getenv('AWXKIT_USER_PASSWORD', 'password')
-                }
-            })
+            config.credentials = utils.PseudoNamespace(
+                {'default': {'username': os.getenv('AWXKIT_USER', 'admin'), 'password': os.getenv('AWXKIT_USER_PASSWORD', 'password')}}
+            )
 
         if akit_args.project_file != utils.not_provided:
-            config.project_urls = utils.load_projects(
-                akit_args.project_file)
+            config.project_urls = utils.load_projects(akit_args.project_file)
 
         global root
         root = api.Api()
@@ -106,6 +92,7 @@ def load_interactive():
 
     try:
         from IPython import start_ipython
+
         basic_session_path = os.path.abspath(__file__)
         if basic_session_path[-1] == 'c':  # start_ipython doesn't work w/ .pyc
             basic_session_path = basic_session_path[:-1]
@@ -115,6 +102,7 @@ def load_interactive():
         return start_ipython(argv=sargs)
     except ImportError:
         from code import interact
+
         main()
         interact('', local=dict(globals(), **locals()))
 

@@ -17,7 +17,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='workflowjobtemplatenode',
             name='workflow_job_template',
-            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, related_name='workflow_job_template_nodes', to='main.WorkflowJobTemplate'),
+            field=models.ForeignKey(
+                default=None, on_delete=django.db.models.deletion.CASCADE, related_name='workflow_job_template_nodes', to='main.WorkflowJobTemplate'
+            ),
             preserve_default=False,
         ),
     ]

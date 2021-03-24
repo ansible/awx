@@ -5,12 +5,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -136,11 +135,7 @@ def main():
     inventory_id = module.resolve_name_to_id('inventories', inventory)
 
     # Attempt to look up the object based on the provided name and inventory ID
-    group = module.get_one('groups', name_or_id=name, **{
-        'data': {
-            'inventory': inventory_id
-        }
-    })
+    group = module.get_one('groups', name_or_id=name, **{'data': {'inventory': inventory_id}})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -163,9 +158,13 @@ def main():
             continue
         id_list = []
         for sub_name in name_list:
-            sub_obj = module.get_one(resource, name_or_id=sub_name, **{
-                'data': {'inventory': inventory_id},
-            })
+            sub_obj = module.get_one(
+                resource,
+                name_or_id=sub_name,
+                **{
+                    'data': {'inventory': inventory_id},
+                }
+            )
             if sub_obj is None:
                 module.fail_json(msg='Could not find {0} with name {1}'.format(resource, sub_name))
             id_list.append(sub_obj['id'])
@@ -178,10 +177,7 @@ def main():
             association_fields[relationship] = id_list
 
     # If the state was present we can let the module build or update the existing group, this will return on its own
-    module.create_or_update_if_needed(
-        group, group_fields, endpoint='groups', item_type='group',
-        associations=association_fields
-    )
+    module.create_or_update_if_needed(group, group_fields, endpoint='groups', item_type='group', associations=association_fields)
 
 
 if __name__ == '__main__':
