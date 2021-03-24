@@ -73,6 +73,8 @@ def test_global_creation_always_possible(all_views):
     views_by_model = {}
     for View in all_views:
         if not getattr(View, 'deprecated', False) and issubclass(View, ListAPIView) and hasattr(View, 'model'):
+            if type(View.model) is property:
+                continue  # special case for JobEventChildrenList
             views_by_model.setdefault(View.model, []).append(View)
     for model, views in views_by_model.items():
         creatable = False
