@@ -1,16 +1,10 @@
 import pytest
-from unittest import mock
 
 from awx.api.versioning import reverse
 from awx.main.models import AdHocCommand, AdHocCommandEvent, JobEvent
 from awx.main.models import Job
 
 
-# Job.created_or_epoch is used to help retrieve events that were
-# created before job event tables were partitioned.
-# This test can safely behave as if all job events were created
-# after the migration, in which case Job.created_or_epoch == Job.created
-@mock.patch('awx.main.models.Job.created_or_epoch', Job.created)
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     'truncate, expected',
@@ -33,11 +27,6 @@ def test_job_events_sublist_truncation(get, organization_factory, job_template_f
     assert (len(response.data['results'][0]['stdout']) == 1025) == expected
 
 
-# Job.created_or_epoch is used to help retrieve events that were
-# created before job event tables were partitioned.
-# This test can safely behave as if all job events were created
-# after the migration, in which case Job.created_or_epoch == Job.created
-@mock.patch('awx.main.models.ad_hoc_commands.AdHocCommand.created_or_epoch', Job.created)
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     'truncate, expected',
