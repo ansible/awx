@@ -16,7 +16,7 @@ from requests.models import Response, PreparedRequest
 import pytest
 
 from awx.main.tests.functional.conftest import _request
-from awx.main.models import Organization, Project, Inventory, JobTemplate, Credential, CredentialType, ExecutionEnvironment
+from awx.main.models import Organization, Project, Inventory, JobTemplate, Credential, CredentialType, ExecutionEnvironment, UnifiedJob
 
 from django.db import transaction
 
@@ -266,3 +266,14 @@ def silence_warning():
 @pytest.fixture
 def execution_environment():
     return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", managed_by_tower=True)
+
+
+@pytest.fixture(scope='session', autouse=True)
+def mock_has_unpartitioned_events():
+    # has_unpartitioned_events determines if there are any events still
+    # left in the old, unpartitioned job events table. In order to work,
+    # this method looks up when the partition migration occurred. When
+    # Django's unit tests run, however, there will be no record of the migration.
+    # We mock this out to circumvent the migration query.
+    with mock.patch.object(UnifiedJob, 'has_unpartitioned_events', new=False) as _fixture:
+        yield _fixture
