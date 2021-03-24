@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { shape } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
@@ -11,6 +12,7 @@ import {
   Select as PFSelect,
   SelectOption as PFSelectOption,
   SelectVariant,
+  Tooltip,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
 import FormField, { FormSubmitError } from '../../../components/FormField';
@@ -27,6 +29,7 @@ const Select = styled(PFSelect)`
   ul {
     max-width: 495px;
   }
+  ${props => (props.isDisabled ? `cursor: not-allowed` : null)}
 `;
 
 const SelectOption = styled(PFSelectOption)`
@@ -36,6 +39,7 @@ const SelectOption = styled(PFSelectOption)`
 `;
 
 function CredentialFormFields({ i18n, initialTypeId, credentialTypes }) {
+  const { pathname } = useLocation();
   const { setFieldValue, initialValues, setFieldTouched } = useFormikContext();
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
@@ -128,6 +132,38 @@ function CredentialFormFields({ i18n, initialTypeId, credentialTypes }) {
     [setFieldValue]
   );
 
+  const isCredentialTypeDisabled = pathname.includes('edit');
+  const credentialTypeSelect = (
+    <Select
+      isDisabled={isCredentialTypeDisabled}
+      ouiaId="CredentialForm-credential_type"
+      aria-label={i18n._(t`Credential Type`)}
+      isOpen={isSelectOpen}
+      variant={SelectVariant.typeahead}
+      onToggle={setIsSelectOpen}
+      onSelect={(event, value) => {
+        setCredentialTypeId(value);
+        credTypeHelpers.setValue(value);
+        setIsSelectOpen(false);
+      }}
+      selections={credTypeField.value}
+      placeholder={i18n._(t`Select a credential Type`)}
+      isCreatable={false}
+      maxHeight="300px"
+      width="100%"
+    >
+      {credentialTypeOptions.map(credType => (
+        <SelectOption
+          key={credType.value}
+          value={credType.value}
+          dataCy={`${credType.id}-credential-type-select-option`}
+        >
+          {credType.label}
+        </SelectOption>
+      ))}
+    </Select>
+  );
+
   return (
     <>
       <FormField
@@ -164,33 +200,18 @@ function CredentialFormFields({ i18n, initialTypeId, credentialTypes }) {
         }
         label={i18n._(t`Credential Type`)}
       >
-        <Select
-          ouiaId="CredentialForm-credential_type"
-          aria-label={i18n._(t`Credential Type`)}
-          isOpen={isSelectOpen}
-          variant={SelectVariant.typeahead}
-          onToggle={setIsSelectOpen}
-          onSelect={(event, value) => {
-            setCredentialTypeId(value);
-            credTypeHelpers.setValue(value);
-            setIsSelectOpen(false);
-          }}
-          selections={credTypeField.value}
-          placeholder={i18n._(t`Select a credential Type`)}
-          isCreatable={false}
-          maxHeight="300px"
-          width="100%"
-        >
-          {credentialTypeOptions.map(credType => (
-            <SelectOption
-              key={credType.value}
-              value={credType.value}
-              dataCy={`${credType.id}-credential-type-select-option`}
-            >
-              {credType.label}
-            </SelectOption>
-          ))}
-        </Select>
+        {isCredentialTypeDisabled ? (
+          <Tooltip
+            content={i18n._(
+              `You cannot change the credential type of a credential, 
+              as it may break the functionality of the resources using it.`
+            )}
+          >
+            {credentialTypeSelect}
+          </Tooltip>
+        ) : (
+          credentialTypeSelect
+        )}
       </FormGroup>
       {credentialTypeId !== undefined &&
         credentialTypeId !== '' &&
