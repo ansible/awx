@@ -851,6 +851,17 @@ class BaseTask(object):
             "container_options": ['--user=root'],
         }
 
+        if instance.execution_environment.credential:
+            with open('/tmp/auth.json', 'w') as authfile:
+                host = instance.execution_environment.credential.get_input('host')
+                username = instance.execution_environment.credential.get_input('username')
+                password = instance.execution_environment.credential.get_input('password')
+                token = "{}:{}".format(username, password)
+                auth_data = {'auths': {host: {'auth': b64encode(token.encode('ascii')).decode()}}}
+                authfile.write(json.dumps(auth_data, indent=4))
+            authfile.close()
+            params["container_options"].append(f'--authfile={authfile.name}')
+
         pull = instance.execution_environment.pull
         if pull:
             params['container_options'].append(f'--pull={pull}')

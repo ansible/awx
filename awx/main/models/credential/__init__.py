@@ -1096,14 +1096,8 @@ ManagedCredentialType(
                 'type': 'string',
             },
             {
-                'id': 'password',
-                'label': ugettext_noop('Password'),
-                'type': 'string',
-                'secret': True,
-            },
-            {
-                'id': 'token',
-                'label': ugettext_noop('Access Token'),
+                'id': 'password/token',
+                'label': ugettext_noop('Password/Token'),
                 'type': 'string',
                 'secret': True,
                 'help_text': ugettext_noop('A token to use to authenticate with. ' 'This should not be set if username/password are being used.'),
