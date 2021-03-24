@@ -19,35 +19,24 @@ def migrate_event_data(apps, schema_editor):
     # All events for a given job should be placed in
     # a partition based on the job's _created time_.
 
-    for tblname in (
-        'main_jobevent', 'main_inventoryupdateevent',
-        'main_projectupdateevent', 'main_adhoccommandevent',
-        'main_systemjobevent'
-    ):
+    for tblname in ('main_jobevent', 'main_inventoryupdateevent', 'main_projectupdateevent', 'main_adhoccommandevent', 'main_systemjobevent'):
         with connection.cursor() as cursor:
             # mark existing table as _unpartitioned_*
             # we will drop this table after its data
             # has been moved over
-            cursor.execute(
-                f'ALTER TABLE {tblname} RENAME TO _unpartitioned_{tblname}'
-            )
+            cursor.execute(f'ALTER TABLE {tblname} RENAME TO _unpartitioned_{tblname}')
 
             # create a copy of the table that we will use as a reference for schema
             # otherwise, the schema changes we would make on the old jobevents table
             # (namely, dropping the primary key constraint) would cause the migration
             # to suffer a serious performance degradation
-            cursor.execute(
-                f'CREATE TABLE tmp_{tblname} '
-                f'(LIKE _unpartitioned_{tblname} INCLUDING ALL)'
-            )
+            cursor.execute(f'CREATE TABLE tmp_{tblname} ' f'(LIKE _unpartitioned_{tblname} INCLUDING ALL)')
 
             # drop primary key constraint; in a partioned table
             # constraints must include the partition key itself
             # TODO: do more generic search for pkey constraints
             # instead of hardcoding this one that applies to main_jobevent
-            cursor.execute(
-                f'ALTER TABLE tmp_{tblname} DROP CONSTRAINT tmp_{tblname}_pkey'
-            )
+            cursor.execute(f'ALTER TABLE tmp_{tblname} DROP CONSTRAINT tmp_{tblname}_pkey')
 
             # create parent table
             cursor.execute(
@@ -63,14 +52,10 @@ def migrate_event_data(apps, schema_editor):
             cursor.execute(f'DROP INDEX IF EXISTS {tblname}_job_id_brin_idx;')
 
             # recreate primary key constraint
-            cursor.execute(
-                f'ALTER TABLE ONLY {tblname} '
-                f'ADD CONSTRAINT {tblname}_pkey_new PRIMARY KEY (id, job_created);'
-            )
+            cursor.execute(f'ALTER TABLE ONLY {tblname} ' f'ADD CONSTRAINT {tblname}_pkey_new PRIMARY KEY (id, job_created);')
 
 
 class FakeAddField(migrations.AddField):
-
     def database_forwards(self, *args):
         # this is intentionally left blank, because we're
         # going to accomplish the migration with some custom raw SQL
@@ -80,7 +65,7 @@ class FakeAddField(migrations.AddField):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0131_undo_org_polymorphic_ee'),
+        ('main', '0134_unifiedjob_ansible_version'),
     ]
 
     operations = [
