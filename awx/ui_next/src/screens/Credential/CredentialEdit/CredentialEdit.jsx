@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { object } from 'prop-types';
+import PropTypes from 'prop-types';
 import { CardBody } from '../../../components/Card';
 import {
   CredentialsAPI,
@@ -197,8 +197,8 @@ function CredentialEdit({ credential }) {
   );
 }
 
-CredentialEdit.proptype = {
-  inventory: object.isRequired,
+CredentialEdit.propTypes = {
+  credential: PropTypes.objectOf(PropTypes.object).isRequired,
 };
 
 export { CredentialEdit as _CredentialEdit };
