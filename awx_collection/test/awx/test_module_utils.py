@@ -13,9 +13,11 @@ awx_name = 'AWX'
 tower_name = 'Red Hat Ansible Tower'
 ping_version = '1.2.3'
 
+
 def getTowerheader(self, header_name, default):
     mock_headers = {'X-API-Product-Name': tower_name, 'X-API-Product-Version': ping_version}
     return mock_headers.get(header_name, default)
+
 
 def getAWXheader(self, header_name, default):
     mock_headers = {'X-API-Product-Name': awx_name, 'X-API-Product-Version': ping_version}
@@ -37,6 +39,7 @@ def mock_tower_ping_response(self, method, url, **kwargs):
     r.status = status.__get__(r)
     return r
 
+
 def mock_awx_ping_response(self, method, url, **kwargs):
     r = Response()
     r.getheader = getAWXheader.__get__(r)
@@ -55,7 +58,9 @@ def test_version_warning(collection_import, silence_warning):
             my_module._COLLECTION_VERSION = "2.0.0"
             my_module._COLLECTION_TYPE = "awx"
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with('You are running collection version {} but connecting to tower version {}'.format(my_module._COLLECTION_VERSION, ping_version))
+    silence_warning.assert_called_once_with(
+        'You are running collection version {} but connecting to tower version {}'.format(my_module._COLLECTION_VERSION, ping_version)
+    )
 
 
 def test_version_warning_strictness_awx(collection_import, silence_warning):
@@ -80,6 +85,7 @@ def test_version_warning_strictness_awx(collection_import, silence_warning):
             my_module.get_endpoint('ping')
     silence_warning.assert_not_called()
 
+
 def test_version_warning_strictness_tower(collection_import, silence_warning):
     TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
     cli_data = {'ANSIBLE_MODULE_ARGS': {}}
@@ -100,8 +106,9 @@ def test_version_warning_strictness_tower(collection_import, silence_warning):
             my_module._COLLECTION_VERSION = "1.0.0"
             my_module._COLLECTION_TYPE = "tower"
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with('You are running collection version {} but connecting to tower version {}'.format(my_module._COLLECTION_VERSION, ping_version))
-
+    silence_warning.assert_called_once_with(
+        'You are running collection version {} but connecting to tower version {}'.format(my_module._COLLECTION_VERSION, ping_version)
+    )
 
 
 def test_type_warning(collection_import, silence_warning):
