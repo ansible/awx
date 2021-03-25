@@ -276,7 +276,7 @@ black: reports
 	(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
 
 .git/hooks/pre-commit:
-	echo "[ -z \$$AWX_IGNORE_BLACK ] && (black --check \`git diff --cached --name-only | grep -E '\.py$\'\` || (echo 'To fix this, run \`make black\` to auto-format your code prior to commit, or set AWX_IGNORE_BLACK=1' && exit 1))" > .git/hooks/pre-commit
+	echo "[ -z \$$AWX_IGNORE_BLACK ] && (black --check \`git diff --cached --name-only --diff-filter=AM | grep -E '\.py$\'\` || (echo 'To fix this, run \`make black\` to auto-format your code prior to commit, or set AWX_IGNORE_BLACK=1' && exit 1))" > .git/hooks/pre-commit
 	chmod +x .git/hooks/pre-commit
 
 genschema: reports
