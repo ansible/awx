@@ -107,6 +107,7 @@ from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
 from awx.conf.license import get_license
+from awx.main.analytics.subsystem_metrics import Metrics
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -170,6 +171,7 @@ def dispatch_startup():
     cluster_node_heartbeat()
     if Instance.objects.me().is_controller():
         awx_isolated_heartbeat()
+    Metrics().clear_values()
 
     # Update Tower's rsyslog.conf file based on loggins settings in the db
     reconfigure_rsyslog()

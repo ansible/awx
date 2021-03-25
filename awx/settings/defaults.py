@@ -224,6 +224,15 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # The number of job events to migrate per-transaction when moving from int -> bigint
 JOB_EVENT_MIGRATION_CHUNK_SIZE = 1000000
 
+# Histogram buckets for the callback_receiver_batch_events_insert_db metric
+SUBSYSTEM_METRICS_BATCH_INSERT_BUCKETS = [10, 50, 150, 350, 650, 2000]
+
+# Interval in seconds for sending local metrics to other nodes
+SUBSYSTEM_METRICS_INTERVAL_SEND_METRICS = 3
+
+# Interval in seconds for saving local metrics to redis
+SUBSYSTEM_METRICS_INTERVAL_SAVE_TO_REDIS = 2
+
 # The maximum allowed jobs to start on a given task manager cycle
 START_TASK_LIMIT = 100
 
@@ -427,6 +436,7 @@ CELERYBEAT_SCHEDULE = {
     'gather_analytics': {'task': 'awx.main.tasks.gather_analytics', 'schedule': timedelta(minutes=5)},
     'task_manager': {'task': 'awx.main.scheduler.tasks.run_task_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
     'k8s_reaper': {'task': 'awx.main.tasks.awx_k8s_reaper', 'schedule': timedelta(seconds=60), 'options': {'expires': 50}},
+    'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
 
