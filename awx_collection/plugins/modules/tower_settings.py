@@ -41,15 +41,15 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-- name: Set the value of AWX_PROOT_BASE_PATH
+- name: Set the value of AWX_ISOLATION_BASE_PATH
   tower_settings:
-    name: AWX_PROOT_BASE_PATH
+    name: AWX_ISOLATION_BASE_PATH
     value: "/tmp"
   register: testing_settings
 
-- name: Set the value of AWX_PROOT_SHOW_PATHS
+- name: Set the value of AWX_ISOLATION_SHOW_PATHS
   tower_settings:
-    name: "AWX_PROOT_SHOW_PATHS"
+    name: "AWX_ISOLATION_SHOW_PATHS"
     value: "'/var/lib/awx/projects/', '/tmp'"
   register: testing_settings
 

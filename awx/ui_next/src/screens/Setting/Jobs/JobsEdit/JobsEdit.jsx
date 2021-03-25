@@ -70,8 +70,7 @@ function JobsEdit() {
     await submitForm({
       ...form,
       AD_HOC_COMMANDS: formatJson(form.AD_HOC_COMMANDS),
-      AWX_PROOT_SHOW_PATHS: formatJson(form.AWX_PROOT_SHOW_PATHS),
-      AWX_PROOT_HIDE_PATHS: formatJson(form.AWX_PROOT_HIDE_PATHS),
+      AWX_ISOLATION_SHOW_PATHS: formatJson(form.AWX_ISOLATION_SHOW_PATHS),
       AWX_ANSIBLE_CALLBACK_PLUGINS: formatJson(
         form.AWX_ANSIBLE_CALLBACK_PLUGINS
       ),
@@ -116,8 +115,8 @@ function JobsEdit() {
               <Form autoComplete="off" onSubmit={formik.handleSubmit}>
                 <FormColumnLayout>
                   <InputField
-                    name="AWX_PROOT_BASE_PATH"
-                    config={jobs.AWX_PROOT_BASE_PATH}
+                    name="AWX_ISOLATION_BASE_PATH"
+                    config={jobs.AWX_ISOLATION_BASE_PATH}
                     isRequired
                   />
                   <InputField
@@ -150,10 +149,6 @@ function JobsEdit() {
                     name="MAX_FORKS"
                     config={jobs.MAX_FORKS}
                     type="number"
-                  />
-                  <BooleanField
-                    name="AWX_PROOT_ENABLED"
-                    config={jobs.AWX_PROOT_ENABLED}
                   />
                   <BooleanField
                     name="PROJECT_UPDATE_VVV"
@@ -209,12 +204,8 @@ function JobsEdit() {
                     config={jobs.AWX_ANSIBLE_CALLBACK_PLUGINS}
                   />
                   <ObjectField
-                    name="AWX_PROOT_SHOW_PATHS"
-                    config={jobs.AWX_PROOT_SHOW_PATHS}
-                  />
-                  <ObjectField
-                    name="AWX_PROOT_HIDE_PATHS"
-                    config={jobs.AWX_PROOT_HIDE_PATHS}
+                    name="AWX_ISOLATION_SHOW_PATHS"
+                    config={jobs.AWX_ISOLATION_SHOW_PATHS}
                   />
                   <ObjectField name="AWX_TASK_ENV" config={jobs.AWX_TASK_ENV} />
                   {submitError && <FormSubmitError error={submitError} />}

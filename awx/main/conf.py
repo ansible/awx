@@ -233,16 +233,7 @@ register(
 )
 
 register(
-    'AWX_PROOT_ENABLED',
-    field_class=fields.BooleanField,
-    label=_('Enable job isolation'),
-    help_text=_('Isolates an Ansible job from protected parts of the system to prevent exposing sensitive information.'),
-    category=_('Jobs'),
-    category_slug='jobs',
-)
-
-register(
-    'AWX_PROOT_BASE_PATH',
+    'AWX_ISOLATION_BASE_PATH',
     field_class=fields.CharField,
     label=_('Job execution path'),
     help_text=_(
@@ -255,17 +246,7 @@ register(
 )
 
 register(
-    'AWX_PROOT_HIDE_PATHS',
-    field_class=fields.StringListField,
-    required=False,
-    label=_('Paths to hide from isolated jobs'),
-    help_text=_('Additional paths to hide from isolated processes. Enter one path per line.'),
-    category=_('Jobs'),
-    category_slug='jobs',
-)
-
-register(
-    'AWX_PROOT_SHOW_PATHS',
+    'AWX_ISOLATION_SHOW_PATHS',
     field_class=fields.StringListField,
     required=False,
     label=_('Paths to expose to isolated jobs'),

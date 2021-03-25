@@ -569,26 +569,15 @@ AWX_SHOW_PLAYBOOK_LINKS = False
 # Applies to any galaxy server
 GALAXY_IGNORE_CERTS = False
 
-# Enable bubblewrap support for running jobs (playbook runs only).
+# Additional paths to show for jobs using process isolation.
 # Note: This setting may be overridden by database settings.
-AWX_PROOT_ENABLED = True
-
-# Command/path to bubblewrap.
-AWX_PROOT_CMD = 'bwrap'
-
-# Additional paths to hide from jobs using bubblewrap.
-# Note: This setting may be overridden by database settings.
-AWX_PROOT_HIDE_PATHS = []
-
-# Additional paths to show for jobs using bubbelwrap.
-# Note: This setting may be overridden by database settings.
-AWX_PROOT_SHOW_PATHS = []
+AWX_ISOLATION_SHOW_PATHS = []
 
 # The directory in which Tower will create new temporary directories for job
 # execution and isolation (such as credential files and custom
 # inventory scripts).
 # Note: This setting may be overridden by database settings.
-AWX_PROOT_BASE_PATH = "/tmp"
+AWX_ISOLATION_BASE_PATH = "/tmp"
 
 # Disable resource profiling by default
 AWX_RESOURCE_PROFILING_ENABLED = False

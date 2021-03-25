@@ -69,9 +69,6 @@ __all__ = [
     'get_system_task_capacity',
     'get_cpu_capacity',
     'get_mem_capacity',
-    'wrap_args_with_proot',
-    'build_proot_temp_dir',
-    'check_proot_installed',
     'model_to_dict',
     'NullablePromptPseudoField',
     'model_instance_diff',
@@ -840,94 +837,6 @@ def set_environ(**environ):
     finally:
         os.environ.clear()
         os.environ.update(old_environ)
-
-
-@memoize()
-def check_proot_installed():
-    """
-    Check that proot is installed.
-    """
-    from django.conf import settings
-
-    cmd = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--version']
-    try:
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        proc.communicate()
-        return bool(proc.returncode == 0)
-    except (OSError, ValueError) as e:
-        if isinstance(e, ValueError) or getattr(e, 'errno', 1) != 2:  # ENOENT, no such file or directory
-            logger.exception('bwrap unavailable for unexpected reason.')
-        return False
-
-
-def build_proot_temp_dir():
-    """
-    Create a temporary directory for proot to use.
-    """
-    from django.conf import settings
-
-    path = tempfile.mkdtemp(prefix='awx_proot_', dir=settings.AWX_PROOT_BASE_PATH)
-    os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-    return path
-
-
-def wrap_args_with_proot(args, cwd, **kwargs):
-    """
-    Wrap existing command line with proot to restrict access to:
-     - AWX_PROOT_BASE_PATH (generally, /tmp) (except for own /tmp files)
-    For non-isolated nodes:
-     - /etc/tower (to prevent obtaining db info or secret key)
-     - /var/lib/awx (except for current project)
-     - /var/log/tower
-     - /var/log/supervisor
-    """
-    from django.conf import settings
-
-    cwd = os.path.realpath(cwd)
-    new_args = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--unshare-pid', '--dev-bind', '/', '/', '--proc', '/proc']
-    hide_paths = [settings.AWX_PROOT_BASE_PATH]
-    if not kwargs.get('isolated'):
-        hide_paths.extend(['/etc/tower', '/var/lib/awx', '/var/log', '/etc/ssh', settings.PROJECTS_ROOT, settings.JOBOUTPUT_ROOT])
-    hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
-    for path in sorted(set(hide_paths)):
-        if not os.path.exists(path):
-            continue
-        path = os.path.realpath(path)
-        if os.path.isdir(path):
-            new_path = tempfile.mkdtemp(dir=kwargs['proot_temp_dir'])
-            os.chmod(new_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-        else:
-            handle, new_path = tempfile.mkstemp(dir=kwargs['proot_temp_dir'])
-            os.close(handle)
-            os.chmod(new_path, stat.S_IRUSR | stat.S_IWUSR)
-        new_args.extend(['--bind', '%s' % (new_path,), '%s' % (path,)])
-    if kwargs.get('isolated'):
-        show_paths = [kwargs['private_data_dir']]
-    elif 'private_data_dir' in kwargs:
-        show_paths = [cwd, kwargs['private_data_dir']]
-    else:
-        show_paths = [cwd]
-    for venv in (settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH, kwargs.get('proot_custom_virtualenv')):
-        if venv:
-            new_args.extend(['--ro-bind', venv, venv])
-    show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
-    show_paths.extend(kwargs.get('proot_show_paths', []))
-    for path in sorted(set(show_paths)):
-        if not os.path.exists(path):
-            continue
-        path = os.path.realpath(path)
-        new_args.extend(['--bind', '%s' % (path,), '%s' % (path,)])
-    if kwargs.get('isolated'):
-        if '/bin/ansible-playbook' in ' '.join(args):
-            # playbook runs should cwd to the SCM checkout dir
-            new_args.extend(['--chdir', os.path.join(kwargs['private_data_dir'], 'project')])
-        else:
-            # ad-hoc runs should cwd to the root of the private data dir
-            new_args.extend(['--chdir', kwargs['private_data_dir']])
-    else:
-        new_args.extend(['--chdir', cwd])
-    new_args.extend(args)
-    return new_args
 
 
 def get_pk_from_dict(_dict, key):
