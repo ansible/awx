@@ -2,7 +2,7 @@ from django.conf import settings
 from prometheus_client import REGISTRY, PROCESS_COLLECTOR, PLATFORM_COLLECTOR, GC_COLLECTOR, Gauge, Info, generate_latest
 
 from awx.conf.license import get_license
-from awx.main.utils import get_awx_version, get_ansible_version
+from awx.main.utils import get_awx_version
 from awx.main.analytics.collectors import (
     counts,
     instance_info,
@@ -127,7 +127,6 @@ def metrics():
             'insights_analytics': str(settings.INSIGHTS_TRACKING_STATE),
             'tower_url_base': settings.TOWER_URL_BASE,
             'tower_version': get_awx_version(),
-            'ansible_version': get_ansible_version(),
             'license_type': license_info.get('license_type', 'UNLICENSED'),
             'license_expiry': str(license_info.get('time_remaining', 0)),
             'pendo_tracking': settings.PENDO_TRACKING_STATE,
