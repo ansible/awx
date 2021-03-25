@@ -22,6 +22,7 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import Popover from '../../../components/Popover';
 import useRequest from '../../../util/useRequest';
 import { InventorySourcesAPI } from '../../../api';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 function InventorySourceDetail({ inventorySource, i18n }) {
   const {
@@ -95,6 +96,12 @@ function InventorySourceDetail({ inventorySource, i18n }) {
       }
     }
   };
+
+  const deleteDetailsRequests = relatedResourceDeleteRequests.inventorySource(
+    inventorySource.inventory,
+    i18n,
+    inventorySource
+  );
 
   const VERBOSITY = {
     0: i18n._(t`0 (Warning)`),
@@ -281,6 +288,10 @@ function InventorySourceDetail({ inventorySource, i18n }) {
             name={name}
             modalTitle={i18n._(t`Delete inventory source`)}
             onConfirm={handleDelete}
+            deleteDetailsRequests={deleteDetailsRequests}
+            deleteMessage={i18n._(
+              t`This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?`
+            )}
           >
             {i18n._(t`Delete`)}
           </DeleteButton>

@@ -15,6 +15,7 @@ import {
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { toTitleCase } from '../../../util/strings';
 import { ExecutionEnvironmentsAPI } from '../../../api';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
   const history = useHistory();
@@ -41,7 +42,10 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
-
+  const deleteDetailsRequests = relatedResourceDeleteRequests.executionEnvironment(
+    executionEnvironment,
+    i18n
+  );
   return (
     <CardBody>
       <DetailList>
@@ -120,6 +124,10 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
             onConfirm={deleteExecutionEnvironment}
             isDisabled={isLoading}
             ouiaId="delete-button"
+            deleteDetailsRequests={deleteDetailsRequests}
+            deleteMessage={i18n._(
+              t`This execution environment is currently being used by other resources. Are you sure you want to delete it?`
+            )}
           >
             {i18n._(t`Delete`)}
           </DeleteButton>

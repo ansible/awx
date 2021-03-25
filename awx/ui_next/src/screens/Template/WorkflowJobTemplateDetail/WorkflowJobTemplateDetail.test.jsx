@@ -5,6 +5,9 @@ import { act } from 'react-dom/test-utils';
 
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
+import { WorkflowJobTemplateNodesAPI } from '../../../api';
+
+jest.mock('../../../api');
 
 describe('<WorkflowJobTemplateDetail/>', () => {
   let wrapper;
@@ -50,6 +53,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
   };
 
   beforeEach(async () => {
+    WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
     history = createMemoryHistory({
       initialEntries: ['/templates/workflow_job_template/1/details'],
     });
@@ -86,6 +90,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
 
   afterEach(() => {
     wrapper.unmount();
+    jest.clearAllMocks();
   });
 
   test('renders successfully', () => {
@@ -161,6 +166,12 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     expect(
       wrapper.find(`Detail[label="Execution Environment"] dd`).text()
     ).toBe('Demo EE');
+  });
+
+  test('should have proper number of delete detail requests', async () => {
+    expect(
+      wrapper.find('DeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(1);
   });
 
   test('link out resource have the correct url', () => {

@@ -17,6 +17,7 @@ import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useWsInventories from './useWsInventories';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
@@ -126,6 +127,12 @@ function InventoryList({ i18n }) {
       }
     }
   };
+
+  const deleteDetailsRequests = relatedResourceDeleteRequests.inventory(
+    selected[0],
+    i18n
+  );
+
   const addInventory = i18n._(t`Add inventory`);
   const addSmartInventory = i18n._(t`Add smart inventory`);
   const addButton = (
@@ -216,6 +223,11 @@ function InventoryList({ i18n }) {
                     '{numItemsToDelete, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}',
                     { numItemsToDelete: selected.length }
                   )}
+                  deleteMessage={i18n._(
+                    '{numItemsToDelete, plural, one {This inventory is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these inventories could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                    { numItemsToDelete: selected.length }
+                  )}
+                  deleteDetailsRequests={deleteDetailsRequests}
                 />,
               ]}
             />

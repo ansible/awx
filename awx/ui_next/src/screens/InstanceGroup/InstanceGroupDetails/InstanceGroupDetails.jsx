@@ -16,6 +16,7 @@ import {
 } from '../../../components/DetailList';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { InstanceGroupsAPI } from '../../../api';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
@@ -38,7 +39,10 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
-
+  const deleteDetailsRequests = relatedResourceDeleteRequests.instanceGroup(
+    instanceGroup,
+    i18n
+  );
   const verifyInstanceGroup = item => {
     if (item.is_isolated) {
       return (
@@ -142,6 +146,10 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
               modalTitle={i18n._(t`Delete instance group`)}
               onConfirm={deleteInstanceGroup}
               isDisabled={isLoading}
+              deleteDetailsRequests={deleteDetailsRequests}
+              deleteMessage={i18n._(
+                t`This instance group is currently being by other resources. Are you sure you want to delete it?`
+              )}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>

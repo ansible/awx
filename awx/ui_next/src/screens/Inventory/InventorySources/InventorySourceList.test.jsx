@@ -2,7 +2,11 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
+import {
+  InventoriesAPI,
+  InventorySourcesAPI,
+  WorkflowJobTemplateNodesAPI,
+} from '../../../api';
 import {
   mountWithContexts,
   waitForElement,
@@ -13,6 +17,7 @@ import InventorySourceList from './InventorySourceList';
 jest.mock('../../../api/models/InventorySources');
 jest.mock('../../../api/models/Inventories');
 jest.mock('../../../api/models/InventoryUpdates');
+jest.mock('../../../api/models/WorkflowJobTemplateNodes');
 
 const sources = {
   data: {
@@ -61,6 +66,12 @@ describe('<InventorySourceList />', () => {
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
     global.console.debug = () => {};
     InventoriesAPI.readSources.mockResolvedValue(sources);
+    InventoriesAPI.updateSources.mockResolvedValue({
+      data: [{ inventory_source: 1 }],
+    });
+    InventorySourcesAPI.readGroups.mockResolvedValue({ data: { count: 0 } });
+    InventorySourcesAPI.readHosts.mockResolvedValue({ data: { count: 0 } });
+    WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
     InventorySourcesAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
@@ -117,6 +128,12 @@ describe('<InventorySourceList />', () => {
       page_size: 20,
     });
     expect(InventorySourcesAPI.readOptions).toHaveBeenCalled();
+  });
+
+  test('should have proper number of delete detail requests', async () => {
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(3);
   });
 
   test('source data should render properly', async () => {
