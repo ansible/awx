@@ -2,6 +2,12 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+# 19.0.0 (TBD)
+
+* AWX now runs on Python 3.8 (https://github.com/ansible/awx/pull/8778/)
+* Added support for Execution Environments to the Activity Stream (https://github.com/ansible/awx/issues/9308)
+* Fixed a bug that improperly formats OpenSSH keys specified in custom Credential Types (https://github.com/ansible/awx/issues/9361)
+
 # 18.0.0 (March 23, 2021)
 
 **IMPORTANT INSTALL AND UPGRADE NOTES**
