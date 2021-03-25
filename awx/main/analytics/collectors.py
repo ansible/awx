@@ -8,16 +8,16 @@ import distro
 from django.db import connection
 from django.db.models import Count, Max, Min
 from django.conf import settings
+from django.contrib.sessions.models import Session
 from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
 
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore, datetime_hook
 from awx.main import models
-from django.contrib.sessions.models import Session
 from awx.main.analytics import register
 
-'''
+"""
 This module is used to define metrics collected by awx.main.analytics.gather()
 Each function is decorated with a key name, and should return a data
 structure that can be serialized to JSON
@@ -31,7 +31,7 @@ All functions - when called - will be passed a datetime.datetime object,
 `since`, which represents the last time analytics were gathered (some metrics
 functions - like those that return metadata about playbook runs, may return
 data _since_ the last report date - i.e., new data in the last 24 hours)
-'''
+"""
 
 
 def trivial_slicing(key, since, until):
@@ -74,13 +74,13 @@ def events_slicing(key, since, until):
     horizon = until - timedelta(weeks=4)
 
     lower = since or last_gather or horizon
-    if last_entries.get(key):
+    if not since and last_entries.get(key):
         lower = horizon
     pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
 
-    previous_pk = pk_values['pk__min'] or 0
-    if last_entries.get(key):
-        previous_pk = max(last_entries[key] + 1, previous_pk)
+    previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
+    if not since and last_entries.get(key):
+        previous_pk = max(last_entries[key], previous_pk)
     final_pk = pk_values['pk__max'] or 0
 
     step = 100000
