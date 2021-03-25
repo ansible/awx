@@ -185,7 +185,7 @@ def unpartitioned_event_horizon(cls):
     with connection.cursor() as cursor:
         try:
             cursor.execute(f'SELECT MAX(id) FROM _unpartitioned_{cls._meta.db_table}')
-            return cursor.fetchone()[0]
+            return cursor.fetchone()[0] or -1
         except ProgrammingError:
             return 0
 
