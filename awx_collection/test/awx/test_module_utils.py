@@ -9,13 +9,16 @@ from awx.main.models import Organization, Team, Project, Inventory
 from requests.models import Response
 from unittest import mock
 
+awx_name = 'AWX'
+tower_name = 'Red Hat Ansible Tower'
+ping_version = '1.2.3'
 
 def getTowerheader(self, header_name, default):
-    mock_headers = {'X-API-Product-Name': 'Red Hat Ansible Tower', 'X-API-Product-Version': '1.2.3'}
+    mock_headers = {'X-API-Product-Name': tower_name, 'X-API-Product-Version': ping_version}
     return mock_headers.get(header_name, default)
 
 def getAWXheader(self, header_name, default):
-    mock_headers = {'X-API-Product-Name': 'AWX', 'X-API-Product-Version': '1.2.3'}
+    mock_headers = {'X-API-Product-Name': awx_name, 'X-API-Product-Version': ping_version}
     return mock_headers.get(header_name, default)
 
 
@@ -52,7 +55,7 @@ def test_version_warning(collection_import, silence_warning):
             my_module._COLLECTION_VERSION = "2.0.0"
             my_module._COLLECTION_TYPE = "awx"
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with('You are running collection version 2.0.0 but connecting to tower version 1.2.3')
+    silence_warning.assert_called_once_with('You are running collection version {} but connecting to tower version {}'.format(my_module._COLLECTION_VERSION, ping_version))
 
 
 def test_version_warning_strictness_awx(collection_import, silence_warning):
@@ -86,6 +89,7 @@ def test_version_warning_strictness_tower(collection_import, silence_warning):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_tower_ping_response):
             my_module = TowerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "1.2.0"
+            my_module._COLLECTION_TYPE = "tower"
             my_module.get_endpoint('ping')
     silence_warning.assert_not_called()
 
@@ -96,7 +100,7 @@ def test_version_warning_strictness_tower(collection_import, silence_warning):
             my_module._COLLECTION_VERSION = "1.0.0"
             my_module._COLLECTION_TYPE = "tower"
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with('You are running collection version 1.0.0 but connecting to tower version 1.2.3')
+    silence_warning.assert_called_once_with('You are running collection version {} but connecting to tower version {}'.format(my_module._COLLECTION_VERSION, ping_version))
 
 
 
@@ -107,10 +111,10 @@ def test_type_warning(collection_import, silence_warning):
     with mock.patch.object(sys, 'argv', testargs):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_awx_ping_response):
             my_module = TowerAPIModule(argument_spec={})
-            my_module._COLLECTION_VERSION = "1.2.3"
+            my_module._COLLECTION_VERSION = ping_version
             my_module._COLLECTION_TYPE = "tower"
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with('You are using the tower version of this collection but connecting to awx')
+    silence_warning.assert_called_once_with('You are using the {} version of this collection but connecting to {}'.format(my_module._COLLECTION_TYPE, awx_name))
 
 
 def test_duplicate_config(collection_import, silence_warning):

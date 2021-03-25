@@ -267,7 +267,7 @@ class TowerAPIModule(TowerModule):
                 tower_compare_ver = parsed_tower_version[0]
             else:
                 collection_compare_ver = "{}.{}".format(parsed_collection_version[0], parsed_collection_version[1])
-                tower_major = '{}.{}'.format(parsed_tower_version[0], parsed_tower_version[1])
+                tower_compare_ver = '{}.{}'.format(parsed_tower_version[0], parsed_tower_version[1])
 
 
             if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
