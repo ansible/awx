@@ -11,7 +11,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from awx.conf.license import get_license
-from awx.main.utils import get_awx_version, get_ansible_version, get_custom_venv_choices, camelcase_to_underscore
+from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore
 from awx.main import models
 from django.contrib.sessions.models import Session
 from awx.main.analytics import register
@@ -33,7 +33,7 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 '''
 
 
-@register('config', '1.2', description=_('General platform configuration.'))
+@register('config', '1.3', description=_('General platform configuration.'))
 def config(since, **kwargs):
     license_info = get_license()
     install_type = 'traditional'
@@ -52,7 +52,6 @@ def config(since, **kwargs):
         'instance_uuid': settings.SYSTEM_UUID,
         'tower_url_base': settings.TOWER_URL_BASE,
         'tower_version': get_awx_version(),
-        'ansible_version': get_ansible_version(),
         'license_type': license_info.get('license_type', 'UNLICENSED'),
         'free_instances': license_info.get('free_instances', 0),
         'total_licensed_instances': license_info.get('instance_count', 0),
