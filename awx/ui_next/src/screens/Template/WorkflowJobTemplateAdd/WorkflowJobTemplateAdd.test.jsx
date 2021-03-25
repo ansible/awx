@@ -7,8 +7,12 @@ import {
   OrganizationsAPI,
   LabelsAPI,
   ExecutionEnvironmentsAPI,
+  UsersAPI,
 } from '../../../api';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 
 import WorkflowJobTemplateAdd from './WorkflowJobTemplateAdd';
 
@@ -17,6 +21,7 @@ jest.mock('../../../api/models/Organizations');
 jest.mock('../../../api/models/Labels');
 jest.mock('../../../api/models/Inventories');
 jest.mock('../../../api/models/ExecutionEnvironments');
+jest.mock('../../../api/models/Users');
 
 describe('<WorkflowJobTemplateAdd/>', () => {
   let wrapper;
@@ -38,6 +43,10 @@ describe('<WorkflowJobTemplateAdd/>', () => {
 
     ExecutionEnvironmentsAPI.read.mockResolvedValue({
       data: { results: [{ id: 1, name: 'Foo', image: 'localhost.com' }] },
+    });
+
+    UsersAPI.readAdminOfOrganizations.mockResolvedValue({
+      data: { count: 0, results: [] },
     });
 
     await act(async () => {
@@ -67,6 +76,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
           }
         );
       });
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
   });
   afterEach(async () => {
