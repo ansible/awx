@@ -1,7 +1,7 @@
 import Base from '../Base';
-import RelaunchMixin from '../mixins/Relaunch.mixin';
+import RunnableMixin from '../mixins/Runnable.mixin';
 
-class WorkflowJobs extends RelaunchMixin(Base) {
+class WorkflowJobs extends RunnableMixin(Base) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/workflow_jobs/';
@@ -9,6 +9,10 @@ class WorkflowJobs extends RelaunchMixin(Base) {
 
   readNodes(id, params) {
     return this.http.get(`${this.baseUrl}${id}/workflow_nodes/`, { params });
+  }
+
+  readCredentials(id) {
+    return this.http.get(`${this.baseUrl}${id}/credentials/`);
   }
 }
 
