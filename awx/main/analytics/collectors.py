@@ -12,7 +12,7 @@ from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
 
 from awx.conf.license import get_license
-from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore
+from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore, datetime_hook
 from awx.main import models
 from django.contrib.sessions.models import Session
 from awx.main.analytics import register
@@ -42,7 +42,7 @@ def trivial_slicing(key, since, until):
 
     horizon = until - timedelta(weeks=4)
     last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
-    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
+    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
     last_entry = max(last_entries.get(key) or settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
     return [(last_entry, until)]
 
@@ -55,7 +55,7 @@ def four_hour_slicing(key, since, until):
 
         horizon = until - timedelta(weeks=4)
         last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
-        last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
+        last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
         last_entry = max(last_entries.get(key) or settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
 
     start, end = last_entry, None
@@ -70,7 +70,7 @@ def events_slicing(key, since, until):
 
     last_gather = settings.AUTOMATION_ANALYTICS_LAST_GATHER
     last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
-    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
+    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
     horizon = until - timedelta(weeks=4)
 
     lower = since or last_gather or horizon

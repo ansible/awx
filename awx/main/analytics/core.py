@@ -18,7 +18,7 @@ import requests
 from awx.conf.license import get_license
 from awx.main.models import Job
 from awx.main.access import access_registry
-from awx.main.utils import get_awx_http_client_headers, set_environ
+from awx.main.utils import get_awx_http_client_headers, set_environ, datetime_hook
 from awx.main.utils.pglock import advisory_lock
 
 __all__ = ['register', 'gather', 'ship']
@@ -163,7 +163,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         last_gather = max(settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
 
         last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
-        last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}')
+        last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
 
         collector_module = module if module else collectors
         collector_list = [

@@ -18,6 +18,8 @@ from functools import reduce, wraps
 
 from decimal import Decimal
 
+from dateutil import parser
+
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
@@ -54,6 +56,7 @@ __all__ = [
     'copy_m2m_relationships',
     'prefetch_page_capabilities',
     'to_python_boolean',
+    'datetime_hook',
     'ignore_inventory_computed_fields',
     'ignore_inventory_group_removal',
     '_inventory_updates',
@@ -113,6 +116,16 @@ def to_python_boolean(value, allow_none=False):
         return None
     else:
         raise ValueError(_(u'Unable to convert "%s" to boolean') % value)
+
+
+def datetime_hook(d):
+    new_d = {}
+    for key, value in d.items():
+        try:
+            new_d[key] = parser.parse(value)
+        except Exception:
+            new_d[key] = value
+    return new_d
 
 
 def camelcase_to_underscore(s):
