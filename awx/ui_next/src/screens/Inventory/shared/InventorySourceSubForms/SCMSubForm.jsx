@@ -122,9 +122,6 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
           onSelect={(event, value) => {
             setIsOpen(false);
             value = value.trim();
-            if (!value.endsWith('/')) {
-              value += '/';
-            }
             sourcePathHelpers.setValue(value);
           }}
           aria-label={i18n._(t`Select source path`)}
@@ -132,10 +129,6 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
           isCreatable
           onCreateOption={value => {
             value.trim();
-
-            if (!value.endsWith('/')) {
-              value += '/';
-            }
             setSourcePath([...sourcePath, value]);
           }}
         >
