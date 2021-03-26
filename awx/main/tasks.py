@@ -2106,7 +2106,7 @@ class RunProjectUpdate(BaseTask):
         d = super(RunProjectUpdate, self).get_password_prompts(passwords)
         d[r'Username for.*:\s*?$'] = 'scm_username'
         d[r'Password for.*:\s*?$'] = 'scm_password'
-        d['Password:\s*?$'] = 'scm_password'  # noqa
+        d[r'Password:\s*?$'] = 'scm_password'
         d[r'\S+?@\S+?\'s\s+?password:\s*?$'] = 'scm_password'
         d[r'Enter passphrase for .*:\s*?$'] = 'scm_key_unlock'
         d[r'Bad passphrase, try again for .*:\s*?$'] = ''
