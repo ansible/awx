@@ -15,7 +15,6 @@ import {
   UserDateDetail,
 } from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
-import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import CredentialChip from '../../../components/CredentialChip';
 import { ProjectsAPI } from '../../../api';
 import { toTitleCase } from '../../../util/strings';
@@ -27,7 +26,6 @@ function ProjectDetail({ project, i18n }) {
   const {
     allow_override,
     created,
-    custom_virtualenv,
     description,
     id,
     local_path,
@@ -128,11 +126,6 @@ function ProjectDetail({ project, i18n }) {
         <Detail
           label={i18n._(t`Cache Timeout`)}
           value={`${scm_update_cache_timeout} ${i18n._(t`Seconds`)}`}
-        />
-        <ExecutionEnvironmentDetail
-          virtualEnvironment={custom_virtualenv}
-          executionEnvironment={summary_fields?.default_environment}
-          isDefaultEnvironment
         />
         <Config>
           {({ project_base_dir }) => (

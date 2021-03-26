@@ -8,12 +8,10 @@ import { Config } from '../../contexts/Config';
 import { Detail, DeletedDetail } from '../DetailList';
 import CredentialChip from '../CredentialChip';
 import { toTitleCase } from '../../util/strings';
-import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 
 function PromptProjectDetail({ i18n, resource }) {
   const {
     allow_override,
-    custom_virtualenv,
     local_path,
     scm_branch,
     scm_clean,
@@ -65,11 +63,6 @@ function PromptProjectDetail({ i18n, resource }) {
       ) : (
         <DeletedDetail label={i18n._(t`Organization`)} />
       )}
-      <ExecutionEnvironmentDetail
-        virtualEnvironment={custom_virtualenv}
-        executionEnvironment={summary_fields?.default_environment}
-        isDefaultEnvironment
-      />
       <Detail
         label={i18n._(t`Source Control Type`)}
         value={scm_type === '' ? i18n._(t`Manual`) : toTitleCase(scm_type)}

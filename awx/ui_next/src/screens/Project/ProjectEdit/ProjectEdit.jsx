@@ -26,7 +26,6 @@ function ProjectEdit({ project }) {
       } = await ProjectsAPI.update(project.id, {
         ...values,
         organization: values.organization.id,
-        default_environment: values.default_environment?.id || null,
       });
       history.push(`/projects/${id}/details`);
     } catch (error) {
