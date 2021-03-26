@@ -295,6 +295,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             return True
         return field_name in self.inputs and self.inputs[field_name] not in ('', None)
 
+    def has_inputs(self, field_names=()):
+        for name in field_names:
+            if name not in self.inputs:
+                return False
+        return True
+
     def _get_dynamic_input(self, field_name):
         for input_source in self.input_sources.all():
             if input_source.input_field_name == field_name:
@@ -1096,11 +1102,11 @@ ManagedCredentialType(
                 'type': 'string',
             },
             {
-                'id': 'password/token',
-                'label': ugettext_noop('Password/Token'),
+                'id': 'password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ugettext_noop('A token to use to authenticate with. ' 'This should not be set if username/password are being used.'),
+                'help_text': ugettext_noop('A password or token used to authenticate with'),
             },
         ],
         'required': ['host'],

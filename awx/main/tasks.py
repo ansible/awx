@@ -852,15 +852,21 @@ class BaseTask(object):
         }
 
         if instance.execution_environment.credential:
-            with open('/tmp/auth.json', 'w') as authfile:
-                host = instance.execution_environment.credential.get_input('host')
-                username = instance.execution_environment.credential.get_input('username')
-                password = instance.execution_environment.credential.get_input('password')
-                token = "{}:{}".format(username, password)
-                auth_data = {'auths': {host: {'auth': b64encode(token.encode('ascii')).decode()}}}
-                authfile.write(json.dumps(auth_data, indent=4))
-            authfile.close()
-            params["container_options"].append(f'--authfile={authfile.name}')
+            cred = instance.execution_environment.credential
+            if cred.has_inputs(field_names=('host', 'username', 'password')):
+                path = self.build_private_data_dir(instance)
+                with open(path + '/auth.json', 'w') as authfile:
+                    host = cred.get_input('host')
+                    username = cred.get_input('username')
+                    password = cred.get_input('password')
+                    token = "{}:{}".format(username, password)
+                    auth_data = {'auths': {host: {'auth': b64encode(token.encode('ascii')).decode()}}}
+                    authfile.write(json.dumps(auth_data, indent=4))
+                authfile.close()
+                os.chmod(authfile.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+                params["container_options"].append(f'--authfile={authfile.name}')
+            else:
+                logger.exception('Please recheck that your host, username, and password fields are all filled.')
 
         pull = instance.execution_environment.pull
         if pull:
