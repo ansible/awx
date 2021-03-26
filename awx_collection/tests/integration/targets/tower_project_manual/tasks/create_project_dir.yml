@@ -40,7 +40,7 @@
         job_type: run
         module_args: "mkdir -p {{ project_base_dir }}/{{ project_dir_name }}"
         module_name: command
-        wait: True
+        wait: true
 
   always:
     - name: Delete path from setting
