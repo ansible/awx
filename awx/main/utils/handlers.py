@@ -5,6 +5,7 @@
 import logging
 import sys
 import traceback
+from datetime import datetime
 
 # Django
 from django.conf import settings
@@ -34,7 +35,8 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
         # because the alternative is blocking the
         # socket.send() in the Python process, which we definitely don't
         # want to do)
-        msg = f'{record.asctime} ERROR rsyslogd was unresponsive: '
+        dt = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        msg = f'{dt} ERROR rsyslogd was unresponsive: '
         exc = traceback.format_exc()
         try:
             msg += exc.splitlines()[-1]
