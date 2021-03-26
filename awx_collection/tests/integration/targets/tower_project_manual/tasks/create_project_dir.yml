@@ -1,16 +1,4 @@
 ---
-- name: get tower host variable
-  shell: tower-cli config host | cut -d ' ' -f2
-  register: host
-
-- name: get tower username variable
-  shell: tower-cli config username | cut -d ' ' -f2
-  register: username
-
-- name: get tower password variable
-  shell: tower-cli config password | cut -d ' ' -f2
-  register: password
-
 - name: Fetch project_base_dir
   uri:
     url: "{{ host.stdout }}/api/v2/config/"
@@ -44,15 +32,15 @@
     organization: Default
 
 - name: Disable process isolation
-  command: tower-cli setting modify AWX_PROOT_ENABLED false
+  command: awx-cli setting modify AWX_PROOT_ENABLED false
 
 - block:
     - name: Create a directory for manual project
       vars:
         project_base_dir: "{{ awx_config.json.project_base_dir }}"
-      command: tower-cli ad_hoc launch --wait --inventory localhost
+      command: awx-cli ad_hoc launch --wait --inventory localhost
         --credential dummy --module-name command
         --module-args "mkdir -p {{ project_base_dir }}/{{ project_dir_name }}"
   always:
     - name: enable process isolation
-      command: tower-cli setting modify AWX_PROOT_ENABLED true
+      command: awx-cli setting modify AWX_PROOT_ENABLED true
