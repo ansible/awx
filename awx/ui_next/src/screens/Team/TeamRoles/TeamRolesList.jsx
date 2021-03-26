@@ -35,7 +35,7 @@ function TeamRolesList({ i18n, me, team }) {
   const {
     isLoading,
     request: fetchRoles,
-    contentError,
+    error: contentError,
     result: {
       roleCount,
       roles,

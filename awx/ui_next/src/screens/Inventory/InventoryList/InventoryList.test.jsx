@@ -1,11 +1,17 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { InventoriesAPI } from '../../../api';
+import {
+  InventoriesAPI,
+  JobTemplatesAPI,
+  WorkflowJobTemplatesAPI,
+} from '../../../api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InventoryList from './InventoryList';
 
-jest.mock('../../../api');
+jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/JobTemplates');
+jest.mock('../../../api/models/WorkflowJobTemplates');
 
 const mockInventories = [
   {
@@ -136,6 +142,8 @@ describe('<InventoryList />', () => {
         },
       },
     });
+    JobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    WorkflowJobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
     global.console.debug = () => {};
   });
@@ -153,6 +161,16 @@ describe('<InventoryList />', () => {
     wrapper.update();
 
     expect(wrapper.find('InventoryListItem')).toHaveLength(3);
+  });
+
+  test('should have proper number of delete detail requests', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryList />);
+    });
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(2);
   });
 
   test('should select inventory when checked', async () => {

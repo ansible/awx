@@ -67,10 +67,6 @@ CALLBACK_QUEUE = "callback_tasks"
 # Note: This setting may be overridden by database settings.
 AWX_ROLES_ENABLED = True
 
-# Enable PROOT for tower-qa integration tests.
-# Note: This setting may be overridden by database settings.
-AWX_PROOT_ENABLED = True
-
 AWX_ISOLATED_USERNAME = 'root'
 AWX_ISOLATED_CHECK_INTERVAL = 1
 AWX_ISOLATED_PERIODIC_CHECK = 30

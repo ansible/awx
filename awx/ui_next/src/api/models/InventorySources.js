@@ -22,6 +22,14 @@ class InventorySources extends LaunchUpdateMixin(
     });
   }
 
+  readGroups(id) {
+    return this.http.get(`${this.baseUrl}${id}/groups/`);
+  }
+
+  readHosts(id) {
+    return this.http.get(`${this.baseUrl}${id}/hosts/`);
+  }
+
   destroyGroups(id) {
     return this.http.delete(`${this.baseUrl}${id}/groups/`);
   }

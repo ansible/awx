@@ -19,6 +19,7 @@ import ChipGroup from '../../../components/ChipGroup';
 import { InventoriesAPI } from '../../../api';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { Inventory } from '../../../types';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 function InventoryDetail({ inventory, i18n }) {
   const history = useHistory();
@@ -53,6 +54,11 @@ function InventoryDetail({ inventory, i18n }) {
     organization,
     user_capabilities: userCapabilities,
   } = inventory.summary_fields;
+
+  const deleteDetailsRequests = relatedResourceDeleteRequests.inventory(
+    inventory,
+    i18n
+  );
 
   if (isLoading) {
     return <ContentLoading />;
@@ -126,6 +132,10 @@ function InventoryDetail({ inventory, i18n }) {
             name={inventory.name}
             modalTitle={i18n._(t`Delete Inventory`)}
             onConfirm={deleteInventory}
+            deleteDetailsRequests={deleteDetailsRequests}
+            deleteMessage={i18n._(
+              t`This inventory is currently being used by other resources. Are you sure you want to delete it?`
+            )}
           >
             {i18n._(t`Delete`)}
           </DeleteButton>

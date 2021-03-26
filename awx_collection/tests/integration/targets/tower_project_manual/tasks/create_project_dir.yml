@@ -43,7 +43,7 @@
       -----END EC PRIVATE KEY-----
     organization: Default
 
-- name: Disable bubblewrap
+- name: Disable process isolation
   command: tower-cli setting modify AWX_PROOT_ENABLED false
 
 - block:
@@ -54,5 +54,5 @@
         --credential dummy --module-name command
         --module-args "mkdir -p {{ project_base_dir }}/{{ project_dir_name }}"
   always:
-    - name: enable bubblewrap
+    - name: enable process isolation
       command: tower-cli setting modify AWX_PROOT_ENABLED true

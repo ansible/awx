@@ -13,20 +13,12 @@ import useRequest, {
   useDeleteItems,
   useDismissableError,
 } from '../../util/useRequest';
-import isJobRunning from '../../util/jobs';
+import { isJobRunning, getJobModel } from '../../util/jobs';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
 import JobListCancelButton from './JobListCancelButton';
 import useWsJobs from './useWsJobs';
-import {
-  AdHocCommandsAPI,
-  InventoryUpdatesAPI,
-  JobsAPI,
-  ProjectUpdatesAPI,
-  SystemJobsAPI,
-  UnifiedJobsAPI,
-  WorkflowJobsAPI,
-} from '../../api';
+import { UnifiedJobsAPI } from '../../api';
 
 function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   const qsConfig = getQSConfig(
@@ -104,7 +96,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
       return Promise.all(
         selected.map(job => {
           if (isJobRunning(job.status)) {
-            return JobsAPI.cancel(job.id, job.type);
+            return getJobModel(job.type).cancel(job.id);
           }
           return Promise.resolve();
         })
@@ -127,22 +119,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     useCallback(() => {
       return Promise.all(
         selected.map(({ type, id }) => {
-          switch (type) {
-            case 'job':
-              return JobsAPI.destroy(id);
-            case 'ad_hoc_command':
-              return AdHocCommandsAPI.destroy(id);
-            case 'system_job':
-              return SystemJobsAPI.destroy(id);
-            case 'project_update':
-              return ProjectUpdatesAPI.destroy(id);
-            case 'inventory_update':
-              return InventoryUpdatesAPI.destroy(id);
-            case 'workflow_job':
-              return WorkflowJobsAPI.destroy(id);
-            default:
-              return null;
-          }
+          return getJobModel(type).destroy(id);
         })
       );
     }, [selected]),

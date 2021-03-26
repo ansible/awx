@@ -83,6 +83,8 @@ defusedxml==0.6.0
     #   social-auth-core
 dictdiffer==0.8.1
     # via openshift
+distro==1.5.0
+    # via -r /awx_devel/requirements/requirements.in
 django-auth-ldap==2.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-cors-headers==3.2.1
@@ -146,22 +148,12 @@ hyperlink==20.0.1
     # via
     #   autobahn
     #   twisted
-idna-ssl==1.1.0
-    # via aiohttp
 idna==2.9
     # via
     #   hyperlink
-    #   idna-ssl
     #   requests
     #   twisted
     #   yarl
-importlib-metadata==1.5.0
-    # via
-    #   importlib-resources
-    #   irc
-    #   jsonschema
-importlib-resources==1.4.0
-    # via jaraco.text
 incremental==17.5.0
     # via twisted
 irc==18.0.0
@@ -389,8 +381,6 @@ twisted[tls]==20.3.0
     #   daphne
 txaio==20.12.1
     # via autobahn
-typing-extensions==3.7.4.1
-    # via aiohttp
 urllib3==1.25.8
     # via
     #   kubernetes
@@ -407,10 +397,6 @@ xmlsec==1.3.3
     # via python3-saml
 yarl==1.4.2
     # via aiohttp
-zipp==3.1.0
-    # via
-    #   importlib-metadata
-    #   importlib-resources
 zope.interface==5.0.0
     # via twisted
 

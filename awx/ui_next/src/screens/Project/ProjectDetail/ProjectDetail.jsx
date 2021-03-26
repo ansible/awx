@@ -20,6 +20,7 @@ import CredentialChip from '../../../components/CredentialChip';
 import { ProjectsAPI } from '../../../api';
 import { toTitleCase } from '../../../util/strings';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
 
 function ProjectDetail({ project, i18n }) {
@@ -52,7 +53,10 @@ function ProjectDetail({ project, i18n }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
-
+  const deleteDetailsRequests = relatedResourceDeleteRequests.project(
+    project,
+    i18n
+  );
   let optionsList = '';
   if (
     scm_clean ||
@@ -171,6 +175,10 @@ function ProjectDetail({ project, i18n }) {
             modalTitle={i18n._(t`Delete Project`)}
             onConfirm={deleteProject}
             isDisabled={isLoading}
+            deleteDetailsRequests={deleteDetailsRequests}
+            deleteMessage={i18n._(
+              t`This project is currently being used by other resources. Are you sure you want to delete it?`
+            )}
           >
             {i18n._(t`Delete`)}
           </DeleteButton>

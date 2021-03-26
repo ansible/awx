@@ -13,3 +13,4 @@ plugins/module_utils/tower_legacy.py pylint:super-with-arguments
 plugins/module_utils/tower_module.py pylint:super-with-arguments
 plugins/module_utils/tower_module.py pylint:raise-missing-from
 test/awx/conftest.py pylint:raise-missing-from
+plugins/module_utils/tower_api.py pep8:E203
