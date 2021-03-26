@@ -5,7 +5,7 @@ import {
   waitForElement,
 } from '../../../../../testUtils/enzymeHelpers';
 import { SettingsProvider } from '../../../../contexts/Settings';
-import { SettingsAPI } from '../../../../api';
+import { SettingsAPI, ExecutionEnvironmentsAPI } from '../../../../api';
 import {
   assertDetail,
   assertVariableDetail,
@@ -14,13 +14,14 @@ import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import MiscSystemDetail from './MiscSystemDetail';
 
 jest.mock('../../../../api/models/Settings');
+jest.mock('../../../../api/models/ExecutionEnvironments');
+
 SettingsAPI.readCategory.mockResolvedValue({
   data: {
     ALLOW_OAUTH2_FOR_EXTERNAL_USERS: false,
     AUTH_BASIC_ENABLED: true,
     AUTOMATION_ANALYTICS_GATHER_INTERVAL: 14400,
     AUTOMATION_ANALYTICS_URL: 'https://example.com',
-    CUSTOM_VENV_PATHS: [],
     INSIGHTS_TRACKING_STATE: false,
     LOGIN_REDIRECT_OVERRIDE: 'https://redirect.com',
     MANAGE_ORGANIZATION_AUTH: true,
@@ -36,6 +37,16 @@ SettingsAPI.readCategory.mockResolvedValue({
     SESSIONS_PER_USER: -1,
     SESSION_COOKIE_AGE: 30000000000,
     TOWER_URL_BASE: 'https://towerhost',
+    DEFAULT_EXECUTION_ENVIRONMENT: 1,
+  },
+});
+
+ExecutionEnvironmentsAPI.readDetail.mockResolvedValue({
+  data: {
+    id: 1,
+    name: 'Foo',
+    image: 'quay.io/ansible/awx-ee',
+    pull: 'missing',
   },
 });
 
@@ -110,6 +121,33 @@ describe('<MiscSystemDetail />', () => {
     assertDetail(wrapper, 'Red Hat customer username', 'mock name');
     assertDetail(wrapper, 'Refresh Token Expiration', '3 seconds');
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');
+    assertDetail(wrapper, 'Global default execution environment', 'Foo');
+  });
+
+  test('should render execution environment as not configured', async () => {
+    ExecutionEnvironmentsAPI.readDetail.mockResolvedValue({
+      data: {},
+    });
+    let newWrapper;
+    await act(async () => {
+      newWrapper = mountWithContexts(
+        <SettingsProvider
+          value={{
+            ...mockAllOptions.actions,
+            DEFAULT_EXECUTION_ENVIRONMENT: null,
+          }}
+        >
+          <MiscSystemDetail />
+        </SettingsProvider>
+      );
+    });
+    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+
+    assertDetail(
+      newWrapper,
+      'Global default execution environment',
+      'Not configured'
+    );
   });
 
   test('should hide edit button from non-superusers', async () => {
