@@ -419,6 +419,7 @@ describe('Visualizer', () => {
     ).toBe(1);
   });
 
+  // TODO: figure out why this test is failing, the scenario passes in the ui
   test('Error shown when saving fails due to approval template edit error', async () => {
     workflowReducer.mockImplementation(state => {
       const newState = {
@@ -459,6 +460,17 @@ describe('Visualizer', () => {
         results: [],
       },
     });
+    WorkflowJobTemplateNodesAPI.replace.mockResolvedValue({
+      data: {
+        id: 9000,
+        summary_fields: {
+          unified_job_template: {
+            unified_job_type: 'workflow_approval',
+            id: 1,
+          },
+        },
+      },
+    });
     WorkflowApprovalTemplatesAPI.update.mockRejectedValue(new Error());
     await act(async () => {
       wrapper = mountWithContexts(
@@ -475,6 +487,7 @@ describe('Visualizer', () => {
       wrapper.find('Button#visualizer-save').simulate('click');
     });
     wrapper.update();
+    expect(WorkflowJobTemplateNodesAPI.replace).toHaveBeenCalledTimes(1);
     expect(WorkflowApprovalTemplatesAPI.update).toHaveBeenCalledTimes(1);
     expect(
       wrapper.find('AlertModal[title="Error saving the workflow!"]').length

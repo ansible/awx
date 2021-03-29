@@ -44,6 +44,12 @@ const NodeResourceName = styled.p`
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
+const ConvergenceLabel = styled.p`
+  font-size: 12px;
+  color: #ffffff;
+`;
+
 NodeResourceName.displayName = 'NodeResourceName';
 
 function VisualizerNode({
@@ -244,6 +250,38 @@ function VisualizerNode({
           node.id
         ].y - nodePositions[1].y})`}
       >
+        {(node.all_parents_must_converge ||
+          node?.originalNodeObject?.all_parents_must_converge) && (
+          <>
+            <rect
+              fill={
+                hovering && addingLink && !node.isInvalidLinkTarget
+                  ? '#007ABC'
+                  : '#93969A'
+              }
+              height={wfConstants.nodeH / 4}
+              rx={2}
+              ry={2}
+              x={wfConstants.nodeW / 2 - wfConstants.nodeW / 10}
+              y={-wfConstants.nodeH / 4 + 2}
+              stroke={
+                hovering && addingLink && !node.isInvalidLinkTarget
+                  ? '#007ABC'
+                  : '#93969A'
+              }
+              strokeWidth="2px"
+              width={wfConstants.nodeW / 5}
+            />
+            <foreignObject
+              height={wfConstants.nodeH / 4}
+              width={wfConstants.nodeW / 5}
+              x={wfConstants.nodeW / 2 - wfConstants.nodeW / 10 + 7}
+              y={-wfConstants.nodeH / 4 - 1}
+            >
+              <ConvergenceLabel>{i18n._(t`ALL`)}</ConvergenceLabel>
+            </foreignObject>
+          </>
+        )}
         <rect
           fill="#FFFFFF"
           height={wfConstants.nodeH}
