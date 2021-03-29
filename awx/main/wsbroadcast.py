@@ -15,7 +15,7 @@ from awx.main.analytics.broadcast_websocket import (
     BroadcastWebsocketStats,
     BroadcastWebsocketStatsManager,
 )
-
+import awx.main.analytics.subsystem_metrics as s_metrics
 
 logger = logging.getLogger('awx.main.wsbroadcast')
 
@@ -68,6 +68,7 @@ class WebsocketTask:
         self.protocol = protocol
         self.verify_ssl = verify_ssl
         self.channel_layer = None
+        self.subsystem_metrics = s_metrics.Metrics()
 
     async def run_loop(self, websocket: aiohttp.ClientWebSocketResponse):
         raise RuntimeError("Implement me")
@@ -144,9 +145,10 @@ class BroadcastWebsocketTask(WebsocketTask):
                         logmsg = "{} {}".format(logmsg, payload)
                     logger.warn(logmsg)
                     continue
-
                 (group, message) = unwrap_broadcast_msg(payload)
-
+                if group == "metrics":
+                    self.subsystem_metrics.store_metrics(message)
+                    continue
                 await self.channel_layer.group_send(group, {"type": "internal.message", "text": message})
 
 

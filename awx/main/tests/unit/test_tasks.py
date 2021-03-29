@@ -725,7 +725,6 @@ class TestIsolatedExecution(TestJobExecution):
         extra_vars = json.loads(extra_vars)
         assert extra_vars['dest'] == '/tmp'
         assert extra_vars['src'] == private_data
-        assert extra_vars['proot_temp_dir'].startswith('/tmp/awx_proot_')
 
     def test_systemctl_failure(self):
         # If systemctl fails, read the contents of `artifacts/systemctl_logs`

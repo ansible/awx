@@ -466,10 +466,14 @@ class CredentialType(CommonModelNameNotUnique):
             if len(value):
                 namespace[field_name] = value
 
-        # default missing boolean fields to False
         for field in self.inputs.get('fields', []):
+            # default missing boolean fields to False
             if field['type'] == 'boolean' and field['id'] not in credential.inputs.keys():
                 namespace[field['id']] = safe_namespace[field['id']] = False
+            # make sure private keys end with a \n
+            if field.get('format') == 'ssh_private_key':
+                if field['id'] in namespace and not namespace[field['id']].endswith('\n'):
+                    namespace[field['id']] += '\n'
 
         file_tmpls = self.injectors.get('file', {})
         # If any file templates are provided, render the files and update the

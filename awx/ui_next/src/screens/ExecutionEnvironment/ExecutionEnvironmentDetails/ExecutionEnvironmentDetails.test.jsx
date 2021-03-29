@@ -175,4 +175,22 @@ describe('<ExecutionEnvironmentDetails/>', () => {
 
     expect(wrapper.find('Button[aria-label="Delete"]')).toHaveLength(0);
   });
+  test('should have proper number of delete detail requests', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/execution_environments/42/details'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ExecutionEnvironmentDetails
+          executionEnvironment={executionEnvironment}
+        />,
+        {
+          context: { router: { history } },
+        }
+      );
+    });
+    expect(
+      wrapper.find('DeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(4);
+  });
 });

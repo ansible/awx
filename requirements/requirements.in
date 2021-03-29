@@ -8,6 +8,7 @@ channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
 cryptography<3.0.0
 daphne
+distro
 django==2.2.16  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers

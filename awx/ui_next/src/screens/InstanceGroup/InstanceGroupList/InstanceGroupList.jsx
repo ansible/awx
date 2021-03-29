@@ -17,7 +17,7 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import AddDropDownButton from '../../../components/AddDropDownButton';
-
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import InstanceGroupListItem from './InstanceGroupListItem';
 
 const QS_CONFIG = getQSConfig('instance-group', {
@@ -186,7 +186,10 @@ function InstanceGroupList({ i18n }) {
       ? `${match.url}/container_group/${item.id}/details`
       : `${match.url}/${item.id}/details`;
   };
-
+  const deleteDetailsRequests = relatedResourceDeleteRequests.instanceGroup(
+    selected[0],
+    i18n
+  );
   return (
     <>
       <PageSection>
@@ -218,6 +221,11 @@ function InstanceGroupList({ i18n }) {
                     itemsToDelete={modifiedSelected}
                     pluralizedItemName={i18n._(t`Instance Groups`)}
                     errorMessage={errorMessageDelete}
+                    deleteDetailsRequests={deleteDetailsRequests}
+                    deleteMessage={i18n._(
+                      '{numItemsToDelete, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                      { numItemsToDelete: selected.length }
+                    )}
                   />,
                 ]}
               />

@@ -9,6 +9,7 @@ import ContentError from '../../../../components/ContentError';
 import ContentLoading from '../../../../components/ContentLoading';
 import { FormSubmitError } from '../../../../components/FormField';
 import { FormColumnLayout } from '../../../../components/FormLayout';
+import { ExecutionEnvironmentLookup } from '../../../../components/Lookup';
 import { useSettings } from '../../../../contexts/Settings';
 import {
   BooleanField,
@@ -20,7 +21,7 @@ import {
 } from '../../shared';
 import useModal from '../../../../util/useModal';
 import useRequest from '../../../../util/useRequest';
-import { SettingsAPI } from '../../../../api';
+import { SettingsAPI, ExecutionEnvironmentsAPI } from '../../../../api';
 import { pluck, formatJson } from '../../shared/settingUtils';
 
 function MiscSystemEdit({ i18n }) {
@@ -44,7 +45,6 @@ function MiscSystemEdit({ i18n }) {
         'AUTH_BASIC_ENABLED',
         'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
         'AUTOMATION_ANALYTICS_URL',
-        'CUSTOM_VENV_PATHS',
         'INSIGHTS_TRACKING_STATE',
         'LOGIN_REDIRECT_OVERRIDE',
         'MANAGE_ORGANIZATION_AUTH',
@@ -55,7 +55,8 @@ function MiscSystemEdit({ i18n }) {
         'REMOTE_HOST_HEADERS',
         'SESSIONS_PER_USER',
         'SESSION_COOKIE_AGE',
-        'TOWER_URL_BASE'
+        'TOWER_URL_BASE',
+        'DEFAULT_EXECUTION_ENVIRONMENT'
       );
 
       const systemData = {
@@ -128,6 +129,7 @@ function MiscSystemEdit({ i18n }) {
       AUTHORIZATION_CODE_EXPIRE_SECONDS,
       ...formData
     } = form;
+
     await submitForm({
       ...formData,
       REMOTE_HOST_HEADERS: formatJson(formData.REMOTE_HOST_HEADERS),
@@ -136,6 +138,8 @@ function MiscSystemEdit({ i18n }) {
         REFRESH_TOKEN_EXPIRE_SECONDS,
         AUTHORIZATION_CODE_EXPIRE_SECONDS,
       },
+      DEFAULT_EXECUTION_ENVIRONMENT:
+        formData.DEFAULT_EXECUTION_ENVIRONMENT?.id || null,
     });
   };
 
@@ -178,16 +182,73 @@ function MiscSystemEdit({ i18n }) {
       return acc;
     }, {});
 
+  const executionEnvironmentId =
+    system?.DEFAULT_EXECUTION_ENVIRONMENT?.value || null;
+
+  const {
+    isLoading: isLoadingExecutionEnvironment,
+    error: errorExecutionEnvironment,
+    request: fetchExecutionEnvironment,
+    result: executionEnvironment,
+  } = useRequest(
+    useCallback(async () => {
+      if (!executionEnvironmentId) {
+        return '';
+      }
+      const { data } = await ExecutionEnvironmentsAPI.readDetail(
+        executionEnvironmentId
+      );
+      return data;
+    }, [executionEnvironmentId])
+  );
+
+  useEffect(() => {
+    fetchExecutionEnvironment();
+  }, [fetchExecutionEnvironment]);
+
   return (
     <CardBody>
-      {isLoading && <ContentLoading />}
-      {!isLoading && error && <ContentError error={error} />}
-      {!isLoading && system && (
-        <Formik initialValues={initialValues(system)} onSubmit={handleSubmit}>
+      {(isLoading || isLoadingExecutionEnvironment) && <ContentLoading />}
+      {!(isLoading || isLoadingExecutionEnvironment) && error && (
+        <ContentError error={error || errorExecutionEnvironment} />
+      )}
+      {!(isLoading || isLoadingExecutionEnvironment) && system && (
+        <Formik
+          initialValues={{
+            ...initialValues(system),
+            DEFAULT_EXECUTION_ENVIRONMENT: executionEnvironment
+              ? { id: executionEnvironment.id, name: executionEnvironment.name }
+              : null,
+          }}
+          onSubmit={handleSubmit}
+        >
           {formik => {
             return (
               <Form autoComplete="off" onSubmit={formik.handleSubmit}>
                 <FormColumnLayout>
+                  <ExecutionEnvironmentLookup
+                    helperTextInvalid={
+                      formik.errors.DEFAULT_EXECUTION_ENVIRONMENT
+                    }
+                    isValid={
+                      !formik.touched.DEFAULT_EXECUTION_ENVIRONMENT ||
+                      !formik.errors.DEFAULT_EXECUTION_ENVIRONMENT
+                    }
+                    onBlur={() =>
+                      formik.setFieldTouched('DEFAULT_EXECUTION_ENVIRONMENT')
+                    }
+                    value={formik.values.DEFAULT_EXECUTION_ENVIRONMENT}
+                    onChange={value =>
+                      formik.setFieldValue(
+                        'DEFAULT_EXECUTION_ENVIRONMENT',
+                        value
+                      )
+                    }
+                    popoverContent={i18n._(
+                      t`The Execution Environment to be used when one has not been configured for a job template.`
+                    )}
+                    isGlobalDefaultEnvironment
+                  />
                   <InputField
                     name="TOWER_URL_BASE"
                     config={system.TOWER_URL_BASE}

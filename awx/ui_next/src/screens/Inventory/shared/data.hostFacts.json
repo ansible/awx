@@ -101,7 +101,6 @@
       "VIRTUAL_ENV": "/var/lib/awx/venv/ansible",
       "INVENTORY_ID": "1",
       "MAX_EVENT_RES": "700000",
-      "PROOT_TMP_DIR": "/tmp",
       "ANSIBLE_LIBRARY": "/awx_devel/awx/plugins/library",
       "SDB_NOTIFY_HOST": "docker.for.mac.host.internal",
       "AWX_GROUP_QUEUES": "tower",

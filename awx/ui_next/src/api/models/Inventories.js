@@ -78,6 +78,12 @@ class Inventories extends InstanceGroupsMixin(Base) {
     });
   }
 
+  updateSources(inventoryId) {
+    return this.http.get(
+      `${this.baseUrl}${inventoryId}/update_inventory_sources/`
+    );
+  }
+
   async readSourceDetail(inventoryId, sourceId) {
     const {
       data: { results },

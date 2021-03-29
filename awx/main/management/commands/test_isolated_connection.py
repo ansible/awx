@@ -25,7 +25,7 @@ class Command(BaseCommand):
             raise CommandError("--hostname is a required argument")
 
         try:
-            path = tempfile.mkdtemp(prefix='awx_isolated_ssh', dir=settings.AWX_PROOT_BASE_PATH)
+            path = tempfile.mkdtemp(prefix='awx_isolated_ssh', dir=settings.AWX_ISOLATION_BASE_PATH)
             ssh_key = None
             if all([getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True, getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None)]):
                 ssh_key = settings.AWX_ISOLATED_PRIVATE_KEY

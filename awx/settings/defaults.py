@@ -224,6 +224,15 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # The number of job events to migrate per-transaction when moving from int -> bigint
 JOB_EVENT_MIGRATION_CHUNK_SIZE = 1000000
 
+# Histogram buckets for the callback_receiver_batch_events_insert_db metric
+SUBSYSTEM_METRICS_BATCH_INSERT_BUCKETS = [10, 50, 150, 350, 650, 2000]
+
+# Interval in seconds for sending local metrics to other nodes
+SUBSYSTEM_METRICS_INTERVAL_SEND_METRICS = 3
+
+# Interval in seconds for saving local metrics to redis
+SUBSYSTEM_METRICS_INTERVAL_SAVE_TO_REDIS = 2
+
 # The maximum allowed jobs to start on a given task manager cycle
 START_TASK_LIMIT = 100
 
@@ -427,6 +436,7 @@ CELERYBEAT_SCHEDULE = {
     'gather_analytics': {'task': 'awx.main.tasks.gather_analytics', 'schedule': timedelta(minutes=5)},
     'task_manager': {'task': 'awx.main.scheduler.tasks.run_task_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
     'k8s_reaper': {'task': 'awx.main.tasks.awx_k8s_reaper', 'schedule': timedelta(seconds=60), 'options': {'expires': 50}},
+    'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
 
@@ -569,26 +579,15 @@ AWX_SHOW_PLAYBOOK_LINKS = False
 # Applies to any galaxy server
 GALAXY_IGNORE_CERTS = False
 
-# Enable bubblewrap support for running jobs (playbook runs only).
+# Additional paths to show for jobs using process isolation.
 # Note: This setting may be overridden by database settings.
-AWX_PROOT_ENABLED = True
-
-# Command/path to bubblewrap.
-AWX_PROOT_CMD = 'bwrap'
-
-# Additional paths to hide from jobs using bubblewrap.
-# Note: This setting may be overridden by database settings.
-AWX_PROOT_HIDE_PATHS = []
-
-# Additional paths to show for jobs using bubbelwrap.
-# Note: This setting may be overridden by database settings.
-AWX_PROOT_SHOW_PATHS = []
+AWX_ISOLATION_SHOW_PATHS = []
 
 # The directory in which Tower will create new temporary directories for job
 # execution and isolation (such as credential files and custom
 # inventory scripts).
 # Note: This setting may be overridden by database settings.
-AWX_PROOT_BASE_PATH = "/tmp"
+AWX_ISOLATION_BASE_PATH = "/tmp"
 
 # Disable resource profiling by default
 AWX_RESOURCE_PROFILING_ENABLED = False

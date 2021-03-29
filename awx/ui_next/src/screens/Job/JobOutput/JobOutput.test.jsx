@@ -188,9 +188,19 @@ describe('<JobOutput />', () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
     await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
-    await act(async () => {
-      wrapper.find('DeleteButton').invoke('onConfirm')();
-    });
+    await act(async () =>
+      wrapper.find('button[aria-label="Delete"]').simulate('click')
+    );
+    await waitForElement(
+      wrapper,
+      'Modal',
+      el => el.props().isOpen === true && el.props().title === 'Delete Job'
+    );
+    await act(async () =>
+      wrapper
+        .find('Modal button[aria-label="Confirm Delete"]')
+        .simulate('click')
+    );
     expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
   });
 
@@ -268,7 +278,7 @@ describe('<JobOutput />', () => {
       wrapper.find(searchBtn).simulate('click');
     });
     wrapper.update();
-    expect(JobsAPI.readEvents).toHaveBeenCalledWith(2, undefined, {
+    expect(JobsAPI.readEvents).toHaveBeenCalledWith(2, {
       order_by: 'start_line',
       page: 1,
       page_size: 50,

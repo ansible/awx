@@ -1,25 +1,9 @@
 ---
-- name: get tower host variable
-  shell: tower-cli config host | cut -d ' ' -f2
-  register: host
-
-- name: get tower username variable
-  shell: tower-cli config username | cut -d ' ' -f2
-  register: username
-
-- name: get tower password variable
-  shell: tower-cli config password | cut -d ' ' -f2
-  register: password
-
-- name: Fetch project_base_dir
-  uri:
-    url: "{{ host.stdout }}/api/v2/config/"
-    user: "{{ username.stdout }}"
-    password: "{{ password.stdout }}"
-    validate_certs: false
-    return_content: true
-    force_basic_auth: true
-  register: awx_config
+- name: Load the UI settings
+  set_fact:
+    project_base_dir: "{{ tower_settings.project_base_dir }}"
+  vars:
+    tower_settings: "{{ lookup('awx.awx.tower_api', 'config/') }}"
 
 - tower_inventory:
     name: localhost
@@ -43,16 +27,29 @@
       -----END EC PRIVATE KEY-----
     organization: Default
 
-- name: Disable bubblewrap
-  command: tower-cli setting modify AWX_PROOT_ENABLED false
-
 - block:
+    - name: Add a path to a setting
+      tower_settings:
+        name: AWX_ISOLATION_SHOW_PATHS
+        value: "[{{ project_base_dir }}]"
+
     - name: Create a directory for manual project
-      vars:
-        project_base_dir: "{{ awx_config.json.project_base_dir }}"
-      command: tower-cli ad_hoc launch --wait --inventory localhost
-        --credential dummy --module-name command
-        --module-args "mkdir -p {{ project_base_dir }}/{{ project_dir_name }}"
+      tower_ad_hoc_command:
+        credential: dummy
+        inventory: localhost
+        job_type: run
+        module_args: "mkdir -p {{ project_base_dir }}/{{ project_dir_name }}"
+        module_name: command
+        wait: true
+
   always:
-    - name: enable bubblewrap
-      command: tower-cli setting modify AWX_PROOT_ENABLED true
+    - name: Delete path from setting
+      tower_settings:
+        name: AWX_ISOLATION_SHOW_PATHS
+        value: []
+
+    - name: Delete dummy credential
+      tower_credential:
+        name: dummy
+        kind: ssh
+        state: absent

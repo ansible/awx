@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { arrayOf, func } from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { KebabifiedContext } from '../../contexts/Kebabified';
-import isJobRunning from '../../util/jobs';
+import { isJobRunning } from '../../util/jobs';
 import AlertModal from '../AlertModal';
 import { Job } from '../../types';
 

@@ -3,13 +3,12 @@ from unittest import mock
 from unittest.mock import Mock
 
 from awx.main.models import (
-    Job,
     InstanceGroup,
 )
 
 
 def T(impact):
-    j = mock.Mock(Job())
+    j = mock.Mock(spec_set=['task_impact'])
     j.task_impact = impact
     return j
 

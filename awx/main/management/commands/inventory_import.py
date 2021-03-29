@@ -69,8 +69,6 @@ class AnsibleInventoryLoader(object):
     def __init__(self, source, venv_path=None, verbosity=0):
         self.source = source
         self.verbosity = verbosity
-        # TODO: remove once proot has been removed
-        self.tmp_private_dir = None
         if venv_path:
             self.venv_path = venv_path
         else:

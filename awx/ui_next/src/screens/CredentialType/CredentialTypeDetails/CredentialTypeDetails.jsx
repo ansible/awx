@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
@@ -16,6 +16,11 @@ import {
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { CredentialTypesAPI } from '../../../api';
 import { jsonToYaml } from '../../../util/yaml';
+import {
+  relatedResourceDeleteRequests,
+  getRelatedResourceDeleteCounts,
+} from '../../../util/getRelatedResourceDeleteDetails';
+import ErrorDetail from '../../../components/ErrorDetail';
 
 function CredentialTypeDetails({ credentialType, i18n }) {
   const { id, name, description, injectors, inputs } = credentialType;
@@ -32,7 +37,35 @@ function CredentialTypeDetails({ credentialType, i18n }) {
     }, [id, history])
   );
 
-  const { error, dismissError } = useDismissableError(deleteError);
+  const {
+    result: { isDeleteDisabled },
+    error: deleteDetailsError,
+    request: fetchDeleteDetails,
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        results: deleteDetails,
+        error,
+      } = await getRelatedResourceDeleteCounts(
+        relatedResourceDeleteRequests.credentialType(credentialType, i18n)
+      );
+      if (error) {
+        throw new Error(error);
+      }
+      if (deleteDetails) {
+        return { isDeleteDisabled: true };
+      }
+      return { isDeleteDisabled: false };
+    }, [credentialType, i18n]),
+    { isDeleteDisabled: false }
+  );
+
+  useEffect(() => {
+    fetchDeleteDetails();
+  }, [fetchDeleteDetails]);
+  const { error, dismissError } = useDismissableError(
+    deleteError || deleteDetailsError
+  );
 
   return (
     <CardBody>
@@ -82,7 +115,13 @@ function CredentialTypeDetails({ credentialType, i18n }) {
               name={name}
               modalTitle={i18n._(t`Delete credential type`)}
               onConfirm={deleteCredentialType}
-              isDisabled={isLoading}
+              isDisabled={isLoading || isDeleteDisabled}
+              disabledTooltip={
+                isDeleteDisabled &&
+                i18n._(
+                  t`This credential type is currently being used by some credentials and cannot be deleted`
+                )
+              }
             >
               {i18n._(t`Delete`)}
             </DeleteButton>
@@ -95,7 +134,9 @@ function CredentialTypeDetails({ credentialType, i18n }) {
           onClose={dismissError}
           title={i18n._(t`Error`)}
           variant="error"
-        />
+        >
+          <ErrorDetail error={error} />
+        </AlertModal>
       )}
     </CardBody>
   );
