@@ -97,6 +97,7 @@ from awx.main.utils import (
     deepmerge,
     parse_yaml_or_json,
 )
+from awx.main.utils.execution_environments import get_execution_environment_default
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
@@ -3126,7 +3127,10 @@ class AWXReceptorJob:
 
     @property
     def pod_definition(self):
-        ee = self.task.instance.resolve_execution_environment()
+        if self.task:
+            ee = self.task.instance.resolve_execution_environment()
+        else:
+            ee = get_execution_environment_default()
 
         default_pod_spec = {
             "apiVersion": "v1",
