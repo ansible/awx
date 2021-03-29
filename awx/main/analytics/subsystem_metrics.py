@@ -2,6 +2,7 @@ import redis
 import json
 import time
 import logging
+import socket
 
 from django.conf import settings
 from django.apps import apps
@@ -166,6 +167,10 @@ class Metrics:
             FloatM('subsystem_metrics_pipe_execute_seconds', 'Time spent saving metrics to redis'),
             IntM('subsystem_metrics_pipe_execute_calls', 'Number of calls to pipe_execute'),
             FloatM('subsystem_metrics_send_metrics_seconds', 'Time spent sending metrics to other nodes'),
+            SetIntM('uwsgi_workers', 'Number of workers'),
+            SetIntM('uwsgi_worker_busy', 'Number of workers with busy status'),
+            SetIntM('uwsgi_requests', 'Number of requests across workers'),
+            SetFloatM('uwsgi_average_response_time', 'Average of average response times (ms) across workers'),
         ]
         # turn metric list into dictionary with the metric name as a key
         self.METRICS = {}
@@ -219,12 +224,44 @@ class Metrics:
         self.conn.set(root_key + "_instance_" + data['instance'], data['metrics'])
 
     def should_pipe_execute(self):
-        if self.metrics_have_changed is False:
-            return False
         if time.time() - self.last_pipe_execute > self.pipe_execute_interval:
             return True
         else:
             return False
+
+    def get_uwsgi_stats(self):
+        json_str = ''
+        addr = "/tmp/stats.socket"
+        try:
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.connect(addr)
+            while True:
+                data = sock.recv(4096)
+                if len(data) < 1:
+                    break
+                json_str += data.decode('utf8', 'ignore')
+            sock.close()
+            return json.loads(json_str)
+        except:
+            raise Exception("unable to get uWSGI statistics")
+
+    def update_uwsgi_stats(self):
+        data = self.get_uwsgi_stats()
+        num_workers = len(data['workers'])
+        self.set('uwsgi_workers', len(data['workers']))
+        num_busy = 0
+        requests = 0
+        avg_rt = 0
+        for worker in data['workers']:
+            if worker['status'] == 'busy':
+                num_busy += 1
+            requests += worker['requests']
+            avg_rt += worker['avg_rt']
+        avg_rt = avg_rt / num_workers / 1000
+        self.set('uwsgi_workers', num_workers)
+        self.set('uwsgi_worker_busy', num_busy)
+        self.set('uwsgi_requests', requests)
+        self.set('uwsgi_average_response_time', avg_rt)
 
     def pipe_execute(self):
         if self.metrics_have_changed is True:

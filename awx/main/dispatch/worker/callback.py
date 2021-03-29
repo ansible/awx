@@ -75,9 +75,8 @@ class CallbackBrokerWorker(BaseWorker):
         return {'event': 'FLUSH'}
 
     def record_read_metrics(self):
-        if self.queue_pop == 0:
-            return
         if self.subsystem_metrics.should_pipe_execute() is True:
+            self.subsystem_metrics.update_uwsgi_stats()
             queue_size = self.redis.llen(self.queue_name)
             self.subsystem_metrics.set('callback_receiver_events_queue_size_redis', queue_size)
             self.subsystem_metrics.pipe_execute()
