@@ -130,7 +130,9 @@ def main():
     start = time.time()
 
     # Invoke wait function
-    result = module.wait_on_url(url=result['json']['url'], object_name=module.get_item_name(project), object_type='Project Update', timeout=timeout, interval=interval)
+    result = module.wait_on_url(
+        url=result['json']['url'], object_name=module.get_item_name(project), object_type='Project Update', timeout=timeout, interval=interval
+    )
     scm_revision_new = result['json']['scm_revision']
     if scm_revision_new == scm_revision_original:
         module.json_output['changed'] = False
