@@ -272,7 +272,9 @@ class TowerAPIModule(TowerModule):
             if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
                 self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, tower_type))
             elif collection_compare_ver != tower_compare_ver:
-                self.warn("You are running collection version {0} but connecting to tower version {1}".format(self._COLLECTION_VERSION, tower_version))
+                self.warn(
+                    "You are running collection version {0} but connecting to {2} version {1}".format(self._COLLECTION_VERSION, tower_version, tower_type)
+                )
 
             self.version_checked = True
 

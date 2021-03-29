@@ -2944,7 +2944,15 @@
               "child": {
                   "type": "field"
               }
-          }
+          },
+          "DEFAULT_EXECUTION_ENVIRONMENT": {
+            "type": "field",
+            "label": "Global default execution environment",
+            "help_text": "The Execution Environment to be used when one has not been configured for a job template.",
+            "category": "System",
+            "category_slug": "system",
+            "defined_in_file": false
+        }
       },
       "PUT": {
           "ACTIVITY_STREAM_ENABLED": {
@@ -7049,6 +7057,15 @@
                   "read_only": false
               }
           },
+          "DEFAULT_EXECUTION_ENVIRONMENT": {
+            "type": "field",
+            "required": false,
+            "label": "Global default execution environment",
+            "help_text": "The Execution Environment to be used when one has not been configured for a job template.",
+            "category": "System",
+            "category_slug": "system",
+            "default": null
+        },
           "SOCIAL_AUTH_SAML_TEAM_ATTR": {
               "type": "nested object",
               "required": false,

@@ -8,14 +8,55 @@ import {
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import mockAllSettings from '../../shared/data.allSettings.json';
 import { SettingsProvider } from '../../../../contexts/Settings';
-import { SettingsAPI } from '../../../../api';
+import { SettingsAPI, ExecutionEnvironmentsAPI } from '../../../../api';
 import MiscSystemEdit from './MiscSystemEdit';
 
 jest.mock('../../../../api/models/Settings');
+jest.mock('../../../../api/models/ExecutionEnvironments');
+
 SettingsAPI.updateAll.mockResolvedValue({});
 SettingsAPI.readCategory.mockResolvedValue({
   data: mockAllSettings,
 });
+
+const mockExecutionEnvironment = [
+  {
+    id: 1,
+    name: 'Default EE',
+    description: '',
+    image: 'quay.io/ansible/awx-ee',
+  },
+];
+
+ExecutionEnvironmentsAPI.read.mockResolvedValue({
+  data: {
+    results: mockExecutionEnvironment,
+    count: 1,
+  },
+});
+
+const systemData = {
+  ALLOW_OAUTH2_FOR_EXTERNAL_USERS: false,
+  AUTH_BASIC_ENABLED: true,
+  AUTOMATION_ANALYTICS_GATHER_INTERVAL: 14400,
+  AUTOMATION_ANALYTICS_URL: 'https://example.com',
+  DEFAULT_EXECUTION_ENVIRONMENT: 1,
+  INSIGHTS_TRACKING_STATE: false,
+  LOGIN_REDIRECT_OVERRIDE: '',
+  MANAGE_ORGANIZATION_AUTH: true,
+  OAUTH2_PROVIDER: {
+    ACCESS_TOKEN_EXPIRE_SECONDS: 31536000000,
+    AUTHORIZATION_CODE_EXPIRE_SECONDS: 600,
+    REFRESH_TOKEN_EXPIRE_SECONDS: 2628000,
+  },
+  ORG_ADMINS_CAN_SEE_ALL_USERS: true,
+  REDHAT_PASSWORD: '',
+  REDHAT_USERNAME: '',
+  REMOTE_HOST_HEADERS: ['REMOTE_ADDR', 'REMOTE_HOST'],
+  SESSIONS_PER_USER: -1,
+  SESSION_COOKIE_AGE: 1800,
+  TOWER_URL_BASE: 'https://localhost:3000',
+};
 describe('<MiscSystemEdit />', () => {
   let wrapper;
   let history;
@@ -42,8 +83,38 @@ describe('<MiscSystemEdit />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
 
-  test('initially renders without crashing', () => {
+  test('initially renders without crashing', async () => {
     expect(wrapper.find('MiscSystemEdit').length).toBe(1);
+  });
+
+  test('save button should call updateAll', async () => {
+    expect(wrapper.find('MiscSystemEdit').length).toBe(1);
+
+    wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')({
+      id: 1,
+      name: 'Foo',
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
+    wrapper.update();
+    expect(SettingsAPI.updateAll).toHaveBeenCalledWith(systemData);
+  });
+
+  test('should remove execution environment', async () => {
+    expect(wrapper.find('MiscSystemEdit').length).toBe(1);
+
+    wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')(null);
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
+
+    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
+      ...systemData,
+      DEFAULT_EXECUTION_ENVIRONMENT: null,
+    });
   });
 
   test('should successfully send default values to api on form revert all', async () => {

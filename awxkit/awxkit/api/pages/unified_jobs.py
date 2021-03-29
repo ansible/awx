@@ -139,7 +139,7 @@ class UnifiedJob(HasStatus, base.Base):
         """
         self.get()
         job_args = self.job_args
-        expected_prefix = '/tmp/awx_{}'.format(self.id)
+        expected_prefix = '/tmp/pdd_wrapper_{}'.format(self.id)
         for arg1, arg2 in zip(job_args[:-1], job_args[1:]):
             if arg1 == '-v':
                 if ':' in arg2:

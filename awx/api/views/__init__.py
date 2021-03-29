@@ -3043,6 +3043,8 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
     def check_permissions(self, request):
+        if not request.user.is_authenticated:
+            raise PermissionDenied()
         obj = self.get_object().workflow_job_template
         if request.method == 'POST':
             if not request.user.can_access(models.WorkflowJobTemplate, 'change', obj, request.data):
