@@ -2505,7 +2505,7 @@ class RunInventoryUpdate(BaseTask):
         args.append(container_location)
 
         args.append('--output')
-        args.append(os.path.join('/runner', 'artifacts', 'output.json'))
+        args.append(os.path.join('/runner', 'artifacts', str(inventory_update.id), 'output.json'))
 
         if os.path.isdir(source_location):
             playbook_dir = container_location
