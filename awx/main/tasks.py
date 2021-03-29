@@ -3126,11 +3126,20 @@ class AWXReceptorJob:
 
     @property
     def pod_definition(self):
+        ee = self.task.instance.resolve_execution_environment()
+
         default_pod_spec = {
             "apiVersion": "v1",
             "kind": "Pod",
             "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE},
-            "spec": {"containers": [{"image": settings.AWX_CONTAINER_GROUP_DEFAULT_IMAGE, "name": 'worker', "args": ['ansible-runner', 'worker']}]},
+            "spec": {
+                "containers": [
+                    {
+                        "image": ee.image,
+                        "name": 'worker',
+                    }
+                ],
+            },
         }
 
         pod_spec_override = {}
