@@ -65,7 +65,7 @@ class FakeAddField(migrations.AddField):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0134_unifiedjob_ansible_version'),
+        ('main', '0135_schedule_sort_fallback_to_id'),
     ]
 
     operations = [
