@@ -30,6 +30,13 @@ options:
         - Whether or not the EULA is accepted.
       required: True
       type: bool
+    force:
+      description:
+        - By default, the license manifest will only be applied if Tower is currently
+          unlicensed or trial licensed.  When force=true, the license is always applied. 
+      required: True
+      type: bool
+      default: 'False'
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -55,7 +62,7 @@ def main():
         ),
     )
 
-    json_output = {'changed': True}
+    json_output = {}
 
     if not module.params.get('eula_accepted'):
         module.fail_json(msg='You must accept the EULA by passing in the param eula_accepted as True')
@@ -65,11 +72,28 @@ def main():
     except OSError as e:
         module.fail_json(msg=str(e))
 
-    # Deal with check mode
+    # Check if Tower is already licensed
+    config = module.get_endpoint('config')['json']
+    already_licensed = (
+        'license_info' in config
+        and 'instance_count' in config['license_info']
+        and config['license_info']['instance_count'] > 0
+        and 'trial' in config['license_info']
+        and not config['license_info']['trial']
+    )
+
+    # Determine if we will install the license
+    perform_install = (not already_licensed) or module.params.get('force')
+
+    # Handle check mode
     if module.check_mode:
+        json_output['changed'] = perform_install
         module.exit_json(**json_output)
 
-    module.post_endpoint('config', data={'eula_accepted': True, 'manifest': manifest.decode()})
+    # Do the actual install, if we need to
+    if perform_install:
+        json_output['changed'] = True
+        module.post_endpoint('config', data={'eula_accepted': True, 'manifest': manifest.decode()})
 
     module.exit_json(**json_output)
 
