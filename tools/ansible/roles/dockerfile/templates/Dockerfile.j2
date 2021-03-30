@@ -5,7 +5,7 @@
 ###
 
 # Build container
-FROM centos:8 as builder
+FROM {{ base_container | default('centos:8') }}
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -70,7 +70,7 @@ RUN make sdist && \
 {% endif %}
 
 # Final container(s)
-FROM centos:8
+FROM {{ base_container | default('centos:8') }}
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en

@@ -17,3 +17,9 @@ localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env pyth
 
 # awx_image="ansible/awx"
 # migrate_local_docker=false
+
+# Define if you want the image pushed to a registry. The container definition will also use these images
+# docker_registry=172.30.1.1:5000
+# docker_registry_repository=awx
+# docker_registry_username=developer
+# docker_registry_password=""

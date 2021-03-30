@@ -4,3 +4,8 @@ kube_dev: false
 dockerfile_dest: '../..'
 dockerfile_name: 'Dockerfile'
 template_dest: '_build'
+
+# Helper vars to construct the proper multi-arch configuration
+tini_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm", "ppc64le": "ppc64le" }[ansible_facts.architecture] }}'
+kubectl_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm", "ppc64le": "ppc64le" }[ansible_facts.architecture] }}'
+base_container: '{{ { "x86_64": "centos:8", "aarch64": "centos:8", "armv7": "centos:8", "ppc64le": "centos:8" }[ansible_facts.architecture] }}'
