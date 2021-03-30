@@ -35,7 +35,7 @@ function InventoryHostFacts({ i18n, host }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <VariablesDetail label={i18n._(t`Facts`)} fullHeight value={result} />
+        <VariablesDetail label={i18n._(t`Facts`)} rows="auto" value={result} />
       </DetailList>
     </CardBody>
   );

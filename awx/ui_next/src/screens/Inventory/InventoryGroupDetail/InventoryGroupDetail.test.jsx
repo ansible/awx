@@ -72,11 +72,12 @@ describe('<InventoryGroupDetail />', () => {
     });
 
     test('should open delete modal and then call api to delete the group', async () => {
+      expect(wrapper.find('Modal').length).toBe(1); // variables modal already mounted
       await act(async () => {
         wrapper.find('button[aria-label="Delete"]').simulate('click');
       });
-      await waitForElement(wrapper, 'Modal', el => el.length === 1);
-      expect(wrapper.find('Modal').length).toBe(1);
+      wrapper.update();
+      expect(wrapper.find('Modal').length).toBe(2);
       await act(async () => {
         wrapper.find('Radio[id="radio-delete"]').invoke('onChange')();
       });
