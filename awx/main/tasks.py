@@ -1807,13 +1807,14 @@ class RunJob(BaseTask):
             logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
             sync_needs.append(source_update_tag)
         elif job.project.scm_type == 'git' and job.project.scm_revision and (not branch_override):
-            git_repo = git.Repo(project_path)
             try:
+                git_repo = git.Repo(project_path)
+
                 if job_revision == git_repo.head.commit.hexsha:
                     logger.debug('Skipping project sync for {} because commit is locally available'.format(job.log_format))
                 else:
                     sync_needs.append(source_update_tag)
-            except (ValueError, BadGitName):
+            except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
                 logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
                 sync_needs.append(source_update_tag)
         else:
