@@ -117,7 +117,7 @@ const mockResults = [
 ];
 
 UnifiedJobsAPI.read.mockResolvedValue({
-  data: { count: 3, results: mockResults },
+  data: { count: 6, results: mockResults },
 });
 
 UnifiedJobsAPI.readOptions.mockResolvedValue({
@@ -141,6 +141,9 @@ function waitForLoaded(wrapper) {
 describe('<JobList />', () => {
   let debug;
   beforeEach(() => {
+    UnifiedJobsAPI.read.mockResolvedValue({
+      data: { count: 6, results: mockResults },
+    });
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
     global.console.debug = () => {};
   });
@@ -262,6 +265,72 @@ describe('<JobList />', () => {
     jest.restoreAllMocks();
   });
 
+  test('should display message about job running status', async () => {
+    UnifiedJobsAPI.read.mockResolvedValue({
+      data: {
+        count: 2,
+        results: [
+          {
+            id: 1,
+            url: '/api/v2/project_updates/1',
+            name: 'job 1',
+            type: 'project_update',
+            status: 'running',
+            related: {
+              cancel: '/api/v2/project_updates/1/cancel',
+            },
+            summary_fields: {
+              user_capabilities: {
+                delete: true,
+                start: true,
+              },
+            },
+          },
+          {
+            id: 2,
+            url: '/api/v2/jobs/2',
+            name: 'job 2',
+            type: 'job',
+            status: 'running',
+            related: {
+              cancel: '/api/v2/jobs/2/cancel',
+            },
+            summary_fields: {
+              user_capabilities: {
+                delete: true,
+                start: true,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobList />);
+    });
+    await waitForLoaded(wrapper);
+
+    act(() => {
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
+    });
+    wrapper.update();
+    wrapper.find('JobListItem');
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('itemsToDelete')
+    ).toHaveLength(2);
+
+    wrapper.update();
+
+    const deleteButton = wrapper.find('ToolbarDeleteButton');
+    expect(deleteButton.find('Tooltip').prop('content').props.children).toEqual(
+      'The selected jobs cannot be deleted due to insufficient permissions or a running job status: job 1, job 2'
+    );
+
+    jest.restoreAllMocks();
+  });
+
   test('error is shown when job not successfully deleted from api', async () => {
     JobsAPI.destroy.mockImplementation(() => {
       throw new Error({
@@ -298,7 +367,7 @@ describe('<JobList />', () => {
     );
   });
 
-  test('should send all corresponding delete API requests', async () => {
+  test('should send all corresponding cancel API requests', async () => {
     JobsAPI.cancel = jest.fn();
     let wrapper;
     await act(async () => {
