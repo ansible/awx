@@ -290,6 +290,8 @@ ROOT_URLCONF = 'awx.urls'
 
 WSGI_APPLICATION = 'awx.wsgi.application'
 
+WSGI_STATS_SOCKET = '/var/lib/awx/uwsgi.stats'
+
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',

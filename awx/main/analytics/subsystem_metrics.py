@@ -152,6 +152,7 @@ class Metrics:
         self.auto_pipe_execute = auto_pipe_execute
         Instance = apps.get_model('main', 'Instance')
         self.instance_name = Instance.objects.me().hostname
+        self.wsgi_stats_socket = settings.WSGI_STATS_SOCKET
 
         # metric name, help_text
         METRICSLIST = [
@@ -231,10 +232,9 @@ class Metrics:
 
     def get_uwsgi_stats(self):
         json_str = ''
-        addr = "/tmp/stats.socket"
         try:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            sock.connect(addr)
+            sock.connect(self.wsgi_stats_socket)
             while True:
                 data = sock.recv(4096)
                 if len(data) < 1:

@@ -73,6 +73,8 @@ INSIGHTS_TRACKING_STATE = False
 
 INSTALLED_APPS += ['rest_framework_swagger', 'debug_toolbar']  # NOQA
 
+WSGI_STATS_SOCKET = '/tmp/stats.socket'
+
 MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE  # NOQA
 
 DEBUG_TOOLBAR_CONFIG = {'ENABLE_STACKTRACES': True}
