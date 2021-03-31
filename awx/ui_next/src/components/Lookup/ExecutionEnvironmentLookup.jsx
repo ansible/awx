@@ -75,15 +75,21 @@ function ExecutionEnvironmentLookup({
       const globallyAvailableParams = globallyAvailable
         ? { or__organization__isnull: 'True' }
         : {};
-      const organizationIdParams =
-        organizationId || project?.organization
-          ? { or__organization__id: organizationId }
+      const organizationIdParams = organizationId
+        ? { or__organization__id: organizationId }
+        : {};
+      const projectIdParams =
+        projectId && project?.organization
+          ? {
+              or__organization__id: project.organization,
+            }
           : {};
       const [{ data }, actionsResponse] = await Promise.all([
         ExecutionEnvironmentsAPI.read(
           mergeParams(params, {
             ...globallyAvailableParams,
             ...organizationIdParams,
+            ...projectIdParams,
           })
         ),
         ExecutionEnvironmentsAPI.readOptions(),
@@ -98,7 +104,7 @@ function ExecutionEnvironmentLookup({
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
-    }, [location, globallyAvailable, organizationId, project]),
+    }, [location, globallyAvailable, organizationId, projectId, project]),
     {
       executionEnvironments: [],
       count: 0,
@@ -174,7 +180,7 @@ function ExecutionEnvironmentLookup({
       label={renderLabel(isGlobalDefaultEnvironment, isDefaultEnvironment)}
       labelIcon={popoverContent && <Popover content={popoverContent} />}
     >
-      {tooltip ? (
+      {tooltip && isDisabled ? (
         <Tooltip content={tooltip}>{renderLookup()}</Tooltip>
       ) : (
         renderLookup()
