@@ -33,7 +33,7 @@ options:
     force:
       description:
         - By default, the license manifest will only be applied if Tower is currently
-          unlicensed or trial licensed.  When force=true, the license is always applied. 
+          unlicensed or trial licensed.  When force=true, the license is always applied.
       required: True
       type: bool
       default: 'False'
@@ -62,7 +62,7 @@ def main():
         ),
     )
 
-    json_output = {}
+    json_output = {'changed': False}
 
     if not module.params.get('eula_accepted'):
         module.fail_json(msg='You must accept the EULA by passing in the param eula_accepted as True')
@@ -83,7 +83,7 @@ def main():
     )
 
     # Determine if we will install the license
-    perform_install = (not already_licensed) or module.params.get('force')
+    perform_install = bool((not already_licensed) or module.params.get('force'))
 
     # Handle check mode
     if module.check_mode:
