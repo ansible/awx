@@ -6,7 +6,7 @@ export default function getRowRangePageSize(startIndex, stopIndex) {
     page = startIndex + 1;
     pageSize = 1;
   } else if (stopIndex >= startIndex + 50) {
-    page = Math.ceil(startIndex / 50);
+    page = Math.floor(startIndex / 50) + 1;
     pageSize = 50;
   } else {
     for (let i = stopIndex - startIndex + 1; i <= 50; i++) {
