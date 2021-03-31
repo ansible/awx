@@ -297,8 +297,11 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     def has_inputs(self, field_names=()):
         for name in field_names:
-            if name not in self.inputs:
-                return False
+            if name in self.inputs:
+                if self.inputs[name] in ('', None):
+                    return False
+            else:
+                raise ValueError('{} is not an input field'.format(name))
         return True
 
     def _get_dynamic_input(self, field_name):
