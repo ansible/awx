@@ -5,8 +5,7 @@ aiohttp==3.6.2
 aioredis==1.3.1
     # via channels-redis
 ansible-runner==2.0.0a1
-    # via
-    #   -r /awx_devel/requirements/requirements.in
+    # via -r /awx_devel/requirements/requirements.in
 ansiconv==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 asciichartpy==1.5.25
@@ -230,8 +229,8 @@ pkgconfig==1.5.1
     # via xmlsec
 prometheus-client==0.7.1
     # via -r /awx_devel/requirements/requirements.in
-psutil==5.7.0
-    # via ansible-runner
+psutil==5.8.0
+    # via -r /awx_devel/requirements/requirements.in
 psycopg2==2.8.4
     # via -r /awx_devel/requirements/requirements.in
 ptyprocess==0.6.0
@@ -296,7 +295,8 @@ pyyaml==5.4.1
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl
-    # via -r /awx_devel/requirements/requirements_git.txt
+receptorctl==0.9.7
+    # via -r /awx_devel/requirements/requirements.in
 redis==3.4.1
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -411,5 +411,4 @@ setuptools==41.6.0
     #   kubernetes
     #   markdown
     #   python-daemon
-    #   receptorctl
     #   zope.interface
