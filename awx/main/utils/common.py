@@ -44,7 +44,6 @@ __all__ = [
     'underscore_to_camelcase',
     'memoize',
     'memoize_delete',
-    'get_ansible_version',
     'get_licenser',
     'get_awx_http_client_headers',
     'get_awx_version',
@@ -190,20 +189,6 @@ def memoize(ttl=60, cache_key=None, track_function=False, cache=None):
 def memoize_delete(function_name):
     cache = get_memoize_cache()
     return cache.delete(function_name)
-
-
-@memoize()
-def get_ansible_version():
-    """
-    Return Ansible version installed.
-    Ansible path needs to be provided to account for custom virtual environments
-    """
-    try:
-        proc = subprocess.Popen(['ansible', '--version'], stdout=subprocess.PIPE)
-        result = smart_str(proc.communicate()[0])
-        return result.split('\n')[0].replace('ansible', '').strip()
-    except Exception:
-        return 'unknown'
 
 
 def get_awx_version():

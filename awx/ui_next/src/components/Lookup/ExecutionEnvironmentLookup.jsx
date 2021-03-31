@@ -25,6 +25,7 @@ function ExecutionEnvironmentLookup({
   globallyAvailable,
   i18n,
   isDefaultEnvironment,
+  isGlobalDefaultEnvironment,
   isDisabled,
   onBlur,
   onChange,
@@ -154,17 +155,26 @@ function ExecutionEnvironmentLookup({
     </>
   );
 
+  const renderLabel = (
+    globalDefaultEnvironment,
+    defaultExecutionEnvironment
+  ) => {
+    if (globalDefaultEnvironment) {
+      return i18n._(t`Global Default Execution Environment`);
+    }
+    if (defaultExecutionEnvironment) {
+      return i18n._(t`Default Execution Environment`);
+    }
+    return i18n._(t`Execution Environment`);
+  };
+
   return (
     <FormGroup
       fieldId="execution-environment-lookup"
-      label={
-        isDefaultEnvironment
-          ? i18n._(t`Default Execution Environment`)
-          : i18n._(t`Execution Environment`)
-      }
+      label={renderLabel(isGlobalDefaultEnvironment, isDefaultEnvironment)}
       labelIcon={popoverContent && <Popover content={popoverContent} />}
     >
-      {isDisabled ? (
+      {tooltip ? (
         <Tooltip content={tooltip}>{renderLookup()}</Tooltip>
       ) : (
         renderLookup()
@@ -180,6 +190,7 @@ ExecutionEnvironmentLookup.propTypes = {
   popoverContent: string,
   onChange: func.isRequired,
   isDefaultEnvironment: bool,
+  isGlobalDefaultEnvironment: bool,
   projectId: oneOfType([number, string]),
   organizationId: oneOfType([number, string]),
 };
@@ -187,6 +198,7 @@ ExecutionEnvironmentLookup.propTypes = {
 ExecutionEnvironmentLookup.defaultProps = {
   popoverContent: '',
   isDefaultEnvironment: false,
+  isGlobalDefaultEnvironment: false,
   value: null,
   projectId: null,
   organizationId: null,

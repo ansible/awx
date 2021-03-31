@@ -68,12 +68,12 @@ class Command(BaseCommand):
                     print('Demo Credential, Inventory, and Job Template added.')
                     changed = True
 
-                default_ee = settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE
-                ee, created = ExecutionEnvironment.objects.get_or_create(name='Default EE', defaults={'image': default_ee, 'managed_by_tower': True})
+                for ee in reversed(settings.DEFAULT_EXECUTION_ENVIRONMENTS):
+                    _, created = ExecutionEnvironment.objects.get_or_create(name=ee['name'], defaults={'image': ee['image'], 'managed_by_tower': True})
 
                 if created:
                     changed = True
-                    print('Default Execution Environment registered.')
+                    print('Default Execution Environment(s) registered.')
 
         if changed:
             print('(changed: True)')

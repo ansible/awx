@@ -98,7 +98,7 @@ describe('<SCMSubForm />', () => {
     });
     wrapper.update();
     expect(wrapper.find('Select#source_path').prop('selections')).toEqual(
-      'bar/'
+      'bar'
     );
 
     await act(async () => {
@@ -138,7 +138,7 @@ describe('<SCMSubForm />', () => {
       customWrapper.find('Select').invoke('onSelect')({}, 'newPath');
     });
     customWrapper.update();
-    expect(customWrapper.find('Select').prop('selections')).toBe('newPath/');
+    expect(customWrapper.find('Select').prop('selections')).toBe('newPath');
   });
   test('Update on project update should be disabled', async () => {
     const customInitialValues = {

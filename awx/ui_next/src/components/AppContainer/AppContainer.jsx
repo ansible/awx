@@ -204,7 +204,6 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
         {isReady && <ConfigProvider value={config}>{children}</ConfigProvider>}
       </Page>
       <About
-        ansible_version={config?.ansible_version}
         version={config?.version}
         isOpen={isAboutModalOpen}
         onClose={handleAboutModalClose}

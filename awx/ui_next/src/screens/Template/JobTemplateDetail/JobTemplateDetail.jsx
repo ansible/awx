@@ -371,6 +371,7 @@ function JobTemplateDetail({ i18n, template }) {
           value={extra_vars}
           rows={4}
           label={i18n._(t`Variables`)}
+          dataCy={`jt-details-${template.id}`}
         />
       </DetailList>
       <CardActionsRow>

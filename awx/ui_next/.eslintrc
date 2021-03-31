@@ -77,7 +77,8 @@
           "resizeOrientation",
           "src",
           "theme",
-          "gridColumns"
+          "gridColumns",
+          "rows"
         ],
         "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg"],
         "ignoreComponent": [

@@ -23,7 +23,7 @@ VENV_BASE ?= /var/lib/awx/venv/
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
-DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
+DEV_DOCKER_TAG_BASE ?= quay.io/awx
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 # Python packages to install only from source (not from binary wheels)
@@ -272,12 +272,12 @@ reports:
 	mkdir -p $@
 
 black: reports
-	command -v black >/dev/null 2>&1 || { echo "could not find black on your PATH, you may need to \`pip install black\`, or set AWX_IGNORE_BLACK=1" && exit 1; }
-	(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
+	@command -v black >/dev/null 2>&1 || { echo "could not find black on your PATH, you may need to \`pip install black\`, or set AWX_IGNORE_BLACK=1" && exit 1; }
+	@(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
 
 .git/hooks/pre-commit:
-	echo "[ -z \$$AWX_IGNORE_BLACK ] && (black --check \`git diff --cached --name-only | grep -E '\.py$\'\` || (echo 'To fix this, run \`make black\` to auto-format your code prior to commit, or set AWX_IGNORE_BLACK=1' && exit 1))" > .git/hooks/pre-commit
-	chmod +x .git/hooks/pre-commit
+	@echo "[ -z \$$AWX_IGNORE_BLACK ] && (black --check \`git diff --cached --name-only --diff-filter=AM | grep -E '\.py$\'\` || (echo 'To fix this, run \`make black\` to auto-format your code prior to commit, or set AWX_IGNORE_BLACK=1' && exit 1))" > .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
 
 genschema: reports
 	$(MAKE) swagger PYTEST_ARGS="--genschema --create-db "

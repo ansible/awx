@@ -53,6 +53,7 @@
 - assert:
     that:
       - result is successful
+      - result is not changed
 
 - name: Delete the test project 1
   tower_project:

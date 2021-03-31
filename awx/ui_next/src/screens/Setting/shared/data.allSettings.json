@@ -303,5 +303,6 @@
     "applications":{"fields":["name"],"adj_list":[["organization","organizations"]]},
     "users":{"fields":["username"],"adj_list":[]},
     "instances":{"fields":["hostname"],"adj_list":[]}
-  }
+  },
+  "DEFAULT_EXECUTION_ENVIRONMENT": 1
 }
