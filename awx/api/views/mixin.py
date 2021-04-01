@@ -52,6 +52,11 @@ class UnifiedJobDeletionMixin(object):
             else:
                 # if it has been > 1 minute, events are probably lost
                 logger.warning('Allowing deletion of {} through the API without all events ' 'processed.'.format(obj.log_format))
+
+        # Manually cascade delete events if unpartitioned job
+        if obj.has_unpartitioned_events:
+            obj.get_event_queryset().delete()
+
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
