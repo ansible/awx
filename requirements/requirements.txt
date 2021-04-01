@@ -1,15 +1,15 @@
 adal==1.2.2
     # via msrestazure
 aiohttp==3.6.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 aioredis==1.3.1
     # via channels-redis
 ansible-runner==2.0.0a1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 ansiconv==1.0.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 asciichartpy==1.5.25
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 asgiref==3.2.5
     # via
     #   channels
@@ -28,30 +28,30 @@ attrs==19.3.0
     #   twisted
 autobahn==20.12.3
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   daphne
 automat==20.2.0
     # via twisted
 azure-common==1.1.25
     # via azure-keyvault
 azure-keyvault==1.1.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 azure-nspkg==3.0.2
     # via azure-keyvault
 cachetools==4.0.0
     # via google-auth
+certifi==2020.12.5
     # via
-    #   -r /awx_devel/requirements/requirements_git.txt
     #   kubernetes
     #   msrest
     #   requests
 cffi==1.14.0
     # via cryptography
 channels-redis==3.1.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 channels==2.4.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   channels-redis
 chardet==3.0.4
     # via
@@ -63,7 +63,7 @@ constantly==15.1.0
     # via twisted
 cryptography==2.9.2
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   adal
     #   autobahn
     #   azure-keyvault
@@ -72,7 +72,7 @@ cryptography==2.9.2
     #   social-auth-core
 daphne==2.4.1
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   channels
 defusedxml==0.6.0
     # via
@@ -82,40 +82,40 @@ defusedxml==0.6.0
 dictdiffer==0.8.1
     # via openshift
 distro==1.5.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-auth-ldap==2.1.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-cors-headers==3.2.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-crum==0.7.5
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-extensions==2.2.9
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-guid==2.2.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-jsonfield==1.2.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-oauth-toolkit==1.1.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-pglocks==1.0.4
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-polymorphic==2.1.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-qsstats-magic==1.1.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-radius==1.3.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-redis==4.5.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-solo==1.1.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-split-settings==1.0.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-taggit==1.2.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django==2.2.16
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   channels
     #   django-auth-ldap
     #   django-cors-headers
@@ -127,9 +127,9 @@ django==2.2.16
     #   django-taggit
     #   djangorestframework
 djangorestframework-yaml==1.0.3
-    # via -r /awx_devel/requirements/requirements.in
-djangorestframework==3.12.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
+djangorestframework==3.12.4
+    # via -r requirements.in
 docutils==0.16
     # via python-daemon
 future==0.16.0
@@ -137,7 +137,7 @@ future==0.16.0
 gitdb==4.0.2
     # via gitpython
 gitpython==3.1.7
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 google-auth==1.11.3
     # via kubernetes
 hiredis==1.0.1
@@ -155,7 +155,7 @@ idna==2.9
 incremental==17.5.0
     # via twisted
 irc==18.0.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 isodate==0.6.0
     # via
     #   msrest
@@ -179,12 +179,12 @@ jaraco.text==3.2.0
     #   jaraco.collections
 jinja2==2.11.2
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   openshift
 json-log-formatter==0.3.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 jsonschema==3.2.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 kubernetes==11.0.0
     # via openshift
 lockfile==0.12.2
@@ -192,7 +192,7 @@ lockfile==0.12.2
 lxml==4.5.0
     # via xmlsec
 markdown==3.2.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 markupsafe==1.1.1
     # via jinja2
 more-itertools==8.2.0
@@ -220,19 +220,19 @@ oauthlib==3.1.0
     #   requests-oauthlib
     #   social-auth-core
 openshift==0.11.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 pexpect==4.7.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   ansible-runner
 pkgconfig==1.5.1
     # via xmlsec
 prometheus-client==0.7.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 psutil==5.8.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 psycopg2==2.8.4
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 ptyprocess==0.6.0
     # via pexpect
 pyasn1-modules==0.2.8
@@ -249,7 +249,7 @@ pyasn1==0.4.8
 pycparser==2.20
     # via cffi
 pygerduty==0.38.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 pyhamcrest==2.0.2
     # via twisted
 pyjwt==1.7.1
@@ -260,7 +260,7 @@ pyjwt==1.7.1
 pyopenssl==19.1.0
     # via twisted
 pyparsing==2.4.6
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 pyrad==2.3
     # via django-radius
 pyrsistent==0.15.7
@@ -274,14 +274,14 @@ python-dateutil==2.8.1
     #   receptorctl
 python-ldap==3.3.1
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   django-auth-ldap
 python-string-utils==1.0.0
     # via openshift
 python3-openid==3.1.0
     # via social-auth-core
 python3-saml==1.9.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 pytz==2019.3
     # via
     #   django
@@ -290,16 +290,16 @@ pytz==2019.3
     #   twilio
 pyyaml==5.4.1
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   ansible-runner
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl
 receptorctl==0.9.7
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 redis==3.4.1
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   django-redis
 requests-oauthlib==1.3.0
     # via
@@ -308,7 +308,7 @@ requests-oauthlib==1.3.0
     #   social-auth-core
 requests==2.23.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   adal
     #   azure-keyvault
     #   django-oauth-toolkit
@@ -320,12 +320,10 @@ requests==2.23.0
     #   twilio
 rsa==4.0
     # via google-auth
-ruamel.yaml.clib==0.2.0
-    # via ruamel.yaml
 ruamel.yaml==0.16.10
     # via openshift
 schedule==0.6.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 service-identity==18.1.0
     # via twisted
 six==1.14.0
@@ -355,28 +353,28 @@ six==1.14.0
     #   twilio
     #   websocket-client
 slackclient==1.1.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 smmap==3.0.1
     # via gitdb
 social-auth-app-django==3.1.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 social-auth-core==3.3.1
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   social-auth-app-django
 sqlparse==0.3.1
     # via django
 tacacs_plus==1.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 tempora==2.1.0
     # via
     #   irc
     #   jaraco.logging
 twilio==6.37.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 twisted[tls]==20.3.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   daphne
 txaio==20.12.1
     # via autobahn
@@ -385,9 +383,9 @@ urllib3==1.25.8
     #   kubernetes
     #   requests
 uwsgi==2.0.18
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 uwsgitop==0.11
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 websocket-client==0.57.0
     # via
     #   kubernetes
@@ -401,10 +399,10 @@ zope.interface==5.0.0
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==19.3.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 setuptools==41.6.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   asciichartpy
     #   google-auth
     #   jsonschema
