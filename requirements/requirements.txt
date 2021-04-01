@@ -70,6 +70,9 @@ cryptography==2.9.2
     #   pyopenssl
     #   service-identity
     #   social-auth-core
+Cython==0.29.22
+    # via
+    #   -r /awx_devel/requirements/requirements.in
 daphne==2.4.1
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -412,3 +415,5 @@ setuptools==41.6.0
     #   markdown
     #   python-daemon
     #   zope.interface
+wheel==0.36.2
+    # via -r /awx_devel/requirements/requirements.in

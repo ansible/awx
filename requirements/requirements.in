@@ -7,6 +7,7 @@ azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
 cryptography<3.0.0
+Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
 django==2.2.16  # see UPGRADE BLOCKERs
@@ -55,5 +56,6 @@ twilio
 twisted[tls]>=20.3.0  # CVE-2020-10108, CVE-2020-10109
 uWSGI
 uwsgitop
+wheel
 pip==19.3.1  # see UPGRADE BLOCKERs
 setuptools==41.6.0  # see UPGRADE BLOCKERs
