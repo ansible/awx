@@ -54,8 +54,8 @@ SurveyStep.propTypes = {
 function TextField({ question, i18n }) {
   const validators = [
     question.required ? required(null, i18n) : null,
-    question.min ? minLength(question.min, i18n) : null,
-    question.max ? maxLength(question.max, i18n) : null,
+    question.required && question.min ? minLength(question.min, i18n) : null,
+    question.required && question.max ? maxLength(question.max, i18n) : null,
   ];
   return (
     <FormField
@@ -124,7 +124,7 @@ function MultiSelectField({ question, i18n }) {
   const [isOpen, setIsOpen] = useState(false);
   const [field, meta, helpers] = useField({
     name: `survey_${question.variable}`,
-    validate: question.isrequired ? required(null, i18n) : null,
+    validate: question.required ? required(null, i18n) : null,
   });
   const id = `survey-question-${question.variable}`;
   const hasActualValue = !question.required || meta.value?.length > 0;
