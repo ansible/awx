@@ -8,7 +8,7 @@ pytest
 pytest-cov
 pytest-django
 pytest-pythonpath
-pytest-mock==1.11.1
+pytest-mock==3.5.1
 pytest-timeout
 pytest-xdist==1.34.0 # 2.0.0 broke zuul for some reason
 tox  # for awxkit
