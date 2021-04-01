@@ -4,6 +4,8 @@
 # Python
 import datetime
 import logging
+import pytz
+import re
 
 
 # Django
@@ -16,6 +18,151 @@ from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, S
 from awx.main.signals import disable_activity_stream, disable_computed_fields
 
 from awx.main.utils.deletion import AWXCollector, pre_delete
+
+
+def unified_job_class_to_event_table_name(job_class):
+    return f'main_{job_class().event_class.__name__.lower()}'
+
+
+def partition_table_name(job_class, d_or_suffix):
+    if isinstance(d_or_suffix, str):
+        suffix = d_or_suffix
+    else:
+        suffix = partition_suffix(d_or_suffix)
+
+    event_tbl_name = unified_job_class_to_event_table_name(job_class)
+    event_tbl_name += f'_{suffix}'
+    return event_tbl_name
+
+
+def partition_suffix(d):
+    return d.replace(microsecond=0, second=0, minute=0).strftime('%Y%m%d_%H')
+
+
+def partition_name_dt(part_name):
+    """
+    part_name examples:
+        main_jobevent_20210318_09
+        main_projectupdateevent_20210318_11
+        main_inventoryupdateevent_20210318_03
+    """
+    if 'old_events' in part_name:
+        return None
+    p = re.compile('([a-z]+)_([a-z]+)_([0-9]+)_([0-9][0-9])')
+    m = p.match(part_name)
+    if not m:
+        return m
+    dt_str = f"{m.group(3)}_{m.group(4)}"
+    dt = datetime.datetime.strptime(dt_str, '%Y%m%d_%H').replace(tzinfo=pytz.UTC)
+    return dt
+
+
+def dt_to_partition_name(tbl_name, dt):
+    return f"{tbl_name}_{dt.strftime('%Y%m%d_%H')}"
+
+
+class DeleteMeta:
+    def __init__(self, logger, job_class, cutoff, dry_run):
+        self.logger = logger
+        self.job_class = job_class
+        self.cutoff = cutoff
+        self.dry_run = dry_run
+
+        self.jobs_qs = None  # Set in by find_jobs_to_delete()
+
+        self.parts_no_drop = set()  # Set in identify_excluded_partitions()
+        self.parts_to_drop = set()  # Set in find_partitions_to_drop()
+        self.jobs_pk_list = []  # Set in find_jobs_to_delete()
+        self.jobs_to_delete_count = 0  # Set in find_jobs_to_delete()
+        self.jobs_no_delete_count = 0  # Set in find_jobs_to_delete()
+
+    def find_jobs_to_delete(self):
+        self.job_qs = self.job_class.objects.filter(created__lt=self.cutoff).values_list('pk', 'status', 'created')
+        for pk, status, created in self.job_qs:
+            if status not in ['pending', 'waiting', 'running']:
+                self.jobs_to_delete_count += 1
+                self.jobs_pk_list.append(pk)
+        self.jobs_no_delete_count = (
+            self.job_class.objects.filter(created__gte=self.cutoff) | self.job_class.objects.filter(status__in=['pending', 'waiting', 'running'])
+        ).count()
+
+    def identify_excluded_partitions(self):
+
+        part_drop = {}
+
+        for pk, status, created in self.job_qs:
+
+            part_key = partition_table_name(self.job_class, created)
+            if status in ['pending', 'waiting', 'running']:
+                part_drop[part_key] = False
+            else:
+                # Special "old" job partition handling
+                applied = get_event_partition_epoch()
+                if applied and created < applied:
+                    part_key = 'old_events'
+
+                part_drop.setdefault(part_key, True)
+
+        self.parts_no_drop = set([k for k, v in part_drop.items() if v is False])
+
+    def delete_jobs(self):
+        if not self.dry_run:
+            self.job_class.objects.filter(pk__in=self.jobs_pk_list).delete()
+
+    def find_partitions_to_drop(self):
+        tbl_name = unified_job_class_to_event_table_name(self.job_class)
+        old_events_tbl_name = f"{tbl_name}_old_events"
+
+        with connection.cursor() as cursor:
+            cursor.execute(f"select to_regclass('{old_events_tbl_name}') is not null")
+            old_events_table_exists = cursor.fetchone()[0]
+
+            '''
+            Get all event partitions. Exclude <tbl_name>_old_events partition if it exists.
+            '''
+            query = f"SELECT inhrelid::regclass::text AS child FROM pg_catalog.pg_inherits WHERE inhparent = 'public.{tbl_name}'::regclass"
+            if old_events_table_exists:
+                query += f" AND inhrelid != 'public.{old_events_tbl_name}'::regclass"
+
+            cursor.execute(query)
+            partitions_from_db = [r[0] for r in cursor.fetchall()]
+
+        partitions_dt = [partition_name_dt(p) for p in partitions_from_db if not None]
+        partitions_dt = [p for p in partitions_dt if not None]
+        partitions_dt.sort()
+
+        # Find partitions that match our drop date window
+        i = 0
+        for i, dt in enumerate(partitions_dt):
+            if dt > self.cutoff:
+                break
+        partitions_dt = partitions_dt[0:i]
+
+        # convert datetime partition back to string partition
+        partitions_maybe_drop = set([dt_to_partition_name(dt) for dt in partitions_dt])
+
+        # Do not drop partition if there is a job that will not be deleted pointing at it
+        self.parts_to_drop = partitions_maybe_drop - self.parts_no_drop
+
+        # Handle dropping special case <job_table_name>_old_events
+        epoch = get_event_partition_epoch()
+        if old_events_table_exists and epoch <= self.cutoff:
+            self.parts_to_drop.add(old_events_tbl_name)
+
+    def drop_partitions(self):
+        if self.parts_to_drop and not self.dry_run:
+            parts_to_drop_str = ','.join(self.parts_to_drop)
+            self.logger.debug(f"Dropping {parts_to_drop_str}")
+            with connection.cursor() as cursor:
+                cursor.execute(f"DROP TABLE {parts_to_drop_str}")
+
+    def delete(self):
+        self.find_jobs_to_delete()
+        self.identify_excluded_partitions()
+        self.find_partitions_to_drop()
+        self.drop_partitions()
+        self.delete_jobs()
+        return (self.jobs_no_delete_count, self.jobs_to_delete_count)
 
 
 class Command(BaseCommand):
@@ -35,6 +182,34 @@ class Command(BaseCommand):
         parser.add_argument('--management-jobs', default=False, action='store_true', dest='only_management_jobs', help='Remove management jobs')
         parser.add_argument('--notifications', dest='only_notifications', action='store_true', default=False, help='Remove notifications')
         parser.add_argument('--workflow-jobs', default=False, action='store_true', dest='only_workflow_jobs', help='Remove workflow jobs')
+
+    def cleanup(self, job_class):
+        delete_meta = DeleteMeta(self.logger, job_class, self.cutoff, self.dry_run)
+        skipped, deleted = delete_meta.delete()
+
+        return (delete_meta.jobs_no_delete_count, delete_meta.jobs_to_delete_count)
+
+    def cleanup_jobs_partition(self):
+        return self.cleanup(Job)
+
+    def cleanup_ad_hoc_commands_partition(self):
+        return self.cleanup(AdHocCommand)
+
+    def cleanup_project_updates_partition(self):
+        return self.cleanup(ProjectUpdate)
+
+    def cleanup_inventory_updates_partition(self):
+        return self.cleanup(InventoryUpdate)
+
+    def cleanup_management_jobs_partition(self):
+        return self.cleanup(SystemJob)
+
+    def cleanup_workflow_jobs_partition(self):
+        delete_meta = DeleteMeta(self.logger, WorkflowJob, self.cutoff, self.dry_run)
+
+        delete_meta.find_jobs_to_delete()
+        delete_meta.delete_jobs()
+        return (delete_meta.jobs_no_delete_count, delete_meta.jobs_to_delete_count)
 
     def cleanup_jobs(self):
         skipped, deleted = 0, 0
@@ -222,6 +397,13 @@ class Command(BaseCommand):
             for m in model_names:
                 if m in models_to_cleanup:
                     skipped, deleted = getattr(self, 'cleanup_%s' % m)()
+
+                    func = getattr(self, 'cleanup_%s_partition' % m, None)
+                    if func:
+                        skipped_partition, deleted_partition = getattr(self, 'cleanup_%s' % m)()
+                        skipped += skipped_partition
+                        deleted += deleted_partition
+
                     if self.dry_run:
                         self.logger.log(99, '%s: %d would be deleted, %d would be skipped.', m.replace('_', ' '), deleted, skipped)
                     else:
