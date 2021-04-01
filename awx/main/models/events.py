@@ -480,7 +480,7 @@ class JobEvent(BasePlaybookEvent):
         'Job',
         related_name='job_events',
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
         editable=False,
     )
     host = models.ForeignKey(
