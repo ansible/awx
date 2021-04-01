@@ -4,10 +4,8 @@ aiohttp==3.6.2
     # via -r /awx_devel/requirements/requirements.in
 aioredis==1.3.1
     # via channels-redis
-#ansible-runner==1.4.7
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   -r /awx_devel/requirements/requirements_git.txt
+ansible-runner==2.0.0a1
+    # via -r /awx_devel/requirements/requirements.in
 ansiconv==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 asciichartpy==1.5.25
@@ -72,6 +70,9 @@ cryptography==2.9.2
     #   pyopenssl
     #   service-identity
     #   social-auth-core
+Cython==0.29.22
+    # via
+    #   -r /awx_devel/requirements/requirements.in
 daphne==2.4.1
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -83,6 +84,8 @@ defusedxml==0.6.0
     #   social-auth-core
 dictdiffer==0.8.1
     # via openshift
+distro==1.5.0
+    # via -r /awx_devel/requirements/requirements.in
 django-auth-ldap==2.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-cors-headers==3.2.1
@@ -146,22 +149,12 @@ hyperlink==20.0.1
     # via
     #   autobahn
     #   twisted
-idna-ssl==1.1.0
-    # via aiohttp
 idna==2.9
     # via
     #   hyperlink
-    #   idna-ssl
     #   requests
     #   twisted
     #   yarl
-importlib-metadata==1.5.0
-    # via
-    #   importlib-resources
-    #   irc
-    #   jsonschema
-importlib-resources==1.4.0
-    # via jaraco.text
 incremental==17.5.0
     # via twisted
 irc==18.0.0
@@ -239,8 +232,8 @@ pkgconfig==1.5.1
     # via xmlsec
 prometheus-client==0.7.1
     # via -r /awx_devel/requirements/requirements.in
-psutil==5.7.0
-    # via ansible-runner
+psutil==5.8.0
+    # via -r /awx_devel/requirements/requirements.in
 psycopg2==2.8.4
     # via -r /awx_devel/requirements/requirements.in
 ptyprocess==0.6.0
@@ -305,7 +298,8 @@ pyyaml==5.4.1
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl
-    # via -r /awx_devel/requirements/requirements_git.txt
+receptorctl==0.9.7
+    # via -r /awx_devel/requirements/requirements.in
 redis==3.4.1
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -389,8 +383,6 @@ twisted[tls]==20.3.0
     #   daphne
 txaio==20.12.1
     # via autobahn
-typing-extensions==3.7.4.1
-    # via aiohttp
 urllib3==1.25.8
     # via
     #   kubernetes
@@ -407,10 +399,6 @@ xmlsec==1.3.3
     # via python3-saml
 yarl==1.4.2
     # via aiohttp
-zipp==3.1.0
-    # via
-    #   importlib-metadata
-    #   importlib-resources
 zope.interface==5.0.0
     # via twisted
 
@@ -426,5 +414,6 @@ setuptools==41.6.0
     #   kubernetes
     #   markdown
     #   python-daemon
-    #   receptorctl
     #   zope.interface
+wheel==0.36.2
+    # via -r /awx_devel/requirements/requirements.in

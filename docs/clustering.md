@@ -103,7 +103,7 @@ When a job is scheduled to run on an "isolated" instance:
    - a static inventory file
    - pexpect passwords
    - environment variables
-   - the `ansible`/`ansible-playbook` command invocation, _i.e._, `bwrap ... ansible-playbook -i /path/to/inventory /path/to/playbook.yml -e ...`
+   - the `ansible`/`ansible-playbook` command invocation, _i.e._, `ansible-playbook -i /path/to/inventory /path/to/playbook.yml -e ...`
 
 * Once the metadata has been `rsync`ed to the isolated host, the "controller instance" starts a process on the "isolated" instance which consumes the metadata and starts running `ansible`/`ansible-playbook`.  As the playbook runs, job artifacts (such as `stdout` and job events) are written to disk on the "isolated" instance.
 

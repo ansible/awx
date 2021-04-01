@@ -7,6 +7,7 @@ from ansible.module_utils.urls import Request, SSLValidationError, ConnectionErr
 from ansible.module_utils.six import PY2
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
+from distutils.version import LooseVersion as Version
 import time
 from json import loads, dumps
 
@@ -259,10 +260,22 @@ class TowerAPIModule(TowerModule):
                 tower_type = response.info().getheader('X-API-Product-Name', None)
                 tower_version = response.info().getheader('X-API-Product-Version', None)
 
+            parsed_collection_version = Version(self._COLLECTION_VERSION).version
+            parsed_tower_version = Version(tower_version).version
+            if tower_type == 'AWX':
+                collection_compare_ver = parsed_collection_version[0]
+                tower_compare_ver = parsed_tower_version[0]
+            else:
+                collection_compare_ver = "{0}.{1}".format(parsed_collection_version[0], parsed_collection_version[1])
+                tower_compare_ver = '{0}.{1}'.format(parsed_tower_version[0], parsed_tower_version[1])
+
             if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
                 self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, tower_type))
-            elif self._COLLECTION_VERSION != tower_version:
-                self.warn("You are running collection version {0} but connecting to tower version {1}".format(self._COLLECTION_VERSION, tower_version))
+            elif collection_compare_ver != tower_compare_ver:
+                self.warn(
+                    "You are running collection version {0} but connecting to {2} version {1}".format(self._COLLECTION_VERSION, tower_version, tower_type)
+                )
+
             self.version_checked = True
 
         response_body = ''

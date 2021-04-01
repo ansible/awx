@@ -1,5 +1,5 @@
 aiohttp
-ansible-runner>=1.4.7
+ansible-runner==2.0.0a1
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 autobahn>=20.12.3  # CVE-2020-35678
@@ -7,7 +7,9 @@ azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis>=3.1.0  # https://github.com/django/channels_redis/issues/212
 cryptography<3.0.0
+Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
+distro
 django==2.2.16  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers
@@ -36,11 +38,13 @@ openshift>=0.11.0  # minimum version to pull in new pyyaml for CVE-2017-18342
 pexpect==4.7.0 # see library notes
 prometheus_client
 psycopg2
+psutil
 pygerduty
 pyparsing
 python3-saml
 python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
 pyyaml>=5.4.1  # minimum to fix https://github.com/yaml/pyyaml/issues/478
+receptorctl
 schedule==0.6.0
 social-auth-core==3.3.1  # see UPGRADE BLOCKERs
 social-auth-app-django==3.1.0  # see UPGRADE BLOCKERs
@@ -52,5 +56,6 @@ twilio
 twisted[tls]>=20.3.0  # CVE-2020-10108, CVE-2020-10109
 uWSGI
 uwsgitop
+wheel
 pip==19.3.1  # see UPGRADE BLOCKERs
 setuptools==41.6.0  # see UPGRADE BLOCKERs

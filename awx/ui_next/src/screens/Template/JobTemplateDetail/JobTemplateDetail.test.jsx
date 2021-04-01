@@ -5,7 +5,7 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import JobTemplateDetail from './JobTemplateDetail';
-import { JobTemplatesAPI } from '../../../api';
+import { JobTemplatesAPI, WorkflowJobTemplateNodesAPI } from '../../../api';
 import mockTemplate from '../shared/data.job_template.json';
 
 jest.mock('../../../api');
@@ -25,6 +25,7 @@ describe('<JobTemplateDetail />', () => {
 
   beforeEach(async () => {
     JobTemplatesAPI.readInstanceGroups.mockResolvedValue(mockInstanceGroups);
+    WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
     await act(async () => {
       wrapper = mountWithContexts(
         <JobTemplateDetail template={mockTemplate} />
@@ -54,6 +55,23 @@ describe('<JobTemplateDetail />', () => {
       'Detail[label="Name"]',
       el => el.length === 1
     );
+  });
+
+  test('should have proper number of delete detail requests', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail
+          template={{
+            ...mockTemplate,
+            become_enabled: true,
+            summary_fields: { user_capabilities: { delete: true } },
+          }}
+        />
+      );
+    });
+    expect(
+      wrapper.find('DeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(1);
   });
 
   test('should request instance groups from api', async () => {

@@ -6,10 +6,18 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 
-import { InstanceGroupsAPI } from '../../../api';
+import {
+  InstanceGroupsAPI,
+  OrganizationsAPI,
+  InventoriesAPI,
+  UnifiedJobTemplatesAPI,
+} from '../../../api';
 import InstanceGroupList from './InstanceGroupList';
 
 jest.mock('../../../api/models/InstanceGroups');
+jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/UnifiedJobTemplates');
 
 const instanceGroups = {
   data: {
@@ -44,6 +52,9 @@ const instanceGroups = {
 };
 
 const options = { data: { actions: { POST: true } } };
+OrganizationsAPI.read.mockResolvedValue({ data: { count: 0 } });
+InventoriesAPI.read.mockResolvedValue({ data: { count: 0 } });
+UnifiedJobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
 
 describe('<InstanceGroupList />', () => {
   let wrapper;

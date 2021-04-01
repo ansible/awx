@@ -52,7 +52,6 @@ ENV_BLOCKLIST = frozenset(
         'VIRTUAL_ENV',
         'PATH',
         'PYTHONPATH',
-        'PROOT_TMP_DIR',
         'JOB_ID',
         'INVENTORY_ID',
         'INVENTORY_SOURCE_ID',

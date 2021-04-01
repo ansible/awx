@@ -55,8 +55,8 @@ function JobTypeRedirect({ id, path, view, i18n }) {
       </PageSection>
     );
   }
-  const type = JOB_TYPE_URL_SEGMENTS[job.type];
-  return <Redirect from={path} to={`/jobs/${type}/${job.id}/${view}`} />;
+  const typeSegment = JOB_TYPE_URL_SEGMENTS[job.type];
+  return <Redirect from={path} to={`/jobs/${typeSegment}/${job.id}/${view}`} />;
 }
 
 JobTypeRedirect.defaultProps = {

@@ -1,7 +1,7 @@
 import Base from '../Base';
-import LaunchUpdateMixin from '../mixins/LaunchUpdate.mixin';
+import RunnableMixin from '../mixins/Runnable.mixin';
 
-class InventoryUpdates extends LaunchUpdateMixin(Base) {
+class InventoryUpdates extends RunnableMixin(Base) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/inventory_updates/';
@@ -10,6 +10,10 @@ class InventoryUpdates extends LaunchUpdateMixin(Base) {
 
   createSyncCancel(sourceId) {
     return this.http.post(`${this.baseUrl}${sourceId}/cancel/`);
+  }
+
+  readCredentials(id) {
+    return this.http.get(`${this.baseUrl}${id}/credentials/`);
   }
 }
 export default InventoryUpdates;

@@ -157,7 +157,7 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
     return 'OK'
 
 
-def test_completeness(collection_import, request, admin_user, job_template):
+def test_completeness(collection_import, request, admin_user, job_template, execution_environment):
     option_comparison = {}
     # Load a list of existing module files from disk
     base_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))

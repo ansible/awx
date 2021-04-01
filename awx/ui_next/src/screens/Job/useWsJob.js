@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import useWebsocket from '../../util/useWebsocket';
-import { JobsAPI } from '../../api';
+import { getJobModel } from '../../util/jobs';
 
 export default function useWsJob(initialJob) {
-  const { type } = useParams();
   const [job, setJob] = useState(initialJob);
   const lastMessage = useWebsocket({
     jobs: ['status_changed'],
@@ -18,7 +16,7 @@ export default function useWsJob(initialJob) {
   useEffect(
     function parseWsMessage() {
       async function fetchJob() {
-        const { data } = await JobsAPI.readDetail(job.id, type);
+        const { data } = await getJobModel(job.type).readDetail(job.id);
         setJob(data);
       }
 

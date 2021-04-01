@@ -1,5 +1,5 @@
 ---
-version: '2'
+version: '2.1'
 services:
 {% for i in range(cluster_node_count|int) %}
   {% set container_postfix = loop.index %}
@@ -87,8 +87,11 @@ services:
       - "awx_db:/var/lib/postgresql/data"
 volumes:
   awx_db:
+    name: tools_awx_db
 {% for i in range(cluster_node_count|int) -%}
   {% set container_postfix = loop.index %}
   receptor_{{ container_postfix }}:
+    name: tools_receptor_{{ container_postfix }}
   redis_socket_{{ container_postfix }}:
+    name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}

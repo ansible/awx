@@ -15,6 +15,7 @@ import {
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { toTitleCase } from '../../../util/strings';
 import { ExecutionEnvironmentsAPI } from '../../../api';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
   const history = useHistory();
@@ -41,7 +42,10 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
-
+  const deleteDetailsRequests = relatedResourceDeleteRequests.executionEnvironment(
+    executionEnvironment,
+    i18n
+  );
   return (
     <CardBody>
       <DetailList>
@@ -61,6 +65,11 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           dataCy="execution-environment-detail-description"
         />
         <Detail
+          label={i18n._(t`Managed by Tower`)}
+          value={managedByTower ? i18n._(t`True`) : i18n._(t`False`)}
+          dataCy="execution-environment-managed-by-tower"
+        />
+        <Detail
           label={i18n._(t`Organization`)}
           value={
             organization ? (
@@ -75,6 +84,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
           }
           dataCy="execution-environment-detail-organization"
         />
+
         <Detail
           label={i18n._(t`Pull`)}
           value={pull === '' ? i18n._(t`Missing`) : toTitleCase(pull)}
@@ -106,23 +116,31 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
       </DetailList>
       {!managedByTower && (
         <CardActionsRow>
-          <Button
-            ouiaId="execution-environment-detail-edit-button"
-            aria-label={i18n._(t`edit`)}
-            component={Link}
-            to={`/execution_environments/${id}/edit`}
-          >
-            {i18n._(t`Edit`)}
-          </Button>
-          <DeleteButton
-            name={image}
-            modalTitle={i18n._(t`Delete Execution Environment`)}
-            onConfirm={deleteExecutionEnvironment}
-            isDisabled={isLoading}
-            ouiaId="delete-button"
-          >
-            {i18n._(t`Delete`)}
-          </DeleteButton>
+          {summary_fields.user_capabilities?.edit && (
+            <Button
+              ouiaId="execution-environment-detail-edit-button"
+              aria-label={i18n._(t`edit`)}
+              component={Link}
+              to={`/execution_environments/${id}/edit`}
+            >
+              {i18n._(t`Edit`)}
+            </Button>
+          )}
+          {summary_fields.user_capabilities?.delete && (
+            <DeleteButton
+              name={image}
+              modalTitle={i18n._(t`Delete Execution Environment`)}
+              onConfirm={deleteExecutionEnvironment}
+              isDisabled={isLoading}
+              ouiaId="delete-button"
+              deleteDetailsRequests={deleteDetailsRequests}
+              deleteMessage={i18n._(
+                t`This execution environment is currently being used by other resources. Are you sure you want to delete it?`
+              )}
+            >
+              {i18n._(t`Delete`)}
+            </DeleteButton>
+          )}
         </CardActionsRow>
       )}
 

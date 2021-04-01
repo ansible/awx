@@ -20,6 +20,7 @@ import AlertModal from '../../../components/AlertModal/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
 import InventorySourceListItem from './InventorySourceListItem';
 import useWsInventorySources from './useWsInventorySources';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 const QS_CONFIG = getQSConfig('inventory', {
   not__source: '',
@@ -142,6 +143,12 @@ function InventorySourceList({ i18n }) {
     sourceChoicesOptions &&
     Object.prototype.hasOwnProperty.call(sourceChoicesOptions, 'POST');
   const listUrl = `/inventories/${inventoryType}/${id}/sources/`;
+
+  const deleteDetailsRequests = relatedResourceDeleteRequests.inventorySource(
+    id,
+    i18n,
+    selected[0]
+  );
   return (
     <>
       <PaginatedDataList
@@ -174,6 +181,11 @@ function InventorySourceList({ i18n }) {
                 onDelete={handleDelete}
                 itemsToDelete={selected}
                 pluralizedItemName={i18n._(t`Inventory Sources`)}
+                deleteDetailsRequests={deleteDetailsRequests}
+                deleteMessage={i18n._(
+                  '{numItemsToDelete, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                  { numItemsToDelete: selected.length }
+                )}
               />,
               ...(canSyncSources
                 ? [

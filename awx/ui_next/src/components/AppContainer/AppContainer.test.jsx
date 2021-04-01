@@ -10,13 +10,11 @@ import AppContainer from './AppContainer';
 jest.mock('../../api');
 
 describe('<AppContainer />', () => {
-  const ansible_version = '111';
   const version = '222';
 
   beforeEach(() => {
     ConfigAPI.read.mockResolvedValue({
       data: {
-        ansible_version,
         version,
       },
     });
@@ -93,7 +91,6 @@ describe('<AppContainer />', () => {
 
     // check about modal content
     const content = await waitForElement(wrapper, aboutModalContent);
-    expect(content.find('dd').text()).toContain(ansible_version);
     expect(content.find('pre').text()).toContain(`<  AWX ${version}  >`);
 
     // close about modal

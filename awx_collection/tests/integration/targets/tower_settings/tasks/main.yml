@@ -1,13 +1,13 @@
 ---
-- name: Set the value of AWX_PROOT_SHOW_PATHS to a baseline
+- name: Set the value of AWX_ISOLATION_SHOW_PATHS to a baseline
   tower_settings:
-    name: AWX_PROOT_SHOW_PATHS
+    name: AWX_ISOLATION_SHOW_PATHS
     value: '["/var/lib/awx/projects/"]'
 
-- name: Set the value of AWX_PROOT_SHOW_PATHS to get an error back from Tower
+- name: Set the value of AWX_ISOLATION_SHOW_PATHS to get an error back from Tower
   tower_settings:
     settings:
-      AWX_PROOT_SHOW_PATHS:
+      AWX_ISOLATION_SHOW_PATHS:
         'not': 'a valid'
         'tower': 'setting'
   register: result
@@ -17,9 +17,9 @@
     that:
       - "result is failed"
 
-- name: Set the value of AWX_PROOT_SHOW_PATHS
+- name: Set the value of AWX_ISOLATION_SHOW_PATHS
   tower_settings:
-    name: AWX_PROOT_SHOW_PATHS
+    name: AWX_ISOLATION_SHOW_PATHS
     value: '["/var/lib/awx/projects/", "/tmp"]'
   register: result
 
@@ -27,9 +27,9 @@
     that:
       - "result is changed"
 
-- name: Attempt to set the value of AWX_PROOT_BASE_PATH to what it already is
+- name: Attempt to set the value of AWX_ISOLATION_BASE_PATH to what it already is
   tower_settings:
-    name: AWX_PROOT_BASE_PATH
+    name: AWX_ISOLATION_BASE_PATH
     value: /tmp
   register: result
 
@@ -42,7 +42,7 @@
 
 - name: Apply a single setting via settings
   tower_settings:
-    name: AWX_PROOT_SHOW_PATHS
+    name: AWX_ISOLATION_SHOW_PATHS
     value: '["/var/lib/awx/projects/", "/var/tmp"]'
   register: result
 
@@ -53,8 +53,8 @@
 - name: Apply multiple setting via settings with no change
   tower_settings:
     settings:
-      AWX_PROOT_BASE_PATH: /tmp
-      AWX_PROOT_SHOW_PATHS: ["/var/lib/awx/projects/", "/var/tmp"]
+      AWX_ISOLATION_BASE_PATH: /tmp
+      AWX_ISOLATION_SHOW_PATHS: ["/var/lib/awx/projects/", "/var/tmp"]
   register: result
 
 - debug:
@@ -67,8 +67,8 @@
 - name: Apply multiple setting via settings with change
   tower_settings:
     settings:
-      AWX_PROOT_BASE_PATH: /tmp
-      AWX_PROOT_SHOW_PATHS: []
+      AWX_ISOLATION_BASE_PATH: /tmp
+      AWX_ISOLATION_SHOW_PATHS: []
   register: result
 
 - assert:
@@ -77,7 +77,7 @@
 
 - name: Handle an omit value
   tower_settings:
-    name: AWX_PROOT_BASE_PATH
+    name: AWX_ISOLATION_BASE_PATH
     value: '{{ junk_var | default(omit) }}'
   register: result
   ignore_errors: true

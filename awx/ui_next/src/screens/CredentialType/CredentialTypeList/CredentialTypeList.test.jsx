@@ -6,10 +6,11 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 
-import { CredentialTypesAPI } from '../../../api';
+import { CredentialTypesAPI, CredentialsAPI } from '../../../api';
 import CredentialTypeList from './CredentialTypeList';
 
 jest.mock('../../../api/models/CredentialTypes');
+jest.mock('../../../api/models/Credentials');
 
 const credentialTypes = {
   data: {
@@ -49,6 +50,12 @@ describe('<CredentialTypeList', () => {
     await waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
   });
 
+  test('should have proper number of delete detail requests', () => {
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(1);
+  });
+
   test('should have data fetched and render 2 rows', async () => {
     CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
     CredentialTypesAPI.readOptions.mockResolvedValue(options);
@@ -65,6 +72,7 @@ describe('<CredentialTypeList', () => {
   test('should delete item successfully', async () => {
     CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
     CredentialTypesAPI.readOptions.mockResolvedValue(options);
+    CredentialsAPI.read.mockResolvedValue({ data: { count: 0 } });
 
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);

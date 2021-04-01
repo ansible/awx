@@ -12,19 +12,31 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import { JobsAPI } from '../../api';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
 import RoutedTabs from '../../components/RoutedTabs';
 import useRequest from '../../util/useRequest';
+import { getJobModel } from '../../util/jobs';
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 import { WorkflowOutput } from './WorkflowOutput';
 import useWsJob from './useWsJob';
 
+// maps the displayed url segments to actual api types
+export const JOB_URL_SEGMENT_MAP = {
+  playbook: 'job',
+  project: 'project_update',
+  management: 'system_job',
+  inventory: 'inventory_update',
+  command: 'ad_hoc_command',
+  workflow: 'workflow_job',
+};
+
 function Job({ i18n, setBreadcrumb }) {
-  const { id, type } = useParams();
+  const { id, typeSegment } = useParams();
   const match = useRouteMatch();
+
+  const type = JOB_URL_SEGMENT_MAP[typeSegment];
 
   const {
     isLoading,
@@ -34,12 +46,11 @@ function Job({ i18n, setBreadcrumb }) {
   } = useRequest(
     useCallback(async () => {
       let eventOptions = {};
-      const { data: jobDetailData } = await JobsAPI.readDetail(id, type);
-      if (jobDetailData.type !== 'workflow_job') {
-        const { data: jobEventOptions } = await JobsAPI.readEventOptions(
-          id,
+      const { data: jobDetailData } = await getJobModel(type).readDetail(id);
+      if (type !== 'workflow_job') {
+        const { data: jobEventOptions } = await getJobModel(
           type
-        );
+        ).readEventOptions(id);
         eventOptions = jobEventOptions;
       }
       if (
@@ -49,7 +60,7 @@ function Job({ i18n, setBreadcrumb }) {
       ) {
         const {
           data: { results },
-        } = await JobsAPI.readCredentials(jobDetailData.id, type);
+        } = await getJobModel(type).readCredentials(jobDetailData.id);
 
         jobDetailData.summary_fields.credentials = results;
       }
@@ -125,37 +136,37 @@ function Job({ i18n, setBreadcrumb }) {
       <Card>
         <RoutedTabs tabsArray={tabsArray} />
         <Switch>
-          <Redirect from="/jobs/:type/:id" to="/jobs/:type/:id/output" exact />
-          {job &&
-            job.type === 'workflow_job' && [
-              <Route key="workflow-details" path="/jobs/workflow/:id/details">
-                <JobDetail type={match.params.type} job={job} />
-              </Route>,
-              <Route key="workflow-output" path="/jobs/workflow/:id/output">
+          <Redirect
+            from="/jobs/:typeSegment/:id"
+            to="/jobs/:typeSegment/:id/output"
+            exact
+          />
+          {job && [
+            <Route
+              key={job.type === 'workflow_job' ? 'workflow-details' : 'details'}
+              path="/jobs/:typeSegment/:id/details"
+            >
+              <JobDetail job={job} />
+            </Route>,
+            <Route key="output" path="/jobs/:typeSegment/:id/output">
+              {job.type === 'workflow_job' ? (
                 <WorkflowOutput job={job} />
-              </Route>,
-            ]}
-          {job &&
-            job.type !== 'workflow_job' && [
-              <Route key="details" path="/jobs/:type/:id/details">
-                <JobDetail type={type} job={job} />
-              </Route>,
-              <Route key="output" path="/jobs/:type/:id/output">
+              ) : (
                 <JobOutput
-                  type={type}
                   job={job}
                   eventRelatedSearchableKeys={eventRelatedSearchableKeys}
                   eventSearchableKeys={eventSearchableKeys}
                 />
-              </Route>,
-              <Route key="not-found" path="*">
-                <ContentError isNotFound>
-                  <Link to={`/jobs/${type}/${id}/details`}>
-                    {i18n._(t`View Job Details`)}
-                  </Link>
-                </ContentError>
-              </Route>,
-            ]}
+              )}
+            </Route>,
+            <Route key="not-found" path="*">
+              <ContentError isNotFound>
+                <Link to={`/jobs/${typeSegment}/${id}/details`}>
+                  {i18n._(t`View Job Details`)}
+                </Link>
+              </ContentError>
+            </Route>,
+          ]}
         </Switch>
       </Card>
     </PageSection>

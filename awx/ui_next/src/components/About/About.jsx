@@ -2,17 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  AboutModal,
-  TextContent,
-  TextList,
-  TextListItem,
-} from '@patternfly/react-core';
+import { AboutModal } from '@patternfly/react-core';
 
 import { BrandName } from '../../variables';
 import brandLogoImg from './brand-logo.svg';
 
-function About({ ansible_version, version, isOpen, onClose, i18n }) {
+function About({ version, isOpen, onClose, i18n }) {
   const createSpeechBubble = () => {
     let text = `${BrandName} ${version}`;
     let top = '';
@@ -52,27 +47,17 @@ function About({ ansible_version, version, isOpen, onClose, i18n }) {
                   ||     ||
                     `}
       </pre>
-      <TextContent>
-        <TextList component="dl">
-          <TextListItem component="dt">
-            {i18n._(t`Ansible Version`)}
-          </TextListItem>
-          <TextListItem component="dd">{ansible_version}</TextListItem>
-        </TextList>
-      </TextContent>
     </AboutModal>
   );
 }
 
 About.propTypes = {
-  ansible_version: PropTypes.string,
   isOpen: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   version: PropTypes.string,
 };
 
 About.defaultProps = {
-  ansible_version: null,
   isOpen: false,
   version: null,
 };

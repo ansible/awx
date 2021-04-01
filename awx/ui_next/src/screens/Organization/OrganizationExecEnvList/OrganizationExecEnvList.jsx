@@ -38,7 +38,7 @@ function OrganizationExecEnvList({ i18n, organization }) {
 
       const [response, responseActions] = await Promise.all([
         OrganizationsAPI.readExecutionEnvironments(id, params),
-        OrganizationsAPI.readExecutionEnvironmentsOptions(id, params),
+        OrganizationsAPI.readExecutionEnvironmentsOptions(id),
       ]);
 
       return {

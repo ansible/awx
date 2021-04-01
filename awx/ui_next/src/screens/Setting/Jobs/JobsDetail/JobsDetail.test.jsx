@@ -50,7 +50,6 @@ describe('<JobsDetail />', () => {
   });
 
   test('should render expected details', () => {
-    assertDetail(wrapper, 'Enable job isolation', 'On');
     assertDetail(wrapper, 'Job execution path', '/tmp');
     assertDetail(wrapper, 'Isolated status check interval', '1 seconds');
     assertDetail(wrapper, 'Isolated launch timeout', '600 seconds');
@@ -81,7 +80,6 @@ describe('<JobsDetail />', () => {
       'Ansible Modules Allowed for Ad Hoc Jobs',
       '[\n  "command"\n]'
     );
-    assertVariableDetail(wrapper, 'Paths to hide from isolated jobs', '[]');
     assertVariableDetail(wrapper, 'Paths to expose to isolated jobs', '[]');
     assertVariableDetail(wrapper, 'Extra Environment Variables', '{}');
     assertVariableDetail(wrapper, 'Ansible Callback Plugins', '[]');

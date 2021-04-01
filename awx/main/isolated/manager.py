@@ -135,7 +135,7 @@ class IsolatedManager(object):
 
         extravars = {
             'src': self.private_data_dir,
-            'dest': settings.AWX_PROOT_BASE_PATH,
+            'dest': settings.AWX_ISOLATION_BASE_PATH,
             'ident': self.ident,
             'job_id': self.instance.id,
         }
@@ -304,7 +304,7 @@ class IsolatedManager(object):
         if not len(instance_qs):
             return
         try:
-            private_data_dir = tempfile.mkdtemp(prefix='awx_iso_heartbeat_', dir=settings.AWX_PROOT_BASE_PATH)
+            private_data_dir = tempfile.mkdtemp(prefix='awx_iso_heartbeat_', dir=settings.AWX_ISOLATION_BASE_PATH)
             self.runner_params = self.build_runner_params([instance.hostname for instance in instance_qs])
             self.runner_params['private_data_dir'] = private_data_dir
             self.runner_params['forks'] = len(instance_qs)

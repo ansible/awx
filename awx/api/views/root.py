@@ -24,7 +24,7 @@ from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
-from awx.main.utils import get_awx_version, get_ansible_version, get_custom_venv_choices, to_python_boolean
+from awx.main.utils import get_awx_version, get_custom_venv_choices, to_python_boolean
 from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
@@ -279,7 +279,6 @@ class ApiV2ConfigView(APIView):
             time_zone=settings.TIME_ZONE,
             license_info=license_data,
             version=get_awx_version(),
-            ansible_version=get_ansible_version(),
             eula=render_to_string("eula.md") if license_data.get('license_type', 'UNLICENSED') != 'open' else '',
             analytics_status=pendo_state,
             analytics_collectors=all_collectors(),

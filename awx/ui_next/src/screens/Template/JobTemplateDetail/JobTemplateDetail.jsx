@@ -31,6 +31,7 @@ import { VariablesDetail } from '../../../components/CodeEditor';
 import { JobTemplatesAPI } from '../../../api';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 function JobTemplateDetail({ i18n, template }) {
   const {
@@ -96,6 +97,10 @@ function JobTemplateDetail({ i18n, template }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
 
+  const deleteDetailsRequests = relatedResourceDeleteRequests.template(
+    template,
+    i18n
+  );
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;
   const verbosityOptions = [
@@ -366,6 +371,7 @@ function JobTemplateDetail({ i18n, template }) {
           value={extra_vars}
           rows={4}
           label={i18n._(t`Variables`)}
+          dataCy={`jt-details-${template.id}`}
         />
       </DetailList>
       <CardActionsRow>
@@ -401,6 +407,10 @@ function JobTemplateDetail({ i18n, template }) {
               modalTitle={i18n._(t`Delete Job Template`)}
               onConfirm={deleteJobTemplate}
               isDisabled={isDeleteLoading}
+              deleteDetailsRequests={deleteDetailsRequests}
+              deleteMessage={i18n._(
+                t`This job template is currently being used by other resources. Are you sure you want to delete it?`
+              )}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>

@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -25,17 +25,11 @@ import {
 } from '../../../components/LaunchButton';
 import StatusIcon from '../../../components/StatusIcon';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
+import { getJobModel, isJobRunning } from '../../../util/jobs';
 import { toTitleCase } from '../../../util/strings';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { formatDateString } from '../../../util/dates';
 import { Job } from '../../../types';
-import {
-  JobsAPI,
-  ProjectUpdatesAPI,
-  SystemJobsAPI,
-  WorkflowJobsAPI,
-  InventoriesAPI,
-  AdHocCommandsAPI,
-} from '../../../api';
 
 const VariablesInput = styled(_VariablesInput)`
   .pf-c-form__label {
@@ -77,6 +71,24 @@ function JobDetail({ job, i18n }) {
   const [errorMsg, setErrorMsg] = useState();
   const history = useHistory();
 
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
+  const {
+    error: cancelError,
+    isLoading: isCancelling,
+    request: cancelJob,
+  } = useRequest(
+    useCallback(async () => {
+      await getJobModel(job.type).cancel(job.id, job.type);
+    }, [job.id, job.type]),
+    {}
+  );
+
+  const {
+    error: dismissableCancelError,
+    dismissError: dismissCancelError,
+  } = useDismissableError(cancelError);
+
   const jobTypes = {
     project_update: i18n._(t`Source Control Update`),
     inventory_update: i18n._(t`Inventory Sync`),
@@ -91,25 +103,7 @@ function JobDetail({ job, i18n }) {
 
   const deleteJob = async () => {
     try {
-      switch (job.type) {
-        case 'project_update':
-          await ProjectUpdatesAPI.destroy(job.id);
-          break;
-        case 'system_job':
-          await SystemJobsAPI.destroy(job.id);
-          break;
-        case 'workflow_job':
-          await WorkflowJobsAPI.destroy(job.id);
-          break;
-        case 'ad_hoc_command':
-          await AdHocCommandsAPI.destroy(job.id);
-          break;
-        case 'inventory_update':
-          await InventoriesAPI.destroy(job.id);
-          break;
-        default:
-          await JobsAPI.destroy(job.id);
-      }
+      await getJobModel(job.type).destroy(job.id);
       history.push('/jobs');
     } catch (err) {
       setErrorMsg(err);
@@ -410,16 +404,75 @@ function JobDetail({ job, i18n }) {
               )}
             </LaunchButton>
           ))}
-        {job.summary_fields.user_capabilities.delete && (
-          <DeleteButton
-            name={job.name}
-            modalTitle={i18n._(t`Delete Job`)}
-            onConfirm={deleteJob}
-          >
-            {i18n._(t`Delete`)}
-          </DeleteButton>
-        )}
+        {isJobRunning(job.status) &&
+          job?.summary_fields?.user_capabilities?.start && (
+            <Button
+              variant="secondary"
+              aria-label={i18n._(t`Cancel`)}
+              isDisabled={isCancelling}
+              onClick={() => setShowCancelModal(true)}
+              ouiaId="job-detail-cancel-button"
+            >
+              {i18n._(t`Cancel`)}
+            </Button>
+          )}
+        {!isJobRunning(job.status) &&
+          job?.summary_fields?.user_capabilities?.delete && (
+            <DeleteButton
+              name={job.name}
+              modalTitle={i18n._(t`Delete Job`)}
+              onConfirm={deleteJob}
+              ouiaId="job-detail-delete-button"
+            >
+              {i18n._(t`Delete`)}
+            </DeleteButton>
+          )}
       </CardActionsRow>
+      {showCancelModal && isJobRunning(job.status) && (
+        <AlertModal
+          isOpen={showCancelModal}
+          variant="danger"
+          onClose={() => setShowCancelModal(false)}
+          title={i18n._(t`Cancel Job`)}
+          label={i18n._(t`Cancel Job`)}
+          actions={[
+            <Button
+              id="cancel-job-confirm-button"
+              key="delete"
+              variant="danger"
+              isDisabled={isCancelling}
+              aria-label={i18n._(t`Cancel job`)}
+              onClick={cancelJob}
+            >
+              {i18n._(t`Cancel job`)}
+            </Button>,
+            <Button
+              id="cancel-job-return-button"
+              key="cancel"
+              variant="secondary"
+              aria-label={i18n._(t`Return`)}
+              onClick={() => setShowCancelModal(false)}
+            >
+              {i18n._(t`Return`)}
+            </Button>,
+          ]}
+        >
+          {i18n._(
+            t`Are you sure you want to submit the request to cancel this job?`
+          )}
+        </AlertModal>
+      )}
+      {dismissableCancelError && (
+        <AlertModal
+          isOpen={dismissableCancelError}
+          variant="danger"
+          onClose={dismissCancelError}
+          title={i18n._(t`Job Cancel Error`)}
+          label={i18n._(t`Job Cancel Error`)}
+        >
+          <ErrorDetail error={dismissableCancelError} />
+        </AlertModal>
+      )}
       {errorMsg && (
         <AlertModal
           isOpen={errorMsg}

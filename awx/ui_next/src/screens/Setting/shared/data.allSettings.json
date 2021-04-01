@@ -34,10 +34,8 @@
     "win_user"
   ],
   "ALLOW_JINJA_IN_EXTRA_VARS":"template",
-  "AWX_PROOT_ENABLED":true,
-  "AWX_PROOT_BASE_PATH":"/tmp",
-  "AWX_PROOT_HIDE_PATHS":[],
-  "AWX_PROOT_SHOW_PATHS":[],
+  "AWX_ISOLATION_BASE_PATH":"/tmp",
+  "AWX_ISOLATION_SHOW_PATHS":[],
   "AWX_ISOLATED_CHECK_INTERVAL":1,
   "AWX_ISOLATED_LAUNCH_TIMEOUT":600,
   "AWX_ISOLATED_CONNECTION_TIMEOUT":10,
@@ -305,5 +303,6 @@
     "applications":{"fields":["name"],"adj_list":[["organization","organizations"]]},
     "users":{"fields":["username"],"adj_list":[]},
     "instances":{"fields":["hostname"],"adj_list":[]}
-  }
+  },
+  "DEFAULT_EXECUTION_ENVIRONMENT": 1
 }
