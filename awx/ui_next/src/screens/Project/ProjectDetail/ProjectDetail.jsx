@@ -53,10 +53,7 @@ function ProjectDetail({ project, i18n }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
-  const deleteDetailsRequests = relatedResourceDeleteRequests.project(
-    project,
-    i18n
-  );
+  const deleteDetailsRequests = relatedResourceDeleteRequests.project(project);
   let optionsList = '';
   if (
     scm_clean ||

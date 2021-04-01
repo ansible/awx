@@ -1,6 +1,10 @@
 import React from 'react';
-import { shallow } from 'enzyme';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+
+import {
+  mountWithContexts,
+  shallowWithContexts,
+} from '../../../testUtils/enzymeHelpers';
+
 import SelectRoleStep from './SelectRoleStep';
 
 describe('<SelectRoleStep />', () => {
@@ -31,7 +35,7 @@ describe('<SelectRoleStep />', () => {
     },
   ];
   test('initially renders without crashing', () => {
-    wrapper = shallow(
+    wrapper = shallowWithContexts(
       <SelectRoleStep
         roles={roles}
         selectedResourceRows={selectedResourceRows}

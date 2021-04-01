@@ -104,8 +104,7 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
   }));
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.template(
-    template,
-    i18n
+    template
   );
 
   return (

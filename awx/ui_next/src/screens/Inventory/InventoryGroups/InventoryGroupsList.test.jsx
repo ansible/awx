@@ -219,10 +219,12 @@ describe('<InventoryGroupsList/> error handling', () => {
     await act(async () => {
       wrapper.find('Toolbar Button[aria-label="Delete"]').invoke('onClick')();
     });
+    wrapper.update();
+
     await waitForElement(
       wrapper,
-      'AlertModal[title="Delete Group?"]',
-      el => el.props().isOpen === true
+      'AlertModal__Header',
+      el => el.text() === 'Delete Group?'
     );
     await act(async () => {
       wrapper.find('Radio[id="radio-delete"]').invoke('onChange')();

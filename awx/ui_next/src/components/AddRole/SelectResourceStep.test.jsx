@@ -1,9 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { shallow } from 'enzyme';
 import {
   mountWithContexts,
+  shallowWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 import { sleep } from '../../../testUtils/testUtils';
@@ -27,17 +27,19 @@ describe('<SelectResourceStep />', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-  test('initially renders without crashing', () => {
-    shallow(
-      <SelectResourceStep
-        searchColumns={searchColumns}
-        sortColumns={sortColumns}
-        displayKey="username"
-        onRowClick={() => {}}
-        fetchItems={() => {}}
-        fetchOptions={() => {}}
-      />
-    );
+  test('initially renders without crashing', async () => {
+    act(() => {
+      shallowWithContexts(
+        <SelectResourceStep
+          searchColumns={searchColumns}
+          sortColumns={sortColumns}
+          displayKey="username"
+          onRowClick={() => {}}
+          fetchItems={() => {}}
+          fetchOptions={() => {}}
+        />
+      );
+    });
   });
 
   test('fetches resources on mount and adds items to list', async () => {

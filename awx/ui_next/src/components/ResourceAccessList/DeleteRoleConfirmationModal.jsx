@@ -15,12 +15,12 @@ function DeleteRoleConfirmationModal({
   i18n,
 }) {
   const isTeamRole = () => {
-    return typeof role.team_id !== 'undefined';
+    return typeof role.team_id !== 'undefined'
+      ? i18n._(t`Team`)
+      : i18n._(t`User`);
   };
 
-  const title = i18n._(
-    t`Remove ${isTeamRole() ? i18n._(t`Team`) : i18n._(t`User`)} Access`
-  );
+  const title = i18n._(t`Remove ${isTeamRole()} Access`);
   return (
     <AlertModal
       variant="danger"

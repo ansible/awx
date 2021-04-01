@@ -40,8 +40,7 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
   const deleteDetailsRequests = relatedResourceDeleteRequests.instanceGroup(
-    instanceGroup,
-    i18n
+    instanceGroup
   );
   const verifyInstanceGroup = item => {
     if (item.is_isolated) {
