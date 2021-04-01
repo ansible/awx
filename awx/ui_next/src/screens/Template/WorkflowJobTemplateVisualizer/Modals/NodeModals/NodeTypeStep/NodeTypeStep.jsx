@@ -237,10 +237,10 @@ function NodeTypeStep({ i18n }) {
               className="convergenceSelect"
               ouiaId="convergenceSelect"
             >
-              <SelectOption key="any" value="any">
+              <SelectOption key="any" value="any" id="select-option-any">
                 {i18n._(t`Any`)}
               </SelectOption>
-              <SelectOption key="all" value="all">
+              <SelectOption key="all" value="all" id="select-option-all">
                 {i18n._(t`All`)}
               </SelectOption>
             </Select>
