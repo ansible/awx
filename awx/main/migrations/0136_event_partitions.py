@@ -49,7 +49,6 @@ def migrate_event_data(apps, schema_editor):
 
             # let's go ahead and add and subtract a few indexes while we're here
             cursor.execute(f'CREATE INDEX {tblname}_modified_idx ON {tblname} (modified);')
-            cursor.execute(f'DROP INDEX IF EXISTS {tblname}_job_id_brin_idx;')
 
             # recreate primary key constraint
             cursor.execute(f'ALTER TABLE ONLY {tblname} ' f'ADD CONSTRAINT {tblname}_pkey_new PRIMARY KEY (id, job_created);')
@@ -98,7 +97,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jobevent',
             name='job',
-            field=models.ForeignKey(editable=False, null=True, on_delete=models.deletion.SET_NULL, related_name='job_events', to='main.Job'),
+            field=models.ForeignKey(editable=False, null=True, on_delete=models.deletion.DO_NOTHING, related_name='job_events', to='main.Job'),
         ),
         migrations.CreateModel(
             name='UnpartitionedAdHocCommandEvent',

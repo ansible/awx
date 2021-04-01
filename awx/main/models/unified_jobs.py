@@ -1000,7 +1000,7 @@ class UnifiedJob(
     @property
     def has_unpartitioned_events(self):
         applied = get_event_partition_epoch()
-        return applied and self.created < applied
+        return applied and self.created and self.created < applied
 
     def get_event_queryset(self):
         kwargs = {
