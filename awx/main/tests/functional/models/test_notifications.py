@@ -120,7 +120,6 @@ class TestJobNotificationMixin(object):
     @pytest.mark.django_db
     def test_schedule_context(self, job_template, admin_user):
         schedule = Schedule.objects.create(name='job-schedule', rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY', unified_job_template=job_template)
-        kwargs = {}
         job = Job.objects.create(name='fake-job', launch_type='workflow', schedule=schedule, job_template=job_template, extra_vars={'foo': 'bar'})
 
         job_serialization = UnifiedJobSerializer(job).to_representation(job)
