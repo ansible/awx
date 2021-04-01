@@ -38,7 +38,8 @@ no_endpoint_for_module = [
     'tower_workflow_launch',
     'tower_job_cancel',
     'tower_workflow_template',
-    'tower_workflow_job_template_schema' 'tower_ad_hoc_command_wait',
+    'tower_workflow_job_template_schema',
+    'tower_ad_hoc_command_wait',
     'tower_ad_hoc_command_cancel',
 ]
 
@@ -60,7 +61,7 @@ no_api_parameter_ok = {
     'tower_workflow_job_template_node': ['organization', 'approval_node'],
     # Survey is how we handle associations
     'tower_workflow_job_template': ['survey_spec', 'destroy_current_schema'],
-    # ad hoc commands support interval and timeout since its more like tower_job_launc
+    # ad hoc commands support interval and timeout since its more like tower_job_launch
     'tower_ad_hoc_command': ['interval', 'timeout', 'wait'],
     # tower_group parameters to perserve hosts and children.
     'tower_group': ['preserve_existing_children', 'preserve_existing_hosts'],
