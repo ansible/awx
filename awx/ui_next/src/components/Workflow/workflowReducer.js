@@ -183,6 +183,7 @@ function createNode(state, node) {
     fullUnifiedJobTemplate: node.nodeResource,
     isInvalidLinkTarget: false,
     promptValues: node.promptValues,
+    all_parents_must_converge: node.all_parents_must_converge,
   });
 
   // Ensures that root nodes appear to always run
@@ -657,10 +658,19 @@ function updateLink(state, linkType) {
 
 function updateNode(state, editedNode) {
   const { nodeToEdit, nodes } = state;
-  const { nodeResource, launchConfig, promptValues } = editedNode;
+  const {
+    nodeResource,
+    launchConfig,
+    promptValues,
+    all_parents_must_converge,
+  } = editedNode;
   const newNodes = [...nodes];
 
   const matchingNode = newNodes.find(node => node.id === nodeToEdit.id);
+  matchingNode.all_parents_must_converge = all_parents_must_converge;
+  if (matchingNode.originalNodeObject) {
+    delete matchingNode.originalNodeObject.all_parents_must_converge;
+  }
   matchingNode.fullUnifiedJobTemplate = nodeResource;
   matchingNode.isEdited = true;
   matchingNode.launchConfig = launchConfig;

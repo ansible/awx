@@ -101,7 +101,6 @@ function NodeModalForm({
       values.extra_data = extraVars && parseVariableField(extraVars);
       delete values.extra_vars;
     }
-
     onSave(values, launchConfig);
   };
 
@@ -357,6 +356,7 @@ const NodeModal = ({ onSave, i18n, askLinkType, title }) => {
         approvalDescription: '',
         timeoutMinutes: 0,
         timeoutSeconds: 0,
+        convergence: 'any',
         linkType: 'success',
         nodeResource: nodeToEdit?.fullUnifiedJobTemplate || null,
         nodeType: nodeToEdit?.fullUnifiedJobTemplate?.type || 'job_template',

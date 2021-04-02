@@ -39,6 +39,11 @@ const getNodeToEditDefaultValues = (
   const initialValues = {
     nodeResource: nodeToEdit?.fullUnifiedJobTemplate || null,
     nodeType: nodeToEdit?.fullUnifiedJobTemplate?.type || 'job_template',
+    convergence:
+      nodeToEdit?.all_parents_must_converge ||
+      nodeToEdit?.originalNodeObject?.all_parents_must_converge
+        ? 'all'
+        : 'any',
   };
 
   if (
@@ -228,7 +233,6 @@ export default function useWorkflowNodeSteps(
   useEffect(() => {
     if (launchConfig && surveyConfig && isReady) {
       let initialValues = {};
-
       if (
         nodeToEdit &&
         nodeToEdit?.fullUnifiedJobTemplate &&
@@ -264,10 +268,15 @@ export default function useWorkflowNodeSteps(
         );
       }
 
+      if (initialValues.convergence === 'all') {
+        formikValues.convergence = 'all';
+      }
+
       resetForm({
         errors,
         values: {
           ...initialValues,
+          convergence: formikValues.convergence,
           nodeResource: formikValues.nodeResource,
           nodeType: formikValues.nodeType,
           linkType: formikValues.linkType,

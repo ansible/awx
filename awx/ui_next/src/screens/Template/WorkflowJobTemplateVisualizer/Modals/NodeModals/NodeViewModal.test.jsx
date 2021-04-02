@@ -282,6 +282,7 @@ describe('NodeViewModal', () => {
           description: '',
           type: 'workflow_approval_template',
           timeout: 0,
+          all_parents_must_converge: false,
         },
       },
     };
