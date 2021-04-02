@@ -59,6 +59,7 @@ def main():
         argument_spec=dict(
             manifest=dict(type='str', required=True),
             eula_accepted=dict(type='bool', required=True),
+            force=dict(type='bool', required=False),
         ),
     )
 
