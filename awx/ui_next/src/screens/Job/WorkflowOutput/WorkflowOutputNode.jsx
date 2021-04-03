@@ -59,6 +59,11 @@ const NodeDefaultLabel = styled.p`
   white-space: nowrap;
 `;
 
+const ConvergenceLabel = styled.p`
+  font-size: 12px;
+  color: #ffffff;
+`;
+
 Elapsed.displayName = 'Elapsed';
 
 function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
@@ -100,6 +105,30 @@ function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
       onMouseEnter={mouseEnter}
       onMouseLeave={mouseLeave}
     >
+      {(node.all_parents_must_converge ||
+        node?.originalNodeObject?.all_parents_must_converge) && (
+        <>
+          <rect
+            fill={borderColor}
+            height={wfConstants.nodeH / 4}
+            rx={2}
+            ry={2}
+            x={wfConstants.nodeW / 2 - wfConstants.nodeW / 10}
+            y={-wfConstants.nodeH / 4 + 2}
+            stroke={borderColor}
+            strokeWidth="2px"
+            width={wfConstants.nodeW / 5}
+          />
+          <foreignObject
+            height={wfConstants.nodeH / 4}
+            width={wfConstants.nodeW / 5}
+            x={wfConstants.nodeW / 2 - wfConstants.nodeW / 10 + 7}
+            y={-wfConstants.nodeH / 4 - 1}
+          >
+            <ConvergenceLabel>{i18n._(t`ALL`)}</ConvergenceLabel>
+          </foreignObject>
+        </>
+      )}
       <rect
         fill="#FFFFFF"
         height={wfConstants.nodeH}

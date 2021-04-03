@@ -4,31 +4,36 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
 
-import { OrganizationsAPI } from '../../../api';
+import { ExecutionEnvironmentsAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useRequest from '../../../util/useRequest';
-import PaginatedDataList from '../../../components/PaginatedDataList';
 import DatalistToolbar from '../../../components/DataListToolbar';
+import PaginatedDataList from '../../../components/PaginatedDataList';
 
-import OrganizationExecEnvListItem from './OrganizationExecEnvListItem';
+import ExecutionEnvironmentTemplateListItem from './ExecutionEnvironmentTemplateListItem';
 
-const QS_CONFIG = getQSConfig('organizations', {
-  page: 1,
-  page_size: 20,
-  order_by: 'name',
-});
+const QS_CONFIG = getQSConfig(
+  'execution_environments',
+  {
+    page: 1,
+    page_size: 20,
+    order_by: 'name',
+    type: 'job_template,workflow_job_template',
+  },
+  ['id', 'page', 'page_size']
+);
 
-function OrganizationExecEnvList({ i18n, organization }) {
-  const { id } = organization;
+function ExecutionEnvironmentTemplateList({ i18n, executionEnvironment }) {
+  const { id } = executionEnvironment;
   const location = useLocation();
 
   const {
     error: contentError,
     isLoading,
-    request: fetchExecutionEnvironments,
+    request: fetchTemplates,
     result: {
-      executionEnvironments,
-      executionEnvironmentsCount,
+      templates,
+      templatesCount,
       relatedSearchableKeys,
       searchableKeys,
     },
@@ -37,13 +42,13 @@ function OrganizationExecEnvList({ i18n, organization }) {
       const params = parseQueryString(QS_CONFIG, location.search);
 
       const [response, responseActions] = await Promise.all([
-        OrganizationsAPI.readExecutionEnvironments(id, params),
-        OrganizationsAPI.readExecutionEnvironmentsOptions(id),
+        ExecutionEnvironmentsAPI.readUnifiedJobTemplates(id, params),
+        ExecutionEnvironmentsAPI.readUnifiedJobTemplateOptions(id),
       ]);
 
       return {
-        executionEnvironments: response.data.results,
-        executionEnvironmentsCount: response.data.count,
+        templates: response.data.results,
+        templatesCount: response.data.count,
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
           responseActions?.data?.related_search_fields || []
@@ -54,8 +59,8 @@ function OrganizationExecEnvList({ i18n, organization }) {
       };
     }, [location, id]),
     {
-      executionEnvironments: [],
-      executionEnvironmentsCount: 0,
+      templates: [],
+      templatesCount: 0,
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
@@ -63,8 +68,8 @@ function OrganizationExecEnvList({ i18n, organization }) {
   );
 
   useEffect(() => {
-    fetchExecutionEnvironments();
-  }, [fetchExecutionEnvironments]);
+    fetchTemplates();
+  }, [fetchTemplates]);
 
   return (
     <>
@@ -72,9 +77,9 @@ function OrganizationExecEnvList({ i18n, organization }) {
         <PaginatedDataList
           contentError={contentError}
           hasContentLoading={isLoading}
-          items={executionEnvironments}
-          itemCount={executionEnvironmentsCount}
-          pluralizedItemName={i18n._(t`Execution Environments`)}
+          items={templates}
+          itemCount={templatesCount}
+          pluralizedItemName={i18n._(t`Templates`)}
           qsConfig={QS_CONFIG}
           toolbarSearchableKeys={searchableKeys}
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
@@ -85,9 +90,12 @@ function OrganizationExecEnvList({ i18n, organization }) {
               isDefault: true,
             },
             {
-              name: i18n._(t`Image`),
-              key: 'image__icontains',
-              isDefault: false,
+              name: i18n._(t`Type`),
+              key: 'or__type',
+              options: [
+                [`job_template`, i18n._(t`Job Template`)],
+                [`workflow_job_template`, i18n._(t`Workflow Template`)],
+              ],
             },
             {
               name: i18n._(t`Created By (Username)`),
@@ -104,10 +112,6 @@ function OrganizationExecEnvList({ i18n, organization }) {
               key: 'name',
             },
             {
-              name: i18n._(t`Image`),
-              key: 'image',
-            },
-            {
               name: i18n._(t`Created`),
               key: 'created',
             },
@@ -119,11 +123,11 @@ function OrganizationExecEnvList({ i18n, organization }) {
           renderToolbar={props => (
             <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
           )}
-          renderItem={executionEnvironment => (
-            <OrganizationExecEnvListItem
-              key={executionEnvironment.id}
-              executionEnvironment={executionEnvironment}
-              detailUrl={`/execution_environments/${executionEnvironment.id}`}
+          renderItem={template => (
+            <ExecutionEnvironmentTemplateListItem
+              key={template.id}
+              template={template}
+              detailUrl={`/templates/${template.type}/${template.id}/details`}
             />
           )}
         />
@@ -132,4 +136,4 @@ function OrganizationExecEnvList({ i18n, organization }) {
   );
 }
 
-export default withI18n()(OrganizationExecEnvList);
+export default withI18n()(ExecutionEnvironmentTemplateList);

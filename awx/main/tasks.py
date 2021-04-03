@@ -97,6 +97,7 @@ from awx.main.utils import (
     deepmerge,
     parse_yaml_or_json,
 )
+from awx.main.utils.execution_environments import get_execution_environment_default
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
@@ -1806,13 +1807,14 @@ class RunJob(BaseTask):
             logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
             sync_needs.append(source_update_tag)
         elif job.project.scm_type == 'git' and job.project.scm_revision and (not branch_override):
-            git_repo = git.Repo(project_path)
             try:
+                git_repo = git.Repo(project_path)
+
                 if job_revision == git_repo.head.commit.hexsha:
                     logger.debug('Skipping project sync for {} because commit is locally available'.format(job.log_format))
                 else:
                     sync_needs.append(source_update_tag)
-            except (ValueError, BadGitName):
+            except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
                 logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
                 sync_needs.append(source_update_tag)
         else:
@@ -2505,7 +2507,7 @@ class RunInventoryUpdate(BaseTask):
         args.append(container_location)
 
         args.append('--output')
-        args.append(os.path.join('/runner', 'artifacts', 'output.json'))
+        args.append(os.path.join('/runner', 'artifacts', str(inventory_update.id), 'output.json'))
 
         if os.path.isdir(source_location):
             playbook_dir = container_location
@@ -3010,7 +3012,7 @@ class AWXReceptorJob:
             return self._run_internal(receptor_ctl)
         finally:
             # Make sure to always release the work unit if we established it
-            if self.unit_id is not None:
+            if self.unit_id is not None and not settings.AWX_CONTAINER_GROUP_KEEP_POD:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
 
     def _run_internal(self, receptor_ctl):
@@ -3126,11 +3128,23 @@ class AWXReceptorJob:
 
     @property
     def pod_definition(self):
+        if self.task:
+            ee = self.task.instance.resolve_execution_environment()
+        else:
+            ee = get_execution_environment_default()
+
         default_pod_spec = {
             "apiVersion": "v1",
             "kind": "Pod",
             "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE},
-            "spec": {"containers": [{"image": settings.AWX_CONTAINER_GROUP_DEFAULT_IMAGE, "name": 'worker', "args": ['ansible-runner', 'worker']}]},
+            "spec": {
+                "containers": [
+                    {
+                        "image": ee.image,
+                        "name": 'worker',
+                    }
+                ],
+            },
         }
 
         pod_spec_override = {}

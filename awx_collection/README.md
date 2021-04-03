@@ -72,6 +72,8 @@ Notable releases of the `awx.awx` collection:
 The following notes are changes that may require changes to playbooks:
 
  - When a project is created, it will wait for the update/sync to finish by default; this can be turned off with the `wait` parameter, if desired.
+ - When using the wait parameter with project update, if the project did not undergo a revision update, the result will be 
+ 'not changed'
  - Creating a "scan" type job template is no longer supported.
  - Specifying a custom certificate via the `TOWER_CERTIFICATE` environment variable no longer works.
  - Type changes of variable fields:

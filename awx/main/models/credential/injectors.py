@@ -115,6 +115,6 @@ def kubernetes_bearer_token(cred, env, private_data_dir):
         with os.fdopen(handle, 'w') as f:
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
             f.write(cred.get_input('ssl_ca_cert'))
-        env['K8S_AUTH_SSL_CA_CERT'] = path
+        env['K8S_AUTH_SSL_CA_CERT'] = os.path.join('/runner', os.path.basename(path))
     else:
         env['K8S_AUTH_VERIFY_SSL'] = 'False'

@@ -1,6 +1,7 @@
 django-debug-toolbar==1.11
 django-rest-swagger
 pprofile
+ipython==7.21.0
 unittest2
 black
 pytest

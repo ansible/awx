@@ -29,4 +29,11 @@ describe('getRowRangePageSize', () => {
       firstIndex: 5,
     });
   });
+  test('handles range with 0 startIndex', () => {
+    expect(getRowRangePageSize(0, 50)).toEqual({
+      page: 1,
+      pageSize: 50,
+      firstIndex: 0,
+    });
+  });
 });

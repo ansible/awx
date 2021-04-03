@@ -829,5 +829,5 @@ def slice_job_factory(slice_jt_factory):
 
 
 @pytest.fixture
-def execution_environment(organization):
-    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", organization=organization)
+def execution_environment():
+    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", managed_by_tower=True)
