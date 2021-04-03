@@ -500,8 +500,7 @@ docker-compose-clean: awx/projects
 docker-compose-build:
 	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True
 	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
-	    --build-arg BUILDKIT_INLINE_CACHE=1 \
-	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
+	    --build-arg BUILDKIT_INLINE_CACHE=1 .
 
 docker-clean:
 	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq),docker stop $(container_id); docker rm -f $(container_id);)
