@@ -177,7 +177,13 @@ def main():
         module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
 
     # If the state was present and we can let the module build or update the existing inventory, this will return on its own
-    module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory', associations=association_fields,)
+    module.create_or_update_if_needed(
+        inventory,
+        inventory_fields,
+        endpoint='inventories',
+        item_type='inventory',
+        associations=association_fields,
+    )
 
 
 if __name__ == '__main__':
