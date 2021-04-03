@@ -830,7 +830,7 @@ class TowerAPIModule(TowerModule):
                     existing_item = self.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
                 approval_endpoint = 'workflow_job_template_nodes/{0}/create_approval_template/'.format(workflow_job_template_node_id)
 
-                self.create_if_needed(
+                self.create_or_update_if_needed(
                     existing_item,
                     workflow_node_fields,
                     endpoint=approval_endpoint,
