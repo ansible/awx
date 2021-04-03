@@ -54,8 +54,9 @@ function AddResourceRole({ onSave, onClose, roles, i18n, resource, onError }) {
     );
 
     if (selectedIndex > -1) {
-      selectedRoleRows.splice(selectedIndex, 1);
-      setSelectedRoleRows(selectedRoleRows);
+      setSelectedRoleRows(
+        selectedRoleRows.filter((r, index) => index !== selectedIndex)
+      );
     } else {
       setSelectedRoleRows([...selectedRoleRows, role]);
     }

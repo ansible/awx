@@ -29,6 +29,7 @@ from awx.main.utils.safe_yaml import sanitize_jinja
 # other AWX imports
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import ignore_inventory_computed_fields, get_licenser
+from awx.main.utils.execution_environments import get_execution_environment_default
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.utils.pglock import advisory_lock
@@ -69,8 +70,6 @@ class AnsibleInventoryLoader(object):
     def __init__(self, source, venv_path=None, verbosity=0):
         self.source = source
         self.verbosity = verbosity
-        # TODO: remove once proot has been removed
-        self.tmp_private_dir = None
         if venv_path:
             self.venv_path = venv_path
         else:
@@ -92,7 +91,7 @@ class AnsibleInventoryLoader(object):
         bargs.extend(['-v', '{0}:{0}:Z'.format(self.source)])
         for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
-        bargs.extend([settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE])
+        bargs.extend([get_execution_environment_default().image])
         bargs.extend(['ansible-inventory', '-i', self.source])
         bargs.extend(['--playbook-dir', functioning_dir(self.source)])
         if self.verbosity:

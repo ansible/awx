@@ -88,6 +88,8 @@ export default withI18n()(
         );
         break;
       case 'choice':
+      case 'field':
+      case 'string':
         detail = (
           <Detail
             alwaysVisible
@@ -107,18 +109,6 @@ export default withI18n()(
             helpText={helpText}
             label={label}
             value={unit ? `${value} ${unit}` : `${value}`}
-          />
-        );
-        break;
-      case 'string':
-        detail = (
-          <Detail
-            alwaysVisible
-            dataCy={id}
-            helpText={helpText}
-            isNotConfigured={!value}
-            label={label}
-            value={!value ? i18n._(t`Not configured`) : value}
           />
         );
         break;

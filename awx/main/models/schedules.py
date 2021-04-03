@@ -63,7 +63,7 @@ class ScheduleManager(ScheduleFilterMethods, models.Manager):
 class Schedule(PrimordialModel, LaunchTimeConfig):
     class Meta:
         app_label = 'main'
-        ordering = ['-next_run']
+        ordering = [models.F('next_run').desc(nulls_last=True), 'id']
         unique_together = ('unified_job_template', 'name')
 
     objects = ScheduleManager()

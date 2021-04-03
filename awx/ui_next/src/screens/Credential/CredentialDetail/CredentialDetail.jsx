@@ -22,6 +22,7 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
 import { Credential } from '../../../types';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 const PluginInputMetadata = styled(CodeEditor)`
   grid-column: 1 / -1;
@@ -183,6 +184,11 @@ function CredentialDetail({ i18n, credential }) {
     fetchDetails();
   }, [fetchDetails]);
 
+  const deleteDetailsRequests = relatedResourceDeleteRequests.credential(
+    credential,
+    i18n
+  );
+
   if (hasContentLoading) {
     return <ContentLoading />;
   }
@@ -270,9 +276,14 @@ function CredentialDetail({ i18n, credential }) {
         {user_capabilities.delete && (
           <DeleteButton
             name={name}
+            itemToDelete={credential}
             modalTitle={i18n._(t`Delete Credential`)}
             onConfirm={deleteCredential}
             isLoading={isLoading}
+            deleteDetailsRequests={deleteDetailsRequests}
+            deleteMessage={i18n._(
+              t`This credential is currently being used by other resources. Are you sure you want to delete it?`
+            )}
           >
             {i18n._(t`Delete`)}
           </DeleteButton>

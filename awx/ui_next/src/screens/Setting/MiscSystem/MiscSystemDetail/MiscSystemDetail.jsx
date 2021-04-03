@@ -9,7 +9,7 @@ import ContentError from '../../../../components/ContentError';
 import ContentLoading from '../../../../components/ContentLoading';
 import { DetailList } from '../../../../components/DetailList';
 import RoutedTabs from '../../../../components/RoutedTabs';
-import { SettingsAPI } from '../../../../api';
+import { SettingsAPI, ExecutionEnvironmentsAPI } from '../../../../api';
 import useRequest from '../../../../util/useRequest';
 import { useConfig } from '../../../../contexts/Config';
 import { useSettings } from '../../../../contexts/Settings';
@@ -23,7 +23,15 @@ function MiscSystemDetail({ i18n }) {
   const { isLoading, error, request, result: system } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('all');
-
+      let DEFAULT_EXECUTION_ENVIRONMENT = '';
+      if (data.DEFAULT_EXECUTION_ENVIRONMENT) {
+        const {
+          data: { name },
+        } = await ExecutionEnvironmentsAPI.readDetail(
+          data.DEFAULT_EXECUTION_ENVIRONMENT
+        );
+        DEFAULT_EXECUTION_ENVIRONMENT = name;
+      }
       const {
         OAUTH2_PROVIDER: {
           ACCESS_TOKEN_EXPIRE_SECONDS,
@@ -49,19 +57,17 @@ function MiscSystemDetail({ i18n }) {
         'SESSION_COOKIE_AGE',
         'TOWER_URL_BASE'
       );
-
       const systemData = {
         ...pluckedSystemData,
         ACCESS_TOKEN_EXPIRE_SECONDS,
         REFRESH_TOKEN_EXPIRE_SECONDS,
         AUTHORIZATION_CODE_EXPIRE_SECONDS,
+        DEFAULT_EXECUTION_ENVIRONMENT,
       };
-
       const {
         OAUTH2_PROVIDER: OAUTH2_PROVIDER_OPTIONS,
         ...options
       } = allOptions;
-
       const systemOptions = {
         ...options,
         ACCESS_TOKEN_EXPIRE_SECONDS: {
@@ -80,7 +86,6 @@ function MiscSystemDetail({ i18n }) {
           label: i18n._(t`Authorization Code Expiration`),
         },
       };
-
       const mergedData = {};
       Object.keys(systemData).forEach(key => {
         mergedData[key] = systemOptions[key];

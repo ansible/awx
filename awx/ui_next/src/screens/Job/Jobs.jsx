@@ -21,12 +21,12 @@ function Jobs({ i18n }) {
         return;
       }
 
-      const type = JOB_TYPE_URL_SEGMENTS[job.type];
+      const typeSegment = JOB_TYPE_URL_SEGMENTS[job.type];
       setBreadcrumbConfig({
         '/jobs': i18n._(t`Jobs`),
-        [`/jobs/${type}/${job.id}`]: `${job.name}`,
-        [`/jobs/${type}/${job.id}/output`]: i18n._(t`Output`),
-        [`/jobs/${type}/${job.id}/details`]: i18n._(t`Details`),
+        [`/jobs/${typeSegment}/${job.id}`]: `${job.name}`,
+        [`/jobs/${typeSegment}/${job.id}/output`]: i18n._(t`Output`),
+        [`/jobs/${typeSegment}/${job.id}/details`]: i18n._(t`Details`),
       });
     },
     [i18n]
@@ -53,7 +53,7 @@ function Jobs({ i18n }) {
         <Route path={`${match.path}/:id/output`}>
           <TypeRedirect view="output" />
         </Route>
-        <Route path={`${match.path}/:type/:id`}>
+        <Route path={`${match.path}/:typeSegment/:id`}>
           <Job setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path={`${match.path}/:id`}>

@@ -5,7 +5,12 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { ProjectsAPI } from '../../../api';
+import {
+  ProjectsAPI,
+  JobTemplatesAPI,
+  WorkflowJobTemplatesAPI,
+  InventorySourcesAPI,
+} from '../../../api';
 import ProjectDetail from './ProjectDetail';
 
 jest.mock('../../../api');
@@ -145,6 +150,27 @@ describe('<ProjectDetail />', () => {
       <ProjectDetail project={{ ...mockProject, ...mockOptions }} />
     );
     expect(wrapper.find('Detail[label="Options"]').length).toBe(0);
+  });
+
+  test('should have proper number of delete detail requests', () => {
+    JobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    WorkflowJobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    InventorySourcesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    const mockOptions = {
+      scm_type: '',
+      scm_clean: false,
+      scm_delete_on_update: false,
+      scm_update_on_launch: false,
+      allow_override: false,
+      created: '',
+      modified: '',
+    };
+    const wrapper = mountWithContexts(
+      <ProjectDetail project={{ ...mockProject, ...mockOptions }} />
+    );
+    expect(
+      wrapper.find('DeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(3);
   });
 
   test('should render with missing summary fields', async () => {

@@ -116,7 +116,7 @@ describe('<JobDetail />', () => {
     wrapper.update();
     const modal = wrapper.find('Modal');
     expect(modal.length).toBe(1);
-    modal.find('button[aria-label="Delete"]').simulate('click');
+    modal.find('button[aria-label="Confirm Delete"]').simulate('click');
     expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
   });
 
@@ -138,7 +138,7 @@ describe('<JobDetail />', () => {
     const modal = wrapper.find('Modal');
     expect(modal.length).toBe(1);
     await act(async () => {
-      modal.find('button[aria-label="Delete"]').simulate('click');
+      modal.find('button[aria-label="Confirm Delete"]').simulate('click');
     });
     wrapper.update();
 

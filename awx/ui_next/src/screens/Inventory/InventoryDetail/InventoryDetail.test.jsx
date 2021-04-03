@@ -105,6 +105,18 @@ describe('<InventoryDetail />', () => {
     expect(dates.at(1).prop('date')).toEqual(mockInventory.modified);
   });
 
+  test('should have proper number of delete detail requests', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventoryDetail inventory={mockInventory} />
+      );
+    });
+    expect(
+      wrapper.find('DeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(2);
+  });
+
   test('should load instance groups', async () => {
     InventoriesAPI.readInstanceGroups.mockResolvedValue({
       data: {

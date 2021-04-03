@@ -286,7 +286,7 @@ const ObjectField = withI18n()(({ i18n, name, config, isRequired = false }) => {
       >
         <CodeEditor
           {...field}
-          fullHeight
+          rows="auto"
           id={name}
           mode="javascript"
           onChange={value => {

@@ -97,6 +97,7 @@ from awx.main.utils import (
     deepmerge,
     parse_yaml_or_json,
 )
+from awx.main.utils.execution_environments import get_execution_environment_default
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
@@ -107,6 +108,7 @@ from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
 from awx.conf.license import get_license
+from awx.main.analytics.subsystem_metrics import Metrics
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -170,6 +172,7 @@ def dispatch_startup():
     cluster_node_heartbeat()
     if Instance.objects.me().is_controller():
         awx_isolated_heartbeat()
+    Metrics().clear_values()
 
     # Update Tower's rsyslog.conf file based on loggins settings in the db
     reconfigure_rsyslog()
@@ -841,7 +844,6 @@ class BaseTask(object):
     model = None
     event_model = None
     abstract = True
-    proot_show_paths = []
 
     def __init__(self):
         self.cleanup_paths = []
@@ -908,9 +910,9 @@ class BaseTask(object):
         if pull:
             params['container_options'].append(f'--pull={pull}')
 
-        if settings.AWX_PROOT_SHOW_PATHS:
+        if settings.AWX_ISOLATION_SHOW_PATHS:
             params['container_volume_mounts'] = []
-            for this_path in settings.AWX_PROOT_SHOW_PATHS:
+            for this_path in settings.AWX_ISOLATION_SHOW_PATHS:
                 params['container_volume_mounts'].append(f'{this_path}:{this_path}:Z')
         return params
 
@@ -924,7 +926,7 @@ class BaseTask(object):
         """
         Create a temporary directory for job-related files.
         """
-        pdd_wrapper_path = tempfile.mkdtemp(prefix=f'pdd_wrapper_{instance.pk}_', dir=settings.AWX_PROOT_BASE_PATH)
+        pdd_wrapper_path = tempfile.mkdtemp(prefix=f'pdd_wrapper_{instance.pk}_', dir=settings.AWX_ISOLATION_BASE_PATH)
         os.chmod(pdd_wrapper_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         if settings.AWX_CLEANUP_PATHS:
             self.cleanup_paths.append(pdd_wrapper_path)
@@ -1087,12 +1089,6 @@ class BaseTask(object):
     def should_use_resource_profiling(self, job):
         """
         Return whether this task should use resource profiling
-        """
-        return False
-
-    def should_use_proot(self, instance):
-        """
-        Return whether this task should use proot.
         """
         return False
 
@@ -1371,8 +1367,8 @@ class BaseTask(object):
                 status = self.instance.status
                 raise RuntimeError('not starting %s task' % self.instance.status)
 
-            if not os.path.exists(settings.AWX_PROOT_BASE_PATH):
-                raise RuntimeError('AWX_PROOT_BASE_PATH=%s does not exist' % settings.AWX_PROOT_BASE_PATH)
+            if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
+                raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
             # store a record of the venv used at runtime
             if hasattr(self.instance, 'custom_virtualenv'):
@@ -1598,8 +1594,7 @@ class RunJob(BaseTask):
                 env['ANSIBLE_CALLBACK_PLUGINS'] = ':'.join(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
             env['AWX_HOST'] = settings.TOWER_URL_BASE
 
-        # Create a directory for ControlPath sockets that is unique to each
-        # job and visible inside the proot environment (when enabled).
+        # Create a directory for ControlPath sockets that is unique to each job
         cp_dir = os.path.join(private_data_dir, 'cp')
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0o700)
@@ -1768,14 +1763,6 @@ class RunJob(BaseTask):
         """
         return settings.AWX_RESOURCE_PROFILING_ENABLED
 
-    def should_use_proot(self, job):
-        """
-        Return whether this task should use proot.
-        """
-        if job.is_container_group_task:
-            return False
-        return getattr(settings, 'AWX_PROOT_ENABLED', False)
-
     def build_execution_environment_params(self, instance):
         if settings.IS_K8S:
             return {}
@@ -1820,13 +1807,14 @@ class RunJob(BaseTask):
             logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
             sync_needs.append(source_update_tag)
         elif job.project.scm_type == 'git' and job.project.scm_revision and (not branch_override):
-            git_repo = git.Repo(project_path)
             try:
+                git_repo = git.Repo(project_path)
+
                 if job_revision == git_repo.head.commit.hexsha:
                     logger.debug('Skipping project sync for {} because commit is locally available'.format(job.log_format))
                 else:
                     sync_needs.append(source_update_tag)
-            except (ValueError, BadGitName):
+            except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
                 logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
                 sync_needs.append(source_update_tag)
         else:
@@ -1929,10 +1917,6 @@ class RunProjectUpdate(BaseTask):
     event_model = ProjectUpdateEvent
     event_data_key = 'project_update_id'
 
-    @property
-    def proot_show_paths(self):
-        return [settings.PROJECTS_ROOT]
-
     def __init__(self, *args, job_private_data_dir=None, **kwargs):
         super(RunProjectUpdate, self).__init__(*args, **kwargs)
         self.playbook_new_revision = None
@@ -1990,7 +1974,7 @@ class RunProjectUpdate(BaseTask):
         env['DISPLAY'] = ''  # Prevent stupid password popup when running tests.
         # give ansible a hint about the intended tmpdir to work around issues
         # like https://github.com/ansible/ansible/issues/30064
-        env['TMP'] = settings.AWX_PROOT_BASE_PATH
+        env['TMP'] = settings.AWX_ISOLATION_BASE_PATH
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
         if settings.GALAXY_IGNORE_CERTS:
             env['ANSIBLE_GALAXY_IGNORE'] = True
@@ -2124,7 +2108,7 @@ class RunProjectUpdate(BaseTask):
         d = super(RunProjectUpdate, self).get_password_prompts(passwords)
         d[r'Username for.*:\s*?$'] = 'scm_username'
         d[r'Password for.*:\s*?$'] = 'scm_password'
-        d['Password:\s*?$'] = 'scm_password'  # noqa
+        d[r'Password:\s*?$'] = 'scm_password'
         d[r'\S+?@\S+?\'s\s+?password:\s*?$'] = 'scm_password'
         d[r'Enter passphrase for .*:\s*?$'] = 'scm_key_unlock'
         d[r'Bad passphrase, try again for .*:\s*?$'] = ''
@@ -2394,12 +2378,6 @@ class RunProjectUpdate(BaseTask):
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
 
-    def should_use_proot(self, project_update):
-        """
-        Return whether this task should use proot.
-        """
-        return getattr(settings, 'AWX_PROOT_ENABLED', False)
-
     def build_execution_environment_params(self, instance):
         if settings.IS_K8S:
             return {}
@@ -2529,7 +2507,7 @@ class RunInventoryUpdate(BaseTask):
         args.append(container_location)
 
         args.append('--output')
-        args.append(os.path.join('/runner', 'artifacts', 'output.json'))
+        args.append(os.path.join('/runner', 'artifacts', str(inventory_update.id), 'output.json'))
 
         if os.path.isdir(source_location):
             playbook_dir = container_location
@@ -2790,7 +2768,7 @@ class RunAdHocCommand(BaseTask):
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
 
         # Create a directory for ControlPath sockets that is unique to each
-        # ad hoc command and visible inside the proot environment (when enabled).
+        # ad hoc command
         cp_dir = os.path.join(private_data_dir, 'cp')
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0o700)
@@ -2893,14 +2871,6 @@ class RunAdHocCommand(BaseTask):
         d[r'SSH password:\s*?$'] = 'ssh_password'
         d[r'Password:\s*?$'] = 'ssh_password'
         return d
-
-    def should_use_proot(self, ad_hoc_command):
-        """
-        Return whether this task should use proot.
-        """
-        if ad_hoc_command.is_container_group_task:
-            return False
-        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def final_run_hook(self, adhoc_job, status, private_data_dir, fact_modification_times, isolated_manager_instance=None):
         super(RunAdHocCommand, self).final_run_hook(adhoc_job, status, private_data_dir, fact_modification_times)
@@ -3042,7 +3012,7 @@ class AWXReceptorJob:
             return self._run_internal(receptor_ctl)
         finally:
             # Make sure to always release the work unit if we established it
-            if self.unit_id is not None:
+            if self.unit_id is not None and not settings.AWX_CONTAINER_GROUP_KEEP_POD:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
 
     def _run_internal(self, receptor_ctl):
@@ -3158,11 +3128,23 @@ class AWXReceptorJob:
 
     @property
     def pod_definition(self):
+        if self.task:
+            ee = self.task.instance.resolve_execution_environment()
+        else:
+            ee = get_execution_environment_default()
+
         default_pod_spec = {
             "apiVersion": "v1",
             "kind": "Pod",
             "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE},
-            "spec": {"containers": [{"image": settings.AWX_CONTAINER_GROUP_DEFAULT_IMAGE, "name": 'worker', "args": ['ansible-runner', 'worker']}]},
+            "spec": {
+                "containers": [
+                    {
+                        "image": ee.image,
+                        "name": 'worker',
+                    }
+                ],
+            },
         }
 
         pod_spec_override = {}

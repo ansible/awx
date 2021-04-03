@@ -6,10 +6,22 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 
-import { ExecutionEnvironmentsAPI } from '../../../api';
+import {
+  ExecutionEnvironmentsAPI,
+  InventorySourcesAPI,
+  WorkflowJobTemplateNodesAPI,
+  OrganizationsAPI,
+  ProjectsAPI,
+  UnifiedJobTemplatesAPI,
+} from '../../../api';
 import ExecutionEnvironmentList from './ExecutionEnvironmentList';
 
 jest.mock('../../../api/models/ExecutionEnvironments');
+jest.mock('../../../api/models/UnifiedJobTemplates');
+jest.mock('../../../api/models/Projects');
+jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api/models/InventorySources');
+jest.mock('../../../api/models/WorkflowJobTemplateNodes');
 
 const executionEnvironments = {
   data: {
@@ -43,6 +55,16 @@ describe('<ExecutionEnvironmentList/>', () => {
   beforeEach(() => {
     ExecutionEnvironmentsAPI.read.mockResolvedValue(executionEnvironments);
     ExecutionEnvironmentsAPI.readOptions.mockResolvedValue(options);
+    InventorySourcesAPI.read.mockResolvedValue({
+      data: { results: [{ id: 10000000 }] },
+    });
+    WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
+
+    OrganizationsAPI.read.mockResolvedValue({ data: { count: 0 } });
+
+    UnifiedJobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
+
+    ProjectsAPI.read.mockResolvedValue({ data: { count: 0 } });
   });
 
   afterEach(() => {
@@ -144,6 +166,11 @@ describe('<ExecutionEnvironmentList/>', () => {
     );
     wrapper.update();
 
+    await waitForElement(
+      wrapper,
+      'Button[aria-label="confirm delete"]',
+      el => el.length > 0
+    );
     await act(async () =>
       wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
     );
@@ -184,5 +211,18 @@ describe('<ExecutionEnvironmentList/>', () => {
     });
     waitForElement(wrapper, 'ExecutionEnvironmentList', el => el.length > 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+  });
+
+  test('should have proper number of delete detail requests', async () => {
+    ExecutionEnvironmentsAPI.read.mockResolvedValue(executionEnvironments);
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { POST: false } },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<ExecutionEnvironmentList />);
+    });
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('deleteDetailsRequests')
+    ).toHaveLength(4);
   });
 });

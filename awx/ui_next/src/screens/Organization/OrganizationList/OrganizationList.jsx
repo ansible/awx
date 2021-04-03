@@ -19,6 +19,7 @@ import PaginatedTable, {
 } from '../../../components/PaginatedTable';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import OrganizationListItem from './OrganizationListItem';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
 const QS_CONFIG = getQSConfig('organization', {
   page: 1,
@@ -116,6 +117,10 @@ function OrganizationsList({ i18n }) {
       setSelected(selected.concat(row));
     }
   };
+  const deleteDetailsRequests = relatedResourceDeleteRequests.organization(
+    selected[0],
+    i18n
+  );
 
   return (
     <>
@@ -173,6 +178,11 @@ function OrganizationsList({ i18n }) {
                     onDelete={handleOrgDelete}
                     itemsToDelete={selected}
                     pluralizedItemName={i18n._(t`Organizations`)}
+                    deleteDetailsRequests={deleteDetailsRequests}
+                    deleteMessage={i18n._(
+                      '{numItemsToDelete, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                      { numItemsToDelete: selected.length }
+                    )}
                   />,
                 ]}
               />

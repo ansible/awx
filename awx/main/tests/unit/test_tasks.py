@@ -725,7 +725,6 @@ class TestIsolatedExecution(TestJobExecution):
         extra_vars = json.loads(extra_vars)
         assert extra_vars['dest'] == '/tmp'
         assert extra_vars['src'] == private_data
-        assert extra_vars['proot_temp_dir'].startswith('/tmp/awx_proot_')
 
     def test_systemctl_failure(self):
         # If systemctl fails, read the contents of `artifacts/systemctl_logs`
@@ -1004,7 +1003,8 @@ class TestJobCredentials(TestJobExecution):
 
         if verify:
             assert env['K8S_AUTH_VERIFY_SSL'] == 'True'
-            cert = open(env['K8S_AUTH_SSL_CA_CERT'], 'r').read()
+            local_path = os.path.join(private_data_dir, os.path.basename(env['K8S_AUTH_SSL_CA_CERT']))
+            cert = open(local_path, 'r').read()
             assert cert == 'CERTDATA'
         else:
             assert env['K8S_AUTH_VERIFY_SSL'] == 'False'

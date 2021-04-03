@@ -1,8 +1,8 @@
 from django.conf import settings
-from prometheus_client import REGISTRY, PROCESS_COLLECTOR, PLATFORM_COLLECTOR, GC_COLLECTOR, Gauge, Info, generate_latest
+from prometheus_client import PROCESS_COLLECTOR, PLATFORM_COLLECTOR, GC_COLLECTOR, CollectorRegistry, Gauge, Info, generate_latest
 
 from awx.conf.license import get_license
-from awx.main.utils import get_awx_version, get_ansible_version
+from awx.main.utils import get_awx_version
 from awx.main.analytics.collectors import (
     counts,
     instance_info,
@@ -11,115 +11,123 @@ from awx.main.analytics.collectors import (
 )
 
 
-REGISTRY.unregister(PROCESS_COLLECTOR)
-REGISTRY.unregister(PLATFORM_COLLECTOR)
-REGISTRY.unregister(GC_COLLECTOR)
-
-SYSTEM_INFO = Info('awx_system', 'AWX System Information')
-ORG_COUNT = Gauge('awx_organizations_total', 'Number of organizations')
-USER_COUNT = Gauge('awx_users_total', 'Number of users')
-TEAM_COUNT = Gauge('awx_teams_total', 'Number of teams')
-INV_COUNT = Gauge('awx_inventories_total', 'Number of inventories')
-PROJ_COUNT = Gauge('awx_projects_total', 'Number of projects')
-JT_COUNT = Gauge('awx_job_templates_total', 'Number of job templates')
-WFJT_COUNT = Gauge('awx_workflow_job_templates_total', 'Number of workflow job templates')
-HOST_COUNT = Gauge(
-    'awx_hosts_total',
-    'Number of hosts',
-    [
-        'type',
-    ],
-)
-SCHEDULE_COUNT = Gauge('awx_schedules_total', 'Number of schedules')
-INV_SCRIPT_COUNT = Gauge('awx_inventory_scripts_total', 'Number of invetory scripts')
-USER_SESSIONS = Gauge(
-    'awx_sessions_total',
-    'Number of sessions',
-    [
-        'type',
-    ],
-)
-CUSTOM_VENVS = Gauge('awx_custom_virtualenvs_total', 'Number of virtualenvs')
-RUNNING_JOBS = Gauge('awx_running_jobs_total', 'Number of running jobs on the Tower system')
-PENDING_JOBS = Gauge('awx_pending_jobs_total', 'Number of pending jobs on the Tower system')
-STATUS = Gauge(
-    'awx_status_total',
-    'Status of Job launched',
-    [
-        'status',
-    ],
-)
-
-INSTANCE_CAPACITY = Gauge(
-    'awx_instance_capacity',
-    'Capacity of each node in a Tower system',
-    [
-        'hostname',
-        'instance_uuid',
-    ],
-)
-INSTANCE_CPU = Gauge(
-    'awx_instance_cpu',
-    'CPU cores on each node in a Tower system',
-    [
-        'hostname',
-        'instance_uuid',
-    ],
-)
-INSTANCE_MEMORY = Gauge(
-    'awx_instance_memory',
-    'RAM (Kb) on each node in a Tower system',
-    [
-        'hostname',
-        'instance_uuid',
-    ],
-)
-INSTANCE_INFO = Info(
-    'awx_instance',
-    'Info about each node in a Tower system',
-    [
-        'hostname',
-        'instance_uuid',
-    ],
-)
-INSTANCE_LAUNCH_TYPE = Gauge(
-    'awx_instance_launch_type_total',
-    'Type of Job launched',
-    [
-        'node',
-        'launch_type',
-    ],
-)
-INSTANCE_STATUS = Gauge(
-    'awx_instance_status_total',
-    'Status of Job launched',
-    [
-        'node',
-        'status',
-    ],
-)
-INSTANCE_CONSUMED_CAPACITY = Gauge(
-    'awx_instance_consumed_capacity',
-    'Consumed capacity of each node in a Tower system',
-    [
-        'hostname',
-        'instance_uuid',
-    ],
-)
-INSTANCE_REMAINING_CAPACITY = Gauge(
-    'awx_instance_remaining_capacity',
-    'Remaining capacity of each node in a Tower system',
-    [
-        'hostname',
-        'instance_uuid',
-    ],
-)
-
-LICENSE_INSTANCE_TOTAL = Gauge('awx_license_instance_total', 'Total number of managed hosts provided by your license')
-LICENSE_INSTANCE_FREE = Gauge('awx_license_instance_free', 'Number of remaining managed hosts provided by your license')
-
-
 def metrics():
+    REGISTRY = CollectorRegistry()
+
+    SYSTEM_INFO = Info('awx_system', 'AWX System Information', registry=REGISTRY)
+    ORG_COUNT = Gauge('awx_organizations_total', 'Number of organizations', registry=REGISTRY)
+    USER_COUNT = Gauge('awx_users_total', 'Number of users', registry=REGISTRY)
+    TEAM_COUNT = Gauge('awx_teams_total', 'Number of teams', registry=REGISTRY)
+    INV_COUNT = Gauge('awx_inventories_total', 'Number of inventories', registry=REGISTRY)
+    PROJ_COUNT = Gauge('awx_projects_total', 'Number of projects', registry=REGISTRY)
+    JT_COUNT = Gauge('awx_job_templates_total', 'Number of job templates', registry=REGISTRY)
+    WFJT_COUNT = Gauge('awx_workflow_job_templates_total', 'Number of workflow job templates', registry=REGISTRY)
+    HOST_COUNT = Gauge(
+        'awx_hosts_total',
+        'Number of hosts',
+        [
+            'type',
+        ],
+        registry=REGISTRY,
+    )
+    SCHEDULE_COUNT = Gauge('awx_schedules_total', 'Number of schedules', registry=REGISTRY)
+    INV_SCRIPT_COUNT = Gauge('awx_inventory_scripts_total', 'Number of invetory scripts', registry=REGISTRY)
+    USER_SESSIONS = Gauge(
+        'awx_sessions_total',
+        'Number of sessions',
+        [
+            'type',
+        ],
+        registry=REGISTRY,
+    )
+    CUSTOM_VENVS = Gauge('awx_custom_virtualenvs_total', 'Number of virtualenvs', registry=REGISTRY)
+    RUNNING_JOBS = Gauge('awx_running_jobs_total', 'Number of running jobs on the Tower system', registry=REGISTRY)
+    PENDING_JOBS = Gauge('awx_pending_jobs_total', 'Number of pending jobs on the Tower system', registry=REGISTRY)
+    STATUS = Gauge(
+        'awx_status_total',
+        'Status of Job launched',
+        [
+            'status',
+        ],
+        registry=REGISTRY,
+    )
+
+    INSTANCE_CAPACITY = Gauge(
+        'awx_instance_capacity',
+        'Capacity of each node in a Tower system',
+        [
+            'hostname',
+            'instance_uuid',
+        ],
+        registry=REGISTRY,
+    )
+    INSTANCE_CPU = Gauge(
+        'awx_instance_cpu',
+        'CPU cores on each node in a Tower system',
+        [
+            'hostname',
+            'instance_uuid',
+        ],
+        registry=REGISTRY,
+    )
+    INSTANCE_MEMORY = Gauge(
+        'awx_instance_memory',
+        'RAM (Kb) on each node in a Tower system',
+        [
+            'hostname',
+            'instance_uuid',
+        ],
+        registry=REGISTRY,
+    )
+    INSTANCE_INFO = Info(
+        'awx_instance',
+        'Info about each node in a Tower system',
+        [
+            'hostname',
+            'instance_uuid',
+        ],
+        registry=REGISTRY,
+    )
+    INSTANCE_LAUNCH_TYPE = Gauge(
+        'awx_instance_launch_type_total',
+        'Type of Job launched',
+        [
+            'node',
+            'launch_type',
+        ],
+        registry=REGISTRY,
+    )
+    INSTANCE_STATUS = Gauge(
+        'awx_instance_status_total',
+        'Status of Job launched',
+        [
+            'node',
+            'status',
+        ],
+        registry=REGISTRY,
+    )
+    INSTANCE_CONSUMED_CAPACITY = Gauge(
+        'awx_instance_consumed_capacity',
+        'Consumed capacity of each node in a Tower system',
+        [
+            'hostname',
+            'instance_uuid',
+        ],
+        registry=REGISTRY,
+    )
+    INSTANCE_REMAINING_CAPACITY = Gauge(
+        'awx_instance_remaining_capacity',
+        'Remaining capacity of each node in a Tower system',
+        [
+            'hostname',
+            'instance_uuid',
+        ],
+        registry=REGISTRY,
+    )
+
+    LICENSE_INSTANCE_TOTAL = Gauge('awx_license_instance_total', 'Total number of managed hosts provided by your license', registry=REGISTRY)
+    LICENSE_INSTANCE_FREE = Gauge('awx_license_instance_free', 'Number of remaining managed hosts provided by your license', registry=REGISTRY)
+
     license_info = get_license()
     SYSTEM_INFO.info(
         {
@@ -127,7 +135,6 @@ def metrics():
             'insights_analytics': str(settings.INSIGHTS_TRACKING_STATE),
             'tower_url_base': settings.TOWER_URL_BASE,
             'tower_version': get_awx_version(),
-            'ansible_version': get_ansible_version(),
             'license_type': license_info.get('license_type', 'UNLICENSED'),
             'license_expiry': str(license_info.get('time_remaining', 0)),
             'pendo_tracking': settings.PENDO_TRACKING_STATE,
@@ -197,7 +204,7 @@ def metrics():
         for status, value in statuses.items():
             INSTANCE_STATUS.labels(node=node, status=status).set(value)
 
-    return generate_latest()
+    return generate_latest(registry=REGISTRY)
 
 
 __all__ = ['metrics']

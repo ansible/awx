@@ -20,6 +20,7 @@ import ContentLoading from '../../components/ContentLoading';
 
 import ExecutionEnvironmentDetails from './ExecutionEnvironmentDetails';
 import ExecutionEnvironmentEdit from './ExecutionEnvironmentEdit';
+import ExecutionEnvironmentTemplateList from './ExecutionEnvironmentTemplate';
 
 function ExecutionEnvironment({ i18n, setBreadcrumb }) {
   const { id } = useParams();
@@ -63,6 +64,11 @@ function ExecutionEnvironment({ i18n, setBreadcrumb }) {
       name: i18n._(t`Details`),
       link: `/execution_environments/${id}/details`,
       id: 0,
+    },
+    {
+      name: i18n._(t`Templates`),
+      link: `/execution_environments/${id}/templates`,
+      id: 1,
     },
   ];
 
@@ -111,6 +117,11 @@ function ExecutionEnvironment({ i18n, setBreadcrumb }) {
                 </Route>
                 <Route path="/execution_environments/:id/details">
                   <ExecutionEnvironmentDetails
+                    executionEnvironment={executionEnvironment}
+                  />
+                </Route>
+                <Route path="/execution_environments/:id/templates">
+                  <ExecutionEnvironmentTemplateList
                     executionEnvironment={executionEnvironment}
                   />
                 </Route>

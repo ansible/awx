@@ -33,16 +33,14 @@ def test_jobs_settings(get, put, patch, delete, admin):
     response = get(url, user=admin, expect=200)
     data = dict(response.data.items())
     put(url, user=admin, data=data, expect=200)
-    patch(url, user=admin, data={'AWX_PROOT_HIDE_PATHS': ['/home']}, expect=200)
+    patch(url, user=admin, data={'AWX_ISOLATION_SHOW_PATHS': ['/home']}, expect=200)
     response = get(url, user=admin, expect=200)
-    assert response.data['AWX_PROOT_HIDE_PATHS'] == ['/home']
-    data.pop('AWX_PROOT_HIDE_PATHS')
-    data.pop('AWX_PROOT_SHOW_PATHS')
+    assert response.data['AWX_ISOLATION_SHOW_PATHS'] == ['/home']
+    data.pop('AWX_ISOLATION_SHOW_PATHS')
     data.pop('AWX_ANSIBLE_CALLBACK_PLUGINS')
     put(url, user=admin, data=data, expect=200)
     response = get(url, user=admin, expect=200)
-    assert response.data['AWX_PROOT_HIDE_PATHS'] == []
-    assert response.data['AWX_PROOT_SHOW_PATHS'] == []
+    assert response.data['AWX_ISOLATION_SHOW_PATHS'] == []
     assert response.data['AWX_ANSIBLE_CALLBACK_PLUGINS'] == []
 
 

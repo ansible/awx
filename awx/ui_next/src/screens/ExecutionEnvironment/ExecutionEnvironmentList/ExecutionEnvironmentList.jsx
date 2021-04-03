@@ -19,7 +19,7 @@ import PaginatedTable, {
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
-
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import ExecutionEnvironmentsListItem from './ExecutionEnvironmentListItem';
 
 const QS_CONFIG = getQSConfig('execution_environments', {
@@ -105,7 +105,10 @@ function ExecutionEnvironmentList({ i18n }) {
   };
 
   const canAdd = actions && actions.POST;
-
+  const deleteDetailsRequests = relatedResourceDeleteRequests.executionEnvironment(
+    selected[0],
+    i18n
+  );
   return (
     <>
       <PageSection>
@@ -181,6 +184,11 @@ function ExecutionEnvironmentList({ i18n }) {
                     onDelete={handleDelete}
                     itemsToDelete={selected}
                     pluralizedItemName={i18n._(t`Execution Environments`)}
+                    deleteDetailsRequests={deleteDetailsRequests}
+                    deleteMessage={i18n._(
+                      '{numItemsToDelete, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                      { numItemsToDelete: selected.length }
+                    )}
                   />,
                 ]}
               />

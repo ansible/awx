@@ -27,6 +27,7 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import { LaunchButton } from '../../../components/LaunchButton';
 import Sparkline from '../../../components/Sparkline';
 import { toTitleCase } from '../../../util/strings';
+import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 
 function WorkflowJobTemplateDetail({ template, i18n }) {
@@ -101,6 +102,11 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
     ...job,
     type: 'workflow_job',
   }));
+
+  const deleteDetailsRequests = relatedResourceDeleteRequests.template(
+    template,
+    i18n
+  );
 
   return (
     <CardBody>
@@ -241,6 +247,10 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
               modalTitle={i18n._(t`Delete Workflow Job Template`)}
               onConfirm={deleteWorkflowJobTemplate}
               isDisabled={isLoading}
+              deleteDetailsRequests={deleteDetailsRequests}
+              deleteMessage={i18n._(
+                t`This workflow job template is currently being used by other resources. Are you sure you want to delete it?`
+              )}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>
