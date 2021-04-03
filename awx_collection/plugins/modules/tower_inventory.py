@@ -61,6 +61,11 @@ options:
       description:
         - Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.
       type: str
+    instance_groups:
+      description:
+        - list of Instance Groups for this Organization to run on.
+      type: list
+      elements: str
     state:
       description:
         - Desired state of the resource.
@@ -104,6 +109,7 @@ def main():
         variables=dict(type='dict'),
         kind=dict(choices=['', 'smart'], default=''),
         host_filter=dict(),
+        instance_groups=dict(type="list", elements='str'),
         insights_credential=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
@@ -158,12 +164,20 @@ def main():
     if insights_credential is not None:
         inventory_fields['insights_credential'] = module.resolve_name_to_id('credentials', insights_credential)
 
+    association_fields = {}
+
+    instance_group_names = module.params.get('instance_groups')
+    if instance_group_names is not None:
+        association_fields['instance_groups'] = []
+        for item in instance_group_names:
+            association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
+
     # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
     if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
         module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
 
     # If the state was present and we can let the module build or update the existing inventory, this will return on its own
-    module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory')
+    module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory', associations=association_fields,)
 
 
 if __name__ == '__main__':
