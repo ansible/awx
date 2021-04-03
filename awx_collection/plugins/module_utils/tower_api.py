@@ -826,20 +826,10 @@ class TowerAPIModule(TowerModule):
                     existing_item = self.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
                 approval_endpoint = 'workflow_job_template_nodes/{0}/create_approval_template/'.format(workflow_job_template_node_id)
 
-<<<<<<< HEAD
                 self.create_or_update_if_needed(
                     existing_item, workflow_node_fields,
                     endpoint=approval_endpoint, item_type='workflow_job_template_approval_node',
                     associations=association_fields, auto_exit=False,
-=======
-                self.create_if_needed(
-                    existing_item,
-                    workflow_node_fields,
-                    endpoint=approval_endpoint,
-                    item_type='workflow_job_template_approval_node',
-                    associations=association_fields,
-                    auto_exit=False,
->>>>>>> 2ea1325d14 (update to fix approval bug)
                 )
 
     def create_schema_nodes_association(self, response, schema, workflow_id):
