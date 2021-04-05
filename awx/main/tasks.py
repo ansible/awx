@@ -97,7 +97,7 @@ from awx.main.utils import (
     deepmerge,
     parse_yaml_or_json,
 )
-from awx.main.utils.execution_environments import get_execution_environment_default
+from awx.main.utils.execution_environments import get_default_execution_environment, get_default_pod_spec
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
@@ -525,15 +525,16 @@ def cluster_node_heartbeat():
 def awx_k8s_reaper():
     from awx.main.scheduler.kubernetes import PodManager  # prevent circular import
 
-    for group in InstanceGroup.objects.filter(credential__isnull=False).iterator():
-        if group.is_container_group:
-            logger.debug("Checking for orphaned k8s pods for {}.".format(group))
-            for job in UnifiedJob.objects.filter(pk__in=list(PodManager.list_active_jobs(group))).exclude(status__in=ACTIVE_STATES):
-                logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
-                try:
-                    PodManager(job).delete()
-                except Exception:
-                    logger.exception("Failed to delete orphaned pod {} from {}".format(job.log_format, group))
+    for group in InstanceGroup.objects.filter(is_container_group=True).iterator():
+        logger.debug("Checking for orphaned k8s pods for {}.".format(group))
+        pods = PodManager.list_active_jobs(group)
+        for job in UnifiedJob.objects.filter(pk__in=pods.keys()).exclude(status__in=ACTIVE_STATES):
+            logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
+            try:
+                pm = PodManager(job)
+                pm.kube_api.delete_namespaced_pod(name=pods[job.id], namespace=pm.namespace, _request_timeout=settings.AWX_CONTAINER_GROUP_K8S_API_TIMEOUT)
+            except Exception:
+                logger.exception("Failed to delete orphaned pod {} from {}".format(job.log_format, group))
 
 
 @task(queue=get_local_queuename)
@@ -3131,21 +3132,10 @@ class AWXReceptorJob:
         if self.task:
             ee = self.task.instance.resolve_execution_environment()
         else:
-            ee = get_execution_environment_default()
+            ee = get_default_execution_environment()
 
-        default_pod_spec = {
-            "apiVersion": "v1",
-            "kind": "Pod",
-            "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE},
-            "spec": {
-                "containers": [
-                    {
-                        "image": ee.image,
-                        "name": 'worker',
-                    }
-                ],
-            },
-        }
+        default_pod_spec = get_default_pod_spec()
+        default_pod_spec['spec']['containers'][0]['image'] = ee.image
 
         pod_spec_override = {}
         if self.task and self.task.instance.instance_group.pod_spec_override:
