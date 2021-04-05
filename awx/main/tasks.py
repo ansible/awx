@@ -3012,7 +3012,7 @@ class AWXReceptorJob:
             return self._run_internal(receptor_ctl)
         finally:
             # Make sure to always release the work unit if we established it
-            if self.unit_id is not None and not settings.AWX_CONTAINER_GROUP_KEEP_POD:
+            if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
 
     def _run_internal(self, receptor_ctl):
