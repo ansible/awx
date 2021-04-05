@@ -20,7 +20,7 @@ Contributing
 - All code submissions are made through pull requests against the `devel` branch.
 - All contributors must use git commit --signoff for any commit to be merged and agree that usage of --signoff constitutes agreement with the terms of [DCO 1.1](./DCO_1_1.md)
 - Take care to make sure no merge commits are in the submission, and use `git rebase` vs. `git merge` for this reason.
-- If submitting a large code change, it's a good idea to join the `#ansible-awx` channel on irc.freenode.net and talk about what you would like to do or add first. This not only helps everyone know what's going on, but it also helps save time and effort if the community decides some changes are needed.
+- If submitting a large code change, it's a good idea to join the `#ansible-awx` channel on webchat.freenode.net and talk about what you would like to do or add first. This not only helps everyone know what's going on, but it also helps save time and effort if the community decides some changes are needed.
 
 Reporting Issues
 ----------------
@@ -37,5 +37,5 @@ Get Involved
 
 We welcome your feedback and ideas. Here's how to reach us with feedback and questions:
 
-- Join the `#ansible-awx` channel on irc.freenode.net
+- Join the `#ansible-awx` channel on webchat.freenode.net
 - Join the [mailing list](https://groups.google.com/forum/#!forum/awx-project) 

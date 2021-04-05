@@ -2,7 +2,7 @@
 
 Hi there! We're excited to have you as a contributor.
 
-Have questions about this document or anything not covered here? Come chat with us at `#ansible-awx` on irc.freenode.net, or submit your question to the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+Have questions about this document or anything not covered here? Come chat with us at `#ansible-awx` on webchat.freenode.net, or submit your question to the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
 ## Table of contents
 
@@ -28,7 +28,7 @@ Have questions about this document or anything not covered here? Come chat with 
 - You must use `git commit --signoff` for any commit to be merged, and agree that usage of --signoff constitutes agreement with the terms of [DCO 1.1](./DCO_1_1.md).
 - Take care to make sure no merge commits are in the submission, and use `git rebase` vs `git merge` for this reason.
   - If collaborating with someone else on the same branch, consider using `--force-with-lease` instead of `--force`. This will prevent you from accidentally overwriting commits pushed by someone else. For more information, see https://git-scm.com/docs/git-push#git-push---force-with-leaseltrefnamegt
-- If submitting a large code change, it's a good idea to join the `#ansible-awx` channel on irc.freenode.net, and talk about what you would like to do or add first. This not only helps everyone know what's going on, it also helps save time and effort, if the community decides some changes are needed.
+- If submitting a large code change, it's a good idea to join the `#ansible-awx` channel on webchat.freenode.net, and talk about what you would like to do or add first. This not only helps everyone know what's going on, it also helps save time and effort, if the community decides some changes are needed.
 - We ask all of our community members and contributors to adhere to the [Ansible code of conduct](http://docs.ansible.com/ansible/latest/community/code_of_conduct.html). If you have questions, or need assistance, please reach out to our community team at [codeofconduct@ansible.com](mailto:codeofconduct@ansible.com)
 
 ## Setting up your development environment
@@ -114,7 +114,7 @@ Fixing bugs, adding translations, and updating the documentation are always appr
 
 **NOTE**
 
-> If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the `#ansible-awx` channel on irc.freenode.net, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+> If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the `#ansible-awx` channel on webchat.freenode.net, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
 **NOTE**
 
@@ -136,7 +136,7 @@ Here are a few things you can do to help the visibility of your change, and incr
 * Make the smallest change possible
 * Write good commit messages. See [How to write a Git commit message](https://chris.beams.io/posts/git-commit/).
 
-It's generally a good idea to discuss features with us first by engaging us in the `#ansible-awx` channel on irc.freenode.net, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+It's generally a good idea to discuss features with us first by engaging us in the `#ansible-awx` channel on webchat.freenode.net, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
 We like to keep our commit history clean, and will require resubmission of pull requests that contain merge commits. Use `git pull --rebase`, rather than
 `git pull`, and `git rebase`, rather than `git merge`.
