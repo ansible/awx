@@ -17,6 +17,7 @@ from django.conf import settings
 
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch import pg_bus_conn
+import awx.main.analytics.subsystem_metrics as s_metrics
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -127,10 +128,21 @@ class AWXConsumerRedis(AWXConsumerBase):
     def run(self, *args, **kwargs):
         super(AWXConsumerRedis, self).run(*args, **kwargs)
         self.worker.on_start()
-
+        subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
+        last_debug_time = 0
+        previous_requests = 0
         while True:
-            logger.debug(f'{os.getpid()} is alive')
-            time.sleep(60)
+            requests = subsystem_metrics.update_uwsgi_stats()
+            # if no requests were made since last time, skip the redis save
+            if requests != previous_requests:
+                subsystem_metrics.pipe_execute()
+                logger.info("==== uwsgi stats update =====")
+                previous_requests = requests
+            time.sleep(subsystem_metrics.pipe_execute_interval)
+            now = time.time()
+            if now - last_debug_time > 60:
+                logger.debug(f'{os.getpid()} is alive')
+                last_debug_time = now
 
 
 class AWXConsumerPG(AWXConsumerBase):

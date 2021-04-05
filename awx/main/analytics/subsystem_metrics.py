@@ -47,8 +47,9 @@ class FloatM(BaseM):
             return 0.0
 
     def store_value(self, conn):
-        conn.hincrbyfloat(root_key, self.field, self.current_value)
-        self.current_value = 0
+        if self.current_value != 0:
+            conn.hincrbyfloat(root_key, self.field, self.current_value)
+            self.current_value = 0
 
 
 class IntM(BaseM):
@@ -59,8 +60,9 @@ class IntM(BaseM):
             return 0
 
     def store_value(self, conn):
-        conn.hincrby(root_key, self.field, self.current_value)
-        self.current_value = 0
+        if self.current_value != 0:
+            conn.hincrby(root_key, self.field, self.current_value)
+            self.current_value = 0
 
 
 class SetIntM(BaseM):
@@ -171,7 +173,10 @@ class Metrics:
             SetIntM('uwsgi_workers', 'Number of workers'),
             SetIntM('uwsgi_workers_busy', 'Number of workers with busy status'),
             SetIntM('uwsgi_requests', 'Number of requests across workers'),
-            SetFloatM('uwsgi_average_response_time', 'Average of average response times (ms) across workers'),
+            SetFloatM('uwsgi_response_time', 'Average response times (ms) across workers'),
+            SetFloatM('uwsgi_busy_response_time', 'Average response times (ms) across busy workers'),
+            IntM('uwsgi_update_stats_calls', 'Number of uwsgi stats updates'),
+            FloatM('uwsgi_update_stats_seconds', 'Time spent updating uwsgi stats'),
         ]
         # turn metric list into dictionary with the metric name as a key
         self.METRICS = {}
@@ -225,6 +230,8 @@ class Metrics:
         self.conn.set(root_key + "_instance_" + data['instance'], data['metrics'])
 
     def should_pipe_execute(self):
+        if self.metrics_have_changed is False:
+            return False
         if time.time() - self.last_pipe_execute > self.pipe_execute_interval:
             return True
         else:
@@ -246,39 +253,48 @@ class Metrics:
             raise Exception("unable to get uWSGI statistics")
 
     def update_uwsgi_stats(self):
+        begin_time = time.perf_counter()
         data = self.get_uwsgi_stats()
         num_workers = len(data['workers'])
-        self.set('uwsgi_workers', len(data['workers']))
         num_busy = 0
         requests = 0
         avg_rt = 0
+        busy_avg_rt = 0
         for worker in data['workers']:
             if worker['status'] == 'busy':
                 num_busy += 1
+                busy_avg_rt += worker['avg_rt']
             requests += worker['requests']
             avg_rt += worker['avg_rt']
         avg_rt = avg_rt / num_workers / 1000
+        if num_busy > 0:
+            busy_avg_rt = busy_avg_rt / num_busy / 1000
         self.set('uwsgi_workers', num_workers)
         self.set('uwsgi_workers_busy', num_busy)
         self.set('uwsgi_requests', requests)
-        self.set('uwsgi_average_response_time', avg_rt)
+        self.set('uwsgi_response_time', avg_rt)
+        self.set('uwsgi_busy_response_time', busy_avg_rt)
+        self.inc('uwsgi_update_stats_calls', 1)
+        self.inc('uwsgi_update_stats_seconds', time.perf_counter() - begin_time)
+        # return requests so that we can track whether to save to redis
+        # if requests haven't changed, we can probably skip the save
+        return requests
 
     def pipe_execute(self):
         if self.metrics_have_changed is True:
-            duration_to_save = time.perf_counter()
+            begin_time = time.perf_counter()
             for m in self.METRICS:
                 self.METRICS[m].store_value(self.pipe)
+            logger.debug(f"======{len(self.pipe.command_stack)}======")
             self.pipe.execute()
             self.last_pipe_execute = time.time()
             self.metrics_have_changed = False
-            duration_to_save = time.perf_counter() - duration_to_save
-            self.METRICS['subsystem_metrics_pipe_execute_seconds'].inc(duration_to_save)
+            self.METRICS['subsystem_metrics_pipe_execute_seconds'].inc(time.perf_counter() - begin_time)
             self.METRICS['subsystem_metrics_pipe_execute_calls'].inc(1)
 
-            duration_to_save = time.perf_counter()
+            begin_time = time.perf_counter()
             self.send_metrics()
-            duration_to_save = time.perf_counter() - duration_to_save
-            self.METRICS['subsystem_metrics_send_metrics_seconds'].inc(duration_to_save)
+            self.METRICS['subsystem_metrics_send_metrics_seconds'].inc(time.perf_counter() - begin_time)
 
     def send_metrics(self):
         # more than one thread could be calling this at the same time, so should
