@@ -32,17 +32,7 @@ describe('ExecutionEnvironmentLookup', () => {
     ExecutionEnvironmentsAPI.read.mockResolvedValue(
       mockedExecutionEnvironments
     );
-    ProjectsAPI.read.mockResolvedValue({
-      data: {
-        count: 1,
-        results: [
-          {
-            id: 1,
-            name: 'Fuz',
-          },
-        ],
-      },
-    });
+    ProjectsAPI.readDetail.mockResolvedValue({ data: { organization: 39 } });
   });
 
   afterEach(() => {
@@ -96,5 +86,46 @@ describe('ExecutionEnvironmentLookup', () => {
     expect(
       wrapper.find('FormGroup[label="Execution Environment"]').length
     ).toBe(1);
+  });
+
+  test('should call api with organization id', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ExecutionEnvironmentLookup
+          value={executionEnvironment}
+          onChange={() => {}}
+          organizationId={1}
+          globallyAvailable
+        />
+      );
+    });
+    expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalledWith({
+      or__organization__id: 1,
+      or__organization__isnull: 'True',
+      order_by: 'name',
+      page: 1,
+      page_size: 5,
+    });
+  });
+
+  test('should call api with organization id from the related project', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ExecutionEnvironmentLookup
+          value={executionEnvironment}
+          onChange={() => {}}
+          projectId={12}
+          globallyAvailable
+        />
+      );
+    });
+    expect(ProjectsAPI.readDetail).toHaveBeenCalledWith(12);
+    expect(ExecutionEnvironmentsAPI.read).toHaveBeenCalledWith({
+      or__organization__id: 39,
+      or__organization__isnull: 'True',
+      order_by: 'name',
+      page: 1,
+      page_size: 5,
+    });
   });
 });
