@@ -359,7 +359,7 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
     optional_dependencies = [Credential, InventoryScript, Project]
     NATURAL_KEY = ('organization', 'name', 'inventory')
 
-    def payload(self, inventory, source='custom', credential=None, source_script=None, project=None, **kwargs):
+    def payload(self, inventory, source='scm', credential=None, source_script=None, project=None, **kwargs):
         payload = PseudoNamespace(
             name=kwargs.get('name') or 'InventorySource - {}'.format(random_title()),
             description=kwargs.get('description') or random_title(10),
@@ -391,12 +391,13 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
         return payload
 
     def create_payload(
-        self, name='', description='', source='custom', inventory=Inventory, credential=None, source_script=InventoryScript, project=None, **kwargs
+        self, name='', description='', source='scm', inventory=Inventory, credential=None, source_script=InventoryScript, project=None, **kwargs
     ):
         if source != 'custom' and source_script == InventoryScript:
             source_script = None
         if source == 'scm':
             kwargs.setdefault('overwrite_vars', True)
+            kwargs.setdefault('source_path', 'inventories/script_migrations/script_source.py')
             if project is None:
                 project = Project
 
@@ -425,7 +426,7 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload
 
-    def create(self, name='', description='', source='custom', inventory=Inventory, credential=None, source_script=InventoryScript, project=None, **kwargs):
+    def create(self, name='', description='', source='scm', inventory=Inventory, credential=None, source_script=InventoryScript, project=None, **kwargs):
         payload = self.create_payload(
             name=name,
             description=description,
