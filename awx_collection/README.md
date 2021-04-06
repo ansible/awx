@@ -71,9 +71,8 @@ Notable releases of the `awx.awx` collection:
 
 The following notes are changes that may require changes to playbooks:
 
+ - The module tower_notification was renamed tower_notification_template. In ansible >= 2.10 there is a seemless redirect. Ansible 2.9 does not respect the redirect.
  - When a project is created, it will wait for the update/sync to finish by default; this can be turned off with the `wait` parameter, if desired.
- - When using the wait parameter with project update, if the project did not undergo a revision update, the result will be 
- 'not changed'
  - Creating a "scan" type job template is no longer supported.
  - Specifying a custom certificate via the `TOWER_CERTIFICATE` environment variable no longer works.
  - Type changes of variable fields:
@@ -118,7 +117,7 @@ py.test awx_collection/test/awx/
 
 ## Running Integration Tests
 
-The integration tests require a virtualenv with `ansible` >= 2.9 and `tower_cli`.
+The integration tests require a virtualenv with `ansible` >= 2.9 and `awxkit`.
 The collection must first be installed, which can be done using `make install_collection`.
 You also need a configuration file, as described in the running section.
 

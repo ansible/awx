@@ -67,6 +67,11 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    instance_groups:
+      description:
+        - list of Ansible Tower instance groups to associate to the organization
+      type: list
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -87,6 +92,16 @@ EXAMPLES = '''
     description: "Our Foo Cloud Servers"
     organization: Foo
     state: present
+    tower_config_file: "~/tower_cli.cfg"
+
+- name: Create tower inventory and assign instance groups
+  tower_inventory:
+    name: "Foo"
+    organization: "Bar Org"
+    instance_groups:
+      - geneva
+      - london
+    tower_config_file: "~/tower_cli.cfg"
 '''
 
 
@@ -106,6 +121,7 @@ def main():
         host_filter=dict(),
         insights_credential=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
+        instance_groups=dict(type='list',elements='str'),
     )
 
     # Create a module for ourselves
@@ -121,7 +137,8 @@ def main():
     kind = module.params.get('kind')
     host_filter = module.params.get('host_filter')
     insights_credential = module.params.get('insights_credential')
-
+    instance_groups = module.params.get('instance_groups')
+            
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
 
@@ -157,7 +174,11 @@ def main():
         inventory_fields['variables'] = json.dumps(variables)
     if insights_credential is not None:
         inventory_fields['insights_credential'] = module.resolve_name_to_id('credentials', insights_credential)
-
+    if instance_groups is not None:
+        inventory_fields['instance_groups']  = []
+        for item in instance_groups:
+            inventory_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
+            
     # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
     if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
         module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')

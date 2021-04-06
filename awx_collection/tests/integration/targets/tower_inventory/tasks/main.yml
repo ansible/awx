@@ -8,8 +8,15 @@
     inv_name1: "AWX-Collection-tests-tower_inventory-inv1-{{ test_id }}"
     inv_name2: "AWX-Collection-tests-tower_inventory-inv2-{{ test_id }}"
     cred_name1: "AWX-Collection-tests-tower_inventory-cred1-{{ test_id }}"
+    instance_groups_names: 
+    - "AWX-Collection-tests-tower_inventory-instance_group-{{ test_id }}"
 
 - block:
+    - name: Create an instance group
+      tower_instance_group:
+        name: "{{ instance_group_names }}"
+        state: present
+
     - name: Create an Insights Credential
       tower_credential:
         name: "{{ cred_name1 }}"
@@ -31,6 +38,7 @@
         organization: Default
         insights_credential: "{{ result.id }}"
         state: present
+        instance_groups: "{{ instance_group_names }}"
       register: result
 
     - assert:
@@ -40,6 +48,7 @@
       tower_inventory:
         name: "{{ result.id }}"
         organization: Default
+        instance_groups: "{{ instance_groups_names }}"
         insights_credential: "{{ cred_name1 }}"
         state: present
       register: result
@@ -52,6 +61,7 @@
       tower_inventory:
         name: "copy_{{ inv_name1 }}"
         copy_from: "{{ inv_name1 }}"
+        instance_groups: "{{ instance_groups_names }}"
         organization: Default
         description: "Our Foo Cloud Servers"
         state: present
@@ -153,6 +163,8 @@
         name: "{{ item }}"
         organization: Default
         state: absent
+        intance_groups:
+        - "{{ instance_group_name }}"
       loop:
         - "{{ inv_name1 }}"
         - "{{ inv_name2 }}"
