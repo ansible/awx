@@ -57,7 +57,6 @@ from receptorctl.socket_interface import ReceptorControl
 from awx import __version__ as awx_application_version
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.access import access_registry
-from awx.main.analytics import all_collectors, expensive_collectors
 from awx.main.redact import UriCleaner
 from awx.main.models import (
     Schedule,
@@ -377,70 +376,15 @@ def send_notifications(notification_list, job_id=None):
 
 @task(queue=get_local_queuename)
 def gather_analytics():
-    def _gather_and_ship(subset, since, until):
-        tgzfiles = []
-        try:
-            tgzfiles = analytics.gather(subset=subset, since=since, until=until)
-            # empty analytics without raising an exception is not an error
-            if not tgzfiles:
-                return True
-            logger.info('Gathered analytics from {} to {}: {}'.format(since, until, tgzfiles))
-            for tgz in tgzfiles:
-                analytics.ship(tgz)
-        except Exception:
-            logger.exception('Error gathering and sending analytics for {} to {}.'.format(since, until))
-            return False
-        finally:
-            if tgzfiles:
-                for tgz in tgzfiles:
-                    if os.path.exists(tgz):
-                        os.remove(tgz)
-        return True
-
     from awx.conf.models import Setting
     from rest_framework.fields import DateTimeField
-    from awx.main.signals import disable_activity_stream
 
-    if not settings.INSIGHTS_TRACKING_STATE:
-        return
-    if not (settings.AUTOMATION_ANALYTICS_URL and settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD):
-        logger.debug('Not gathering analytics, configuration is invalid')
-        return
     last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
-    if last_gather:
-        last_time = DateTimeField().to_internal_value(last_gather.value)
-    else:
-        last_time = None
+    last_time = DateTimeField().to_internal_value(last_gather.value) if last_gather else None
     gather_time = now()
+
     if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
-        with advisory_lock('gather_analytics_lock', wait=False) as acquired:
-            if acquired is False:
-                logger.debug('Not gathering analytics, another task holds lock')
-                return
-            subset = list(all_collectors().keys())
-            incremental_collectors = []
-            for collector in expensive_collectors():
-                if collector in subset:
-                    subset.remove(collector)
-                    incremental_collectors.append(collector)
-
-            # Cap gathering at 4 weeks of data if there has been no data gathering
-            since = last_time or (gather_time - timedelta(weeks=4))
-
-            if incremental_collectors:
-                start = since
-                until = None
-                while start < gather_time:
-                    until = start + timedelta(hours=4)
-                    if until > gather_time:
-                        until = gather_time
-                    if not _gather_and_ship(incremental_collectors, since=start, until=until):
-                        break
-                    start = until
-                    with disable_activity_stream():
-                        settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
-            if subset:
-                _gather_and_ship(subset, since=since, until=gather_time)
+        analytics.gather()
 
 
 @task(queue=get_local_queuename)
