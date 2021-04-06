@@ -1,7 +1,12 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: Generate an org name
   set_fact:
-    org_name: "AWX-Collection-tests-tower_organization-org-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    org_name: "AWX-Collection-tests-tower_organization-org-{{ test_id }}"
+    group_name1: "AWX-Collection-tests-tower_instance_group-group1-{{ test_id }}"
 
 - name: Make sure {{ org_name }} is not there
   tower_organization:
@@ -28,10 +33,22 @@
     that:
       - "result is not changed"
 
+- name: Create an Instance Group
+  tower_instance_group:
+    name: "{{ group_name1 }}"
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: "Pass in all parameters"
   tower_organization:
     name: "{{ org_name }}"
     description: "A description"
+    instance_groups:
+      - "{{ group_name1 }}"
   register: result
 
 - assert:
@@ -47,6 +64,11 @@
 - assert:
     that:
       - "result is changed"
+
+- name: Delete the instance groups
+  tower_instance_group:
+    name: "{{ group_name1 }}"
+    state: absent
 
 - name: "Remove the organization"
   tower_organization:
