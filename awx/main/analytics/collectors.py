@@ -4,6 +4,8 @@ import os
 import os.path
 import platform
 import distro
+import pytz
+import datetime
 
 from django.db import connection
 from django.db.models import Count, Max, Min
@@ -79,10 +81,45 @@ def events_slicing(key, since, until):
     if not since and last_entries.get(key):
         lower = horizon
     partition_epoch = get_event_partition_epoch()
+
+    def get_partitions():
+        """
+        Get all event partitions. Exclude _unpartitioned_main_jobevents partition if it exists.
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(f"select to_regclass('_unpartitioned_main_jobevents') is not null")
+            old_events_table_exists = cursor.fetchone()[0]
+
+            query = f"SELECT inhrelid::regclass::text AS child FROM pg_catalog.pg_inherits WHERE inhparent = 'public.main_jobevent'::regclass"
+            if old_events_table_exists:
+                query += f" AND inhrelid != 'public._unpartitioned_main_jobevents'::regclass"
+
+            cursor.execute(query)
+            partitions_from_db = [r[0] for r in cursor.fetchall()]
+
+        return partitions_from_db
+
+    def partition_within_horizon(partition, horizon):
+        dt_str = partition[14:]
+        dt = datetime.datetime.strptime(dt_str, '%Y%m%d_%H').replace(tzinfo=pytz.UTC)
+        return dt > horizon
+
+    # TODO: Make default once unpartitioned tables are no longer supported
+    # if we are collecting job events starting at the horizon
+    # and all job events are stored in partitions,
+    # slice by partition
+    if lower == horizon and lower > partition_epoch:
+        # get list of partitions in this time frame
+        # .. and yeld them
+        for partition in get_partitions():
+            yield (partition, None)
+        return
+
     # JobEvent.modified index was created at the partition epoch
     # Events created before this are in a separate table that does not
     # have this index.
     if lower >= partition_epoch:
+        # TODO: Make default once unpartitioned tables are no longer supported
         pk_values = models.JobEvent.objects.filter(modified__gte=lower, modified__lte=until).aggregate(Min('pk'), Max('pk'))
     elif until < partition_epoch:
         pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
@@ -356,37 +393,45 @@ def _copy_table(table, query, path):
 
 @register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing)
 def events_table(since, full_path, until, **kwargs):
-    def query(event_data):
-        return f'''COPY (SELECT main_jobevent.id,
-                         main_jobevent.created,
-                         main_jobevent.modified,
-                         main_jobevent.uuid,
-                         main_jobevent.parent_uuid,
-                         main_jobevent.event,
+    def query(event_data, tbl, from_clause):
+        return f'''COPY (SELECT {tbl}.id,
+                         {tbl}.created,
+                         {tbl}.modified,
+                         {tbl}.uuid,
+                         {tbl}.parent_uuid,
+                         {tbl}.event,
                          {event_data}->'task_action' AS task_action,
                          (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
-                         main_jobevent.failed,
-                         main_jobevent.changed,
-                         main_jobevent.playbook,
-                         main_jobevent.play,
-                         main_jobevent.task,
-                         main_jobevent.role,
-                         main_jobevent.job_id,
-                         main_jobevent.host_id,
-                         main_jobevent.host_name,
+                         {tbl}.failed,
+                         {tbl}.changed,
+                         {tbl}.playbook,
+                         {tbl}.play,
+                         {tbl}.task,
+                         {tbl}.role,
+                         {tbl}.job_id,
+                         {tbl}.host_id,
+                         {tbl}.host_name,
                          CAST({event_data}->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
                          CAST({event_data}->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
                          {event_data}->'duration' AS duration,
                          {event_data}->'res'->'warnings' AS warnings,
                          {event_data}->'res'->'deprecations' AS deprecations
-                         FROM main_jobevent
-                         WHERE (main_jobevent.id > {since} AND main_jobevent.id <= {until})
-                         ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''
+                         {from_clause}
+                         ORDER BY {tbl}.id ASC) TO STDOUT WITH CSV HEADER
+                '''
 
+    # handle special case of selecting entire partition
+    if type(since) is str:
+        partition = since
+        tbl = partition
+        from_clause = f'FROM {partition}'
+    else:
+        tbl = 'main_jobevent'
+        from_clause = f'FROM main_jobevent WHERE (main_jobevent.id > {since} AND main_jobevent.id <= {until})'
     try:
-        return _copy_table(table='events', query=query("main_jobevent.event_data::json"), path=full_path)
-    except UntranslatableCharacter:
-        return _copy_table(table='events', query=query("replace(main_jobevent.event_data::text, '\\u0000', '')::json"), path=full_path)
+        return _copy_table(table='events', query=query("main_jobevent.event_data::json", tbl, from_clause), path=full_path)
+    except UntranslatableCharacter as exc:
+        return _copy_table(table='events', query=query("replace(main_jobevent.event_data::text, '\\u0000', '')::json", tbl, from_clause), path=full_path)
 
 
 @register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
