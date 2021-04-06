@@ -347,29 +347,29 @@ def _copy_table(table, query, path):
 @register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing)
 def events_table(since, full_path, until, **kwargs):
     def query(event_data):
-        return f'''COPY (SELECT main_jobevent.id, 
+        return f'''COPY (SELECT main_jobevent.id,
                          main_jobevent.created,
                          main_jobevent.modified,
                          main_jobevent.uuid,
                          main_jobevent.parent_uuid,
-                         main_jobevent.event, 
+                         main_jobevent.event,
                          {event_data}->'task_action' AS task_action,
                          (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
-                         main_jobevent.failed, 
-                         main_jobevent.changed, 
-                         main_jobevent.playbook, 
+                         main_jobevent.failed,
+                         main_jobevent.changed,
+                         main_jobevent.playbook,
                          main_jobevent.play,
                          main_jobevent.task,
-                         main_jobevent.role, 
-                         main_jobevent.job_id, 
-                         main_jobevent.host_id, 
+                         main_jobevent.role,
+                         main_jobevent.job_id,
+                         main_jobevent.host_id,
                          main_jobevent.host_name,
                          CAST({event_data}->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
                          CAST({event_data}->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
                          {event_data}->'duration' AS duration,
                          {event_data}->'res'->'warnings' AS warnings,
                          {event_data}->'res'->'deprecations' AS deprecations
-                         FROM main_jobevent 
+                         FROM main_jobevent
                          WHERE (main_jobevent.id > {since} AND main_jobevent.id <= {until})
                          ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''
 
@@ -386,22 +386,22 @@ def unified_jobs_table(since, full_path, until, **kwargs):
                                  django_content_type.model,
                                  main_unifiedjob.organization_id,
                                  main_organization.name as organization_name,
-                                 main_job.inventory_id, 
+                                 main_job.inventory_id,
                                  main_inventory.name as inventory_name,
-                                 main_unifiedjob.created,  
-                                 main_unifiedjob.name,  
-                                 main_unifiedjob.unified_job_template_id, 
-                                 main_unifiedjob.launch_type, 
-                                 main_unifiedjob.schedule_id, 
-                                 main_unifiedjob.execution_node, 
-                                 main_unifiedjob.controller_node, 
-                                 main_unifiedjob.cancel_flag, 
-                                 main_unifiedjob.status, 
-                                 main_unifiedjob.failed, 
-                                 main_unifiedjob.started, 
-                                 main_unifiedjob.finished, 
-                                 main_unifiedjob.elapsed, 
-                                 main_unifiedjob.job_explanation, 
+                                 main_unifiedjob.created,
+                                 main_unifiedjob.name,
+                                 main_unifiedjob.unified_job_template_id,
+                                 main_unifiedjob.launch_type,
+                                 main_unifiedjob.schedule_id,
+                                 main_unifiedjob.execution_node,
+                                 main_unifiedjob.controller_node,
+                                 main_unifiedjob.cancel_flag,
+                                 main_unifiedjob.status,
+                                 main_unifiedjob.failed,
+                                 main_unifiedjob.started,
+                                 main_unifiedjob.finished,
+                                 main_unifiedjob.elapsed,
+                                 main_unifiedjob.job_explanation,
                                  main_unifiedjob.instance_group_id,
                                  main_unifiedjob.installed_collections,
                                  main_unifiedjob.ansible_version
@@ -422,21 +422,21 @@ def unified_jobs_table(since, full_path, until, **kwargs):
 
 @register('unified_job_template_table', '1.0', format='csv', description=_('Data on job templates'))
 def unified_job_template_table(since, full_path, **kwargs):
-    unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id, 
+    unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id,
                                  main_unifiedjobtemplate.polymorphic_ctype_id,
                                  django_content_type.model,
-                                 main_unifiedjobtemplate.created, 
-                                 main_unifiedjobtemplate.modified, 
-                                 main_unifiedjobtemplate.created_by_id, 
-                                 main_unifiedjobtemplate.modified_by_id, 
-                                 main_unifiedjobtemplate.name, 
-                                 main_unifiedjobtemplate.current_job_id, 
-                                 main_unifiedjobtemplate.last_job_id, 
-                                 main_unifiedjobtemplate.last_job_failed, 
-                                 main_unifiedjobtemplate.last_job_run, 
-                                 main_unifiedjobtemplate.next_job_run, 
-                                 main_unifiedjobtemplate.next_schedule_id, 
-                                 main_unifiedjobtemplate.status 
+                                 main_unifiedjobtemplate.created,
+                                 main_unifiedjobtemplate.modified,
+                                 main_unifiedjobtemplate.created_by_id,
+                                 main_unifiedjobtemplate.modified_by_id,
+                                 main_unifiedjobtemplate.name,
+                                 main_unifiedjobtemplate.current_job_id,
+                                 main_unifiedjobtemplate.last_job_id,
+                                 main_unifiedjobtemplate.last_job_failed,
+                                 main_unifiedjobtemplate.last_job_run,
+                                 main_unifiedjobtemplate.next_job_run,
+                                 main_unifiedjobtemplate.next_schedule_id,
+                                 main_unifiedjobtemplate.status
                                  FROM main_unifiedjobtemplate, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
                                  ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''
@@ -447,15 +447,15 @@ def unified_job_template_table(since, full_path, **kwargs):
 def workflow_job_node_table(since, full_path, until, **kwargs):
     workflow_job_node_query = '''COPY (SELECT main_workflowjobnode.id,
                                  main_workflowjobnode.created,
-                                 main_workflowjobnode.modified, 
-                                 main_workflowjobnode.job_id, 
-                                 main_workflowjobnode.unified_job_template_id, 
-                                 main_workflowjobnode.workflow_job_id, 
-                                 main_workflowjobnode.inventory_id, 
+                                 main_workflowjobnode.modified,
+                                 main_workflowjobnode.job_id,
+                                 main_workflowjobnode.unified_job_template_id,
+                                 main_workflowjobnode.workflow_job_id,
+                                 main_workflowjobnode.inventory_id,
                                  success_nodes.nodes AS success_nodes,
                                  failure_nodes.nodes AS failure_nodes,
                                  always_nodes.nodes AS always_nodes,
-                                 main_workflowjobnode.do_not_run, 
+                                 main_workflowjobnode.do_not_run,
                                  main_workflowjobnode.all_parents_must_converge
                                  FROM main_workflowjobnode
                                  LEFT JOIN (
@@ -483,12 +483,12 @@ def workflow_job_node_table(since, full_path, until, **kwargs):
 
 @register('workflow_job_template_node_table', '1.0', format='csv', description=_('Data on workflows'))
 def workflow_job_template_node_table(since, full_path, **kwargs):
-    workflow_job_template_node_query = '''COPY (SELECT main_workflowjobtemplatenode.id, 
+    workflow_job_template_node_query = '''COPY (SELECT main_workflowjobtemplatenode.id,
                                  main_workflowjobtemplatenode.created,
-                                 main_workflowjobtemplatenode.modified, 
-                                 main_workflowjobtemplatenode.unified_job_template_id, 
-                                 main_workflowjobtemplatenode.workflow_job_template_id, 
-                                 main_workflowjobtemplatenode.inventory_id, 
+                                 main_workflowjobtemplatenode.modified,
+                                 main_workflowjobtemplatenode.unified_job_template_id,
+                                 main_workflowjobtemplatenode.workflow_job_template_id,
+                                 main_workflowjobtemplatenode.inventory_id,
                                  success_nodes.nodes AS success_nodes,
                                  failure_nodes.nodes AS failure_nodes,
                                  always_nodes.nodes AS always_nodes,
