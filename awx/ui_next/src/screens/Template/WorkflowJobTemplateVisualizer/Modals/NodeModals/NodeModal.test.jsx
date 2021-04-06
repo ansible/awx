@@ -307,6 +307,7 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
+          convergence: 'any',
           linkType: 'always',
           nodeType: 'job_template',
           inventory: { name: 'Foo Inv', id: 1 },
@@ -345,6 +346,7 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
+          convergence: 'any',
           linkType: 'failure',
           nodeResource: {
             id: 1,
@@ -383,6 +385,7 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
+          convergence: 'any',
           linkType: 'failure',
           nodeResource: {
             id: 1,
@@ -422,6 +425,7 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
+          convergence: 'any',
           linkType: 'success',
           nodeResource: {
             id: 1,
@@ -506,6 +510,7 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
+          convergence: 'any',
           approvalDescription: 'Test Approval Description',
           approvalName: 'Test Approval',
           linkType: 'always',
@@ -605,6 +610,7 @@ describe('NodeModal', () => {
 
       expect(onSave).toBeCalledWith(
         {
+          convergence: 'any',
           approvalDescription: 'Test Approval Description',
           approvalName: 'Test Approval',
           linkType: 'success',
@@ -668,6 +674,7 @@ describe('NodeModal', () => {
       });
       expect(onSave).toBeCalledWith(
         {
+          convergence: 'any',
           linkType: 'success',
           nodeResource: {
             id: 1,

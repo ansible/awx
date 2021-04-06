@@ -12,6 +12,8 @@ import {
   HostFilterField,
 } from './SharedFields';
 import { required } from '../../../../util/validators';
+import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
+import { useConfig } from '../../../../contexts/Config';
 
 const SatelliteSubForm = ({ autoPopulateCredential, i18n }) => {
   const { setFieldValue } = useFormikContext();
@@ -19,6 +21,7 @@ const SatelliteSubForm = ({ autoPopulateCredential, i18n }) => {
     name: 'credential',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
+  const config = useConfig();
 
   const handleCredentialUpdate = useCallback(
     value => {
@@ -27,8 +30,9 @@ const SatelliteSubForm = ({ autoPopulateCredential, i18n }) => {
     [setFieldValue]
   );
 
-  const pluginLink =
-    'http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins';
+  const pluginLink = `${getDocsBaseUrl(
+    config
+  )}/html/userguide/inventories.html#inventory-plugins`;
   const configLink =
     'https://docs.ansible.com/ansible/latest/collections/theforeman/foreman/foreman_inventory.html';
 

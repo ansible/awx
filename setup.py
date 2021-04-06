@@ -141,7 +141,7 @@ setup(
         #        ("%s" % webconfig,      ["config/uwsgi_params"]),
         ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh","tools/scripts/request_tower_configuration.ps1"]),
         ("%s" % docdir,         ["docs/licenses/*",]),
-        ("%s" % bindir, ["tools/scripts/ansible-tower-service",
+        ("%s" % bindir, ["tools/scripts/automation-controller-service",
                          "tools/scripts/failure-event-handler",
                          "tools/scripts/awx-python",
                          "tools/scripts/ansible-tower-setup"]),

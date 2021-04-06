@@ -19,6 +19,7 @@ function NodeAddModal({ i18n }) {
       timeoutMinutes,
       timeoutSeconds,
       linkType,
+      convergence,
     } = values;
 
     if (values) {
@@ -33,7 +34,10 @@ function NodeAddModal({ i18n }) {
 
     const node = {
       linkType,
+      all_parents_must_converge: convergence === 'all',
     };
+
+    delete values.convergence;
 
     delete values.linkType;
 
