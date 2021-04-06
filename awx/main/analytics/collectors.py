@@ -12,6 +12,8 @@ from django.contrib.sessions.models import Session
 from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
 
+from psycopg2.errors import UntranslatableCharacter
+
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore, datetime_hook
 from awx.main import models
@@ -344,35 +346,37 @@ def _copy_table(table, query, path):
 
 @register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing)
 def events_table(since, full_path, until, **kwargs):
-    events_query = '''COPY (SELECT main_jobevent.id, 
-                              main_jobevent.created,
-                              main_jobevent.modified,
-                              main_jobevent.uuid,
-                              main_jobevent.parent_uuid,
-                              main_jobevent.event, 
-                              main_jobevent.event_data::json->'task_action' AS task_action,
-                              (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
-                              main_jobevent.failed, 
-                              main_jobevent.changed, 
-                              main_jobevent.playbook, 
-                              main_jobevent.play,
-                              main_jobevent.task,
-                              main_jobevent.role, 
-                              main_jobevent.job_id, 
-                              main_jobevent.host_id, 
-                              main_jobevent.host_name,
-                              CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
-                              CAST(main_jobevent.event_data::json->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
-                              main_jobevent.event_data::json->'duration' AS duration,
-                              main_jobevent.event_data::json->'res'->'warnings' AS warnings,
-                              main_jobevent.event_data::json->'res'->'deprecations' AS deprecations
-                              FROM main_jobevent 
-                              WHERE (main_jobevent.id > {} AND main_jobevent.id <= {})
-                              ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER
-                   '''.format(
-        since, until
-    )
-    return _copy_table(table='events', query=events_query, path=full_path)
+    def query(event_data):
+        return f'''COPY (SELECT main_jobevent.id, 
+                         main_jobevent.created,
+                         main_jobevent.modified,
+                         main_jobevent.uuid,
+                         main_jobevent.parent_uuid,
+                         main_jobevent.event, 
+                         {event_data}->'task_action' AS task_action,
+                         (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
+                         main_jobevent.failed, 
+                         main_jobevent.changed, 
+                         main_jobevent.playbook, 
+                         main_jobevent.play,
+                         main_jobevent.task,
+                         main_jobevent.role, 
+                         main_jobevent.job_id, 
+                         main_jobevent.host_id, 
+                         main_jobevent.host_name,
+                         CAST({event_data}->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
+                         CAST({event_data}->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
+                         {event_data}->'duration' AS duration,
+                         {event_data}->'res'->'warnings' AS warnings,
+                         {event_data}->'res'->'deprecations' AS deprecations
+                         FROM main_jobevent 
+                         WHERE (main_jobevent.id > {since} AND main_jobevent.id <= {until})
+                         ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''
+
+    try:
+        return _copy_table(table='events', query=query("main_jobevent.event_data::json"), path=full_path)
+    except UntranslatableCharacter as exc:
+        return _copy_table(table='events', query=query("replace(main_jobevent.event_data::text, '\\u0000', '')::json"), path=full_path)
 
 
 @register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
