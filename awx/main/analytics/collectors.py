@@ -15,7 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 from psycopg2.errors import UntranslatableCharacter
 
 from awx.conf.license import get_license
-from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore, datetime_hook
+from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore, datetime_hook, get_event_partition_epoch
 from awx.main import models
 from awx.main.analytics import register
 
@@ -78,7 +78,17 @@ def events_slicing(key, since, until):
     lower = since or last_gather or horizon
     if not since and last_entries.get(key):
         lower = horizon
-    pk_values = models.JobEvent.objects.filter(modified__gte=lower, modified__lte=until).aggregate(Min('pk'), Max('pk'))
+    partition_epoch = get_event_partition_epoch()
+    # JobEvent.modified index was created at the partition epoch
+    # Events created before this are in a separate table that does not
+    # have this index.
+    if lower >= partition_epoch:
+        pk_values = models.JobEvent.objects.filter(modified__gte=lower, modified__lte=until).aggregate(Min('pk'), Max('pk'))
+    elif until < partition_epoch:
+        pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
+    else:
+        pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=partition_epoch).aggregate(Min('pk'))
+        pk_values.update(models.JobEvent.objects.filter(modified__gte=partition_epoch, modified__lte=until).aggregate(Max('pk')))
 
     previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
     if not since and last_entries.get(key):
