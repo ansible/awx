@@ -78,7 +78,7 @@ def events_slicing(key, since, until):
     lower = since or last_gather or horizon
     if not since and last_entries.get(key):
         lower = horizon
-    pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
+    pk_values = models.JobEvent.objects.filter(modified__gte=lower, modified__lte=until).aggregate(Min('pk'), Max('pk'))
 
     previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
     if not since and last_entries.get(key):
