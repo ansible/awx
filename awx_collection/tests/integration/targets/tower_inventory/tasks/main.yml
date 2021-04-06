@@ -11,6 +11,17 @@
     group_name1: "AWX-Collection-tests-tower_instance_group-group1-{{ test_id }}"
 
 - block:
+
+    - name: Create an Instance Group
+      tower_instance_group:
+        name: "{{ group_name1 }}"
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Create an Insights Credential
       tower_credential:
         name: "{{ cred_name1 }}"
@@ -19,16 +30,6 @@
         inputs:
           username: joe
           password: secret
-        state: present
-      register: result
-
-    - assert:
-        that:
-          - "result is changed"
-
-    - name: Create an Instance Group
-      tower_instance_group:
-        name: "{{ group_name1 }}"
         state: present
       register: result
 
