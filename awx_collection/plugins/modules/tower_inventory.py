@@ -121,7 +121,7 @@ def main():
         host_filter=dict(),
         insights_credential=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
-        instance_groups=dict(type='list',elements='str'),
+        instance_groups=dict(type='list', elements='str'),
     )
 
     # Create a module for ourselves
@@ -138,7 +138,7 @@ def main():
     host_filter = module.params.get('host_filter')
     insights_credential = module.params.get('insights_credential')
     instance_groups = module.params.get('instance_groups')
-            
+
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
 
@@ -175,10 +175,10 @@ def main():
     if insights_credential is not None:
         inventory_fields['insights_credential'] = module.resolve_name_to_id('credentials', insights_credential)
     if instance_groups is not None:
-        inventory_fields['instance_groups']  = []
+        inventory_fields['instance_groups'] = []
         for item in instance_groups:
             inventory_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
-            
+
     # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
     if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
         module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
