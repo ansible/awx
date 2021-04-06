@@ -8,8 +8,8 @@
     inv_name1: "AWX-Collection-tests-tower_inventory-inv1-{{ test_id }}"
     inv_name2: "AWX-Collection-tests-tower_inventory-inv2-{{ test_id }}"
     cred_name1: "AWX-Collection-tests-tower_inventory-cred1-{{ test_id }}"
-    instance_group_name: 
-    - "AWX-Collection-tests-tower_inventory-instance_group-{{ test_id }}"
+    instance_group_name:
+      - "AWX-Collection-tests-tower_inventory-instance_group-{{ test_id }}"
 
 - block:
     - name: Create an instance group
@@ -164,7 +164,7 @@
         organization: Default
         state: absent
         intance_groups:
-        - "{{ instance_group_name }}"
+          - "{{ instance_group_name }}"
       loop:
         - "{{ inv_name1 }}"
         - "{{ inv_name2 }}"
