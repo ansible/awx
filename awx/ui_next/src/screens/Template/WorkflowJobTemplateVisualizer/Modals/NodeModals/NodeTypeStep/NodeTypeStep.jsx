@@ -26,6 +26,8 @@ import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';
 import WorkflowJobTemplatesList from './WorkflowJobTemplatesList';
 import FormField from '../../../../../../components/FormField';
+import getDocsBaseUrl from '../../../../../../util/getDocsBaseUrl';
+import { useConfig } from '../../../../../../contexts/Config';
 
 const NodeTypeErrorAlert = styled(Alert)`
   margin-bottom: 20px;
@@ -59,6 +61,7 @@ function NodeTypeStep({ i18n }) {
   const [convergenceField, , convergenceFieldHelpers] = useField('convergence');
 
   const [isConvergenceOpen, setIsConvergenceOpen] = useState(false);
+  const config = useConfig();
 
   const isValid = !approvalNameMeta.touched || !approvalNameMeta.error;
   return (
@@ -212,7 +215,9 @@ function NodeTypeStep({ i18n }) {
                       t`Preconditions for running this node when there are multiple parents. Refer to the`
                     )}{' '}
                     <a
-                      href="https://docs.ansible.com/ansible-tower/latest/html/userguide/workflow_templates.html#convergence-node"
+                      href={`${getDocsBaseUrl(
+                        config
+                      )}/html/userguide/workflow_templates.html#convergence-node`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
