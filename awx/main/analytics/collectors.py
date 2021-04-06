@@ -109,10 +109,9 @@ def events_slicing(key, since, until):
     # and all job events are stored in partitions,
     # slice by partition
     if lower == horizon and lower > partition_epoch:
-        # get list of partitions in this time frame
-        # .. and yeld them
         for partition in get_partitions():
-            yield (partition, None)
+            if partition_within_horizon(partition, horizon):
+                yield (partition, None)
         return
 
     # JobEvent.modified index was created at the partition epoch
