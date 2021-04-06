@@ -8,13 +8,13 @@
     inv_name1: "AWX-Collection-tests-tower_inventory-inv1-{{ test_id }}"
     inv_name2: "AWX-Collection-tests-tower_inventory-inv2-{{ test_id }}"
     cred_name1: "AWX-Collection-tests-tower_inventory-cred1-{{ test_id }}"
-    instance_groups_names: 
+    instance_group_name: 
     - "AWX-Collection-tests-tower_inventory-instance_group-{{ test_id }}"
 
 - block:
     - name: Create an instance group
       tower_instance_group:
-        name: "{{ instance_group_names }}"
+        name: "{{ instance_groups_name }}"
         state: present
 
     - name: Create an Insights Credential
@@ -38,7 +38,7 @@
         organization: Default
         insights_credential: "{{ result.id }}"
         state: present
-        instance_groups: "{{ instance_group_names }}"
+        instance_groups: "{{ instance_group_name }}"
       register: result
 
     - assert:
