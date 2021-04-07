@@ -149,11 +149,22 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         from awx.main.signals import disable_activity_stream
 
         _now = now()
-        until = _now if until is None else min(until, _now)  # Make sure the end isn't in the future.
+
+        # Make sure that the endpoints are not in the future.
+        until = None if until is None else min(until, _now)
+        since = None if since is None else min(since, _now)
+
+        if since and not until:
+            # If `since` is explicit but not `until`, `since` should be used to calculate the 4-week limit
+            until = min(since + timedelta(weeks=4), _now)
+        else:
+            until = _now if until is None else until
+
         horizon = until - timedelta(weeks=4)
         if since is not None:
-            # Make sure the start isn't in the future or more than 4 weeks prior to `until`.
-            since = max(min(since, _now), horizon)
+            # Make sure the start isn't more than 4 weeks prior to `until`.
+            since = max(since, horizon)
+
         if since and since >= until:
             logger.warning("Start of the collection interval is later than the end, ignoring request.")
             return None
