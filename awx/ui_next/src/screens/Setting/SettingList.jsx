@@ -32,15 +32,15 @@ const SplitLayout = styled(PageSection)`
 `;
 const Card = styled(_Card)`
   display: inline-block;
+  break-inside: avoid;
   margin-bottom: 24px;
   width: 100%;
 `;
 const CardHeader = styled(_CardHeader)`
-  align-items: flex-start;
-  display: flex;
-  flex-flow: column nowrap;
-  && > * {
-    padding: 0;
+  && {
+    align-items: flex-start;
+    display: flex;
+    flex-flow: column nowrap;
   }
 `;
 const CardDescription = styled.div`
@@ -134,13 +134,13 @@ function SettingList({ i18n }) {
       ],
     },
     {
-      header: i18n._(t`License`),
-      description: i18n._(t`View and edit your license information`),
-      id: 'license',
+      header: i18n._(t`Subscription`),
+      description: i18n._(t`View and edit your subscription information`),
+      id: 'subscription',
       routes: [
         {
-          title: i18n._(t`License settings`),
-          path: '/settings/license',
+          title: i18n._(t`Subscription settings`),
+          path: '/settings/subscription',
         },
       ],
     },
@@ -159,7 +159,10 @@ function SettingList({ i18n }) {
   return (
     <SplitLayout>
       {settingRoutes.map(({ description, header, id, routes }) => {
-        if (id === 'license' && config?.license_info?.license_type === 'open') {
+        if (
+          id === 'subscription' &&
+          config?.license_info?.license_type === 'open'
+        ) {
           return null;
         }
         return (
