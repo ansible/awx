@@ -65,6 +65,7 @@ function PlaybookSelect({
       isValid={isValid}
       onBlur={onBlur}
       isDisabled={isLoading || isDisabled}
+      maxHeight="1000%"
     >
       {options.map(opt => (
         <SelectOption key={opt} value={opt} />
