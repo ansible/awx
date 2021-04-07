@@ -18,6 +18,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Added support for Execution Environments to the Activity Stream (https://github.com/ansible/awx/issues/9308)
 - Fixed a bug that improperly formats OpenSSH keys specified in custom Credential Types (https://github.com/ansible/awx/issues/9361)
 - Fixed an HTTP 500 error for unauthenticated users (https://github.com/ansible/awx/pull/9725)
+- Added subscription wizard: https://github.com/ansible/awx/pull/9496
 
 # 18.0.0 (March 23, 2021)
 
