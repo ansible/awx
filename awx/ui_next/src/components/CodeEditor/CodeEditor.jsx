@@ -96,11 +96,15 @@ function CodeEditor({
   useEffect(
     function removeTextareaTabIndex() {
       const editorInput = editor.current.refEditor?.querySelector('textarea');
-      if (editorInput && !readOnly) {
+      if (!editorInput) {
+        return;
+      }
+      if (!readOnly) {
         editorInput.tabIndex = -1;
       }
+      editorInput.id = id;
     },
-    [readOnly]
+    [readOnly, id]
   );
 
   const listen = useCallback(event => {
@@ -144,7 +148,7 @@ function CodeEditor({
           value={value}
           onFocus={onFocus}
           onBlur={onBlur}
-          name={id || 'code-editor'}
+          name={`${id}-editor` || 'code-editor'}
           editorProps={{ $blockScrolling: true }}
           fontSize={16}
           width="100%"

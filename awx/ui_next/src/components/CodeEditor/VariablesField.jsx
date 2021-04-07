@@ -167,7 +167,7 @@ function VariablesFieldInternals({
             <label htmlFor={id} className="pf-c-form__label">
               <span className="pf-c-form__label-text">{label}</span>
             </label>
-            {tooltip && <Popover content={tooltip} id={id} />}
+            {tooltip && <Popover content={tooltip} id={`${id}-tooltip`} />}
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle
@@ -210,6 +210,7 @@ function VariablesFieldInternals({
         )}
       </FieldHeader>
       <CodeEditor
+        id={id}
         mode={mode}
         readOnly={readOnly}
         {...field}
