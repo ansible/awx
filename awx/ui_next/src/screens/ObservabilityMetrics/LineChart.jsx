@@ -1,11 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
 import * as d3 from 'd3';
-import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
 import { PageContextConsumer } from '@patternfly/react-core';
 
-function LineChart({ data, i18n, helpText }) {
-  console.log(data, 'data');
+function LineChart({ data, helpText }) {
   const count = data[0]?.values.length;
   const draw = useCallback(() => {
     const margin = 80;
@@ -31,6 +28,7 @@ function LineChart({ data, i18n, helpText }) {
 
     /* Scale */
     let smallestY;
+    let largestY;
     data.map(line =>
       line.values.forEach(value => {
         if (smallestY === undefined) {
@@ -39,17 +37,27 @@ function LineChart({ data, i18n, helpText }) {
         if (value.y < smallestY) {
           smallestY = value.y;
         }
+        if (largestY === undefined) {
+          largestY = smallestY + 10;
+        }
+        if (value.y > largestY) {
+          largestY = value.y;
+        }
       })
     );
 
     const xScale = d3
       .scaleLinear()
-      .domain(d3.extent(data[0].values, d => d.x))
+      .domain(
+        d3.max(data[0].values, d => d.x) > 49
+          ? d3.extent(data[0].values, d => d.x)
+          : [0, 50]
+      )
       .range([0, width - margin]);
 
     const yScale = d3
       .scaleLinear()
-      .domain([smallestY, d3.max(data[0].values, d => d.y)])
+      .domain([smallestY, largestY])
       .range([height - margin, 0]);
 
     const color = d3.scaleOrdinal(d3.schemeCategory10);
@@ -221,24 +229,13 @@ function LineChart({ data, i18n, helpText }) {
       .append('g')
       .attr('class', 'x axis')
       .attr('transform', `translate(0, ${height - margin})`)
-      .call(xAxis)
-      .append('text')
-      .attr('x', 30)
-      .attr('y', 30)
-      .attr('fill', '#000')
-      .text(i18n._(t`Count`));
+      .call(xAxis);
 
     svg
       .append('g')
       .attr('class', 'y axis')
-      .call(yAxis)
-      .append('text')
-      .attr('y', -30)
-      .attr('x', 0)
-      .attr('transform', 'rotate(-90)')
-      .attr('fill', '#000')
-      .text(i18n._(t`Values`));
-  }, [data, i18n, helpText]);
+      .call(yAxis);
+  }, [data, helpText]);
 
   useEffect(() => {
     draw();
@@ -269,4 +266,4 @@ const withPageContext = Component => {
   };
 };
 
-export default withI18n()(withPageContext(LineChart));
+export default withPageContext(LineChart);

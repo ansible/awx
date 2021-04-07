@@ -185,7 +185,7 @@ function ObservabilityMetrics({ i18n }) {
                       setRenderedData([]);
                     }}
                     selections={instance}
-                    placeholderText={i18n._(t`Select an instance`)}
+                    placeholderText={i18n._(t`Select a instance`)}
                   >
                     {instances.map(inst => (
                       <SelectOption value={inst} key={inst} />
@@ -196,7 +196,7 @@ function ObservabilityMetrics({ i18n }) {
                 <ToolbarItem>
                   <Select
                     ouiaId="Metric-select"
-                    placeholderText={i18n._(t`Select an metric`)}
+                    placeholderText={i18n._(t`Select a metric`)}
                     isOpen={metricIsOpen}
                     onSelect={(e, value) => {
                       count = [0];
