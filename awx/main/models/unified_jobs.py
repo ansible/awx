@@ -851,7 +851,7 @@ class UnifiedJob(
         # out the time that elapsed, do so.
         if self.started and self.finished and self.elapsed == 0.0:
             td = self.finished - self.started
-            self.elapsed = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
+            self.elapsed = str((td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0))
             if 'elapsed' not in update_fields:
                 update_fields.append('elapsed')
 
