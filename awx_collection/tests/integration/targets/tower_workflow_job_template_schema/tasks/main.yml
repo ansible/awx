@@ -157,24 +157,17 @@
           organization:
             name: Default
           name: "{{ jt1_name }}"
-        credentials: []
+          type: job_template
         related:
           success_nodes:
             - identifier: node201
-          failure_nodes: []
-          always_nodes: []
-          credentials: []
       - identifier: node201
         unified_job_template:
           name: "{{ project_inv_source }}"
           inventory:
             organization:
               name: Default
-        related:
-          success_nodes: []
-          failure_nodes: []
-          always_nodes: []
-          credentials: []
+          type: inventory_source
   register: result
   ignore_errors: true
 
