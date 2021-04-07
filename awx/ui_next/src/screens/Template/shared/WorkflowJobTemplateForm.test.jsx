@@ -124,6 +124,40 @@ describe('<WorkflowJobTemplateForm/>', () => {
     expect(wrapper.length).toBe(1);
   });
 
+  test('organization is a required field for organization admins', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/workflow_job_template/:id/edit"
+          component={() => (
+            <WorkflowJobTemplateForm
+              template={mockTemplate}
+              handleCancel={handleCancel}
+              handleSubmit={handleSubmit}
+              isOrgAdmin
+            />
+          )}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 6 } },
+              },
+            },
+          },
+        }
+      );
+    });
+
+    wrapper.update();
+    expect(
+      wrapper.find('FormGroup[label="Organization"]').prop('isRequired')
+    ).toBeTruthy();
+  });
+
   test('all the fields render successfully', () => {
     const fields = [
       'FormField[name="name"]',
@@ -140,6 +174,9 @@ describe('<WorkflowJobTemplateForm/>', () => {
       expect(wrapper.find(`${field}`).length).toBe(1);
     };
     fields.map((field, index) => assertField(field, index));
+    expect(
+      wrapper.find('FormGroup[label="Organization"]').prop('isRequired')
+    ).toBeFalsy();
   });
 
   test('changing inputs should update values', async () => {

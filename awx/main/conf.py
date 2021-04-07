@@ -778,6 +778,15 @@ register(
     category=_('System'),
     category_slug='system',
 )
+register(
+    'AUTOMATION_ANALYTICS_LAST_ENTRIES',
+    field_class=fields.CharField,
+    label=_('Last gathered entries for expensive Automation Analytics collectors.'),
+    default='',
+    allow_blank=True,
+    category=_('System'),
+    category_slug='system',
+)
 
 
 register(

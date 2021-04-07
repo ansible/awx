@@ -14,7 +14,7 @@
 - block:
     - name: Create an instance group
       tower_instance_group:
-        name: "{{ instance_groups_name }}"
+        name: "{{ instance_group_name }}"
         state: present
 
     - name: Create an Insights Credential
@@ -44,11 +44,12 @@
     - assert:
         that:
           - "result is changed"
+
     - name: Test Inventory module idempotency
       tower_inventory:
         name: "{{ result.id }}"
         organization: Default
-        instance_groups: "{{ instance_groups_names }}"
+        instance_groups: "{{ instance_group_name }}"
         insights_credential: "{{ cred_name1 }}"
         state: present
       register: result
@@ -61,7 +62,7 @@
       tower_inventory:
         name: "copy_{{ inv_name1 }}"
         copy_from: "{{ inv_name1 }}"
-        instance_groups: "{{ instance_groups_names }}"
+        instance_groups: "{{ instance_group_name }}"
         organization: Default
         description: "Our Foo Cloud Servers"
         state: present
@@ -169,6 +170,11 @@
         - "{{ inv_name1 }}"
         - "{{ inv_name2 }}"
         - "copy_{{ inv_name1 }}"
+
+    - name: Delete the instance groups
+      tower_instance_group:
+        name: "{{ group_name1 }}"
+        state: absent
 
     - name: Delete Insights Credential
       tower_credential:

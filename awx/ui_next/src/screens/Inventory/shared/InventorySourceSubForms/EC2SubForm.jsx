@@ -11,10 +11,13 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
+import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
+import { useConfig } from '../../../../contexts/Config';
 
 const EC2SubForm = ({ i18n }) => {
   const { setFieldValue } = useFormikContext();
   const [credentialField] = useField('credential');
+  const config = useConfig();
 
   const handleCredentialUpdate = useCallback(
     value => {
@@ -23,8 +26,9 @@ const EC2SubForm = ({ i18n }) => {
     [setFieldValue]
   );
 
-  const pluginLink =
-    'http://docs.ansible.com/ansible-tower/latest/html/userguide/inventories.html#inventory-plugins';
+  const pluginLink = `${getDocsBaseUrl(
+    config
+  )}/html/userguide/inventories.html#inventory-plugins`;
   const configLink =
     'https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html';
 

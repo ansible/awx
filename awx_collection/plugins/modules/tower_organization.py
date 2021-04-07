@@ -45,6 +45,11 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    instance_groups:
+      description:
+        - list of Instance Groups for this Organization to run on.
+      type: list
+      elements: str
     notification_templates_started:
       description:
         - list of notifications to send on start
@@ -108,6 +113,7 @@ def main():
         description=dict(),
         default_environment=dict(),
         max_hosts=dict(type='int', default="0"),
+        instance_groups=dict(type="list", elements='str'),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
@@ -124,7 +130,6 @@ def main():
     description = module.params.get('description')
     default_ee = module.params.get('default_environment')
     max_hosts = module.params.get('max_hosts')
-    # instance_group_names = module.params.get('instance_groups')
     state = module.params.get('state')
 
     # Attempt to look up organization based on the provided name
@@ -135,6 +140,12 @@ def main():
         module.delete_if_needed(organization)
     # Attempt to look up associated field items the user specified.
     association_fields = {}
+
+    instance_group_names = module.params.get('instance_groups')
+    if instance_group_names is not None:
+        association_fields['instance_groups'] = []
+        for item in instance_group_names:
+            association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
 
     notifications_start = module.params.get('notification_templates_started')
     if notifications_start is not None:
