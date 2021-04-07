@@ -74,7 +74,7 @@ options:
       type: str
     instance_groups:
       description:
-        - list of Ansible Tower instance groups to associate to the organization
+        - list of Ansible Tower instance groups to associate to the inventory
       type: list
       elements: str
 extends_documentation_fragment: awx.awx.auth
