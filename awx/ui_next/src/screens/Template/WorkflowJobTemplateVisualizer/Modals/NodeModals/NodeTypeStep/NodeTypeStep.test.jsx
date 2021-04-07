@@ -177,6 +177,7 @@ describe('NodeTypeStep', () => {
             approvalDescription: '',
             timeoutMinutes: 0,
             timeoutSeconds: 0,
+            convergence: 'any',
           }}
         >
           <NodeTypeStep />

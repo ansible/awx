@@ -68,7 +68,7 @@ DATABASES = {
 # the K8S cluster where awx itself is running)
 IS_K8S = False
 
-AWX_CONTAINER_GROUP_KEEP_POD = False
+RECEPTOR_RELEASE_WORK = True
 AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
 AWX_CONTAINER_GROUP_POD_LAUNCH_RETRIES = 100
 AWX_CONTAINER_GROUP_POD_LAUNCH_RETRY_DELAY = 5
@@ -620,6 +620,8 @@ INSIGHTS_TRACKING_STATE = False
 
 # Last gather date for Analytics
 AUTOMATION_ANALYTICS_LAST_GATHER = None
+# Last gathered entries for expensive Analytics
+AUTOMATION_ANALYTICS_LAST_ENTRIES = ''
 
 # Default list of modules allowed for ad hoc commands.
 # Note: This setting may be overridden by database settings.

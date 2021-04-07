@@ -14,6 +14,7 @@
     lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
     email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
     webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ test_id }}"
+    group_name1: "AWX-Collection-tests-tower_instance_group-group1-{{ test_id }}"
 
 - name: Create a Demo Project
   tower_project:
@@ -48,6 +49,16 @@
     name: "{{ lab1 }}"
     organization: Default
 
+- name: Create an Instance Group
+  tower_instance_group:
+    name: "{{ group_name1 }}"
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Add email notification
   tower_notification_template:
     name: "{{ email_not }}"
@@ -81,7 +92,11 @@
     project: "{{ proj1 }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
-    credentials: ["{{ cred1 }}", "{{ cred2 }}"]
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+    instance_groups:
+      - "{{ group_name1 }}"
     job_type: run
     state: present
   register: jt1_result
@@ -382,6 +397,11 @@
   tower_notification_template:
     name: "{{ email_not }}"
     organization: Default
+    state: absent
+
+- name: Delete the instance groups
+  tower_instance_group:
+    name: "{{ group_name1 }}"
     state: absent
 
 - name: Delete webhook notification

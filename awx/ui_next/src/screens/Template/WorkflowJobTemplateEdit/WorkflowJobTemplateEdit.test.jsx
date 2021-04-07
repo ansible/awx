@@ -7,8 +7,12 @@ import {
   OrganizationsAPI,
   LabelsAPI,
   ExecutionEnvironmentsAPI,
+  UsersAPI,
 } from '../../../api';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 
 jest.mock('../../../api/models/WorkflowJobTemplates');
@@ -16,6 +20,7 @@ jest.mock('../../../api/models/Labels');
 jest.mock('../../../api/models/Organizations');
 jest.mock('../../../api/models/Inventories');
 jest.mock('../../../api/models/ExecutionEnvironments');
+jest.mock('../../../api/models/Users');
 
 const mockTemplate = {
   id: 6,
@@ -74,6 +79,10 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       },
     });
 
+    UsersAPI.readAdminOfOrganizations.mockResolvedValue({
+      data: { count: 1, results: [{ id: 1 }] },
+    });
+
     await act(async () => {
       history = createMemoryHistory({
         initialEntries: ['/templates/workflow_job_template/6/edit'],
@@ -95,6 +104,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
           },
         }
       );
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
   });
 
@@ -241,6 +251,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         }
       );
     });
+    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
     OrganizationsAPI.read.mockRejectedValue({
       response: {
         config: {

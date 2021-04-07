@@ -17,11 +17,13 @@ function NodeEditModal({ i18n }) {
       nodeType,
       timeoutMinutes,
       timeoutSeconds,
+      convergence,
       ...rest
     } = values;
     let node;
     if (values.nodeType === 'workflow_approval_template') {
       node = {
+        all_parents_must_converge: convergence === 'all',
         nodeResource: {
           description: approvalDescription,
           name: approvalName,
@@ -32,6 +34,7 @@ function NodeEditModal({ i18n }) {
     } else {
       node = {
         nodeResource,
+        all_parents_must_converge: convergence === 'all',
       };
       if (nodeType === 'job_template' || nodeType === 'workflow_job_template') {
         node.promptValues = {

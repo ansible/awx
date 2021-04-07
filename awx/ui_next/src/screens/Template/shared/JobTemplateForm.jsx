@@ -296,7 +296,7 @@ function JobTemplateForm({
             t`Select a project before editing the execution environment.`
           )}
           globallyAvailable
-          isDisabled={!projectField.value}
+          isDisabled={!projectField.value?.id}
           projectId={projectField.value?.id}
         />
 

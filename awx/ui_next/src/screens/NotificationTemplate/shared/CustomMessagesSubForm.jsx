@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { useEffect, useRef } from 'react';
-import { Trans, withI18n } from '@lingui/react';
+import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField, useFormikContext } from 'formik';
 import { Switch, Text } from '@patternfly/react-core';
@@ -9,6 +9,8 @@ import {
   SubFormLayout,
 } from '../../../components/FormLayout';
 import CodeEditorField from '../../../components/CodeEditor/CodeEditorField';
+import { useConfig } from '../../../contexts/Config';
+import getDocsBaseUrl from '../../../util/getDocsBaseUrl';
 
 function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
   const [useCustomField, , useCustomHelpers] = useField('useCustomMessages');
@@ -16,6 +18,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
   const showBodies = ['email', 'pagerduty', 'webhook'].includes(type);
 
   const { setFieldValue } = useFormikContext();
+  const config = useConfig();
   const mountedRef = useRef(null);
   useEffect(
     function resetToDefaultMessages() {
@@ -69,11 +72,9 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
             css="margin-bottom: var(--pf-c-content--MarginBottom)"
           >
             <small>
-              <Trans>
-                Use custom messages to change the content of notifications sent
-                when a job starts, succeeds, or fails. Use curly braces to
-                access information about the job:{' '}
-              </Trans>
+              {i18n._(t`Use custom messages to change the content of
+                notifications sent when a job starts, succeeds, or fails. Use
+                curly braces to access information about the job:`)}{' '}
               <code>
                 {'{{'} job_friendly_name {'}}'}
               </code>
@@ -81,23 +82,22 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
               <code>
                 {'{{'} url {'}}'}
               </code>
-              , <Trans>or attributes of the job such as</Trans>{' '}
+              ,{' '}
               <code>
                 {'{{'} job.status {'}}'}
               </code>
               .{' '}
-              <Trans>
-                You may apply a number of possible variables in the message.
-                Refer to the{' '}
-              </Trans>{' '}
+              {i18n._(t`You may apply a number of possible variables in the
+                message. For more information, refer to the`)}{' '}
               <a
-                href="https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications"
                 target="_blank"
                 rel="noopener noreferrer"
+                href={`${getDocsBaseUrl(
+                  config
+                )}/html/userguide/notifications.html#create-custom-notifications`}
               >
-                Ansible Tower documentation
-              </a>{' '}
-              <Trans>for more details.</Trans>
+                {i18n._(t`Ansible Tower Documentation.`)}
+              </a>
             </small>
           </Text>
           <FormFullWidthLayout>
