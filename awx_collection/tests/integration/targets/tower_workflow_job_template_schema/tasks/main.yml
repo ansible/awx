@@ -102,6 +102,7 @@
           inventory:
             organization:
               name: Default
+          type: inventory_source
         related:
           failure_nodes:
             - identifier: node201
@@ -112,6 +113,7 @@
           organization:
             name: Default
           name: "{{ jt1_name }}"
+          type: job_template
         related:
           success_nodes:
             - identifier: node301
@@ -120,12 +122,14 @@
           organization:
             name: Default
           name: "{{ demo_project_name }}"
+          type: project
       - all_parents_must_converge: false
         identifier: node301
         unified_job_template:
           organization:
             name: Default
           name: "{{ jt2_name }}"
+          type: job_template
   register: result
 
 - assert:
