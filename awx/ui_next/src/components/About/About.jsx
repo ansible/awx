@@ -5,7 +5,6 @@ import { t } from '@lingui/macro';
 import { AboutModal } from '@patternfly/react-core';
 
 import { BrandName } from '../../variables';
-import brandLogoImg from './brand-logo.svg';
 
 function About({ version, isOpen, onClose, i18n }) {
   const createSpeechBubble = () => {
@@ -32,8 +31,8 @@ function About({ version, isOpen, onClose, i18n }) {
       isOpen={isOpen}
       onClose={onClose}
       productName={`Ansible ${BrandName}`}
-      trademark={i18n._(t`Copyright 2019 Red Hat, Inc.`)}
-      brandImageSrc={brandLogoImg}
+      trademark={i18n._(t`Copyright ${new Date().getFullYear()} Red Hat, Inc.`)}
+      brandImageSrc="/static/media/logo-header.svg"
       brandImageAlt={i18n._(t`Brand Image`)}
     >
       <pre>
