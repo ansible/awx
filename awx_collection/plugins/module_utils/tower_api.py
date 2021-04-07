@@ -753,6 +753,8 @@ class TowerAPIModule(TowerModule):
             # Lookup Job Template ID
             if workflow_node['unified_job_template']['name']:
                 search_fields = {'name': workflow_node['unified_job_template']['name']}
+                if workflow_node['unified_job_template']['type'] is None:
+                    self.fail_json(msg='Could not find unified job template type in schema {1}'.format(workflow_node))
                 if workflow_node['unified_job_template']['type'] == 'inventory_source':
                     # workflow_node['unified_job_template']['inventory']:
                     organization_id = self.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])

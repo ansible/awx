@@ -359,45 +359,33 @@
           inventory:
             organization:
               name: Default
+          type: inventory_source
         related:
-          success_nodes: []
           failure_nodes:
             - identifier: node201
-          always_nodes: []
-          credentials: []
       - identifier: node201
         unified_job_template:
           organization:
             name: Default
           name: "{{ jt1_name }}"
+          type: job_template
         credentials: []
         related:
           success_nodes:
             - identifier: node301
-          failure_nodes: []
-          always_nodes: []
-          credentials: []
       - identifier: node202
         unified_job_template:
           organization:
             name: Default
           name: "{{ demo_project_name }}"
-        related:
-          success_nodes: []
-          failure_nodes: []
-          always_nodes: []
-          credentials: []
+          type: project
       - all_parents_must_converge: false
         identifier: node301
         unified_job_template:
           organization:
             name: Default
           name: "{{ jt2_name }}"
-        related:
-          success_nodes: []
-          failure_nodes: []
-          always_nodes: []
-          credentials: []
+          type: job_template
   register: result
 
 - assert:
