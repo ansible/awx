@@ -2,7 +2,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import ObservabilityMetrics from './ObservabilityMetrics';
+import Metrics from './Metrics';
 import { MetricsAPI, InstancesAPI } from '../../api';
 
 jest.mock('../../api/models/Instances');
@@ -23,11 +23,11 @@ MetricsAPI.read.mockResolvedValue({
   },
 });
 
-describe('<ObservabilityMetrics/>', () => {
+describe('<Metrics/>', () => {
   let wrapper;
   beforeEach(async () => {
     await act(async () => {
-      wrapper = mountWithContexts(<ObservabilityMetrics />);
+      wrapper = mountWithContexts(<Metrics />);
     });
   });
   afterEach(() => {
@@ -35,7 +35,7 @@ describe('<ObservabilityMetrics/>', () => {
     jest.clearAllMocks();
   });
   test('should mound properly', () => {
-    expect(wrapper.find('ObservabilityMetrics').length).toBe(1);
+    expect(wrapper.find('Metrics').length).toBe(1);
     expect(wrapper.find('EmptyStateBody').length).toBe(1);
     expect(wrapper.find('ChartLine').length).toBe(0);
   });

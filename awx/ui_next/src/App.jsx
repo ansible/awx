@@ -20,7 +20,7 @@ import Login from './screens/Login';
 import { isAuthenticated } from './util/auth';
 import { getLanguageWithoutRegionCode } from './util/language';
 import { dynamicActivate, locales } from './i18nLoader';
-import ObservabilityMetrics from './screens/ObservabilityMetrics';
+import Metrics from './screens/Metrics';
 
 import getRouteConfig from './routeConfig';
 import SubscriptionEdit from './screens/Setting/Subscription/SubscriptionEdit';
@@ -59,6 +59,9 @@ const AuthorizedRoutes = ({ routeConfig }) => {
           </ProtectedRoute>
         ))
         .concat(
+          <ProtectedRoute key="metrics" path="/metrics">
+            <Metrics />
+          </ProtectedRoute>,
           <ProtectedRoute key="not-found" path="*">
             <NotFound />
           </ProtectedRoute>
@@ -88,7 +91,6 @@ function App() {
   const { hash, search, pathname } = useLocation();
 
   return (
-<<<<<<< HEAD
     <I18nProvider i18n={i18n}>
       <Background>
         <Switch>
@@ -110,47 +112,6 @@ function App() {
           </ProtectedRoute>
         </Switch>
       </Background>
-=======
-    <I18nProvider language={language} catalogs={catalogs}>
-      <I18n>
-        {({ i18n }) => (
-          <Background>
-            <Switch>
-              <Route exact strict path="/*/">
-                <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />
-              </Route>
-              <Route path="/login">
-                <Login isAuthenticated={isAuthenticated} />
-              </Route>
-              <Route exact path="/">
-                <Redirect to="/home" />
-              </Route>
-              <ProtectedRoute>
-                <AppContainer navRouteConfig={getRouteConfig(i18n)}>
-                  <Switch>
-                    {getRouteConfig(i18n)
-                      .flatMap(({ routes }) => routes)
-                      .map(({ path, screen: Screen }) => (
-                        <ProtectedRoute key={path} path={path}>
-                          <Screen match={match} />
-                        </ProtectedRoute>
-                      ))
-                      .concat(
-                        <Route exact path="/metrics">
-                          <ObservabilityMetrics />
-                        </Route>,
-                        <ProtectedRoute key="not-found" path="*">
-                          <NotFound />
-                        </ProtectedRoute>
-                      )}
-                  </Switch>
-                </AppContainer>
-              </ProtectedRoute>
-            </Switch>
-          </Background>
-        )}
-      </I18n>
->>>>>>> Adds observability metrics chart
     </I18nProvider>
   );
 }

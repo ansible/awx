@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
 import * as d3 from 'd3';
-import { PageContextConsumer } from '@patternfly/react-core';
 
 function LineChart({ data, helpText }) {
   const count = data[0]?.values.length;
@@ -256,14 +255,4 @@ function LineChart({ data, helpText }) {
   return <div id="chart" />;
 }
 
-const withPageContext = Component => {
-  return function contextComponent(props) {
-    return (
-      <PageContextConsumer>
-        {pageContext => <Component {...props} pageContext={pageContext} />}
-      </PageContextConsumer>
-    );
-  };
-};
-
-export default withPageContext(LineChart);
+export default LineChart;

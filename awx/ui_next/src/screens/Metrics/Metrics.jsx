@@ -18,6 +18,7 @@ import LineChart from './LineChart';
 import { MetricsAPI, InstancesAPI } from '../../api';
 import useRequest from '../../util/useRequest';
 import ContentEmpty from '../../components/ContentEmpty';
+import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 import ContentError from '../../components/ContentError';
 
 let count = [0];
@@ -43,7 +44,7 @@ function useInterval(callback, delay, instance, metric) {
   }, [callback, delay, instance, metric]);
   return { count };
 }
-function ObservabilityMetrics({ i18n }) {
+function Metrics({ i18n }) {
   const [instanceIsOpen, setInstanceIsOpen] = useState(false);
   const [instance, setInstance] = useState(null);
   const [metric, setMetric] = useState(null);
@@ -154,7 +155,6 @@ function ObservabilityMetrics({ i18n }) {
     fetchInstances();
   }, [fetchInstances]);
   if (fetchInitialError || updateError) {
-    console.log('here');
     return (
       <PageSection>
         <Card>
@@ -166,74 +166,78 @@ function ObservabilityMetrics({ i18n }) {
     );
   }
   return (
-    <PageSection>
-      <Card>
-        <CardHeader>
-          <Toolbar>
-            <ToolbarContent>
-              <ToolbarGroup>
-                <ToolbarItem>{i18n._(t`Instance`)}</ToolbarItem>
-                <ToolbarItem>
-                  <Select
-                    ouiaId="Instance-select"
-                    onToggle={setInstanceIsOpen}
-                    isOpen={instanceIsOpen}
-                    onSelect={(e, value) => {
-                      count = [0];
-                      setInstance(value);
-                      setInstanceIsOpen(false);
-                      setRenderedData([]);
-                    }}
-                    selections={instance}
-                    placeholderText={i18n._(t`Select a instance`)}
-                  >
-                    {instances.map(inst => (
-                      <SelectOption value={inst} key={inst} />
-                    ))}
-                  </Select>
-                </ToolbarItem>
-                <ToolbarItem>{i18n._(t`Metric`)}</ToolbarItem>
-                <ToolbarItem>
-                  <Select
-                    ouiaId="Metric-select"
-                    placeholderText={i18n._(t`Select a metric`)}
-                    isOpen={metricIsOpen}
-                    onSelect={(e, value) => {
-                      count = [0];
-                      setMetric(value);
-                      setRenderedData([]);
-                      setMetricIsOpen(false);
-                    }}
-                    onToggle={setMetricIsOpen}
-                    selections={metric}
-                  >
-                    {metrics.map(met => (
-                      <SelectOption value={met} key={met} />
-                    ))}
-                  </Select>
-                </ToolbarItem>
-              </ToolbarGroup>
-            </ToolbarContent>
-          </Toolbar>
-        </CardHeader>
-        <CardBody>
-          {instance && metric ? (
-            Object.keys(renderedData).length > 0 && (
-              <LineChart
-                data={renderedData}
-                count={count}
-                helpText={helpText}
+    <>
+      <ScreenHeader breadcrumbConfig={{ '/metrics': i18n._(t`Metrics`) }} />
+
+      <PageSection>
+        <Card>
+          <CardHeader>
+            <Toolbar>
+              <ToolbarContent>
+                <ToolbarGroup>
+                  <ToolbarItem>{i18n._(t`Instance`)}</ToolbarItem>
+                  <ToolbarItem>
+                    <Select
+                      ouiaId="Instance-select"
+                      onToggle={setInstanceIsOpen}
+                      isOpen={instanceIsOpen}
+                      onSelect={(e, value) => {
+                        count = [0];
+                        setInstance(value);
+                        setInstanceIsOpen(false);
+                        setRenderedData([]);
+                      }}
+                      selections={instance}
+                      placeholderText={i18n._(t`Select a instance`)}
+                    >
+                      {instances.map(inst => (
+                        <SelectOption value={inst} key={inst} />
+                      ))}
+                    </Select>
+                  </ToolbarItem>
+                  <ToolbarItem>{i18n._(t`Metric`)}</ToolbarItem>
+                  <ToolbarItem>
+                    <Select
+                      ouiaId="Metric-select"
+                      placeholderText={i18n._(t`Select a metric`)}
+                      isOpen={metricIsOpen}
+                      onSelect={(e, value) => {
+                        count = [0];
+                        setMetric(value);
+                        setRenderedData([]);
+                        setMetricIsOpen(false);
+                      }}
+                      onToggle={setMetricIsOpen}
+                      selections={metric}
+                    >
+                      {metrics.map(met => (
+                        <SelectOption value={met} key={met} />
+                      ))}
+                    </Select>
+                  </ToolbarItem>
+                </ToolbarGroup>
+              </ToolbarContent>
+            </Toolbar>
+          </CardHeader>
+          <CardBody>
+            {instance && metric ? (
+              Object.keys(renderedData).length > 0 && (
+                <LineChart
+                  data={renderedData}
+                  count={count}
+                  helpText={helpText}
+                />
+              )
+            ) : (
+              <ContentEmpty
+                title={i18n._(t`Select an instance and a metric to show chart`)}
               />
-            )
-          ) : (
-            <ContentEmpty
-              title={i18n._(t`Select an instance and a metric to show chart`)}
-            />
-          )}
-        </CardBody>
-      </Card>
-    </PageSection>
+            )}
+          </CardBody>
+        </Card>
+      </PageSection>
+    </>
   );
 }
 
-export default withI18n()(ObservabilityMetrics);
+export default withI18n()(Metrics);

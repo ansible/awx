@@ -164,6 +164,7 @@ describe('<InstanceGroupList />', () => {
   });
 
   test('should render deletion error modal', async () => {
+    jest.setTimeout(5000 * 4);
     InstanceGroupsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
