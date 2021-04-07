@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+readonly CMDNAME=$(basename "$0")
+
+readonly MIN_SLEEP=0.5
+readonly MAX_SLEEP=30
+readonly ATTEMPTS=10
+readonly TIMEOUT=60
+
+log_message() { echo "[${CMDNAME}]" "$@" >&2; }
+log_error() { echo "[${CMDNAME}] ERROR:" "$@" >&2; }
+
+# Args: last_sleep
+next_sleep() {
+    awk "BEGIN {ns = ${1} * 2; ns = ns > ${MAX_SLEEP} ? ${MAX_SLEEP} : ns; print(ns)}"
+}
+
+wait_for() {
+    local rc=1
+    local attempt=1
+    local next_sleep="${MIN_SLEEP}"
+
+    while true; do
+        log_message "Attempt ${attempt} of ${ATTEMPTS}"
+
+        timeout "${TIMEOUT}" \
+                /bin/bash -c "! awx-manage showmigrations | grep '\[ \]'" &>/dev/null \
+            && return || rc=$?
+
+        (( ++attempt > ATTEMPTS )) && break
+
+        log_message "Waiting ${next_sleep} seconds before next attempt"
+        sleep "${next_sleep}"
+        next_sleep=$(next_sleep ${next_sleep})
+    done
+
+    return $rc
+}
+
+main() {
+    log_message "Waiting for database migrations..."
+    if ! wait_for "$@"; then
+        log_message "ERROR: Database migrations not applied"
+        exit 1
+    fi
+}
+
+main "$@"
