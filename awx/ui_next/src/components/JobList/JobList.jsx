@@ -244,13 +244,15 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
                     isJobRunning(item.status) ||
                     !item.summary_fields.user_capabilities.delete
                   }
-                  errorMessage={i18n.plural({
-                    value: cannotDeleteItems.length,
-                    one:
-                      'The selected job cannot be deleted due to insufficient permission or a running job status',
-                    other:
-                      'The selected jobs cannot be deleted due to insufficient permissions or a running job status',
-                  })}
+                  errorMessage={
+                    cannotDeleteItems.length === 1
+                      ? i18n._(
+                          t`The selected job cannot be deleted due to insufficient permission or a running job status`
+                        )
+                      : i18n._(
+                          t`The selected jobs cannot be deleted due to insufficient permissions or a running job status`
+                        )
+                  }
                 />,
                 <JobListCancelButton
                   key="cancel"
