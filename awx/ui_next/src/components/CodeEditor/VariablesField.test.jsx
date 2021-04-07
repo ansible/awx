@@ -65,15 +65,14 @@ describe('VariablesField', () => {
         )}
       </Formik>
     );
-    const buttons = wrapper.find('Button');
-    expect(buttons).toHaveLength(2);
+    const jsButton = wrapper.find('Button.toggle-button-javascript');
     await act(async () => {
-      buttons.at(1).simulate('click');
+      jsButton.simulate('click');
     });
     wrapper.update();
-    const buttons2 = wrapper.find('Button');
+    const yamlButton = wrapper.find('Button.toggle-button-yaml');
     await act(async () => {
-      buttons2.at(0).simulate('click');
+      yamlButton.simulate('click');
     });
     wrapper.update();
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
@@ -89,18 +88,17 @@ describe('VariablesField', () => {
         )}
       </Formik>
     );
-    const buttons = wrapper.find('Button');
-    expect(buttons).toHaveLength(2);
+    const jsButton = wrapper.find('Button.toggle-button-javascript');
     await act(async () => {
-      buttons.at(1).simulate('click');
+      jsButton.simulate('click');
     });
     wrapper.update();
     wrapper.find('CodeEditor').invoke('onChange')(
       '{\n  "foo": "bar",\n  "baz": 3\n}'
     );
-    const buttons2 = wrapper.find('Button');
+    const yamlButton = wrapper.find('Button.toggle-button-yaml');
     await act(async () => {
-      buttons2.at(0).simulate('click');
+      yamlButton.simulate('click');
     });
     wrapper.update();
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
