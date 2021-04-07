@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, plural } from '@lingui/macro';
 
 import { Card } from '@patternfly/react-core';
 import AlertModal from '../AlertModal';
@@ -244,15 +244,12 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
                     isJobRunning(item.status) ||
                     !item.summary_fields.user_capabilities.delete
                   }
-                  errorMessage={
-                    cannotDeleteItems.length === 1
-                      ? i18n._(
-                          t`The selected job cannot be deleted due to insufficient permission or a running job status`
-                        )
-                      : i18n._(
-                          t`The selected jobs cannot be deleted due to insufficient permissions or a running job status`
-                        )
-                  }
+                  errorMessage={plural(cannotDeleteItems.length, {
+                    one:
+                      'The selected job cannot be deleted due to insufficient permission or a running job status',
+                    other:
+                      'The selected jobs cannot be deleted due to insufficient permissions or a running job status',
+                  })}
                 />,
                 <JobListCancelButton
                   key="cancel"

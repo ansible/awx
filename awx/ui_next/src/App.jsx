@@ -9,16 +9,17 @@ import {
 } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import { i18n } from '@lingui/core';
+import { Card, PageSection } from '@patternfly/react-core';
 
+import { ConfigProvider, useAuthorizedPath } from './contexts/Config';
 import AppContainer from './components/AppContainer';
 import Background from './components/Background';
 import NotFound from './screens/NotFound';
 import Login from './screens/Login';
 
 import { isAuthenticated } from './util/auth';
-import { locales, dynamicActivate } from './i18nLoader';
-
 import { getLanguageWithoutRegionCode } from './util/language';
+import { dynamicActivate, locales } from './i18nLoader';
 
 import getRouteConfig from './routeConfig';
 import SubscriptionEdit from './screens/Setting/Subscription/SubscriptionEdit';
@@ -79,11 +80,12 @@ function App() {
     // preferred language, default to one that has strings.
     language = 'en';
   }
-  const { hash, search, pathname } = useLocation();
   useEffect(() => {
     dynamicActivate(language);
   }, [language]);
-  i18n.activate(language);
+
+  const { hash, search, pathname } = useLocation();
+
   return (
     <I18nProvider i18n={i18n}>
       <Background>
@@ -98,22 +100,11 @@ function App() {
             <Redirect to="/home" />
           </Route>
           <ProtectedRoute>
-            <AppContainer navRouteConfig={getRouteConfig(i18n)}>
-              <Switch>
-                {getRouteConfig(i18n)
-                  .flatMap(({ routes }) => routes)
-                  .map(({ path, screen: Screen }) => (
-                    <ProtectedRoute key={path} path={path}>
-                      <Screen match={match} />
-                    </ProtectedRoute>
-                  ))
-                  .concat(
-                    <ProtectedRoute key="not-found" path="*">
-                      <NotFound />
-                    </ProtectedRoute>
-                  )}
-              </Switch>
-            </AppContainer>
+            <ConfigProvider>
+              <AppContainer navRouteConfig={getRouteConfig(i18n)}>
+                <AuthorizedRoutes routeConfig={getRouteConfig(i18n)} />
+              </AppContainer>
+            </ConfigProvider>
           </ProtectedRoute>
         </Switch>
       </Background>

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { t, Plural } from '@lingui/macro';
+import { t, plural } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 import { InventoriesAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
@@ -219,13 +219,12 @@ function InventoryList({ i18n }) {
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Inventories`)}
                   deleteDetailsRequests={deleteDetailsRequests}
-                  warningMessage={
-                    <Plural
-                      value={selected.length}
-                      one="The inventory will be in a pending status until the final delete is processed."
-                      other="The inventories will be in a pending status until the final delete is processed."
-                    />
-                  }
+                  warningMessage={plural(selected.length, {
+                    one:
+                      'The inventory will be in a pending status until the final delete is processed.',
+                    other:
+                      'The inventories will be in a pending status until the final delete is processed.',
+                  })}
                 />,
               ]}
             />

@@ -21,7 +21,7 @@ import {
   ToolbarToggleGroup,
   Tooltip,
 } from '@patternfly/react-core';
-import { SearchIcon, QuestionCircleIcon } from '@patternfly/react-icons';
+import { SearchIcon } from '@patternfly/react-icons';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody as _CardBody } from '../../../components/Card';
@@ -47,8 +47,6 @@ import {
   removeParams,
   getQSConfig,
 } from '../../../util/qs';
-import getDocsBaseUrl from '../../../util/getDocsBaseUrl';
-import { useConfig } from '../../../contexts/Config';
 
 const QS_CONFIG = getQSConfig('job_output', {
   order_by: 'start_line',
@@ -282,7 +280,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const jobSocketCounter = useRef(0);
   const interval = useRef(null);
   const history = useHistory();
-  const config = useConfig();
   const [contentError, setContentError] = useState(null);
   const [cssMap, setCssMap] = useState({});
   const [currentlyLoading, setCurrentlyLoading] = useState([]);

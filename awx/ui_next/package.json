@@ -36,6 +36,7 @@
     "@babel/polyfill": "^7.8.7",
     "@cypress/instrument-cra": "^1.4.0",
     "@lingui/cli": "^3.7.1",
+    "@lingui/loader": "^3.8.3",
     "@lingui/macro": "^3.7.1",
     "@nteract/mockument": "^1.0.4",
     "babel-core": "^7.0.0-bridge.0",
