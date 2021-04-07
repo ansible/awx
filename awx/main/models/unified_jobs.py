@@ -842,15 +842,16 @@ class UnifiedJob(
             if 'finished' not in update_fields:
                 update_fields.append('finished')
 
+        if self.elapsed is None:
+            self.elapsed = 0.0
+            if 'elapsed' not in update_fields:
+                update_fields.append('elapsed')
+
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
-        if self.started and self.finished and not self.elapsed:
+        if self.started and self.finished and self.elapsed == 0.0:
             td = self.finished - self.started
-            elapsed = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
-        else:
-            elapsed = 0.0
-        if self.elapsed != elapsed:
-            self.elapsed = str(elapsed)
+            self.elapsed = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
             if 'elapsed' not in update_fields:
                 update_fields.append('elapsed')
 
