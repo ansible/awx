@@ -2,11 +2,22 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-# 19.0.0 (TBD)
+# 19.0.0 (April 7, 2021)
 
-* AWX now runs on Python 3.8 (https://github.com/ansible/awx/pull/8778/)
-* Added support for Execution Environments to the Activity Stream (https://github.com/ansible/awx/issues/9308)
-* Fixed a bug that improperly formats OpenSSH keys specified in custom Credential Types (https://github.com/ansible/awx/issues/9361)
+- AWX now runs on Python 3.8 (https://github.com/ansible/awx/pull/8778/)
+- Fixed inventories-from-projects when running in Kubernetes (https://github.com/ansible/awx/pull/9741)
+- Fixed a bug where a slash was appended to invetory file paths in UI dropdown (https://github.com/ansible/awx/pull/9713)
+- Fix a bug with large file parsing in project sync (https://github.com/ansible/awx/pull/9627)
+- Fix k8s credentials that use a custom ca cert (https://github.com/ansible/awx/pull/9744)
+- Fix a bug that allowed a user to attempt deleting a running job (https://github.com/ansible/awx/pull/9758)
+- Fixed the Kubernetes Pod reaper to properly delete Pods launched by Receptor (https://github.com/ansible/awx/pull/9819)
+- AWX Collection Modules: added ability to set instance groups for organization, job templates, and inventories. (https://github.com/ansible/awx/pull/9804)
+- Fixed CSP violation errors on job details and job settings views (https://github.com/ansible/awx/pull/9818)
+- Added support for convergence any/all on workflow nodes (https://github.com/ansible/awx/pull/9737)
+- Fixed race condition that causes InvalidGitRepositoryError (https://github.com/ansible/awx/pull/9754)
+- Added support for Execution Environments to the Activity Stream (https://github.com/ansible/awx/issues/9308)
+- Fixed a bug that improperly formats OpenSSH keys specified in custom Credential Types (https://github.com/ansible/awx/issues/9361)
+- Fixed an HTTP 500 error for unauthenticated users (https://github.com/ansible/awx/pull/9725)
 
 # 18.0.0 (March 23, 2021)
 
