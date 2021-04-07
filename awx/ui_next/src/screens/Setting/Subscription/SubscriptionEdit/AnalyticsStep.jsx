@@ -3,6 +3,7 @@ import { withI18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Button, Flex, FormGroup } from '@patternfly/react-core';
+import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
 import { required } from '../../../../util/validators';
 import FormField, {
   CheckboxField,
@@ -49,7 +50,9 @@ function AnalyticsStep({ i18n }) {
           more information, see{' '}
           <Button
             component="a"
-            href="http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0"
+            href={`${getDocsBaseUrl(
+              config
+            )}/html/installandreference/user-data.html#index-0`}
             variant="link"
             isInline
             ouiaId="tower-documentation-link"

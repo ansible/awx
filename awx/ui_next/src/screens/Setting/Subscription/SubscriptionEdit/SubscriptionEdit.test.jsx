@@ -59,6 +59,7 @@ const emptyConfig = {
   license_info: {
     valid_key: false,
   },
+  setConfig: jest.fn(),
 };
 
 describe('<SubscriptionEdit />', () => {
@@ -157,8 +158,9 @@ describe('<SubscriptionEdit />', () => {
     });
 
     test('clicking next button should show analytics step', async () => {
+      wrapper.update();
       await act(async () => {
-        wrapper.find('Button[children="Next"]').simulate('click');
+        wrapper.find('button#subscription-wizard-next').simulate('click');
       });
       wrapper.update();
       expect(wrapper.find('AnalyticsStep').length).toBe(1);
@@ -185,27 +187,27 @@ describe('<SubscriptionEdit />', () => {
 
     test('clicking next button should show eula step', async () => {
       await act(async () => {
-        wrapper.find('Button[children="Next"]').simulate('click');
+        wrapper.find('button#subscription-wizard-next').simulate('click');
       });
       wrapper.update();
       expect(wrapper.find('EulaStep').length).toBe(1);
       expect(wrapper.find('CheckboxField').length).toBe(1);
-      expect(wrapper.find('Button[children="Submit"]').length).toBe(1);
+      expect(wrapper.find('button#subscription-wizard-submit').length).toBe(1);
     });
 
     test('checking EULA agreement should enable Submit button', async () => {
-      expect(wrapper.find('Button[children="Submit"]').prop('isDisabled')).toBe(
-        true
-      );
+      expect(
+        wrapper.find('button#subscription-wizard-submit').prop('disabled')
+      ).toBe(true);
       await act(async () => {
         wrapper.find('Checkbox[name="eula"] input').simulate('change', {
           target: { value: true, name: 'eula' },
         });
       });
       wrapper.update();
-      expect(wrapper.find('Button[children="Submit"]').prop('isDisabled')).toBe(
-        false
-      );
+      expect(
+        wrapper.find('button#subscription-wizard-submit').prop('disabled')
+      ).toBe(false);
     });
 
     test('should successfully save on form submission', async () => {
@@ -271,6 +273,7 @@ describe('<SubscriptionEdit />', () => {
           context: {
             config: {
               mockConfig,
+              setConfig: jest.fn(),
             },
             me: {
               is_superuser: true,
@@ -370,7 +373,7 @@ describe('<SubscriptionEdit />', () => {
     });
     test('next should skip analytics step and navigate to eula step', async () => {
       await act(async () => {
-        wrapper.find('Button[children="Next"]').simulate('click');
+        wrapper.find('button#subscription-wizard-next').simulate('click');
       });
       wrapper.update();
       expect(wrapper.find('SubscriptionStep').length).toBe(0);
@@ -379,18 +382,18 @@ describe('<SubscriptionEdit />', () => {
     });
 
     test('submit should be disabled until EULA agreement checked', async () => {
-      expect(wrapper.find('Button[children="Submit"]').prop('isDisabled')).toBe(
-        true
-      );
+      expect(
+        wrapper.find('button#subscription-wizard-submit').prop('disabled')
+      ).toBe(true);
       await act(async () => {
         wrapper.find('Checkbox[name="eula"] input').simulate('change', {
           target: { value: true, name: 'eula' },
         });
       });
       wrapper.update();
-      expect(wrapper.find('Button[children="Submit"]').prop('isDisabled')).toBe(
-        false
-      );
+      expect(
+        wrapper.find('button#subscription-wizard-submit').prop('disabled')
+      ).toBe(false);
     });
 
     test('should successfully send request to api on form submission', async () => {
@@ -420,7 +423,7 @@ describe('<SubscriptionEdit />', () => {
         el => el.length === 0
       );
       await act(async () =>
-        wrapper.find('Button[children="Submit"]').prop('onClick')()
+        wrapper.find('button#subscription-wizard-submit').prop('onClick')()
       );
       wrapper.update();
       waitForElement(wrapper, 'Alert[title="Save successful"]');
@@ -441,7 +444,7 @@ describe('<SubscriptionEdit />', () => {
     });
   });
 
-  test.only('should throw a content error', async () => {
+  test('should throw a content error', async () => {
     RootAPI.readAssetVariables.mockRejectedValueOnce(new Error());
     let wrapper;
     await act(async () => {
