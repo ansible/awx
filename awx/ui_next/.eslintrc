@@ -83,6 +83,7 @@
         ],
         "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg"],
         "ignoreComponent": [
+          "AboutModal",
           "code",
           "Omit",
           "PotentialLink",
