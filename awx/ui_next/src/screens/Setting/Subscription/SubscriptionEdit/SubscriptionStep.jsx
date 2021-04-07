@@ -16,6 +16,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { useConfig } from '../../../../contexts/Config';
+import getDocsBaseUrl from '../../../../util/getDocsBaseUrl';
 import useModal from '../../../../util/useModal';
 import FormField, { PasswordField } from '../../../../components/FormField';
 import Popover from '../../../../components/Popover';
@@ -150,7 +151,9 @@ function SubscriptionStep({ i18n }) {
                       . For more information, see the{' '}
                       <Button
                         component="a"
-                        href="https://docs.ansible.com/ansible-tower/latest/html/userguide/import_license.html"
+                        href={`${getDocsBaseUrl(
+                          config
+                        )}/html/userguide/import_license.html`}
                         variant="link"
                         target="_blank"
                         ouiaId="import-license-link"
