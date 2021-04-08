@@ -226,24 +226,26 @@ function TemplateListItem({
           <ExpandableRowContent>
             <DetailList>
               <Detail
+                label={i18n._(t`Description`)}
+                value={template.description}
+                dataCy={`template-${template.id}-description`}
+              />
+              <Detail
                 label={i18n._(t`Activity`)}
                 value={<Sparkline jobs={summaryFields.recent_jobs} />}
                 dataCy={`template-${template.id}-activity`}
               />
-              {summaryFields.credentials && summaryFields.credentials.length && (
+              {summaryFields.organization && (
                 <Detail
-                  label={i18n._(t`Credentials`)}
+                  label={i18n._(t`Organization`)}
                   value={
-                    <ChipGroup
-                      numChips={5}
-                      totalChips={summaryFields.credentials.length}
+                    <Link
+                      to={`/organizations/${summaryFields.organization.id}/details`}
                     >
-                      {summaryFields.credentials.map(c => (
-                        <CredentialChip key={c.id} credential={c} isReadOnly />
-                      ))}
-                    </ChipGroup>
+                      {summaryFields.organization.name}
+                    </Link>
                   }
-                  dataCy={`template-${template.id}-credentials`}
+                  dataCy={`template-${template.id}-organization`}
                 />
               )}
               {summaryFields.inventory ? (
@@ -259,24 +261,6 @@ function TemplateListItem({
                 !askInventoryOnLaunch && (
                   <DeletedDetail label={i18n._(t`Inventory`)} />
                 )
-              )}
-              {summaryFields.labels && summaryFields.labels.results.length > 0 && (
-                <Detail
-                  label={i18n._(t`Labels`)}
-                  value={
-                    <ChipGroup
-                      numChips={5}
-                      totalChips={summaryFields.labels.results.length}
-                    >
-                      {summaryFields.labels.results.map(l => (
-                        <Chip key={l.id} isReadOnly>
-                          {l.name}
-                        </Chip>
-                      ))}
-                    </ChipGroup>
-                  }
-                  dataCy={`template-${template.id}-labels`}
-                />
               )}
               {summaryFields.project && (
                 <Detail
@@ -294,6 +278,42 @@ function TemplateListItem({
                 value={formatDateString(template.modified)}
                 dataCy={`template-${template.id}-last-modified`}
               />
+              {summaryFields.credentials && summaryFields.credentials.length && (
+                <Detail
+                  fullWidth
+                  label={i18n._(t`Credentials`)}
+                  value={
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={summaryFields.credentials.length}
+                    >
+                      {summaryFields.credentials.map(c => (
+                        <CredentialChip key={c.id} credential={c} isReadOnly />
+                      ))}
+                    </ChipGroup>
+                  }
+                  dataCy={`template-${template.id}-credentials`}
+                />
+              )}
+              {summaryFields.labels && summaryFields.labels.results.length > 0 && (
+                <Detail
+                  fullWidth
+                  label={i18n._(t`Labels`)}
+                  value={
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={summaryFields.labels.results.length}
+                    >
+                      {summaryFields.labels.results.map(l => (
+                        <Chip key={l.id} isReadOnly>
+                          {l.name}
+                        </Chip>
+                      ))}
+                    </ChipGroup>
+                  }
+                  dataCy={`template-${template.id}-labels`}
+                />
+              )}
             </DetailList>
           </ExpandableRowContent>
         </Td>

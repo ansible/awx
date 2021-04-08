@@ -28,6 +28,11 @@
         "webhook_key": "/api/v2/job_templates/7/webhook_key/"
     },
     "summary_fields": {
+        "organization": {
+          "id": 1,
+          "name": "Mike's Org",
+          "description": ""
+        },
         "inventory": {
             "id": 1,
             "name": "Mike's Inventory",
