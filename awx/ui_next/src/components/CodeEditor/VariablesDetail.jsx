@@ -70,6 +70,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
         css="grid-column: 1 / -1"
       >
         <ModeToggle
+          id={`${dataCy}-preview`}
           label={label}
           helpText={helpText}
           dataCy={dataCy}
@@ -89,6 +90,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
         css="grid-column: 1 / -1; margin-top: -20px"
       >
         <CodeEditor
+          id={`${dataCy}-preview`}
           mode={mode}
           value={currentValue}
           readOnly
@@ -123,6 +125,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
       >
         <div className="pf-c-form">
           <ModeToggle
+            id={`${dataCy}-preview-expanded`}
             label={label}
             helpText={helpText}
             dataCy={dataCy}
@@ -134,6 +137,7 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
             i18n={i18n}
           />
           <CodeEditor
+            id={`${dataCy}-preview-expanded`}
             mode={mode}
             value={currentValue}
             readOnly
@@ -160,6 +164,7 @@ VariablesDetail.defaultProps = {
 };
 
 function ModeToggle({
+  id,
   label,
   helpText,
   dataCy,
@@ -176,7 +181,7 @@ function ModeToggle({
       <SplitItem isFilled>
         <Split hasGutter css="align-items: baseline">
           <SplitItem>
-            <div className="pf-c-form__label">
+            <label className="pf-c-form__label" htmlFor={id}>
               <span
                 className="pf-c-form__label-text"
                 css="font-weight: var(--pf-global--FontWeight--bold)"
@@ -186,7 +191,7 @@ function ModeToggle({
               {helpText && (
                 <Popover header={label} content={helpText} id={dataCy} />
               )}
-            </div>
+            </label>
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle

@@ -138,10 +138,12 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
     }
   }, [handleLogout, timeRemaining]);
 
+  const brandName = config?.license_info?.product_name || 'brand';
+
   const header = (
     <PageHeader
       showNavToggle
-      logo={<BrandLogo />}
+      logo={<BrandLogo alt={i18n._(t`${brandName} logo`)} />}
       logoProps={{ href: '/' }}
       headerTools={
         <PageHeaderToolbar

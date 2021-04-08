@@ -98,7 +98,7 @@ function ProjectListItem({
       />
       <Td id={labelId} dataLabel={i18n._(t`Name`)}>
         <span>
-          <Link id={labelId} to={`${detailUrl}`}>
+          <Link to={`${detailUrl}`}>
             <b>{project.name}</b>
           </Link>
         </span>
