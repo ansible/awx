@@ -285,7 +285,6 @@ class Metrics:
             begin_time = time.perf_counter()
             for m in self.METRICS:
                 self.METRICS[m].store_value(self.pipe)
-            logger.debug(f"======{len(self.pipe.command_stack)}======")
             self.pipe.execute()
             self.last_pipe_execute = time.time()
             self.metrics_have_changed = False

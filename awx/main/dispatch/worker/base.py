@@ -136,7 +136,6 @@ class AWXConsumerRedis(AWXConsumerBase):
             # if no requests were made since last time, skip the redis save
             if requests != previous_requests:
                 subsystem_metrics.pipe_execute()
-                logger.info("==== uwsgi stats update =====")
                 previous_requests = requests
             time.sleep(subsystem_metrics.pipe_execute_interval)
             now = time.time()
