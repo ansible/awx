@@ -846,8 +846,6 @@ class UnifiedJob(
         dq = decimal.Decimal('1.000')
         if self.elapsed is None:
             self.elapsed = decimal.Decimal(0.0).quantize(dq)
-            if 'elapsed' not in update_fields:
-                update_fields.append('elapsed')
 
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
