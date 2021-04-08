@@ -4,6 +4,7 @@
 # Python
 from io import StringIO
 import datetime
+import decimal
 import codecs
 import json
 import logging
@@ -842,8 +843,9 @@ class UnifiedJob(
             if 'finished' not in update_fields:
                 update_fields.append('finished')
 
+        dq = decimal.Decimal('1.000')
         if self.elapsed is None:
-            self.elapsed = 0.0
+            self.elapsed = decimal.Decimal(0.0).quantize(dq)
             if 'elapsed' not in update_fields:
                 update_fields.append('elapsed')
 
@@ -851,7 +853,8 @@ class UnifiedJob(
         # out the time that elapsed, do so.
         if self.started and self.finished and self.elapsed == 0.0:
             td = self.finished - self.started
-            self.elapsed = str((td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0))
+            elapsed = decimal.Decimal(td.total_seconds())
+            self.elapsed = elapsed.quantize(dq)
             if 'elapsed' not in update_fields:
                 update_fields.append('elapsed')
 
