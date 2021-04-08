@@ -3,7 +3,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Button, Label, Split, SplitItem } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -43,40 +43,13 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
     instanceGroup,
     i18n
   );
-  const verifyInstanceGroup = item => {
-    if (item.is_isolated) {
-      return (
-        <Split hasGutter>
-          <SplitItem>{item.name}</SplitItem>
-          <SplitItem>
-            <Label aria-label={i18n._(t`isolated instance`)}>
-              {i18n._(t`Isolated`)}
-            </Label>
-          </SplitItem>
-        </Split>
-      );
-    }
-    if (item.is_controller) {
-      return (
-        <Split hasGutter>
-          <SplitItem>{item.name}</SplitItem>
-          <SplitItem>
-            <Label aria-label={i18n._(t`controller instance`)}>
-              {i18n._(t`Controller`)}
-            </Label>
-          </SplitItem>
-        </Split>
-      );
-    }
-    return <>{item.name}</>;
-  };
 
   return (
     <CardBody>
       <DetailList>
         <Detail
           label={i18n._(t`Name`)}
-          value={verifyInstanceGroup(instanceGroup)}
+          value={instanceGroup.name}
           dataCy="instance-group-detail-name"
         />
         <Detail
