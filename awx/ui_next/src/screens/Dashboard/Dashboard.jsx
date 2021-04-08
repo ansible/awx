@@ -170,86 +170,93 @@ function Dashboard({ i18n }) {
                 aria-label={i18n._(t`Job status graph tab`)}
                 eventKey={0}
                 title={<TabTitleText>{i18n._(t`Job status`)}</TabTitleText>}
-              />
+              >
+                <Fragment>
+                  <GraphCardHeader>
+                    <GraphCardActions>
+                      <Select
+                        variant={SelectVariant.single}
+                        placeholderText={i18n._(t`Select period`)}
+                        aria-label={i18n._(t`Select period`)}
+                        className="periodSelect"
+                        onToggle={setIsPeriodDropdownOpen}
+                        onSelect={(event, selection) =>
+                          setPeriodSelection(selection)
+                        }
+                        selections={periodSelection}
+                        isOpen={isPeriodDropdownOpen}
+                      >
+                        <SelectOption key="month" value="month">
+                          {i18n._(t`Past month`)}
+                        </SelectOption>
+                        <SelectOption key="two_weeks" value="two_weeks">
+                          {i18n._(t`Past two weeks`)}
+                        </SelectOption>
+                        <SelectOption key="week" value="week">
+                          {i18n._(t`Past week`)}
+                        </SelectOption>
+                      </Select>
+                      <Select
+                        variant={SelectVariant.single}
+                        placeholderText={i18n._(t`Select job type`)}
+                        aria-label={i18n._(t`Select job type`)}
+                        className="jobTypeSelect"
+                        onToggle={setIsJobTypeDropdownOpen}
+                        onSelect={(event, selection) =>
+                          setJobTypeSelection(selection)
+                        }
+                        selections={jobTypeSelection}
+                        isOpen={isJobTypeDropdownOpen}
+                      >
+                        <SelectOption key="all" value="all">
+                          {i18n._(t`All job types`)}
+                        </SelectOption>
+                        <SelectOption key="inv_sync" value="inv_sync">
+                          {i18n._(t`Inventory sync`)}
+                        </SelectOption>
+                        <SelectOption key="scm_update" value="scm_update">
+                          {i18n._(t`SCM update`)}
+                        </SelectOption>
+                        <SelectOption key="playbook_run" value="playbook_run">
+                          {i18n._(t`Playbook run`)}
+                        </SelectOption>
+                      </Select>
+                    </GraphCardActions>
+                  </GraphCardHeader>
+                  <CardBody>
+                    <LineChart
+                      height={390}
+                      id="d3-line-chart-root"
+                      data={jobGraphData}
+                    />
+                  </CardBody>
+                </Fragment>
+              </Tab>
               <Tab
                 aria-label={i18n._(t`Recent Jobs list tab`)}
                 eventKey={1}
                 title={<TabTitleText>{i18n._(t`Recent Jobs`)}</TabTitleText>}
-              />
+              >
+                <div>
+                  {activeTabId === 1 && (
+                    <JobList defaultParams={{ page_size: 5 }} />
+                  )}
+                </div>
+              </Tab>
               <Tab
                 aria-label={i18n._(t`Recent Templates list tab`)}
                 eventKey={2}
                 title={
                   <TabTitleText>{i18n._(t`Recent Templates`)}</TabTitleText>
                 }
-              />
+              >
+                <div>
+                  {activeTabId === 2 && (
+                    <TemplateList defaultParams={{ page_size: 5 }} />
+                  )}
+                </div>
+              </Tab>
             </Tabs>
-            {activeTabId === 0 && (
-              <Fragment>
-                <GraphCardHeader>
-                  <GraphCardActions>
-                    <Select
-                      variant={SelectVariant.single}
-                      placeholderText={i18n._(t`Select period`)}
-                      aria-label={i18n._(t`Select period`)}
-                      className="periodSelect"
-                      onToggle={setIsPeriodDropdownOpen}
-                      onSelect={(event, selection) =>
-                        setPeriodSelection(selection)
-                      }
-                      selections={periodSelection}
-                      isOpen={isPeriodDropdownOpen}
-                    >
-                      <SelectOption key="month" value="month">
-                        {i18n._(t`Past month`)}
-                      </SelectOption>
-                      <SelectOption key="two_weeks" value="two_weeks">
-                        {i18n._(t`Past two weeks`)}
-                      </SelectOption>
-                      <SelectOption key="week" value="week">
-                        {i18n._(t`Past week`)}
-                      </SelectOption>
-                    </Select>
-                    <Select
-                      variant={SelectVariant.single}
-                      placeholderText={i18n._(t`Select job type`)}
-                      aria-label={i18n._(t`Select job type`)}
-                      className="jobTypeSelect"
-                      onToggle={setIsJobTypeDropdownOpen}
-                      onSelect={(event, selection) =>
-                        setJobTypeSelection(selection)
-                      }
-                      selections={jobTypeSelection}
-                      isOpen={isJobTypeDropdownOpen}
-                    >
-                      <SelectOption key="all" value="all">
-                        {i18n._(t`All job types`)}
-                      </SelectOption>
-                      <SelectOption key="inv_sync" value="inv_sync">
-                        {i18n._(t`Inventory sync`)}
-                      </SelectOption>
-                      <SelectOption key="scm_update" value="scm_update">
-                        {i18n._(t`SCM update`)}
-                      </SelectOption>
-                      <SelectOption key="playbook_run" value="playbook_run">
-                        {i18n._(t`Playbook run`)}
-                      </SelectOption>
-                    </Select>
-                  </GraphCardActions>
-                </GraphCardHeader>
-                <CardBody>
-                  <LineChart
-                    height={390}
-                    id="d3-line-chart-root"
-                    data={jobGraphData}
-                  />
-                </CardBody>
-              </Fragment>
-            )}
-            {activeTabId === 1 && <JobList defaultParams={{ page_size: 5 }} />}
-            {activeTabId === 2 && (
-              <TemplateList defaultParams={{ page_size: 5 }} />
-            )}
           </Card>
         </div>
       </MainPageSection>
