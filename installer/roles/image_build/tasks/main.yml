@@ -6,7 +6,7 @@
 
 - name: Verify awx-logos directory exists for official install
   stat:
-    path: "../../awx-logos"
+    path: "../awx-logos"
   delegate_to: localhost
   register: logosdir
   failed_when: logosdir.stat.isdir is not defined or not logosdir.stat.isdir
@@ -14,7 +14,7 @@
 
 - name: Copy logos for inclusion in sdist
   copy:
-    src: "../../awx-logos/awx/ui/client/assets"
+    src: "../awx-logos/awx/ui/client/assets"
     dest: "../awx/ui/client/"
   delegate_to: localhost
   when: awx_official|default(false)|bool
