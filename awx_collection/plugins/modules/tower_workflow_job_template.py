@@ -527,10 +527,6 @@ def create_schema_nodes(module, response, schema, workflow_id):
                 auto_exit=False,
             )
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 348cfd901b609e4203309bc3cfaad60172c87783
 def create_schema_nodes_association(module, response, schema, workflow_id):
     for workflow_node in schema:
         workflow_node_fields = {}
@@ -586,10 +582,6 @@ def create_schema_nodes_association(module, response, schema, workflow_id):
                         associations=association_fields,
                     )
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 348cfd901b609e4203309bc3cfaad60172c87783
 def destroy_schema_nodes(module, response, workflow_id):
     search_fields = {}
 
@@ -601,10 +593,6 @@ def destroy_schema_nodes(module, response, workflow_id):
     for workflow_node in existing_items['json']['results']:
         response.append(module.delete_endpoint(workflow_node['url']))
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 348cfd901b609e4203309bc3cfaad60172c87783
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
