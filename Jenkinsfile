@@ -31,6 +31,12 @@ pipeline {
       }
     }
 
+    stage('Create mounts and set permissions') {
+        steps {
+          sh(script: "mkdir -p .docker .config workspace && chown ${JENKINSID}:${DOCKERGID} .docker .config workspace", returnStdout: true)
+        }
+    }
+
     stage('Build and publish image') {
       agent {
         docker { 
