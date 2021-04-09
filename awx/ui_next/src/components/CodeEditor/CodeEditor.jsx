@@ -73,6 +73,8 @@ function CodeEditor({
   id,
   value,
   onChange,
+  onFocus,
+  onBlur,
   mode,
   readOnly,
   hasErrors,
@@ -140,6 +142,8 @@ function CodeEditor({
           theme="github"
           onChange={debounce(onChange, 250)}
           value={value}
+          onFocus={onFocus}
+          onBlur={onBlur}
           name={id || 'code-editor'}
           editorProps={{ $blockScrolling: true }}
           fontSize={16}
