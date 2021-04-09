@@ -419,6 +419,7 @@ describe('<TemplateListItem />', () => {
     assertDetail('Organization', "Mike's Org");
     assertDetail('Inventory', "Mike's Inventory");
     assertDetail('Project', "Mike's Project");
+    assertDetail('Execution Environment', 'Mock EE 1.2.3');
     expect(
       wrapper.find('Detail[label="Credentials"]').containsAllMatchingElements([
         <span>

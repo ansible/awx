@@ -17,6 +17,7 @@ import { ActionsTd, ActionItem } from '../PaginatedTable';
 import { DetailList, Detail, DeletedDetail } from '../DetailList';
 import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
+import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 import { timeOfDay, formatDateString } from '../../util/dates';
 
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
@@ -258,7 +259,8 @@ function TemplateListItem({
                   dataCy={`template-${template.id}-inventory`}
                 />
               ) : (
-                !askInventoryOnLaunch && (
+                !askInventoryOnLaunch &&
+                template.type === 'job_template' && (
                   <DeletedDetail label={i18n._(t`Inventory`)} />
                 )
               )}
@@ -273,6 +275,10 @@ function TemplateListItem({
                   dataCy={`template-${template.id}-project`}
                 />
               )}
+              <ExecutionEnvironmentDetail
+                virtualEnvironment={template.custom_virtualenv}
+                executionEnvironment={summaryFields?.execution_environment}
+              />
               <Detail
                 label={i18n._(t`Last Modified`)}
                 value={formatDateString(template.modified)}
