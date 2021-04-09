@@ -25,13 +25,15 @@ function About({ version, isOpen, onClose, i18n }) {
   };
 
   const speechBubble = createSpeechBubble();
+  const copyright = i18n._(t`Copyright`);
+  const redHatInc = i18n._(t`Red Hat, Inc.`);
 
   return (
     <AboutModal
       isOpen={isOpen}
       onClose={onClose}
       productName={`Ansible ${BrandName}`}
-      trademark={i18n._(t`Copyright ${new Date().getFullYear()} Red Hat, Inc.`)}
+      trademark={`${copyright} ${new Date().getFullYear()} ${redHatInc}`}
       brandImageSrc="/static/media/logo-header.svg"
       brandImageAlt={i18n._(t`Brand Image`)}
     >
