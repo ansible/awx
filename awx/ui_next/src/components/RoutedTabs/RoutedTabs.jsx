@@ -3,8 +3,7 @@ import { shape, string, number, arrayOf, node, oneOfType } from 'prop-types';
 import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import { useHistory, useLocation } from 'react-router-dom';
 
-function RoutedTabs(props) {
-  const { tabsArray } = props;
+function RoutedTabs({ tabsArray }) {
   const history = useHistory();
   const location = useLocation();
 
@@ -36,8 +35,9 @@ function RoutedTabs(props) {
           aria-label={typeof tab.name === 'string' ? tab.name : null}
           eventKey={tab.id}
           key={tab.id}
-          link={tab.link}
+          href={tab.link}
           title={<TabTitleText>{tab.name}</TabTitleText>}
+          aria-controls=""
         />
       ))}
     </Tabs>
