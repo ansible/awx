@@ -1,0 +1,16 @@
+# psutil is mondatory in every AWX env
+psutil
+
+# ansible version and all modules from ansible-cloud repo
+ansible==2.9.16
+pbr!=2.1.0,>=2.0.0
+oslo.config>=5.2.0
+PyYAML>=3.12
+cryptography>=2.1
+oslo.utils>=3.33.0
+Jinja2>=2.10
+jmespath>=0.9.3
+kolla-ansible==10.1.0
+netaddr
+hvac==0.10.5
+openstacksdk==0.52.0
