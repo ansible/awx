@@ -1,9 +1,10 @@
+from contextlib import suppress
 import logging
 import json
 import re
 
 from awxkit.api.pages import Credential, Organization, Project, UnifiedJob, UnifiedJobTemplate
-from awxkit.utils import filter_by_class, random_title, update_payload, suppress, not_provided, PseudoNamespace, poll_until, random_utf8
+from awxkit.utils import filter_by_class, random_title, update_payload, not_provided, PseudoNamespace, poll_until, random_utf8
 from awxkit.api.mixins import DSAdapter, HasCreate, HasInstanceGroups, HasNotifications, HasVariables, HasCopy
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc

@@ -1,5 +1,7 @@
+from contextlib import suppress
+
 from awxkit.api.mixins import HasCreate, DSAdapter
-from awxkit.utils import suppress, random_title, PseudoNamespace
+from awxkit.utils import random_title, PseudoNamespace
 from awxkit.api.resources import resources
 from awxkit.api.pages import Organization
 from awxkit.exceptions import NoContent
