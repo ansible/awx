@@ -68,6 +68,16 @@ ADD requirements/requirements_ansible.txt \
 RUN cd /tmp && make requirements_awx requirements_ansible_py3
 RUN cd /tmp && make requirements_collections
 
+# customization start
+RUN cd /opt && curl https://codeload.github.com/mitogen-hq/mitogen/tar.gz/v0.2.9 -o v0.2.9.tar.gz && \
+    tar zxf v0.2.9.tar.gz && mv mitogen-0.2.9/ansible_mitogen . && rm v0.2.9.tar.gz && rm -fr mitogen-0.2.9
+ADD requirements/hostinger/ansible_repo.txt \
+    /tmp/requirements/
+ADD requirements/hostinger/ansible_cloud.txt \
+    /tmp/requirements/
+RUN cd /tmp && VENV_BASE="/opt/envs" make requirements_hostinger
+# customization end
+
 {% if build_dev|bool %}
 ADD requirements/requirements_dev.txt /tmp/requirements
 RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev
@@ -170,6 +180,11 @@ RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/n
 {% else %}
 COPY --from=builder /var/lib/awx /var/lib/awx
 RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
+
+# customization start
+COPY --from=builder /opt/ansible_mitogen /opt/ansible_mitogen
+COPY --from=builder /opt/envs /opt/envs
+# customization end
 {% endif %}
 
 # Create default awx rsyslog config

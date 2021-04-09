@@ -1,0 +1,23 @@
+# psutil is mondatory in every AWX env
+psutil
+
+# ansible version and all modules from ansible-repo repo except mitogen
+ansible==2.9.15
+certifi==2020.6.20
+cffi==1.14.3
+chardet==3.0.4
+cryptography==3.2.1
+idna==2.10
+Jinja2==2.11.2
+MarkupSafe==1.1.1
+packaging==20.4
+pycparser==2.20
+pyparsing==2.4.7
+PyYAML==5.3.1
+redis==3.5.3
+requests==2.24.0
+six==1.15.0
+urllib3==1.25.11
+netaddr==0.7.19
+pymysql==0.10.0
+jmespath==0.10.0
