@@ -417,6 +417,182 @@ def update_survey(module, last_request):
             module.fail_json(msg="Failed to update survey: {0}".format(response['json']['error']))
 
 
+def create_schema_nodes(module, response, schema, workflow_id):
+    for workflow_node in schema:
+        workflow_node_fields = {}
+        search_fields = {}
+        association_fields = {}
+
+        # Lookup Job Template ID
+        if workflow_node['unified_job_template']['name']:
+            search_fields = {'name': workflow_node['unified_job_template']['name']}
+            if workflow_node['unified_job_template']['type'] is None:
+                module.fail_json(msg='Could not find unified job template type in schema {1}'.format(workflow_node))
+            if workflow_node['unified_job_template']['type'] == 'inventory_source':
+                # workflow_node['unified_job_template']['inventory']:
+                organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
+                search_fields['organization'] = organization_id
+            elif workflow_node['unified_job_template']['type'] == 'workflow_approval':
+                pass
+            else:
+                # workflow_node['unified_job_template']['organization']:
+                organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['organization']['name'])
+                search_fields['organization'] = organization_id
+            unified_job_template = module.get_one('unified_job_templates', **{'data': search_fields})
+            if unified_job_template:
+                workflow_node_fields['unified_job_template'] = unified_job_template['id']
+            else:
+                if workflow_node['unified_job_template']['type'] != 'workflow_approval':
+                    module.fail_json(msg="Unable to Find unified_job_template: {0}".format(search_fields))
+
+        # Lookup Values for other fields
+
+        for field_name in (
+            'identifier',
+            'extra_data',
+            'scm_branch',
+            'job_type',
+            'job_tags',
+            'skip_tags',
+            'limit',
+            'diff_mode',
+            'verbosity',
+            'all_parents_must_converge',
+            'state',
+        ):
+            field_val = workflow_node.get(field_name)
+            if field_val:
+                workflow_node_fields[field_name] = field_val
+            if workflow_node['identifier']:
+                search_fields = {'identifier': workflow_node['identifier']}
+
+        # Set Search fields
+        search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
+
+        # Attempt to look up an existing item based on the provided data
+        existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+
+        # Determine if state is present or absent.
+        state = True
+        if 'state' in workflow_node:
+            if workflow_node['state'] == 'absent':
+                state = False
+        if state:
+            response.append(
+                module.create_or_update_if_needed(
+                    existing_item,
+                    workflow_node_fields,
+                    endpoint='workflow_job_template_nodes',
+                    item_type='workflow_job_template_node',
+                    auto_exit=False,
+                )
+            )
+        else:
+            # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+            response.append(
+                module.delete_if_needed(
+                    existing_item,
+                    auto_exit=False,
+                )
+            )
+
+        # Start Approval Node creation process
+        if workflow_node['unified_job_template']['type'] == 'workflow_approval':
+            new_fields = {}
+
+            for field_name in (
+                'name',
+                'description',
+                'timeout',
+            ):
+                field_val = workflow_node['unified_job_template'].get(field_name)
+                if field_val:
+                    workflow_node_fields[field_name] = field_val
+
+            # Attempt to look up an existing item just created
+            workflow_job_template_node = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+            workflow_job_template_node_id = workflow_job_template_node['id']
+            existing_item = None
+            # Due to not able to lookup workflow_approval_templates, find the existing item in another place
+            if workflow_job_template_node['related'].get('unified_job_template') is not None:
+                existing_item = module.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
+            approval_endpoint = 'workflow_job_template_nodes/{0}/create_approval_template/'.format(workflow_job_template_node_id)
+
+            module.create_or_update_if_needed(
+                existing_item,
+                workflow_node_fields,
+                endpoint=approval_endpoint,
+                item_type='workflow_job_template_approval_node',
+                associations=association_fields,
+                auto_exit=False,
+            )
+
+def create_schema_nodes_association(module, response, schema, workflow_id):
+    for workflow_node in schema:
+        workflow_node_fields = {}
+        search_fields = {}
+        association_fields = {}
+
+        # Set Search fields
+        search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
+
+        # Lookup Values for other fields
+        if workflow_node['identifier']:
+            workflow_node_fields['identifier'] = workflow_node['identifier']
+            search_fields['identifier'] = workflow_node['identifier']
+
+        # Attempt to look up an existing item based on the provided data
+        existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+
+        if 'state' in workflow_node:
+            if workflow_node['state'] == 'absent':
+                continue
+
+        if 'related' in workflow_node:
+            # Get id's for association fields
+            association_fields = {}
+
+            for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
+                # Extract out information if it exists
+                # Test if it is defined, else move to next association.
+                if association in workflow_node['related']:
+                    id_list = []
+                    for sub_name in workflow_node['related'][association]:
+                        if association == 'credentials':
+                            endpoint = 'credentials'
+                            lookup_data = {'name': sub_name['name']}
+                        else:
+                            endpoint = 'workflow_job_template_nodes'
+                            lookup_data = {'identifier': sub_name['identifier']}
+                            lookup_data['workflow_job_template'] = workflow_id
+                        sub_obj = module.get_one(endpoint, **{'data': lookup_data})
+                        if sub_obj is None:
+                            module.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
+                        id_list.append(sub_obj['id'])
+                        temp = sub_obj['id']
+                    if id_list:
+                        association_fields[association] = id_list
+
+                    module.create_or_update_if_needed(
+                        existing_item,
+                        workflow_node_fields,
+                        endpoint='workflow_job_template_nodes',
+                        item_type='workflow_job_template_node',
+                        auto_exit=False,
+                        associations=association_fields,
+                    )
+
+def destroy_schema_nodes(module, response, workflow_id):
+    search_fields = {}
+
+    # Search for existing nodes.
+    search_fields['workflow_job_template'] = workflow_id
+    existing_items = module.get_all_endpoint('workflow_job_template_nodes', **{'data': search_fields})
+
+    # Loop through found fields
+    for workflow_node in existing_items['json']['results']:
+        response.append(module.delete_endpoint(workflow_node['url']))
+
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
@@ -591,16 +767,17 @@ def main():
 
     # Get Workflow information in case one was just created.
     existing_item = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})
+    workflow_job_template_id = existing_item['id']
     # Destroy current nodes if selected.
     if destroy_current_schema:
-        module.destroy_schema_nodes(response, existing_item['id'])
+        destroy_schema_nodes(module, response, workflow_job_template_id)
 
     # Work thorugh and lookup value for schema fields
     if schema:
         # Create Schema Nodes
-        module.create_schema_nodes(response, schema, existing_item['id'])
+        create_schema_nodes(module, response, schema, workflow_job_template_id)
         # Create Schema Associations
-        module.create_schema_nodes_association(response, schema, existing_item['id'])
+        create_schema_nodes_association(module, response, schema, workflow_job_template_id)
         module.json_output['schema_creation_data'] = response
 
     module.exit_json(**module.json_output)

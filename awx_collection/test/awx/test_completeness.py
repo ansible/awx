@@ -38,7 +38,6 @@ no_endpoint_for_module = [
     'tower_workflow_launch',
     'tower_job_cancel',
     'tower_workflow_template',
-    'tower_workflow_job_template_schema',
     'tower_ad_hoc_command_wait',
     'tower_ad_hoc_command_cancel',
 ]
