@@ -231,11 +231,13 @@ function TemplateListItem({
                 value={template.description}
                 dataCy={`template-${template.id}-description`}
               />
-              <Detail
-                label={i18n._(t`Activity`)}
-                value={<Sparkline jobs={summaryFields.recent_jobs} />}
-                dataCy={`template-${template.id}-activity`}
-              />
+              {summaryFields.recent_jobs && summaryFields.recent_jobs.length ? (
+                <Detail
+                  label={i18n._(t`Activity`)}
+                  value={<Sparkline jobs={summaryFields.recent_jobs} />}
+                  dataCy={`template-${template.id}-activity`}
+                />
+              ) : null}
               {summaryFields.organization && (
                 <Detail
                   label={i18n._(t`Organization`)}
@@ -284,7 +286,7 @@ function TemplateListItem({
                 value={formatDateString(template.modified)}
                 dataCy={`template-${template.id}-last-modified`}
               />
-              {summaryFields.credentials && summaryFields.credentials.length && (
+              {summaryFields.credentials && summaryFields.credentials.length ? (
                 <Detail
                   fullWidth
                   label={i18n._(t`Credentials`)}
@@ -300,7 +302,7 @@ function TemplateListItem({
                   }
                   dataCy={`template-${template.id}-credentials`}
                 />
-              )}
+              ) : null}
               {summaryFields.labels && summaryFields.labels.results.length > 0 && (
                 <Detail
                   fullWidth
