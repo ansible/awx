@@ -22,6 +22,8 @@ import {
 } from '@patternfly/react-icons';
 import { WorkflowApprovalsAPI } from '../../api';
 import useRequest from '../../util/useRequest';
+import getDocsBaseUrl from '../../util/getDocsBaseUrl';
+import { useConfig } from '../../contexts/Config';
 import useWsPendingApprovalCount from './useWsPendingApprovalCount';
 
 const PendingWorkflowApprovals = styled.div`
@@ -35,9 +37,6 @@ const PendingWorkflowApprovalBadge = styled(Badge)`
   margin-left: 10px;
 `;
 
-const DOCLINK =
-  'https://docs.ansible.com/ansible-tower/latest/html/userguide/index.html';
-
 function PageHeaderToolbar({
   isAboutDisabled,
   onAboutClick,
@@ -47,6 +46,7 @@ function PageHeaderToolbar({
 }) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
+  const config = useConfig();
 
   const {
     request: fetchPendingApprovalCount,
@@ -101,37 +101,39 @@ function PageHeaderToolbar({
             </Link>
           </PageHeaderToolsItem>
         </Tooltip>
-        <Tooltip position="bottom" content={<div>{i18n._(t`Info`)}</div>}>
-          <PageHeaderToolsItem>
-            <Dropdown
-              isPlain
-              isOpen={isHelpOpen}
-              position={DropdownPosition.right}
-              onSelect={handleHelpSelect}
-              toggle={
-                <DropdownToggle
-                  onToggle={setIsHelpOpen}
-                  aria-label={i18n._(t`Info`)}
-                >
-                  <QuestionCircleIcon />
-                </DropdownToggle>
-              }
-              dropdownItems={[
-                <DropdownItem key="help" target="_blank" href={DOCLINK}>
-                  {i18n._(t`Help`)}
-                </DropdownItem>,
-                <DropdownItem
-                  key="about"
-                  component="button"
-                  isDisabled={isAboutDisabled}
-                  onClick={onAboutClick}
-                >
-                  {i18n._(t`About`)}
-                </DropdownItem>,
-              ]}
-            />
-          </PageHeaderToolsItem>
-        </Tooltip>
+        <PageHeaderToolsItem>
+          <Dropdown
+            isPlain
+            isOpen={isHelpOpen}
+            position={DropdownPosition.right}
+            onSelect={handleHelpSelect}
+            toggle={
+              <DropdownToggle
+                onToggle={setIsHelpOpen}
+                aria-label={i18n._(t`Info`)}
+              >
+                <QuestionCircleIcon />
+              </DropdownToggle>
+            }
+            dropdownItems={[
+              <DropdownItem
+                key="help"
+                target="_blank"
+                href={`${getDocsBaseUrl(config)}/html/userguide/index.html`}
+              >
+                {i18n._(t`Help`)}
+              </DropdownItem>,
+              <DropdownItem
+                key="about"
+                component="button"
+                isDisabled={isAboutDisabled}
+                onClick={onAboutClick}
+              >
+                {i18n._(t`About`)}
+              </DropdownItem>,
+            ]}
+          />
+        </PageHeaderToolsItem>
         <Tooltip position="left" content={<div>{i18n._(t`User`)}</div>}>
           <PageHeaderToolsItem>
             <Dropdown

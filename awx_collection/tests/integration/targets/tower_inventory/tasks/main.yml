@@ -8,8 +8,20 @@
     inv_name1: "AWX-Collection-tests-tower_inventory-inv1-{{ test_id }}"
     inv_name2: "AWX-Collection-tests-tower_inventory-inv2-{{ test_id }}"
     cred_name1: "AWX-Collection-tests-tower_inventory-cred1-{{ test_id }}"
+    group_name1: "AWX-Collection-tests-tower_instance_group-group1-{{ test_id }}"
 
 - block:
+
+    - name: Create an Instance Group
+      tower_instance_group:
+        name: "{{ group_name1 }}"
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Create an Insights Credential
       tower_credential:
         name: "{{ cred_name1 }}"
@@ -30,12 +42,15 @@
         name: "{{ inv_name1 }}"
         organization: Default
         insights_credential: "{{ result.id }}"
+        instance_groups:
+          - "{{ group_name1 }}"
         state: present
       register: result
 
     - assert:
         that:
           - "result is changed"
+
     - name: Test Inventory module idempotency
       tower_inventory:
         name: "{{ result.id }}"
@@ -157,6 +172,11 @@
         - "{{ inv_name1 }}"
         - "{{ inv_name2 }}"
         - "copy_{{ inv_name1 }}"
+
+    - name: Delete the instance groups
+      tower_instance_group:
+        name: "{{ group_name1 }}"
+        state: absent
 
     - name: Delete Insights Credential
       tower_credential:

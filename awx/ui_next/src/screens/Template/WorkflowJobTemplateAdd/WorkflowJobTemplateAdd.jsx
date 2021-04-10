@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from '../../../components/Card';
 
-import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../../api';
+import {
+  WorkflowJobTemplatesAPI,
+  OrganizationsAPI,
+  UsersAPI,
+} from '../../../api';
 import WorkflowJobTemplateForm from '../shared/WorkflowJobTemplateForm';
+import { useConfig } from '../../../contexts/Config';
+import useRequest from '../../../util/useRequest';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
 
 function WorkflowJobTemplateAdd() {
+  const { me = {} } = useConfig();
   const history = useHistory();
   const [formSubmitError, setFormSubmitError] = useState(null);
 
@@ -60,6 +69,33 @@ function WorkflowJobTemplateAdd() {
     history.push(`/templates`);
   };
 
+  const {
+    isLoading,
+    request: fetchUserRole,
+    result: { orgAdminResults, isOrgAdmin },
+    error: contentError,
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        data: { results, count },
+      } = await UsersAPI.readAdminOfOrganizations(me?.id);
+      return { isOrgAdmin: count > 0, orgAdminResults: results };
+    }, [me.id]),
+    { isOrgAdmin: false, orgAdminResults: null }
+  );
+
+  useEffect(() => {
+    fetchUserRole();
+  }, [fetchUserRole]);
+
+  if (contentError) {
+    return <ContentError error={contentError} />;
+  }
+
+  if (isLoading || !orgAdminResults) {
+    return <ContentLoading />;
+  }
+
   return (
     <PageSection>
       <Card>
@@ -68,6 +104,7 @@ function WorkflowJobTemplateAdd() {
             handleCancel={handleCancel}
             handleSubmit={handleSubmit}
             submitError={formSubmitError}
+            isOrgAdmin={isOrgAdmin}
           />
         </CardBody>
       </Card>

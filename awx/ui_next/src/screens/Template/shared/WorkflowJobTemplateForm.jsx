@@ -43,6 +43,7 @@ function WorkflowJobTemplateForm({
   handleCancel,
   i18n,
   submitError,
+  isOrgAdmin,
 }) {
   const { setFieldValue } = useFormikContext();
   const [enableWebhooks, setEnableWebhooks] = useState(
@@ -55,7 +56,9 @@ function WorkflowJobTemplateForm({
   );
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta, limitHelpers] = useField('limit');
-  const [organizationField, organizationMeta] = useField('organization');
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
   const [scmField, , scmHelpers] = useField('scm_branch');
   const [, webhookServiceMeta, webhookServiceHelpers] = useField(
     'webhook_service'
@@ -119,9 +122,14 @@ function WorkflowJobTemplateForm({
         />
         <OrganizationLookup
           helperTextInvalid={organizationMeta.error}
+          isValid={!organizationMeta.touched || !organizationMeta.error}
+          onBlur={() => organizationHelpers.setTouched()}
           onChange={onOrganizationChange}
           value={organizationField.value}
-          isValid={!organizationMeta.error}
+          touched={organizationMeta.touched}
+          error={organizationMeta.error}
+          required={isOrgAdmin}
+          autoPopulate={isOrgAdmin}
         />
         <>
           <InventoryLookup
@@ -287,6 +295,7 @@ WorkflowJobTemplateForm.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   submitError: shape({}),
+  isOrgAdmin: PropTypes.bool,
 };
 
 WorkflowJobTemplateForm.defaultProps = {
@@ -297,6 +306,7 @@ WorkflowJobTemplateForm.defaultProps = {
     inventory: undefined,
     project: undefined,
   },
+  isOrgAdmin: false,
 };
 
 const FormikApp = withFormik({

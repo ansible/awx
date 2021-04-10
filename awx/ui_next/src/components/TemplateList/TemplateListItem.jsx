@@ -17,6 +17,7 @@ import { ActionsTd, ActionItem } from '../PaginatedTable';
 import { DetailList, Detail, DeletedDetail } from '../DetailList';
 import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
+import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 import { timeOfDay, formatDateString } from '../../util/dates';
 
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
@@ -226,12 +227,68 @@ function TemplateListItem({
           <ExpandableRowContent>
             <DetailList>
               <Detail
-                label={i18n._(t`Activity`)}
-                value={<Sparkline jobs={summaryFields.recent_jobs} />}
-                dataCy={`template-${template.id}-activity`}
+                label={i18n._(t`Description`)}
+                value={template.description}
+                dataCy={`template-${template.id}-description`}
               />
-              {summaryFields.credentials && summaryFields.credentials.length && (
+              {summaryFields.recent_jobs && summaryFields.recent_jobs.length ? (
                 <Detail
+                  label={i18n._(t`Activity`)}
+                  value={<Sparkline jobs={summaryFields.recent_jobs} />}
+                  dataCy={`template-${template.id}-activity`}
+                />
+              ) : null}
+              {summaryFields.organization && (
+                <Detail
+                  label={i18n._(t`Organization`)}
+                  value={
+                    <Link
+                      to={`/organizations/${summaryFields.organization.id}/details`}
+                    >
+                      {summaryFields.organization.name}
+                    </Link>
+                  }
+                  dataCy={`template-${template.id}-organization`}
+                />
+              )}
+              {summaryFields.inventory ? (
+                <Detail
+                  label={i18n._(t`Inventory`)}
+                  value={inventoryValue(
+                    summaryFields.inventory.kind,
+                    summaryFields.inventory.id
+                  )}
+                  dataCy={`template-${template.id}-inventory`}
+                />
+              ) : (
+                !askInventoryOnLaunch &&
+                template.type === 'job_template' && (
+                  <DeletedDetail label={i18n._(t`Inventory`)} />
+                )
+              )}
+              {summaryFields.project && (
+                <Detail
+                  label={i18n._(t`Project`)}
+                  value={
+                    <Link to={`/projects/${summaryFields.project.id}/details`}>
+                      {summaryFields.project.name}
+                    </Link>
+                  }
+                  dataCy={`template-${template.id}-project`}
+                />
+              )}
+              <ExecutionEnvironmentDetail
+                virtualEnvironment={template.custom_virtualenv}
+                executionEnvironment={summaryFields?.execution_environment}
+              />
+              <Detail
+                label={i18n._(t`Last Modified`)}
+                value={formatDateString(template.modified)}
+                dataCy={`template-${template.id}-last-modified`}
+              />
+              {summaryFields.credentials && summaryFields.credentials.length ? (
+                <Detail
+                  fullWidth
                   label={i18n._(t`Credentials`)}
                   value={
                     <ChipGroup
@@ -245,23 +302,10 @@ function TemplateListItem({
                   }
                   dataCy={`template-${template.id}-credentials`}
                 />
-              )}
-              {summaryFields.inventory ? (
-                <Detail
-                  label={i18n._(t`Inventory`)}
-                  value={inventoryValue(
-                    summaryFields.inventory.kind,
-                    summaryFields.inventory.id
-                  )}
-                  dataCy={`template-${template.id}-inventory`}
-                />
-              ) : (
-                !askInventoryOnLaunch && (
-                  <DeletedDetail label={i18n._(t`Inventory`)} />
-                )
-              )}
+              ) : null}
               {summaryFields.labels && summaryFields.labels.results.length > 0 && (
                 <Detail
+                  fullWidth
                   label={i18n._(t`Labels`)}
                   value={
                     <ChipGroup
@@ -278,22 +322,6 @@ function TemplateListItem({
                   dataCy={`template-${template.id}-labels`}
                 />
               )}
-              {summaryFields.project && (
-                <Detail
-                  label={i18n._(t`Project`)}
-                  value={
-                    <Link to={`/projects/${summaryFields.project.id}/details`}>
-                      {summaryFields.project.name}
-                    </Link>
-                  }
-                  dataCy={`template-${template.id}-project`}
-                />
-              )}
-              <Detail
-                label={i18n._(t`Last Modified`)}
-                value={formatDateString(template.modified)}
-                dataCy={`template-${template.id}-last-modified`}
-              />
             </DetailList>
           </ExpandableRowContent>
         </Td>

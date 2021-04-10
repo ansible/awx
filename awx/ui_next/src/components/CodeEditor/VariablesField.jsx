@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { string, bool } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -33,9 +33,45 @@ function VariablesField({
   promptId,
   tooltip,
 }) {
-  const [field, meta] = useField(name);
-  const [mode, setMode] = useState(
-    isJsonString(field.value) ? JSON_MODE : YAML_MODE
+  // track focus manually, because the Code Editor library doesn't wire
+  // into Formik completely
+  const [shouldValidate, setShouldValidate] = useState(false);
+  const [mode, setMode] = useState(YAML_MODE);
+  const validate = useCallback(
+    value => {
+      if (!shouldValidate) {
+        return undefined;
+      }
+      try {
+        if (mode === YAML_MODE) {
+          yamlToJson(value);
+        } else {
+          JSON.parse(value);
+        }
+      } catch (error) {
+        return error.message;
+      }
+      return undefined;
+    },
+    [shouldValidate, mode]
+  );
+  const [field, meta, helpers] = useField({ name, validate });
+
+  // mode's useState above couldn't be initialized to JSON_MODE because
+  // the field value had to be defined below it
+  useEffect(function initializeMode() {
+    if (isJsonString(field.value)) {
+      setMode(JSON_MODE);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(
+    function validateOnBlur() {
+      if (shouldValidate) {
+        helpers.setError(validate(field.value));
+      }
+    },
+    [shouldValidate, validate] // eslint-disable-line react-hooks/exhaustive-deps
   );
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -52,6 +88,7 @@ function VariablesField({
         onExpand={() => setIsExpanded(true)}
         mode={mode}
         setMode={setMode}
+        setShouldValidate={setShouldValidate}
       />
       <Modal
         variant="xlarge"
@@ -82,6 +119,7 @@ function VariablesField({
             fullHeight
             mode={mode}
             setMode={setMode}
+            setShouldValidate={setShouldValidate}
           />
         </div>
       </Modal>
@@ -117,6 +155,7 @@ function VariablesFieldInternals({
   mode,
   setMode,
   onExpand,
+  setShouldValidate,
 }) {
   const [field, meta, helpers] = useField(name);
 
@@ -178,6 +217,8 @@ function VariablesFieldInternals({
           helpers.setValue(newVal);
         }}
         fullHeight={fullHeight}
+        onFocus={() => setShouldValidate(false)}
+        onBlur={() => setShouldValidate(true)}
         hasErrors={!!meta.error}
       />
     </div>

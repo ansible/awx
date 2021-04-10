@@ -5,6 +5,7 @@ import {
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 import { ConfigAPI, MeAPI, RootAPI } from '../../api';
+import { useAuthorizedPath } from '../../contexts/Config';
 import AppContainer from './AppContainer';
 
 jest.mock('../../api');
@@ -19,10 +20,12 @@ describe('<AppContainer />', () => {
       },
     });
     MeAPI.read.mockResolvedValue({ data: { results: [{}] } });
+    useAuthorizedPath.mockImplementation(() => true);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   test('expected content is rendered', async () => {
@@ -77,7 +80,9 @@ describe('<AppContainer />', () => {
 
     let wrapper;
     await act(async () => {
-      wrapper = mountWithContexts(<AppContainer />);
+      wrapper = mountWithContexts(<AppContainer />, {
+        context: { config: { version } },
+      });
     });
 
     // open about dropdown menu

@@ -78,10 +78,13 @@
           "src",
           "theme",
           "gridColumns",
-          "rows"
+          "rows",
+          "href",
+          "modifier"
         ],
         "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg"],
         "ignoreComponent": [
+          "AboutModal",
           "code",
           "Omit",
           "PotentialLink",

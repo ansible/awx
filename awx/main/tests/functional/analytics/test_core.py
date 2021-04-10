@@ -39,7 +39,7 @@ def mock_valid_license():
 def test_gather(mock_valid_license):
     settings.INSIGHTS_TRACKING_STATE = True
 
-    tgzfiles = gather(module=importlib.import_module(__name__))
+    tgzfiles = gather(module=importlib.import_module(__name__), collection_type='dry-run')
     files = {}
     with tarfile.open(tgzfiles[0], "r:gz") as archive:
         for member in archive.getmembers():

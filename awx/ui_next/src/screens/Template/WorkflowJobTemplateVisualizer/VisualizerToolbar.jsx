@@ -23,6 +23,8 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '../../../contexts/Workflow';
+import getDocsBaseUrl from '../../../util/getDocsBaseUrl';
+import { useConfig } from '../../../contexts/Config';
 
 const Badge = styled(PFBadge)`
   align-items: center;
@@ -47,9 +49,6 @@ const ActionButton = styled(Button)`
 `;
 ActionButton.displayName = 'ActionButton';
 
-const DOCLINK =
-  'https://docs.ansible.com/ansible-tower/latest/html/userguide/workflow_templates.html#ug-wf-editor';
-
 function VisualizerToolbar({
   i18n,
   onClose,
@@ -59,8 +58,8 @@ function VisualizerToolbar({
   readOnly,
 }) {
   const dispatch = useContext(WorkflowDispatchContext);
-
   const { nodes, showLegend, showTools } = useContext(WorkflowStateContext);
+  const config = useConfig();
 
   const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
 
@@ -113,7 +112,9 @@ function VisualizerToolbar({
               variant="plain"
               component="a"
               target="_blank"
-              href={DOCLINK}
+              href={`${getDocsBaseUrl(
+                config
+              )}/html/userguide/workflow_templates.html#ug-wf-editor`}
             >
               <BookIcon />
             </ActionButton>
