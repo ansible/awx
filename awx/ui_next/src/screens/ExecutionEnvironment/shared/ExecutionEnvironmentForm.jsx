@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect } from 'react';
-import { func, shape } from 'prop-types';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { func, shape, bool } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Form, FormGroup } from '@patternfly/react-core';
+import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
 
 import { ExecutionEnvironmentsAPI } from '../../../api';
 import CredentialLookup from '../../../components/Lookup/CredentialLookup';
@@ -22,6 +22,7 @@ function ExecutionEnvironmentFormFields({
   me,
   options,
   executionEnvironment,
+  isOrgLookupDisabled,
 }) {
   const [credentialField, credentialMeta, credentialHelpers] = useField(
     'credential'
@@ -32,6 +33,8 @@ function ExecutionEnvironmentFormFields({
       !me?.is_superuser &&
       required(i18n._(t`Select a value for this field`), i18n),
   });
+
+  const isGloballyAvailable = useRef(!organizationField.value);
 
   const { setFieldValue } = useFormikContext();
 
@@ -60,6 +63,30 @@ function ExecutionEnvironmentFormFields({
   const containerPullChoices = options?.actions?.POST?.pull?.choices.map(
     ([value, label]) => ({ value, label, key: value })
   );
+
+  const renderOrganizationLookup = () => {
+    return (
+      <OrganizationLookup
+        helperTextInvalid={organizationMeta.error}
+        isValid={!organizationMeta.touched || !organizationMeta.error}
+        onBlur={() => organizationHelpers.setTouched()}
+        onChange={onOrganizationChange}
+        value={organizationField.value}
+        required={!me.is_superuser}
+        helperText={
+          me?.is_superuser &&
+          ((!isOrgLookupDisabled && isGloballyAvailable) ||
+            organizationField.value === null)
+            ? i18n._(
+                t`Leave this field blank to make the execution environment globally available.`
+              )
+            : null
+        }
+        autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
+        isDisabled={!!isOrgLookupDisabled && isGloballyAvailable.current}
+      />
+    );
+  };
 
   return (
     <>
@@ -107,22 +134,17 @@ function ExecutionEnvironmentFormFields({
         name="description"
         type="text"
       />
-      <OrganizationLookup
-        helperTextInvalid={organizationMeta.error}
-        isValid={!organizationMeta.touched || !organizationMeta.error}
-        onBlur={() => organizationHelpers.setTouched()}
-        onChange={onOrganizationChange}
-        value={organizationField.value}
-        required={!me.is_superuser}
-        helperText={
-          me?.is_superuser
-            ? i18n._(
-                t`Leave this field blank to make the execution environment globally available.`
-              )
-            : null
-        }
-        autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
-      />
+      {isOrgLookupDisabled && isGloballyAvailable.current ? (
+        <Tooltip
+          content={i18n._(
+            t`Globally available execution environment can not be reassigned to a specific Organization`
+          )}
+        >
+          {renderOrganizationLookup()}
+        </Tooltip>
+      ) : (
+        renderOrganizationLookup()
+      )}
 
       <CredentialLookup
         label={i18n._(t`Registry credential`)}
@@ -146,6 +168,7 @@ function ExecutionEnvironmentForm({
   onCancel,
   submitError,
   me,
+  isOrgLookupDisabled,
   ...rest
 }) {
   const {
@@ -191,6 +214,7 @@ function ExecutionEnvironmentForm({
               me={me}
               options={options}
               executionEnvironment={executionEnvironment}
+              isOrgLookupDisabled={isOrgLookupDisabled}
               {...rest}
             />
             {submitError && <FormSubmitError error={submitError} />}
@@ -210,11 +234,13 @@ ExecutionEnvironmentForm.propTypes = {
   onCancel: func.isRequired,
   onSubmit: func.isRequired,
   submitError: shape({}),
+  isOrgLookupDisabled: bool,
 };
 
 ExecutionEnvironmentForm.defaultProps = {
   executionEnvironment: {},
   submitError: null,
+  isOrgLookupDisabled: false,
 };
 
 export default withI18n()(ExecutionEnvironmentForm);
