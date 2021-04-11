@@ -36,6 +36,8 @@ no_endpoint_for_module = [
     'tower_receive',
     'tower_send',
     'tower_workflow_launch',
+    'tower_workflow_node_wait',
+    'tower_workflow_approval',
     'tower_job_cancel',
     'tower_workflow_template',
     'tower_ad_hoc_command_wait',
