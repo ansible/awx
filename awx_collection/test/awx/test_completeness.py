@@ -66,7 +66,7 @@ no_api_parameter_ok = {
     # tower_group parameters to perserve hosts and children.
     'tower_group': ['preserve_existing_children', 'preserve_existing_hosts'],
     # tower_workflow_approval parameters that do not apply when approving an approval node.
-    'tower_workflow_approval': ['action', 'description', 'execution_environment', 'interval', 'timeout', 'workflow_job_id'],
+    'tower_workflow_approval': ['action', 'interval', 'timeout', 'workflow_job_id'],
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
@@ -75,6 +75,7 @@ no_api_parameter_ok = {
 needs_development = ['tower_inventory_script']
 needs_param_development = {
     'tower_host': ['instance_id'],
+    'tower_workflow_approval': ['description', 'execution_environment'],
 }
 # -----------------------------------------------------------------------------------------------------------
 
