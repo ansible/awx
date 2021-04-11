@@ -150,7 +150,7 @@
         that:
           - result is not failed
 
-    - name: Test waiting for an approval node that doesn't exit on the last workflow for failure. 
+    - name: Test waiting for an approval node that doesn't exit on the last workflow for failure.
       tower_workflow_approval:
         workflow_job_id: "{{ result.id }}"
         name: Test workflow approval
@@ -213,7 +213,7 @@
           - result is failed
           - "'Monitoring of Workflow Node - Demo Job Template aborted due to timeout' in result.msg"
 
-    - name: Wait for approval node to activate and approve 
+    - name: Wait for approval node to activate and approve
       awx.awx.tower_workflow_approval:
         workflow_job_id: "{{ wfjt_info.id }}"
         name: "{{ approval_node_name }}"
