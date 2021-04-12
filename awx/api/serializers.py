@@ -4805,6 +4805,14 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
             )
         return value
 
+    def validate(self, attrs):
+        # if the schedule is being disabled, there's no need
+        # validate the related UnifiedJobTemplate
+        # see: https://github.com/ansible/awx/issues/8641
+        if self.context['request'].method == 'PATCH' and attrs == {'enabled': False}:
+            return attrs
+        return super(ScheduleSerializer, self).validate(attrs)
+
 
 class InstanceSerializer(BaseSerializer):
 
