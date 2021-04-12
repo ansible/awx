@@ -1,5 +1,5 @@
 from django.conf import settings
-from prometheus_client import PROCESS_COLLECTOR, PLATFORM_COLLECTOR, GC_COLLECTOR, CollectorRegistry, Gauge, Info, generate_latest
+from prometheus_client import CollectorRegistry, Gauge, Info, generate_latest
 
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version

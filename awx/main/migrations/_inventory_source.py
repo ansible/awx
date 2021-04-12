@@ -1,9 +1,6 @@
 import logging
 
-from uuid import uuid4
-
 from django.utils.encoding import smart_text
-from django.utils.timezone import now
 
 from awx.main.utils.common import set_current_apps
 from awx.main.utils.common import parse_yaml_or_json
