@@ -118,8 +118,7 @@ function ProjectList({ i18n }) {
   };
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.project(
-    selected[0],
-    i18n
+    selected[0]
   );
 
   return (

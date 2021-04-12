@@ -43,8 +43,7 @@ function ExecutionEnvironmentDetails({ executionEnvironment, i18n }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
   const deleteDetailsRequests = relatedResourceDeleteRequests.executionEnvironment(
-    executionEnvironment,
-    i18n
+    executionEnvironment
   );
   return (
     <CardBody>

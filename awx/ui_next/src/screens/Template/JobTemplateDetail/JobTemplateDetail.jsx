@@ -98,8 +98,7 @@ function JobTemplateDetail({ i18n, template }) {
   const { error, dismissError } = useDismissableError(deleteError);
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.template(
-    template,
-    i18n
+    template
   );
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;

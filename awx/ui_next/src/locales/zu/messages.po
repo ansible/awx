@@ -1,11 +1,11 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2021-03-02 14:48+0000\n"
+"POT-Creation-Date: 2021-04-06 17:06-0400\n"
 "Mime-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
-"Language: fr\n"
+"Language: zu\n"
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: \n"
@@ -119,10 +119,6 @@ msgid ""
 "module). This parameter allows access to references via\n"
 "the branch field not otherwise available."
 msgstr ""
-
-#: src/screens/Project/shared/ProjectSubForms/GitSubForm.jsx:57
-#~ msgid "A refspec to fetch (passed to the Ansible git module). This parameter allows access to references via the branch field not otherwise available."
-#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:137
 msgid "A subscription manifest is an export of a Red Hat Subscription. To generate a subscription manifest, go to <0>access.redhat.com</0>. For more information, see the <1>User Guide</1>."
@@ -346,10 +342,6 @@ msgstr ""
 msgid "Add workflow template"
 msgstr ""
 
-#: src/screens/ActivityStream/ActivityStream.jsx:187
-#~ msgid "Adminisration"
-#~ msgstr ""
-
 #: routeConfig.js:114
 #: screens/ActivityStream/ActivityStream.jsx:187
 msgid "Administration"
@@ -376,11 +368,6 @@ msgid ""
 "before executing job tasks. This is intended for static content,\n"
 "like the Ansible inventory .ini file format."
 msgstr ""
-
-#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:168
-#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:177
-#~ msgid "After every project update where the SCM revision changes, refresh the inventory from the selected source before executing job tasks. This is intended for static content, like the Ansible inventory .ini file format."
-#~ msgstr ""
 
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:508
 msgid "After number of occurrences"
@@ -424,10 +411,6 @@ msgid ""
 "template that uses this project."
 msgstr ""
 
-#: src/screens/Project/shared/ProjectSubForms/SharedFields.jsx:102
-#~ msgid "Allow changing the Source Control branch or revision in a job template that uses this project."
-#~ msgstr ""
-
 #: screens/Application/shared/ApplicationForm.jsx:119
 msgid "Allowed URIs list, space separated"
 msgstr ""
@@ -451,16 +434,6 @@ msgstr ""
 msgid "An inventory must be selected"
 msgstr ""
 
-#: src/components/PromptDetail/PromptInventorySourceDetail.jsx:87
-#: src/components/PromptDetail/PromptProjectDetail.jsx:92
-#: src/screens/Inventory/shared/InventorySourceForm.jsx:143
-#: src/screens/Organization/OrganizationDetail/OrganizationDetail.jsx:94
-#: src/screens/Organization/shared/OrganizationForm.jsx:82
-#: src/screens/Project/ProjectDetail/ProjectDetail.jsx:128
-#: src/screens/Project/shared/ProjectForm.jsx:274
-#~ msgid "Ansible Environment"
-#~ msgstr ""
-
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:98
 msgid "Ansible Tower"
 msgstr ""
@@ -469,14 +442,6 @@ msgstr ""
 #: screens/Project/shared/ProjectSubForms/GitSubForm.jsx:91
 msgid "Ansible Tower Documentation."
 msgstr ""
-
-#: src/components/About/About.jsx:58
-#~ msgid "Ansible Version"
-#~ msgstr ""
-
-#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:204
-#~ msgid "Ansible environment"
-#~ msgstr ""
 
 #: screens/Template/Survey/SurveyQuestionForm.jsx:33
 msgid "Answer type"
@@ -561,10 +526,6 @@ msgstr ""
 #: components/Schedule/shared/FrequencyDetailSubform.jsx:127
 msgid "April"
 msgstr ""
-
-#: src/screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:116
-#~ msgid "Are you sure you want to delete the {0} below?"
-#~ msgstr ""
 
 #: components/DeleteButton/DeleteButton.jsx:127
 msgid "Are you sure you want to delete:"
@@ -784,10 +745,6 @@ msgid ""
 "path used to locate playbooks."
 msgstr ""
 
-#: src/screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:70
-#~ msgid "Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. Together the base path and selected playbook directory provide the full path used to locate playbooks."
-#~ msgstr ""
-
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:456
 msgid "Basic auth password"
 msgstr ""
@@ -799,10 +756,6 @@ msgid ""
 "commit hashes and refs may not be available unless you also\n"
 "provide a custom refspec."
 msgstr ""
-
-#: src/screens/Project/shared/ProjectSubForms/SharedFields.jsx:33
-#~ msgid "Branch to checkout. In addition to branches, you can input tags, commit hashes, and arbitrary refs. Some commit hashes and refs may not be available unless you also provide a custom refspec."
-#~ msgstr ""
 
 #: components/About/About.jsx:37
 msgid "Brand Image"
@@ -952,10 +905,6 @@ msgid ""
 "logging aggregator host and logging aggregator type."
 msgstr ""
 
-#: src/screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:153
-#~ msgid "Cannot enable log aggregator without providing logging aggregator host and logging aggregator type."
-#~ msgstr ""
-
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:239
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:101
 msgid "Capacity"
@@ -986,10 +935,6 @@ msgid ""
 "Change PROJECTS_ROOT when deploying\n"
 "{brandName} to change this location."
 msgstr ""
-
-#: src/screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:76
-#~ msgid "Change PROJECTS_ROOT when deploying {brandName} to change this location."
-#~ msgstr ""
 
 #: screens/Job/JobOutput/shared/HostStatusBar.jsx:43
 msgid "Changed"
@@ -1060,10 +1005,6 @@ msgid ""
 "Refer to the Ansible Tower Documentation for more additional\n"
 "information about each option."
 msgstr ""
-
-#: src/screens/Template/Survey/SurveyQuestionForm.jsx:37
-#~ msgid "Choose an answer type or format you want as the prompt for the user. Refer to the Ansible Tower Documentation for more additional information about each option."
-#~ msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:142
 msgid "Choose an email option"
@@ -1166,22 +1107,6 @@ msgstr ""
 msgid "Command"
 msgstr ""
 
-#: src/screens/Host/Host.jsx:67
-#: src/screens/Host/Hosts.jsx:32
-#: src/screens/Inventory/Inventory.jsx:68
-#: src/screens/Inventory/InventoryHost/InventoryHost.jsx:88
-#: src/screens/Template/Template.jsx:151
-#: src/screens/Template/Templates.jsx:48
-#: src/screens/Template/WorkflowJobTemplate.jsx:145
-#~ msgid "Completed Jobs"
-#~ msgstr ""
-
-#: src/screens/Inventory/Inventories.jsx:59
-#: src/screens/Inventory/Inventories.jsx:73
-#: src/screens/Inventory/SmartInventory.jsx:73
-#~ msgid "Completed jobs"
-#~ msgstr ""
-
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:53
 msgid "Compliant"
 msgstr ""
@@ -1256,10 +1181,6 @@ msgid ""
 "will produce for inventory source update jobs."
 msgstr ""
 
-#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:92
-#~ msgid "Control the level of output Ansible will produce for inventory source update jobs."
-#~ msgstr ""
-
 #: components/LaunchPrompt/steps/OtherPromptsStep.jsx:152
 msgid ""
 "Control the level of output ansible\n"
@@ -1271,11 +1192,6 @@ msgid ""
 "Control the level of output ansible will\n"
 "produce as the playbook executes."
 msgstr ""
-
-#: src/components/LaunchPrompt/steps/OtherPromptsStep.jsx:152
-#: src/screens/Template/shared/JobTemplateForm.jsx:414
-#~ msgid "Control the level of output ansible will produce as the playbook executes."
-#~ msgstr ""
 
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:64
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:69
@@ -1592,10 +1508,6 @@ msgstr ""
 msgid "Credential passwords"
 msgstr ""
 
-#: src/screens/InstanceGroup/shared/ContainerGroupForm.jsx:60
-#~ msgid "Credential to authenticate with Kubernetes or OpenShift.  Must be of type \"Kubernetes/OpenShift API Bearer Token”."
-#~ msgstr ""
-
 #: screens/InstanceGroup/shared/ContainerGroupForm.jsx:58
 msgid "Credential to authenticate with Kubernetes or OpenShift. Must be of type \"Kubernetes/OpenShift API Bearer Token\". If left blank, the underlying Pod's service account will be used."
 msgstr ""
@@ -1784,14 +1696,6 @@ msgstr ""
 msgid "Delete Execution Environment"
 msgstr ""
 
-#: src/screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:92
-#~ msgid "Delete Group?"
-#~ msgstr ""
-
-#: src/screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:91
-#~ msgid "Delete Groups?"
-#~ msgstr ""
-
 #: screens/Host/HostDetail/HostDetail.jsx:123
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:113
 msgid "Delete Host"
@@ -1897,10 +1801,6 @@ msgid ""
 "repository this may significantly increase the amount\n"
 "of time required to complete an update."
 msgstr ""
-
-#: src/screens/Project/shared/ProjectSubForms/SharedFields.jsx:81
-#~ msgid "Delete the local repository in its entirety prior to performing an update. Depending on the size of the repository this may significantly increase the amount of time required to complete an update."
-#~ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerLink.jsx:89
 msgid "Delete this link"
@@ -2198,10 +2098,6 @@ msgid ""
 "same tasks against a portion of the inventory."
 msgstr ""
 
-#: src/screens/Template/shared/JobTemplateForm.jsx:429
-#~ msgid "Divide the work done by this job template into the specified number of job slices, each running the same tasks against a portion of the inventory."
-#~ msgstr ""
-
 #: components/CodeEditor/VariablesDetail.jsx:114
 #: components/CodeEditor/VariablesDetail.jsx:120
 #: components/CodeEditor/VariablesField.jsx:63
@@ -2234,20 +2130,11 @@ msgid ""
 "executing job tasks."
 msgstr ""
 
-#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:158
-#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:168
-#~ msgid "Each time a job runs using this inventory, refresh the inventory from the selected source before executing job tasks."
-#~ msgstr ""
-
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:92
 msgid ""
 "Each time a job runs using this project, update the\n"
 "revision of the project prior to starting the job."
 msgstr ""
-
-#: src/screens/Project/shared/ProjectSubForms/SharedFields.jsx:92
-#~ msgid "Each time a job runs using this project, update the revision of the project prior to starting the job."
-#~ msgstr ""
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:397
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:401
@@ -2586,14 +2473,6 @@ msgid ""
 "template"
 msgstr ""
 
-#: src/screens/Template/shared/JobTemplateForm.jsx:517
-#~ msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact BRAND_NAME and request a configuration update using this job template."
-#~ msgstr ""
-
-#: src/components/AdHocCommands/AdHocDetailsStep.jsx:244
-#~ msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {brandName} and request a configuration update using this job template"
-#~ msgstr ""
-
 #: screens/Credential/CredentialDetail/CredentialDetail.jsx:154
 #: screens/Setting/shared/SettingDetail.jsx:75
 msgid "Encrypted"
@@ -2642,10 +2521,6 @@ msgstr ""
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
 msgstr ""
 
-#: src/screens/Inventory/shared/SmartInventoryForm.jsx:100
-#~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
-#~ msgstr ""
-
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:193
 msgid "Enter one Annotation Tag per line, without commas."
 msgstr ""
@@ -2657,19 +2532,11 @@ msgid ""
 "required."
 msgstr ""
 
-#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:244
-#~ msgid "Enter one IRC channel or username per line. The pound symbol (#) for channels, and the at (@) symbol for users, are not required."
-#~ msgstr ""
-
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:377
 msgid ""
 "Enter one Slack channel per line. The pound symbol (#)\n"
 "is required for channels."
 msgstr ""
-
-#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:377
-#~ msgid "Enter one Slack channel per line. The pound symbol (#) is required for channels."
-#~ msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:92
 msgid ""
@@ -2677,29 +2544,17 @@ msgid ""
 "list for this type of notification."
 msgstr ""
 
-#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:92
-#~ msgid "Enter one email address per line to create a recipient list for this type of notification."
-#~ msgstr ""
-
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:426
 msgid ""
 "Enter one phone number per line to specify where to\n"
 "route SMS messages."
 msgstr ""
 
-#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:426
-#~ msgid "Enter one phone number per line to specify where to route SMS messages."
-#~ msgstr ""
-
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:416
 msgid ""
 "Enter the number associated with the \"Messaging\n"
 "Service\" in Twilio in the format +18005550199."
 msgstr ""
-
-#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:416
-#~ msgid "Enter the number associated with the \"Messaging Service\" in Twilio in the format +18005550199."
-#~ msgstr ""
 
 #: screens/Inventory/shared/InventorySourceSubForms/TowerSubForm.jsx:60
 msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
@@ -2736,10 +2591,6 @@ msgstr ""
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:38
 msgid "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr ""
-
-#: src/screens/Job/JobDetail/JobDetail.jsx:224
-#~ msgid "Environment"
-#~ msgstr ""
 
 #: components/JobList/JobList.jsx:207
 #: components/Workflow/WorkflowNodeHelp.jsx:92
@@ -3470,11 +3321,6 @@ msgid ""
 "and report problems without executing the playbook."
 msgstr ""
 
-#: src/components/LaunchPrompt/steps/OtherPromptsStep.jsx:115
-#: src/screens/Template/shared/JobTemplateForm.jsx:216
-#~ msgid "For job templates, select run to execute the playbook. Select check to only check playbook syntax, test environment setup, and report problems without executing the playbook."
-#~ msgstr ""
-
 #: screens/Project/shared/ProjectSubForms/GitSubForm.jsx:83
 msgid "For more information, refer to the"
 msgstr ""
@@ -3889,11 +3735,6 @@ msgid ""
 "on the external source."
 msgstr ""
 
-#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:141
-#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:153
-#~ msgid "If checked, all variables for child groups and hosts will be removed and replaced by those found on the external source."
-#~ msgstr ""
-
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:126
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:135
 msgid ""
@@ -3906,20 +3747,11 @@ msgid ""
 "default group for the inventory."
 msgstr ""
 
-#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:118
-#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:132
-#~ msgid "If checked, any hosts and groups that were previously present on the external source but are now removed will be removed from the Tower inventory. Hosts and groups that were not managed by the inventory source will be promoted to the next manually created group or if there is no manually created group to promote them into, they will be left in the \"all\" default group for the inventory."
-#~ msgstr ""
-
 #: screens/Template/shared/JobTemplateForm.jsx:537
 msgid ""
 "If enabled, run this playbook as an\n"
 "administrator."
 msgstr ""
-
-#: src/screens/Template/shared/JobTemplateForm.jsx:507
-#~ msgid "If enabled, run this playbook as an administrator."
-#~ msgstr ""
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.jsx:177
 msgid ""
@@ -3935,10 +3767,6 @@ msgid ""
 "to Ansible's --diff mode."
 msgstr ""
 
-#: src/screens/Template/shared/JobTemplateForm.jsx:448
-#~ msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible's --diff mode."
-#~ msgstr ""
-
 #: components/AdHocCommands/AdHocDetailsStep.jsx:216
 msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode."
 msgstr ""
@@ -3948,10 +3776,6 @@ msgid ""
 "If enabled, simultaneous runs of this job\n"
 "template will be allowed."
 msgstr ""
-
-#: src/screens/Template/shared/JobTemplateForm.jsx:551
-#~ msgid "If enabled, simultaneous runs of this job template will be allowed."
-#~ msgstr ""
 
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:271
 msgid "If enabled, simultaneous runs of this workflow job template will be allowed."
@@ -3963,10 +3787,6 @@ msgid ""
 "be viewed at the host level. Facts are persisted and\n"
 "injected into the fact cache at runtime."
 msgstr ""
-
-#: src/screens/Template/shared/JobTemplateForm.jsx:559
-#~ msgid "If enabled, this will store gathered facts so they can be viewed at the host level. Facts are persisted and injected into the fact cache at runtime."
-#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:140
 msgid "If you are ready to upgrade or renew, please <0>contact us.</0>"
@@ -4013,10 +3833,6 @@ msgid ""
 "jobs.  For hosts that are part of an external inventory, this may be\n"
 "reset by the inventory sync process."
 msgstr ""
-
-#: src/components/HostToggle/HostToggle.jsx:18
-#~ msgid "Indicates if a host is available and should be included in running jobs.  For hosts that are part of an external inventory, this may be reset by the inventory sync process."
-#~ msgstr ""
 
 #: components/AppContainer/PageHeaderToolbar.jsx:113
 msgid "Info"
@@ -4847,19 +4663,11 @@ msgid ""
 "assigned to this group when new instances come online."
 msgstr ""
 
-#: src/screens/InstanceGroup/shared/InstanceGroupForm.jsx:34
-#~ msgid "Minimum number of instances that will be automatically assigned to this group when new instances come online."
-#~ msgstr ""
-
 #: screens/InstanceGroup/shared/InstanceGroupForm.jsx:46
 msgid ""
 "Minimum percentage of all instances that will be automatically\n"
 "assigned to this group when new instances come online."
 msgstr ""
-
-#: src/screens/InstanceGroup/shared/InstanceGroupForm.jsx:46
-#~ msgid "Minimum percentage of all instances that will be automatically assigned to this group when new instances come online."
-#~ msgstr ""
 
 #: components/Schedule/shared/ScheduleForm.jsx:163
 msgid "Minute"
@@ -5316,10 +5124,6 @@ msgid ""
 "directly from the sub-group level that they belong."
 msgstr ""
 
-#: src/screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.jsx:224
-#~ msgid "Note that only hosts directly in this group can be disassociated. Hosts in sub-groups must be disassociated directly from the sub-group level that they belong."
-#~ msgstr ""
-
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:214
 msgid ""
 "Note that you may still see the group in the list after\n"
@@ -5336,14 +5140,6 @@ msgid ""
 "with directly and indirectly."
 msgstr ""
 
-#: src/screens/Host/HostGroups/HostGroupsList.jsx:212
-#~ msgid "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s  children.  This list shows all groups the host is associated  with directly and indirectly."
-#~ msgstr ""
-
-#: src/screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:214
-#~ msgid "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s children.  This list shows all groups the host is associated with directly and indirectly."
-#~ msgstr ""
-
 #: screens/Project/shared/ProjectSubForms/GitSubForm.jsx:66
 msgid "Note: This field assumes the remote name is \"origin\"."
 msgstr ""
@@ -5357,14 +5153,6 @@ msgid ""
 "read only protocol (git://) does not use username or\n"
 "password information."
 msgstr ""
-
-#: src/screens/Project/shared/ProjectSubForms/GitSubForm.jsx:36
-#~ msgid "Note: When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using SSH. GIT read only protocol (git://) does not use username or password information."
-#~ msgstr ""
-
-#: src/screens/Inventory/Inventories.jsx:120
-#~ msgid "Notifcations"
-#~ msgstr ""
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:270
 msgid "Notification Color"
@@ -5517,11 +5305,6 @@ msgid ""
 "such as 'dev' or 'test'. Labels can be used to group and filter\n"
 "job templates and completed jobs."
 msgstr ""
-
-#: src/screens/Template/shared/JobTemplateForm.jsx:342
-#: src/screens/Template/shared/WorkflowJobTemplateForm.jsx:187
-#~ msgid "Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs."
-#~ msgstr ""
 
 #: screens/Template/shared/WebhookSubForm.jsx:219
 msgid "Optionally select the credential to use to send status updates back to the webhook service."
@@ -5865,10 +5648,6 @@ msgid ""
 "examples."
 msgstr ""
 
-#: src/components/Lookup/HostFilterLookup.jsx:287
-#~ msgid "Populate the hosts for this inventory by using a search filter. Example: ansible_facts.ansible_distribution:\"RedHat\". Refer to the Ansible Tower documentation for further syntax and examples."
-#~ msgstr ""
-
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:102
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:105
 msgid "Port"
@@ -5999,12 +5778,6 @@ msgid ""
 "information and examples on patterns."
 msgstr ""
 
-#: src/components/LaunchPrompt/steps/OtherPromptsStep.jsx:36
-#: src/screens/Template/shared/JobTemplateForm.jsx:393
-#: src/screens/Template/shared/WorkflowJobTemplateForm.jsx:147
-#~ msgid "Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. Multiple patterns are allowed. Refer to Ansible documentation for more information and examples on patterns."
-#~ msgstr ""
-
 #: screens/Credential/shared/CredentialFormFields/CredentialField.jsx:164
 msgid "Provide a value for this field or select the Prompt on launch option."
 msgstr ""
@@ -6014,10 +5787,6 @@ msgid ""
 "Provide key/value pairs using either\n"
 "YAML or JSON."
 msgstr ""
-
-#: src/components/AdHocCommands/AdHocDetailsStep.jsx:284
-#~ msgid "Provide key/value pairs using either YAML or JSON."
-#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:205
 msgid ""
@@ -6132,10 +5901,6 @@ msgid ""
 "Refer to the Ansible documentation for details\n"
 "about the configuration file."
 msgstr ""
-
-#: src/screens/Template/shared/JobTemplateForm.jsx:383
-#~ msgid "Refer to the Ansible documentation for details about the configuration file."
-#~ msgstr ""
 
 #: screens/User/UserTokens/UserTokens.jsx:78
 msgid "Refresh Token"
@@ -6294,10 +6059,6 @@ msgid ""
 "Retrieve the enabled state from the given dict of host variables.\n"
 "The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
 msgstr ""
-
-#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:212
-#~ msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
-#~ msgstr ""
 
 #: components/JobList/JobListCancelButton.jsx:143
 #: components/JobList/JobListCancelButton.jsx:146
@@ -6676,10 +6437,6 @@ msgid ""
 "all job template nodes that prompt for a branch."
 msgstr ""
 
-#: src/screens/Template/shared/JobTemplateForm.jsx:280
-#~ msgid "Select a branch for the job template. This branch is applied to all job template nodes that prompt for a branch."
-#~ msgstr ""
-
 #: components/LaunchPrompt/steps/OtherPromptsStep.jsx:48
 msgid "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch"
 msgstr ""
@@ -6794,20 +6551,12 @@ msgid ""
 "credential(s) become the defaults that can be updated at run time."
 msgstr ""
 
-#: src/screens/Template/shared/JobTemplateForm.jsx:324
-#~ msgid "Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking \"Prompt on launch\" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check \"Prompt on launch\", the selected credential(s) become the defaults that can be updated at run time."
-#~ msgstr ""
-
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:89
 msgid ""
 "Select from the list of directories found in\n"
 "the Project Base Path. Together the base path and the playbook\n"
 "directory provide the full path used to locate playbooks."
 msgstr ""
-
-#: src/screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:89
-#~ msgid "Select from the list of directories found in the Project Base Path. Together the base path and the playbook directory provide the full path used to locate playbooks."
-#~ msgstr ""
 
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:94
 msgid "Select items from list"
@@ -6854,10 +6603,6 @@ msgstr ""
 msgid "Select the credential you want to use when accessing the remote hosts to run the command. Choose the credential containing the username and SSH key or password that Ansible will need to log into the remote hosts."
 msgstr ""
 
-#: src/screens/Inventory/shared/InventorySourceForm.jsx:146
-#~ msgid "Select the custom Python virtual environment for this inventory source sync to run on."
-#~ msgstr ""
-
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:209
 msgid "Select the default execution environment for this organization to run on."
 msgstr ""
@@ -6881,21 +6626,12 @@ msgid ""
 "you want this job to manage."
 msgstr ""
 
-#: src/components/Lookup/InventoryLookup.jsx:89
-#: src/screens/Template/shared/JobTemplateForm.jsx:248
-#~ msgid "Select the inventory containing the hosts you want this job to manage."
-#~ msgstr ""
-
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.jsx:105
 msgid ""
 "Select the inventory file\n"
 "to be synced by this source. You can select from\n"
 "the dropdown or enter a file within the input."
 msgstr ""
-
-#: src/screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.jsx:105
-#~ msgid "Select the inventory file to be synced by this source. You can select from the dropdown or enter a file within the input."
-#~ msgstr ""
 
 #: components/HostForm/HostForm.jsx:32
 #: components/HostForm/HostForm.jsx:47
@@ -6911,10 +6647,6 @@ msgid ""
 "Select the project containing the playbook\n"
 "you want this job to execute."
 msgstr ""
-
-#: src/screens/Template/shared/JobTemplateForm.jsx:264
-#~ msgid "Select the project containing the playbook you want this job to execute."
-#~ msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:89
 msgid "Select your Ansible Automation Platform subscription to use."
@@ -7139,11 +6871,6 @@ msgid ""
 "documentation for details on the usage of tags."
 msgstr ""
 
-#: src/components/LaunchPrompt/steps/OtherPromptsStep.jsx:74
-#: src/screens/Template/shared/JobTemplateForm.jsx:487
-#~ msgid "Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags."
-#~ msgstr ""
-
 #: screens/Job/JobOutput/shared/HostStatusBar.jsx:39
 msgid "Skipped"
 msgstr ""
@@ -7300,19 +7027,11 @@ msgid ""
 "the Ansible Tower documentation for example syntax."
 msgstr ""
 
-#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:478
-#~ msgid "Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax."
-#~ msgstr ""
-
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:392
 msgid ""
 "Specify a notification color. Acceptable colors are hex\n"
 "color code (example: #3af or #789abc)."
 msgstr ""
-
-#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:392
-#~ msgid "Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc)."
-#~ msgstr ""
 
 #: screens/User/shared/UserTokenForm.jsx:71
 msgid "Specify a scope for the token's access"
@@ -7595,11 +7314,6 @@ msgid ""
 "documentation for details on the usage of tags."
 msgstr ""
 
-#: src/components/LaunchPrompt/steps/OtherPromptsStep.jsx:62
-#: src/screens/Template/shared/JobTemplateForm.jsx:471
-#~ msgid "Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags."
-#~ msgstr ""
-
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:138
 msgid "Tags for the Annotation"
 msgstr ""
@@ -7747,20 +7461,12 @@ msgid ""
 "from 1 to 120 seconds."
 msgstr ""
 
-#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:122
-#~ msgid "The amount of time (in seconds) before the email notification stops trying to reach the host and times out. Ranges from 1 to 120 seconds."
-#~ msgstr ""
-
 #: screens/Template/shared/JobTemplateForm.jsx:469
 msgid ""
 "The amount of time (in seconds) to run\n"
 "before the job is canceled. Defaults to 0 for no job\n"
 "timeout."
 msgstr ""
-
-#: src/screens/Template/shared/JobTemplateForm.jsx:439
-#~ msgid "The amount of time (in seconds) to run before the job is canceled. Defaults to 0 for no job timeout."
-#~ msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:164
 msgid ""
@@ -7769,10 +7475,6 @@ msgid ""
 "Grafana URL."
 msgstr ""
 
-#: src/screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:164
-#~ msgid "The base URL of the Grafana server - the /api/annotations endpoint will be added automatically to the base Grafana URL."
-#~ msgstr ""
-
 #: screens/Project/shared/ProjectSubForms/GitSubForm.jsx:78
 msgid ""
 "The first fetches all references. The second\n"
@@ -7780,20 +7482,12 @@ msgid ""
 "the branch needs to be \"pull/62/head\"."
 msgstr ""
 
-#: src/screens/Project/shared/ProjectSubForms/GitSubForm.jsx:74
-#~ msgid "The first fetches all references. The second fetches the Github pull request number 62, in this example the branch needs to be \"pull/62/head\"."
-#~ msgstr ""
-
 #: screens/Organization/shared/OrganizationForm.jsx:77
 msgid ""
 "The maximum number of hosts allowed to be managed by this organization.\n"
 "Value defaults to 0 which means no limit. Refer to the Ansible\n"
 "documentation for more details."
 msgstr ""
-
-#: src/screens/Organization/shared/OrganizationForm.jsx:69
-#~ msgid "The maximum number of hosts allowed to be managed by this organization. Value defaults to 0 which means no limit. Refer to the Ansible documentation for more details."
-#~ msgstr ""
 
 #: screens/Template/shared/JobTemplateForm.jsx:407
 msgid ""
@@ -7803,10 +7497,6 @@ msgid ""
 "usually 5. The default number of forks can be overwritten\n"
 "with a change to"
 msgstr ""
-
-#: src/screens/Template/shared/JobTemplateForm.jsx:377
-#~ msgid "The number of parallel or simultaneous processes to use while executing the playbook. An empty value, or a value less than 1 will use the Ansible default which is usually 5. The default number of forks can be overwritten with a change to"
-#~ msgstr ""
 
 #: components/AdHocCommands/AdHocDetailsStep.jsx:197
 msgid "The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information"
@@ -7837,10 +7527,6 @@ msgid ""
 "etc.). Variable names with spaces are not allowed."
 msgstr ""
 
-#: src/screens/Template/Survey/SurveyQuestionForm.jsx:134
-#~ msgid "The suggested format for variable names is lowercase and underscore-separated (for example, foo_bar, user_id, host_name, etc.). Variable names with spaces are not allowed."
-#~ msgstr ""
-
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:153
 msgid "The tower instance group cannot be deleted."
 msgstr ""
@@ -7854,10 +7540,6 @@ msgid ""
 "or have {brandName} directly retrieve your playbooks from\n"
 "source control using the Source Control Type option above."
 msgstr ""
-
-#: src/screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:53
-#~ msgid "There are no available playbook directories in {project_base_dir}. Either that directory is empty, or all of the contents are already assigned to other projects. Create a new directory there and make sure the playbook files can be read by the \"awx\" system user, or have {brandName} directly retrieve your playbooks from source control using the Source Control Type option above."
-#~ msgstr ""
 
 #: screens/Login/Login.jsx:120
 msgid "There was a problem signing in. Please try again."
@@ -8079,10 +7761,6 @@ msgid ""
 "their factory defaults. Are you sure you want to proceed?"
 msgstr ""
 
-#: src/screens/Setting/shared/RevertAllAlert.jsx:36
-#~ msgid "This will revert all configuration values on this page to their factory defaults. Are you sure you want to proceed?"
-#~ msgstr ""
-
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.jsx:41
 msgid "This workflow does not have any nodes configured."
 msgstr ""
@@ -8117,10 +7795,6 @@ msgid ""
 "performed."
 msgstr ""
 
-#: src/screens/Project/shared/ProjectSubForms/SharedFields.jsx:121
-#~ msgid "Time in seconds to consider a project to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, and a new project update will be performed."
-#~ msgstr ""
-
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:238
 msgid ""
 "Time in seconds to consider an inventory sync\n"
@@ -8129,10 +7803,6 @@ msgid ""
 "Cache Timeout, it is not considered current, and a new\n"
 "inventory sync will be performed."
 msgstr ""
-
-#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:195
-#~ msgid "Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, and a new inventory sync will be performed."
-#~ msgstr ""
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalStatus.jsx:21
 msgid "Timed out"
@@ -8415,12 +8085,6 @@ msgstr ""
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:109
 msgid "Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <0>subscription allocations</0> on the Red Hat Customer Portal."
 msgstr ""
-
-#: src/screens/Inventory/shared/InventorySourceForm.jsx:57
-#: src/screens/Organization/shared/OrganizationForm.jsx:33
-#: src/screens/Project/shared/ProjectForm.jsx:286
-#~ msgid "Use Default Ansible Environment"
-#~ msgstr ""
 
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:67
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:139
@@ -8982,11 +8646,6 @@ msgid ""
 "external source."
 msgstr ""
 
-#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:146
-#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:158
-#~ msgid "When not checked, a merge will be performed, combining local variables with those found on the external source."
-#~ msgstr ""
-
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:135
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:144
 msgid ""
@@ -8994,11 +8653,6 @@ msgid ""
 "hosts and groups not found on the external source will remain\n"
 "untouched by the inventory update process."
 msgstr ""
-
-#: src/screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:127
-#: src/screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:141
-#~ msgid "When not checked, local child hosts and groups not found on the external source will remain untouched by the inventory update process."
-#~ msgstr ""
 
 #: components/Workflow/WorkflowLegend.jsx:96
 msgid "Workflow"
@@ -9290,14 +8944,6 @@ msgstr ""
 msgid "for more info."
 msgstr ""
 
-#: src/screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:117
-#~ msgid "group"
-#~ msgstr ""
-
-#: src/screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:117
-#~ msgid "groups"
-#~ msgstr ""
-
 #: components/AdHocCommands/AdHocDetailsStep.jsx:182
 msgid "here"
 msgstr ""
@@ -9543,17 +9189,9 @@ msgstr ""
 msgid "{minutes} min {seconds} sec"
 msgstr ""
 
-#: src/screens/Inventory/InventoryList/InventoryList.jsx:215
-#~ msgid "{numItemsToDelete, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
-#~ msgstr ""
-
 #: components/JobList/JobListCancelButton.jsx:92
 msgid "{numJobsToCancel, plural, one {Cancel job} other {Cancel jobs}}"
 msgstr ""
-
-#: src/components/JobList/JobListCancelButton.jsx:81
-#~ msgid "{numJobsToCancel, plural, one {Cancel selected job} other {Cancel selected jobs}}"
-#~ msgstr ""
 
 #: components/JobList/JobListCancelButton.jsx:151
 msgid "{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}"
@@ -9563,19 +9201,7 @@ msgstr ""
 msgid "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 msgstr ""
 
-#: src/components/JobList/JobListCancelButton.jsx:68
-#~ msgid "{numJobsUnableToCancel, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}"
-#~ msgstr ""
-
-#: src/components/JobList/JobListCancelButton.jsx:57
-#~ msgid "{numJobsUnableToCancel, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}"
-#~ msgstr ""
-
 #: components/PaginatedDataList/PaginatedDataList.jsx:92
 #: components/PaginatedTable/PaginatedTable.jsx:77
 msgid "{pluralizedItemName} List"
 msgstr ""
-
-#: src/components/JobList/JobListCancelButton.jsx:96
-#~ msgid "{zeroOrOneJobSelected, plural, one {Cancel job} other {Cancel jobs}}"
-#~ msgstr ""

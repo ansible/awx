@@ -93,7 +93,8 @@
           "RunOnRadio",
           "NodeTypeLetter",
           "SelectableItem",
-          "Dash"
+          "Dash",
+          "Plural"
         ],
         "ignoreCallee": ["describe"]
       }

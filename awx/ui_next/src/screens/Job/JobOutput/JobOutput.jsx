@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation, withRouter } from 'react-router-dom';
-import { I18n } from '@lingui/react';
+import { i18n } from '@lingui/core';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
@@ -21,7 +21,7 @@ import {
   ToolbarToggleGroup,
   Tooltip,
 } from '@patternfly/react-core';
-import { SearchIcon, QuestionCircleIcon } from '@patternfly/react-icons';
+import { SearchIcon } from '@patternfly/react-icons';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody as _CardBody } from '../../../components/Card';
@@ -47,8 +47,6 @@ import {
   removeParams,
   getQSConfig,
 } from '../../../util/qs';
-import getDocsBaseUrl from '../../../util/getDocsBaseUrl';
-import { useConfig } from '../../../contexts/Config';
 
 const QS_CONFIG = getQSConfig('job_output', {
   order_by: 'start_line',
@@ -282,7 +280,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const jobSocketCounter = useRef(0);
   const interval = useRef(null);
   const history = useHistory();
-  const config = useConfig();
   const [contentError, setContentError] = useState(null);
   const [cssMap, setCssMap] = useState({});
   const [currentlyLoading, setCurrentlyLoading] = useState([]);
@@ -625,7 +622,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     history.push(encodedParams ? `${pathname}?${encodedParams}` : pathname);
   };
 
-  const renderSearchComponent = i18n => (
+  const renderSearchComponent = () => (
     <Search
       qsConfig={QS_CONFIG}
       columns={[
@@ -688,176 +685,157 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   }
 
   return (
-    <I18n>
-      {({ i18n }) => (
-        <>
-          <CardBody>
-            {isHostModalOpen && (
-              <HostEventModal
-                onClose={handleHostModalClose}
-                isOpen={isHostModalOpen}
-                hostEvent={hostEvent}
-              />
-            )}
-            <OutputHeader>
-              <HeaderTitle>
-                <StatusIcon status={job.status} />
-                <h1>{job.name}</h1>
-              </HeaderTitle>
-              <OutputToolbar
-                job={job}
-                jobStatus={jobStatus}
-                onCancel={() => setShowCancelModal(true)}
-                onDelete={deleteJob}
-                isDeleteDisabled={isDeleting}
-              />
-            </OutputHeader>
-            <HostStatusBar counts={job.host_status_counts} />
-            <SearchToolbar
-              id="job_output-toolbar"
-              clearAllFilters={handleRemoveAllSearchTerms}
-              collapseListedFiltersBreakpoint="lg"
-              clearFiltersButtonText={i18n._(t`Clear all filters`)}
-            >
-              <SearchToolbarContent>
-                <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
-                  <ToolbarItem variant="search-filter">
-                    {isJobRunning(job.status) ? (
-                      <Tooltip
-                        content={i18n._(
-                          t`Search is disabled while the job is running`
-                        )}
-                      >
-                        {renderSearchComponent(i18n)}
-                      </Tooltip>
-                    ) : (
-                      renderSearchComponent(i18n)
+    <>
+      <CardBody>
+        {isHostModalOpen && (
+          <HostEventModal
+            onClose={handleHostModalClose}
+            isOpen={isHostModalOpen}
+            hostEvent={hostEvent}
+          />
+        )}
+        <OutputHeader>
+          <HeaderTitle>
+            <StatusIcon status={job.status} />
+            <h1>{job.name}</h1>
+          </HeaderTitle>
+          <OutputToolbar
+            job={job}
+            jobStatus={jobStatus}
+            onCancel={() => setShowCancelModal(true)}
+            onDelete={deleteJob}
+            isDeleteDisabled={isDeleting}
+          />
+        </OutputHeader>
+        <HostStatusBar counts={job.host_status_counts} />
+        <SearchToolbar
+          id="job_output-toolbar"
+          clearAllFilters={handleRemoveAllSearchTerms}
+          collapseListedFiltersBreakpoint="lg"
+          clearFiltersButtonText={i18n._(t`Clear all filters`)}
+        >
+          <SearchToolbarContent>
+            <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
+              <ToolbarItem variant="search-filter">
+                {isJobRunning(job.status) ? (
+                  <Tooltip
+                    content={i18n._(
+                      t`Search is disabled while the job is running`
                     )}
-                    <Tooltip
-                      content={i18n._(t`Job output documentation`)}
-                      position="bottom"
-                    >
-                      <Button
-                        component="a"
-                        variant="plain"
-                        target="_blank"
-                        href={`${getDocsBaseUrl(
-                          config
-                        )}/html/userguide/jobs.html#standard-out-pane`}
-                      >
-                        <QuestionCircleIcon />
-                      </Button>
-                    </Tooltip>
-                  </ToolbarItem>
-                </ToolbarToggleGroup>
-              </SearchToolbarContent>
-            </SearchToolbar>
-            <PageControls
-              onScrollFirst={handleScrollFirst}
-              onScrollLast={handleScrollLast}
-              onScrollNext={handleScrollNext}
-              onScrollPrevious={handleScrollPrevious}
-            />
-            <OutputWrapper cssMap={cssMap}>
-              <InfiniteLoader
-                isRowLoaded={isRowLoaded}
-                loadMoreRows={loadMoreRows}
-                rowCount={remoteRowCount}
-              >
-                {({ onRowsRendered, registerChild }) => (
-                  <AutoSizer nonce={window.NONCE_ID} onResize={handleResize}>
-                    {({ width, height }) => {
-                      return (
-                        <>
-                          {hasContentLoading ? (
-                            <div style={{ width }}>
-                              <ContentLoading />
-                            </div>
-                          ) : (
-                            <List
-                              ref={ref => {
-                                registerChild(ref);
-                                listRef.current = ref;
-                              }}
-                              deferredMeasurementCache={cache}
-                              height={height || 1}
-                              onRowsRendered={onRowsRendered}
-                              rowCount={remoteRowCount}
-                              rowHeight={cache.rowHeight}
-                              rowRenderer={rowRenderer}
-                              scrollToAlignment="start"
-                              width={width || 1}
-                              overscanRowCount={20}
-                            />
-                          )}
-                        </>
-                      );
-                    }}
-                  </AutoSizer>
+                  >
+                    {renderSearchComponent(i18n)}
+                  </Tooltip>
+                ) : (
+                  renderSearchComponent(i18n)
                 )}
-              </InfiniteLoader>
-              <OutputFooter />
-            </OutputWrapper>
-          </CardBody>
-          {showCancelModal && isJobRunning(job.status) && (
-            <AlertModal
-              isOpen={showCancelModal}
+              </ToolbarItem>
+            </ToolbarToggleGroup>
+          </SearchToolbarContent>
+        </SearchToolbar>
+        <PageControls
+          onScrollFirst={handleScrollFirst}
+          onScrollLast={handleScrollLast}
+          onScrollNext={handleScrollNext}
+          onScrollPrevious={handleScrollPrevious}
+        />
+        <OutputWrapper cssMap={cssMap}>
+          <InfiniteLoader
+            isRowLoaded={isRowLoaded}
+            loadMoreRows={loadMoreRows}
+            rowCount={remoteRowCount}
+          >
+            {({ onRowsRendered, registerChild }) => (
+              <AutoSizer nonce={window.NONCE_ID} onResize={handleResize}>
+                {({ width, height }) => {
+                  return (
+                    <>
+                      {hasContentLoading ? (
+                        <div style={{ width }}>
+                          <ContentLoading />
+                        </div>
+                      ) : (
+                        <List
+                          ref={ref => {
+                            registerChild(ref);
+                            listRef.current = ref;
+                          }}
+                          deferredMeasurementCache={cache}
+                          height={height || 1}
+                          onRowsRendered={onRowsRendered}
+                          rowCount={remoteRowCount}
+                          rowHeight={cache.rowHeight}
+                          rowRenderer={rowRenderer}
+                          scrollToAlignment="start"
+                          width={width || 1}
+                          overscanRowCount={20}
+                        />
+                      )}
+                    </>
+                  );
+                }}
+              </AutoSizer>
+            )}
+          </InfiniteLoader>
+          <OutputFooter />
+        </OutputWrapper>
+      </CardBody>
+      {showCancelModal && isJobRunning(job.status) && (
+        <AlertModal
+          isOpen={showCancelModal}
+          variant="danger"
+          onClose={() => setShowCancelModal(false)}
+          title={i18n._(t`Cancel Job`)}
+          label={i18n._(t`Cancel Job`)}
+          actions={[
+            <Button
+              id="cancel-job-confirm-button"
+              key="delete"
               variant="danger"
-              onClose={() => setShowCancelModal(false)}
-              title={i18n._(t`Cancel Job`)}
-              label={i18n._(t`Cancel Job`)}
-              actions={[
-                <Button
-                  id="cancel-job-confirm-button"
-                  key="delete"
-                  variant="danger"
-                  isDisabled={isCancelling}
-                  aria-label={i18n._(t`Cancel job`)}
-                  onClick={cancelJob}
-                >
-                  {i18n._(t`Cancel job`)}
-                </Button>,
-                <Button
-                  id="cancel-job-return-button"
-                  key="cancel"
-                  variant="secondary"
-                  aria-label={i18n._(t`Return`)}
-                  onClick={() => setShowCancelModal(false)}
-                >
-                  {i18n._(t`Return`)}
-                </Button>,
-              ]}
+              isDisabled={isCancelling}
+              aria-label={i18n._(t`Cancel job`)}
+              onClick={cancelJob}
             >
-              {i18n._(
-                t`Are you sure you want to submit the request to cancel this job?`
-              )}
-            </AlertModal>
-          )}
-          {dismissableDeleteError && (
-            <AlertModal
-              isOpen={dismissableDeleteError}
-              variant="danger"
-              onClose={dismissDeleteError}
-              title={i18n._(t`Job Delete Error`)}
-              label={i18n._(t`Job Delete Error`)}
+              {i18n._(t`Cancel job`)}
+            </Button>,
+            <Button
+              id="cancel-job-return-button"
+              key="cancel"
+              variant="secondary"
+              aria-label={i18n._(t`Return`)}
+              onClick={() => setShowCancelModal(false)}
             >
-              <ErrorDetail error={dismissableDeleteError} />
-            </AlertModal>
+              {i18n._(t`Return`)}
+            </Button>,
+          ]}
+        >
+          {i18n._(
+            t`Are you sure you want to submit the request to cancel this job?`
           )}
-          {dismissableCancelError && (
-            <AlertModal
-              isOpen={dismissableCancelError}
-              variant="danger"
-              onClose={dismissCancelError}
-              title={i18n._(t`Job Cancel Error`)}
-              label={i18n._(t`Job Cancel Error`)}
-            >
-              <ErrorDetail error={dismissableCancelError} />
-            </AlertModal>
-          )}
-        </>
+        </AlertModal>
       )}
-    </I18n>
+      {dismissableDeleteError && (
+        <AlertModal
+          isOpen={dismissableDeleteError}
+          variant="danger"
+          onClose={dismissDeleteError}
+          title={i18n._(t`Job Delete Error`)}
+          label={i18n._(t`Job Delete Error`)}
+        >
+          <ErrorDetail error={dismissableDeleteError} />
+        </AlertModal>
+      )}
+      {dismissableCancelError && (
+        <AlertModal
+          isOpen={dismissableCancelError}
+          variant="danger"
+          onClose={dismissCancelError}
+          title={i18n._(t`Job Cancel Error`)}
+          label={i18n._(t`Job Cancel Error`)}
+        >
+          <ErrorDetail error={dismissableCancelError} />
+        </AlertModal>
+      )}
+    </>
   );
 }
 

@@ -20,9 +20,7 @@ describe('validators', () => {
   });
 
   test('required returns default message if value missing', () => {
-    expect(required(null, i18n)('')).toEqual({
-      id: 'This field must not be blank',
-    });
+    expect(required(null, i18n)('')).toEqual('This field must not be blank');
   });
 
   test('required returns custom message if value missing', () => {
@@ -30,18 +28,14 @@ describe('validators', () => {
   });
 
   test('required interprets white space as empty value', () => {
-    expect(required(null, i18n)(' ')).toEqual({
-      id: 'This field must not be blank',
-    });
-    expect(required(null, i18n)('\t')).toEqual({
-      id: 'This field must not be blank',
-    });
+    expect(required(null, i18n)(' ')).toEqual('This field must not be blank');
+    expect(required(null, i18n)('\t')).toEqual('This field must not be blank');
   });
 
   test('required interprets undefined as empty value', () => {
-    expect(required(null, i18n)(undefined)).toEqual({
-      id: 'This field must not be blank',
-    });
+    expect(required(null, i18n)(undefined)).toEqual(
+      'This field must not be blank'
+    );
   });
 
   test('required interprets 0 as non-empty value', () => {
@@ -57,10 +51,9 @@ describe('validators', () => {
   });
 
   test('maxLength rejects value above max', () => {
-    expect(maxLength(8, i18n)('abracadbra')).toEqual({
-      id: 'This field must not exceed {max} characters',
-      values: { max: 8 },
-    });
+    expect(maxLength(8, i18n)('abracadbra')).toEqual(
+      'This field must not exceed {max} characters'
+    );
   });
 
   test('minLength accepts value above min', () => {
@@ -72,22 +65,21 @@ describe('validators', () => {
   });
 
   test('minLength rejects value below min', () => {
-    expect(minLength(12, i18n)('abracadbra')).toEqual({
-      id: 'This field must be at least {min} characters',
-      values: { min: 12 },
-    });
+    expect(minLength(12, i18n)('abracadbra')).toEqual(
+      'This field must be at least {min} characters'
+    );
   });
 
   test('noWhiteSpace returns error', () => {
-    expect(noWhiteSpace(i18n)('this has spaces')).toEqual({
-      id: 'This field must not contain spaces',
-    });
-    expect(noWhiteSpace(i18n)('this has\twhitespace')).toEqual({
-      id: 'This field must not contain spaces',
-    });
-    expect(noWhiteSpace(i18n)('this\nhas\nnewlines')).toEqual({
-      id: 'This field must not contain spaces',
-    });
+    expect(noWhiteSpace(i18n)('this has spaces')).toEqual(
+      'This field must not contain spaces'
+    );
+    expect(noWhiteSpace(i18n)('this has\twhitespace')).toEqual(
+      'This field must not contain spaces'
+    );
+    expect(noWhiteSpace(i18n)('this\nhas\nnewlines')).toEqual(
+      'This field must not contain spaces'
+    );
   });
 
   test('noWhiteSpace should accept valid string', () => {
@@ -103,15 +95,11 @@ describe('validators', () => {
   });
 
   test('integer should reject decimal/float', () => {
-    expect(integer(i18n)(13.1)).toEqual({
-      id: 'This field must be an integer',
-    });
+    expect(integer(i18n)(13.1)).toEqual('This field must be an integer');
   });
 
   test('integer should reject string containing alphanum', () => {
-    expect(integer(i18n)('15a')).toEqual({
-      id: 'This field must be an integer',
-    });
+    expect(integer(i18n)('15a')).toEqual('This field must be an integer');
   });
 
   test('number should accept number (number)', () => {
@@ -136,15 +124,11 @@ describe('validators', () => {
   });
 
   test('number should reject string containing alphanum', () => {
-    expect(number(i18n)('15a')).toEqual({
-      id: 'This field must be a number',
-    });
+    expect(number(i18n)('15a')).toEqual('This field must be a number');
   });
 
   test('url should reject incomplete url', () => {
-    expect(url(i18n)('abcd')).toEqual({
-      id: 'Please enter a valid URL',
-    });
+    expect(url(i18n)('abcd')).toEqual('Please enter a valid URL');
   });
 
   test('url should accept fully qualified url', () => {
@@ -156,43 +140,37 @@ describe('validators', () => {
   });
 
   test('url should reject short protocol', () => {
-    expect(url(i18n)('h://example.com/foo')).toEqual({
-      id: 'Please enter a valid URL',
-    });
+    expect(url(i18n)('h://example.com/foo')).toEqual(
+      'Please enter a valid URL'
+    );
   });
 
   test('combine should run all validators', () => {
     const validators = [required(null, i18n), noWhiteSpace(i18n)];
-    expect(combine(validators)('')).toEqual({
-      id: 'This field must not be blank',
-    });
-    expect(combine(validators)('one two')).toEqual({
-      id: 'This field must not contain spaces',
-    });
+    expect(combine(validators)('')).toEqual('This field must not be blank');
+    expect(combine(validators)('one two')).toEqual(
+      'This field must not contain spaces'
+    );
     expect(combine(validators)('ok')).toBeUndefined();
   });
 
   test('combine should skip null validators', () => {
     const validators = [required(null, i18n), null];
-    expect(combine(validators)('')).toEqual({
-      id: 'This field must not be blank',
-    });
+    expect(combine(validators)('')).toEqual('This field must not be blank');
     expect(combine(validators)('ok')).toBeUndefined();
   });
 
   test('regExp rejects invalid regular expression', () => {
-    expect(regExp(i18n)('[')).toEqual({
-      id: 'This field must be a regular expression',
-    });
+    expect(regExp(i18n)('[')).toEqual(
+      'This field must be a regular expression'
+    );
     expect(regExp(i18n)('')).toBeUndefined();
     expect(regExp(i18n)('ok')).toBeUndefined();
     expect(regExp(i18n)('[^a-zA-Z]')).toBeUndefined();
   });
 
   test('email validator rejects obviously invalid email ', () => {
-    expect(requiredEmail(i18n)('foobar321')).toEqual({
-      id: 'Invalid email address',
-    });
+    expect(requiredEmail(i18n)('foobar321')).toEqual('Invalid email address');
   });
 
   test('bob has email', () => {

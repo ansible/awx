@@ -106,8 +106,7 @@ function ExecutionEnvironmentList({ i18n }) {
 
   const canAdd = actions && actions.POST;
   const deleteDetailsRequests = relatedResourceDeleteRequests.executionEnvironment(
-    selected[0],
-    i18n
+    selected[0]
   );
   return (
     <>

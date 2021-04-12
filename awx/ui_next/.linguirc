@@ -1,6 +1,17 @@
-{
-   "localeDir": "src/locales/",
-   "srcPathDirs": ["src/"],
-   "format": "po",
-   "sourceLocale": "en"
+{"catalogs":[{
+   "path": "<rootDir>/locales/{locale}/messages",
+   "include": ["<rootDir>"],
+   "exclude": ["**/node_modules/**"]
+}],
+"compileNamespace": "cjs",
+"extractBabelOptions": {},
+"compilerBabelOptions": {},
+"fallbackLocales": { default: "en"},
+"format": "po",
+"locales": ["en","es","fr","nl","zh","ja", "zu"],
+"orderBy": "messageId",
+"pseudoLocale": "zu",
+"rootDir": "./src",
+"runtimeConfigModule": ["@lingui/core", "i18n"],
+"sourceLocale": "en",
 }
