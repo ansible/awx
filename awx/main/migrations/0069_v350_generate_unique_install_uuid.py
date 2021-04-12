@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 from uuid import uuid4
 
-from django.db import migrations, models
+from django.db import migrations
 from django.utils.timezone import now
 
 

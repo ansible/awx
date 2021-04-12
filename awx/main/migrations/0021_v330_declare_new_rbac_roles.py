@@ -3,8 +3,7 @@
 from __future__ import unicode_literals
 
 import awx.main.fields
-from django.conf import settings
-from django.db import migrations, models
+from django.db import migrations
 import django.db.models.deletion
 
 
