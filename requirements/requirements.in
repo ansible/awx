@@ -12,7 +12,7 @@ daphne
 distro
 django==2.2.16  # see UPGRADE BLOCKERs
 django-auth-ldap
-django-cors-headers
+django-cors-headers>=3.5.0
 django-crum
 django-extensions>=2.2.9  # https://github.com/ansible/awx/pull/6441
 django-guid==2.2.0  # pinned to match Django 2.2
