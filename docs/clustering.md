@@ -131,7 +131,7 @@ For users who wish to manage SSH authentication from controlling instances to is
 
 * **Provisioning** - Provisioning Instances after installation is supported by updating the `inventory` file and re-running the setup playbook. It's important that this file contain all passwords and information used when installing the cluster, or other instances may be reconfigured (this can be done intentionally).
 
-* **Deprovisioning** - Tower does not automatically de-provision instances since it cannot distinguish between an instance that was taken offline intentionally or due to failure. Instead, the procedure for de-provisioning an instance is to shut it down (or stop the `ansible-tower-service`) and run the Tower de-provision command:
+* **Deprovisioning** - Tower does not automatically de-provision instances since it cannot distinguish between an instance that was taken offline intentionally or due to failure. Instead, the procedure for de-provisioning an instance is to shut it down (or stop the `automation-controller-service`) and run the Tower de-provision command:
 
 ```
 $ awx-manage deprovision_instance --hostname=<hostname>
