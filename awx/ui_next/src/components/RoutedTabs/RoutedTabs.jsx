@@ -35,7 +35,7 @@ function RoutedTabs({ tabsArray }) {
           aria-label={typeof tab.name === 'string' ? tab.name : null}
           eventKey={tab.id}
           key={tab.id}
-          href={tab.link}
+          link={tab.link}
           title={<TabTitleText>{tab.name}</TabTitleText>}
           aria-controls=""
         />
