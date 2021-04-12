@@ -6,11 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-<<<<<<< HEAD:awx/main/migrations/0136_scm_track_submodules.py
         ('main', '0135_schedule_sort_fallback_to_id'),
-=======
-        ('main', '0131_undo_org_polymorphic_ee'),
->>>>>>> Update and rename 0124_scm_track_submodules.py to 0132_scm_track_submodules.py:awx/main/migrations/0132_scm_track_submodules.py
     ]
 
     operations = [
