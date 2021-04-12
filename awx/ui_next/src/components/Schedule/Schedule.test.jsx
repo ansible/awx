@@ -121,8 +121,8 @@ describe('<Schedule />', () => {
   });
   test('expect all tabs to exist, including Back to Schedules', async () => {
     expect(
-      wrapper.find('button[link="/templates/job_template/1/schedules"]').length
+      wrapper.find('a[href="/templates/job_template/1/schedules"]').length
     ).toBe(1);
-    expect(wrapper.find('button[aria-label="Details"]').length).toBe(1);
+    expect(wrapper.find('a[aria-label="Details"]').length).toBe(1);
   });
 });
