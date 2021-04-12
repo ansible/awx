@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='Project',
             name='scm_track_submodules',
-            field=models.BooleanField(help_text='Track submodule latest commit on specified branch.'),
+            field=models.BooleanField(default=False, help_text='Track submodule latest commit on specified branch.'),
         ),
         migrations.AddField(
             model_name='ProjectUpdate',
             name='scm_track_submodules',
-            field=models.BooleanField(help_text='Track submodule latest commit on specified branch.'),
+            field=models.BooleanField(default=False, help_text='Track submodule latest commit on specified branch.'),
         ),
         migrations.AlterField(
             model_name='project',
