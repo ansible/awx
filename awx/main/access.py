@@ -34,7 +34,6 @@ from awx.main.models import (
     Credential,
     CredentialType,
     CredentialInputSource,
-    CustomInventoryScript,
     ExecutionEnvironment,
     Group,
     Host,
@@ -465,7 +464,7 @@ class BaseAccess(object):
             if display_method == 'schedule':
                 user_capabilities['schedule'] = user_capabilities['start']
                 continue
-            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CustomInventoryScript, CredentialInputSource)):
+            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CredentialInputSource)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
             elif display_method == 'copy' and isinstance(obj, (Group, Host)):
@@ -2753,33 +2752,6 @@ class ActivityStreamAccess(BaseAccess):
 
     def can_delete(self, obj):
         return False
-
-
-class CustomInventoryScriptAccess(BaseAccess):
-
-    model = CustomInventoryScript
-    prefetch_related = ('created_by', 'modified_by', 'organization')
-
-    def filtered_queryset(self):
-        return self.model.accessible_objects(self.user, 'read_role').all()
-
-    @check_superuser
-    def can_add(self, data):
-        if not data:  # So the browseable API will work
-            return Organization.accessible_objects(self.user, 'admin_role').exists()
-        return self.check_related('organization', Organization, data, mandatory=True)
-
-    @check_superuser
-    def can_admin(self, obj, data=None):
-        return self.check_related('organization', Organization, data, obj=obj) and self.user in obj.admin_role
-
-    @check_superuser
-    def can_change(self, obj, data):
-        return self.can_admin(obj, data=data)
-
-    @check_superuser
-    def can_delete(self, obj):
-        return self.can_admin(obj)
 
 
 class RoleAccess(BaseAccess):

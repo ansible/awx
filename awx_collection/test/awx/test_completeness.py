@@ -69,7 +69,9 @@ no_api_parameter_ok = {
 # When this tool was created we were not feature complete. Adding something in here indicates a module
 # that needs to be developed. If the module is found on the file system it will auto-detect that the
 # work is being done and will bypass this check. At some point this module should be removed from this list.
-needs_development = ['tower_inventory_script', 'tower_workflow_approval']
+needs_development = [
+    'tower_workflow_approval',
+]
 needs_param_development = {
     'tower_host': ['instance_id'],
 }

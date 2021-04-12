@@ -12,7 +12,7 @@ from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate, StdoutM
 from awx.main.models.organization import Organization, Profile, Team, UserSessionMembership  # noqa
 from awx.main.models.credential import Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env  # noqa
 from awx.main.models.projects import Project, ProjectUpdate  # noqa
-from awx.main.models.inventory import CustomInventoryScript, Group, Host, Inventory, InventorySource, InventoryUpdate, SmartInventoryMembership  # noqa
+from awx.main.models.inventory import Group, Host, Inventory, InventorySource, InventoryUpdate, SmartInventoryMembership  # noqa
 from awx.main.models.jobs import (  # noqa
     Job,
     JobHostSummary,
@@ -224,7 +224,6 @@ activity_stream_registrar.connect(AdHocCommand)
 # activity_stream_registrar.connect(JobEvent)
 # activity_stream_registrar.connect(Profile)
 activity_stream_registrar.connect(Schedule)
-activity_stream_registrar.connect(CustomInventoryScript)
 activity_stream_registrar.connect(NotificationTemplate)
 activity_stream_registrar.connect(Notification)
 activity_stream_registrar.connect(Label)

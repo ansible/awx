@@ -43,7 +43,6 @@ from .host import urls as host_urls
 from .group import urls as group_urls
 from .inventory_source import urls as inventory_source_urls
 from .inventory_update import urls as inventory_update_urls
-from .inventory_script import urls as inventory_script_urls
 from .credential_type import urls as credential_type_urls
 from .credential import urls as credential_urls
 from .credential_input_source import urls as credential_input_source_urls
@@ -111,7 +110,6 @@ v2_urls = [
     url(r'^groups/', include(group_urls)),
     url(r'^inventory_sources/', include(inventory_source_urls)),
     url(r'^inventory_updates/', include(inventory_update_urls)),
-    url(r'^inventory_scripts/', include(inventory_script_urls)),
     url(r'^credentials/', include(credential_urls)),
     url(r'^roles/', include(role_urls)),
     url(r'^job_templates/', include(job_template_urls)),

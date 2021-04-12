@@ -66,12 +66,6 @@ options:
       default: []
       type: list
       elements: str
-    inventory_script:
-      description:
-        - List of inventory script names to export
-      default: []
-      type: list
-      elements: str
     inventory:
       description:
         - List of inventory names to export
@@ -153,7 +147,6 @@ def main():
         credential=dict(type='list', default=[], elements='str'),
         credential_type=dict(type='list', default=[], elements='str'),
         inventory=dict(type='list', default=[], elements='str'),
-        inventory_script=dict(type='list', default=[], elements='str'),
         job_template=dict(type='list', default=[], elements='str'),
         notification_template=dict(type='list', default=[], elements='str'),
         organization=dict(type='list', default=[], elements='str'),

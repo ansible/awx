@@ -349,7 +349,6 @@ class RoleMixin(object):
         ['organizations', 'organization'],
         ['projects', 'project'],
         ['inventories', 'inventory'],
-        ['inventory_scripts', 'inventory_script'],
         ['teams', 'team'],
         ['credentials', 'credential'],
         ['job_templates', 'job_template'],

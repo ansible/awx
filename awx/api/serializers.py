@@ -51,7 +51,6 @@ from awx.main.models import (
     Credential,
     CredentialInputSource,
     CredentialType,
-    CustomInventoryScript,
     ExecutionEnvironment,
     Group,
     Host,
@@ -167,7 +166,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('id', 'name', 'source', 'last_updated', 'status'),
-    'custom_inventory_script': DEFAULT_SUMMARY_FIELDS,
     'source_script': DEFAULT_SUMMARY_FIELDS,
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
@@ -1984,49 +1982,6 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
         model = Group
 
 
-class CustomInventoryScriptSerializer(BaseSerializer):
-
-    script = serializers.CharField(trim_whitespace=False)
-    show_capabilities = ['edit', 'delete', 'copy']
-    capabilities_prefetch = [{'edit': 'admin'}]
-
-    class Meta:
-        model = CustomInventoryScript
-        fields = ('*', "script", "organization")
-
-    def validate_script(self, value):
-        if not value.startswith("#!"):
-            raise serializers.ValidationError(_('Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python'))
-        return value
-
-    def to_representation(self, obj):
-        ret = super(CustomInventoryScriptSerializer, self).to_representation(obj)
-        if obj is None:
-            return ret
-        request = self.context.get('request', None)
-        if (
-            request.user not in obj.admin_role
-            and not request.user.is_superuser
-            and not request.user.is_system_auditor
-            and not (obj.organization is not None and request.user in obj.organization.auditor_role)
-        ):
-            ret['script'] = None
-        return ret
-
-    def get_related(self, obj):
-        res = super(CustomInventoryScriptSerializer, self).get_related(obj)
-        res.update(
-            dict(
-                object_roles=self.reverse('api:inventory_script_object_roles_list', kwargs={'pk': obj.pk}),
-                copy=self.reverse('api:inventory_script_copy', kwargs={'pk': obj.pk}),
-            )
-        )
-
-        if obj.organization:
-            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
-        return res
-
-
 class InventorySourceOptionsSerializer(BaseSerializer):
     credential = DeprecatedCredentialField(help_text=_('Cloud credential to use for inventory updates.'))
 
@@ -2053,8 +2008,6 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
         if obj.credential:  # TODO: remove when 'credential' field is removed
             res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential})
-        if obj.source_script:
-            res['source_script'] = self.reverse('api:inventory_script_detail', kwargs={'pk': obj.source_script.pk})
         return res
 
     def validate_source_vars(self, value):

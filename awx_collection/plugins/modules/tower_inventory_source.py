@@ -256,8 +256,6 @@ def main():
         inventory_source_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
     if source_project is not None:
         inventory_source_fields['source_project'] = module.resolve_name_to_id('projects', source_project)
-    if source_script is not None:
-        inventory_source_fields['source_script'] = module.resolve_name_to_id('inventory_scripts', source_script)
 
     OPTIONAL_VARS = (
         'description',

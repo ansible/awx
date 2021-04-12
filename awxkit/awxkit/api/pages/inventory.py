@@ -125,64 +125,6 @@ class Inventories(page.PageList, Inventory):
 page.register_page([resources.inventories, resources.related_inventories], Inventories)
 
 
-class InventoryScript(HasCopy, HasCreate, base.Base):
-
-    dependencies = [Organization]
-
-    def payload(self, organization, **kwargs):
-        payload = PseudoNamespace(
-            name=kwargs.get('name') or 'Inventory Script - {}'.format(random_title()),
-            description=kwargs.get('description') or random_title(10),
-            organization=organization.id,
-            script=kwargs.get('script') or self._generate_script(),
-        )
-        return payload
-
-    def create_payload(self, name='', description='', organization=Organization, script='', **kwargs):
-        self.create_and_update_dependencies(organization)
-        payload = self.payload(name=name, description=description, organization=self.ds.organization, script=script, **kwargs)
-        payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
-        return payload
-
-    def create(self, name='', description='', organization=Organization, script='', **kwargs):
-        payload = self.create_payload(name=name, description=description, organization=organization, script=script, **kwargs)
-        return self.update_identity(InventoryScripts(self.connection).post(payload))
-
-    def _generate_script(self):
-        script = '\n'.join(
-            [
-                '#!/usr/bin/env python',
-                '# -*- coding: utf-8 -*-',
-                'import json',
-                'inventory = dict()',
-                'inventory["{0}"] = dict()',
-                'inventory["{0}"]["hosts"] = list()',
-                'inventory["{0}"]["hosts"].append("{1}")',
-                'inventory["{0}"]["hosts"].append("{2}")',
-                'inventory["{0}"]["hosts"].append("{3}")',
-                'inventory["{0}"]["hosts"].append("{4}")',
-                'inventory["{0}"]["hosts"].append("{5}")',
-                'inventory["{0}"]["vars"] = dict(ansible_host="127.0.0.1", ansible_connection="local")',
-                'print(json.dumps(inventory))',
-            ]
-        )
-        group_name = re.sub(r"[\']", "", "group_{}".format(random_title(non_ascii=False)))
-        host_names = [re.sub(r"[\':]", "", "host_{}".format(random_utf8())) for _ in range(5)]
-
-        return script.format(group_name, *host_names)
-
-
-page.register_page([resources.inventory_script, (resources.inventory_scripts, 'post'), (resources.inventory_script_copy, 'post')], InventoryScript)
-
-
-class InventoryScripts(page.PageList, InventoryScript):
-
-    pass
-
-
-page.register_page([resources.inventory_scripts], InventoryScripts)
-
-
 class Group(HasCreate, HasVariables, base.Base):
 
     dependencies = [Inventory]
@@ -408,8 +350,6 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
 
         if credential:
             credential = self.ds.credential
-        if source_script:
-            source_script = self.ds.inventory_script
         if project:
             project = self.ds.project
 

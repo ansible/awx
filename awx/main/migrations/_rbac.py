@@ -28,7 +28,6 @@ def create_roles(apps, schema_editor):
             'Inventory',
             'Project',
             'Credential',
-            'CustomInventoryScript',
             'JobTemplate',
         ]
     ]

@@ -12,7 +12,6 @@ def test_empty():
         "active_sessions": 0,
         "active_host_count": 0,
         "credential": 0,
-        "custom_inventory_script": 0,
         "custom_virtualenvs": 0,  # dev env ansible3
         "host": 0,
         "inventory": 0,
@@ -48,7 +47,6 @@ def test_database_counts(organization_factory, job_template_factory, workflow_jo
         rrule="DTSTART;TZID=America/New_York:20300504T150000",
         unified_job_template=jt.job_template,
     ).save()
-    models.CustomInventoryScript(organization=objs.organization).save()
 
     counts = collectors.counts(None)
     for key in (
@@ -62,7 +60,6 @@ def test_database_counts(organization_factory, job_template_factory, workflow_jo
         "workflow_job_template",
         "host",
         "schedule",
-        "custom_inventory_script",
     ):
         assert counts[key] == 1
 

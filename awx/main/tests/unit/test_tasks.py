@@ -30,7 +30,6 @@ from awx.main.models import (
     ProjectUpdate,
     UnifiedJob,
     User,
-    CustomInventoryScript,
     build_safe_env,
 )
 from awx.main.models.credential import ManagedCredentialType
@@ -1630,55 +1629,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         assert 'AWS_ACCESS_KEY_ID' not in env
         assert 'AWS_SECRET_ACCESS_KEY' not in env
-
-    @pytest.mark.parametrize('with_credential', [True, False])
-    def test_custom_source(self, with_credential, mocker, inventory_update, private_data_dir):
-        task = tasks.RunInventoryUpdate()
-        task.instance = inventory_update
-        inventory_update.source = 'custom'
-        inventory_update.source_vars = '{"FOO": "BAR"}'
-        inventory_update.source_script = CustomInventoryScript(script='#!/bin/sh\necho "Hello, World!"')
-
-        if with_credential:
-            azure_rm = CredentialType.defaults['azure_rm']()
-
-            def get_creds():
-                cred = Credential(
-                    pk=1,
-                    credential_type=azure_rm,
-                    inputs={
-                        'client': 'some-client',
-                        'secret': 'some-secret',
-                        'tenant': 'some-tenant',
-                        'subscription': 'some-subscription',
-                    },
-                )
-                return [cred]
-
-            inventory_update.get_extra_credentials = get_creds
-        else:
-            inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
-        inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
-
-        env = task.build_env(inventory_update, private_data_dir, False)
-        args = task.build_args(inventory_update, private_data_dir, {})
-
-        credentials = task.build_credentials_list(inventory_update)
-        for credential in credentials:
-            if credential:
-                credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
-
-        assert '-i' in ' '.join(args)
-        script = args[args.index('-i') + 1]
-        host_script = script.replace('/runner', private_data_dir)
-        with open(host_script, 'r') as f:
-            assert f.read() == inventory_update.source_script.script
-        assert env['FOO'] == 'BAR'
-        if with_credential:
-            assert env['AZURE_CLIENT_ID'] == 'some-client'
-            assert env['AZURE_SECRET'] == 'some-secret'
-            assert env['AZURE_TENANT'] == 'some-tenant'
-            assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
 
     def test_ec2_source(self, private_data_dir, inventory_update, mocker):
         task = tasks.RunInventoryUpdate()

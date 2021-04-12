@@ -216,16 +216,3 @@ def test_notification_template_copy(post, get, notification_template_with_encryp
     assert decrypt_field(notification_template_with_encrypt, 'notification_configuration', 'token') == decrypt_field(
         notification_template_copy, 'notification_configuration', 'token'
     )
-
-
-@pytest.mark.django_db
-def test_inventory_script_copy(post, get, inventory_script, organization, alice):
-    inventory_script.organization.auditor_role.members.add(alice)
-    assert get(reverse('api:inventory_script_copy', kwargs={'pk': inventory_script.pk}), alice, expect=200).data['can_copy'] is False
-    inventory_script.organization.admin_role.members.add(alice)
-    assert get(reverse('api:inventory_script_copy', kwargs={'pk': inventory_script.pk}), alice, expect=200).data['can_copy'] is True
-    is_copy_pk = post(reverse('api:inventory_script_copy', kwargs={'pk': inventory_script.pk}), {'name': 'copied inv script'}, alice, expect=201).data['id']
-    inventory_script_copy = type(inventory_script).objects.get(pk=is_copy_pk)
-    assert inventory_script_copy.created_by == alice
-    assert inventory_script_copy.name == 'copied inv script'
-    assert inventory_script_copy.organization == organization

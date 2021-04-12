@@ -52,7 +52,7 @@ from awx.main.utils import _inventory_updates
 from awx.main.utils.safe_yaml import sanitize_jinja
 
 
-__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript', 'SmartInventoryMembership']
+__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership']
 
 logger = logging.getLogger('awx.main.models.inventory')
 
@@ -845,6 +845,7 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         default='',
     )
+    # TODO: migrate away
     source_script = models.ForeignKey(
         'CustomInventoryScript',
         null=True,
