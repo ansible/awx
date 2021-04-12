@@ -247,38 +247,6 @@
               "category_slug": "jobs",
               "defined_in_file": false
           },
-          "AWX_RESOURCE_PROFILING_ENABLED": {
-              "type": "boolean",
-              "label": "Enable detailed resource profiling on all playbook runs",
-              "help_text": "If set, detailed resource profiling data will be collected on all jobs. This data can be gathered with `sosreport`.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_RESOURCE_PROFILING_CPU_POLL_INTERVAL": {
-              "type": "float",
-              "label": "Interval (in seconds) between polls for cpu usage.",
-              "help_text": "Interval (in seconds) between polls for cpu usage. Setting this lower than the default will affect playbook performance.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_RESOURCE_PROFILING_MEMORY_POLL_INTERVAL": {
-              "type": "float",
-              "label": "Interval (in seconds) between polls for memory usage.",
-              "help_text": "Interval (in seconds) between polls for memory usage. Setting this lower than the default will affect playbook performance.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
-          "AWX_RESOURCE_PROFILING_PID_POLL_INTERVAL": {
-              "type": "float",
-              "label": "Interval (in seconds) between polls for PID count.",
-              "help_text": "Interval (in seconds) between polls for PID count. Setting this lower than the default will affect playbook performance.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "defined_in_file": false
-          },
           "AWX_TASK_ENV": {
               "type": "nested object",
               "label": "Extra Environment Variables",
@@ -3211,42 +3179,6 @@
               "category": "Jobs",
               "category_slug": "jobs",
               "default": false
-          },
-          "AWX_RESOURCE_PROFILING_ENABLED": {
-              "type": "boolean",
-              "required": false,
-              "label": "Enable detailed resource profiling on all playbook runs",
-              "help_text": "If set, detailed resource profiling data will be collected on all jobs. This data can be gathered with `sosreport`.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": false
-          },
-          "AWX_RESOURCE_PROFILING_CPU_POLL_INTERVAL": {
-              "type": "float",
-              "required": false,
-              "label": "Interval (in seconds) between polls for cpu usage.",
-              "help_text": "Interval (in seconds) between polls for cpu usage. Setting this lower than the default will affect playbook performance.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": 0.25
-          },
-          "AWX_RESOURCE_PROFILING_MEMORY_POLL_INTERVAL": {
-              "type": "float",
-              "required": false,
-              "label": "Interval (in seconds) between polls for memory usage.",
-              "help_text": "Interval (in seconds) between polls for memory usage. Setting this lower than the default will affect playbook performance.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": 0.25
-          },
-          "AWX_RESOURCE_PROFILING_PID_POLL_INTERVAL": {
-              "type": "float",
-              "required": false,
-              "label": "Interval (in seconds) between polls for PID count.",
-              "help_text": "Interval (in seconds) between polls for PID count. Setting this lower than the default will affect playbook performance.",
-              "category": "Jobs",
-              "category_slug": "jobs",
-              "default": 0.25
           },
           "AWX_TASK_ENV": {
               "type": "nested object",

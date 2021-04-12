@@ -592,18 +592,6 @@ AWX_ISOLATION_SHOW_PATHS = []
 # Note: This setting may be overridden by database settings.
 AWX_ISOLATION_BASE_PATH = "/tmp"
 
-# Disable resource profiling by default
-AWX_RESOURCE_PROFILING_ENABLED = False
-
-# Interval (in seconds) between polls for cpu usage
-AWX_RESOURCE_PROFILING_CPU_POLL_INTERVAL = '0.25'
-
-# Interval (in seconds) between polls for memory usage
-AWX_RESOURCE_PROFILING_MEMORY_POLL_INTERVAL = '0.25'
-
-# Interval (in seconds) between polls for PID count
-AWX_RESOURCE_PROFILING_PID_POLL_INTERVAL = '0.25'
-
 # User definable ansible callback plugins
 # Note: This setting may be overridden by database settings.
 AWX_ANSIBLE_CALLBACK_PLUGINS = ""

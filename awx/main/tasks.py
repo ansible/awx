@@ -997,36 +997,6 @@ class BaseTask(object):
         Build ansible yaml file filled with extra vars to be passed via -e@file.yml
         """
 
-    def build_params_resource_profiling(self, instance, private_data_dir):
-        resource_profiling_params = {}
-        if self.should_use_resource_profiling(instance):
-            cpu_poll_interval = settings.AWX_RESOURCE_PROFILING_CPU_POLL_INTERVAL
-            mem_poll_interval = settings.AWX_RESOURCE_PROFILING_MEMORY_POLL_INTERVAL
-            pid_poll_interval = settings.AWX_RESOURCE_PROFILING_PID_POLL_INTERVAL
-
-            results_dir = os.path.join(private_data_dir, 'artifacts/playbook_profiling')
-            if not os.path.isdir(results_dir):
-                os.makedirs(results_dir, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
-            # FIXME: develop some better means of referencing paths inside containers
-            container_results_dir = os.path.join('/runner', 'artifacts/playbook_profiling')
-
-            logger.debug(
-                'Collected the following resource profiling intervals: cpu: {} mem: {} pid: {}'.format(cpu_poll_interval, mem_poll_interval, pid_poll_interval)
-            )
-
-            resource_profiling_params.update(
-                {
-                    'resource_profiling': True,
-                    'resource_profiling_base_cgroup': 'ansible-runner',
-                    'resource_profiling_cpu_poll_interval': cpu_poll_interval,
-                    'resource_profiling_memory_poll_interval': mem_poll_interval,
-                    'resource_profiling_pid_poll_interval': pid_poll_interval,
-                    'resource_profiling_results_dir': container_results_dir,
-                }
-            )
-
-        return resource_profiling_params
-
     def _write_extra_vars_file(self, private_data_dir, vars, safe_dict={}):
         env_path = os.path.join(private_data_dir, 'env')
         try:
@@ -1069,12 +1039,6 @@ class BaseTask(object):
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
 
         return env
-
-    def should_use_resource_profiling(self, job):
-        """
-        Return whether this task should use resource profiling
-        """
-        return False
 
     def build_inventory(self, instance, private_data_dir):
         script_params = dict(hostvars=True, towervars=True)
@@ -1371,7 +1335,6 @@ class BaseTask(object):
             passwords = self.build_passwords(self.instance, kwargs)
             self.build_extra_vars_file(self.instance, private_data_dir)
             args = self.build_args(self.instance, private_data_dir, passwords)
-            resource_profiling_params = self.build_params_resource_profiling(self.instance, private_data_dir)
             env = self.build_env(self.instance, private_data_dir, isolated, private_data_files=private_data_files)
             self.safe_env = build_safe_env(env)
 
@@ -1398,7 +1361,6 @@ class BaseTask(object):
                 'settings': {
                     'job_timeout': self.get_instance_timeout(self.instance),
                     'suppress_ansible_output': True,
-                    **resource_profiling_params,
                 },
             }
 
@@ -1741,12 +1703,6 @@ class RunJob(BaseTask):
                 vault_id = k.split('.', 1)[1]
                 d[r'Vault password \({}\):\s*?$'.format(vault_id)] = k
         return d
-
-    def should_use_resource_profiling(self, job):
-        """
-        Return whether this task should use resource profiling
-        """
-        return settings.AWX_RESOURCE_PROFILING_ENABLED
 
     def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:

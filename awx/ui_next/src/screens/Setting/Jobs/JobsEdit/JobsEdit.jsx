@@ -174,10 +174,6 @@ function JobsEdit() {
                     name="AWX_ISOLATED_HOST_KEY_CHECKING"
                     config={jobs.AWX_ISOLATED_HOST_KEY_CHECKING}
                   />
-                  <BooleanField
-                    name="AWX_RESOURCE_PROFILING_ENABLED"
-                    config={jobs.AWX_RESOURCE_PROFILING_ENABLED}
-                  />
                   <InputField
                     name="AWX_ISOLATED_CHECK_INTERVAL"
                     config={jobs.AWX_ISOLATED_CHECK_INTERVAL}
