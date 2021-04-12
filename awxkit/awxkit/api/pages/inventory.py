@@ -158,9 +158,6 @@ class Group(HasCreate, HasVariables, base.Base):
         return payload
 
     def create_payload(self, name='', description='', inventory=Inventory, credential=None, **kwargs):
-        credential = filter_by_class(
-            (credential, Credential),
-        )
         self.create_and_update_dependencies(inventory, credential)
         credential = self.ds.credential if credential else None
         payload = self.payload(inventory=self.ds.inventory, credential=credential, name=name, description=description, **kwargs)
