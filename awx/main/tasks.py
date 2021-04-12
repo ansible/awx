@@ -1394,6 +1394,7 @@ class BaseTask(object):
                 )
             else:
                 receptor_job = AWXReceptorJob(self, params)
+                self.unit_id = receptor_job.unit_id
                 res = receptor_job.run()
 
                 if not res:
@@ -3069,6 +3070,11 @@ class AWXReceptorJob:
             if self.task.cancel_callback():
                 result = namedtuple('result', ['status', 'rc'])
                 return result('canceled', 1)
+
+            if hasattr(self, 'unit_id') and 'RECEPTOR_UNIT_ID' not in self.task.instance.job_env:
+                self.task.instance.job_env['RECEPTOR_UNIT_ID'] = self.unit_id
+                self.task.update_model(self.task.instance.pk, job_env=self.task.instance.job_env)
+
             time.sleep(1)
 
     @property
