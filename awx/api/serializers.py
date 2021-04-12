@@ -1412,6 +1412,14 @@ class ExecutionEnvironmentSerializer(BaseSerializer):
             res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential.pk})
         return res
 
+    def validate(self, attrs):
+        # prevent changing organization of ee. Unsetting (change to null) is allowed
+        if self.instance:
+            org = attrs.get('organization', None)
+            if org and org.pk != self.instance.organization_id:
+                raise serializers.ValidationError({"organization": _("Cannot change the organization of an execution environment")})
+        return super(ExecutionEnvironmentSerializer, self).validate(attrs)
+
 
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
