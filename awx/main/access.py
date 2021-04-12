@@ -2670,7 +2670,6 @@ class ActivityStreamAccess(BaseAccess):
         'role',
         'actor',
         'schedule',
-        'custom_inventory_script',
         'unified_job_template',
         'workflow_job_template_node',
     )

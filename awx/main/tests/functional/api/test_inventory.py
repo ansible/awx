@@ -147,7 +147,7 @@ def test_async_inventory_deletion_deletes_related_jt(delete, get, job_template, 
 @pytest.mark.parametrize('order_by', ('extra_vars', '-extra_vars', 'extra_vars,pk', '-extra_vars,pk'))
 @pytest.mark.django_db
 def test_list_cannot_order_by_unsearchable_field(get, organization, alice, order_by):
-    get(reverse('api:jobs_list'), alice, QUERY_STRING='order_by=%s' % order_by, expect=403)
+    get(reverse('api:job_list'), alice, QUERY_STRING='order_by=%s' % order_by, expect=403)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [(None, 403), ('admin_role', 201), ('update_role', 403), ('adhoc_role', 403), ('use_role', 403)])

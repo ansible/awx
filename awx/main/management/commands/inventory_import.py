@@ -147,9 +147,6 @@ class Command(BaseCommand):
         parser.add_argument('--overwrite', dest='overwrite', action='store_true', default=False, help='overwrite the destination hosts and groups')
         parser.add_argument('--overwrite-vars', dest='overwrite_vars', action='store_true', default=False, help='overwrite (rather than merge) variables')
         parser.add_argument('--keep-vars', dest='keep_vars', action='store_true', default=False, help='DEPRECATED legacy option, has no effect')
-        parser.add_argument(
-            '--custom', dest='custom', action='store_true', default=False, help='DEPRECATED indicates a custom inventory script, no longer used'
-        )
         parser.add_argument('--source', dest='source', type=str, default=None, metavar='s', help='inventory directory, file, or script to load')
         parser.add_argument(
             '--enabled-var',

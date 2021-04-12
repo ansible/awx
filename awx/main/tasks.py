@@ -2412,7 +2412,7 @@ class RunInventoryUpdate(BaseTask):
             # All CLOUD_PROVIDERS sources implement as inventory plugin from collection
             env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
 
-        if inventory_update.source in ['scm', 'custom']:
+        if inventory_update.source == 'scm':
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLOCKED:
                     env[str(env_k)] = str(inventory_update.source_vars_dict[env_k])
@@ -2513,16 +2513,7 @@ class RunInventoryUpdate(BaseTask):
             rel_path = injector.filename
         elif src == 'scm':
             rel_path = os.path.join('project', inventory_update.source_path)
-        elif src == 'custom':
-            handle, inventory_path = tempfile.mkstemp(dir=private_data_dir)
-            f = os.fdopen(handle, 'w')
-            if inventory_update.source_script is None:
-                raise RuntimeError('Inventory Script does not exist')
-            f.write(inventory_update.source_script.script)
-            f.close()
-            os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
-            rel_path = os.path.split(inventory_path)[-1]
         return rel_path
 
     def build_cwd(self, inventory_update, private_data_dir):

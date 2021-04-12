@@ -128,7 +128,7 @@ page.register_page([resources.inventories, resources.related_inventories], Inven
 class Group(HasCreate, HasVariables, base.Base):
 
     dependencies = [Inventory]
-    optional_dependencies = [Credential, InventoryScript]
+    optional_dependencies = [Credential]
     NATURAL_KEY = ('name', 'inventory')
 
     @property
@@ -157,9 +157,11 @@ class Group(HasCreate, HasVariables, base.Base):
 
         return payload
 
-    def create_payload(self, name='', description='', inventory=Inventory, credential=None, source_script=None, **kwargs):
-        credential, source_script = filter_by_class((credential, Credential), (source_script, InventoryScript))
-        self.create_and_update_dependencies(inventory, credential, source_script)
+    def create_payload(self, name='', description='', inventory=Inventory, credential=None, **kwargs):
+        credential = filter_by_class(
+            (credential, Credential),
+        )
+        self.create_and_update_dependencies(inventory, credential)
         credential = self.ds.credential if credential else None
         payload = self.payload(inventory=self.ds.inventory, credential=credential, name=name, description=description, **kwargs)
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
@@ -298,10 +300,10 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
 
     optional_schedule_fields = tuple()
     dependencies = [Inventory]
-    optional_dependencies = [Credential, InventoryScript, Project]
+    optional_dependencies = [Credential, Project]
     NATURAL_KEY = ('organization', 'name', 'inventory')
 
-    def payload(self, inventory, source='scm', credential=None, source_script=None, project=None, **kwargs):
+    def payload(self, inventory, source='scm', credential=None, project=None, **kwargs):
         payload = PseudoNamespace(
             name=kwargs.get('name') or 'InventorySource - {}'.format(random_title()),
             description=kwargs.get('description') or random_title(10),
@@ -311,8 +313,6 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
 
         if credential:
             payload.credential = credential.id
-        if source_script:
-            payload.source_script = source_script.id
         if project:
             payload.source_project = project.id
 
@@ -332,51 +332,27 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
 
         return payload
 
-    def create_payload(
-        self, name='', description='', source='scm', inventory=Inventory, credential=None, source_script=InventoryScript, project=None, **kwargs
-    ):
-        if source != 'custom' and source_script == InventoryScript:
-            source_script = None
+    def create_payload(self, name='', description='', source='scm', inventory=Inventory, credential=None, project=None, **kwargs):
         if source == 'scm':
             kwargs.setdefault('overwrite_vars', True)
             kwargs.setdefault('source_path', 'inventories/script_migrations/script_source.py')
             if project is None:
                 project = Project
 
-        inventory, credential, source_script, project = filter_by_class(
-            (inventory, Inventory), (credential, Credential), (source_script, InventoryScript), (project, Project)
-        )
-        self.create_and_update_dependencies(inventory, credential, source_script, project)
+        inventory, credential, project = filter_by_class((inventory, Inventory), (credential, Credential), (project, Project))
+        self.create_and_update_dependencies(inventory, credential, project)
 
         if credential:
             credential = self.ds.credential
         if project:
             project = self.ds.project
 
-        payload = self.payload(
-            inventory=self.ds.inventory,
-            source=source,
-            credential=credential,
-            source_script=source_script,
-            project=project,
-            name=name,
-            description=description,
-            **kwargs
-        )
+        payload = self.payload(inventory=self.ds.inventory, source=source, credential=credential, project=project, name=name, description=description, **kwargs)
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload
 
-    def create(self, name='', description='', source='scm', inventory=Inventory, credential=None, source_script=InventoryScript, project=None, **kwargs):
-        payload = self.create_payload(
-            name=name,
-            description=description,
-            source=source,
-            inventory=inventory,
-            credential=credential,
-            source_script=source_script,
-            project=project,
-            **kwargs
-        )
+    def create(self, name='', description='', source='scm', inventory=Inventory, credential=None, project=None, **kwargs):
+        payload = self.create_payload(name=name, description=description, source=source, inventory=inventory, credential=credential, project=project, **kwargs)
         return self.update_identity(InventorySources(self.connection).post(payload))
 
     def update(self):

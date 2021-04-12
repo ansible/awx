@@ -235,11 +235,7 @@ register(
     'AWX_ISOLATION_BASE_PATH',
     field_class=fields.CharField,
     label=_('Job execution path'),
-    help_text=_(
-        'The directory in which Tower will create new temporary '
-        'directories for job execution and isolation '
-        '(such as credential files and custom inventory scripts).'
-    ),
+    help_text=_('The directory in which Tower will create new temporary directories for job execution and isolation (such as credential files).'),
     category=_('Jobs'),
     category_slug='jobs',
 )
