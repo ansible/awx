@@ -2,7 +2,6 @@ import pytest
 
 from awx.api.versioning import reverse
 from awx.main.models import AdHocCommand, AdHocCommandEvent, JobEvent
-from awx.main.models import Job
 
 
 @pytest.mark.django_db
