@@ -458,6 +458,7 @@ EXAMPLES = '''
 from ..module_utils.tower_api import TowerAPIModule
 
 import json
+
 response = []
 
 response = []
