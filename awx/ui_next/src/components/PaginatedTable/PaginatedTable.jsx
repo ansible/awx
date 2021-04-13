@@ -123,6 +123,9 @@ function PaginatedTable({
       }
       onSetPage={handleSetPage}
       onPerPageSelect={handleSetPageSize}
+      titles={{
+        paginationTitle: t`Top Pagination`,
+      }}
     />
   );
 

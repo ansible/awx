@@ -43,8 +43,6 @@ function ExecutionEnvironmentListItem({
     setIsDisabled(false);
   }, []);
 
-  const labelId = `check-action-${executionEnvironment.id}`;
-
   return (
     <Tr id={`ee-row-${executionEnvironment.id}`}>
       <Td
@@ -56,15 +54,13 @@ function ExecutionEnvironmentListItem({
         }}
         dataLabel={i18n._(t`Selected`)}
       />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+      <Td id={`ee-name-${executionEnvironment.id}`} dataLabel={i18n._(t`Name`)}>
         <Link to={`${detailUrl}`}>
           <b>{executionEnvironment.name}</b>
         </Link>
       </Td>
-      <Td id={labelId} dataLabel={i18n._(t`Image`)}>
-        {executionEnvironment.image}
-      </Td>
-      <Td id={labelId} dataLabel={i18n._(t`Organization`)}>
+      <Td dataLabel={i18n._(t`Image`)}>{executionEnvironment.image}</Td>
+      <Td dataLabel={i18n._(t`Organization`)}>
         {executionEnvironment.organization ? (
           <Link
             to={`/organizations/${executionEnvironment?.summary_fields?.organization?.id}/details`}
