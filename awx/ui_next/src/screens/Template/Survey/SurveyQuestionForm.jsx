@@ -10,7 +10,9 @@ import FormField, {
   CheckboxField,
   PasswordField,
   FormSubmitError,
+  TextAndCheckboxField,
 } from '../../../components/FormField';
+
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import Popover from '../../../components/Popover';
 import {
@@ -75,7 +77,10 @@ function SurveyQuestionForm({
   const defaultIsNotAvailable = choices => {
     return defaultValue => {
       let errorMessage;
-      const found = [...defaultValue].every(dA => choices.indexOf(dA) > -1);
+      const found = [...defaultValue].every(dA => {
+        console.log(dA, '\n', choices);
+        return choices.indexOf(dA) > -1;
+      });
 
       if (!found) {
         errorMessage = t`Default choice must be answered from the choices listed.`;
@@ -203,7 +208,7 @@ function SurveyQuestionForm({
             )}
             {['multiplechoice', 'multiselect'].includes(formik.values.type) && (
               <>
-                <FormField
+                <TextAndCheckboxField
                   id="question-options"
                   name="choices"
                   type="textarea"
