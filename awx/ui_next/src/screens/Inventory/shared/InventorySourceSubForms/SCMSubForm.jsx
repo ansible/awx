@@ -125,6 +125,7 @@ const SCMSubForm = ({ autoPopulateProject, i18n }) => {
             sourcePathHelpers.setValue(value);
           }}
           aria-label={i18n._(t`Select source path`)}
+          typeAheadAriaLabel={i18n._(t`Select source path`)}
           placeholder={i18n._(t`Select source path`)}
           createText={i18n._(t`Set source path to`)}
           isCreatable

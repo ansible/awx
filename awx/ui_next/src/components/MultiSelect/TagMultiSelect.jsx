@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { func, string } from 'prop-types';
+import { t } from '@lingui/macro';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 import { arrayToString, stringToArray } from '../../util/strings';
 
@@ -51,7 +52,7 @@ function TagMultiSelect({ onChange, value }) {
       }}
       selections={selections}
       isOpen={isExpanded}
-      aria-labelledby="tag-select"
+      typeAheadAriaLabel={t`Select tags`}
     >
       {renderOptions(options)}
     </Select>

@@ -178,6 +178,7 @@ function Dashboard({ i18n }) {
                         variant={SelectVariant.single}
                         placeholderText={i18n._(t`Select period`)}
                         aria-label={i18n._(t`Select period`)}
+                        typeAheadAriaLabel={i18n._(t`Select period`)}
                         className="periodSelect"
                         onToggle={setIsPeriodDropdownOpen}
                         onSelect={(event, selection) =>

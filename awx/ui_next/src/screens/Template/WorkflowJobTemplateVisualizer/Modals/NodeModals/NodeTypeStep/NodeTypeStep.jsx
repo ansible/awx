@@ -239,6 +239,7 @@ function NodeTypeStep({ i18n }) {
                 setIsConvergenceOpen(false);
               }}
               aria-label={i18n._(t`Convergence select`)}
+              typeAheadAriaLabel={i18n._(t`Convergence select`)}
               className="convergenceSelect"
               ouiaId="convergenceSelect"
             >
