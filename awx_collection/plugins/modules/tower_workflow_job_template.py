@@ -333,6 +333,63 @@ EXAMPLES = '''
     description: created by Ansible Playbook
     organization: Default
 
+- name: Create a workflow job template with schema in template
+  awx.awx.tower_workflow_job_template:
+    name: example-workflow
+    inventory: Demo Inventory
+    extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
+    schema:
+      - identifier: node101
+        unified_job_template:
+          name: example-project
+          inventory:
+            organization:
+              name: Default
+          type: inventory_source
+        related:
+          success_nodes: []
+          failure_nodes:
+            - identifier: node201
+          always_nodes: []
+          credentials: []
+      - identifier: node201
+        unified_job_template:
+          organization:
+            name: Default
+          name: job template 1
+          type: job_template
+        credentials: []
+        related:
+          success_nodes:
+            - identifier: node301
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+      - identifier: node202
+        unified_job_template:
+          organization:
+            name: Default
+          name: example-project
+          type: project
+        related:
+          success_nodes: []
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+      - identifier: node301
+        all_parents_must_converge: false
+        unified_job_template:
+          organization:
+            name: Default
+          name: job template 2
+          type: job_template
+        related:
+          success_nodes: []
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+  register: result
+
 - name: Copy a workflow job template
   tower_workflow_job_template:
     name: copy-workflow
@@ -401,6 +458,8 @@ EXAMPLES = '''
 from ..module_utils.tower_api import TowerAPIModule
 
 import json
+response = []
+
 response = []
 
 
@@ -765,6 +824,7 @@ def main():
         associations=association_fields,
         on_create=on_change,
         on_update=on_change,
+        auto_exit=False,
     )
 
     # Get Workflow information in case one was just created.
