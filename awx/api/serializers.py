@@ -1385,6 +1385,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             errors['scm_branch'] = _('SCM branch cannot be used with archive projects.')
         if attrs.get('scm_refspec') and scm_type != 'git':
             errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
+        if attrs.get('scm_track_submodules') and scm_type != 'git':
+            errors['scm_track_submodules'] = _('SCM track_submodules can only be used with git projects.')
 
         if errors:
             raise serializers.ValidationError(errors)
