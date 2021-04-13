@@ -143,8 +143,7 @@ setup(
         ("%s" % docdir,         ["docs/licenses/*",]),
         ("%s" % bindir, ["tools/scripts/ansible-tower-service",
                          "tools/scripts/failure-event-handler",
-                         "tools/scripts/awx-python",
-                         "tools/scripts/ansible-tower-setup"]),
+                         "tools/scripts/awx-python"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     options = {
         'aliases': {
