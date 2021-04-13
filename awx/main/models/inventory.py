@@ -803,6 +803,12 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         return UnifiedJob.objects.non_polymorphic().filter(Q(job__inventory=self.inventory) | Q(inventoryupdate__inventory_source__groups=self))
 
 
+class HostMetric(models.Model):
+    hostname = models.CharField(primary_key=True, max_length=512)
+    first_automation = models.DateTimeField(auto_now_add=True, null=False, db_index=True, help_text=_('When the host was first automated against'))
+    last_automation = models.DateTimeField(db_index=True, help_text=_('When the host was last automated against'))
+
+
 class InventorySourceOptions(BaseModel):
     """
     Common fields for InventorySource and InventoryUpdate.
