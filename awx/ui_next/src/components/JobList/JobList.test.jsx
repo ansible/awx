@@ -320,10 +320,8 @@ describe('<JobList />', () => {
 
     wrapper.update();
 
-    const deleteButton = wrapper.find('ToolbarDeleteButton');
-    expect(deleteButton.find('Tooltip').prop('content').props.children).toEqual(
-      'The selected jobs cannot be deleted due to insufficient permissions or a running job status: job 1, job 2'
-    );
+    const deleteButton = wrapper.find('ToolbarDeleteButton').find('Button');
+    expect(deleteButton.prop('isDisabled')).toBe(true);
 
     jest.restoreAllMocks();
   });

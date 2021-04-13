@@ -145,11 +145,16 @@ function ToolbarDeleteButton({
     if (itemsToDelete.some(cannotDelete)) {
       return (
         <div>
-          {errorMessage
-            ? `${errorMessage}: ${itemsUnableToDelete}`
-            : i18n._(
-                t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}`
-              )}
+          {errorMessage ? (
+            <>
+              <span>{errorMessage}</span>
+              <span>{`: ${itemsUnableToDelete}`}</span>
+            </>
+          ) : (
+            i18n._(
+              t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}`
+            )
+          )}
         </div>
       );
     }
@@ -303,14 +308,12 @@ ToolbarDeleteButton.propTypes = {
   onDelete: func.isRequired,
   itemsToDelete: arrayOf(ItemToDelete).isRequired,
   pluralizedItemName: string,
-  errorMessage: string,
   warningMessage: node,
   cannotDelete: func,
 };
 
 ToolbarDeleteButton.defaultProps = {
   pluralizedItemName: 'Items',
-  errorMessage: '',
   warningMessage: null,
   cannotDelete: item => !item.summary_fields.user_capabilities.delete,
 };
