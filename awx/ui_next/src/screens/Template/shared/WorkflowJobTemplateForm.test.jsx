@@ -226,22 +226,14 @@ describe('<WorkflowJobTemplateForm/>', () => {
 
   test('test changes in FieldWithPrompt', async () => {
     await act(async () => {
-      wrapper.find('TextInputBase#text-wfjt-scm-branch').prop('onChange')(
-        'main'
-      );
-      wrapper.find('TextInputBase#text-wfjt-limit').prop('onChange')(
-        1234567890
-      );
+      wrapper.find('TextInputBase#wfjt-scm-branch').prop('onChange')('main');
+      wrapper.find('TextInputBase#wfjt-limit').prop('onChange')(1234567890);
     });
 
     wrapper.update();
 
-    expect(wrapper.find('input#text-wfjt-scm-branch').prop('value')).toEqual(
-      'main'
-    );
-    expect(wrapper.find('input#text-wfjt-limit').prop('value')).toEqual(
-      1234567890
-    );
+    expect(wrapper.find('input#wfjt-scm-branch').prop('value')).toEqual('main');
+    expect(wrapper.find('input#wfjt-limit').prop('value')).toEqual(1234567890);
   });
 
   test('webhooks and enable concurrent jobs functions properly', async () => {
