@@ -81,7 +81,7 @@ function VariablesField({
 
   const handleModeChange = newMode => {
     if (newMode === YAML_MODE && !isJsonEdited && lastYamlValue !== null) {
-      helpers.setValue(lastYamlValue);
+      helpers.setValue(lastYamlValue, false);
       setMode(newMode);
       return;
     }
@@ -91,7 +91,7 @@ function VariablesField({
         newMode === YAML_MODE
           ? jsonToYaml(field.value)
           : yamlToJson(field.value);
-      helpers.setValue(newVal);
+      helpers.setValue(newVal, false);
       setMode(newMode);
     } catch (err) {
       helpers.setError(err.message);
@@ -109,7 +109,7 @@ function VariablesField({
   };
 
   return (
-    <>
+    <div>
       <VariablesFieldInternals
         i18n={i18n}
         id={id}
@@ -163,7 +163,7 @@ function VariablesField({
           {meta.error}
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
 VariablesField.propTypes = {
