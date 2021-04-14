@@ -99,41 +99,29 @@ def events_slicing(key, since, until):
 
         return partitions_from_db
 
-    def partition_within_horizon(partition, horizon):
-        dt_str = partition[14:]
+    def partition_within_interval(partition, start, end):
+        dt_str = partition[14:]  # TODO: parse correctly
         dt = datetime.datetime.strptime(dt_str, '%Y%m%d_%H').replace(tzinfo=pytz.UTC)
-        return dt > horizon
+        return dt >= start and dt <= end
 
-    # TODO: Make default once unpartitioned tables are no longer supported
-    # if we are collecting job events starting at the horizon
-    # and all job events are stored in partitions,
-    # slice by partition
-    if lower == horizon and lower > partition_epoch:
+    # Stage 1: Process any job events in unpartitioned job event table
+    if lower < partition_epoch:
+        pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=min(partition_epoch, until).aggregate(Min('pk'))
+
+        previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
+        if not since and last_entries.get(key):
+            previous_pk = max(last_entries[key], previous_pk)
+        final_pk = pk_values['pk__max'] or 0
+
+        step = 100000
+        for start in range(previous_pk, final_pk + 1, step):
+            yield (start, min(start + step, final_pk))
+
+    # Stage 2: Process any job events from partitioned table
+    if until > partition_epoch:
         for partition in get_partitions():
-            if partition_within_horizon(partition, horizon):
-                yield (partition, None)
-        return
-
-    # JobEvent.modified index was created at the partition epoch
-    # Events created before this are in a separate table that does not
-    # have this index.
-    if lower >= partition_epoch:
-        # TODO: Make default once unpartitioned tables are no longer supported
-        pk_values = models.JobEvent.objects.filter(modified__gte=lower, modified__lte=until).aggregate(Min('pk'), Max('pk'))
-    elif until < partition_epoch:
-        pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
-    else:
-        pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=partition_epoch).aggregate(Min('pk'))
-        pk_values.update(models.JobEvent.objects.filter(modified__gte=partition_epoch, modified__lte=until).aggregate(Max('pk')))
-
-    previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
-    if not since and last_entries.get(key):
-        previous_pk = max(last_entries[key], previous_pk)
-    final_pk = pk_values['pk__max'] or 0
-
-    step = 100000
-    for start in range(previous_pk, final_pk + 1, step):
-        yield (start, min(start + step, final_pk))
+            if partition_within_interval(partition, lower, until):
+                yield (partition, partition)
 
 
 @register('config', '1.3', description=_('General platform configuration.'))
@@ -429,7 +417,6 @@ def events_table(since, full_path, until, **kwargs):
                          ORDER BY {tbl}.id ASC) TO STDOUT WITH CSV HEADER
                 '''
 
-    # handle special case of selecting entire partition
     if type(since) is str:
         partition = since
         tbl = partition
