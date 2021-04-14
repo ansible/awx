@@ -78,7 +78,6 @@ function SurveyQuestionForm({
     return defaultValue => {
       let errorMessage;
       const found = [...defaultValue].every(dA => {
-        console.log(dA, '\n', choices);
         return choices.indexOf(dA) > -1;
       });
 
@@ -211,9 +210,9 @@ function SurveyQuestionForm({
                 <TextAndCheckboxField
                   id="question-options"
                   name="choices"
-                  type="textarea"
+                  type={formik.values.type}
                   label={t`Multiple Choice Options`}
-                  validate={required(null)}
+                  validate={required()}
                   tooltip={t`Each answer choice must be on a separate line.`}
                   isRequired
                   rows="10"
