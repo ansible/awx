@@ -408,6 +408,7 @@ def events_table(since, full_path, until, **kwargs):
                          {tbl}.task,
                          {tbl}.role,
                          {tbl}.job_id,
+                         {tbl}.job_created,
                          {tbl}.host_id,
                          {tbl}.host_name,
                          CAST({event_data}->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
