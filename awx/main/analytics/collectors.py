@@ -390,7 +390,16 @@ def _copy_table(table, query, path):
     return file.file_list()
 
 
-@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing)
+def jobevent_lastentry_cmp(lastentry):
+    '''pk-based entries came before partition table-based entries'''
+    if not isinstance(lastentry, (int, str)):
+        raise ValueError(f'{lastentry} must be of type int or str')
+    if isinstance(lastentry, int):
+        return f'01_{lastentry}'
+    return f'02_{lastentry}'
+
+
+@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing, compare_key=jobevent_lastentry_cmp)
 def events_table(since, full_path, until, **kwargs):
     def query(event_data, tbl, from_clause):
         return f'''COPY (SELECT {tbl}.id,

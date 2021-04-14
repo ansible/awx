@@ -52,7 +52,7 @@ def all_collectors():
     }
 
 
-def register(key, version, description=None, format='json', expensive=None):
+def register(key, version, description=None, format='json', expensive=None, compare_key=None):
     """
     A decorator used to register a function as a metric collector.
 
@@ -71,6 +71,7 @@ def register(key, version, description=None, format='json', expensive=None):
         f.__awx_analytics_description__ = description
         f.__awx_analytics_type__ = format
         f.__awx_expensive__ = expensive
+        f.__awx_analytics_compare_key__ = compare_key
         return f
 
     return decorate
@@ -228,6 +229,8 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         for func in csv_collectors:
             key = func.__awx_analytics_key__
             filename = f'{key}.csv'
+            compare_key = func.__awx_analytics_compare_key__
+
             try:
                 # These slicer functions may return a generator. The `since` parameter is
                 # allowed to be None, and will fall back to LAST_ENTRIES[key] or to
@@ -243,7 +246,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     if not files:
                         if collection_type != 'dry-run':
                             with disable_activity_stream():
-                                last_entries[key] = max(last_entries[key], end) if last_entries.get(key) else end
+                                last_entries[key] = max(last_entries[key], end, key=compare_key) if last_entries.get(key) else end
                                 settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
                         continue
 
@@ -265,7 +268,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
 
                     if slice_succeeded and collection_type != 'dry-run':
                         with disable_activity_stream():
-                            last_entries[key] = max(last_entries[key], end) if last_entries.get(key) else end
+                            last_entries[key] = max(last_entries[key], end, key=compare_key) if last_entries.get(key) else end
                             settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
             except Exception:
                 succeeded = False
