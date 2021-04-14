@@ -13,6 +13,7 @@ import { i18n } from '@lingui/core';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import { ConfigProvider, useAuthorizedPath } from './contexts/Config';
+import { SessionProvider, useSession } from './contexts/Session';
 import AppContainer from './components/AppContainer';
 import Background from './components/Background';
 import ContentError from './components/ContentError';
@@ -82,16 +83,23 @@ const AuthorizedRoutes = ({ routeConfig }) => {
   );
 };
 
-const ProtectedRoute = ({ children, ...rest }) =>
-  isAuthenticated(document.cookie) ? (
-    <Route {...rest}>
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        {children}
-      </ErrorBoundary>
-    </Route>
-  ) : (
-    <Redirect to="/login" />
-  );
+const ProtectedRoute = ({ children, ...rest }) => {
+  const { authRedirectTo, setAuthRedirectTo } = useSession();
+  const { pathname } = useLocation();
+
+  if (isAuthenticated(document.cookie)) {
+    return (
+      <Route {...rest}>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          {children}
+        </ErrorBoundary>
+      </Route>
+    )
+  }
+
+  if (authRedirectTo !== null) setAuthRedirectTo(pathname);
+  return <Redirect to="/login" />;
+};
 
 function App() {
   let language = getLanguageWithoutRegionCode(navigator);
@@ -109,24 +117,26 @@ function App() {
   return (
     <I18nProvider i18n={i18n}>
       <Background>
-        <Switch>
-          <Route exact strict path="/*/">
-            <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />
-          </Route>
-          <Route path="/login">
-            <Login isAuthenticated={isAuthenticated} />
-          </Route>
-          <Route exact path="/">
-            <Redirect to="/home" />
-          </Route>
-          <ProtectedRoute>
-            <ConfigProvider>
-              <AppContainer navRouteConfig={getRouteConfig()}>
-                <AuthorizedRoutes routeConfig={getRouteConfig()} />
-              </AppContainer>
-            </ConfigProvider>
-          </ProtectedRoute>
-        </Switch>
+        <SessionProvider>
+          <Switch>
+            <Route exact strict path="/*/">
+              <Redirect to={`${pathname.slice(0, -1)}${search}${hash}`} />
+            </Route>
+            <Route path="/login">
+              <Login isAuthenticated={isAuthenticated} />
+            </Route>
+            <Route exact path="/">
+              <Redirect to="/home" />
+            </Route>
+            <ProtectedRoute>
+              <ConfigProvider>
+                <AppContainer navRouteConfig={getRouteConfig()}>
+                  <AuthorizedRoutes routeConfig={getRouteConfig()} />
+                </AppContainer>
+              </ConfigProvider>
+            </ProtectedRoute>
+          </Switch>
+        </SessionProvider>
       </Background>
     </I18nProvider>
   );

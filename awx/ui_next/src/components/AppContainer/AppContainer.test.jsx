@@ -181,12 +181,17 @@ describe('<AppContainer />', () => {
   test('logout makes expected call to api client', async () => {
     const userMenuButton = 'UserIcon';
     const logoutButton = '#logout-button button';
-
+    const logout = jest.fn();
     let wrapper;
     await act(async () => {
-      wrapper = mountWithContexts(<AppContainer />);
+      wrapper = mountWithContexts(<AppContainer />, {
+        context: {
+          session: {
+            logout,
+          },
+        },
+      });
     });
-
     // open the user menu
     expect(wrapper.find(logoutButton)).toHaveLength(0);
     wrapper.find(userMenuButton).simulate('click');
@@ -194,6 +199,6 @@ describe('<AppContainer />', () => {
 
     // logout
     wrapper.find(logoutButton).simulate('click');
-    expect(RootAPI.logout).toHaveBeenCalledTimes(1);
+    expect(logout).toHaveBeenCalledTimes(1);
   });
 });

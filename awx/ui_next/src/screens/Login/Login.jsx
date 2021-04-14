@@ -6,6 +6,7 @@ import { Formik } from 'formik';
 import styled from 'styled-components';
 import sanitizeHtml from 'sanitize-html';
 import {
+  Alert,
   Brand,
   LoginMainFooterLinksItem,
   LoginForm,
@@ -28,6 +29,7 @@ import useRequest, { useDismissableError } from '../../util/useRequest';
 import { AuthAPI, RootAPI } from '../../api';
 import AlertModal from '../../components/AlertModal';
 import ErrorDetail from '../../components/ErrorDetail';
+import { useSession } from '../../contexts/Session';
 
 const loginLogoSrc = '/static/media/logo-login.svg';
 
@@ -37,7 +39,9 @@ const Login = styled(PFLogin)`
   }
 `;
 
-function AWXLogin({ alt, isAuthenticated }) {
+function AWXLogin({ alt, i18n, isAuthenticated }) {
+  const { authRedirectTo, isSessionExpired, setAuthRedirectTo } = useSession();
+
   const {
     isLoading: isCustomLoginInfoLoading,
     error: customLoginInfoError,
@@ -110,6 +114,7 @@ function AWXLogin({ alt, isAuthenticated }) {
   const handleSubmit = async values => {
     dismissAuthError();
     await authenticate(values);
+    setAuthRedirectTo('/home');
   };
 
   if (isCustomLoginInfoLoading) {
@@ -120,7 +125,7 @@ function AWXLogin({ alt, isAuthenticated }) {
     return null;
   }
   if (isAuthenticated(document.cookie)) {
-    return <Redirect to="/" />;
+    return <Redirect to={authRedirectTo || '/'} />;
   }
 
   let helperText;
@@ -151,6 +156,13 @@ function AWXLogin({ alt, isAuthenticated }) {
         subtitle={t`Please log in`}
       />
       <LoginMainBody>
+        {isSessionExpired.current ? (
+          <Alert
+            variant="warning"
+            isInline
+            title={t`Your session has expired. Please log in to continue where you left off.`}
+          />
+        ) : null}
         <Formik
           initialValues={{
             password: '',

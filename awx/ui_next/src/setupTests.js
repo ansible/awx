@@ -35,3 +35,12 @@ jest.doMock('./contexts/Config', () => ({
   useConfig: () => React.useContext(MockConfigContext),
   useAuthorizedPath: jest.fn(),
 }));
+
+// ?
+const MockSessionContext = React.createContext({});
+jest.doMock('./contexts/Session', () => ({
+  __esModule: true,
+  SessionContext: MockSessionContext,
+  SessionProvider: MockSessionContext.Provider,
+  useSession: () => React.useContext(MockSessionContext),
+}));
