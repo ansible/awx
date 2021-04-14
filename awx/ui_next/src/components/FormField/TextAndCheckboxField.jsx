@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { useField, useFormikContext } from 'formik';
-
-import { Checkbox, FormGroup, TextInput, Radio } from '@patternfly/react-core';
+import { t } from '@lingui/macro';
+import { FormGroup, TextInput, Button } from '@patternfly/react-core';
+import PFCheckIcon from '@patternfly/react-icons/dist/js/icons/check-icon';
 import styled from 'styled-components';
 import Popover from '../Popover';
 
 const InputWrapper = styled.span`
   && {
     display: flex;
-    padding-bottom: 20px;
+    padding-bottom: 5px;
   }
+`;
+const CheckIcon = styled(PFCheckIcon)`
+  color: var(--pf-c-button--m-plain--disabled--Color);
+  ${props =>
+    props.isSelected &&
+    `color: var(--pf-c-button--m-secondary--active--Color)`};
 `;
 function TextAndCheckboxField({
   id,
@@ -32,44 +39,24 @@ function TextAndCheckboxField({
 
   const [isNewValueChecked, setIsNewValueChecked] = useState(false);
   console.log('set');
+
+  const handleCheckboxChange = v =>
+    defaultSplit.includes(v)
+      ? defaultHelpers.setValue(defaultSplit.filter(d => d !== v).join('\n'))
+      : defaultHelpers.setValue(formikValues.default.concat(`\n${v}`));
   const choicesSplit = choicesField.value.split('\n');
   const defaultSplit = formikValues.default.split('\n');
   return (
     <FormGroup
-      fieldId={id}
       helperText={helperText}
       helperTextInvalid={choicesMeta.error}
-      isRequired={isRequired}
-      validated={isValid ? 'default' : 'error'}
       label={label}
       labelIcon={<Popover content={tooltip} />}
     >
       {choicesSplit
         .map((v, i) => (
           <InputWrapper>
-            {formikValues.type === 'multiselect' ? (
-              <Checkbox
-                isChecked={defaultSplit.includes(v)}
-                onChange={() =>
-                  defaultSplit.includes(v)
-                    ? defaultHelpers.setValue(
-                        defaultSplit.filter(d => d !== v).join('\n')
-                      )
-                    : defaultHelpers.setValue(
-                        formikValues.default.concat(`\n${v}`)
-                      )
-                }
-              />
-            ) : (
-              <Radio
-                isChecked={defaultSplit.includes(v)}
-                onChange={defaultHelpers.setValue(`${v}`)}
-              />
-            )}
             <TextInput
-              id={id}
-              isRequired={isRequired}
-              validated={isValid ? 'default' : 'error'}
               value={v}
               onChange={value => {
                 defaultHelpers.setValue(
@@ -87,30 +74,41 @@ function TextAndCheckboxField({
                   : choicesHelpers.setValue(newFields);
               }}
             />
+            <Button
+              variant="control"
+              aria-label={t`Click to toggle default value`}
+              ouiaId={v}
+              onClick={() =>
+                formikValues.type === 'multiselect'
+                  ? handleCheckboxChange(v)
+                  : defaultHelpers.setValue(`${v}`)
+              }
+            >
+              <CheckIcon isSelected={defaultSplit.includes(v)} />
+            </Button>
           </InputWrapper>
         ))
         .concat(
           <InputWrapper>
-            {formikValues.type === 'multiselect' ? (
-              <Checkbox
-                isChecked={isNewValueChecked}
-                onChange={setIsNewValueChecked}
-              />
-            ) : (
-              <Radio
-                isChecked={isNewValueChecked}
-                onChange={setIsNewValueChecked}
-              />
-            )}
             <TextInput
-              id={id}
-              isRequired={isRequired}
-              validated={isValid ? 'default' : 'error'}
               value=""
               onChange={(value, event) => {
                 choicesHelpers.setValue([...choicesSplit, value].join('\n'));
               }}
             />
+            <Button
+              variant="control"
+              aria-label={t`Click to toggle default value`}
+              ouiaId="new input"
+              onClick={
+                () => {}
+                // formikValues.type === 'multiselect'
+                //   ? handleCheckboxChange(v)
+                //   : defaultHelpers.setValue(`${v}`)
+              }
+            >
+              <CheckIcon isSelected={false} />
+            </Button>
           </InputWrapper>
         )}
     </FormGroup>

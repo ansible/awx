@@ -25,10 +25,37 @@ import {
 } from '../../../util/validators';
 
 function AnswerTypeField() {
-  const [field] = useField({
+  const [field, meta, helpers] = useField({
     name: 'type',
     validate: required(t`Select a value for this field`),
   });
+  const [defaultField, defaultMeta, defaultHelpers] = useField('default');
+  const [choicesField] = useField('choices');
+
+  const handleTypeChange = value => {
+    helpers.setValue(value);
+
+    const firstElementInBoth = choicesField.value
+      ?.split('\n')
+      .map(d =>
+        defaultField.value?.split('\n').find(c => (c === d ? c : false))
+      );
+
+    if (value === 'multiplechoice' && meta.initialValue === 'multiselect') {
+      defaultHelpers.setValue(
+        firstElementInBoth.length > 0
+          ? firstElementInBoth[0]
+          : defaultField.value
+      );
+    }
+    if (
+      field.value === 'multiplechoice' &&
+      value === 'multiselect' &&
+      meta.initialValue === 'multiselect'
+    ) {
+      defaultHelpers.setValue(defaultMeta.initialValue);
+    }
+  };
 
   return (
     <FormGroup
@@ -46,6 +73,9 @@ function AnswerTypeField() {
       <AnsibleSelect
         id="question-type"
         {...field}
+        onChange={(event, value) => {
+          handleTypeChange(value);
+        }}
         data={[
           { key: 'text', value: 'text', label: t`Text` },
           { key: 'textarea', value: 'textarea', label: t`Textarea` },
