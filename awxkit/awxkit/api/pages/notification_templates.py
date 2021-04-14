@@ -1,9 +1,11 @@
+from contextlib import suppress
+
 from awxkit.api.mixins import HasCreate, HasCopy, DSAdapter
 from awxkit.api.pages import Organization
 from awxkit.api.resources import resources
 from awxkit.config import config
 import awxkit.exceptions as exc
-from awxkit.utils import not_provided, random_title, suppress, PseudoNamespace
+from awxkit.utils import not_provided, random_title, PseudoNamespace
 from . import base
 from . import page
 

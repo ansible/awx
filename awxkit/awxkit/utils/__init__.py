@@ -362,28 +362,6 @@ def are_same_endpoint(first, second):
     return strip(first) == strip(second)
 
 
-@contextmanager
-def suppress(*exceptions):
-    """Context manager that suppresses the provided exceptions
-
-    :param exceptions: List of exceptions to suppress
-
-    Usage::
-        >>> with suppress(ZeroDivisionError):
-        >>>     foo = 1/0
-        >>>     # This code will not run
-
-    Note: This is an intermediate framework and test refactoring tool.
-    It's almost never a good idea to plan on using this. Also, note
-    that after the suppressed exception has been caught, no further
-    statements in the with block will be executed.
-    """
-    try:
-        yield
-    except exceptions:
-        pass
-
-
 def utcnow():
     """Provide a wrapped copy of the built-in utcnow that can be easily mocked."""
     return datetime.utcnow()

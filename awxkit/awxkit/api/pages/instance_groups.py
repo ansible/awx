@@ -1,4 +1,6 @@
-from awxkit.utils import PseudoNamespace, random_title, suppress, update_payload, set_payload_foreign_key_args
+from contextlib import suppress
+
+from awxkit.utils import PseudoNamespace, random_title, update_payload, set_payload_foreign_key_args
 from awxkit.api.resources import resources
 from awxkit.api.mixins import HasCreate
 import awxkit.exceptions as exc
