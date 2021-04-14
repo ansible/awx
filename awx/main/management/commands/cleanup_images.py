@@ -49,7 +49,10 @@ class Command(BaseCommand):
 
     def cleanup_images(self):
         self.images_in_use = [ee.image for ee in ExecutionEnvironment.objects.all()]
-        self.logger.info(f"Execution environment images in use: {self.images_in_use}")
+        if self.images_in_use:
+            self.logger.info("Execution environment images in use:")
+            for i in self.images_in_use:
+                self.logger.info(f"\t{i}")
         self.deleted = []
         # find and remove unused images
         images_system = subprocess.run("podman images -a --format json".split(" "), capture_output=True)
@@ -63,7 +66,7 @@ class Command(BaseCommand):
             images_system = json.loads(images_system.stdout)
             self.delete_images(images_system)
         if not self.deleted:
-            self.logger.info("Did not find images to remove")
+            self.logger.info("Did not find unused images to remove")
 
     def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))
