@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO, logging.DEBUG, 0]))
-        self.logger = logging.getLogger('awx.main.commands.cleanup_sessions')
+        self.logger = logging.getLogger('awx.main.commands.cleanup_images')
         self.logger.setLevel(log_levels.get(self.verbosity, 0))
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter('%(message)s'))
@@ -34,6 +34,10 @@ class Command(BaseCommand):
         parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False, help='Dry run mode (show items that would ' 'be removed)')
 
     def delete_images(self, images_json):
+        if self.dry_run:
+            delete_prefix = "Would delete"
+        else:
+            delete_prefix = "Deleting"
         for e in images_json:
             if 'Names' in e:
                 image_names = e['Names']
@@ -43,7 +47,7 @@ class Command(BaseCommand):
             for i in image_names:
                 if i not in self.images_in_use and i not in self.deleted:
                     self.deleted.append(i)
-                    self.logger.info(f"{self.delete_prefix} {i}: {image_size:.0f} MB")
+                    self.logger.info(f"{delete_prefix} {i}: {image_size:.0f} MB")
                     if not self.dry_run:
                         subprocess.run(['podman', 'rmi', i, '-f'], stdout=subprocess.DEVNULL)
 
@@ -73,10 +77,7 @@ class Command(BaseCommand):
         self.init_logging()
         self.dry_run = bool(options.get('dry_run', False))
         if self.dry_run:
-            self.delete_prefix = "Would delete"
             self.logger.info("Dry run enabled, images will not be deleted")
-        else:
-            self.delete_prefix = "Deleting"
         if settings.IS_K8S:
             raise CommandError("Cannot run cleanup tool on k8s installations")
         self.cleanup_images()
