@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
-import { useField, useFormikContext } from 'formik';
+import React from 'react';
+import { useField } from 'formik';
 import { t } from '@lingui/macro';
-import { FormGroup, TextInput, Button } from '@patternfly/react-core';
+import {
+  FormGroup,
+  TextInput,
+  Button,
+  InputGroup as PFInputGroup,
+  Tooltip,
+} from '@patternfly/react-core';
 import PFCheckIcon from '@patternfly/react-icons/dist/js/icons/check-icon';
 import styled from 'styled-components';
 import Popover from '../Popover';
 
-const InputWrapper = styled.span`
-  && {
-    display: flex;
-    padding-bottom: 5px;
-  }
+const InputGroup = styled(PFInputGroup)`
+  padding-bottom: 5px;
 `;
 const CheckIcon = styled(PFCheckIcon)`
   color: var(--pf-c-button--m-plain--disabled--Color);
@@ -18,34 +21,17 @@ const CheckIcon = styled(PFCheckIcon)`
     props.isSelected &&
     `color: var(--pf-c-button--m-secondary--active--Color)`};
 `;
-function TextAndCheckboxField({
-  id,
-  label,
-  helperText,
-  isRequired,
-  isValid,
-  tooltip,
-  name,
-  rows,
-  ...rest
-}) {
-  const { values: formikValues } = useFormikContext();
+function TextAndCheckboxField({ label, helperText, tooltip }) {
   const [choicesField, choicesMeta, choicesHelpers] = useField('choices');
-  // const [fields, setFields] = useState(choicesField.value.split('\n'));
-  // const [defaultValue, setDefaultValue] = useState(
-  //   formikValues.default.split('\n')
-  // );
-  const [, , defaultHelpers] = useField('default');
-
-  const [isNewValueChecked, setIsNewValueChecked] = useState(false);
-  console.log('set');
+  const [typeField] = useField('type');
+  const [defaultField, , defaultHelpers] = useField('default');
 
   const handleCheckboxChange = v =>
     defaultSplit.includes(v)
       ? defaultHelpers.setValue(defaultSplit.filter(d => d !== v).join('\n'))
-      : defaultHelpers.setValue(formikValues.default.concat(`\n${v}`));
+      : defaultHelpers.setValue(defaultField.value.concat(`\n${v}`));
   const choicesSplit = choicesField.value.split('\n');
-  const defaultSplit = formikValues.default.split('\n');
+  const defaultSplit = defaultField.value?.split('\n');
   return (
     <FormGroup
       helperText={helperText}
@@ -53,64 +39,58 @@ function TextAndCheckboxField({
       label={label}
       labelIcon={<Popover content={tooltip} />}
     >
-      {choicesSplit
-        .map((v, i) => (
-          <InputWrapper>
-            <TextInput
-              value={v}
-              onChange={value => {
-                defaultHelpers.setValue(
-                  defaultSplit.filter(d => d !== v).join('\n')
-                );
+      {choicesSplit.map((v, i) => (
+        <InputGroup>
+          <TextInput
+            onKeyDown={e => {
+              if (e.key === 'Enter' && i === choicesSplit.length - 1) {
+                choicesHelpers.setValue(choicesField.value.concat('\n'));
+              }
 
-                const newFields = choicesSplit
-                  .map((choice, index) => (i === index ? value : choice))
+              if (e.key === 'Backspace' && v.length <= 1) {
+                const removeEmptyField = choicesSplit
+                  .filter((choice, index) => index !== i)
                   .join('\n');
+                choicesHelpers.setValue(removeEmptyField);
+              }
+            }}
+            value={v}
+            onChange={value => {
+              defaultHelpers.setValue(
+                defaultSplit.filter(d => d !== v).join('\n')
+              );
 
-                return value === ''
-                  ? choicesHelpers.setValue(
-                      choicesSplit.filter(d => d !== v).join('\n')
-                    )
-                  : choicesHelpers.setValue(newFields);
-              }}
-            />
+              const newFields = choicesSplit
+                .map((choice, index) => (i === index ? value : choice))
+                .join('\n');
+
+              return value === ''
+                ? choicesHelpers.setValue(
+                    choicesSplit.filter(d => d !== v).join('\n')
+                  )
+                : choicesHelpers.setValue(newFields);
+            }}
+          />
+          <Tooltip
+            content={t`Click to select this answer as a default answer.`}
+            position="right"
+            trigger="mouseenter"
+          >
             <Button
               variant="control"
               aria-label={t`Click to toggle default value`}
               ouiaId={v}
               onClick={() =>
-                formikValues.type === 'multiselect'
+                typeField.value === 'multiselect'
                   ? handleCheckboxChange(v)
                   : defaultHelpers.setValue(`${v}`)
               }
             >
-              <CheckIcon isSelected={defaultSplit.includes(v)} />
+              <CheckIcon isSelected={defaultSplit?.includes(v) || false} />
             </Button>
-          </InputWrapper>
-        ))
-        .concat(
-          <InputWrapper>
-            <TextInput
-              value=""
-              onChange={(value, event) => {
-                choicesHelpers.setValue([...choicesSplit, value].join('\n'));
-              }}
-            />
-            <Button
-              variant="control"
-              aria-label={t`Click to toggle default value`}
-              ouiaId="new input"
-              onClick={
-                () => {}
-                // formikValues.type === 'multiselect'
-                //   ? handleCheckboxChange(v)
-                //   : defaultHelpers.setValue(`${v}`)
-              }
-            >
-              <CheckIcon isSelected={false} />
-            </Button>
-          </InputWrapper>
-        )}
+          </Tooltip>
+        </InputGroup>
+      ))}
     </FormGroup>
   );
 }

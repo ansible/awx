@@ -104,20 +104,6 @@ function SurveyQuestionForm({
   handleCancel,
   submitError,
 }) {
-  const defaultIsNotAvailable = choices => {
-    return defaultValue => {
-      let errorMessage;
-      const found = [...defaultValue].every(dA => {
-        return choices.indexOf(dA) > -1;
-      });
-
-      if (!found) {
-        errorMessage = t`Default choice must be answered from the choices listed.`;
-      }
-      return errorMessage;
-    };
-  };
-
   return (
     <Formik
       enableReinitialize
@@ -236,29 +222,14 @@ function SurveyQuestionForm({
               />
             )}
             {['multiplechoice', 'multiselect'].includes(formik.values.type) && (
-              <>
-                <TextAndCheckboxField
-                  id="question-options"
-                  name="choices"
-                  type={formik.values.type}
-                  label={t`Multiple Choice Options`}
-                  validate={required()}
-                  tooltip={t`Each answer choice must be on a separate line.`}
-                  isRequired
-                  rows="10"
-                />
-                <FormField
-                  id="question-default"
-                  name="default"
-                  validate={defaultIsNotAvailable(formik.values.choices)}
-                  type={
-                    formik.values.type === 'multiplechoice'
-                      ? 'text'
-                      : 'textarea'
-                  }
-                  label={t`Default answer`}
-                />
-              </>
+              <TextAndCheckboxField
+                id="question-options"
+                name="choices"
+                label={t`Multiple Choice Options`}
+                validate={required()}
+                tooltip={t`Type answer choices and click the check next the default choice(s). Multiple Choice (multi select) can have more than 1 default answer.  Multiple Choice (single select) can only have 1 default answer.  Press enter to get additional inputs`}
+                isRequired
+              />
             )}
           </FormColumnLayout>
           <FormSubmitError error={submitError} />
