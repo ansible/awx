@@ -97,6 +97,37 @@ def test_collect_job_events_from_unpartitioned_table(sqlite_copy_expert):
             assert slices == [(999, 2000)]
 
 
+partition_epoch = now() - timedelta(hours=5)
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.analytics.collectors.get_event_partition_epoch', lambda: partition_epoch)
+def test_collect_job_events_from_unpartitioned_and_partitioned_table(sqlite_copy_expert):
+    """
+    Ensure that the jobevent collector can correctly collect jobs from
+    both unpartitioned and partitioned tables.
+    """
+    time_start = now() - timedelta(hours=10)
+    time_end = now() - timedelta(hours=0)
+
+    with mock.patch('awx.main.models.JobEvent.objects.filter') as event_search:
+        with mock.patch('awx.main.analytics.collectors.get_partitions') as get_partitions:
+            # events from unpartitioned table
+            mock_qs = mock.MagicMock()
+            mock_qs.aggregate.side_effect = ({'pk__min': 1000, 'pk__max': 2000}, {'pk__min': 2001, 'pk__max': 3000})  # unpartitioned  # partitioned
+            event_search.return_value = mock_qs
+            slices = list(collectors.events_slicing('events_table', time_start, time_end))
+
+            # when asserting calls, skip over calls to child mocks (aggregate)
+            assert event_search.mock_calls[0] == mock.call(created__gte=time_start, created__lte=partition_epoch)
+            assert event_search.mock_calls[2] == mock.call(modified__gte=partition_epoch, modified__lte=time_end)
+
+            # partitions not considered since event collection does not run up through horizon
+            get_partitions.assert_not_called()
+
+            assert slices == [(999, 2000), (2000, 3000)]
+
+
 @pytest.mark.django_db
 def test_copy_tables_unified_job_query(sqlite_copy_expert, project, inventory, job_template):
     """
