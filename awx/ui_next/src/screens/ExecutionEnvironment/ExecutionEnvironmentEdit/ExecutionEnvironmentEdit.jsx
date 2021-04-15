@@ -37,6 +37,7 @@ function ExecutionEnvironmentEdit({ executionEnvironment }) {
             submitError={submitError}
             onCancel={handleCancel}
             me={me || {}}
+            isOrgLookupDisabled
           />
         )}
       </Config>
