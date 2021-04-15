@@ -47,6 +47,18 @@ def delete_all_user_roles(apps, schema_editor):
         role.delete()
 
 
+def delete_all_custom_script_roles(apps, schema_editor):
+    ContentType = apps.get_model('contenttypes', "ContentType")
+    Role = apps.get_model('main', "Role")
+    cis_type = ContentType.objects.get(model='custominventoryscript')
+    role_ct = 0
+    for role in Role.objects.filter(content_type=cis_type).iterator():
+        role.delete()
+        role_ct += 1
+    if role_ct:
+        logger.debug('Deleted roles corresponding to custom inventory sources.')
+
+
 UNIFIED_ORG_LOOKUPS = {
     # Job Templates had an implicit organization via their project
     'jobtemplate': 'project',

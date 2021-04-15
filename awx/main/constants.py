@@ -7,7 +7,6 @@ from django.utils.translation import ugettext_lazy as _
 
 __all__ = [
     'CLOUD_PROVIDERS',
-    'SCHEDULEABLE_PROVIDERS',
     'PRIVILEGE_ESCALATION_METHODS',
     'ANSI_SGR_PATTERN',
     'CAN_CANCEL',
@@ -16,10 +15,6 @@ __all__ = [
 ]
 
 CLOUD_PROVIDERS = ('azure_rm', 'ec2', 'gce', 'vmware', 'openstack', 'rhv', 'satellite6', 'tower')
-SCHEDULEABLE_PROVIDERS = CLOUD_PROVIDERS + (
-    'custom',
-    'scm',
-)
 PRIVILEGE_ESCALATION_METHODS = [
     ('sudo', _('Sudo')),
     ('su', _('Su')),

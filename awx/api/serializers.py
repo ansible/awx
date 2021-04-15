@@ -43,7 +43,7 @@ from polymorphic.models import PolymorphicModel
 
 # AWX
 from awx.main.access import get_user_capabilities
-from awx.main.constants import SCHEDULEABLE_PROVIDERS, ACTIVE_STATES, CENSOR_VALUE
+from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE
 from awx.main.models import (
     ActivityStream,
     AdHocCommand,
@@ -91,6 +91,7 @@ from awx.main.models import (
     WorkflowJobTemplate,
     WorkflowJobTemplateNode,
     StdoutMaxBytesExceeded,
+    CLOUD_INVENTORY_SOURCES,
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import get_roles_on_resource, role_summary_fields_generator
@@ -4761,7 +4762,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         return summary_fields
 
     def validate_unified_job_template(self, value):
-        if type(value) == InventorySource and value.source not in SCHEDULEABLE_PROVIDERS:
+        if type(value) == InventorySource and value.source not in CLOUD_INVENTORY_SOURCES:
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
         elif type(value) == Project and value.scm_type == '':
             raise serializers.ValidationError(_('Manual Project cannot have a schedule set.'))

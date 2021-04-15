@@ -90,3 +90,22 @@ def delete_cloudforms_inv_source(apps, schema_editor):
     if ct:
         ct.credentials.all().delete()
         ct.delete()
+
+
+def delete_custom_inv_source(apps, schema_editor):
+    set_current_apps(apps)
+    InventorySource = apps.get_model('main', 'InventorySource')
+    InventoryUpdate = apps.get_model('main', 'InventoryUpdate')
+    ct, deletions = InventoryUpdate.objects.filter(source='custom').delete()
+    if ct:
+        logger.info('deleted {}'.format((ct, deletions)))
+        update_ct = deletions['main.InventoryUpdate']
+        if update_ct:
+            logger.info('Deleted {} custom inventory script sources.'.format(update_ct))
+    ct, deletions = InventorySource.objects.filter(source='custom').delete()
+    if ct:
+        logger.info('deleted {}'.format((ct, deletions)))
+        src_ct = deletions['main.InventorySource']
+        if src_ct:
+            logger.info('Deleted {} custom inventory script updates.'.format(src_ct))
+            logger.warning('Custom inventory scripts have been removed, see awx-manage XXXXX')
