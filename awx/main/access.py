@@ -1030,7 +1030,7 @@ class InventorySourceAccess(NotificationAttachMixin, BaseAccess):
 
     model = InventorySource
     select_related = ('created_by', 'modified_by', 'inventory')
-    prefetch_related = ('credentials__credential_type', 'last_job', 'source_script', 'source_project')
+    prefetch_related = ('credentials__credential_type', 'last_job', 'source_project')
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
@@ -1092,7 +1092,7 @@ class InventoryUpdateAccess(BaseAccess):
         'modified_by',
         'inventory_source',
     )
-    prefetch_related = ('unified_job_template', 'instance_group', 'credentials__credential_type', 'inventory', 'source_script')
+    prefetch_related = ('unified_job_template', 'instance_group', 'credentials__credential_type', 'inventory')
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory_source__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))

@@ -198,7 +198,7 @@ class TestWFJTCopyAccess:
 
     def test_workflow_copy_no_start(self, wfjt, inventory, admin_user):
         # Test that un-startable resource doesn't block copy
-        inv_src = InventorySource.objects.create(inventory=inventory, source='custom', source_script=None)
+        inv_src = InventorySource.objects.create(inventory=inventory, source='file')
         assert not inv_src.can_update
         wfjt.workflow_job_template_nodes.create(unified_job_template=inv_src)
         access = WorkflowJobTemplateAccess(admin_user, save_messages=True)

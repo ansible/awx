@@ -167,7 +167,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('id', 'name', 'source', 'last_updated', 'status'),
-    'source_script': DEFAULT_SUMMARY_FIELDS,
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
     'instance_group': ('id', 'name', 'controller_id', 'is_container_group'),
@@ -1991,7 +1990,6 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             '*',
             'source',
             'source_path',
-            'source_script',
             'source_vars',
             'credential',
             'enabled_var',
@@ -2017,34 +2015,6 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             if env_k in settings.INV_ENV_VARIABLE_BLOCKED:
                 raise serializers.ValidationError(_("`{}` is a prohibited environment variable".format(env_k)))
         return ret
-
-    def validate(self, attrs):
-        # TODO: Validate source
-        errors = {}
-
-        source = attrs.get('source', self.instance and self.instance.source or '')
-        source_script = attrs.get('source_script', self.instance and self.instance.source_script or '')
-        if source == 'custom':
-            if source_script is None or source_script == '':
-                errors['source_script'] = _("If 'source' is 'custom', 'source_script' must be provided.")
-            else:
-                try:
-                    if not self.instance:
-                        dest_inventory = attrs.get('inventory', None)
-                        if not dest_inventory:
-                            errors['inventory'] = _("Must provide an inventory.")
-                    else:
-                        dest_inventory = self.instance.inventory
-                    if dest_inventory and source_script.organization != dest_inventory.organization:
-                        errors['source_script'] = _("The 'source_script' does not belong to the same organization as the inventory.")
-                except Exception:
-                    errors['source_script'] = _("'source_script' doesn't exist.")
-                    logger.exception('Problem processing source_script validation.')
-
-        if errors:
-            raise serializers.ValidationError(errors)
-
-        return super(InventorySourceOptionsSerializer, self).validate(attrs)
 
     # TODO: remove when old 'credential' fields are removed
     def get_summary_fields(self, obj):
