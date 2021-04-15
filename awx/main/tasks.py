@@ -27,6 +27,7 @@ import socket
 import threading
 import concurrent.futures
 from base64 import b64encode
+import subprocess
 
 # Django
 from django.conf import settings
@@ -59,6 +60,7 @@ from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_
 from awx.main.access import access_registry
 from awx.main.redact import UriCleaner
 from awx.main.models import (
+    ExecutionEnvironment,
     Schedule,
     TowerScheduleState,
     Instance,
@@ -394,6 +396,23 @@ def purge_old_stdout_files():
         if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT, f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
             os.unlink(os.path.join(settings.JOBOUTPUT_ROOT, f))
             logger.debug("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT, f)))
+
+
+@task(queue=get_local_queuename)
+def cleanup_execution_environment_images():
+    images_in_use = [ee.image for ee in ExecutionEnvironment.objects.all()]
+    images_system = subprocess.run("podman images -a --format json".split(" "), capture_output=True)
+    if len(images_system.stdout) > 0:
+        images_system = json.loads(images_system.stdout)
+        for e in images_system:
+            if 'Names' in e:
+                image_name = e['Names'][0]
+            else:
+                image_name = e["Id"]
+            image_size = e['Size'] / 1e6
+            if image_name not in images_in_use:
+                logger.debug(f"Cleanup execution environment images: deleting {image_name}, {image_size:.0f} MB")
+                subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
 
 
 @task(queue=get_local_queuename)
