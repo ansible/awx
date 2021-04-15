@@ -2044,6 +2044,7 @@ class RunProjectUpdate(BaseTask):
                 'scm_url': scm_url,
                 'scm_branch': scm_branch,
                 'scm_clean': project_update.scm_clean,
+                'scm_track_submodules': project_update.scm_track_submodules,
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
             }

@@ -104,6 +104,7 @@
   "scm_refspec": "",
   "scm_clean": false,
   "scm_delete_on_update": false,
+  "scm_track_submodules": false,
   "credential": null,
   "timeout": 0,
   "scm_revision": "f5de82382e756b87143f3511c7c6c006d941830d",

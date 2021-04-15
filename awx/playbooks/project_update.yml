@@ -12,6 +12,7 @@
 # scm_password: password (only for svn/insights)
 # scm_accept_hostkey: true/false (only for git, set automatically)
 # scm_refspec: a refspec to fetch in addition to obtaining version
+# scm_track_submodules: true/false
 # roles_enabled: Value of the global setting to enable roles downloading
 # collections_enabled: Value of the global setting to enable collections downloading
 # awx_version: Current running version of the awx or tower as a string
@@ -36,6 +37,7 @@
             version: "{{scm_branch|quote}}"
             refspec: "{{scm_refspec|default(omit)}}"
             force: "{{scm_clean}}"
+            track_submodules: "{{scm_track_submodules|default(omit)}}"
             accept_hostkey: "{{scm_accept_hostkey|default(omit)}}"
           register: git_result
 

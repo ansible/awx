@@ -1350,6 +1350,7 @@ class ProjectOptionsSerializer(BaseSerializer):
             'scm_branch',
             'scm_refspec',
             'scm_clean',
+            'scm_track_submodules',
             'scm_delete_on_update',
             'credential',
             'timeout',
@@ -1384,6 +1385,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             errors['scm_branch'] = _('SCM branch cannot be used with archive projects.')
         if attrs.get('scm_refspec') and scm_type != 'git':
             errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
+        if attrs.get('scm_track_submodules') and scm_type != 'git':
+            errors['scm_track_submodules'] = _('SCM track_submodules can only be used with git projects.')
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1510,7 +1513,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                     )
 
         if get_field_from_model_or_attrs('scm_type') == '':
-            for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_clean'):
+            for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_track_submodules', 'scm_clean'):
                 if get_field_from_model_or_attrs(fd):
                     raise serializers.ValidationError({fd: _('Update options must be set to false for manual projects.')})
         return super(ProjectSerializer, self).validate(attrs)
