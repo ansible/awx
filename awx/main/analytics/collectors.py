@@ -108,7 +108,7 @@ def events_slicing(key, since, until, strategy=None):
 
     # Stage 1: Process any job events in unpartitioned job event table
     if lower < partition_epoch:
-        pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=min(partition_epoch, until)).aggregate(Min('pk'))
+        pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=min(partition_epoch, until)).aggregate(Min('pk'), Max('pk'))
 
         previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
         if not since and last_entries.get(key):
