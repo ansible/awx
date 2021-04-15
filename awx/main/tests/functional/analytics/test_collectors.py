@@ -3,6 +3,7 @@ import tempfile
 import os
 import re
 import shutil
+from unittest import mock
 import csv
 
 from django.utils.timezone import now
@@ -70,6 +71,29 @@ def sqlite_copy_expert(request):
     request.addfinalizer(lambda: shutil.rmtree(path))
     request.addfinalizer(lambda: delattr(SQLiteCursorWrapper, "copy_expert"))
     return path
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.analytics.collectors.get_event_partition_epoch', lambda: now() - timedelta(hours=1))
+def test_collect_job_events_from_unpartitioned_table(sqlite_copy_expert):
+    """
+    Ensure that the jobevent collector can correctly collect jobs from
+    unpartitioned tables.
+    """
+    time_start = now() - timedelta(hours=9)
+    time_end = now() - timedelta(hours=2)
+
+    with mock.patch('awx.main.models.JobEvent.objects.filter') as event_search:
+        with mock.patch('awx.main.analytics.collectors.get_partitions') as get_partitions:
+            mock_qs = mock.MagicMock().aggregate.return_value = {'pk__min': 1000, 'pk__max': 2000}
+            event_search.return_value = mock_qs
+            # convert generator to list to force method to get called
+            # (otherwise, method never gets called because of lazy-loading)
+            slices = list(collectors.events_slicing('events_table', time_start, time_end))
+
+            event_search.assert_called_with(created_gte=time_start, created_lte=time_end)
+            get_partitions.assert_not_called()
+            assert slices == [(1000, 2000)]
 
 
 @pytest.mark.django_db
