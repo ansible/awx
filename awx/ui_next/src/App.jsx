@@ -20,6 +20,7 @@ import Login from './screens/Login';
 import { isAuthenticated } from './util/auth';
 import { getLanguageWithoutRegionCode } from './util/language';
 import { dynamicActivate, locales } from './i18nLoader';
+import Metrics from './screens/Metrics';
 
 import getRouteConfig from './routeConfig';
 import SubscriptionEdit from './screens/Setting/Subscription/SubscriptionEdit';
@@ -58,6 +59,9 @@ const AuthorizedRoutes = ({ routeConfig }) => {
           </ProtectedRoute>
         ))
         .concat(
+          <ProtectedRoute key="metrics" path="/metrics">
+            <Metrics />
+          </ProtectedRoute>,
           <ProtectedRoute key="not-found" path="*">
             <NotFound />
           </ProtectedRoute>
