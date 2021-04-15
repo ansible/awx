@@ -126,6 +126,7 @@ function ActivityStream({ i18n }) {
           maxHeight="480px"
           variant={SelectVariant.single}
           aria-labelledby="grouped-type-select-id"
+          typeAheadAriaLabel={t`Select an activity type`}
           className="activityTypeSelect"
           onToggle={setIsTypeDropdownOpen}
           onSelect={(event, selection) => {

@@ -138,10 +138,13 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
     }
   }, [handleLogout, timeRemaining]);
 
+  const brandName = config?.license_info?.product_name;
+  const alt = brandName ? i18n._(t`${brandName} logo`) : i18n._(t`brand logo`);
+
   const header = (
     <PageHeader
       showNavToggle
-      logo={<BrandLogo />}
+      logo={<BrandLogo alt={alt} />}
       logoProps={{ href: '/' }}
       headerTools={
         <PageHeaderToolbar
@@ -156,7 +159,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
 
   const simpleHeader = config.isLoading ? null : (
     <PageHeader
-      logo={<BrandLogo />}
+      logo={<BrandLogo alt={alt} />}
       headerTools={
         <PageHeaderTools>
           <PageHeaderToolsGroup>

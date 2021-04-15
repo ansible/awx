@@ -138,6 +138,7 @@ function CredentialFormFields({ i18n, initialTypeId, credentialTypes }) {
       isDisabled={isCredentialTypeDisabled}
       ouiaId="CredentialForm-credential_type"
       aria-label={i18n._(t`Credential Type`)}
+      typeAheadAriaLabel={i18n._(t`Select Credential Type`)}
       isOpen={isSelectOpen}
       variant={SelectVariant.typeahead}
       onToggle={setIsSelectOpen}
@@ -203,7 +204,7 @@ function CredentialFormFields({ i18n, initialTypeId, credentialTypes }) {
         {isCredentialTypeDisabled ? (
           <Tooltip
             content={i18n._(
-              `You cannot change the credential type of a credential, 
+              `You cannot change the credential type of a credential,
               as it may break the functionality of the resources using it.`
             )}
           >

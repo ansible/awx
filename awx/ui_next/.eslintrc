@@ -60,6 +60,7 @@
           "mode",
           "aria-labelledby",
           "aria-hidden",
+          "aria-controls",
           "sortKey",
           "ouiaId",
           "credentialTypeNamespace",

@@ -88,6 +88,7 @@ function SurveyPreviewModal({
                       id={`survey-preview-multipleChoice-${q.variable}`}
                       isDisabled
                       aria-label={i18n._(t`Multiple Choice`)}
+                      typeAheadAriaLabel={i18n._(t`Multiple Choice`)}
                       placeholderText={q.default}
                       onToggle={() => {}}
                     />
@@ -109,6 +110,7 @@ function SurveyPreviewModal({
                       }
                       onToggle={() => {}}
                       aria-label={i18n._(t`Multi-Select`)}
+                      typeAheadAriaLabel={i18n._(t`Multi-Select`)}
                       id={`survey-preview-multiSelect-${q.variable}`}
                     >
                       {q.choices.length > 0 &&
