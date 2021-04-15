@@ -400,6 +400,8 @@ def purge_old_stdout_files():
 
 @task(queue=get_local_queuename)
 def cleanup_execution_environment_images():
+    if settings.IS_K8S:
+        return
     images_in_use = [ee.image for ee in ExecutionEnvironment.objects.all()]
     images_system = subprocess.run("podman images -a --format json".split(" "), capture_output=True)
     if len(images_system.stdout) > 0:
@@ -414,7 +416,7 @@ def cleanup_execution_environment_images():
                 logger.debug(f"Cleanup execution environment images: deleting {image_name}, {image_size:.0f} MB")
                 process = subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
                 if process.returncode != 0:
-                    logger.debug(f"Unsuccessful deletion of image {image_name}")
+                    logger.debug(f"Unsuccessfully deleted image {image_name}")
 
 
 @task(queue=get_local_queuename)
