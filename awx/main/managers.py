@@ -142,7 +142,7 @@ class InstanceManager(models.Manager):
             pod_ip = os.environ.get('MY_POD_IP')
             registered = self.register(ip_address=pod_ip)
             is_container_group = settings.IS_K8S
-            RegisterQueue('tower', None, 100, 0, [], is_container_group).register()
+            RegisterQueue('tower', 100, 0, [], is_container_group).register()
             return registered
         else:
             return (False, self.me())
