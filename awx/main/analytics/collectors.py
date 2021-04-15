@@ -93,7 +93,7 @@ def partition_within_interval(partition, start, end):
     return dt >= start and dt <= end
 
 
-def events_slicing(key, since, until):
+def events_slicing(key, since, until, strategy=None):
     from awx.conf.models import Setting
 
     last_gather = settings.AUTOMATION_ANALYTICS_LAST_GATHER
@@ -112,7 +112,7 @@ def events_slicing(key, since, until):
 
         previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
         if not since and last_entries.get(key):
-            previous_pk = max(last_entries[key], previous_pk)
+            previous_pk = max(last_entries[key], previous_pk)  # TODO: ensure last_entries[key] has pk (and not part table name)
         final_pk = pk_values['pk__max'] or 0
 
         step = 100000
@@ -121,9 +121,23 @@ def events_slicing(key, since, until):
 
     # Stage 2: Process any job events from partitioned table
     if until > partition_epoch:
-        for partition in get_partitions():
-            if partition_within_interval(partition, lower, until):
-                yield (partition, partition)
+        # when collecting up to the horizon, gather *all* partitions going back to the horizon
+        if lower == horizon or strategy == "partitions":  # TODO: pick most performant strategy, remove other option
+            for partition in get_partitions():
+                if partition_within_interval(partition, lower, until):
+                    yield (partition, partition)
+        else:
+            # otherwise, only grab job events based on modified time
+            pk_values = models.JobEvent.objects.filter(modified__gte=max(lower, partition_epoch), modified__lte=until).aggregate(Min('pk'), Max('pk'))
+
+            previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
+            if not since and last_entries.get(key):
+                previous_pk = max(last_entries[key], previous_pk)  # TODO: ensure last_entries[key] has table name
+            final_pk = pk_values['pk__max'] or 0
+
+            step = 100000
+            for start in range(previous_pk, final_pk + 1, step):
+                yield (start, min(start + step, final_pk))
 
 
 @register('config', '1.3', description=_('General platform configuration.'))
