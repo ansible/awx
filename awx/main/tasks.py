@@ -412,7 +412,9 @@ def cleanup_execution_environment_images():
             image_size = e['Size'] / 1e6
             if image_name not in images_in_use:
                 logger.debug(f"Cleanup execution environment images: deleting {image_name}, {image_size:.0f} MB")
-                subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
+                process = subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
+                if process.returncode != 0:
+                    logger.debug(f"Unsuccessful deletion of image {image_name}")
 
 
 @task(queue=get_local_queuename)
