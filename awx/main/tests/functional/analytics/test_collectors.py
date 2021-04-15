@@ -104,7 +104,7 @@ partition_epoch = now() - timedelta(hours=5)
 @mock.patch('awx.main.analytics.collectors.get_event_partition_epoch', lambda: partition_epoch)
 def test_collect_job_events_from_unpartitioned_and_partitioned_table(sqlite_copy_expert):
     """
-    Ensure that the jobevent collector can correctly collect jobs from
+    Ensure that the jobevent collector can correctly collect job events from
     both unpartitioned and partitioned tables.
     """
     time_start = now() - timedelta(hours=10)
@@ -112,9 +112,8 @@ def test_collect_job_events_from_unpartitioned_and_partitioned_table(sqlite_copy
 
     with mock.patch('awx.main.models.JobEvent.objects.filter') as event_search:
         with mock.patch('awx.main.analytics.collectors.get_partitions') as get_partitions:
-            # events from unpartitioned table
             mock_qs = mock.MagicMock()
-            mock_qs.aggregate.side_effect = ({'pk__min': 1000, 'pk__max': 2000}, {'pk__min': 2001, 'pk__max': 3000})  # unpartitioned  # partitioned
+            mock_qs.aggregate.side_effect = ({'pk__min': 1000, 'pk__max': 2000}, {'pk__min': 2001, 'pk__max': 3000})
             event_search.return_value = mock_qs
             slices = list(collectors.events_slicing('events_table', time_start, time_end))
 
@@ -126,6 +125,30 @@ def test_collect_job_events_from_unpartitioned_and_partitioned_table(sqlite_copy
             get_partitions.assert_not_called()
 
             assert slices == [(999, 2000), (2000, 3000)]
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.analytics.collectors.get_event_partition_epoch', lambda: partition_epoch)
+def test_collect_job_events_from_partitioned_table(sqlite_copy_expert):
+    """
+    Ensure that the jobevent collector can correctly collect job events from partitioned tables.
+    """
+    time_start = now() - timedelta(hours=4)
+    time_end = now() - timedelta(hours=0)
+
+    with mock.patch('awx.main.models.JobEvent.objects.filter') as event_search:
+        with mock.patch('awx.main.analytics.collectors.get_partitions') as get_partitions:
+            mock_qs = mock.MagicMock()
+            mock_qs.aggregate.return_value = {'pk__min': 1000, 'pk__max': 2000}
+            event_search.return_value = mock_qs
+            slices = list(collectors.events_slicing('events_table', time_start, time_end))
+
+            event_search.assert_called_with(modified__gte=time_start, modified__lte=time_end)
+
+            # partitions not considered since event collection does not run up through horizon
+            get_partitions.assert_not_called()
+
+            assert slices == [(999, 2000)]
 
 
 @pytest.mark.django_db
