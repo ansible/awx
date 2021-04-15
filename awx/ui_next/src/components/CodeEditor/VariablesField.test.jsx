@@ -52,7 +52,86 @@ describe('VariablesField', () => {
     wrapper.update();
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
     expect(wrapper.find('CodeEditor').prop('value')).toEqual(
+      '---\nfoo: bar\nbaz: 3'
+    );
+  });
+
+  it('should retain non-expanded yaml if JSON value not edited', async () => {
+    const value = '---\na: &aa [a,b,c]\nb: *aa';
+    const wrapper = mountWithContexts(
+      <Formik initialValues={{ variables: value }}>
+        {() => (
+          <VariablesField id="the-field" name="variables" label="Variables" />
+        )}
+      </Formik>
+    );
+    const jsButton = wrapper.find('Button.toggle-button-javascript');
+    await act(async () => {
+      jsButton.simulate('click');
+    });
+    wrapper.update();
+    const yamlButton = wrapper.find('Button.toggle-button-yaml');
+    await act(async () => {
+      yamlButton.simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(value);
+  });
+
+  it('should retain expanded yaml if JSON value is edited', async () => {
+    const value = '---\na: &aa [a,b,c]\nb: *aa';
+    const wrapper = mountWithContexts(
+      <Formik initialValues={{ variables: value }}>
+        {() => (
+          <VariablesField id="the-field" name="variables" label="Variables" />
+        )}
+      </Formik>
+    );
+    const jsButton = wrapper.find('Button.toggle-button-javascript');
+    await act(async () => {
+      jsButton.simulate('click');
+    });
+    wrapper.update();
+    wrapper.find('CodeEditor').invoke('onChange')(
+      '{\n  "foo": "bar",\n  "baz": 3\n}'
+    );
+    const yamlButton = wrapper.find('Button.toggle-button-yaml');
+    await act(async () => {
+      yamlButton.simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(
       'foo: bar\nbaz: 3\n'
+    );
+  });
+
+  it('should retain non-expanded yaml if YAML value is edited', async () => {
+    const value = '---\na: &aa [a,b,c]\nb: *aa';
+    const wrapper = mountWithContexts(
+      <Formik initialValues={{ variables: value }}>
+        {() => (
+          <VariablesField id="the-field" name="variables" label="Variables" />
+        )}
+      </Formik>
+    );
+    wrapper.find('CodeEditor').invoke('onChange')(
+      '---\na: &aa [a,b,c]\nb: *aa\n'
+    );
+    const buttons = wrapper.find('Button');
+    await act(async () => {
+      buttons.at(1).simulate('click');
+    });
+    wrapper.update();
+    const buttons2 = wrapper.find('Button');
+    await act(async () => {
+      buttons2.at(0).simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('CodeEditor').prop('mode')).toEqual('yaml');
+    expect(wrapper.find('CodeEditor').prop('value')).toEqual(
+      '---\na: &aa [a,b,c]\nb: *aa\n'
     );
   });
 
