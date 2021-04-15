@@ -371,21 +371,23 @@ function JobDetail({ job, i18n }) {
           job.summary_fields.user_capabilities.start &&
           (job.status === 'failed' && job.type === 'job' ? (
             <LaunchButton resource={job}>
-              {({ handleRelaunch }) => (
+              {({ handleRelaunch, isSending }) => (
                 <ReLaunchDropDown
                   ouiaId="job-detail-relaunch-dropdown"
                   isPrimary
                   handleRelaunch={handleRelaunch}
+                  isSending={isSending}
                 />
               )}
             </LaunchButton>
           ) : (
             <LaunchButton resource={job} aria-label={i18n._(t`Relaunch`)}>
-              {({ handleRelaunch }) => (
+              {({ handleRelaunch, isSending }) => (
                 <Button
                   ouiaId="job-detail-relaunch-button"
                   type="submit"
                   onClick={handleRelaunch}
+                  isDisabled={isSending}
                 >
                   {i18n._(t`Relaunch`)}
                 </Button>

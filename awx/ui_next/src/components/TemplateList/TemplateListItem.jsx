@@ -176,11 +176,11 @@ function TemplateListItem({
             tooltip={i18n._(t`Launch Template`)}
           >
             <LaunchButton resource={template}>
-              {({ handleLaunch }) => (
+              {({ handleLaunch, isSending }) => (
                 <Button
                   ouiaId={`${template.id}-launch-button`}
                   id={`template-action-launch-${template.id}`}
-                  isDisabled={isDisabled}
+                  isDisabled={isDisabled || isSending}
                   aria-label={i18n._(t`Launch template`)}
                   variant="plain"
                   onClick={handleLaunch}

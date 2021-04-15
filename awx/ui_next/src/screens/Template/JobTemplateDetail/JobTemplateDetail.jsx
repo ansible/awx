@@ -387,12 +387,13 @@ function JobTemplateDetail({ i18n, template }) {
           )}
         {canLaunch && (
           <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
-            {({ handleLaunch }) => (
+            {({ handleLaunch, isSending }) => (
               <Button
                 ouiaId="job-template-detail-launch-button"
                 variant="secondary"
                 type="submit"
                 onClick={handleLaunch}
+                isDisabled={isSending}
               >
                 {i18n._(t`Launch`)}
               </Button>
