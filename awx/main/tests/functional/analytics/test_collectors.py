@@ -151,6 +151,44 @@ def test_collect_job_events_from_partitioned_table(sqlite_copy_expert):
             assert slices == [(999, 2000)]
 
 
+stable_now = now()
+distant_partition_epoch = stable_now - timedelta(weeks=10)
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.analytics.collectors.get_event_partition_epoch', lambda: distant_partition_epoch)
+def test_collect_job_events_up_through_horizon(sqlite_copy_expert):
+    """
+    Ensure that the jobevent collector can correctly collect job events up through the horizon.
+    """
+    # analytics.core.gather ensures that `since` >= `horizon`
+    # so we'll just use the horizon as our starting point
+    time_start = horizon = stable_now - timedelta(weeks=4)
+    time_end = stable_now
+
+    mock_partitions = []
+    expected_slices = []
+    # start at the first hour that is within the horizon
+    time = distant_partition_epoch.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+    # create mock partition tables that run from the partition epoch up to now
+    while time < time_end:
+        time_label = time.strftime("%Y%m%d_%H")
+        partition_label = f'main_jobevent_{time_label}'
+        mock_partitions.append(partition_label)
+        if time >= horizon:
+            expected_slices.append((partition_label, partition_label))
+        time += timedelta(hours=1)
+
+    with mock.patch('awx.main.models.JobEvent.objects.filter') as event_search:
+        with mock.patch('awx.main.analytics.collectors.get_partitions') as get_partitions:
+            get_partitions.return_value = mock_partitions
+            slices = list(collectors.events_slicing('events_table', time_start, time_end))
+            event_search.assert_not_called()
+            get_partitions.assert_called_once()
+
+            assert slices == expected_slices
+
+
 @pytest.mark.django_db
 def test_copy_tables_unified_job_query(sqlite_copy_expert, project, inventory, job_template):
     """
