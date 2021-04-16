@@ -402,21 +402,18 @@ def purge_old_stdout_files():
 def cleanup_execution_environment_images():
     if settings.IS_K8S:
         return
-    images_in_use = [ee.image for ee in ExecutionEnvironment.objects.all()]
-    images_system = subprocess.run("podman images -a --format json".split(" "), capture_output=True)
-    if len(images_system.stdout) > 0:
-        images_system = json.loads(images_system.stdout)
+    process = subprocess.run('podman images --filter="dangling=true" --format json'.split(" "), capture_output=True)
+    if process.returncode != 0:
+        logger.debug("Cleanup execution environment images: could not get list of images")
+        return
+    if len(process.stdout) > 0:
+        images_system = json.loads(process.stdout)
         for e in images_system:
-            if 'Names' in e:
-                image_name = e['Names'][0]
-            else:
-                image_name = e["Id"]
-            image_size = e['Size'] / 1e6
-            if image_name not in images_in_use:
-                logger.debug(f"Cleanup execution environment images: deleting {image_name}, {image_size:.0f} MB")
-                process = subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
-                if process.returncode != 0:
-                    logger.debug(f"Unsuccessfully deleted image {image_name}")
+            image_name = e["Id"]
+            logger.debug(f"Cleanup execution environment images: deleting {image_name}")
+            process = subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
+            if process.returncode != 0:
+                logger.debug(f"Failed to delete image {image_name}")
 
 
 @task(queue=get_local_queuename)
