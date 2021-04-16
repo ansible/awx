@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, List, ListItem } from '@patternfly/react-core';
+import { Button, List, ListItem, Tooltip } from '@patternfly/react-core';
 import { Project } from '../../../types';
 import { Config } from '../../../contexts/Config';
 
@@ -22,6 +22,8 @@ import { toTitleCase } from '../../../util/strings';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
+import StatusLabel from '../../../components/StatusLabel';
+import { formatDateString } from '../../../util/dates';
 
 function ProjectDetail({ project, i18n }) {
   const {
@@ -84,9 +86,44 @@ function ProjectDetail({ project, i18n }) {
     );
   }
 
+  const generateLastJobTooltip = job => {
+    return (
+      <Fragment>
+        <div>{i18n._(t`MOST RECENT SYNC`)}</div>
+        <div>
+          {i18n._(t`JOB ID:`)} {job.id}
+        </div>
+        <div>
+          {i18n._(t`STATUS:`)} {job.status.toUpperCase()}
+        </div>
+        {job.finished && (
+          <div>
+            {i18n._(t`FINISHED:`)} {formatDateString(job.finished)}
+          </div>
+        )}
+      </Fragment>
+    );
+  };
+
   return (
     <CardBody>
       <DetailList gutter="sm">
+        <Detail
+          label={i18n._(t`Last Job Status`)}
+          value={
+            summary_fields.last_job && (
+              <Tooltip
+                position="top"
+                content={generateLastJobTooltip(summary_fields.last_job)}
+                key={summary_fields.last_job.id}
+              >
+                <Link to={`/jobs/project/${summary_fields.last_job.id}`}>
+                  <StatusLabel status={summary_fields.last_job.status} />
+                </Link>
+              </Tooltip>
+            )
+          }
+        />
         <Detail
           label={i18n._(t`Name`)}
           value={name}
