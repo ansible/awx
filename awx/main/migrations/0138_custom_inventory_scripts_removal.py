@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0136_custom_inventory_scripts_removal_data'),
+        ('main', '0137_custom_inventory_scripts_removal_data'),
     ]
 
     operations = [

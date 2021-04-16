@@ -50,7 +50,10 @@ def delete_all_user_roles(apps, schema_editor):
 def delete_all_custom_script_roles(apps, schema_editor):
     ContentType = apps.get_model('contenttypes', "ContentType")
     Role = apps.get_model('main', "Role")
-    cis_type = ContentType.objects.get(model='custominventoryscript')
+    try:
+        cis_type = ContentType.objects.get(model='custominventoryscript')
+    except ContentType.DoesNotExist:
+        return
     role_ct = 0
     for role in Role.objects.filter(content_type=cis_type).iterator():
         role.delete()
