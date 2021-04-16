@@ -108,4 +108,4 @@ def delete_custom_inv_source(apps, schema_editor):
         src_ct = deletions['main.InventorySource']
         if src_ct:
             logger.info('Deleted {} custom inventory script updates.'.format(src_ct))
-            logger.warning('Custom inventory scripts have been removed, see awx-manage XXXXX')
+            logger.warning('Custom inventory scripts have been removed, see awx-manage export_custom_scripts')
