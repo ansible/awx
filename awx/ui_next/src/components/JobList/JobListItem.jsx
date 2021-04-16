@@ -12,6 +12,7 @@ import StatusLabel from '../StatusLabel';
 import { DetailList, Detail, LaunchedByDetail } from '../DetailList';
 import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
+import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
 import { formatDateString } from '../../util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
@@ -36,7 +37,16 @@ function JobListItem({
     workflow_job: i18n._(t`Workflow Job`),
   };
 
-  const { credentials, inventory, labels } = job.summary_fields;
+  const {
+    credentials,
+    execution_environment,
+    inventory,
+    job_template,
+    labels,
+    project,
+    source_workflow_job,
+    workflow_job_template,
+  } = job.summary_fields;
 
   return (
     <>
@@ -114,34 +124,39 @@ function JobListItem({
       </Tr>
       <Tr isExpanded={isExpanded} id={`expanded-job-row-${job.id}`}>
         <Td colSpan={2} />
-        <Td colSpan={showTypeColumn ? 5 : 4}>
+        <Td colSpan={showTypeColumn ? 6 : 5}>
           <ExpandableRowContent>
             <DetailList>
               <LaunchedByDetail job={job} i18n={i18n} />
-              {credentials && credentials.length > 0 && (
+              {job_template && (
                 <Detail
-                  fullWidth
-                  label={i18n._(t`Credentials`)}
+                  label={i18n._(t`Job Template`)}
                   value={
-                    <ChipGroup numChips={5} totalChips={credentials.length}>
-                      {credentials.map(c => (
-                        <CredentialChip key={c.id} credential={c} isReadOnly />
-                      ))}
-                    </ChipGroup>
+                    <Link to={`/templates/job_template/${job_template.id}`}>
+                      {job_template.name}
+                    </Link>
                   }
                 />
               )}
-              {labels && labels.count > 0 && (
+              {workflow_job_template && (
                 <Detail
-                  label={i18n._(t`Labels`)}
+                  label={i18n._(t`Workflow Job Template`)}
                   value={
-                    <ChipGroup numChips={5} totalChips={labels.results.length}>
-                      {labels.results.map(l => (
-                        <Chip key={l.id} isReadOnly>
-                          {l.name}
-                        </Chip>
-                      ))}
-                    </ChipGroup>
+                    <Link
+                      to={`/templates/workflow_job_template/${workflow_job_template.id}`}
+                    >
+                      {workflow_job_template.name}
+                    </Link>
+                  }
+                />
+              )}
+              {source_workflow_job && (
+                <Detail
+                  label={i18n._(t`Source Workflow Job`)}
+                  value={
+                    <Link to={`/jobs/workflow/${source_workflow_job.id}`}>
+                      {source_workflow_job.id} - {source_workflow_job.name}
+                    </Link>
                   }
                 />
               )}
@@ -161,7 +176,49 @@ function JobListItem({
                   }
                 />
               )}
-
+              {project && (
+                <Detail
+                  label={i18n._(t`Project`)}
+                  value={
+                    <Link to={`/projects/${project.id}/details`}>
+                      {project.name}
+                    </Link>
+                  }
+                  dataCy={`job-${job.id}-project`}
+                />
+              )}
+              <ExecutionEnvironmentDetail
+                virtualEnvironment={job.custom_virtualenv}
+                executionEnvironment={execution_environment}
+              />
+              {credentials && credentials.length > 0 && (
+                <Detail
+                  fullWidth
+                  label={i18n._(t`Credentials`)}
+                  value={
+                    <ChipGroup numChips={5} totalChips={credentials.length}>
+                      {credentials.map(c => (
+                        <CredentialChip key={c.id} credential={c} isReadOnly />
+                      ))}
+                    </ChipGroup>
+                  }
+                />
+              )}
+              {labels && labels.count > 0 && (
+                <Detail
+                  fullWidth
+                  label={i18n._(t`Labels`)}
+                  value={
+                    <ChipGroup numChips={5} totalChips={labels.results.length}>
+                      {labels.results.map(l => (
+                        <Chip key={l.id} isReadOnly>
+                          {l.name}
+                        </Chip>
+                      ))}
+                    </ChipGroup>
+                  }
+                />
+              )}
               {job.job_explanation && (
                 <Detail
                   fullWidth
