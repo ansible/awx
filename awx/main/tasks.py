@@ -60,7 +60,6 @@ from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_
 from awx.main.access import access_registry
 from awx.main.redact import UriCleaner
 from awx.main.models import (
-    ExecutionEnvironment,
     Schedule,
     TowerScheduleState,
     Instance,
