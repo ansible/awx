@@ -3,7 +3,6 @@
 from django.db import migrations
 
 # AWX migration utils
-from awx.main.migrations._rbac import delete_all_custom_script_roles
 from awx.main.migrations._inventory_source import delete_custom_inv_source
 
 
@@ -15,5 +14,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(delete_custom_inv_source),
-        migrations.RunPython(delete_all_custom_script_roles),
     ]

@@ -2,6 +2,8 @@
 
 from django.db import migrations, models
 
+from awx.main.migrations._rbac import delete_all_custom_script_roles
+
 
 class Migration(migrations.Migration):
 
@@ -78,4 +80,5 @@ class Migration(migrations.Migration):
             model_name='custominventoryscript',
             name='read_role',
         ),
+        migrations.RunPython(delete_all_custom_script_roles),
     ]

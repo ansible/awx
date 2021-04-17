@@ -59,7 +59,7 @@ def delete_all_custom_script_roles(apps, schema_editor):
         role.delete()
         role_ct += 1
     if role_ct:
-        logger.debug('Deleted roles corresponding to custom inventory sources.')
+        logger.debug('Deleted {} roles corresponding to custom inventory sources.'.format(role_ct))
 
 
 UNIFIED_ORG_LOOKUPS = {
