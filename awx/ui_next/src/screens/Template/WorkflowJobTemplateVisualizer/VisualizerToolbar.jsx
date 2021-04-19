@@ -125,12 +125,12 @@ function VisualizerToolbar({
                 resource={template}
                 aria-label={i18n._(t`Launch workflow`)}
               >
-                {({ handleLaunch, isSending }) => (
+                {({ handleLaunch, isLaunching }) => (
                   <ActionButton
                     id="visualizer-launch"
                     variant="plain"
                     isDisabled={
-                      hasUnsavedChanges || totalNodes === 0 || isSending
+                      hasUnsavedChanges || totalNodes === 0 || isLaunching
                     }
                     onClick={handleLaunch}
                   >

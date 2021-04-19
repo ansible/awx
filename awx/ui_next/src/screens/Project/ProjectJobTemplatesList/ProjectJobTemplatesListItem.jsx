@@ -116,13 +116,13 @@ function ProjectJobTemplateListItem({
           {canLaunch && template.type === 'job_template' && (
             <Tooltip content={i18n._(t`Launch Template`)} position="top">
               <LaunchButton resource={template}>
-                {({ handleLaunch, isSending }) => (
+                {({ handleLaunch, isLaunching }) => (
                   <Button
                     ouiaId={`${template.id}-launch-button`}
                     css="grid-column: 1"
                     variant="plain"
                     onClick={handleLaunch}
-                    isDisabled={isSending}
+                    isDisabled={isLaunching}
                   >
                     <RocketIcon />
                   </Button>

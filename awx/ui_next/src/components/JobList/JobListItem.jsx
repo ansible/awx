@@ -91,22 +91,22 @@ function JobListItem({
           >
             {job.status === 'failed' && job.type === 'job' ? (
               <LaunchButton resource={job}>
-                {({ handleRelaunch, isSending }) => (
+                {({ handleRelaunch, isLaunching }) => (
                   <ReLaunchDropDown
                     handleRelaunch={handleRelaunch}
-                    isSending={isSending}
+                    isLaunching={isLaunching}
                   />
                 )}
               </LaunchButton>
             ) : (
               <LaunchButton resource={job}>
-                {({ handleRelaunch, isSending }) => (
+                {({ handleRelaunch, isLaunching }) => (
                   <Button
                     ouiaId={`${job.id}-relaunch-button`}
                     variant="plain"
                     onClick={handleRelaunch}
                     aria-label={i18n._(t`Relaunch`)}
-                    isDisabled={isSending}
+                    isDisabled={isLaunching}
                   >
                     <RocketIcon />
                   </Button>
