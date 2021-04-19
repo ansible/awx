@@ -36,9 +36,12 @@ function LaunchButton({ resource, i18n, children, history }) {
   const [showLaunchPrompt, setShowLaunchPrompt] = useState(false);
   const [launchConfig, setLaunchConfig] = useState(null);
   const [surveyConfig, setSurveyConfig] = useState(null);
+  const [isLaunching, setIsLaunching] = useState(false);
   const [resourceCredentials, setResourceCredentials] = useState([]);
   const [error, setError] = useState(null);
+
   const handleLaunch = async () => {
+    setIsLaunching(true);
     const readLaunch =
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.readLaunch(resource.id)
@@ -96,6 +99,8 @@ function LaunchButton({ resource, i18n, children, history }) {
       history.push(`/jobs/${job.id}/output`);
     } catch (launchError) {
       setError(launchError);
+    } finally {
+      setIsLaunching(false);
     }
   };
 
@@ -103,6 +108,7 @@ function LaunchButton({ resource, i18n, children, history }) {
     let readRelaunch;
     let relaunch;
 
+    setIsLaunching(true);
     if (resource.type === 'inventory_update') {
       // We'll need to handle the scenario where the src no longer exists
       readRelaunch = InventorySourcesAPI.readLaunchUpdate(
@@ -146,6 +152,8 @@ function LaunchButton({ resource, i18n, children, history }) {
       }
     } catch (err) {
       setError(err);
+    } finally {
+      setIsLaunching(false);
     }
   };
 
@@ -154,6 +162,7 @@ function LaunchButton({ resource, i18n, children, history }) {
       {children({
         handleLaunch,
         handleRelaunch,
+        isLaunching,
       })}
       {error && (
         <AlertModal

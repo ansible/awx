@@ -227,12 +227,13 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
           )}
         {canLaunch && (
           <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
-            {({ handleLaunch }) => (
+            {({ handleLaunch, isLaunching }) => (
               <Button
                 ouiaId="workflow-job-template-detail-launch-button"
                 variant="secondary"
                 type="submit"
                 onClick={handleLaunch}
+                isDisabled={isLaunching}
               >
                 {i18n._(t`Launch`)}
               </Button>

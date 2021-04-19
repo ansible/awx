@@ -11,11 +11,17 @@ import {
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
 
-function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
-  const [isOpen, setIsOPen] = useState(false);
+function ReLaunchDropDown({
+  isPrimary = false,
+  handleRelaunch,
+  isLaunching,
+  i18n,
+  ouiaId,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
 
   const onToggle = () => {
-    setIsOPen(prev => !prev);
+    setIsOpen(prev => !prev);
   };
 
   const dropdownItems = [
@@ -35,6 +41,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
       onClick={() => {
         handleRelaunch({ hosts: 'all' });
       }}
+      isDisabled={isLaunching}
     >
       {i18n._(t`All`)}
     </DropdownItem>,
@@ -46,6 +53,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
       onClick={() => {
         handleRelaunch({ hosts: 'failed' });
       }}
+      isDisabled={isLaunching}
     >
       {i18n._(t`Failed hosts`)}
     </DropdownItem>,

@@ -144,21 +144,23 @@ const OutputToolbar = ({
           >
             {job.status === 'failed' && job.type === 'job' ? (
               <LaunchButton resource={job}>
-                {({ handleRelaunch }) => (
+                {({ handleRelaunch, isLaunching }) => (
                   <ReLaunchDropDown
                     handleRelaunch={handleRelaunch}
                     ouiaId="job-output-relaunch-dropdown"
+                    isLaunching={isLaunching}
                   />
                 )}
               </LaunchButton>
             ) : (
               <LaunchButton resource={job}>
-                {({ handleRelaunch }) => (
+                {({ handleRelaunch, isLaunching }) => (
                   <Button
                     ouiaId="job-output-relaunch-button"
                     variant="plain"
                     onClick={handleRelaunch}
                     aria-label={i18n._(t`Relaunch`)}
+                    isDisabled={isLaunching}
                   >
                     <RocketIcon />
                   </Button>
