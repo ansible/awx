@@ -11,6 +11,8 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { KeyIcon } from '@patternfly/react-icons';
+import styles from '@patternfly/react-styles/css/components/Form/form';
+import { css } from '@patternfly/react-styles';
 import FieldWithPrompt from '../../../../components/FieldWithPrompt';
 import Popover from '../../../../components/Popover';
 import { CredentialPluginPrompt } from './CredentialPluginPrompt';
@@ -101,6 +103,16 @@ function CredentialPluginField(props) {
   const [, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const [passwordPromptField] = useField(`passwordPrompts.${fieldOptions.id}`);
 
+  const invalidHelperTextToDisplay = meta.error && meta.touched && (
+    <div
+      className={css(styles.formHelperText, styles.modifiers.error)}
+      id={`${fieldOptions.id}-helper`}
+      aria-live="polite"
+    >
+      {meta.error}
+    </div>
+  );
+
   useEffect(() => {
     if (passwordPromptField.value) {
       helpers.setValue('');
@@ -121,15 +133,7 @@ function CredentialPluginField(props) {
           tooltip={fieldOptions.help_text}
         >
           <CredentialPluginInput {...props} />
-          {meta.error && meta.touched && (
-            <div
-              className="pf-c-form__helper-text pf-m-error"
-              id={`${fieldOptions.id}-helper`}
-              aria-live="polite"
-            >
-              {meta.error}
-            </div>
-          )}
+          {invalidHelperTextToDisplay}
         </FieldWithPrompt>
       ) : (
         <FormGroup
@@ -145,6 +149,7 @@ function CredentialPluginField(props) {
           }
         >
           <CredentialPluginInput {...props} />
+          {invalidHelperTextToDisplay}
         </FormGroup>
       )}
     </>
