@@ -402,6 +402,7 @@ function JobTemplateDetail({ i18n, template }) {
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.delete && (
             <DeleteButton
+              ouiaId="job-template-detail-delete-button"
               name={name}
               modalTitle={i18n._(t`Delete Job Template`)}
               onConfirm={deleteJobTemplate}
