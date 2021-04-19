@@ -215,6 +215,7 @@ describe('VariablesField', () => {
         </Formik>
       );
     });
+    wrapper.update();
 
     expect(wrapper.find('CodeEditor').prop('mode')).toEqual('javascript');
   });
