@@ -154,10 +154,6 @@
   gather_facts: false
   connection: local
   name: Install content with ansible-galaxy command if necessary
-  vars:
-    yaml_exts:
-      - {ext: .yml}
-      - {ext: .yaml}
   tasks:
 
     - block:
