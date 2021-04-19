@@ -87,6 +87,7 @@ def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_aud
         try:
             if settings.SAML_AUTO_CREATE_OBJECTS:
                 org = Organization.objects.get_or_create(name=org_name)[0]
+                org.create_default_galaxy_credential()
             else:
                 org = Organization.objects.get(name=org_name)
         except ObjectDoesNotExist:
@@ -117,6 +118,7 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
     org_map = backend.setting('ORGANIZATION_MAP') or {}
     for org_name, org_opts in org_map.items():
         org = Organization.objects.get_or_create(name=org_name)[0]
+        org.create_default_galaxy_credential()
 
         # Update org admins from expression(s).
         remove = bool(org_opts.get('remove', True))
@@ -145,6 +147,7 @@ def update_user_teams(backend, details, user=None, *args, **kwargs):
         if 'organization' not in team_opts:
             continue
         org = Organization.objects.get_or_create(name=team_opts['organization'])[0]
+        org.create_default_galaxy_credential()
 
         # Update team members from expression(s).
         team = Team.objects.get_or_create(name=team_name, organization=org)[0]
@@ -205,6 +208,7 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
             try:
                 if settings.SAML_AUTO_CREATE_OBJECTS:
                     org = Organization.objects.get_or_create(name=organization_name)[0]
+                    org.create_default_galaxy_credential()
                 else:
                     org = Organization.objects.get(name=organization_name)
             except ObjectDoesNotExist:

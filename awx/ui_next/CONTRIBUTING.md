@@ -35,7 +35,6 @@ Have questions about this document or anything not covered here? Feel free to re
     - [Setting up .po files to give to translation team](#setting-up-po-files-to-give-to-translation-team)
     - [Marking an issue to be translated](#marking-an-issue-to-be-translated)
 
-
 ## Things to know prior to submitting code
 
 - All code submissions are done through pull requests against the `devel` branch.
@@ -61,6 +60,7 @@ The AWX UI requires the following:
 - NPM 6.x LTS
 
 Run the following to install all the dependencies:
+
 ```bash
 (host) $ npm install
 ```
@@ -85,10 +85,10 @@ Example:
 
 `import { OrganizationsAPI, UsersAPI } from '../../../api';`
 
-All models extend a `Base` class which provides an interface to the standard HTTP methods (GET, POST, PUT etc).  Methods that are specific to that endpoint should be added directly to model's class.
+All models extend a `Base` class which provides an interface to the standard HTTP methods (GET, POST, PUT etc). Methods that are specific to that endpoint should be added directly to model's class.
 
-**Mixins** - For related endpoints that apply to several different models a mixin should be used.  Mixins are classes with a number of methods and can be used to avoid adding the same methods to a number of different models.  A good example of this is the Notifications mixin.  This mixin provides generic methods for reading notification templates and toggling them on and off.
-Note that mixins can be chained.  See the example below.
+**Mixins** - For related endpoints that apply to several different models a mixin should be used. Mixins are classes with a number of methods and can be used to avoid adding the same methods to a number of different models. A good example of this is the Notifications mixin. This mixin provides generic methods for reading notification templates and toggling them on and off.
+Note that mixins can be chained. See the example below.
 
 Example of a model using multiple mixins:
 
@@ -103,7 +103,7 @@ class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
 export default Organizations;
 ```
 
-**Testing** - The easiest way to mock the api module in tests is to use jest's [automatic mock](https://jestjs.io/docs/en/es6-class-mocks#automatic-mock).  This syntax will replace the class with a mock constructor and mock out all methods to return undefined by default.  If necessary, you can still override these mocks for specific tests.  See the example below.
+**Testing** - The easiest way to mock the api module in tests is to use jest's [automatic mock](https://jestjs.io/docs/en/es6-class-mocks#automatic-mock). This syntax will replace the class with a mock constructor and mock out all methods to return undefined by default. If necessary, you can still override these mocks for specific tests. See the example below.
 
 Example of mocking a specific method for every test in a suite:
 
@@ -132,6 +132,7 @@ afterEach(() => {
 It should be noted that the `dataCy` prop, as well as its equivalent attribute `data-cy`, are used as flags for any UI test that wants to avoid relying on brittle CSS selectors such as `nth-of-type()`.
 
 ## Handling API Errors
+
 API requests can and will fail occasionally so they should include explicit error handling. The three _main_ categories of errors from our perspective are: content loading errors, form submission errors, and other errors. The patterns currently in place for these are described below:
 
 - **content loading errors** - These are any errors that occur when fetching data to initialize a page or populate a list. For these, we conditionally render a _content error component_ in place of the unresolved content.
@@ -141,6 +142,7 @@ API requests can and will fail occasionally so they should include explicit erro
 - **other errors** - Most errors will fall into the first two categories, but for miscellaneous actions like toggling notifications, deleting a list item, etc. we display an alert modal to notify the user that their requested action couldn't be performed.
 
 ## Forms
+
 Our forms should have a known, consistent, and fully-resolved starting state before it is possible for a user, keyboard-mouse, screen reader, or automated test to interact with them. If multiple network calls are needed to populate a form, resolve them all before displaying the form or showing a content error. When multiple requests are needed to create or update the resources represented by a form, resolve them all before transitioning the ui to a success or failure state.
 
 ## Working with React
@@ -150,8 +152,9 @@ Our forms should have a known, consistent, and fully-resolved starting state bef
 All source code lives in the `/src` directory and all tests are colocated with the components that they test.
 
 Inside these folders, the internal structure is:
-- **/api** - All classes used to interact with API's are found here.  See [AWX REST API Interaction](#awx-rest-api-interaction) for more information.
-- **/components** - All generic components that are meant to be used in multiple contexts throughout awx.  Things like buttons, tabs go here.
+
+- **/api** - All classes used to interact with API's are found here. See [AWX REST API Interaction](#awx-rest-api-interaction) for more information.
+- **/components** - All generic components that are meant to be used in multiple contexts throughout awx. Things like buttons, tabs go here.
 - **/contexts** - Components which utilize react's context api.
 - **/locales** - [Internationalization](#internationalization) config and source files.
 - **/screens** - Based on the various routes of awx.
@@ -159,11 +162,12 @@ Inside these folders, the internal structure is:
 - **/util** - Stateless helper functions that aren't tied to react.
 
 ### Patterns
+
 - A **screen** shouldn't import from another screen. If a component _needs_ to be shared between two or more screens, it is a generic and should be moved to `src/components`.
 
 #### Bootstrapping the application (root src/ files)
 
-In the root of `/src`, there are a few files which are used to initialize the react app.  These are
+In the root of `/src`, there are a few files which are used to initialize the react app. These are
 
 - **index.jsx**
   - Connects react app to root dom node.
@@ -178,57 +182,66 @@ In the root of `/src`, there are a few files which are used to initialize the re
 
 ### Naming files
 
-Ideally, files should be named the same as the component they export, and tests with `.test` appended.  In other words, `<FooBar>` would be defined in `FooBar.jsx`, and its tests would be defined in `FooBar.test.jsx`.
+Ideally, files should be named the same as the component they export, and tests with `.test` appended. In other words, `<FooBar>` would be defined in `FooBar.jsx`, and its tests would be defined in `FooBar.test.jsx`.
 
 #### Naming components that use the context api
 
-**File naming** - Since contexts export both consumer and provider (and potentially in withContext function form), the file can be simplified to be named after the consumer export.  In other words, the file containing the `Network` context components would be named `Network.jsx`.
+**File naming** - Since contexts export both consumer and provider (and potentially in withContext function form), the file can be simplified to be named after the consumer export. In other words, the file containing the `Network` context components would be named `Network.jsx`.
 
 **Component naming and conventions** - In order to provide a consistent interface with react-router and [lingui](https://lingui.js.org/), as well as make their usage easier and less verbose, context components follow these conventions:
+
 - Providers are wrapped in a component in the `FooProvider` format.
-  - The value prop of the provider should be pulled from state.  This is recommended by the react docs, [here](https://reactjs.org/docs/context.html#caveats).
+  - The value prop of the provider should be pulled from state. This is recommended by the react docs, [here](https://reactjs.org/docs/context.html#caveats).
   - The provider should also be able to accept its value by prop for testing.
   - Any sort of code related to grabbing data to put on the context should be done in this component.
 - Consumers are wrapped in a component in the `Foo` format.
-- If it makes sense, consumers can be exported as a function in the `withFoo()` format.  If a component is wrapped in this function, its context values are available on the component as props.
+- If it makes sense, consumers can be exported as a function in the `withFoo()` format. If a component is wrapped in this function, its context values are available on the component as props.
 
 ### Class constructors vs Class properties
+
 It is good practice to use constructor-bound instance methods rather than methods as class properties. Methods as arrow functions provide lexical scope and are bound to the Component class instance instead of the class itself. This makes it so we cannot easily test a Component's methods without invoking an instance of the Component and calling the method directly within our tests.
 
 BAD:
-  ```javascript
-    class MyComponent extends React.Component {
-      constructor(props) {
-        super(props);
-      }
 
-      myEventHandler = () => {
-        // do a thing
-      }
-    }
-  ```
+```javascript
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  myEventHandler = () => {
+    // do a thing
+  };
+}
+```
+
 GOOD:
-  ```javascript
-    class MyComponent extends React.Component {
-      constructor(props) {
-        super(props);
-        this.myEventHandler = this.myEventHandler.bind(this);
-      }
 
-      myEventHandler() {
-        // do a thing
-      }
-    }
-  ```
+```javascript
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.myEventHandler = this.myEventHandler.bind(this);
+  }
+
+  myEventHandler() {
+    // do a thing
+  }
+}
+```
 
 ### Binding
+
 It is good practice to bind our class methods within our class constructor method for the following reasons:
-  1. Avoid defining the method every time `render()` is called.
-  2. [Performance advantages](https://stackoverflow.com/a/44844916).
-  3. Ease of [testing](https://github.com/airbnb/enzyme/issues/365).
+
+1. Avoid defining the method every time `render()` is called.
+2. [Performance advantages](https://stackoverflow.com/a/44844916).
+3. Ease of [testing](https://github.com/airbnb/enzyme/issues/365).
 
 ### Typechecking with PropTypes
+
 Shared components should have their prop values typechecked. This will help catch bugs when components get refactored/renamed.
+
 ```javascript
 About.propTypes = {
   ansible_version: PropTypes.string,
@@ -254,6 +267,7 @@ There are currently a few custom hooks:
 4. [useSelected](https://github.com/ansible/awx/blob/devel/awx/ui_next/src/util/useSelected.jsx#L14) provides a way to read and update a selected list.
 
 ### Naming Functions
+
 Here are the guidelines for how to name functions.
 
 | Naming Convention | Description                                                                       |
@@ -273,6 +287,7 @@ Here are the guidelines for how to name functions.
 | `can<x>`          | Use for props dealing with RBAC to denote whether a user has access to something  |
 
 ### Default State Initialization
+
 When declaring empty initial states, prefer the following instead of leaving them undefined:
 
 ```javascript
@@ -282,7 +297,7 @@ this.state = {
   somethingC: 0,
   somethingD: {},
   somethingE: '',
-}
+};
 ```
 
 ### Testing components that use contexts
@@ -315,33 +330,35 @@ mountWithContexts(<Organization />< {
 
 ## Internationalization
 
-Internationalization leans on the [lingui](https://github.com/lingui/js-lingui) project.  [Official documentation here](https://lingui.js.org/).  We use this library to mark our strings for translation.  If you want to see this in action you'll need to take the following steps:
+Internationalization leans on the [lingui](https://github.com/lingui/js-lingui) project. [Official documentation here](https://lingui.js.org/). We use this library to mark our strings for translation. If you want to see this in action you'll need to take the following steps:
 
 ### Marking strings for translation and replacement in the UI
 
-The lingui library provides various React helpers for dealing with both marking strings for translation, and replacing strings that have been translated.  For consistency and ease of use, we have consolidated on one pattern for the codebase.  To set strings to be translated in the UI:
+The lingui library provides various React helpers for dealing with both marking strings for translation, and replacing strings that have been translated. For consistency and ease of use, we have consolidated on one pattern for the codebase. To set strings to be translated in the UI:
 
 - import the withI18n function and wrap the export of your component in it (i.e. `export default withI18n()(Foo)`)
-- doing the above gives you access to the i18n object on props.  Make sure to put it in the scope of the function that contains strings needed to be translated (i.e. `const { i18n } = this.props;`)
+- doing the above gives you access to the i18n object on props. Make sure to put it in the scope of the function that contains strings needed to be translated (i.e. `const { i18n } = this.props;`)
 - import the t template tag function from the @lingui/macro package.
-- wrap your string using the following format: ```i18n._(t`String to be translated`)```
+- wrap your string using the following format: `` i18n._(t`String to be translated`) ``
 
-**Note:** Variables that are put inside the t-marked template tag will not be translated.  If you have a variable string with text that needs translating, you must wrap it in ```i18n._(t``)``` where it is defined.
+**Note:** Variables that are put inside the t-marked template tag will not be translated. If you have a variable string with text that needs translating, you must wrap it in ` i18n._(t``) ` where it is defined.
 
-**Note:** We try to avoid the `I18n` consumer, `i18nMark` function, or `<Trans>` component lingui gives us access to in this repo.  i18nMark does not actually replace the string in the UI (leading to the potential for untranslated bugs), and the other helpers are redundant.  Settling on a consistent, single pattern helps us ease the mental overhead of the need to understand the ins and outs of the lingui API.
+**Note:** We try to avoid the `I18n` consumer, `i18nMark` function, or `<Trans>` component lingui gives us access to in this repo. i18nMark does not actually replace the string in the UI (leading to the potential for untranslated bugs), and the other helpers are redundant. Settling on a consistent, single pattern helps us ease the mental overhead of the need to understand the ins and outs of the lingui API.
+
+**Note:** Pluralization can be complicated so it is best to allow lingui handle cases where we have a string that may need to be pluralized based on number of items, or count. In that case lingui provides a `<Plural>` component, and a `plural()` function. See documentation [here](https://lingui.js.org/guides/plurals.html?highlight=pluralization).
 
 You can learn more about the ways lingui and its React helpers at [this link](https://lingui.js.org/tutorials/react-patterns.html).
 
 ### Setting up .po files to give to translation team
 
-1) `npm run add-locale` to add the language that you want to translate to (we should only have to do this once and the commit to repo afaik).  Example: `npm run add-locale en es fr`  # Add English, Spanish and French locale
-2) `npm run extract-strings` to create .po files for each language specified.  The .po files will be placed in src/locales.
-3) Open up the .po file for the language you want to test and add some translations.  In production we would pass this .po file off to the translation team.
-4) Once you've edited your .po file (or we've gotten a .po file back from the translation team) run `npm run compile-strings`.  This command takes the .po files and turns them into a minified JSON object and can be seen in the `messages.js` file in each locale directory.  These files get loaded at the App root level (see: App.jsx).
-5) Change the language in your browser and reload the page.  You should see your specified translations in place of English strings.
+1. `npm run add-locale` to add the language that you want to translate to (we should only have to do this once and the commit to repo afaik). Example: `npm run add-locale en es fr` # Add English, Spanish and French locale
+2. `npm run extract-strings` to create .po files for each language specified. The .po files will be placed in src/locales. When updating strings that are used by `<Plural>` or `plural()` you will need to run this command to get the strings to render properly. This commmand will create `.po` files for each of the supported languages that will need to be commited with your PR.
+3. Open up the .po file for the language you want to test and add some translations. In production we would pass this .po file off to the translation team.
+4. Once you've edited your .po file (or we've gotten a .po file back from the translation team) run `npm run compile-strings`. This command takes the .po files and turns them into a minified JSON object and can be seen in the `messages.js` file in each locale directory. These files get loaded at the App root level (see: App.jsx).
+5. Change the language in your browser and reload the page. You should see your specified translations in place of English strings.
 
 ### Marking an issue to be translated
 
-1) Issues marked with `component:I10n` should not be closed after the issue was fixed.
-2) Remove the label `state:needs_devel`.
-3) Add the label `state:pending_translations`. At this point, the translations will be batch translated by a maintainer, creating relevant entries in the PO files. Then after those translations have been merged, the issue can be closed.
+1. Issues marked with `component:I10n` should not be closed after the issue was fixed.
+2. Remove the label `state:needs_devel`.
+3. Add the label `state:pending_translations`. At this point, the translations will be batch translated by a maintainer, creating relevant entries in the PO files. Then after those translations have been merged, the issue can be closed.

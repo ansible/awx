@@ -60,6 +60,7 @@
           "mode",
           "aria-labelledby",
           "aria-hidden",
+          "aria-controls",
           "sortKey",
           "ouiaId",
           "credentialTypeNamespace",
@@ -77,10 +78,14 @@
           "resizeOrientation",
           "src",
           "theme",
-          "gridColumns"
+          "gridColumns",
+          "rows",
+          "href",
+          "modifier"
         ],
         "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg"],
         "ignoreComponent": [
+          "AboutModal",
           "code",
           "Omit",
           "PotentialLink",
@@ -89,7 +94,8 @@
           "RunOnRadio",
           "NodeTypeLetter",
           "SelectableItem",
-          "Dash"
+          "Dash",
+          "Plural"
         ],
         "ignoreCallee": ["describe"]
       }

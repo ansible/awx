@@ -22,7 +22,7 @@ function CredentialPluginInput(props) {
     i18n,
     isDisabled,
     isRequired,
-    isValid,
+    validated,
     fieldOptions,
   } = props;
 
@@ -52,7 +52,7 @@ function CredentialPluginInput(props) {
           {React.cloneElement(children, {
             ...inputField,
             isRequired,
-            validated: isValid ? 'default' : 'error',
+            validated: validated ? 'default' : 'error',
             isDisabled: disableFieldAndButtons,
             onChange: (_, event) => {
               inputField.onChange(event);
@@ -96,7 +96,7 @@ function CredentialPluginInput(props) {
 }
 
 function CredentialPluginField(props) {
-  const { fieldOptions, isRequired, isValid } = props;
+  const { fieldOptions, isRequired, validated } = props;
 
   const [, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const [passwordPromptField] = useField(`passwordPrompts.${fieldOptions.id}`);
@@ -136,7 +136,7 @@ function CredentialPluginField(props) {
           fieldId={`credential-${fieldOptions.id}`}
           helperTextInvalid={meta.error}
           isRequired={isRequired}
-          validated={isValid ? 'default' : 'error'}
+          validated={validated ? 'default' : 'error'}
           label={fieldOptions.label}
           labelIcon={
             fieldOptions.help_text && (

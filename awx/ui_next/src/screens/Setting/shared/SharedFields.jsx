@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { bool, oneOf, shape, string } from 'prop-types';
-import { withI18n } from '@lingui/react';
+import { shape, string } from 'prop-types';
+import { useLingui } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
@@ -35,20 +35,20 @@ const FormGroup = styled(PFFormGroup)`
   }
 `;
 
-const SettingGroup = withI18n()(
-  ({
-    i18n,
-    children,
-    defaultValue,
-    fieldId,
-    helperTextInvalid,
-    isDisabled,
-    isRequired,
-    label,
-    onRevertCallback,
-    popoverContent,
-    validated,
-  }) => (
+const SettingGroup = ({
+  children,
+  defaultValue,
+  fieldId,
+  helperTextInvalid,
+  isDisabled,
+  isRequired,
+  label,
+  onRevertCallback,
+  popoverContent,
+  validated,
+}) => {
+  const { i18n } = useLingui();
+  return (
     <FormGroup
       fieldId={fieldId}
       helperTextInvalid={helperTextInvalid}
@@ -73,43 +73,42 @@ const SettingGroup = withI18n()(
     >
       {children}
     </FormGroup>
-  )
-);
+  );
+};
+const BooleanField = ({ ariaLabel = '', name, config, disabled = false }) => {
+  const [field, meta, helpers] = useField(name);
+  const { i18n } = useLingui();
 
-const BooleanField = withI18n()(
-  ({ i18n, ariaLabel = '', name, config, disabled = false }) => {
-    const [field, meta, helpers] = useField(name);
-    return config ? (
-      <SettingGroup
-        defaultValue={config.default ?? false}
-        fieldId={name}
-        helperTextInvalid={meta.error}
+  return config ? (
+    <SettingGroup
+      defaultValue={config.default ?? false}
+      fieldId={name}
+      helperTextInvalid={meta.error}
+      isDisabled={disabled}
+      label={config.label}
+      popoverContent={config.help_text}
+    >
+      <Switch
+        id={name}
+        ouiaId={name}
+        isChecked={field.value}
         isDisabled={disabled}
-        label={config.label}
-        popoverContent={config.help_text}
-      >
-        <Switch
-          id={name}
-          ouiaId={name}
-          isChecked={field.value}
-          isDisabled={disabled}
-          label={i18n._(t`On`)}
-          labelOff={i18n._(t`Off`)}
-          onChange={checked => helpers.setValue(checked)}
-          aria-label={ariaLabel || config.label}
-        />
-      </SettingGroup>
-    ) : null;
-  }
-);
+        label={i18n._(t`On`)}
+        labelOff={i18n._(t`Off`)}
+        onChange={checked => helpers.setValue(checked)}
+        aria-label={ariaLabel || config.label}
+      />
+    </SettingGroup>
+  ) : null;
+};
 BooleanField.propTypes = {
   name: string.isRequired,
   config: shape({}).isRequired,
-  ariaLabel: string,
-  disabled: bool,
 };
 
-const ChoiceField = withI18n()(({ i18n, name, config, isRequired = false }) => {
+const ChoiceField = ({ name, config, isRequired = false }) => {
+  const { i18n } = useLingui();
+
   const validate = isRequired ? required(null, i18n) : null;
   const [field, meta] = useField({ name, validate });
   const isValid = !meta.error || !meta.touched;
@@ -137,133 +136,130 @@ const ChoiceField = withI18n()(({ i18n, name, config, isRequired = false }) => {
       />
     </SettingGroup>
   ) : null;
-});
+};
 ChoiceField.propTypes = {
   name: string.isRequired,
   config: shape({}).isRequired,
-  isRequired: bool,
 };
 
-const EncryptedField = withI18n()(
-  ({ i18n, name, config, isRequired = false }) => {
-    const validate = isRequired ? required(null, i18n) : null;
-    const [, meta] = useField({ name, validate });
-    const isValid = !(meta.touched && meta.error);
+const EncryptedField = ({ name, config, isRequired = false }) => {
+  const { i18n } = useLingui();
 
-    return config ? (
-      <SettingGroup
-        defaultValue={config.default ?? ''}
-        fieldId={name}
-        helperTextInvalid={meta.error}
-        isRequired={isRequired}
-        label={config.label}
-        popoverContent={config.help_text}
-        validated={isValid ? 'default' : 'error'}
-      >
-        <InputGroup>
-          <PasswordInput
-            id={name}
-            name={name}
-            label={config.label}
-            validate={validate}
-            isRequired={isRequired}
-          />
-        </InputGroup>
-      </SettingGroup>
-    ) : null;
-  }
-);
+  const validate = isRequired ? required(null, i18n) : null;
+  const [, meta] = useField({ name, validate });
+  const isValid = !(meta.touched && meta.error);
+
+  return config ? (
+    <SettingGroup
+      defaultValue={config.default ?? ''}
+      fieldId={name}
+      helperTextInvalid={meta.error}
+      isRequired={isRequired}
+      label={config.label}
+      popoverContent={config.help_text}
+      validated={isValid ? 'default' : 'error'}
+    >
+      <InputGroup>
+        <PasswordInput
+          id={name}
+          name={name}
+          label={config.label}
+          validate={validate}
+          isRequired={isRequired}
+        />
+      </InputGroup>
+    </SettingGroup>
+  ) : null;
+};
 EncryptedField.propTypes = {
   name: string.isRequired,
   config: shape({}).isRequired,
-  isRequired: bool,
 };
 
-const InputField = withI18n()(
-  ({ i18n, name, config, type = 'text', isRequired = false }) => {
-    const min_value = config?.min_value ?? Number.MIN_SAFE_INTEGER;
-    const max_value = config?.max_value ?? Number.MAX_SAFE_INTEGER;
-    const validators = [
-      ...(isRequired ? [required(null, i18n)] : []),
-      ...(type === 'url' ? [url(i18n)] : []),
-      ...(type === 'number'
-        ? [integer(i18n), minMaxValue(min_value, max_value, i18n)]
-        : []),
-    ];
-    const [field, meta] = useField({ name, validate: combine(validators) });
-    const isValid = !(meta.touched && meta.error);
+const InputField = ({ name, config, type = 'text', isRequired = false }) => {
+  const { i18n } = useLingui();
 
-    return config ? (
-      <SettingGroup
-        defaultValue={config.default ?? ''}
-        fieldId={name}
-        helperTextInvalid={meta.error}
+  const min_value = config?.min_value ?? Number.MIN_SAFE_INTEGER;
+  const max_value = config?.max_value ?? Number.MAX_SAFE_INTEGER;
+  const validators = [
+    ...(isRequired ? [required(null, i18n)] : []),
+    ...(type === 'url' ? [url(i18n)] : []),
+    ...(type === 'number'
+      ? [integer(i18n), minMaxValue(min_value, max_value, i18n)]
+      : []),
+  ];
+  const [field, meta] = useField({ name, validate: combine(validators) });
+  const isValid = !(meta.touched && meta.error);
+
+  return config ? (
+    <SettingGroup
+      defaultValue={config.default ?? ''}
+      fieldId={name}
+      helperTextInvalid={meta.error}
+      isRequired={isRequired}
+      label={config.label}
+      popoverContent={config.help_text}
+      validated={isValid ? 'default' : 'error'}
+    >
+      <TextInput
+        id={name}
         isRequired={isRequired}
-        label={config.label}
-        popoverContent={config.help_text}
+        placeholder={config.placeholder}
         validated={isValid ? 'default' : 'error'}
-      >
-        <TextInput
-          id={name}
-          isRequired={isRequired}
-          placeholder={config.placeholder}
-          validated={isValid ? 'default' : 'error'}
-          value={field.value}
-          onBlur={field.onBlur}
-          onChange={(value, event) => {
-            field.onChange(event);
-          }}
-        />
-      </SettingGroup>
-    ) : null;
-  }
-);
+        value={field.value}
+        onBlur={field.onBlur}
+        onChange={(value, event) => {
+          field.onChange(event);
+        }}
+      />
+    </SettingGroup>
+  ) : null;
+};
 InputField.propTypes = {
   name: string.isRequired,
   config: shape({}).isRequired,
-  type: oneOf(['text', 'number', 'url']),
-  isRequired: bool,
 };
 
-const TextAreaField = withI18n()(
-  ({ i18n, name, config, isRequired = false }) => {
-    const validate = isRequired ? required(null, i18n) : null;
-    const [field, meta] = useField({ name, validate });
-    const isValid = !(meta.touched && meta.error);
+const TextAreaField = ({ name, config, isRequired = false }) => {
+  const { i18n } = useLingui();
 
-    return config ? (
-      <SettingGroup
-        defaultValue={config.default || ''}
-        fieldId={name}
-        helperTextInvalid={meta.error}
+  const validate = isRequired ? required(null, i18n) : null;
+  const [field, meta] = useField({ name, validate });
+  const isValid = !(meta.touched && meta.error);
+
+  return config ? (
+    <SettingGroup
+      defaultValue={config.default || ''}
+      fieldId={name}
+      helperTextInvalid={meta.error}
+      isRequired={isRequired}
+      label={config.label}
+      popoverContent={config.help_text}
+      validated={isValid ? 'default' : 'error'}
+    >
+      <TextArea
+        id={name}
         isRequired={isRequired}
-        label={config.label}
-        popoverContent={config.help_text}
+        placeholder={config.placeholder}
         validated={isValid ? 'default' : 'error'}
-      >
-        <TextArea
-          id={name}
-          isRequired={isRequired}
-          placeholder={config.placeholder}
-          validated={isValid ? 'default' : 'error'}
-          value={field.value}
-          onBlur={field.onBlur}
-          onChange={(value, event) => {
-            field.onChange(event);
-          }}
-          resizeOrientation="vertical"
-        />
-      </SettingGroup>
-    ) : null;
-  }
-);
+        value={field.value}
+        onBlur={field.onBlur}
+        onChange={(value, event) => {
+          field.onChange(event);
+        }}
+        resizeOrientation="vertical"
+      />
+    </SettingGroup>
+  ) : null;
+};
 TextAreaField.propTypes = {
   name: string.isRequired,
   config: shape({}).isRequired,
-  isRequired: bool,
 };
 
-const ObjectField = withI18n()(({ i18n, name, config, isRequired = false }) => {
+const ObjectField = ({ name, config, isRequired = false }) => {
+  const { i18n } = useLingui();
+
   const validate = isRequired ? required(null, i18n) : null;
   const [field, meta, helpers] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
@@ -286,7 +282,7 @@ const ObjectField = withI18n()(({ i18n, name, config, isRequired = false }) => {
       >
         <CodeEditor
           {...field}
-          fullHeight
+          rows="auto"
           id={name}
           mode="javascript"
           onChange={value => {
@@ -297,76 +293,79 @@ const ObjectField = withI18n()(({ i18n, name, config, isRequired = false }) => {
       </SettingGroup>
     </FormFullWidthLayout>
   ) : null;
-});
+};
 ObjectField.propTypes = {
   name: string.isRequired,
   config: shape({}).isRequired,
-  isRequired: bool,
 };
 
 const FileUploadIconWrapper = styled.div`
   margin: var(--pf-global--spacer--md);
 `;
-const FileUploadField = withI18n()(
-  ({ i18n, name, config, type = 'text', isRequired = false }) => {
-    const validate = isRequired ? required(null, i18n) : null;
-    const [filename, setFilename] = useState('');
-    const [fileIsUploading, setFileIsUploading] = useState(false);
-    const [field, meta, helpers] = useField({ name, validate });
-    const isValid = !(meta.touched && meta.error);
+const FileUploadField = ({
+  name,
+  config,
+  type = 'text',
+  isRequired = false,
+}) => {
+  const { i18n } = useLingui();
 
-    return config ? (
-      <FormFullWidthLayout>
-        <SettingGroup
-          defaultValue={config.default ?? ''}
-          fieldId={name}
-          helperTextInvalid={meta.error}
-          isRequired={isRequired}
-          label={config.label}
-          popoverContent={config.help_text}
+  const validate = isRequired ? required(null, i18n) : null;
+  const [filename, setFilename] = useState('');
+  const [fileIsUploading, setFileIsUploading] = useState(false);
+  const [field, meta, helpers] = useField({ name, validate });
+  const isValid = !(meta.touched && meta.error);
+
+  return config ? (
+    <FormFullWidthLayout>
+      <SettingGroup
+        defaultValue={config.default ?? ''}
+        fieldId={name}
+        helperTextInvalid={meta.error}
+        isRequired={isRequired}
+        label={config.label}
+        popoverContent={config.help_text}
+        validated={isValid ? 'default' : 'error'}
+        onRevertCallback={() => setFilename('')}
+      >
+        <FileUpload
+          {...field}
+          id={name}
+          type={type}
+          filename={filename}
+          onChange={(value, title) => {
+            helpers.setValue(value);
+            setFilename(title);
+          }}
+          onReadStarted={() => setFileIsUploading(true)}
+          onReadFinished={() => setFileIsUploading(false)}
+          isLoading={fileIsUploading}
+          allowEditingUploadedText
           validated={isValid ? 'default' : 'error'}
-          onRevertCallback={() => setFilename('')}
+          hideDefaultPreview={type === 'dataURL'}
         >
-          <FileUpload
-            {...field}
-            id={name}
-            type={type}
-            filename={filename}
-            onChange={(value, title) => {
-              helpers.setValue(value);
-              setFilename(title);
-            }}
-            onReadStarted={() => setFileIsUploading(true)}
-            onReadFinished={() => setFileIsUploading(false)}
-            isLoading={fileIsUploading}
-            allowEditingUploadedText
-            validated={isValid ? 'default' : 'error'}
-            hideDefaultPreview={type === 'dataURL'}
-          >
-            {type === 'dataURL' && (
-              <FileUploadIconWrapper>
-                {field.value ? (
-                  <img
-                    src={field.value}
-                    alt={filename}
-                    height="200px"
-                    width="200px"
-                  />
-                ) : (
-                  <FileUploadIcon size="lg" />
-                )}
-              </FileUploadIconWrapper>
-            )}
-          </FileUpload>
-        </SettingGroup>
-      </FormFullWidthLayout>
-    ) : null;
-  }
-);
+          {type === 'dataURL' && (
+            <FileUploadIconWrapper>
+              {field.value ? (
+                <img
+                  src={field.value}
+                  alt={filename}
+                  height="200px"
+                  width="200px"
+                />
+              ) : (
+                <FileUploadIcon size="lg" />
+              )}
+            </FileUploadIconWrapper>
+          )}
+        </FileUpload>
+      </SettingGroup>
+    </FormFullWidthLayout>
+  ) : null;
+};
 FileUploadField.propTypes = {
   name: string.isRequired,
   config: shape({}).isRequired,
-  isRequired: bool,
 };
 
 export {

@@ -115,6 +115,10 @@ class ProjectOptions(models.Model):
         default=False,
         help_text=_('Delete the project before syncing.'),
     )
+    scm_track_submodules = models.BooleanField(
+        default=False,
+        help_text=_('Track submodules latest commits on defined branch.'),
+    )
     credential = models.ForeignKey(
         'Credential',
         related_name='%(class)ss',
@@ -184,7 +188,7 @@ class ProjectOptions(models.Model):
         Jobs using the project can use the default_environment, but the project updates
         are not flexible enough to allow customizing the image they use.
         """
-        return self.get_execution_environment_default()
+        return self.get_default_execution_environment()
 
     def get_project_path(self, check_if_exists=True):
         local_path = os.path.basename(self.local_path)

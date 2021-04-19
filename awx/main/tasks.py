@@ -57,7 +57,6 @@ from receptorctl.socket_interface import ReceptorControl
 from awx import __version__ as awx_application_version
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.access import access_registry
-from awx.main.analytics import all_collectors, expensive_collectors
 from awx.main.redact import UriCleaner
 from awx.main.models import (
     Schedule,
@@ -97,6 +96,7 @@ from awx.main.utils import (
     deepmerge,
     parse_yaml_or_json,
 )
+from awx.main.utils.execution_environments import get_default_execution_environment, get_default_pod_spec
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
@@ -376,70 +376,15 @@ def send_notifications(notification_list, job_id=None):
 
 @task(queue=get_local_queuename)
 def gather_analytics():
-    def _gather_and_ship(subset, since, until):
-        tgzfiles = []
-        try:
-            tgzfiles = analytics.gather(subset=subset, since=since, until=until)
-            # empty analytics without raising an exception is not an error
-            if not tgzfiles:
-                return True
-            logger.info('Gathered analytics from {} to {}: {}'.format(since, until, tgzfiles))
-            for tgz in tgzfiles:
-                analytics.ship(tgz)
-        except Exception:
-            logger.exception('Error gathering and sending analytics for {} to {}.'.format(since, until))
-            return False
-        finally:
-            if tgzfiles:
-                for tgz in tgzfiles:
-                    if os.path.exists(tgz):
-                        os.remove(tgz)
-        return True
-
     from awx.conf.models import Setting
     from rest_framework.fields import DateTimeField
-    from awx.main.signals import disable_activity_stream
 
-    if not settings.INSIGHTS_TRACKING_STATE:
-        return
-    if not (settings.AUTOMATION_ANALYTICS_URL and settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD):
-        logger.debug('Not gathering analytics, configuration is invalid')
-        return
     last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
-    if last_gather:
-        last_time = DateTimeField().to_internal_value(last_gather.value)
-    else:
-        last_time = None
+    last_time = DateTimeField().to_internal_value(last_gather.value) if last_gather else None
     gather_time = now()
+
     if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
-        with advisory_lock('gather_analytics_lock', wait=False) as acquired:
-            if acquired is False:
-                logger.debug('Not gathering analytics, another task holds lock')
-                return
-            subset = list(all_collectors().keys())
-            incremental_collectors = []
-            for collector in expensive_collectors():
-                if collector in subset:
-                    subset.remove(collector)
-                    incremental_collectors.append(collector)
-
-            # Cap gathering at 4 weeks of data if there has been no data gathering
-            since = last_time or (gather_time - timedelta(weeks=4))
-
-            if incremental_collectors:
-                start = since
-                until = None
-                while start < gather_time:
-                    until = start + timedelta(hours=4)
-                    if until > gather_time:
-                        until = gather_time
-                    if not _gather_and_ship(incremental_collectors, since=start, until=until):
-                        break
-                    start = until
-                    with disable_activity_stream():
-                        settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
-            if subset:
-                _gather_and_ship(subset, since=since, until=gather_time)
+        analytics.gather()
 
 
 @task(queue=get_local_queuename)
@@ -522,17 +467,21 @@ def cluster_node_heartbeat():
 
 @task(queue=get_local_queuename)
 def awx_k8s_reaper():
+    if not settings.RECEPTOR_RELEASE_WORK:
+        return
+
     from awx.main.scheduler.kubernetes import PodManager  # prevent circular import
 
-    for group in InstanceGroup.objects.filter(credential__isnull=False).iterator():
-        if group.is_container_group:
-            logger.debug("Checking for orphaned k8s pods for {}.".format(group))
-            for job in UnifiedJob.objects.filter(pk__in=list(PodManager.list_active_jobs(group))).exclude(status__in=ACTIVE_STATES):
-                logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
-                try:
-                    PodManager(job).delete()
-                except Exception:
-                    logger.exception("Failed to delete orphaned pod {} from {}".format(job.log_format, group))
+    for group in InstanceGroup.objects.filter(is_container_group=True).iterator():
+        logger.debug("Checking for orphaned k8s pods for {}.".format(group))
+        pods = PodManager.list_active_jobs(group)
+        for job in UnifiedJob.objects.filter(pk__in=pods.keys()).exclude(status__in=ACTIVE_STATES):
+            logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
+            try:
+                pm = PodManager(job)
+                pm.kube_api.delete_namespaced_pod(name=pods[job.id], namespace=pm.namespace, _request_timeout=settings.AWX_CONTAINER_GROUP_K8S_API_TIMEOUT)
+            except Exception:
+                logger.exception("Failed to delete orphaned pod {} from {}".format(job.log_format, group))
 
 
 @task(queue=get_local_queuename)
@@ -888,7 +837,7 @@ class BaseTask(object):
         """
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
-    def build_execution_environment_params(self, instance):
+    def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:
             return {}
 
@@ -904,6 +853,23 @@ class BaseTask(object):
             "process_isolation": True,
             "container_options": ['--user=root'],
         }
+
+        if instance.execution_environment.credential:
+            cred = instance.execution_environment.credential
+            if cred.has_inputs(field_names=('host', 'username', 'password')):
+                path = os.path.split(private_data_dir)[0]
+                with open(path + '/auth.json', 'w') as authfile:
+                    host = cred.get_input('host')
+                    username = cred.get_input('username')
+                    password = cred.get_input('password')
+                    token = "{}:{}".format(username, password)
+                    auth_data = {'auths': {host: {'auth': b64encode(token.encode('ascii')).decode()}}}
+                    authfile.write(json.dumps(auth_data, indent=4))
+                authfile.close()
+                os.chmod(authfile.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+                params["container_options"].append(f'--authfile={authfile.name}')
+            else:
+                raise RuntimeError('Please recheck that your host, username, and password fields are all filled.')
 
         pull = instance.execution_environment.pull
         if pull:
@@ -1448,6 +1414,7 @@ class BaseTask(object):
                 )
             else:
                 receptor_job = AWXReceptorJob(self, params)
+                self.unit_id = receptor_job.unit_id
                 res = receptor_job.run()
 
                 if not res:
@@ -1762,11 +1729,11 @@ class RunJob(BaseTask):
         """
         return settings.AWX_RESOURCE_PROFILING_ENABLED
 
-    def build_execution_environment_params(self, instance):
+    def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:
             return {}
 
-        params = super(RunJob, self).build_execution_environment_params(instance)
+        params = super(RunJob, self).build_execution_environment_params(instance, private_data_dir)
         # If this has an insights agent and it is not already mounted then show it
         insights_dir = os.path.dirname(settings.INSIGHTS_SYSTEM_ID_FILE)
         if instance.use_fact_cache and os.path.exists(insights_dir):
@@ -1806,13 +1773,14 @@ class RunJob(BaseTask):
             logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
             sync_needs.append(source_update_tag)
         elif job.project.scm_type == 'git' and job.project.scm_revision and (not branch_override):
-            git_repo = git.Repo(project_path)
             try:
+                git_repo = git.Repo(project_path)
+
                 if job_revision == git_repo.head.commit.hexsha:
                     logger.debug('Skipping project sync for {} because commit is locally available'.format(job.log_format))
                 else:
                     sync_needs.append(source_update_tag)
-            except (ValueError, BadGitName):
+            except (ValueError, BadGitName, git.exc.InvalidGitRepositoryError):
                 logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
                 sync_needs.append(source_update_tag)
         else:
@@ -2079,6 +2047,7 @@ class RunProjectUpdate(BaseTask):
                 'scm_url': scm_url,
                 'scm_branch': scm_branch,
                 'scm_clean': project_update.scm_clean,
+                'scm_track_submodules': project_update.scm_track_submodules,
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
             }
@@ -2376,11 +2345,11 @@ class RunProjectUpdate(BaseTask):
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
 
-    def build_execution_environment_params(self, instance):
+    def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:
             return {}
 
-        params = super(RunProjectUpdate, self).build_execution_environment_params(instance)
+        params = super(RunProjectUpdate, self).build_execution_environment_params(instance, private_data_dir)
         project_path = instance.get_project_path(check_if_exists=False)
         cache_path = instance.get_cache_path()
         params.setdefault('container_volume_mounts', [])
@@ -2505,7 +2474,7 @@ class RunInventoryUpdate(BaseTask):
         args.append(container_location)
 
         args.append('--output')
-        args.append(os.path.join('/runner', 'artifacts', 'output.json'))
+        args.append(os.path.join('/runner', 'artifacts', str(inventory_update.id), 'output.json'))
 
         if os.path.isdir(source_location):
             playbook_dir = container_location
@@ -2883,7 +2852,7 @@ class RunSystemJob(BaseTask):
     event_model = SystemJobEvent
     event_data_key = 'system_job_id'
 
-    def build_execution_environment_params(self, system_job):
+    def build_execution_environment_params(self, system_job, private_data_dir):
         return {}
 
     def build_args(self, system_job, private_data_dir, passwords):
@@ -2999,7 +2968,7 @@ class AWXReceptorJob:
         self.unit_id = None
 
         if self.task and not self.task.instance.is_container_group_task:
-            execution_environment_params = self.task.build_execution_environment_params(self.task.instance)
+            execution_environment_params = self.task.build_execution_environment_params(self.task.instance, runner_params['private_data_dir'])
             self.runner_params['settings'].update(execution_environment_params)
 
     def run(self):
@@ -3010,7 +2979,7 @@ class AWXReceptorJob:
             return self._run_internal(receptor_ctl)
         finally:
             # Make sure to always release the work unit if we established it
-            if self.unit_id is not None:
+            if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 receptor_ctl.simple_command(f"work release {self.unit_id}")
 
     def _run_internal(self, receptor_ctl):
@@ -3122,16 +3091,22 @@ class AWXReceptorJob:
             if self.task.cancel_callback():
                 result = namedtuple('result', ['status', 'rc'])
                 return result('canceled', 1)
+
+            if hasattr(self, 'unit_id') and 'RECEPTOR_UNIT_ID' not in self.task.instance.job_env:
+                self.task.instance.job_env['RECEPTOR_UNIT_ID'] = self.unit_id
+                self.task.update_model(self.task.instance.pk, job_env=self.task.instance.job_env)
+
             time.sleep(1)
 
     @property
     def pod_definition(self):
-        default_pod_spec = {
-            "apiVersion": "v1",
-            "kind": "Pod",
-            "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE},
-            "spec": {"containers": [{"image": settings.AWX_CONTAINER_GROUP_DEFAULT_IMAGE, "name": 'worker', "args": ['ansible-runner', 'worker']}]},
-        }
+        if self.task:
+            ee = self.task.instance.resolve_execution_environment()
+        else:
+            ee = get_default_execution_environment()
+
+        default_pod_spec = get_default_pod_spec()
+        default_pod_spec['spec']['containers'][0]['image'] = ee.image
 
         pod_spec_override = {}
         if self.task and self.task.instance.instance_group.pod_spec_override:

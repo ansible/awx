@@ -16,7 +16,7 @@ from requests.models import Response, PreparedRequest
 import pytest
 
 from awx.main.tests.functional.conftest import _request
-from awx.main.models import Organization, Project, Inventory, JobTemplate, Credential, CredentialType
+from awx.main.models import Organization, Project, Inventory, JobTemplate, Credential, CredentialType, ExecutionEnvironment
 
 from django.db import transaction
 
@@ -261,3 +261,8 @@ def silence_warning():
     """Warnings use global variable, same as deprecations."""
     with mock.patch('ansible.module_utils.basic.AnsibleModule.warn') as this_mock:
         yield this_mock
+
+
+@pytest.fixture
+def execution_environment():
+    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", managed_by_tower=True)

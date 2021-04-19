@@ -175,6 +175,7 @@ function Search({
             variant={SelectVariant.single}
             className="simpleKeySelect"
             aria-label={i18n._(t`Simple key select`)}
+            typeAheadAriaLabel={i18n._(t`Simple key select`)}
             onToggle={setIsSearchDropdownOpen}
             onSelect={handleDropdownSelect}
             selections={searchColumnName}
@@ -212,6 +213,7 @@ function Search({
                 <Select
                   variant={SelectVariant.checkbox}
                   aria-label={name}
+                  typeAheadAriaLabel={name}
                   onToggle={setIsFilterDropdownOpen}
                   onSelect={(event, selection) =>
                     handleFilterDropdownSelect(key, event, selection)

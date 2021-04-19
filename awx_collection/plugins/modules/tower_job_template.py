@@ -86,6 +86,11 @@ options:
       description:
         - Execution Environment to use for the JT.
       type: str
+    instance_groups:
+      description:
+        - list of Instance Groups for this Organization to run on.
+      type: list
+      elements: str
     forks:
       description:
         - The number of parallel or simultaneous processes to use while executing the playbook.
@@ -366,6 +371,7 @@ def main():
         vault_credential=dict(),
         credentials=dict(type='list', elements='str'),
         execution_environment=dict(),
+        instance_groups=dict(type="list", elements='str'),
         forks=dict(type='int'),
         limit=dict(),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
@@ -563,6 +569,12 @@ def main():
         association_fields['notification_templates_error'] = []
         for item in notifications_error:
             association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
+
+    instance_group_names = module.params.get('instance_groups')
+    if instance_group_names is not None:
+        association_fields['instance_groups'] = []
+        for item in instance_group_names:
+            association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
 
     on_change = None
     new_spec = module.params.get('survey_spec')

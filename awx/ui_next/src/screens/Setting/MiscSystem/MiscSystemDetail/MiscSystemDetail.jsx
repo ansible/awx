@@ -55,6 +55,8 @@ function MiscSystemDetail({ i18n }) {
         'REMOTE_HOST_HEADERS',
         'SESSIONS_PER_USER',
         'SESSION_COOKIE_AGE',
+        'SUBSCRIPTIONS_USERNAME',
+        'SUBSCRIPTIONS_PASSWORD',
         'TOWER_URL_BASE'
       );
       const systemData = {

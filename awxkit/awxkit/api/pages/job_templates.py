@@ -1,6 +1,7 @@
+from contextlib import suppress
 import json
 
-from awxkit.utils import filter_by_class, not_provided, random_title, suppress, update_payload, set_payload_foreign_key_args, PseudoNamespace
+from awxkit.utils import filter_by_class, not_provided, random_title, update_payload, set_payload_foreign_key_args, PseudoNamespace
 from awxkit.api.pages import Credential, Inventory, Project, UnifiedJobTemplate
 from awxkit.api.mixins import HasCreate, HasInstanceGroups, HasNotifications, HasSurvey, HasCopy, DSAdapter
 from awxkit.api.resources import resources

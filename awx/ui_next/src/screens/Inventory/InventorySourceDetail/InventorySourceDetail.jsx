@@ -99,7 +99,6 @@ function InventorySourceDetail({ inventorySource, i18n }) {
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.inventorySource(
     inventorySource.inventory,
-    i18n,
     inventorySource
   );
 

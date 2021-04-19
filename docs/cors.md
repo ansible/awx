@@ -6,7 +6,7 @@ AWX supports custom CORS headers via the Django CORS Middleware
 To define CORS-specific settings, add them to ``/etc/tower/conf.d/cors.py``:
 
 ```python
-CORS_ORIGIN_WHITELIST = (
+CORS_ALLOWED_ORIGINS = (
     'hostname.example.com',
     '127.0.0.1:9000'
 )

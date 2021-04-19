@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { oneOf, bool, number, string, func } from 'prop-types';
+import { oneOf, bool, number, string, func, oneOfType } from 'prop-types';
+import { config } from 'ace-builds';
+
 import ReactAce from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-javascript';
@@ -10,6 +12,8 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import debounce from '../../util/debounce';
+
+config.set('loadWorkerFromBlob', false);
 
 const LINE_HEIGHT = 24;
 const PADDING = 12;
@@ -69,6 +73,8 @@ function CodeEditor({
   id,
   value,
   onChange,
+  onFocus,
+  onBlur,
   mode,
   readOnly,
   hasErrors,
@@ -77,17 +83,28 @@ function CodeEditor({
   className,
   i18n,
 }) {
+  if (rows && typeof rows !== 'number' && rows !== 'auto') {
+    // eslint-disable-next-line no-console
+    console.warning(
+      `CodeEditor: Unexpected value for 'rows': ${rows}; expected number or 'auto'`
+    );
+  }
+
   const wrapper = useRef(null);
   const editor = useRef(null);
 
   useEffect(
     function removeTextareaTabIndex() {
       const editorInput = editor.current.refEditor?.querySelector('textarea');
-      if (editorInput && !readOnly) {
+      if (!editorInput) {
+        return;
+      }
+      if (!readOnly) {
         editorInput.tabIndex = -1;
       }
+      editorInput.id = id;
     },
-    [readOnly]
+    [readOnly, id]
   );
 
   const listen = useCallback(event => {
@@ -117,7 +134,8 @@ function CodeEditor({
     jinja2: 'django',
   };
 
-  const numRows = fullHeight ? value.split('\n').length : rows;
+  const numRows = rows === 'auto' ? value.split('\n').length : rows;
+  const height = fullHeight ? '50vh' : `${numRows * LINE_HEIGHT + PADDING}px`;
 
   return (
     <>
@@ -128,11 +146,13 @@ function CodeEditor({
           theme="github"
           onChange={debounce(onChange, 250)}
           value={value}
-          name={id || 'code-editor'}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          name={`${id}-editor` || 'code-editor'}
           editorProps={{ $blockScrolling: true }}
           fontSize={16}
           width="100%"
-          height={`${numRows * LINE_HEIGHT + PADDING}px`}
+          height={height}
           hasErrors={hasErrors}
           setOptions={{
             readOnly,
@@ -178,7 +198,7 @@ CodeEditor.propTypes = {
   readOnly: bool,
   hasErrors: bool,
   fullHeight: bool,
-  rows: number,
+  rows: oneOfType([number, string]),
   className: string,
 };
 CodeEditor.defaultProps = {

@@ -56,8 +56,7 @@ function InventoryDetail({ inventory, i18n }) {
   } = inventory.summary_fields;
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.inventory(
-    inventory,
-    i18n
+    inventory
   );
 
   if (isLoading) {

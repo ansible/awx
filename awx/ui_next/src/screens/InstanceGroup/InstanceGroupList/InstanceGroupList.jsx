@@ -187,8 +187,7 @@ function InstanceGroupList({ i18n }) {
       : `${match.url}/${item.id}/details`;
   };
   const deleteDetailsRequests = relatedResourceDeleteRequests.instanceGroup(
-    selected[0],
-    i18n
+    selected[0]
   );
   return (
     <>

@@ -1,13 +1,20 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
+import { i18n } from '@lingui/core';
+import { en } from 'make-plural/plurals';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import UserTeamListItem from './UserTeamListItem';
+import english from '../../../locales/en/messages';
+
+i18n.loadLocaleData({ en: { plurals: en } });
+i18n.load({ en: english });
+i18n.activate('en');
 
 describe('<UserTeamListItem />', () => {
   test('should render item', () => {
     const wrapper = mountWithContexts(
-      <I18nProvider>
+      <I18nProvider i18n={i18n}>
         <MemoryRouter initialEntries={['/teams']} initialIndex={0}>
           <UserTeamListItem
             team={{

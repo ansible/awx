@@ -31,7 +31,7 @@ DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio,pycurl
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
-VENV_BOOTSTRAP ?= pip==19.3.1 setuptools==41.6.0
+VENV_BOOTSTRAP ?= pip==19.3.1 setuptools==41.6.0 wheel==0.36.2
 
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
@@ -65,7 +65,8 @@ I18N_FLAG_FILE = .i18n_built
 	receiver test test_unit test_coverage coverage_html \
 	dev_build release_build sdist \
 	ui-release ui-devel \
-	VERSION docker-compose-sources
+	VERSION docker-compose-sources \
+	.git/hooks/pre-commit
 
 clean-tmp:
 	rm -rf tmp/
@@ -473,7 +474,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e cluster_node_count=$(CLUSTER_NODE_COUNT)
 
 docker-compose: docker-auth awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_UP_OPTS) up
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml up $(COMPOSE_UP_OPTS)
 
 docker-compose-credential-plugins: docker-auth awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"

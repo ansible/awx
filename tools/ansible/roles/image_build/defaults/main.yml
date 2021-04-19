@@ -1,6 +1,2 @@
 ---
 awx_image: quay.io/ansible/awx
-
-# Helper vars to construct the proper download URL for the current architecture
-tini_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm" }[ansible_facts.architecture] }}'
-kubectl_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm" }[ansible_facts.architecture] }}'

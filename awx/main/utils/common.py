@@ -7,7 +7,6 @@ import yaml
 import logging
 import os
 import re
-import subprocess
 import stat
 import urllib.parse
 import threading
@@ -20,6 +19,7 @@ from decimal import Decimal
 
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
+from django.utils.dateparse import parse_datetime
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
@@ -54,6 +54,7 @@ __all__ = [
     'copy_m2m_relationships',
     'prefetch_page_capabilities',
     'to_python_boolean',
+    'datetime_hook',
     'ignore_inventory_computed_fields',
     'ignore_inventory_group_removal',
     '_inventory_updates',
@@ -113,6 +114,16 @@ def to_python_boolean(value, allow_none=False):
         return None
     else:
         raise ValueError(_(u'Unable to convert "%s" to boolean') % value)
+
+
+def datetime_hook(d):
+    new_d = {}
+    for key, value in d.items():
+        try:
+            new_d[key] = parse_datetime(value)
+        except TypeError:
+            new_d[key] = value
+    return new_d
 
 
 def camelcase_to_underscore(s):

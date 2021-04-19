@@ -8,6 +8,7 @@ import ContentLoading from '../../../../components/ContentLoading';
 import { FormSubmitError } from '../../../../components/FormField';
 import { FormColumnLayout } from '../../../../components/FormLayout';
 import { useSettings } from '../../../../contexts/Settings';
+import { useConfig } from '../../../../contexts/Config';
 import { RevertAllAlert, RevertFormActionGroup } from '../../shared';
 import {
   ChoiceField,
@@ -22,6 +23,7 @@ function UIEdit() {
   const history = useHistory();
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
+  const { license_info } = useConfig();
 
   const { isLoading, error, request: fetchUI, result: uiData } = useRequest(
     useCallback(async () => {
@@ -88,13 +90,12 @@ function UIEdit() {
           {formik => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
-                {uiData?.PENDO_TRACKING_STATE?.value !== 'off' && (
-                  <ChoiceField
-                    name="PENDO_TRACKING_STATE"
-                    config={uiData.PENDO_TRACKING_STATE}
-                    isRequired
-                  />
-                )}
+                <ChoiceField
+                  name="PENDO_TRACKING_STATE"
+                  config={uiData.PENDO_TRACKING_STATE}
+                  isDisabled={license_info?.license_type === 'open'}
+                  isRequired
+                />
                 <TextAreaField
                   name="CUSTOM_LOGIN_INFO"
                   config={uiData.CUSTOM_LOGIN_INFO}

@@ -1,4 +1,5 @@
-from awxkit.utils import suppress
+from contextlib import suppress
+
 import awxkit.exceptions as exc
 
 

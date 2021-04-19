@@ -30,6 +30,45 @@ const executionEnvironment = {
     credential: '/api/v2/credentials/4/',
   },
   summary_fields: {
+    organization: {
+      id: 1,
+      name: 'Default',
+      description: '',
+    },
+    credential: {
+      id: 4,
+      name: 'Container Registry',
+      description: '',
+      kind: 'registry',
+      cloud: false,
+      kubernetes: false,
+      credential_type_id: 17,
+    },
+  },
+  created: '2020-09-17T16:06:57.346128Z',
+  modified: '2020-09-17T16:06:57.346147Z',
+  description: 'A simple EE',
+  organization: 1,
+  image: 'https://registry.com/image/container',
+  managed_by_tower: false,
+  credential: 4,
+};
+
+const globallyAvailableEE = {
+  id: 17,
+  name: 'GEE',
+  type: 'execution_environment',
+  pull: 'one',
+  url: '/api/v2/execution_environments/17/',
+  related: {
+    created_by: '/api/v2/users/1/',
+    modified_by: '/api/v2/users/1/',
+    activity_stream: '/api/v2/execution_environments/16/activity_stream/',
+    unified_job_templates:
+      '/api/v2/execution_environments/16/unified_job_templates/',
+    credential: '/api/v2/credentials/4/',
+  },
+  summary_fields: {
     credential: {
       id: 4,
       name: 'Container Registry',
@@ -179,5 +218,56 @@ describe('<ExecutionEnvironmentForm/>', () => {
     expect(onCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(onCancel).toBeCalled();
+  });
+
+  test('globally available EE can not have organization reassigned', async () => {
+    let newWrapper;
+    await act(async () => {
+      newWrapper = mountWithContexts(
+        <ExecutionEnvironmentForm
+          onCancel={onCancel}
+          onSubmit={onSubmit}
+          executionEnvironment={globallyAvailableEE}
+          options={mockOptions}
+          me={mockMe}
+          isOrgLookupDisabled
+        />
+      );
+    });
+    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+    expect(newWrapper.find('OrganizationLookup').prop('isDisabled')).toEqual(
+      true
+    );
+    expect(newWrapper.find('Tooltip').prop('content')).toEqual(
+      'Globally available execution environment can not be reassigned to a specific Organization'
+    );
+  });
+
+  test('should allow an organization to be re-assigned as globally available EE', async () => {
+    let newWrapper;
+    await act(async () => {
+      newWrapper = mountWithContexts(
+        <ExecutionEnvironmentForm
+          onCancel={onCancel}
+          onSubmit={onSubmit}
+          executionEnvironment={executionEnvironment}
+          options={mockOptions}
+          me={mockMe}
+          isOrgLookupDisabled
+        />
+      );
+    });
+    await waitForElement(newWrapper, 'ContentLoading', el => el.length === 0);
+    expect(newWrapper.find('OrganizationLookup').prop('isDisabled')).toEqual(
+      false
+    );
+    expect(newWrapper.find('Tooltip').length).toEqual(0);
+
+    await act(async () => {
+      newWrapper.find('OrganizationLookup').invoke('onBlur')();
+      newWrapper.find('OrganizationLookup').invoke('onChange')(null);
+    });
+    newWrapper.update();
+    expect(newWrapper.find('OrganizationLookup').prop('value')).toEqual(null);
   });
 });

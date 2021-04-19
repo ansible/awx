@@ -1,12 +1,3 @@
-// TODO: switch to using Lingui i18n for articles
-export function getArticle(str) {
-  const first = str[0];
-  if ('aeiou'.includes(first)) {
-    return 'an';
-  }
-  return 'a';
-}
-
 export const toTitleCase = string => {
   if (!string) {
     return '';

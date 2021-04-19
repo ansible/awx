@@ -377,4 +377,67 @@ describe('<TemplateListItem />', () => {
       'Custom virtual environment /var/lib/awx/env must be replaced by an execution environment.'
     );
   });
+
+  test('should render expected details in expanded section', async () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <TemplateListItem
+            isSelected={false}
+            detailUrl="/templates/job_template/1/details"
+            template={{
+              ...mockJobTemplateData,
+              description: 'mock description',
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    expect(
+      wrapper
+        .find('Tr')
+        .last()
+        .prop('isExpanded')
+    ).toBe(false);
+    await act(async () =>
+      wrapper.find('button[aria-label="Details"]').simulate('click')
+    );
+    wrapper.update();
+    expect(
+      wrapper
+        .find('Tr')
+        .last()
+        .prop('isExpanded')
+    ).toBe(true);
+
+    function assertDetail(label, value) {
+      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+    }
+
+    assertDetail('Description', 'mock description');
+    assertDetail('Organization', "Mike's Org");
+    assertDetail('Inventory', "Mike's Inventory");
+    assertDetail('Project', "Mike's Project");
+    assertDetail('Execution Environment', 'Mock EE 1.2.3');
+    expect(
+      wrapper.find('Detail[label="Credentials"]').containsAllMatchingElements([
+        <span>
+          <strong>SSH:</strong>Credential 1
+        </span>,
+        <span>
+          <strong>Awx:</strong>Credential 2
+        </span>,
+      ])
+    ).toEqual(true);
+    expect(
+      wrapper
+        .find('Detail[label="Labels"]')
+        .containsAllMatchingElements([<span>L_91o2</span>])
+    ).toEqual(true);
+    expect(wrapper.find('Detail[label="Organization"] dd a').prop('href')).toBe(
+      '/organizations/1/details'
+    );
+    expect(wrapper.find(`Detail[label="Activity"] Sparkline`)).toHaveLength(1);
+  });
 });

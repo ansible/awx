@@ -1,22 +1,25 @@
 import io
+import json
 import os
 import os.path
 import platform
 import distro
 
 from django.db import connection
-from django.db.models import Count
+from django.db.models import Count, Max, Min
 from django.conf import settings
-from django.utils.timezone import now
+from django.contrib.sessions.models import Session
+from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
 
+from psycopg2.errors import UntranslatableCharacter
+
 from awx.conf.license import get_license
-from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore
+from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore, datetime_hook
 from awx.main import models
-from django.contrib.sessions.models import Session
 from awx.main.analytics import register
 
-'''
+"""
 This module is used to define metrics collected by awx.main.analytics.gather()
 Each function is decorated with a key name, and should return a data
 structure that can be serialized to JSON
@@ -30,7 +33,61 @@ All functions - when called - will be passed a datetime.datetime object,
 `since`, which represents the last time analytics were gathered (some metrics
 functions - like those that return metadata about playbook runs, may return
 data _since_ the last report date - i.e., new data in the last 24 hours)
-'''
+"""
+
+
+def trivial_slicing(key, since, until):
+    if since is not None:
+        return [(since, until)]
+
+    from awx.conf.models import Setting
+
+    horizon = until - timedelta(weeks=4)
+    last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
+    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
+    last_entry = max(last_entries.get(key) or settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
+    return [(last_entry, until)]
+
+
+def four_hour_slicing(key, since, until):
+    if since is not None:
+        last_entry = since
+    else:
+        from awx.conf.models import Setting
+
+        horizon = until - timedelta(weeks=4)
+        last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
+        last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
+        last_entry = max(last_entries.get(key) or settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
+
+    start, end = last_entry, None
+    while start < until:
+        end = min(start + timedelta(hours=4), until)
+        yield (start, end)
+        start = end
+
+
+def events_slicing(key, since, until):
+    from awx.conf.models import Setting
+
+    last_gather = settings.AUTOMATION_ANALYTICS_LAST_GATHER
+    last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
+    last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
+    horizon = until - timedelta(weeks=4)
+
+    lower = since or last_gather or horizon
+    if not since and last_entries.get(key):
+        lower = horizon
+    pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
+
+    previous_pk = pk_values['pk__min'] - 1 if pk_values['pk__min'] is not None else 0
+    if not since and last_entries.get(key):
+        previous_pk = max(last_entries[key], previous_pk)
+    final_pk = pk_values['pk__max'] or 0
+
+    step = 100000
+    for start in range(previous_pk, final_pk + 1, step):
+        yield (start, min(start + step, final_pk))
 
 
 @register('config', '1.3', description=_('General platform configuration.'))
@@ -265,12 +322,15 @@ class FileSplitter(io.StringIO):
             self.files = self.files[:-1]
         # If we only have one file, remove the suffix
         if len(self.files) == 1:
-            os.rename(self.files[0], self.files[0].replace('_split0', ''))
+            filename = self.files.pop()
+            new_filename = filename.replace('_split0', '')
+            os.rename(filename, new_filename)
+            self.files.append(new_filename)
         return self.files
 
     def write(self, s):
         if not self.header:
-            self.header = s[0 : s.index('\n')]
+            self.header = s[: s.index('\n')]
         self.counter += self.currentfile.write(s)
         if self.counter >= MAX_TABLE_SIZE:
             self.cycle_file()
@@ -284,40 +344,42 @@ def _copy_table(table, query, path):
     return file.file_list()
 
 
-@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=True)
+@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing)
 def events_table(since, full_path, until, **kwargs):
-    events_query = '''COPY (SELECT main_jobevent.id, 
-                              main_jobevent.created,
-                              main_jobevent.modified,
-                              main_jobevent.uuid,
-                              main_jobevent.parent_uuid,
-                              main_jobevent.event, 
-                              main_jobevent.event_data::json->'task_action' AS task_action,
-                              (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
-                              main_jobevent.failed, 
-                              main_jobevent.changed, 
-                              main_jobevent.playbook, 
-                              main_jobevent.play,
-                              main_jobevent.task,
-                              main_jobevent.role, 
-                              main_jobevent.job_id, 
-                              main_jobevent.host_id, 
-                              main_jobevent.host_name
-                              , CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
-                              CAST(main_jobevent.event_data::json->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
-                              main_jobevent.event_data::json->'duration' AS duration,
-                              main_jobevent.event_data::json->'res'->'warnings' AS warnings,
-                              main_jobevent.event_data::json->'res'->'deprecations' AS deprecations
-                              FROM main_jobevent 
-                              WHERE (main_jobevent.created > '{}' AND main_jobevent.created <= '{}')
-                              ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER
-                   '''.format(
-        since.isoformat(), until.isoformat()
-    )
-    return _copy_table(table='events', query=events_query, path=full_path)
+    def query(event_data):
+        return f'''COPY (SELECT main_jobevent.id, 
+                         main_jobevent.created,
+                         main_jobevent.modified,
+                         main_jobevent.uuid,
+                         main_jobevent.parent_uuid,
+                         main_jobevent.event, 
+                         {event_data}->'task_action' AS task_action,
+                         (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
+                         main_jobevent.failed, 
+                         main_jobevent.changed, 
+                         main_jobevent.playbook, 
+                         main_jobevent.play,
+                         main_jobevent.task,
+                         main_jobevent.role, 
+                         main_jobevent.job_id, 
+                         main_jobevent.host_id, 
+                         main_jobevent.host_name,
+                         CAST({event_data}->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
+                         CAST({event_data}->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
+                         {event_data}->'duration' AS duration,
+                         {event_data}->'res'->'warnings' AS warnings,
+                         {event_data}->'res'->'deprecations' AS deprecations
+                         FROM main_jobevent 
+                         WHERE (main_jobevent.id > {since} AND main_jobevent.id <= {until})
+                         ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''
+
+    try:
+        return _copy_table(table='events', query=query("main_jobevent.event_data::json"), path=full_path)
+    except UntranslatableCharacter:
+        return _copy_table(table='events', query=query("replace(main_jobevent.event_data::text, '\\u0000', '')::json"), path=full_path)
 
 
-@register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=True)
+@register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
 def unified_jobs_table(since, full_path, until, **kwargs):
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
@@ -381,7 +443,7 @@ def unified_job_template_table(since, full_path, **kwargs):
     return _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
 
 
-@register('workflow_job_node_table', '1.0', format='csv', description=_('Data on workflow runs'), expensive=True)
+@register('workflow_job_node_table', '1.0', format='csv', description=_('Data on workflow runs'), expensive=four_hour_slicing)
 def workflow_job_node_table(since, full_path, until, **kwargs):
     workflow_job_node_query = '''COPY (SELECT main_workflowjobnode.id,
                                  main_workflowjobnode.created,

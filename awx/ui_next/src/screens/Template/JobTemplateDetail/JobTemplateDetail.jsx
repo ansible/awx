@@ -98,8 +98,7 @@ function JobTemplateDetail({ i18n, template }) {
   const { error, dismissError } = useDismissableError(deleteError);
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.template(
-    template,
-    i18n
+    template
   );
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;
@@ -371,6 +370,7 @@ function JobTemplateDetail({ i18n, template }) {
           value={extra_vars}
           rows={4}
           label={i18n._(t`Variables`)}
+          dataCy={`jt-details-${template.id}`}
         />
       </DetailList>
       <CardActionsRow>

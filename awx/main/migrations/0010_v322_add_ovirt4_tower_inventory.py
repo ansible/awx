@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-# AWX
-from awx.main.migrations import _migration_utils as migration_utils
-from awx.main.migrations import _credentialtypes as credentialtypes
-
 from django.db import migrations, models
 
 

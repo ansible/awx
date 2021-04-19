@@ -13,9 +13,11 @@ import ScreenHeader from '../../components/ScreenHeader';
 
 function InstanceGroups({ i18n }) {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
-    '/instance_groups': i18n._(t`Instance groups`),
-    '/instance_groups/add': i18n._(t`Create instance group`),
-    '/instance_groups/container_group/add': i18n._(t`Create container group`),
+    '/instance_groups': i18n._(t`Instance Groups`),
+    '/instance_groups/add': i18n._(t`Create new instance group`),
+    '/instance_groups/container_group/add': i18n._(
+      t`Create new container group`
+    ),
   });
 
   const buildBreadcrumbConfig = useCallback(
@@ -24,10 +26,10 @@ function InstanceGroups({ i18n }) {
         return;
       }
       setBreadcrumbConfig({
-        '/instance_groups': i18n._(t`Instance group`),
-        '/instance_groups/add': i18n._(t`Create instance group`),
+        '/instance_groups': i18n._(t`Instance Groups`),
+        '/instance_groups/add': i18n._(t`Create new instance group`),
         '/instance_groups/container_group/add': i18n._(
-          t`Create container group`
+          t`Create new container group`
         ),
 
         [`/instance_groups/${instanceGroups.id}/details`]: i18n._(t`Details`),

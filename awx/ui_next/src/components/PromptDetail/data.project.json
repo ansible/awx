@@ -96,6 +96,7 @@
   "scm_refspec":"refs/",
   "scm_clean":true,
   "scm_delete_on_update":true,
+  "scm_track_submodules":false,
   "credential":9,
   "timeout":0,
   "scm_revision":"",

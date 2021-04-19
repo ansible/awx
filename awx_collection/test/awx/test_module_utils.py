@@ -59,7 +59,7 @@ def test_version_warning(collection_import, silence_warning):
             my_module._COLLECTION_TYPE = "awx"
             my_module.get_endpoint('ping')
     silence_warning.assert_called_once_with(
-        'You are running collection version {} but connecting to {} version {}'.format(my_module._COLLECTION_VERSION, awx_name, ping_version)
+        'You are running collection version {0} but connecting to {1} version {2}'.format(my_module._COLLECTION_VERSION, awx_name, ping_version)
     )
 
 
@@ -107,7 +107,7 @@ def test_version_warning_strictness_tower(collection_import, silence_warning):
             my_module._COLLECTION_TYPE = "tower"
             my_module.get_endpoint('ping')
     silence_warning.assert_called_once_with(
-        'You are running collection version {} but connecting to {} version {}'.format(my_module._COLLECTION_VERSION, tower_name, ping_version)
+        'You are running collection version {0} but connecting to {1} version {2}'.format(my_module._COLLECTION_VERSION, tower_name, ping_version)
     )
 
 
@@ -121,7 +121,9 @@ def test_type_warning(collection_import, silence_warning):
             my_module._COLLECTION_VERSION = ping_version
             my_module._COLLECTION_TYPE = "tower"
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with('You are using the {} version of this collection but connecting to {}'.format(my_module._COLLECTION_TYPE, awx_name))
+    silence_warning.assert_called_once_with(
+        'You are using the {0} version of this collection but connecting to {1}'.format(my_module._COLLECTION_TYPE, awx_name)
+    )
 
 
 def test_duplicate_config(collection_import, silence_warning):

@@ -248,7 +248,7 @@ function LineChart({ id, data, height, i18n, pageContext }) {
       .style('fill', () => colors(0))
       .attr('cx', d => x(d.DATE))
       .attr('cy', d => y(d.FAIL))
-      .attr('id', d => `success-dot-${dateFormat(d.DATE)}`)
+      .attr('id', d => `fail-dot-${dateFormat(d.DATE)}`)
       .on('mouseover', handleMouseOver)
       .on('mousemove', handleMouseMove)
       .on('mouseout', handleMouseOut);

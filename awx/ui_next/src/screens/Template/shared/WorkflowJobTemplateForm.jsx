@@ -43,6 +43,7 @@ function WorkflowJobTemplateForm({
   handleCancel,
   i18n,
   submitError,
+  isOrgAdmin,
 }) {
   const { setFieldValue } = useFormikContext();
   const [enableWebhooks, setEnableWebhooks] = useState(
@@ -55,7 +56,9 @@ function WorkflowJobTemplateForm({
   );
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta, limitHelpers] = useField('limit');
-  const [organizationField, organizationMeta] = useField('organization');
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
+  );
   const [scmField, , scmHelpers] = useField('scm_branch');
   const [, webhookServiceMeta, webhookServiceHelpers] = useField(
     'webhook_service'
@@ -119,9 +122,14 @@ function WorkflowJobTemplateForm({
         />
         <OrganizationLookup
           helperTextInvalid={organizationMeta.error}
+          isValid={!organizationMeta.touched || !organizationMeta.error}
+          onBlur={() => organizationHelpers.setTouched()}
           onChange={onOrganizationChange}
           value={organizationField.value}
-          isValid={!organizationMeta.error}
+          touched={organizationMeta.touched}
+          error={organizationMeta.error}
+          required={isOrgAdmin}
+          autoPopulate={isOrgAdmin}
         />
         <>
           <InventoryLookup
@@ -151,7 +159,7 @@ function WorkflowJobTemplateForm({
             )}
         </>
         <FieldWithPrompt
-          fieldId="wjft-limit"
+          fieldId="wfjt-limit"
           label={i18n._(t`Limit`)}
           promptId="template-ask-limit-on-launch"
           promptName="ask_limit_on_launch"
@@ -161,7 +169,7 @@ function WorkflowJobTemplateForm({
                   documentation for more information and examples on patterns.`)}
         >
           <TextInput
-            id="text-wfjt-limit"
+            id="wfjt-limit"
             {...limitField}
             validated={
               !limitMeta.touched || !limitMeta.error ? 'default' : 'error'
@@ -182,7 +190,7 @@ function WorkflowJobTemplateForm({
           )}
         >
           <TextInput
-            id="text-wfjt-scm-branch"
+            id="wfjt-scm-branch"
             {...scmField}
             onChange={value => {
               scmHelpers.setValue(value);
@@ -287,6 +295,7 @@ WorkflowJobTemplateForm.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   submitError: shape({}),
+  isOrgAdmin: PropTypes.bool,
 };
 
 WorkflowJobTemplateForm.defaultProps = {
@@ -297,6 +306,7 @@ WorkflowJobTemplateForm.defaultProps = {
     inventory: undefined,
     project: undefined,
   },
+  isOrgAdmin: false,
 };
 
 const FormikApp = withFormik({

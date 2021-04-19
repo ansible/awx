@@ -369,27 +369,24 @@ function Visualizer({ template, i18n }) {
             node.fullUnifiedJobTemplate.type === 'workflow_approval_template'
           ) {
             nodeRequests.push(
-              WorkflowJobTemplatesAPI.createNode(template.id, {}).then(
-                ({ data }) => {
-                  node.originalNodeObject = data;
-                  originalLinkMap[node.id] = {
-                    id: data.id,
-                    success_nodes: [],
-                    failure_nodes: [],
-                    always_nodes: [],
-                  };
-                  approvalTemplateRequests.push(
-                    WorkflowJobTemplateNodesAPI.createApprovalTemplate(
-                      data.id,
-                      {
-                        name: node.fullUnifiedJobTemplate.name,
-                        description: node.fullUnifiedJobTemplate.description,
-                        timeout: node.fullUnifiedJobTemplate.timeout,
-                      }
-                    )
-                  );
-                }
-              )
+              WorkflowJobTemplatesAPI.createNode(template.id, {
+                all_parents_must_converge: node.all_parents_must_converge,
+              }).then(({ data }) => {
+                node.originalNodeObject = data;
+                originalLinkMap[node.id] = {
+                  id: data.id,
+                  success_nodes: [],
+                  failure_nodes: [],
+                  always_nodes: [],
+                };
+                approvalTemplateRequests.push(
+                  WorkflowJobTemplateNodesAPI.createApprovalTemplate(data.id, {
+                    name: node.fullUnifiedJobTemplate.name,
+                    description: node.fullUnifiedJobTemplate.description,
+                    timeout: node.fullUnifiedJobTemplate.timeout,
+                  })
+                );
+              })
             );
           } else {
             nodeRequests.push(
@@ -397,6 +394,7 @@ function Visualizer({ template, i18n }) {
                 ...node.promptValues,
                 inventory: node.promptValues?.inventory?.id || null,
                 unified_job_template: node.fullUnifiedJobTemplate.id,
+                all_parents_must_converge: node.all_parents_must_converge,
               }).then(({ data }) => {
                 node.originalNodeObject = data;
                 originalLinkMap[node.id] = {
@@ -427,27 +425,47 @@ function Visualizer({ template, i18n }) {
               node.originalNodeObject.summary_fields.unified_job_template
                 .unified_job_type === 'workflow_approval'
             ) {
-              approvalTemplateRequests.push(
-                WorkflowApprovalTemplatesAPI.update(
-                  node.originalNodeObject.summary_fields.unified_job_template
-                    .id,
-                  {
-                    name: node.fullUnifiedJobTemplate.name,
-                    description: node.fullUnifiedJobTemplate.description,
-                    timeout: node.fullUnifiedJobTemplate.timeout,
-                  }
-                )
-              );
-            } else {
-              approvalTemplateRequests.push(
-                WorkflowJobTemplateNodesAPI.createApprovalTemplate(
+              nodeRequests.push(
+                WorkflowJobTemplateNodesAPI.replace(
                   node.originalNodeObject.id,
                   {
-                    name: node.fullUnifiedJobTemplate.name,
-                    description: node.fullUnifiedJobTemplate.description,
-                    timeout: node.fullUnifiedJobTemplate.timeout,
+                    all_parents_must_converge: node.all_parents_must_converge,
                   }
-                )
+                ).then(({ data }) => {
+                  node.originalNodeObject = data;
+                  approvalTemplateRequests.push(
+                    WorkflowApprovalTemplatesAPI.update(
+                      node.originalNodeObject.summary_fields
+                        .unified_job_template.id,
+                      {
+                        name: node.fullUnifiedJobTemplate.name,
+                        description: node.fullUnifiedJobTemplate.description,
+                        timeout: node.fullUnifiedJobTemplate.timeout,
+                      }
+                    )
+                  );
+                })
+              );
+            } else {
+              nodeRequests.push(
+                WorkflowJobTemplateNodesAPI.replace(
+                  node.originalNodeObject.id,
+                  {
+                    all_parents_must_converge: node.all_parents_must_converge,
+                  }
+                ).then(({ data }) => {
+                  node.originalNodeObject = data;
+                  approvalTemplateRequests.push(
+                    WorkflowJobTemplateNodesAPI.createApprovalTemplate(
+                      node.originalNodeObject.id,
+                      {
+                        name: node.fullUnifiedJobTemplate.name,
+                        description: node.fullUnifiedJobTemplate.description,
+                        timeout: node.fullUnifiedJobTemplate.timeout,
+                      }
+                    )
+                  );
+                })
               );
             }
           } else {
@@ -456,6 +474,7 @@ function Visualizer({ template, i18n }) {
                 ...node.promptValues,
                 inventory: node.promptValues?.inventory?.id || null,
                 unified_job_template: node.fullUnifiedJobTemplate.id,
+                all_parents_must_converge: node.all_parents_must_converge,
               }).then(() => {
                 const {
                   added: addedCredentials,

@@ -3,6 +3,7 @@ import { mount } from 'enzyme';
 import { Formik } from 'formik';
 import { I18nProvider } from '@lingui/react';
 import { act } from 'react-dom/test-utils';
+import { i18n } from '@lingui/core';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import {
   BooleanField,
@@ -13,13 +14,17 @@ import {
   ObjectField,
   TextAreaField,
 } from './SharedFields';
+import en from '../../../locales/en/messages';
 
 describe('Setting form fields', () => {
   test('BooleanField renders the expected content', async () => {
     const outerNode = document.createElement('div');
     document.body.appendChild(outerNode);
+    i18n.loadLocaleData({ en: { plurals: en } });
+    i18n.load({ en });
+    i18n.activate('en');
     const wrapper = mount(
-      <I18nProvider>
+      <I18nProvider i18n={i18n}>
         <Formik
           initialValues={{
             boolean: true,
@@ -244,7 +249,10 @@ describe('Setting form fields', () => {
         )}
       </Formik>
     );
-    expect(wrapper.find('FileUploadField')).toHaveLength(1);
+
+    expect(
+      wrapper.find('FileUploadField[value="mock file value"]')
+    ).toHaveLength(1);
     expect(wrapper.find('label').text()).toEqual('mock file label');
     expect(wrapper.find('input#mock_file-filename').prop('value')).toEqual('');
     await act(async () => {

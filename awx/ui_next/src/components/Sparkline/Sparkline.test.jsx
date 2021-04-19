@@ -1,12 +1,15 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+
+import {
+  mountWithContexts,
+  shallowWithContexts,
+} from '../../../testUtils/enzymeHelpers';
 
 import Sparkline from './Sparkline';
 
 describe('Sparkline', () => {
   test('renders the expected content', () => {
-    const wrapper = mount(<Sparkline />);
+    const wrapper = shallowWithContexts(<Sparkline />);
     expect(wrapper).toHaveLength(1);
   });
   test('renders an icon with tooltips and links for each job', () => {

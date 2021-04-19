@@ -185,8 +185,7 @@ function CredentialDetail({ i18n, credential }) {
   }, [fetchDetails]);
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.credential(
-    credential,
-    i18n
+    credential
   );
 
   if (hasContentLoading) {

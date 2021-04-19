@@ -21,6 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 from awx.main.models.base import prevent_search
 from awx.main.models.rbac import Role, RoleAncestorEntry, get_roles_on_resource
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
+from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import JSONField, AskForField
@@ -461,13 +462,6 @@ class ExecutionEnvironmentMixin(models.Model):
         help_text=_('The container image to be used for execution.'),
     )
 
-    def get_execution_environment_default(self):
-        from awx.main.models.execution_environments import ExecutionEnvironment
-
-        if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
-            return settings.DEFAULT_EXECUTION_ENVIRONMENT
-        return ExecutionEnvironment.objects.filter(organization=None, managed_by_tower=True).first()
-
     def resolve_execution_environment(self):
         """
         Return the execution environment that should be used when creating a new job.
@@ -482,7 +476,7 @@ class ExecutionEnvironmentMixin(models.Model):
             if self.inventory.organization.default_environment is not None:
                 return self.inventory.organization.default_environment
 
-        return self.get_execution_environment_default()
+        return get_default_execution_environment()
 
 
 class CustomVirtualEnvMixin(models.Model):
