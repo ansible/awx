@@ -1068,6 +1068,30 @@ class BaseTask(object):
 
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
 
+        ee_cred = self.instance.execution_environment.credential
+        if ee_cred:
+            verify_ssl = ee_cred.get_input('verify_ssl')
+            if not verify_ssl:
+                pdd_wrapper_path = os.path.split(private_data_dir)[0]
+                registries_conf_path = os.path.join(pdd_wrapper_path, 'registries.conf')
+                host = ee_cred.get_input('host')
+
+                with open(registries_conf_path, 'w') as registries_conf:
+                    os.chmod(registries_conf.name, stat.S_IRUSR | stat.S_IWUSR)
+
+                    lines = [
+                        '[[registry]]',
+                        'location = "{}"'.format(host),
+                        'insecure = true',
+                    ]
+
+                    registries_conf.write('\n'.join(lines))
+
+                # Podman >= 3.1.0
+                env['CONTAINERS_REGISTRIES_CONF'] = registries_conf_path
+                # Podman < 3.1.0
+                env['REGISTRIES_CONFIG_PATH'] = registries_conf_path
+
         return env
 
     def should_use_resource_profiling(self, job):
