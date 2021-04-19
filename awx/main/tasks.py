@@ -467,6 +467,9 @@ def cluster_node_heartbeat():
 
 @task(queue=get_local_queuename)
 def awx_k8s_reaper():
+    if not settings.RECEPTOR_RELEASE_WORK:
+        return
+
     from awx.main.scheduler.kubernetes import PodManager  # prevent circular import
 
     for group in InstanceGroup.objects.filter(is_container_group=True).iterator():
