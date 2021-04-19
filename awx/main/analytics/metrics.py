@@ -184,7 +184,6 @@ def metrics():
         INSTANCE_INFO.labels(hostname=hostname, instance_uuid=uuid).info(
             {
                 'enabled': str(instance_data[uuid]['enabled']),
-                'last_isolated_check': getattr(instance_data[uuid], 'last_isolated_check', 'None'),
                 'managed_by_policy': str(instance_data[uuid]['managed_by_policy']),
                 'version': instance_data[uuid]['version'],
             }

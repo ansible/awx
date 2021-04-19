@@ -220,17 +220,11 @@ def projects_by_scm_type(since, **kwargs):
     return counts
 
 
-def _get_isolated_datetime(last_check):
-    if last_check:
-        return last_check.isoformat()
-    return last_check
-
-
-@register('instance_info', '1.0', description=_('Cluster topology and capacity'))
+@register('instance_info', '1.1', description=_('Cluster topology and capacity'))
 def instance_info(since, include_hostnames=False, **kwargs):
     info = {}
     instances = models.Instance.objects.values_list('hostname').values(
-        'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'last_isolated_check', 'enabled'
+        'uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'hostname', 'enabled'
     )
     for instance in instances:
         consumed_capacity = sum(x.task_impact for x in models.UnifiedJob.objects.filter(execution_node=instance['hostname'], status__in=('running', 'waiting')))
@@ -241,7 +235,6 @@ def instance_info(since, include_hostnames=False, **kwargs):
             'cpu': instance['cpu'],
             'memory': instance['memory'],
             'managed_by_policy': instance['managed_by_policy'],
-            'last_isolated_check': _get_isolated_datetime(instance['last_isolated_check']),
             'enabled': instance['enabled'],
             'consumed_capacity': consumed_capacity,
             'remaining_capacity': instance['capacity'] - consumed_capacity,

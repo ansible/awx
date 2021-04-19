@@ -126,7 +126,7 @@ LOGIN_URL = '/api/login/'
 PROJECTS_ROOT = '/var/lib/awx/projects/'
 
 # Absolute filesystem path to the directory to host collections for
-# running inventory imports, isolated playbooks
+# running inventory imports
 AWX_ANSIBLE_COLLECTIONS_PATHS = os.path.join(BASE_DIR, 'vendor', 'awx_ansible_collections')
 
 # Absolute filesystem path to the directory for job status stdout (default for
@@ -440,7 +440,6 @@ CELERYBEAT_SCHEDULE = {
     'k8s_reaper': {'task': 'awx.main.tasks.awx_k8s_reaper', 'schedule': timedelta(seconds=60), 'options': {'expires': 50}},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.cleanup_execution_environment_images', 'schedule': timedelta(hours=3)},
-    # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
 
 # Django Caching Configuration
@@ -854,12 +853,6 @@ LOGGING = {
             'filename': os.path.join(LOG_ROOT, 'tower_rbac_migrations.log'),
             'formatter': 'simple',
         },
-        'isolated_manager': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filename': os.path.join(LOG_ROOT, 'isolated_manager.log'),
-            'formatter': 'simple',
-        },
         'job_lifecycle': {
             'level': 'DEBUG',
             'class': 'logging.handlers.WatchedFileHandler',
@@ -881,8 +874,6 @@ LOGGING = {
         'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'awx.main.wsbroadcast': {'handlers': ['wsbroadcast']},
-        'awx.isolated.manager': {'level': 'WARNING', 'handlers': ['console', 'file', 'isolated_manager'], 'propagate': True},
-        'awx.isolated.manager.playbooks': {'handlers': ['management_playbooks'], 'propagate': False},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
         'awx.main.tasks': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
         'awx.main.analytics': {'handlers': ['task_system', 'external_logger'], 'level': 'INFO', 'propagate': False},
