@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { shape, string } from 'prop-types';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -26,7 +26,7 @@ const FileUpload = styled(PFFileUpload)`
   flex-grow: 1;
 `;
 
-function CredentialInput({ i18n, fieldOptions, credentialKind, ...rest }) {
+function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
   const [fileName, setFileName] = useState('');
   const [fileIsUploading, setFileIsUploading] = useState(false);
   const [subFormField, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
@@ -39,19 +39,15 @@ function CredentialInput({ i18n, fieldOptions, credentialKind, ...rest }) {
         !meta.initialValue.credential && (
           <Tooltip
             id={`credential-${fieldOptions.id}-replace-tooltip`}
-            content={
-              meta.value !== meta.initialValue
-                ? i18n._(t`Revert`)
-                : i18n._(t`Replace`)
-            }
+            content={meta.value !== meta.initialValue ? t`Revert` : t`Replace`}
           >
             <Button
               id={`credential-${fieldOptions.id}-replace-button`}
               variant={ButtonVariant.control}
               aria-label={
                 meta.touched
-                  ? i18n._(t`Revert field to previously saved value`)
-                  : i18n._(t`Replace field with new value`)
+                  ? t`Revert field to previously saved value`
+                  : t`Replace field with new value`
               }
               onClick={() => {
                 if (meta.value !== meta.initialValue) {
@@ -153,18 +149,16 @@ CredentialInput.defaultProps = {
   credentialKind: '',
 };
 
-function CredentialField({ credentialType, fieldOptions, i18n }) {
+function CredentialField({ credentialType, fieldOptions }) {
   const { values: formikValues } = useFormikContext();
   const requiredFields = credentialType?.inputs?.required || [];
   const isRequired = requiredFields.includes(fieldOptions.id);
   const validateField = () => {
     if (isRequired && !formikValues?.passwordPrompts[fieldOptions.id]) {
       const validationMsg = fieldOptions.ask_at_runtime
-        ? i18n._(
-            t`Provide a value for this field or select the Prompt on launch option.`
-          )
+        ? t`Provide a value for this field or select the Prompt on launch option.`
         : null;
-      return required(validationMsg, i18n);
+      return required(validationMsg);
     }
     return null;
   };
@@ -214,7 +208,6 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
         validated={isValid ? 'default' : 'error'}
       >
         <CredentialInput
-          i18n={i18n}
           credentialKind={credentialType.kind}
           fieldOptions={fieldOptions}
           isDisabled={
@@ -239,7 +232,7 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
       isRequired={isRequired}
       validated={isValid ? 'default' : 'error'}
     >
-      <CredentialInput i18n={i18n} fieldOptions={fieldOptions} />
+      <CredentialInput fieldOptions={fieldOptions} />
     </CredentialPluginField>
   );
 }
@@ -254,4 +247,4 @@ CredentialField.propTypes = {
 
 CredentialField.defaultProps = {};
 
-export default withI18n()(CredentialField);
+export default CredentialField;

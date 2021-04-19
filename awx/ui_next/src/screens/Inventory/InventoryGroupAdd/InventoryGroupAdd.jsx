@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { useHistory, useParams } from 'react-router-dom';
 import { Card } from '@patternfly/react-core';
 import { GroupsAPI } from '../../../api';
@@ -35,5 +35,5 @@ function InventoryGroupsAdd() {
     </Card>
   );
 }
-export default withI18n()(InventoryGroupsAdd);
+export default InventoryGroupsAdd;
 export { InventoryGroupsAdd as _InventoryGroupsAdd };

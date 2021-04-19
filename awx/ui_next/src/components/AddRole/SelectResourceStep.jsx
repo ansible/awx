@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter, useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import useRequest from '../../util/useRequest';
 
@@ -30,7 +30,6 @@ function SelectResourceStep({
   selectedResourceRows,
   fetchItems,
   fetchOptions,
-  i18n,
 }) {
   const location = useLocation();
 
@@ -78,9 +77,7 @@ function SelectResourceStep({
   return (
     <Fragment>
       <div>
-        {i18n._(
-          t`Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step.`
-        )}
+        {t`Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step.`}
       </div>
       {selectedResourceRows.length > 0 && (
         <SelectedList
@@ -139,4 +136,4 @@ SelectResourceStep.defaultProps = {
 };
 
 export { SelectResourceStep as _SelectResourceStep };
-export default withI18n()(withRouter(SelectResourceStep));
+export default withRouter(SelectResourceStep);

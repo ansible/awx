@@ -1,5 +1,4 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
 
 import { Switch, Route } from 'react-router-dom';
 
@@ -16,4 +15,4 @@ function InventoryHostGroups() {
 }
 
 export { InventoryHostGroups as _InventoryHostGroups };
-export default withI18n()(InventoryHostGroups);
+export default InventoryHostGroups;

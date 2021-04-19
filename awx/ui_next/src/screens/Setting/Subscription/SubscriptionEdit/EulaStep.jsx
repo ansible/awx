@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { Trans, t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Flex, FormGroup, TextArea } from '@patternfly/react-core';
@@ -7,7 +7,7 @@ import { required } from '../../../../util/validators';
 import { useConfig } from '../../../../contexts/Config';
 import { CheckboxField } from '../../../../components/FormField';
 
-function EulaStep({ i18n }) {
+function EulaStep() {
   const { eula, me } = useConfig();
   const [, meta] = useField('eula');
   const isValid = !(meta.touched && meta.error);
@@ -21,7 +21,7 @@ function EulaStep({ i18n }) {
       </b>
       <FormGroup
         fieldId="eula"
-        label={i18n._(t`End User License Agreement`)}
+        label={t`End User License Agreement`}
         validated={isValid ? 'default' : 'error'}
         helperTextInvalid={meta.error}
         isRequired
@@ -36,19 +36,16 @@ function EulaStep({ i18n }) {
         </TextArea>
         <CheckboxField
           name="eula"
-          aria-label={i18n._(t`Agree to end user license agreement`)}
-          label={i18n._(t`I agree to the End User License Agreement`)}
+          aria-label={t`Agree to end user license agreement`}
+          label={t`I agree to the End User License Agreement`}
           id="eula"
           isDisabled={!me.is_superuser}
           validate={required(
-            i18n._(
-              t`Please agree to End User License Agreement before proceeding.`
-            ),
-            i18n
+            t`Please agree to End User License Agreement before proceeding.`
           )}
         />
       </FormGroup>
     </Flex>
   );
 }
-export default withI18n()(EulaStep);
+export default EulaStep;

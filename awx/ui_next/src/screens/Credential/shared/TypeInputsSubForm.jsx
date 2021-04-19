@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { FormGroup, Title } from '@patternfly/react-core';
 import {
@@ -12,7 +12,7 @@ import { CheckboxField } from '../../../components/FormField';
 import { CredentialType } from '../../../types';
 import { CredentialField, GceFileUploadField } from './CredentialFormFields';
 
-function TypeInputsSubForm({ credentialType, i18n }) {
+function TypeInputsSubForm({ credentialType }) {
   const stringFields = credentialType.inputs.fields.filter(
     fieldOptions => fieldOptions.type === 'string' || fieldOptions.choices
   );
@@ -22,7 +22,7 @@ function TypeInputsSubForm({ credentialType, i18n }) {
   return (
     <SubFormLayout>
       <Title size="md" headingLevel="h4">
-        {i18n._(t`Type Details`)}
+        {t`Type Details`}
       </Title>
       <FormColumnLayout>
         {credentialType.namespace === 'gce' && <GceFileUploadField />}
@@ -44,10 +44,7 @@ function TypeInputsSubForm({ credentialType, i18n }) {
         )}
         {booleanFields.length > 0 && (
           <FormFullWidthLayout>
-            <FormGroup
-              fieldId="credential-checkboxes"
-              label={i18n._(t`Options`)}
-            >
+            <FormGroup fieldId="credential-checkboxes" label={t`Options`}>
               <FormCheckboxLayout>
                 {booleanFields.map(fieldOptions => (
                   <CheckboxField
@@ -73,4 +70,4 @@ TypeInputsSubForm.propTypes = {
 
 TypeInputsSubForm.defaultProps = {};
 
-export default withI18n()(TypeInputsSubForm);
+export default TypeInputsSubForm;

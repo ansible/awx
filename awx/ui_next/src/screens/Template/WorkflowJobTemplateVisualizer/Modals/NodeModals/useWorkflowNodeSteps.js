@@ -187,7 +187,6 @@ const getNodeToEditDefaultValues = (
 export default function useWorkflowNodeSteps(
   launchConfig,
   surveyConfig,
-  i18n,
   resource,
   askLinkType,
   resourceDefaultCredentials
@@ -201,17 +200,12 @@ export default function useWorkflowNodeSteps(
   const [visited, setVisited] = useState({});
 
   const steps = [
-    useRunTypeStep(i18n, askLinkType),
-    useNodeTypeStep(launchConfig, i18n),
-    useInventoryStep(launchConfig, resource, i18n, visited),
-    useCredentialsStep(
-      launchConfig,
-      resource,
-      resourceDefaultCredentials,
-      i18n
-    ),
-    useOtherPromptsStep(launchConfig, resource, i18n),
-    useSurveyStep(launchConfig, surveyConfig, resource, i18n, visited),
+    useRunTypeStep(askLinkType),
+    useNodeTypeStep(),
+    useInventoryStep(launchConfig, resource, visited),
+    useCredentialsStep(launchConfig, resource, resourceDefaultCredentials),
+    useOtherPromptsStep(launchConfig, resource),
+    useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
 
   const hasErrors = steps.some(step => step.hasError);
@@ -219,7 +213,6 @@ export default function useWorkflowNodeSteps(
   steps.push(
     usePreviewStep(
       launchConfig,
-      i18n,
       resource,
       surveyConfig,
       hasErrors,
@@ -263,9 +256,7 @@ export default function useWorkflowNodeSteps(
         !launchConfig?.ask_credential_on_launch &&
         launchConfig?.passwords_needed_to_start?.length > 0
       ) {
-        errors.nodeResource = i18n._(
-          t`Job Templates with credentials that prompt for passwords cannot be selected when creating or editing nodes`
-        );
+        errors.nodeResource = t`Job Templates with credentials that prompt for passwords cannot be selected when creating or editing nodes`;
       }
 
       if (initialValues.convergence === 'all') {

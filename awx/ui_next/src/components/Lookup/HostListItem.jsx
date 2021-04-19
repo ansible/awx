@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   DataListItem,
@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-core';
 import DataListCell from '../DataListCell';
 
-function HostListItem({ item, i18n }) {
+function HostListItem({ item }) {
   return (
     <DataListItem
       aria-labelledby={`items-list-item-${item.id}`}
@@ -20,14 +20,14 @@ function HostListItem({ item, i18n }) {
       <DataListItemRow>
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="name" aria-label={i18n._(t`name`)}>
+            <DataListCell key="name" aria-label={t`name`}>
               <TextContent>
                 <Link to={{ pathname: item.url }}>
                   <b id={`items-list-item-${item.id}`}>{item.name}</b>
                 </Link>
               </TextContent>
             </DataListCell>,
-            <DataListCell key="inventory" aria-label={i18n._(t`inventory`)}>
+            <DataListCell key="inventory" aria-label={t`inventory`}>
               {item.summary_fields.inventory.name}
             </DataListCell>,
           ]}
@@ -37,4 +37,4 @@ function HostListItem({ item, i18n }) {
   );
 }
 
-export default withI18n()(HostListItem);
+export default HostListItem;

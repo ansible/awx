@@ -6,7 +6,7 @@ import StepName from '../../../../../../components/LaunchPrompt/steps/StepName';
 
 const STEP_ID = 'nodeType';
 
-export default function useNodeTypeStep(launchConfig, i18n) {
+export default function useNodeTypeStep() {
   const [, meta] = useField('nodeType');
   const [approvalNameField] = useField('approvalName');
   const [nodeTypeField, ,] = useField('nodeType');
@@ -20,9 +20,7 @@ export default function useNodeTypeStep(launchConfig, i18n) {
           ((!value?.inventory || value?.inventory === null) &&
             !value?.ask_inventory_on_launch))
       ) {
-        return i18n._(
-          t`Job Templates with a missing inventory or project cannot be selected when creating or editing nodes.  Select another template or fix the missing fields to proceed.`
-        );
+        return t`Job Templates with a missing inventory or project cannot be selected when creating or editing nodes.  Select another template or fix the missing fields to proceed.`;
       }
       return undefined;
     },
@@ -32,7 +30,6 @@ export default function useNodeTypeStep(launchConfig, i18n) {
 
   return {
     step: getStep(
-      i18n,
       nodeTypeField,
       approvalNameField,
       nodeResourceField,
@@ -49,7 +46,6 @@ export default function useNodeTypeStep(launchConfig, i18n) {
   };
 }
 function getStep(
-  i18n,
   nodeTypeField,
   approvalNameField,
   nodeResourceField,
@@ -71,10 +67,10 @@ function getStep(
     id: STEP_ID,
     name: (
       <StepName hasErrors={formError} id="node-type-step">
-        {i18n._(t`Node type`)}
+        {t`Node type`}
       </StepName>
     ),
-    component: <NodeTypeStep i18n={i18n} />,
+    component: <NodeTypeStep />,
     enableNext: isEnabled(),
   };
 }

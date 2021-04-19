@@ -16,9 +16,9 @@ const getVariablesData = resource => {
   return '---';
 };
 
-export default function useOtherPromptsStep(launchConfig, resource, i18n) {
+export default function useOtherPromptsStep(launchConfig, resource) {
   return {
-    step: getStep(launchConfig, i18n),
+    step: getStep(launchConfig),
     initialValues: getInitialValues(launchConfig, resource),
     isReady: true,
     contentError: null,
@@ -38,7 +38,7 @@ export default function useOtherPromptsStep(launchConfig, resource, i18n) {
   };
 }
 
-function getStep(launchConfig, i18n) {
+function getStep(launchConfig) {
   if (!shouldShowPrompt(launchConfig)) {
     return null;
   }
@@ -47,10 +47,10 @@ function getStep(launchConfig, i18n) {
     key: 5,
     name: (
       <StepName hasErrors={false} id="other-prompts-step">
-        {i18n._(t`Other prompts`)}
+        {t`Other prompts`}
       </StepName>
     ),
-    component: <OtherPromptsStep launchConfig={launchConfig} i18n={i18n} />,
+    component: <OtherPromptsStep launchConfig={launchConfig} />,
     enableNext: true,
   };
 }

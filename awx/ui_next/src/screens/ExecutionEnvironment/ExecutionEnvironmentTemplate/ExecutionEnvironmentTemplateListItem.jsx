@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
@@ -10,7 +10,7 @@ import {
 
 import DataListCell from '../../../components/DataListCell';
 
-function ExecutionEnvironmentTemplateListItem({ template, detailUrl, i18n }) {
+function ExecutionEnvironmentTemplateListItem({ template, detailUrl }) {
   return (
     <DataListItem
       key={template.id}
@@ -20,18 +20,15 @@ function ExecutionEnvironmentTemplateListItem({ template, detailUrl, i18n }) {
       <DataListItemRow>
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="name" aria-label={i18n._(t`Name`)}>
+            <DataListCell key="name" aria-label={t`Name`}>
               <Link to={`${detailUrl}`}>
                 <b>{template.name}</b>
               </Link>
             </DataListCell>,
-            <DataListCell
-              key="template-type"
-              aria-label={i18n._(t`Template type`)}
-            >
+            <DataListCell key="template-type" aria-label={t`Template type`}>
               {template.type === 'job_template'
-                ? i18n._(t`Job Template`)
-                : i18n._(t`Workflow Job Template`)}
+                ? t`Job Template`
+                : t`Workflow Job Template`}
             </DataListCell>,
           ]}
         />
@@ -40,4 +37,4 @@ function ExecutionEnvironmentTemplateListItem({ template, detailUrl, i18n }) {
   );
 }
 
-export default withI18n()(ExecutionEnvironmentTemplateListItem);
+export default ExecutionEnvironmentTemplateListItem;

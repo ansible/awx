@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { func, number, shape } from 'prop-types';
 
@@ -17,11 +17,11 @@ import {
   FormFullWidthLayout,
 } from '../../../components/FormLayout';
 
-function InventoryFormFields({ i18n, credentialTypeId, inventory }) {
+function InventoryFormFields({ credentialTypeId, inventory }) {
   const { setFieldValue } = useFormikContext();
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: required(t`Select a value for this field`),
   });
   const [instanceGroupsField, , instanceGroupsHelpers] = useField(
     'instanceGroups'
@@ -44,15 +44,15 @@ function InventoryFormFields({ i18n, credentialTypeId, inventory }) {
     <>
       <FormField
         id="inventory-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="inventory-description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
@@ -68,7 +68,7 @@ function InventoryFormFields({ i18n, credentialTypeId, inventory }) {
         autoPopulate={!inventory?.id}
       />
       <CredentialLookup
-        label={i18n._(t`Insights Credential`)}
+        label={t`Insights Credential`}
         credentialTypeId={credentialTypeId}
         onChange={onCredentialChange}
         value={insightsCredentialField.value}
@@ -81,12 +81,10 @@ function InventoryFormFields({ i18n, credentialTypeId, inventory }) {
       />
       <FormFullWidthLayout>
         <VariablesField
-          tooltip={i18n._(
-            t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`
-          )}
+          tooltip={t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`}
           id="inventory-variables"
           name="variables"
-          label={i18n._(t`Variables`)}
+          label={t`Variables`}
         />
       </FormFullWidthLayout>
     </>
@@ -153,4 +151,4 @@ InventoryForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(InventoryForm);
+export default InventoryForm;

@@ -7,7 +7,7 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -22,7 +22,7 @@ import JobList from '../../components/JobList';
 import ContainerGroupDetails from './ContainerGroupDetails';
 import ContainerGroupEdit from './ContainerGroupEdit';
 
-function ContainerGroup({ i18n, setBreadcrumb }) {
+function ContainerGroup({ setBreadcrumb }) {
   const { id } = useParams();
   const { pathname } = useLocation();
 
@@ -53,19 +53,19 @@ function ContainerGroup({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to instance groups`)}
+          {t`Back to instance groups`}
         </>
       ),
       link: '/instance_groups',
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/instance_groups/container_group/${id}/details`,
       id: 0,
     },
     {
-      name: i18n._(t`Jobs`),
+      name: t`Jobs`,
       link: `/instance_groups/container_group/${id}/jobs`,
       id: 1,
     },
@@ -78,11 +78,9 @@ function ContainerGroup({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response?.status === 404 && (
               <span>
-                {i18n._(t`Container group not found.`)}
+                {t`Container group not found.`}
                 {''}
-                <Link to="/instance_groups">
-                  {i18n._(t`View all instance groups`)}
-                </Link>
+                <Link to="/instance_groups">{t`View all instance groups`}</Link>
               </span>
             )}
           </ContentError>
@@ -131,4 +129,4 @@ function ContainerGroup({ i18n, setBreadcrumb }) {
   );
 }
 
-export default withI18n()(ContainerGroup);
+export default ContainerGroup;

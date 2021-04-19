@@ -1,7 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import CheckboxCard from './CheckboxCard';
@@ -14,21 +13,18 @@ function RolesStep({
   selectedListLabel,
   selectedResourceRows,
   selectedRoleRows,
-  i18n,
 }) {
   return (
     <Fragment>
       <div>
-        {i18n._(
-          t`Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources.`
-        )}
+        {t`Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources.`}
       </div>
       <div>
         {selectedResourceRows.length > 0 && (
           <SelectedList
             displayKey={selectedListKey}
             isReadOnly
-            label={selectedListLabel || i18n._(t`Selected`)}
+            label={selectedListLabel || t`Selected`}
             selected={selectedResourceRows}
           />
         )}
@@ -75,4 +71,4 @@ RolesStep.defaultProps = {
   selectedRoleRows: [],
 };
 
-export default withI18n()(RolesStep);
+export default RolesStep;

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { func, shape } from 'prop-types';
 import { Formik, useField, useFormikContext } from 'formik';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 
@@ -17,20 +17,13 @@ import ContentLoading from '../../../components/ContentLoading';
 import { required } from '../../../util/validators';
 import useRequest from '../../../util/useRequest';
 
-function ExecutionEnvironmentFormFields({
-  i18n,
-  me,
-  options,
-  executionEnvironment,
-}) {
+function ExecutionEnvironmentFormFields({ me, options, executionEnvironment }) {
   const [credentialField, credentialMeta, credentialHelpers] = useField(
     'credential'
   );
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
-    validate:
-      !me?.is_superuser &&
-      required(i18n._(t`Select a value for this field`), i18n),
+    validate: !me?.is_superuser && required(t`Select a value for this field`),
   });
 
   const { setFieldValue } = useFormikContext();
@@ -65,22 +58,20 @@ function ExecutionEnvironmentFormFields({
     <>
       <FormField
         id="execution-environment-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="execution-environment-image"
-        label={i18n._(t`Image name`)}
+        label={t`Image name`}
         name="image"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
-        tooltip={i18n._(
-          t`The registry location where the container is stored.`
-        )}
+        tooltip={t`The registry location where the container is stored.`}
       />
       <FormGroup
         fieldId="execution-environment-container-options"
@@ -90,7 +81,7 @@ function ExecutionEnvironmentFormFields({
             ? 'default'
             : 'error'
         }
-        label={i18n._(t`Pull`)}
+        label={t`Pull`}
       >
         <AnsibleSelect
           {...containerOptionsField}
@@ -103,7 +94,7 @@ function ExecutionEnvironmentFormFields({
       </FormGroup>
       <FormField
         id="execution-environment-description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
@@ -116,25 +107,21 @@ function ExecutionEnvironmentFormFields({
         required={!me.is_superuser}
         helperText={
           me?.is_superuser
-            ? i18n._(
-                t`Leave this field blank to make the execution environment globally available.`
-              )
+            ? t`Leave this field blank to make the execution environment globally available.`
             : null
         }
         autoPopulate={!me?.is_superuser ? !executionEnvironment?.id : null}
       />
 
       <CredentialLookup
-        label={i18n._(t`Registry credential`)}
+        label={t`Registry credential`}
         credentialTypeKind="registry"
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}
         onBlur={() => credentialHelpers.setTouched()}
         onChange={onCredentialChange}
         value={credentialField.value}
-        tooltip={i18n._(
-          t`Credential to authenticate with a protected container registry.`
-        )}
+        tooltip={t`Credential to authenticate with a protected container registry.`}
       />
     </>
   );
@@ -217,4 +204,4 @@ ExecutionEnvironmentForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(ExecutionEnvironmentForm);
+export default ExecutionEnvironmentForm;

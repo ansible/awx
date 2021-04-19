@@ -7,7 +7,7 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -22,7 +22,7 @@ import ExecutionEnvironmentDetails from './ExecutionEnvironmentDetails';
 import ExecutionEnvironmentEdit from './ExecutionEnvironmentEdit';
 import ExecutionEnvironmentTemplateList from './ExecutionEnvironmentTemplate';
 
-function ExecutionEnvironment({ i18n, setBreadcrumb }) {
+function ExecutionEnvironment({ setBreadcrumb }) {
   const { id } = useParams();
   const { pathname } = useLocation();
 
@@ -54,19 +54,19 @@ function ExecutionEnvironment({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to execution environments`)}
+          {t`Back to execution environments`}
         </>
       ),
       link: '/execution_environments',
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/execution_environments/${id}/details`,
       id: 0,
     },
     {
-      name: i18n._(t`Templates`),
+      name: t`Templates`,
       link: `/execution_environments/${id}/templates`,
       id: 1,
     },
@@ -79,9 +79,9 @@ function ExecutionEnvironment({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response?.status === 404 && (
               <span>
-                {i18n._(t`Execution environment not found.`)}{' '}
+                {t`Execution environment not found.`}{' '}
                 <Link to="/execution_environments">
-                  {i18n._(t`View all execution environments`)}
+                  {t`View all execution environments`}
                 </Link>
               </span>
             )}
@@ -134,4 +134,4 @@ function ExecutionEnvironment({ i18n, setBreadcrumb }) {
   );
 }
 
-export default withI18n()(ExecutionEnvironment);
+export default ExecutionEnvironment;

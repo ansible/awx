@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -42,7 +42,6 @@ function PageHeaderToolbar({
   onAboutClick,
   onLogoutClick,
   loggedInUser,
-  i18n,
 }) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
@@ -83,10 +82,7 @@ function PageHeaderToolbar({
   return (
     <PageHeaderTools>
       <PageHeaderToolsGroup>
-        <Tooltip
-          position="bottom"
-          content={i18n._(t`Pending Workflow Approvals`)}
-        >
+        <Tooltip position="bottom" content={t`Pending Workflow Approvals`}>
           <PageHeaderToolsItem>
             <Link to="/workflow_approvals?workflow_approvals.status=pending">
               <PendingWorkflowApprovals>
@@ -108,10 +104,7 @@ function PageHeaderToolbar({
             position={DropdownPosition.right}
             onSelect={handleHelpSelect}
             toggle={
-              <DropdownToggle
-                onToggle={setIsHelpOpen}
-                aria-label={i18n._(t`Info`)}
-              >
+              <DropdownToggle onToggle={setIsHelpOpen} aria-label={t`Info`}>
                 <QuestionCircleIcon />
               </DropdownToggle>
             }
@@ -121,7 +114,7 @@ function PageHeaderToolbar({
                 target="_blank"
                 href={`${getDocsBaseUrl(config)}/html/userguide/index.html`}
               >
-                {i18n._(t`Help`)}
+                {t`Help`}
               </DropdownItem>,
               <DropdownItem
                 key="about"
@@ -129,12 +122,12 @@ function PageHeaderToolbar({
                 isDisabled={isAboutDisabled}
                 onClick={onAboutClick}
               >
-                {i18n._(t`About`)}
+                {t`About`}
               </DropdownItem>,
             ]}
           />
         </PageHeaderToolsItem>
-        <Tooltip position="left" content={<div>{i18n._(t`User`)}</div>}>
+        <Tooltip position="left" content={<div>{t`User`}</div>}>
           <PageHeaderToolsItem>
             <Dropdown
               id="toolbar-user-dropdown"
@@ -155,14 +148,14 @@ function PageHeaderToolbar({
               dropdownItems={[
                 <DropdownItem
                   key="user"
-                  aria-label={i18n._(t`User details`)}
+                  aria-label={t`User details`}
                   href={
                     loggedInUser
                       ? `/#/users/${loggedInUser.id}/details`
                       : '/#/home'
                   }
                 >
-                  {i18n._(t`User Details`)}
+                  {t`User Details`}
                 </DropdownItem>,
                 <DropdownItem
                   key="logout"
@@ -170,7 +163,7 @@ function PageHeaderToolbar({
                   onClick={onLogoutClick}
                   id="logout-button"
                 >
-                  {i18n._(t`Logout`)}
+                  {t`Logout`}
                 </DropdownItem>,
               ]}
             />
@@ -191,4 +184,4 @@ PageHeaderToolbar.defaultProps = {
   isAboutDisabled: false,
 };
 
-export default withI18n()(PageHeaderToolbar);
+export default PageHeaderToolbar;

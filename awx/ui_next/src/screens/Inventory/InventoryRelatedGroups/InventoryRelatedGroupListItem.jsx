@@ -2,7 +2,7 @@ import 'styled-components/macro';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 
 import {
@@ -28,7 +28,6 @@ const DataListAction = styled(_DataListAction)`
 `;
 
 function InventoryRelatedGroupListItem({
-  i18n,
   detailUrl,
   editUrl,
   group,
@@ -56,15 +55,15 @@ function InventoryRelatedGroupListItem({
           ]}
         />
         <DataListAction
-          aria-label={i18n._(t`actions`)}
+          aria-label={t`actions`}
           aria-labelledby={labelId}
           id={labelId}
         >
           {group.summary_fields.user_capabilities?.edit && (
-            <Tooltip content={i18n._(t`Edit Group`)} position="top">
+            <Tooltip content={t`Edit Group`} position="top">
               <Button
                 ouiaId={`${group.id}-edit-button`}
-                aria-label={i18n._(t`Edit Group`)}
+                aria-label={t`Edit Group`}
                 css="grid-column: 2"
                 variant="plain"
                 component={Link}
@@ -88,4 +87,4 @@ InventoryRelatedGroupListItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(InventoryRelatedGroupListItem);
+export default InventoryRelatedGroupListItem;

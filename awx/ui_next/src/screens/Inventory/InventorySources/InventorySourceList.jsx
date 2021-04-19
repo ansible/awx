@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button, Tooltip } from '@patternfly/react-core';
 
@@ -29,7 +29,7 @@ const QS_CONFIG = getQSConfig('inventory', {
   order_by: 'name',
 });
 
-function InventorySourceList({ i18n }) {
+function InventorySourceList() {
   const { inventoryType, id } = useParams();
   const { search } = useLocation();
 
@@ -160,7 +160,7 @@ function InventorySourceList({ i18n }) {
         }
         items={sources}
         itemCount={sourceCount}
-        pluralizedItemName={i18n._(t`Inventory Sources`)}
+        pluralizedItemName={t`Inventory Sources`}
         qsConfig={QS_CONFIG}
         renderToolbar={props => (
           <DatalistToolbar
@@ -179,27 +179,27 @@ function InventorySourceList({ i18n }) {
                 key="delete"
                 onDelete={handleDelete}
                 itemsToDelete={selected}
-                pluralizedItemName={i18n._(t`Inventory Sources`)}
+                pluralizedItemName={t`Inventory Sources`}
                 deleteDetailsRequests={deleteDetailsRequests}
-                deleteMessage={i18n._(
-                  '{numItemsToDelete, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
-                  { numItemsToDelete: selected.length }
-                )}
+                deleteMessage={
+                  ('{numItemsToDelete, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                  { numItemsToDelete: selected.length })
+                }
               />,
               ...(canSyncSources
                 ? [
                     <Tooltip
                       key="update"
-                      content={i18n._(t`Sync all sources`)}
+                      content={t`Sync all sources`}
                       position="top"
                     >
                       <Button
                         ouiaId="sync-all-button"
                         onClick={syncAll}
-                        aria-label={i18n._(t`Sync all`)}
+                        aria-label={t`Sync all`}
                         variant="secondary"
                       >
-                        {i18n._(t`Sync all`)}
+                        {t`Sync all`}
                       </Button>
                     </Tooltip>,
                   ]
@@ -228,30 +228,30 @@ function InventorySourceList({ i18n }) {
       />
       {syncError && (
         <AlertModal
-          aria-label={i18n._(t`Sync error`)}
+          aria-label={t`Sync error`}
           isOpen={syncError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
         >
-          {i18n._(t`Failed to sync some or all inventory sources.`)}
+          {t`Failed to sync some or all inventory sources.`}
           <ErrorDetail error={syncError} />
         </AlertModal>
       )}
 
       {(deletionError || deleteRelatedResourcesError) && (
         <AlertModal
-          aria-label={i18n._(t`Delete error`)}
+          aria-label={t`Delete error`}
           isOpen={deletionError || deleteRelatedResourcesError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDeletionError}
         >
-          {i18n._(t`Failed to delete one or more inventory sources.`)}
+          {t`Failed to delete one or more inventory sources.`}
           <ErrorDetail error={deletionError || deleteRelatedResourcesError} />
         </AlertModal>
       )}
     </>
   );
 }
-export default withI18n()(InventorySourceList);
+export default InventorySourceList;

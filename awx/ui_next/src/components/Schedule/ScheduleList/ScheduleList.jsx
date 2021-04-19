@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { SchedulesAPI } from '../../../api';
 import AlertModal from '../../AlertModal';
@@ -20,7 +20,6 @@ const QS_CONFIG = getQSConfig('schedule', {
 });
 
 function ScheduleList({
-  i18n,
   loadSchedules,
   loadScheduleOptions,
   hideAddButton,
@@ -128,7 +127,7 @@ function ScheduleList({
     ) {
       return null;
     }
-    return i18n._(t`This schedule is missing an Inventory`);
+    return t`This schedule is missing an Inventory`;
   };
 
   const hasMissingSurveyValue = schedule => {
@@ -153,10 +152,7 @@ function ScheduleList({
         }
       });
     }
-    return (
-      missingValues &&
-      i18n._(t`This schedule is missing required survey values`)
-    );
+    return missingValues && t`This schedule is missing required survey values`;
   };
 
   return (
@@ -170,10 +166,10 @@ function ScheduleList({
         onRowClick={handleSelect}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG}>
-            <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-            <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
-            <HeaderCell sortKey="next_run">{i18n._(t`Next Run`)}</HeaderCell>
-            <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Type`}</HeaderCell>
+            <HeaderCell sortKey="next_run">{t`Next Run`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
           </HeaderRow>
         }
         renderRow={(item, index) => (
@@ -189,20 +185,20 @@ function ScheduleList({
         )}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name__icontains',
             isDefault: true,
           },
           {
-            name: i18n._(t`Description`),
+            name: t`Description`,
             key: 'description__icontains',
           },
           {
-            name: i18n._(t`Created By (Username)`),
+            name: t`Created By (Username)`,
             key: 'created_by__username__icontains',
           },
           {
-            name: i18n._(t`Modified By (Username)`),
+            name: t`Modified By (Username)`,
             key: 'modified_by__username__icontains',
           },
         ]}
@@ -228,7 +224,7 @@ function ScheduleList({
                 key="delete"
                 onDelete={handleDelete}
                 itemsToDelete={selected}
-                pluralizedItemName={i18n._(t`Schedules`)}
+                pluralizedItemName={t`Schedules`}
               />,
             ]}
           />
@@ -238,10 +234,10 @@ function ScheduleList({
         <AlertModal
           isOpen={deletionError}
           variant="danger"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDeletionError}
         >
-          {i18n._(t`Failed to delete one or more schedules.`)}
+          {t`Failed to delete one or more schedules.`}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
@@ -258,4 +254,4 @@ ScheduleList.defaultProps = {
   hideAddButton: false,
 };
 
-export default withI18n()(ScheduleList);
+export default ScheduleList;

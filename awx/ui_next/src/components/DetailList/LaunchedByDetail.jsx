@@ -32,13 +32,13 @@ const getLaunchedByDetails = ({ summary_fields = {}, related = {} }) => {
   return { link, value };
 };
 
-export default function LaunchedByDetail({ job, i18n }) {
+export default function LaunchedByDetail({ job }) {
   const { value: launchedByValue, link: launchedByLink } =
     getLaunchedByDetails(job) || {};
 
   return (
     <Detail
-      label={i18n._(t`Launched By`)}
+      label={t`Launched By`}
       value={
         launchedByLink ? (
           <Link to={`${launchedByLink}`}>{launchedByValue}</Link>

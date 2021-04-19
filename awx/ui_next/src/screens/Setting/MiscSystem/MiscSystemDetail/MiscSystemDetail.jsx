@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -16,7 +16,7 @@ import { useSettings } from '../../../../contexts/Settings';
 import { SettingDetail } from '../../shared';
 import { sortNestedDetails, pluck } from '../../shared/settingUtils';
 
-function MiscSystemDetail({ i18n }) {
+function MiscSystemDetail() {
   const { me } = useConfig();
   const { GET: allOptions } = useSettings();
 
@@ -75,17 +75,17 @@ function MiscSystemDetail({ i18n }) {
         ACCESS_TOKEN_EXPIRE_SECONDS: {
           ...OAUTH2_PROVIDER_OPTIONS,
           type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: i18n._(t`Access Token Expiration`),
+          label: t`Access Token Expiration`,
         },
         REFRESH_TOKEN_EXPIRE_SECONDS: {
           ...OAUTH2_PROVIDER_OPTIONS,
           type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: i18n._(t`Refresh Token Expiration`),
+          label: t`Refresh Token Expiration`,
         },
         AUTHORIZATION_CODE_EXPIRE_SECONDS: {
           ...OAUTH2_PROVIDER_OPTIONS,
           type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: i18n._(t`Authorization Code Expiration`),
+          label: t`Authorization Code Expiration`,
         },
       };
       const mergedData = {};
@@ -94,7 +94,7 @@ function MiscSystemDetail({ i18n }) {
         mergedData[key].value = systemData[key];
       });
       return sortNestedDetails(mergedData);
-    }, [allOptions, i18n]),
+    }, [allOptions]),
     null
   );
 
@@ -107,14 +107,14 @@ function MiscSystemDetail({ i18n }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Settings`)}
+          {t`Back to Settings`}
         </>
       ),
       link: `/settings`,
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/settings/miscellaneous_system/details`,
       id: 0,
     },
@@ -145,11 +145,11 @@ function MiscSystemDetail({ i18n }) {
           <CardActionsRow>
             <Button
               ouiaId="system-detail-edit-button"
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
               component={Link}
               to="/settings/miscellaneous_system/edit"
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           </CardActionsRow>
         )}
@@ -158,4 +158,4 @@ function MiscSystemDetail({ i18n }) {
   );
 }
 
-export default withI18n()(MiscSystemDetail);
+export default MiscSystemDetail;

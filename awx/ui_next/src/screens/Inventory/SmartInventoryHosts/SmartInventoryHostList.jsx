@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedDataList from '../../../components/PaginatedDataList';
@@ -18,7 +18,7 @@ const QS_CONFIG = getQSConfig('host', {
   order_by: 'name',
 });
 
-function SmartInventoryHostList({ i18n, inventory }) {
+function SmartInventoryHostList({ inventory }) {
   const location = useLocation();
 
   const {
@@ -59,27 +59,27 @@ function SmartInventoryHostList({ i18n, inventory }) {
         hasContentLoading={isLoading}
         items={hosts}
         itemCount={count}
-        pluralizedItemName={i18n._(t`Hosts`)}
+        pluralizedItemName={t`Hosts`}
         qsConfig={QS_CONFIG}
         onRowClick={handleSelect}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name',
             isDefault: true,
           },
           {
-            name: i18n._(t`Created by (username)`),
+            name: t`Created by (username)`,
             key: 'created_by__username',
           },
           {
-            name: i18n._(t`Modified by (username)`),
+            name: t`Modified by (username)`,
             key: 'modified_by__username',
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name',
           },
         ]}
@@ -122,4 +122,4 @@ SmartInventoryHostList.propTypes = {
   inventory: Inventory.isRequired,
 };
 
-export default withI18n()(SmartInventoryHostList);
+export default SmartInventoryHostList;

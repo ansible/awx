@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
@@ -11,49 +11,34 @@ import ContainerGroupAdd from './ContainerGroupAdd';
 import ContainerGroup from './ContainerGroup';
 import ScreenHeader from '../../components/ScreenHeader';
 
-function InstanceGroups({ i18n }) {
+function InstanceGroups() {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
-    '/instance_groups': i18n._(t`Instance Groups`),
-    '/instance_groups/add': i18n._(t`Create new instance group`),
-    '/instance_groups/container_group/add': i18n._(
-      t`Create new container group`
-    ),
+    '/instance_groups': t`Instance Groups`,
+    '/instance_groups/add': t`Create new instance group`,
+    '/instance_groups/container_group/add': t`Create new container group`,
   });
 
-  const buildBreadcrumbConfig = useCallback(
-    instanceGroups => {
-      if (!instanceGroups) {
-        return;
-      }
-      setBreadcrumbConfig({
-        '/instance_groups': i18n._(t`Instance Groups`),
-        '/instance_groups/add': i18n._(t`Create new instance group`),
-        '/instance_groups/container_group/add': i18n._(
-          t`Create new container group`
-        ),
+  const buildBreadcrumbConfig = useCallback(instanceGroups => {
+    if (!instanceGroups) {
+      return;
+    }
+    setBreadcrumbConfig({
+      '/instance_groups': t`Instance Groups`,
+      '/instance_groups/add': t`Create new instance group`,
+      '/instance_groups/container_group/add': t`Create new container group`,
 
-        [`/instance_groups/${instanceGroups.id}/details`]: i18n._(t`Details`),
-        [`/instance_groups/${instanceGroups.id}/instances`]: i18n._(
-          t`Instances`
-        ),
-        [`/instance_groups/${instanceGroups.id}/jobs`]: i18n._(t`Jobs`),
-        [`/instance_groups/${instanceGroups.id}/edit`]: i18n._(t`Edit details`),
-        [`/instance_groups/${instanceGroups.id}`]: `${instanceGroups.name}`,
+      [`/instance_groups/${instanceGroups.id}/details`]: t`Details`,
+      [`/instance_groups/${instanceGroups.id}/instances`]: t`Instances`,
+      [`/instance_groups/${instanceGroups.id}/jobs`]: t`Jobs`,
+      [`/instance_groups/${instanceGroups.id}/edit`]: t`Edit details`,
+      [`/instance_groups/${instanceGroups.id}`]: `${instanceGroups.name}`,
 
-        [`/instance_groups/container_group/${instanceGroups.id}/details`]: i18n._(
-          t`Details`
-        ),
-        [`/instance_groups/container_group/${instanceGroups.id}/jobs`]: i18n._(
-          t`Jobs`
-        ),
-        [`/instance_groups/container_group/${instanceGroups.id}/edit`]: i18n._(
-          t`Edit details`
-        ),
-        [`/instance_groups/container_group/${instanceGroups.id}`]: `${instanceGroups.name}`,
-      });
-    },
-    [i18n]
-  );
+      [`/instance_groups/container_group/${instanceGroups.id}/details`]: t`Details`,
+      [`/instance_groups/container_group/${instanceGroups.id}/jobs`]: t`Jobs`,
+      [`/instance_groups/container_group/${instanceGroups.id}/edit`]: t`Edit details`,
+      [`/instance_groups/container_group/${instanceGroups.id}`]: `${instanceGroups.name}`,
+    });
+  }, []);
   return (
     <>
       <ScreenHeader
@@ -81,4 +66,4 @@ function InstanceGroups({ i18n }) {
   );
 }
 
-export default withI18n()(InstanceGroups);
+export default InstanceGroups;

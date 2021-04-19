@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t, plural } from '@lingui/macro';
 
 import { Card } from '@patternfly/react-core';
@@ -20,7 +20,7 @@ import JobListCancelButton from './JobListCancelButton';
 import useWsJobs from './useWsJobs';
 import { UnifiedJobsAPI } from '../../api';
 
-function JobList({ i18n, defaultParams, showTypeColumn = false }) {
+function JobList({ defaultParams, showTypeColumn = false }) {
   const qsConfig = getQSConfig(
     'job',
     {
@@ -162,67 +162,65 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
           hasContentLoading={isLoading || isDeleteLoading || isCancelLoading}
           items={jobs}
           itemCount={count}
-          pluralizedItemName={i18n._(t`Jobs`)}
+          pluralizedItemName={t`Jobs`}
           qsConfig={qsConfig}
           toolbarSearchColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name__icontains',
               isDefault: true,
             },
             {
-              name: i18n._(t`ID`),
+              name: t`ID`,
               key: 'id',
             },
             {
-              name: i18n._(t`Label Name`),
+              name: t`Label Name`,
               key: 'labels__name__icontains',
             },
             {
-              name: i18n._(t`Job Type`),
+              name: t`Job Type`,
               key: `or__type`,
               options: [
-                [`project_update`, i18n._(t`Source Control Update`)],
-                [`inventory_update`, i18n._(t`Inventory Sync`)],
-                [`job`, i18n._(t`Playbook Run`)],
-                [`ad_hoc_command`, i18n._(t`Command`)],
-                [`system_job`, i18n._(t`Management Job`)],
-                [`workflow_job`, i18n._(t`Workflow Job`)],
+                [`project_update`, t`Source Control Update`],
+                [`inventory_update`, t`Inventory Sync`],
+                [`job`, t`Playbook Run`],
+                [`ad_hoc_command`, t`Command`],
+                [`system_job`, t`Management Job`],
+                [`workflow_job`, t`Workflow Job`],
               ],
             },
             {
-              name: i18n._(t`Launched By (Username)`),
+              name: t`Launched By (Username)`,
               key: 'created_by__username__icontains',
             },
             {
-              name: i18n._(t`Status`),
+              name: t`Status`,
               key: 'status',
               options: [
-                [`new`, i18n._(t`New`)],
-                [`pending`, i18n._(t`Pending`)],
-                [`waiting`, i18n._(t`Waiting`)],
-                [`running`, i18n._(t`Running`)],
-                [`successful`, i18n._(t`Successful`)],
-                [`failed`, i18n._(t`Failed`)],
-                [`error`, i18n._(t`Error`)],
-                [`canceled`, i18n._(t`Canceled`)],
+                [`new`, t`New`],
+                [`pending`, t`Pending`],
+                [`waiting`, t`Waiting`],
+                [`running`, t`Running`],
+                [`successful`, t`Successful`],
+                [`failed`, t`Failed`],
+                [`error`, t`Error`],
+                [`canceled`, t`Canceled`],
               ],
             },
             {
-              name: i18n._(t`Limit`),
+              name: t`Limit`,
               key: 'job__limit',
             },
           ]}
           headerRow={
             <HeaderRow qsConfig={qsConfig} isExpandable>
-              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-              <HeaderCell sortKey="status">{i18n._(t`Status`)}</HeaderCell>
-              {showTypeColumn && <HeaderCell>{i18n._(t`Type`)}</HeaderCell>}
-              <HeaderCell sortKey="started">{i18n._(t`Start Time`)}</HeaderCell>
-              <HeaderCell sortKey="finished">
-                {i18n._(t`Finish Time`)}
-              </HeaderCell>
-              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell sortKey="status">{t`Status`}</HeaderCell>
+              {showTypeColumn && <HeaderCell>{t`Type`}</HeaderCell>}
+              <HeaderCell sortKey="started">{t`Start Time`}</HeaderCell>
+              <HeaderCell sortKey="finished">{t`Finish Time`}</HeaderCell>
+              <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
           toolbarSearchableKeys={searchableKeys}
@@ -239,7 +237,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
                   key="delete"
                   onDelete={handleJobDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName={i18n._(t`Jobs`)}
+                  pluralizedItemName={t`Jobs`}
                   cannotDelete={item =>
                     isJobRunning(item.status) ||
                     !item.summary_fields.user_capabilities.delete
@@ -275,10 +273,10 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
         <AlertModal
           isOpen
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDeletionError}
         >
-          {i18n._(t`Failed to delete one or more jobs.`)}
+          {t`Failed to delete one or more jobs.`}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
@@ -286,10 +284,10 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
         <AlertModal
           isOpen
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissCancelError}
         >
-          {i18n._(t`Failed to cancel one or more jobs.`)}
+          {t`Failed to cancel one or more jobs.`}
           <ErrorDetail error={cancelError} />
         </AlertModal>
       )}
@@ -297,4 +295,4 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   );
 }
 
-export default withI18n()(JobList);
+export default JobList;

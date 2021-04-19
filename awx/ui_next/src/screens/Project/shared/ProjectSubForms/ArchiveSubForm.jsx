@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   UrlFormField,
@@ -9,17 +9,15 @@ import {
 } from './SharedFields';
 
 const ArchiveSubForm = ({
-  i18n,
   credential,
   onCredentialSelection,
   scmUpdateOnLaunch,
 }) => (
   <>
     <UrlFormField
-      i18n={i18n}
       tooltip={
         <span>
-          {i18n._(t`Example URLs for Remote Archive Source Control include:`)}
+          {t`Example URLs for Remote Archive Source Control include:`}
           <ul css={{ margin: '10px 0 10px 20px' }}>
             <li>
               <code>
@@ -43,4 +41,4 @@ const ArchiveSubForm = ({
   </>
 );
 
-export default withI18n()(ArchiveSubForm);
+export default ArchiveSubForm;

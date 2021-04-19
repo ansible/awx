@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { bool, shape, func } from 'prop-types';
 import {
@@ -63,7 +63,6 @@ const OUTPUT_NO_COUNT_JOB_TYPES = [
 ];
 
 const OutputToolbar = ({
-  i18n,
   job,
   onDelete,
   onCancel,
@@ -86,27 +85,27 @@ const OutputToolbar = ({
       {!hideCounts && (
         <>
           {playCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Play Count`)}>
-              <div>{i18n._(t`Plays`)}</div>
+            <BadgeGroup aria-label={t`Play Count`}>
+              <div>{t`Plays`}</div>
               <Badge isRead>{playCount}</Badge>
             </BadgeGroup>
           )}
           {taskCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Task Count`)}>
-              <div>{i18n._(t`Tasks`)}</div>
+            <BadgeGroup aria-label={t`Task Count`}>
+              <div>{t`Tasks`}</div>
               <Badge isRead>{taskCount}</Badge>
             </BadgeGroup>
           )}
           {totalHostCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Host Count`)}>
-              <div>{i18n._(t`Hosts`)}</div>
+            <BadgeGroup aria-label={t`Host Count`}>
+              <div>{t`Hosts`}</div>
               <Badge isRead>{totalHostCount}</Badge>
             </BadgeGroup>
           )}
           {darkCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Unreachable Host Count`)}>
-              <div>{i18n._(t`Unreachable`)}</div>
-              <Tooltip content={i18n._(t`Unreachable Hosts`)}>
+            <BadgeGroup aria-label={t`Unreachable Host Count`}>
+              <div>{t`Unreachable`}</div>
+              <Tooltip content={t`Unreachable Hosts`}>
                 <Badge color="#470000" isRead>
                   {darkCount}
                 </Badge>
@@ -114,9 +113,9 @@ const OutputToolbar = ({
             </BadgeGroup>
           )}
           {failureCount > 0 && (
-            <BadgeGroup aria-label={i18n._(t`Failed Host Count`)}>
-              <div>{i18n._(t`Failed`)}</div>
-              <Tooltip content={i18n._(t`Failed Hosts`)}>
+            <BadgeGroup aria-label={t`Failed Host Count`}>
+              <div>{t`Failed`}</div>
+              <Tooltip content={t`Failed Hosts`}>
                 <Badge color="#C9190B" isRead>
                   {failureCount}
                 </Badge>
@@ -126,9 +125,9 @@ const OutputToolbar = ({
         </>
       )}
 
-      <BadgeGroup aria-label={i18n._(t`Elapsed Time`)}>
-        <div>{i18n._(t`Elapsed`)}</div>
-        <Tooltip content={i18n._(t`Elapsed time that the job ran`)}>
+      <BadgeGroup aria-label={t`Elapsed Time`}>
+        <div>{t`Elapsed`}</div>
+        <Tooltip content={t`Elapsed time that the job ran`}>
           <Badge isRead>{toHHMMSS(job.elapsed)}</Badge>
         </Tooltip>
       </BadgeGroup>
@@ -138,8 +137,8 @@ const OutputToolbar = ({
           <Tooltip
             content={
               job.status === 'failed' && job.type === 'job'
-                ? i18n._(t`Relaunch using host parameters`)
-                : i18n._(t`Relaunch Job`)
+                ? t`Relaunch using host parameters`
+                : t`Relaunch Job`
             }
           >
             {job.status === 'failed' && job.type === 'job' ? (
@@ -158,7 +157,7 @@ const OutputToolbar = ({
                     ouiaId="job-output-relaunch-button"
                     variant="plain"
                     onClick={handleRelaunch}
-                    aria-label={i18n._(t`Relaunch`)}
+                    aria-label={t`Relaunch`}
                   >
                     <RocketIcon />
                   </Button>
@@ -169,12 +168,12 @@ const OutputToolbar = ({
         )}
 
       {job.related?.stdout && (
-        <Tooltip content={i18n._(t`Download Output`)}>
+        <Tooltip content={t`Download Output`}>
           <a href={`${job.related.stdout}?format=txt_download`}>
             <Button
               ouiaId="job-output-download-button"
               variant="plain"
-              aria-label={i18n._(t`Download Output`)}
+              aria-label={t`Download Output`}
             >
               <DownloadIcon />
             </Button>
@@ -183,11 +182,11 @@ const OutputToolbar = ({
       )}
       {job.summary_fields.user_capabilities.start &&
         ['pending', 'waiting', 'running'].includes(jobStatus) && (
-          <Tooltip content={i18n._(t`Cancel Job`)}>
+          <Tooltip content={t`Cancel Job`}>
             <Button
               ouiaId="job-output-cancel-button"
               variant="plain"
-              aria-label={i18n._(t`Cancel Job`)}
+              aria-label={t`Cancel Job`}
               onClick={onCancel}
             >
               <MinusCircleIcon />
@@ -198,11 +197,11 @@ const OutputToolbar = ({
         ['new', 'successful', 'failed', 'error', 'canceled'].includes(
           jobStatus
         ) && (
-          <Tooltip content={i18n._(t`Delete Job`)}>
+          <Tooltip content={t`Delete Job`}>
             <DeleteButton
               ouiaId="job-output-delete-button"
               name={job.name}
-              modalTitle={i18n._(t`Delete Job`)}
+              modalTitle={t`Delete Job`}
               onConfirm={onDelete}
               variant="plain"
               isDisabled={isDeleteDisabled}
@@ -225,4 +224,4 @@ OutputToolbar.defaultProps = {
   isDeleteDisabled: false,
 };
 
-export default withI18n()(OutputToolbar);
+export default OutputToolbar;

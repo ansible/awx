@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { number, string, oneOfType } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { SelectVariant, Select, SelectOption } from '@patternfly/react-core';
 import { ProjectsAPI } from '../../../api';
@@ -13,7 +13,6 @@ function PlaybookSelect({
   onBlur,
   onError,
   onChange,
-  i18n,
 }) {
   const [isDisabled, setIsDisabled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -55,7 +54,7 @@ function PlaybookSelect({
       variant={SelectVariant.typeahead}
       selections={selected}
       onToggle={setIsOpen}
-      placeholderText={i18n._(t`Select a playbook`)}
+      placeholderText={t`Select a playbook`}
       isCreateable={false}
       onSelect={(event, value) => {
         setIsOpen(false);
@@ -81,4 +80,4 @@ PlaybookSelect.defaultProps = {
 };
 
 export { PlaybookSelect as _PlaybookSelect };
-export default withI18n()(PlaybookSelect);
+export default PlaybookSelect;

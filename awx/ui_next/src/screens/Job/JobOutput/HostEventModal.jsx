@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { AllHtmlEntities } from 'html-entities';
@@ -78,7 +78,7 @@ const processStdOutValue = hostEvent => {
   return stdOut;
 };
 
-function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
+function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
   const [hostStatus, setHostStatus] = useState(null);
   const [activeTabKey, setActiveTabKey] = useState(0);
 
@@ -98,26 +98,26 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={i18n._(t`Host Details`)}
-      aria-label={i18n._(t`Host details modal`)}
+      title={t`Host Details`}
+      aria-label={t`Host details modal`}
       width="75%"
     >
       <Tabs
-        aria-label={i18n._(t`Tabs`)}
+        aria-label={t`Tabs`}
         activeKey={activeTabKey}
         onSelect={handleTabClick}
       >
         <Tab
-          aria-label={i18n._(t`Details tab`)}
+          aria-label={t`Details tab`}
           eventKey={0}
-          title={<TabTitleText>{i18n._(t`Details`)}</TabTitleText>}
+          title={<TabTitleText>{t`Details`}</TabTitleText>}
         >
           <DetailList
             style={{ alignItems: 'center', marginTop: '20px' }}
             gutter="sm"
           >
             <Detail
-              label={i18n._(t`Host Name`)}
+              label={t`Host Name`}
               value={
                 <HostNameDetailValue>
                   {hostStatus ? <StatusIcon status={hostStatus} /> : null}
@@ -125,24 +125,22 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
                 </HostNameDetailValue>
               }
             />
-            <Detail label={i18n._(t`Play`)} value={hostEvent.play} />
-            <Detail label={i18n._(t`Task`)} value={hostEvent.task} />
+            <Detail label={t`Play`} value={hostEvent.play} />
+            <Detail label={t`Task`} value={hostEvent.task} />
             <Detail
-              label={i18n._(t`Module`)}
-              value={
-                hostEvent.event_data.task_action || i18n._(t`No result found`)
-              }
+              label={t`Module`}
+              value={hostEvent.event_data.task_action || t`No result found`}
             />
             <Detail
-              label={i18n._(t`Command`)}
+              label={t`Command`}
               value={hostEvent?.event_data?.res?.cmd}
             />
           </DetailList>
         </Tab>
         <Tab
           eventKey={1}
-          title={<TabTitleText>{i18n._(t`JSON`)}</TabTitleText>}
-          aria-label={i18n._(t`JSON tab`)}
+          title={<TabTitleText>{t`JSON`}</TabTitleText>}
+          aria-label={t`JSON tab`}
         >
           {activeTabKey === 1 && jsonObj ? (
             <CodeEditor
@@ -154,13 +152,13 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
               hasErrors={false}
             />
           ) : (
-            <ContentEmpty title={i18n._(t`No JSON Available`)} />
+            <ContentEmpty title={t`No JSON Available`} />
           )}
         </Tab>
         <Tab
           eventKey={2}
-          title={<TabTitleText>{i18n._(t`Standard Out`)}</TabTitleText>}
-          aria-label={i18n._(t`Standard out tab`)}
+          title={<TabTitleText>{t`Standard Out`}</TabTitleText>}
+          aria-label={t`Standard out tab`}
         >
           {activeTabKey === 2 && stdOut ? (
             <CodeEditor
@@ -172,13 +170,13 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
               hasErrors={false}
             />
           ) : (
-            <ContentEmpty title={i18n._(t`No Standard Out Available`)} />
+            <ContentEmpty title={t`No Standard Out Available`} />
           )}
         </Tab>
         <Tab
           eventKey={3}
-          title={<TabTitleText>{i18n._(t`Standard Error`)}</TabTitleText>}
-          aria-label={i18n._(t`Standard error tab`)}
+          title={<TabTitleText>{t`Standard Error`}</TabTitleText>}
+          aria-label={t`Standard error tab`}
         >
           {activeTabKey === 3 && stdErr ? (
             <CodeEditor
@@ -190,7 +188,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
               rows={20}
             />
           ) : (
-            <ContentEmpty title={i18n._(t`No Standard Error Available`)} />
+            <ContentEmpty title={t`No Standard Error Available`} />
           )}
         </Tab>
       </Tabs>
@@ -198,7 +196,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
   );
 }
 
-export default withI18n()(HostEventModal);
+export default HostEventModal;
 
 HostEventModal.propTypes = {
   onClose: PropTypes.func.isRequired,

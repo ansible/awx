@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   DataListItem,
@@ -11,37 +11,37 @@ import { Link } from 'react-router-dom';
 import { DetailList, Detail } from '../../../components/DetailList';
 import DataListCell from '../../../components/DataListCell';
 
-function UserRolesListItem({ role, i18n, detailUrl, onSelect }) {
+function UserRolesListItem({ role, detailUrl, onSelect }) {
   const labelId = `userRole-${role.id}`;
   return (
     <DataListItem key={role.id} aria-labelledby={labelId} id={`${role.id}`}>
       <DataListItemRow>
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="name" aria-label={i18n._(t`Resource name`)}>
+            <DataListCell key="name" aria-label={t`Resource name`}>
               {role.summary_fields.resource_name ? (
                 <Link to={`${detailUrl}`} id={labelId}>
                   <b>{role.summary_fields.resource_name}</b>
                 </Link>
               ) : (
-                <b>{i18n._(t`System`)}</b>
+                <b>{t`System`}</b>
               )}
             </DataListCell>,
-            <DataListCell key="type" aria-label={i18n._(t`Resource type`)}>
+            <DataListCell key="type" aria-label={t`Resource type`}>
               {role.summary_fields && (
                 <DetailList stacked>
                   <Detail
-                    label={i18n._(t`Type`)}
+                    label={t`Type`}
                     value={role.summary_fields.resource_type_display_name}
                   />
                 </DetailList>
               )}
             </DataListCell>,
-            <DataListCell key="role" aria-label={i18n._(t`Resource role`)}>
+            <DataListCell key="role" aria-label={t`Resource role`}>
               {role.name && (
                 <DetailList stacked>
                   <Detail
-                    label={i18n._(t`Role`)}
+                    label={t`Role`}
                     value={
                       <Chip
                         key={role.name}
@@ -65,4 +65,4 @@ function UserRolesListItem({ role, i18n, detailUrl, onSelect }) {
   );
 }
 
-export default withI18n()(UserRolesListItem);
+export default UserRolesListItem;

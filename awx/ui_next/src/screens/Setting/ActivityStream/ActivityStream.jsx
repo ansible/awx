@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
@@ -8,7 +8,7 @@ import { useConfig } from '../../../contexts/Config';
 import ActivityStreamDetail from './ActivityStreamDetail';
 import ActivityStreamEdit from './ActivityStreamEdit';
 
-function ActivityStream({ i18n }) {
+function ActivityStream() {
   const baseURL = '/settings/activity_stream';
   const { me } = useConfig();
 
@@ -30,7 +30,7 @@ function ActivityStream({ i18n }) {
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>
               <Link to={`${baseURL}/details`}>
-                {i18n._(t`View Activity Stream settings`)}
+                {t`View Activity Stream settings`}
               </Link>
             </ContentError>
           </Route>
@@ -40,4 +40,4 @@ function ActivityStream({ i18n }) {
   );
 }
 
-export default withI18n()(ActivityStream);
+export default ActivityStream;

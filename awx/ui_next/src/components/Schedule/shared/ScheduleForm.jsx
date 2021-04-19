@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { shape, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
 import { RRule } from 'rrule';
@@ -78,36 +78,33 @@ const generateRunOnTheDay = (days = []) => {
   return null;
 };
 
-function ScheduleFormFields({ i18n, hasDaysToKeepField, zoneOptions }) {
+function ScheduleFormFields({ hasDaysToKeepField, zoneOptions }) {
   const [startDateTime, startDateTimeMeta] = useField({
     name: 'startDateTime',
-    validate: required(
-      i18n._(t`Select a valid date and time for this field`),
-      i18n
-    ),
+    validate: required(t`Select a valid date and time for this field`),
   });
   const [timezone, timezoneMeta] = useField({
     name: 'timezone',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: required(t`Select a value for this field`),
   });
   const [frequency, frequencyMeta] = useField({
     name: 'frequency',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: required(t`Select a value for this field`),
   });
 
   return (
     <>
       <FormField
         id="schedule-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="schedule-description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
@@ -120,7 +117,7 @@ function ScheduleFormFields({ i18n, hasDaysToKeepField, zoneOptions }) {
             ? 'default'
             : 'error'
         }
-        label={i18n._(t`Start date/time`)}
+        label={t`Start date/time`}
       >
         <input
           className="pf-c-form-control"
@@ -138,7 +135,7 @@ function ScheduleFormFields({ i18n, hasDaysToKeepField, zoneOptions }) {
         validated={
           !timezoneMeta.touched || !timezoneMeta.error ? 'default' : 'error'
         }
-        label={i18n._(t`Local time zone`)}
+        label={t`Local time zone`}
       >
         <AnsibleSelect
           id="schedule-timezone"
@@ -154,18 +151,18 @@ function ScheduleFormFields({ i18n, hasDaysToKeepField, zoneOptions }) {
         validated={
           !frequencyMeta.touched || !frequencyMeta.error ? 'default' : 'error'
         }
-        label={i18n._(t`Run frequency`)}
+        label={t`Run frequency`}
       >
         <AnsibleSelect
           id="schedule-frequency"
           data={[
-            { value: 'none', key: 'none', label: i18n._(t`None (run once)`) },
-            { value: 'minute', key: 'minute', label: i18n._(t`Minute`) },
-            { value: 'hour', key: 'hour', label: i18n._(t`Hour`) },
-            { value: 'day', key: 'day', label: i18n._(t`Day`) },
-            { value: 'week', key: 'week', label: i18n._(t`Week`) },
-            { value: 'month', key: 'month', label: i18n._(t`Month`) },
-            { value: 'year', key: 'year', label: i18n._(t`Year`) },
+            { value: 'none', key: 'none', label: t`None (run once)` },
+            { value: 'minute', key: 'minute', label: t`Minute` },
+            { value: 'hour', key: 'hour', label: t`Hour` },
+            { value: 'day', key: 'day', label: t`Day` },
+            { value: 'week', key: 'week', label: t`Week` },
+            { value: 'month', key: 'month', label: t`Month` },
+            { value: 'year', key: 'year', label: t`Year` },
           ]}
           {...frequency}
         />
@@ -173,17 +170,17 @@ function ScheduleFormFields({ i18n, hasDaysToKeepField, zoneOptions }) {
       {hasDaysToKeepField ? (
         <FormField
           id="schedule-days-to-keep"
-          label={i18n._(t`Days of Data to Keep`)}
+          label={t`Days of Data to Keep`}
           name="daysToKeep"
           type="number"
-          validate={required(null, i18n)}
+          validate={required(null)}
           isRequired
         />
       ) : null}
       {frequency.value !== 'none' && (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
-            {i18n._(t`Frequency Details`)}
+            {t`Frequency Details`}
           </Title>
           <FormColumnLayout>
             <FrequencyDetailSubform />
@@ -198,7 +195,7 @@ function ScheduleForm({
   hasDaysToKeepField,
   handleCancel,
   handleSubmit,
-  i18n,
+
   schedule,
   submitError,
   resource,
@@ -531,7 +528,7 @@ function ScheduleForm({
         rruleError = error;
       }
     } else {
-      rruleError = new Error(i18n._(t`Schedule is missing rrule`));
+      rruleError = new Error(t`Schedule is missing rrule`);
     }
   }
 
@@ -567,9 +564,7 @@ function ScheduleForm({
                 end === 'onDate' &&
                 new Date(startDateTime) > new Date(endDateTime)
               ) {
-                errors.endDateTime = i18n._(
-                  t`Please select an end date/time that comes after the start date/time.`
-                );
+                errors.endDateTime = t`Please select an end date/time that comes after the start date/time.`;
               }
 
               if (
@@ -577,9 +572,7 @@ function ScheduleForm({
                 runOn === 'day' &&
                 (runOnDayNumber < 1 || runOnDayNumber > 31)
               ) {
-                errors.runOn = i18n._(
-                  t`Please select a day number between 1 and 31.`
-                );
+                errors.runOn = t`Please select a day number between 1 and 31.`;
               }
 
               return errors;
@@ -590,7 +583,6 @@ function ScheduleForm({
                 <FormColumnLayout>
                   <ScheduleFormFields
                     hasDaysToKeepField={hasDaysToKeepField}
-                    i18n={i18n}
                     zoneOptions={zoneOptions}
                     {...rest}
                   />
@@ -616,13 +608,13 @@ function ScheduleForm({
                     <ActionGroup>
                       <Button
                         ouiaId="schedule-form-save-button"
-                        aria-label={i18n._(t`Save`)}
+                        aria-label={t`Save`}
                         variant="primary"
                         type="button"
                         onClick={formik.handleSubmit}
                         isDisabled={isSaveDisabled}
                       >
-                        {i18n._(t`Save`)}
+                        {t`Save`}
                       </Button>
 
                       {isTemplate && showPromptButton && (
@@ -630,20 +622,20 @@ function ScheduleForm({
                           ouiaId="schedule-form-prompt-button"
                           variant="secondary"
                           type="button"
-                          aria-label={i18n._(t`Prompt`)}
+                          aria-label={t`Prompt`}
                           onClick={() => setIsWizardOpen(true)}
                         >
-                          {i18n._(t`Prompt`)}
+                          {t`Prompt`}
                         </Button>
                       )}
                       <Button
                         ouiaId="schedule-form-cancel-button"
-                        aria-label={i18n._(t`Cancel`)}
+                        aria-label={t`Cancel`}
                         variant="secondary"
                         type="button"
                         onClick={handleCancel}
                       >
-                        {i18n._(t`Cancel`)}
+                        {t`Cancel`}
                       </Button>
                     </ActionGroup>
                   </FormFullWidthLayout>
@@ -669,4 +661,4 @@ ScheduleForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(ScheduleForm);
+export default ScheduleForm;

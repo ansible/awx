@@ -2,7 +2,7 @@ import { t } from '@lingui/macro';
 import { RRule } from 'rrule';
 import { getRRuleDayConstants } from '../../../util/dates';
 
-export default function buildRuleObj(values, i18n) {
+export default function buildRuleObj(values) {
   const [startDate, startTime] = values.startDateTime.split('T');
   // Dates are formatted like "YYYY-MM-DD"
   const [startYear, startMonth, startDay] = startDate.split('-');
@@ -51,7 +51,7 @@ export default function buildRuleObj(values, i18n) {
         ruleObj.bymonthday = values.runOnDayNumber;
       } else if (values.runOn === 'the') {
         ruleObj.bysetpos = parseInt(values.runOnTheOccurrence, 10);
-        ruleObj.byweekday = getRRuleDayConstants(values.runOnTheDay, i18n);
+        ruleObj.byweekday = getRRuleDayConstants(values.runOnTheDay);
       }
       break;
     case 'year':
@@ -61,12 +61,12 @@ export default function buildRuleObj(values, i18n) {
         ruleObj.bymonthday = values.runOnDayNumber;
       } else if (values.runOn === 'the') {
         ruleObj.bysetpos = parseInt(values.runOnTheOccurrence, 10);
-        ruleObj.byweekday = getRRuleDayConstants(values.runOnTheDay, i18n);
+        ruleObj.byweekday = getRRuleDayConstants(values.runOnTheDay);
         ruleObj.bymonth = parseInt(values.runOnTheMonth, 10);
       }
       break;
     default:
-      throw new Error(i18n._(t`Frequency did not match an expected value`));
+      throw new Error(t`Frequency did not match an expected value`);
   }
 
   if (values.frequency !== 'none') {
@@ -93,7 +93,7 @@ export default function buildRuleObj(values, i18n) {
         break;
       }
       default:
-        throw new Error(i18n._(t`End did not match an expected value`));
+        throw new Error(t`End did not match an expected value`);
     }
   }
 

@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
 import RADIUSDetail from './RADIUSDetail';
 import RADIUSEdit from './RADIUSEdit';
 
-function RADIUS({ i18n }) {
+function RADIUS() {
   const baseURL = '/settings/radius';
   return (
     <PageSection>
@@ -22,9 +22,7 @@ function RADIUS({ i18n }) {
           </Route>
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>
-              <Link to={`${baseURL}/details`}>
-                {i18n._(t`View RADIUS settings`)}
-              </Link>
+              <Link to={`${baseURL}/details`}>{t`View RADIUS settings`}</Link>
             </ContentError>
           </Route>
         </Switch>
@@ -33,4 +31,4 @@ function RADIUS({ i18n }) {
   );
 }
 
-export default withI18n()(RADIUS);
+export default RADIUS;

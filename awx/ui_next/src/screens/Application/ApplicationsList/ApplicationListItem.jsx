@@ -1,6 +1,6 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
@@ -16,7 +16,6 @@ function ApplicationListItem({
   onSelect,
   detailUrl,
   rowIndex,
-  i18n,
 }) {
   const labelId = `check-action-${application.id}`;
   return (
@@ -27,31 +26,31 @@ function ApplicationListItem({
           isSelected,
           onSelect,
         }}
-        dataLabel={i18n._(t`Selected`)}
+        dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+      <Td id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{application.name}</b>
         </Link>
       </Td>
-      <Td dataLabel={i18n._(t`Organization`)}>
+      <Td dataLabel={t`Organization`}>
         <Link
           to={`/organizations/${application.summary_fields.organization.id}`}
         >
           <b>{application.summary_fields.organization.name}</b>
         </Link>
       </Td>
-      <Td dataLabel={i18n._(t`Last Modified`)}>
+      <Td dataLabel={t`Last Modified`}>
         {formatDateString(application.modified)}
       </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+      <ActionsTd dataLabel={t`Actions`}>
         <ActionItem
           visible={application.summary_fields.user_capabilities.edit}
-          tooltip={i18n._(t`Edit application`)}
+          tooltip={t`Edit application`}
         >
           <Button
             ouiaId={`${application.id}-edit-button`}
-            aria-label={i18n._(t`Edit application`)}
+            aria-label={t`Edit application`}
             variant="plain"
             component={Link}
             to={`/applications/${application.id}/edit`}
@@ -71,4 +70,4 @@ ApplicationListItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(ApplicationListItem);
+export default ApplicationListItem;

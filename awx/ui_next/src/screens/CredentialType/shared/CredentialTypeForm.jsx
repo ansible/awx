@@ -1,7 +1,7 @@
 import React from 'react';
 import { func, shape } from 'prop-types';
 import { Formik } from 'formik';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 
 import { Form } from '@patternfly/react-core';
@@ -16,41 +16,37 @@ import {
 
 import { jsonToYaml } from '../../../util/yaml';
 
-function CredentialTypeFormFields({ i18n }) {
+function CredentialTypeFormFields() {
   return (
     <>
       <FormField
         id="credential-type-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="credential-type-description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
       <FormFullWidthLayout>
         <VariablesField
-          tooltip={i18n._(
-            t`Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.`
-          )}
+          tooltip={t`Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.`}
           id="credential-type-inputs-configuration"
           name="inputs"
-          label={i18n._(t`Input configuration`)}
+          label={t`Input configuration`}
         />
       </FormFullWidthLayout>
       <FormFullWidthLayout>
         <VariablesField
-          tooltip={i18n._(
-            t`Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.`
-          )}
+          tooltip={t`Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax.`}
           id="credential-type-injectors-configuration"
           name="injectors"
-          label={i18n._(t`Injector configuration`)}
+          label={t`Injector configuration`}
         />
       </FormFullWidthLayout>
     </>
@@ -104,4 +100,4 @@ CredentialTypeForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(CredentialTypeForm);
+export default CredentialTypeForm;

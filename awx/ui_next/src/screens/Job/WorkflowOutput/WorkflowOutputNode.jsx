@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { func, shape } from 'prop-types';
@@ -66,7 +66,7 @@ const ConvergenceLabel = styled.p`
 
 Elapsed.displayName = 'Elapsed';
 
-function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
+function WorkflowOutputNode({ mouseEnter, mouseLeave, node }) {
   const history = useHistory();
   const { nodePositions } = useContext(WorkflowStateContext);
   const job = node?.originalNodeObject?.summary_fields?.job;
@@ -125,7 +125,7 @@ function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
             x={wfConstants.nodeW / 2 - wfConstants.nodeW / 10 + 7}
             y={-wfConstants.nodeH / 4 - 1}
           >
-            <ConvergenceLabel>{i18n._(t`ALL`)}</ConvergenceLabel>
+            <ConvergenceLabel>{t`ALL`}</ConvergenceLabel>
           </foreignObject>
         </>
       )}
@@ -151,7 +151,7 @@ function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
               )}
             </>
           ) : (
-            <NodeDefaultLabel>{jobName || i18n._(t`DELETED`)}</NodeDefaultLabel>
+            <NodeDefaultLabel>{jobName || t`DELETED`}</NodeDefaultLabel>
           )}
         </NodeContents>
       </foreignObject>
@@ -168,4 +168,4 @@ WorkflowOutputNode.propTypes = {
   node: shape().isRequired,
 };
 
-export default withI18n()(WorkflowOutputNode);
+export default WorkflowOutputNode;

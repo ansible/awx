@@ -12,7 +12,7 @@ import {
   PageSidebar,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import styled from 'styled-components';
 
 import { MeAPI, RootAPI } from '../../api';
@@ -85,7 +85,7 @@ function useStorage(key) {
   return [storageVal, setValue];
 }
 
-function AppContainer({ i18n, navRouteConfig = [], children }) {
+function AppContainer({ navRouteConfig = [], children }) {
   const history = useHistory();
   const config = useConfig();
 
@@ -162,7 +162,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
           <PageHeaderToolsGroup>
             <PageHeaderToolsItem>
               <Button onClick={handleLogout} variant="tertiary" ouiaId="logout">
-                {i18n._(t`Logout`)}
+                {t`Logout`}
               </Button>
             </PageHeaderToolsItem>
           </PageHeaderToolsGroup>
@@ -175,7 +175,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
     <PageSidebar
       theme="dark"
       nav={
-        <Nav aria-label={i18n._(t`Navigation`)} theme="dark">
+        <Nav aria-label={t`Navigation`} theme="dark">
           <NavList>
             {navRouteConfig.map(({ groupId, groupTitle, routes }) => (
               <NavExpandableGroup
@@ -207,7 +207,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
       />
       <AlertModal
         ouiaId="session-expiration-modal"
-        title={i18n._(t`Your session is about to expire`)}
+        title={t`Your session is about to expire`}
         isOpen={timeoutWarning && sessionTimeout > 0 && timeRemaining !== null}
         onClose={handleLogout}
         showClose={false}
@@ -219,7 +219,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
             variant="primary"
             onClick={handleSessionContinue}
           >
-            {i18n._(t`Continue`)}
+            {t`Continue`}
           </Button>,
           <Button
             ouiaId="session-expiration-logout-button"
@@ -227,19 +227,17 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
             variant="secondary"
             onClick={handleLogout}
           >
-            {i18n._(t`Logout`)}
+            {t`Logout`}
           </Button>,
         ]}
       >
-        {i18n._(
-          t`You will be logged out in ${Number(
-            Math.max(Math.floor(timeRemaining / 1000), 0)
-          )} seconds due to inactivity.`
-        )}
+        {t`You will be logged out in ${Number(
+          Math.max(Math.floor(timeRemaining / 1000), 0)
+        )} seconds due to inactivity.`}
       </AlertModal>
     </>
   );
 }
 
 export { AppContainer as _AppContainer };
-export default withI18n()(withRouter(AppContainer));
+export default withRouter(AppContainer);

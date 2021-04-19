@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik, useField, useFormikContext } from 'formik';
 import { Form } from '@patternfly/react-core';
@@ -10,14 +10,14 @@ import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import { required } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 
-function TeamFormFields({ team, i18n }) {
+function TeamFormFields({ team }) {
   const { setFieldValue } = useFormikContext();
   const [organization, setOrganization] = useState(
     team.summary_fields ? team.summary_fields.organization : null
   );
   const [, orgMeta, orgHelpers] = useField({
     name: 'organization',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: required(t`Select a value for this field`),
   });
 
   const onOrganizationChange = useCallback(
@@ -32,15 +32,15 @@ function TeamFormFields({ team, i18n }) {
     <>
       <FormField
         id="team-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="team-description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
@@ -97,4 +97,4 @@ TeamForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(TeamForm);
+export default TeamForm;

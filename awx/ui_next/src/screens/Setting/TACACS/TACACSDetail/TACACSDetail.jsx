@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -15,7 +15,7 @@ import { useConfig } from '../../../../contexts/Config';
 import { useSettings } from '../../../../contexts/Settings';
 import { SettingDetail } from '../../shared';
 
-function TACACSDetail({ i18n }) {
+function TACACSDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
@@ -36,14 +36,14 @@ function TACACSDetail({ i18n }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Settings`)}
+          {t`Back to Settings`}
         </>
       ),
       link: `/settings`,
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/settings/tacacs/details`,
       id: 0,
     },
@@ -76,12 +76,12 @@ function TACACSDetail({ i18n }) {
         {me?.is_superuser && (
           <CardActionsRow>
             <Button
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
               component={Link}
               to="/settings/tacacs/edit"
               ouiaId="tacacs-detail-edit-button"
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           </CardActionsRow>
         )}
@@ -90,4 +90,4 @@ function TACACSDetail({ i18n }) {
   );
 }
 
-export default withI18n()(TACACSDetail);
+export default TACACSDetail;

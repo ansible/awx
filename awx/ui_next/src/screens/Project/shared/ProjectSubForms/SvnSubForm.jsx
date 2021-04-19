@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   UrlFormField,
@@ -10,17 +10,15 @@ import {
 } from './SharedFields';
 
 const SvnSubForm = ({
-  i18n,
   credential,
   onCredentialSelection,
   scmUpdateOnLaunch,
 }) => (
   <>
     <UrlFormField
-      i18n={i18n}
       tooltip={
         <span>
-          {i18n._(t`Example URLs for Subversion Source Control include:`)}
+          {t`Example URLs for Subversion Source Control include:`}
           <ul css={{ margin: '10px 0 10px 20px' }}>
             <li>
               <code>https://github.com/ansible/ansible</code>
@@ -35,7 +33,7 @@ const SvnSubForm = ({
         </span>
       }
     />
-    <BranchFormField i18n={i18n} label={i18n._(t`Revision #`)} />
+    <BranchFormField label={t`Revision #`} />
     <ScmCredentialFormField
       credential={credential}
       onCredentialSelection={onCredentialSelection}
@@ -44,4 +42,4 @@ const SvnSubForm = ({
   </>
 );
 
-export default withI18n()(SvnSubForm);
+export default SvnSubForm;

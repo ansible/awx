@@ -9,7 +9,7 @@ import {
   string,
   oneOfType,
 } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { CredentialsAPI } from '../../api';
@@ -39,7 +39,7 @@ function CredentialLookup({
   credentialTypeKind,
   credentialTypeNamespace,
   value,
-  i18n,
+
   tooltip,
   isDisabled,
   autoPopulate,
@@ -145,22 +145,22 @@ function CredentialLookup({
             qsConfig={QS_CONFIG}
             searchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Created By (Username)`),
+                name: t`Created By (Username)`,
                 key: 'created_by__username__icontains',
               },
               {
-                name: i18n._(t`Modified By (Username)`),
+                name: t`Modified By (Username)`,
                 key: 'modified_by__username__icontains',
               },
             ]}
             sortColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name',
               },
             ]}
@@ -228,4 +228,4 @@ CredentialLookup.defaultProps = {
 };
 
 export { CredentialLookup as _CredentialLookup };
-export default withI18n()(CredentialLookup);
+export default CredentialLookup;

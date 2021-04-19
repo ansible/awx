@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { bool, func, shape } from 'prop-types';
 import {
@@ -53,7 +53,6 @@ const ConvergenceLabel = styled.p`
 NodeResourceName.displayName = 'NodeResourceName';
 
 function VisualizerNode({
-  i18n,
   node,
   onMouseOver,
   readOnly,
@@ -147,10 +146,8 @@ function VisualizerNode({
     if (addingLink) {
       updateHelpText(
         node.isInvalidLinkTarget
-          ? i18n._(
-              t`Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported.`
-            )
-          : i18n._(t`Click to create a new link to this node.`)
+          ? t`Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported.`
+          : t`Click to create a new link to this node.`
       );
       onMouseOver(node);
     }
@@ -174,7 +171,7 @@ function VisualizerNode({
       id="node-details"
       key="details"
       onClick={handleViewClick}
-      onMouseEnter={() => updateHelpText(i18n._(t`View node details`))}
+      onMouseEnter={() => updateHelpText(t`View node details`)}
       onMouseLeave={() => updateHelpText(null)}
     >
       <InfoIcon />
@@ -192,7 +189,7 @@ function VisualizerNode({
             setHovering(false);
             dispatch({ type: 'START_ADD_NODE', sourceNodeId: node.id });
           }}
-          onMouseEnter={() => updateHelpText(i18n._(t`Add a new node`))}
+          onMouseEnter={() => updateHelpText(t`Add a new node`)}
           onMouseLeave={() => updateHelpText(null)}
         >
           <PlusIcon />
@@ -202,7 +199,7 @@ function VisualizerNode({
           id="node-edit"
           key="edit"
           onClick={handleEditClick}
-          onMouseEnter={() => updateHelpText(i18n._(t`Edit this node`))}
+          onMouseEnter={() => updateHelpText(t`Edit this node`)}
           onMouseLeave={() => updateHelpText(null)}
         >
           <PencilAltIcon />
@@ -215,9 +212,7 @@ function VisualizerNode({
             setHovering(false);
             dispatch({ type: 'SELECT_SOURCE_FOR_LINKING', node });
           }}
-          onMouseEnter={() =>
-            updateHelpText(i18n._(t`Link to an available node`))
-          }
+          onMouseEnter={() => updateHelpText(t`Link to an available node`)}
           onMouseLeave={() => updateHelpText(null)}
         >
           <LinkIcon />
@@ -230,7 +225,7 @@ function VisualizerNode({
             setHovering(false);
             dispatch({ type: 'SET_NODE_TO_DELETE', value: node });
           }}
-          onMouseEnter={() => updateHelpText(i18n._(t`Delete this node`))}
+          onMouseEnter={() => updateHelpText(t`Delete this node`)}
           onMouseLeave={() => updateHelpText(null)}
         >
           <TrashAltIcon />
@@ -278,7 +273,7 @@ function VisualizerNode({
               x={wfConstants.nodeW / 2 - wfConstants.nodeW / 10 + 7}
               y={-wfConstants.nodeH / 4 - 1}
             >
-              <ConvergenceLabel>{i18n._(t`ALL`)}</ConvergenceLabel>
+              <ConvergenceLabel>{t`ALL`}</ConvergenceLabel>
             </foreignObject>
           </>
         )}
@@ -311,7 +306,7 @@ function VisualizerNode({
               {node?.fullUnifiedJobTemplate?.name ||
                 node?.originalNodeObject?.summary_fields?.unified_job_template
                   ?.name ||
-                i18n._(t`DELETED`)}
+                t`DELETED`}
             </NodeResourceName>
           </NodeContents>
         </foreignObject>
@@ -328,10 +323,10 @@ function VisualizerNode({
         <AlertModal
           isOpen={detailError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={handleDetailErrorClose}
         >
-          {i18n._(t`Failed to retrieve full node resource object.`)}
+          {t`Failed to retrieve full node resource object.`}
           <ErrorDetail error={detailError} />
         </AlertModal>
       )}
@@ -339,10 +334,10 @@ function VisualizerNode({
         <AlertModal
           isOpen={credentialsError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={handleCredentialsErrorClose}
         >
-          {i18n._(t`Failed to retrieve node credentials.`)}
+          {t`Failed to retrieve node credentials.`}
           <ErrorDetail error={credentialsError} />
         </AlertModal>
       )}
@@ -362,4 +357,4 @@ VisualizerNode.defaultProps = {
   onMouseOver: () => {},
 };
 
-export default withI18n()(VisualizerNode);
+export default VisualizerNode;

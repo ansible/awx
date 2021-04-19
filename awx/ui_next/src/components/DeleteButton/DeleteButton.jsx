@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { Button, Badge, Alert, Tooltip } from '@patternfly/react-core';
@@ -20,7 +20,6 @@ function DeleteButton({
   onConfirm,
   modalTitle,
   name,
-  i18n,
   variant,
   children,
   isDisabled,
@@ -54,7 +53,7 @@ function DeleteButton({
     return (
       <AlertModal
         isOpen={deleteMessageError}
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => {
           toggleModal(false);
           setDeleteMessageError();
@@ -73,12 +72,12 @@ function DeleteButton({
               isLoading={isLoading}
               spinnerAriaValueText={isLoading ? 'Loading' : undefined}
               variant={variant || 'secondary'}
-              aria-label={i18n._(t`Delete`)}
+              aria-label={t`Delete`}
               isDisabled={isDisabled}
               onClick={() => toggleModal(true)}
               ouiaId={ouiaId}
             >
-              {children || i18n._(t`Delete`)}
+              {children || t`Delete`}
             </Button>
           </div>
         </Tooltip>
@@ -87,11 +86,11 @@ function DeleteButton({
           isLoading={isLoading}
           spinnerAriaValueText={isLoading ? 'Loading' : undefined}
           variant={variant || 'secondary'}
-          aria-label={i18n._(t`Delete`)}
+          aria-label={t`Delete`}
           isDisabled={isDisabled}
           onClick={() => toggleModal(true)}
         >
-          {children || i18n._(t`Delete`)}
+          {children || t`Delete`}
         </Button>
       )}
       <AlertModal
@@ -104,27 +103,27 @@ function DeleteButton({
             ouiaId="delete-modal-confirm"
             key="delete"
             variant="danger"
-            aria-label={i18n._(t`Confirm Delete`)}
+            aria-label={t`Confirm Delete`}
             isDisabled={isDisabled}
             onClick={() => {
               onConfirm();
               toggleModal(false);
             }}
           >
-            {i18n._(t`Delete`)}
+            {t`Delete`}
           </Button>,
           <Button
             ouiaId="delete-modal-cancel"
             key="cancel"
             variant="link"
-            aria-label={i18n._(t`Cancel`)}
+            aria-label={t`Cancel`}
             onClick={() => toggleModal(false)}
           >
-            {i18n._(t`Cancel`)}
+            {t`Cancel`}
           </Button>,
         ]}
       >
-        {i18n._(t`Are you sure you want to delete:`)}
+        {t`Are you sure you want to delete:`}
         <br />
         <strong>{name}</strong>
         {Object.values(deleteDetails).length > 0 && (
@@ -157,4 +156,4 @@ DeleteButton.defaultProps = {
   ouiaId: null,
 };
 
-export default withI18n()(DeleteButton);
+export default DeleteButton;

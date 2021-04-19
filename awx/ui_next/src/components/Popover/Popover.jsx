@@ -1,6 +1,6 @@
 import React from 'react';
 import { node, string } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Popover as PFPopover } from '@patternfly/react-core';
 import { HelpIcon } from '@patternfly/react-icons';
@@ -13,7 +13,6 @@ const PopoverButton = styled.button`
 `;
 
 function Popover({
-  i18n,
   i18nHash,
   ariaLabel,
   content,
@@ -36,7 +35,7 @@ function Popover({
       {...rest}
     >
       <PopoverButton
-        aria-label={ariaLabel ?? i18n._(t`More information`)}
+        aria-label={ariaLabel ?? t`More information`}
         aria-haspopup="true"
         className="pf-c-form__group-label-help"
         onClick={e => e.preventDefault()}
@@ -63,4 +62,4 @@ Popover.defaultProps = {
   maxWidth: '',
 };
 
-export default withI18n()(Popover);
+export default Popover;

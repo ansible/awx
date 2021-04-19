@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { WorkflowApprovalsAPI } from '../../../api';
@@ -29,7 +29,7 @@ const QS_CONFIG = getQSConfig('workflow_approvals', {
   order_by: '-started',
 });
 
-function WorkflowApprovalsList({ i18n }) {
+function WorkflowApprovalsList() {
   const location = useLocation();
   const match = useRouteMatch();
 
@@ -167,17 +167,17 @@ function WorkflowApprovalsList({ i18n }) {
             }
             items={workflowApprovals}
             itemCount={count}
-            pluralizedItemName={i18n._(t`Workflow Approvals`)}
+            pluralizedItemName={t`Workflow Approvals`}
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
             toolbarSearchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Description`),
+                name: t`Description`,
                 key: 'description__icontains',
               },
             ]}
@@ -207,24 +207,22 @@ function WorkflowApprovalsList({ i18n }) {
                     key="delete"
                     onDelete={handleDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName={i18n._(t`Workflow Approvals`)}
+                    pluralizedItemName={t`Workflow Approvals`}
                     cannotDelete={item =>
                       item.status === 'pending' ||
                       !item.summary_fields.user_capabilities.delete
                     }
-                    errorMessage={i18n._(
-                      t`These approvals cannot be deleted due to insufficient permissions or a pending job status`
-                    )}
+                    errorMessage={t`These approvals cannot be deleted due to insufficient permissions or a pending job status`}
                   />,
                 ]}
               />
             )}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Job`)}</HeaderCell>
-                <HeaderCell sortKey="started">{i18n._(t`Started`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
+                <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell>{t`Job`}</HeaderCell>
+                <HeaderCell sortKey="started">{t`Started`}</HeaderCell>
+                <HeaderCell>{t`Status`}</HeaderCell>
               </HeaderRow>
             }
             renderRow={(workflowApproval, index) => (
@@ -247,10 +245,10 @@ function WorkflowApprovalsList({ i18n }) {
         <AlertModal
           isOpen={deletionError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDeletionError}
         >
-          {i18n._(t`Failed to delete one or more workflow approval.`)}
+          {t`Failed to delete one or more workflow approval.`}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
@@ -258,12 +256,12 @@ function WorkflowApprovalsList({ i18n }) {
         <AlertModal
           isOpen={actionError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissActionError}
         >
           {approveApprovalError
-            ? i18n._(t`Failed to approve one or more workflow approval.`)
-            : i18n._(t`Failed to deny one or more workflow approval.`)}
+            ? t`Failed to approve one or more workflow approval.`
+            : t`Failed to deny one or more workflow approval.`}
           <ErrorDetail error={actionError} />
         </AlertModal>
       )}
@@ -271,4 +269,4 @@ function WorkflowApprovalsList({ i18n }) {
   );
 }
 
-export default withI18n()(WorkflowApprovalsList);
+export default WorkflowApprovalsList;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import 'styled-components/macro';
 
@@ -15,13 +15,7 @@ import DataListCell from '../../../components/DataListCell';
 import Sparkline from '../../../components/Sparkline';
 import { Host } from '../../../types';
 
-function SmartInventoryHostListItem({
-  i18n,
-  detailUrl,
-  host,
-  isSelected,
-  onSelect,
-}) {
+function SmartInventoryHostListItem({ detailUrl, host, isSelected, onSelect }) {
   const recentPlaybookJobs = host.summary_fields.recent_jobs.map(job => ({
     ...job,
     type: 'job',
@@ -50,7 +44,7 @@ function SmartInventoryHostListItem({
             </DataListCell>,
             <DataListCell key="inventory">
               <>
-                <b css="margin-right: 24px">{i18n._(t`Inventory`)}</b>
+                <b css="margin-right: 24px">{t`Inventory`}</b>
                 <Link
                   to={`/inventories/inventory/${host.summary_fields.inventory.id}/details`}
                 >
@@ -72,4 +66,4 @@ SmartInventoryHostListItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(SmartInventoryHostListItem);
+export default SmartInventoryHostListItem;

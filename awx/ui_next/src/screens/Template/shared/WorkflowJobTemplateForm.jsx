@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import PropTypes, { shape } from 'prop-types';
 
-import { withI18n } from '@lingui/react';
 import { useField, useFormikContext, withFormik } from 'formik';
 import {
   Form,
@@ -41,7 +40,7 @@ function WorkflowJobTemplateForm({
   template,
   handleSubmit,
   handleCancel,
-  i18n,
+
   submitError,
   isOrgAdmin,
 }) {
@@ -110,15 +109,15 @@ function WorkflowJobTemplateForm({
           id="wfjt-name"
           name="name"
           type="text"
-          label={i18n._(t`Name`)}
-          validate={required(null, i18n)}
+          label={t`Name`}
+          validate={required(null)}
           isRequired
         />
         <FormField
           id="wfjt-description"
           name="description"
           type="text"
-          label={i18n._(t`Description`)}
+          label={t`Description`}
         />
         <OrganizationLookup
           helperTextInvalid={organizationMeta.error}
@@ -135,9 +134,7 @@ function WorkflowJobTemplateForm({
           <InventoryLookup
             promptId="wfjt-ask-inventory-on-launch"
             promptName="ask_inventory_on_launch"
-            tooltip={i18n._(
-              t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
-            )}
+            tooltip={t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`}
             fieldId="wfjt-inventory"
             isPromptableField
             value={inventoryField.value}
@@ -160,13 +157,13 @@ function WorkflowJobTemplateForm({
         </>
         <FieldWithPrompt
           fieldId="wjft-limit"
-          label={i18n._(t`Limit`)}
+          label={t`Limit`}
           promptId="template-ask-limit-on-launch"
           promptName="ask_limit_on_launch"
-          tooltip={i18n._(t`Provide a host pattern to further constrain
+          tooltip={t`Provide a host pattern to further constrain
                   the list of hosts that will be managed or affected by the
                   playbook. Multiple patterns are allowed. Refer to Ansible
-                  documentation for more information and examples on patterns.`)}
+                  documentation for more information and examples on patterns.`}
         >
           <TextInput
             id="text-wfjt-limit"
@@ -182,12 +179,10 @@ function WorkflowJobTemplateForm({
 
         <FieldWithPrompt
           fieldId="wfjt-scm-branch"
-          label={i18n._(t`Source control branch`)}
+          label={t`Source control branch`}
           promptId="wfjt-ask-scm-branch-on-launch"
           promptName="ask_scm_branch_on_launch"
-          tooltip={i18n._(
-            t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`
-          )}
+          tooltip={t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`}
         >
           <TextInput
             id="text-wfjt-scm-branch"
@@ -205,21 +200,19 @@ function WorkflowJobTemplateForm({
           onBlur={() => executionEnvironmentHelpers.setTouched()}
           value={executionEnvironmentField.value}
           onChange={value => executionEnvironmentHelpers.setValue(value)}
-          tooltip={i18n._(
-            t`Select the default execution environment for this organization to run on.`
-          )}
+          tooltip={t`Select the default execution environment for this organization to run on.`}
           globallyAvailable
           organizationId={organizationField.value?.id}
         />
       </FormColumnLayout>
       <FormFullWidthLayout>
         <FormGroup
-          label={i18n._(t`Labels`)}
+          label={t`Labels`}
           labelIcon={
             <Popover
-              content={i18n._(t`Optional labels that describe this job template,
+              content={t`Optional labels that describe this job template,
                     such as 'dev' or 'test'. Labels can be used to group and filter
-                    job templates and completed jobs.`)}
+                    job templates and completed jobs.`}
             />
           }
           fieldId="template-labels"
@@ -228,7 +221,7 @@ function WorkflowJobTemplateForm({
             value={labelsField.value}
             onChange={labels => labelsHelpers.setValue(labels)}
             onError={setContentError}
-            createText={i18n._(t`Create`)}
+            createText={t`Create`}
           />
         </FormGroup>
       </FormFullWidthLayout>
@@ -236,25 +229,21 @@ function WorkflowJobTemplateForm({
         <VariablesField
           id="wfjt-variables"
           name="extra_vars"
-          label={i18n._(t`Variables`)}
+          label={t`Variables`}
           promptId="template-ask-variables-on-launch"
-          tooltip={i18n._(
-            t`Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.`
-          )}
+          tooltip={t`Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.`}
         />
       </FormFullWidthLayout>
-      <FormGroup fieldId="options" label={i18n._(t`Options`)}>
+      <FormGroup fieldId="options" label={t`Options`}>
         <FormCheckboxLayout isInline>
           <Checkbox
-            aria-label={i18n._(t`Enable Webhook`)}
+            aria-label={t`Enable Webhook`}
             label={
               <span>
-                {i18n._(t`Enable Webhook`)}
+                {t`Enable Webhook`}
                 &nbsp;
                 <Popover
-                  content={i18n._(
-                    t`Enable Webhook for this workflow job template.`
-                  )}
+                  content={t`Enable Webhook for this workflow job template.`}
                 />
               </span>
             }
@@ -267,10 +256,8 @@ function WorkflowJobTemplateForm({
           <CheckboxField
             name="allow_simultaneous"
             id="allow_simultaneous"
-            tooltip={i18n._(
-              t`If enabled, simultaneous runs of this workflow job template will be allowed.`
-            )}
-            label={i18n._(t`Enable Concurrent Jobs`)}
+            tooltip={t`If enabled, simultaneous runs of this workflow job template will be allowed.`}
+            label={t`Enable Concurrent Jobs`}
           />
         </FormCheckboxLayout>
       </FormGroup>
@@ -278,7 +265,7 @@ function WorkflowJobTemplateForm({
       {enableWebhooks && (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
-            {i18n._(t`Webhook details`)}
+            {t`Webhook details`}
           </Title>
           <WebhookSubForm templateType={template.type} />
         </SubFormLayout>
@@ -345,4 +332,4 @@ const FormikApp = withFormik({
 })(WorkflowJobTemplateForm);
 
 export { WorkflowJobTemplateForm as _WorkflowJobTemplateForm };
-export default withI18n()(FormikApp);
+export default FormikApp;

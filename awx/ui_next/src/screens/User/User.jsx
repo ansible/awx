@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Switch,
@@ -22,7 +22,7 @@ import UserTeams from './UserTeams';
 import UserTokens from './UserTokens';
 import UserRolesList from './UserRoles/UserRolesList';
 
-function User({ i18n, setBreadcrumb, me }) {
+function User({ setBreadcrumb, me }) {
   const location = useLocation();
   const match = useRouteMatch('/users/:id');
   const userListUrl = `/users`;
@@ -54,25 +54,25 @@ function User({ i18n, setBreadcrumb, me }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Users`)}
+          {t`Back to Users`}
         </>
       ),
       link: `/users`,
       id: 99,
     },
-    { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
+    { name: t`Details`, link: `${match.url}/details`, id: 0 },
     {
-      name: i18n._(t`Organizations`),
+      name: t`Organizations`,
       link: `${match.url}/organizations`,
       id: 1,
     },
-    { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 },
-    { name: i18n._(t`Roles`), link: `${match.url}/roles`, id: 3 },
+    { name: t`Teams`, link: `${match.url}/teams`, id: 2 },
+    { name: t`Roles`, link: `${match.url}/roles`, id: 3 },
   ];
 
   if (me?.id === Number(match.params.id)) {
     tabsArray.push({
-      name: i18n._(t`Tokens`),
+      name: t`Tokens`,
       link: `${match.url}/tokens`,
       id: 4,
     });
@@ -92,8 +92,8 @@ function User({ i18n, setBreadcrumb, me }) {
           <ContentError error={contentError}>
             {contentError.response && contentError.response.status === 404 && (
               <span>
-                {i18n._(t`User not found.`)}{' '}
-                <Link to={userListUrl}>{i18n._(t`View all Users.`)}</Link>
+                {t`User not found.`}{' '}
+                <Link to={userListUrl}>{t`View all Users.`}</Link>
               </span>
             )}
           </ContentError>
@@ -137,7 +137,7 @@ function User({ i18n, setBreadcrumb, me }) {
               <ContentError isNotFound>
                 {match.params.id && (
                   <Link to={`/users/${match.params.id}/details`}>
-                    {i18n._(t`View User Details`)}
+                    {t`View User Details`}
                   </Link>
                 )}
               </ContentError>
@@ -149,4 +149,4 @@ function User({ i18n, setBreadcrumb, me }) {
   );
 }
 
-export default withI18n()(User);
+export default User;

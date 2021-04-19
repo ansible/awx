@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { OrganizationsAPI } from '../../../api';
 import PaginatedDataList from '../../../components/PaginatedDataList';
@@ -15,7 +15,7 @@ const QS_CONFIG = getQSConfig('team', {
   order_by: 'name',
 });
 
-function OrganizationTeamList({ id, i18n }) {
+function OrganizationTeamList({ id }) {
   const location = useLocation();
 
   const {
@@ -59,26 +59,26 @@ function OrganizationTeamList({ id, i18n }) {
       hasContentLoading={isLoading}
       items={teams}
       itemCount={count}
-      pluralizedItemName={i18n._(t`Teams`)}
+      pluralizedItemName={t`Teams`}
       qsConfig={QS_CONFIG}
       toolbarSearchColumns={[
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name__icontains',
           isDefault: true,
         },
         {
-          name: i18n._(t`Created by (username)`),
+          name: t`Created by (username)`,
           key: 'created_by__username__icontains',
         },
         {
-          name: i18n._(t`Modified by (username)`),
+          name: t`Modified by (username)`,
           key: 'modified_by__username__icontains',
         },
       ]}
       toolbarSortColumns={[
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name',
         },
       ]}
@@ -101,4 +101,4 @@ OrganizationTeamList.propTypes = {
 };
 
 export { OrganizationTeamList as _OrganizationTeamList };
-export default withI18n()(OrganizationTeamList);
+export default OrganizationTeamList;

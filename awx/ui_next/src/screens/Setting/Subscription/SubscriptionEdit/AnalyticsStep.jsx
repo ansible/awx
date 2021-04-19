@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { Trans, t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Button, Flex, FormGroup } from '@patternfly/react-core';
@@ -13,7 +13,7 @@ import { useConfig } from '../../../../contexts/Config';
 
 const ANALYTICSLINK = 'https://www.ansible.com/products/automation-analytics';
 
-function AnalyticsStep({ i18n }) {
+function AnalyticsStep() {
   const config = useConfig();
   const [manifest] = useField({
     name: 'manifest_file',
@@ -67,24 +67,24 @@ function AnalyticsStep({ i18n }) {
         <CheckboxField
           name="pendo"
           isDisabled={!config.me.is_superuser}
-          aria-label={i18n._(t`User analytics`)}
-          label={i18n._(t`User analytics`)}
+          aria-label={t`User analytics`}
+          label={t`User analytics`}
           id="pendo-field"
-          description={i18n._(t`This data is used to enhance
+          description={t`This data is used to enhance
                    future releases of the Tower Software and help
-                   streamline customer experience and success.`)}
+                   streamline customer experience and success.`}
         />
       </FormGroup>
       <FormGroup fieldId="insights">
         <CheckboxField
           name="insights"
           isDisabled={!config.me.is_superuser}
-          aria-label={i18n._(t`Insights analytics`)}
-          label={i18n._(t`Insights Analytics`)}
+          aria-label={t`Insights analytics`}
+          label={t`Insights Analytics`}
           id="insights-field"
-          description={i18n._(t`This data is used to enhance
+          description={t`This data is used to enhance
                    future releases of the Tower Software and to provide
-                   Insights Analytics to Tower subscribers.`)}
+                   Insights Analytics to Tower subscribers.`}
         />
       </FormGroup>
       {requireCredentialFields && (
@@ -100,18 +100,18 @@ function AnalyticsStep({ i18n }) {
             id="username-field"
             isDisabled={!config.me.is_superuser}
             isRequired={requireCredentialFields}
-            label={i18n._(t`Username`)}
+            label={t`Username`}
             name="username"
             type="text"
-            validate={required(null, i18n)}
+            validate={required(null)}
           />
           <PasswordField
             id="password-field"
             isDisabled={!config.me.is_superuser}
             isRequired={requireCredentialFields}
-            label={i18n._(t`Password`)}
+            label={t`Password`}
             name="password"
-            validate={required(null, i18n)}
+            validate={required(null)}
           />
         </>
       )}
@@ -119,7 +119,7 @@ function AnalyticsStep({ i18n }) {
         <img
           width="300"
           src="/static/media/insights-analytics-dashboard.jpeg"
-          alt={i18n._(t`Insights Analytics dashboard`)}
+          alt={t`Insights Analytics dashboard`}
         />
         <Button
           component="a"
@@ -134,4 +134,4 @@ function AnalyticsStep({ i18n }) {
     </Flex>
   );
 }
-export default withI18n()(AnalyticsStep);
+export default AnalyticsStep;

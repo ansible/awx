@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState, useContext } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Button, DropdownItem } from '@patternfly/react-core';
@@ -15,7 +14,7 @@ import { KebabifiedContext } from '../../contexts/Kebabified';
 import ContentLoading from '../ContentLoading';
 import ContentError from '../ContentError';
 
-function AdHocCommands({ adHocItems, i18n, hasListItems }) {
+function AdHocCommands({ adHocItems, hasListItems }) {
   const history = useHistory();
   const { id } = useParams();
 
@@ -23,11 +22,11 @@ function AdHocCommands({ adHocItems, i18n, hasListItems }) {
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
 
   const verbosityOptions = [
-    { value: '0', key: '0', label: i18n._(t`0 (Normal)`) },
-    { value: '1', key: '1', label: i18n._(t`1 (Verbose)`) },
-    { value: '2', key: '2', label: i18n._(t`2 (More Verbose)`) },
-    { value: '3', key: '3', label: i18n._(t`3 (Debug)`) },
-    { value: '4', key: '4', label: i18n._(t`4 (Connection Debug)`) },
+    { value: '0', key: '0', label: t`0 (Normal)` },
+    { value: '1', key: '1', label: t`1 (Verbose)` },
+    { value: '2', key: '2', label: t`2 (More Verbose)` },
+    { value: '3', key: '3', label: t`3 (Debug)` },
+    { value: '4', key: '4', label: t`4 (Connection Debug)` },
   ];
   useEffect(() => {
     if (isKebabified) {
@@ -95,7 +94,7 @@ function AdHocCommands({ adHocItems, i18n, hasListItems }) {
       <AlertModal
         isOpen={error}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => {
           dismissError();
           setIsWizardOpen(false);
@@ -103,7 +102,7 @@ function AdHocCommands({ adHocItems, i18n, hasListItems }) {
       >
         {launchError ? (
           <>
-            {i18n._(t`Failed to launch job.`)}
+            {t`Failed to launch job.`}
             <ErrorDetail error={error} />
           </>
         ) : (
@@ -121,20 +120,20 @@ function AdHocCommands({ adHocItems, i18n, hasListItems }) {
           key="cancel-job"
           isDisabled={isAdHocDisabled || !hasListItems}
           component="button"
-          aria-label={i18n._(t`Run Command`)}
+          aria-label={t`Run Command`}
           onClick={() => setIsWizardOpen(true)}
         >
-          {i18n._(t`Run Command`)}
+          {t`Run Command`}
         </DropdownItem>
       ) : (
         <Button
           ouiaId="run-command-button"
           variant="secondary"
-          aria-label={i18n._(t`Run Command`)}
+          aria-label={t`Run Command`}
           onClick={() => setIsWizardOpen(true)}
           isDisabled={isAdHocDisabled || !hasListItems}
         >
-          {i18n._(t`Run Command`)}
+          {t`Run Command`}
         </Button>
       )}
 
@@ -158,4 +157,4 @@ AdHocCommands.propTypes = {
   hasListItems: PropTypes.bool.isRequired,
 };
 
-export default withI18n()(AdHocCommands);
+export default AdHocCommands;

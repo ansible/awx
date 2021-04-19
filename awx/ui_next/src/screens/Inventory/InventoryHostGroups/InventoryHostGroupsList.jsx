@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
 import useRequest, {
@@ -26,7 +26,7 @@ const QS_CONFIG = getQSConfig('group', {
   order_by: 'name',
 });
 
-function InventoryHostGroupsList({ i18n }) {
+function InventoryHostGroupsList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { hostId, id: invId } = useParams();
   const { search } = useLocation();
@@ -154,22 +154,22 @@ function InventoryHostGroupsList({ i18n }) {
         onRowClick={handleSelect}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name__icontains',
             isDefault: true,
           },
           {
-            name: i18n._(t`Created By (Username)`),
+            name: t`Created By (Username)`,
             key: 'created_by__username__icontains',
           },
           {
-            name: i18n._(t`Modified By (Username)`),
+            name: t`Modified By (Username)`,
             key: 'modified_by__username__icontains',
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name',
           },
         ]}
@@ -210,13 +210,13 @@ function InventoryHostGroupsList({ i18n }) {
                 key="disassociate"
                 onDisassociate={handleDisassociate}
                 itemsToDisassociate={selected}
-                modalTitle={i18n._(t`Disassociate group from host?`)}
-                modalNote={i18n._(t`
+                modalTitle={t`Disassociate group from host?`}
+                modalNote={t`
                   Note that you may still see the group in the list after
                   disassociating if the host is also a member of that group’s
                   children.  This list shows all groups the host is associated
                   with directly and indirectly.
-                `)}
+                `}
               />,
             ]}
           />
@@ -229,29 +229,29 @@ function InventoryHostGroupsList({ i18n }) {
       />
       {isModalOpen && (
         <AssociateModal
-          header={i18n._(t`Groups`)}
+          header={t`Groups`}
           fetchRequest={fetchGroupsToAssociate}
           optionsRequest={fetchGroupsOptions}
           isModalOpen={isModalOpen}
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}
-          title={i18n._(t`Select Groups`)}
+          title={t`Select Groups`}
         />
       )}
       {error && (
         <AlertModal
           isOpen={error}
           onClose={dismissError}
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           variant="error"
         >
           {associateError
-            ? i18n._(t`Failed to associate.`)
-            : i18n._(t`Failed to disassociate one or more groups.`)}
+            ? t`Failed to associate.`
+            : t`Failed to disassociate one or more groups.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
     </>
   );
 }
-export default withI18n()(InventoryHostGroupsList);
+export default InventoryHostGroupsList;

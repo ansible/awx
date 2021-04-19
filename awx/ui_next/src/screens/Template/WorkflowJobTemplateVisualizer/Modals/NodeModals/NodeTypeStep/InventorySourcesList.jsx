@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { InventorySourcesAPI } from '../../../../../../api';
@@ -16,7 +16,7 @@ const QS_CONFIG = getQSConfig('inventory-sources', {
   order_by: 'name',
 });
 
-function InventorySourcesList({ i18n, nodeResource, onUpdateNodeResource }) {
+function InventorySourcesList({ nodeResource, onUpdateNodeResource }) {
   const location = useLocation();
 
   const {
@@ -78,30 +78,30 @@ function InventorySourcesList({ i18n, nodeResource, onUpdateNodeResource }) {
       renderToolbar={props => <DataListToolbar {...props} fillWidth />}
       toolbarSearchColumns={[
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name__icontains',
           isDefault: true,
         },
         {
-          name: i18n._(t`Source`),
+          name: t`Source`,
           key: 'or__source',
           options: [
-            [`file`, i18n._(t`File, directory or script`)],
-            [`scm`, i18n._(t`Sourced from a project`)],
-            [`ec2`, i18n._(t`Amazon EC2`)],
-            [`gce`, i18n._(t`Google Compute Engine`)],
-            [`azure_rm`, i18n._(t`Microsoft Azure Resource Manager`)],
-            [`vmware`, i18n._(t`VMware vCenter`)],
-            [`satellite6`, i18n._(t`Red Hat Satellite 6`)],
-            [`openstack`, i18n._(t`OpenStack`)],
-            [`rhv`, i18n._(t`Red Hat Virtualization`)],
-            [`tower`, i18n._(t`Ansible Tower`)],
+            [`file`, t`File, directory or script`],
+            [`scm`, t`Sourced from a project`],
+            [`ec2`, t`Amazon EC2`],
+            [`gce`, t`Google Compute Engine`],
+            [`azure_rm`, t`Microsoft Azure Resource Manager`],
+            [`vmware`, t`VMware vCenter`],
+            [`satellite6`, t`Red Hat Satellite 6`],
+            [`openstack`, t`OpenStack`],
+            [`rhv`, t`Red Hat Virtualization`],
+            [`tower`, t`Ansible Tower`],
           ],
         },
       ]}
       toolbarSortColumns={[
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name',
         },
       ]}
@@ -120,4 +120,4 @@ InventorySourcesList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(InventorySourcesList);
+export default InventorySourcesList;

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { shape } from 'prop-types';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
@@ -56,7 +56,7 @@ const StatusIconWithMargin = styled(StatusIcon)`
   margin-right: 20px;
 `;
 
-function WorkflowOutputToolbar({ i18n, job }) {
+function WorkflowOutputToolbar({ job }) {
   const dispatch = useContext(WorkflowDispatchContext);
 
   const { nodes, showLegend, showTools } = useContext(WorkflowStateContext);
@@ -70,9 +70,9 @@ function WorkflowOutputToolbar({ i18n, job }) {
         <b>{job.name}</b>
       </ToolbarJob>
       <ToolbarActions>
-        <div>{i18n._(t`Total Nodes`)}</div>
+        <div>{t`Total Nodes`}</div>
         <Badge isRead>{totalNodes}</Badge>
-        <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
+        <Tooltip content={t`Toggle Legend`} position="bottom">
           <ActionButton
             id="workflow-output-toggle-legend"
             isActive={showLegend}
@@ -82,7 +82,7 @@ function WorkflowOutputToolbar({ i18n, job }) {
             <CompassIcon />
           </ActionButton>
         </Tooltip>
-        <Tooltip content={i18n._(t`Toggle Tools`)} position="bottom">
+        <Tooltip content={t`Toggle Tools`} position="bottom">
           <ActionButton
             id="workflow-output-toggle-tools"
             isActive={showTools}
@@ -101,4 +101,4 @@ WorkflowOutputToolbar.propTypes = {
   job: shape().isRequired,
 };
 
-export default withI18n()(WorkflowOutputToolbar);
+export default WorkflowOutputToolbar;

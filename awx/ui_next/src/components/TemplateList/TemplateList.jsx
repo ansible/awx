@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState, useCallback } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+
+import { t, Plural } from '@lingui/macro';
 import { Card, DropdownItem } from '@patternfly/react-core';
 import {
   JobTemplatesAPI,
@@ -20,7 +20,7 @@ import AddDropDownButton from '../AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
 import { relatedResourceDeleteRequests } from '../../util/getRelatedResourceDeleteDetails';
 
-function TemplateList({ defaultParams, i18n }) {
+function TemplateList({ defaultParams }) {
   // The type value in const qsConfig below does not have a space between job_template and
   // workflow_job_template so the params sent to the API match what the api expects.
   const qsConfig = getQSConfig(
@@ -138,8 +138,8 @@ function TemplateList({ defaultParams, i18n }) {
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
 
-  const addTemplate = i18n._(t`Add job template`);
-  const addWFTemplate = i18n._(t`Add workflow template`);
+  const addTemplate = t`Add job template`;
+  const addWFTemplate = t`Add workflow template`;
   const addDropDownButton = [];
   if (canAddJT) {
     addDropDownButton.push(
@@ -181,37 +181,37 @@ function TemplateList({ defaultParams, i18n }) {
           hasContentLoading={isLoading || isDeleteLoading}
           items={templates}
           itemCount={count}
-          pluralizedItemName={i18n._(t`Templates`)}
+          pluralizedItemName={t`Templates`}
           qsConfig={qsConfig}
           onRowClick={handleSelect}
           toolbarSearchColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name__icontains',
               isDefault: true,
             },
             {
-              name: i18n._(t`Description`),
+              name: t`Description`,
               key: 'description__icontains',
             },
             {
-              name: i18n._(t`Type`),
+              name: t`Type`,
               key: 'or__type',
               options: [
-                [`job_template`, i18n._(t`Job Template`)],
-                [`workflow_job_template`, i18n._(t`Workflow Template`)],
+                [`job_template`, t`Job Template`],
+                [`workflow_job_template`, t`Workflow Template`],
               ],
             },
             {
-              name: i18n._(t`Playbook name`),
+              name: t`Playbook name`,
               key: 'job_template__playbook__icontains',
             },
             {
-              name: i18n._(t`Created By (Username)`),
+              name: t`Created By (Username)`,
               key: 'created_by__username__icontains',
             },
             {
-              name: i18n._(t`Modified By (Username)`),
+              name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
           ]}
@@ -219,12 +219,10 @@ function TemplateList({ defaultParams, i18n }) {
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           headerRow={
             <HeaderRow qsConfig={qsConfig} isExpandable>
-              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-              <HeaderCell sortKey="type">{i18n._(t`Type`)}</HeaderCell>
-              <HeaderCell sortKey="last_job_run">
-                {i18n._(t`Last Ran`)}
-              </HeaderCell>
-              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell sortKey="type">{t`Type`}</HeaderCell>
+              <HeaderCell sortKey="last_job_run">{t`Last Ran`}</HeaderCell>
+              <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
           renderToolbar={props => (
@@ -240,12 +238,15 @@ function TemplateList({ defaultParams, i18n }) {
                   key="delete"
                   onDelete={handleTemplateDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName={i18n._(t`Templates`)}
+                  pluralizedItemName={t`Templates`}
                   deleteDetailsRequests={deleteDetailsRequests}
-                  deleteMessage={i18n._(
-                    '{numItemsToDelete, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} other {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}',
-                    { numItemsToDelete: selected.length }
-                  )}
+                  deleteMessage={
+                    <Plural
+                      value={selected.length}
+                      one="This template is currently being used by some workflow nodes. Are you sure you want to delete it?"
+                      other="Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?"
+                    />
+                  }
                 />,
               ]}
             />
@@ -266,17 +267,17 @@ function TemplateList({ defaultParams, i18n }) {
         />
       </Card>
       <AlertModal
-        aria-label={i18n._(t`Deletion Error`)}
+        aria-label={t`Deletion Error`}
         isOpen={deletionError}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more templates.`)}
+        {t`Failed to delete one or more templates.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </Fragment>
   );
 }
 
-export default withI18n()(TemplateList);
+export default TemplateList;

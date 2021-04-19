@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Tooltip } from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
@@ -27,7 +27,7 @@ function cannotDelete(item) {
   return !item.summary_fields.user_capabilities.delete;
 }
 
-function InventoryGroupsList({ i18n }) {
+function InventoryGroupsList() {
   const location = useLocation();
   const { id: inventoryId } = useParams();
 
@@ -88,16 +88,14 @@ function InventoryGroupsList({ i18n }) {
     if (selected.some(cannotDelete)) {
       return (
         <div>
-          {i18n._(
-            t`You do not have permission to delete the following Groups: ${itemsUnableToDelete}`
-          )}
+          {t`You do not have permission to delete the following Groups: ${itemsUnableToDelete}`}
         </div>
       );
     }
     if (selected.length) {
-      return i18n._(t`Delete`);
+      return t`Delete`;
     }
-    return i18n._(t`Select a row to delete`);
+    return t`Select a row to delete`;
   };
 
   const canAdd =
@@ -114,31 +112,31 @@ function InventoryGroupsList({ i18n }) {
         onRowClick={handleSelect}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name__icontains',
             isDefault: true,
           },
           {
-            name: i18n._(t`Group type`),
+            name: t`Group type`,
             key: 'parents__isnull',
             isBoolean: true,
             booleanLabels: {
-              true: i18n._(t`Show only root groups`),
-              false: i18n._(t`Show all groups`),
+              true: t`Show only root groups`,
+              false: t`Show all groups`,
             },
           },
           {
-            name: i18n._(t`Created By (Username)`),
+            name: t`Created By (Username)`,
             key: 'created_by__username__icontains',
           },
           {
-            name: i18n._(t`Modified By (Username)`),
+            name: t`Modified By (Username)`,
             key: 'modified_by__username__icontains',
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name',
           },
         ]}
@@ -202,4 +200,4 @@ function InventoryGroupsList({ i18n }) {
     </>
   );
 }
-export default withI18n()(InventoryGroupsList);
+export default InventoryGroupsList;

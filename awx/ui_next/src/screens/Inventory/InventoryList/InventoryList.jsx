@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch, Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t, plural } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 import { InventoriesAPI } from '../../../api';
@@ -25,7 +25,7 @@ const QS_CONFIG = getQSConfig('inventory', {
   order_by: 'name',
 });
 
-function InventoryList({ i18n }) {
+function InventoryList() {
   const location = useLocation();
   const match = useRouteMatch();
   const [selected, setSelected] = useState([]);
@@ -132,8 +132,8 @@ function InventoryList({ i18n }) {
     selected[0]
   );
 
-  const addInventory = i18n._(t`Add inventory`);
-  const addSmartInventory = i18n._(t`Add smart inventory`);
+  const addInventory = t`Add inventory`;
+  const addSmartInventory = t`Add smart inventory`;
   const addButton = (
     <AddDropDownButton
       key="add"
@@ -166,30 +166,30 @@ function InventoryList({ i18n }) {
           hasContentLoading={hasContentLoading}
           items={inventories}
           itemCount={itemCount}
-          pluralizedItemName={i18n._(t`Inventories`)}
+          pluralizedItemName={t`Inventories`}
           qsConfig={QS_CONFIG}
           toolbarSearchColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name__icontains',
               isDefault: true,
             },
             {
-              name: i18n._(t`Description`),
+              name: t`Description`,
               key: 'description__icontains',
             },
             {
-              name: i18n._(t`Created By (Username)`),
+              name: t`Created By (Username)`,
               key: 'created_by__username__icontains',
             },
             {
-              name: i18n._(t`Modified By (Username)`),
+              name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
           ]}
           toolbarSortColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name',
             },
           ]}
@@ -197,11 +197,11 @@ function InventoryList({ i18n }) {
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           headerRow={
             <HeaderRow qsConfig={QS_CONFIG}>
-              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Organization`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell>{t`Status`}</HeaderCell>
+              <HeaderCell>{t`Type`}</HeaderCell>
+              <HeaderCell>{t`Organization`}</HeaderCell>
+              <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
           renderToolbar={props => (
@@ -217,7 +217,7 @@ function InventoryList({ i18n }) {
                   key="delete"
                   onDelete={handleInventoryDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName={i18n._(t`Inventories`)}
+                  pluralizedItemName={t`Inventories`}
                   deleteDetailsRequests={deleteDetailsRequests}
                   warningMessage={plural(selected.length, {
                     one:
@@ -251,15 +251,15 @@ function InventoryList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
-        aria-label={i18n._(t`Deletion Error`)}
-        title={i18n._(t`Error!`)}
+        aria-label={t`Deletion Error`}
+        title={t`Error!`}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more inventories.`)}
+        {t`Failed to delete one or more inventories.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </PageSection>
   );
 }
 
-export default withI18n()(InventoryList);
+export default InventoryList;

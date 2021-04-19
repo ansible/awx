@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 
@@ -16,7 +16,6 @@ function CopyButton({
   onCopyStart,
   onCopyFinish,
   errorMessage,
-  i18n,
   ouiaId,
 }) {
   const { isLoading, error: copyError, request: copyItemToAPI } = useRequest(
@@ -38,17 +37,17 @@ function CopyButton({
         id={id}
         ouiaId={ouiaId}
         isDisabled={isLoading || isDisabled}
-        aria-label={i18n._(t`Copy`)}
+        aria-label={t`Copy`}
         variant="plain"
         onClick={copyItemToAPI}
       >
         <CopyIcon />
       </Button>
       <AlertModal
-        aria-label={i18n._(t`Copy Error`)}
+        aria-label={t`Copy Error`}
         isOpen={error}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={dismissError}
       >
         {errorMessage}
@@ -72,4 +71,4 @@ CopyButton.defaultProps = {
   ouiaId: null,
 };
 
-export default withI18n()(CopyButton);
+export default CopyButton;

@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Card,
@@ -29,7 +29,7 @@ import { ActivityStreamAPI } from '../../api';
 
 import ActivityStreamListItem from './ActivityStreamListItem';
 
-function ActivityStream({ i18n }) {
+function ActivityStream() {
   const { light } = PageSectionVariants;
 
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
@@ -116,10 +116,10 @@ function ActivityStream({ i18n }) {
         style={{ display: 'flex', justifyContent: 'space-between' }}
       >
         <Title size="2xl" headingLevel="h2">
-          {i18n._(t`Activity Stream`)}
+          {t`Activity Stream`}
         </Title>
         <span id="grouped-type-select-id" hidden>
-          {i18n._(t`Activity Stream type selector`)}
+          {t`Activity Stream type selector`}
         </span>
         <Select
           width="250px"
@@ -139,80 +139,80 @@ function ActivityStream({ i18n }) {
           isOpen={isTypeDropdownOpen}
           isGrouped
         >
-          <SelectGroup label={i18n._(t`Views`)} key="views">
+          <SelectGroup label={t`Views`} key="views">
             <SelectOption key="all_activity" value="all">
-              {i18n._(t`Dashboard (all activity)`)}
+              {t`Dashboard (all activity)`}
             </SelectOption>
             <SelectOption key="jobs" value="job">
-              {i18n._(t`Jobs`)}
+              {t`Jobs`}
             </SelectOption>
             <SelectOption key="schedules" value="schedule">
-              {i18n._(t`Schedules`)}
+              {t`Schedules`}
             </SelectOption>
             <SelectOption key="workflow_approvals" value="workflow_approval">
-              {i18n._(t`Workflow Approvals`)}
+              {t`Workflow Approvals`}
             </SelectOption>
           </SelectGroup>
-          <SelectGroup label={i18n._(t`Resources`)} key="resources">
+          <SelectGroup label={t`Resources`} key="resources">
             <SelectOption
               key="templates"
               value="job_template,workflow_job_template,workflow_job_template_node"
             >
-              {i18n._(t`Templates`)}
+              {t`Templates`}
             </SelectOption>
             <SelectOption key="credentials" value="credential">
-              {i18n._(t`Credentials`)}
+              {t`Credentials`}
             </SelectOption>
             <SelectOption key="projects" value="project">
-              {i18n._(t`Projects`)}
+              {t`Projects`}
             </SelectOption>
             <SelectOption key="inventories" value="inventory">
-              {i18n._(t`Inventories`)}
+              {t`Inventories`}
             </SelectOption>
             <SelectOption key="hosts" value="host">
-              {i18n._(t`Hosts`)}
+              {t`Hosts`}
             </SelectOption>
           </SelectGroup>
-          <SelectGroup label={i18n._(t`Access`)} key="access">
+          <SelectGroup label={t`Access`} key="access">
             <SelectOption key="organizations" value="organization">
-              {i18n._(t`Organizations`)}
+              {t`Organizations`}
             </SelectOption>
             <SelectOption key="users" value="user">
-              {i18n._(t`Users`)}
+              {t`Users`}
             </SelectOption>
             <SelectOption key="teams" value="team">
-              {i18n._(t`Teams`)}
+              {t`Teams`}
             </SelectOption>
           </SelectGroup>
-          <SelectGroup label={i18n._(t`Administration`)} key="administration">
+          <SelectGroup label={t`Administration`} key="administration">
             <SelectOption key="credential_types" value="credential_type">
-              {i18n._(t`Credential Types`)}
+              {t`Credential Types`}
             </SelectOption>
             <SelectOption
               key="notification_templates"
               value="notification_template"
             >
-              {i18n._(t`Notification Templates`)}
+              {t`Notification Templates`}
             </SelectOption>
             <SelectOption key="instance_groups" value="instance_group">
-              {i18n._(t`Instance Groups`)}
+              {t`Instance Groups`}
             </SelectOption>
             <SelectOption
               key="applications"
               value="o_auth2_application,o_auth2_access_token"
             >
-              {i18n._(t`Applications & Tokens`)}
+              {t`Applications & Tokens`}
             </SelectOption>
             <SelectOption
               key="execution_environments"
               value="execution_environment"
             >
-              {i18n._(t`Execution Environments`)}
+              {t`Execution Environments`}
             </SelectOption>
           </SelectGroup>
-          <SelectGroup label={i18n._(t`Settings`)} key="settings">
+          <SelectGroup label={t`Settings`} key="settings">
             <SelectOption key="settings" value="setting">
-              {i18n._(t`Settings`)}
+              {t`Settings`}
             </SelectOption>
           </SelectGroup>
         </Select>
@@ -224,26 +224,26 @@ function ActivityStream({ i18n }) {
             hasContentLoading={isLoading}
             items={results}
             itemCount={count}
-            pluralizedItemName={i18n._(t`Events`)}
+            pluralizedItemName={t`Events`}
             qsConfig={QS_CONFIG}
             toolbarSearchColumns={[
               {
-                name: i18n._(t`Keyword`),
+                name: t`Keyword`,
                 key: 'search',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Initiated by (username)`),
+                name: t`Initiated by (username)`,
                 key: 'actor__username__icontains',
               },
             ]}
             toolbarSortColumns={[
               {
-                name: i18n._(t`Time`),
+                name: t`Time`,
                 key: 'timestamp',
               },
               {
-                name: i18n._(t`Initiated by`),
+                name: t`Initiated by`,
                 key: 'actor__username',
               },
             ]}
@@ -251,12 +251,12 @@ function ActivityStream({ i18n }) {
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="timestamp">{i18n._(t`Time`)}</HeaderCell>
+                <HeaderCell sortKey="timestamp">{t`Time`}</HeaderCell>
                 <HeaderCell sortKey="actor__username">
-                  {i18n._(t`Initiated by`)}
+                  {t`Initiated by`}
                 </HeaderCell>
-                <HeaderCell>{i18n._(t`Event`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+                <HeaderCell>{t`Event`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
             renderToolbar={props => (
@@ -272,4 +272,4 @@ function ActivityStream({ i18n }) {
   );
 }
 
-export default withI18n()(ActivityStream);
+export default ActivityStream;

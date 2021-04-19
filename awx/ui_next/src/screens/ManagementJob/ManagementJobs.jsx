@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
 
@@ -7,34 +7,27 @@ import ScreenHeader from '../../components/ScreenHeader';
 import ManagementJob from './ManagementJob';
 import ManagementJobList from './ManagementJobList';
 
-function ManagementJobs({ i18n }) {
+function ManagementJobs() {
   const basePath = '/management_jobs';
 
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
-    [basePath]: i18n._(t`Management jobs`),
+    [basePath]: t`Management jobs`,
   });
 
-  const buildBreadcrumbConfig = useCallback(
-    ({ id, name }, nested) => {
-      if (!id) return;
+  const buildBreadcrumbConfig = useCallback(({ id, name }, nested) => {
+    if (!id) return;
 
-      setBreadcrumbConfig({
-        [basePath]: i18n._(t`Management job`),
-        [`${basePath}/${id}`]: name,
-        [`${basePath}/${id}/notifications`]: i18n._(t`Notifications`),
-        [`${basePath}/${id}/schedules`]: i18n._(t`Schedules`),
-        [`${basePath}/${id}/schedules/add`]: i18n._(t`Create New Schedule`),
-        [`${basePath}/${id}/schedules/${nested?.id}`]: `${nested?.name}`,
-        [`${basePath}/${id}/schedules/${nested?.id}/details`]: i18n._(
-          t`Details`
-        ),
-        [`${basePath}/${id}/schedules/${nested?.id}/edit`]: i18n._(
-          t`Edit Details`
-        ),
-      });
-    },
-    [i18n]
-  );
+    setBreadcrumbConfig({
+      [basePath]: t`Management job`,
+      [`${basePath}/${id}`]: name,
+      [`${basePath}/${id}/notifications`]: t`Notifications`,
+      [`${basePath}/${id}/schedules`]: t`Schedules`,
+      [`${basePath}/${id}/schedules/add`]: t`Create New Schedule`,
+      [`${basePath}/${id}/schedules/${nested?.id}`]: `${nested?.name}`,
+      [`${basePath}/${id}/schedules/${nested?.id}/details`]: t`Details`,
+      [`${basePath}/${id}/schedules/${nested?.id}/edit`]: t`Edit Details`,
+    });
+  }, []);
 
   return (
     <>
@@ -51,4 +44,4 @@ function ManagementJobs({ i18n }) {
   );
 }
 
-export default withI18n()(ManagementJobs);
+export default ManagementJobs;

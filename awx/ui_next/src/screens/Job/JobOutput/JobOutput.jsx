@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation, withRouter } from 'react-router-dom';
-import { i18n } from '@lingui/core';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
@@ -627,48 +627,48 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       qsConfig={QS_CONFIG}
       columns={[
         {
-          name: i18n._(t`Stdout`),
+          name: t`Stdout`,
           key: 'stdout__icontains',
           isDefault: true,
         },
         {
-          name: i18n._(t`Event`),
+          name: t`Event`,
           key: 'event',
           options: [
-            ['runner_on_failed', i18n._(t`Host Failed`)],
-            ['runner_on_start', i18n._(t`Host Started`)],
-            ['runner_on_ok', i18n._(t`Host OK`)],
-            ['runner_on_error', i18n._(t`Host Failure`)],
-            ['runner_on_skipped', i18n._(t`Host Skipped`)],
-            ['runner_on_unreachable', i18n._(t`Host Unreachable`)],
-            ['runner_on_no_hosts', i18n._(t`No Hosts Remaining`)],
-            ['runner_on_async_poll', i18n._(t`Host Polling`)],
-            ['runner_on_async_ok', i18n._(t`Host Async OK`)],
-            ['runner_on_async_failed', i18n._(t`Host Async Failure`)],
-            ['runner_item_on_ok', i18n._(t`Item OK`)],
-            ['runner_item_on_failed', i18n._(t`Item Failed`)],
-            ['runner_item_on_skipped', i18n._(t`Item Skipped`)],
-            ['runner_retry', i18n._(t`Host Retry`)],
-            ['runner_on_file_diff', i18n._(t`File Difference`)],
-            ['playbook_on_start', i18n._(t`Playbook Started`)],
-            ['playbook_on_notify', i18n._(t`Running Handlers`)],
-            ['playbook_on_include', i18n._(t`Including File`)],
-            ['playbook_on_no_hosts_matched', i18n._(t`No Hosts Matched`)],
-            ['playbook_on_no_hosts_remaining', i18n._(t`No Hosts Remaining`)],
-            ['playbook_on_task_start', i18n._(t`Task Started`)],
-            ['playbook_on_vars_prompt', i18n._(t`Variables Prompted`)],
-            ['playbook_on_setup', i18n._(t`Gathering Facts`)],
-            ['playbook_on_play_start', i18n._(t`Play Started`)],
-            ['playbook_on_stats', i18n._(t`Playbook Complete`)],
-            ['debug', i18n._(t`Debug`)],
-            ['verbose', i18n._(t`Verbose`)],
-            ['deprecated', i18n._(t`Deprecated`)],
-            ['warning', i18n._(t`Warning`)],
-            ['system_warning', i18n._(t`System Warning`)],
-            ['error', i18n._(t`Error`)],
+            ['runner_on_failed', t`Host Failed`],
+            ['runner_on_start', t`Host Started`],
+            ['runner_on_ok', t`Host OK`],
+            ['runner_on_error', t`Host Failure`],
+            ['runner_on_skipped', t`Host Skipped`],
+            ['runner_on_unreachable', t`Host Unreachable`],
+            ['runner_on_no_hosts', t`No Hosts Remaining`],
+            ['runner_on_async_poll', t`Host Polling`],
+            ['runner_on_async_ok', t`Host Async OK`],
+            ['runner_on_async_failed', t`Host Async Failure`],
+            ['runner_item_on_ok', t`Item OK`],
+            ['runner_item_on_failed', t`Item Failed`],
+            ['runner_item_on_skipped', t`Item Skipped`],
+            ['runner_retry', t`Host Retry`],
+            ['runner_on_file_diff', t`File Difference`],
+            ['playbook_on_start', t`Playbook Started`],
+            ['playbook_on_notify', t`Running Handlers`],
+            ['playbook_on_include', t`Including File`],
+            ['playbook_on_no_hosts_matched', t`No Hosts Matched`],
+            ['playbook_on_no_hosts_remaining', t`No Hosts Remaining`],
+            ['playbook_on_task_start', t`Task Started`],
+            ['playbook_on_vars_prompt', t`Variables Prompted`],
+            ['playbook_on_setup', t`Gathering Facts`],
+            ['playbook_on_play_start', t`Play Started`],
+            ['playbook_on_stats', t`Playbook Complete`],
+            ['debug', t`Debug`],
+            ['verbose', t`Verbose`],
+            ['deprecated', t`Deprecated`],
+            ['warning', t`Warning`],
+            ['system_warning', t`System Warning`],
+            ['error', t`Error`],
           ],
         },
-        { name: i18n._(t`Advanced`), key: 'advanced' },
+        { name: t`Advanced`, key: 'advanced' },
       ]}
       searchableKeys={eventSearchableKeys}
       relatedSearchableKeys={eventRelatedSearchableKeys}
@@ -712,21 +712,19 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           id="job_output-toolbar"
           clearAllFilters={handleRemoveAllSearchTerms}
           collapseListedFiltersBreakpoint="lg"
-          clearFiltersButtonText={i18n._(t`Clear all filters`)}
+          clearFiltersButtonText={t`Clear all filters`}
         >
           <SearchToolbarContent>
             <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
               <ToolbarItem variant="search-filter">
                 {isJobRunning(job.status) ? (
                   <Tooltip
-                    content={i18n._(
-                      t`Search is disabled while the job is running`
-                    )}
+                    content={t`Search is disabled while the job is running`}
                   >
-                    {renderSearchComponent(i18n)}
+                    {renderSearchComponent()}
                   </Tooltip>
                 ) : (
-                  renderSearchComponent(i18n)
+                  renderSearchComponent()
                 )}
               </ToolbarItem>
             </ToolbarToggleGroup>
@@ -784,33 +782,31 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           isOpen={showCancelModal}
           variant="danger"
           onClose={() => setShowCancelModal(false)}
-          title={i18n._(t`Cancel Job`)}
-          label={i18n._(t`Cancel Job`)}
+          title={t`Cancel Job`}
+          label={t`Cancel Job`}
           actions={[
             <Button
               id="cancel-job-confirm-button"
               key="delete"
               variant="danger"
               isDisabled={isCancelling}
-              aria-label={i18n._(t`Cancel job`)}
+              aria-label={t`Cancel job`}
               onClick={cancelJob}
             >
-              {i18n._(t`Cancel job`)}
+              {t`Cancel job`}
             </Button>,
             <Button
               id="cancel-job-return-button"
               key="cancel"
               variant="secondary"
-              aria-label={i18n._(t`Return`)}
+              aria-label={t`Return`}
               onClick={() => setShowCancelModal(false)}
             >
-              {i18n._(t`Return`)}
+              {t`Return`}
             </Button>,
           ]}
         >
-          {i18n._(
-            t`Are you sure you want to submit the request to cancel this job?`
-          )}
+          {t`Are you sure you want to submit the request to cancel this job?`}
         </AlertModal>
       )}
       {dismissableDeleteError && (
@@ -818,8 +814,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           isOpen={dismissableDeleteError}
           variant="danger"
           onClose={dismissDeleteError}
-          title={i18n._(t`Job Delete Error`)}
-          label={i18n._(t`Job Delete Error`)}
+          title={t`Job Delete Error`}
+          label={t`Job Delete Error`}
         >
           <ErrorDetail error={dismissableDeleteError} />
         </AlertModal>
@@ -829,8 +825,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           isOpen={dismissableCancelError}
           variant="danger"
           onClose={dismissCancelError}
-          title={i18n._(t`Job Cancel Error`)}
-          label={i18n._(t`Job Cancel Error`)}
+          title={t`Job Cancel Error`}
+          label={t`Job Cancel Error`}
         >
           <ErrorDetail error={dismissableCancelError} />
         </AlertModal>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { bool, node, string } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { CheckboxField } from '../FormField';
@@ -19,7 +19,6 @@ const StyledCheckboxField = styled(CheckboxField)`
 function FieldWithPrompt({
   children,
   fieldId,
-  i18n,
   isRequired,
   label,
   promptId,
@@ -44,7 +43,7 @@ function FieldWithPrompt({
         <StyledCheckboxField
           isDisabled={isDisabled}
           id={promptId}
-          label={i18n._(t`Prompt on launch`)}
+          label={t`Prompt on launch`}
           name={promptName}
         />
       </FieldHeader>
@@ -67,4 +66,4 @@ FieldWithPrompt.defaultProps = {
   tooltip: null,
 };
 
-export default withI18n()(FieldWithPrompt);
+export default FieldWithPrompt;

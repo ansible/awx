@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
@@ -19,29 +19,26 @@ const ApplicationAlert = styled(Alert)`
   margin-bottom: 20px;
 `;
 
-function Applications({ i18n }) {
+function Applications() {
   const [applicationModalSource, setApplicationModalSource] = useState(null);
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
-    '/applications': i18n._(t`Applications`),
-    '/applications/add': i18n._(t`Create New Application`),
+    '/applications': t`Applications`,
+    '/applications/add': t`Create New Application`,
   });
 
-  const buildBreadcrumbConfig = useCallback(
-    application => {
-      if (!application) {
-        return;
-      }
-      setBreadcrumbConfig({
-        '/applications': i18n._(t`Applications`),
-        '/applications/add': i18n._(t`Create New Application`),
-        [`/applications/${application.id}`]: `${application.name}`,
-        [`/applications/${application.id}/edit`]: i18n._(t`Edit Details`),
-        [`/applications/${application.id}/details`]: i18n._(t`Details`),
-        [`/applications/${application.id}/tokens`]: i18n._(t`Tokens`),
-      });
-    },
-    [i18n]
-  );
+  const buildBreadcrumbConfig = useCallback(application => {
+    if (!application) {
+      return;
+    }
+    setBreadcrumbConfig({
+      '/applications': t`Applications`,
+      '/applications/add': t`Create New Application`,
+      [`/applications/${application.id}`]: `${application.name}`,
+      [`/applications/${application.id}/edit`]: t`Edit Details`,
+      [`/applications/${application.id}/details`]: t`Details`,
+      [`/applications/${application.id}/tokens`]: t`Tokens`,
+    });
+  }, []);
 
   return (
     <>
@@ -64,29 +61,24 @@ function Applications({ i18n }) {
       </Switch>
       {applicationModalSource && (
         <Modal
-          aria-label={i18n._(t`Application information`)}
+          aria-label={t`Application information`}
           isOpen
           variant="medium"
-          title={i18n._(t`Application information`)}
+          title={t`Application information`}
           onClose={() => setApplicationModalSource(null)}
         >
           {applicationModalSource.client_secret && (
             <ApplicationAlert
               variant="info"
               isInline
-              title={i18n._(
-                t`This is the only time the client secret will be shown.`
-              )}
+              title={t`This is the only time the client secret will be shown.`}
             />
           )}
           <DetailList stacked>
-            <Detail
-              label={i18n._(t`Name`)}
-              value={applicationModalSource.name}
-            />
+            <Detail label={t`Name`} value={applicationModalSource.name} />
             {applicationModalSource.client_id && (
               <Detail
-                label={i18n._(t`Client ID`)}
+                label={t`Client ID`}
                 value={
                   <ClipboardCopy
                     isReadOnly
@@ -99,7 +91,7 @@ function Applications({ i18n }) {
             )}
             {applicationModalSource.client_secret && (
               <Detail
-                label={i18n._(t`Client secret`)}
+                label={t`Client secret`}
                 value={
                   <ClipboardCopy
                     isReadOnly
@@ -117,4 +109,4 @@ function Applications({ i18n }) {
   );
 }
 
-export default withI18n()(Applications);
+export default Applications;

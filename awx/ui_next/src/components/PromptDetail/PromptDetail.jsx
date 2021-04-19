@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React from 'react';
 import { shape } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t, Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -90,13 +90,13 @@ function omitOverrides(resource, overrides, defaultConfig) {
   return clonedResource;
 }
 
-function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
+function PromptDetail({ resource, launchConfig = {}, overrides = {} }) {
   const VERBOSITY = {
-    0: i18n._(t`0 (Normal)`),
-    1: i18n._(t`1 (Verbose)`),
-    2: i18n._(t`2 (More Verbose)`),
-    3: i18n._(t`3 (Debug)`),
-    4: i18n._(t`4 (Connection Debug)`),
+    0: t`0 (Normal)`,
+    1: t`1 (Verbose)`,
+    2: t`2 (More Verbose)`,
+    3: t`3 (Debug)`,
+    4: t`4 (Connection Debug)`,
   };
 
   const details = omitOverrides(resource, overrides, launchConfig.defaults);
@@ -106,16 +106,13 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
   return (
     <>
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={buildResourceLink(resource)} />
-        <Detail label={i18n._(t`Description`)} value={details.description} />
+        <Detail label={t`Name`} value={buildResourceLink(resource)} />
+        <Detail label={t`Description`} value={details.description} />
         <Detail
-          label={i18n._(t`Type`)}
+          label={t`Type`}
           value={toTitleCase(details.unified_job_type || details.type)}
         />
-        <Detail
-          label={i18n._(t`Timeout`)}
-          value={formatTimeout(details?.timeout)}
-        />
+        <Detail label={t`Timeout`} value={formatTimeout(details?.timeout)} />
         {details?.type === 'project' && (
           <PromptProjectDetail resource={details} />
         )}
@@ -130,14 +127,14 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
         )}
         {details?.created && (
           <UserDateDetail
-            label={i18n._(t`Created`)}
+            label={t`Created`}
             date={details.created}
             user={details?.summary_fields?.created_by}
           />
         )}
         {details?.modified && (
           <UserDateDetail
-            label={i18n._(t`Last Modified`)}
+            label={t`Last Modified`}
             date={details?.modified}
             user={details?.summary_fields?.modified_by}
           />
@@ -146,21 +143,19 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
 
       {hasPromptData(launchConfig) && hasOverrides && (
         <>
-          <PromptTitle headingLevel="h2">
-            {i18n._(t`Prompted Values`)}
-          </PromptTitle>
+          <PromptTitle headingLevel="h2">{t`Prompted Values`}</PromptTitle>
           <PromptDivider />
-          <PromptDetailList aria-label={i18n._(t`Prompt Overrides`)}>
+          <PromptDetailList aria-label={t`Prompt Overrides`}>
             {launchConfig.ask_job_type_on_launch && (
               <Detail
-                label={i18n._(t`Job Type`)}
+                label={t`Job Type`}
                 value={toTitleCase(overrides.job_type)}
               />
             )}
             {launchConfig.ask_credential_on_launch && (
               <Detail
                 fullWidth
-                label={i18n._(t`Credentials`)}
+                label={t`Credentials`}
                 rows={4}
                 value={
                   <ChipGroup
@@ -179,31 +174,28 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
               />
             )}
             {launchConfig.ask_inventory_on_launch && (
-              <Detail
-                label={i18n._(t`Inventory`)}
-                value={overrides.inventory?.name}
-              />
+              <Detail label={t`Inventory`} value={overrides.inventory?.name} />
             )}
             {launchConfig.ask_scm_branch_on_launch && (
               <Detail
-                label={i18n._(t`Source Control Branch`)}
+                label={t`Source Control Branch`}
                 value={overrides.scm_branch}
               />
             )}
             {launchConfig.ask_limit_on_launch && (
-              <Detail label={i18n._(t`Limit`)} value={overrides.limit} />
+              <Detail label={t`Limit`} value={overrides.limit} />
             )}
             {Object.prototype.hasOwnProperty.call(overrides, 'verbosity') &&
             launchConfig.ask_verbosity_on_launch ? (
               <Detail
-                label={i18n._(t`Verbosity`)}
+                label={t`Verbosity`}
                 value={VERBOSITY[overrides.verbosity]}
               />
             ) : null}
             {launchConfig.ask_tags_on_launch && (
               <Detail
                 fullWidth
-                label={i18n._(t`Job Tags`)}
+                label={t`Job Tags`}
                 value={
                   <ChipGroup
                     numChips={5}
@@ -226,7 +218,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
             {launchConfig.ask_skip_tags_on_launch && (
               <Detail
                 fullWidth
-                label={i18n._(t`Skip Tags`)}
+                label={t`Skip Tags`}
                 value={
                   <ChipGroup
                     numChips={5}
@@ -248,16 +240,14 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
             )}
             {launchConfig.ask_diff_mode_on_launch && (
               <Detail
-                label={i18n._(t`Show Changes`)}
-                value={
-                  overrides.diff_mode === true ? i18n._(t`On`) : i18n._(t`Off`)
-                }
+                label={t`Show Changes`}
+                value={overrides.diff_mode === true ? t`On` : t`Off`}
               />
             )}
             {(launchConfig.survey_enabled ||
               launchConfig.ask_variables_on_launch) && (
               <VariablesDetail
-                label={i18n._(t`Variables`)}
+                label={t`Variables`}
                 rows={4}
                 value={overrides.extra_vars}
               />
@@ -278,4 +268,4 @@ PromptDetail.propTypes = {
   launchConfig: shape({}),
 };
 
-export default withI18n()(PromptDetail);
+export default PromptDetail;

@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Card,
@@ -54,7 +54,7 @@ const GraphCardActions = styled(CardActions)`
   padding-left: 0;
 `;
 
-function Dashboard({ i18n }) {
+function Dashboard() {
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isJobTypeDropdownOpen, setIsJobTypeDropdownOpen] = useState(false);
   const [periodSelection, setPeriodSelection] = useState('month');
@@ -119,42 +119,42 @@ function Dashboard({ i18n }) {
     <Fragment>
       <ScreenHeader
         streamType="all"
-        breadcrumbConfig={{ '/home': i18n._(t`Dashboard`) }}
+        breadcrumbConfig={{ '/home': t`Dashboard` }}
       />
       <PageSection>
         <Counts>
           <Count
             link="/hosts"
             data={countData?.hosts?.total}
-            label={i18n._(t`Hosts`)}
+            label={t`Hosts`}
           />
           <Count
             failed
             link="/hosts?host.last_job_host_summary__failed=true"
             data={countData?.hosts?.failed}
-            label={i18n._(t`Failed hosts`)}
+            label={t`Failed hosts`}
           />
           <Count
             link="/inventories"
             data={countData?.inventories?.total}
-            label={i18n._(t`Inventories`)}
+            label={t`Inventories`}
           />
           <Count
             failed
             link="/inventories?inventory.inventory_sources_with_failures__gt=0"
             data={countData?.inventories?.inventory_failed}
-            label={i18n._(t`Inventory sync failures`)}
+            label={t`Inventory sync failures`}
           />
           <Count
             link="/projects"
             data={countData?.projects?.total}
-            label={i18n._(t`Projects`)}
+            label={t`Projects`}
           />
           <Count
             failed
             link="/projects?project.status__in=failed,canceled"
             data={countData?.projects?.failed}
-            label={i18n._(t`Project sync failures`)}
+            label={t`Project sync failures`}
           />
         </Counts>
       </PageSection>
@@ -162,26 +162,24 @@ function Dashboard({ i18n }) {
         <div className="spacer">
           <Card id="dashboard-main-container">
             <Tabs
-              aria-label={i18n._(t`Tabs`)}
+              aria-label={t`Tabs`}
               activeKey={activeTabId}
               onSelect={(key, eventKey) => setActiveTabId(eventKey)}
             >
               <Tab
-                aria-label={i18n._(t`Job status graph tab`)}
+                aria-label={t`Job status graph tab`}
                 eventKey={0}
-                title={<TabTitleText>{i18n._(t`Job status`)}</TabTitleText>}
+                title={<TabTitleText>{t`Job status`}</TabTitleText>}
               />
               <Tab
-                aria-label={i18n._(t`Recent Jobs list tab`)}
+                aria-label={t`Recent Jobs list tab`}
                 eventKey={1}
-                title={<TabTitleText>{i18n._(t`Recent Jobs`)}</TabTitleText>}
+                title={<TabTitleText>{t`Recent Jobs`}</TabTitleText>}
               />
               <Tab
-                aria-label={i18n._(t`Recent Templates list tab`)}
+                aria-label={t`Recent Templates list tab`}
                 eventKey={2}
-                title={
-                  <TabTitleText>{i18n._(t`Recent Templates`)}</TabTitleText>
-                }
+                title={<TabTitleText>{t`Recent Templates`}</TabTitleText>}
               />
             </Tabs>
             {activeTabId === 0 && (
@@ -190,8 +188,8 @@ function Dashboard({ i18n }) {
                   <GraphCardActions>
                     <Select
                       variant={SelectVariant.single}
-                      placeholderText={i18n._(t`Select period`)}
-                      aria-label={i18n._(t`Select period`)}
+                      placeholderText={t`Select period`}
+                      aria-label={t`Select period`}
                       className="periodSelect"
                       onToggle={setIsPeriodDropdownOpen}
                       onSelect={(event, selection) =>
@@ -201,19 +199,19 @@ function Dashboard({ i18n }) {
                       isOpen={isPeriodDropdownOpen}
                     >
                       <SelectOption key="month" value="month">
-                        {i18n._(t`Past month`)}
+                        {t`Past month`}
                       </SelectOption>
                       <SelectOption key="two_weeks" value="two_weeks">
-                        {i18n._(t`Past two weeks`)}
+                        {t`Past two weeks`}
                       </SelectOption>
                       <SelectOption key="week" value="week">
-                        {i18n._(t`Past week`)}
+                        {t`Past week`}
                       </SelectOption>
                     </Select>
                     <Select
                       variant={SelectVariant.single}
-                      placeholderText={i18n._(t`Select job type`)}
-                      aria-label={i18n._(t`Select job type`)}
+                      placeholderText={t`Select job type`}
+                      aria-label={t`Select job type`}
                       className="jobTypeSelect"
                       onToggle={setIsJobTypeDropdownOpen}
                       onSelect={(event, selection) =>
@@ -223,16 +221,16 @@ function Dashboard({ i18n }) {
                       isOpen={isJobTypeDropdownOpen}
                     >
                       <SelectOption key="all" value="all">
-                        {i18n._(t`All job types`)}
+                        {t`All job types`}
                       </SelectOption>
                       <SelectOption key="inv_sync" value="inv_sync">
-                        {i18n._(t`Inventory sync`)}
+                        {t`Inventory sync`}
                       </SelectOption>
                       <SelectOption key="scm_update" value="scm_update">
-                        {i18n._(t`SCM update`)}
+                        {t`SCM update`}
                       </SelectOption>
                       <SelectOption key="playbook_run" value="playbook_run">
-                        {i18n._(t`Playbook run`)}
+                        {t`Playbook run`}
                       </SelectOption>
                     </Select>
                   </GraphCardActions>
@@ -257,4 +255,4 @@ function Dashboard({ i18n }) {
   );
 }
 
-export default withI18n()(Dashboard);
+export default Dashboard;

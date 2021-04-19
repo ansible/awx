@@ -49,7 +49,7 @@ export default function visualizerReducer(state, action) {
     case 'DELETE_NODE':
       return deleteNode(state);
     case 'GENERATE_NODES_AND_LINKS':
-      return generateNodesAndLinks(state, action.nodes, action.i18n);
+      return generateNodesAndLinks(state, action.nodes);
     case 'RESET':
       return initReducer();
     case 'SELECT_SOURCE_FOR_LINKING':
@@ -400,7 +400,7 @@ function deleteNode(state) {
   };
 }
 
-function generateNodes(workflowNodes, i18n) {
+function generateNodes(workflowNodes) {
   const allNodeIds = [];
   const chartNodeIdToIndexMapping = {};
   const nodeIdToChartNodeIdMapping = {};
@@ -409,7 +409,7 @@ function generateNodes(workflowNodes, i18n) {
     {
       id: 1,
       fullUnifiedJobTemplate: {
-        name: i18n._(t`START`),
+        name: t`START`,
       },
     },
   ];
@@ -477,6 +477,7 @@ function generateLinks(
       });
       nonRootNodeIds.push(nodeId);
     });
+
     node.always_nodes.forEach(nodeId => {
       const targetIndex =
         chartNodeIdToIndexMapping[nodeIdToChartNodeIdMapping[nodeId]];
@@ -492,17 +493,14 @@ function generateLinks(
   return [arrayOfLinksForChart, nonRootNodeIds];
 }
 
-// TODO: check to make sure passing i18n into this reducer
-// actually works the way we want it to.  If not we may
-// have to explore other options
-function generateNodesAndLinks(state, workflowNodes, i18n) {
+function generateNodesAndLinks(state, workflowNodes) {
   const [
     arrayOfNodesForChart,
     allNodeIds,
     nodeIdToChartNodeIdMapping,
     chartNodeIdToIndexMapping,
     nodeIdCounter,
-  ] = generateNodes(workflowNodes, i18n);
+  ] = generateNodes(workflowNodes);
   const [arrayOfLinksForChart, nonRootNodeIds] = generateLinks(
     workflowNodes,
     chartNodeIdToIndexMapping,

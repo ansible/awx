@@ -43,35 +43,35 @@ export default function useLaunchSteps(
   launchConfig,
   surveyConfig,
   resource,
-  i18n,
+
   resourceDefaultCredentials
 ) {
   const [visited, setVisited] = useState({});
   const [isReady, setIsReady] = useState(false);
   const { touched, values: formikValues } = useFormikContext();
   const steps = [
-    useInventoryStep(launchConfig, resource, i18n, visited),
+    useInventoryStep(launchConfig, resource, visited),
     useCredentialsStep(
       launchConfig,
       resource,
       resourceDefaultCredentials,
-      i18n,
+
       true
     ),
     useCredentialPasswordsStep(
       launchConfig,
-      i18n,
+
       showCredentialPasswordsStep(formikValues.credentials, launchConfig),
       visited
     ),
-    useOtherPromptsStep(launchConfig, resource, i18n),
-    useSurveyStep(launchConfig, surveyConfig, resource, i18n, visited),
+    useOtherPromptsStep(launchConfig, resource),
+    useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
   const { resetForm } = useFormikContext();
   const hasErrors = steps.some(step => step.hasError);
 
   steps.push(
-    usePreviewStep(launchConfig, i18n, resource, surveyConfig, hasErrors, true)
+    usePreviewStep(launchConfig, resource, surveyConfig, hasErrors, true)
   );
 
   const pfSteps = steps.map(s => s.step).filter(s => s != null);

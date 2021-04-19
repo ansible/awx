@@ -1,7 +1,7 @@
 import React from 'react';
 import { bool, func } from 'prop-types';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   DataListItemCells,
@@ -14,7 +14,7 @@ import {
 import DataListCell from '../../../components/DataListCell';
 import { Team } from '../../../types';
 
-function UserTeamListItem({ team, isSelected, onSelect, i18n }) {
+function UserTeamListItem({ team, isSelected, onSelect }) {
   return (
     <DataListItem
       key={team.id}
@@ -39,7 +39,7 @@ function UserTeamListItem({ team, isSelected, onSelect, i18n }) {
               {team.summary_fields.organization && (
                 <Split hasGutter>
                   <SplitItem>
-                    <b>{i18n._(t`Organization`)}</b>{' '}
+                    <b>{t`Organization`}</b>{' '}
                   </SplitItem>
                   <SplitItem>
                     <Link
@@ -65,4 +65,4 @@ UserTeamListItem.prototype = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(UserTeamListItem);
+export default UserTeamListItem;

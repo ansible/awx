@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { number, shape } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 
 import AlertModal from '../AlertModal';
@@ -32,7 +32,7 @@ function canLaunchWithoutPrompt(launchData) {
   );
 }
 
-function LaunchButton({ resource, i18n, children, history }) {
+function LaunchButton({ resource, children, history }) {
   const [showLaunchPrompt, setShowLaunchPrompt] = useState(false);
   const [launchConfig, setLaunchConfig] = useState(null);
   const [surveyConfig, setSurveyConfig] = useState(null);
@@ -159,10 +159,10 @@ function LaunchButton({ resource, i18n, children, history }) {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={() => setError(null)}
         >
-          {i18n._(t`Failed to launch job.`)}
+          {t`Failed to launch job.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -186,4 +186,4 @@ LaunchButton.propTypes = {
   }).isRequired,
 };
 
-export default withI18n()(withRouter(LaunchButton));
+export default withRouter(LaunchButton);

@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
 import yaml from 'js-yaml';
@@ -34,7 +34,7 @@ import NodeNextButton from './NodeNextButton';
 
 function NodeModalForm({
   askLinkType,
-  i18n,
+
   onSave,
   title,
   credentialError,
@@ -68,7 +68,7 @@ function NodeModalForm({
   } = useWorkflowNodeSteps(
     launchConfig,
     surveyConfig,
-    i18n,
+
     values.nodeResource,
     askLinkType,
     resourceDefaultCredentials
@@ -116,8 +116,8 @@ function NodeModalForm({
   const nextButtonText = activeStep =>
     activeStep.id === promptSteps[promptSteps?.length - 1]?.id ||
     activeStep.name === 'Preview'
-      ? i18n._(t`Save`)
-      : i18n._(t`Next`);
+      ? t`Save`
+      : t`Next`;
 
   const CustomFooter = (
     <WizardFooter>
@@ -138,20 +138,20 @@ function NodeModalForm({
                 ouiaId="node-modal-back-button"
                 id="back-node-modal"
                 variant="secondary"
-                aria-label={i18n._(t`Back`)}
+                aria-label={t`Back`}
                 onClick={onBack}
               >
-                {i18n._(t`Back`)}
+                {t`Back`}
               </Button>
             )}
             <Button
               ouiaId="node-modal-cancel-button"
               id="cancel-node-modal"
               variant="link"
-              aria-label={i18n._(t`Cancel`)}
+              aria-label={t`Cancel`}
               onClick={handleCancel}
             >
-              {i18n._(t`Cancel`)}
+              {t`Cancel`}
             </Button>
           </>
         )}
@@ -164,7 +164,7 @@ function NodeModalForm({
       <AlertModal
         isOpen={error}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => {
           dismissError();
         }}
@@ -179,7 +179,7 @@ function NodeModalForm({
       <AlertModal
         isOpen={error}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => {
           dismissError();
         }}
@@ -222,7 +222,7 @@ function NodeModalForm({
   );
 }
 
-const NodeModalInner = ({ i18n, title, ...rest }) => {
+const NodeModalInner = ({ title, ...rest }) => {
   const { values } = useFormikContext();
 
   const wizardTitle = values.nodeResource
@@ -304,7 +304,7 @@ const NodeModalInner = ({ i18n, title, ...rest }) => {
       <AlertModal
         isOpen={error}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => {
           dismissError();
         }}
@@ -320,7 +320,7 @@ const NodeModalInner = ({ i18n, title, ...rest }) => {
         isOpen
         steps={[
           {
-            name: i18n._(t`Loading`),
+            name: t`Loading`,
             component: <ContentLoading />,
           },
         ]}
@@ -338,12 +338,11 @@ const NodeModalInner = ({ i18n, title, ...rest }) => {
       resourceDefaultCredentials={resourceDefaultCredentials}
       isLaunchLoading={isLoading}
       title={wizardTitle}
-      i18n={i18n}
     />
   );
 };
 
-const NodeModal = ({ onSave, i18n, askLinkType, title }) => {
+const NodeModal = ({ onSave, askLinkType, title }) => {
   const { nodeToEdit } = useContext(WorkflowStateContext);
   const onSaveForm = (values, config) => {
     onSave(values, config);
@@ -367,7 +366,6 @@ const NodeModal = ({ onSave, i18n, askLinkType, title }) => {
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <NodeModalInner
             onSave={onSaveForm}
-            i18n={i18n}
             title={title}
             askLinkType={askLinkType}
           />
@@ -383,4 +381,4 @@ NodeModal.propTypes = {
   title: node.isRequired,
 };
 
-export default withI18n()(NodeModal);
+export default NodeModal;

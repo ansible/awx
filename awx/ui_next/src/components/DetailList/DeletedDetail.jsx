@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { node } from 'prop-types';
 import styled from 'styled-components';
@@ -11,12 +11,12 @@ const Detail = styled(_Detail)`
   }
 `;
 
-function DeletedDetail({ i18n, label }) {
-  return <Detail label={label} value={i18n._(t`Deleted`)} />;
+function DeletedDetail({ label }) {
+  return <Detail label={label} value={t`Deleted`} />;
 }
 
 DeletedDetail.propTypes = {
   label: node.isRequired,
 };
 
-export default withI18n()(DeletedDetail);
+export default DeletedDetail;

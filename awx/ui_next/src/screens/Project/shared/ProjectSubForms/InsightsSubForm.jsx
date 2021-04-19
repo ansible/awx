@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useField, useFormikContext } from 'formik';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
@@ -7,7 +7,6 @@ import { required } from '../../../../util/validators';
 import { ScmTypeOptions } from './SharedFields';
 
 const InsightsSubForm = ({
-  i18n,
   credential,
   onCredentialSelection,
   scmUpdateOnLaunch,
@@ -16,7 +15,7 @@ const InsightsSubForm = ({
   const { setFieldValue } = useFormikContext();
   const [, credMeta, credHelpers] = useField({
     name: 'credential',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: required(t`Select a value for this field`),
   });
 
   const onCredentialChange = useCallback(
@@ -31,7 +30,7 @@ const InsightsSubForm = ({
     <>
       <CredentialLookup
         credentialTypeId={credential.typeId}
-        label={i18n._(t`Insights Credential`)}
+        label={t`Insights Credential`}
         helperTextInvalid={credMeta.error}
         isValid={!credMeta.touched || !credMeta.error}
         onBlur={() => credHelpers.setTouched()}
@@ -45,4 +44,4 @@ const InsightsSubForm = ({
   );
 };
 
-export default withI18n()(InsightsSubForm);
+export default InsightsSubForm;

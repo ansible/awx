@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -15,7 +15,7 @@ import useRequest from '../../../../util/useRequest';
 import { SettingsAPI } from '../../../../api';
 import { SettingDetail } from '../../shared';
 
-function AzureADDetail({ i18n }) {
+function AzureADDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
@@ -36,14 +36,14 @@ function AzureADDetail({ i18n }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Settings`)}
+          {t`Back to Settings`}
         </>
       ),
       link: `/settings`,
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/settings/azure/details`,
       id: 0,
     },
@@ -77,11 +77,11 @@ function AzureADDetail({ i18n }) {
           <CardActionsRow>
             <Button
               ouiaId="azure-detail-edit-button"
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
               component={Link}
               to="/settings/azure/edit"
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           </CardActionsRow>
         )}
@@ -90,4 +90,4 @@ function AzureADDetail({ i18n }) {
   );
 }
 
-export default withI18n()(AzureADDetail);
+export default AzureADDetail;

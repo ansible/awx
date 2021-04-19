@@ -8,7 +8,7 @@ import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/mode-django';
 import 'ace-builds/src-noconflict/theme-github';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import debounce from '../../util/debounce';
@@ -81,7 +81,6 @@ function CodeEditor({
   rows,
   fullHeight,
   className,
-  i18n,
 }) {
   if (rows && typeof rows !== 'number' && rows !== 'auto') {
     // eslint-disable-next-line no-console
@@ -181,7 +180,7 @@ function CodeEditor({
           className="pf-c-form__helper-text keyboard-help-text"
           aria-live="polite"
         >
-          {i18n._(t`Press Enter to edit. Press ESC to stop editing.`)}
+          {t`Press Enter to edit. Press ESC to stop editing.`}
         </div>
       )}
     </>
@@ -206,4 +205,4 @@ CodeEditor.defaultProps = {
   className: '',
 };
 
-export default withI18n()(CodeEditor);
+export default CodeEditor;

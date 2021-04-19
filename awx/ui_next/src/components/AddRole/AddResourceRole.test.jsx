@@ -65,7 +65,7 @@ describe('<_AddResourceRole />', () => {
         onClose={() => {}}
         onSave={() => {}}
         roles={roles}
-        i18n={{ _: val => val.toString() }}
+        // i18n={{ _: val => val.toString() }}
       />
     );
   });

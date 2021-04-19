@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { shape } from 'prop-types';
@@ -16,7 +16,6 @@ import mergeExtraVars from '../../../util/prompt/mergeExtraVars';
 import getSurveyValues from '../../../util/prompt/getSurveyValues';
 
 function ScheduleEdit({
-  i18n,
   hasDaysToKeepField,
   schedule,
   resource,
@@ -84,7 +83,7 @@ function ScheduleEdit({
     }
 
     try {
-      const rule = new RRule(buildRuleObj(values, i18n));
+      const rule = new RRule(buildRuleObj(values));
       const requestData = {
         ...submitValues,
         rrule: rule.toString().replace(/\n/g, ' '),
@@ -145,4 +144,4 @@ ScheduleEdit.propTypes = {
 
 ScheduleEdit.defaultProps = {};
 
-export default withI18n()(ScheduleEdit);
+export default ScheduleEdit;

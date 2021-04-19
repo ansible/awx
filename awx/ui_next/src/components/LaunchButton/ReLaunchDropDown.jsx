@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Dropdown,
@@ -11,7 +11,7 @@ import {
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
 
-function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
+function ReLaunchDropDown({ isPrimary = false, handleRelaunch, ouiaId }) {
   const [isOpen, setIsOPen] = useState(false);
 
   const onToggle = () => {
@@ -20,34 +20,34 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
 
   const dropdownItems = [
     <DropdownItem
-      aria-label={i18n._(t`Relaunch on`)}
+      aria-label={t`Relaunch on`}
       key="relaunch_on"
       component="div"
       isPlainText
     >
-      {i18n._(t`Relaunch on`)}
+      {t`Relaunch on`}
     </DropdownItem>,
     <DropdownSeparator key="separator" />,
     <DropdownItem
       key="relaunch_all"
-      aria-label={i18n._(t`Relaunch all hosts`)}
+      aria-label={t`Relaunch all hosts`}
       component="button"
       onClick={() => {
         handleRelaunch({ hosts: 'all' });
       }}
     >
-      {i18n._(t`All`)}
+      {t`All`}
     </DropdownItem>,
 
     <DropdownItem
       key="relaunch_failed"
-      aria-label={i18n._(t`Relaunch failed hosts`)}
+      aria-label={t`Relaunch failed hosts`}
       component="button"
       onClick={() => {
         handleRelaunch({ hosts: 'failed' });
       }}
     >
-      {i18n._(t`Failed hosts`)}
+      {t`Failed hosts`}
     </DropdownItem>,
   ];
 
@@ -63,11 +63,11 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
           <DropdownToggle
             toggleIndicator={null}
             onToggle={onToggle}
-            aria-label={i18n._(t`relaunch jobs`)}
+            aria-label={t`relaunch jobs`}
             id="relaunch_jobs"
             isPrimary
           >
-            {i18n._(t`Relaunch`)}
+            {t`Relaunch`}
           </DropdownToggle>
         }
       />
@@ -85,7 +85,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
         <DropdownToggle
           toggleIndicator={null}
           onToggle={onToggle}
-          aria-label={i18n._(t`relaunch jobs`)}
+          aria-label={t`relaunch jobs`}
           id="relaunch_jobs"
         >
           <RocketIcon />
@@ -95,4 +95,4 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
   );
 }
 
-export default withI18n()(ReLaunchDropDown);
+export default ReLaunchDropDown;

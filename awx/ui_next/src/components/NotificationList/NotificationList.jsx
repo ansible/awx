@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { number, shape, bool } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
@@ -21,7 +21,7 @@ function NotificationList({
   apiModel,
   canToggleNotifications,
   id,
-  i18n,
+
   showApprovalsToggle,
 }) {
   const location = useLocation();
@@ -174,40 +174,40 @@ function NotificationList({
         hasContentLoading={isLoading}
         items={notifications}
         itemCount={itemCount}
-        pluralizedItemName={i18n._(t`Notifications`)}
+        pluralizedItemName={t`Notifications`}
         qsConfig={QS_CONFIG}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name__icontains',
             isDefault: true,
           },
           {
-            name: i18n._(t`Description`),
+            name: t`Description`,
             key: 'description__icontains',
           },
           {
-            name: i18n._(t`Notification type`),
+            name: t`Notification type`,
             key: 'or__notification_type',
             options: [
-              ['email', i18n._(t`Email`)],
-              ['grafana', i18n._(t`Grafana`)],
-              ['hipchat', i18n._(t`Hipchat`)],
-              ['irc', i18n._(t`IRC`)],
-              ['mattermost', i18n._(t`Mattermost`)],
-              ['pagerduty', i18n._(t`Pagerduty`)],
-              ['rocketchat', i18n._(t`Rocket.Chat`)],
-              ['slack', i18n._(t`Slack`)],
-              ['twilio', i18n._(t`Twilio`)],
-              ['webhook', i18n._(t`Webhook`)],
+              ['email', t`Email`],
+              ['grafana', t`Grafana`],
+              ['hipchat', t`Hipchat`],
+              ['irc', t`IRC`],
+              ['mattermost', t`Mattermost`],
+              ['pagerduty', t`Pagerduty`],
+              ['rocketchat', t`Rocket.Chat`],
+              ['slack', t`Slack`],
+              ['twilio', t`Twilio`],
+              ['webhook', t`Webhook`],
             ],
           },
           {
-            name: i18n._(t`Created By (Username)`),
+            name: t`Created By (Username)`,
             key: 'created_by__username__icontains',
           },
           {
-            name: i18n._(t`Modified By (Username)`),
+            name: t`Modified By (Username)`,
             key: 'modified_by__username__icontains',
           },
         ]}
@@ -215,11 +215,9 @@ function NotificationList({
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
-            <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-            <HeaderCell sortKey="notification_type">
-              {i18n._(t`Type`)}
-            </HeaderCell>
-            <HeaderCell>{i18n._(t`Options`)}</HeaderCell>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell sortKey="notification_type">{t`Type`}</HeaderCell>
+            <HeaderCell>{t`Options`}</HeaderCell>
           </HeaderRow>
         }
         renderRow={(notification, index) => (
@@ -245,11 +243,11 @@ function NotificationList({
       {toggleError && (
         <AlertModal
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           isOpen={loadingToggleIds.length === 0}
           onClose={() => setToggleError(null)}
         >
-          {i18n._(t`Failed to toggle notification.`)}
+          {t`Failed to toggle notification.`}
           <ErrorDetail error={toggleError} />
         </AlertModal>
       )}
@@ -268,4 +266,4 @@ NotificationList.defaultProps = {
   showApprovalsToggle: false,
 };
 
-export default withI18n()(NotificationList);
+export default NotificationList;

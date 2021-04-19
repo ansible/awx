@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React, { Fragment, useState, useCallback } from 'react';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { Button, Tooltip } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
@@ -37,7 +37,6 @@ function ProjectListItem({
   detailUrl,
   fetchProjects,
   rowIndex,
-  i18n,
 }) {
   const [isDisabled, setIsDisabled] = useState(false);
   ProjectListItem.propTypes = {
@@ -57,16 +56,16 @@ function ProjectListItem({
   const generateLastJobTooltip = job => {
     return (
       <Fragment>
-        <div>{i18n._(t`MOST RECENT SYNC`)}</div>
+        <div>{t`MOST RECENT SYNC`}</div>
         <div>
-          {i18n._(t`JOB ID:`)} {job.id}
+          {t`JOB ID:`} {job.id}
         </div>
         <div>
-          {i18n._(t`STATUS:`)} {job.status.toUpperCase()}
+          {t`STATUS:`} {job.status.toUpperCase()}
         </div>
         {job.finished && (
           <div>
-            {i18n._(t`FINISHED:`)} {formatDateString(job.finished)}
+            {t`FINISHED:`} {formatDateString(job.finished)}
           </div>
         )}
       </Fragment>
@@ -94,9 +93,9 @@ function ProjectListItem({
           isSelected,
           onSelect,
         }}
-        dataLabel={i18n._(t`Selected`)}
+        dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+      <Td id={labelId} dataLabel={t`Name`}>
         <span>
           <Link id={labelId} to={`${detailUrl}`}>
             <b>{project.name}</b>
@@ -105,9 +104,7 @@ function ProjectListItem({
         {missingExecutionEnvironment && (
           <span>
             <Tooltip
-              content={i18n._(
-                t`Custom virtual environment ${project.custom_virtualenv} must be replaced by an execution environment.`
-              )}
+              content={t`Custom virtual environment ${project.custom_virtualenv} must be replaced by an execution environment.`}
               position="right"
               className="missing-execution-environment"
             >
@@ -116,7 +113,7 @@ function ProjectListItem({
           </span>
         )}
       </Td>
-      <Td dataLabel={i18n._(t`Status`)}>
+      <Td dataLabel={t`Status`}>
         {project.summary_fields.last_job && (
           <Tooltip
             position="top"
@@ -129,41 +126,39 @@ function ProjectListItem({
           </Tooltip>
         )}
       </Td>
-      <Td dataLabel={i18n._(t`Type`)}>
-        {project.scm_type === ''
-          ? i18n._(t`Manual`)
-          : toTitleCase(project.scm_type)}
+      <Td dataLabel={t`Type`}>
+        {project.scm_type === '' ? t`Manual` : toTitleCase(project.scm_type)}
       </Td>
-      <Td dataLabel={i18n._(t`Revision`)}>
+      <Td dataLabel={t`Revision`}>
         {project.scm_revision.substring(0, 7)}
         {!project.scm_revision && (
-          <Label aria-label={i18n._(t`copy to clipboard disabled`)}>
-            {i18n._(t`Sync for revision`)}
+          <Label aria-label={t`copy to clipboard disabled`}>
+            {t`Sync for revision`}
           </Label>
         )}
         <ClipboardCopyButton
           isDisabled={!project.scm_revision}
           stringToCopy={project.scm_revision}
-          copyTip={i18n._(t`Copy full revision to clipboard.`)}
-          copiedSuccessTip={i18n._(t`Successfully copied to clipboard!`)}
+          copyTip={t`Copy full revision to clipboard.`}
+          copiedSuccessTip={t`Successfully copied to clipboard!`}
           ouiaId="copy-revision-button"
         />
       </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+      <ActionsTd dataLabel={t`Actions`}>
         <ActionItem
           visible={project.summary_fields.user_capabilities.start}
-          tooltip={i18n._(t`Sync Project`)}
+          tooltip={t`Sync Project`}
         >
           <ProjectSyncButton projectId={project.id} />
         </ActionItem>
         <ActionItem
           visible={project.summary_fields.user_capabilities.edit}
-          tooltip={i18n._(t`Edit Project`)}
+          tooltip={t`Edit Project`}
         >
           <Button
             ouiaId={`${project.id}-edit-button`}
             isDisabled={isDisabled}
-            aria-label={i18n._(t`Edit Project`)}
+            aria-label={t`Edit Project`}
             variant="plain"
             component={Link}
             to={`/projects/${project.id}/edit`}
@@ -172,7 +167,7 @@ function ProjectListItem({
           </Button>
         </ActionItem>
         <ActionItem
-          tooltip={i18n._(t`Copy Project`)}
+          tooltip={t`Copy Project`}
           visible={project.summary_fields.user_capabilities.copy}
         >
           <CopyButton
@@ -180,11 +175,11 @@ function ProjectListItem({
             isDisabled={isDisabled}
             onCopyStart={handleCopyStart}
             onCopyFinish={handleCopyFinish}
-            errorMessage={i18n._(t`Failed to copy project.`)}
+            errorMessage={t`Failed to copy project.`}
           />
         </ActionItem>
       </ActionsTd>
     </Tr>
   );
 }
-export default withI18n()(ProjectListItem);
+export default ProjectListItem;

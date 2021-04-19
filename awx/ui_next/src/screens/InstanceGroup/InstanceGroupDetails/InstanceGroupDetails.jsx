@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,7 +22,7 @@ const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
 `;
 
-function InstanceGroupDetails({ instanceGroup, i18n }) {
+function InstanceGroupDetails({ instanceGroup }) {
   const { id, name } = instanceGroup;
 
   const history = useHistory();
@@ -47,32 +47,32 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
     <CardBody>
       <DetailList>
         <Detail
-          label={i18n._(t`Name`)}
+          label={t`Name`}
           value={instanceGroup.name}
           dataCy="instance-group-detail-name"
         />
         <Detail
-          label={i18n._(t`Type`)}
+          label={t`Type`}
           value={
             instanceGroup.is_container_group
-              ? i18n._(t`Container group`)
-              : i18n._(t`Instance group`)
+              ? t`Container group`
+              : t`Instance group`
           }
           dataCy="instance-group-type"
         />
         <DetailBadge
-          label={i18n._(t`Policy instance minimum`)}
+          label={t`Policy instance minimum`}
           dataCy="instance-group-policy-instance-minimum"
           content={instanceGroup.policy_instance_minimum}
         />
         <DetailBadge
-          label={i18n._(t`Policy instance percentage`)}
+          label={t`Policy instance percentage`}
           dataCy="instance-group-policy-instance-percentage"
           content={`${instanceGroup.policy_instance_percentage} %`}
         />
         {instanceGroup.capacity ? (
           <DetailBadge
-            label={i18n._(t`Used capacity`)}
+            label={t`Used capacity`}
             content={`${Math.round(
               100 - instanceGroup.percent_capacity_remaining
             )} %`}
@@ -80,19 +80,19 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
           />
         ) : (
           <Detail
-            label={i18n._(t`Used capacity`)}
-            value={<Unavailable>{i18n._(t`Unavailable`)}</Unavailable>}
+            label={t`Used capacity`}
+            value={<Unavailable>{t`Unavailable`}</Unavailable>}
             dataCy="instance-group-used-capacity"
           />
         )}
 
         <UserDateDetail
-          label={i18n._(t`Created`)}
+          label={t`Created`}
           date={instanceGroup.created}
           user={instanceGroup.summary_fields.created_by}
         />
         <UserDateDetail
-          label={i18n._(t`Last Modified`)}
+          label={t`Last Modified`}
           date={instanceGroup.modified}
           user={instanceGroup.summary_fields.modified_by}
         />
@@ -103,11 +103,11 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
           instanceGroup.summary_fields.user_capabilities.edit && (
             <Button
               ouiaId="instance-group-detail-edit-button"
-              aria-label={i18n._(t`edit`)}
+              aria-label={t`edit`}
               component={Link}
               to={`/instance_groups/${id}/edit`}
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           )}
         {name !== 'tower' &&
@@ -115,15 +115,13 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
           instanceGroup.summary_fields.user_capabilities.delete && (
             <DeleteButton
               name={name}
-              modalTitle={i18n._(t`Delete instance group`)}
+              modalTitle={t`Delete instance group`}
               onConfirm={deleteInstanceGroup}
               isDisabled={isLoading}
               deleteDetailsRequests={deleteDetailsRequests}
-              deleteMessage={i18n._(
-                t`This instance group is currently being by other resources. Are you sure you want to delete it?`
-              )}
+              deleteMessage={t`This instance group is currently being by other resources. Are you sure you want to delete it?`}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </DeleteButton>
           )}
       </CardActionsRow>
@@ -131,7 +129,7 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
         <AlertModal
           isOpen={error}
           onClose={dismissError}
-          title={i18n._(t`Error`)}
+          title={t`Error`}
           variant="error"
         />
       )}
@@ -139,4 +137,4 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
   );
 }
 
-export default withI18n()(InstanceGroupDetails);
+export default InstanceGroupDetails;

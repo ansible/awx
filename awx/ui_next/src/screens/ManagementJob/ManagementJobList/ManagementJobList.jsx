@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import { useLocation } from 'react-router-dom';
 import { Card, PageSection } from '@patternfly/react-core';
 
@@ -48,7 +48,7 @@ const loadManagementJobs = async search => {
   return { items, count, options };
 };
 
-function ManagementJobList({ i18n }) {
+function ManagementJobList() {
   const { search } = useLocation();
   const { me } = useConfig();
   const [launchError, setLaunchError] = useState(null);
@@ -79,13 +79,13 @@ function ManagementJobList({ i18n }) {
             hasContentLoading={isLoading}
             items={items}
             itemCount={count}
-            pluralizedItemName={i18n._(t`Management Jobs`)}
+            pluralizedItemName={t`Management Jobs`}
             emptyContentMessage={' '}
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             toolbarSearchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
@@ -99,9 +99,9 @@ function ManagementJobList({ i18n }) {
             )}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Description`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+                <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell>{t`Description`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
             renderRow={({ id, name, description, job_type }) => (
@@ -124,14 +124,14 @@ function ManagementJobList({ i18n }) {
       <AlertModal
         isOpen={Boolean(launchError)}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => setLaunchError(null)}
       >
-        {i18n._(t`Failed to launch job.`)}
+        {t`Failed to launch job.`}
         <ErrorDetail error={launchError} />
       </AlertModal>
     </>
   );
 }
 
-export default withI18n()(ManagementJobList);
+export default ManagementJobList;

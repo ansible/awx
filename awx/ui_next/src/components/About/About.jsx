@@ -1,12 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { AboutModal } from '@patternfly/react-core';
 
 import { BrandName } from '../../variables';
 
-function About({ version, isOpen, onClose, i18n }) {
+function About({ version, isOpen, onClose }) {
   const createSpeechBubble = () => {
     let text = `${BrandName} ${version}`;
     let top = '';
@@ -25,8 +24,8 @@ function About({ version, isOpen, onClose, i18n }) {
   };
 
   const speechBubble = createSpeechBubble();
-  const copyright = i18n._(t`Copyright`);
-  const redHatInc = i18n._(t`Red Hat, Inc.`);
+  const copyright = t`Copyright`;
+  const redHatInc = t`Red Hat, Inc.`;
 
   return (
     <AboutModal
@@ -35,7 +34,7 @@ function About({ version, isOpen, onClose, i18n }) {
       productName={`Ansible ${BrandName}`}
       trademark={`${copyright} ${new Date().getFullYear()} ${redHatInc}`}
       brandImageSrc="/static/media/logo-header.svg"
-      brandImageAlt={i18n._(t`Brand Image`)}
+      brandImageAlt={t`Brand Image`}
     >
       <pre>
         {speechBubble}
@@ -63,4 +62,4 @@ About.defaultProps = {
   version: null,
 };
 
-export default withI18n()(About);
+export default About;

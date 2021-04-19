@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Link,
@@ -25,7 +25,7 @@ import InventorySourceDetail from '../InventorySourceDetail';
 import InventorySourceEdit from '../InventorySourceEdit';
 import NotificationList from '../../../components/NotificationList/NotificationList';
 
-function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
+function InventorySource({ inventory, setBreadcrumb, me }) {
   const location = useLocation();
   const match = useRouteMatch('/inventories/inventory/:id/sources/:sourceId');
   const sourceListUrl = `/inventories/inventory/${inventory.id}/sources`;
@@ -78,19 +78,19 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Sources`)}
+          {t`Back to Sources`}
         </>
       ),
       link: `${sourceListUrl}`,
       id: 0,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `${match.url}/details`,
       id: 1,
     },
     {
-      name: i18n._(t`Schedules`),
+      name: t`Schedules`,
       link: `${match.url}/schedules`,
       id: 2,
     },
@@ -101,7 +101,7 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
 
   if (canSeeNotificationsTab) {
     tabsArray.push({
-      name: i18n._(t`Notifications`),
+      name: t`Notifications`,
       link: `${match.url}/notifications`,
       id: 3,
     });
@@ -169,7 +169,7 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
           <Route key="not-found" path="*">
             <ContentError isNotFound>
               <Link to={`${match.url}/details`}>
-                {i18n._(t`View inventory source details`)}
+                {t`View inventory source details`}
               </Link>
             </ContentError>
           </Route>
@@ -179,4 +179,4 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
   );
 }
 
-export default withI18n()(InventorySource);
+export default InventorySource;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import styled from 'styled-components';
 
 import {
@@ -23,7 +23,7 @@ function SurveyToolbar({
   canEdit,
   isAllSelected,
   onSelectAll,
-  i18n,
+
   surveyEnabled,
   onToggleSurvey,
   isDeleteDisabled,
@@ -41,16 +41,16 @@ function SurveyToolbar({
             onChange={isChecked => {
               onSelectAll(isChecked);
             }}
-            aria-label={i18n._(t`Select all`)}
+            aria-label={t`Select all`}
             id="select-all"
           />
         </ToolbarItem>
         <ToolbarItem>
           <Switch
-            aria-label={i18n._(t`Survey Toggle`)}
+            aria-label={t`Survey Toggle`}
             id="survey-toggle"
-            label={i18n._(t`On`)}
-            labelOff={i18n._(t`Off`)}
+            label={t`On`}
+            labelOff={t`Off`}
             isChecked={surveyEnabled}
             isDisabled={!canEdit}
             onChange={() => onToggleSurvey(!surveyEnabled)}
@@ -70,7 +70,7 @@ function SurveyToolbar({
               isDisabled={isDeleteDisabled}
               onClick={() => onToggleDeleteModal(true)}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </Button>
           </ToolbarItem>
         </ToolbarGroup>
@@ -79,4 +79,4 @@ function SurveyToolbar({
   );
 }
 
-export default withI18n()(SurveyToolbar);
+export default SurveyToolbar;

@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { CredentialsAPI } from '../../../api';
@@ -27,7 +27,7 @@ const QS_CONFIG = getQSConfig('credential', {
   order_by: 'name',
 });
 
-function CredentialList({ i18n }) {
+function CredentialList() {
   const location = useLocation();
   const {
     result: {
@@ -121,28 +121,28 @@ function CredentialList({ i18n }) {
           toolbarRelatedSearchableKeys={relatedSearchableKeys}
           toolbarSearchColumns={[
             {
-              name: i18n._(t`Name`),
+              name: t`Name`,
               key: 'name__icontains',
               isDefault: true,
             },
             {
-              name: i18n._(t`Description`),
+              name: t`Description`,
               key: 'description__icontains',
             },
             {
-              name: i18n._(t`Created By (Username)`),
+              name: t`Created By (Username)`,
               key: 'created_by__username__icontains',
             },
             {
-              name: i18n._(t`Modified By (Username)`),
+              name: t`Modified By (Username)`,
               key: 'modified_by__username__icontains',
             },
           ]}
           headerRow={
             <HeaderRow qsConfig={QS_CONFIG}>
-              <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-              <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
-              <HeaderCell alignRight>{i18n._(t`Actions`)}</HeaderCell>
+              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+              <HeaderCell>{t`Type`}</HeaderCell>
+              <HeaderCell alignRight>{t`Actions`}</HeaderCell>
             </HeaderRow>
           }
           renderRow={(item, index) => (
@@ -173,12 +173,12 @@ function CredentialList({ i18n }) {
                   key="delete"
                   onDelete={handleDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName={i18n._(t`Credentials`)}
+                  pluralizedItemName={t`Credentials`}
                   deleteDetailsRequests={deleteDetailsRequests}
-                  deleteMessage={i18n._(
-                    '{numItemsToDelete, plural, one {This credential is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these credentials could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
-                    { numItemsToDelete: selected.length }
-                  )}
+                  deleteMessage={
+                    ('{numItemsToDelete, plural, one {This credential is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these credentials could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                    { numItemsToDelete: selected.length })
+                  }
                 />,
               ]}
             />
@@ -186,17 +186,17 @@ function CredentialList({ i18n }) {
         />
       </Card>
       <AlertModal
-        aria-label={i18n._(t`Deletion Error`)}
+        aria-label={t`Deletion Error`}
         isOpen={deletionError}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more credentials.`)}
+        {t`Failed to delete one or more credentials.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </PageSection>
   );
 }
 
-export default withI18n()(CredentialList);
+export default CredentialList;

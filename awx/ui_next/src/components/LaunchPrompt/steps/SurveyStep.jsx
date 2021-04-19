@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
@@ -22,7 +22,7 @@ import {
 } from '../../../util/validators';
 import { Survey } from '../../../types';
 
-function SurveyStep({ surveyConfig, i18n }) {
+function SurveyStep({ surveyConfig }) {
   const fieldTypes = {
     text: TextField,
     textarea: TextField,
@@ -40,9 +40,7 @@ function SurveyStep({ surveyConfig, i18n }) {
     >
       {surveyConfig.spec.map(question => {
         const Field = fieldTypes[question.type];
-        return (
-          <Field key={question.variable} question={question} i18n={i18n} />
-        );
+        return <Field key={question.variable} question={question} />;
       })}
     </Form>
   );
@@ -51,11 +49,11 @@ SurveyStep.propTypes = {
   surveyConfig: Survey.isRequired,
 };
 
-function TextField({ question, i18n }) {
+function TextField({ question }) {
   const validators = [
-    question.required ? required(null, i18n) : null,
-    question.required && question.min ? minLength(question.min, i18n) : null,
-    question.required && question.max ? maxLength(question.max, i18n) : null,
+    question.required ? required(null) : null,
+    question.required && question.min ? minLength(question.min) : null,
+    question.required && question.max ? maxLength(question.max) : null,
   ];
   return (
     <FormField
@@ -72,11 +70,11 @@ function TextField({ question, i18n }) {
   );
 }
 
-function NumberField({ question, i18n }) {
+function NumberField({ question }) {
   const validators = [
-    question.required ? required(null, i18n) : null,
-    minMaxValue(question.min, question.max, i18n),
-    question.type === 'integer' ? integer(i18n) : null,
+    question.required ? required(null) : null,
+    minMaxValue(question.min, question.max),
+    question.type === 'integer' ? integer() : null,
   ];
   return (
     <FormField
@@ -120,11 +118,11 @@ function MultipleChoiceField({ question }) {
   );
 }
 
-function MultiSelectField({ question, i18n }) {
+function MultiSelectField({ question }) {
   const [isOpen, setIsOpen] = useState(false);
   const [field, meta, helpers] = useField({
     name: `survey_${question.variable}`,
-    validate: question.required ? required(null, i18n) : null,
+    validate: question.required ? required(null) : null,
   });
   const id = `survey-question-${question.variable}`;
   const hasActualValue = !question.required || meta.value?.length > 0;
@@ -134,8 +132,7 @@ function MultiSelectField({ question, i18n }) {
     <FormGroup
       fieldId={id}
       helperTextInvalid={
-        meta.error ||
-        i18n._(t`At least one value must be selected for this field.`)
+        meta.error || t`At least one value must be selected for this field.`
       }
       isRequired={question.required}
       validated={isValid ? 'default' : 'error'}
@@ -169,4 +166,4 @@ function MultiSelectField({ question, i18n }) {
   );
 }
 
-export default withI18n()(SurveyStep);
+export default SurveyStep;

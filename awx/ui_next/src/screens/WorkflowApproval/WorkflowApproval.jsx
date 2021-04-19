@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import { Card, PageSection } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import {
@@ -18,7 +18,7 @@ import ContentError from '../../components/ContentError';
 import { WorkflowApprovalsAPI } from '../../api';
 import WorkflowApprovalDetail from './WorkflowApprovalDetail';
 
-function WorkflowApproval({ setBreadcrumb, i18n }) {
+function WorkflowApproval({ setBreadcrumb }) {
   const { id: workflowApprovalId } = useParams();
   const match = useRouteMatch();
   const location = useLocation();
@@ -49,9 +49,9 @@ function WorkflowApproval({ setBreadcrumb, i18n }) {
           <ContentError error={error}>
             {error.response.status === 404 && (
               <span>
-                {i18n._(t`Workflow Approval not found.`)}{' '}
+                {t`Workflow Approval not found.`}{' '}
                 <Link to="/workflow_approvals">
-                  {i18n._(t`View all Workflow Approvals.`)}
+                  {t`View all Workflow Approvals.`}
                 </Link>
               </span>
             )}
@@ -66,14 +66,14 @@ function WorkflowApproval({ setBreadcrumb, i18n }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Workflow Approvals`)}
+          {t`Back to Workflow Approvals`}
         </>
       ),
       link: `/workflow_approvals`,
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `${match.url}/details`,
       id: 0,
     },
@@ -101,7 +101,7 @@ function WorkflowApproval({ setBreadcrumb, i18n }) {
               <ContentError isNotFound>
                 {match.params.id && (
                   <Link to={`/workflow_approvals/${match.params.id}/details`}>
-                    {i18n._(t`View Workflow Approval Details`)}
+                    {t`View Workflow Approval Details`}
                   </Link>
                 )}
               </ContentError>
@@ -113,4 +113,4 @@ function WorkflowApproval({ setBreadcrumb, i18n }) {
   );
 }
 
-export default withI18n()(WorkflowApproval);
+export default WorkflowApproval;

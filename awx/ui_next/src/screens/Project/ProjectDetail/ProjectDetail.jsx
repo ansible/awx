@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button, List, ListItem } from '@patternfly/react-core';
 import { Project } from '../../../types';
@@ -23,7 +23,7 @@ import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
 
-function ProjectDetail({ project, i18n }) {
+function ProjectDetail({ project }) {
   const {
     allow_override,
     created,
@@ -63,16 +63,12 @@ function ProjectDetail({ project, i18n }) {
   ) {
     optionsList = (
       <List>
-        {scm_clean && <ListItem>{i18n._(t`Clean`)}</ListItem>}
-        {scm_delete_on_update && (
-          <ListItem>{i18n._(t`Delete on Update`)}</ListItem>
-        )}
+        {scm_clean && <ListItem>{t`Clean`}</ListItem>}
+        {scm_delete_on_update && <ListItem>{t`Delete on Update`}</ListItem>}
         {scm_update_on_launch && (
-          <ListItem>{i18n._(t`Update Revision on Launch`)}</ListItem>
+          <ListItem>{t`Update Revision on Launch`}</ListItem>
         )}
-        {allow_override && (
-          <ListItem>{i18n._(t`Allow Branch Override`)}</ListItem>
-        )}
+        {allow_override && <ListItem>{t`Allow Branch Override`}</ListItem>}
       </List>
     );
   }
@@ -80,15 +76,11 @@ function ProjectDetail({ project, i18n }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <Detail
-          label={i18n._(t`Name`)}
-          value={name}
-          dataCy="project-detail-name"
-        />
-        <Detail label={i18n._(t`Description`)} value={description} />
+        <Detail label={t`Name`} value={name} dataCy="project-detail-name" />
+        <Detail label={t`Description`} value={description} />
         {summary_fields.organization && (
           <Detail
-            label={i18n._(t`Organization`)}
+            label={t`Organization`}
             value={
               <Link
                 to={`/organizations/${summary_fields.organization.id}/details`}
@@ -99,17 +91,15 @@ function ProjectDetail({ project, i18n }) {
           />
         )}
         <Detail
-          label={i18n._(t`Source Control Type`)}
-          value={
-            scm_type === '' ? i18n._(t`Manual`) : toTitleCase(project.scm_type)
-          }
+          label={t`Source Control Type`}
+          value={scm_type === '' ? t`Manual` : toTitleCase(project.scm_type)}
         />
-        <Detail label={i18n._(t`Source Control URL`)} value={scm_url} />
-        <Detail label={i18n._(t`Source Control Branch`)} value={scm_branch} />
-        <Detail label={i18n._(t`Source Control Refspec`)} value={scm_refspec} />
+        <Detail label={t`Source Control URL`} value={scm_url} />
+        <Detail label={t`Source Control Branch`} value={scm_branch} />
+        <Detail label={t`Source Control Refspec`} value={scm_refspec} />
         {summary_fields.credential && (
           <Detail
-            label={i18n._(t`Source Control Credential`)}
+            label={t`Source Control Credential`}
             value={
               <CredentialChip
                 key={summary_fields.credential.id}
@@ -119,12 +109,10 @@ function ProjectDetail({ project, i18n }) {
             }
           />
         )}
-        {optionsList && (
-          <Detail label={i18n._(t`Options`)} value={optionsList} />
-        )}
+        {optionsList && <Detail label={t`Options`} value={optionsList} />}
         <Detail
-          label={i18n._(t`Cache Timeout`)}
-          value={`${scm_update_cache_timeout} ${i18n._(t`Seconds`)}`}
+          label={t`Cache Timeout`}
+          value={`${scm_update_cache_timeout} ${t`Seconds`}`}
         />
         <ExecutionEnvironmentDetail
           virtualEnvironment={custom_virtualenv}
@@ -133,21 +121,18 @@ function ProjectDetail({ project, i18n }) {
         />
         <Config>
           {({ project_base_dir }) => (
-            <Detail
-              label={i18n._(t`Project Base Path`)}
-              value={project_base_dir}
-            />
+            <Detail label={t`Project Base Path`} value={project_base_dir} />
           )}
         </Config>
-        <Detail label={i18n._(t`Playbook Directory`)} value={local_path} />
+        <Detail label={t`Playbook Directory`} value={local_path} />
 
         <UserDateDetail
-          label={i18n._(t`Created`)}
+          label={t`Created`}
           date={created}
           user={summary_fields.created_by}
         />
         <UserDateDetail
-          label={i18n._(t`Last Modified`)}
+          label={t`Last Modified`}
           date={modified}
           user={summary_fields.modified_by}
         />
@@ -156,11 +141,11 @@ function ProjectDetail({ project, i18n }) {
         {summary_fields.user_capabilities?.edit && (
           <Button
             ouiaId="project-detail-edit-button"
-            aria-label={i18n._(t`edit`)}
+            aria-label={t`edit`}
             component={Link}
             to={`/projects/${id}/edit`}
           >
-            {i18n._(t`Edit`)}
+            {t`Edit`}
           </Button>
         )}
         {summary_fields.user_capabilities?.start && (
@@ -169,15 +154,13 @@ function ProjectDetail({ project, i18n }) {
         {summary_fields.user_capabilities?.delete && (
           <DeleteButton
             name={name}
-            modalTitle={i18n._(t`Delete Project`)}
+            modalTitle={t`Delete Project`}
             onConfirm={deleteProject}
             isDisabled={isLoading}
             deleteDetailsRequests={deleteDetailsRequests}
-            deleteMessage={i18n._(
-              t`This project is currently being used by other resources. Are you sure you want to delete it?`
-            )}
+            deleteMessage={t`This project is currently being used by other resources. Are you sure you want to delete it?`}
           >
-            {i18n._(t`Delete`)}
+            {t`Delete`}
           </DeleteButton>
         )}
       </CardActionsRow>
@@ -186,10 +169,10 @@ function ProjectDetail({ project, i18n }) {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
         >
-          {i18n._(t`Failed to delete project.`)}
+          {t`Failed to delete project.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -201,4 +184,4 @@ ProjectDetail.propTypes = {
   project: Project.isRequired,
 };
 
-export default withI18n()(ProjectDetail);
+export default ProjectDetail;

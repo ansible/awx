@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { withRouter, useHistory, useLocation } from 'react-router-dom';
 import { number, func, bool, string } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { SearchIcon } from '@patternfly/react-icons';
@@ -72,46 +72,46 @@ const QS_CONFIG = getQSConfig(
   ['id', 'page', 'page_size', 'inventory']
 );
 
-const buildSearchColumns = i18n => [
+const buildSearchColumns = () => [
   {
-    name: i18n._(t`Name`),
+    name: t`Name`,
     key: 'name__icontains',
     isDefault: true,
   },
   {
-    name: i18n._(t`ID`),
+    name: t`ID`,
     key: 'id',
   },
   {
-    name: i18n._(t`Group`),
+    name: t`Group`,
     key: 'groups__name__icontains',
   },
   {
-    name: i18n._(t`Inventory ID`),
+    name: t`Inventory ID`,
     key: 'inventory',
   },
   {
-    name: i18n._(t`Enabled`),
+    name: t`Enabled`,
     key: 'enabled',
     isBoolean: true,
   },
   {
-    name: i18n._(t`Instance ID`),
+    name: t`Instance ID`,
     key: 'instance_id',
   },
   {
-    name: i18n._(t`Last job`),
+    name: t`Last job`,
     key: 'last_job',
   },
   {
-    name: i18n._(t`Insights system ID`),
+    name: t`Insights system ID`,
     key: 'insights_system_id',
   },
 ];
 
 function HostFilterLookup({
   helperTextInvalid,
-  i18n,
+
   isValid,
   isDisabled,
   onBlur,
@@ -124,7 +124,7 @@ function HostFilterLookup({
   const [chips, setChips] = useState({});
   const [queryString, setQueryString] = useState('');
   const { isModalOpen, toggleModal, closeModal } = useModal();
-  const searchColumns = buildSearchColumns(i18n);
+  const searchColumns = buildSearchColumns();
 
   const {
     result: { count, hosts, relatedSearchableKeys, searchableKeys },
@@ -248,7 +248,7 @@ function HostFilterLookup({
     <InputGroup onBlur={onBlur}>
       <Button
         ouiaId="host-filter-search-button"
-        aria-label={i18n._(t`Search`)}
+        aria-label={t`Search`}
         id="host-filter"
         isDisabled={isDisabled}
         onClick={handleOpenModal}
@@ -280,24 +280,20 @@ function HostFilterLookup({
       fieldId="host-filter"
       helperTextInvalid={helperTextInvalid}
       isRequired
-      label={i18n._(t`Smart host filter`)}
+      label={t`Smart host filter`}
       validated={isValid ? 'default' : 'error'}
       labelIcon={
         <Popover
-          content={i18n._(
-            t`Populate the hosts for this inventory by using a search
+          content={t`Populate the hosts for this inventory by using a search
               filter. Example: ansible_facts.ansible_distribution:"RedHat".
               Refer to the Ansible Tower documentation for further syntax and
-              examples.`
-          )}
+              examples.`}
         />
       }
     >
       {isDisabled ? (
         <Tooltip
-          content={i18n._(
-            t`Please select an organization before editing the host filter`
-          )}
+          content={t`Please select an organization before editing the host filter`}
         >
           {renderLookup()}
         </Tooltip>
@@ -305,10 +301,10 @@ function HostFilterLookup({
         renderLookup()
       )}
       <Modal
-        aria-label={i18n._(t`Lookup modal`)}
+        aria-label={t`Lookup modal`}
         isOpen={isModalOpen}
         onClose={handleClose}
-        title={i18n._(t`Perform a search to define a host filter`)}
+        title={t`Perform a search to define a host filter`}
         variant="large"
         actions={[
           <Button
@@ -318,7 +314,7 @@ function HostFilterLookup({
             onClick={save}
             variant="primary"
           >
-            {i18n._(t`Select`)}
+            {t`Select`}
           </Button>,
           <Button
             ouiaId="host-filter-modal-cancel-button"
@@ -326,7 +322,7 @@ function HostFilterLookup({
             variant="link"
             onClick={handleClose}
           >
-            {i18n._(t`Cancel`)}
+            {t`Cancel`}
           </Button>,
         ]}
       >
@@ -337,7 +333,7 @@ function HostFilterLookup({
             itemCount={count}
             items={hosts}
             onRowClick={() => {}}
-            pluralizedItemName={i18n._(t`hosts`)}
+            pluralizedItemName={t`hosts`}
             qsConfig={QS_CONFIG}
             renderItem={item => (
               <HostListItem
@@ -349,15 +345,15 @@ function HostFilterLookup({
             toolbarSearchColumns={searchColumns}
             toolbarSortColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name',
               },
               {
-                name: i18n._(t`Created`),
+                name: t`Created`,
                 key: 'created',
               },
               {
-                name: i18n._(t`Modified`),
+                name: t`Modified`,
                 key: 'modified',
               },
             ]}
@@ -386,4 +382,4 @@ HostFilterLookup.defaultProps = {
   value: '',
 };
 
-export default withI18n()(withRouter(HostFilterLookup));
+export default withRouter(HostFilterLookup);

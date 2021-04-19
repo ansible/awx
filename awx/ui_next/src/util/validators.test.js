@@ -11,142 +11,138 @@ import {
   requiredEmail,
 } from './validators';
 
-const i18n = { _: val => val };
+// const  = { _: val => val };
 
 describe('validators', () => {
   test('required returns undefined if value given', () => {
-    expect(required(null, i18n)('some value')).toBeUndefined();
-    expect(required('oops', i18n)('some value')).toBeUndefined();
+    expect(required(null)('some value')).toBeUndefined();
+    expect(required('oops')('some value')).toBeUndefined();
   });
 
   test('required returns default message if value missing', () => {
-    expect(required(null, i18n)('')).toEqual('This field must not be blank');
+    expect(required(null)('')).toEqual('This field must not be blank');
   });
 
   test('required returns custom message if value missing', () => {
-    expect(required('oops', i18n)('')).toEqual('oops');
+    expect(required('oops')('')).toEqual('oops');
   });
 
   test('required interprets white space as empty value', () => {
-    expect(required(null, i18n)(' ')).toEqual('This field must not be blank');
-    expect(required(null, i18n)('\t')).toEqual('This field must not be blank');
+    expect(required(null)(' ')).toEqual('This field must not be blank');
+    expect(required(null)('\t')).toEqual('This field must not be blank');
   });
 
   test('required interprets undefined as empty value', () => {
-    expect(required(null, i18n)(undefined)).toEqual(
-      'This field must not be blank'
-    );
+    expect(required(null)(undefined)).toEqual('This field must not be blank');
   });
 
   test('required interprets 0 as non-empty value', () => {
-    expect(required(null, i18n)(0)).toBeUndefined();
+    expect(required(null)(0)).toBeUndefined();
   });
 
   test('maxLength accepts value below max', () => {
-    expect(maxLength(10, i18n)('snazzy')).toBeUndefined();
+    expect(maxLength(10)('snazzy')).toBeUndefined();
   });
 
   test('maxLength accepts value equal to max', () => {
-    expect(maxLength(10, i18n)('abracadbra')).toBeUndefined();
+    expect(maxLength(10)('abracadbra')).toBeUndefined();
   });
 
   test('maxLength rejects value above max', () => {
-    expect(maxLength(8, i18n)('abracadbra')).toEqual(
-      'This field must not exceed {max} characters'
+    expect(maxLength(8)('abracadbra')).toEqual(
+      'This field must not exceed 8 characters'
     );
   });
 
   test('minLength accepts value above min', () => {
-    expect(minLength(3, i18n)('snazzy')).toBeUndefined();
+    expect(minLength(3)('snazzy')).toBeUndefined();
   });
 
   test('minLength accepts value equal to min', () => {
-    expect(minLength(10, i18n)('abracadbra')).toBeUndefined();
+    expect(minLength(10)('abracadbra')).toBeUndefined();
   });
 
   test('minLength rejects value below min', () => {
-    expect(minLength(12, i18n)('abracadbra')).toEqual(
-      'This field must be at least {min} characters'
+    expect(minLength(12)('abracadbra')).toEqual(
+      'This field must be at least 12 characters'
     );
   });
 
   test('noWhiteSpace returns error', () => {
-    expect(noWhiteSpace(i18n)('this has spaces')).toEqual(
+    expect(noWhiteSpace()('this has spaces')).toEqual(
       'This field must not contain spaces'
     );
-    expect(noWhiteSpace(i18n)('this has\twhitespace')).toEqual(
+    expect(noWhiteSpace()('this has\twhitespace')).toEqual(
       'This field must not contain spaces'
     );
-    expect(noWhiteSpace(i18n)('this\nhas\nnewlines')).toEqual(
+    expect(noWhiteSpace()('this\nhas\nnewlines')).toEqual(
       'This field must not contain spaces'
     );
   });
 
   test('noWhiteSpace should accept valid string', () => {
-    expect(noWhiteSpace(i18n)('this_has_no_whitespace')).toBeUndefined();
+    expect(noWhiteSpace()('this_has_no_whitespace')).toBeUndefined();
   });
 
   test('integer should accept integer (number)', () => {
-    expect(integer(i18n)(13)).toBeUndefined();
+    expect(integer()(13)).toBeUndefined();
   });
 
   test('integer should accept integer (string)', () => {
-    expect(integer(i18n)('13')).toBeUndefined();
+    expect(integer()('13')).toBeUndefined();
   });
 
   test('integer should reject decimal/float', () => {
-    expect(integer(i18n)(13.1)).toEqual('This field must be an integer');
+    expect(integer()(13.1)).toEqual('This field must be an integer');
   });
 
   test('integer should reject string containing alphanum', () => {
-    expect(integer(i18n)('15a')).toEqual('This field must be an integer');
+    expect(integer()('15a')).toEqual('This field must be an integer');
   });
 
   test('number should accept number (number)', () => {
-    expect(number(i18n)(13)).toBeUndefined();
+    expect(number()(13)).toBeUndefined();
   });
 
   test('number should accept number (string)', () => {
-    expect(number(i18n)('13')).toBeUndefined();
+    expect(number()('13')).toBeUndefined();
   });
 
   test('number should accept negative number', () => {
-    expect(number(i18n)(-14)).toBeUndefined();
+    expect(number()(-14)).toBeUndefined();
   });
 
   test('number should accept decimal/float', () => {
-    expect(number(i18n)(13.1)).toBeUndefined();
+    expect(number()(13.1)).toBeUndefined();
   });
 
   test('number should accept large number', () => {
-    expect(number(i18n)(999999999999999999999.9)).toBeUndefined();
-    expect(number(i18n)(-999999999999999999999.9)).toBeUndefined();
+    expect(number()(999999999999999999999.9)).toBeUndefined();
+    expect(number()(-999999999999999999999.9)).toBeUndefined();
   });
 
   test('number should reject string containing alphanum', () => {
-    expect(number(i18n)('15a')).toEqual('This field must be a number');
+    expect(number()('15a')).toEqual('This field must be a number');
   });
 
   test('url should reject incomplete url', () => {
-    expect(url(i18n)('abcd')).toEqual('Please enter a valid URL');
+    expect(url()('abcd')).toEqual('Please enter a valid URL');
   });
 
   test('url should accept fully qualified url', () => {
-    expect(url(i18n)('http://example.com/foo')).toBeUndefined();
+    expect(url()('http://example.com/foo')).toBeUndefined();
   });
 
   test('url should accept url with query params', () => {
-    expect(url(i18n)('https://example.com/foo?bar=baz')).toBeUndefined();
+    expect(url()('https://example.com/foo?bar=baz')).toBeUndefined();
   });
 
   test('url should reject short protocol', () => {
-    expect(url(i18n)('h://example.com/foo')).toEqual(
-      'Please enter a valid URL'
-    );
+    expect(url()('h://example.com/foo')).toEqual('Please enter a valid URL');
   });
 
   test('combine should run all validators', () => {
-    const validators = [required(null, i18n), noWhiteSpace(i18n)];
+    const validators = [required(null), noWhiteSpace()];
     expect(combine(validators)('')).toEqual('This field must not be blank');
     expect(combine(validators)('one two')).toEqual(
       'This field must not contain spaces'
@@ -155,25 +151,23 @@ describe('validators', () => {
   });
 
   test('combine should skip null validators', () => {
-    const validators = [required(null, i18n), null];
+    const validators = [required(null), null];
     expect(combine(validators)('')).toEqual('This field must not be blank');
     expect(combine(validators)('ok')).toBeUndefined();
   });
 
   test('regExp rejects invalid regular expression', () => {
-    expect(regExp(i18n)('[')).toEqual(
-      'This field must be a regular expression'
-    );
-    expect(regExp(i18n)('')).toBeUndefined();
-    expect(regExp(i18n)('ok')).toBeUndefined();
-    expect(regExp(i18n)('[^a-zA-Z]')).toBeUndefined();
+    expect(regExp()('[')).toEqual('This field must be a regular expression');
+    expect(regExp()('')).toBeUndefined();
+    expect(regExp()('ok')).toBeUndefined();
+    expect(regExp()('[^a-zA-Z]')).toBeUndefined();
   });
 
   test('email validator rejects obviously invalid email ', () => {
-    expect(requiredEmail(i18n)('foobar321')).toEqual('Invalid email address');
+    expect(requiredEmail()('foobar321')).toEqual('Invalid email address');
   });
 
   test('bob has email', () => {
-    expect(requiredEmail(i18n)('bob@localhost')).toBeUndefined();
+    expect(requiredEmail()('bob@localhost')).toBeUndefined();
   });
 });

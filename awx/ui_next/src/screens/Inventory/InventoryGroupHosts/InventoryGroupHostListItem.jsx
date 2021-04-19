@@ -2,7 +2,7 @@ import 'styled-components/macro';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 
 import {
@@ -30,7 +30,6 @@ const DataListAction = styled(_DataListAction)`
 `;
 
 function InventoryGroupHostListItem({
-  i18n,
   detailUrl,
   editUrl,
   host,
@@ -66,16 +65,16 @@ function InventoryGroupHostListItem({
           ]}
         />
         <DataListAction
-          aria-label={i18n._(t`actions`)}
+          aria-label={t`actions`}
           aria-labelledby={labelId}
           id={labelId}
         >
           <HostToggle css="grid-column: 1" host={host} />
           {host.summary_fields.user_capabilities?.edit && (
-            <Tooltip content={i18n._(t`Edit Host`)} position="top">
+            <Tooltip content={t`Edit Host`} position="top">
               <Button
                 ouiaId={`${host.id}-edit-button`}
-                aria-label={i18n._(t`Edit Host`)}
+                aria-label={t`Edit Host`}
                 css="grid-column: 2"
                 variant="plain"
                 component={Link}
@@ -99,4 +98,4 @@ InventoryGroupHostListItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(InventoryGroupHostListItem);
+export default InventoryGroupHostListItem;

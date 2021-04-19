@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { Redirect, Link } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import useRequest from '../../util/useRequest';
 import { UnifiedJobsAPI } from '../../api';
@@ -11,7 +11,7 @@ import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 const NOT_FOUND = 'not found';
 
-function JobTypeRedirect({ id, path, view, i18n }) {
+function JobTypeRedirect({ id, path, view }) {
   const {
     isLoading,
     error,
@@ -37,7 +37,7 @@ function JobTypeRedirect({ id, path, view, i18n }) {
         <Card>
           {error === NOT_FOUND ? (
             <ContentError isNotFound>
-              <Link to="/jobs">{i18n._(t`View all Jobs`)}</Link>
+              <Link to="/jobs">{t`View all Jobs`}</Link>
             </ContentError>
           ) : (
             <ContentError error={error} />
@@ -62,4 +62,4 @@ function JobTypeRedirect({ id, path, view, i18n }) {
 JobTypeRedirect.defaultProps = {
   view: 'output',
 };
-export default withI18n()(JobTypeRedirect);
+export default JobTypeRedirect;

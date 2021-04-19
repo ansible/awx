@@ -6,7 +6,6 @@ class Tooltip {
     this.label = opts.label;
     this.svg = opts.svg;
     this.colors = opts.colors;
-    this.i18n = opts.i18n;
     this.draw();
   }
 
@@ -56,14 +55,14 @@ class Tooltip {
       .attr('y', 4)
       .attr('font-size', 12)
       .attr('fill', 'white')
-      .text(this.i18n._(t`Successful`));
+      .text(t`Successful`);
     this.failText = this.toolTipBase
       .append('text')
       .attr('x', 43)
       .attr('y', 28)
       .attr('font-size', 12)
       .attr('fill', 'white')
-      .text(this.i18n._(t`Failed`));
+      .text(t`Failed`);
     this.icon = this.toolTipBase
       .append('text')
       .attr('fill', 'white')
@@ -79,7 +78,7 @@ class Tooltip {
       .attr('y', -21)
       .attr('font-size', 12)
       .attr('text-anchor', 'end')
-      .text(this.i18n._(t`No Jobs`));
+      .text(t`No Jobs`);
     this.successful = this.toolTipBase
       .append('text')
       .attr('fill', 'white')
@@ -103,7 +102,7 @@ class Tooltip {
       .attr('x', 20)
       .attr('y', -21)
       .attr('font-size', 12)
-      .text(this.i18n._(t`Never`));
+      .text(t`Never`);
   }
 
   handleMouseOver = d => {

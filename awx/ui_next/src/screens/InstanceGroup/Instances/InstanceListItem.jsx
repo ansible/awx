@@ -1,6 +1,6 @@
 import React from 'react';
 import { bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import 'styled-components/macro';
@@ -40,13 +40,7 @@ const ListGroup = styled.span`
   }
 `;
 
-function InstanceListItem({
-  instance,
-  isSelected,
-  onSelect,
-  fetchInstances,
-  i18n,
-}) {
+function InstanceListItem({ instance, isSelected, onSelect, fetchInstances }) {
   const labelId = `check-action-${instance.id}`;
 
   function usedCapacity(item) {
@@ -56,11 +50,11 @@ function InstanceListItem({
           value={Math.round(100 - item.percent_capacity_remaining)}
           measureLocation={ProgressMeasureLocation.top}
           size={ProgressSize.sm}
-          title={i18n._(t`Used capacity`)}
+          title={t`Used capacity`}
         />
       );
     }
-    return <Unavailable>{i18n._(t`Unavailable`)}</Unavailable>;
+    return <Unavailable>{t`Unavailable`}</Unavailable>;
   }
 
   return (
@@ -79,41 +73,39 @@ function InstanceListItem({
 
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="name" aria-label={i18n._(t`instance host name`)}>
+            <DataListCell key="name" aria-label={t`instance host name`}>
               <b>{instance.hostname}</b>
             </DataListCell>,
-            <DataListCell key="type" aria-label={i18n._(t`instance type`)}>
-              <b css="margin-right: 24px">{i18n._(t`Type`)}</b>
+            <DataListCell key="type" aria-label={t`instance type`}>
+              <b css="margin-right: 24px">{t`Type`}</b>
               <span id={labelId}>
-                {instance.managed_by_policy
-                  ? i18n._(t`Auto`)
-                  : i18n._(t`Manual`)}
+                {instance.managed_by_policy ? t`Auto` : t`Manual`}
               </span>
             </DataListCell>,
             <DataListCell
               key="related-field-counts"
-              aria-label={i18n._(t`instance counts`)}
+              aria-label={t`instance counts`}
               width={2}
             >
               <ListGroup>
-                <b>{i18n._(t`Running jobs`)}</b>
+                <b>{t`Running jobs`}</b>
                 <Badge isRead>{instance.jobs_running}</Badge>
               </ListGroup>
               <ListGroup>
-                <b>{i18n._(t`Total jobs`)}</b>
+                <b>{t`Total jobs`}</b>
                 <Badge isRead>{instance.jobs_total}</Badge>
               </ListGroup>
             </DataListCell>,
             <DataListCell
               key="capacity"
-              aria-label={i18n._(t`instance group used capacity`)}
+              aria-label={t`instance group used capacity`}
             >
               {usedCapacity(instance)}
             </DataListCell>,
           ]}
         />
         <DataListAction
-          aria-label={i18n._(t`actions`)}
+          aria-label={t`actions`}
           aria-labelledby={labelId}
           id={labelId}
         >
@@ -133,4 +125,4 @@ InstanceListItem.prototype = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(InstanceListItem);
+export default InstanceListItem;

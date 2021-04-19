@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { bool, func, shape } from 'prop-types';
 import { Formik, useField } from 'formik';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 
 import { Form, FormGroup } from '@patternfly/react-core';
@@ -13,24 +13,22 @@ import { FormColumnLayout, FormFullWidthLayout } from '../FormLayout';
 import Popover from '../Popover';
 import { required } from '../../util/validators';
 
-const InventoryLookupField = withI18n()(({ i18n, host }) => {
+const InventoryLookupField = ({ host }) => {
   const [inventory, setInventory] = useState(
     host ? host.summary_fields.inventory : ''
   );
 
   const [, inventoryMeta, inventoryHelpers] = useField({
     name: 'inventory',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: required(t`Select a value for this field`),
   });
 
   return (
     <FormGroup
-      label={i18n._(t`Inventory`)}
+      label={t`Inventory`}
       labelIcon={
         <Popover
-          content={i18n._(
-            t`Select the inventory that this host will belong to.`
-          )}
+          content={t`Select the inventory that this host will belong to.`}
         />
       }
       isRequired
@@ -44,7 +42,7 @@ const InventoryLookupField = withI18n()(({ i18n, host }) => {
         fieldId="inventory-lookup"
         value={inventory}
         onBlur={() => inventoryHelpers.setTouched()}
-        tooltip={i18n._(t`Select the inventory that this host will belong to.`)}
+        tooltip={t`Select the inventory that this host will belong to.`}
         isValid={!inventoryMeta.touched || !inventoryMeta.error}
         helperTextInvalid={inventoryMeta.error}
         onChange={value => {
@@ -57,14 +55,13 @@ const InventoryLookupField = withI18n()(({ i18n, host }) => {
       />
     </FormGroup>
   );
-});
+};
 
 const HostForm = ({
   handleCancel,
   handleSubmit,
   host,
   isInventoryVisible,
-  i18n,
   submitError,
 }) => {
   return (
@@ -84,22 +81,22 @@ const HostForm = ({
               id="host-name"
               name="name"
               type="text"
-              label={i18n._(t`Name`)}
-              validate={required(null, i18n)}
+              label={t`Name`}
+              validate={required(null)}
               isRequired
             />
             <FormField
               id="host-description"
               name="description"
               type="text"
-              label={i18n._(t`Description`)}
+              label={t`Description`}
             />
             {isInventoryVisible && <InventoryLookupField host={host} />}
             <FormFullWidthLayout>
               <VariablesField
                 id="host-variables"
                 name="variables"
-                label={i18n._(t`Variables`)}
+                label={t`Variables`}
               />
             </FormFullWidthLayout>
             {submitError && <FormSubmitError error={submitError} />}
@@ -137,4 +134,4 @@ HostForm.defaultProps = {
 };
 
 export { HostForm as _HostForm };
-export default withI18n()(HostForm);
+export default HostForm;

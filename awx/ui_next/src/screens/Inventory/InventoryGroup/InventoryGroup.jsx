@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
 
 import {
   Switch,
@@ -21,7 +20,7 @@ import InventoryRelatedGroups from '../InventoryRelatedGroups';
 
 import { GroupsAPI } from '../../../api';
 
-function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
+function InventoryGroup({ setBreadcrumb, inventory }) {
   const [inventoryGroup, setInventoryGroup] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
   const [contentError, setContentError] = useState(null);
@@ -48,25 +47,25 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
     {
       name: (
         <>
-          <CaretLeftIcon aria-label={i18n._(t`Back to Groups`)} />
-          {i18n._(t`Back to Groups`)}
+          <CaretLeftIcon aria-label={t`Back to Groups`} />
+          {t`Back to Groups`}
         </>
       ),
       link: `/inventories/inventory/${inventory.id}/groups`,
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/inventories/inventory/${inventory.id}/groups/${inventoryGroup?.id}/details`,
       id: 0,
     },
     {
-      name: i18n._(t`Related Groups`),
+      name: t`Related Groups`,
       link: `/inventories/inventory/${inventory.id}/groups/${inventoryGroup?.id}/nested_groups`,
       id: 1,
     },
     {
-      name: i18n._(t`Hosts`),
+      name: t`Hosts`,
       link: `/inventories/inventory/${inventory.id}/groups/${inventoryGroup?.id}/nested_hosts`,
       id: 2,
     },
@@ -91,7 +90,7 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
     return (
       <ContentError isNotFound>
         <Link to={`/inventories/inventory/${inventory.id}/groups`}>
-          {i18n._(t`View Inventory Groups`)}
+          {t`View Inventory Groups`}
         </Link>
       </ContentError>
     );
@@ -141,7 +140,7 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
           <ContentError>
             {inventory && (
               <Link to={`/inventories/inventory/${inventory.id}/details`}>
-                {i18n._(t`View Inventory Details`)}
+                {t`View Inventory Details`}
               </Link>
             )}
           </ContentError>
@@ -152,4 +151,4 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
 }
 
 export { InventoryGroup as _InventoryGroup };
-export default withI18n()(InventoryGroup);
+export default InventoryGroup;

@@ -1,7 +1,7 @@
 /* eslint no-nested-ternary: 0 */
 import React, { useCallback, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
@@ -70,7 +70,7 @@ function ProjectFormFields({
   project_base_dir,
   project_local_paths,
   formik,
-  i18n,
+
   setCredentials,
   credentials,
   scmTypeOptions,
@@ -93,11 +93,11 @@ function ProjectFormFields({
 
   const [scmTypeField, scmTypeMeta, scmTypeHelpers] = useField({
     name: 'scm_type',
-    validate: required(i18n._(t`Set a value for this field`), i18n),
+    validate: required(t`Set a value for this field`),
   });
   const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: required(t`Select a value for this field`),
   });
 
   const [
@@ -164,15 +164,15 @@ function ProjectFormFields({
     <>
       <FormField
         id="project-name"
-        label={i18n._(t`Name`)}
+        label={t`Name`}
         name="name"
         type="text"
-        validate={required(null, i18n)}
+        validate={required(null)}
         isRequired
       />
       <FormField
         id="project-description"
-        label={i18n._(t`Description`)}
+        label={t`Description`}
         name="description"
         type="text"
       />
@@ -193,12 +193,8 @@ function ProjectFormFields({
         onBlur={() => executionEnvironmentHelpers.setTouched()}
         value={executionEnvironmentField.value}
         onChange={value => executionEnvironmentHelpers.setValue(value)}
-        popoverContent={i18n._(
-          t`Select the default execution environment for this project.`
-        )}
-        tooltip={i18n._(
-          t`Select an organization before editing the default execution environment.`
-        )}
+        popoverContent={t`Select the default execution environment for this project.`}
+        tooltip={t`Select an organization before editing the default execution environment.`}
         globallyAvailable
         isDisabled={!organizationField.value}
         organizationId={organizationField.value?.id}
@@ -211,7 +207,7 @@ function ProjectFormFields({
         validated={
           !scmTypeMeta.touched || !scmTypeMeta.error ? 'default' : 'error'
         }
-        label={i18n._(t`Source Control Credential Type`)}
+        label={t`Source Control Credential Type`}
       >
         <AnsibleSelect
           {...scmTypeField}
@@ -220,7 +216,7 @@ function ProjectFormFields({
             {
               value: '',
               key: '',
-              label: i18n._(t`Choose a Source Control Type`),
+              label: t`Choose a Source Control Type`,
               isDisabled: true,
             },
             ...scmTypeOptions.map(([value, label]) => {
@@ -243,7 +239,7 @@ function ProjectFormFields({
       {formik.values.scm_type !== '' && (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
-            {i18n._(t`Type Details`)}
+            {t`Type Details`}
           </Title>
           <FormColumnLayout>
             {
@@ -295,7 +291,7 @@ function ProjectFormFields({
   );
 }
 
-function ProjectForm({ i18n, project, submitError, ...props }) {
+function ProjectForm({ project, submitError, ...props }) {
   const { handleCancel, handleSubmit } = props;
   const { summary_fields = {} } = project;
   const { project_base_dir, project_local_paths } = useConfig();
@@ -388,7 +384,6 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
               project_base_dir={project_base_dir}
               project_local_paths={project_local_paths}
               formik={formik}
-              i18n={i18n}
               setCredentials={setCredentials}
               credentials={credentials}
               scmTypeOptions={scmTypeOptions}
@@ -419,4 +414,4 @@ ProjectForm.defaultProps = {
   submitError: null,
 };
 
-export default withI18n()(ProjectForm);
+export default ProjectForm;

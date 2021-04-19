@@ -1,6 +1,6 @@
 import React from 'react';
 import { Wizard } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
 import ContentError from '../ContentError';
@@ -13,7 +13,7 @@ import AlertModal from '../AlertModal';
 
 function PromptModalForm({
   launchConfig,
-  i18n,
+
   onCancel,
   onSubmit,
   resource,
@@ -33,7 +33,7 @@ function PromptModalForm({
     launchConfig,
     surveyConfig,
     resource,
-    i18n,
+
     resourceDefaultCredentials
   );
 
@@ -70,7 +70,7 @@ function PromptModalForm({
       <AlertModal
         isOpen={error}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => {
           dismissError();
         }}
@@ -104,27 +104,27 @@ function PromptModalForm({
           validateStep(nextStep.id);
         }
       }}
-      title={i18n._(t`Prompts`)}
+      title={t`Prompts`}
       steps={
         isReady
           ? steps
           : [
               {
-                name: i18n._(t`Content Loading`),
+                name: t`Content Loading`,
                 component: <ContentLoading />,
               },
             ]
       }
-      backButtonText={i18n._(t`Back`)}
-      cancelButtonText={i18n._(t`Cancel`)}
-      nextButtonText={i18n._(t`Next`)}
+      backButtonText={t`Back`}
+      cancelButtonText={t`Cancel`}
+      nextButtonText={t`Next`}
     />
   );
 }
 
 function LaunchPrompt({
   launchConfig,
-  i18n,
+
   onCancel,
   onLaunch,
   resource = {},
@@ -136,7 +136,6 @@ function LaunchPrompt({
       <PromptModalForm
         onSubmit={values => onLaunch(values)}
         onCancel={onCancel}
-        i18n={i18n}
         launchConfig={launchConfig}
         surveyConfig={surveyConfig}
         resource={resource}
@@ -147,4 +146,4 @@ function LaunchPrompt({
 }
 
 export { LaunchPrompt as _LaunchPrompt };
-export default withI18n()(LaunchPrompt);
+export default LaunchPrompt;

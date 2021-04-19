@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 
 import PropTypes from 'prop-types';
 import { DataList } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { withRouter, useHistory, useLocation } from 'react-router-dom';
 
@@ -40,7 +40,7 @@ function PaginatedDataList({
   pluralizedItemName,
   showPageSizeOptions,
   location,
-  i18n,
+
   renderToolbar,
 }) {
   const { search, pathname } = useLocation();
@@ -74,7 +74,7 @@ function PaginatedDataList({
     ? toolbarSearchColumns
     : [
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name',
           isDefault: true,
         },
@@ -83,17 +83,15 @@ function PaginatedDataList({
     ? toolbarSortColumns
     : [
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name',
         },
       ];
   const queryParams = parseQueryString(qsConfig, location.search);
 
-  const dataListLabel = i18n._(t`${pluralizedItemName} List`);
-  const emptyContentMessage = i18n._(
-    t`Please add ${pluralizedItemName} to populate this list `
-  );
-  const emptyContentTitle = i18n._(t`No ${pluralizedItemName} Found `);
+  const dataListLabel = t`${pluralizedItemName} List`;
+  const emptyContentMessage = t`Please add ${pluralizedItemName} to populate this list `;
+  const emptyContentTitle = t`No ${pluralizedItemName} Found `;
 
   let Content;
   if (hasContentLoading && items.length <= 0) {
@@ -216,4 +214,4 @@ PaginatedDataList.defaultProps = {
 };
 
 export { PaginatedDataList as _PaginatedDataList };
-export default withI18n()(withRouter(PaginatedDataList));
+export default withRouter(PaginatedDataList);

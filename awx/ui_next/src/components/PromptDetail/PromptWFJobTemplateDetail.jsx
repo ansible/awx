@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ import { VariablesDetail } from '../CodeEditor';
 import Sparkline from '../Sparkline';
 import { toTitleCase } from '../../util/strings';
 
-function PromptWFJobTemplateDetail({ i18n, resource }) {
+function PromptWFJobTemplateDetail({ resource }) {
   const {
     allow_simultaneous,
     extra_vars,
@@ -27,10 +27,8 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
   if (allow_simultaneous || webhook_service) {
     optionsList = (
       <List>
-        {allow_simultaneous && (
-          <ListItem>{i18n._(t`Enable Concurrent Jobs`)}</ListItem>
-        )}
-        {webhook_service && <ListItem>{i18n._(t`Enable Webhooks`)}</ListItem>}
+        {allow_simultaneous && <ListItem>{t`Enable Concurrent Jobs`}</ListItem>}
+        {webhook_service && <ListItem>{t`Enable Webhooks`}</ListItem>}
       </List>
     );
   }
@@ -48,14 +46,11 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
   return (
     <>
       {summary_fields?.recent_jobs?.length > 0 && (
-        <Detail
-          value={<Sparkline jobs={recentJobs} />}
-          label={i18n._(t`Activity`)}
-        />
+        <Detail value={<Sparkline jobs={recentJobs} />} label={t`Activity`} />
       )}
       {summary_fields?.organization && (
         <Detail
-          label={i18n._(t`Organization`)}
+          label={t`Organization`}
           value={
             <Link
               to={`/organizations/${summary_fields.organization.id}/details`}
@@ -67,7 +62,7 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
       )}
       {summary_fields?.inventory && (
         <Detail
-          label={i18n._(t`Inventory`)}
+          label={t`Inventory`}
           value={
             <Link
               to={`/${inventoryKind}/${summary_fields.inventory?.id}/details`}
@@ -77,24 +72,21 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
           }
         />
       )}
-      <Detail label={i18n._(t`Source Control Branch`)} value={scm_branch} />
-      <Detail label={i18n._(t`Limit`)} value={limit} />
-      <Detail
-        label={i18n._(t`Webhook Service`)}
-        value={toTitleCase(webhook_service)}
-      />
-      <Detail label={i18n._(t`Webhook Key`)} value={webhook_key} />
+      <Detail label={t`Source Control Branch`} value={scm_branch} />
+      <Detail label={t`Limit`} value={limit} />
+      <Detail label={t`Webhook Service`} value={toTitleCase(webhook_service)} />
+      <Detail label={t`Webhook Key`} value={webhook_key} />
       {related?.webhook_receiver && (
         <Detail
-          label={i18n._(t`Webhook URL`)}
+          label={t`Webhook URL`}
           value={`${window.location.origin}${related.webhook_receiver}`}
         />
       )}
-      {optionsList && <Detail label={i18n._(t`Options`)} value={optionsList} />}
+      {optionsList && <Detail label={t`Options`} value={optionsList} />}
       {summary_fields?.webhook_credential && (
         <Detail
           fullWidth
-          label={i18n._(t`Webhook Credential`)}
+          label={t`Webhook Credential`}
           value={
             <CredentialChip
               key={summary_fields.webhook_credential?.id}
@@ -107,7 +99,7 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
       {summary_fields?.labels?.results?.length > 0 && (
         <Detail
           fullWidth
-          label={i18n._(t`Labels`)}
+          label={t`Labels`}
           value={
             <ChipGroup
               numChips={5}
@@ -123,14 +115,10 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
         />
       )}
       {extra_vars && (
-        <VariablesDetail
-          label={i18n._(t`Variables`)}
-          rows={4}
-          value={extra_vars}
-        />
+        <VariablesDetail label={t`Variables`} rows={4} value={extra_vars} />
       )}
     </>
   );
 }
 
-export default withI18n()(PromptWFJobTemplateDetail);
+export default PromptWFJobTemplateDetail;

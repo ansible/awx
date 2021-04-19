@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Host } from '../../../types';
 import { CardBody } from '../../../components/Card';
@@ -12,7 +12,7 @@ import {
 import Sparkline from '../../../components/Sparkline';
 import { VariablesDetail } from '../../../components/CodeEditor';
 
-function SmartInventoryHostDetail({ host, i18n }) {
+function SmartInventoryHostDetail({ host }) {
   const {
     created,
     description,
@@ -28,41 +28,30 @@ function SmartInventoryHostDetail({ host, i18n }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={name} />
+        <Detail label={t`Name`} value={name} />
         {recentPlaybookJobs?.length > 0 && (
           <Detail
-            label={i18n._(t`Activity`)}
+            label={t`Activity`}
             value={<Sparkline jobs={recentPlaybookJobs} />}
           />
         )}
-        <Detail label={i18n._(t`Description`)} value={description} />
+        <Detail label={t`Description`} value={description} />
         <Detail
-          label={i18n._(t`Inventory`)}
+          label={t`Inventory`}
           value={
             <Link to={`/inventories/inventory/${inventory?.id}/details`}>
               {inventory?.name}
             </Link>
           }
         />
-        <Detail
-          label={i18n._(t`Enabled`)}
-          value={enabled ? i18n._(t`On`) : i18n._(t`Off`)}
-        />
-        <UserDateDetail
-          date={created}
-          label={i18n._(t`Created`)}
-          user={created_by}
-        />
+        <Detail label={t`Enabled`} value={enabled ? t`On` : t`Off`} />
+        <UserDateDetail date={created} label={t`Created`} user={created_by} />
         <UserDateDetail
           date={modified}
-          label={i18n._(t`Last modified`)}
+          label={t`Last modified`}
           user={modified_by}
         />
-        <VariablesDetail
-          label={i18n._(t`Variables`)}
-          rows={4}
-          value={variables}
-        />
+        <VariablesDetail label={t`Variables`} rows={4} value={variables} />
       </DetailList>
     </CardBody>
   );
@@ -72,4 +61,4 @@ SmartInventoryHostDetail.propTypes = {
   host: Host.isRequired,
 };
 
-export default withI18n()(SmartInventoryHostDetail);
+export default SmartInventoryHostDetail;

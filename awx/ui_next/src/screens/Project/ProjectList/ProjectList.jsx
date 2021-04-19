@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
@@ -29,7 +29,7 @@ const QS_CONFIG = getQSConfig('project', {
   order_by: 'name',
 });
 
-function ProjectList({ i18n }) {
+function ProjectList() {
   const location = useLocation();
   const match = useRouteMatch();
   const [selected, setSelected] = useState([]);
@@ -130,40 +130,40 @@ function ProjectList({ i18n }) {
             hasContentLoading={hasContentLoading}
             items={projects}
             itemCount={itemCount}
-            pluralizedItemName={i18n._(t`Projects`)}
+            pluralizedItemName={t`Projects`}
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
             toolbarSearchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Description`),
+                name: t`Description`,
                 key: 'description__icontains',
               },
               {
-                name: i18n._(t`Type`),
+                name: t`Type`,
                 key: 'or__scm_type',
                 options: [
-                  [``, i18n._(t`Manual`)],
-                  [`git`, i18n._(t`Git`)],
-                  [`svn`, i18n._(t`Subversion`)],
-                  [`archive`, i18n._(t`Remote Archive`)],
-                  [`insights`, i18n._(t`Red Hat Insights`)],
+                  [``, t`Manual`],
+                  [`git`, t`Git`],
+                  [`svn`, t`Subversion`],
+                  [`archive`, t`Remote Archive`],
+                  [`insights`, t`Red Hat Insights`],
                 ],
               },
               {
-                name: i18n._(t`Source Control URL`),
+                name: t`Source Control URL`,
                 key: 'scm_url__icontains',
               },
               {
-                name: i18n._(t`Modified By (Username)`),
+                name: t`Modified By (Username)`,
                 key: 'modified_by__username__icontains',
               },
               {
-                name: i18n._(t`Created By (Username)`),
+                name: t`Created By (Username)`,
                 key: 'created_by__username__icontains',
               },
             ]}
@@ -171,11 +171,11 @@ function ProjectList({ i18n }) {
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Revision`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+                <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell>{t`Status`}</HeaderCell>
+                <HeaderCell>{t`Type`}</HeaderCell>
+                <HeaderCell>{t`Revision`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
             renderToolbar={props => (
@@ -198,12 +198,12 @@ function ProjectList({ i18n }) {
                     key="delete"
                     onDelete={handleProjectDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName={i18n._(t`Projects`)}
+                    pluralizedItemName={t`Projects`}
                     deleteDetailsRequests={deleteDetailsRequests}
-                    deleteMessage={i18n._(
-                      '{numItemsToDelete, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
-                      { numItemsToDelete: selected.length }
-                    )}
+                    deleteMessage={
+                      ('{numItemsToDelete, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                      { numItemsToDelete: selected.length })
+                    }
                   />,
                 ]}
               />
@@ -230,15 +230,15 @@ function ProjectList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
-        aria-label={i18n._(t`Deletion Error`)}
-        title={i18n._(t`Error!`)}
+        aria-label={t`Deletion Error`}
+        title={t`Error!`}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more projects.`)}
+        {t`Failed to delete one or more projects.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </Fragment>
   );
 }
 
-export default withI18n()(ProjectList);
+export default ProjectList;

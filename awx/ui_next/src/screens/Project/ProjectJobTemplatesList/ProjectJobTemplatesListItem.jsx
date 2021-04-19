@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import {
   ExclamationTriangleIcon,
   PencilAltIcon,
@@ -37,7 +37,6 @@ const ExclamationTriangleIconWarning = styled(ExclamationTriangleIcon)`
 `;
 
 function ProjectJobTemplateListItem({
-  i18n,
   template,
   isSelected,
   onSelect,
@@ -77,9 +76,7 @@ function ProjectJobTemplateListItem({
               {missingResourceIcon && (
                 <span>
                   <Tooltip
-                    content={i18n._(
-                      t`Resources are missing from this template.`
-                    )}
+                    content={t`Resources are missing from this template.`}
                     position="right"
                   >
                     <ExclamationTriangleIcon css="color: #c9190b; margin-left: 20px;" />
@@ -89,9 +86,7 @@ function ProjectJobTemplateListItem({
               {missingExecutionEnvironment && (
                 <span>
                   <Tooltip
-                    content={i18n._(
-                      t`Custom virtual environment ${template.custom_virtualenv} must be replaced by an execution environment.`
-                    )}
+                    content={t`Custom virtual environment ${template.custom_virtualenv} must be replaced by an execution environment.`}
                     position="right"
                     className="missing-execution-environment"
                   >
@@ -109,12 +104,12 @@ function ProjectJobTemplateListItem({
           ]}
         />
         <DataListAction
-          aria-label={i18n._(t`actions`)}
+          aria-label={t`actions`}
           aria-labelledby={labelId}
           id={labelId}
         >
           {canLaunch && template.type === 'job_template' && (
-            <Tooltip content={i18n._(t`Launch Template`)} position="top">
+            <Tooltip content={t`Launch Template`} position="top">
               <LaunchButton resource={template}>
                 {({ handleLaunch }) => (
                   <Button
@@ -130,7 +125,7 @@ function ProjectJobTemplateListItem({
             </Tooltip>
           )}
           {template.summary_fields.user_capabilities.edit && (
-            <Tooltip content={i18n._(t`Edit Template`)} position="top">
+            <Tooltip content={t`Edit Template`} position="top">
               <Button
                 ouiaId={`${template.id}-edit-button`}
                 css="grid-column: 2"
@@ -149,4 +144,4 @@ function ProjectJobTemplateListItem({
 }
 
 export { ProjectJobTemplateListItem as _ProjectJobTemplateListItem };
-export default withI18n()(ProjectJobTemplateListItem);
+export default ProjectJobTemplateListItem;

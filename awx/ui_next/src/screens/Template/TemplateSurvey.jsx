@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Switch, Route, useParams } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
 import ContentError from '../../components/ContentError';
@@ -9,7 +9,7 @@ import ErrorDetail from '../../components/ErrorDetail';
 import useRequest, { useDismissableError } from '../../util/useRequest';
 import { SurveyList, SurveyQuestionAdd, SurveyQuestionEdit } from './Survey';
 
-function TemplateSurvey({ template, canEdit, i18n }) {
+function TemplateSurvey({ template, canEdit }) {
   const [surveyEnabled, setSurveyEnabled] = useState(template.survey_enabled);
 
   const { templateType, id: templateId } = useParams();
@@ -123,10 +123,10 @@ function TemplateSurvey({ template, canEdit, i18n }) {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
         >
-          {i18n._(t`Failed to update survey.`)}
+          {t`Failed to update survey.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -134,4 +134,4 @@ function TemplateSurvey({ template, canEdit, i18n }) {
   );
 }
 
-export default withI18n()(TemplateSurvey);
+export default TemplateSurvey;

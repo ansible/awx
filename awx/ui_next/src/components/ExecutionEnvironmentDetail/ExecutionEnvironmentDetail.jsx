@@ -1,7 +1,7 @@
 import React from 'react';
 import { bool, string } from 'prop-types';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Tooltip } from '@patternfly/react-core';
 import styled from 'styled-components';
@@ -20,11 +20,10 @@ function ExecutionEnvironmentDetail({
   virtualEnvironment,
   executionEnvironment,
   isDefaultEnvironment,
-  i18n,
 }) {
   const label = isDefaultEnvironment
-    ? i18n._(t`Default Execution Environment`)
-    : i18n._(t`Execution Environment`);
+    ? t`Default Execution Environment`
+    : t`Execution Environment`;
 
   if (executionEnvironment) {
     return (
@@ -47,12 +46,10 @@ function ExecutionEnvironmentDetail({
         label={label}
         value={
           <>
-            {i18n._(t`Missing resource`)}
+            {t`Missing resource`}
             <span>
               <Tooltip
-                content={i18n._(
-                  t`Custom virtual environment ${virtualEnvironment} must be replaced by an execution environment.`
-                )}
+                content={t`Custom virtual environment ${virtualEnvironment} must be replaced by an execution environment.`}
                 position="right"
               >
                 <ExclamationTriangleIcon />
@@ -79,4 +76,4 @@ ExecutionEnvironmentDetail.defaultProps = {
   virtualEnvironment: '',
 };
 
-export default withI18n()(ExecutionEnvironmentDetail);
+export default ExecutionEnvironmentDetail;

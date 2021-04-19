@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useLocation, useParams } from 'react-router-dom';
 import 'styled-components/macro';
@@ -29,7 +29,7 @@ const QS_CONFIG = getQSConfig('instance', {
   order_by: 'hostname',
 });
 
-function InstanceList({ i18n }) {
+function InstanceList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
   const { id: instanceGroupId } = useParams();
@@ -145,21 +145,21 @@ function InstanceList({ i18n }) {
         hasContentLoading={isLoading || isDisassociateLoading}
         items={instances}
         itemCount={count}
-        pluralizedItemName={i18n._(t`Instances`)}
+        pluralizedItemName={t`Instances`}
         qsConfig={QS_CONFIG}
         onRowClick={handleSelect}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'hostname',
             isDefault: true,
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'hostname',
           },
         ]}
@@ -178,7 +178,7 @@ function InstanceList({ i18n }) {
                     <ToolbarAddButton
                       key="associate"
                       onClick={() => setIsModalOpen(true)}
-                      defaultLabel={i18n._(t`Associate`)}
+                      defaultLabel={t`Associate`}
                     />,
                   ]
                 : []),
@@ -187,9 +187,7 @@ function InstanceList({ i18n }) {
                 key="disassociate"
                 onDisassociate={handleDisassociate}
                 itemsToDisassociate={selected}
-                modalTitle={i18n._(
-                  t`Disassociate instance from instance group?`
-                )}
+                modalTitle={t`Disassociate instance from instance group?`}
               />,
             ]}
             emptyStateControls={
@@ -215,12 +213,12 @@ function InstanceList({ i18n }) {
       />
       {isModalOpen && (
         <AssociateModal
-          header={i18n._(t`Instances`)}
+          header={t`Instances`}
           fetchRequest={fetchInstancesToAssociate}
           isModalOpen={isModalOpen}
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}
-          title={i18n._(t`Select Instances`)}
+          title={t`Select Instances`}
           optionsRequest={readInstancesOptions}
           displayKey="hostname"
         />
@@ -229,12 +227,12 @@ function InstanceList({ i18n }) {
         <AlertModal
           isOpen={error}
           onClose={dismissError}
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           variant="error"
         >
           {associateError
-            ? i18n._(t`Failed to associate.`)
-            : i18n._(t`Failed to disassociate one or more instances.`)}
+            ? t`Failed to associate.`
+            : t`Failed to disassociate one or more instances.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -242,4 +240,4 @@ function InstanceList({ i18n }) {
   );
 }
 
-export default withI18n()(InstanceList);
+export default InstanceList;

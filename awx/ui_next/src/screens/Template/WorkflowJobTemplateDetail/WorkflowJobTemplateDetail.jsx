@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Chip,
@@ -30,7 +30,7 @@ import { toTitleCase } from '../../../util/strings';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 
-function WorkflowJobTemplateDetail({ template, i18n }) {
+function WorkflowJobTemplateDetail({ template }) {
   const {
     id,
     ask_inventory_on_launch,
@@ -56,12 +56,12 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
     <TextList component={TextListVariants.ul}>
       {template.allow_simultaneous && (
         <TextListItem component={TextListItemVariants.li}>
-          {i18n._(t`- Enable Concurrent Jobs`)}
+          {t`- Enable Concurrent Jobs`}
         </TextListItem>
       )}
       {template.webhook_service && (
         <TextListItem component={TextListItemVariants.li}>
-          {i18n._(t`- Enable Webhooks`)}
+          {t`- Enable Webhooks`}
         </TextListItem>
       )}
     </TextList>
@@ -88,7 +88,7 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
         <Link to={`/inventories/${inventorykind}/${inventoryId}/details`}>
           <Label>{summary_fields.inventory.name}</Label>
         </Link>
-        <span> {i18n._(t`(Prompt on launch)`)}</span>
+        <span> {t`(Prompt on launch)`}</span>
       </>
     ) : (
       <Link to={`/inventories/${inventorykind}/${inventoryId}/details`}>
@@ -110,17 +110,17 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={name} dataCy="jt-detail-name" />
-        <Detail label={i18n._(t`Description`)} value={description} />
+        <Detail label={t`Name`} value={name} dataCy="jt-detail-name" />
+        <Detail label={t`Description`} value={description} />
         {summary_fields.recent_jobs?.length > 0 && (
           <Detail
             value={<Sparkline jobs={recentPlaybookJobs} />}
-            label={i18n._(t`Activity`)}
+            label={t`Activity`}
           />
         )}
         {summary_fields.organization && (
           <Detail
-            label={i18n._(t`Organization`)}
+            label={t`Organization`}
             value={
               <Link
                 to={`/organizations/${summary_fields.organization.id}/details`}
@@ -132,7 +132,7 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
         )}
         {summary_fields?.execution_environment && (
           <Detail
-            label={i18n._(t`Execution Environment`)}
+            label={t`Execution Environment`}
             value={
               <Link
                 to={`/execution_environments/${summary_fields.execution_environment.id}/details`}
@@ -142,10 +142,10 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
             }
           />
         )}
-        <Detail label={i18n._(t`Job Type`)} value={toTitleCase(type)} />
+        <Detail label={t`Job Type`} value={toTitleCase(type)} />
         {summary_fields.inventory && (
           <Detail
-            label={i18n._(t`Inventory`)}
+            label={t`Inventory`}
             value={inventoryValue(
               summary_fields.inventory.kind,
               summary_fields.inventory.id
@@ -153,20 +153,20 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
           />
         )}
         <Detail
-          label={i18n._(t`Webhook Service`)}
+          label={t`Webhook Service`}
           value={toTitleCase(template.webhook_service)}
         />
         {related.webhook_receiver && (
           <Detail
-            label={i18n._(t`Webhook URL`)}
+            label={t`Webhook URL`}
             value={`${urlOrigin}${template.related.webhook_receiver}`}
           />
         )}
-        <Detail label={i18n._(t`Webhook Key`)} value={webhook_key} />
+        <Detail label={t`Webhook Key`} value={webhook_key} />
         {webhook_credential && (
           <Detail
             fullWidth
-            label={i18n._(t`Webhook Credentials`)}
+            label={t`Webhook Credentials`}
             value={
               <Link
                 to={`/credentials/${summary_fields.webhook_credential.id}/details`}
@@ -177,22 +177,22 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
           />
         )}
         {renderOptionsField && (
-          <Detail label={i18n._(t`Options`)} value={renderOptions} />
+          <Detail label={t`Options`} value={renderOptions} />
         )}
         <UserDateDetail
-          label={i18n._(t`Created`)}
+          label={t`Created`}
           date={created}
           user={summary_fields.created_by}
         />
         <UserDateDetail
-          label={i18n._(t`Modified`)}
+          label={t`Modified`}
           date={modified}
           user={summary_fields.modified_by}
         />
         {summary_fields.labels?.results?.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Labels`)}
+            label={t`Labels`}
             value={
               <ChipGroup
                 numChips={3}
@@ -207,11 +207,7 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
             }
           />
         )}
-        <VariablesDetail
-          label={i18n._(t`Variables`)}
-          value={extra_vars}
-          rows={4}
-        />
+        <VariablesDetail label={t`Variables`} value={extra_vars} rows={4} />
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities &&
@@ -220,13 +216,13 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
               ouiaId="workflow-job-template-detail-edit-button"
               component={Link}
               to={`/templates/workflow_job_template/${id}/edit`}
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           )}
         {canLaunch && (
-          <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
+          <LaunchButton resource={template} aria-label={t`Launch`}>
             {({ handleLaunch }) => (
               <Button
                 ouiaId="workflow-job-template-detail-launch-button"
@@ -234,7 +230,7 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
                 type="submit"
                 onClick={handleLaunch}
               >
-                {i18n._(t`Launch`)}
+                {t`Launch`}
               </Button>
             )}
           </LaunchButton>
@@ -243,15 +239,13 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
           summary_fields.user_capabilities.delete && (
             <DeleteButton
               name={name}
-              modalTitle={i18n._(t`Delete Workflow Job Template`)}
+              modalTitle={t`Delete Workflow Job Template`}
               onConfirm={deleteWorkflowJobTemplate}
               isDisabled={isLoading}
               deleteDetailsRequests={deleteDetailsRequests}
-              deleteMessage={i18n._(
-                t`This workflow job template is currently being used by other resources. Are you sure you want to delete it?`
-              )}
+              deleteMessage={t`This workflow job template is currently being used by other resources. Are you sure you want to delete it?`}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </DeleteButton>
           )}
       </CardActionsRow>
@@ -259,10 +253,10 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
         >
-          {i18n._(t`Failed to delete workflow job template.`)}
+          {t`Failed to delete workflow job template.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -270,4 +264,4 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
   );
 }
 export { WorkflowJobTemplateDetail as _WorkflowJobTemplateDetail };
-export default withI18n()(WorkflowJobTemplateDetail);
+export default WorkflowJobTemplateDetail;

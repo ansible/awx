@@ -2,7 +2,7 @@ import 'styled-components/macro';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { TableComposable, Tbody } from '@patternfly/react-table';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useHistory } from 'react-router-dom';
 
@@ -35,7 +35,7 @@ function PaginatedTable({
   toolbarRelatedSearchableKeys,
   pluralizedItemName,
   showPageSizeOptions,
-  i18n,
+
   renderToolbar,
   emptyContentMessage,
   ouiaId,
@@ -67,15 +67,15 @@ function PaginatedTable({
     ? toolbarSearchColumns
     : [
         {
-          name: i18n._(t`Name`),
+          name: t`Name`,
           key: 'name',
           isDefault: true,
         },
       ];
   const queryParams = parseQueryString(qsConfig, history.location.search);
 
-  const dataListLabel = i18n._(t`${pluralizedItemName} List`);
-  const emptyContentTitle = i18n._(t`No ${pluralizedItemName} Found `);
+  const dataListLabel = t`${pluralizedItemName} List`;
+  const emptyContentTitle = t`No ${pluralizedItemName} Found `;
 
   let Content;
   if (hasContentLoading && items.length <= 0) {
@@ -88,7 +88,7 @@ function PaginatedTable({
         title={emptyContentTitle}
         message={
           emptyContentMessage ||
-          i18n._(t`Please add ${pluralizedItemName} to populate this list `)
+          t`Please add ${pluralizedItemName} to populate this list `
         }
       />
     );
@@ -198,4 +198,4 @@ PaginatedTable.defaultProps = {
 };
 
 export { PaginatedTable as _PaginatedTable };
-export default withI18n()(PaginatedTable);
+export default PaginatedTable;

@@ -7,7 +7,7 @@ const STEP_ID = 'preview';
 
 export default function usePreviewStep(
   launchConfig,
-  i18n,
+
   resource,
   surveyConfig,
   hasErrors,
@@ -20,7 +20,7 @@ export default function usePreviewStep(
           id: STEP_ID,
           name: (
             <StepName hasErrors={false} id="preview-step">
-              {i18n._(t`Preview`)}
+              {t`Preview`}
             </StepName>
           ),
           component: (
@@ -32,7 +32,7 @@ export default function usePreviewStep(
             />
           ),
           enableNext: !hasErrors,
-          nextButtonText: nextButtonText || i18n._(t`Launch`),
+          nextButtonText: nextButtonText || t`Launch`,
         }
       : null,
     initialValues: {},

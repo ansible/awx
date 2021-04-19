@@ -1,6 +1,6 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button, Tooltip } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
@@ -24,7 +24,6 @@ function OrganizationListItem({
   onSelect,
   rowIndex,
   detailUrl,
-  i18n,
 }) {
   const labelId = `check-action-${organization.id}`;
 
@@ -40,9 +39,9 @@ function OrganizationListItem({
           onSelect,
           disable: false,
         }}
-        dataLabel={i18n._(t`Selected`)}
+        dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+      <Td id={labelId} dataLabel={t`Name`}>
         <span>
           <Link to={`${detailUrl}`}>
             <b>{organization.name}</b>
@@ -52,9 +51,7 @@ function OrganizationListItem({
           <span>
             <Tooltip
               className="missing-execution-environment"
-              content={i18n._(
-                t`Custom virtual environment ${organization.custom_virtualenv} must be replaced by an execution environment.`
-              )}
+              content={t`Custom virtual environment ${organization.custom_virtualenv} must be replaced by an execution environment.`}
               position="right"
             >
               <ExclamationTriangleIcon />
@@ -62,20 +59,20 @@ function OrganizationListItem({
           </span>
         )}
       </Td>
-      <Td dataLabel={i18n._(t`Members`)}>
+      <Td dataLabel={t`Members`}>
         {organization.summary_fields.related_field_counts.users}
       </Td>
-      <Td dataLabel={i18n._(t`Teams`)}>
+      <Td dataLabel={t`Teams`}>
         {organization.summary_fields.related_field_counts.teams}
       </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+      <ActionsTd dataLabel={t`Actions`}>
         <ActionItem
           visible={organization.summary_fields.user_capabilities.edit}
-          tooltip={i18n._(t`Edit Organization`)}
+          tooltip={t`Edit Organization`}
         >
           <Button
             ouiaId={`${organization.id}-edit-button`}
-            aria-label={i18n._(t`Edit Organization`)}
+            aria-label={t`Edit Organization`}
             variant="plain"
             component={Link}
             to={`/organizations/${organization.id}/edit`}
@@ -95,4 +92,4 @@ OrganizationListItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(OrganizationListItem);
+export default OrganizationListItem;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+
+import { t, Plural } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '../../../api';
@@ -27,7 +27,7 @@ const QS_CONFIG = getQSConfig('organization', {
   order_by: 'name',
 });
 
-function OrganizationsList({ i18n }) {
+function OrganizationsList() {
   const location = useLocation();
   const match = useRouteMatch();
 
@@ -130,24 +130,24 @@ function OrganizationsList({ i18n }) {
             hasContentLoading={hasContentLoading}
             items={organizations}
             itemCount={organizationCount}
-            pluralizedItemName={i18n._(t`Organizations`)}
+            pluralizedItemName={t`Organizations`}
             qsConfig={QS_CONFIG}
             toolbarSearchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Description`),
+                name: t`Description`,
                 key: 'description__icontains',
               },
               {
-                name: i18n._(t`Created By (Username)`),
+                name: t`Created By (Username)`,
                 key: 'created_by__username__icontains',
               },
               {
-                name: i18n._(t`Modified By (Username)`),
+                name: t`Modified By (Username)`,
                 key: 'modified_by__username__icontains',
               },
             ]}
@@ -155,10 +155,10 @@ function OrganizationsList({ i18n }) {
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Members`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Teams`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+                <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell>{t`Members`}</HeaderCell>
+                <HeaderCell>{t`Teams`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
             renderToolbar={props => (
@@ -176,12 +176,15 @@ function OrganizationsList({ i18n }) {
                     key="delete"
                     onDelete={handleOrgDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName={i18n._(t`Organizations`)}
+                    pluralizedItemName={t`Organizations`}
                     deleteDetailsRequests={deleteDetailsRequests}
-                    deleteMessage={i18n._(
-                      '{numItemsToDelete, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
-                      { numItemsToDelete: selected.length }
-                    )}
+                    deleteMessage={
+                      <Plural
+                        value={selected.length}
+                        one="This organization is currently being by other resources. Are you sure you want to delete it?"
+                        other="Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?"
+                      />
+                    }
                   />,
                 ]}
               />
@@ -205,10 +208,10 @@ function OrganizationsList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more organizations.`)}
+        {t`Failed to delete one or more organizations.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </>
@@ -216,4 +219,4 @@ function OrganizationsList({ i18n }) {
 }
 
 export { OrganizationsList as _OrganizationsList };
-export default withI18n()(OrganizationsList);
+export default OrganizationsList;

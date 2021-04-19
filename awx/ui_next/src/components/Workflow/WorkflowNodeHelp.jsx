@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t, Trans } from '@lingui/macro';
 import styled from 'styled-components';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
@@ -31,7 +31,7 @@ const StyledExclamationTriangleIcon = styled(ExclamationTriangleIcon)`
   width: 20px;
 `;
 
-function WorkflowNodeHelp({ node, i18n }) {
+function WorkflowNodeHelp({ node }) {
   let nodeType;
   const job = node?.originalNodeObject?.summary_fields?.job;
   const unifiedJobTemplate =
@@ -44,23 +44,23 @@ function WorkflowNodeHelp({ node, i18n }) {
     switch (type) {
       case 'job_template':
       case 'job':
-        nodeType = i18n._(t`Job Template`);
+        nodeType = t`Job Template`;
         break;
       case 'workflow_job_template':
       case 'workflow_job':
-        nodeType = i18n._(t`Workflow Job Template`);
+        nodeType = t`Workflow Job Template`;
         break;
       case 'project':
       case 'project_update':
-        nodeType = i18n._(t`Project Update`);
+        nodeType = t`Project Update`;
         break;
       case 'inventory_source':
       case 'inventory_update':
-        nodeType = i18n._(t`Inventory Update`);
+        nodeType = t`Inventory Update`;
         break;
       case 'workflow_approval_template':
       case 'workflow_approval':
-        nodeType = i18n._(t`Workflow Approval`);
+        nodeType = t`Workflow Approval`;
         break;
       default:
         nodeType = '';
@@ -71,43 +71,43 @@ function WorkflowNodeHelp({ node, i18n }) {
   if (job) {
     switch (job.status) {
       case 'new':
-        jobStatus = i18n._(t`New`);
+        jobStatus = t`New`;
         break;
       case 'pending':
-        jobStatus = i18n._(t`Pending`);
+        jobStatus = t`Pending`;
         break;
       case 'waiting':
-        jobStatus = i18n._(t`Waiting`);
+        jobStatus = t`Waiting`;
         break;
       case 'running':
-        jobStatus = i18n._(t`Running`);
+        jobStatus = t`Running`;
         break;
       case 'successful':
-        jobStatus = i18n._(t`Successful`);
+        jobStatus = t`Successful`;
         break;
       case 'failed':
-        jobStatus = i18n._(t`Failed`);
+        jobStatus = t`Failed`;
         break;
       case 'error':
-        jobStatus = i18n._(t`Error`);
+        jobStatus = t`Error`;
         break;
       case 'canceled':
-        jobStatus = i18n._(t`Canceled`);
+        jobStatus = t`Canceled`;
         break;
       case 'never updated':
-        jobStatus = i18n._(t`Never Updated`);
+        jobStatus = t`Never Updated`;
         break;
       case 'ok':
-        jobStatus = i18n._(t`OK`);
+        jobStatus = t`OK`;
         break;
       case 'missing':
-        jobStatus = i18n._(t`Missing`);
+        jobStatus = t`Missing`;
         break;
       case 'none':
-        jobStatus = i18n._(t`None`);
+        jobStatus = t`None`;
         break;
       case 'updating':
-        jobStatus = i18n._(t`Updating`);
+        jobStatus = t`Updating`;
         break;
       default:
         jobStatus = '';
@@ -129,21 +129,21 @@ function WorkflowNodeHelp({ node, i18n }) {
       {job && (
         <GridDL>
           <dt>
-            <b>{i18n._(t`Name`)}</b>
+            <b>{t`Name`}</b>
           </dt>
           <dd id="workflow-node-help-name">{job.name}</dd>
           <dt>
-            <b>{i18n._(t`Type`)}</b>
+            <b>{t`Type`}</b>
           </dt>
           <dd id="workflow-node-help-type">{nodeType}</dd>
           <dt>
-            <b>{i18n._(t`Job Status`)}</b>
+            <b>{t`Job Status`}</b>
           </dt>
           <dd id="workflow-node-help-status">{jobStatus}</dd>
           {typeof job.elapsed === 'number' && (
             <>
               <dt>
-                <b>{i18n._(t`Elapsed`)}</b>
+                <b>{t`Elapsed`}</b>
               </dt>
               <dd id="workflow-node-help-elapsed">
                 {secondsToHHMMSS(job.elapsed)}
@@ -155,17 +155,17 @@ function WorkflowNodeHelp({ node, i18n }) {
       {unifiedJobTemplate && !job && (
         <GridDL>
           <dt>
-            <b>{i18n._(t`Name`)}</b>
+            <b>{t`Name`}</b>
           </dt>
           <dd id="workflow-node-help-name">{unifiedJobTemplate.name}</dd>
           <dt>
-            <b>{i18n._(t`Type`)}</b>
+            <b>{t`Type`}</b>
           </dt>
           <dd id="workflow-node-help-type">{nodeType}</dd>
         </GridDL>
       )}
       {job && job.type !== 'workflow_approval' && (
-        <p css="margin-top: 10px">{i18n._(t`Click to view job details`)}</p>
+        <p css="margin-top: 10px">{t`Click to view job details`}</p>
       )}
     </>
   );
@@ -175,4 +175,4 @@ WorkflowNodeHelp.propTypes = {
   node: shape().isRequired,
 };
 
-export default withI18n()(WorkflowNodeHelp);
+export default WorkflowNodeHelp;

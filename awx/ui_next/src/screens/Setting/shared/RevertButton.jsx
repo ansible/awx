@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Button, Tooltip } from '@patternfly/react-core';
@@ -14,7 +14,6 @@ const ButtonWrapper = styled.div`
 `;
 
 function RevertButton({
-  i18n,
   id,
   defaultValue,
   isDisabled = false,
@@ -40,18 +39,18 @@ function RevertButton({
   }
 
   const revertTooltipContent = isRevertable
-    ? i18n._(t`Revert to factory default.`)
-    : i18n._(t`Restore initial value.`);
+    ? t`Revert to factory default.`
+    : t`Restore initial value.`;
   const tooltipContent =
     isDisabled || isMatch
-      ? i18n._(t`Setting matches factory default.`)
+      ? t`Setting matches factory default.`
       : revertTooltipContent;
 
   return (
     <Tooltip entryDelay={700} content={tooltipContent}>
       <ButtonWrapper>
         <Button
-          aria-label={isRevertable ? i18n._(t`Revert`) : i18n._(t`Undo`)}
+          aria-label={isRevertable ? t`Revert` : t`Undo`}
           ouiaId={`${id}-revert`}
           isInline
           isSmall
@@ -60,7 +59,7 @@ function RevertButton({
           variant="link"
           isDisabled={isDisabled || isMatch}
         >
-          {isRevertable ? i18n._(t`Revert`) : i18n._(t`Undo`)}
+          {isRevertable ? t`Revert` : t`Undo`}
         </Button>
       </ButtonWrapper>
     </Tooltip>
@@ -71,4 +70,4 @@ RevertButton.propTypes = {
   id: PropTypes.string.isRequired,
 };
 
-export default withI18n()(RevertButton);
+export default RevertButton;

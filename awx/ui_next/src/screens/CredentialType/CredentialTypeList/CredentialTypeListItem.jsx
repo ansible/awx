@@ -1,6 +1,6 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
@@ -15,7 +15,6 @@ function CredentialTypeListItem({
   isSelected,
   onSelect,
   rowIndex,
-  i18n,
 }) {
   const labelId = `check-action-${credentialType.id}`;
 
@@ -27,21 +26,21 @@ function CredentialTypeListItem({
           isSelected,
           onSelect,
         }}
-        dataLabel={i18n._(t`Selected`)}
+        dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+      <Td id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{credentialType.name}</b>
         </Link>
       </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)}>
+      <ActionsTd dataLabel={t`Actions`}>
         <ActionItem
           visible={credentialType.summary_fields.user_capabilities.edit}
-          tooltip={i18n._(t`Edit credential type`)}
+          tooltip={t`Edit credential type`}
         >
           <Button
             ouiaId={`${credentialType.id}-edit-button`}
-            aria-label={i18n._(t`Edit credential type`)}
+            aria-label={t`Edit credential type`}
             variant="plain"
             component={Link}
             to={`/credential_types/${credentialType.id}/edit`}
@@ -61,4 +60,4 @@ CredentialTypeListItem.prototype = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(CredentialTypeListItem);
+export default CredentialTypeListItem;

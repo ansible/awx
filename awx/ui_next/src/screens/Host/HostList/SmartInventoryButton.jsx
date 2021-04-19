@@ -1,11 +1,11 @@
 import React from 'react';
 import { func } from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useKebabifiedMenu } from '../../../contexts/Kebabified';
 
-function SmartInventoryButton({ onClick, i18n, isDisabled }) {
+function SmartInventoryButton({ onClick, isDisabled }) {
   const { isKebabified } = useKebabifiedMenu();
 
   if (isKebabified) {
@@ -16,7 +16,7 @@ function SmartInventoryButton({ onClick, i18n, isDisabled }) {
         component="button"
         onClick={onClick}
       >
-        {i18n._(t`Smart Inventory`)}
+        {t`Smart Inventory`}
       </DropdownItem>
     );
   }
@@ -26,10 +26,8 @@ function SmartInventoryButton({ onClick, i18n, isDisabled }) {
       key="smartInventory"
       content={
         !isDisabled
-          ? i18n._(t`Create a new Smart Inventory with the applied filter`)
-          : i18n._(
-              t`Enter at least one search filter to create a new Smart Inventory`
-            )
+          ? t`Create a new Smart Inventory with the applied filter`
+          : t`Enter at least one search filter to create a new Smart Inventory`
       }
       position="top"
     >
@@ -37,11 +35,11 @@ function SmartInventoryButton({ onClick, i18n, isDisabled }) {
         <Button
           ouiaId="smart-inventory-button"
           onClick={onClick}
-          aria-label={i18n._(t`Smart Inventory`)}
+          aria-label={t`Smart Inventory`}
           variant="secondary"
           isDisabled={isDisabled}
         >
-          {i18n._(t`Smart Inventory`)}
+          {t`Smart Inventory`}
         </Button>
       </div>
     </Tooltip>
@@ -51,4 +49,4 @@ SmartInventoryButton.propTypes = {
   onClick: func.isRequired,
 };
 
-export default withI18n()(SmartInventoryButton);
+export default SmartInventoryButton;

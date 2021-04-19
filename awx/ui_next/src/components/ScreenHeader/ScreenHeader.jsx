@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -14,7 +14,7 @@ import {
 import { HistoryIcon } from '@patternfly/react-icons';
 import { Link, Route, useRouteMatch } from 'react-router-dom';
 
-const ScreenHeader = ({ breadcrumbConfig, i18n, streamType }) => {
+const ScreenHeader = ({ breadcrumbConfig, streamType }) => {
   const { light } = PageSectionVariants;
   const oneCrumbMatch = useRouteMatch({
     path: Object.keys(breadcrumbConfig)[0],
@@ -51,10 +51,10 @@ const ScreenHeader = ({ breadcrumbConfig, i18n, streamType }) => {
         </div>
         {streamType !== 'none' && (
           <div>
-            <Tooltip content={i18n._(t`View activity stream`)} position="top">
+            <Tooltip content={t`View activity stream`} position="top">
               <Button
                 ouiaId="activity-stream-button"
-                aria-label={i18n._(t`View activity stream`)}
+                aria-label={t`View activity stream`}
                 variant="plain"
                 component={Link}
                 to={`/activity_stream${
@@ -133,4 +133,4 @@ Crumb.propTypes = {
   breadcrumbConfig: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
-export default withI18n()(ScreenHeader);
+export default ScreenHeader;

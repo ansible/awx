@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useRouteMatch } from 'react-router-dom';
 import {
@@ -32,7 +32,6 @@ function SurveyList({
   updateSurvey,
   deleteSurvey,
   canEdit,
-  i18n,
 }) {
   const match = useRouteMatch();
 
@@ -88,9 +87,7 @@ function SurveyList({
   const deleteModal = (
     <AlertModal
       variant="danger"
-      title={
-        isAllSelected ? i18n._(t`Delete Survey`) : i18n._(t`Delete Questions`)
-      }
+      title={isAllSelected ? t`Delete Survey` : t`Delete Questions`}
       isOpen={isDeleteModalOpen}
       onClose={() => {
         setIsDeleteModalOpen(false);
@@ -101,26 +98,26 @@ function SurveyList({
           ouiaId="delete-confirm-button"
           key="delete"
           variant="danger"
-          aria-label={i18n._(t`confirm delete`)}
+          aria-label={t`confirm delete`}
           onClick={handleDelete}
         >
-          {i18n._(t`Delete`)}
+          {t`Delete`}
         </Button>,
         <Button
           ouiaId="delete-cancel-button"
           key="cancel"
           variant="link"
-          aria-label={i18n._(t`cancel delete`)}
+          aria-label={t`cancel delete`}
           onClick={() => {
             setIsDeleteModalOpen(false);
             setSelected([]);
           }}
         >
-          {i18n._(t`Cancel`)}
+          {t`Cancel`}
         </Button>,
       ]}
     >
-      <div>{i18n._(t`This action will delete the following:`)}</div>
+      <div>{t`This action will delete the following:`}</div>
       {selected.map(question => (
         <span key={question.variable}>
           <strong>{question.question_name}</strong>
@@ -135,7 +132,7 @@ function SurveyList({
     content = <ContentLoading />;
   } else {
     content = (
-      <DataList aria-label={i18n._(t`Survey List`)}>
+      <DataList aria-label={t`Survey List`}>
         {questions?.map((question, index) => (
           <SurveyListItem
             key={question.variable}
@@ -160,9 +157,9 @@ function SurveyList({
         <Button
           onClick={() => setIsPreviewModalOpen(true)}
           variant="primary"
-          aria-label={i18n._(t`Preview`)}
+          aria-label={t`Preview`}
         >
-          {i18n._(t`Preview`)}
+          {t`Preview`}
         </Button>
       </DataList>
     );
@@ -173,11 +170,9 @@ function SurveyList({
       <EmptyState variant="full">
         <EmptyStateIcon icon={CubesIcon} />
         <Title size="lg" headingLevel="h3">
-          {i18n._(t`No survey questions found.`)}
+          {t`No survey questions found.`}
         </Title>
-        <EmptyStateBody>
-          {i18n._(t`Please add survey questions.`)}
-        </EmptyStateBody>
+        <EmptyStateBody>{t`Please add survey questions.`}</EmptyStateBody>
         <ToolbarAddButton isDisabled={!canEdit} linkTo={`${match.url}/add`} />
       </EmptyState>
     );
@@ -198,4 +193,4 @@ function SurveyList({
   );
 }
 
-export default withI18n()(SurveyList);
+export default SurveyList;

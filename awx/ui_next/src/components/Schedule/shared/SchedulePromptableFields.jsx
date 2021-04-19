@@ -1,6 +1,6 @@
 import React from 'react';
 import { Wizard } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
 import AlertModal from '../../AlertModal';
@@ -18,7 +18,6 @@ function SchedulePromptableFields({
   credentials,
   resource,
   resourceDefaultCredentials,
-  i18n,
 }) {
   const {
     setFieldTouched,
@@ -38,7 +37,7 @@ function SchedulePromptableFields({
     launchConfig,
     schedule,
     resource,
-    i18n,
+
     credentials,
     resourceDefaultCredentials
   );
@@ -74,7 +73,7 @@ function SchedulePromptableFields({
       <AlertModal
         isOpen={error}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => {
           dismissError();
           onCloseWizard();
@@ -108,22 +107,22 @@ function SchedulePromptableFields({
           validateStep(nextStep.id);
         }
       }}
-      title={i18n._(t`Prompts`)}
+      title={t`Prompts`}
       steps={
         isReady
           ? steps
           : [
               {
-                name: i18n._(t`Content Loading`),
+                name: t`Content Loading`,
                 component: <ContentLoading />,
               },
             ]
       }
-      backButtonText={i18n._(t`Back`)}
-      cancelButtonText={i18n._(t`Cancel`)}
-      nextButtonText={i18n._(t`Next`)}
+      backButtonText={t`Back`}
+      cancelButtonText={t`Cancel`}
+      nextButtonText={t`Next`}
     />
   );
 }
 
-export default withI18n()(SchedulePromptableFields);
+export default SchedulePromptableFields;

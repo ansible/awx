@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { func, node } from 'prop-types';
 import { withRouter, useLocation } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { ApplicationsAPI } from '../../api';
@@ -18,7 +18,7 @@ const QS_CONFIG = getQSConfig('applications', {
   order_by: 'name',
 });
 
-function ApplicationLookup({ i18n, onChange, value, label }) {
+function ApplicationLookup({ onChange, value, label }) {
   const location = useLocation();
   const {
     error,
@@ -62,7 +62,7 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
     <FormGroup fieldId="application" label={label}>
       <Lookup
         id="application"
-        header={i18n._(t`Application`)}
+        header={t`Application`}
         value={value}
         onChange={onChange}
         qsConfig={QS_CONFIG}
@@ -71,34 +71,34 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
             value={state.selectedItems}
             options={applications}
             optionCount={itemCount}
-            header={i18n._(t`Applications`)}
+            header={t`Applications`}
             qsConfig={QS_CONFIG}
             searchColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`Description`),
+                name: t`Description`,
                 key: 'description__icontains',
               },
             ]}
             sortColumns={[
               {
-                name: i18n._(t`Name`),
+                name: t`Name`,
                 key: 'name',
               },
               {
-                name: i18n._(t`Created`),
+                name: t`Created`,
                 key: 'created',
               },
               {
-                name: i18n._(t`Organization`),
+                name: t`Organization`,
                 key: 'organization',
               },
               {
-                name: i18n._(t`Description`),
+                name: t`Description`,
                 key: 'description',
               },
             ]}
@@ -125,4 +125,4 @@ ApplicationLookup.defaultProps = {
   value: null,
 };
 
-export default withI18n()(withRouter(ApplicationLookup));
+export default withRouter(ApplicationLookup);

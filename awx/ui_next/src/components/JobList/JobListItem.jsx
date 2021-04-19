@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
@@ -17,7 +17,6 @@ import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 const Dash = styled.span``;
 function JobListItem({
-  i18n,
   job,
   rowIndex,
   isSelected,
@@ -28,12 +27,12 @@ function JobListItem({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const jobTypes = {
-    project_update: i18n._(t`Source Control Update`),
-    inventory_update: i18n._(t`Inventory Sync`),
-    job: i18n._(t`Playbook Run`),
-    ad_hoc_command: i18n._(t`Command`),
-    system_job: i18n._(t`Management Job`),
-    workflow_job: i18n._(t`Workflow Job`),
+    project_update: t`Source Control Update`,
+    inventory_update: t`Inventory Sync`,
+    job: t`Playbook Run`,
+    ad_hoc_command: t`Command`,
+    system_job: t`Management Job`,
+    workflow_job: t`Workflow Job`,
   };
 
   const { credentials, inventory, labels } = job.summary_fields;
@@ -54,9 +53,9 @@ function JobListItem({
             isSelected,
             onSelect,
           }}
-          dataLabel={i18n._(t`Select`)}
+          dataLabel={t`Select`}
         />
-        <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+        <Td id={labelId} dataLabel={t`Name`}>
           <span>
             <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
               <b>
@@ -65,19 +64,15 @@ function JobListItem({
             </Link>
           </span>
         </Td>
-        <Td dataLabel={i18n._(t`Status`)}>
+        <Td dataLabel={t`Status`}>
           {job.status && <StatusLabel status={job.status} />}
         </Td>
-        {showTypeColumn && (
-          <Td dataLabel={i18n._(t`Type`)}>{jobTypes[job.type]}</Td>
-        )}
-        <Td dataLabel={i18n._(t`Start Time`)}>
-          {formatDateString(job.started)}
-        </Td>
-        <Td dataLabel={i18n._(t`Finish Time`)}>
+        {showTypeColumn && <Td dataLabel={t`Type`}>{jobTypes[job.type]}</Td>}
+        <Td dataLabel={t`Start Time`}>{formatDateString(job.started)}</Td>
+        <Td dataLabel={t`Finish Time`}>
           {job.finished ? formatDateString(job.finished) : ''}
         </Td>
-        <ActionsTd dataLabel={i18n._(t`Actions`)}>
+        <ActionsTd dataLabel={t`Actions`}>
           <ActionItem
             visible={
               job.type !== 'system_job' &&
@@ -85,8 +80,8 @@ function JobListItem({
             }
             tooltip={
               job.status === 'failed' && job.type === 'job'
-                ? i18n._(t`Relaunch using host parameters`)
-                : i18n._(t`Relaunch Job`)
+                ? t`Relaunch using host parameters`
+                : t`Relaunch Job`
             }
           >
             {job.status === 'failed' && job.type === 'job' ? (
@@ -102,7 +97,7 @@ function JobListItem({
                     ouiaId={`${job.id}-relaunch-button`}
                     variant="plain"
                     onClick={handleRelaunch}
-                    aria-label={i18n._(t`Relaunch`)}
+                    aria-label={t`Relaunch`}
                   >
                     <RocketIcon />
                   </Button>
@@ -117,11 +112,11 @@ function JobListItem({
         <Td colSpan={showTypeColumn ? 5 : 4}>
           <ExpandableRowContent>
             <DetailList>
-              <LaunchedByDetail job={job} i18n={i18n} />
+              <LaunchedByDetail job={job} />
               {credentials && credentials.length > 0 && (
                 <Detail
                   fullWidth
-                  label={i18n._(t`Credentials`)}
+                  label={t`Credentials`}
                   value={
                     <ChipGroup numChips={5} totalChips={credentials.length}>
                       {credentials.map(c => (
@@ -133,7 +128,7 @@ function JobListItem({
               )}
               {labels && labels.count > 0 && (
                 <Detail
-                  label={i18n._(t`Labels`)}
+                  label={t`Labels`}
                   value={
                     <ChipGroup numChips={5} totalChips={labels.results.length}>
                       {labels.results.map(l => (
@@ -147,7 +142,7 @@ function JobListItem({
               )}
               {inventory && (
                 <Detail
-                  label={i18n._(t`Inventory`)}
+                  label={t`Inventory`}
                   value={
                     <Link
                       to={
@@ -165,7 +160,7 @@ function JobListItem({
               {job.job_explanation && (
                 <Detail
                   fullWidth
-                  label={i18n._(t`Explanation`)}
+                  label={t`Explanation`}
                   value={job.job_explanation}
                 />
               )}
@@ -178,4 +173,4 @@ function JobListItem({
 }
 
 export { JobListItem as _JobListItem };
-export default withI18n()(JobListItem);
+export default JobListItem;

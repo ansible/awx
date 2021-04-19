@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Link,
@@ -17,7 +17,7 @@ import { TokensAPI } from '../../../api';
 import useRequest from '../../../util/useRequest';
 import UserTokenDetail from '../UserTokenDetail';
 
-function UserToken({ i18n, setBreadcrumb, user }) {
+function UserToken({ setBreadcrumb, user }) {
   const location = useLocation();
   const { id, tokenId } = useParams();
   const {
@@ -44,14 +44,14 @@ function UserToken({ i18n, setBreadcrumb, user }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Tokens`)}
+          {t`Back to Tokens`}
         </>
       ),
       link: `/users/${id}/tokens`,
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/users/${id}/tokens/${tokenId}/details`,
       id: 0,
     },
@@ -70,10 +70,8 @@ function UserToken({ i18n, setBreadcrumb, user }) {
           <ContentError error={error}>
             {error.response.status === 404 && (
               <span>
-                {i18n._(t`Token not found.`)}{' '}
-                <Link to="/users/:id/tokens">
-                  {i18n._(t`View all tokens.`)}
-                </Link>
+                {t`Token not found.`}{' '}
+                <Link to="/users/:id/tokens">{t`View all tokens.`}</Link>
               </span>
             )}
           </ContentError>
@@ -99,9 +97,7 @@ function UserToken({ i18n, setBreadcrumb, user }) {
         <Route key="not-found" path="*">
           {!isLoading && (
             <ContentError isNotFound>
-              {id && (
-                <Link to={`/users/${id}/tokens`}>{i18n._(t`View Tokens`)}</Link>
-              )}
+              {id && <Link to={`/users/${id}/tokens`}>{t`View Tokens`}</Link>}
             </ContentError>
           )}
         </Route>
@@ -110,4 +106,4 @@ function UserToken({ i18n, setBreadcrumb, user }) {
   );
 }
 
-export default withI18n()(UserToken);
+export default UserToken;

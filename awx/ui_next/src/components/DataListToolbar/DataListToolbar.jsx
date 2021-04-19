@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Checkbox,
@@ -37,7 +37,6 @@ function DataListToolbar({
   onExpand,
   onSelectAll,
   additionalControls,
-  i18n,
   qsConfig,
   pagination,
 }) {
@@ -62,7 +61,7 @@ function DataListToolbar({
       id={`${qsConfig.namespace}-list-toolbar`}
       clearAllFilters={clearAllFilters}
       collapseListedFiltersBreakpoint="lg"
-      clearFiltersButtonText={i18n._(t`Clear all filters`)}
+      clearFiltersButtonText={t`Clear all filters`}
     >
       <ToolbarContent>
         {showSelectAll && (
@@ -71,7 +70,7 @@ function DataListToolbar({
               <Checkbox
                 isChecked={isAllSelected}
                 onChange={onSelectAll}
-                aria-label={i18n._(t`Select all`)}
+                aria-label={t`Select all`}
                 id="select-all"
               />
             </ToolbarItem>
@@ -83,7 +82,7 @@ function DataListToolbar({
               qsConfig={qsConfig}
               columns={[
                 ...searchColumns,
-                { name: i18n._(t`Advanced`), key: 'advanced' },
+                { name: t`Advanced`, key: 'advanced' },
               ]}
               searchableKeys={searchableKeys}
               relatedSearchableKeys={relatedSearchableKeys}
@@ -190,4 +189,4 @@ DataListToolbar.defaultProps = {
   additionalControls: [],
 };
 
-export default withI18n()(DataListToolbar);
+export default DataListToolbar;

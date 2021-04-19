@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import { Form } from '@patternfly/react-core';
@@ -24,7 +24,7 @@ import useRequest from '../../../../util/useRequest';
 import { SettingsAPI, ExecutionEnvironmentsAPI } from '../../../../api';
 import { pluck, formatJson } from '../../shared/settingUtils';
 
-function MiscSystemEdit({ i18n }) {
+function MiscSystemEdit() {
   const history = useHistory();
   const { isModalOpen, toggleModal, closeModal } = useModal();
   const { PUT: options } = useSettings();
@@ -77,20 +77,20 @@ function MiscSystemEdit({ i18n }) {
           ...OAUTH2_PROVIDER_OPTIONS,
           default: OAUTH2_PROVIDER_OPTIONS.default.ACCESS_TOKEN_EXPIRE_SECONDS,
           type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: i18n._(t`Access Token Expiration`),
+          label: t`Access Token Expiration`,
         },
         REFRESH_TOKEN_EXPIRE_SECONDS: {
           ...OAUTH2_PROVIDER_OPTIONS,
           default: OAUTH2_PROVIDER_OPTIONS.default.REFRESH_TOKEN_EXPIRE_SECONDS,
           type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: i18n._(t`Refresh Token Expiration`),
+          label: t`Refresh Token Expiration`,
         },
         AUTHORIZATION_CODE_EXPIRE_SECONDS: {
           ...OAUTH2_PROVIDER_OPTIONS,
           default:
             OAUTH2_PROVIDER_OPTIONS.default.AUTHORIZATION_CODE_EXPIRE_SECONDS,
           type: OAUTH2_PROVIDER_OPTIONS.child.type,
-          label: i18n._(t`Authorization Code Expiration`),
+          label: t`Authorization Code Expiration`,
         },
       };
 
@@ -103,7 +103,7 @@ function MiscSystemEdit({ i18n }) {
         mergedData[key].value = systemData[key];
       });
       return mergedData;
-    }, [options, i18n]),
+    }, [options]),
     null
   );
 
@@ -244,9 +244,7 @@ function MiscSystemEdit({ i18n }) {
                         value
                       )
                     }
-                    popoverContent={i18n._(
-                      t`The Execution Environment to be used when one has not been configured for a job template.`
-                    )}
+                    popoverContent={t`The Execution Environment to be used when one has not been configured for a job template.`}
                     isGlobalDefaultEnvironment
                   />
                   <InputField
@@ -353,4 +351,4 @@ function MiscSystemEdit({ i18n }) {
   );
 }
 
-export default withI18n()(MiscSystemEdit);
+export default MiscSystemEdit;

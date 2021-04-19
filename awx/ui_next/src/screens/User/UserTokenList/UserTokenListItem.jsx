@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   DataListItemCells,
@@ -22,7 +22,7 @@ const NameLabel = styled.b`
   margin-right: 5px;
 `;
 
-function UserTokenListItem({ i18n, token, isSelected, onSelect }) {
+function UserTokenListItem({ token, isSelected, onSelect }) {
   const { id } = useParams();
   const labelId = `check-action-${token.id}`;
   return (
@@ -36,20 +36,20 @@ function UserTokenListItem({ i18n, token, isSelected, onSelect }) {
         />
         <DataListItemCells
           dataListCells={[
-            <DataListCell aria-label={i18n._(t`Token type`)} key="type">
+            <DataListCell aria-label={t`Token type`} key="type">
               <Link to={`/users/${id}/tokens/${token.id}/details`}>
                 {token.summary_fields?.application
-                  ? i18n._(t`Application access token`)
-                  : i18n._(t`Personal access token`)}
+                  ? t`Application access token`
+                  : t`Personal access token`}
               </Link>
             </DataListCell>,
             <DataListCell
-              aria-label={i18n._(t`Application name`)}
+              aria-label={t`Application name`}
               key="applicationName"
             >
               {token.summary_fields?.application && (
                 <span>
-                  <NameLabel>{i18n._(t`Application`)}</NameLabel>
+                  <NameLabel>{t`Application`}</NameLabel>
                   <Link
                     to={`/applications/${token.summary_fields.application.id}/details`}
                   >
@@ -58,12 +58,12 @@ function UserTokenListItem({ i18n, token, isSelected, onSelect }) {
                 </span>
               )}
             </DataListCell>,
-            <DataListCell aria-label={i18n._(t`Scope`)} key="scope">
-              <Label>{i18n._(t`Scope`)}</Label>
+            <DataListCell aria-label={t`Scope`} key="scope">
+              <Label>{t`Scope`}</Label>
               {toTitleCase(token.scope)}
             </DataListCell>,
-            <DataListCell aria-label={i18n._(t`Expiration`)} key="expiration">
-              <Label>{i18n._(t`Expires`)}</Label>
+            <DataListCell aria-label={t`Expiration`} key="expiration">
+              <Label>{t`Expires`}</Label>
               {formatDateString(token.expires)}
             </DataListCell>,
           ]}
@@ -73,4 +73,4 @@ function UserTokenListItem({ i18n, token, isSelected, onSelect }) {
   );
 }
 
-export default withI18n()(UserTokenListItem);
+export default UserTokenListItem;

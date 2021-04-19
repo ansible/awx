@@ -1,6 +1,6 @@
 import React from 'react';
 import { shape } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { Tr, Td } from '@patternfly/react-table';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
@@ -11,7 +11,7 @@ import { ActionsTd, ActionItem } from '../../components/PaginatedTable';
 import ActivityStreamDetailButton from './ActivityStreamDetailButton';
 import ActivityStreamDescription from './ActivityStreamDescription';
 
-function ActivityStreamListItem({ streamItem, i18n }) {
+function ActivityStreamListItem({ streamItem }) {
   ActivityStreamListItem.propTypes = {
     streamItem: shape({}).isRequired,
   };
@@ -25,9 +25,9 @@ function ActivityStreamListItem({ streamItem, i18n }) {
         </Link>
       );
     } else if (item?.summary_fields?.actor) {
-      link = i18n._(t`${item.summary_fields.actor.username} (deleted)`);
+      link = t`${item.summary_fields.actor.username} (deleted)`;
     } else {
-      link = i18n._(t`system`);
+      link = t`system`;
     }
     return link;
   };
@@ -39,15 +39,15 @@ function ActivityStreamListItem({ streamItem, i18n }) {
   return (
     <Tr id={streamItem.id} aria-labelledby={labelId}>
       <Td />
-      <Td dataLabel={i18n._(t`Time`)}>
+      <Td dataLabel={t`Time`}>
         {streamItem.timestamp ? formatDateString(streamItem.timestamp) : ''}
       </Td>
-      <Td dataLabel={i18n._(t`Initiated By`)}>{user}</Td>
-      <Td id={labelId} dataLabel={i18n._(t`Event`)}>
+      <Td dataLabel={t`Initiated By`}>{user}</Td>
+      <Td id={labelId} dataLabel={t`Event`}>
         {description}
       </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)}>
-        <ActionItem visible tooltip={i18n._(t`View event details`)}>
+      <ActionsTd dataLabel={t`Actions`}>
+        <ActionItem visible tooltip={t`View event details`}>
           <ActivityStreamDetailButton
             streamItem={streamItem}
             user={user}
@@ -58,4 +58,4 @@ function ActivityStreamListItem({ streamItem, i18n }) {
     </Tr>
   );
 }
-export default withI18n()(ActivityStreamListItem);
+export default ActivityStreamListItem;

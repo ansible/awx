@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { Formik } from 'formik';
@@ -14,7 +14,6 @@ import useRequest from '../../../util/useRequest';
 import { CredentialPluginTestAlert } from './CredentialPlugins';
 
 function ExternalTestModal({
-  i18n,
   credential,
   credentialType,
   credentialFormValues,
@@ -75,7 +74,7 @@ function ExternalTestModal({
       >
         {({ handleSubmit, setFieldValue }) => (
           <Modal
-            title={i18n._(t`Test External Credential`)}
+            title={t`Test External Credential`}
             isOpen
             onClose={() => onClose()}
             variant="small"
@@ -87,7 +86,7 @@ function ExternalTestModal({
                 variant="primary"
                 onClick={() => handleSubmit()}
               >
-                {i18n._(t`Run`)}
+                {t`Run`}
               </Button>,
               <Button
                 ouiaId="external-test-modal-cancel-button"
@@ -96,7 +95,7 @@ function ExternalTestModal({
                 variant="link"
                 onClick={() => onClose()}
               >
-                {i18n._(t`Cancel`)}
+                {t`Cancel`}
               </Button>,
             ]}
           >
@@ -134,7 +133,7 @@ function ExternalTestModal({
                             onChange={(event, value) => {
                               setFieldValue(field.id, value);
                             }}
-                            validate={isRequired ? required(null, i18n) : null}
+                            validate={isRequired ? required(null) : null}
                           />
                         </FormGroup>
                       );
@@ -149,7 +148,7 @@ function ExternalTestModal({
                         name={field.id}
                         type={field.multiline ? 'textarea' : 'text'}
                         isRequired={isRequired}
-                        validate={isRequired ? required(null, i18n) : null}
+                        validate={isRequired ? required(null) : null}
                       />
                     );
                   }
@@ -181,4 +180,4 @@ ExternalTestModal.defaultProps = {
   credential: null,
 };
 
-export default withI18n()(ExternalTestModal);
+export default ExternalTestModal;

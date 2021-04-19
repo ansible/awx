@@ -1,7 +1,7 @@
-import { t } from '@lingui/macro';
+import { t, plural } from '@lingui/macro';
 
-export function required(message, i18n) {
-  const errorMessage = message || i18n._(t`This field must not be blank`);
+export function required(message) {
+  const errorMessage = message || t`This field must not be blank`;
   return value => {
     if (typeof value === 'string' && !value.trim()) {
       return errorMessage;
@@ -16,39 +16,43 @@ export function required(message, i18n) {
   };
 }
 
-export function maxLength(max, i18n) {
+export function maxLength(max) {
   return value => {
     if (value.trim().length > max) {
-      return i18n._(t`This field must not exceed ${max} characters`);
+      return plural(max, {
+        one: 'This field must not exceed 1 character',
+        other: `This field must not exceed ${max} characters`,
+      });
     }
     return undefined;
   };
 }
 
-export function minLength(min, i18n) {
+export function minLength(min) {
   return value => {
     if (value.trim().length < min) {
-      return i18n._(t`This field must be at least ${min} characters`);
+      return plural(min, {
+        one: 'This field must be at least 1 character',
+        other: `This field must be at least ${min} characters`,
+      });
     }
     return undefined;
   };
 }
 
-export function minMaxValue(min, max, i18n) {
+export function minMaxValue(min, max) {
   return value => {
     if (value < min || value > max) {
-      return i18n._(
-        t`This field must be a number and have a value between ${min} and ${max}`
-      );
+      return t`This field must be a number and have a value between ${min} and ${max}`;
     }
     return undefined;
   };
 }
 
-export function requiredEmail(i18n) {
+export function requiredEmail() {
   return value => {
     if (!value) {
-      return i18n._(t`This field must not be blank`);
+      return t`This field must not be blank`;
     }
 
     // This isn't a perfect validator. It's likely to let a few
@@ -66,30 +70,30 @@ export function requiredEmail(i18n) {
       }
     }
 
-    return i18n._(t`Invalid email address`);
+    return t`Invalid email address`;
   };
 }
 
-export function noWhiteSpace(i18n) {
+export function noWhiteSpace() {
   return value => {
     if (/\s/.test(value)) {
-      return i18n._(t`This field must not contain spaces`);
+      return t`This field must not contain spaces`;
     }
     return undefined;
   };
 }
 
-export function integer(i18n) {
+export function integer() {
   return value => {
     const str = String(value);
     if (!Number.isInteger(value) && /[^0-9]/.test(str)) {
-      return i18n._(t`This field must be an integer`);
+      return t`This field must be an integer`;
     }
     return undefined;
   };
 }
 
-export function number(i18n) {
+export function number() {
   return value => {
     const str = String(value);
     if (/^-?[0-9]*(\.[0-9]*)?$/.test(str)) {
@@ -99,11 +103,11 @@ export function number(i18n) {
     if (/^-?[0-9]*e[+-][0-9]*$/.test(str)) {
       return undefined;
     }
-    return i18n._(t`This field must be a number`);
+    return t`This field must be a number`;
   };
 }
 
-export function url(i18n) {
+export function url() {
   return value => {
     if (!value) {
       return undefined;
@@ -115,7 +119,7 @@ export function url(i18n) {
         value
       )
     ) {
-      return i18n._(t`Please enter a valid URL`);
+      return t`Please enter a valid URL`;
     }
     return undefined;
   };
@@ -134,12 +138,12 @@ export function combine(validators) {
   };
 }
 
-export function regExp(i18n) {
+export function regExp() {
   return value => {
     try {
       RegExp(value);
     } catch {
-      return i18n._(t`This field must be a regular expression`);
+      return t`This field must be a regular expression`;
     }
     return undefined;
   };

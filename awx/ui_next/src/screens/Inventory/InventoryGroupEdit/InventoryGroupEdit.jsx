@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { useParams, useHistory } from 'react-router-dom';
 import { GroupsAPI } from '../../../api';
 
@@ -32,5 +32,5 @@ function InventoryGroupEdit({ inventoryGroup }) {
     />
   );
 }
-export default withI18n()(InventoryGroupEdit);
+export default InventoryGroupEdit;
 export { InventoryGroupEdit as _InventoryGroupEdit };

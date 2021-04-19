@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch, Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 
@@ -43,7 +43,7 @@ function modifyInstanceGroups(items = []) {
   });
 }
 
-function InstanceGroupList({ i18n }) {
+function InstanceGroupList() {
   const location = useLocation();
   const match = useRouteMatch();
 
@@ -127,7 +127,7 @@ function InstanceGroupList({ i18n }) {
     return !item.summary_fields.user_capabilities.delete;
   }
 
-  const pluralizedItemName = i18n._(t`Instance Groups`);
+  const pluralizedItemName = t`Instance Groups`;
 
   let errorMessageDelete = '';
 
@@ -140,9 +140,7 @@ function InstanceGroupList({ i18n }) {
 
     if (itemsUnableToDelete) {
       if (modifiedSelected.some(cannotDelete)) {
-        errorMessageDelete = i18n._(
-          t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}. `
-        );
+        errorMessageDelete = t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}. `;
       }
     }
 
@@ -150,12 +148,12 @@ function InstanceGroupList({ i18n }) {
       errorMessageDelete = errorMessageDelete.concat('\n');
     }
     errorMessageDelete = errorMessageDelete.concat(
-      i18n._(t`The tower instance group cannot be deleted.`)
+      t`The tower instance group cannot be deleted.`
     );
   }
 
-  const addContainerGroup = i18n._(t`Add container group`);
-  const addInstanceGroup = i18n._(t`Add instance group`);
+  const addContainerGroup = t`Add container group`;
+  const addInstanceGroup = t`Add instance group`;
 
   const addButton = (
     <AddDropDownButton
@@ -218,26 +216,26 @@ function InstanceGroupList({ i18n }) {
                     key="delete"
                     onDelete={handleDelete}
                     itemsToDelete={modifiedSelected}
-                    pluralizedItemName={i18n._(t`Instance Groups`)}
+                    pluralizedItemName={t`Instance Groups`}
                     errorMessage={errorMessageDelete}
                     deleteDetailsRequests={deleteDetailsRequests}
-                    deleteMessage={i18n._(
-                      '{numItemsToDelete, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
-                      { numItemsToDelete: selected.length }
-                    )}
+                    deleteMessage={
+                      ('{numItemsToDelete, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
+                      { numItemsToDelete: selected.length })
+                    }
                   />,
                 ]}
               />
             )}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Type`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Running Jobs`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Total Jobs`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Instances`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Capacity`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+                <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+                <HeaderCell>{t`Type`}</HeaderCell>
+                <HeaderCell>{t`Running Jobs`}</HeaderCell>
+                <HeaderCell>{t`Total Jobs`}</HeaderCell>
+                <HeaderCell>{t`Instances`}</HeaderCell>
+                <HeaderCell>{t`Capacity`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
             renderRow={(instanceGroup, index) => (
@@ -256,17 +254,17 @@ function InstanceGroupList({ i18n }) {
         </Card>
       </PageSection>
       <AlertModal
-        aria-label={i18n._(t`Deletion error`)}
+        aria-label={t`Deletion error`}
         isOpen={deletionError}
         onClose={clearDeletionError}
-        title={i18n._(t`Error`)}
+        title={t`Error`}
         variant="error"
       >
-        {i18n._(t`Failed to delete one or more instance groups.`)}
+        {t`Failed to delete one or more instance groups.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </>
   );
 }
 
-export default withI18n()(InstanceGroupList);
+export default InstanceGroupList;

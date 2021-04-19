@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { useContext } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { bool, func, shape } from 'prop-types';
 import {
@@ -50,7 +50,6 @@ const ActionButton = styled(Button)`
 ActionButton.displayName = 'ActionButton';
 
 function VisualizerToolbar({
-  i18n,
   onClose,
   onSave,
   template,
@@ -74,13 +73,13 @@ function VisualizerToolbar({
           {template.name}
         </Title>
         <div css="align-items: center; display: flex; flex: 1; justify-content: flex-end">
-          <div>{i18n._(t`Total Nodes`)}</div>
+          <div>{t`Total Nodes`}</div>
           <Badge id="visualizer-total-nodes-badge" isRead>
             {totalNodes}
           </Badge>
-          <Tooltip content={i18n._(t`Toggle legend`)} position="bottom">
+          <Tooltip content={t`Toggle legend`} position="bottom">
             <ActionButton
-              aria-label={i18n._(t`Toggle legend`)}
+              aria-label={t`Toggle legend`}
               id="visualizer-toggle-legend"
               isActive={totalNodes > 0 && showLegend}
               isDisabled={totalNodes === 0}
@@ -90,9 +89,9 @@ function VisualizerToolbar({
               <CompassIcon />
             </ActionButton>
           </Tooltip>
-          <Tooltip content={i18n._(t`Toggle tools`)} position="bottom">
+          <Tooltip content={t`Toggle tools`} position="bottom">
             <ActionButton
-              aria-label={i18n._(t`Toggle tools`)}
+              aria-label={t`Toggle tools`}
               id="visualizer-toggle-tools"
               isActive={totalNodes > 0 && showTools}
               isDisabled={totalNodes === 0}
@@ -102,12 +101,9 @@ function VisualizerToolbar({
               <WrenchIcon />
             </ActionButton>
           </Tooltip>
-          <Tooltip
-            content={i18n._(t`Workflow documentation`)}
-            position="bottom"
-          >
+          <Tooltip content={t`Workflow documentation`} position="bottom">
             <ActionButton
-              aria-label={i18n._(t`Workflow documentation`)}
+              aria-label={t`Workflow documentation`}
               id="visualizer-documentation"
               variant="plain"
               component="a"
@@ -120,11 +116,8 @@ function VisualizerToolbar({
             </ActionButton>
           </Tooltip>
           {template.summary_fields?.user_capabilities?.start && (
-            <Tooltip content={i18n._(t`Launch workflow`)} position="bottom">
-              <LaunchButton
-                resource={template}
-                aria-label={i18n._(t`Launch workflow`)}
-              >
+            <Tooltip content={t`Launch workflow`} position="bottom">
+              <LaunchButton resource={template} aria-label={t`Launch workflow`}>
                 {({ handleLaunch }) => (
                   <ActionButton
                     id="visualizer-launch"
@@ -140,10 +133,10 @@ function VisualizerToolbar({
           )}
           {!readOnly && (
             <>
-              <Tooltip content={i18n._(t`Delete all nodes`)} position="bottom">
+              <Tooltip content={t`Delete all nodes`} position="bottom">
                 <ActionButton
                   id="visualizer-delete-all"
-                  aria-label={i18n._(t`Delete all nodes`)}
+                  aria-label={t`Delete all nodes`}
                   isDisabled={totalNodes === 0}
                   onClick={() =>
                     dispatch({
@@ -160,18 +153,18 @@ function VisualizerToolbar({
                 ouiaId="visualizer-save-button"
                 id="visualizer-save"
                 css="margin: 0 32px"
-                aria-label={i18n._(t`Save`)}
+                aria-label={t`Save`}
                 variant="primary"
                 onClick={onSave}
               >
-                {i18n._(t`Save`)}
+                {t`Save`}
               </Button>
             </>
           )}
           <Button
             ouiaId="visualizer-close-button"
             id="visualizer-close"
-            aria-label={i18n._(t`Close`)}
+            aria-label={t`Close`}
             onClick={onClose}
             variant="plain"
           >
@@ -191,4 +184,4 @@ VisualizerToolbar.propTypes = {
   readOnly: bool.isRequired,
 };
 
-export default withI18n()(VisualizerToolbar);
+export default VisualizerToolbar;

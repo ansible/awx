@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 
 import { ConfigAPI, MeAPI, RootAPI } from '../api';
@@ -21,7 +21,7 @@ export const useConfig = () => {
   return context;
 };
 
-export const ConfigProvider = withI18n()(({ i18n, children }) => {
+export const ConfigProvider = ({ children }) => {
   const { pathname } = useLocation();
 
   const {
@@ -71,18 +71,18 @@ export const ConfigProvider = withI18n()(({ i18n, children }) => {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
           ouiaId="config-error-modal"
         >
-          {i18n._(t`Failed to retrieve configuration.`)}
+          {t`Failed to retrieve configuration.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
       {children}
     </ConfigContext.Provider>
   );
-});
+};
 
 export const useAuthorizedPath = () => {
   const config = useConfig();

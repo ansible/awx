@@ -21,137 +21,133 @@ import Users from './screens/User';
 import WorkflowApprovals from './screens/WorkflowApproval';
 import { Jobs } from './screens/Job';
 
-// Ideally, this should just be a regular object that we export, but we
-// need the i18n. When lingui3 arrives, we will be able to import i18n
-// directly and we can replace this function with a simple export.
-
-function getRouteConfig(i18n) {
+function getRouteConfig() {
   return [
     {
-      groupTitle: i18n._(t`Views`),
+      groupTitle: t`Views`,
       groupId: 'views_group',
       routes: [
         {
-          title: i18n._(t`Dashboard`),
+          title: t`Dashboard`,
           path: '/home',
           screen: Dashboard,
         },
         {
-          title: i18n._(t`Jobs`),
+          title: t`Jobs`,
           path: '/jobs',
           screen: Jobs,
         },
         {
-          title: i18n._(t`Schedules`),
+          title: t`Schedules`,
           path: '/schedules',
           screen: Schedules,
         },
         {
-          title: i18n._(t`Activity Stream`),
+          title: t`Activity Stream`,
           path: '/activity_stream',
           screen: ActivityStream,
         },
         {
-          title: i18n._(t`Workflow Approvals`),
+          title: t`Workflow Approvals`,
           path: '/workflow_approvals',
           screen: WorkflowApprovals,
         },
       ],
     },
     {
-      groupTitle: i18n._(t`Resources`),
+      groupTitle: t`Resources`,
       groupId: 'resources_group',
       routes: [
         {
-          title: i18n._(t`Templates`),
+          title: t`Templates`,
           path: '/templates',
           screen: Templates,
         },
         {
-          title: i18n._(t`Credentials`),
+          title: t`Credentials`,
           path: '/credentials',
           screen: Credentials,
         },
         {
-          title: i18n._(t`Projects`),
+          title: t`Projects`,
           path: '/projects',
           screen: Projects,
         },
         {
-          title: i18n._(t`Inventories`),
+          title: t`Inventories`,
           path: '/inventories',
           screen: Inventory,
         },
         {
-          title: i18n._(t`Hosts`),
+          title: t`Hosts`,
           path: '/hosts',
           screen: Hosts,
         },
       ],
     },
     {
-      groupTitle: i18n._(t`Access`),
+      groupTitle: t`Access`,
       groupId: 'access_group',
       routes: [
         {
-          title: i18n._(t`Organizations`),
+          title: t`Organizations`,
           path: '/organizations',
           screen: Organizations,
         },
         {
-          title: i18n._(t`Users`),
+          title: t`Users`,
           path: '/users',
           screen: Users,
         },
         {
-          title: i18n._(t`Teams`),
+          title: t`Teams`,
           path: '/teams',
           screen: Teams,
         },
       ],
     },
     {
-      groupTitle: i18n._(t`Administration`),
+      groupTitle: t`Administration`,
       groupId: 'administration_group',
       routes: [
         {
-          title: i18n._(t`Credential Types`),
+          title: t`Credential Types`,
           path: '/credential_types',
           screen: CredentialTypes,
         },
         {
-          title: i18n._(t`Notifications`),
+          title: t`Notifications`,
           path: '/notification_templates',
           screen: NotificationTemplates,
         },
         {
-          title: i18n._(t`Management Jobs`),
+          title: t`Management Jobs`,
           path: '/management_jobs',
           screen: ManagementJobs,
         },
         {
-          title: i18n._(t`Instance Groups`),
+          title: t`Instance Groups`,
           path: '/instance_groups',
           screen: InstanceGroups,
         },
         {
-          title: i18n._(t`Applications`),
+          title: t`Applications`,
           path: '/applications',
           screen: Applications,
         },
         {
-          title: i18n._(t`Execution Environments`),
+          title: t`Execution Environments`,
           path: '/execution_environments',
           screen: ExecutionEnvironments,
         },
       ],
     },
     {
-      groupTitle: i18n._(t`Settings`),
+      groupTitle: t`Settings`,
       groupId: 'settings',
       routes: [
         {
-          title: i18n._(t`Settings`),
+          title: t`Settings`,
           path: '/settings',
           screen: Settings,
         },

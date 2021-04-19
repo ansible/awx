@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import { useParams, useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import {
   FormGroup,
   TextInput,
@@ -23,7 +23,7 @@ import {
   CredentialTypesAPI,
 } from '../../../api';
 
-function WebhookSubForm({ i18n, templateType }) {
+function WebhookSubForm({ templateType }) {
   const { setFieldValue } = useFormikContext();
   const { id } = useParams();
   const { pathname } = useLocation();
@@ -99,19 +99,19 @@ function WebhookSubForm({ i18n, templateType }) {
     {
       value: '',
       key: '',
-      label: i18n._(t`Choose a Webhook Service`),
+      label: t`Choose a Webhook Service`,
       isDisabled: true,
     },
     {
       value: 'github',
       key: 'github',
-      label: i18n._(t`GitHub`),
+      label: t`GitHub`,
       isDisabled: false,
     },
     {
       value: 'gitlab',
       key: 'gitlab',
-      label: i18n._(t`GitLab`),
+      label: t`GitLab`,
       isDisabled: false,
     },
   ];
@@ -128,8 +128,8 @@ function WebhookSubForm({ i18n, templateType }) {
         name="webhook_service"
         fieldId="webhook_service"
         helperTextInvalid={webhookServiceMeta.error}
-        label={i18n._(t`Webhook Service`)}
-        labelIcon={<Popover content={i18n._(t`Select a webhook service.`)} />}
+        label={t`Webhook Service`}
+        labelIcon={<Popover content={t`Select a webhook service.`} />}
       >
         <AnsibleSelect
           {...webhookServiceField}
@@ -139,9 +139,7 @@ function WebhookSubForm({ i18n, templateType }) {
             webhookServiceHelpers.setValue(val);
             webhookUrlHelpers.setValue(
               pathname.endsWith('/add')
-                ? i18n
-                    ._(t`a new webhook url will be generated on save.`)
-                    .toUpperCase()
+                ? t`A NEW WEBHOOK WILL BE GENERATED ON SAVE`
                 : `${origin}/api/v2/${templateType}s/${id}/${val}/`
             );
             if (val === webhookServiceMeta.initialValue || val === '') {
@@ -151,9 +149,7 @@ function WebhookSubForm({ i18n, templateType }) {
               );
             } else {
               webhookKeyHelpers.setValue(
-                i18n
-                  ._(t`a new webhook key will be generated on save.`)
-                  .toUpperCase()
+                t`A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE.`
               );
               webhookCredentialHelpers.setValue(null);
             }
@@ -164,30 +160,26 @@ function WebhookSubForm({ i18n, templateType }) {
         <FormGroup
           type="text"
           fieldId="jt-webhookURL"
-          label={i18n._(t`Webhook URL`)}
+          label={t`Webhook URL`}
           labelIcon={
             <Popover
-              content={i18n._(
-                t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`
-              )}
+              content={t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`}
             />
           }
           name="webhook_url"
         >
           <TextInput
             id="t-webhookURL"
-            aria-label={i18n._(t`Webhook URL`)}
+            aria-label={t`Webhook URL`}
             value={webhookUrlField.value}
             isReadOnly
           />
         </FormGroup>
         <FormGroup
-          label={i18n._(t`Webhook Key`)}
+          label={t`Webhook Key`}
           labelIcon={
             <Popover
-              content={i18n._(
-                t`Webhook services can use this as a shared secret.`
-              )}
+              content={t`Webhook services can use this as a shared secret.`}
             />
           }
           fieldId="template-webhook_key"
@@ -196,14 +188,14 @@ function WebhookSubForm({ i18n, templateType }) {
             <TextInput
               id="template-webhook_key"
               isReadOnly
-              aria-label={i18n._(t`workflow job template webhook key`)}
+              aria-label={t`workflow job template webhook key`}
               value={webhookKeyField.value}
             />
             <Button
               ouiaId="update-webhook-key-button"
               isDisabled={isUpdateKeyDisabled}
               variant="tertiary"
-              aria-label={i18n._(t`Update webhook key`)}
+              aria-label={t`Update webhook key`}
               onClick={changeWebhookKey}
             >
               <SyncAltIcon />
@@ -214,10 +206,8 @@ function WebhookSubForm({ i18n, templateType }) {
 
       {credTypeId && (
         <CredentialLookup
-          label={i18n._(t`Webhook Credential`)}
-          tooltip={i18n._(
-            t`Optionally select the credential to use to send status updates back to the webhook service.`
-          )}
+          label={t`Webhook Credential`}
+          tooltip={t`Optionally select the credential to use to send status updates back to the webhook service.`}
           credentialTypeId={credTypeId}
           onChange={onCredentialChange}
           isValid={!webhookCredentialMeta.error}
@@ -228,4 +218,4 @@ function WebhookSubForm({ i18n, templateType }) {
     </FormColumnLayout>
   );
 }
-export default withI18n()(WebhookSubForm);
+export default WebhookSubForm;

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { useLocation, useParams } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
@@ -16,7 +16,7 @@ const QS_CONFIG = getQSConfig('organizations', {
   type: 'organization',
 });
 
-function UserOrganizationsList({ i18n }) {
+function UserOrganizationsList() {
   const location = useLocation();
   const { id: userId } = useParams();
 
@@ -52,7 +52,7 @@ function UserOrganizationsList({ i18n }) {
       contentError={contentError}
       hasContentLoading={isLoading}
       itemCount={count}
-      pluralizedItemName={i18n._(t`Organizations`)}
+      pluralizedItemName={t`Organizations`}
       qsConfig={QS_CONFIG}
       renderItem={organization => (
         <UserOrganizationListItem
@@ -68,4 +68,4 @@ function UserOrganizationsList({ i18n }) {
   );
 }
 
-export default withI18n()(UserOrganizationsList);
+export default UserOrganizationsList;

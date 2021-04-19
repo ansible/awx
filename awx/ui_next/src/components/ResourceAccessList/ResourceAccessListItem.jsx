@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React from 'react';
 import { func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Chip,
@@ -24,7 +24,7 @@ const DataListItemCells = styled(PFDataListItemCells)`
   align-items: start;
 `;
 
-function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
+function ResourceAccessListItem({ accessRecord, onRoleDelete }) {
   ResourceAccessListItem.propTypes = {
     accessRecord: AccessRecord.isRequired,
     onRoleDelete: func.isRequired,
@@ -57,7 +57,7 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
         }}
         isReadOnly={!role.user_capabilities.unattach}
         ouiaId={`${role.name}-${role.id}`}
-        closeBtnAriaLabel={i18n._(t`Remove ${role.name} chip`)}
+        closeBtnAriaLabel={t`Remove ${role.name} chip`}
       >
         {role.name}
       </Chip>
@@ -97,7 +97,7 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
               {accessRecord.first_name || accessRecord.last_name ? (
                 <DetailList stacked>
                   <Detail
-                    label={i18n._(t`Name`)}
+                    label={t`Name`}
                     value={`${accessRecord.first_name} ${accessRecord.last_name}`}
                   />
                 </DetailList>
@@ -107,7 +107,7 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
               <DetailList stacked>
                 {userRoles.length > 0 && (
                   <Detail
-                    label={i18n._(t`User Roles`)}
+                    label={t`User Roles`}
                     value={
                       <ChipGroup numChips={5} totalChips={userRoles.length}>
                         {userRoles.map(renderChip)}
@@ -117,7 +117,7 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
                 )}
                 {teamRoles.length > 0 && (
                   <Detail
-                    label={i18n._(t`Team Roles`)}
+                    label={t`Team Roles`}
                     value={
                       <ChipGroup numChips={5} totalChips={teamRoles.length}>
                         {teamRoles.map(renderChip)}
@@ -134,4 +134,4 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete, i18n }) {
   );
 }
 
-export default withI18n()(ResourceAccessListItem);
+export default ResourceAccessListItem;

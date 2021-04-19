@@ -2,12 +2,12 @@ import React, { useEffect, useCallback } from 'react';
 import { string, number, shape, arrayOf } from 'prop-types';
 import * as d3 from 'd3';
 import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
+
 import { PageContextConsumer } from '@patternfly/react-core';
 
 import ChartTooltip from './ChartTooltip';
 
-function LineChart({ id, data, height, i18n, pageContext }) {
+function LineChart({ id, data, height, pageContext }) {
   const { isNavOpen } = pageContext;
 
   // Methods
@@ -66,8 +66,7 @@ function LineChart({ id, data, height, i18n, pageContext }) {
     const tooltip = new ChartTooltip({
       svg: `#${id}`,
       colors,
-      label: i18n._(t`Jobs`),
-      i18n,
+      label: t`Jobs`,
     });
     const parseTime = d3.timeParse('%Y-%m-%d');
 
@@ -252,7 +251,7 @@ function LineChart({ id, data, height, i18n, pageContext }) {
       .on('mouseover', handleMouseOver)
       .on('mousemove', handleMouseMove)
       .on('mouseout', handleMouseOut);
-  }, [data, height, i18n, id]);
+  }, [data, height, id]);
 
   useEffect(() => {
     draw();
@@ -289,4 +288,4 @@ const withPageContext = Component => {
   };
 };
 
-export default withI18n()(withPageContext(LineChart));
+export default withPageContext(LineChart);

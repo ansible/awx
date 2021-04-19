@@ -1,6 +1,6 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Button,
@@ -28,7 +28,7 @@ const DataListAction = styled(_DataListAction)`
 `;
 
 function InventoryHostItem(props) {
-  const { detailUrl, editUrl, host, i18n, isSelected, onSelect } = props;
+  const { detailUrl, editUrl, host, isSelected, onSelect } = props;
 
   const recentPlaybookJobs = host.summary_fields.recent_jobs.map(job => ({
     ...job,
@@ -59,13 +59,13 @@ function InventoryHostItem(props) {
           ]}
         />
         <DataListAction
-          aria-label={i18n._(t`actions`)}
+          aria-label={t`actions`}
           aria-labelledby={labelId}
           id={labelId}
         >
           <HostToggle host={host} />
           {host.summary_fields.user_capabilities?.edit && (
-            <Tooltip content={i18n._(t`Edit Host`)} position="top">
+            <Tooltip content={t`Edit Host`} position="top">
               <Button
                 ouiaId={`${host.id}-edit-button`}
                 variant="plain"
@@ -89,4 +89,4 @@ InventoryHostItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(InventoryHostItem);
+export default InventoryHostItem;

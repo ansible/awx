@@ -6,11 +6,11 @@ import StepName from '../../../../../components/LaunchPrompt/steps/StepName';
 
 const STEP_ID = 'runType';
 
-export default function useRunTypeStep(i18n, askLinkType) {
+export default function useRunTypeStep(askLinkType) {
   const [, meta] = useField('linkType');
 
   return {
-    step: getStep(askLinkType, meta, i18n),
+    step: getStep(askLinkType, meta),
     initialValues: askLinkType ? { linkType: 'success' } : {},
     isReady: true,
     contentError: null,
@@ -21,7 +21,7 @@ export default function useRunTypeStep(i18n, askLinkType) {
     validate: () => {},
   };
 }
-function getStep(askLinkType, meta, i18n) {
+function getStep(askLinkType, meta) {
   if (!askLinkType) {
     return null;
   }
@@ -29,7 +29,7 @@ function getStep(askLinkType, meta, i18n) {
     id: STEP_ID,
     name: (
       <StepName hasErrors={false} id="run-type-step">
-        {i18n._(t`Run type`)}
+        {t`Run type`}
       </StepName>
     ),
     component: <RunStep />,

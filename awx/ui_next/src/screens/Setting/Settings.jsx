@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { Link, Route, Switch, Redirect } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import ContentError from '../../components/ContentError';
@@ -25,7 +25,7 @@ import { useConfig } from '../../contexts/Config';
 import { SettingsAPI } from '../../api';
 import useRequest from '../../util/useRequest';
 
-function Settings({ i18n }) {
+function Settings() {
   const { license_info = {}, me } = useConfig();
 
   const { request, result, isLoading, error } = useRequest(
@@ -40,80 +40,78 @@ function Settings({ i18n }) {
   }, [request]);
 
   const breadcrumbConfig = {
-    '/settings': i18n._(t`Settings`),
-    '/settings/activity_stream': i18n._(t`Activity Stream`),
-    '/settings/activity_stream/details': i18n._(t`Details`),
-    '/settings/activity_stream/edit': i18n._(t`Edit Details`),
-    '/settings/azure': i18n._(t`Azure AD`),
-    '/settings/azure/details': i18n._(t`Details`),
-    '/settings/azure/edit': i18n._(t`Edit Details`),
+    '/settings': t`Settings`,
+    '/settings/activity_stream': t`Activity Stream`,
+    '/settings/activity_stream/details': t`Details`,
+    '/settings/activity_stream/edit': t`Edit Details`,
+    '/settings/azure': t`Azure AD`,
+    '/settings/azure/details': t`Details`,
+    '/settings/azure/edit': t`Edit Details`,
     '/settings/github': null,
-    '/settings/github/default': i18n._(t`GitHub Default`),
-    '/settings/github/default/details': i18n._(t`Details`),
-    '/settings/github/default/edit': i18n._(t`Edit Details`),
-    '/settings/github/organization': i18n._(t`GitHub Organization`),
-    '/settings/github/organization/details': i18n._(t`Details`),
-    '/settings/github/organization/edit': i18n._(t`Edit Details`),
-    '/settings/github/team': i18n._(t`GitHub Team`),
-    '/settings/github/team/details': i18n._(t`Details`),
-    '/settings/github/team/edit': i18n._(t`Edit Details`),
-    '/settings/github/enterprise': i18n._(t`GitHub Enterprise`),
-    '/settings/github/enterprise/details': i18n._(t`Details`),
-    '/settings/github/enterprise/edit': i18n._(t`Edit Details`),
-    '/settings/github/enterprise_organization': i18n._(
-      t`GitHub Enterprise Organization`
-    ),
-    '/settings/github/enterprise_organization/details': i18n._(t`Details`),
-    '/settings/github/enterprise_organization/edit': i18n._(t`Edit Details`),
-    '/settings/github/enterprise_team': i18n._(t`GitHub Enterprise Team`),
-    '/settings/github/enterprise_team/details': i18n._(t`Details`),
-    '/settings/github/enterprise_team/edit': i18n._(t`Edit Details`),
-    '/settings/google_oauth2': i18n._(t`Google OAuth2`),
-    '/settings/google_oauth2/details': i18n._(t`Details`),
-    '/settings/google_oauth2/edit': i18n._(t`Edit Details`),
-    '/settings/jobs': i18n._(t`Jobs`),
-    '/settings/jobs/details': i18n._(t`Details`),
-    '/settings/jobs/edit': i18n._(t`Edit Details`),
+    '/settings/github/default': t`GitHub Default`,
+    '/settings/github/default/details': t`Details`,
+    '/settings/github/default/edit': t`Edit Details`,
+    '/settings/github/organization': t`GitHub Organization`,
+    '/settings/github/organization/details': t`Details`,
+    '/settings/github/organization/edit': t`Edit Details`,
+    '/settings/github/team': t`GitHub Team`,
+    '/settings/github/team/details': t`Details`,
+    '/settings/github/team/edit': t`Edit Details`,
+    '/settings/github/enterprise': t`GitHub Enterprise`,
+    '/settings/github/enterprise/details': t`Details`,
+    '/settings/github/enterprise/edit': t`Edit Details`,
+    '/settings/github/enterprise_organization': t`GitHub Enterprise Organization`,
+    '/settings/github/enterprise_organization/details': t`Details`,
+    '/settings/github/enterprise_organization/edit': t`Edit Details`,
+    '/settings/github/enterprise_team': t`GitHub Enterprise Team`,
+    '/settings/github/enterprise_team/details': t`Details`,
+    '/settings/github/enterprise_team/edit': t`Edit Details`,
+    '/settings/google_oauth2': t`Google OAuth2`,
+    '/settings/google_oauth2/details': t`Details`,
+    '/settings/google_oauth2/edit': t`Edit Details`,
+    '/settings/jobs': t`Jobs`,
+    '/settings/jobs/details': t`Details`,
+    '/settings/jobs/edit': t`Edit Details`,
     '/settings/ldap': null,
-    '/settings/ldap/default': i18n._(t`LDAP Default`),
-    '/settings/ldap/1': i18n._(t`LDAP 1`),
-    '/settings/ldap/2': i18n._(t`LDAP 2`),
-    '/settings/ldap/3': i18n._(t`LDAP 3`),
-    '/settings/ldap/4': i18n._(t`LDAP 4`),
-    '/settings/ldap/5': i18n._(t`LDAP 5`),
-    '/settings/ldap/default/details': i18n._(t`Details`),
-    '/settings/ldap/1/details': i18n._(t`Details`),
-    '/settings/ldap/2/details': i18n._(t`Details`),
-    '/settings/ldap/3/details': i18n._(t`Details`),
-    '/settings/ldap/4/details': i18n._(t`Details`),
-    '/settings/ldap/5/details': i18n._(t`Details`),
-    '/settings/ldap/default/edit': i18n._(t`Edit Details`),
-    '/settings/ldap/1/edit': i18n._(t`Edit Details`),
-    '/settings/ldap/2/edit': i18n._(t`Edit Details`),
-    '/settings/ldap/3/edit': i18n._(t`Edit Details`),
-    '/settings/ldap/4/edit': i18n._(t`Edit Details`),
-    '/settings/ldap/5/edit': i18n._(t`Edit Details`),
-    '/settings/logging': i18n._(t`Logging`),
-    '/settings/logging/details': i18n._(t`Details`),
-    '/settings/logging/edit': i18n._(t`Edit Details`),
-    '/settings/miscellaneous_system': i18n._(t`Miscellaneous System`),
-    '/settings/miscellaneous_system/details': i18n._(t`Details`),
-    '/settings/miscellaneous_system/edit': i18n._(t`Edit Details`),
-    '/settings/radius': i18n._(t`RADIUS`),
-    '/settings/radius/details': i18n._(t`Details`),
-    '/settings/radius/edit': i18n._(t`Edit Details`),
-    '/settings/saml': i18n._(t`SAML`),
-    '/settings/saml/details': i18n._(t`Details`),
-    '/settings/saml/edit': i18n._(t`Edit Details`),
-    '/settings/subscription': i18n._(t`Subscription`),
-    '/settings/subscription/details': i18n._(t`Details`),
-    '/settings/subscription/edit': i18n._(t`Edit Details`),
-    '/settings/tacacs': i18n._(t`TACACS+`),
-    '/settings/tacacs/details': i18n._(t`Details`),
-    '/settings/tacacs/edit': i18n._(t`Edit Details`),
-    '/settings/ui': i18n._(t`User Interface`),
-    '/settings/ui/details': i18n._(t`Details`),
-    '/settings/ui/edit': i18n._(t`Edit Details`),
+    '/settings/ldap/default': t`LDAP Default`,
+    '/settings/ldap/1': t`LDAP 1`,
+    '/settings/ldap/2': t`LDAP 2`,
+    '/settings/ldap/3': t`LDAP 3`,
+    '/settings/ldap/4': t`LDAP 4`,
+    '/settings/ldap/5': t`LDAP 5`,
+    '/settings/ldap/default/details': t`Details`,
+    '/settings/ldap/1/details': t`Details`,
+    '/settings/ldap/2/details': t`Details`,
+    '/settings/ldap/3/details': t`Details`,
+    '/settings/ldap/4/details': t`Details`,
+    '/settings/ldap/5/details': t`Details`,
+    '/settings/ldap/default/edit': t`Edit Details`,
+    '/settings/ldap/1/edit': t`Edit Details`,
+    '/settings/ldap/2/edit': t`Edit Details`,
+    '/settings/ldap/3/edit': t`Edit Details`,
+    '/settings/ldap/4/edit': t`Edit Details`,
+    '/settings/ldap/5/edit': t`Edit Details`,
+    '/settings/logging': t`Logging`,
+    '/settings/logging/details': t`Details`,
+    '/settings/logging/edit': t`Edit Details`,
+    '/settings/miscellaneous_system': t`Miscellaneous System`,
+    '/settings/miscellaneous_system/details': t`Details`,
+    '/settings/miscellaneous_system/edit': t`Edit Details`,
+    '/settings/radius': t`RADIUS`,
+    '/settings/radius/details': t`Details`,
+    '/settings/radius/edit': t`Edit Details`,
+    '/settings/saml': t`SAML`,
+    '/settings/saml/details': t`Details`,
+    '/settings/saml/edit': t`Edit Details`,
+    '/settings/subscription': t`Subscription`,
+    '/settings/subscription/details': t`Details`,
+    '/settings/subscription/edit': t`Edit Details`,
+    '/settings/tacacs': t`TACACS+`,
+    '/settings/tacacs/details': t`Details`,
+    '/settings/tacacs/edit': t`Edit Details`,
+    '/settings/ui': t`User Interface`,
+    '/settings/ui/details': t`Details`,
+    '/settings/ui/edit': t`Edit Details`,
   };
 
   if (error) {
@@ -194,7 +192,7 @@ function Settings({ i18n }) {
           <PageSection>
             <Card>
               <ContentError isNotFound>
-                <Link to="/settings">{i18n._(t`View all settings`)}</Link>
+                <Link to="/settings">{t`View all settings`}</Link>
               </ContentError>
             </Card>
           </PageSection>
@@ -204,4 +202,4 @@ function Settings({ i18n }) {
   );
 }
 
-export default withI18n()(Settings);
+export default Settings;

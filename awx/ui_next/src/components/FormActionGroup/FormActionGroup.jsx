@@ -1,32 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { ActionGroup, Button } from '@patternfly/react-core';
 import { FormFullWidthLayout } from '../FormLayout';
 
-const FormActionGroup = ({ onCancel, onSubmit, submitDisabled, i18n }) => {
+const FormActionGroup = ({ onCancel, onSubmit, submitDisabled }) => {
   return (
     <FormFullWidthLayout>
       <ActionGroup>
         <Button
           ouiaId="form-save-button"
-          aria-label={i18n._(t`Save`)}
+          aria-label={t`Save`}
           variant="primary"
           type="button"
           onClick={onSubmit}
           isDisabled={submitDisabled}
         >
-          {i18n._(t`Save`)}
+          {t`Save`}
         </Button>
         <Button
           ouiaId="form-cancel-button"
-          aria-label={i18n._(t`Cancel`)}
+          aria-label={t`Cancel`}
           variant="link"
           type="button"
           onClick={onCancel}
         >
-          {i18n._(t`Cancel`)}
+          {t`Cancel`}
         </Button>
       </ActionGroup>
     </FormFullWidthLayout>
@@ -43,4 +43,4 @@ FormActionGroup.defaultProps = {
   submitDisabled: false,
 };
 
-export default withI18n()(FormActionGroup);
+export default FormActionGroup;

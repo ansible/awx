@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { Button } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import AlertModal from '../../../components/AlertModal';
@@ -20,7 +20,7 @@ import useRequest, { useDismissableError } from '../../../util/useRequest';
 import hasCustomMessages from '../shared/hasCustomMessages';
 import { NOTIFICATION_TYPES } from '../constants';
 
-function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
+function NotificationTemplateDetail({ template, defaultMessages }) {
   const history = useHistory();
 
   const {
@@ -44,19 +44,15 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
+        <Detail label={t`Name`} value={template.name} dataCy="nt-detail-name" />
         <Detail
-          label={i18n._(t`Name`)}
-          value={template.name}
-          dataCy="nt-detail-name"
-        />
-        <Detail
-          label={i18n._(t`Description`)}
+          label={t`Description`}
           value={template.description}
           dataCy="nt-detail-description"
         />
         {summary_fields.organization ? (
           <Detail
-            label={i18n._(t`Organization`)}
+            label={t`Organization`}
             value={
               <Link
                 to={`/organizations/${summary_fields.organization.id}/details`}
@@ -66,10 +62,10 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
             }
           />
         ) : (
-          <DeletedDetail label={i18n._(t`Organization`)} />
+          <DeletedDetail label={t`Organization`} />
         )}
         <Detail
-          label={i18n._(t`Notification Type`)}
+          label={t`Notification Type`}
           value={
             NOTIFICATION_TYPES[template.notification_type] ||
             template.notification_type
@@ -79,40 +75,38 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {template.notification_type === 'email' && (
           <>
             <Detail
-              label={i18n._(t`Username`)}
+              label={t`Username`}
               value={configuration.username}
               dataCy="nt-detail-username"
             />
             <Detail
-              label={i18n._(t`Host`)}
+              label={t`Host`}
               value={configuration.host}
               dataCy="nt-detail-host"
             />
             <ArrayDetail
-              label={i18n._(t`Recipient List`)}
+              label={t`Recipient List`}
               value={configuration.recipients}
               dataCy="nt-detail-recipients"
             />
             <Detail
-              label={i18n._(t`Sender Email`)}
+              label={t`Sender Email`}
               value={configuration.sender}
               dataCy="nt-detail-sender"
             />
             <Detail
-              label={i18n._(t`Port`)}
+              label={t`Port`}
               value={configuration.port}
               dataCy="nt-detail-port"
             />
             <Detail
-              label={i18n._(t`Timeout`)}
+              label={t`Timeout`}
               value={configuration.timeout}
               dataCy="nt-detail-timeout"
             />
             <Detail
-              label={i18n._(t`Email Options`)}
-              value={
-                configuration.use_ssl ? i18n._(t`Use SSL`) : i18n._(t`Use TLS`)
-              }
+              label={t`Email Options`}
+              value={configuration.use_ssl ? t`Use SSL` : t`Use TLS`}
               dataCy="nt-detail-email-options"
             />
           </>
@@ -120,32 +114,28 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {template.notification_type === 'grafana' && (
           <>
             <Detail
-              label={i18n._(t`Grafana URL`)}
+              label={t`Grafana URL`}
               value={configuration.grafana_url}
               dataCy="nt-detail-grafana-url"
             />
             <Detail
-              label={i18n._(t`ID of the Dashboard`)}
+              label={t`ID of the Dashboard`}
               value={configuration.dashboardId}
               dataCy="nt-detail-dashboard-id"
             />
             <Detail
-              label={i18n._(t`ID of the Panel`)}
+              label={t`ID of the Panel`}
               value={configuration.panelId}
               dataCy="nt-detail-panel-id"
             />
             <ArrayDetail
-              label={i18n._(t`Tags for the Annotation`)}
+              label={t`Tags for the Annotation`}
               value={configuration.annotation_tags}
               dataCy="nt-detail-"
             />
             <Detail
-              label={i18n._(t`Disable SSL Verification`)}
-              value={
-                configuration.grafana_no_verify_ssl
-                  ? i18n._(t`True`)
-                  : i18n._(t`False`)
-              }
+              label={t`Disable SSL Verification`}
+              value={configuration.grafana_no_verify_ssl ? t`True` : t`False`}
               dataCy="nt-detail-disable-ssl"
             />
           </>
@@ -153,28 +143,28 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {template.notification_type === 'irc' && (
           <>
             <Detail
-              label={i18n._(t`IRC Server Port`)}
+              label={t`IRC Server Port`}
               value={configuration.port}
               dataCy="nt-detail-irc-port"
             />
             <Detail
-              label={i18n._(t`IRC Server Address`)}
+              label={t`IRC Server Address`}
               value={configuration.server}
               dataCy="nt-detail-irc-server"
             />
             <Detail
-              label={i18n._(t`IRC Nick`)}
+              label={t`IRC Nick`}
               value={configuration.nickname}
               dataCy="nt-detail-irc-nickname"
             />
             <ArrayDetail
-              label={i18n._(t`Destination Channels or Users`)}
+              label={t`Destination Channels or Users`}
               value={configuration.targets}
               dataCy="nt-detail-channels"
             />
             <Detail
-              label={i18n._(t`SSL Connection`)}
-              value={configuration.use_ssl ? i18n._(t`True`) : i18n._(t`False`)}
+              label={t`SSL Connection`}
+              value={configuration.use_ssl ? t`True` : t`False`}
               dataCy="nt-detail-irc-ssl"
             />
           </>
@@ -182,31 +172,29 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {template.notification_type === 'mattermost' && (
           <>
             <Detail
-              label={i18n._(t`Target URL`)}
+              label={t`Target URL`}
               value={configuration.mattermost_url}
               dataCy="nt-detail-mattermost-url"
             />
             <Detail
-              label={i18n._(t`Username`)}
+              label={t`Username`}
               value={configuration.mattermost_username}
               dataCy="nt-detail-mattermost-username"
             />
             <Detail
-              label={i18n._(t`Channel`)}
+              label={t`Channel`}
               value={configuration.mattermost_channel}
               dataCy="nt-detail-mattermost_channel"
             />
             <Detail
-              label={i18n._(t`Icon URL`)}
+              label={t`Icon URL`}
               value={configuration.mattermost_icon_url}
               dataCy="nt-detail-mattermost-icon-url"
             />
             <Detail
-              label={i18n._(t`Disable SSL Verification`)}
+              label={t`Disable SSL Verification`}
               value={
-                configuration.mattermost_no_verify_ssl
-                  ? i18n._(t`True`)
-                  : i18n._(t`False`)
+                configuration.mattermost_no_verify_ssl ? t`True` : t`False`
               }
               dataCy="nt-detail-disable-ssl"
             />
@@ -215,17 +203,17 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {template.notification_type === 'pagerduty' && (
           <>
             <Detail
-              label={i18n._(t`Pagerduty Subdomain`)}
+              label={t`Pagerduty Subdomain`}
               value={configuration.subdomain}
               dataCy="nt-detail-pagerduty-subdomain"
             />
             <Detail
-              label={i18n._(t`API Service/Integration Key`)}
+              label={t`API Service/Integration Key`}
               value={configuration.service_key}
               dataCy="nt-detail-pagerduty-service-key"
             />
             <Detail
-              label={i18n._(t`Client Identifier`)}
+              label={t`Client Identifier`}
               value={configuration.client_name}
               dataCy="nt-detail-pagerduty-client-name"
             />
@@ -234,26 +222,24 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {template.notification_type === 'rocketchat' && (
           <>
             <Detail
-              label={i18n._(t`Target URL`)}
+              label={t`Target URL`}
               value={configuration.rocketchat_url}
               dataCy="nt-detail-rocketchat-url"
             />
             <Detail
-              label={i18n._(t`Username`)}
+              label={t`Username`}
               value={configuration.rocketchat_username}
               dataCy="nt-detail-rocketchat-username"
             />
             <Detail
-              label={i18n._(t`Icon URL`)}
+              label={t`Icon URL`}
               value={configuration.rocketchat_icon_url}
               dataCy="nt-detail-rocketchat-icon-url"
             />
             <Detail
-              label={i18n._(t`Disable SSL Verification`)}
+              label={t`Disable SSL Verification`}
               value={
-                configuration.rocketchat_no_verify_ssl
-                  ? i18n._(t`True`)
-                  : i18n._(t`False`)
+                configuration.rocketchat_no_verify_ssl ? t`True` : t`False`
               }
               dataCy="nt-detail-disable-ssl"
             />
@@ -262,12 +248,12 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {template.notification_type === 'slack' && (
           <>
             <ArrayDetail
-              label={i18n._(t`Destination Channels`)}
+              label={t`Destination Channels`}
               value={configuration.channels}
               dataCy="nt-detail-slack-channels"
             />
             <Detail
-              label={i18n._(t`Notification Color`)}
+              label={t`Notification Color`}
               value={configuration.hex_color}
               dataCy="nt-detail-slack-color"
             />
@@ -276,17 +262,17 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {template.notification_type === 'twilio' && (
           <>
             <Detail
-              label={i18n._(t`Source Phone Number`)}
+              label={t`Source Phone Number`}
               value={configuration.from_number}
               dataCy="nt-detail-twilio-source-phone"
             />
             <ArrayDetail
-              label={i18n._(t`Destination SMS Number(s)`)}
+              label={t`Destination SMS Number(s)`}
               value={configuration.to_numbers}
               dataCy="nt-detail-twilio-destination-numbers"
             />
             <Detail
-              label={i18n._(t`Account SID`)}
+              label={t`Account SID`}
               value={configuration.account_sid}
               dataCy="nt-detail-twilio-account-sid"
             />
@@ -295,31 +281,29 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         {template.notification_type === 'webhook' && (
           <>
             <Detail
-              label={i18n._(t`Username`)}
+              label={t`Username`}
               value={configuration.username}
               dataCy="nt-detail-webhook-password"
             />
             <Detail
-              label={i18n._(t`Target URL`)}
+              label={t`Target URL`}
               value={configuration.url}
               dataCy="nt-detail-webhook-url"
             />
             <Detail
-              label={i18n._(t`Disable SSL Verification`)}
+              label={t`Disable SSL Verification`}
               value={
-                configuration.disable_ssl_verification
-                  ? i18n._(t`True`)
-                  : i18n._(t`False`)
+                configuration.disable_ssl_verification ? t`True` : t`False`
               }
               dataCy="nt-detail-disable-ssl"
             />
             <Detail
-              label={i18n._(t`HTTP Method`)}
+              label={t`HTTP Method`}
               value={configuration.http_method}
               dataCy="nt-detail-webhook-http-method"
             />
             <CodeDetail
-              label={i18n._(t`HTTP Headers`)}
+              label={t`HTTP Headers`}
               value={JSON.stringify(configuration.headers)}
               mode="json"
               rows="6"
@@ -328,12 +312,12 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
           </>
         )}
         <UserDateDetail
-          label={i18n._(t`Created`)}
+          label={t`Created`}
           date={created}
           user={summary_fields?.created_by}
         />
         <UserDateDetail
-          label={i18n._(t`Last Modified`)}
+          label={t`Last Modified`}
           date={modified}
           user={summary_fields?.modified_by}
         />
@@ -342,7 +326,6 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
             messages={messages}
             defaults={typeMessageDefaults}
             type={template.notification_type}
-            i18n={i18n}
           />
         )}
       </DetailList>
@@ -353,20 +336,20 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
               ouiaId="notification-template-detail-edit-button"
               component={Link}
               to={`/notification_templates/${template.id}/edit`}
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           )}
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.delete && (
             <DeleteButton
               name={template.name}
-              modalTitle={i18n._(t`Delete Notification`)}
+              modalTitle={t`Delete Notification`}
               onConfirm={deleteTemplate}
               isDisabled={isLoading}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </DeleteButton>
           )}
       </CardActionsRow>
@@ -374,10 +357,10 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
         >
-          {i18n._(t`Failed to delete notification.`)}
+          {t`Failed to delete notification.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -385,7 +368,7 @@ function NotificationTemplateDetail({ i18n, template, defaultMessages }) {
   );
 }
 
-function CustomMessageDetails({ messages, defaults, type, i18n }) {
+function CustomMessageDetails({ messages, defaults, type }) {
   const showMessages = type !== 'webhook';
   const showBodies = ['email', 'pagerduty', 'webhook'].includes(type);
 
@@ -393,7 +376,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
     <>
       {showMessages && (
         <CodeDetail
-          label={i18n._(t`Start message`)}
+          label={t`Start message`}
           value={messages.started.message || defaults.started.message}
           mode="jinja2"
           rows="2"
@@ -402,7 +385,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showBodies && (
         <CodeDetail
-          label={i18n._(t`Start message body`)}
+          label={t`Start message body`}
           value={messages.started.body || defaults.started.body}
           mode="jinja2"
           rows="6"
@@ -411,7 +394,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showMessages && (
         <CodeDetail
-          label={i18n._(t`Success message`)}
+          label={t`Success message`}
           value={messages.success.message || defaults.success.message}
           mode="jinja2"
           rows="2"
@@ -420,7 +403,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showBodies && (
         <CodeDetail
-          label={i18n._(t`Success message body`)}
+          label={t`Success message body`}
           value={messages.success.body || defaults.success.body}
           mode="jinja2"
           rows="6"
@@ -429,7 +412,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showMessages && (
         <CodeDetail
-          label={i18n._(t`Error message`)}
+          label={t`Error message`}
           value={messages.error.message || defaults.error.message}
           mode="jinja2"
           rows="2"
@@ -438,7 +421,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showBodies && (
         <CodeDetail
-          label={i18n._(t`Error message body`)}
+          label={t`Error message body`}
           value={messages.error.body || defaults.error.body}
           mode="jinja2"
           rows="6"
@@ -447,7 +430,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showMessages && (
         <CodeDetail
-          label={i18n._(t`Workflow approved message`)}
+          label={t`Workflow approved message`}
           value={
             messages.workflow_approval?.approved?.message ||
             defaults.workflow_approval.approved.message
@@ -459,7 +442,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showBodies && (
         <CodeDetail
-          label={i18n._(t`Workflow approved message body`)}
+          label={t`Workflow approved message body`}
           value={
             messages.workflow_approval?.approved?.body ||
             defaults.workflow_approval.approved.body
@@ -471,7 +454,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showMessages && (
         <CodeDetail
-          label={i18n._(t`Workflow denied message`)}
+          label={t`Workflow denied message`}
           value={
             messages.workflow_approval?.denied?.message ||
             defaults.workflow_approval.denied.message
@@ -483,7 +466,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showBodies && (
         <CodeDetail
-          label={i18n._(t`Workflow denied message body`)}
+          label={t`Workflow denied message body`}
           value={
             messages.workflow_approval?.denied?.body ||
             defaults.workflow_approval.denied.body
@@ -495,7 +478,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showMessages && (
         <CodeDetail
-          label={i18n._(t`Workflow pending message`)}
+          label={t`Workflow pending message`}
           value={
             messages.workflow_approval?.running?.message ||
             defaults.workflow_approval.running.message
@@ -507,7 +490,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showBodies && (
         <CodeDetail
-          label={i18n._(t`Workflow pending message body`)}
+          label={t`Workflow pending message body`}
           value={
             messages.workflow_approval?.running?.body ||
             defaults.workflow_approval.running.body
@@ -519,7 +502,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showMessages && (
         <CodeDetail
-          label={i18n._(t`Workflow timed out message`)}
+          label={t`Workflow timed out message`}
           value={
             messages.workflow_approval?.timed_out?.message ||
             defaults.workflow_approval.timed_out.message
@@ -531,7 +514,7 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
       )}
       {showBodies && (
         <CodeDetail
-          label={i18n._(t`Workflow timed out message body`)}
+          label={t`Workflow timed out message body`}
           value={
             messages.workflow_approval?.timed_out?.body ||
             defaults.workflow_approval.timed_out.body
@@ -545,4 +528,4 @@ function CustomMessageDetails({ messages, defaults, type, i18n }) {
   );
 }
 
-export default withI18n()(NotificationTemplateDetail);
+export default NotificationTemplateDetail;

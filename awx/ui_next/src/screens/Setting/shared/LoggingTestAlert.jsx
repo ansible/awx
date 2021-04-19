@@ -1,5 +1,5 @@
 import React from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import {
@@ -8,23 +8,21 @@ import {
   AlertGroup,
 } from '@patternfly/react-core';
 
-function LoggingTestAlert({ i18n, successResponse, errorResponse, onClose }) {
+function LoggingTestAlert({ successResponse, errorResponse, onClose }) {
   let testMessage = null;
   if (successResponse) {
-    testMessage = i18n._(t`Log aggregator test sent successfully.`);
+    testMessage = t`Log aggregator test sent successfully.`;
   }
 
   let errorData = null;
   if (errorResponse) {
-    testMessage = i18n._(t`There was an error testing the log aggregator.`);
+    testMessage = t`There was an error testing the log aggregator.`;
     if (
       errorResponse?.response?.statusText &&
       errorResponse?.response?.status
     ) {
-      testMessage = i18n._(
-        t`${errorResponse.response.statusText}: ${errorResponse.response.status}`
-      );
-      errorData = i18n._(t`${errorResponse.response?.data?.error}`);
+      testMessage = t`${errorResponse.response.statusText}: ${errorResponse.response.status}`;
+      errorData = t`${errorResponse.response?.data?.error}`;
     }
   }
 
@@ -34,7 +32,7 @@ function LoggingTestAlert({ i18n, successResponse, errorResponse, onClose }) {
         <Alert
           actionClose={<AlertActionCloseButton onClose={onClose} />}
           ouiaId="logging-test-alert"
-          title={successResponse ? i18n._(t`Success`) : i18n._(t`Error`)}
+          title={successResponse ? t`Success` : t`Error`}
           variant={successResponse ? 'success' : 'danger'}
         >
           <b id="test-message">{testMessage}</b>
@@ -57,4 +55,4 @@ LoggingTestAlert.defaultProps = {
   onClose: () => {},
 };
 
-export default withI18n()(LoggingTestAlert);
+export default LoggingTestAlert;

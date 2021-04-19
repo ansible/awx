@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { string, bool } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import styled from 'styled-components';
@@ -24,15 +24,7 @@ const StyledCheckboxField = styled(CheckboxField)`
   margin-left: auto;
 `;
 
-function VariablesField({
-  i18n,
-  id,
-  name,
-  label,
-  readOnly,
-  promptId,
-  tooltip,
-}) {
+function VariablesField({ id, name, label, readOnly, promptId, tooltip }) {
   // track focus manually, because the Code Editor library doesn't wire
   // into Formik completely
   const [shouldValidate, setShouldValidate] = useState(false);
@@ -78,7 +70,6 @@ function VariablesField({
   return (
     <>
       <VariablesFieldInternals
-        i18n={i18n}
         id={id}
         name={name}
         label={label}
@@ -97,19 +88,18 @@ function VariablesField({
         onClose={() => setIsExpanded(false)}
         actions={[
           <Button
-            aria-label={i18n._(t`Done`)}
+            aria-label={t`Done`}
             key="select"
             variant="primary"
             onClick={() => setIsExpanded(false)}
             ouiaId={`${id}-variables-unexpand`}
           >
-            {i18n._(t`Done`)}
+            {t`Done`}
           </Button>,
         ]}
       >
         <div className="pf-c-form">
           <VariablesFieldInternals
-            i18n={i18n}
             id={`${id}-expanded`}
             name={name}
             label={label}
@@ -144,7 +134,6 @@ VariablesField.defaultProps = {
 };
 
 function VariablesFieldInternals({
-  i18n,
   id,
   name,
   label,
@@ -194,14 +183,14 @@ function VariablesFieldInternals({
         {promptId && (
           <StyledCheckboxField
             id="template-ask-variables-on-launch"
-            label={i18n._(t`Prompt on launch`)}
+            label={t`Prompt on launch`}
             name="ask_variables_on_launch"
           />
         )}
         {onExpand && (
           <Button
             variant="plain"
-            aria-label={i18n._(t`Expand input`)}
+            aria-label={t`Expand input`}
             onClick={onExpand}
             ouiaId={`${id}-variables-expand`}
           >
@@ -225,4 +214,4 @@ function VariablesFieldInternals({
   );
 }
 
-export default withI18n()(VariablesField);
+export default VariablesField;

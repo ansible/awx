@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   Link,
@@ -20,7 +20,7 @@ import { TeamsAPI } from '../../api';
 import TeamRolesList from './TeamRoles';
 import { ResourceAccessList } from '../../components/ResourceAccessList';
 
-function Team({ i18n, setBreadcrumb }) {
+function Team({ setBreadcrumb }) {
   const [team, setTeam] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -46,15 +46,15 @@ function Team({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Teams`)}
+          {t`Back to Teams`}
         </>
       ),
       link: `/teams`,
       id: 99,
     },
-    { name: i18n._(t`Details`), link: `/teams/${id}/details`, id: 0 },
-    { name: i18n._(t`Access`), link: `/teams/${id}/access`, id: 1 },
-    { name: i18n._(t`Roles`), link: `/teams/${id}/roles`, id: 2 },
+    { name: t`Details`, link: `/teams/${id}/details`, id: 0 },
+    { name: t`Access`, link: `/teams/${id}/access`, id: 1 },
+    { name: t`Roles`, link: `/teams/${id}/roles`, id: 2 },
   ];
 
   let showCardHeader = true;
@@ -70,8 +70,8 @@ function Team({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response.status === 404 && (
               <span>
-                {i18n._(t`Team not found.`)}{' '}
-                <Link to="/teams">{i18n._(t`View all Teams.`)}</Link>
+                {t`Team not found.`}{' '}
+                <Link to="/teams">{t`View all Teams.`}</Link>
               </span>
             )}
           </ContentError>
@@ -113,7 +113,7 @@ function Team({ i18n, setBreadcrumb }) {
               <ContentError isNotFound>
                 {id && (
                   <Link to={`/teams/${id}/details`}>
-                    {i18n._(t`View Team Details`)}
+                    {t`View Team Details`}
                   </Link>
                 )}
               </ContentError>
@@ -125,5 +125,5 @@ function Team({ i18n, setBreadcrumb }) {
   );
 }
 
-export default withI18n()(Team);
+export default Team;
 export { Team as _Team };

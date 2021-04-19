@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
@@ -22,7 +22,7 @@ import {
 } from '../../../util/getRelatedResourceDeleteDetails';
 import ErrorDetail from '../../../components/ErrorDetail';
 
-function CredentialTypeDetails({ credentialType, i18n }) {
+function CredentialTypeDetails({ credentialType }) {
   const { id, name, description, injectors, inputs } = credentialType;
   const history = useHistory();
 
@@ -47,7 +47,7 @@ function CredentialTypeDetails({ credentialType, i18n }) {
         results: deleteDetails,
         error,
       } = await getRelatedResourceDeleteCounts(
-        relatedResourceDeleteRequests.credentialType(credentialType, i18n)
+        relatedResourceDeleteRequests.credentialType(credentialType)
       );
       if (error) {
         throw new Error(error);
@@ -56,7 +56,7 @@ function CredentialTypeDetails({ credentialType, i18n }) {
         return { isDeleteDisabled: true };
       }
       return { isDeleteDisabled: false };
-    }, [credentialType, i18n]),
+    }, [credentialType]),
     { isDeleteDisabled: false }
   );
 
@@ -71,28 +71,28 @@ function CredentialTypeDetails({ credentialType, i18n }) {
     <CardBody>
       <DetailList>
         <Detail
-          label={i18n._(t`Name`)}
+          label={t`Name`}
           value={name}
           dataCy="credential-type-detail-name"
         />
-        <Detail label={i18n._(t`Description`)} value={description} />
+        <Detail label={t`Description`} value={description} />
         <VariablesDetail
-          label={i18n._(t`Input configuration`)}
+          label={t`Input configuration`}
           value={jsonToYaml(JSON.stringify(inputs))}
           rows={6}
         />
         <VariablesDetail
-          label={i18n._(t`Injector configuration`)}
+          label={t`Injector configuration`}
           value={jsonToYaml(JSON.stringify(injectors))}
           rows={6}
         />
         <UserDateDetail
-          label={i18n._(t`Created`)}
+          label={t`Created`}
           date={credentialType.created}
           user={credentialType.summary_fields.created_by}
         />
         <UserDateDetail
-          label={i18n._(t`Last Modified`)}
+          label={t`Last Modified`}
           date={credentialType.modified}
           user={credentialType.summary_fields.modified_by}
         />
@@ -102,28 +102,26 @@ function CredentialTypeDetails({ credentialType, i18n }) {
           credentialType.summary_fields.user_capabilities.edit && (
             <Button
               ouiaId="credential-type-detail-edit-button"
-              aria-label={i18n._(t`edit`)}
+              aria-label={t`edit`}
               component={Link}
               to={`/credential_types/${id}/edit`}
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           )}
         {credentialType.summary_fields.user_capabilities &&
           credentialType.summary_fields.user_capabilities.delete && (
             <DeleteButton
               name={name}
-              modalTitle={i18n._(t`Delete credential type`)}
+              modalTitle={t`Delete credential type`}
               onConfirm={deleteCredentialType}
               isDisabled={isLoading || isDeleteDisabled}
               disabledTooltip={
                 isDeleteDisabled &&
-                i18n._(
-                  t`This credential type is currently being used by some credentials and cannot be deleted`
-                )
+                t`This credential type is currently being used by some credentials and cannot be deleted`
               }
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </DeleteButton>
           )}
       </CardActionsRow>
@@ -132,7 +130,7 @@ function CredentialTypeDetails({ credentialType, i18n }) {
         <AlertModal
           isOpen={error}
           onClose={dismissError}
-          title={i18n._(t`Error`)}
+          title={t`Error`}
           variant="error"
         >
           <ErrorDetail error={error} />
@@ -142,4 +140,4 @@ function CredentialTypeDetails({ credentialType, i18n }) {
   );
 }
 
-export default withI18n()(CredentialTypeDetails);
+export default CredentialTypeDetails;
