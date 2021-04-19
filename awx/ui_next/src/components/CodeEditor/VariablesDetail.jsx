@@ -23,23 +23,6 @@ import {
 import CodeEditor from './CodeEditor';
 import { JSON_MODE, YAML_MODE } from './constants';
 
-function getValueAsMode(value, mode) {
-  if (!value) {
-    if (mode === JSON_MODE) {
-      return '{}';
-    }
-    return '---';
-  }
-  const modeMatches = isJsonString(value) === (mode === JSON_MODE);
-  if (modeMatches) {
-    if (mode === YAML_MODE) {
-      return value;
-    }
-    return JSON.stringify(JSON.parse(value), null, 2);
-  }
-  return mode === YAML_MODE ? jsonToYaml(value) : yamlToJson(value);
-}
-
 function VariablesDetail({
   dataCy,
   helpText,
