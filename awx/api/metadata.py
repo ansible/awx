@@ -26,6 +26,9 @@ from awx.main.fields import JSONField, ImplicitRoleField
 from awx.main.models import NotificationTemplate
 from awx.main.tasks import AWXReceptorJob
 
+# Polymorphic
+from polymorphic.models import PolymorphicModel
+
 
 class Metadata(metadata.SimpleMetadata):
     def get_field_info(self, field):
@@ -78,7 +81,9 @@ class Metadata(metadata.SimpleMetadata):
                 field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
 
             if field.field_name == 'type':
-                field_info['filterable'] = True
+                # Only include model classes with `type` field.
+                if issubclass(serializer.Meta.model, PolymorphicModel):
+                    field_info['filterable'] = True
             else:
                 for model_field in serializer.Meta.model._meta.fields:
                     if field.field_name == model_field.name:
