@@ -99,6 +99,7 @@ function LaunchButton({ resource, i18n, children, history }) {
       history.push(`/jobs/${job.id}/output`);
     } catch (launchError) {
       setError(launchError);
+    } finally {
       setIsLaunching(false);
     }
   };
@@ -151,6 +152,7 @@ function LaunchButton({ resource, i18n, children, history }) {
       }
     } catch (err) {
       setError(err);
+    } finally {
       setIsLaunching(false);
     }
   };
