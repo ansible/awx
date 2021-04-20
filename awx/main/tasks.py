@@ -1035,7 +1035,6 @@ class BaseTask(object):
         self.host_map = {hostname: hv.pop('remote_tower_id', '') for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()}
         json_data = json.dumps(script_data)
         path = os.path.join(private_data_dir, 'inventory')
-        os.makedirs(path, mode=0o700)
         fn = os.path.join(path, 'hosts')
         with open(fn, 'w') as f:
             os.chmod(fn, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
