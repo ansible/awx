@@ -244,7 +244,7 @@ function CredentialForm({
     description: credential.description || '',
     organization: credential?.summary_fields?.organization || null,
     credential_type: credentialTypes[initialTypeId]?.name || '',
-    inputs: credential?.inputs || {},
+    inputs: { ...credential?.inputs },
     passwordPrompts: {},
     isOrgLookupDisabled: isOrgLookupDisabled || false,
   };
@@ -253,7 +253,7 @@ function CredentialForm({
     const fields = credentialType.inputs.fields || [];
     fields.forEach(
       ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
-        if (credential?.inputs && credential.inputs[id]) {
+        if (credential?.inputs && id in credential.inputs) {
           if (ask_at_runtime) {
             initialValues.passwordPrompts[id] =
               credential.inputs[id] === 'ASK' || false;
