@@ -58,15 +58,29 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
                 one="You do not have permission to cancel the following job:"
                 other="You do not have permission to cancel the following jobs:"
               />
+              {cannotCancelPermissions.map((job, i) =>
+                i === cannotCancelPermissions.length - 1 ? (
+                  <strong> {job}</strong>
+                ) : (
+                  <strong> {job},</strong>
+                )
+              )}
             </div>
           )}
           {cannotCancelNotRunning.length > 0 && (
             <div>
               <Plural
                 value={cannotCancelNotRunning.length}
-                one="You cannot cancel the following job because it is not running"
-                other="You cannot cancel the following jobs because they are not running"
+                one="You cannot cancel the following job because it is not running:"
+                other="You cannot cancel the following jobs because they are not running:"
               />
+              {cannotCancelNotRunning.map((job, i) =>
+                i === cannotCancelNotRunning.length - 1 ? (
+                  <strong> {job}</strong>
+                ) : (
+                  <strong> {job},</strong>
+                )
+              )}
             </div>
           )}
         </div>
@@ -99,6 +113,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
           key="cancel-job"
           isDisabled={isDisabled}
           component="button"
+          aria-labelledby="jobs-list-cancel-button"
           onClick={toggleModal}
         >
           {cancelJobText}
@@ -107,9 +122,10 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
         <Tooltip content={renderTooltip()} position="top">
           <div>
             <Button
+              id="jobs-list-cancel-button"
               ouiaId="cancel-job-button"
               variant="secondary"
-              aria-label={cancelJobText}
+              aria-labelledby="jobs-list-cancel-button"
               onClick={toggleModal}
               isDisabled={isDisabled}
             >
@@ -130,7 +146,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
               id="cancel-job-confirm-button"
               key="delete"
               variant="danger"
-              aria-label={cancelJobText}
+              aria-labelledby="cancel-job-confirm-button"
               onClick={handleCancelJob}
             >
               {cancelJobText}

@@ -12,7 +12,7 @@
 msgid "(Limited to first 10)"
 msgstr "（限制为前 10）"
 
-#: components/TemplateList/TemplateListItem.jsx:90
+#: components/TemplateList/TemplateListItem.jsx:91
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:153
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:91
 msgid "(Prompt on launch)"
@@ -141,7 +141,7 @@ msgid "About"
 msgstr "关于"
 
 #: routeConfig.js:93
-#: screens/ActivityStream/ActivityStream.jsx:176
+#: screens/ActivityStream/ActivityStream.jsx:177
 #: screens/Credential/Credential.jsx:60
 #: screens/Credential/Credentials.jsx:29
 #: screens/Inventory/Inventories.jsx:58
@@ -178,12 +178,12 @@ msgid "Action"
 msgstr "操作"
 
 #: components/JobList/JobList.jsx:225
-#: components/JobList/JobListItem.jsx:80
+#: components/JobList/JobListItem.jsx:90
 #: components/Schedule/ScheduleList/ScheduleList.jsx:176
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:112
 #: components/TemplateList/TemplateList.jsx:227
-#: components/TemplateList/TemplateListItem.jsx:156
-#: screens/ActivityStream/ActivityStream.jsx:259
+#: components/TemplateList/TemplateListItem.jsx:157
+#: screens/ActivityStream/ActivityStream.jsx:260
 #: screens/ActivityStream/ActivityStreamListItem.jsx:49
 #: screens/Application/ApplicationsList/ApplicationListItem.jsx:47
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:166
@@ -192,11 +192,11 @@ msgstr "操作"
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:181
 #: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.jsx:37
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:160
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:78
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:74
 #: screens/Host/HostList/HostList.jsx:170
 #: screens/Host/HostList/HostListItem.jsx:48
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:240
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:102
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:78
 #: screens/Inventory/InventoryList/InventoryList.jsx:204
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:112
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:104
@@ -216,7 +216,7 @@ msgstr "操作"
 
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:87
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:53
-#: components/TemplateList/TemplateListItem.jsx:229
+#: components/TemplateList/TemplateListItem.jsx:236
 #: screens/Host/HostDetail/HostDetail.jsx:77
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:78
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:101
@@ -342,7 +342,7 @@ msgid "Adminisration"
 msgstr "管理"
 
 #: routeConfig.js:114
-#: screens/ActivityStream/ActivityStream.jsx:187
+#: screens/ActivityStream/ActivityStream.jsx:188
 msgid "Administration"
 msgstr "管理"
 
@@ -389,18 +389,18 @@ msgstr ""
 msgid "Alert modal"
 msgstr "警报模式"
 
-#: components/LaunchButton/ReLaunchDropDown.jsx:39
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:249
+#: components/LaunchButton/ReLaunchDropDown.jsx:46
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:250
 msgid "All"
 msgstr "所有"
 
-#: screens/Dashboard/Dashboard.jsx:226
+#: screens/Dashboard/Dashboard.jsx:213
 msgid "All job types"
 msgstr "作业作业类型"
 
-#: components/PromptDetail/PromptProjectDetail.jsx:46
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:74
-#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:100
+#: components/PromptDetail/PromptProjectDetail.jsx:53
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:81
+#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:113
 msgid "Allow Branch Override"
 msgstr "允许分支覆写"
 
@@ -475,7 +475,7 @@ msgstr "Answer 类型"
 msgid "Answer variable name"
 msgstr "回答变量名称"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:246
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:247
 msgid "Any"
 msgstr ""
 
@@ -519,7 +519,7 @@ msgstr "未找到应用程序。"
 msgid "Applications"
 msgstr "应用程序"
 
-#: screens/ActivityStream/ActivityStream.jsx:204
+#: screens/ActivityStream/ActivityStream.jsx:205
 msgid "Applications & Tokens"
 msgstr "应用程序和令牌"
 
@@ -555,7 +555,7 @@ msgstr "4 月"
 msgid "Are you sure you want to delete the {0} below?"
 msgstr "您确定要删除以下 {0} 吗？"
 
-#: components/DeleteButton/DeleteButton.jsx:127
+#: components/DeleteButton/DeleteButton.jsx:128
 msgid "Are you sure you want to delete:"
 msgstr "您确定要删除："
 
@@ -587,7 +587,7 @@ msgstr "您确定要从 {1} 中删除访问 {0} 吗？这样做会影响团队�
 msgid "Are you sure you want to remove {0} access from {username}?"
 msgstr "您确定要从 {username} 中删除 {0} 吗？"
 
-#: screens/Job/JobDetail/JobDetail.jsx:461
+#: screens/Job/JobDetail/JobDetail.jsx:451
 #: screens/Job/JobOutput/JobOutput.jsx:812
 msgid "Are you sure you want to submit the request to cancel this job?"
 msgstr "您确定要提交取消此作业的请求吗？"
@@ -597,7 +597,7 @@ msgstr "您确定要提交取消此作业的请求吗？"
 msgid "Arguments"
 msgstr "参数"
 
-#: screens/Job/JobDetail/JobDetail.jsx:378
+#: screens/Job/JobDetail/JobDetail.jsx:366
 msgid "Artifacts"
 msgstr "工件"
 
@@ -785,22 +785,22 @@ msgstr "要签出的分支。除了分支外，您可以输入标签、提交散
 #~ msgid "Branch to checkout. In addition to branches, you can input tags, commit hashes, and arbitrary refs. Some commit hashes and refs may not be available unless you also provide a custom refspec."
 #~ msgstr ""
 
-#: components/About/About.jsx:37
+#: components/About/About.jsx:38
 msgid "Brand Image"
 msgstr "品牌图像"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:172
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:175
 msgid "Browse"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:46
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:47
 msgid "By default, Tower collects and transmits analytics data on Tower usage to Red Hat. There are two categories of data collected by Tower. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
 msgstr ""
 
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:104
-#: components/PromptDetail/PromptProjectDetail.jsx:94
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:126
-#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:120
+#: components/PromptDetail/PromptProjectDetail.jsx:101
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:133
+#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:133
 msgid "Cache Timeout"
 msgstr "缓存超时"
 
@@ -816,8 +816,8 @@ msgstr "缓存超时（秒）"
 #: components/AddRole/AddResourceRole.jsx:287
 #: components/AssociateModal/AssociateModal.jsx:115
 #: components/AssociateModal/AssociateModal.jsx:120
-#: components/DeleteButton/DeleteButton.jsx:120
-#: components/DeleteButton/DeleteButton.jsx:123
+#: components/DeleteButton/DeleteButton.jsx:121
+#: components/DeleteButton/DeleteButton.jsx:124
 #: components/DisassociateButton/DisassociateButton.jsx:125
 #: components/DisassociateButton/DisassociateButton.jsx:128
 #: components/FormActionGroup/FormActionGroup.jsx:24
@@ -830,13 +830,13 @@ msgstr "缓存超时（秒）"
 #: components/Schedule/shared/ScheduleForm.jsx:641
 #: components/Schedule/shared/ScheduleForm.jsx:646
 #: components/Schedule/shared/SchedulePromptableFields.jsx:123
-#: screens/Credential/shared/CredentialForm.jsx:347
-#: screens/Credential/shared/CredentialForm.jsx:352
+#: screens/Credential/shared/CredentialForm.jsx:348
+#: screens/Credential/shared/CredentialForm.jsx:353
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:103
 #: screens/Credential/shared/ExternalTestModal.jsx:99
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:109
-#: screens/Job/JobDetail/JobDetail.jsx:411
-#: screens/Job/JobDetail/JobDetail.jsx:416
+#: screens/Job/JobDetail/JobDetail.jsx:401
+#: screens/Job/JobDetail/JobDetail.jsx:406
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:64
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:67
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:83
@@ -859,17 +859,17 @@ msgstr "缓存超时（秒）"
 msgid "Cancel"
 msgstr "取消"
 
-#: screens/Job/JobDetail/JobDetail.jsx:436
-#: screens/Job/JobDetail/JobDetail.jsx:437
+#: screens/Job/JobDetail/JobDetail.jsx:426
+#: screens/Job/JobDetail/JobDetail.jsx:427
 #: screens/Job/JobOutput/JobOutput.jsx:787
 #: screens/Job/JobOutput/JobOutput.jsx:788
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:186
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:190
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:188
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:192
 msgid "Cancel Job"
 msgstr "取消作业"
 
-#: screens/Job/JobDetail/JobDetail.jsx:444
-#: screens/Job/JobDetail/JobDetail.jsx:447
+#: screens/Job/JobDetail/JobDetail.jsx:434
+#: screens/Job/JobDetail/JobDetail.jsx:437
 #: screens/Job/JobOutput/JobOutput.jsx:795
 #: screens/Job/JobOutput/JobOutput.jsx:798
 msgid "Cancel job"
@@ -896,11 +896,11 @@ msgstr "取消节点删除"
 msgid "Cancel revert"
 msgstr "取消恢复"
 
-#: components/JobList/JobListCancelButton.jsx:79
+#: components/JobList/JobListCancelButton.jsx:93
 msgid "Cancel selected job"
 msgstr ""
 
-#: components/JobList/JobListCancelButton.jsx:80
+#: components/JobList/JobListCancelButton.jsx:94
 msgid "Cancel selected jobs"
 msgstr ""
 
@@ -936,7 +936,7 @@ msgstr "在不提供日志记录聚合器主机和日志记录聚合器类型的
 #~ msgstr ""
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:239
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:101
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:77
 msgid "Capacity"
 msgstr "容量"
 
@@ -1006,7 +1006,7 @@ msgstr "选择通知类型"
 msgid "Choose a Playbook Directory"
 msgstr "选择 Playbook 目录"
 
-#: screens/Project/shared/ProjectForm.jsx:223
+#: screens/Project/shared/ProjectForm.jsx:224
 msgid "Choose a Source Control Type"
 msgstr "选择源控制类型"
 
@@ -1055,8 +1055,8 @@ msgstr "选择将获得新角色的资源。您可以选择下一步中要应用
 msgid "Choose the type of resource that will be receiving new roles.  For example, if you'd like to add new roles to a set of users please choose Users and click Next.  You'll be able to select the specific resources in the next step."
 msgstr "选择将获得新角色的资源类型。例如，如果您想为一组用户添加新角色，请选择用户并点击下一步。您可以选择下一步中的具体资源。"
 
-#: components/PromptDetail/PromptProjectDetail.jsx:38
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:66
+#: components/PromptDetail/PromptProjectDetail.jsx:40
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:68
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:71
 msgid "Clean"
 msgstr "清理"
@@ -1066,11 +1066,11 @@ msgstr "清理"
 msgid "Clear all filters"
 msgstr "清除所有过滤器"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:261
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:264
 msgid "Clear subscription"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:266
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:269
 msgid "Clear subscription selection"
 msgstr ""
 
@@ -1117,7 +1117,7 @@ msgid "Client type"
 msgstr "客户端类型"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:104
-#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:174
+#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:176
 msgid "Close"
 msgstr "关闭"
 
@@ -1134,7 +1134,7 @@ msgid "Collapse"
 msgstr "折叠"
 
 #: components/JobList/JobList.jsx:188
-#: components/JobList/JobListItem.jsx:34
+#: components/JobList/JobListItem.jsx:35
 #: screens/Job/JobDetail/JobDetail.jsx:99
 #: screens/Job/JobOutput/HostEventModal.jsx:137
 msgid "Command"
@@ -1160,7 +1160,7 @@ msgstr "完成的作业"
 msgid "Concurrent Jobs"
 msgstr "并发作业"
 
-#: components/DeleteButton/DeleteButton.jsx:107
+#: components/DeleteButton/DeleteButton.jsx:108
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:95
 msgid "Confirm Delete"
 msgstr "确认删除"
@@ -1197,13 +1197,13 @@ msgstr "确认全部恢复"
 msgid "Confirm selection"
 msgstr ""
 
-#: screens/Job/JobDetail/JobDetail.jsx:265
+#: screens/Job/JobDetail/JobDetail.jsx:253
 msgid "Container Group"
 msgstr "容器组"
 
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:51
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:85
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:95
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:58
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:71
 msgid "Container group"
 msgstr "容器组"
 
@@ -1216,7 +1216,7 @@ msgstr "未找到容器组。"
 msgid "Content Loading"
 msgstr "内容加载"
 
-#: components/AppContainer/AppContainer.jsx:222
+#: components/AppContainer/AppContainer.jsx:225
 msgid "Continue"
 msgstr "继续"
 
@@ -1245,6 +1245,7 @@ msgid "Convergence"
 msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:241
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:242
 msgid "Convergence select"
 msgstr ""
 
@@ -1260,7 +1261,7 @@ msgstr "复制凭证"
 msgid "Copy Error"
 msgstr "复制错误"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:95
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:91
 msgid "Copy Execution Environment"
 msgstr ""
 
@@ -1276,7 +1277,7 @@ msgstr "复制通知模板"
 msgid "Copy Project"
 msgstr "复制项目"
 
-#: components/TemplateList/TemplateListItem.jsx:209
+#: components/TemplateList/TemplateListItem.jsx:210
 msgid "Copy Template"
 msgstr "复制模板"
 
@@ -1287,6 +1288,10 @@ msgstr "将完整修订复制到剪贴板。"
 #: components/About/About.jsx:35
 msgid "Copyright 2019 Red Hat, Inc."
 msgstr "Copyright 2019 Red Hat, Inc."
+
+#: components/About/About.jsx:35
+#~ msgid "Copyright 2019 Red Hat, Inc."
+#~ msgstr ""
 
 #: screens/Template/shared/JobTemplateForm.jsx:383
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:231
@@ -1424,7 +1429,7 @@ msgstr "创建用户令牌"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:115
 #: screens/Host/HostDetail/HostDetail.jsx:93
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:66
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:117
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:90
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:109
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:46
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:85
@@ -1432,11 +1437,11 @@ msgstr "创建用户令牌"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:262
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:141
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:53
-#: screens/Job/JobDetail/JobDetail.jsx:355
+#: screens/Job/JobDetail/JobDetail.jsx:343
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:331
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:105
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:111
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:145
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:152
 #: screens/Team/TeamDetail/TeamDetail.jsx:47
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:281
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:183
@@ -1524,12 +1529,12 @@ msgstr "凭证名称"
 
 #: screens/Credential/CredentialDetail/CredentialDetail.jsx:229
 #: screens/Credential/shared/CredentialForm.jsx:140
-#: screens/Credential/shared/CredentialForm.jsx:201
+#: screens/Credential/shared/CredentialForm.jsx:202
 msgid "Credential Type"
 msgstr "凭证类型"
 
 #: routeConfig.js:118
-#: screens/ActivityStream/ActivityStream.jsx:189
+#: screens/ActivityStream/ActivityStream.jsx:190
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:122
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:168
 #: screens/CredentialType/CredentialTypes.jsx:13
@@ -1553,7 +1558,7 @@ msgstr "与 Kubernetes 或 OpenShift 进行身份验证的凭证。必须为“K
 msgid "Credential type not found."
 msgstr "未找到凭证类型。"
 
-#: components/JobList/JobListItem.jsx:124
+#: components/JobList/JobListItem.jsx:201
 #: components/LaunchPrompt/steps/CredentialsStep.jsx:196
 #: components/LaunchPrompt/steps/useCredentialsStep.jsx:65
 #: components/Lookup/MultiCredentialsLookup.jsx:126
@@ -1561,14 +1566,14 @@ msgstr "未找到凭证类型。"
 #: components/PromptDetail/PromptDetail.jsx:163
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:184
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:337
-#: components/TemplateList/TemplateListItem.jsx:235
+#: components/TemplateList/TemplateListItem.jsx:292
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:77
 #: routeConfig.js:71
-#: screens/ActivityStream/ActivityStream.jsx:164
+#: screens/ActivityStream/ActivityStream.jsx:165
 #: screens/Credential/CredentialList/CredentialList.jsx:176
 #: screens/Credential/Credentials.jsx:13
 #: screens/Credential/Credentials.jsx:24
-#: screens/Job/JobDetail/JobDetail.jsx:293
+#: screens/Job/JobDetail/JobDetail.jsx:281
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:293
 #: screens/Template/shared/JobTemplateForm.jsx:351
 #: util/getRelatedResourceDeleteDetails.js:98
@@ -1587,7 +1592,7 @@ msgstr "当前页"
 msgid "Custom pod spec"
 msgstr "自定义 pod 规格"
 
-#: components/TemplateList/TemplateListItem.jsx:145
+#: components/TemplateList/TemplateListItem.jsx:146
 #: screens/Inventory/InventorySources/InventorySourceListItem.jsx:101
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:56
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:93
@@ -1618,7 +1623,7 @@ msgstr "已删除"
 msgid "Dashboard"
 msgstr "仪表板"
 
-#: screens/ActivityStream/ActivityStream.jsx:144
+#: screens/ActivityStream/ActivityStream.jsx:145
 msgid "Dashboard (all activity)"
 msgstr "仪表板（所有活动）"
 
@@ -1676,9 +1681,9 @@ msgstr "定义系统级的特性和功能"
 
 #: components/DeleteButton/DeleteButton.jsx:76
 #: components/DeleteButton/DeleteButton.jsx:81
-#: components/DeleteButton/DeleteButton.jsx:90
-#: components/DeleteButton/DeleteButton.jsx:94
-#: components/DeleteButton/DeleteButton.jsx:114
+#: components/DeleteButton/DeleteButton.jsx:91
+#: components/DeleteButton/DeleteButton.jsx:95
+#: components/DeleteButton/DeleteButton.jsx:115
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:157
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:233
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:243
@@ -1691,7 +1696,7 @@ msgstr "定义系统级的特性和功能"
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:126
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:140
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:112
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:153
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:126
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:139
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.jsx:98
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:295
@@ -1701,16 +1706,16 @@ msgstr "定义系统级的特性和功能"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:74
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:78
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:101
-#: screens/Job/JobDetail/JobDetail.jsx:427
+#: screens/Job/JobDetail/JobDetail.jsx:417
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:369
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:170
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:180
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:187
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:79
 #: screens/Team/TeamDetail/TeamDetail.jsx:73
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:414
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:416
 #: screens/Template/Survey/SurveyList.jsx:107
 #: screens/Template/Survey/SurveyToolbar.jsx:73
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:254
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:255
 #: screens/User/UserDetail/UserDetail.jsx:104
 #: screens/User/UserTokenDetail/UserTokenDetail.jsx:82
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:218
@@ -1746,13 +1751,13 @@ msgstr "删除主机"
 msgid "Delete Inventory"
 msgstr "删除清单"
 
-#: screens/Job/JobDetail/JobDetail.jsx:423
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:201
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:205
+#: screens/Job/JobDetail/JobDetail.jsx:413
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:203
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:207
 msgid "Delete Job"
 msgstr "删除作业"
 
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:406
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:408
 msgid "Delete Job Template"
 msgstr "删除作业模板"
 
@@ -1764,7 +1769,7 @@ msgstr "删除通知"
 msgid "Delete Organization"
 msgstr "删除机构"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:172
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:179
 msgid "Delete Project"
 msgstr "删除项目"
 
@@ -1796,12 +1801,12 @@ msgstr "删除用户令牌"
 msgid "Delete Workflow Approval"
 msgstr "删除工作流批准"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:246
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:247
 msgid "Delete Workflow Job Template"
 msgstr "删除工作流作业模板"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:143
-#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:146
+#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:145
+#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:148
 msgid "Delete all nodes"
 msgstr "删除所有节点"
 
@@ -1818,7 +1823,7 @@ msgid "Delete error"
 msgstr "删除错误"
 
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:104
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:145
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:118
 msgid "Delete instance group"
 msgstr "删除实例组"
 
@@ -1826,8 +1831,8 @@ msgstr "删除实例组"
 msgid "Delete inventory source"
 msgstr "删除清单源"
 
-#: components/PromptDetail/PromptProjectDetail.jsx:40
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:68
+#: components/PromptDetail/PromptProjectDetail.jsx:42
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:70
 msgid "Delete on Update"
 msgstr "更新时删除"
 
@@ -1904,18 +1909,19 @@ msgstr ""
 #: components/Schedule/ScheduleList/ScheduleList.jsx:197
 #: components/Schedule/shared/ScheduleForm.jsx:110
 #: components/TemplateList/TemplateList.jsx:194
+#: components/TemplateList/TemplateListItem.jsx:230
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:68
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:126
 #: screens/Application/shared/ApplicationForm.jsx:62
 #: screens/Credential/CredentialDetail/CredentialDetail.jsx:211
 #: screens/Credential/CredentialList/CredentialList.jsx:129
-#: screens/Credential/shared/CredentialForm.jsx:179
+#: screens/Credential/shared/CredentialForm.jsx:180
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:78
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.jsx:132
 #: screens/CredentialType/shared/CredentialTypeForm.jsx:32
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:62
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:151
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:106
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:133
 #: screens/Host/HostDetail/HostDetail.jsx:81
 #: screens/Host/HostList/HostList.jsx:152
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:78
@@ -1937,9 +1943,9 @@ msgstr ""
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:95
 #: screens/Organization/OrganizationList/OrganizationList.jsx:142
 #: screens/Organization/shared/OrganizationForm.jsx:68
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:88
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:95
 #: screens/Project/ProjectList/ProjectList.jsx:143
-#: screens/Project/shared/ProjectForm.jsx:175
+#: screens/Project/shared/ProjectForm.jsx:176
 #: screens/Team/TeamDetail/TeamDetail.jsx:38
 #: screens/Team/TeamList/TeamList.jsx:134
 #: screens/Team/shared/TeamForm.jsx:43
@@ -2140,8 +2146,8 @@ msgstr ""
 msgid "Divide the work done by this job template into the specified number of job slices, each running the same tasks against a portion of the inventory."
 msgstr "将此作业模板完成的工作分成指定作业分片数，每一分片都针对清单的一部分运行相同的任务。"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:172
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:177
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:174
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:179
 msgid "Download Output"
 msgstr "下载输出"
 
@@ -2279,8 +2285,8 @@ msgstr "编辑凭证插件配置"
 msgid "Edit Details"
 msgstr "类型详情"
 
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:77
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:81
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:85
 msgid "Edit Execution Environment"
 msgstr ""
 
@@ -2350,9 +2356,9 @@ msgstr "编辑源"
 msgid "Edit Team"
 msgstr "编辑团队"
 
-#: components/TemplateList/TemplateListItem.jsx:194
-#: components/TemplateList/TemplateListItem.jsx:200
-#: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:133
+#: components/TemplateList/TemplateListItem.jsx:195
+#: components/TemplateList/TemplateListItem.jsx:201
+#: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:134
 msgid "Edit Template"
 msgstr "编辑模板"
 
@@ -2386,8 +2392,8 @@ msgstr "编辑详情"
 msgid "Edit form coming soon :)"
 msgstr "编辑表单即将发布 :）"
 
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:105
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:109
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:81
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:85
 msgid "Edit instance group"
 msgstr "编辑实例组"
 
@@ -2667,7 +2673,7 @@ msgstr ""
 #: components/InstanceToggle/InstanceToggle.jsx:69
 #: components/JobList/JobList.jsx:278
 #: components/JobList/JobList.jsx:289
-#: components/LaunchButton/LaunchButton.jsx:162
+#: components/LaunchButton/LaunchButton.jsx:171
 #: components/LaunchPrompt/LaunchPrompt.jsx:73
 #: components/NotificationList/NotificationList.jsx:248
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:204
@@ -2714,16 +2720,16 @@ msgstr ""
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:164
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:179
 #: screens/Organization/OrganizationList/OrganizationList.jsx:208
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:189
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:196
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:197
 #: screens/Project/ProjectList/ProjectList.jsx:234
 #: screens/Project/shared/ProjectSyncButton.jsx:41
 #: screens/Team/TeamDetail/TeamDetail.jsx:81
 #: screens/Team/TeamList/TeamList.jsx:205
 #: screens/Team/TeamRoles/TeamRolesList.jsx:231
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:423
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:425
 #: screens/Template/TemplateSurvey.jsx:126
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:262
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:263
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:167
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:182
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:307
@@ -2743,7 +2749,7 @@ msgstr ""
 msgid "Error!"
 msgstr "错误！"
 
-#: screens/ActivityStream/ActivityStream.jsx:258
+#: screens/ActivityStream/ActivityStream.jsx:259
 #: screens/ActivityStream/ActivityStreamListItem.jsx:46
 #: screens/Job/JobOutput/JobOutput.jsx:635
 msgid "Event"
@@ -2761,7 +2767,7 @@ msgstr "事件详情 modal"
 msgid "Event summary not available"
 msgstr "事件摘要不可用"
 
-#: screens/ActivityStream/ActivityStream.jsx:227
+#: screens/ActivityStream/ActivityStream.jsx:228
 msgid "Events"
 msgstr "事件"
 
@@ -2806,7 +2812,7 @@ msgstr ""
 
 #: components/Lookup/ExecutionEnvironmentLookup.jsx:124
 #: routeConfig.js:143
-#: screens/ActivityStream/ActivityStream.jsx:210
+#: screens/ActivityStream/ActivityStream.jsx:211
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:121
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:185
 #: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:13
@@ -2819,7 +2825,7 @@ msgstr ""
 msgid "Execution Environments"
 msgstr ""
 
-#: screens/Job/JobDetail/JobDetail.jsx:256
+#: screens/Job/JobDetail/JobDetail.jsx:244
 msgid "Execution Node"
 msgstr "执行节点"
 
@@ -2849,8 +2855,8 @@ msgstr "不保存退出"
 msgid "Expand"
 msgstr "展开"
 
-#: components/CodeEditor/VariablesDetail.jsx:214
-#: components/CodeEditor/VariablesField.jsx:165
+#: components/CodeEditor/VariablesDetail.jsx:211
+#: components/CodeEditor/VariablesField.jsx:229
 msgid "Expand input"
 msgstr ""
 
@@ -2887,7 +2893,7 @@ msgstr ""
 msgid "Expires on {0}"
 msgstr "过期于 {0}"
 
-#: components/JobList/JobListItem.jsx:168
+#: components/JobList/JobListItem.jsx:229
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:129
 msgid "Explanation"
 msgstr "解释"
@@ -2932,7 +2938,7 @@ msgstr "失败的主机计数"
 msgid "Failed Hosts"
 msgstr "失败的主机"
 
-#: components/LaunchButton/ReLaunchDropDown.jsx:50
+#: components/LaunchButton/ReLaunchDropDown.jsx:58
 #: screens/Dashboard/Dashboard.jsx:135
 msgid "Failed hosts"
 msgstr "失败的主机"
@@ -2974,7 +2980,7 @@ msgstr "取消一个或多个作业失败。"
 msgid "Failed to copy credential."
 msgstr "复制凭证失败。"
 
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:103
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:99
 msgid "Failed to copy execution environment"
 msgstr ""
 
@@ -2986,7 +2992,7 @@ msgstr "复制清单失败。"
 msgid "Failed to copy project."
 msgstr "复制项目失败。"
 
-#: components/TemplateList/TemplateListItem.jsx:214
+#: components/TemplateList/TemplateListItem.jsx:215
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:155
 msgid "Failed to copy template."
 msgstr "复制模板失败。"
@@ -3016,7 +3022,7 @@ msgstr "删除清单源 {name} 失败。"
 msgid "Failed to delete inventory."
 msgstr "删除清单失败。"
 
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:426
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:428
 msgid "Failed to delete job template."
 msgstr "删除作业模板失败。"
 
@@ -3113,7 +3119,7 @@ msgstr "无法删除一个或多个工作流批准。"
 msgid "Failed to delete organization."
 msgstr "删除机构失败。"
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:192
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:199
 msgid "Failed to delete project."
 msgstr "删除项目失败。"
 
@@ -3146,7 +3152,7 @@ msgstr "删除用户失败。"
 msgid "Failed to delete workflow approval."
 msgstr "删除工作流批准失败。"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:265
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:266
 msgid "Failed to delete workflow job template."
 msgstr "删除工作流任务模板失败。"
 
@@ -3186,7 +3192,7 @@ msgid "Failed to fetch custom login configuration settings.  System defaults wil
 msgstr "获取自定义登录配置设置失败。系统默认设置会被显示。"
 
 #: components/AdHocCommands/AdHocCommands.jsx:106
-#: components/LaunchButton/LaunchButton.jsx:165
+#: components/LaunchButton/LaunchButton.jsx:174
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.jsx:130
 msgid "Failed to launch job."
 msgstr "启动作业失败。"
@@ -3299,11 +3305,11 @@ msgid "File, directory or script"
 msgstr "文件、目录或脚本"
 
 #: components/JobList/JobList.jsx:223
-#: components/JobList/JobListItem.jsx:77
+#: components/JobList/JobListItem.jsx:87
 msgid "Finish Time"
 msgstr "完成时间"
 
-#: screens/Job/JobDetail/JobDetail.jsx:157
+#: screens/Job/JobDetail/JobDetail.jsx:145
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:171
 msgid "Finished"
 msgstr "完成"
@@ -3408,11 +3414,11 @@ msgstr "Galaxy 凭证必须属于机构。"
 msgid "Gathering Facts"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:236
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:239
 msgid "Get subscription"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:230
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:233
 msgid "Get subscriptions"
 msgstr ""
 
@@ -3473,8 +3479,12 @@ msgid "Global Default Execution Environment"
 msgstr ""
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:81
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:75
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:71
 msgid "Globally Available"
+msgstr ""
+
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:140
+msgid "Globally available execution environment can not be reassigned to a specific Organization"
 msgstr ""
 
 #: components/Pagination/Pagination.jsx:29
@@ -3662,7 +3672,7 @@ msgid "Host status information for this job is unavailable."
 msgstr "此作业的主机状态信息不可用。"
 
 #: routeConfig.js:86
-#: screens/ActivityStream/ActivityStream.jsx:173
+#: screens/ActivityStream/ActivityStream.jsx:174
 #: screens/Dashboard/Dashboard.jsx:129
 #: screens/Host/HostList/HostList.jsx:142
 #: screens/Host/HostList/HostList.jsx:188
@@ -3841,13 +3851,13 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:133
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:139
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:158
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:64
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:62
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:88
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.jsx:107
 msgid "Image"
 msgstr ""
 
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:76
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:103
 msgid "Image name"
 msgstr ""
 
@@ -3874,13 +3884,13 @@ msgstr ""
 msgid "Initiated By"
 msgstr "启动者"
 
-#: screens/ActivityStream/ActivityStream.jsx:246
-#: screens/ActivityStream/ActivityStream.jsx:256
+#: screens/ActivityStream/ActivityStream.jsx:247
+#: screens/ActivityStream/ActivityStream.jsx:257
 #: screens/ActivityStream/ActivityStreamDetailButton.jsx:44
 msgid "Initiated by"
 msgstr "启动者"
 
-#: screens/ActivityStream/ActivityStream.jsx:236
+#: screens/ActivityStream/ActivityStream.jsx:237
 msgid "Initiated by (username)"
 msgstr "启动者（用户名）"
 
@@ -3894,11 +3904,11 @@ msgstr "注入程序配置"
 msgid "Input configuration"
 msgstr "输入配置"
 
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:80
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:83
 msgid "Insights Analytics"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:119
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:122
 msgid "Insights Analytics dashboard"
 msgstr ""
 
@@ -3907,7 +3917,7 @@ msgstr ""
 msgid "Insights Credential"
 msgstr "Insights 凭证"
 
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:79
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:82
 msgid "Insights analytics"
 msgstr ""
 
@@ -3915,11 +3925,15 @@ msgstr ""
 msgid "Insights system ID"
 msgstr "Insights 系统 ID"
 
+#: screens/Metrics/Metrics.jsx:178
+msgid "Instance"
+msgstr ""
+
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:137
 msgid "Instance Filters"
 msgstr "实例过滤器"
 
-#: screens/Job/JobDetail/JobDetail.jsx:259
+#: screens/Job/JobDetail/JobDetail.jsx:247
 msgid "Instance Group"
 msgstr "实例组"
 
@@ -3928,7 +3942,7 @@ msgstr "实例组"
 #: components/Lookup/InstanceGroupsLookup.jsx:109
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:218
 #: routeConfig.js:133
-#: screens/ActivityStream/ActivityStream.jsx:198
+#: screens/ActivityStream/ActivityStream.jsx:199
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:130
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:221
 #: screens/InstanceGroup/InstanceGroups.jsx:16
@@ -3943,8 +3957,8 @@ msgstr "实例组"
 msgid "Instance ID"
 msgstr "实例 ID"
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:86
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:96
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:59
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:72
 msgid "Instance group"
 msgstr "实例组"
 
@@ -3958,7 +3972,7 @@ msgstr "实例组"
 
 #: screens/InstanceGroup/InstanceGroup.jsx:69
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:238
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:100
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:76
 #: screens/InstanceGroup/InstanceGroups.jsx:37
 #: screens/InstanceGroup/Instances/InstanceList.jsx:148
 #: screens/InstanceGroup/Instances/InstanceList.jsx:218
@@ -3973,7 +3987,7 @@ msgstr "整数"
 msgid "Invalid email address"
 msgstr "无效的电子邮件地址"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:129
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:130
 msgid "Invalid file format. Please upload a valid Red Hat Subscription Manifest."
 msgstr ""
 
@@ -3987,7 +4001,7 @@ msgstr "无效的用户名或密码。请重试。"
 
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:119
 #: routeConfig.js:81
-#: screens/ActivityStream/ActivityStream.jsx:170
+#: screens/ActivityStream/ActivityStream.jsx:171
 #: screens/Dashboard/Dashboard.jsx:140
 #: screens/Inventory/Inventories.jsx:16
 #: screens/Inventory/InventoryList/InventoryList.jsx:169
@@ -4003,7 +4017,7 @@ msgid "Inventories with sources cannot be copied"
 msgstr "无法复制含有源的清单"
 
 #: components/HostForm/HostForm.jsx:28
-#: components/JobList/JobListItem.jsx:150
+#: components/JobList/JobListItem.jsx:169
 #: components/LaunchPrompt/steps/InventoryStep.jsx:107
 #: components/LaunchPrompt/steps/useInventoryStep.jsx:53
 #: components/Lookup/InventoryLookup.jsx:85
@@ -4017,8 +4031,8 @@ msgstr "无法复制含有源的清单"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:118
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:70
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:295
-#: components/TemplateList/TemplateListItem.jsx:251
-#: components/TemplateList/TemplateListItem.jsx:260
+#: components/TemplateList/TemplateListItem.jsx:256
+#: components/TemplateList/TemplateListItem.jsx:266
 #: screens/Host/HostDetail/HostDetail.jsx:83
 #: screens/Host/HostList/HostList.jsx:169
 #: screens/Host/HostList/HostListItem.jsx:39
@@ -4026,7 +4040,7 @@ msgstr "无法复制含有源的清单"
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:98
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.jsx:40
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.jsx:53
-#: screens/Job/JobDetail/JobDetail.jsx:196
+#: screens/Job/JobDetail/JobDetail.jsx:184
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:135
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:192
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:200
@@ -4046,7 +4060,7 @@ msgstr "清单文件"
 msgid "Inventory ID"
 msgstr "清单 ID"
 
-#: screens/Job/JobDetail/JobDetail.jsx:212
+#: screens/Job/JobDetail/JobDetail.jsx:200
 msgid "Inventory Source"
 msgstr ""
 
@@ -4062,7 +4076,7 @@ msgid "Inventory Sources"
 msgstr "清单源"
 
 #: components/JobList/JobList.jsx:186
-#: components/JobList/JobListItem.jsx:32
+#: components/JobList/JobListItem.jsx:33
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:37
 #: components/Workflow/WorkflowLegend.jsx:100
 #: screens/Job/JobDetail/JobDetail.jsx:94
@@ -4082,7 +4096,7 @@ msgstr "清单文件"
 msgid "Inventory not found."
 msgstr "未找到清单。"
 
-#: screens/Dashboard/Dashboard.jsx:229
+#: screens/Dashboard/Dashboard.jsx:216
 msgid "Inventory sync"
 msgstr "清单同步"
 
@@ -4143,20 +4157,20 @@ msgstr "1 月"
 msgid "Job"
 msgstr "作业"
 
-#: screens/Job/JobDetail/JobDetail.jsx:470
-#: screens/Job/JobDetail/JobDetail.jsx:471
+#: screens/Job/JobDetail/JobDetail.jsx:460
+#: screens/Job/JobDetail/JobDetail.jsx:461
 #: screens/Job/JobOutput/JobOutput.jsx:832
 #: screens/Job/JobOutput/JobOutput.jsx:833
 msgid "Job Cancel Error"
 msgstr "作业取消错误"
 
-#: screens/Job/JobDetail/JobDetail.jsx:481
+#: screens/Job/JobDetail/JobDetail.jsx:471
 #: screens/Job/JobOutput/JobOutput.jsx:821
 #: screens/Job/JobOutput/JobOutput.jsx:822
 msgid "Job Delete Error"
 msgstr "作业删除错误"
 
-#: screens/Job/JobDetail/JobDetail.jsx:272
+#: screens/Job/JobDetail/JobDetail.jsx:260
 msgid "Job Slice"
 msgstr "作业分片"
 
@@ -4175,18 +4189,19 @@ msgstr "作业状态"
 #: components/PromptDetail/PromptDetail.jsx:206
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:233
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:350
-#: screens/Job/JobDetail/JobDetail.jsx:321
+#: screens/Job/JobDetail/JobDetail.jsx:309
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:342
 #: screens/Template/shared/JobTemplateForm.jsx:498
 msgid "Job Tags"
 msgstr "作业标签"
 
+#: components/JobList/JobListItem.jsx:137
 #: components/TemplateList/TemplateList.jsx:201
 #: components/Workflow/WorkflowLegend.jsx:92
 #: components/Workflow/WorkflowNodeHelp.jsx:47
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:96
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.jsx:33
-#: screens/Job/JobDetail/JobDetail.jsx:162
+#: screens/Job/JobDetail/JobDetail.jsx:150
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:98
 msgid "Job Template"
 msgstr "作业模板"
@@ -4216,7 +4231,7 @@ msgstr ""
 #: components/PromptDetail/PromptDetail.jsx:156
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:90
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:291
-#: screens/Job/JobDetail/JobDetail.jsx:192
+#: screens/Job/JobDetail/JobDetail.jsx:180
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:175
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:145
 #: screens/Template/shared/JobTemplateForm.jsx:220
@@ -4240,7 +4255,7 @@ msgstr "作业模板"
 #: components/JobList/JobList.jsx:165
 #: components/JobList/JobList.jsx:242
 #: routeConfig.js:40
-#: screens/ActivityStream/ActivityStream.jsx:147
+#: screens/ActivityStream/ActivityStream.jsx:148
 #: screens/Dashboard/shared/LineChart.jsx:69
 #: screens/Host/Host.jsx:67
 #: screens/Host/Hosts.jsx:32
@@ -4287,7 +4302,7 @@ msgstr "键选择"
 msgid "Key typeahead"
 msgstr "键 typeahead"
 
-#: screens/ActivityStream/ActivityStream.jsx:231
+#: screens/ActivityStream/ActivityStream.jsx:232
 msgid "Keyword"
 msgstr "关键词"
 
@@ -4348,11 +4363,11 @@ msgstr "LDAP5"
 msgid "Label Name"
 msgstr "标签名称"
 
-#: components/JobList/JobListItem.jsx:136
+#: components/JobList/JobListItem.jsx:214
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:200
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:110
-#: components/TemplateList/TemplateListItem.jsx:265
-#: screens/Job/JobDetail/JobDetail.jsx:306
+#: components/TemplateList/TemplateListItem.jsx:309
+#: screens/Job/JobDetail/JobDetail.jsx:294
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:309
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:195
 #: screens/Template/shared/JobTemplateForm.jsx:369
@@ -4370,7 +4385,7 @@ msgstr "最近登陆"
 
 #: components/PromptDetail/PromptDetail.jsx:140
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:278
-#: components/TemplateList/TemplateListItem.jsx:293
+#: components/TemplateList/TemplateListItem.jsx:285
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:107
 #: screens/Application/ApplicationsList/ApplicationListItem.jsx:44
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:165
@@ -4379,14 +4394,14 @@ msgstr "最近登陆"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:110
 #: screens/Host/HostDetail/HostDetail.jsx:99
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:71
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:122
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:95
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:114
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.jsx:51
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:90
-#: screens/Job/JobDetail/JobDetail.jsx:359
+#: screens/Job/JobDetail/JobDetail.jsx:347
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:336
 #: screens/Organization/OrganizationDetail/OrganizationDetail.jsx:110
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:150
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:157
 #: screens/Team/TeamDetail/TeamDetail.jsx:49
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:286
 #: screens/User/UserTokenDetail/UserTokenDetail.jsx:69
@@ -4408,7 +4423,7 @@ msgid "Last Name"
 msgstr "姓氏"
 
 #: components/TemplateList/TemplateList.jsx:225
-#: components/TemplateList/TemplateListItem.jsx:155
+#: components/TemplateList/TemplateListItem.jsx:156
 msgid "Last Ran"
 msgstr "最后运行"
 
@@ -4435,9 +4450,9 @@ msgstr "最后修改"
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:55
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.jsx:58
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:389
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:397
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:398
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:229
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:237
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:238
 msgid "Launch"
 msgstr "启动"
 
@@ -4445,7 +4460,7 @@ msgstr "启动"
 msgid "Launch Management Job"
 msgstr "启动管理作业"
 
-#: components/TemplateList/TemplateListItem.jsx:175
+#: components/TemplateList/TemplateListItem.jsx:176
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:117
 msgid "Launch Template"
 msgstr "启动模板"
@@ -4459,7 +4474,7 @@ msgstr "启动模板"
 msgid "Launch management job"
 msgstr "启动管理作业"
 
-#: components/TemplateList/TemplateListItem.jsx:183
+#: components/TemplateList/TemplateListItem.jsx:184
 msgid "Launch template"
 msgstr "启动模板"
 
@@ -4516,7 +4531,7 @@ msgstr "许可证设置"
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:140
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:81
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:326
-#: screens/Job/JobDetail/JobDetail.jsx:250
+#: screens/Job/JobDetail/JobDetail.jsx:238
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:225
 #: screens/Template/shared/JobTemplateForm.jsx:420
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:163
@@ -4555,8 +4570,8 @@ msgstr "日志记录"
 msgid "Logging settings"
 msgstr "日志设置"
 
-#: components/AppContainer/AppContainer.jsx:165
-#: components/AppContainer/AppContainer.jsx:230
+#: components/AppContainer/AppContainer.jsx:168
+#: components/AppContainer/AppContainer.jsx:233
 #: components/AppContainer/PageHeaderToolbar.jsx:173
 msgid "Logout"
 msgstr "退出"
@@ -4586,7 +4601,7 @@ msgstr "最新同步"
 #: components/AdHocCommands/AdHocCredentialStep.jsx:67
 #: components/AdHocCommands/AdHocCredentialStep.jsx:68
 #: components/AdHocCommands/AdHocCredentialStep.jsx:86
-#: screens/Job/JobDetail/JobDetail.jsx:278
+#: screens/Job/JobDetail/JobDetail.jsx:266
 msgid "Machine Credential"
 msgstr "机器凭证"
 
@@ -4604,7 +4619,7 @@ msgid "Managed nodes"
 msgstr ""
 
 #: components/JobList/JobList.jsx:189
-#: components/JobList/JobListItem.jsx:35
+#: components/JobList/JobListItem.jsx:36
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:40
 #: screens/Job/JobDetail/JobDetail.jsx:100
 msgid "Management Job"
@@ -4633,11 +4648,11 @@ msgid "Management jobs"
 msgstr "管理作业"
 
 #: components/Lookup/ProjectLookup.jsx:113
-#: components/PromptDetail/PromptProjectDetail.jsx:75
+#: components/PromptDetail/PromptProjectDetail.jsx:82
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:88
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:157
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:90
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:104
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:111
 #: screens/Project/ProjectList/ProjectList.jsx:150
 #: screens/Project/ProjectList/ProjectListItem.jsx:134
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:89
@@ -4678,6 +4693,14 @@ msgstr "成员"
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:48
 msgid "Metadata"
 msgstr "元数据"
+
+#: screens/Metrics/Metrics.jsx:198
+msgid "Metric"
+msgstr ""
+
+#: screens/Metrics/Metrics.jsx:170
+msgid "Metrics"
+msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.jsx:93
 msgid "Microsoft Azure Resource Manager"
@@ -4811,11 +4834,13 @@ msgstr "更多信息"
 msgid "More information for"
 msgstr "更多信息"
 
-#: screens/Template/Survey/SurveyPreviewModal.jsx:111
+#: screens/Template/Survey/SurveyPreviewModal.jsx:112
+#: screens/Template/Survey/SurveyPreviewModal.jsx:113
 msgid "Multi-Select"
 msgstr "多选"
 
 #: screens/Template/Survey/SurveyPreviewModal.jsx:90
+#: screens/Template/Survey/SurveyPreviewModal.jsx:91
 msgid "Multiple Choice"
 msgstr "多选"
 
@@ -4840,7 +4865,7 @@ msgstr "多项选择选项"
 #: components/HostForm/HostForm.jsx:87
 #: components/JobList/JobList.jsx:169
 #: components/JobList/JobList.jsx:218
-#: components/JobList/JobListItem.jsx:59
+#: components/JobList/JobListItem.jsx:69
 #: components/LaunchPrompt/steps/CredentialsStep.jsx:174
 #: components/LaunchPrompt/steps/CredentialsStep.jsx:189
 #: components/LaunchPrompt/steps/InventoryStep.jsx:86
@@ -4880,7 +4905,7 @@ msgstr "多项选择选项"
 #: components/Schedule/shared/ScheduleForm.jsx:102
 #: components/TemplateList/TemplateList.jsx:189
 #: components/TemplateList/TemplateList.jsx:222
-#: components/TemplateList/TemplateListItem.jsx:126
+#: components/TemplateList/TemplateListItem.jsx:127
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:18
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:37
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:49
@@ -4907,7 +4932,7 @@ msgstr "多项选择选项"
 #: screens/Credential/CredentialList/CredentialList.jsx:124
 #: screens/Credential/CredentialList/CredentialList.jsx:143
 #: screens/Credential/CredentialList/CredentialListItem.jsx:55
-#: screens/Credential/shared/CredentialForm.jsx:171
+#: screens/Credential/shared/CredentialForm.jsx:172
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:85
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.jsx:100
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.jsx:74
@@ -4918,11 +4943,11 @@ msgstr "多项选择选项"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:52
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:128
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:157
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:59
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:57
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:88
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:111
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.jsx:23
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:68
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:95
 #: screens/Host/HostDetail/HostDetail.jsx:74
 #: screens/Host/HostGroups/HostGroupsList.jsx:158
 #: screens/Host/HostGroups/HostGroupsList.jsx:173
@@ -4930,9 +4955,9 @@ msgstr "多项选择选项"
 #: screens/Host/HostList/HostList.jsx:168
 #: screens/Host/HostList/HostListItem.jsx:34
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:45
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:77
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:50
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:234
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:87
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:64
 #: screens/InstanceGroup/Instances/InstanceList.jsx:155
 #: screens/InstanceGroup/Instances/InstanceList.jsx:162
 #: screens/InstanceGroup/shared/ContainerGroupForm.jsx:44
@@ -4979,13 +5004,13 @@ msgstr "多项选择选项"
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.jsx:66
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.jsx:81
 #: screens/Organization/shared/OrganizationForm.jsx:60
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:84
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:91
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:120
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:147
 #: screens/Project/ProjectList/ProjectList.jsx:138
 #: screens/Project/ProjectList/ProjectList.jsx:174
 #: screens/Project/ProjectList/ProjectListItem.jsx:99
-#: screens/Project/shared/ProjectForm.jsx:167
+#: screens/Project/shared/ProjectForm.jsx:168
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:145
 #: screens/Team/TeamDetail/TeamDetail.jsx:34
 #: screens/Team/TeamList/TeamList.jsx:129
@@ -5013,7 +5038,7 @@ msgstr "多项选择选项"
 msgid "Name"
 msgstr "名称"
 
-#: components/AppContainer/AppContainer.jsx:178
+#: components/AppContainer/AppContainer.jsx:181
 msgid "Navigation"
 msgstr "导航"
 
@@ -5053,7 +5078,7 @@ msgstr "下一"
 msgid "Next Run"
 msgstr "下次运行"
 
-#: components/Search/Search.jsx:257
+#: components/Search/Search.jsx:259
 msgid "No"
 msgstr "否"
 
@@ -5201,7 +5226,7 @@ msgstr "通知颜色"
 msgid "Notification Template not found."
 msgstr "没有找到通知模板。"
 
-#: screens/ActivityStream/ActivityStream.jsx:195
+#: screens/ActivityStream/ActivityStream.jsx:196
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:133
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:188
 #: screens/NotificationTemplate/NotificationTemplates.jsx:13
@@ -5332,7 +5357,7 @@ msgstr "唯一分组标准"
 msgid "OpenStack"
 msgstr "OpenStack"
 
-#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:113
+#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:126
 msgid "Option Details"
 msgstr "选项详情"
 
@@ -5357,13 +5382,13 @@ msgstr "（可选）选择要用来向 Webhook 服务发回状态更新的凭证
 #: components/NotificationList/NotificationListItem.jsx:34
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:167
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:180
-#: components/PromptDetail/PromptProjectDetail.jsx:92
+#: components/PromptDetail/PromptProjectDetail.jsx:99
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:93
 #: screens/Credential/CredentialDetail/CredentialDetail.jsx:141
 #: screens/Credential/shared/TypeInputsSubForm.jsx:49
 #: screens/InstanceGroup/shared/ContainerGroupForm.jsx:65
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:251
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:123
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:130
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:66
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:278
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:180
@@ -5380,9 +5405,10 @@ msgstr "选项"
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:74
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:93
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:103
-#: components/PromptDetail/PromptProjectDetail.jsx:56
-#: components/PromptDetail/PromptProjectDetail.jsx:66
+#: components/PromptDetail/PromptProjectDetail.jsx:63
+#: components/PromptDetail/PromptProjectDetail.jsx:73
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:58
+#: components/TemplateList/TemplateListItem.jsx:243
 #: screens/Application/ApplicationDetails/ApplicationDetails.jsx:73
 #: screens/Application/ApplicationsList/ApplicationListItem.jsx:37
 #: screens/Application/ApplicationsList/ApplicationsList.jsx:163
@@ -5390,7 +5416,7 @@ msgstr "选项"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:72
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:147
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.jsx:159
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:67
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:63
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:81
 #: screens/Inventory/InventoryList/InventoryList.jsx:203
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:100
@@ -5398,7 +5424,7 @@ msgstr "选项"
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:108
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:59
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.jsx:69
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:91
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:98
 #: screens/Team/TeamDetail/TeamDetail.jsx:40
 #: screens/Team/TeamList/TeamList.jsx:155
 #: screens/Team/TeamList/TeamListItem.jsx:45
@@ -5424,7 +5450,7 @@ msgstr "未找到机构。"
 
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:188
 #: routeConfig.js:97
-#: screens/ActivityStream/ActivityStream.jsx:178
+#: screens/ActivityStream/ActivityStream.jsx:179
 #: screens/Organization/OrganizationList/OrganizationList.jsx:133
 #: screens/Organization/OrganizationList/OrganizationList.jsx:179
 #: screens/Organization/Organizations.jsx:16
@@ -5524,22 +5550,22 @@ msgstr "向 playbook 传递额外的命令行变量。这是 ansible-playbook �
 
 #: screens/Login/Login.jsx:172
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:73
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:109
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:226
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:112
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:229
 #: screens/Template/Survey/SurveyQuestionForm.jsx:52
 #: screens/User/shared/UserForm.jsx:85
 msgid "Password"
 msgstr "密码"
 
-#: screens/Dashboard/Dashboard.jsx:204
+#: screens/Dashboard/Dashboard.jsx:191
 msgid "Past month"
 msgstr "过去一个月"
 
-#: screens/Dashboard/Dashboard.jsx:207
+#: screens/Dashboard/Dashboard.jsx:194
 msgid "Past two weeks"
 msgstr "过去两周"
 
-#: screens/Dashboard/Dashboard.jsx:210
+#: screens/Dashboard/Dashboard.jsx:197
 msgid "Past week"
 msgstr "过去一周"
 
@@ -5577,7 +5603,7 @@ msgid "Play Started"
 msgstr ""
 
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:138
-#: screens/Job/JobDetail/JobDetail.jsx:249
+#: screens/Job/JobDetail/JobDetail.jsx:237
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:223
 #: screens/Template/shared/JobTemplateForm.jsx:330
 msgid "Playbook"
@@ -5591,14 +5617,14 @@ msgstr ""
 msgid "Playbook Complete"
 msgstr ""
 
-#: components/PromptDetail/PromptProjectDetail.jsx:105
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:142
+#: components/PromptDetail/PromptProjectDetail.jsx:112
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:149
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:86
 msgid "Playbook Directory"
 msgstr "Playbook 目录"
 
 #: components/JobList/JobList.jsx:187
-#: components/JobList/JobListItem.jsx:33
+#: components/JobList/JobListItem.jsx:34
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:38
 #: screens/Job/JobDetail/JobDetail.jsx:98
 msgid "Playbook Run"
@@ -5615,7 +5641,7 @@ msgstr ""
 msgid "Playbook name"
 msgstr "Playbook 名称"
 
-#: screens/Dashboard/Dashboard.jsx:235
+#: screens/Dashboard/Dashboard.jsx:222
 msgid "Playbook run"
 msgstr "Playbook 运行"
 
@@ -5668,18 +5694,18 @@ msgstr "请在编辑主机过滤器前选择机构"
 msgid "Pod spec override"
 msgstr "Pod 规格覆写"
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:91
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:64
 #: screens/InstanceGroup/shared/InstanceGroupForm.jsx:28
 msgid "Policy instance minimum"
 msgstr "策略实例最小值"
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:96
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:69
 #: screens/InstanceGroup/shared/InstanceGroupForm.jsx:40
 msgid "Policy instance percentage"
 msgstr "策略实例百分比"
 
-#: screens/Credential/shared/CredentialPlugins/CredentialPluginField.jsx:63
-#: screens/Credential/shared/CredentialPlugins/CredentialPluginField.jsx:71
+#: screens/Credential/shared/CredentialPlugins/CredentialPluginField.jsx:65
+#: screens/Credential/shared/CredentialPlugins/CredentialPluginField.jsx:73
 msgid "Populate field from an external secret management system"
 msgstr "从外部 secret 管理系统填充字段"
 
@@ -5700,7 +5726,7 @@ msgstr "端口"
 msgid "Preconditions for running this node when there are multiple parents. Refer to the"
 msgstr ""
 
-#: components/CodeEditor/CodeEditor.jsx:180
+#: components/CodeEditor/CodeEditor.jsx:188
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr ""
 
@@ -5722,24 +5748,25 @@ msgstr "权限升级"
 msgid "Privilege escalation password"
 msgstr "权限升级密码"
 
+#: components/JobList/JobListItem.jsx:185
 #: components/Lookup/ProjectLookup.jsx:86
 #: components/Lookup/ProjectLookup.jsx:91
 #: components/Lookup/ProjectLookup.jsx:144
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:89
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:123
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:131
-#: components/TemplateList/TemplateListItem.jsx:283
+#: components/TemplateList/TemplateListItem.jsx:271
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:217
-#: screens/Job/JobDetail/JobDetail.jsx:224
-#: screens/Job/JobDetail/JobDetail.jsx:239
+#: screens/Job/JobDetail/JobDetail.jsx:212
+#: screens/Job/JobDetail/JobDetail.jsx:227
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesList.jsx:151
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:205
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:213
 msgid "Project"
 msgstr "项目"
 
-#: components/PromptDetail/PromptProjectDetail.jsx:100
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:137
+#: components/PromptDetail/PromptProjectDetail.jsx:107
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:144
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:64
 msgid "Project Base Path"
 msgstr "项目基本路径"
@@ -5763,7 +5790,7 @@ msgstr "项目同步失败"
 
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:146
 #: routeConfig.js:76
-#: screens/ActivityStream/ActivityStream.jsx:167
+#: screens/ActivityStream/ActivityStream.jsx:168
 #: screens/Dashboard/Dashboard.jsx:151
 #: screens/Project/ProjectList/ProjectList.jsx:133
 #: screens/Project/ProjectList/ProjectList.jsx:201
@@ -5788,7 +5815,7 @@ msgstr "提示"
 msgid "Prompt Overrides"
 msgstr "提示覆盖"
 
-#: components/CodeEditor/VariablesField.jsx:158
+#: components/CodeEditor/VariablesField.jsx:222
 #: components/FieldWithPrompt/FieldWithPrompt.jsx:47
 #: screens/Credential/CredentialDetail/CredentialDetail.jsx:167
 msgid "Prompt on launch"
@@ -5857,7 +5884,7 @@ msgid "Provisioning Callbacks"
 msgstr "置备回调"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:88
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:93
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:120
 msgid "Pull"
 msgstr ""
 
@@ -5877,19 +5904,19 @@ msgstr "RADIUS 设置"
 msgid "Read"
 msgstr "读取"
 
-#: screens/Dashboard/Dashboard.jsx:177
+#: screens/Dashboard/Dashboard.jsx:239
 msgid "Recent Jobs"
 msgstr "最近的作业"
 
-#: screens/Dashboard/Dashboard.jsx:175
+#: screens/Dashboard/Dashboard.jsx:237
 msgid "Recent Jobs list tab"
 msgstr "最近的任务列表标签页"
 
-#: screens/Dashboard/Dashboard.jsx:183
+#: screens/Dashboard/Dashboard.jsx:251
 msgid "Recent Templates"
 msgstr "最近模板"
 
-#: screens/Dashboard/Dashboard.jsx:180
+#: screens/Dashboard/Dashboard.jsx:248
 msgid "Recent Templates list tab"
 msgstr "最近模板列表标签页"
 
@@ -5917,8 +5944,12 @@ msgstr "Red Hat Satellite 6"
 msgid "Red Hat Virtualization"
 msgstr "Red Hat Virtualization"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:131
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:132
 msgid "Red Hat subscription manifest"
+msgstr ""
+
+#: components/About/About.jsx:29
+msgid "Red Hat, Inc."
 msgstr ""
 
 #: screens/Application/shared/ApplicationForm.jsx:108
@@ -5950,7 +5981,7 @@ msgstr "刷新令牌过期"
 msgid "Regions"
 msgstr "区域"
 
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:128
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:150
 msgid "Registry credential"
 msgstr ""
 
@@ -5964,33 +5995,33 @@ msgstr "仅导入主机名与这个正则表达式匹配的主机。该过滤器
 msgid "Related Groups"
 msgstr "相关组"
 
-#: components/JobList/JobListItem.jsx:105
-#: components/LaunchButton/ReLaunchDropDown.jsx:70
-#: screens/Job/JobDetail/JobDetail.jsx:395
-#: screens/Job/JobDetail/JobDetail.jsx:402
-#: screens/Job/JobOutput/shared/OutputToolbar.jsx:161
+#: components/JobList/JobListItem.jsx:118
+#: components/LaunchButton/ReLaunchDropDown.jsx:78
+#: screens/Job/JobDetail/JobDetail.jsx:384
+#: screens/Job/JobDetail/JobDetail.jsx:392
+#: screens/Job/JobOutput/shared/OutputToolbar.jsx:162
 msgid "Relaunch"
 msgstr "重新启动"
 
-#: components/JobList/JobListItem.jsx:89
+#: components/JobList/JobListItem.jsx:99
 #: screens/Job/JobOutput/shared/OutputToolbar.jsx:142
 msgid "Relaunch Job"
 msgstr "重新启动作业"
 
-#: components/LaunchButton/ReLaunchDropDown.jsx:33
+#: components/LaunchButton/ReLaunchDropDown.jsx:39
 msgid "Relaunch all hosts"
 msgstr "重新启动所有主机"
 
-#: components/LaunchButton/ReLaunchDropDown.jsx:44
+#: components/LaunchButton/ReLaunchDropDown.jsx:51
 msgid "Relaunch failed hosts"
 msgstr "重新启动失败的主机"
 
-#: components/LaunchButton/ReLaunchDropDown.jsx:23
-#: components/LaunchButton/ReLaunchDropDown.jsx:28
+#: components/LaunchButton/ReLaunchDropDown.jsx:29
+#: components/LaunchButton/ReLaunchDropDown.jsx:34
 msgid "Relaunch on"
 msgstr "重新启动于"
 
-#: components/JobList/JobListItem.jsx:88
+#: components/JobList/JobListItem.jsx:98
 #: screens/Job/JobOutput/shared/OutputToolbar.jsx:141
 msgid "Relaunch using host parameters"
 msgstr "使用主机参数重新启动"
@@ -6049,8 +6080,8 @@ msgstr ""
 msgid "Replace field with new value"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:75
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:82
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:76
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:83
 msgid "Request subscription"
 msgstr ""
 
@@ -6076,11 +6107,11 @@ msgid "Resource type"
 msgstr "资源类型"
 
 #: routeConfig.js:62
-#: screens/ActivityStream/ActivityStream.jsx:156
+#: screens/ActivityStream/ActivityStream.jsx:157
 msgid "Resources"
 msgstr "资源"
 
-#: components/TemplateList/TemplateListItem.jsx:133
+#: components/TemplateList/TemplateListItem.jsx:134
 #: screens/Project/ProjectJobTemplatesList/ProjectJobTemplatesListItem.jsx:81
 msgid "Resources are missing from this template."
 msgstr "此模板中缺少资源。"
@@ -6097,10 +6128,10 @@ msgstr "从给定的主机变量字典中检索启用的状态。启用的变量
 #~ msgid "Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'"
 #~ msgstr ""
 
-#: components/JobList/JobListCancelButton.jsx:143
-#: components/JobList/JobListCancelButton.jsx:146
-#: screens/Job/JobDetail/JobDetail.jsx:453
-#: screens/Job/JobDetail/JobDetail.jsx:456
+#: components/JobList/JobListCancelButton.jsx:159
+#: components/JobList/JobListCancelButton.jsx:162
+#: screens/Job/JobDetail/JobDetail.jsx:443
+#: screens/Job/JobDetail/JobDetail.jsx:446
 #: screens/Job/JobOutput/JobOutput.jsx:804
 #: screens/Job/JobOutput/JobOutput.jsx:807
 msgid "Return"
@@ -6149,7 +6180,7 @@ msgstr "恢复设置"
 msgid "Revert to factory default."
 msgstr "恢复到工厂默认值。"
 
-#: screens/Job/JobDetail/JobDetail.jsx:248
+#: screens/Job/JobDetail/JobDetail.jsx:236
 #: screens/Project/ProjectList/ProjectList.jsx:177
 #: screens/Project/ProjectList/ProjectListItem.jsx:137
 msgid "Revision"
@@ -6219,7 +6250,7 @@ msgid "Run type"
 msgstr "运行类型"
 
 #: components/JobList/JobList.jsx:204
-#: components/TemplateList/TemplateListItem.jsx:105
+#: components/TemplateList/TemplateListItem.jsx:106
 #: components/Workflow/WorkflowNodeHelp.jsx:83
 msgid "Running"
 msgstr "运行中"
@@ -6232,7 +6263,7 @@ msgstr ""
 msgid "Running Jobs"
 msgstr "运行作业"
 
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:98
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:74
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:99
 msgid "Running jobs"
 msgstr "运行作业"
@@ -6245,7 +6276,7 @@ msgstr "SAML"
 msgid "SAML settings"
 msgstr "SAML 设置"
 
-#: screens/Dashboard/Dashboard.jsx:232
+#: screens/Dashboard/Dashboard.jsx:219
 msgid "SCM update"
 msgstr "SCM 更新"
 
@@ -6291,14 +6322,14 @@ msgstr "周六"
 #: components/Schedule/shared/ScheduleForm.jsx:625
 #: components/Schedule/shared/useSchedulePromptSteps.js:46
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:126
-#: screens/Credential/shared/CredentialForm.jsx:322
-#: screens/Credential/shared/CredentialForm.jsx:327
+#: screens/Credential/shared/CredentialForm.jsx:323
+#: screens/Credential/shared/CredentialForm.jsx:328
 #: screens/Setting/shared/RevertFormActionGroup.jsx:19
 #: screens/Setting/shared/RevertFormActionGroup.jsx:25
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkModal.jsx:35
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.jsx:119
-#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:163
-#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:167
+#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:165
+#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.jsx:169
 msgid "Save"
 msgstr "保存"
 
@@ -6342,7 +6373,7 @@ msgstr "调度缺少规则"
 
 #: components/Schedule/ScheduleList/ScheduleList.jsx:231
 #: routeConfig.js:45
-#: screens/ActivityStream/ActivityStream.jsx:150
+#: screens/ActivityStream/ActivityStream.jsx:151
 #: screens/Inventory/Inventories.jsx:108
 #: screens/Inventory/InventorySource/InventorySource.jsx:93
 #: screens/ManagementJob/ManagementJob.jsx:107
@@ -6392,11 +6423,11 @@ msgid "Search is disabled while the job is running"
 msgstr ""
 
 #: components/Search/AdvancedSearch.jsx:262
-#: components/Search/Search.jsx:282
+#: components/Search/Search.jsx:284
 msgid "Search submit button"
 msgstr "搜索提交按钮"
 
-#: components/Search/Search.jsx:272
+#: components/Search/Search.jsx:274
 msgid "Search text input"
 msgstr "搜索文本输入"
 
@@ -6405,8 +6436,8 @@ msgid "Second"
 msgstr "秒"
 
 #: components/PromptDetail/PromptInventorySourceDetail.jsx:105
-#: components/PromptDetail/PromptProjectDetail.jsx:95
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:127
+#: components/PromptDetail/PromptProjectDetail.jsx:102
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:134
 msgid "Seconds"
 msgstr "秒"
 
@@ -6414,13 +6445,17 @@ msgstr "秒"
 msgid "See errors on the left"
 msgstr "在左侧查看错误"
 
-#: components/JobList/JobListItem.jsx:57
+#: components/JobList/JobListItem.jsx:67
 #: components/Lookup/HostFilterLookup.jsx:321
 #: components/Lookup/Lookup.jsx:141
 #: components/Pagination/Pagination.jsx:33
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:90
 msgid "Select"
 msgstr "选择"
+
+#: screens/Credential/shared/CredentialForm.jsx:141
+msgid "Select Credential Type"
+msgstr ""
 
 #: screens/Host/HostGroups/HostGroupsList.jsx:236
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.jsx:238
@@ -6447,6 +6482,10 @@ msgstr "选择项"
 #: components/AddRole/AddResourceRole.jsx:221
 msgid "Select Items from List"
 msgstr "从列表中选择项"
+
+#: screens/Template/shared/LabelSelect.jsx:88
+msgid "Select Labels"
+msgstr ""
 
 #: components/AddRole/AddResourceRole.jsx:255
 msgid "Select Roles to Apply"
@@ -6484,19 +6523,28 @@ msgstr "为工作流选择分支。此分支应用于提示分支的所有作业
 msgid "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch."
 msgstr "为工作流选择分支。此分支应用于提示分支的所有作业模板节点。"
 
-#: screens/Credential/shared/CredentialForm.jsx:150
+#: screens/Credential/shared/CredentialForm.jsx:151
 msgid "Select a credential Type"
 msgstr "选择一个凭证类型"
 
-#: components/JobList/JobListCancelButton.jsx:84
+#: screens/Metrics/Metrics.jsx:191
+msgid "Select a instance"
+msgstr ""
+
+#: components/JobList/JobListCancelButton.jsx:98
 msgid "Select a job to cancel"
 msgstr "选择要取消的作业"
+
+#: screens/Metrics/Metrics.jsx:202
+msgid "Select a metric"
+msgstr ""
 
 #: components/AdHocCommands/AdHocDetailsStep.jsx:81
 msgid "Select a module"
 msgstr "选择一个模块"
 
 #: screens/Template/shared/PlaybookSelect.jsx:58
+#: screens/Template/shared/PlaybookSelect.jsx:59
 msgid "Select a playbook"
 msgstr "选择一个 playbook"
 
@@ -6538,7 +6586,7 @@ msgstr "为此字段选择有效日期和时间"
 #: components/Schedule/shared/ScheduleForm.jsx:91
 #: components/Schedule/shared/ScheduleForm.jsx:95
 #: screens/Credential/shared/CredentialForm.jsx:47
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:33
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:34
 #: screens/Inventory/shared/InventoryForm.jsx:24
 #: screens/Inventory/shared/InventorySourceSubForms/AzureSubForm.jsx:22
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.jsx:22
@@ -6553,7 +6601,7 @@ msgstr "为此字段选择有效日期和时间"
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.jsx:24
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:61
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:444
-#: screens/Project/shared/ProjectForm.jsx:100
+#: screens/Project/shared/ProjectForm.jsx:101
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.jsx:19
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.jsx:41
 #: screens/Team/shared/TeamForm.jsx:20
@@ -6573,11 +6621,19 @@ msgstr "选择 Webhook 服务。"
 msgid "Select all"
 msgstr "选择所有"
 
+#: screens/ActivityStream/ActivityStream.jsx:129
+msgid "Select an activity type"
+msgstr ""
+
+#: screens/Metrics/Metrics.jsx:233
+msgid "Select an instance and a metric to show chart"
+msgstr ""
+
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:139
 msgid "Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory."
 msgstr "为工作流选择清单。此清单应用于提示清单的所有作业模板节点。"
 
-#: screens/Project/shared/ProjectForm.jsx:200
+#: screens/Project/shared/ProjectForm.jsx:201
 msgid "Select an organization before editing the default execution environment."
 msgstr ""
 
@@ -6602,13 +6658,14 @@ msgstr "从位于项目基本路径的目录列表中进行选择。基本路径
 msgid "Select items from list"
 msgstr "从列表中选择项"
 
-#: screens/Dashboard/Dashboard.jsx:215
-#: screens/Dashboard/Dashboard.jsx:216
+#: screens/Dashboard/Dashboard.jsx:202
+#: screens/Dashboard/Dashboard.jsx:203
 msgid "Select job type"
 msgstr "选择作业类型"
 
-#: screens/Dashboard/Dashboard.jsx:193
-#: screens/Dashboard/Dashboard.jsx:194
+#: screens/Dashboard/Dashboard.jsx:179
+#: screens/Dashboard/Dashboard.jsx:180
+#: screens/Dashboard/Dashboard.jsx:181
 msgid "Select period"
 msgstr "选择周期"
 
@@ -6618,8 +6675,13 @@ msgstr "选择要应用的角色"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.jsx:127
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.jsx:128
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.jsx:129
 msgid "Select source path"
 msgstr "选择源路径"
+
+#: components/MultiSelect/TagMultiSelect.jsx:55
+msgid "Select tags"
+msgstr ""
 
 #: screens/Inventory/shared/SmartInventoryForm.jsx:91
 msgid "Select the Instance Groups for this Inventory to run on."
@@ -6685,20 +6747,20 @@ msgstr "选择 {0}"
 #: components/AddRole/SelectRoleStep.jsx:31
 #: components/OptionsList/OptionsList.jsx:51
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:76
-#: components/TemplateList/TemplateListItem.jsx:124
+#: components/TemplateList/TemplateListItem.jsx:125
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:103
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.jsx:121
 #: screens/Application/ApplicationsList/ApplicationListItem.jsx:30
 #: screens/Credential/CredentialList/CredentialListItem.jsx:53
 #: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.jsx:30
-#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:57
+#: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.jsx:55
 #: screens/Host/HostList/HostListItem.jsx:32
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:85
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:62
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:79
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:105
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:43
 #: screens/Project/ProjectList/ProjectListItem.jsx:97
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:256
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:259
 #: screens/Team/TeamList/TeamListItem.jsx:38
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.jsx:60
 msgid "Selected"
@@ -6732,7 +6794,7 @@ msgid "Service account JSON file"
 msgstr "服务账户 JSON 文件"
 
 #: screens/Inventory/shared/InventorySourceForm.jsx:56
-#: screens/Project/shared/ProjectForm.jsx:96
+#: screens/Project/shared/ProjectForm.jsx:97
 msgid "Set a value for this field"
 msgstr "为这个字段设置值"
 
@@ -6744,7 +6806,7 @@ msgstr "设置数据应保留的天数。"
 msgid "Set preferences for data collection, logos, and logins"
 msgstr "为数据收集、日志和登录设置偏好"
 
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.jsx:129
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.jsx:130
 msgid "Set source path to"
 msgstr ""
 
@@ -6786,8 +6848,8 @@ msgstr "设置名称"
 
 #: routeConfig.js:150
 #: routeConfig.js:154
-#: screens/ActivityStream/ActivityStream.jsx:213
-#: screens/ActivityStream/ActivityStream.jsx:215
+#: screens/ActivityStream/ActivityStream.jsx:214
+#: screens/ActivityStream/ActivityStream.jsx:216
 #: screens/Setting/Settings.jsx:43
 msgid "Settings"
 msgstr "设置"
@@ -6863,6 +6925,7 @@ msgid "Sign in with SAML {samlIDP}"
 msgstr "使用 SAML {samlIDP} 登陆"
 
 #: components/Search/Search.jsx:177
+#: components/Search/Search.jsx:178
 msgid "Simple key select"
 msgstr "简单键选择"
 
@@ -6871,7 +6934,7 @@ msgstr "简单键选择"
 #: components/PromptDetail/PromptDetail.jsx:229
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:248
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:368
-#: screens/Job/JobDetail/JobDetail.jsx:339
+#: screens/Job/JobDetail/JobDetail.jsx:327
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:357
 #: screens/Template/shared/JobTemplateForm.jsx:514
 msgid "Skip Tags"
@@ -6959,10 +7022,10 @@ msgstr "源"
 #: components/LaunchPrompt/steps/OtherPromptsStep.jsx:46
 #: components/PromptDetail/PromptDetail.jsx:189
 #: components/PromptDetail/PromptJobTemplateDetail.jsx:137
-#: components/PromptDetail/PromptProjectDetail.jsx:78
+#: components/PromptDetail/PromptProjectDetail.jsx:85
 #: components/PromptDetail/PromptWFJobTemplateDetail.jsx:80
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:321
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:108
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:115
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:220
 #: screens/Template/shared/JobTemplateForm.jsx:306
 msgid "Source Control Branch"
@@ -6972,32 +7035,32 @@ msgstr "源控制分支"
 msgid "Source Control Branch/Tag/Commit"
 msgstr "源控制分支/标签/提交"
 
-#: components/PromptDetail/PromptProjectDetail.jsx:82
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:112
+#: components/PromptDetail/PromptProjectDetail.jsx:89
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:119
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:55
 msgid "Source Control Credential"
 msgstr "源控制凭证"
 
-#: screens/Project/shared/ProjectForm.jsx:214
+#: screens/Project/shared/ProjectForm.jsx:215
 msgid "Source Control Credential Type"
 msgstr "源控制凭证类型"
 
-#: components/PromptDetail/PromptProjectDetail.jsx:79
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:109
+#: components/PromptDetail/PromptProjectDetail.jsx:86
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:116
 #: screens/Project/shared/ProjectSubForms/GitSubForm.jsx:55
 msgid "Source Control Refspec"
 msgstr "源控制 Refspec"
 
-#: components/PromptDetail/PromptProjectDetail.jsx:74
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:102
+#: components/PromptDetail/PromptProjectDetail.jsx:81
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:109
 msgid "Source Control Type"
 msgstr "源控制类型"
 
 #: components/Lookup/ProjectLookup.jsx:121
-#: components/PromptDetail/PromptProjectDetail.jsx:77
+#: components/PromptDetail/PromptProjectDetail.jsx:84
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:96
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:165
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:107
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:114
 #: screens/Project/ProjectList/ProjectList.jsx:158
 #: screens/Project/shared/ProjectSubForms/SharedFields.jsx:18
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/ProjectsList.jsx:97
@@ -7005,7 +7068,7 @@ msgid "Source Control URL"
 msgstr "源控制 URL"
 
 #: components/JobList/JobList.jsx:185
-#: components/JobList/JobListItem.jsx:31
+#: components/JobList/JobListItem.jsx:32
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:39
 #: screens/Job/JobDetail/JobDetail.jsx:93
 msgid "Source Control Update"
@@ -7019,7 +7082,8 @@ msgstr "源电话号码"
 msgid "Source Variables"
 msgstr "源变量"
 
-#: screens/Job/JobDetail/JobDetail.jsx:184
+#: components/JobList/JobListItem.jsx:159
+#: screens/Job/JobDetail/JobDetail.jsx:172
 msgid "Source Workflow Job"
 msgstr "源工作流作业"
 
@@ -7095,7 +7159,7 @@ msgid "Start"
 msgstr "开始"
 
 #: components/JobList/JobList.jsx:221
-#: components/JobList/JobListItem.jsx:74
+#: components/JobList/JobListItem.jsx:84
 msgid "Start Time"
 msgstr "开始时间"
 
@@ -7121,7 +7185,7 @@ msgstr "启动同步进程"
 msgid "Start sync source"
 msgstr "启动同步源"
 
-#: screens/Job/JobDetail/JobDetail.jsx:153
+#: screens/Job/JobDetail/JobDetail.jsx:141
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.jsx:226
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.jsx:79
 msgid "Started"
@@ -7129,10 +7193,10 @@ msgstr "已开始"
 
 #: components/JobList/JobList.jsx:198
 #: components/JobList/JobList.jsx:219
-#: components/JobList/JobListItem.jsx:68
+#: components/JobList/JobListItem.jsx:78
 #: screens/Inventory/InventoryList/InventoryList.jsx:201
 #: screens/Inventory/InventoryList/InventoryListItem.jsx:90
-#: screens/Job/JobDetail/JobDetail.jsx:142
+#: screens/Job/JobDetail/JobDetail.jsx:130
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.jsx:196
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.jsx:112
 #: screens/Project/ProjectList/ProjectList.jsx:175
@@ -7154,6 +7218,16 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
+#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:92
+msgid ""
+"Submodules will track the latest commit on\n"
+"their master branch (or other branch specified in\n"
+".gitmodules). If no, submodules will be kept at\n"
+"the revision specified by the main project.\n"
+"This is equivalent to specifying the --remote\n"
+"flag to git submodule update."
+msgstr ""
+
 #: screens/Setting/SettingList.jsx:137
 #: screens/Setting/Settings.jsx:108
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:78
@@ -7169,7 +7243,7 @@ msgstr ""
 msgid "Subscription Management"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:94
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:95
 msgid "Subscription manifest"
 msgstr ""
 
@@ -7398,7 +7472,7 @@ msgstr "未找到团队"
 #: components/AddRole/AddResourceRole.jsx:209
 #: components/AddRole/AddResourceRole.jsx:210
 #: routeConfig.js:107
-#: screens/ActivityStream/ActivityStream.jsx:184
+#: screens/ActivityStream/ActivityStream.jsx:185
 #: screens/Organization/Organization.jsx:125
 #: screens/Organization/OrganizationList/OrganizationList.jsx:160
 #: screens/Organization/OrganizationList/OrganizationListItem.jsx:68
@@ -7428,7 +7502,7 @@ msgstr ""
 #: components/TemplateList/TemplateList.jsx:184
 #: components/TemplateList/TemplateList.jsx:243
 #: routeConfig.js:66
-#: screens/ActivityStream/ActivityStream.jsx:161
+#: screens/ActivityStream/ActivityStream.jsx:162
 #: screens/ExecutionEnvironment/ExecutionEnvironment.jsx:69
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:82
 #: screens/Template/Templates.jsx:16
@@ -7437,8 +7511,8 @@ msgstr ""
 msgid "Templates"
 msgstr "模板"
 
-#: screens/Credential/shared/CredentialForm.jsx:335
-#: screens/Credential/shared/CredentialForm.jsx:341
+#: screens/Credential/shared/CredentialForm.jsx:336
+#: screens/Credential/shared/CredentialForm.jsx:342
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.jsx:83
 #: screens/Setting/Logging/LoggingEdit/LoggingEdit.jsx:260
 msgid "Test"
@@ -7533,7 +7607,7 @@ msgstr "您请求的页面无法找到。"
 msgid "The pattern used to target hosts in the inventory. Leaving the field blank, all, and * will all target all hosts in the inventory. You can find more information about Ansible's host patterns"
 msgstr "用于将字段保留为清单中的目标主机的模式。留空、所有和 * 将针对清单中的所有主机。您可以找到有关 Ansible 主机模式的更多信息"
 
-#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:82
+#: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.jsx:109
 msgid "The registry location where the container is stored."
 msgstr ""
 
@@ -7636,14 +7710,14 @@ msgstr ""
 msgid "This credential type is currently being used by some credentials and cannot be deleted"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:70
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:73
 msgid ""
 "This data is used to enhance\n"
 "future releases of the Tower Software and help\n"
 "streamline customer experience and success."
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:82
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:85
 msgid ""
 "This data is used to enhance\n"
 "future releases of the Tower Software and to provide\n"
@@ -7719,7 +7793,7 @@ msgstr "此字段不能超过 {max} 个字符"
 msgid "This field will be retrieved from an external secret management system using the specified credential."
 msgstr "此字段将使用指定的凭证从外部 secret 管理系统检索。"
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:150
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:123
 msgid "This instance group is currently being by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -7743,7 +7817,7 @@ msgstr "这是唯一显示客户端 secret 的时间。"
 msgid "This is the only time the token value and associated refresh token value will be shown."
 msgstr "这是唯一显示令牌值和关联刷新令牌值的时间。"
 
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:411
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:413
 msgid "This job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -7751,7 +7825,7 @@ msgstr ""
 msgid "This organization is currently being by other resources. Are you sure you want to delete it?"
 msgstr ""
 
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:177
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:184
 msgid "This project is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -7788,7 +7862,7 @@ msgstr "这会将此页中的所有配置值重置为其工厂默认值。确定
 msgid "This workflow does not have any nodes configured."
 msgstr "此工作流没有配置任何节点。"
 
-#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:251
+#: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:252
 msgid "This workflow job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr ""
 
@@ -7801,14 +7875,14 @@ msgstr "周四"
 msgid "Thursday"
 msgstr "周四"
 
-#: screens/ActivityStream/ActivityStream.jsx:242
-#: screens/ActivityStream/ActivityStream.jsx:254
+#: screens/ActivityStream/ActivityStream.jsx:243
+#: screens/ActivityStream/ActivityStream.jsx:255
 #: screens/ActivityStream/ActivityStreamDetailButton.jsx:41
 #: screens/ActivityStream/ActivityStreamListItem.jsx:42
 msgid "Time"
 msgstr "时间"
 
-#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:121
+#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:134
 msgid ""
 "Time in seconds to consider a project\n"
 "to be current. During job runs and callbacks the task\n"
@@ -7933,6 +8007,10 @@ msgstr "令牌"
 msgid "Tools"
 msgstr "工具"
 
+#: components/PaginatedTable/PaginatedTable.jsx:127
+msgid "Top Pagination"
+msgstr ""
+
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:237
 msgid "Total Jobs"
 msgstr "作业总数"
@@ -7942,10 +8020,19 @@ msgstr "作业总数"
 msgid "Total Nodes"
 msgstr "节点总数"
 
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:99
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:75
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:103
 msgid "Total jobs"
 msgstr "作业总数"
+
+#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:90
+msgid "Track submodules"
+msgstr ""
+
+#: components/PromptDetail/PromptProjectDetail.jsx:46
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:74
+msgid "Track submodules latest commit on branch"
+msgstr ""
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:83
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.jsx:164
@@ -7977,7 +8064,7 @@ msgid "Twilio"
 msgstr "Twilio"
 
 #: components/JobList/JobList.jsx:220
-#: components/JobList/JobListItem.jsx:72
+#: components/JobList/JobListItem.jsx:82
 #: components/Lookup/ProjectLookup.jsx:110
 #: components/NotificationList/NotificationList.jsx:220
 #: components/NotificationList/NotificationListItem.jsx:30
@@ -7986,7 +8073,7 @@ msgstr "Twilio"
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:95
 #: components/TemplateList/TemplateList.jsx:198
 #: components/TemplateList/TemplateList.jsx:223
-#: components/TemplateList/TemplateListItem.jsx:154
+#: components/TemplateList/TemplateListItem.jsx:155
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:85
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:154
 #: components/Workflow/WorkflowNodeHelp.jsx:136
@@ -7995,9 +8082,9 @@ msgstr "Twilio"
 #: screens/Credential/CredentialList/CredentialListItem.jsx:60
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.jsx:93
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:50
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:82
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:55
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.jsx:235
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:93
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:69
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:86
 #: screens/Inventory/InventoryDetail/InventoryDetail.jsx:79
 #: screens/Inventory/InventoryList/InventoryList.jsx:202
@@ -8020,12 +8107,12 @@ msgstr "类型"
 
 #: screens/Credential/shared/TypeInputsSubForm.jsx:25
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:44
-#: screens/Project/shared/ProjectForm.jsx:246
+#: screens/Project/shared/ProjectForm.jsx:247
 msgid "Type Details"
 msgstr "类型详情"
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:111
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:50
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:84
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:49
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:63
 msgid "Unavailable"
 msgstr "不可用"
@@ -8060,9 +8147,9 @@ msgstr "未识别的日字符串"
 msgid "Unsaved changes modal"
 msgstr "未保存的修改 modal"
 
-#: components/PromptDetail/PromptProjectDetail.jsx:43
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:71
-#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:90
+#: components/PromptDetail/PromptProjectDetail.jsx:50
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:78
+#: screens/Project/shared/ProjectSubForms/SharedFields.jsx:103
 msgid "Update Revision on Launch"
 msgstr "启动时更新修订"
 
@@ -8100,11 +8187,11 @@ msgstr "轮转 Webhook 密钥"
 msgid "Updating"
 msgstr "更新"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:132
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:133
 msgid "Upload a .zip file"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:109
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:110
 msgid "Upload a Red Hat Subscription Manifest containing your subscription. To generate your subscription manifest, go to <0>subscription allocations</0> on the Red Hat Customer Portal."
 msgstr ""
 
@@ -8133,9 +8220,9 @@ msgstr "使用 TLS"
 #~ msgid "Use custom messages to change the content of notifications sent when a job starts, succeeds, or fails. Use curly braces to access information about the job:"
 #~ msgstr ""
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:102
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:110
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:46
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:75
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:83
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:45
 #: screens/InstanceGroup/Instances/InstanceListItem.jsx:59
 msgid "Used capacity"
 msgstr "使用的容量"
@@ -8168,12 +8255,12 @@ msgstr "用户角色"
 msgid "User Type"
 msgstr "用户类型"
 
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:67
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:68
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:70
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:71
 msgid "User analytics"
 msgstr ""
 
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:44
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:45
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:220
 msgid "User and Insights analytics"
 msgstr ""
@@ -8203,8 +8290,8 @@ msgstr "用户令牌"
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:270
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:347
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.jsx:450
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:100
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:218
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.jsx:103
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:221
 #: screens/User/UserDetail/UserDetail.jsx:60
 #: screens/User/UserList/UserList.jsx:118
 #: screens/User/UserList/UserList.jsx:163
@@ -8213,14 +8300,14 @@ msgstr "用户令牌"
 msgid "Username"
 msgstr "用户名"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:100
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:101
 msgid "Username / password"
 msgstr ""
 
 #: components/AddRole/AddResourceRole.jsx:201
 #: components/AddRole/AddResourceRole.jsx:202
 #: routeConfig.js:102
-#: screens/ActivityStream/ActivityStream.jsx:181
+#: screens/ActivityStream/ActivityStream.jsx:182
 #: screens/Team/Teams.jsx:30
 #: screens/User/UserList/UserList.jsx:113
 #: screens/User/UserList/UserList.jsx:155
@@ -8248,7 +8335,7 @@ msgstr "VMware vCenter"
 #: screens/Inventory/shared/InventoryForm.jsx:89
 #: screens/Inventory/shared/InventoryGroupForm.jsx:55
 #: screens/Inventory/shared/SmartInventoryForm.jsx:98
-#: screens/Job/JobDetail/JobDetail.jsx:368
+#: screens/Job/JobDetail/JobDetail.jsx:356
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:372
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.jsx:211
 #: screens/Template/shared/JobTemplateForm.jsx:389
@@ -8280,7 +8367,7 @@ msgstr ""
 #: components/Schedule/ScheduleDetail/ScheduleDetail.jsx:315
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:233
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.jsx:90
-#: screens/Job/JobDetail/JobDetail.jsx:251
+#: screens/Job/JobDetail/JobDetail.jsx:239
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.jsx:227
 #: screens/Template/shared/JobTemplateForm.jsx:441
 msgid "Verbosity"
@@ -8534,12 +8621,12 @@ msgid "View smart inventory host details"
 msgstr "查看智能清单主机详情"
 
 #: routeConfig.js:31
-#: screens/ActivityStream/ActivityStream.jsx:142
+#: screens/ActivityStream/ActivityStream.jsx:143
 msgid "Views"
 msgstr "视图"
 
-#: components/TemplateList/TemplateListItem.jsx:159
-#: components/TemplateList/TemplateListItem.jsx:165
+#: components/TemplateList/TemplateListItem.jsx:160
+#: components/TemplateList/TemplateListItem.jsx:166
 #: screens/Template/WorkflowJobTemplate.jsx:141
 msgid "Visualizer"
 msgstr "Visualizer"
@@ -8649,7 +8736,7 @@ msgstr "周末日"
 msgid "Welcome to Ansible {brandName}! Please Sign In."
 msgstr "欢迎使用 Ansible {brandName}！请登录。"
 
-#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:67
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.jsx:68
 msgid ""
 "Welcome to Red Hat Ansible Automation Platform!\n"
 "Please complete the steps below to activate your subscription."
@@ -8686,7 +8773,7 @@ msgid "Workflow Approval not found."
 msgstr "未找到工作流批准。"
 
 #: routeConfig.js:55
-#: screens/ActivityStream/ActivityStream.jsx:153
+#: screens/ActivityStream/ActivityStream.jsx:154
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.jsx:170
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.jsx:210
 #: screens/WorkflowApproval/WorkflowApprovals.jsx:12
@@ -8695,16 +8782,17 @@ msgid "Workflow Approvals"
 msgstr "工作流批准"
 
 #: components/JobList/JobList.jsx:190
-#: components/JobList/JobListItem.jsx:36
+#: components/JobList/JobListItem.jsx:37
 #: components/Schedule/ScheduleList/ScheduleListItem.jsx:41
 #: screens/Job/JobDetail/JobDetail.jsx:101
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:134
 msgid "Workflow Job"
 msgstr "工作流作业"
 
+#: components/JobList/JobListItem.jsx:147
 #: components/Workflow/WorkflowNodeHelp.jsx:51
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.jsx:34
-#: screens/Job/JobDetail/JobDetail.jsx:172
+#: screens/Job/JobDetail/JobDetail.jsx:160
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:110
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.jsx:147
 #: util/getRelatedResourceDeleteDetails.js:112
@@ -8799,7 +8887,7 @@ msgstr "YAML："
 msgid "Year"
 msgstr "年"
 
-#: components/Search/Search.jsx:254
+#: components/Search/Search.jsx:256
 msgid "Yes"
 msgstr "是"
 
@@ -8835,11 +8923,11 @@ msgstr "您没有权限取消关联： {itemsUnableToDisassociate}"
 #~ msgid "You may apply a number of possible variables in the message. Refer to the"
 #~ msgstr ""
 
-#: components/AppContainer/AppContainer.jsx:235
+#: components/AppContainer/AppContainer.jsx:238
 msgid "You will be logged out in {0} seconds due to inactivity."
 msgstr "因不活跃，您将在 {0} 秒内登出。"
 
-#: components/AppContainer/AppContainer.jsx:210
+#: components/AppContainer/AppContainer.jsx:213
 msgid "Your session is about to expire"
 msgstr "您的会话即将到期"
 
@@ -8882,6 +8970,10 @@ msgstr ""
 #: screens/ActivityStream/ActivityStreamDescription.jsx:514
 msgid "approved"
 msgstr "批准"
+
+#: components/AppContainer/AppContainer.jsx:142
+msgid "brand logo"
+msgstr ""
 
 #: components/PaginatedDataList/ToolbarDeleteButton.jsx:275
 #: screens/Template/Survey/SurveyList.jsx:113
@@ -8931,11 +9023,11 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.jsx:121
 #: screens/Host/HostDetail/HostDetail.jsx:113
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.jsx:93
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:133
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:106
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.jsx:103
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.jsx:276
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.jsx:156
-#: screens/Project/ProjectDetail/ProjectDetail.jsx:159
+#: screens/Project/ProjectDetail/ProjectDetail.jsx:166
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.jsx:154
 #: screens/User/UserDetail/UserDetail.jsx:89
 msgid "edit"
@@ -9045,8 +9137,8 @@ msgstr "页"
 msgid "per page"
 msgstr "按页面"
 
-#: components/LaunchButton/ReLaunchDropDown.jsx:66
-#: components/LaunchButton/ReLaunchDropDown.jsx:88
+#: components/LaunchButton/ReLaunchDropDown.jsx:74
+#: components/LaunchButton/ReLaunchDropDown.jsx:96
 msgid "relaunch jobs"
 msgstr ""
 
@@ -9138,9 +9230,13 @@ msgstr ""
 #~ msgid "{0, plural, one {The template will be in a pending status until the final delete is processed.} other {The templates will be in a pending status until the final delete is processed.}}"
 #~ msgstr ""
 
-#: components/JobList/JobListCancelButton.jsx:65
-msgid "{0, plural, one {You cannot cancel the following job because it is not running} other {You cannot cancel the following jobs because they are not running}}"
+#: components/JobList/JobListCancelButton.jsx:72
+msgid "{0, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}"
 msgstr ""
+
+#: components/JobList/JobListCancelButton.jsx:65
+#~ msgid "{0, plural, one {You cannot cancel the following job because it is not running} other {You cannot cancel the following jobs because they are not running}}"
+#~ msgstr ""
 
 #: components/JobList/JobListCancelButton.jsx:56
 msgid "{0, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}"
@@ -9165,6 +9261,10 @@ msgstr "{0} 同步失败的源。"
 #: screens/Setting/shared/LoggingTestAlert.jsx:25
 msgid "{0}: {1}"
 msgstr "{0}: {1}"
+
+#: components/AppContainer/AppContainer.jsx:142
+msgid "{brandName} logo"
+msgstr ""
 
 #: components/DetailList/UserDateDetail.jsx:23
 msgid "{dateStr} by <0>{username}</0>"
