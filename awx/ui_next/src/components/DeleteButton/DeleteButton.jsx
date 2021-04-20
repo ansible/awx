@@ -84,6 +84,7 @@ function DeleteButton({
         </Tooltip>
       ) : (
         <Button
+          ouiaId={ouiaId}
           isLoading={isLoading}
           spinnerAriaValueText={isLoading ? 'Loading' : undefined}
           variant={variant || 'secondary'}
