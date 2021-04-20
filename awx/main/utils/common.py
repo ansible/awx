@@ -213,7 +213,7 @@ def memoize_delete(function_name):
 def get_event_partition_epoch():
     from django.db.migrations.recorder import MigrationRecorder
 
-    return MigrationRecorder.Migration.objects.filter(app='main', name='0136_event_partitions').first().applied
+    return MigrationRecorder.Migration.objects.filter(app='main', name='0137_event_partitions').first().applied
 
 
 @memoize()
