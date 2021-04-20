@@ -379,7 +379,7 @@ describe('<CredentialForm />', () => {
       gceFieldExpects();
     });
 
-    test('should display from fields for galaxy/automation hub credentials', async () => {
+    test('should display form fields for galaxy/automation hub credentials', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
           <CredentialForm
@@ -399,7 +399,7 @@ describe('<CredentialForm />', () => {
       expect(wrapper.find('FormGroup[label="Credential Type"]').length).toBe(1);
     });
 
-    test('should display from fields for tower credentials', async () => {
+    test('should display form fields for tower credentials', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
           <CredentialForm
