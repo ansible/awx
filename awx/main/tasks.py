@@ -27,6 +27,7 @@ import socket
 import threading
 import concurrent.futures
 from base64 import b64encode
+import subprocess
 
 # Django
 from django.conf import settings
@@ -394,6 +395,24 @@ def purge_old_stdout_files():
         if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT, f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
             os.unlink(os.path.join(settings.JOBOUTPUT_ROOT, f))
             logger.debug("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT, f)))
+
+
+@task(queue=get_local_queuename)
+def cleanup_execution_environment_images():
+    if settings.IS_K8S:
+        return
+    process = subprocess.run('podman images --filter="dangling=true" --format json'.split(" "), capture_output=True)
+    if process.returncode != 0:
+        logger.debug("Cleanup execution environment images: could not get list of images")
+        return
+    if len(process.stdout) > 0:
+        images_system = json.loads(process.stdout)
+        for e in images_system:
+            image_name = e["Id"]
+            logger.debug(f"Cleanup execution environment images: deleting {image_name}")
+            process = subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
+            if process.returncode != 0:
+                logger.debug(f"Failed to delete image {image_name}")
 
 
 @task(queue=get_local_queuename)
