@@ -20,6 +20,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
 
   const dropdownItems = [
     <DropdownItem
+      ouiaId={`${ouiaId}-on`}
       aria-label={i18n._(t`Relaunch on`)}
       key="relaunch_on"
       component="div"
@@ -29,6 +30,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
     </DropdownItem>,
     <DropdownSeparator key="separator" />,
     <DropdownItem
+      ouiaId={`${ouiaId}-all`}
       key="relaunch_all"
       aria-label={i18n._(t`Relaunch all hosts`)}
       component="button"
@@ -40,6 +42,7 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
     </DropdownItem>,
 
     <DropdownItem
+      ouiaId={`${ouiaId}-failed`}
       key="relaunch_failed"
       aria-label={i18n._(t`Relaunch failed hosts`)}
       component="button"
