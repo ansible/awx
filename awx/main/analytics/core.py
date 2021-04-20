@@ -259,9 +259,10 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                         tgzfile = package(dest.parent, payload, until)
                         if tgzfile is not None:
                             tarfiles.append(tgzfile)
-                            if not ship(tgzfile):
-                                slice_succeeded, succeeded = False, False
-                                break
+                            if collection_type != 'dry-run':
+                                if not ship(tgzfile):
+                                    slice_succeeded, succeeded = False, False
+                                    break
 
                     if slice_succeeded and collection_type != 'dry-run':
                         with disable_activity_stream():
