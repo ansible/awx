@@ -64,7 +64,7 @@ class FakeAddField(migrations.AddField):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0135_schedule_sort_fallback_to_id'),
+        ('main', '0136_scm_track_submodules'),
     ]
 
     operations = [
