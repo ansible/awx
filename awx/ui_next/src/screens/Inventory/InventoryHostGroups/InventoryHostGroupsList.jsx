@@ -28,6 +28,7 @@ const QS_CONFIG = getQSConfig('group', {
 
 function InventoryHostGroupsList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const { hostId, id: invId } = useParams();
   const { search } = useLocation();
 
@@ -147,7 +148,9 @@ function InventoryHostGroupsList({ i18n }) {
     <>
       <PaginatedDataList
         contentError={contentError}
-        hasContentLoading={isLoading || isDisassociateLoading}
+        hasContentLoading={
+          isLoading || isDisassociateLoading || isAdHocLaunchLoading
+        }
         items={groups}
         itemCount={itemCount}
         qsConfig={QS_CONFIG}
@@ -205,6 +208,7 @@ function InventoryHostGroupsList({ i18n }) {
               <AdHocCommands
                 adHocItems={selected}
                 hasListItems={itemCount > 0}
+                onLaunchLoading={setIsAdHocLaunchLoading}
               />,
               <DisassociateButton
                 key="disassociate"

@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import Wizard from '../Wizard';
 import AdHocCredentialStep from './AdHocCredentialStep';
 import AdHocDetailsStep from './AdHocDetailsStep';
+import AdHocExecutionEnvironmentStep from './AdHocExecutionEnvironmentStep';
 
 const AlertText = styled.div`
   color: var(--pf-global--danger-color--200);
@@ -81,6 +82,14 @@ function AdHocCommandsWizard({
     {
       id: 2,
       key: 2,
+      name: t`Execution Environment`,
+      component: <AdHocExecutionEnvironmentStep />,
+      enableNext: true,
+      canJumpTo: currentStepId >= 2,
+    },
+    {
+      id: 3,
+      key: 3,
       name: i18n._(t`Machine credential`),
       component: (
         <AdHocCredentialStep
@@ -128,6 +137,7 @@ const FormikApp = withFormik({
       module_name: '',
       extra_vars: '---',
       job_type: 'run',
+      execution_environment: '',
     };
   },
 })(AdHocCommandsWizard);

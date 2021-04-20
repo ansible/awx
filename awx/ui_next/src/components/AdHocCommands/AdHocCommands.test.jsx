@@ -4,12 +4,19 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { CredentialTypesAPI, InventoriesAPI, CredentialsAPI } from '../../api';
+import {
+  CredentialTypesAPI,
+  InventoriesAPI,
+  CredentialsAPI,
+  ExecutionEnvironmentsAPI,
+} from '../../api';
 import AdHocCommands from './AdHocCommands';
 
 jest.mock('../../api/models/CredentialTypes');
 jest.mock('../../api/models/Inventories');
 jest.mock('../../api/models/Credentials');
+jest.mock('../../api/models/ExecutionEnvironments');
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
@@ -51,6 +58,15 @@ describe('<AdHocCommands />', () => {
     CredentialTypesAPI.read.mockResolvedValue({
       data: { count: 1, results: [{ id: 1, name: 'cred' }] },
     });
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          { id: 1, name: 'EE1 1', url: 'wwww.google.com' },
+          { id: 2, name: 'EE2', url: 'wwww.google.com' },
+        ],
+        count: 2,
+      },
+    });
   });
   let wrapper;
   afterEach(() => {
@@ -61,7 +77,11 @@ describe('<AdHocCommands />', () => {
   test('mounts successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <AdHocCommands adHocItems={adHocItems} hasListItems />
+        <AdHocCommands
+          adHocItems={adHocItems}
+          hasListItems
+          onLaunchLoading={() => jest.fn()}
+        />
       );
     });
     expect(wrapper.find('AdHocCommands').length).toBe(1);
@@ -86,9 +106,22 @@ describe('<AdHocCommands />', () => {
     CredentialTypesAPI.read.mockResolvedValue({
       data: { results: [{ id: 1 }] },
     });
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          { id: 1, name: 'EE1 1', url: 'wwww.google.com' },
+          { id: 2, name: 'EE2', url: 'wwww.google.com' },
+        ],
+        count: 2,
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
-        <AdHocCommands adHocItems={adHocItems} hasListItems />
+        <AdHocCommands
+          adHocItems={adHocItems}
+          hasListItems
+          onLaunchLoading={() => jest.fn()}
+        />
       );
     });
     await act(async () =>
@@ -108,9 +141,22 @@ describe('<AdHocCommands />', () => {
         count: 5,
       },
     });
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          { id: 1, name: 'EE1 1', url: 'wwww.google.com' },
+          { id: 2, name: 'EE2', url: 'wwww.google.com' },
+        ],
+        count: 2,
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
-        <AdHocCommands adHocItems={adHocItems} hasListItems />
+        <AdHocCommands
+          adHocItems={adHocItems}
+          hasListItems
+          onLaunchLoading={() => jest.fn()}
+        />
       );
     });
 
@@ -147,7 +193,26 @@ describe('<AdHocCommands />', () => {
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
     await waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+
     // second step of wizard
+
+    await act(async () => {
+      wrapper
+        .find('input[aria-labelledby="check-action-item-2"]')
+        .simulate('change', { target: { checked: true } });
+    });
+
+    wrapper.update();
+
+    expect(
+      wrapper.find('CheckboxListItem[label="EE2"]').prop('isSelected')
+    ).toBe(true);
+
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    // third step of wizard
+    await waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
 
     await act(async () => {
       wrapper
@@ -176,6 +241,7 @@ describe('<AdHocCommands />', () => {
       limit: 'Inventory 1 Org 0, Inventory 2 Org 0',
       module_name: 'command',
       verbosity: 1,
+      execution_environment: 2,
     });
   });
 
@@ -202,13 +268,21 @@ describe('<AdHocCommands />', () => {
                 ['foo', 'foo'],
               ],
             },
-            verbosity: { choices: [[1], [2]] },
+            verbosity: {
+              choices: [[1], [2]],
+            },
           },
         },
       },
     });
     CredentialTypesAPI.read.mockResolvedValue({
-      data: { results: [{ id: 1 }] },
+      data: {
+        results: [
+          {
+            id: 1,
+          },
+        ],
+      },
     });
     CredentialsAPI.read.mockResolvedValue({
       data: {
@@ -216,9 +290,30 @@ describe('<AdHocCommands />', () => {
         count: 5,
       },
     });
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 1,
+            name: 'EE1 1',
+            url: 'wwww.google.com',
+          },
+          {
+            id: 2,
+            name: 'EE2',
+            url: 'wwww.google.com',
+          },
+        ],
+        count: 2,
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
-        <AdHocCommands adHocItems={adHocItems} hasListItems />
+        <AdHocCommands
+          adHocItems={adHocItems}
+          hasListItems
+          onLaunchLoading={() => jest.fn()}
+        />
       );
     });
 
@@ -240,7 +335,10 @@ describe('<AdHocCommands />', () => {
         'command'
       );
       wrapper.find('input#module_args').simulate('change', {
-        target: { value: 'foo', name: 'module_args' },
+        target: {
+          value: 'foo',
+          name: 'module_args',
+        },
       });
       wrapper.find('AnsibleSelect[name="verbosity"]').prop('onChange')({}, 1);
     });
@@ -261,8 +359,34 @@ describe('<AdHocCommands />', () => {
 
     await act(async () => {
       wrapper
+        .find('input[aria-labelledby="check-action-item-2"]')
+        .simulate('change', {
+          target: {
+            checked: true,
+          },
+        });
+    });
+
+    wrapper.update();
+
+    expect(
+      wrapper.find('CheckboxListItem[label="EE2"]').prop('isSelected')
+    ).toBe(true);
+
+    await act(async () =>
+      wrapper.find('Button[type="submit"]').prop('onClick')()
+    );
+    // third step of wizard
+    await waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+
+    await act(async () => {
+      wrapper
         .find('input[aria-labelledby="check-action-item-4"]')
-        .simulate('change', { target: { checked: true } });
+        .simulate('change', {
+          target: {
+            checked: true,
+          },
+        });
     });
 
     wrapper.update();
@@ -291,7 +415,11 @@ describe('<AdHocCommands />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <AdHocCommands adHocItems={adHocItems} hasListItems />
+        <AdHocCommands
+          adHocItems={adHocItems}
+          hasListItems
+          onLaunchLoading={() => jest.fn()}
+        />
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -312,7 +440,11 @@ describe('<AdHocCommands />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <AdHocCommands adHocItems={adHocItems} hasListItems={false} />
+        <AdHocCommands
+          adHocItems={adHocItems}
+          hasListItems={false}
+          onLaunchLoading={() => jest.fn()}
+        />
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
@@ -335,7 +467,11 @@ describe('<AdHocCommands />', () => {
     );
     await act(async () => {
       wrapper = mountWithContexts(
-        <AdHocCommands adHocItems={adHocItems} hasListItems />
+        <AdHocCommands
+          adHocItems={adHocItems}
+          hasListItems
+          onLaunchLoading={() => jest.fn()}
+        />
       );
     });
     await act(async () => wrapper.find('button').prop('onClick')());

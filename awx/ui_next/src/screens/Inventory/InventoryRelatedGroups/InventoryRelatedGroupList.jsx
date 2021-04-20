@@ -26,6 +26,7 @@ const QS_CONFIG = getQSConfig('group', {
 });
 function InventoryRelatedGroupList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const [associateError, setAssociateError] = useState(null);
   const [disassociateError, setDisassociateError] = useState(null);
   const { id: inventoryId, groupId } = useParams();
@@ -154,7 +155,7 @@ function InventoryRelatedGroupList({ i18n }) {
     <>
       <PaginatedDataList
         contentError={contentError}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isAdHocLaunchLoading}
         items={groups}
         itemCount={itemCount}
         pluralizedItemName={i18n._(t`Related Groups`)}
@@ -197,6 +198,7 @@ function InventoryRelatedGroupList({ i18n }) {
               <AdHocCommands
                 adHocItems={selected}
                 hasListItems={itemCount > 0}
+                onLaunchLoading={setIsAdHocLaunchLoading}
               />,
               <DisassociateButton
                 key="disassociate"

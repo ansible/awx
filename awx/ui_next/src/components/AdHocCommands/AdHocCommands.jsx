@@ -12,10 +12,9 @@ import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
 import { KebabifiedContext } from '../../contexts/Kebabified';
-import ContentLoading from '../ContentLoading';
 import ContentError from '../ContentError';
 
-function AdHocCommands({ adHocItems, i18n, hasListItems }) {
+function AdHocCommands({ adHocItems, i18n, hasListItems, onLaunchLoading }) {
   const history = useHistory();
   const { id } = useParams();
 
@@ -76,19 +75,20 @@ function AdHocCommands({ adHocItems, i18n, hasListItems }) {
   );
 
   const handleSubmit = async values => {
-    const { credential, ...remainingValues } = values;
+    const { credential, execution_environment, ...remainingValues } = values;
     const newCredential = credential[0].id;
 
     const manipulatedValues = {
       credential: newCredential,
+      execution_environment: execution_environment[0]?.id,
       ...remainingValues,
     };
     await launchAdHocCommands(manipulatedValues);
   };
-
-  if (isLaunchLoading) {
-    return <ContentLoading />;
-  }
+  useEffect(() => onLaunchLoading(isLaunchLoading), [
+    isLaunchLoading,
+    onLaunchLoading,
+  ]);
 
   if (error && isWizardOpen) {
     return (
