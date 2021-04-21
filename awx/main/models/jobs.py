@@ -587,10 +587,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
         return RunJob
 
-    @classmethod
-    def supports_isolation(cls):
-        return True
-
     def _global_timeout_setting(self):
         return 'DEFAULT_JOB_TIMEOUT'
 
@@ -759,7 +755,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def can_run_containerized(self):
-        return any([ig for ig in self.preferred_instance_groups if ig.is_container_group])
+        return True
 
     @property
     def is_container_group_task(self):

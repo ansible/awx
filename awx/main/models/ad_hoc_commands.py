@@ -146,10 +146,6 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
         return RunAdHocCommand
 
-    @classmethod
-    def supports_isolation(cls):
-        return True
-
     @property
     def is_container_group_task(self):
         return bool(self.instance_group and self.instance_group.is_container_group)
