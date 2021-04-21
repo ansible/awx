@@ -45,10 +45,12 @@ $ minikube start --cpus=4 --memory=8g --addons=ingress
 
 #### Deploying the AWX Operator
 
-For a comprehensive overview of features, see [README.md](https://github.com/ansible/awx-operator/blob/devel/README.md) in the awx-operator repo. The following steps are the bare minimum to get AWX up and running. 
+For a comprehensive overview of features, see [README.md](https://github.com/ansible/awx-operator/blob/devel/README.md) in the awx-operator repo. The following steps are the bare minimum to get AWX up and running.
+
+Start by going to https://github.com/ansible/awx-operator/releases and making note of the latest release. Replace `<tag>` in the URL below with the version you are deploying:
 
 ```
-$ minikube kubectl -- apply -f https://raw.githubusercontent.com/ansible/awx-operator/devel/deploy/awx-operator.yaml
+$ minikube kubectl -- apply -f https://raw.githubusercontent.com/ansible/awx-operator/<tag>/deploy/awx-operator.yaml
 ```
 
 ##### Verifying the Operator Deployment
