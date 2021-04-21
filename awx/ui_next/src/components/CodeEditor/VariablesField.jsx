@@ -57,11 +57,12 @@ function VariablesField({
   );
   const [field, meta, helpers] = useField({ name, validate });
 
-  // mode's useState above couldn't be initialized to JSON_MODE because
-  // the field value had to be defined below it
-  useEffect(function initializeMode() {
+  useEffect(function initializeJSON() {
     if (isJsonString(field.value)) {
+      // mode's useState above couldn't be initialized to JSON_MODE because
+      // the field value had to be defined below it
       setMode(JSON_MODE);
+      helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -193,7 +194,14 @@ function VariablesFieldInternals({
   setShouldValidate,
   handleChange,
 }) {
-  const [field, meta] = useField(name);
+  const [field, meta, helpers] = useField(name);
+
+  useEffect(function formatJsonString() {
+    if (mode === YAML_MODE) {
+      return;
+    }
+    helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="pf-c-form__group">

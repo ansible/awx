@@ -49,6 +49,9 @@ function VariablesDetail({
     }
     const modeMatches = isJsonString(value) === (mode === JSON_MODE);
     if (modeMatches) {
+      if (mode === JSON_MODE) {
+        return JSON.stringify(JSON.parse(value), null, 2);
+      }
       return value;
     }
     return mode === YAML_MODE ? jsonToYaml(value) : yamlToJson(value);

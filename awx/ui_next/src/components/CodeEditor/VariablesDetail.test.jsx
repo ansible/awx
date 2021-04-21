@@ -24,7 +24,15 @@ describe('<VariablesDetail>', () => {
     const input = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input).toHaveLength(1);
     expect(input.prop('mode')).toEqual('javascript');
-    expect(input.prop('value')).toEqual('{"foo": "bar"}');
+  });
+
+  test('should format JSON', () => {
+    const wrapper = mountWithContexts(
+      <VariablesDetail value='{"foo": "bar"}' label="Variables" />
+    );
+    const input = wrapper.find('VariablesDetail___StyledCodeEditor');
+    expect(input).toHaveLength(1);
+    expect(input.prop('value')).toEqual('{\n  "foo": "bar"\n}');
   });
 
   test('should convert between modes', () => {
