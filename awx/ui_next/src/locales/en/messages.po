@@ -518,7 +518,7 @@ msgstr "Ansible Tower Documentation."
 #~ msgid "Ansible environment"
 #~ msgstr "Ansible environment"
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:33
+#: screens/Template/Survey/SurveyQuestionForm.jsx:63
 msgid "Answer type"
 msgstr "Answer type"
 
@@ -1194,6 +1194,14 @@ msgstr "Click this button to verify connection to the secret management system u
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.jsx:150
 msgid "Click to create a new link to this node."
 msgstr "Click to create a new link to this node."
+
+#: components/FormField/TextAndCheckboxField.jsx:99
+msgid "Click to select this answer as a default answer."
+msgstr "Click to select this answer as a default answer."
+
+#: components/FormField/TextAndCheckboxField.jsx:107
+msgid "Click to toggle default value"
+msgstr "Click to toggle default value"
 
 #: components/Workflow/WorkflowNodeHelp.jsx:168
 msgid "Click to view job details"
@@ -5283,6 +5291,10 @@ msgstr "Multiple Choice (single select)"
 msgid "Multiple Choice Options"
 msgstr "Multiple Choice Options"
 
+#: components/FormField/TextAndCheckboxField.jsx:100
+msgid "Must type an answer choice before a default value can be selected"
+msgstr "Must type an answer choice before a default value can be selected"
+
 #: src/index.jsx:110
 #: src/pages/Portal.jsx:19
 #~ msgid "My View"
@@ -6305,6 +6317,14 @@ msgstr "Preconditions for running this node when there are multiple parents. Ref
 #: components/CodeEditor/CodeEditor.jsx:187
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr "Press Enter to edit. Press ESC to stop editing."
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:239
+msgid "Press Enter to get additional inputs. Refer to the"
+msgstr "Press Enter to get additional inputs. Refer to the"
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:239
+#~ msgid "Press enter to get additional inputs. Refer to the"
+#~ msgstr "Press enter to get additional inputs. Refer to the"
 
 #: components/LaunchPrompt/steps/usePreviewStep.jsx:23
 #: screens/Template/Survey/SurveyList.jsx:160
@@ -10031,6 +10051,10 @@ msgstr "expiration"
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:224
 msgid "for more info."
 msgstr "for more info."
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:247
+msgid "for more information."
+msgstr "for more information."
 
 #: src/screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:117
 #~ msgid "group"

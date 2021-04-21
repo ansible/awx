@@ -18,6 +18,28 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
         );
         return;
       }
+      let choices = '';
+      let defaultAnswers = '';
+      if (
+        question.type === 'multiselect' ||
+        question.type === 'multiplechoice'
+      ) {
+        question.formattedChoices.forEach(({ question: q, isDefault }, i) => {
+          choices =
+            i === question.formattedChoices.length - 1
+              ? choices.concat(`${q}`)
+              : choices.concat(`${q}\n`);
+          if (isDefault) {
+            defaultAnswers =
+              i === question.formattedChoices.length - 1
+                ? defaultAnswers.concat(`${q}`)
+                : defaultAnswers.concat(`${q}\n`);
+          }
+        });
+        question.default = defaultAnswers;
+        question.choices = choices;
+      }
+
       if (question.type === 'multiselect') {
         question.default = question.default
           .split('\n')

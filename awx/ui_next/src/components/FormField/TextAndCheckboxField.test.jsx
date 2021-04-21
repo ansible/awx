@@ -12,8 +12,11 @@ describe('<TextAndCheckboxField/>', () => {
       wrapper = mountWithContexts(
         <Formik
           initialValues={{
-            choices: 'alex\napollo\nathena',
-            default: 'alex\napollo',
+            formattedChoices: [
+              { choice: 'apollo', isDefault: true },
+              { choice: 'alex', isDefault: true },
+              { choice: 'athena', isDefault: false },
+            ],
             type: 'multiselect',
           }}
         >
@@ -21,21 +24,13 @@ describe('<TextAndCheckboxField/>', () => {
         </Formik>
       );
     });
-    await act(async () =>
-      wrapper
-        .find('TextAndCheckboxField')
-        .find('TextAndCheckboxField')
-        .find('TextInput')
-        .at(0)
-        .prop('onChange')('alex')
-    );
-    wrapper.update();
+
     expect(
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
         .prop('isSelected')
-    ).toBe(false);
+    ).toBe(true);
     await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
     wrapper.update();
     expect(
@@ -43,14 +38,13 @@ describe('<TextAndCheckboxField/>', () => {
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
         .prop('isSelected')
-    ).toBe(true);
+    ).toBe(false);
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
         .find('TextAndCheckboxField')
         .find('TextInput')
         .at(0)
-        .prop('onKeyDown')({ key: 'Enter' })
+        .prop('onKeyUp')({ key: 'Enter' })
     );
     wrapper.update();
     expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
@@ -59,15 +53,12 @@ describe('<TextAndCheckboxField/>', () => {
     await act(async () =>
       wrapper
         .find('TextAndCheckboxField')
-        .find('TextAndCheckboxField')
         .find('TextInput')
-        .at(1)
+        .at(2)
         .prop('onChange')('spencer')
     );
     wrapper.update();
-    expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
-      3
-    );
+
     await act(() => wrapper.find('Button[ouiaId="spencer"]').prop('onClick')());
     wrapper.update();
     expect(
@@ -83,7 +74,7 @@ describe('<TextAndCheckboxField/>', () => {
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
         .prop('isSelected')
-    ).toBe(false);
+    ).toBe(true);
   });
 
   test('should select default, multiplechoice', async () => {
@@ -93,8 +84,11 @@ describe('<TextAndCheckboxField/>', () => {
       wrapper = mountWithContexts(
         <Formik
           initialValues={{
-            choices: 'alex\napollo\nathena',
-            default: 'alex\napollo',
+            formattedChoices: [
+              { choice: 'alex', isDefault: true },
+              { choice: 'apollo', isDefault: false },
+              { choice: 'athena', isDefault: false },
+            ],
             type: 'multiplechoice',
           }}
         >
@@ -102,21 +96,13 @@ describe('<TextAndCheckboxField/>', () => {
         </Formik>
       );
     });
-    await act(async () =>
-      wrapper
-        .find('TextAndCheckboxField')
-        .find('TextAndCheckboxField')
-        .find('TextInput')
-        .at(0)
-        .prop('onChange')('alex')
-    );
-    wrapper.update();
+
     expect(
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
         .prop('isSelected')
-    ).toBe(false);
+    ).toBe(true);
     await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
     wrapper.update();
     expect(
@@ -124,31 +110,27 @@ describe('<TextAndCheckboxField/>', () => {
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
         .prop('isSelected')
-    ).toBe(true);
+    ).toBe(false);
     expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
       3
     );
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
         .find('TextAndCheckboxField')
         .find('TextInput')
         .at(0)
-        .prop('onKeyDown')({ key: 'Enter' })
+        .prop('onKeyUp')({ key: 'Enter' })
     );
     wrapper.update();
     await act(async () =>
       wrapper
         .find('TextAndCheckboxField')
-        .find('TextAndCheckboxField')
         .find('TextInput')
-        .at(1)
+        .at(2)
         .prop('onChange')('spencer')
     );
     wrapper.update();
-    expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
-      3
-    );
+
     await act(() => wrapper.find('Button[ouiaId="spencer"]').prop('onClick')());
     wrapper.update();
 

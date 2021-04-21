@@ -12,7 +12,8 @@ import FormField, {
   FormSubmitError,
   TextAndCheckboxField,
 } from '../../../components/FormField';
-
+import { useConfig } from '../../../contexts/Config';
+import getDocsBaseUrl from '../../../util/getDocsBaseUrl';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import Popover from '../../../components/Popover';
 import {
@@ -25,37 +26,10 @@ import {
 } from '../../../util/validators';
 
 function AnswerTypeField() {
-  const [field, meta, helpers] = useField({
+  const [field] = useField({
     name: 'type',
     validate: required(t`Select a value for this field`),
   });
-  const [defaultField, defaultMeta, defaultHelpers] = useField('default');
-  const [choicesField] = useField('choices');
-
-  const handleTypeChange = value => {
-    helpers.setValue(value);
-
-    const firstElementInBoth = choicesField.value
-      ?.split('\n')
-      .map(d =>
-        defaultField.value?.split('\n').find(c => (c === d ? c : false))
-      );
-
-    if (value === 'multiplechoice' && meta.initialValue === 'multiselect') {
-      defaultHelpers.setValue(
-        firstElementInBoth.length > 0
-          ? firstElementInBoth[0]
-          : defaultField.value
-      );
-    }
-    if (
-      field.value === 'multiplechoice' &&
-      value === 'multiselect' &&
-      meta.initialValue === 'multiselect'
-    ) {
-      defaultHelpers.setValue(defaultMeta.initialValue);
-    }
-  };
 
   return (
     <FormGroup
@@ -73,9 +47,6 @@ function AnswerTypeField() {
       <AnsibleSelect
         id="question-type"
         {...field}
-        onChange={(event, value) => {
-          handleTypeChange(value);
-        }}
         data={[
           { key: 'text', value: 'text', label: t`Text` },
           { key: 'textarea', value: 'textarea', label: t`Textarea` },
@@ -104,21 +75,44 @@ function SurveyQuestionForm({
   handleCancel,
   submitError,
 }) {
+  const config = useConfig();
+  let initialValues = {
+    question_name: question?.question_name || '',
+    question_description: question?.question_description || '',
+    required: question ? question?.required : true,
+    type: question?.type || 'text',
+    variable: question?.variable || '',
+    min: question?.min || 0,
+    max: question?.max || 1024,
+    default: question?.default || '',
+    formattedChoices: question?.choices || [{ choice: '', isDefault: false }],
+    new_question: !question,
+  };
+  if (question?.type === 'multiselect' || question?.type === 'multiplechoice') {
+    const newQuestions = question.choices.split('\n').map(c => {
+      if (question.default.split('\n').includes(c)) {
+        return { choice: c, isDefault: true };
+      }
+      return { choice: c, isDefault: false };
+    });
+
+    initialValues = {
+      question_name: question?.question_name || '',
+      question_description: question?.question_description || '',
+      required: question ? question?.required : true,
+      type: question?.type || 'text',
+      variable: question?.variable || '',
+      min: question?.min || 0,
+      max: question?.max || 1024,
+      formattedChoices: newQuestions,
+      new_question: !question,
+    };
+  }
+
   return (
     <Formik
       enableReinitialize
-      initialValues={{
-        question_name: question?.question_name || '',
-        question_description: question?.question_description || '',
-        required: question ? question?.required : true,
-        type: question?.type || 'text',
-        variable: question?.variable || '',
-        min: question?.min || 0,
-        max: question?.max || 1024,
-        default: question?.default || '',
-        choices: question?.choices || '',
-        new_question: !question,
-      }}
+      initialValues={initialValues}
       onSubmit={handleSubmit}
     >
       {formik => (
@@ -227,7 +221,19 @@ function SurveyQuestionForm({
                 name="choices"
                 label={t`Multiple Choice Options`}
                 validate={required()}
-                tooltip={t`Type answer choices and click the check next the default choice(s). Multiple Choice (multi select) can have more than 1 default answer.  Multiple Choice (single select) can only have 1 default answer.  Press enter to get additional inputs`}
+                tooltip={
+                  <>
+                    {t`Press Enter to get additional inputs. Refer to the `}{' '}
+                    <a
+                      href={`${getDocsBaseUrl(
+                        config
+                      )}/html/userguide/job_templates.html#surveys`}
+                    >
+                      {t`documentation`}{' '}
+                    </a>
+                    {t`for more information.`}
+                  </>
+                }
                 isRequired
               />
             )}

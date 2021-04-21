@@ -29,7 +29,6 @@ function FormField(props) {
           helperText={helperText}
           helperTextInvalid={meta.error}
           isRequired={isRequired}
-          validated={isValid ? 'default' : 'error'}
           label={label}
           labelIcon={<Popover content={tooltip} maxWidth={tooltipMaxWidth} />}
         >

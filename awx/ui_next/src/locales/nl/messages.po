@@ -485,7 +485,7 @@ msgstr ""
 #~ msgid "Ansible environment"
 #~ msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:33
+#: screens/Template/Survey/SurveyQuestionForm.jsx:63
 msgid "Answer type"
 msgstr ""
 
@@ -1125,6 +1125,14 @@ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.jsx:150
 msgid "Click to create a new link to this node."
+msgstr ""
+
+#: components/FormField/TextAndCheckboxField.jsx:99
+msgid "Click to select this answer as a default answer."
+msgstr ""
+
+#: components/FormField/TextAndCheckboxField.jsx:107
+msgid "Click to toggle default value"
 msgstr ""
 
 #: components/Workflow/WorkflowNodeHelp.jsx:168
@@ -6018,6 +6026,14 @@ msgstr ""
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr ""
 
+#: screens/Template/Survey/SurveyQuestionForm.jsx:239
+msgid "Press Enter to get additional inputs. Refer to the"
+msgstr ""
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:239
+#~ msgid "Press enter to get additional inputs. Refer to the"
+#~ msgstr ""
+
 #: components/LaunchPrompt/steps/usePreviewStep.jsx:23
 #: screens/Template/Survey/SurveyList.jsx:160
 #: screens/Template/Survey/SurveyList.jsx:162
@@ -9541,6 +9557,10 @@ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:224
 msgid "for more info."
+msgstr ""
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:247
+msgid "for more information."
 msgstr ""
 
 #: src/screens/Inventory/shared/InventoryGroupsDeleteModal.jsx:117

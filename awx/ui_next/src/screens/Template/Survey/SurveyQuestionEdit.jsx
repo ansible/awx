@@ -55,6 +55,28 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
       if (questionIndex === -1) {
         throw new Error('Question not found in spec');
       }
+      let choices = '';
+      let defaultAnswers = '';
+      if (
+        formData.type === 'multiselect' ||
+        formData.type === 'multiplechoice'
+      ) {
+        formData.formattedChoices.forEach(({ question: q, isDefault }, i) => {
+          choices =
+            i === formData.formattedChoices.length - 1
+              ? choices.concat(`${q}`)
+              : choices.concat(`${q}\n`);
+          if (isDefault) {
+            defaultAnswers =
+              i === formData.formattedChoices.length - 1
+                ? defaultAnswers.concat(`${q}`)
+                : defaultAnswers.concat(`${q}\n`);
+          }
+        });
+        formData.default = defaultAnswers;
+        formData.choices = choices;
+      }
+
       if (formData.type === 'multiselect') {
         formData.default = formData.default
           .split('\n')

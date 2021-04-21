@@ -273,10 +273,9 @@ describe('<SurveyQuestionForm />', () => {
     await act(async () =>
       wrapper
         .find('TextAndCheckboxField')
-        .find('TextAndCheckboxField')
         .find('TextInput')
         .at(0)
-        .prop('onKeyDown')({ key: 'Enter' })
+        .prop('onKeyUp')({ key: 'Enter' })
     );
     wrapper.update();
     expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
@@ -284,7 +283,6 @@ describe('<SurveyQuestionForm />', () => {
     );
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
         .find('TextAndCheckboxField')
         .find('TextInput')
         .at(1)
@@ -328,7 +326,6 @@ describe('<SurveyQuestionForm />', () => {
     await act(async () =>
       wrapper
         .find('TextAndCheckboxField')
-        .find('TextAndCheckboxField')
         .find('TextInput')
         .at(0)
         .prop('onChange')('alex')
@@ -354,15 +351,13 @@ describe('<SurveyQuestionForm />', () => {
     await act(async () =>
       wrapper
         .find('TextAndCheckboxField')
-        .find('TextAndCheckboxField')
         .find('TextInput')
         .at(0)
-        .prop('onKeyDown')({ key: 'Enter' })
+        .prop('onKeyUp')({ key: 'Enter' })
     );
     wrapper.update();
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
         .find('TextAndCheckboxField')
         .find('TextInput')
         .at(1)

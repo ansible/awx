@@ -484,7 +484,7 @@ msgstr "Ansible Tower ドキュメント。"
 #~ msgid "Ansible environment"
 #~ msgstr "Ansible 環境"
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:33
+#: screens/Template/Survey/SurveyQuestionForm.jsx:63
 msgid "Answer type"
 msgstr "回答タイプ"
 
@@ -1125,6 +1125,14 @@ msgstr "このボタンをクリックして、選択した認証情報と指定
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.jsx:150
 msgid "Click to create a new link to this node."
 msgstr "クリックして、このノードへの新しいリンクを作成します。"
+
+#: components/FormField/TextAndCheckboxField.jsx:99
+msgid "Click to select this answer as a default answer."
+msgstr ""
+
+#: components/FormField/TextAndCheckboxField.jsx:107
+msgid "Click to toggle default value"
+msgstr ""
 
 #: components/Workflow/WorkflowNodeHelp.jsx:168
 msgid "Click to view job details"
@@ -6008,6 +6016,14 @@ msgstr ""
 #: components/CodeEditor/CodeEditor.jsx:187
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr ""
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:239
+msgid "Press Enter to get additional inputs. Refer to the"
+msgstr ""
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:239
+#~ msgid "Press enter to get additional inputs. Refer to the"
+#~ msgstr ""
 
 #: components/LaunchPrompt/steps/usePreviewStep.jsx:23
 #: screens/Template/Survey/SurveyList.jsx:160
