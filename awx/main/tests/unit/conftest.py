@@ -4,9 +4,15 @@ import logging
 from unittest.mock import PropertyMock
 
 from awx.api.urls import urlpatterns as api_patterns
+from awx.main.models import ExecutionEnvironment
 
 # Django
 from django.urls import URLResolver, URLPattern
+
+
+@pytest.fixture()
+def execution_environment():
+    return ExecutionEnvironment(name="test-ee", description="test-ee", managed_by_tower=True)
 
 
 @pytest.fixture(autouse=True)

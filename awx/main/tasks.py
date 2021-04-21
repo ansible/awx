@@ -860,12 +860,6 @@ class BaseTask(object):
         if settings.IS_K8S:
             return {}
 
-        if instance.execution_environment_id is None:
-            from awx.main.signals import disable_activity_stream
-
-            with disable_activity_stream():
-                self.instance = instance = self.update_model(instance.pk, execution_environment=instance.resolve_execution_environment())
-
         image = instance.execution_environment.image
         params = {
             "container_image": image,
@@ -1338,6 +1332,12 @@ class BaseTask(object):
         Run the job/task and capture its output.
         """
         self.instance = self.model.objects.get(pk=pk)
+
+        if self.instance.execution_environment_id is None:
+            from awx.main.signals import disable_activity_stream
+
+            with disable_activity_stream():
+                self.instance = self.update_model(self.instance.pk, execution_environment=self.instance.resolve_execution_environment())
 
         # self.instance because of the update_model pattern and when it's used in callback handlers
         self.instance = self.update_model(pk, status='running', start_args='')  # blank field to remove encrypted passwords
