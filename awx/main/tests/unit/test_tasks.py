@@ -467,11 +467,13 @@ class TestExtraVarSanitation(TestJobExecution):
 
 
 class TestGenericRun:
-    def test_generic_failure(self, patch_Job):
+    def test_generic_failure(self, patch_Job, execution_environment):
         job = Job(status='running', inventory=Inventory(), project=Project(local_path='/projects/_23_foo'))
         job.websocket_emit_status = mock.Mock()
+        job.execution_environment = execution_environment
 
         task = tasks.RunJob()
+        task.instance = job
         task.update_model = mock.Mock(return_value=job)
         task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
@@ -485,13 +487,15 @@ class TestGenericRun:
         assert update_model_call['status'] == 'error'
         assert update_model_call['emitted_events'] == 0
 
-    def test_cancel_flag(self, job, update_model_wrapper):
+    def test_cancel_flag(self, job, update_model_wrapper, execution_environment):
         job.status = 'running'
         job.cancel_flag = True
         job.websocket_emit_status = mock.Mock()
         job.send_notification_templates = mock.Mock()
+        job.execution_environment = execution_environment
 
         task = tasks.RunJob()
+        task.instance = job
         task.update_model = mock.Mock(wraps=update_model_wrapper)
         task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock()
@@ -594,10 +598,12 @@ class TestGenericRun:
         private_data_dir, extra_vars, safe_dict = call_args
         assert extra_vars['super_secret'] == "CLASSIFIED"
 
-    def test_awx_task_env(self, patch_Job, private_data_dir):
+    def test_awx_task_env(self, patch_Job, private_data_dir, execution_environment):
         job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
 
         task = tasks.RunJob()
+        task.instance = job
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
@@ -764,10 +770,12 @@ class TestIsolatedExecution(TestJobExecution):
 
 class TestJobCredentials(TestJobExecution):
     @pytest.fixture
-    def job(self):
+    def job(self, execution_environment):
         job = Job(pk=1, inventory=Inventory(pk=1), project=Project(pk=1))
         job.websocket_emit_status = mock.Mock()
         job._credentials = []
+
+        job.execution_environment = execution_environment
 
         def _credentials_filter(credential_type__kind=None):
             creds = job._credentials
@@ -1113,6 +1121,7 @@ class TestJobCredentials(TestJobExecution):
 
     def test_openstack_credentials(self, private_data_dir, job):
         task = tasks.RunJob()
+        task.instance = job
         openstack = CredentialType.defaults['openstack']()
         credential = Credential(
             pk=1, credential_type=openstack, inputs={'username': 'bob', 'password': 'secret', 'project': 'tenant-name', 'host': 'https://keystone.example.org'}
@@ -1180,6 +1189,7 @@ class TestJobCredentials(TestJobExecution):
     )
     def test_net_credentials(self, authorize, expected_authorize, job, private_data_dir):
         task = tasks.RunJob()
+        task.instance = job
         net = CredentialType.defaults['net']()
         inputs = {'username': 'bob', 'password': 'secret', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY, 'authorize_password': 'authorizeme'}
         if authorize is not None:
@@ -1247,6 +1257,7 @@ class TestJobCredentials(TestJobExecution):
 
     def test_custom_environment_injectors_with_reserved_env_var(self, private_data_dir, job):
         task = tasks.RunJob()
+        task.instance = job
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',
@@ -1446,6 +1457,7 @@ class TestJobCredentials(TestJobExecution):
     def test_awx_task_env(self, settings, private_data_dir, job):
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
         task = tasks.RunJob()
+        task.instance = job
         env = task.build_env(job, private_data_dir)
 
         assert env['FOO'] == 'BAR'
@@ -1454,11 +1466,12 @@ class TestJobCredentials(TestJobExecution):
 @pytest.mark.usefixtures("patch_Organization")
 class TestProjectUpdateGalaxyCredentials(TestJobExecution):
     @pytest.fixture
-    def project_update(self):
+    def project_update(self, execution_environment):
         org = Organization(pk=1)
         proj = Project(pk=1, organization=org)
         project_update = ProjectUpdate(pk=1, project=proj, scm_type='git')
         project_update.websocket_emit_status = mock.Mock()
+        project_update.execution_environment = execution_environment
         return project_update
 
     parametrize = {
@@ -1471,6 +1484,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
     def test_galaxy_credentials_ignore_certs(self, private_data_dir, project_update, ignore):
         settings.GALAXY_IGNORE_CERTS = ignore
         task = tasks.RunProjectUpdate()
+        task.instance = project_update
         env = task.build_env(project_update, private_data_dir)
         if ignore:
             assert env['ANSIBLE_GALAXY_IGNORE'] is True
@@ -1485,6 +1499,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
                 self.__vars__ = extra_vars
 
         task = RunProjectUpdate()
+        task.instance = project_update
         env = task.build_env(project_update, private_data_dir)
 
         with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
@@ -1512,6 +1527,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
         )
         project_update.project.organization.galaxy_credentials.add(public_galaxy)
         task = RunProjectUpdate()
+        task.instance = project_update
         env = task.build_env(project_update, private_data_dir)
 
         with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
@@ -1545,6 +1561,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
         project_update.project.organization.galaxy_credentials.add(public_galaxy)
         project_update.project.organization.galaxy_credentials.add(rh)
         task = tasks.RunProjectUpdate()
+        task.instance = project_update
         env = task.build_env(project_update, private_data_dir)
         assert sorted([(k, v) for k, v in env.items() if k.startswith('ANSIBLE_GALAXY')]) == [
             ('ANSIBLE_GALAXY_SERVER_LIST', 'server0,server1'),
@@ -1610,9 +1627,11 @@ class TestProjectUpdateCredentials(TestJobExecution):
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
         assert 'bob' in expect_passwords.values()
 
-    def test_awx_task_env(self, project_update, settings, private_data_dir, scm_type):
+    def test_awx_task_env(self, project_update, settings, private_data_dir, scm_type, execution_environment):
+        project_update.execution_environment = execution_environment
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
         task = tasks.RunProjectUpdate()
+        task.instance = project_update
         project_update.scm_type = scm_type
 
         env = task.build_env(project_update, private_data_dir)
@@ -1622,11 +1641,12 @@ class TestProjectUpdateCredentials(TestJobExecution):
 
 class TestInventoryUpdateCredentials(TestJobExecution):
     @pytest.fixture
-    def inventory_update(self):
-        return InventoryUpdate(pk=1, inventory_source=InventorySource(pk=1, inventory=Inventory(pk=1)))
+    def inventory_update(self, execution_environment):
+        return InventoryUpdate(pk=1, execution_environment=execution_environment, inventory_source=InventorySource(pk=1, inventory=Inventory(pk=1)))
 
     def test_source_without_credential(self, mocker, inventory_update, private_data_dir):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         inventory_update.source = 'ec2'
         inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
@@ -1640,6 +1660,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
     @pytest.mark.parametrize('with_credential', [True, False])
     def test_custom_source(self, with_credential, mocker, inventory_update, private_data_dir):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         inventory_update.source = 'custom'
         inventory_update.source_vars = '{"FOO": "BAR"}'
         inventory_update.source_script = CustomInventoryScript(script='#!/bin/sh\necho "Hello, World!"')
@@ -1687,6 +1708,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
     def test_ec2_source(self, private_data_dir, inventory_update, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         aws = CredentialType.defaults['aws']()
         inventory_update.source = 'ec2'
 
@@ -1710,6 +1732,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
     def test_vmware_source(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         vmware = CredentialType.defaults['vmware']()
         inventory_update.source = 'vmware'
 
@@ -1737,6 +1760,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
     def test_azure_rm_source_with_tenant(self, private_data_dir, inventory_update, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         azure_rm = CredentialType.defaults['azure_rm']()
         inventory_update.source = 'azure_rm'
 
@@ -1772,6 +1796,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
     def test_azure_rm_source_with_password(self, private_data_dir, inventory_update, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         azure_rm = CredentialType.defaults['azure_rm']()
         inventory_update.source = 'azure_rm'
 
@@ -1800,6 +1825,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
     def test_gce_source(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         gce = CredentialType.defaults['gce']()
         inventory_update.source = 'gce'
 
@@ -1829,6 +1855,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
     def test_openstack_source(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         openstack = CredentialType.defaults['openstack']()
         inventory_update.source = 'openstack'
 
@@ -1868,6 +1895,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
     def test_satellite6_source(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         satellite6 = CredentialType.defaults['satellite6']()
         inventory_update.source = 'satellite6'
 
@@ -1891,6 +1919,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
     @pytest.mark.parametrize('verify', [True, False])
     def test_tower_source(self, verify, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         tower = CredentialType.defaults['tower']()
         inventory_update.source = 'tower'
         inputs = {'host': 'https://tower.example.org', 'username': 'bob', 'password': 'secret', 'verify_ssl': verify}
@@ -1918,6 +1947,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
     def test_tower_source_ssl_verify_empty(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         tower = CredentialType.defaults['tower']()
         inventory_update.source = 'tower'
         inputs = {
@@ -1945,6 +1975,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
     def test_awx_task_env(self, inventory_update, private_data_dir, settings, mocker):
         task = tasks.RunInventoryUpdate()
+        task.instance = inventory_update
         gce = CredentialType.defaults['gce']()
         inventory_update.source = 'gce'
 

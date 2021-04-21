@@ -860,12 +860,6 @@ class BaseTask(object):
         if settings.IS_K8S:
             return {}
 
-        if instance.execution_environment_id is None:
-            from awx.main.signals import disable_activity_stream
-
-            with disable_activity_stream():
-                self.instance = instance = self.update_model(instance.pk, execution_environment=instance.resolve_execution_environment())
-
         image = instance.execution_environment.image
         params = {
             "container_image": image,
@@ -878,14 +872,14 @@ class BaseTask(object):
             if cred.has_inputs(field_names=('host', 'username', 'password')):
                 path = os.path.split(private_data_dir)[0]
                 with open(path + '/auth.json', 'w') as authfile:
+                    os.chmod(authfile.name, stat.S_IRUSR | stat.S_IWUSR)
+
                     host = cred.get_input('host')
                     username = cred.get_input('username')
                     password = cred.get_input('password')
                     token = "{}:{}".format(username, password)
                     auth_data = {'auths': {host: {'auth': b64encode(token.encode('ascii')).decode()}}}
                     authfile.write(json.dumps(auth_data, indent=4))
-                authfile.close()
-                os.chmod(authfile.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
                 params["container_options"].append(f'--authfile={authfile.name}')
             else:
                 raise RuntimeError('Please recheck that your host, username, and password fields are all filled.')
@@ -1067,6 +1061,30 @@ class BaseTask(object):
             env[key] = str(value)
 
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
+
+        ee_cred = self.instance.execution_environment.credential
+        if ee_cred:
+            verify_ssl = ee_cred.get_input('verify_ssl')
+            if not verify_ssl:
+                pdd_wrapper_path = os.path.split(private_data_dir)[0]
+                registries_conf_path = os.path.join(pdd_wrapper_path, 'registries.conf')
+                host = ee_cred.get_input('host')
+
+                with open(registries_conf_path, 'w') as registries_conf:
+                    os.chmod(registries_conf.name, stat.S_IRUSR | stat.S_IWUSR)
+
+                    lines = [
+                        '[[registry]]',
+                        'location = "{}"'.format(host),
+                        'insecure = true',
+                    ]
+
+                    registries_conf.write('\n'.join(lines))
+
+                # Podman >= 3.1.0
+                env['CONTAINERS_REGISTRIES_CONF'] = registries_conf_path
+                # Podman < 3.1.0
+                env['REGISTRIES_CONFIG_PATH'] = registries_conf_path
 
         return env
 
@@ -1314,6 +1332,12 @@ class BaseTask(object):
         Run the job/task and capture its output.
         """
         self.instance = self.model.objects.get(pk=pk)
+
+        if self.instance.execution_environment_id is None:
+            from awx.main.signals import disable_activity_stream
+
+            with disable_activity_stream():
+                self.instance = self.update_model(self.instance.pk, execution_environment=self.instance.resolve_execution_environment())
 
         # self.instance because of the update_model pattern and when it's used in callback handlers
         self.instance = self.update_model(pk, status='running', start_args='')  # blank field to remove encrypted passwords

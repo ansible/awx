@@ -1111,6 +1111,12 @@ ManagedCredentialType(
                 'secret': True,
                 'help_text': ugettext_noop('A password or token used to authenticate with'),
             },
+            {
+                'id': 'verify_ssl',
+                'label': ugettext_noop('Verify SSL'),
+                'type': 'boolean',
+                'default': True,
+            },
         ],
         'required': ['host'],
     },
