@@ -3,47 +3,29 @@
  * derived from https://lingui.js.org/guides/testing.html
  */
 import React from 'react';
-import { shape, object, string, arrayOf } from 'prop-types';
+import { shape, string, arrayOf } from 'prop-types';
 import { mount, shallow } from 'enzyme';
 import { MemoryRouter, Router } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
+import { i18n } from '@lingui/core';
+import { en } from 'make-plural/plurals';
+import english from '../src/locales/en/messages';
 import { ConfigProvider } from '../src/contexts/Config';
 
-const language = 'en-US';
-const intlProvider = new I18nProvider(
-  {
-    language,
-    catalogs: {
-      [language]: {},
-    },
-  },
-  {}
-);
-const {
-  linguiPublisher: { i18n: originalI18n },
-} = intlProvider.getChildContext();
+i18n.loadLocaleData({ en: { plurals: en } });
+i18n.load({ en: english });
+i18n.activate('en');
 
 const defaultContexts = {
-  linguiPublisher: {
-    i18n: {
-      ...originalI18n,
-      _: key => {
-        if (key.values) {
-          Object.entries(key.values).forEach(([k, v]) => {
-            key.id = key.id.replace(new RegExp(`\\{${k}\\}`), v);
-          });
-        }
-        return key.id;
-      }, // provide _ macro, for just passing down the key
-      toJSON: () => '/i18n/',
-    },
-  },
   config: {
     ansible_version: null,
     custom_virtualenvs: [],
     version: null,
     me: { is_superuser: true },
     toJSON: () => '/config/',
+    license_info: {
+      valid_key: true,
+    },
   },
   router: {
     history_: {
@@ -86,15 +68,19 @@ function wrapContexts(node, context) {
       const component = React.cloneElement(children, props);
       if (router.history) {
         return (
-          <ConfigProvider value={config}>
-            <Router history={router.history}>{component}</Router>
-          </ConfigProvider>
+          <I18nProvider i18n={i18n}>
+            <ConfigProvider value={config}>
+              <Router history={router.history}>{component}</Router>
+            </ConfigProvider>
+          </I18nProvider>
         );
       }
       return (
-        <ConfigProvider value={config}>
-          <MemoryRouter>{component}</MemoryRouter>
-        </ConfigProvider>
+        <I18nProvider i18n={i18n}>
+          <ConfigProvider value={config}>
+            <MemoryRouter>{component}</MemoryRouter>
+          </ConfigProvider>
+        </I18nProvider>
       );
     }
   }
@@ -124,9 +110,6 @@ export function shallowWithContexts(node, options = {}) {
 export function mountWithContexts(node, options = {}) {
   const context = applyDefaultContexts(options.context);
   const childContextTypes = {
-    linguiPublisher: shape({
-      i18n: object.isRequired, // eslint-disable-line react/forbid-prop-types
-    }).isRequired,
     config: shape({
       ansible_version: string,
       custom_virtualenvs: arrayOf(string),

@@ -12,7 +12,7 @@ import GitHub from './GitHub';
 import GoogleOAuth2 from './GoogleOAuth2';
 import Jobs from './Jobs';
 import LDAP from './LDAP';
-import License from './License';
+import Subscription from './Subscription';
 import Logging from './Logging';
 import MiscSystem from './MiscSystem';
 import RADIUS from './RADIUS';
@@ -93,7 +93,6 @@ function Settings({ i18n }) {
     '/settings/ldap/3/edit': i18n._(t`Edit Details`),
     '/settings/ldap/4/edit': i18n._(t`Edit Details`),
     '/settings/ldap/5/edit': i18n._(t`Edit Details`),
-    '/settings/license': i18n._(t`License`),
     '/settings/logging': i18n._(t`Logging`),
     '/settings/logging/details': i18n._(t`Details`),
     '/settings/logging/edit': i18n._(t`Edit Details`),
@@ -106,6 +105,9 @@ function Settings({ i18n }) {
     '/settings/saml': i18n._(t`SAML`),
     '/settings/saml/details': i18n._(t`Details`),
     '/settings/saml/edit': i18n._(t`Edit Details`),
+    '/settings/subscription': i18n._(t`Subscription`),
+    '/settings/subscription/details': i18n._(t`Details`),
+    '/settings/subscription/edit': i18n._(t`Edit Details`),
     '/settings/tacacs': i18n._(t`TACACS+`),
     '/settings/tacacs/details': i18n._(t`Details`),
     '/settings/tacacs/edit': i18n._(t`Edit Details`),
@@ -160,11 +162,11 @@ function Settings({ i18n }) {
         <Route path="/settings/ldap">
           <LDAP />
         </Route>
-        <Route path="/settings/license">
+        <Route path="/settings/subscription">
           {license_info?.license_type === 'open' ? (
-            <License />
-          ) : (
             <Redirect to="/settings" />
+          ) : (
+            <Subscription />
           )}
         </Route>
         <Route path="/settings/logging">

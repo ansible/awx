@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { string, bool } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -33,14 +33,83 @@ function VariablesField({
   promptId,
   tooltip,
 }) {
-  const [field, meta] = useField(name);
-  const [mode, setMode] = useState(
-    isJsonString(field.value) ? JSON_MODE : YAML_MODE
+  // track focus manually, because the Code Editor library doesn't wire
+  // into Formik completely
+  const [shouldValidate, setShouldValidate] = useState(false);
+  const [mode, setMode] = useState(YAML_MODE);
+  const validate = useCallback(
+    value => {
+      if (!shouldValidate) {
+        return undefined;
+      }
+      try {
+        if (mode === YAML_MODE) {
+          yamlToJson(value);
+        } else {
+          JSON.parse(value);
+        }
+      } catch (error) {
+        return error.message;
+      }
+      return undefined;
+    },
+    [shouldValidate, mode]
   );
+  const [field, meta, helpers] = useField({ name, validate });
+
+  // mode's useState above couldn't be initialized to JSON_MODE because
+  // the field value had to be defined below it
+  useEffect(function initializeMode() {
+    if (isJsonString(field.value)) {
+      setMode(JSON_MODE);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(
+    function validateOnBlur() {
+      if (shouldValidate) {
+        helpers.setError(validate(field.value));
+      }
+    },
+    [shouldValidate, validate] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const [lastYamlValue, setLastYamlValue] = useState(
+    mode === YAML_MODE ? field.value : null
+  );
+  const [isJsonEdited, setIsJsonEdited] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const handleModeChange = newMode => {
+    if (newMode === YAML_MODE && !isJsonEdited && lastYamlValue !== null) {
+      helpers.setValue(lastYamlValue, false);
+      setMode(newMode);
+      return;
+    }
+
+    try {
+      const newVal =
+        newMode === YAML_MODE
+          ? jsonToYaml(field.value)
+          : yamlToJson(field.value);
+      helpers.setValue(newVal, false);
+      setMode(newMode);
+    } catch (err) {
+      helpers.setError(err.message);
+    }
+  };
+
+  const handleChange = newVal => {
+    helpers.setValue(newVal);
+    if (mode === JSON_MODE) {
+      setIsJsonEdited(true);
+    } else {
+      setLastYamlValue(newVal);
+      setIsJsonEdited(false);
+    }
+  };
+
   return (
-    <>
+    <div>
       <VariablesFieldInternals
         i18n={i18n}
         id={id}
@@ -51,7 +120,9 @@ function VariablesField({
         tooltip={tooltip}
         onExpand={() => setIsExpanded(true)}
         mode={mode}
-        setMode={setMode}
+        setMode={handleModeChange}
+        setShouldValidate={setShouldValidate}
+        handleChange={handleChange}
       />
       <Modal
         variant="xlarge"
@@ -81,7 +152,9 @@ function VariablesField({
             tooltip={tooltip}
             fullHeight
             mode={mode}
-            setMode={setMode}
+            setMode={handleModeChange}
+            setShouldValidate={setShouldValidate}
+            handleChange={handleChange}
           />
         </div>
       </Modal>
@@ -90,7 +163,7 @@ function VariablesField({
           {meta.error}
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
 VariablesField.propTypes = {
@@ -117,8 +190,10 @@ function VariablesFieldInternals({
   mode,
   setMode,
   onExpand,
+  setShouldValidate,
+  handleChange,
 }) {
-  const [field, meta, helpers] = useField(name);
+  const [field, meta] = useField(name);
 
   return (
     <div className="pf-c-form__group">
@@ -128,7 +203,7 @@ function VariablesFieldInternals({
             <label htmlFor={id} className="pf-c-form__label">
               <span className="pf-c-form__label-text">{label}</span>
             </label>
-            {tooltip && <Popover content={tooltip} id={id} />}
+            {tooltip && <Popover content={tooltip} id={`${id}-tooltip`} />}
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle
@@ -137,18 +212,7 @@ function VariablesFieldInternals({
                 [JSON_MODE, 'JSON'],
               ]}
               value={mode}
-              onChange={newMode => {
-                try {
-                  const newVal =
-                    newMode === YAML_MODE
-                      ? jsonToYaml(field.value)
-                      : yamlToJson(field.value);
-                  helpers.setValue(newVal);
-                  setMode(newMode);
-                } catch (err) {
-                  helpers.setError(err.message);
-                }
-              }}
+              onChange={setMode}
             />
           </SplitItem>
         </Split>
@@ -171,13 +235,14 @@ function VariablesFieldInternals({
         )}
       </FieldHeader>
       <CodeEditor
+        id={id}
         mode={mode}
         readOnly={readOnly}
         {...field}
-        onChange={newVal => {
-          helpers.setValue(newVal);
-        }}
+        onChange={handleChange}
         fullHeight={fullHeight}
+        onFocus={() => setShouldValidate(false)}
+        onBlur={() => setShouldValidate(true)}
         hasErrors={!!meta.error}
       />
     </div>

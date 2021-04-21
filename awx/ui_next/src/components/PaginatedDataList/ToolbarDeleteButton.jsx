@@ -145,7 +145,7 @@ function ToolbarDeleteButton({
     if (itemsToDelete.some(cannotDelete)) {
       return (
         <div>
-          {errorMessage.length > 0
+          {errorMessage
             ? `${errorMessage}: ${itemsUnableToDelete}`
             : i18n._(
                 t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}`

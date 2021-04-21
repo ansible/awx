@@ -61,8 +61,8 @@ describe('FieldWithPrompt', () => {
       </Formik>
     );
     expect(wrapper.find('.pf-c-form__label-required')).toHaveLength(1);
-    expect(wrapper.find('Popover[data-cy="job-template-limit"]').length).toBe(
-      1
-    );
+    expect(
+      wrapper.find('Popover[data-cy="job-template-limit-tooltip"]').length
+    ).toBe(1);
   });
 });

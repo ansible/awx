@@ -13,9 +13,10 @@ def test_ad_hoc_command_wait_successful(run_module, admin_user):
     command = AdHocCommand.objects.create(status='successful', started=now(), finished=now())
     result = run_module('tower_ad_hoc_command_wait', dict(command_id=command.id), admin_user)
     result.pop('invocation', None)
+    result['elapsed'] = float(result['elapsed'])
     assert result.pop('finished', '')[:10] == str(command.finished)[:10]
     assert result.pop('started', '')[:10] == str(command.started)[:10]
-    assert result == {"status": "successful", "changed": False, "elapsed": str(command.elapsed), "id": command.id}
+    assert result == {"status": "successful", "changed": False, "elapsed": command.elapsed, "id": command.id}
 
 
 @pytest.mark.django_db
@@ -23,13 +24,14 @@ def test_ad_hoc_command_wait_failed(run_module, admin_user):
     command = AdHocCommand.objects.create(status='failed', started=now(), finished=now())
     result = run_module('tower_ad_hoc_command_wait', dict(command_id=command.id), admin_user)
     result.pop('invocation', None)
+    result['elapsed'] = float(result['elapsed'])
     assert result.pop('finished', '')[:10] == str(command.finished)[:10]
     assert result.pop('started', '')[:10] == str(command.started)[:10]
     assert result == {
         "status": "failed",
         "failed": True,
         "changed": False,
-        "elapsed": str(command.elapsed),
+        "elapsed": command.elapsed,
         "id": command.id,
         "msg": "The ad hoc command - 1, failed",
     }

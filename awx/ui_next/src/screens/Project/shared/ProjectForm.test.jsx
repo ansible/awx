@@ -17,6 +17,7 @@ describe('<ProjectForm />', () => {
     scm_type: 'git',
     scm_url: 'https://foo.bar',
     scm_clean: true,
+    scm_track_submodules: false,
     credential: 100,
     organization: 2,
     scm_update_on_launch: true,

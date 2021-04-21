@@ -2,14 +2,21 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 
+import { en } from 'make-plural/plurals';
+import { i18n } from '@lingui/core';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
+import english from '../../../locales/en/messages';
 import OrganizationListItem from './OrganizationListItem';
+
+i18n.loadLocaleData({ en: { plurals: en } });
+i18n.load({ en: english });
+i18n.activate('en');
 
 describe('<OrganizationListItem />', () => {
   test('initially renders successfully', () => {
     mountWithContexts(
-      <I18nProvider>
+      <I18nProvider i18n={i18n}>
         <MemoryRouter initialEntries={['/organizations']} initialIndex={0}>
           <table>
             <tbody>
@@ -40,7 +47,7 @@ describe('<OrganizationListItem />', () => {
 
   test('edit button shown to users with edit capabilities', () => {
     const wrapper = mountWithContexts(
-      <I18nProvider>
+      <I18nProvider i18n={i18n}>
         <MemoryRouter initialEntries={['/organizations']} initialIndex={0}>
           <table>
             <tbody>
@@ -72,7 +79,7 @@ describe('<OrganizationListItem />', () => {
 
   test('edit button hidden from users without edit capabilities', () => {
     const wrapper = mountWithContexts(
-      <I18nProvider>
+      <I18nProvider i18n={i18n}>
         <MemoryRouter initialEntries={['/organizations']} initialIndex={0}>
           <table>
             <tbody>

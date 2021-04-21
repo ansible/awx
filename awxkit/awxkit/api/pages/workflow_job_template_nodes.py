@@ -1,9 +1,10 @@
-import awxkit.exceptions as exc
+from contextlib import suppress
 
+import awxkit.exceptions as exc
 from awxkit.api.pages import base, WorkflowJobTemplate, UnifiedJobTemplate, JobTemplate
 from awxkit.api.mixins import HasCreate, DSAdapter
 from awxkit.api.resources import resources
-from awxkit.utils import update_payload, PseudoNamespace, suppress, random_title
+from awxkit.utils import update_payload, PseudoNamespace, random_title
 from . import page
 
 

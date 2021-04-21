@@ -65,7 +65,8 @@ I18N_FLAG_FILE = .i18n_built
 	receiver test test_unit test_coverage coverage_html \
 	dev_build release_build sdist \
 	ui-release ui-devel \
-	VERSION docker-compose-sources
+	VERSION docker-compose-sources \
+	.git/hooks/pre-commit
 
 clean-tmp:
 	rm -rf tmp/

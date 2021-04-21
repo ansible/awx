@@ -10,7 +10,7 @@ import re
 from django.utils.translation import ugettext_lazy as _
 
 # Tower
-from awx.conf import fields, register
+from awx.conf import fields
 
 
 class PendoTrackingStateField(fields.ChoiceField):

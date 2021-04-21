@@ -39,7 +39,7 @@ function FieldWithPrompt({
               </span>
             )}
           </label>
-          {tooltip && <Popover content={tooltip} id={fieldId} />}
+          {tooltip && <Popover content={tooltip} id={`${fieldId}-tooltip`} />}
         </div>
         <StyledCheckboxField
           isDisabled={isDisabled}

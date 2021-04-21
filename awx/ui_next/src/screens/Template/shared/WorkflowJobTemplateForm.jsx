@@ -159,7 +159,7 @@ function WorkflowJobTemplateForm({
             )}
         </>
         <FieldWithPrompt
-          fieldId="wjft-limit"
+          fieldId="wfjt-limit"
           label={i18n._(t`Limit`)}
           promptId="template-ask-limit-on-launch"
           promptName="ask_limit_on_launch"
@@ -169,7 +169,7 @@ function WorkflowJobTemplateForm({
                   documentation for more information and examples on patterns.`)}
         >
           <TextInput
-            id="text-wfjt-limit"
+            id="wfjt-limit"
             {...limitField}
             validated={
               !limitMeta.touched || !limitMeta.error ? 'default' : 'error'
@@ -190,7 +190,7 @@ function WorkflowJobTemplateForm({
           )}
         >
           <TextInput
-            id="text-wfjt-scm-branch"
+            id="wfjt-scm-branch"
             {...scmField}
             onChange={value => {
               scmHelpers.setValue(value);

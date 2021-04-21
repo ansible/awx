@@ -1,8 +1,6 @@
-import random
 import logging
 
-from django.db import migrations, models
-from django.utils.timezone import now, timedelta
+from django.utils.timezone import now
 
 logger = logging.getLogger('awx.main.migrations')
 

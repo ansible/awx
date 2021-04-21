@@ -43,7 +43,7 @@ function UserListItem({
         }}
       />
       <Td id={labelId} dataLabel={i18n._(t`Username`)}>
-        <Link to={`${detailUrl}`} id={labelId}>
+        <Link to={`${detailUrl}`}>
           <b>{user.username}</b>
         </Link>
         {ldapUser && (

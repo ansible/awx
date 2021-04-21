@@ -2,12 +2,8 @@
 # Python
 from __future__ import unicode_literals
 
-# Django
-from django.db import migrations, models
-
 # AWX
 from awx.main.migrations import ActivityStreamDisabledMigration
-import awx.main.fields
 
 
 class Migration(ActivityStreamDisabledMigration):

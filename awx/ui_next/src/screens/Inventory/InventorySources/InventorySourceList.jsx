@@ -146,7 +146,6 @@ function InventorySourceList({ i18n }) {
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.inventorySource(
     id,
-    i18n,
     selected[0]
   );
   return (

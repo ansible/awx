@@ -375,7 +375,7 @@ def events_table(since, full_path, until, **kwargs):
 
     try:
         return _copy_table(table='events', query=query("main_jobevent.event_data::json"), path=full_path)
-    except UntranslatableCharacter as exc:
+    except UntranslatableCharacter:
         return _copy_table(table='events', query=query("replace(main_jobevent.event_data::text, '\\u0000', '')::json"), path=full_path)
 
 

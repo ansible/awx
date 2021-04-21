@@ -85,6 +85,19 @@ export const ScmTypeOptions = withI18n()(
             )}
           />
           <CheckboxField
+            id="option-scm-track-submodules"
+            name="scm_track_submodules"
+            label={i18n._(t`Track submodules`)}
+            tooltip={i18n._(
+              t`Submodules will track the latest commit on
+                  their master branch (or other branch specified in
+                  .gitmodules). If no, submodules will be kept at
+                  the revision specified by the main project.
+                  This is equivalent to specifying the --remote
+                  flag to git submodule update.`
+            )}
+          />
+          <CheckboxField
             id="option-scm-update-on-launch"
             name="scm_update_on_launch"
             label={i18n._(t`Update Revision on Launch`)}

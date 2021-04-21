@@ -7,7 +7,6 @@ import django.db.models.deletion
 
 from awx.main.migrations._rbac import (
     rebuild_role_parentage,
-    rebuild_role_hierarchy,
     migrate_ujt_organization,
     migrate_ujt_organization_backward,
     restore_inventory_admins,

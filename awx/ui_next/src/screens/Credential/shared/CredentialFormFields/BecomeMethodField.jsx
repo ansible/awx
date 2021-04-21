@@ -43,6 +43,7 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
     >
       <Select
         ouiaId={`CredentialForm-${fieldOptions.id}`}
+        typeAheadAriaLabel={fieldOptions.label}
         maxHeight={200}
         variant={SelectVariant.typeahead}
         onToggle={setIsOpen}

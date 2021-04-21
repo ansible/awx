@@ -56,6 +56,7 @@ function PlaybookSelect({
       selections={selected}
       onToggle={setIsOpen}
       placeholderText={i18n._(t`Select a playbook`)}
+      typeAheadAriaLabel={i18n._(t`Select a playbook`)}
       isCreateable={false}
       onSelect={(event, value) => {
         setIsOpen(false);

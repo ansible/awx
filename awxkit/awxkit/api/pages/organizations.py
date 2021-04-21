@@ -1,5 +1,7 @@
+from contextlib import suppress
+
 from awxkit.api.mixins import HasCreate, HasInstanceGroups, HasNotifications, DSAdapter
-from awxkit.utils import random_title, suppress, set_payload_foreign_key_args, PseudoNamespace
+from awxkit.utils import random_title, set_payload_foreign_key_args, PseudoNamespace
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
 from . import base

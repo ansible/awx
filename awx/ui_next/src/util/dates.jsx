@@ -23,6 +23,14 @@ export function secondsToHHMMSS(seconds) {
   return new Date(seconds * 1000).toISOString().substr(11, 8);
 }
 
+export function secondsToDays(seconds) {
+  let duration = Math.floor(parseInt(seconds, 10) / 86400);
+  if (duration < 0) {
+    duration = 0;
+  }
+  return duration.toString();
+}
+
 export function timeOfDay() {
   const date = new Date();
   const hour = date.getHours();

@@ -1,7 +1,8 @@
+from contextlib import suppress
+
 from awxkit.api.pages import UnifiedJob
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
-from awxkit.utils import suppress
 from . import page
 from . import base
 

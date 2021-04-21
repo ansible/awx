@@ -1,4 +1,6 @@
-﻿# Define parameters
+#!/usr/bin/env pwsh
+
+# Define parameters
 [cmdletbinding()]
 Param(
     [Alias("k")]
@@ -21,8 +23,6 @@ Param(
 )
 
 # Initialize variables
-Set-StrictMode -Version 2
-$ErrorActionPreference = "Stop"
 $retry_attempts = 10
 $attempt = 0
 $usage = @"
@@ -54,46 +54,89 @@ If (-not $tower_url -or -not $host_config_key -or -not $job_template_id -or $hel
 }
 
 # Create Invoke-WebRequest JSON data hash tables
-If (-not $extra_vars) {
-    $data = @{
-        host_config_key=$host_config_key
-    }
-} Else {
-    $data = @{
-        host_config_key=$host_config_key
-        extra_vars=$extra_vars
+$data = @{
+    host_config_key = $host_config_key
+}
+If ($extra_vars) {
+    $data.extra_vars = $extra_vars
+}
+
+# Ensure TLS 1.2 is enabled (this isn't on by default on older .NET versions)
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+
+$invoke_params = @{
+    ContentType = 'application/json'
+    Method = 'POST'
+    Body = (ConvertTo-Json $data)
+    Uri = "$tower_url/api/v2/job_templates/$job_template_id/callback/"
+    UseBasicParsing = $true
+    ErrorAction = 'Stop'
+}
+
+$invoke_command = Get-Command -Name Invoke-WebRequest
+$legacy_insecure = $insecure
+If ('SkipCertificateCheck' -in $invoke_command.Parameters.Keys) {
+    $invoke_params.SkipCertificateCheck = $insecure
+    $legacy_insecure = $false
+}
+Else {
+    Add-Type -TypeDefinition @'
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+
+public class TrustAllCertsPolicy : ICertificatePolicy {
+    public bool CheckValidationResult(ServicePoint srvPoint, X509Certificate certificate,
+            WebRequest request, int certificateProblem) {
+        return true;
     }
 }
+'@
+}
+$old_validation_policy = [System.Net.ServicePointManager]::CertificatePolicy
 
 # Success on any 2xx status received, failure on only 404 status received, retry any other status every min for up to 10 min
 While ($attempt -lt $retry_attempts) {
     Try {
-        If ($insecure) {
-            [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+        If ($legacy_insecure) {
+            [System.Net.ServicePointManager]::CertificatePolicy = New-Object -TypeName TrustAllCertsPolicy
         }
-        $resp = Invoke-WebRequest -ContentType application/json -Method POST -Body (ConvertTo-Json $data) -Uri $tower_url/api/v2/job_templates/$job_template_id/callback/
-        If ($resp.StatusCode -match '^2[0-9]+$') {
-            Exit 0
-        }
-    }
-    Catch [System.Security.Authentication.AuthenticationException] {
-        Write-Host $_
-        Exit 1
+        $null = Invoke-WebRequest @invoke_params
+        Exit 0
     }
     Catch {
-        $ex = $_
-        $attempt++
-        If ($([int]$ex.Exception.Response.StatusCode) -eq 404) {
-            Write-Host "$([int]$ex.Exception.Response.StatusCode) received... encountered problem, halting"
+        $exp = $_.Exception
+
+        # The StatusCode is only present on certain exception which differ across PowerShell versions.
+        $status_code = If ($exp.GetType().FullName -in @(
+            'System.Net.WebException',  # Windows PowerShell (<=5.1)
+            'Microsoft.PowerShell.Commands.HttpResponseException'  # PowerShell (6+)
+        )) {
+            $exp.Response.StatusCode
+        }
+
+        # WinPS cert validation errors are a WebException but have no StatusCode so we need to check that explicitly.
+        If ($null -ne $status_code) {
+            $attempt++
+            
+            $msg = "$([int]$status_code) ($status_code) received... "
+
+            If ([int]$status_code -eq 404) {
+                Write-Host "$msg encountered problem, halting"
+                Exit 1
+            }
+
+            Write-Host "$msg retrying in 1 minute (Attempt $attempt)"
+        }
+        Else {
+            Write-Host "Unknown error received... $($_.ToString()) ($($exp.GetType().FullName))"
             Exit 1
         }
-        Write-Host "$([int]$ex.Exception.Response.StatusCode) received... retrying in 1 minute (Attempt $attempt)"
     }
     Finally {
-        If ($insecure) {
-            $sp = [System.Net.ServicePointManager]::FindServicePoint($tower_url)
+        If ($legacy_insecure) {
+            $sp = [System.Net.ServicePointManager]::FindServicePoint($invoke_params.Uri)
             $sp.CloseConnectionGroup("") > $null
-            [System.Net.ServicePointManager]::ServerCertificateValidationCallback = $null
+            [System.Net.ServicePointManager]::CertificatePolicy = $old_validation_policy
         }
     }
     Start-Sleep -Seconds 60

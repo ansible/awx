@@ -82,7 +82,13 @@ describe('<JobOutput />', () => {
   let wrapper;
   const mockJob = mockJobData;
   const mockJobEvents = mockJobEventsData;
+  beforeAll(() => {
+    jest.setTimeout(5000 * 4);
+  });
 
+  afterAll(() => {
+    jest.setTimeout(5000);
+  });
   beforeEach(() => {
     JobsAPI.readEvents.mockResolvedValue({
       data: {
@@ -259,6 +265,7 @@ describe('<JobOutput />', () => {
   });
 
   test('filter should trigger api call and display correct rows', async () => {
+    jest.setTimeout(5000 * 4);
     const searchBtn = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
     await act(async () => {

@@ -2,10 +2,17 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 
+import { i18n } from '@lingui/core';
+import { en } from 'make-plural/plurals';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import mockDetails from '../data.user.json';
 import UserListItem from './UserListItem';
+import english from '../../../locales/en/messages';
+
+i18n.loadLocaleData({ en: { plurals: en } });
+i18n.load({ en: english });
+i18n.activate('en');
 
 let wrapper;
 
@@ -16,7 +23,7 @@ afterEach(() => {
 describe('UserListItem with full permissions', () => {
   beforeEach(() => {
     wrapper = mountWithContexts(
-      <I18nProvider>
+      <I18nProvider i18n={i18n}>
         <MemoryRouter initialEntries={['/users']} initialIndex={0}>
           <table>
             <tbody>
@@ -52,7 +59,7 @@ describe('UserListItem with full permissions', () => {
 describe('UserListItem without full permissions', () => {
   test('edit button hidden from users without edit capabilities', () => {
     wrapper = mountWithContexts(
-      <I18nProvider>
+      <I18nProvider i18n={i18n}>
         <MemoryRouter initialEntries={['/users']} initialIndex={0}>
           <table>
             <tbody>

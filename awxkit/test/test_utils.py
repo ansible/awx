@@ -216,32 +216,6 @@ class RecordingCallback(object):
         return self.value
 
 
-def test_suppress():
-    callback = RecordingCallback()
-
-    with utils.suppress(ZeroDivisionError, IndexError):
-        raise ZeroDivisionError
-        callback()
-        raise IndexError
-        raise KeyError
-    assert callback.call_count == 0
-
-    with utils.suppress(ZeroDivisionError, IndexError):
-        raise IndexError
-        callback()
-        raise ZeroDivisionError
-        raise KeyError
-    assert callback.call_count == 0
-
-    with pytest.raises(KeyError):
-        with utils.suppress(ZeroDivisionError, IndexError):
-            raise KeyError
-            callback()
-            raise ZeroDivisionError
-            raise IndexError
-    assert callback.call_count == 0
-
-
 class TestPollUntil(object):
     @pytest.mark.parametrize('timeout', [0, 0.0, -0.5, -1, -9999999])
     def test_callback_called_once_for_non_positive_timeout(self, timeout):

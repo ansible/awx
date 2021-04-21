@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Plural } from '@lingui/macro';
 import { arrayOf, func } from 'prop-types';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { KebabifiedContext } from '../../contexts/Kebabified';
@@ -22,7 +22,6 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const numJobsToCancel = jobsToCancel.length;
-  const zeroOrOneJobSelected = numJobsToCancel < 2;
 
   const handleCancelJob = () => {
     onCancel();
@@ -54,35 +53,32 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
         <div>
           {cannotCancelPermissions.length > 0 && (
             <div>
-              {i18n._(
-                '{numJobsUnableToCancel, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}',
-                {
-                  numJobsUnableToCancel: cannotCancelPermissions.length,
-                }
-              )}
-              {' '.concat(cannotCancelPermissions.join(', '))}
+              <Plural
+                value={cannotCancelPermissions.length}
+                one="You do not have permission to cancel the following job:"
+                other="You do not have permission to cancel the following jobs:"
+              />
             </div>
           )}
           {cannotCancelNotRunning.length > 0 && (
             <div>
-              {i18n._(
-                '{numJobsUnableToCancel, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}',
-                {
-                  numJobsUnableToCancel: cannotCancelNotRunning.length,
-                }
-              )}
-              {' '.concat(cannotCancelNotRunning.join(', '))}
+              <Plural
+                value={cannotCancelNotRunning.length}
+                one="You cannot cancel the following job because it is not running"
+                other="You cannot cancel the following jobs because they are not running"
+              />
             </div>
           )}
         </div>
       );
     }
     if (numJobsToCancel > 0) {
-      return i18n._(
-        '{numJobsToCancel, plural, one {Cancel selected job} other {Cancel selected jobs}}',
-        {
-          numJobsToCancel,
-        }
+      return (
+        <Plural
+          value={numJobsToCancel}
+          one={i18n._(t`Cancel selected job`)}
+          other={i18n._(t`Cancel selected jobs`)}
+        />
       );
     }
     return i18n._(t`Select a job to cancel`);
@@ -92,12 +88,8 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
     jobsToCancel.length === 0 ||
     jobsToCancel.some(cannotCancelBecausePermissions) ||
     jobsToCancel.some(cannotCancelBecauseNotRunning);
-
-  const cancelJobText = i18n._(
-    '{zeroOrOneJobSelected, plural, one {Cancel job} other {Cancel jobs}}',
-    {
-      zeroOrOneJobSelected,
-    }
+  const cancelJobText = (
+    <Plural value={numJobsToCancel} one="Cancel job" other="Cancel jobs" />
   );
 
   return (
@@ -156,12 +148,11 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
           ]}
         >
           <div>
-            {i18n._(
-              '{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}',
-              {
-                numJobsToCancel,
-              }
-            )}
+            <Plural
+              value={numJobsToCancel}
+              one="This action will cancel the following job:"
+              other="This action will cancel the following jobs:"
+            />
           </div>
           {jobsToCancel.map(job => (
             <span key={job.id}>

@@ -98,8 +98,7 @@ function JobTemplateDetail({ i18n, template }) {
   const { error, dismissError } = useDismissableError(deleteError);
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.template(
-    template,
-    i18n
+    template
   );
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;
@@ -388,12 +387,13 @@ function JobTemplateDetail({ i18n, template }) {
           )}
         {canLaunch && (
           <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
-            {({ handleLaunch }) => (
+            {({ handleLaunch, isLaunching }) => (
               <Button
                 ouiaId="job-template-detail-launch-button"
                 variant="secondary"
                 type="submit"
                 onClick={handleLaunch}
+                isDisabled={isLaunching}
               >
                 {i18n._(t`Launch`)}
               </Button>
@@ -403,6 +403,7 @@ function JobTemplateDetail({ i18n, template }) {
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.delete && (
             <DeleteButton
+              ouiaId="job-template-detail-delete-button"
               name={name}
               modalTitle={i18n._(t`Delete Job Template`)}
               onConfirm={deleteJobTemplate}

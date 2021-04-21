@@ -1,3 +1,4 @@
+from contextlib import suppress
 import inspect
 import logging
 import json
@@ -6,7 +7,7 @@ import re
 from requests import Response
 import http.client as http
 
-from awxkit.utils import PseudoNamespace, is_relative_endpoint, are_same_endpoint, super_dir_set, suppress, is_list_or_tuple, to_str
+from awxkit.utils import PseudoNamespace, is_relative_endpoint, are_same_endpoint, super_dir_set, is_list_or_tuple, to_str
 from awxkit.api import utils
 from awxkit.api.client import Connection
 from awxkit.api.registry import URLRegistry

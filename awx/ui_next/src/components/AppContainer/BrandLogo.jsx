@@ -13,6 +13,8 @@ const BrandImg = styled.img`
   pointer-events: none;
 `;
 
-const BrandLogo = () => <BrandImg src="/static/media/logo-header.svg" />;
+const BrandLogo = ({ alt }) => (
+  <BrandImg src="/static/media/logo-header.svg" alt={alt} />
+);
 
 export default BrandLogo;

@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { node, number, oneOfType, shape, string, arrayOf } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -23,39 +23,42 @@ import {
 import CodeEditor from './CodeEditor';
 import { JSON_MODE, YAML_MODE } from './constants';
 
-function getValueAsMode(value, mode) {
-  if (!value) {
-    if (mode === JSON_MODE) {
-      return '{}';
-    }
-    return '---';
-  }
-  const modeMatches = isJsonString(value) === (mode === JSON_MODE);
-  if (modeMatches) {
-    return value;
-  }
-  return mode === YAML_MODE ? jsonToYaml(value) : yamlToJson(value);
-}
-
-function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
+function VariablesDetail({
+  dataCy,
+  helpText,
+  value,
+  label,
+  rows,
+  fullHeight,
+  i18n,
+}) {
   const [mode, setMode] = useState(
     isJsonObject(value) || isJsonString(value) ? JSON_MODE : YAML_MODE
   );
-  const [currentValue, setCurrentValue] = useState(
-    isJsonObject(value) ? JSON.stringify(value, null, 2) : value || '---'
-  );
   const [isExpanded, setIsExpanded] = useState(false);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    setCurrentValue(
-      getValueAsMode(
-        isJsonObject(value) ? JSON.stringify(value, null, 2) : value,
-        mode
-      )
-    );
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [value]);
+  let currentValue = value;
+  let error;
+
+  const getValueInCurrentMode = () => {
+    if (!value) {
+      if (mode === JSON_MODE) {
+        return '{}';
+      }
+      return '---';
+    }
+    const modeMatches = isJsonString(value) === (mode === JSON_MODE);
+    if (modeMatches) {
+      return value;
+    }
+    return mode === YAML_MODE ? jsonToYaml(value) : yamlToJson(value);
+  };
+
+  try {
+    currentValue = getValueInCurrentMode();
+  } catch (err) {
+    error = err;
+  }
 
   const labelCy = dataCy ? `${dataCy}-label` : null;
   const valueCy = dataCy ? `${dataCy}-value` : null;
@@ -70,14 +73,13 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
         css="grid-column: 1 / -1"
       >
         <ModeToggle
+          id={`${dataCy}-preview`}
           label={label}
           helpText={helpText}
           dataCy={dataCy}
           mode={mode}
           setMode={setMode}
           currentValue={currentValue}
-          setCurrentValue={setCurrentValue}
-          setError={setError}
           onExpand={() => setIsExpanded(true)}
           i18n={i18n}
         />
@@ -89,10 +91,12 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
         css="grid-column: 1 / -1; margin-top: -20px"
       >
         <CodeEditor
+          id={`${dataCy}-preview`}
           mode={mode}
           value={currentValue}
           readOnly
           rows={rows}
+          fullHeight={fullHeight}
           css="margin-top: 10px"
         />
         {error && (
@@ -123,17 +127,17 @@ function VariablesDetail({ dataCy, helpText, value, label, rows, i18n }) {
       >
         <div className="pf-c-form">
           <ModeToggle
+            id={`${dataCy}-preview-expanded`}
             label={label}
             helpText={helpText}
             dataCy={dataCy}
             mode={mode}
             setMode={setMode}
             currentValue={currentValue}
-            setCurrentValue={setCurrentValue}
-            setError={setError}
             i18n={i18n}
           />
           <CodeEditor
+            id={`${dataCy}-preview-expanded`}
             mode={mode}
             value={currentValue}
             readOnly
@@ -160,14 +164,12 @@ VariablesDetail.defaultProps = {
 };
 
 function ModeToggle({
+  id,
   label,
   helpText,
   dataCy,
-  currentValue,
-  setCurrentValue,
   mode,
   setMode,
-  setError,
   onExpand,
   i18n,
 }) {
@@ -176,7 +178,7 @@ function ModeToggle({
       <SplitItem isFilled>
         <Split hasGutter css="align-items: baseline">
           <SplitItem>
-            <div className="pf-c-form__label">
+            <label className="pf-c-form__label" htmlFor={id}>
               <span
                 className="pf-c-form__label-text"
                 css="font-weight: var(--pf-global--FontWeight--bold)"
@@ -186,7 +188,7 @@ function ModeToggle({
               {helpText && (
                 <Popover header={label} content={helpText} id={dataCy} />
               )}
-            </div>
+            </label>
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle
@@ -196,12 +198,7 @@ function ModeToggle({
               ]}
               value={mode}
               onChange={newMode => {
-                try {
-                  setCurrentValue(getValueAsMode(currentValue, newMode));
-                  setMode(newMode);
-                } catch (err) {
-                  setError(err);
-                }
+                setMode(newMode);
               }}
             />
           </SplitItem>

@@ -73,8 +73,7 @@ function OrganizationDetail({ i18n, organization }) {
   const { error, dismissError } = useDismissableError(deleteError);
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.organization(
-    organization,
-    i18n
+    organization
   );
 
   if (hasContentLoading) {

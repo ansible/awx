@@ -2627,7 +2627,7 @@ class LabelAccess(BaseAccess):
         return self.model.objects.filter(
             Q(organization__in=Organization.accessible_pk_qs(self.user, 'read_role'))
             | Q(unifiedjobtemplate_labels__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
-        )
+        ).distinct()
 
     @check_superuser
     def can_add(self, data):

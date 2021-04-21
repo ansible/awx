@@ -39,15 +39,15 @@ describe('<VariablesDetail>', () => {
     wrapper.find('MultiButtonToggle').invoke('onChange')('yaml');
     const input2 = wrapper.find('VariablesDetail___StyledCodeEditor');
     expect(input2.prop('mode')).toEqual('yaml');
-    expect(input2.prop('value')).toEqual('foo: bar\n');
+    expect(input2.prop('value')).toEqual('---foo: bar');
   });
 
-  test('should render label and value= --- when there are no values', () => {
+  test('should render label and value --- when there are no values', () => {
     const wrapper = mountWithContexts(
       <VariablesDetail value="" label="Variables" />
     );
     expect(wrapper.find('VariablesDetail___StyledCodeEditor').length).toBe(1);
-    expect(wrapper.find('div.pf-c-form__label').text()).toBe('Variables');
+    expect(wrapper.find('.pf-c-form__label').text()).toBe('Variables');
   });
 
   test('should update value if prop changes', () => {

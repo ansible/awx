@@ -319,4 +319,71 @@ describe('<ProjectsListItem />', () => {
     ).toBe('Sync for revision');
     expect(wrapper.find('ClipboardCopyButton').prop('isDisabled')).toBe(true);
   });
+  test('should render expected details in expanded section', async () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <ProjectsListItem
+            rowIndex={1}
+            isSelected={false}
+            detailUrl="/project/1"
+            onSelect={() => {}}
+            project={{
+              id: 1,
+              name: 'Project 1',
+              description: 'Project 1 description',
+              url: '/api/v2/projects/1',
+              type: 'project',
+              scm_type: 'git',
+              scm_revision: '123456789',
+              summary_fields: {
+                organization: {
+                  id: 999,
+                  description: '',
+                  name: 'Mock org',
+                },
+                user_capabilities: {
+                  start: true,
+                },
+                default_environment: {
+                  id: 123,
+                  name: 'Mock EE',
+                  image: 'mock.image',
+                },
+              },
+              custom_virtualenv: '/var/lib/awx/env',
+              default_environment: 123,
+              organization: 999,
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    expect(
+      wrapper
+        .find('Tr')
+        .last()
+        .prop('isExpanded')
+    ).toBe(false);
+    await act(async () =>
+      wrapper.find('button[aria-label="Details"]').simulate('click')
+    );
+    wrapper.update();
+    expect(
+      wrapper
+        .find('Tr')
+        .last()
+        .prop('isExpanded')
+    ).toBe(true);
+
+    function assertDetail(label, value) {
+      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+    }
+    assertDetail('Description', 'Project 1 description');
+    assertDetail('Organization', 'Mock org');
+    assertDetail('Default Execution Environment', 'Mock EE');
+    expect(wrapper.find('Detail[label="Last modified"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Last used"]').length).toBe(1);
+  });
 });

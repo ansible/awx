@@ -118,8 +118,7 @@ function ProjectList({ i18n }) {
   };
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.project(
-    selected[0],
-    i18n
+    selected[0]
   );
 
   return (
@@ -171,7 +170,7 @@ function ProjectList({ i18n }) {
             toolbarSearchableKeys={searchableKeys}
             toolbarRelatedSearchableKeys={relatedSearchableKeys}
             headerRow={
-              <HeaderRow qsConfig={QS_CONFIG}>
+              <HeaderRow qsConfig={QS_CONFIG} isExpandable>
                 <HeaderCell sortKey="name">{i18n._(t`Name`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Status`)}</HeaderCell>
                 <HeaderCell>{i18n._(t`Type`)}</HeaderCell>

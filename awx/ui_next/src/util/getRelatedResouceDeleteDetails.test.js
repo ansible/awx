@@ -10,6 +10,8 @@ import {
   WorkflowJobTemplatesAPI,
   WorkflowJobTemplateNodesAPI,
   CredentialsAPI,
+  ExecutionEnvironmentsAPI,
+  CredentialInputSourcesAPI,
 } from '../api';
 
 jest.mock('../api/models/Credentials');
@@ -19,17 +21,8 @@ jest.mock('../api/models/JobTemplates');
 jest.mock('../api/models/Projects');
 jest.mock('../api/models/WorkflowJobTemplates');
 jest.mock('../api/models/WorkflowJobTemplateNodes');
-
-const i18n = {
-  _: key => {
-    if (key.values) {
-      Object.entries(key.values).forEach(([k, v]) => {
-        key.id = key.id.replace(new RegExp(`\\{${k}\\}`), v);
-      });
-    }
-    return key.id;
-  },
-};
+jest.mock('../api/models/CredentialInputSources');
+jest.mock('../api/models/ExecutionEnvironments');
 
 describe('delete details', () => {
   afterEach(() => {
@@ -38,7 +31,7 @@ describe('delete details', () => {
 
   test('should call api for credentials list', () => {
     getRelatedResourceDeleteCounts(
-      relatedResourceDeleteRequests.credential({ id: 1 }, i18n)
+      relatedResourceDeleteRequests.credential({ id: 1 })
     );
     expect(InventoriesAPI.read).toBeCalledWith({
       insights_credential: 1,
@@ -52,7 +45,7 @@ describe('delete details', () => {
 
   test('should call api for projects list', () => {
     getRelatedResourceDeleteCounts(
-      relatedResourceDeleteRequests.project({ id: 1 }, i18n)
+      relatedResourceDeleteRequests.project({ id: 1 })
     );
     expect(WorkflowJobTemplateNodesAPI.read).toBeCalledWith({
       unified_job_template: 1,
@@ -65,7 +58,7 @@ describe('delete details', () => {
 
   test('should call api for templates list', () => {
     getRelatedResourceDeleteCounts(
-      relatedResourceDeleteRequests.template({ id: 1 }, i18n)
+      relatedResourceDeleteRequests.template({ id: 1 })
     );
     expect(WorkflowJobTemplateNodesAPI.read).toBeCalledWith({
       unified_job_template: 1,
@@ -74,7 +67,7 @@ describe('delete details', () => {
 
   test('should call api for credential type list', () => {
     getRelatedResourceDeleteCounts(
-      relatedResourceDeleteRequests.credentialType({ id: 1 }, i18n)
+      relatedResourceDeleteRequests.credentialType({ id: 1 })
     );
     expect(CredentialsAPI.read).toBeCalledWith({
       credential_type__id: 1,
@@ -83,7 +76,7 @@ describe('delete details', () => {
 
   test('should call api for inventory list', () => {
     getRelatedResourceDeleteCounts(
-      relatedResourceDeleteRequests.inventory({ id: 1 }, i18n)
+      relatedResourceDeleteRequests.inventory({ id: 1 })
     );
     expect(JobTemplatesAPI.read).toBeCalledWith({ inventory: 1 });
     expect(WorkflowJobTemplatesAPI.read).toBeCalledWith({
@@ -96,7 +89,7 @@ describe('delete details', () => {
       data: [{ inventory_source: 2 }],
     });
     await getRelatedResourceDeleteCounts(
-      relatedResourceDeleteRequests.inventorySource(1, i18n)
+      relatedResourceDeleteRequests.inventorySource(1)
     );
     expect(InventoriesAPI.updateSources).toBeCalledWith(1);
     expect(WorkflowJobTemplateNodesAPI.read).toBeCalledWith({
@@ -106,7 +99,7 @@ describe('delete details', () => {
 
   test('should call api for organization list', async () => {
     getRelatedResourceDeleteCounts(
-      relatedResourceDeleteRequests.organization({ id: 1 }, i18n)
+      relatedResourceDeleteRequests.organization({ id: 1 })
     );
     expect(CredentialsAPI.read).toBeCalledWith({ organization: 1 });
   });
@@ -123,7 +116,7 @@ describe('delete details', () => {
       },
     });
     const { error } = await getRelatedResourceDeleteCounts(
-      relatedResourceDeleteRequests.inventorySource(1, i18n)
+      relatedResourceDeleteRequests.inventorySource(1)
     );
 
     expect(InventoriesAPI.updateSources).toBeCalledWith(1);
@@ -131,14 +124,24 @@ describe('delete details', () => {
   });
 
   test('should return proper results', async () => {
-    JobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    JobTemplatesAPI.read.mockResolvedValue({ data: { count: 1 } });
+
+    InventorySourcesAPI.read.mockResolvedValue({ data: { count: 10 } });
+    CredentialInputSourcesAPI.read.mockResolvedValue({ data: { count: 20 } });
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({ data: { count: 30 } });
     ProjectsAPI.read.mockResolvedValue({ data: { count: 2 } });
     InventoriesAPI.read.mockResolvedValue({ data: { count: 3 } });
-    InventorySourcesAPI.read.mockResolvedValue({ data: { count: 0 } });
 
     const { results } = await getRelatedResourceDeleteCounts(
-      relatedResourceDeleteRequests.credential({ id: 1 }, i18n)
+      relatedResourceDeleteRequests.credential({ id: 1 })
     );
-    expect(results).toEqual({ Projects: 2, Inventories: 3 });
+    expect(results).toEqual({
+      'Job Templates': 1,
+      Projects: 2,
+      Inventories: 3,
+      'Inventory Sources': 10,
+      'Credential Input Sources': 20,
+      'Execution Environments': 30,
+    });
   });
 });

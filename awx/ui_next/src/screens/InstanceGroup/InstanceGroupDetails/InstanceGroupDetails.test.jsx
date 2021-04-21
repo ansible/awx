@@ -21,7 +21,6 @@ const instanceGroups = [
     policy_instance_percentage: 50,
     percent_capacity_remaining: 60,
     is_container_group: false,
-    is_isolated: false,
     created: '2020-07-21T18:41:02.818081Z',
     modified: '2020-07-24T20:32:03.121079Z',
     summary_fields: {
@@ -41,7 +40,6 @@ const instanceGroups = [
     policy_instance_percentage: 0,
     percent_capacity_remaining: 0,
     is_container_group: true,
-    is_isolated: false,
     created: '2020-07-21T18:41:02.818081Z',
     modified: '2020-07-24T20:32:03.121079Z',
     summary_fields: {
@@ -149,19 +147,5 @@ describe('<InstanceGroupDetails/>', () => {
     wrapper.update();
 
     expect(wrapper.find('Button[aria-label="Edit"]').length).toBe(0);
-  });
-
-  test('should display isolated label', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <InstanceGroupDetails
-          instanceGroup={{ ...instanceGroups[0], is_isolated: true }}
-        />
-      );
-    });
-    wrapper.update();
-    expect(
-      wrapper.find('Label[aria-label="isolated instance"]').prop('children')
-    ).toEqual('Isolated');
   });
 });

@@ -5,7 +5,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
-import { Config } from '../../../contexts/Config';
+import { useConfig } from '../../../contexts/Config';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
@@ -84,6 +84,7 @@ function ProjectFormFields({
     credential: '',
     scm_clean: false,
     scm_delete_on_update: false,
+    scm_track_submodules: false,
     scm_update_on_launch: false,
     allow_override: false,
     scm_update_cache_timeout: 0,
@@ -298,6 +299,7 @@ function ProjectFormFields({
 function ProjectForm({ i18n, project, submitError, ...props }) {
   const { handleCancel, handleSubmit } = props;
   const { summary_fields = {} } = project;
+  const { project_base_dir, project_local_paths } = useConfig();
   const [contentError, setContentError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [scmSubFormState, setScmSubFormState] = useState({
@@ -307,6 +309,7 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
     credential: '',
     scm_clean: false,
     scm_delete_on_update: false,
+    scm_track_submodules: false,
     scm_update_on_launch: false,
     allow_override: false,
     scm_update_cache_timeout: 0,
@@ -352,61 +355,58 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
   }
 
   return (
-    <Config>
-      {({ project_base_dir, project_local_paths }) => (
-        <Formik
-          initialValues={{
-            allow_override: project.allow_override || false,
-            base_dir: project_base_dir || '',
-            credential: project.credential || '',
-            description: project.description || '',
-            local_path: project.local_path || '',
-            name: project.name || '',
-            organization: project.summary_fields?.organization || null,
-            scm_branch: project.scm_branch || '',
-            scm_clean: project.scm_clean || false,
-            scm_delete_on_update: project.scm_delete_on_update || false,
-            scm_refspec: project.scm_refspec || '',
-            scm_type:
-              project.scm_type === ''
-                ? 'manual'
-                : project.scm_type === undefined
-                ? ''
-                : project.scm_type,
-            scm_update_cache_timeout: project.scm_update_cache_timeout || 0,
-            scm_update_on_launch: project.scm_update_on_launch || false,
-            scm_url: project.scm_url || '',
-            default_environment:
-              project.summary_fields?.default_environment || null,
-          }}
-          onSubmit={handleSubmit}
-        >
-          {formik => (
-            <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-              <FormColumnLayout>
-                <ProjectFormFields
-                  project={project}
-                  project_base_dir={project_base_dir}
-                  project_local_paths={project_local_paths}
-                  formik={formik}
-                  i18n={i18n}
-                  setCredentials={setCredentials}
-                  credentials={credentials}
-                  scmTypeOptions={scmTypeOptions}
-                  setScmSubFormState={setScmSubFormState}
-                  scmSubFormState={scmSubFormState}
-                />
-                <FormSubmitError error={submitError} />
-                <FormActionGroup
-                  onCancel={handleCancel}
-                  onSubmit={formik.handleSubmit}
-                />
-              </FormColumnLayout>
-            </Form>
-          )}
-        </Formik>
+    <Formik
+      initialValues={{
+        allow_override: project.allow_override || false,
+        base_dir: project_base_dir || '',
+        credential: project.credential || '',
+        description: project.description || '',
+        local_path: project.local_path || '',
+        name: project.name || '',
+        organization: project.summary_fields?.organization || null,
+        scm_branch: project.scm_branch || '',
+        scm_clean: project.scm_clean || false,
+        scm_delete_on_update: project.scm_delete_on_update || false,
+        scm_track_submodules: project.scm_track_submodules || false,
+        scm_refspec: project.scm_refspec || '',
+        scm_type:
+          project.scm_type === ''
+            ? 'manual'
+            : project.scm_type === undefined
+            ? ''
+            : project.scm_type,
+        scm_update_cache_timeout: project.scm_update_cache_timeout || 0,
+        scm_update_on_launch: project.scm_update_on_launch || false,
+        scm_url: project.scm_url || '',
+        default_environment:
+          project.summary_fields?.default_environment || null,
+      }}
+      onSubmit={handleSubmit}
+    >
+      {formik => (
+        <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+          <FormColumnLayout>
+            <ProjectFormFields
+              project={project}
+              project_base_dir={project_base_dir}
+              project_local_paths={project_local_paths}
+              formik={formik}
+              i18n={i18n}
+              setCredentials={setCredentials}
+              credentials={credentials}
+              scmTypeOptions={scmTypeOptions}
+              setScmSubFormState={setScmSubFormState}
+              scmSubFormState={scmSubFormState}
+            />
+            <FormSubmitError error={submitError} />
+            <FormActionGroup
+              onCancel={handleCancel}
+              onSubmit={formik.handleSubmit}
+            />
+          </FormColumnLayout>
+        </Form>
       )}
-    </Config>
+    </Formik>
   );
 }
 

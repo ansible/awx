@@ -73,6 +73,8 @@ function CodeEditor({
   id,
   value,
   onChange,
+  onFocus,
+  onBlur,
   mode,
   readOnly,
   hasErrors,
@@ -94,11 +96,15 @@ function CodeEditor({
   useEffect(
     function removeTextareaTabIndex() {
       const editorInput = editor.current.refEditor?.querySelector('textarea');
-      if (editorInput && !readOnly) {
+      if (!editorInput) {
+        return;
+      }
+      if (!readOnly) {
         editorInput.tabIndex = -1;
       }
+      editorInput.id = id;
     },
-    [readOnly]
+    [readOnly, id]
   );
 
   const listen = useCallback(event => {
@@ -140,7 +146,9 @@ function CodeEditor({
           theme="github"
           onChange={debounce(onChange, 250)}
           value={value}
-          name={id || 'code-editor'}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          name={`${id}-editor` || 'code-editor'}
           editorProps={{ $blockScrolling: true }}
           fontSize={16}
           width="100%"

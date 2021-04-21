@@ -2,8 +2,8 @@ import 'styled-components/macro';
 import React, { useState, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { func, bool, arrayOf } from 'prop-types';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { useLingui } from '@lingui/react';
+import { t, Plural } from '@lingui/macro';
 import { Button, Radio, DropdownItem } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { KebabifiedContext } from '../../../contexts/Kebabified';
@@ -18,12 +18,8 @@ const ListItem = styled.li`
   color: var(--pf-global--danger-color--100);
 `;
 
-const InventoryGroupsDeleteModal = ({
-  onAfterDelete,
-  isDisabled,
-  groups,
-  i18n,
-}) => {
+const InventoryGroupsDeleteModal = ({ onAfterDelete, isDisabled, groups }) => {
+  const { i18n } = useLingui();
   const [radioOption, setRadioOption] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
@@ -87,9 +83,11 @@ const InventoryGroupsDeleteModal = ({
           isOpen={isModalOpen}
           variant="danger"
           title={
-            groups.length > 1
-              ? i18n._(t`Delete Groups?`)
-              : i18n._(t`Delete Group?`)
+            <Plural
+              value={groups.length}
+              one="Delete Group?"
+              other="Delete Groups?"
+            />
           }
           onClose={() => setIsModalOpen(false)}
           actions={[
@@ -112,11 +110,12 @@ const InventoryGroupsDeleteModal = ({
             </Button>,
           ]}
         >
-          {i18n._(
-            t`Are you sure you want to delete the ${
-              groups.length > 1 ? i18n._(t`groups`) : i18n._(t`group`)
-            } below?`
-          )}
+          <Plural
+            value={groups.length}
+            one="Are you sure you want delete the group below?"
+            other="Are you sure you want delete the groups below?"
+          />
+
           <div css="padding: 24px 0;">
             {groups.map(group => {
               return <ListItem key={group.id}>{group.name}</ListItem>;
@@ -167,4 +166,4 @@ InventoryGroupsDeleteModal.defaultProps = {
   groups: [],
 };
 
-export default withI18n()(InventoryGroupsDeleteModal);
+export default InventoryGroupsDeleteModal;

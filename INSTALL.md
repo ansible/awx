@@ -32,6 +32,9 @@ If you don't have an existing OpenShift or Kubernetes cluster, minikube is a fas
 
 To install minikube, follow the steps in their [documentation](https://minikube.sigs.k8s.io/docs/start/).
 
+:warning: NOTE |
+--- |
+If you're about to install minikube or have already installed it, please be sure you're using [Minikube v1.18.1](https://github.com/kubernetes/minikube/releases/tag/v1.18.1). There's a [bug](https://github.com/ansible/awx-operator/issues/205) right now that will not allow you to run it using Minikube v1.19.x.
 #### Starting minikube
 
 Once you have installed minikube, run the following command to start it. You may wish to customize these options.

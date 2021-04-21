@@ -170,8 +170,7 @@ function TemplateList({ defaultParams, i18n }) {
   );
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.template(
-    selected[0],
-    i18n
+    selected[0]
   );
 
   return (

@@ -14,6 +14,10 @@ class Settings extends Base {
     return this.http.patch(`${this.baseUrl}all/`, data);
   }
 
+  updateCategory(category, data) {
+    return this.http.patch(`${this.baseUrl}${category}/`, data);
+  }
+
   readCategory(category) {
     return this.http.get(`${this.baseUrl}${category}/`);
   }

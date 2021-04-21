@@ -3,15 +3,11 @@
 import logging
 
 import awx.main.fields
-from awx.main.utils.encryption import encrypt_field, decrypt_field
 
 from django.db import migrations, models
-from django.utils.timezone import now
 import django.db.models.deletion
 
 from awx.main.migrations import _galaxy as galaxy
-from awx.main.models import CredentialType as ModernCredentialType
-from awx.main.utils.common import set_current_apps
 
 logger = logging.getLogger('awx.main.migrations')
 

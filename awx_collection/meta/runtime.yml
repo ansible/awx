@@ -1,4 +1,33 @@
 ---
+action_groups:
+  tower:
+    - tower_credential_input_source
+    - tower_credential
+    - tower_credential_type
+    - tower_group
+    - tower_host
+    - tower_inventory
+    - tower_inventory_source
+    - tower_job_cancel
+    - tower_job_launch
+    - tower_job_list
+    - tower_job_template
+    - tower_job_wait
+    - tower_label
+    - tower_license
+    - tower_notification
+    - tower_organization
+    - tower_project
+    - tower_role
+    - tower_schedule
+    - tower_settings
+    - tower_team
+    - tower_token
+    - tower_user
+    - tower_workflow_job_template_node
+    - tower_workflow_job_template
+    - tower_workflow_launch
+
 plugin_routing:
   modules:
     tower_receive:

@@ -11,15 +11,22 @@ import {
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
 
-function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
-  const [isOpen, setIsOPen] = useState(false);
+function ReLaunchDropDown({
+  isPrimary = false,
+  handleRelaunch,
+  isLaunching,
+  i18n,
+  ouiaId,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
 
   const onToggle = () => {
-    setIsOPen(prev => !prev);
+    setIsOpen(prev => !prev);
   };
 
   const dropdownItems = [
     <DropdownItem
+      ouiaId={`${ouiaId}-on`}
       aria-label={i18n._(t`Relaunch on`)}
       key="relaunch_on"
       component="div"
@@ -29,23 +36,27 @@ function ReLaunchDropDown({ isPrimary = false, handleRelaunch, i18n, ouiaId }) {
     </DropdownItem>,
     <DropdownSeparator key="separator" />,
     <DropdownItem
+      ouiaId={`${ouiaId}-all`}
       key="relaunch_all"
       aria-label={i18n._(t`Relaunch all hosts`)}
       component="button"
       onClick={() => {
         handleRelaunch({ hosts: 'all' });
       }}
+      isDisabled={isLaunching}
     >
       {i18n._(t`All`)}
     </DropdownItem>,
 
     <DropdownItem
+      ouiaId={`${ouiaId}-failed`}
       key="relaunch_failed"
       aria-label={i18n._(t`Relaunch failed hosts`)}
       component="button"
       onClick={() => {
         handleRelaunch({ hosts: 'failed' });
       }}
+      isDisabled={isLaunching}
     >
       {i18n._(t`Failed hosts`)}
     </DropdownItem>,

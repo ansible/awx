@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
-import { t, Trans } from '@lingui/macro';
+import { t, Trans, Plural } from '@lingui/macro';
 import { RRule } from 'rrule';
 import {
   Checkbox as _Checkbox,
@@ -185,29 +185,17 @@ const FrequencyDetailSubform = ({ i18n }) => {
 
     switch (frequency.value) {
       case 'minute':
-        return i18n._('{intervalValue, plural, one {minute} other {minutes}}', {
-          intervalValue,
-        });
+        return <Plural value={intervalValue} one="minute" other="minutes" />;
       case 'hour':
-        return i18n._('{intervalValue, plural, one {hour} other {hours}}', {
-          intervalValue,
-        });
+        return <Plural value={intervalValue} one="hour" other="hours" />;
       case 'day':
-        return i18n._('{intervalValue, plural, one {day} other {days}}', {
-          intervalValue,
-        });
+        return <Plural value={intervalValue} one="day" other="days" />;
       case 'week':
-        return i18n._('{intervalValue, plural, one {week} other {weeks}}', {
-          intervalValue,
-        });
+        return <Plural value={intervalValue} one="week" other="weeks" />;
       case 'month':
-        return i18n._('{intervalValue, plural, one {month} other {months}}', {
-          intervalValue,
-        });
+        return <Plural value={intervalValue} one="month" other="months" />;
       case 'year':
-        return i18n._('{intervalValue, plural, one {year} other {years}}', {
-          intervalValue,
-        });
+        return <Plural value={intervalValue} one="year" other="years" />;
       default:
         throw new Error(i18n._(t`Frequency did not match an expected value`));
     }

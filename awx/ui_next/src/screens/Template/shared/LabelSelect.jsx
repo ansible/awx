@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { func, arrayOf, number, shape, string, oneOfType } from 'prop-types';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
+import { t } from '@lingui/macro';
 import { LabelsAPI } from '../../../api';
 import { useSyncedSelectValue } from '../../../components/MultiSelect';
 
@@ -84,7 +85,7 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
       isDisabled={isLoading}
       selections={selections}
       isOpen={isExpanded}
-      aria-labelledby="label-select"
+      typeAheadAriaLabel={t`Select Labels`}
       placeholderText={placeholder}
       createText={createText}
     >

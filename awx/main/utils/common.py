@@ -7,7 +7,6 @@ import yaml
 import logging
 import os
 import re
-import subprocess
 import stat
 import urllib.parse
 import threading

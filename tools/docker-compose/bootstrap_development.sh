@@ -12,7 +12,13 @@ make awx-link
 
 # AWX bootstrapping
 make version_file
-make migrate
+
+if [[ -n "$RUN_MIGRATIONS" ]]; then
+    make migrate
+else
+    wait-for-migrations
+fi
+
 make init
 
 

@@ -11,6 +11,8 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { KeyIcon } from '@patternfly/react-icons';
+import styles from '@patternfly/react-styles/css/components/Form/form';
+import { css } from '@patternfly/react-styles';
 import FieldWithPrompt from '../../../../components/FieldWithPrompt';
 import Popover from '../../../../components/Popover';
 import { CredentialPluginPrompt } from './CredentialPluginPrompt';
@@ -22,7 +24,7 @@ function CredentialPluginInput(props) {
     i18n,
     isDisabled,
     isRequired,
-    isValid,
+    validated,
     fieldOptions,
   } = props;
 
@@ -52,7 +54,7 @@ function CredentialPluginInput(props) {
           {React.cloneElement(children, {
             ...inputField,
             isRequired,
-            validated: isValid ? 'default' : 'error',
+            validated: validated ? 'default' : 'error',
             isDisabled: disableFieldAndButtons,
             onChange: (_, event) => {
               inputField.onChange(event);
@@ -96,10 +98,20 @@ function CredentialPluginInput(props) {
 }
 
 function CredentialPluginField(props) {
-  const { fieldOptions, isRequired, isValid } = props;
+  const { fieldOptions, isRequired, validated } = props;
 
   const [, meta, helpers] = useField(`inputs.${fieldOptions.id}`);
   const [passwordPromptField] = useField(`passwordPrompts.${fieldOptions.id}`);
+
+  const invalidHelperTextToDisplay = meta.error && meta.touched && (
+    <div
+      className={css(styles.formHelperText, styles.modifiers.error)}
+      id={`${fieldOptions.id}-helper`}
+      aria-live="polite"
+    >
+      {meta.error}
+    </div>
+  );
 
   useEffect(() => {
     if (passwordPromptField.value) {
@@ -121,22 +133,14 @@ function CredentialPluginField(props) {
           tooltip={fieldOptions.help_text}
         >
           <CredentialPluginInput {...props} />
-          {meta.error && meta.touched && (
-            <div
-              className="pf-c-form__helper-text pf-m-error"
-              id={`${fieldOptions.id}-helper`}
-              aria-live="polite"
-            >
-              {meta.error}
-            </div>
-          )}
+          {invalidHelperTextToDisplay}
         </FieldWithPrompt>
       ) : (
         <FormGroup
           fieldId={`credential-${fieldOptions.id}`}
           helperTextInvalid={meta.error}
           isRequired={isRequired}
-          validated={isValid ? 'default' : 'error'}
+          validated={validated ? 'default' : 'error'}
           label={fieldOptions.label}
           labelIcon={
             fieldOptions.help_text && (
@@ -145,6 +149,7 @@ function CredentialPluginField(props) {
           }
         >
           <CredentialPluginInput {...props} />
+          {invalidHelperTextToDisplay}
         </FormGroup>
       )}
     </>

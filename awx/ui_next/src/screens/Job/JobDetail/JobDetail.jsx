@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, Chip, Label } from '@patternfly/react-core';
+import { Button, Chip } from '@patternfly/react-core';
 import styled from 'styled-components';
 
 import AlertModal from '../../../components/AlertModal';
@@ -111,18 +111,6 @@ function JobDetail({ job, i18n }) {
   };
 
   const buildInstanceGroupLink = item => {
-    if (item.is_isolated) {
-      return (
-        <>
-          <Link to={`/instance_groups/${item.id}`}>{item.name}</Link>
-          <span css="margin-left: 12px">
-            <Label aria-label={i18n._(t`isolated instance`)}>
-              {i18n._(t`Isolated`)}
-            </Label>
-          </span>
-        </>
-      );
-    }
     return <Link to={`/instance_groups/${item.id}`}>{item.name}</Link>;
   };
 
@@ -383,21 +371,23 @@ function JobDetail({ job, i18n }) {
           job.summary_fields.user_capabilities.start &&
           (job.status === 'failed' && job.type === 'job' ? (
             <LaunchButton resource={job}>
-              {({ handleRelaunch }) => (
+              {({ handleRelaunch, isLaunching }) => (
                 <ReLaunchDropDown
                   ouiaId="job-detail-relaunch-dropdown"
                   isPrimary
                   handleRelaunch={handleRelaunch}
+                  isLaunching={isLaunching}
                 />
               )}
             </LaunchButton>
           ) : (
             <LaunchButton resource={job} aria-label={i18n._(t`Relaunch`)}>
-              {({ handleRelaunch }) => (
+              {({ handleRelaunch, isLaunching }) => (
                 <Button
                   ouiaId="job-detail-relaunch-button"
                   type="submit"
                   onClick={handleRelaunch}
+                  isDisabled={isLaunching}
                 >
                   {i18n._(t`Relaunch`)}
                 </Button>

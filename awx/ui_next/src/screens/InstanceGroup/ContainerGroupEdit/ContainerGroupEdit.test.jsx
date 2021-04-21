@@ -29,8 +29,6 @@ const instanceGroup = {
   jobs_total: 0,
   instances: 0,
   controller: null,
-  is_controller: false,
-  is_isolated: false,
   is_container_group: true,
   credential: 71,
   policy_instance_percentage: 0,

@@ -19,6 +19,7 @@ describe('<ProjectEdit />', () => {
     scm_type: 'git',
     scm_url: 'https://foo.bar',
     scm_clean: true,
+    scm_track_submodules: false,
     credential: 100,
     local_path: 'bar',
     organization: 2,

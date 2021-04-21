@@ -118,8 +118,7 @@ function OrganizationsList({ i18n }) {
     }
   };
   const deleteDetailsRequests = relatedResourceDeleteRequests.organization(
-    selected[0],
-    i18n
+    selected[0]
   );
 
   return (

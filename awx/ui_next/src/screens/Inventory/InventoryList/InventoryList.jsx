@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, plural } from '@lingui/macro';
 import { Card, PageSection, DropdownItem } from '@patternfly/react-core';
 import { InventoriesAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
@@ -129,8 +129,7 @@ function InventoryList({ i18n }) {
   };
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.inventory(
-    selected[0],
-    i18n
+    selected[0]
   );
 
   const addInventory = i18n._(t`Add inventory`);
@@ -219,15 +218,13 @@ function InventoryList({ i18n }) {
                   onDelete={handleInventoryDelete}
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Inventories`)}
-                  warningMessage={i18n._(
-                    '{numItemsToDelete, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}',
-                    { numItemsToDelete: selected.length }
-                  )}
-                  deleteMessage={i18n._(
-                    '{numItemsToDelete, plural, one {This inventory is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these inventories could impact other resources that rely on them. Are you sure you want to delete anyway?}}',
-                    { numItemsToDelete: selected.length }
-                  )}
                   deleteDetailsRequests={deleteDetailsRequests}
+                  warningMessage={plural(selected.length, {
+                    one:
+                      'The inventory will be in a pending status until the final delete is processed.',
+                    other:
+                      'The inventories will be in a pending status until the final delete is processed.',
+                  })}
                 />,
               ]}
             />

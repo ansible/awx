@@ -1,24 +1,26 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useHistory, useLocation, withRouter } from 'react-router-dom';
+import { useHistory, withRouter } from 'react-router-dom';
 import {
   Button,
   Nav,
   NavList,
   Page,
   PageHeader as PFPageHeader,
+  PageHeaderTools,
+  PageHeaderToolsGroup,
+  PageHeaderToolsItem,
   PageSidebar,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import styled from 'styled-components';
 
-import { ConfigAPI, MeAPI, RootAPI } from '../../api';
-import { ConfigProvider } from '../../contexts/Config';
+import { MeAPI, RootAPI } from '../../api';
+import { useConfig, useAuthorizedPath } from '../../contexts/Config';
 import { SESSION_TIMEOUT_KEY } from '../../constants';
 import { isAuthenticated } from '../../util/auth';
 import About from '../About';
 import AlertModal from '../AlertModal';
-import ErrorDetail from '../ErrorDetail';
 import BrandLogo from './BrandLogo';
 import NavExpandableGroup from './NavExpandableGroup';
 import PageHeaderToolbar from './PageHeaderToolbar';
@@ -85,11 +87,11 @@ function useStorage(key) {
 
 function AppContainer({ i18n, navRouteConfig = [], children }) {
   const history = useHistory();
-  const { pathname } = useLocation();
-  const [config, setConfig] = useState({});
-  const [configError, setConfigError] = useState(null);
+  const config = useConfig();
+
+  const isReady = !!config.license_info;
+  const isSidebarVisible = useAuthorizedPath();
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
-  const [isReady, setIsReady] = useState(false);
 
   const sessionTimeoutId = useRef();
   const sessionIntervalId = useRef();
@@ -99,7 +101,6 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
 
   const handleAboutModalOpen = () => setIsAboutModalOpen(true);
   const handleAboutModalClose = () => setIsAboutModalOpen(false);
-  const handleConfigErrorClose = () => setConfigError(null);
   const handleSessionTimeout = () => setTimeoutWarning(true);
 
   const handleLogout = useCallback(async () => {
@@ -137,35 +138,13 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
     }
   }, [handleLogout, timeRemaining]);
 
-  useEffect(() => {
-    const loadConfig = async () => {
-      if (config?.version) return;
-      try {
-        const [
-          { data },
-          {
-            data: {
-              results: [me],
-            },
-          },
-        ] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
-        setConfig({ ...data, me });
-        setIsReady(true);
-      } catch (err) {
-        if (err.response.status === 401) {
-          handleLogout();
-          return;
-        }
-        setConfigError(err);
-      }
-    };
-    loadConfig();
-  }, [config, pathname, handleLogout]);
+  const brandName = config?.license_info?.product_name;
+  const alt = brandName ? i18n._(t`${brandName} logo`) : i18n._(t`brand logo`);
 
   const header = (
     <PageHeader
       showNavToggle
-      logo={<BrandLogo />}
+      logo={<BrandLogo alt={alt} />}
       logoProps={{ href: '/' }}
       headerTools={
         <PageHeaderToolbar
@@ -174,6 +153,23 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
           onAboutClick={handleAboutModalOpen}
           onLogoutClick={handleLogout}
         />
+      }
+    />
+  );
+
+  const simpleHeader = config.isLoading ? null : (
+    <PageHeader
+      logo={<BrandLogo alt={alt} />}
+      headerTools={
+        <PageHeaderTools>
+          <PageHeaderToolsGroup>
+            <PageHeaderToolsItem>
+              <Button onClick={handleLogout} variant="tertiary" ouiaId="logout">
+                {i18n._(t`Logout`)}
+              </Button>
+            </PageHeaderToolsItem>
+          </PageHeaderToolsGroup>
+        </PageHeaderTools>
       }
     />
   );
@@ -200,23 +196,18 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
 
   return (
     <>
-      <Page isManagedSidebar header={header} sidebar={sidebar}>
-        {isReady && <ConfigProvider value={config}>{children}</ConfigProvider>}
+      <Page
+        isManagedSidebar={isSidebarVisible}
+        header={isSidebarVisible ? header : simpleHeader}
+        sidebar={isSidebarVisible && sidebar}
+      >
+        {isReady ? children : null}
       </Page>
       <About
         version={config?.version}
         isOpen={isAboutModalOpen}
         onClose={handleAboutModalClose}
       />
-      <AlertModal
-        isOpen={configError}
-        variant="error"
-        title={i18n._(t`Error!`)}
-        onClose={handleConfigErrorClose}
-      >
-        {i18n._(t`Failed to retrieve configuration.`)}
-        <ErrorDetail error={configError} />
-      </AlertModal>
       <AlertModal
         ouiaId="session-expiration-modal"
         title={i18n._(t`Your session is about to expire`)}

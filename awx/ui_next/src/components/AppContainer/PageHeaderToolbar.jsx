@@ -119,7 +119,7 @@ function PageHeaderToolbar({
               <DropdownItem
                 key="help"
                 target="_blank"
-                href={`${getDocsBaseUrl(config)}//html/userguide/index.html`}
+                href={`${getDocsBaseUrl(config)}/html/userguide/index.html`}
               >
                 {i18n._(t`Help`)}
               </DropdownItem>,

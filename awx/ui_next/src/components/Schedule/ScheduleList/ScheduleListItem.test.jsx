@@ -50,13 +50,17 @@ describe('ScheduleListItem', () => {
   describe('User has edit permissions', () => {
     beforeAll(() => {
       wrapper = mountWithContexts(
-        <ScheduleListItem
-          isSelected={false}
-          onSelect={onSelect}
-          schedule={mockSchedule}
-          isMissingSurvey={false}
-          isMissingInventory={false}
-        />
+        <table>
+          <tbody>
+            <ScheduleListItem
+              isSelected={false}
+              onSelect={onSelect}
+              schedule={mockSchedule}
+              isMissingSurvey={false}
+              isMissingInventory={false}
+            />
+          </tbody>
+        </table>
       );
     });
 
@@ -190,22 +194,26 @@ describe('ScheduleListItem', () => {
   describe('schedule has missing prompt data', () => {
     beforeAll(() => {
       wrapper = mountWithContexts(
-        <ScheduleListItem
-          isSelected={false}
-          onSelect={onSelect}
-          schedule={{
-            ...mockSchedule,
-            summary_fields: {
-              ...mockSchedule.summary_fields,
-              user_capabilities: {
-                edit: false,
-                delete: false,
-              },
-            },
-          }}
-          isMissingInventory="Inventory Error"
-          isMissingSurvey="Survey Error"
-        />
+        <table>
+          <tbody>
+            <ScheduleListItem
+              isSelected={false}
+              onSelect={onSelect}
+              schedule={{
+                ...mockSchedule,
+                summary_fields: {
+                  ...mockSchedule.summary_fields,
+                  user_capabilities: {
+                    edit: false,
+                    delete: false,
+                  },
+                },
+              }}
+              isMissingInventory="Inventory Error"
+              isMissingSurvey="Survey Error"
+            />
+          </tbody>
+        </table>
       );
     });
 

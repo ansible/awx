@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 # Django
-from django.db import migrations, models
+from django.db import migrations
 
 # AWX
 from awx.main.migrations import _migration_utils as migration_utils

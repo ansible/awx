@@ -1,4 +1,5 @@
 import { t } from '@lingui/macro';
+import { i18n } from '@lingui/core';
 
 import {
   UnifiedJobTemplatesAPI,
@@ -46,7 +47,7 @@ export async function getRelatedResourceDeleteCounts(requests) {
 }
 
 export const relatedResourceDeleteRequests = {
-  credential: (selected, i18n) => [
+  credential: selected => [
     {
       request: () =>
         JobTemplatesAPI.read({
@@ -77,7 +78,7 @@ export const relatedResourceDeleteRequests = {
         CredentialInputSourcesAPI.read({
           source_credential: selected.id,
         }),
-      label: i18n._(t`Credential`),
+      label: i18n._(t`Credential Input Sources`),
     },
     {
       request: () =>
@@ -88,7 +89,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  credentialType: (selected, i18n) => [
+  credentialType: selected => [
     {
       request: async () =>
         CredentialsAPI.read({
@@ -98,7 +99,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  inventory: (selected, i18n) => [
+  inventory: selected => [
     {
       request: async () =>
         JobTemplatesAPI.read({
@@ -112,7 +113,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  inventorySource: (inventoryId, i18n, inventorySource) => [
+  inventorySource: (inventoryId, inventorySource) => [
     {
       request: async () => {
         try {
@@ -147,7 +148,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  project: (selected, i18n) => [
+  project: selected => [
     {
       request: () =>
         JobTemplatesAPI.read({
@@ -171,7 +172,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  template: (selected, i18n) => [
+  template: selected => [
     {
       request: async () =>
         WorkflowJobTemplateNodesAPI.read({
@@ -181,7 +182,7 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  organization: (selected, i18n) => [
+  organization: selected => [
     {
       request: async () =>
         CredentialsAPI.read({
@@ -232,7 +233,7 @@ export const relatedResourceDeleteRequests = {
       label: i18n._(t`Applications`),
     },
   ],
-  executionEnvironment: (selected, i18n) => [
+  executionEnvironment: selected => [
     {
       request: async () =>
         UnifiedJobTemplatesAPI.read({
@@ -283,7 +284,7 @@ export const relatedResourceDeleteRequests = {
       label: [i18n._(t`Workflow Job Template Nodes`)],
     },
   ],
-  instanceGroup: (selected, i18n) => [
+  instanceGroup: selected => [
     {
       request: () => OrganizationsAPI.read({ instance_groups: selected.id }),
       label: i18n._(t`Organizations`),

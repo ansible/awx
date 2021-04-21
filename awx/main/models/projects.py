@@ -115,6 +115,10 @@ class ProjectOptions(models.Model):
         default=False,
         help_text=_('Delete the project before syncing.'),
     )
+    scm_track_submodules = models.BooleanField(
+        default=False,
+        help_text=_('Track submodules latest commits on defined branch.'),
+    )
     credential = models.ForeignKey(
         'Credential',
         related_name='%(class)ss',

@@ -28,6 +28,11 @@
         "webhook_key": "/api/v2/job_templates/7/webhook_key/"
     },
     "summary_fields": {
+        "organization": {
+          "id": 1,
+          "name": "Mike's Org",
+          "description": ""
+        },
         "inventory": {
             "id": 1,
             "name": "Mike's Inventory",
@@ -133,6 +138,12 @@
             "id": "1",
             "name": "Webhook Credential"
 
+        },
+        "execution_environment": {
+            "description": "",
+            "id": 1,
+            "image": "foo.io/mock/test-ee:1.2.3",
+            "name": "Mock EE 1.2.3"
         }
     },
     "created": "2019-09-30T16:18:34.564820Z",
@@ -174,6 +185,7 @@
     "diff_mode": false,
     "allow_simultaneous": false,
     "custom_virtualenv": null,
+    "execution_environment": 1,
     "job_slice_count": 1,
     "webhook_credential": 1,
     "webhook_key": "asertdyuhjkhgfd234567kjgfds",

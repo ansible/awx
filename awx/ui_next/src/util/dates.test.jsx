@@ -4,6 +4,7 @@ import {
   formatDateString,
   formatDateStringUTC,
   getRRuleDayConstants,
+  secondsToDays,
   secondsToHHMMSS,
 } from './dates';
 
@@ -49,6 +50,13 @@ describe('formatDateStringUTC', () => {
     expect(formatDateStringUTC('2018-01-31T01:14:52.969227Z', lang)).toEqual(
       '1/31/2018, 1:14:52 AM'
     );
+  });
+});
+
+describe('secondsToDays', () => {
+  test('it returns the expected value', () => {
+    expect(secondsToDays(604800)).toEqual('7');
+    expect(secondsToDays(0)).toEqual('0');
   });
 });
 

@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import 'styled-components/macro';
 import {
   Button,
-  Label,
   Progress,
   ProgressMeasureLocation,
   ProgressSize,
@@ -52,28 +51,6 @@ function InstanceGroupListItem({
     return null;
   }
 
-  const verifyInstanceGroup = item => {
-    if (item.is_isolated) {
-      return (
-        <span css="margin-left: 12px">
-          <Label aria-label={i18n._(t`isolated instance`)}>
-            {i18n._(t`Isolated`)}
-          </Label>
-        </span>
-      );
-    }
-    if (item.is_controller) {
-      return (
-        <span css="margin-left: 12px">
-          <Label aria-label={i18n._(t`controller instance`)}>
-            {i18n._(t`Controller`)}
-          </Label>
-        </span>
-      );
-    }
-    return null;
-  };
-
   return (
     <Tr id={`ig-row-${instanceGroup.id}`}>
       <Td
@@ -87,7 +64,6 @@ function InstanceGroupListItem({
       <Td id={labelId} dataLabel={i18n._(t`Name`)}>
         <Link to={`${detailUrl}`}>
           <b>{instanceGroup.name}</b>
-          {verifyInstanceGroup(instanceGroup)}
         </Link>
       </Td>
       <Td dataLabel={i18n._(t`Type`)}>

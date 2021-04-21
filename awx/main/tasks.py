@@ -27,6 +27,7 @@ import socket
 import threading
 import concurrent.futures
 from base64 import b64encode
+import subprocess
 
 # Django
 from django.conf import settings
@@ -397,6 +398,24 @@ def purge_old_stdout_files():
 
 
 @task(queue=get_local_queuename)
+def cleanup_execution_environment_images():
+    if settings.IS_K8S:
+        return
+    process = subprocess.run('podman images --filter="dangling=true" --format json'.split(" "), capture_output=True)
+    if process.returncode != 0:
+        logger.debug("Cleanup execution environment images: could not get list of images")
+        return
+    if len(process.stdout) > 0:
+        images_system = json.loads(process.stdout)
+        for e in images_system:
+            image_name = e["Id"]
+            logger.debug(f"Cleanup execution environment images: deleting {image_name}")
+            process = subprocess.run(['podman', 'rmi', image_name, '-f'], stdout=subprocess.DEVNULL)
+            if process.returncode != 0:
+                logger.debug(f"Failed to delete image {image_name}")
+
+
+@task(queue=get_local_queuename)
 def cluster_node_heartbeat():
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
@@ -467,6 +486,9 @@ def cluster_node_heartbeat():
 
 @task(queue=get_local_queuename)
 def awx_k8s_reaper():
+    if not settings.RECEPTOR_RELEASE_WORK:
+        return
+
     from awx.main.scheduler.kubernetes import PodManager  # prevent circular import
 
     for group in InstanceGroup.objects.filter(is_container_group=True).iterator():
@@ -834,7 +856,7 @@ class BaseTask(object):
         """
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
-    def build_execution_environment_params(self, instance):
+    def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:
             return {}
 
@@ -850,6 +872,23 @@ class BaseTask(object):
             "process_isolation": True,
             "container_options": ['--user=root'],
         }
+
+        if instance.execution_environment.credential:
+            cred = instance.execution_environment.credential
+            if cred.has_inputs(field_names=('host', 'username', 'password')):
+                path = os.path.split(private_data_dir)[0]
+                with open(path + '/auth.json', 'w') as authfile:
+                    host = cred.get_input('host')
+                    username = cred.get_input('username')
+                    password = cred.get_input('password')
+                    token = "{}:{}".format(username, password)
+                    auth_data = {'auths': {host: {'auth': b64encode(token.encode('ascii')).decode()}}}
+                    authfile.write(json.dumps(auth_data, indent=4))
+                authfile.close()
+                os.chmod(authfile.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+                params["container_options"].append(f'--authfile={authfile.name}')
+            else:
+                raise RuntimeError('Please recheck that your host, username, and password fields are all filled.')
 
         pull = instance.execution_environment.pull
         if pull:
@@ -1394,6 +1433,7 @@ class BaseTask(object):
                 )
             else:
                 receptor_job = AWXReceptorJob(self, params)
+                self.unit_id = receptor_job.unit_id
                 res = receptor_job.run()
 
                 if not res:
@@ -1708,11 +1748,11 @@ class RunJob(BaseTask):
         """
         return settings.AWX_RESOURCE_PROFILING_ENABLED
 
-    def build_execution_environment_params(self, instance):
+    def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:
             return {}
 
-        params = super(RunJob, self).build_execution_environment_params(instance)
+        params = super(RunJob, self).build_execution_environment_params(instance, private_data_dir)
         # If this has an insights agent and it is not already mounted then show it
         insights_dir = os.path.dirname(settings.INSIGHTS_SYSTEM_ID_FILE)
         if instance.use_fact_cache and os.path.exists(insights_dir):
@@ -2026,6 +2066,7 @@ class RunProjectUpdate(BaseTask):
                 'scm_url': scm_url,
                 'scm_branch': scm_branch,
                 'scm_clean': project_update.scm_clean,
+                'scm_track_submodules': project_update.scm_track_submodules,
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
             }
@@ -2323,11 +2364,11 @@ class RunProjectUpdate(BaseTask):
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
 
-    def build_execution_environment_params(self, instance):
+    def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:
             return {}
 
-        params = super(RunProjectUpdate, self).build_execution_environment_params(instance)
+        params = super(RunProjectUpdate, self).build_execution_environment_params(instance, private_data_dir)
         project_path = instance.get_project_path(check_if_exists=False)
         cache_path = instance.get_cache_path()
         params.setdefault('container_volume_mounts', [])
@@ -2830,7 +2871,7 @@ class RunSystemJob(BaseTask):
     event_model = SystemJobEvent
     event_data_key = 'system_job_id'
 
-    def build_execution_environment_params(self, system_job):
+    def build_execution_environment_params(self, system_job, private_data_dir):
         return {}
 
     def build_args(self, system_job, private_data_dir, passwords):
@@ -2946,7 +2987,7 @@ class AWXReceptorJob:
         self.unit_id = None
 
         if self.task and not self.task.instance.is_container_group_task:
-            execution_environment_params = self.task.build_execution_environment_params(self.task.instance)
+            execution_environment_params = self.task.build_execution_environment_params(self.task.instance, runner_params['private_data_dir'])
             self.runner_params['settings'].update(execution_environment_params)
 
     def run(self):
@@ -3069,6 +3110,11 @@ class AWXReceptorJob:
             if self.task.cancel_callback():
                 result = namedtuple('result', ['status', 'rc'])
                 return result('canceled', 1)
+
+            if hasattr(self, 'unit_id') and 'RECEPTOR_UNIT_ID' not in self.task.instance.job_env:
+                self.task.instance.job_env['RECEPTOR_UNIT_ID'] = self.unit_id
+                self.task.update_model(self.task.instance.pk, job_env=self.task.instance.job_env)
+
             time.sleep(1)
 
     @property
