@@ -108,7 +108,7 @@ describe('delete details', () => {
       response: {
         config: {
           method: 'get',
-          url: '/api/v2/workflow_job_template_nodesP',
+          url: '/api/v2/workflow_job_template_nodes',
         },
         data: 'An error occurred',
         status: 403,
