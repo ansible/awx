@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import serializers
-from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
