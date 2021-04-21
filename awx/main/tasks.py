@@ -2734,14 +2734,6 @@ class RunAdHocCommand(BaseTask):
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
 
-        # Create a directory for ControlPath sockets that is unique to each
-        # ad hoc command
-        cp_dir = os.path.join(private_data_dir, 'cp')
-        if not os.path.exists(cp_dir):
-            os.mkdir(cp_dir, 0o700)
-        # FIXME: more elegant way to manage this path in container
-        env['ANSIBLE_SSH_CONTROL_PATH'] = '/runner/cp'
-
         return env
 
     def build_args(self, ad_hoc_command, private_data_dir, passwords):
