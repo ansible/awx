@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import serializers
-from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
@@ -342,49 +341,6 @@ register(
     help_text=_('The RSA public key for SSH traffic to isolated instances'),  # noqa
     category=_('Jobs'),
     category_slug='jobs',
-)
-
-register(
-    'AWX_RESOURCE_PROFILING_ENABLED',
-    field_class=fields.BooleanField,
-    default=False,
-    label=_('Enable detailed resource profiling on all playbook runs'),
-    help_text=_('If set, detailed resource profiling data will be collected on all jobs. ' 'This data can be gathered with `sosreport`.'),  # noqa
-    category=_('Jobs'),
-    category_slug='jobs',
-)
-
-register(
-    'AWX_RESOURCE_PROFILING_CPU_POLL_INTERVAL',
-    field_class=FloatField,
-    default='0.25',
-    label=_('Interval (in seconds) between polls for cpu usage.'),
-    help_text=_('Interval (in seconds) between polls for cpu usage. ' 'Setting this lower than the default will affect playbook performance.'),
-    category=_('Jobs'),
-    category_slug='jobs',
-    required=False,
-)
-
-register(
-    'AWX_RESOURCE_PROFILING_MEMORY_POLL_INTERVAL',
-    field_class=FloatField,
-    default='0.25',
-    label=_('Interval (in seconds) between polls for memory usage.'),
-    help_text=_('Interval (in seconds) between polls for memory usage. ' 'Setting this lower than the default will affect playbook performance.'),
-    category=_('Jobs'),
-    category_slug='jobs',
-    required=False,
-)
-
-register(
-    'AWX_RESOURCE_PROFILING_PID_POLL_INTERVAL',
-    field_class=FloatField,
-    default='0.25',
-    label=_('Interval (in seconds) between polls for PID count.'),
-    help_text=_('Interval (in seconds) between polls for PID count. ' 'Setting this lower than the default will affect playbook performance.'),
-    category=_('Jobs'),
-    category_slug='jobs',
-    required=False,
 )
 
 register(

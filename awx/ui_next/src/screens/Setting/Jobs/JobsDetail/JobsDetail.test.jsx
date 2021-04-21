@@ -55,11 +55,6 @@ describe('<JobsDetail />', () => {
     assertDetail(wrapper, 'Isolated launch timeout', '600 seconds');
     assertDetail(wrapper, 'Isolated connection timeout', '10 seconds');
     assertDetail(wrapper, 'Isolated host key checking', 'Off');
-    assertDetail(
-      wrapper,
-      'Enable detailed resource profiling on all playbook runs',
-      'Off'
-    );
     assertDetail(wrapper, 'Run Project Updates With Higher Verbosity', 'Off');
     assertDetail(wrapper, 'Enable Role Download', 'On');
     assertDetail(wrapper, 'Enable Collection(s) Download', 'On');
