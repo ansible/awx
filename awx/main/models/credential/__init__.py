@@ -498,7 +498,7 @@ class CredentialType(CommonModelNameNotUnique):
                 f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
             # FIXME: develop some better means of referencing paths inside containers
-            container_path = os.path.join('/runner', os.path.basename(path))
+            container_path = os.path.join('/runner', 'env', os.path.basename(path))
 
             # determine if filename indicates single file or many
             if file_label.find('.') == -1:
@@ -536,7 +536,7 @@ class CredentialType(CommonModelNameNotUnique):
             if extra_vars:
                 path = build_extra_vars_file(extra_vars, private_data_dir)
                 # FIXME: develop some better means of referencing paths inside containers
-                container_path = os.path.join('/runner', os.path.basename(path))
+                container_path = os.path.join('/runner', 'env', os.path.basename(path))
                 args.extend(['-e', '@%s' % container_path])
 
 

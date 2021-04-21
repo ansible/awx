@@ -30,8 +30,9 @@ def gce(cred, env, private_data_dir):
     json.dump(json_cred, f, indent=2)
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-    env['GCE_CREDENTIALS_FILE_PATH'] = os.path.join('/runner', os.path.basename(path))
-    env['GCP_SERVICE_ACCOUNT_FILE'] = os.path.join('/runner', os.path.basename(path))
+    cred_path = os.path.join('/runner', 'env', os.path.basename(path))
+    env['GCE_CREDENTIALS_FILE_PATH'] = cred_path
+    env['GCP_SERVICE_ACCOUNT_FILE'] = cred_path
 
     # Handle env variables for new module types.
     # This includes gcp_compute inventory plugin and
@@ -103,7 +104,7 @@ def openstack(cred, env, private_data_dir):
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
     # TODO: constant for container base path
-    env['OS_CLIENT_CONFIG_FILE'] = os.path.join('/runner', os.path.basename(path))
+    env['OS_CLIENT_CONFIG_FILE'] = os.path.join('/runner', 'env', os.path.basename(path))
 
 
 def kubernetes_bearer_token(cred, env, private_data_dir):
@@ -115,6 +116,6 @@ def kubernetes_bearer_token(cred, env, private_data_dir):
         with os.fdopen(handle, 'w') as f:
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
             f.write(cred.get_input('ssl_ca_cert'))
-        env['K8S_AUTH_SSL_CA_CERT'] = os.path.join('/runner', os.path.basename(path))
+        env['K8S_AUTH_SSL_CA_CERT'] = os.path.join('/runner', 'env', os.path.basename(path))
     else:
         env['K8S_AUTH_VERIFY_SSL'] = 'False'
