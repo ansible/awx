@@ -13,6 +13,7 @@ import {
 } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
+import { BrandName } from '../../../variables';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import { TagMultiSelect } from '../../../components/MultiSelect';
 import useRequest from '../../../util/useRequest';
@@ -545,7 +546,7 @@ function JobTemplateForm({
                         &nbsp;
                         <Popover
                           content={i18n._(t`Enables creation of a provisioning
-                              callback URL. Using the URL a host can contact BRAND_NAME
+                              callback URL. Using the URL a host can contact ${BrandName}
                               and request a configuration update using this job
                               template.`)}
                         />
