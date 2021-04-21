@@ -408,23 +408,6 @@ AUTH_BASIC_ENABLED = True
 # when trying to access a UI page that requries authentication.
 LOGIN_REDIRECT_OVERRIDE = ''
 
-# Default to skipping isolated host key checking (the initial connection will
-# hang on an interactive "The authenticity of host example.org can't be
-# established" message)
-AWX_ISOLATED_HOST_KEY_CHECKING = False
-
-# The number of seconds to sleep between status checks for jobs running on isolated nodes
-AWX_ISOLATED_CHECK_INTERVAL = 30
-
-# The timeout (in seconds) for launching jobs on isolated nodes
-AWX_ISOLATED_LAUNCH_TIMEOUT = 600
-
-# Ansible connection timeout (in seconds) for communicating with isolated instances
-AWX_ISOLATED_CONNECTION_TIMEOUT = 10
-
-# The time (in seconds) between the periodic isolated heartbeat status check
-AWX_ISOLATED_PERIODIC_CHECK = 600
-
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
 

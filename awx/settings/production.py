@@ -40,8 +40,6 @@ ANSIBLE_VENV_PATH = os.path.join(BASE_VENV_PATH, "ansible")
 # Tower base virtualenv paths and enablement
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
-AWX_ISOLATED_USERNAME = 'awx'
-
 # Store a snapshot of default settings at this point before loading any
 # customizable config files.
 DEFAULTS_SNAPSHOT = {}
