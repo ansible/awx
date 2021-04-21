@@ -113,37 +113,20 @@ export const relatedResourceDeleteRequests = {
     },
   ],
 
-  inventorySource: (inventoryId, inventorySource) => [
+  inventorySource: inventorySourceId => [
     {
-      request: async () => {
-        try {
-          const { data } = await InventoriesAPI.updateSources(inventoryId);
-
-          const results = await Promise.all(
-            data.map(async datum =>
-              WorkflowJobTemplateNodesAPI.read({
-                unified_job_template: datum.inventory_source,
-              })
-            )
-          );
-          const total = results.reduce(
-            ({ data: { count: acc } }, { data: { count: cur } }) => acc + cur,
-            { data: { count: 0 } }
-          );
-
-          return { data: { count: total } };
-        } catch (err) {
-          throw new Error(err);
-        }
-      },
+      request: async () =>
+        WorkflowJobTemplateNodesAPI.read({
+          unified_job_template: inventorySourceId,
+        }),
       label: i18n._(t`Workflow Job Template Nodes`),
     },
     {
-      request: async () => InventorySourcesAPI.readGroups(inventorySource.id),
+      request: async () => InventorySourcesAPI.readGroups(inventorySourceId),
       label: i18n._(t`Groups`),
     },
     {
-      request: async () => InventorySourcesAPI.readHosts(inventorySource.id),
+      request: async () => InventorySourcesAPI.readHosts(inventorySourceId),
       label: i18n._(t`Hosts`),
     },
   ],

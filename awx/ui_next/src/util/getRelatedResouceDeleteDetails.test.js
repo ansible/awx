@@ -91,9 +91,8 @@ describe('delete details', () => {
     await getRelatedResourceDeleteCounts(
       relatedResourceDeleteRequests.inventorySource(1)
     );
-    expect(InventoriesAPI.updateSources).toBeCalledWith(1);
     expect(WorkflowJobTemplateNodesAPI.read).toBeCalledWith({
-      unified_job_template: 2,
+      unified_job_template: 1,
     });
   });
 
@@ -105,11 +104,11 @@ describe('delete details', () => {
   });
 
   test('should call return error for inventory source list', async () => {
-    InventoriesAPI.updateSources.mockRejectedValue({
+    WorkflowJobTemplateNodesAPI.read.mockRejectedValue({
       response: {
         config: {
-          method: 'post',
-          url: '/api/v2/inventories/1/ad_hoc_commands',
+          method: 'get',
+          url: '/api/v2/workflow_job_template_nodesP',
         },
         data: 'An error occurred',
         status: 403,
@@ -119,7 +118,6 @@ describe('delete details', () => {
       relatedResourceDeleteRequests.inventorySource(1)
     );
 
-    expect(InventoriesAPI.updateSources).toBeCalledWith(1);
     expect(error).toBeDefined();
   });
 

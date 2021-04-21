@@ -145,8 +145,7 @@ function InventorySourceList({ i18n }) {
   const listUrl = `/inventories/${inventoryType}/${id}/sources/`;
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.inventorySource(
-    id,
-    selected[0]
+    selected[0]?.id
   );
   return (
     <>
