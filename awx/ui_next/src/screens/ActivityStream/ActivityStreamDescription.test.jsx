@@ -3,7 +3,7 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import ActivityStreamDescription from './ActivityStreamDescription';
 
 describe('ActivityStreamDescription', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     const description = mountWithContexts(
       <ActivityStreamDescription activity={{}} />
     );

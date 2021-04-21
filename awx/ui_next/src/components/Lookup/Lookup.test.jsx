@@ -86,7 +86,7 @@ describe('<Lookup />', () => {
     jest.restoreAllMocks();
   });
 
-  test('should render succesfully', async () => {
+  test('should render successfully', async () => {
     wrapper = await mountWrapper();
     expect(wrapper.find('Lookup')).toHaveLength(1);
   });

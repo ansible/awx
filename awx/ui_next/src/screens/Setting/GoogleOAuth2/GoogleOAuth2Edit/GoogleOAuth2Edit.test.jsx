@@ -10,32 +10,34 @@ import { SettingsAPI } from '../../../../api';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import GoogleOAuth2Edit from './GoogleOAuth2Edit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL:
-      'https://towerhost/sso/complete/google-oauth2/',
-    SOCIAL_AUTH_GOOGLE_OAUTH2_KEY: 'mock key',
-    SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: '$encrypted$',
-    SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS: [
-      'example.com',
-      'example_2.com',
-    ],
-    SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS: {},
-    SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP: {
-      Default: {},
-    },
-    SOCIAL_AUTH_GOOGLE_OAUTH2_TEAM_MAP: {},
-  },
-});
+jest.mock('../../../../api');
 
 describe('<GoogleOAuth2Edit />', () => {
   let wrapper;
   let history;
 
+  beforeEach(() => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL:
+          'https://towerhost/sso/complete/google-oauth2/',
+        SOCIAL_AUTH_GOOGLE_OAUTH2_KEY: 'mock key',
+        SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: '$encrypted$',
+        SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS: [
+          'example.com',
+          'example_2.com',
+        ],
+        SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS: {},
+        SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP: {
+          Default: {},
+        },
+        SOCIAL_AUTH_GOOGLE_OAUTH2_TEAM_MAP: {},
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

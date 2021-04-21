@@ -10,16 +10,6 @@ import AWXLogin from './Login';
 
 jest.mock('../../api');
 
-RootAPI.readAssetVariables.mockResolvedValue({
-  data: {
-    BRAND_NAME: 'AWX',
-  },
-});
-
-AuthAPI.read.mockResolvedValue({
-  data: {},
-});
-
 describe('<Login />', () => {
   async function findChildren(wrapper) {
     const [
@@ -56,6 +46,15 @@ describe('<Login />', () => {
   }
 
   beforeEach(() => {
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
+
+    AuthAPI.read.mockResolvedValue({
+      data: {},
+    });
     RootAPI.read.mockResolvedValue({
       data: {
         custom_login_info:
@@ -69,7 +68,7 @@ describe('<Login />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders without crashing', async done => {
+  test('initially renders without crashing', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
@@ -81,10 +80,9 @@ describe('<Login />', () => {
     expect(passwordInput.props().value).toBe('');
     expect(submitButton.props().isDisabled).toBe(false);
     expect(wrapper.find('AlertModal').length).toBe(0);
-    done();
   });
 
-  test('custom logo renders Brand component with correct src and alt', async done => {
+  test('custom logo renders Brand component with correct src and alt', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
@@ -97,10 +95,9 @@ describe('<Login />', () => {
       'Foo Application',
       'data:image/jpeg;images/foo.jpg',
     ]);
-    done();
   });
 
-  test('default logo renders Brand component with correct src and alt', async done => {
+  test('default logo renders Brand component with correct src and alt', async () => {
     RootAPI.read.mockResolvedValue({ data: {} });
     let wrapper;
     await act(async () => {
@@ -109,20 +106,18 @@ describe('<Login />', () => {
     const { loginHeaderLogo } = await findChildren(wrapper);
     const { alt, src } = loginHeaderLogo.props();
     expect([alt, src]).toEqual(['AWX', '/static/media/logo-login.svg']);
-    done();
   });
 
-  test('custom login info handled correctly', async done => {
+  test('custom login info handled correctly', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
     });
     await findChildren(wrapper);
     expect(wrapper.find('footer').html()).toContain('<div>TEST</div>');
-    done();
   });
 
-  test('data initialization error is properly handled', async done => {
+  test('data initialization error is properly handled', async () => {
     RootAPI.read.mockRejectedValueOnce(
       new Error({
         response: {
@@ -143,10 +138,9 @@ describe('<Login />', () => {
     const { alt, src } = loginHeaderLogo.props();
     expect([alt, src]).toEqual([null, '/static/media/logo-login.svg']);
     expect(wrapper.find('AlertModal').length).toBe(1);
-    done();
   });
 
-  test('state maps to un/pw input value props', async done => {
+  test('state maps to un/pw input value props', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
@@ -163,10 +157,9 @@ describe('<Login />', () => {
     expect(
       wrapper.find('TextInputBase#pf-login-password-id').prop('value')
     ).toEqual('pw');
-    done();
   });
 
-  test('handles input validation errors and clears on input value change', async done => {
+  test('handles input validation errors and clears on input value change', async () => {
     RootAPI.login.mockRejectedValueOnce(
       new Error({
         response: {
@@ -243,11 +236,9 @@ describe('<Login />', () => {
     expect(
       wrapper.find('TextInput#pf-login-password-id').prop('validated')
     ).toEqual('default');
-
-    done();
   });
 
-  test('submit calls api.login successfully', async done => {
+  test('submit calls api.login successfully', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
@@ -267,21 +258,18 @@ describe('<Login />', () => {
 
     expect(RootAPI.login).toHaveBeenCalledTimes(1);
     expect(RootAPI.login).toHaveBeenCalledWith('un', 'pw');
-
-    done();
   });
 
-  test('render Redirect to / when already authenticated', async done => {
+  test('render Redirect to / when already authenticated', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => true} />);
     });
     await waitForElement(wrapper, 'Redirect', el => el.length === 1);
     await waitForElement(wrapper, 'Redirect', el => el.props().to === '/');
-    done();
   });
 
-  test('GitHub auth buttons shown', async done => {
+  test('GitHub auth buttons shown', async () => {
     AuthAPI.read.mockResolvedValue({
       data: {
         github: {
@@ -308,10 +296,9 @@ describe('<Login />', () => {
     expect(wrapper.find('AzureIcon').length).toBe(0);
     expect(wrapper.find('GoogleIcon').length).toBe(0);
     expect(wrapper.find('UserCircleIcon').length).toBe(0);
-    done();
   });
 
-  test('Google auth button shown', async done => {
+  test('Google auth button shown', async () => {
     AuthAPI.read.mockResolvedValue({
       data: {
         'google-oauth2': {
@@ -330,10 +317,9 @@ describe('<Login />', () => {
     expect(wrapper.find('AzureIcon').length).toBe(0);
     expect(wrapper.find('GoogleIcon').length).toBe(1);
     expect(wrapper.find('UserCircleIcon').length).toBe(0);
-    done();
   });
 
-  test('Azure AD auth button shown', async done => {
+  test('Azure AD auth button shown', async () => {
     AuthAPI.read.mockResolvedValue({
       data: {
         'azuread-oauth2': {
@@ -352,10 +338,9 @@ describe('<Login />', () => {
     expect(wrapper.find('AzureIcon').length).toBe(1);
     expect(wrapper.find('GoogleIcon').length).toBe(0);
     expect(wrapper.find('UserCircleIcon').length).toBe(0);
-    done();
   });
 
-  test('SAML auth buttons shown', async done => {
+  test('SAML auth buttons shown', async () => {
     AuthAPI.read.mockResolvedValue({
       data: {
         saml: {
@@ -385,6 +370,5 @@ describe('<Login />', () => {
     expect(wrapper.find('AzureIcon').length).toBe(0);
     expect(wrapper.find('GoogleIcon').length).toBe(0);
     expect(wrapper.find('UserCircleIcon').length).toBe(3);
-    done();
   });
 });

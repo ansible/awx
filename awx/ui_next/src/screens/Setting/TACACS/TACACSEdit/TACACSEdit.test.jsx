@@ -10,21 +10,24 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import TACACSEdit from './TACACSEdit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    TACACSPLUS_HOST: 'mockhost',
-    TACACSPLUS_PORT: 49,
-    TACACSPLUS_SECRET: '$encrypted$',
-    TACACSPLUS_SESSION_TIMEOUT: 123,
-    TACACSPLUS_AUTH_PROTOCOL: 'ascii',
-  },
-});
+jest.mock('../../../../api/');
 
 describe('<TACACSEdit />', () => {
   let wrapper;
   let history;
+
+  beforeEach(() => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        TACACSPLUS_HOST: 'mockhost',
+        TACACSPLUS_PORT: 49,
+        TACACSPLUS_SECRET: '$encrypted$',
+        TACACSPLUS_SESSION_TIMEOUT: 123,
+        TACACSPLUS_AUTH_PROTOCOL: 'ascii',
+      },
+    });
+  });
 
   afterEach(() => {
     wrapper.unmount();

@@ -8,18 +8,19 @@ import { GroupsAPI } from '../../../api';
 
 jest.mock('../../../api');
 
-GroupsAPI.createHost.mockResolvedValue({
-  data: {
-    ...mockHost,
-  },
-});
-
 describe('<InventoryGroupHostAdd />', () => {
   let wrapper;
   let history;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     history = createMemoryHistory();
+
+    GroupsAPI.createHost.mockResolvedValue({
+      data: {
+        ...mockHost,
+      },
+    });
+
     await act(async () => {
       wrapper = mountWithContexts(
         <InventoryGroupHostAdd inventoryGroup={{ id: 123, inventory: 3 }} />,
@@ -32,7 +33,6 @@ describe('<InventoryGroupHostAdd />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('handleSubmit should post to api', async () => {

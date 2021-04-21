@@ -73,6 +73,9 @@ describe('<SmartInventoryHost />', () => {
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
+    InventoriesAPI.readHostDetail.mockResolvedValue({
+      data: { ...mockHost },
+    });
     history = createMemoryHistory({
       initialEntries: ['/inventories/smart_inventory/1/hosts/1/foobar'],
     });

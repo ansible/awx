@@ -4,15 +4,6 @@ import WS from 'jest-websocket-mock';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import useWsJobs from './useWsJobs';
 
-/*
-  Jest mock timers don’t play well with jest-websocket-mock,
-  so we'll stub out throttling to resolve immediately
-*/
-jest.mock('../../util/useThrottle', () => ({
-  __esModule: true,
-  default: jest.fn(val => val),
-}));
-
 function TestInner() {
   return <div />;
 }
@@ -26,12 +17,21 @@ describe('useWsJobs hook', () => {
   let debug;
   let wrapper;
   beforeEach(() => {
+    /*
+      Jest mock timers don’t play well with jest-websocket-mock,
+      so we'll stub out throttling to resolve immediately
+    */
+    jest.mock('../../util/useThrottle', () => ({
+      __esModule: true,
+      default: jest.fn(val => val),
+    }));
     debug = global.console.debug; // eslint-disable-line prefer-destructuring
     global.console.debug = () => {};
   });
 
   afterEach(() => {
     global.console.debug = debug;
+    jest.clearAllMocks();
   });
 
   test('should return jobs list', () => {

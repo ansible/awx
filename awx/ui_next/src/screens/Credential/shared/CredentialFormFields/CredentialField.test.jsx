@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
 import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import credentialTypes from '../data.credentialTypes.json';
@@ -67,7 +68,7 @@ describe('<CredentialField />', () => {
     expect(wrapper.find('KeyIcon').length).toBe(1);
     expect(wrapper.find('PficonHistoryIcon').length).toBe(1);
   });
-  test('replace/revert button behaves as expected', () => {
+  test('replace/revert button behaves as expected', async () => {
     wrapper = mountWithContexts(
       <Formik
         initialValues={{
@@ -90,7 +91,10 @@ describe('<CredentialField />', () => {
         .content
     ).toBe('Replace');
     expect(wrapper.find('TextInput').props().isDisabled).toBe(true);
-    expect(wrapper.find('PficonHistoryIcon').simulate('click'));
+    wrapper.find('PficonHistoryIcon').simulate('click');
+    await act(async () => {
+      wrapper.update();
+    });
     expect(
       wrapper.find('Tooltip#credential-password-replace-tooltip').props()
         .content
@@ -98,7 +102,10 @@ describe('<CredentialField />', () => {
     expect(wrapper.find('TextInput').props().isDisabled).toBe(false);
     expect(wrapper.find('TextInput').props().value).toBe('');
     expect(wrapper.find('TextInput').props().placeholder).toBe(undefined);
-    expect(wrapper.find('PficonHistoryIcon').simulate('click'));
+    wrapper.find('PficonHistoryIcon').simulate('click');
+    await act(async () => {
+      wrapper.update();
+    });
     expect(
       wrapper.find('Tooltip#credential-password-replace-tooltip').props()
         .content

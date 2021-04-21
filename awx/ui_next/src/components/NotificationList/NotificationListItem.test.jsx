@@ -28,7 +28,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders succesfully and displays correct label', () => {
+  test('initially renders successfully and displays correct label', () => {
     wrapper = mountWithContexts(
       <table>
         <tbody>

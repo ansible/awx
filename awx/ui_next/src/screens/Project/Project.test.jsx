@@ -39,18 +39,20 @@ async function getOrganizations() {
 describe('<Project />', () => {
   let wrapper;
 
-  test('initially renders successfully', async () => {
+  beforeEach(() => {
+    OrganizationsAPI.read = jest.fn();
+    ProjectsAPI.readDetail = jest.fn();
     ProjectsAPI.readDetail.mockResolvedValue({ data: mockDetails });
     OrganizationsAPI.read.mockImplementation(getOrganizations);
+  });
+
+  test('initially renders successfully', async () => {
     await act(async () => {
       mountWithContexts(<Project setBreadcrumb={() => {}} me={mockMe} />);
     });
   });
 
   test('notifications tab shown for admins', async () => {
-    ProjectsAPI.readDetail.mockResolvedValue({ data: mockDetails });
-    OrganizationsAPI.read.mockImplementation(getOrganizations);
-
     await act(async () => {
       wrapper = mountWithContexts(
         <Project setBreadcrumb={() => {}} me={mockMe} />
@@ -65,8 +67,7 @@ describe('<Project />', () => {
   });
 
   test('notifications tab hidden with reduced permissions', async () => {
-    ProjectsAPI.readDetail.mockResolvedValue({ data: mockDetails });
-    OrganizationsAPI.read.mockResolvedValue({
+    OrganizationsAPI.read = async () => ({
       count: 0,
       next: null,
       previous: null,
@@ -86,8 +87,7 @@ describe('<Project />', () => {
   });
 
   test('schedules tab shown for scm based projects.', async () => {
-    ProjectsAPI.readDetail.mockResolvedValue({ data: mockDetails });
-    OrganizationsAPI.read.mockResolvedValue({
+    OrganizationsAPI.read = async () => ({
       count: 0,
       next: null,
       previous: null,
@@ -109,8 +109,8 @@ describe('<Project />', () => {
 
   test('schedules tab hidden for manual projects.', async () => {
     const manualDetails = Object.assign(mockDetails, { scm_type: '' });
-    ProjectsAPI.readDetail.mockResolvedValue({ data: manualDetails });
-    OrganizationsAPI.read.mockResolvedValue({
+    ProjectsAPI.readDetail = async () => ({ data: manualDetails });
+    OrganizationsAPI.read = async () => ({
       count: 0,
       next: null,
       previous: null,

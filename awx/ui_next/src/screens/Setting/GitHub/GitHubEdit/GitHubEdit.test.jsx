@@ -10,28 +10,30 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import GitHubEdit from './GitHubEdit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    SOCIAL_AUTH_GITHUB_CALLBACK_URL: 'https://foo/complete/github/',
-    SOCIAL_AUTH_GITHUB_KEY: 'mock github key',
-    SOCIAL_AUTH_GITHUB_SECRET: '$encrypted$',
-    SOCIAL_AUTH_GITHUB_TEAM_MAP: {},
-    SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: {
-      Default: {
-        users: true,
-      },
-    },
-  },
-});
+jest.mock('../../../../api');
 
 describe('<GitHubEdit />', () => {
   let wrapper;
   let history;
 
+  beforeEach(() => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        SOCIAL_AUTH_GITHUB_CALLBACK_URL: 'https://foo/complete/github/',
+        SOCIAL_AUTH_GITHUB_KEY: 'mock github key',
+        SOCIAL_AUTH_GITHUB_SECRET: '$encrypted$',
+        SOCIAL_AUTH_GITHUB_TEAM_MAP: {},
+        SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: {
+          Default: {
+            users: true,
+          },
+        },
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

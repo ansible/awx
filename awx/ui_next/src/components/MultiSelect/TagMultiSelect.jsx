@@ -31,17 +31,22 @@ function TagMultiSelect({ onChange, value }) {
     ));
   };
 
+  const onFilter = event => {
+    if (event) {
+      const str = event.target.value.toLowerCase();
+      const matches = options.filter(o => o.toLowerCase().includes(str));
+      return renderOptions(matches);
+    }
+    return null;
+  };
+
   return (
     <Select
       variant={SelectVariant.typeaheadMulti}
       onToggle={toggleExpanded}
       onSelect={onSelect}
       onClear={() => onChange('')}
-      onFilter={event => {
-        const str = event.target.value.toLowerCase();
-        const matches = options.filter(o => o.toLowerCase().includes(str));
-        return renderOptions(matches);
-      }}
+      onFilter={onFilter}
       isCreatable
       onCreateOption={name => {
         name = name.trim();

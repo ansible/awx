@@ -10,28 +10,30 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import GitHubEnterpriseTeamEdit from './GitHubEnterpriseTeamEdit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_CALLBACK_URL:
-      'https://towerhost/sso/complete/github-enterprise-team/',
-    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL: '',
-    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL: '',
-    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY: '',
-    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET: '$encrypted$',
-    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID: '',
-    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ORGANIZATION_MAP: null,
-    SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_TEAM_MAP: null,
-  },
-});
+jest.mock('../../../../api');
 
 describe('<GitHubEnterpriseTeamEdit />', () => {
   let wrapper;
   let history;
 
+  beforeEach(() => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_CALLBACK_URL:
+          'https://towerhost/sso/complete/github-enterprise-team/',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL: '',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL: '',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY: '',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET: '$encrypted$',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID: '',
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ORGANIZATION_MAP: null,
+        SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_TEAM_MAP: null,
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

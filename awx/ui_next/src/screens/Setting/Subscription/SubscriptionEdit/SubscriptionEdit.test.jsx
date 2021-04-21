@@ -16,12 +16,6 @@ import SubscriptionEdit from './SubscriptionEdit';
 
 jest.mock('./bootstrapPendo');
 jest.mock('../../../../api');
-RootAPI.readAssetVariables.mockResolvedValue({
-  data: {
-    BRAND_NAME: 'Mock',
-    PENDO_API_KEY: '',
-  },
-});
 
 const mockConfig = {
   me: {
@@ -68,7 +62,14 @@ describe('<SubscriptionEdit />', () => {
     let history;
 
     beforeAll(async () => {
-      SettingsAPI.readCategory.mockResolvedValue({
+      jest.resetAllMocks();
+      RootAPI.readAssetVariables = async () => ({
+        data: {
+          BRAND_NAME: 'Mock',
+          PENDO_API_KEY: '',
+        },
+      });
+      SettingsAPI.readCategory = async () => ({
         data: {},
       });
       history = createMemoryHistory({
@@ -83,11 +84,6 @@ describe('<SubscriptionEdit />', () => {
         });
       });
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    });
-
-    afterAll(() => {
-      jest.clearAllMocks();
-      wrapper.unmount();
     });
 
     test('initially renders without crashing', () => {
@@ -212,11 +208,11 @@ describe('<SubscriptionEdit />', () => {
 
     test('should successfully save on form submission', async () => {
       const { window } = global;
-      global.window.pendo = { initialize: jest.fn().mockResolvedValue({}) };
-      ConfigAPI.read.mockResolvedValue({
+      global.window.pendo = { initialize: async () => ({}) };
+      ConfigAPI.read = async () => ({
         data: mockConfig,
       });
-      MeAPI.read.mockResolvedValue({
+      MeAPI.read = async () => ({
         data: {
           results: [
             {
@@ -225,8 +221,8 @@ describe('<SubscriptionEdit />', () => {
           ],
         },
       });
-      ConfigAPI.attach.mockResolvedValue({});
-      ConfigAPI.create.mockResolvedValue({
+      ConfigAPI.attach = async () => ({});
+      ConfigAPI.create = async () => ({
         data: mockConfig,
       });
       UsersAPI.readAdminOfOrganizations({
@@ -247,7 +243,7 @@ describe('<SubscriptionEdit />', () => {
     let history;
 
     beforeAll(async () => {
-      SettingsAPI.readCategory.mockResolvedValue({
+      SettingsAPI.readCategory = async () => ({
         data: {
           SUBSCRIPTIONS_PASSWORD: 'mock_password',
           SUBSCRIPTIONS_USERNAME: 'mock_username',
@@ -255,7 +251,7 @@ describe('<SubscriptionEdit />', () => {
           PENDO: 'off',
         },
       });
-      ConfigAPI.readSubscriptions.mockResolvedValue({
+      ConfigAPI.readSubscriptions = async () => ({
         data: [
           {
             subscription_name: 'mock subscription 50 instances',
@@ -283,11 +279,6 @@ describe('<SubscriptionEdit />', () => {
         });
       });
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    });
-
-    afterAll(() => {
-      jest.clearAllMocks();
-      wrapper.unmount();
     });
 
     test('should hide analytics step when editing a current subscription', async () => {
@@ -398,12 +389,12 @@ describe('<SubscriptionEdit />', () => {
 
     test('should successfully send request to api on form submission', async () => {
       expect(wrapper.find('EulaStep').length).toBe(1);
-      ConfigAPI.read.mockResolvedValue({
+      ConfigAPI.read = async () => ({
         data: {
           mockConfig,
         },
       });
-      MeAPI.read.mockResolvedValue({
+      MeAPI.read = async () => ({
         data: {
           results: [
             {
@@ -412,9 +403,9 @@ describe('<SubscriptionEdit />', () => {
           ],
         },
       });
-      ConfigAPI.attach.mockResolvedValue({});
-      ConfigAPI.create.mockResolvedValue({});
-      UsersAPI.readAdminOfOrganizations({
+      ConfigAPI.attach = async () => ({});
+      ConfigAPI.create = async () => ({});
+      UsersAPI.readAdminOfOrganizations = async () => ({
         data: {},
       });
       waitForElement(
@@ -445,6 +436,7 @@ describe('<SubscriptionEdit />', () => {
   });
 
   test('should throw a content error', async () => {
+    RootAPI.readAssetVariables = jest.fn();
     RootAPI.readAssetVariables.mockRejectedValueOnce(new Error());
     let wrapper;
     await act(async () => {
@@ -456,7 +448,5 @@ describe('<SubscriptionEdit />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-    jest.clearAllMocks();
-    wrapper.unmount();
   });
 });

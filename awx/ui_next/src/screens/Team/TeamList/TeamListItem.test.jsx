@@ -14,7 +14,7 @@ i18n.load({ en: english });
 i18n.activate('en');
 
 describe('<TeamListItem />', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(
       <I18nProvider i18n={i18n}>
         <MemoryRouter initialEntries={['/teams']} initialIndex={0}>

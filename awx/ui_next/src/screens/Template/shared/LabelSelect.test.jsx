@@ -26,6 +26,7 @@ describe('<LabelSelect />', () => {
         <LabelSelect value={[]} onError={() => {}} onChange={() => {}} />
       );
     });
+
     expect(LabelsAPI.read).toHaveBeenCalledTimes(1);
     wrapper.find('SelectToggle').simulate('click');
     const selectOptions = wrapper.find('SelectOption');
@@ -35,13 +36,13 @@ describe('<LabelSelect />', () => {
   });
 
   test('should fetch two pages labels if present', async () => {
-    LabelsAPI.read.mockReturnValueOnce({
+    await LabelsAPI.read.mockResolvedValueOnce({
       data: {
         results: options,
         next: '/foo?page=2',
       },
     });
-    LabelsAPI.read.mockReturnValueOnce({
+    await LabelsAPI.read.mockResolvedValueOnce({
       data: {
         results: [
           { id: 3, name: 'three' },
@@ -65,7 +66,7 @@ describe('<LabelSelect />', () => {
   test('Generate a label  ', async () => {
     let wrapper;
     const onChange = jest.fn();
-    LabelsAPI.read.mockReturnValueOnce({
+    LabelsAPI.read.mockReturnValue({
       data: {
         options,
       },

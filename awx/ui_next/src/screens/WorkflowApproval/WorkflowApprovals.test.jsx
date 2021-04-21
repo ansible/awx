@@ -1,18 +1,49 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
 import WorkflowApprovals from './WorkflowApprovals';
+import { WorkflowApprovalsAPI } from '../../api';
+import mockWorkflowApprovals from './data.workflowApprovals.json';
+
+jest.mock('../../api');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
 }));
 
 describe('<WorkflowApprovals />', () => {
-  test('initially renders succesfully', () => {
-    mountWithContexts(<WorkflowApprovals />);
+  beforeEach(() => {
+    WorkflowApprovalsAPI.read.mockResolvedValue({
+      data: {
+        count: mockWorkflowApprovals.results.length,
+        results: mockWorkflowApprovals.results,
+      },
+    });
+
+    WorkflowApprovalsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
   });
 
-  test('should display a breadcrumb heading', () => {
+  test('initially renders successfully', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<WorkflowApprovals />);
+    });
+    expect(wrapper.find('WorkflowApprovals').length).toBe(1);
+  });
+
+  test('should display a breadcrumb heading', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/workflow_approvals'],
     });
@@ -22,18 +53,22 @@ describe('<WorkflowApprovals />', () => {
       isExact: true,
     };
 
-    const wrapper = mountWithContexts(<WorkflowApprovals />, {
-      context: {
-        router: {
-          history,
-          route: {
-            location: history.location,
-            match,
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<WorkflowApprovals />, {
+        context: {
+          router: {
+            history,
+            route: {
+              location: history.location,
+              match,
+            },
           },
         },
-      },
+      });
     });
 
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('Title').length).toBe(1);
     wrapper.unmount();
   });

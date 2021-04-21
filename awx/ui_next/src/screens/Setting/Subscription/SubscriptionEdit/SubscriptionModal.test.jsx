@@ -8,28 +8,6 @@ import { ConfigAPI } from '../../../../api';
 import SubscriptionModal from './SubscriptionModal';
 
 jest.mock('../../../../api');
-ConfigAPI.readSubscriptions.mockResolvedValue({
-  data: [
-    {
-      subscription_name: 'mock A',
-      instance_count: 100,
-      license_date: 1714000271,
-      pool_id: 7,
-    },
-    {
-      subscription_name: 'mock B',
-      instance_count: 200,
-      license_date: 1714000271,
-      pool_id: 8,
-    },
-    {
-      subscription_name: 'mock C',
-      instance_count: 30,
-      license_date: 1714000271,
-      pool_id: 9,
-    },
-  ],
-});
 
 describe('<SubscriptionModal />', () => {
   let wrapper;
@@ -37,6 +15,28 @@ describe('<SubscriptionModal />', () => {
   const onClose = jest.fn();
 
   beforeAll(async () => {
+    ConfigAPI.readSubscriptions = async () => ({
+      data: [
+        {
+          subscription_name: 'mock A',
+          instance_count: 100,
+          license_date: 1714000271,
+          pool_id: 7,
+        },
+        {
+          subscription_name: 'mock B',
+          instance_count: 200,
+          license_date: 1714000271,
+          pool_id: 8,
+        },
+        {
+          subscription_name: 'mock C',
+          instance_count: 30,
+          license_date: 1714000271,
+          pool_id: 9,
+        },
+      ],
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <SubscriptionModal
@@ -106,22 +106,6 @@ describe('<SubscriptionModal />', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  test('should display error detail message', async () => {
-    ConfigAPI.readSubscriptions.mockRejectedValueOnce(new Error());
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <SubscriptionModal
-          subscriptionCreds={{
-            username: 'admin',
-            password: '$encrypted',
-          }}
-        />
-      );
-    });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    await waitForElement(wrapper, 'ErrorDetail', el => el.length === 1);
-  });
-
   test('should show empty content', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
@@ -154,5 +138,22 @@ describe('<SubscriptionModal />', () => {
       expect(wrapper.find('tr[id=8] input').prop('checked')).toBe(true);
       expect(wrapper.find('tr[id=9] input').prop('checked')).toBe(false);
     });
+  });
+
+  test('should display error detail message', async () => {
+    ConfigAPI.readSubscriptions = jest.fn();
+    ConfigAPI.readSubscriptions.mockRejectedValueOnce(new Error());
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <SubscriptionModal
+          subscriptionCreds={{
+            username: 'admin',
+            password: '$encrypted',
+          }}
+        />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ErrorDetail', el => el.length === 1);
   });
 });

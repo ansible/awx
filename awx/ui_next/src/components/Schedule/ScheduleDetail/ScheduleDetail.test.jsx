@@ -9,9 +9,7 @@ import {
 } from '../../../../testUtils/enzymeHelpers';
 import ScheduleDetail from './ScheduleDetail';
 
-jest.mock('../../../api/models/JobTemplates');
-jest.mock('../../../api/models/Schedules');
-jest.mock('../../../api/models/WorkflowJobTemplates');
+jest.mock('../../../api');
 
 const allPrompts = {
   data: {
@@ -108,20 +106,21 @@ const scheduleWithPrompts = {
   extra_data: { foo: 'fii' },
 };
 
-SchedulesAPI.createPreview.mockResolvedValue({
-  data: {
-    local: [],
-    utc: [],
-  },
-});
-
 describe('<ScheduleDetail />', () => {
   let wrapper;
   const history = createMemoryHistory({
     initialEntries: ['/templates/job_template/1/schedules/1/details'],
   });
+  beforeEach(() => {
+    SchedulesAPI.createPreview.mockResolvedValue({
+      data: {
+        local: [],
+        utc: [],
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

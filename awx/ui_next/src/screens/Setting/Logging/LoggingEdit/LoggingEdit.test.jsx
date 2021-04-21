@@ -10,7 +10,8 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import LoggingEdit from './LoggingEdit';
 
-jest.mock('../../../../api/models/Settings');
+jest.mock('../../../../api');
+
 const mockSettings = {
   LOG_AGGREGATOR_HOST: 'https://logstash',
   LOG_AGGREGATOR_PORT: 1234,
@@ -58,21 +59,19 @@ const mockDefaultSettings = {
   LOG_AGGREGATOR_RSYSLOGD_DEBUG: false,
 };
 
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: mockSettings,
-});
-
 describe('<LoggingEdit />', () => {
   let wrapper;
   let history;
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 
   beforeEach(async () => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: mockSettings,
+    });
     history = createMemoryHistory({
       initialEntries: ['/settings/logging/edit'],
     });

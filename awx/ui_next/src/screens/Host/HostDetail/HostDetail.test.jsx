@@ -19,10 +19,6 @@ describe('<HostDetail />', () => {
       wrapper = mountWithContexts(<HostDetail host={mockHost} />);
     });
 
-    afterAll(() => {
-      wrapper.unmount();
-    });
-
     test('should render Details', async () => {
       function assertDetail(label, value) {
         expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
@@ -79,10 +75,6 @@ describe('<HostDetail />', () => {
       readOnlyHost.summary_fields.recent_jobs = [];
 
       wrapper = mountWithContexts(<HostDetail host={mockHost} />);
-    });
-
-    afterAll(() => {
-      wrapper.unmount();
     });
 
     test('should hide activity stream when there are no recent jobs', async () => {

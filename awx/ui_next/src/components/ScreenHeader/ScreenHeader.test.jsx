@@ -28,7 +28,7 @@ describe('<ScreenHeader />', () => {
     breadcrumbHeading = breadcrumbWrapper.find('Title');
   };
 
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     breadcrumbWrapper = mountWithContexts(
       <MemoryRouter initialEntries={['/foo/1/bar']} initialIndex={0}>
         <ScreenHeader streamType="all_activity" breadcrumbConfig={config} />

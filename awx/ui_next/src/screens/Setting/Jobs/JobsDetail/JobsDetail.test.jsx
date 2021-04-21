@@ -14,15 +14,18 @@ import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import mockJobSettings from '../../shared/data.jobSettings.json';
 import JobsDetail from './JobsDetail';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: mockJobSettings,
-});
+jest.mock('../../../../api');
 
 describe('<JobsDetail />', () => {
   let wrapper;
 
-  beforeAll(async () => {
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: mockJobSettings,
+    });
+  });
+
+  beforeEach(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>

@@ -1,34 +1,37 @@
 import Base from './Base';
 
 describe('Base', () => {
-  const createPromise = () => Promise.resolve();
   const mockBaseURL = '/api/v2/organizations/';
-  const mockHttp = {
-    delete: jest.fn(createPromise),
-    get: jest.fn(createPromise),
-    options: jest.fn(createPromise),
-    patch: jest.fn(createPromise),
-    post: jest.fn(createPromise),
-    put: jest.fn(createPromise),
-  };
 
-  const BaseAPI = new Base(mockHttp, mockBaseURL);
+  let BaseAPI;
+  let mockHttp;
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  beforeEach(() => {
+    const createPromise = () => Promise.resolve();
+    mockHttp = {
+      delete: jest.fn(createPromise),
+      get: jest.fn(createPromise),
+      options: jest.fn(createPromise),
+      patch: jest.fn(createPromise),
+      post: jest.fn(createPromise),
+      put: jest.fn(createPromise),
+    };
+    BaseAPI = new Base(mockHttp, mockBaseURL);
   });
 
-  test('create calls http method with expected data', async done => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('create calls http method with expected data', async () => {
     const data = { name: 'test ' };
     await BaseAPI.create(data);
 
     expect(mockHttp.post).toHaveBeenCalledTimes(1);
     expect(mockHttp.post.mock.calls[0][1]).toEqual(data);
-
-    done();
   });
 
-  test('destroy calls http method with expected data', async done => {
+  test('destroy calls http method with expected data', async () => {
     const resourceId = 1;
     await BaseAPI.destroy(resourceId);
 
@@ -36,11 +39,9 @@ describe('Base', () => {
     expect(mockHttp.delete.mock.calls[0][0]).toEqual(
       `${mockBaseURL}${resourceId}/`
     );
-
-    done();
   });
 
-  test('read calls http method with expected data', async done => {
+  test('read calls http method with expected data', async () => {
     const testParams = { foo: 'bar' };
     const testParamsDuplicates = { foo: ['bar', 'baz'] };
 
@@ -57,10 +58,9 @@ describe('Base', () => {
     expect(mockHttp.get.mock.calls[2][1]).toEqual({
       params: { foo: ['bar', 'baz'] },
     });
-    done();
   });
 
-  test('readDetail calls http method with expected data', async done => {
+  test('readDetail calls http method with expected data', async () => {
     const resourceId = 1;
 
     await BaseAPI.readDetail(resourceId);
@@ -69,18 +69,16 @@ describe('Base', () => {
     expect(mockHttp.get.mock.calls[0][0]).toEqual(
       `${mockBaseURL}${resourceId}/`
     );
-    done();
   });
 
-  test('readOptions calls http method with expected data', async done => {
+  test('readOptions calls http method with expected data', async () => {
     await BaseAPI.readOptions();
 
     expect(mockHttp.options).toHaveBeenCalledTimes(1);
     expect(mockHttp.options.mock.calls[0][0]).toEqual(`${mockBaseURL}`);
-    done();
   });
 
-  test('replace calls http method with expected data', async done => {
+  test('replace calls http method with expected data', async () => {
     const resourceId = 1;
     const data = { name: 'test ' };
 
@@ -91,11 +89,9 @@ describe('Base', () => {
       `${mockBaseURL}${resourceId}/`
     );
     expect(mockHttp.put.mock.calls[0][1]).toEqual(data);
-
-    done();
   });
 
-  test('update calls http method with expected data', async done => {
+  test('update calls http method with expected data', async () => {
     const resourceId = 1;
     const data = { name: 'test ' };
 
@@ -106,7 +102,5 @@ describe('Base', () => {
       `${mockBaseURL}${resourceId}/`
     );
     expect(mockHttp.patch.mock.calls[0][1]).toEqual(data);
-
-    done();
   });
 });

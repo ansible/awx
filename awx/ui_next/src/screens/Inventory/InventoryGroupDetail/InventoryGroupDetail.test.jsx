@@ -64,7 +64,6 @@ describe('<InventoryGroupDetail />', () => {
       });
     });
     afterEach(() => {
-      wrapper.unmount();
       jest.clearAllMocks();
     });
     test('InventoryGroupDetail renders successfully', () => {
@@ -150,8 +149,6 @@ describe('<InventoryGroupDetail />', () => {
 
       expect(wrapper.find('button[aria-label="Edit"]').length).toBe(0);
       expect(wrapper.find('button[aria-label="Delete"]').length).toBe(0);
-
-      wrapper.unmount();
     });
   });
 });

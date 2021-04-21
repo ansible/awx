@@ -100,7 +100,7 @@ describe('<InventoryHostList />', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('initially renders successfully', () => {

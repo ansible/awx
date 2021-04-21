@@ -37,7 +37,7 @@ describe('<TeamDetail />', () => {
     wrapper.unmount();
   });
 
-  test('initially renders succesfully', async () => {
+  test('initially renders successfully', async () => {
     await waitForElement(wrapper, 'TeamDetail');
   });
 

@@ -26,7 +26,7 @@ describe('<SmartInventory />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders succesfully', async () => {
+  test('initially renders successfully', async () => {
     InventoriesAPI.readDetail.mockResolvedValue({
       data: mockSmartInventory,
     });

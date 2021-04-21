@@ -10,26 +10,28 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import GitHubOrgEdit from './GitHubOrgEdit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    SOCIAL_AUTH_GITHUB_ORG_CALLBACK_URL:
-      'https://towerhost/sso/complete/github-org/',
-    SOCIAL_AUTH_GITHUB_ORG_KEY: '',
-    SOCIAL_AUTH_GITHUB_ORG_SECRET: '$encrypted$',
-    SOCIAL_AUTH_GITHUB_ORG_NAME: '',
-    SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP: null,
-    SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP: null,
-  },
-});
+jest.mock('../../../../api');
 
 describe('<GitHubOrgEdit />', () => {
   let wrapper;
   let history;
 
+  beforeEach(() => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        SOCIAL_AUTH_GITHUB_ORG_CALLBACK_URL:
+          'https://towerhost/sso/complete/github-org/',
+        SOCIAL_AUTH_GITHUB_ORG_KEY: '',
+        SOCIAL_AUTH_GITHUB_ORG_SECRET: '$encrypted$',
+        SOCIAL_AUTH_GITHUB_ORG_NAME: '',
+        SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP: null,
+        SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP: null,
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

@@ -10,19 +10,22 @@ import { assertDetail } from '../../shared/settingTestUtils';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import UIDetail from './UIDetail';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    CUSTOM_LOGIN_INFO: 'mock info',
-    CUSTOM_LOGO: 'data:image/png',
-    PENDO_TRACKING_STATE: 'off',
-  },
-});
+jest.mock('../../../../api');
 
 describe('<UIDetail />', () => {
   let wrapper;
 
-  beforeAll(async () => {
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        CUSTOM_LOGIN_INFO: 'mock info',
+        CUSTOM_LOGO: 'data:image/png',
+        PENDO_TRACKING_STATE: 'off',
+      },
+    });
+  });
+
+  beforeEach(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>

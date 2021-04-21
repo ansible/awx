@@ -110,7 +110,6 @@ describe('<InventorySourceList />', () => {
     });
   });
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
     global.console.debug = debug;
   });
@@ -366,7 +365,6 @@ describe('<InventorySourceList /> RBAC testing', () => {
       el => el.length > 0
     );
     expect(newWrapper.find('ToolbarAddButton').length).toBe(0);
-    newWrapper.unmount();
     jest.clearAllMocks();
   });
 
@@ -406,7 +404,6 @@ describe('<InventorySourceList /> RBAC testing', () => {
       el => el.length > 0
     );
     expect(newWrapper.find('Button[aria-label="Sync All"]').length).toBe(0);
-    newWrapper.unmount();
     jest.clearAllMocks();
   });
 });

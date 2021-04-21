@@ -40,25 +40,25 @@ async function getOrganizations(params) {
 describe('<Organization />', () => {
   let wrapper;
 
-  beforeAll(() => {
+  beforeEach(() => {
     OrganizationsAPI.readDetail.mockResolvedValue({ data: mockOrganization });
     OrganizationsAPI.readGalaxyCredentials.mockResolvedValue({
       data: {
         results: [],
       },
     });
+
+    OrganizationsAPI.read = jest.fn();
+    OrganizationsAPI.read.mockImplementation(getOrganizations);
   });
 
-  test('initially renders succesfully', async () => {
-    OrganizationsAPI.read.mockImplementation(getOrganizations);
+  test('initially renders successfully', async () => {
     await act(async () => {
       mountWithContexts(<Organization setBreadcrumb={() => {}} me={mockMe} />);
     });
   });
 
-  test('notifications tab shown for admins', async done => {
-    OrganizationsAPI.read.mockImplementation(getOrganizations);
-
+  test('notifications tab shown for admins', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Organization setBreadcrumb={() => {}} me={mockMe} />
@@ -71,12 +71,10 @@ describe('<Organization />', () => {
       el => el.length === 6
     );
     expect(tabs.last().text()).toEqual('Notifications');
-    wrapper.unmount();
-    done();
   });
 
-  test('notifications tab hidden with reduced permissions', async done => {
-    OrganizationsAPI.read.mockResolvedValue({
+  test('notifications tab hidden with reduced permissions', async () => {
+    OrganizationsAPI.read = async () => ({
       count: 0,
       next: null,
       previous: null,
@@ -95,8 +93,6 @@ describe('<Organization />', () => {
       el => el.length === 5
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
-    wrapper.unmount();
-    done();
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
@@ -124,6 +120,5 @@ describe('<Organization />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
-    wrapper.unmount();
   });
 });

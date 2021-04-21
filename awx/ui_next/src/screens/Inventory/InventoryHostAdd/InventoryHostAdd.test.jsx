@@ -8,18 +8,17 @@ import { HostsAPI } from '../../../api';
 
 jest.mock('../../../api');
 
-HostsAPI.create.mockResolvedValue({
-  data: {
-    ...mockHost,
-  },
-});
-
 describe('<InventoryHostAdd />', () => {
   let wrapper;
   let history;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     history = createMemoryHistory();
+    HostsAPI.create.mockResolvedValue({
+      data: {
+        ...mockHost,
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(<InventoryHostAdd inventory={{ id: 3 }} />, {
         context: { router: { history } },
@@ -29,7 +28,6 @@ describe('<InventoryHostAdd />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('handleSubmit should post to api', async () => {

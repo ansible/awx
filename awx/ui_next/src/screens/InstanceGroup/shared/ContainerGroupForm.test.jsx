@@ -111,7 +111,7 @@ describe('<ContainerGroupForm/>', () => {
     expect(wrapper.find('CredentialLookup').prop('value').name).toBe('test');
   });
 
-  test('should update form values', () => {
+  test('should update form values', async () => {
     act(() => {
       wrapper.find('CredentialLookup').invoke('onBlur')();
       wrapper.find('CredentialLookup').invoke('onChange')({
@@ -122,7 +122,9 @@ describe('<ContainerGroupForm/>', () => {
         target: { value: 'new Foo', name: 'name' },
       });
     });
-    wrapper.update();
+    await act(async () => {
+      wrapper.update();
+    });
     expect(wrapper.find('CredentialLookup').prop('value')).toEqual({
       id: 99,
       name: 'credential',

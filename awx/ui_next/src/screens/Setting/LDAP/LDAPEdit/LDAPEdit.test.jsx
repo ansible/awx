@@ -12,18 +12,18 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import LDAPEdit from './LDAPEdit';
 
-jest.mock('../../../../api/models/Settings');
+jest.mock('../../../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: jest.fn(),
 }));
-SettingsAPI.readCategory.mockResolvedValue({ data: mockLDAP });
 
 describe('<LDAPEdit />', () => {
   let wrapper;
   let history;
 
   beforeEach(async () => {
+    SettingsAPI.readCategory.mockResolvedValue({ data: mockLDAP });
     history = createMemoryHistory({
       initialEntries: ['/settings/ldap/default/edit'],
     });
@@ -46,7 +46,6 @@ describe('<LDAPEdit />', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

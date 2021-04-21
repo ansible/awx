@@ -88,11 +88,6 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     });
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-    jest.clearAllMocks();
-  });
-
   test('renders successfully', () => {
     expect(wrapper.find(WorkflowJobTemplateDetail).length).toBe(1);
   });

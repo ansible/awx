@@ -8,13 +8,16 @@ import {
 import { SettingsAPI } from '../../../api';
 import MiscSystem from './MiscSystem';
 
-jest.mock('../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {},
-});
+jest.mock('../../../api');
 
 describe('<MiscSystem />', () => {
   let wrapper;
+
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {},
+    });
+  });
 
   afterEach(() => {
     wrapper.unmount();

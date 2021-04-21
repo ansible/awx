@@ -43,6 +43,12 @@ const options = { data: { actions: { POST: true } } };
 describe('<CredentialTypeList', () => {
   let wrapper;
 
+  beforeEach(() => {
+    CredentialsAPI.read.mockResolvedValue({ data: { count: 0 } });
+    CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
+    CredentialTypesAPI.readOptions.mockResolvedValue(options);
+  });
+
   test('should mount successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
@@ -57,9 +63,6 @@ describe('<CredentialTypeList', () => {
   });
 
   test('should have data fetched and render 2 rows', async () => {
-    CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
-    CredentialTypesAPI.readOptions.mockResolvedValue(options);
-
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
@@ -71,9 +74,6 @@ describe('<CredentialTypeList', () => {
 
   test('should delete item successfully', async () => {
     CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
-    CredentialTypesAPI.readOptions.mockResolvedValue(options);
-    CredentialsAPI.read.mockResolvedValue({ data: { count: 0 } });
-
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
@@ -108,7 +108,19 @@ describe('<CredentialTypeList', () => {
     );
   });
 
+  test('should not render add button', async () => {
+    CredentialTypesAPI.readOptions.mockResolvedValue({
+      data: { actions: { POST: false } },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<CredentialTypeList />);
+    });
+    waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
+    expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+  });
+
   test('should thrown content error', async () => {
+    CredentialTypesAPI.destroy = jest.fn();
     CredentialTypesAPI.read.mockRejectedValue(
       new Error({
         response: {
@@ -120,7 +132,6 @@ describe('<CredentialTypeList', () => {
         },
       })
     );
-    CredentialTypesAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
@@ -129,6 +140,7 @@ describe('<CredentialTypeList', () => {
   });
 
   test('should render deletion error modal', async () => {
+    CredentialTypesAPI.destroy = jest.fn();
     CredentialTypesAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -140,8 +152,6 @@ describe('<CredentialTypeList', () => {
         },
       })
     );
-    CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
-    CredentialTypesAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
@@ -171,17 +181,5 @@ describe('<CredentialTypeList', () => {
     );
     wrapper.update();
     expect(wrapper.find('ErrorDetail').length).toBe(1);
-  });
-
-  test('should not render add button', async () => {
-    CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
-    CredentialTypesAPI.readOptions.mockResolvedValue({
-      data: { actions: { POST: false } },
-    });
-    await act(async () => {
-      wrapper = mountWithContexts(<CredentialTypeList />);
-    });
-    waitForElement(wrapper, 'CredentialTypeList', el => el.length > 0);
-    expect(wrapper.find('ToolbarAddButton').length).toBe(0);
   });
 });

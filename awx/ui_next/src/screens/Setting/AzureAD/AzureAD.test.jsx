@@ -7,27 +7,29 @@ import { SettingsAPI } from '../../../api';
 import mockAllOptions from '../shared/data.allSettingOptions.json';
 import AzureAD from './AzureAD';
 
-jest.mock('../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL:
-      'https://towerhost/sso/complete/azuread-oauth2/',
-    SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: 'mock key',
-    SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET: '$encrypted$',
-    SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: {},
-    SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP: {
-      'My Team': {
-        users: [],
-      },
-    },
-  },
-});
+jest.mock('../../../api');
 
 describe('<AzureAD />', () => {
   let wrapper;
 
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL:
+          'https://towerhost/sso/complete/azuread-oauth2/',
+        SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: 'mock key',
+        SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET: '$encrypted$',
+        SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: {},
+        SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP: {
+          'My Team': {
+            users: [],
+          },
+        },
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

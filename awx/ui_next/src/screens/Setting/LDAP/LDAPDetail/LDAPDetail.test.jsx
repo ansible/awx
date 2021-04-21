@@ -19,14 +19,17 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: jest.fn(),
 }));
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({ data: mockLDAP });
+jest.mock('../../../../api');
 
 describe('<LDAPDetail />', () => {
   describe('Default', () => {
     let wrapper;
 
-    beforeAll(async () => {
+    beforeEach(() => {
+      SettingsAPI.readCategory.mockResolvedValue({ data: mockLDAP });
+    });
+
+    beforeEach(async () => {
       useRouteMatch.mockImplementation(() => ({
         url: '/settings/ldap/default/details',
         path: '/settings/ldap/:category/details',
@@ -131,6 +134,10 @@ describe('<LDAPDetail />', () => {
   });
 
   describe('Redirect', () => {
+    beforeEach(() => {
+      SettingsAPI.readCategory.mockResolvedValue({ data: mockLDAP });
+    });
+
     test('should render redirect when user navigates to erroneous category', async () => {
       let wrapper;
       useRouteMatch.mockImplementation(() => ({

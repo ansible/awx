@@ -41,31 +41,33 @@ describe('<InventorySourceAdd />', () => {
     organization: 2,
   };
 
-  InventorySourcesAPI.readOptions.mockResolvedValue({
-    data: {
-      actions: {
-        GET: {
-          source: {
-            choices: [
-              ['file', 'File, Directory or Script'],
-              ['scm', 'Sourced from a Project'],
-              ['ec2', 'Amazon EC2'],
-              ['gce', 'Google Compute Engine'],
-              ['azure_rm', 'Microsoft Azure Resource Manager'],
-              ['vmware', 'VMware vCenter'],
-              ['satellite6', 'Red Hat Satellite 6'],
-              ['openstack', 'OpenStack'],
-              ['rhv', 'Red Hat Virtualization'],
-              ['tower', 'Ansible Tower'],
-            ],
+  beforeEach(async () => {
+    InventorySourcesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            source: {
+              choices: [
+                ['file', 'File, Directory or Script'],
+                ['scm', 'Sourced from a Project'],
+                ['ec2', 'Amazon EC2'],
+                ['gce', 'Google Compute Engine'],
+                ['azure_rm', 'Microsoft Azure Resource Manager'],
+                ['vmware', 'VMware vCenter'],
+                ['satellite6', 'Red Hat Satellite 6'],
+                ['openstack', 'OpenStack'],
+                ['rhv', 'Red Hat Virtualization'],
+                ['tower', 'Ansible Tower'],
+              ],
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  ProjectsAPI.readInventories.mockResolvedValue({
-    data: [],
+    ProjectsAPI.readInventories.mockResolvedValue({
+      data: [],
+    });
   });
 
   afterEach(() => {

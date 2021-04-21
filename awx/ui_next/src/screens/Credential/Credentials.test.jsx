@@ -14,7 +14,7 @@ describe('<Credentials />', () => {
     wrapper.unmount();
   });
 
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     wrapper = mountWithContexts(<Credentials />);
   });
 

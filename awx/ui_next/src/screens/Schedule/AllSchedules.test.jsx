@@ -14,7 +14,7 @@ describe('<AllSchedules />', () => {
     wrapper.unmount();
   });
 
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     wrapper = mountWithContexts(<AllSchedules />);
   });
 

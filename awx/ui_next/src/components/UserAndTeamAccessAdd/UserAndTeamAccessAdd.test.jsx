@@ -7,9 +7,7 @@ import {
 } from '../../../testUtils/enzymeHelpers';
 import UserAndTeamAccessAdd from './UserAndTeamAccessAdd';
 
-jest.mock('../../api/models/Teams');
-jest.mock('../../api/models/Users');
-jest.mock('../../api/models/JobTemplates');
+jest.mock('../../api');
 
 describe('<UserAndTeamAccessAdd/>', () => {
   const resources = {
@@ -66,8 +64,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
     await waitForElement(wrapper, 'Button[aria-label="Add"]');
   });
   afterEach(() => {
-    wrapper.unmount();
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
   test('should mount properly', async () => {
     expect(wrapper.find('Button[aria-label="Add"]').length).toBe(1);

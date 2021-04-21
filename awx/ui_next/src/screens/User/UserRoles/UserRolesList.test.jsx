@@ -7,15 +7,7 @@ import {
 } from '../../../../testUtils/enzymeHelpers';
 import UserRolesList from './UserRolesList';
 
-jest.mock('../../../api/models/Users');
-jest.mock('../../../api/models/Roles');
-
-UsersAPI.readOptions.mockResolvedValue({
-  data: {
-    actions: { GET: {}, POST: {} },
-    related_search_fields: [],
-  },
-});
+jest.mock('../../../api');
 
 const user = {
   id: 18,
@@ -102,6 +94,14 @@ const roles = {
 };
 
 describe('<UserRolesList />', () => {
+  beforeEach(() => {
+    UsersAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: { GET: {}, POST: {} },
+        related_search_fields: [],
+      },
+    });
+  });
   let wrapper;
   afterEach(() => {
     jest.clearAllMocks();

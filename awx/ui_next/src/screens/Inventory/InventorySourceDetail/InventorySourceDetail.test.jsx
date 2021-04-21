@@ -13,36 +13,7 @@ import {
   WorkflowJobTemplateNodesAPI,
 } from '../../../api';
 
-jest.mock('../../../api/models/InventorySources');
-jest.mock('../../../api/models/Inventories');
-jest.mock('../../../api/models/WorkflowJobTemplateNodes');
-
-InventoriesAPI.updateSources.mockResolvedValue({
-  data: [{ inventory_source: 1 }],
-});
-WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
-InventorySourcesAPI.readOptions.mockResolvedValue({
-  data: {
-    actions: {
-      GET: {
-        source: {
-          choices: [
-            ['file', 'File, Directory or Script'],
-            ['scm', 'Sourced from a Project'],
-            ['ec2', 'Amazon EC2'],
-            ['gce', 'Google Compute Engine'],
-            ['azure_rm', 'Microsoft Azure Resource Manager'],
-            ['vmware', 'VMware vCenter'],
-            ['satellite6', 'Red Hat Satellite 6'],
-            ['openstack', 'OpenStack'],
-            ['rhv', 'Red Hat Virtualization'],
-            ['tower', 'Ansible Tower'],
-          ],
-        },
-      },
-    },
-  },
-});
+jest.mock('../../../api');
 
 function assertDetail(wrapper, label, value) {
   expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
@@ -52,8 +23,36 @@ function assertDetail(wrapper, label, value) {
 describe('InventorySourceDetail', () => {
   let wrapper;
 
+  beforeEach(async () => {
+    InventoriesAPI.updateSources.mockResolvedValue({
+      data: [{ inventory_source: 1 }],
+    });
+    WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    InventorySourcesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            source: {
+              choices: [
+                ['file', 'File, Directory or Script'],
+                ['scm', 'Sourced from a Project'],
+                ['ec2', 'Amazon EC2'],
+                ['gce', 'Google Compute Engine'],
+                ['azure_rm', 'Microsoft Azure Resource Manager'],
+                ['vmware', 'VMware vCenter'],
+                ['satellite6', 'Red Hat Satellite 6'],
+                ['openstack', 'OpenStack'],
+                ['rhv', 'Red Hat Virtualization'],
+                ['tower', 'Ansible Tower'],
+              ],
+            },
+          },
+        },
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

@@ -52,17 +52,19 @@ const instanceGroups = {
 };
 
 const options = { data: { actions: { POST: true } } };
-OrganizationsAPI.read.mockResolvedValue({ data: { count: 0 } });
-InventoriesAPI.read.mockResolvedValue({ data: { count: 0 } });
-UnifiedJobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
 
 describe('<InstanceGroupList />', () => {
   let wrapper;
 
-  test('should have data fetched and render 3 rows', async () => {
+  beforeEach(() => {
+    OrganizationsAPI.read.mockResolvedValue({ data: { count: 0 } });
+    InventoriesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    UnifiedJobTemplatesAPI.read.mockResolvedValue({ data: { count: 0 } });
     InstanceGroupsAPI.read.mockResolvedValue(instanceGroups);
     InstanceGroupsAPI.readOptions.mockResolvedValue(options);
+  });
 
+  test('should have data fetched and render 3 rows', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
@@ -73,9 +75,6 @@ describe('<InstanceGroupList />', () => {
   });
 
   test('should delete item successfully', async () => {
-    InstanceGroupsAPI.read.mockResolvedValue(instanceGroups);
-    InstanceGroupsAPI.readOptions.mockResolvedValue(options);
-
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
@@ -111,9 +110,6 @@ describe('<InstanceGroupList />', () => {
   });
 
   test('should not be able to delete tower instance group', async () => {
-    InstanceGroupsAPI.read.mockResolvedValue(instanceGroups);
-    InstanceGroupsAPI.readOptions.mockResolvedValue(options);
-
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
@@ -144,6 +140,7 @@ describe('<InstanceGroupList />', () => {
   });
 
   test('should thrown content error', async () => {
+    InstanceGroupsAPI.read = jest.fn();
     InstanceGroupsAPI.read.mockRejectedValue(
       new Error({
         response: {
@@ -155,7 +152,6 @@ describe('<InstanceGroupList />', () => {
         },
       })
     );
-    InstanceGroupsAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });
@@ -165,6 +161,7 @@ describe('<InstanceGroupList />', () => {
 
   test('should render deletion error modal', async () => {
     jest.setTimeout(5000 * 4);
+    InstanceGroupsAPI.destroy = jest.fn();
     InstanceGroupsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -176,8 +173,6 @@ describe('<InstanceGroupList />', () => {
         },
       })
     );
-    InstanceGroupsAPI.read.mockResolvedValue(instanceGroups);
-    InstanceGroupsAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
       wrapper = mountWithContexts(<InstanceGroupList />);
     });

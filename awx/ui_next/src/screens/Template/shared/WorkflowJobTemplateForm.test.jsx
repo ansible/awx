@@ -15,13 +15,7 @@ import {
   CredentialTypesAPI,
 } from '../../../api';
 
-jest.mock('../../../api/models/CredentialTypes');
-jest.mock('../../../api/models/WorkflowJobTemplates');
-jest.mock('../../../api/models/Labels');
-jest.mock('../../../api/models/Organizations');
-jest.mock('../../../api/models/Inventories');
-jest.mock('../../../api/models/Projects');
-jest.mock('../../../api/models/Credentials');
+jest.mock('../../../api');
 
 describe('<WorkflowJobTemplateForm/>', () => {
   let wrapper;
@@ -116,7 +110,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
   });
 
   afterEach(() => {
-    wrapper.unmount();
     jest.clearAllMocks();
   });
 

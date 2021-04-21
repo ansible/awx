@@ -32,7 +32,6 @@ describe('<InventoryHostEdit />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('handleSubmit should call api update', async () => {

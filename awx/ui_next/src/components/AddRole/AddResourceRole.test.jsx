@@ -23,30 +23,6 @@ jest.mock('react-router-dom', () => ({
 // this component write tests for it
 
 describe('<_AddResourceRole />', () => {
-  UsersAPI.read.mockResolvedValue({
-    data: {
-      count: 2,
-      results: [
-        { id: 1, username: 'foo', url: '' },
-        { id: 2, username: 'bar', url: '' },
-      ],
-    },
-  });
-  UsersAPI.readOptions.mockResolvedValue({
-    data: { related: {}, actions: { GET: {} } },
-  });
-  TeamsAPI.read.mockResolvedValue({
-    data: {
-      count: 2,
-      results: [
-        { id: 1, name: 'Team foo', url: '' },
-        { id: 2, name: 'Team bar', url: '' },
-      ],
-    },
-  });
-  TeamsAPI.readOptions.mockResolvedValue({
-    data: { related: {}, actions: { GET: {} } },
-  });
   const roles = {
     admin_role: {
       description: 'Can manage all aspects of the organization',
@@ -59,6 +35,34 @@ describe('<_AddResourceRole />', () => {
       name: 'Execute',
     },
   };
+
+  beforeEach(() => {
+    UsersAPI.read.mockResolvedValue({
+      data: {
+        count: 2,
+        results: [
+          { id: 1, username: 'foo', url: '' },
+          { id: 2, username: 'bar', url: '' },
+        ],
+      },
+    });
+    UsersAPI.readOptions.mockResolvedValue({
+      data: { related: {}, actions: { GET: {} } },
+    });
+    TeamsAPI.read.mockResolvedValue({
+      data: {
+        count: 2,
+        results: [
+          { id: 1, name: 'Team foo', url: '' },
+          { id: 2, name: 'Team bar', url: '' },
+        ],
+      },
+    });
+    TeamsAPI.readOptions.mockResolvedValue({
+      data: { related: {}, actions: { GET: {} } },
+    });
+  });
+
   test('initially renders without crashing', () => {
     shallow(
       <_AddResourceRole

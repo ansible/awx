@@ -33,16 +33,6 @@ const mockInputSource = {
   },
 };
 
-CredentialTypesAPI.readDetail.mockResolvedValue({
-  data: mockCredentialType,
-});
-
-CredentialsAPI.readInputSources.mockResolvedValue({
-  data: {
-    results: [mockInputSource],
-  },
-});
-
 function expectDetailToMatch(wrapper, label, value) {
   const detail = wrapper.find(`Detail[label="${label}"]`);
   expect(detail).toHaveLength(1);
@@ -53,6 +43,15 @@ describe('<CredentialDetail />', () => {
   let wrapper;
 
   beforeEach(async () => {
+    CredentialTypesAPI.readDetail.mockResolvedValue({
+      data: mockCredentialType,
+    });
+
+    CredentialsAPI.readInputSources.mockResolvedValue({
+      data: {
+        results: [mockInputSource],
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <CredentialDetail credential={mockCredential} />

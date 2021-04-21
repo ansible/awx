@@ -13,33 +13,36 @@ import {
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import SAMLDetail from './SAMLDetail';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    SOCIAL_AUTH_SAML_CALLBACK_URL: 'https://towerhost/sso/complete/saml/',
-    SOCIAL_AUTH_SAML_METADATA_URL: 'https://towerhost/sso/metadata/saml/',
-    SOCIAL_AUTH_SAML_SP_ENTITY_ID: 'mock_id',
-    SOCIAL_AUTH_SAML_SP_PUBLIC_CERT: 'mock_cert',
-    SOCIAL_AUTH_SAML_SP_PRIVATE_KEY: '',
-    SOCIAL_AUTH_SAML_ORG_INFO: {},
-    SOCIAL_AUTH_SAML_TECHNICAL_CONTACT: {},
-    SOCIAL_AUTH_SAML_SUPPORT_CONTACT: {},
-    SOCIAL_AUTH_SAML_ENABLED_IDPS: {},
-    SOCIAL_AUTH_SAML_SECURITY_CONFIG: {},
-    SOCIAL_AUTH_SAML_SP_EXTRA: {},
-    SOCIAL_AUTH_SAML_EXTRA_DATA: [],
-    SOCIAL_AUTH_SAML_ORGANIZATION_MAP: {},
-    SOCIAL_AUTH_SAML_TEAM_MAP: {},
-    SOCIAL_AUTH_SAML_ORGANIZATION_ATTR: {},
-    SOCIAL_AUTH_SAML_TEAM_ATTR: {},
-    SAML_AUTO_CREATE_OBJECTS: false,
-  },
-});
+jest.mock('../../../../api');
 
 describe('<SAMLDetail />', () => {
   let wrapper;
 
-  beforeAll(async () => {
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        SOCIAL_AUTH_SAML_CALLBACK_URL: 'https://towerhost/sso/complete/saml/',
+        SOCIAL_AUTH_SAML_METADATA_URL: 'https://towerhost/sso/metadata/saml/',
+        SOCIAL_AUTH_SAML_SP_ENTITY_ID: 'mock_id',
+        SOCIAL_AUTH_SAML_SP_PUBLIC_CERT: 'mock_cert',
+        SOCIAL_AUTH_SAML_SP_PRIVATE_KEY: '',
+        SOCIAL_AUTH_SAML_ORG_INFO: {},
+        SOCIAL_AUTH_SAML_TECHNICAL_CONTACT: {},
+        SOCIAL_AUTH_SAML_SUPPORT_CONTACT: {},
+        SOCIAL_AUTH_SAML_ENABLED_IDPS: {},
+        SOCIAL_AUTH_SAML_SECURITY_CONFIG: {},
+        SOCIAL_AUTH_SAML_SP_EXTRA: {},
+        SOCIAL_AUTH_SAML_EXTRA_DATA: [],
+        SOCIAL_AUTH_SAML_ORGANIZATION_MAP: {},
+        SOCIAL_AUTH_SAML_TEAM_MAP: {},
+        SOCIAL_AUTH_SAML_ORGANIZATION_ATTR: {},
+        SOCIAL_AUTH_SAML_TEAM_ATTR: {},
+        SAML_AUTO_CREATE_OBJECTS: false,
+      },
+    });
+  });
+
+  beforeEach(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>

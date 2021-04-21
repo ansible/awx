@@ -5,34 +5,39 @@ import { SchedulesAPI } from '../../../api';
 import ScheduleList from './ScheduleList';
 import mockSchedules from '../data.schedules.json';
 
-jest.mock('../../../api/models/Schedules');
-
-SchedulesAPI.destroy = jest.fn();
-SchedulesAPI.update.mockResolvedValue({
-  data: mockSchedules.results[0],
-});
-SchedulesAPI.read.mockResolvedValue({ data: mockSchedules });
-SchedulesAPI.readOptions.mockResolvedValue({
-  data: {
-    actions: {
-      GET: {},
-      POST: {},
-    },
-  },
-});
-
-const loadSchedules = params => SchedulesAPI.read(params);
-const loadScheduleOptions = () => SchedulesAPI.readOptions();
+jest.mock('../../../api');
 
 describe('ScheduleList', () => {
   let wrapper;
-
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
+  let loadSchedules;
+  let loadScheduleOptions;
 
   describe('read call successful', () => {
     beforeEach(async () => {
+      SchedulesAPI.destroy = jest.fn();
+      SchedulesAPI.update.mockResolvedValue({
+        data: mockSchedules.results[0],
+      });
+      SchedulesAPI.read.mockResolvedValue({ data: mockSchedules });
+      SchedulesAPI.readOptions.mockResolvedValue({
+        data: {
+          actions: {
+            GET: {},
+            POST: {},
+          },
+        },
+      });
+      loadSchedules = jest.fn();
+      loadSchedules.mockResolvedValue({ data: mockSchedules });
+      loadScheduleOptions = jest.fn();
+      loadScheduleOptions.mockResolvedValue({
+        data: {
+          actions: {
+            GET: {},
+            POST: {},
+          },
+        },
+      });
       await act(async () => {
         wrapper = mountWithContexts(
           <ScheduleList
@@ -52,7 +57,7 @@ describe('ScheduleList', () => {
     });
 
     test('should fetch schedules from api and render the list', () => {
-      expect(SchedulesAPI.read).toHaveBeenCalled();
+      expect(loadSchedules).toHaveBeenCalled();
       expect(wrapper.find('ScheduleListItem').length).toBe(5);
     });
 
@@ -193,6 +198,44 @@ describe('ScheduleList', () => {
   });
 
   describe('hidden add button', () => {
+    beforeEach(async () => {
+      SchedulesAPI.destroy = jest.fn();
+      SchedulesAPI.update.mockResolvedValue({
+        data: mockSchedules.results[0],
+      });
+      SchedulesAPI.read.mockResolvedValue({ data: mockSchedules });
+      SchedulesAPI.readOptions.mockResolvedValue({
+        data: {
+          actions: {
+            GET: {},
+            POST: {},
+          },
+        },
+      });
+      loadSchedules = jest.fn();
+      loadSchedules.mockResolvedValue({ data: mockSchedules });
+      loadScheduleOptions = jest.fn();
+      loadScheduleOptions.mockResolvedValue({
+        data: {
+          actions: {
+            GET: {},
+            POST: {},
+          },
+        },
+      });
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <ScheduleList
+            loadSchedules={loadSchedules}
+            loadScheduleOptions={loadScheduleOptions}
+            resource={{ type: 'job_template', inventory: 1 }}
+            launchConfig={{ survey_enabled: false }}
+            surveyConfig={{}}
+          />
+        );
+      });
+      wrapper.update();
+    });
     test('should hide add button when flag is passed', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
@@ -263,8 +306,47 @@ describe('ScheduleList', () => {
   });
 
   describe('read call unsuccessful', () => {
+    beforeEach(async () => {
+      SchedulesAPI.destroy = jest.fn();
+      SchedulesAPI.update.mockResolvedValue({
+        data: mockSchedules.results[0],
+      });
+      SchedulesAPI.read.mockResolvedValue({ data: mockSchedules });
+      SchedulesAPI.readOptions.mockResolvedValue({
+        data: {
+          actions: {
+            GET: {},
+            POST: {},
+          },
+        },
+      });
+      loadSchedules = jest.fn();
+      loadSchedules.mockResolvedValue({ data: mockSchedules });
+      loadScheduleOptions = jest.fn();
+      loadScheduleOptions.mockResolvedValue({
+        data: {
+          actions: {
+            GET: {},
+            POST: {},
+          },
+        },
+      });
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <ScheduleList
+            loadSchedules={loadSchedules}
+            loadScheduleOptions={loadScheduleOptions}
+            resource={{ type: 'job_template', inventory: 1 }}
+            launchConfig={{ survey_enabled: false }}
+            surveyConfig={{}}
+          />
+        );
+      });
+      wrapper.update();
+    });
     test('should show content error when read call unsuccessful', async () => {
       SchedulesAPI.read.mockRejectedValue(new Error());
+      loadSchedules.mockRejectedValue(new Error());
       await act(async () => {
         wrapper = mountWithContexts(
           <ScheduleList

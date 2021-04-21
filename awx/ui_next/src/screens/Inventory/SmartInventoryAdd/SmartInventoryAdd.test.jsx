@@ -19,11 +19,7 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-jest.mock('../../../api/models/Inventories');
-jest.mock('../../../api/models/Organizations');
-jest.mock('../../../api/models/InstanceGroups');
-OrganizationsAPI.read.mockResolvedValue({ data: { results: [], count: 0 } });
-InstanceGroupsAPI.read.mockResolvedValue({ data: { results: [], count: 0 } });
+jest.mock('../../../api');
 
 const formData = {
   name: 'Mock',
@@ -36,18 +32,34 @@ const formData = {
 };
 
 describe('<SmartInventoryAdd />', () => {
-  describe('when initialized by users with POST capability', () => {
-    let history;
-    let wrapper;
+  const history = createMemoryHistory({
+    initialEntries: [`/inventories/smart_inventory/add`],
+  });
 
-    beforeAll(async () => {
+  describe('when initialized by users with POST capability', () => {
+    let wrapper;
+    let consoleError;
+
+    beforeAll(() => {
+      consoleError = global.console.error;
+      global.console.error = jest.fn();
+    });
+
+    beforeEach(async () => {
+      OrganizationsAPI.read.mockResolvedValue({
+        data: { results: [], count: 0 },
+      });
+      InstanceGroupsAPI.read.mockResolvedValue({
+        data: { results: [], count: 0 },
+      });
       InventoriesAPI.create.mockResolvedValueOnce({ data: { id: 1 } });
       InventoriesAPI.readOptions.mockResolvedValue({
         data: { actions: { POST: true } },
       });
-      history = createMemoryHistory({
-        initialEntries: [`/inventories/smart_inventory/add`],
+      InstanceGroupsAPI.read.mockResolvedValue({
+        data: { results: [], count: 0 },
       });
+
       await act(async () => {
         wrapper = mountWithContexts(<SmartInventoryAdd />, {
           context: { router: { history } },
@@ -57,8 +69,8 @@ describe('<SmartInventoryAdd />', () => {
     });
 
     afterAll(() => {
+      global.console.error = consoleError;
       jest.clearAllMocks();
-      wrapper.unmount();
     });
 
     test('should enable save button', () => {
@@ -116,18 +128,31 @@ describe('<SmartInventoryAdd />', () => {
   describe('when initialized by users without POST capability', () => {
     let wrapper;
 
-    beforeAll(async () => {
-      InventoriesAPI.readOptions.mockResolvedValueOnce({
-        data: { actions: { POST: false } },
-      });
-      await act(async () => {
-        wrapper = mountWithContexts(<SmartInventoryAdd />);
-      });
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    });
     afterAll(() => {
       jest.clearAllMocks();
-      wrapper.unmount();
+    });
+
+    beforeEach(async () => {
+      OrganizationsAPI.read.mockResolvedValue({
+        data: { results: [], count: 0 },
+      });
+      InstanceGroupsAPI.read.mockResolvedValue({
+        data: { results: [], count: 0 },
+      });
+      InventoriesAPI.create.mockResolvedValueOnce({ data: { id: 1 } });
+      InventoriesAPI.readOptions.mockResolvedValue({
+        data: { actions: { POST: false } },
+      });
+      InstanceGroupsAPI.read.mockResolvedValue({
+        data: { results: [], count: 0 },
+      });
+
+      await act(async () => {
+        wrapper = mountWithContexts(<SmartInventoryAdd />, {
+          context: { router: { history } },
+        });
+      });
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
 
     test('should disable save button', () => {

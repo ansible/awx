@@ -10,8 +10,6 @@ import NotificationTemplateList from './NotificationTemplateList';
 
 jest.mock('../../../api');
 
-jest.useFakeTimers();
-
 const mockTemplates = {
   data: {
     count: 3,
@@ -82,7 +80,7 @@ describe('<NotificationTemplateList />', () => {
     });
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('should load notifications', async () => {
@@ -204,12 +202,13 @@ describe('<NotificationTemplateList />', () => {
   });
 
   test('should show toast after test resolves', async () => {
-    NotificationTemplatesAPI.test.mockResolvedValueOnce({
+    jest.useFakeTimers();
+    NotificationTemplatesAPI.test.mockResolvedValue({
       data: {
         notification: 9182,
       },
     });
-    NotificationsAPI.readDetail.mockResolvedValueOnce({
+    NotificationsAPI.readDetail.mockResolvedValue({
       data: {
         id: 9182,
         status: 'failed',
@@ -233,6 +232,7 @@ describe('<NotificationTemplateList />', () => {
         .simulate('click');
     });
     wrapper.update();
+
     await act(async () => {
       jest.runAllTimers();
     });

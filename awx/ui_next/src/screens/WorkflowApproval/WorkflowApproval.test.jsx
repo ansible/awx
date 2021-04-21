@@ -17,15 +17,20 @@ const mockMe = {
 };
 
 describe('<WorkflowApproval />', () => {
-  test('initially renders succesfully', async () => {
+  beforeEach(() => {
     WorkflowApprovalsAPI.readDetail.mockResolvedValue({
       data: mockWorkflowApprovals.results[0],
     });
+  });
+
+  test('initially renders successfully', async () => {
+    let wrapper;
     await act(async () => {
-      mountWithContexts(
+      wrapper = mountWithContexts(
         <WorkflowApproval setBreadcrumb={() => {}} me={mockMe} />
       );
     });
+    expect(wrapper.find('WorkflowApproval').length).toBe(1);
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

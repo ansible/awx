@@ -16,19 +16,16 @@ import {
 
 import WorkflowJobTemplateAdd from './WorkflowJobTemplateAdd';
 
-jest.mock('../../../api/models/WorkflowJobTemplates');
-jest.mock('../../../api/models/Organizations');
-jest.mock('../../../api/models/Labels');
-jest.mock('../../../api/models/Inventories');
-jest.mock('../../../api/models/ExecutionEnvironments');
-jest.mock('../../../api/models/Users');
+jest.mock('../../../api');
 
 describe('<WorkflowJobTemplateAdd/>', () => {
   let wrapper;
   let history;
-  const handleSubmit = jest.fn();
-  const handleCancel = jest.fn();
+  let handleSubmit;
+  let handleCancel;
   beforeEach(async () => {
+    handleSubmit = jest.fn();
+    handleCancel = jest.fn();
     WorkflowJobTemplatesAPI.create.mockResolvedValue({ data: { id: 1 } });
     OrganizationsAPI.read.mockResolvedValue({ data: { results: [{ id: 1 }] } });
     LabelsAPI.read.mockResolvedValue({
@@ -41,7 +38,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
       },
     });
 
-    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+    ExecutionEnvironmentsAPI.read.mockResolvedValueOnce({
       data: { results: [{ id: 1, name: 'Foo', image: 'localhost.com' }] },
     });
 
@@ -80,8 +77,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
     });
   });
   afterEach(async () => {
-    wrapper.unmount();
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('initially renders successfully', async () => {
@@ -105,9 +101,11 @@ describe('<WorkflowJobTemplateAdd/>', () => {
       });
     });
 
-    wrapper.update();
+    await act(async () => {
+      wrapper.update();
+    });
 
-    act(() => {
+    await act(async () => {
       wrapper
         .find('SelectOption')
         .find('button[aria-label="Label 3"]')

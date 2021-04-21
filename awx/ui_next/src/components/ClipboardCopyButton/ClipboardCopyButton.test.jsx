@@ -2,11 +2,15 @@ import React from 'react';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import ClipboardCopyButton from './ClipboardCopyButton';
 
-document.execCommand = jest.fn();
-
-jest.useFakeTimers();
-
 describe('ClipboardCopyButton', () => {
+  beforeEach(() => {
+    document.execCommand = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('renders the expected content', () => {
     const wrapper = mountWithContexts(
       <ClipboardCopyButton
@@ -20,7 +24,8 @@ describe('ClipboardCopyButton', () => {
     );
     expect(wrapper).toHaveLength(1);
   });
-  test('clicking button calls execCommand to copy to clipboard', () => {
+  test('clicking button calls execCommand to copy to clipboard', async () => {
+    const mockDelay = 1;
     const wrapper = mountWithContexts(
       <ClipboardCopyButton
         clickTip="foo"
@@ -29,13 +34,14 @@ describe('ClipboardCopyButton', () => {
         copiedSuccessTip="qux"
         stringToCopy="foobar!"
         isDisabled={false}
+        switchDelay={mockDelay}
       />
     ).find('ClipboardCopyButton');
     expect(wrapper.state('copied')).toBe(false);
     wrapper.find('Button').simulate('click');
     expect(document.execCommand).toBeCalledWith('copy');
     expect(wrapper.state('copied')).toBe(true);
-    jest.runAllTimers();
+    await new Promise(resolve => setTimeout(resolve, mockDelay));
     wrapper.update();
     expect(wrapper.state('copied')).toBe(false);
   });

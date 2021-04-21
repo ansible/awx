@@ -3,16 +3,20 @@ import Organizations from './Organizations';
 
 describe('OrganizationsAPI', () => {
   const orgId = 1;
-  const createPromise = () => Promise.resolve();
-  const mockHttp = { get: jest.fn(createPromise) };
+  let mockHttp;
+  let OrganizationsAPI;
+  beforeEach(() => {
+    const createPromise = () => Promise.resolve();
+    mockHttp = { get: jest.fn(createPromise) };
 
-  const OrganizationsAPI = new Organizations(mockHttp);
-
-  afterEach(() => {
-    jest.clearAllMocks();
+    OrganizationsAPI = new Organizations(mockHttp);
   });
 
-  test('read access list calls get with expected params', async done => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('read access list calls get with expected params', async () => {
     const testParams = { foo: 'bar' };
     const testParamsDuplicates = { foo: ['bar', 'baz'] };
 
@@ -31,10 +35,9 @@ describe('OrganizationsAPI', () => {
     expect(mockHttp.get.mock.calls[2][1]).toEqual({
       params: { foo: ['bar', 'baz'] },
     });
-    done();
   });
 
-  test('read teams calls get with expected params', async done => {
+  test('read teams calls get with expected params', async () => {
     const testParams = { foo: 'bar' };
     const testParamsDuplicates = { foo: ['bar', 'baz'] };
 
@@ -53,7 +56,6 @@ describe('OrganizationsAPI', () => {
     expect(mockHttp.get.mock.calls[2][1]).toEqual({
       params: { foo: ['bar', 'baz'] },
     });
-    done();
   });
 });
 

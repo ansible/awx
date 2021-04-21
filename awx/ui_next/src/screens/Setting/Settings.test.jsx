@@ -9,16 +9,20 @@ import { SettingsAPI } from '../../api';
 import mockAllOptions from './shared/data.allSettingOptions.json';
 import Settings from './Settings';
 
-jest.mock('../../api/models/Settings');
-SettingsAPI.readAllOptions.mockResolvedValue({
-  data: mockAllOptions,
-});
+jest.mock('../../api');
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
 }));
 
 describe('<Settings />', () => {
   let wrapper;
+
+  beforeEach(() => {
+    SettingsAPI.readAllOptions.mockResolvedValue({
+      data: mockAllOptions,
+    });
+  });
 
   afterEach(() => {
     wrapper.unmount();

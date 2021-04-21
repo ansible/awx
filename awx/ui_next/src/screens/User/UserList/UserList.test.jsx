@@ -84,23 +84,19 @@ const mockUsers = [
   },
 ];
 
-beforeEach(() => {
-  UsersAPI.destroy = jest.fn();
-  UsersAPI.read.mockResolvedValue({
-    data: {
-      count: mockUsers.length,
-      results: mockUsers,
-    },
-  });
-});
-
 afterEach(() => {
   jest.clearAllMocks();
-  wrapper.unmount();
 });
 
 describe('UsersList with full permissions', () => {
-  beforeAll(() => {
+  beforeEach(() => {
+    UsersAPI.destroy = jest.fn();
+    UsersAPI.read.mockResolvedValue({
+      data: {
+        count: mockUsers.length,
+        results: mockUsers,
+      },
+    });
     UsersAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
@@ -115,6 +111,7 @@ describe('UsersList with full permissions', () => {
     await act(async () => {
       wrapper = mountWithContexts(<UsersList />);
     });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     wrapper.update();
   });
 
@@ -222,7 +219,14 @@ describe('UsersList with full permissions', () => {
 });
 
 describe('UsersList without full permissions', () => {
-  test('Add button hidden for users without ability to POST', async () => {
+  beforeEach(() => {
+    UsersAPI.destroy = jest.fn();
+    UsersAPI.read.mockResolvedValue({
+      data: {
+        count: mockUsers.length,
+        results: mockUsers,
+      },
+    });
     UsersAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
@@ -230,7 +234,9 @@ describe('UsersList without full permissions', () => {
         },
       },
     });
+  });
 
+  test('Add button hidden for users without ability to POST', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<UsersList />);
     });

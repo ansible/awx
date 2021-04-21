@@ -15,16 +15,6 @@ import {
 } from '../../../api';
 
 jest.mock('../../../api');
-CredentialsAPI.read.mockResolvedValue({
-  data: {
-    results: [],
-    count: 0,
-  },
-});
-CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
-ProjectsAPI.readPlaybooks.mockResolvedValue({
-  data: [],
-});
 
 const jobTemplateData = {
   allow_callbacks: false,
@@ -77,6 +67,17 @@ describe('<JobTemplateAdd />', () => {
   };
 
   beforeEach(() => {
+    CredentialsAPI.read.mockResolvedValue({
+      data: {
+        results: [],
+        count: 0,
+      },
+    });
+    CredentialTypesAPI.loadAllTypes = jest.fn();
+    CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
+    ProjectsAPI.readPlaybooks.mockResolvedValue({
+      data: [],
+    });
     LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
     ProjectsAPI.readDetail.mockReturnValue({
       name: 'foo',
@@ -87,7 +88,7 @@ describe('<JobTemplateAdd />', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('should render Job Template Form', async () => {
@@ -102,8 +103,8 @@ describe('<JobTemplateAdd />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<JobTemplateAdd />);
+      await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     });
-    await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     expect(wrapper.find('input#template-description').text()).toBe(
       defaultProps.description
     );

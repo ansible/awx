@@ -10,19 +10,22 @@ import { SettingsProvider } from '../../../../contexts/Settings';
 import { SettingsAPI } from '../../../../api';
 import RADIUSEdit from './RADIUSEdit';
 
-jest.mock('../../../../api/models/Settings');
-SettingsAPI.updateAll.mockResolvedValue({});
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    RADIUS_SERVER: 'radius.mock.org',
-    RADIUS_PORT: 1812,
-    RADIUS_SECRET: '$encrypted$',
-  },
-});
+jest.mock('../../../../api');
 
 describe('<RADIUSEdit />', () => {
   let wrapper;
   let history;
+
+  beforeEach(() => {
+    SettingsAPI.updateAll.mockResolvedValue({});
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        RADIUS_SERVER: 'radius.mock.org',
+        RADIUS_PORT: 1812,
+        RADIUS_SECRET: '$encrypted$',
+      },
+    });
+  });
 
   afterEach(() => {
     wrapper.unmount();

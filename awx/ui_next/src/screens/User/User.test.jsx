@@ -22,10 +22,11 @@ async function getUsers() {
   };
 }
 
-UsersAPI.readDetail.mockResolvedValue({ data: mockDetails });
-UsersAPI.read.mockImplementation(getUsers);
-
 describe('<User />', () => {
+  beforeEach(() => {
+    UsersAPI.readDetail.mockResolvedValue({ data: mockDetails });
+    UsersAPI.read.mockImplementation(getUsers);
+  });
   test('initially renders successfully', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/users/1'],

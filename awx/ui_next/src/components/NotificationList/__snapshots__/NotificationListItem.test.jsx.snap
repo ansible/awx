@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<NotificationListItem canToggleNotifications /> initially renders succesfully and displays correct label 1`] = `
+exports[`<NotificationListItem canToggleNotifications /> initially renders successfully and displays correct label 1`] = `
 <NotificationListItem
   approvalsTurnedOn={false}
   canToggleNotifications={true}

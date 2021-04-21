@@ -14,9 +14,7 @@ import {
 import WorkflowJobTemplate from './WorkflowJobTemplate';
 import mockWorkflowJobTemplateData from './shared/data.workflow_job_template.json';
 
-jest.mock('../../api/models/WorkflowJobTemplates');
-jest.mock('../../api/models/Organizations');
-jest.mock('../../api/models/NotificationTemplates');
+jest.mock('../../api');
 
 const mockMe = {
   is_super_user: true,
@@ -56,7 +54,7 @@ describe('<WorkflowJobTemplate />', () => {
     jest.clearAllMocks();
     wrapper.unmount();
   });
-  test('initially renders succesfully', async () => {
+  test('initially renders successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
@@ -72,7 +70,7 @@ describe('<WorkflowJobTemplate />', () => {
     expect(WorkflowJobTemplatesAPI.readDetail).toBeCalled();
     expect(OrganizationsAPI.read).toBeCalled();
   });
-  test('notifications tab shown for admins', async done => {
+  test('notifications tab shown for admins', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
@@ -85,9 +83,8 @@ describe('<WorkflowJobTemplate />', () => {
       el => el.length === 8
     );
     expect(tabs.at(3).text()).toEqual('Notifications');
-    done();
   });
-  test('notifications tab hidden with reduced permissions', async done => {
+  test('notifications tab hidden with reduced permissions', async () => {
     OrganizationsAPI.read.mockResolvedValue({
       data: {
         count: 0,
@@ -108,7 +105,6 @@ describe('<WorkflowJobTemplate />', () => {
       el => el.length === 7
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
-    done();
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

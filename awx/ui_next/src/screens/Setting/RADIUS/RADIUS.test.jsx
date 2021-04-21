@@ -7,17 +7,20 @@ import { SettingsAPI } from '../../../api';
 import mockAllOptions from '../shared/data.allSettingOptions.json';
 import RADIUS from './RADIUS';
 
-jest.mock('../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    RADIUS_SERVER: 'radius.example.org',
-    RADIUS_PORT: 1812,
-    RADIUS_SECRET: '$encrypted$',
-  },
-});
+jest.mock('../../../api');
 
 describe('<RADIUS />', () => {
   let wrapper;
+
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        RADIUS_SERVER: 'radius.example.org',
+        RADIUS_PORT: 1812,
+        RADIUS_SECRET: '$encrypted$',
+      },
+    });
+  });
 
   afterEach(() => {
     wrapper.unmount();

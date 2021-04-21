@@ -25,10 +25,6 @@ describe('<InventoryRelatedGroupAdd/>', () => {
     wrapper = mountWithContexts(<InventoryRelatedGroupAdd />);
   });
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
   test('should render properly', () => {
     expect(wrapper.find('InventoryRelatedGroupAdd').length).toBe(1);
   });

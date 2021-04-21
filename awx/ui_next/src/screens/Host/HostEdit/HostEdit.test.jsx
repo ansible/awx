@@ -29,7 +29,6 @@ describe('<HostEdit />', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
-    wrapper.unmount();
   });
 
   test('handleSubmit should call api update', async () => {

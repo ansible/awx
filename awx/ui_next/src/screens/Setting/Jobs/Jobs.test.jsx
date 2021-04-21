@@ -6,13 +6,16 @@ import mockJobSettings from '../shared/data.jobSettings.json';
 import { SettingsAPI } from '../../../api';
 import Jobs from './Jobs';
 
-jest.mock('../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: mockJobSettings,
-});
+jest.mock('../../../api');
 
 describe('<Jobs />', () => {
   let wrapper;
+
+  beforeEach(() => {
+    SettingsAPI.readCategory.mockResolvedValue({
+      data: mockJobSettings,
+    });
+  });
 
   afterEach(() => {
     wrapper.unmount();

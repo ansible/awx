@@ -13,66 +13,7 @@ import {
 } from '../../../api';
 import ScheduleEdit from './ScheduleEdit';
 
-jest.mock('../../../api/models/Schedules');
-jest.mock('../../../api/models/JobTemplates');
-jest.mock('../../../api/models/Inventories');
-jest.mock('../../../api/models/Credentials');
-jest.mock('../../../api/models/CredentialTypes');
-
-SchedulesAPI.readZoneInfo.mockResolvedValue({
-  data: [
-    {
-      name: 'America/New_York',
-    },
-  ],
-});
-
-SchedulesAPI.readCredentials.mockResolvedValue({
-  data: {
-    results: [
-      {
-        name: 'schedule credential 1',
-        id: 1,
-        kind: 'vault',
-        credential_type: 3,
-        inputs: {},
-      },
-      {
-        name: 'schedule credential 2',
-        id: 2,
-        kind: 'aws',
-        credential_type: 4,
-        inputs: {},
-      },
-    ],
-    count: 2,
-  },
-});
-
-CredentialTypesAPI.loadAllTypes.mockResolvedValue([
-  { id: 1, name: 'ssh', kind: 'ssh' },
-]);
-
-CredentialsAPI.read.mockResolvedValue({
-  data: {
-    count: 3,
-    results: [
-      { id: 1, name: 'Credential 1', kind: 'ssh', url: '', credential_type: 1 },
-      { id: 2, name: 'Credential 2', kind: 'ssh', url: '', credential_type: 1 },
-      { id: 3, name: 'Credential 3', kind: 'ssh', url: '', credential_type: 1 },
-    ],
-  },
-});
-
-CredentialsAPI.readOptions.mockResolvedValue({
-  data: { related_search_fields: [], actions: { GET: { filterabled: true } } },
-});
-
-SchedulesAPI.update.mockResolvedValue({
-  data: {
-    id: 27,
-  },
-});
+jest.mock('../../../api');
 
 let wrapper;
 
@@ -113,6 +54,81 @@ const mockSchedule = {
 
 describe('<ScheduleEdit />', () => {
   beforeEach(async () => {
+    SchedulesAPI.readZoneInfo.mockResolvedValue({
+      data: [
+        {
+          name: 'America/New_York',
+        },
+      ],
+    });
+
+    SchedulesAPI.readCredentials.mockResolvedValue({
+      data: {
+        results: [
+          {
+            name: 'schedule credential 1',
+            id: 1,
+            kind: 'vault',
+            credential_type: 3,
+            inputs: {},
+          },
+          {
+            name: 'schedule credential 2',
+            id: 2,
+            kind: 'aws',
+            credential_type: 4,
+            inputs: {},
+          },
+        ],
+        count: 2,
+      },
+    });
+
+    CredentialTypesAPI.loadAllTypes.mockResolvedValue([
+      { id: 1, name: 'ssh', kind: 'ssh' },
+    ]);
+
+    CredentialsAPI.read.mockResolvedValue({
+      data: {
+        count: 3,
+        results: [
+          {
+            id: 1,
+            name: 'Credential 1',
+            kind: 'ssh',
+            url: '',
+            credential_type: 1,
+          },
+          {
+            id: 2,
+            name: 'Credential 2',
+            kind: 'ssh',
+            url: '',
+            credential_type: 1,
+          },
+          {
+            id: 3,
+            name: 'Credential 3',
+            kind: 'ssh',
+            url: '',
+            credential_type: 1,
+          },
+        ],
+      },
+    });
+
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: {
+        related_search_fields: [],
+        actions: { GET: { filterabled: true } },
+      },
+    });
+
+    SchedulesAPI.update.mockResolvedValue({
+      data: {
+        id: 27,
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <ScheduleEdit
@@ -486,17 +502,13 @@ describe('<ScheduleEdit />', () => {
 
     await act(async () => {
       wrapper
-        .find('input[aria-labelledby="check-action-item-3"]')
-        .simulate('change', {
-          target: {
-            checked: true,
-          },
-        });
+        .find('input[aria-labelledby="check-action-item-2"]')
+        .simulate('click');
     });
     wrapper.update();
     expect(
       wrapper
-        .find('input[aria-labelledby="check-action-item-3"]')
+        .find('input[aria-labelledby="check-action-item-2"]')
         .prop('checked')
     ).toBe(true);
     await act(async () =>

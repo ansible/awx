@@ -30,10 +30,6 @@ describe('PromptJobTemplateDetail', () => {
     wrapper = mountWithContexts(<PromptJobTemplateDetail resource={mockJT} />);
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('should render successfully', () => {
     expect(wrapper.find('PromptJobTemplateDetail')).toHaveLength(1);
   });

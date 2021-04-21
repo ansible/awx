@@ -8,7 +8,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('<Teams />', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(
       <Teams
         match={{ path: '/teams', url: '/teams' }}

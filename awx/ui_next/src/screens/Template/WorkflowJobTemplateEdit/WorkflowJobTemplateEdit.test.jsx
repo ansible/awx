@@ -15,12 +15,7 @@ import {
 } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 
-jest.mock('../../../api/models/WorkflowJobTemplates');
-jest.mock('../../../api/models/Labels');
-jest.mock('../../../api/models/Organizations');
-jest.mock('../../../api/models/Inventories');
-jest.mock('../../../api/models/ExecutionEnvironments');
-jest.mock('../../../api/models/Users');
+jest.mock('../../../api');
 
 const mockTemplate = {
   id: 6,
@@ -62,7 +57,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
   let history;
 
   beforeEach(async () => {
-    LabelsAPI.read.mockResolvedValue({
+    LabelsAPI.read = async () => ({
       data: {
         results: [
           { name: 'Label 1', id: 1 },
@@ -108,37 +103,39 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     });
   });
 
-  afterEach(async () => {
-    wrapper.unmount();
-    jest.clearAllMocks();
-  });
-
   test('renders successfully', () => {
     expect(wrapper.find('WorkflowJobTemplateEdit').length).toBe(1);
   });
 
   test('api is called to properly to save the updated template.', async () => {
-    act(() => {
+    await act(async () => {
       wrapper.find('input#wfjt-name').simulate('change', {
         target: { value: 'Alex', name: 'name' },
       });
-      wrapper.find('input#wfjt-description').simulate('change', {
-        target: { value: 'Apollo and Athena', name: 'description' },
-      });
-      wrapper.find('input#wfjt-description').simulate('change', {
-        target: { value: 'master', name: 'scm_branch' },
-      });
-      wrapper.find('input#wfjt-description').simulate('change', {
+      wrapper.find('input#wfjt-limit').simulate('change', {
         target: { value: '5000', name: 'limit' },
       });
       wrapper
         .find('LabelSelect')
         .find('SelectToggle')
         .simulate('click');
+      wrapper.update();
       wrapper.find('ExecutionEnvironmentLookup').invoke('onChange')(null);
+      wrapper.find('input#wfjt-description').simulate('change', {
+        target: { value: 'main', name: 'scm_branch' },
+      });
+      wrapper.find('input#wfjt-description').simulate('change', {
+        target: { value: 'Apollo and Athena', name: 'description' },
+      });
     });
 
     wrapper.update();
+    await waitForElement(
+      wrapper,
+      'SelectOption button[aria-label="Label 3"]',
+      el => el.length > 0
+    );
+    wrapper.find('input#wfjt-scm-branch').instance().value = 'main';
 
     act(() => {
       wrapper
@@ -167,7 +164,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       description: 'Apollo and Athena',
       inventory: 1,
       organization: 1,
-      scm_branch: 'master',
+      scm_branch: 'main',
       limit: '5000',
       extra_vars: '---',
       webhook_credential: null,
@@ -219,12 +216,18 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     );
   });
 
-  test('throwing error prevents form submission', async () => {
+  test('system admin can edit a workflow without provide an org', async () => {
     const templateWithoutOrg = {
       id: 6,
       name: 'Foo',
       description: 'Foo description',
       summary_fields: {
+        execution_environment: {
+          id: 1,
+          name: 'Default EE',
+          description: '',
+          image: 'quay.io/ansible/awx-ee',
+        },
         inventory: { id: 1, name: 'Inventory 1' },
         labels: {
           results: [
@@ -236,6 +239,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       scm_branch: 'devel',
       limit: '5000',
       variables: '---',
+      execution_environment: 1,
     };
 
     let newWrapper;
@@ -265,13 +269,36 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     WorkflowJobTemplatesAPI.update.mockResolvedValue();
 
     await act(async () => {
+      newWrapper.find('input#wfjt-description').simulate('change', {
+        target: { value: 'bar', name: 'description' },
+      });
+    });
+
+    await act(async () => {
       await newWrapper.find('Button[aria-label="Save"]').simulate('click');
     });
     expect(newWrapper.find('WorkflowJobTemplateForm').length).toBe(1);
     expect(OrganizationsAPI.read).toBeCalled();
-    expect(WorkflowJobTemplatesAPI.update).not.toBeCalled();
+    expect(WorkflowJobTemplatesAPI.update).toBeCalledWith(6, {
+      allow_simultaneous: false,
+      ask_inventory_on_launch: false,
+      ask_limit_on_launch: false,
+      ask_scm_branch_on_launch: false,
+      ask_variables_on_launch: false,
+      description: 'bar',
+      execution_environment: 1,
+      extra_vars: '---',
+      inventory: 1,
+      limit: '5000',
+      name: 'Foo',
+      organization: 1,
+      scm_branch: 'devel',
+      webhook_credential: null,
+      webhook_service: '',
+      webhook_url: '',
+    });
     expect(history.location.pathname).toBe(
-      '/templates/workflow_job_template/6/edit'
+      '/templates/workflow_job_template/6/details'
     );
   });
 });

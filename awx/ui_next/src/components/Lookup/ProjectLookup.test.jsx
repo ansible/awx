@@ -55,7 +55,12 @@ describe('<ProjectLookup />', () => {
 
   test('project lookup should be enabled', async () => {
     let wrapper;
-
+    ProjectsAPI.read.mockReturnValue({
+      data: {
+        results: [{ id: 1 }],
+        count: 1,
+      },
+    });
     ProjectsAPI.readOptions.mockReturnValue({
       data: {
         actions: {

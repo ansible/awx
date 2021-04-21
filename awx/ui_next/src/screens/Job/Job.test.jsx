@@ -9,7 +9,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('<Job />', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(<Job />);
   });
 });

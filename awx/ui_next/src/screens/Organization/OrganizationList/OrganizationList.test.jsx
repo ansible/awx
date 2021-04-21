@@ -85,7 +85,7 @@ describe('<OrganizationsList />', () => {
     jest.clearAllMocks();
   });
 
-  test('Initially renders succesfully', async () => {
+  test('Initially renders successfully', async () => {
     await act(async () => {
       mountWithContexts(<OrganizationsList />);
     });

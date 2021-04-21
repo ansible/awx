@@ -10,19 +10,16 @@ import azureVaultCredential from '../../data.azureVaultCredential.json';
 import hashiCorpCredential from '../../data.hashiCorpCredential.json';
 import CredentialPluginPrompt from './CredentialPluginPrompt';
 
-jest.mock('../../../../../api/models/Credentials');
-jest.mock('../../../../../api/models/CredentialTypes');
+jest.mock('../../../../../api');
 
-CredentialsAPI.test.mockResolvedValue({});
-
-CredentialsAPI.read.mockResolvedValue({
+const mockCredentialResults = {
   data: {
     count: 3,
     results: [selectedCredential, azureVaultCredential, hashiCorpCredential],
   },
-});
+};
 
-CredentialsAPI.readOptions.mockResolvedValue({
+const mockCredentialOptions = {
   data: {
     actions: {
       GET: {},
@@ -30,9 +27,9 @@ CredentialsAPI.readOptions.mockResolvedValue({
     },
     related_search_fields: [],
   },
-});
+};
 
-CredentialTypesAPI.readDetail.mockResolvedValue({
+const mockCredentialTypeDetail = {
   data: {
     id: 20,
     type: 'credential_type',
@@ -83,7 +80,7 @@ CredentialTypesAPI.readDetail.mockResolvedValue({
     },
     injectors: {},
   },
-});
+};
 
 describe('<CredentialPluginPrompt />', () => {
   describe('Plugin not configured', () => {
@@ -91,15 +88,21 @@ describe('<CredentialPluginPrompt />', () => {
     const onClose = jest.fn();
     const onSubmit = jest.fn();
     beforeAll(async () => {
+      CredentialsAPI.test.mockResolvedValue({});
+      CredentialsAPI.read.mockResolvedValue(mockCredentialResults);
+      CredentialsAPI.readOptions.mockResolvedValue(mockCredentialOptions);
+      CredentialTypesAPI.readDetail = async () => mockCredentialTypeDetail;
       await act(async () => {
         wrapper = mountWithContexts(
           <CredentialPluginPrompt onClose={onClose} onSubmit={onSubmit} />
         );
       });
     });
+
     afterAll(() => {
       wrapper.unmount();
     });
+
     test('should render Wizard with all steps', async () => {
       const wizard = await waitForElement(wrapper, 'Wizard');
       const steps = wizard.prop('steps');
@@ -108,6 +111,7 @@ describe('<CredentialPluginPrompt />', () => {
       expect(steps[0].name).toEqual('Credential');
       expect(steps[1].name).toEqual('Metadata');
     });
+
     test('credentials step renders correctly', () => {
       expect(wrapper.find('CredentialsStep').length).toBe(1);
       expect(wrapper.find('DataListItem').length).toBe(3);
@@ -182,6 +186,11 @@ describe('<CredentialPluginPrompt />', () => {
     const onClose = jest.fn();
     const onSubmit = jest.fn();
     beforeAll(async () => {
+      jest.resetAllMocks();
+      CredentialsAPI.test.mockResolvedValue({});
+      CredentialsAPI.read.mockResolvedValue(mockCredentialResults);
+      CredentialsAPI.readOptions.mockResolvedValue(mockCredentialOptions);
+      CredentialTypesAPI.readDetail = async () => mockCredentialTypeDetail;
       await act(async () => {
         wrapper = mountWithContexts(
           <CredentialPluginPrompt

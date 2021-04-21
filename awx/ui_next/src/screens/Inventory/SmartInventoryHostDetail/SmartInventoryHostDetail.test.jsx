@@ -12,10 +12,6 @@ describe('<SmartInventoryHostDetail />', () => {
     wrapper = mountWithContexts(<SmartInventoryHostDetail host={mockHost} />);
   });
 
-  afterAll(() => {
-    wrapper.unmount();
-  });
-
   test('should render Details', () => {
     function assertDetail(label, value) {
       expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);

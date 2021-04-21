@@ -104,7 +104,7 @@ const mockWorkflowNodes = [
 
 describe('Visualizer', () => {
   let wrapper;
-  beforeAll(() => {
+  beforeEach(() => {
     WorkflowJobTemplatesAPI.readNodes.mockResolvedValue({
       data: {
         count: mockWorkflowNodes.length,
