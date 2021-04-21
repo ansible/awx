@@ -2465,7 +2465,8 @@ class RunInventoryUpdate(BaseTask):
                 f.write(content)
             os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
-            rel_path = injector.filename
+            rel_path = os.path.join('inventory', injector.filename)
+            # rel_path = injector.filename
         elif src == 'scm':
             rel_path = os.path.join('project', inventory_update.source_path)
 
