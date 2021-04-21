@@ -450,7 +450,7 @@ msgstr ""
 msgid "Ansible Tower Documentation."
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:63
+#: screens/Template/Survey/SurveyQuestionForm.jsx:35
 msgid "Answer type"
 msgstr ""
 
@@ -1068,11 +1068,11 @@ msgstr ""
 msgid "Click to create a new link to this node."
 msgstr ""
 
-#: components/FormField/TextAndCheckboxField.jsx:99
+#: components/FormField/TextAndCheckboxField.jsx:86
 msgid "Click to select this answer as a default answer."
 msgstr ""
 
-#: components/FormField/TextAndCheckboxField.jsx:107
+#: components/FormField/TextAndCheckboxField.jsx:94
 msgid "Click to toggle default value"
 msgstr ""
 
@@ -1212,11 +1212,6 @@ msgid ""
 "produce as the playbook executes."
 msgstr ""
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:64
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:69
-#~ msgid "Controller"
-#~ msgstr ""
-
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.jsx:208
 msgid "Convergence"
 msgstr ""
@@ -1274,11 +1269,6 @@ msgstr ""
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:224
 msgid "Create"
 msgstr ""
-
-#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:14
-#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:24
-#~ msgid "Create Execution environments"
-#~ msgstr ""
 
 #: screens/Application/Applications.jsx:26
 #: screens/Application/Applications.jsx:35
@@ -2852,11 +2842,6 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironment.jsx:82
 msgid "Execution environment not found."
 msgstr ""
-
-#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:13
-#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:23
-#~ msgid "Execution environments"
-#~ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:23
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:26
@@ -5805,13 +5790,17 @@ msgstr ""
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:239
-msgid "Press Enter to get additional inputs. Refer to the"
-msgstr ""
-
-#: screens/Template/Survey/SurveyQuestionForm.jsx:239
-#~ msgid "Press enter to get additional inputs. Refer to the"
+#: screens/Template/Survey/SurveyQuestionForm.jsx:223
+#~ msgid "Press Enter to get additional inputs."
 #~ msgstr ""
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:229
+#~ msgid "Press Enter to get additional inputs. Refer to the"
+#~ msgstr ""
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:229
+msgid "Press Enter to get additional {num} inputs. Refer to the"
+msgstr ""
 
 #: components/LaunchPrompt/steps/usePreviewStep.jsx:23
 #: screens/Template/Survey/SurveyList.jsx:160
@@ -8372,10 +8361,6 @@ msgid ""
 "curly braces to access information about the job:"
 msgstr ""
 
-#: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:72
-#~ msgid "Use custom messages to change the content of notifications sent when a job starts, succeeds, or fails. Use curly braces to access information about the job:"
-#~ msgstr ""
-
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:75
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:83
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:44
@@ -9246,12 +9231,6 @@ msgstr ""
 msgid "inventory"
 msgstr ""
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.jsx:51
-#: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.jsx:59
-#: screens/Job/JobDetail/JobDetail.jsx:119
-#~ msgid "isolated instance"
-#~ msgstr ""
-
 #: components/Pagination/Pagination.jsx:24
 msgid "items"
 msgstr ""
@@ -9287,10 +9266,6 @@ msgstr ""
 #: components/AdHocCommands/AdHocDetailsStep.jsx:238
 msgid "option to the"
 msgstr ""
-
-#: screens/NotificationTemplate/shared/CustomMessagesSubForm.jsx:84
-#~ msgid "or attributes of the job such as"
-#~ msgstr ""
 
 #: components/Pagination/Pagination.jsx:25
 msgid "page"

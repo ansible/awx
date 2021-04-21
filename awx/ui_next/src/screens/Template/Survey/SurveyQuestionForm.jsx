@@ -1,7 +1,6 @@
 import React from 'react';
 import { func, string, bool, number, shape } from 'prop-types';
 import { Formik, useField } from 'formik';
-
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { FormColumnLayout } from '../../../components/FormLayout';
@@ -76,6 +75,7 @@ function SurveyQuestionForm({
   submitError,
 }) {
   const config = useConfig();
+
   let initialValues = {
     question_name: question?.question_name || '',
     question_description: question?.question_description || '',
@@ -85,7 +85,8 @@ function SurveyQuestionForm({
     min: question?.min || 0,
     max: question?.max || 1024,
     default: question?.default || '',
-    formattedChoices: question?.choices || [{ choice: '', isDefault: false }],
+    choices: question?.choices || '',
+    formattedChoices: [{ choice: '', isDefault: false }],
     new_question: !question,
   };
   if (question?.type === 'multiselect' || question?.type === 'multiplechoice') {
@@ -93,6 +94,7 @@ function SurveyQuestionForm({
       if (question.default.split('\n').includes(c)) {
         return { choice: c, isDefault: true };
       }
+
       return { choice: c, isDefault: false };
     });
 
@@ -223,7 +225,7 @@ function SurveyQuestionForm({
                 validate={required()}
                 tooltip={
                   <>
-                    {t`Press Enter to get additional inputs. Refer to the `}{' '}
+                    <span>{t`Refer to the`} </span>
                     <a
                       href={`${getDocsBaseUrl(
                         config
@@ -267,5 +269,8 @@ SurveyQuestionForm.defaultProps = {
   question: null,
   submitError: null,
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> updates strings
 export default SurveyQuestionForm;

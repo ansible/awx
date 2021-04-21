@@ -1126,11 +1126,11 @@ msgstr "Cliquez sur ce bouton pour vérifier la connexion au système de gestion
 msgid "Click to create a new link to this node."
 msgstr "Cliquez pour créer un nouveau lien vers ce nœud."
 
-#: components/FormField/TextAndCheckboxField.jsx:99
+#: components/FormField/TextAndCheckboxField.jsx:86
 msgid "Click to select this answer as a default answer."
 msgstr ""
 
-#: components/FormField/TextAndCheckboxField.jsx:107
+#: components/FormField/TextAndCheckboxField.jsx:94
 msgid "Click to toggle default value"
 msgstr ""
 
@@ -1357,11 +1357,6 @@ msgstr ""
 #: screens/Template/shared/WorkflowJobTemplateForm.jsx:224
 msgid "Create"
 msgstr "Créer"
-
-#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:14
-#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:24
-#~ msgid "Create Execution environments"
-#~ msgstr ""
 
 #: screens/Application/Applications.jsx:26
 #: screens/Application/Applications.jsx:35
@@ -2630,9 +2625,13 @@ msgstr ""
 #~ msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact BRAND_NAME and request a configuration update using this job template."
 #~ msgstr ""
 
-#: src/components/AdHocCommands/AdHocDetailsStep.jsx:244
-#~ msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {brandName} and request a configuration update using this job template"
-#~ msgstr ""
+#: components/AdHocCommands/AdHocDetailsStep.jsx:244
+msgid ""
+"Enables creation of a provisioning\n"
+"callback URL. Using the URL a host can contact {brandName}\n"
+"and request a configuration update using this job\n"
+"template"
+msgstr ""
 
 #: src/screens/Template/shared/JobTemplateForm.jsx:517
 #~ msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {brandName} and request a configuration update using this job template."
@@ -2996,11 +2995,6 @@ msgstr ""
 #: screens/ExecutionEnvironment/ExecutionEnvironment.jsx:82
 msgid "Execution environment not found."
 msgstr ""
-
-#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:13
-#: screens/ExecutionEnvironment/ExecutionEnvironments.jsx:23
-#~ msgid "Execution environments"
-#~ msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:23
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/UnsavedChangesModal.jsx:26
@@ -4003,9 +3997,12 @@ msgid ""
 "to Ansible's --diff mode."
 msgstr ""
 
-#: src/screens/Template/shared/JobTemplateForm.jsx:448
-#~ msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible's --diff mode."
-#~ msgstr ""
+#: screens/Template/shared/JobTemplateForm.jsx:479
+msgid ""
+"If enabled, show the changes made by\n"
+"Ansible tasks, where supported. This is equivalent\n"
+"to Ansible's --diff mode."
+msgstr ""
 
 #: components/AdHocCommands/AdHocDetailsStep.jsx:205
 msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode."
@@ -6021,13 +6018,17 @@ msgstr ""
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr ""
 
-#: screens/Template/Survey/SurveyQuestionForm.jsx:239
-msgid "Press Enter to get additional inputs. Refer to the"
-msgstr ""
-
-#: screens/Template/Survey/SurveyQuestionForm.jsx:239
-#~ msgid "Press enter to get additional inputs. Refer to the"
+#: screens/Template/Survey/SurveyQuestionForm.jsx:223
+#~ msgid "Press Enter to get additional inputs."
 #~ msgstr ""
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:229
+#~ msgid "Press Enter to get additional inputs. Refer to the"
+#~ msgstr ""
+
+#: screens/Template/Survey/SurveyQuestionForm.jsx:229
+msgid "Press Enter to get additional {num} inputs. Refer to the"
+msgstr ""
 
 #: components/LaunchPrompt/steps/usePreviewStep.jsx:23
 #: screens/Template/Survey/SurveyList.jsx:160
@@ -6285,9 +6286,15 @@ msgid ""
 "about the configuration file."
 msgstr ""
 
-#: src/screens/Template/shared/JobTemplateForm.jsx:383
-#~ msgid "Refer to the Ansible documentation for details about the configuration file."
-#~ msgstr ""
+#: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.jsx:282
+msgid "Redirecting to subscription detail"
+msgstr ""
+
+#: screens/Template/shared/JobTemplateForm.jsx:414
+msgid ""
+"Refer to the Ansible documentation for details\n"
+"about the configuration file."
+msgstr ""
 
 #: screens/User/UserTokens/UserTokens.jsx:76
 msgid "Refresh Token"

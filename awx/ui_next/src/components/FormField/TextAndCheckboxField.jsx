@@ -1,17 +1,15 @@
 import React from 'react';
 import { useField } from 'formik';
-import { t, Plural } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import {
   FormGroup,
   TextInput,
   Button,
   InputGroup as PFInputGroup,
-  Tooltip,
 } from '@patternfly/react-core';
 import PFCheckIcon from '@patternfly/react-icons/dist/js/icons/check-icon';
 import styled from 'styled-components';
 import Popover from '../Popover';
-import { required } from '../../util/validators';
 
 const InputGroup = styled(PFInputGroup)`
   padding-bottom: 5px;
@@ -22,6 +20,19 @@ const CheckIcon = styled(PFCheckIcon)`
     props.isSelected &&
     `color: var(--pf-c-button--m-secondary--active--Color)`};
 `;
+
+const validate = () => {
+  return value => {
+    let message;
+    const hasValue = value.find(({ choice }) =>
+      choice.trim().length > 0 ? choice : undefined
+    );
+    if (!hasValue) {
+      message = t`There must be a value in at least one input`;
+    }
+    return message;
+  };
+};
 function TextAndCheckboxField({ label, tooltip }) {
   const [
     formattedChoicesField,
@@ -29,33 +40,34 @@ function TextAndCheckboxField({ label, tooltip }) {
     formattedChoicesHelpers,
   ] = useField({
     name: 'formattedChoices',
-    validate: required(null),
+    validate: validate(),
   });
+
   const [typeField] = useField('type');
-  const isValid =
-    !(formattedChoicesMeta.touched && formattedChoicesMeta.error) ||
-    formattedChoicesField.value.trim().length > 0;
+  const isValid = !(formattedChoicesMeta.touched && formattedChoicesMeta.error);
 
   return (
     <FormGroup
-      helperText={
-        <Plural
-          value={typeField.value === 'multiselect' ? 2 : 1}
-          one="Click checkbox next to an option to mark it as the default value."
-          other="Click checkbox next to an option to mark it as a default value."
-        />
-      }
-      hasNoPaddingTop
-      helperTextInvalid={formattedChoicesMeta.error}
       label={label}
       isRequired
-      onBlur={formattedChoicesHelpers.setTouched}
+      helperText={
+        !formattedChoicesField.value[0].choice.trim().length
+          ? t`Type answer then click checkbox on right to select answer as default.`
+          : t`Press 'Enter' to add more answer choices. One answer choice per line. `
+      }
+      helperTextInvalid={formattedChoicesMeta.error}
+      onBlur={e => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          formattedChoicesHelpers.setTouched();
+        }
+      }}
       validated={isValid ? 'default' : 'error'}
       labelIcon={<Popover content={tooltip} />}
     >
       {formattedChoicesField.value.map(({ choice, isDefault }, i) => (
         <InputGroup>
           <TextInput
+            aria-label={choice}
             onKeyUp={e => {
               if (
                 e.key === 'Enter' &&
@@ -69,9 +81,12 @@ function TextAndCheckboxField({ label, tooltip }) {
                   })
                 );
               }
-              // Remove empty string values from formattedChoices from formik and
-              // remove the field from the UI.
-              if (e.key === 'Backspace' && !choice.trim().length) {
+
+              if (
+                e.key === 'Backspace' &&
+                !choice.trim() &&
+                formattedChoicesField.value.length > 1
+              ) {
                 const removeEmptyField = formattedChoicesField.value.filter(
                   (c, index) => index !== i
                 );
@@ -87,40 +102,31 @@ function TextAndCheckboxField({ label, tooltip }) {
               formattedChoicesHelpers.setValue(newValues);
             }}
           />
-          <Tooltip
-            content={
-              choice
-                ? t`Click to select this answer as a default answer.`
-                : t`Must type an answer choice before a default value can be selected`
-            }
-            position="right"
-            trigger="mouseenter"
+
+          <Button
+            variant="control"
+            aria-label={t`Click to toggle default value`}
+            ouiaId={choice}
+            isDisabled={!choice.trim()}
+            onClick={() => {
+              const newValues = formattedChoicesField.value.map((cfv, index) =>
+                i === index
+                  ? { choice: cfv.choice, isDefault: !cfv.isDefault }
+                  : cfv
+              );
+              const singleSelectValues = formattedChoicesField.value.map(
+                (cfv, index) =>
+                  i === index
+                    ? { choice: cfv.choice, isDefault: !cfv.isDefault }
+                    : { choice: cfv.choice, isDefault: false }
+              );
+              return typeField.value === 'multiplechoice'
+                ? formattedChoicesHelpers.setValue(singleSelectValues)
+                : formattedChoicesHelpers.setValue(newValues);
+            }}
           >
-            <Button
-              variant="control"
-              aria-label={t`Click to toggle default value`}
-              ouiaId={choice}
-              onClick={() => {
-                const newValues = formattedChoicesField.value.map(
-                  (cfv, index) =>
-                    i === index
-                      ? { choice: cfv.choice, isDefault: !cfv.isDefault }
-                      : cfv
-                );
-                const singleSelectValues = formattedChoicesField.value.map(
-                  (cfv, index) =>
-                    i === index
-                      ? { choice: cfv.choice, isDefault: !cfv.isDefault }
-                      : { choice: cfv.choice, isDefault: false }
-                );
-                return typeField.value === 'multiplechoice'
-                  ? formattedChoicesHelpers.setValue(singleSelectValues)
-                  : formattedChoicesHelpers.setValue(newValues);
-              }}
-            >
-              <CheckIcon isSelected={isDefault} />
-            </Button>
-          </Tooltip>
+            <CheckIcon isSelected={isDefault} />
+          </Button>
         </InputGroup>
       ))}
     </FormGroup>
