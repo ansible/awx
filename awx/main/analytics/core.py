@@ -154,9 +154,9 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         until = None if until is None else min(until, _now)
         since = None if since is None else min(since, _now)
 
-        if since and not until:
-            # If `since` is explicit but not `until`, `since` should be used to calculate the 4-week limit
-            until = min(since + timedelta(weeks=4), _now)
+        if since:
+            # If `since` is explicit, the four-week limit should be calculated from `since`
+            until = min(since + timedelta(weeks=4), _now if until is None else until)
         else:
             until = _now if until is None else until
 
