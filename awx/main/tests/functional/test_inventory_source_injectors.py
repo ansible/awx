@@ -111,7 +111,7 @@ def read_content(private_data_dir, raw_env, inventory_update):
             continue  # Ansible runner
         abs_file_path = os.path.join(private_data_dir, filename)
         file_aliases[abs_file_path] = filename
-        runner_path = os.path.join('/runner', os.path.basename(abs_file_path))
+        runner_path = abs_file_path.replace(private_data_dir, '/runner')  # host path to container path
         if runner_path in inverse_env:
             referenced_paths.add(abs_file_path)
             alias = 'file_reference'
