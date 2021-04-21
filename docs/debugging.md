@@ -53,6 +53,82 @@ time        sql
 0.046       UPDATE "django_session" SET "session_data" = 'XYZ', "expire_date" = '2019-02-15T21:56:45.693290+00:00'::timestamptz WHERE "django_session"."session_key" = 'we9dumywgju4fulaxz3oki58zpxgmd6t'
 ```
 
+Postgres Tracing Slow Queries
+-----------------------------
+Ensure that slow query logging is turned on in the Postgres config and that the log line prefix contains the application name parameter. Below is an example.
+
+```
+log_min_duration_statement = 500 # in ms
+log_line_prefix = '< %m %a >' # timestamp, application name
+```
+
+We've made it easier to correlate postgres connections <--> the processes that is doing the query. For example, the following line is a log entry from a slow running `awx-manage` command. `< 2021-04-21 12:42:10.307 UTC awx_1-1540765-/bin/awx-manage gather_analytics --dry-run -v 3 >LOG:  duration: 1211.270 ms  statement: SELECT MIN("main_jobevent"."id") AS "pk__min", MAX("main_jobevent"."id") AS "pk__max" FROM "main_jobevent" WHERE ("main_jobevent"."modified" >= '2021-03-24T12:42:08.846790+00:00'::timestamptz AND "main_jobevent"."modified" <= '2021-04-21T12:42:08.846790+00:00'::timestamptz)` the entry was found in the log file `/var/lib/pgsql/data/pg_log/postgresql-Wed.log`
+
+Note the `application_name` portion. This allows us to trace the query to the node `awx_1` with processes id `1540765`. The full task command line string gives us context for each long-running query that we need to find the needle in the hay stack without having to go to each individual AWX node and query Linux by the pid to understand what work is being done by each pid.
+```
+awx_1-1540765-/bin/awx-manage gather_analytics --dry-run -v 3`
+<tower_instance_hostname>-<pid>-<pid_launch_string>
+```
+
+This feature is made possible by Postgres. We do this by using the `application_name` field. You can see this in `pg_stat_activity`. Below is an example where we are querying `pg_stat_activity` for sessions that have been alive for more than 5 minutes.
+
+```
+SELECT
+  now() - pg_stat_activity.query_start AS duration,
+  query,
+  state,
+  application_name
+FROM pg_stat_activity
+WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes';
+```
+
+```
+    duration     |                                                     query                                                     | state  |                        application_name
+-----------------+---------------------------------------------------------------------------------------------------------------+--------+-----------------------------------------------------------------
+ 00:13:17.430778 | LISTEN "ec2-*-**-***-**.compute-1.amazonaws.com";                                                             | idle   | ec2-*-**-***-**.compute-1.amazonaws.com-1460120-/usr/bin/awx-ma
+ 00:13:17.430826 | LISTEN "awx_1";                                                                                               | idle   | awx_1-1540753-/usr/bin/awx-manage run_dispatcher
+ 00:13:17.202724 | LISTEN "ec2-*-**-***-**.compute-1.amazonaws.com";                                                          | idle   | ec2-*-**-***-**.compute-1.amazonaws.com-1497861-/usr/bin/awx
+ 00:13:13.125703 | COPY (SELECT main_jobevent.id,                                                                               +| active | awx_1-1540765-/bin/awx-manage gather_analytics --dry-run -v 3
+                 |                          main_jobevent.created,                                                              +|        |
+                 |                          main_jobevent.modified,                                                             +|        |
+                 |                          main_jobevent.uuid,                                                                 +|        |
+                 |                          main_jobevent.parent_uuid,                                                          +|        |
+                 |                          main_jobevent.event,                                                                +|        |
+                 |                          main_jobevent.event_data::json->'task_action' AS task_action,                       +|        |
+                 |                          (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,   +|        |
+                 |                          main_jobevent.failed,                                                               +|        |
+                 |                          main_jobevent.changed,                                                              +|        |
+                 |                          main_jobevent.playbook,                                                             +|        |
+                 |                          main_jobevent.play,                                                                 +|        |
+                 |                          main_jobevent.task,                                                                 +|        |
+                 |                          main_jobevent.role,                                                                 +|        |
+                 |                          main_jobevent.job_id,                                                               +|        |
+                 |                          main_jobevent.host_id,                                                              +|        |
+                 |                          main_jobevent.host_name,                                                            +|        |
+                 |                          CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,+|        |
+                 |                                                                                                               |        |
+ 00:13:13.125703 | COPY (SELECT main_jobevent.id,                                                                               +| active | awx_1-1540765-/bin/awx-manage gather_analytics --dry-run -v 3
+                 |                          main_jobevent.created,                                                              +|        |
+                 |                          main_jobevent.modified,                                                             +|        |
+                 |                          main_jobevent.uuid,                                                                 +|        |
+                 |                          main_jobevent.parent_uuid,                                                          +|        |
+                 |                          main_jobevent.event,                                                                +|        |
+                 |                          main_jobevent.event_data::json->'task_action' AS task_action,                       +|        |
+                 |                          (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,   +|        |
+                 |                          main_jobevent.failed,                                                               +|        |
+                 |                          main_jobevent.changed,                                                              +|        |
+                 |                          main_jobevent.playbook,                                                             +|        |
+                 |                          main_jobevent.play,                                                                 +|        |
+                 |                          main_jobevent.task,                                                                 +|        |
+                 |                          main_jobevent.role,                                                                 +|        |
+                 |                          main_jobevent.job_id,                                                               +|        |
+                 |                          main_jobevent.host_id,                                                              +|        |
+                 |                          main_jobevent.host_name,                                                            +|        |
+                 |                          CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,+|        |
+                 |                                                                                                               |        |
+                 
+```
+
 Remote Debugging
 ----------------
 Python processes in Tower's development environment are kept running in the
