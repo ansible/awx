@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { t } from '@lingui/macro';
 import { Label, Tooltip } from '@patternfly/react-core';
 import { CheckIcon, InfoCircleIcon } from '@patternfly/react-icons';
@@ -24,9 +23,15 @@ function WorkflowApprovalStatus({ workflowApproval }) {
   if (workflowApproval.status === 'failed' && workflowApproval.failed) {
     return (
       <Tooltip
-        content={t`Denied by ${
-          workflowApproval.summary_fields.approved_or_denied_by.username
-        } - ${formatDateString(workflowApproval.finished)}`}
+        content={
+          workflowApproval.summary_fields?.approved_or_denied_by?.username
+            ? t`Denied by ${
+                workflowApproval.summary_fields.approved_or_denied_by.username
+              } - ${formatDateString(workflowApproval.finished)}`
+            : t`Denied - ${formatDateString(
+                workflowApproval.finished
+              )}.  See the Activity Stream for more information.`
+        }
         position="top"
       >
         <Label variant="outline" color="red" icon={<InfoCircleIcon />}>
@@ -39,9 +44,15 @@ function WorkflowApprovalStatus({ workflowApproval }) {
   if (workflowApproval.status === 'successful') {
     return (
       <Tooltip
-        content={t`Approved by ${
-          workflowApproval.summary_fields.approved_or_denied_by.username
-        } - ${formatDateString(workflowApproval.finished)}`}
+        content={
+          workflowApproval.summary_fields?.approved_or_denied_by?.username
+            ? t`Approved by ${
+                workflowApproval.summary_fields.approved_or_denied_by.username
+              } - ${formatDateString(workflowApproval.finished)}`
+            : t`Approved - ${formatDateString(
+                workflowApproval.finished
+              )}.  See the Activity Stream for more information.`
+        }
         position="top"
       >
         <Label variant="outline" color="green" icon={<CheckIcon />}>
