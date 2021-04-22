@@ -36,6 +36,7 @@ no_endpoint_for_module = [
     'tower_receive',
     'tower_send',
     'tower_workflow_launch',
+    'tower_workflow_node_wait',
     'tower_job_cancel',
     'tower_workflow_template',
     'tower_ad_hoc_command_wait',
@@ -64,16 +65,17 @@ no_api_parameter_ok = {
     'tower_ad_hoc_command': ['interval', 'timeout', 'wait'],
     # tower_group parameters to perserve hosts and children.
     'tower_group': ['preserve_existing_children', 'preserve_existing_hosts'],
+    # tower_workflow_approval parameters that do not apply when approving an approval node.
+    'tower_workflow_approval': ['action', 'interval', 'timeout', 'workflow_job_id'],
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
 # that needs to be developed. If the module is found on the file system it will auto-detect that the
 # work is being done and will bypass this check. At some point this module should be removed from this list.
-needs_development = [
-    'tower_workflow_approval',
-]
+needs_development = ['tower_inventory_script']
 needs_param_development = {
     'tower_host': ['instance_id'],
+    'tower_workflow_approval': ['description', 'execution_environment'],
 }
 # -----------------------------------------------------------------------------------------------------------
 
