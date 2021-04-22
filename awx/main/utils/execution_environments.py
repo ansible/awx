@@ -36,6 +36,11 @@ CONTAINER_ROOT = '/runner'
 
 
 def to_container_path(path, private_data_dir):
+    """Given a path inside of the host machine filesystem,
+    this returns the expected path which would be observed by the job running
+    inside of the EE container.
+    This only handles the volume mount from private_data_dir to /runner
+    """
     if not os.path.isabs(private_data_dir):
         raise RuntimeError('The private_data_dir path must be absolute')
     if private_data_dir != path and Path(private_data_dir) not in Path(path).resolve().parents:
@@ -44,6 +49,9 @@ def to_container_path(path, private_data_dir):
 
 
 def to_host_path(path, private_data_dir):
+    """Given a path inside of the EE container, this gives the absolute path
+    on the host machine within the private_data_dir
+    """
     if not os.path.isabs(private_data_dir):
         raise RuntimeError('The private_data_dir path must be absolute')
     if CONTAINER_ROOT != path and Path(CONTAINER_ROOT) not in Path(path).resolve().parents:
