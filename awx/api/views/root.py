@@ -300,13 +300,7 @@ class ApiV2ConfigView(APIView):
             or Organization.accessible_objects(request.user, 'auditor_role').exists()
             or Organization.accessible_objects(request.user, 'project_admin_role').exists()
         ):
-            data.update(
-                dict(
-                    project_base_dir=settings.PROJECTS_ROOT, project_local_paths=Project.get_local_path_choices(), custom_virtualenvs=get_custom_venv_choices()
-                )
-            )
-        elif JobTemplate.accessible_objects(request.user, 'admin_role').exists():
-            data['custom_virtualenvs'] = get_custom_venv_choices()
+            data.update(dict(project_base_dir=settings.PROJECTS_ROOT, project_local_paths=Project.get_local_path_choices()))
 
         return Response(data)
 

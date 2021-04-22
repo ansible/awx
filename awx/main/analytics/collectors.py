@@ -15,7 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 from psycopg2.errors import UntranslatableCharacter
 
 from awx.conf.license import get_license
-from awx.main.utils import get_awx_version, get_custom_venv_choices, camelcase_to_underscore, datetime_hook
+from awx.main.utils import get_awx_version, camelcase_to_underscore, datetime_hook
 from awx.main import models
 from awx.main.analytics import register
 
@@ -120,7 +120,7 @@ def config(since, **kwargs):
     }
 
 
-@register('counts', '1.0', description=_('Counts of objects such as organizations, inventories, and projects'))
+@register('counts', '1.1', description=_('Counts of objects such as organizations, inventories, and projects'))
 def counts(since, **kwargs):
     counts = {}
     for cls in (
@@ -137,9 +137,6 @@ def counts(since, **kwargs):
         models.NotificationTemplate,
     ):
         counts[camelcase_to_underscore(cls.__name__)] = cls.objects.count()
-
-    venvs = get_custom_venv_choices()
-    counts['custom_virtualenvs'] = len([v for v in venvs if os.path.basename(v.rstrip('/')) != 'ansible'])
 
     inv_counts = dict(models.Inventory.objects.order_by().values_list('kind').annotate(Count('kind')))
     inv_counts['normal'] = inv_counts.get('', 0)

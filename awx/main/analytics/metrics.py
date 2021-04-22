@@ -39,7 +39,6 @@ def metrics():
         ],
         registry=REGISTRY,
     )
-    CUSTOM_VENVS = Gauge('awx_custom_virtualenvs_total', 'Number of virtualenvs', registry=REGISTRY)
     RUNNING_JOBS = Gauge('awx_running_jobs_total', 'Number of running jobs on the system', registry=REGISTRY)
     PENDING_JOBS = Gauge('awx_pending_jobs_total', 'Number of pending jobs on the system', registry=REGISTRY)
     STATUS = Gauge(
@@ -159,7 +158,6 @@ def metrics():
     HOST_COUNT.labels(type='active').set(current_counts['active_host_count'])
 
     SCHEDULE_COUNT.set(current_counts['schedule'])
-    CUSTOM_VENVS.set(current_counts['custom_virtualenvs'])
 
     USER_SESSIONS.labels(type='all').set(current_counts['active_sessions'])
     USER_SESSIONS.labels(type='user').set(current_counts['active_user_sessions'])
