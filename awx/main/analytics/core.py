@@ -156,6 +156,8 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
 
         if since:
             # If `since` is explicit, the four-week limit should be calculated from `since`
+            if until and until > since + timedelta(weeks=4):
+                logger.warning(f'collection interval exceeds four weeks, reducing interval to {since} - {since + timedelta(weeks=4)}')
             until = min(since + timedelta(weeks=4), _now if until is None else until)
         else:
             until = _now if until is None else until
