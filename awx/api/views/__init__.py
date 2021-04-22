@@ -101,6 +101,7 @@ from awx.main.utils import (
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.insights import filter_insights_api_response
+from awx.main.utils.common import get_custom_venv_choices, get_custom_venv_pip_freeze
 from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission,
@@ -295,6 +296,7 @@ class DashboardView(APIView):
         data['teams'] = {'url': reverse('api:team_list', request=request), 'total': team_list.count()}
         data['credentials'] = {'url': reverse('api:credential_list', request=request), 'total': credential_list.count()}
         data['job_templates'] = {'url': reverse('api:job_template_list', request=request), 'total': job_template_list.count()}
+        data['custom_venvs'] = {'url': reverse('api:custom_venv_list', request=request)}
         return Response(data)
 
 
@@ -4527,3 +4529,13 @@ class WorkflowApprovalDeny(RetrieveAPIView):
             return Response({"error": _("This workflow step has already been approved or denied.")}, status=status.HTTP_400_BAD_REQUEST)
         obj.deny(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CustomVenvs(GenericAPIView):
+    def get(self, request, format=None):
+        custom_venv_choices = get_custom_venv_choices()
+        pip_freeze_data = get_custom_venv_pip_freeze(custom_venv_choices)
+        return Response(str(pip_freeze_data))
+
+    # def post(self, request, *args, **kwargs):
+    #     custom_venv_choices = get_custom_venv_choices()

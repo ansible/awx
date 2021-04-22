@@ -6,6 +6,7 @@ import json
 import yaml
 import logging
 import os
+import subprocess
 import re
 import stat
 import urllib.parse
@@ -890,25 +891,45 @@ def get_current_apps():
 def get_custom_venv_choices(custom_paths=None):
     from django.conf import settings
 
-    custom_paths = custom_paths or settings.CUSTOM_VENV_PATHS
-    all_venv_paths = [settings.BASE_VENV_PATH] + custom_paths
+    all_venv_paths = []
+
+    all_venv_paths.append(settings.BASE_VENV_PATH)  # get paths from settings
+    if custom_paths:  # get paths from API request
+        all_venv_paths.append(custom_paths)
+    for root, dir, files in os.walk('..'):  # get paths on machine
+        if 'venv' in root and 'lib64' not in root and "python3" not in root:
+            all_venv_paths.append(root)
+
     custom_venv_choices = []
 
-    for custom_venv_path in all_venv_paths:
+    for venv_path in all_venv_paths:
         try:
-            if os.path.exists(custom_venv_path):
+            if os.path.exists(venv_path):
                 custom_venv_choices.extend(
                     [
-                        os.path.join(custom_venv_path, x, '')
-                        for x in os.listdir(custom_venv_path)
-                        if x != 'awx'
-                        and os.path.isdir(os.path.join(custom_venv_path, x))
-                        and os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
+                        os.path.join(venv_path, x, '')
+                        for x in os.listdir(venv_path)
+                        if os.path.exists(os.path.join(venv_path, x, 'activate')) and os.path.join(venv_path, x) != '../var/lib/awx/venv/awx/bin'
                     ]
                 )
         except Exception:
             logger.exception("Encountered an error while discovering custom virtual environments.")
     return custom_venv_choices
+
+
+def get_custom_venv_pip_freeze(custom_venvs):
+    # import sdb; sdb.set_trace()
+    pip_data = {}
+    for venv_path in custom_venvs:
+        if '..' in venv_path:
+            venv_path = venv_path.replace('..', '')
+        try:
+            freeze_data = subprocess.run([f"{venv_path}/pip", "freeze"], capture_output=True)
+            data = freeze_data.stdout
+            pip_data[venv_path] = data
+        except Exception:
+            logger.exception("Encountered an error while discovering Pip Freeze data for custom virtual environments.")
+    return pip_data
 
 
 def is_ansible_variable(key):
