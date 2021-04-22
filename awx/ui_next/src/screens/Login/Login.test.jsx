@@ -10,6 +10,16 @@ import AWXLogin from './Login';
 
 jest.mock('../../api');
 
+RootAPI.readAssetVariables.mockResolvedValue({
+  data: {
+    BRAND_NAME: 'AWX',
+  },
+});
+
+AuthAPI.read.mockResolvedValue({
+  data: {},
+});
+
 describe('<Login />', () => {
   async function findChildren(wrapper) {
     const [

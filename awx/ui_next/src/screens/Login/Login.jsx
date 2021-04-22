@@ -42,12 +42,18 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
     isLoading: isCustomLoginInfoLoading,
     error: customLoginInfoError,
     request: fetchCustomLoginInfo,
-    result: { brandName, logo, loginInfo, socialAuthOptions },
+    result: {
+      brandName,
+      logo,
+      loginInfo,
+      socialAuthOptions,
+      loginRedirectOverride,
+    },
   } = useRequest(
     useCallback(async () => {
       const [
         {
-          data: { custom_logo, custom_login_info },
+          data: { custom_logo, custom_login_info, login_redirect_override },
         },
         {
           data: { BRAND_NAME },
@@ -61,11 +67,13 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
       const logoSrc = custom_logo
         ? `data:image/jpeg;${custom_logo}`
         : loginLogoSrc;
+
       return {
         brandName: BRAND_NAME,
         logo: logoSrc,
         loginInfo: custom_login_info,
         socialAuthOptions: authData,
+        loginRedirectOverride: login_redirect_override,
       };
     }, []),
     {
@@ -84,7 +92,6 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
   useEffect(() => {
     fetchCustomLoginInfo();
   }, [fetchCustomLoginInfo]);
-
   const {
     isLoading: isAuthenticating,
     error: authenticationError,
@@ -108,7 +115,10 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
   if (isCustomLoginInfoLoading) {
     return null;
   }
-
+  if (!isAuthenticated(document.cookie) && loginRedirectOverride) {
+    window.location.replace(loginRedirectOverride);
+    return null;
+  }
   if (isAuthenticated(document.cookie)) {
     return <Redirect to="/" />;
   }
