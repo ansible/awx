@@ -663,6 +663,19 @@ callback URL. Using the URL a host can contact BRAND_NAME
 and request a configuration update using this job
 template.",
             "Enables creation of a provisioning
+callback URL. Using the URL a host can contact {BrandName}
+and request a configuration update using this job
+template.": Array [
+              "Enables creation of a provisioning
+callback URL. Using the URL a host can contact ",
+              Array [
+                "BrandName",
+              ],
+              "
+and request a configuration update using this job
+template.",
+            ],
+            "Enables creation of a provisioning
 callback URL. Using the URL a host can contact {brandName}
 and request a configuration update using this job
 template": Array [
@@ -1184,6 +1197,7 @@ reset by the inventory sync process.",
             "Last job": "Last job",
             "Last job run": "Last job run",
             "Last modified": "Last modified",
+            "Last used": "Last used",
             "Launch": "Launch",
             "Launch Management Job": "Launch Management Job",
             "Launch Template": "Launch Template",
@@ -1325,11 +1339,11 @@ disassociating if the host is also a member of that group’s
 children.  This list shows all groups the host is associated
 with directly and indirectly.",
             "Note that you may still see the group in the list after
-disassociating if the host is also a member of that group’s
-children.  This list shows all groups the host is associated
+disassociating if the host is also a member of that group’s 
+children.  This list shows all groups the host is associated 
 with directly and indirectly.": "Note that you may still see the group in the list after
-disassociating if the host is also a member of that group’s
-children.  This list shows all groups the host is associated
+disassociating if the host is also a member of that group’s 
+children.  This list shows all groups the host is associated 
 with directly and indirectly.",
             "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s  children.  This list shows all groups the host is associated  with directly and indirectly.": "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s  children.  This list shows all groups the host is associated  with directly and indirectly.",
             "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s children.  This list shows all groups the host is associated with directly and indirectly.": "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s children.  This list shows all groups the host is associated with directly and indirectly.",
@@ -2732,23 +2746,13 @@ message. For more information, refer to the",
                 },
               ],
             ],
-            "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other { Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?}}": Array [
+            "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?}}": Array [
               Array [
                 "0",
                 "plural",
                 Object {
                   "one": "This execution environment is currently being used by other resources. Are you sure you want to delete it?",
-                  "other": " Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?",
-                },
-              ],
-            ],
-            "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?}}": Array [
-              Array [
-                "0",
-                "plural",
-                Object {
-                  "one": "This execution environment is currently being used by other resources. Are you sure you want to delete it?",
-                  "other": "Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?",
+                  "other": "These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?",
                 },
               ],
             ],
@@ -2809,6 +2813,16 @@ message. For more information, refer to the",
                 Object {
                   "one": "This template is currently being used by some workflow nodes. Are you sure you want to delete it?",
                   "other": "Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?",
+                },
+              ],
+            ],
+            "{0, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}": Array [
+              Array [
+                "0",
+                "plural",
+                Object {
+                  "one": "You cannot cancel the following job because it is not running:",
+                  "other": "You cannot cancel the following jobs because they are not running:",
                 },
               ],
             ],
@@ -4504,6 +4518,19 @@ callback URL. Using the URL a host can contact BRAND_NAME
 and request a configuration update using this job
 template.",
                                                               "Enables creation of a provisioning
+callback URL. Using the URL a host can contact {BrandName}
+and request a configuration update using this job
+template.": Array [
+                                                                "Enables creation of a provisioning
+callback URL. Using the URL a host can contact ",
+                                                                Array [
+                                                                  "BrandName",
+                                                                ],
+                                                                "
+and request a configuration update using this job
+template.",
+                                                              ],
+                                                              "Enables creation of a provisioning
 callback URL. Using the URL a host can contact {brandName}
 and request a configuration update using this job
 template": Array [
@@ -5025,6 +5052,7 @@ reset by the inventory sync process.",
                                                               "Last job": "Last job",
                                                               "Last job run": "Last job run",
                                                               "Last modified": "Last modified",
+                                                              "Last used": "Last used",
                                                               "Launch": "Launch",
                                                               "Launch Management Job": "Launch Management Job",
                                                               "Launch Template": "Launch Template",
@@ -5166,11 +5194,11 @@ disassociating if the host is also a member of that group’s
 children.  This list shows all groups the host is associated
 with directly and indirectly.",
                                                               "Note that you may still see the group in the list after
-disassociating if the host is also a member of that group’s
-children.  This list shows all groups the host is associated
+disassociating if the host is also a member of that group’s 
+children.  This list shows all groups the host is associated 
 with directly and indirectly.": "Note that you may still see the group in the list after
-disassociating if the host is also a member of that group’s
-children.  This list shows all groups the host is associated
+disassociating if the host is also a member of that group’s 
+children.  This list shows all groups the host is associated 
 with directly and indirectly.",
                                                               "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s  children.  This list shows all groups the host is associated  with directly and indirectly.": "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s  children.  This list shows all groups the host is associated  with directly and indirectly.",
                                                               "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s children.  This list shows all groups the host is associated with directly and indirectly.": "Note that you may still see the group in the list after disassociating if the host is also a member of that group’s children.  This list shows all groups the host is associated with directly and indirectly.",
@@ -6573,23 +6601,13 @@ message. For more information, refer to the",
                                                                   },
                                                                 ],
                                                               ],
-                                                              "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other { Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?}}": Array [
+                                                              "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?}}": Array [
                                                                 Array [
                                                                   "0",
                                                                   "plural",
                                                                   Object {
                                                                     "one": "This execution environment is currently being used by other resources. Are you sure you want to delete it?",
-                                                                    "other": " Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?",
-                                                                  },
-                                                                ],
-                                                              ],
-                                                              "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?}}": Array [
-                                                                Array [
-                                                                  "0",
-                                                                  "plural",
-                                                                  Object {
-                                                                    "one": "This execution environment is currently being used by other resources. Are you sure you want to delete it?",
-                                                                    "other": "Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?",
+                                                                    "other": "These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?",
                                                                   },
                                                                 ],
                                                               ],
@@ -6650,6 +6668,16 @@ message. For more information, refer to the",
                                                                   Object {
                                                                     "one": "This template is currently being used by some workflow nodes. Are you sure you want to delete it?",
                                                                     "other": "Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?",
+                                                                  },
+                                                                ],
+                                                              ],
+                                                              "{0, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}": Array [
+                                                                Array [
+                                                                  "0",
+                                                                  "plural",
+                                                                  Object {
+                                                                    "one": "You cannot cancel the following job because it is not running:",
+                                                                    "other": "You cannot cancel the following jobs because they are not running:",
                                                                   },
                                                                 ],
                                                               ],

@@ -187,7 +187,7 @@ function ExecutionEnvironmentList() {
                       <Plural
                         value={selected.length}
                         one="This execution environment is currently being used by other resources. Are you sure you want to delete it?"
-                        other="Deleting these execution environemnts could impact other resources that rely on them. Are you sure you want to delete anyway?"
+                        other="These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?"
                       />
                     }
                   />,
