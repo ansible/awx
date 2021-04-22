@@ -278,6 +278,14 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                         os.remove(fpath)
             with disable_activity_stream():
                 if not settings.AUTOMATION_ANALYTICS_LAST_GATHER or until > settings.AUTOMATION_ANALYTICS_LAST_GATHER:
+                    # `AUTOMATION_ANALYTICS_LAST_GATHER` is set whether collection succeeds or fails;
+                    # if collection fails because of a persistent, underlying issue and we do not set last_gather,
+                    # we risk the collectors hitting an increasingly greater workload while the underlying issue
+                    # remains unresolved. Put simply, if collection fails, we just move on.
+
+                    # All that said, `AUTOMATION_ANALYTICS_LAST_GATHER` plays a much smaller role in determining
+                    # what is actually collected than it used to; collectors now mostly rely on their respective entry
+                    # under `last_entries` to determine what should be collected.
                     settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
 
         shutil.rmtree(dest, ignore_errors=True)  # clean up individual artifact files
