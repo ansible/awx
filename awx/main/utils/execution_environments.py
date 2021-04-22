@@ -37,7 +37,15 @@ CONTAINER_ROOT = '/runner'
 
 def to_container_path(path, private_data_dir):
     if not os.path.isabs(private_data_dir):
-        raise Exception
-    if Path(private_data_dir) not in Path(path).parents:
-        raise Exception
-    return path.replace(private_data_dir, CONTAINER_ROOT)
+        raise RuntimeError('The private_data_dir path must be absolute')
+    if private_data_dir != path and Path(private_data_dir) not in Path(path).resolve().parents:
+        raise RuntimeError(f'Cannot convert path {path} unless it is a subdir of {private_data_dir}')
+    return path.replace(private_data_dir, CONTAINER_ROOT, 1)
+
+
+def to_host_path(path, private_data_dir):
+    if not os.path.isabs(private_data_dir):
+        raise RuntimeError('The private_data_dir path must be absolute')
+    if CONTAINER_ROOT != path and Path(CONTAINER_ROOT) not in Path(path).resolve().parents:
+        raise RuntimeError(f'Cannot convert path {path} unless it is a subdir of {CONTAINER_ROOT}')
+    return path.replace(CONTAINER_ROOT, private_data_dir, 1)
