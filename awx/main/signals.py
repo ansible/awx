@@ -378,7 +378,6 @@ def model_serializer_mapping():
         models.Group: serializers.GroupSerializer,
         models.InstanceGroup: serializers.InstanceGroupSerializer,
         models.InventorySource: serializers.InventorySourceSerializer,
-        models.CustomInventoryScript: serializers.CustomInventoryScriptSerializer,
         models.Credential: serializers.CredentialSerializer,
         models.Team: serializers.TeamSerializer,
         models.Project: serializers.ProjectSerializer,

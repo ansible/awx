@@ -39,7 +39,6 @@ def delete_all(v):
         v.projects,
         v.inventory,
         v.hosts,
-        v.inventory_scripts,
         v.labels,
         v.credentials,
         v.teams,

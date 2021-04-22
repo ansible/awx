@@ -48,10 +48,6 @@ options:
       description:
         - For an SCM based inventory source, the source path points to the file within the repo to use as an inventory.
       type: str
-    source_script:
-      description:
-        - Inventory script to be used when group type is C(custom).
-      type: str
     source_vars:
       description:
         - The variables or environment fields to apply to this source type.
@@ -164,7 +160,6 @@ def main():
         #
         source=dict(choices=["scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower", "custom"]),
         source_path=dict(),
-        source_script=dict(),
         source_vars=dict(type='dict'),
         enabled_var=dict(),
         enabled_value=dict(),
@@ -194,7 +189,6 @@ def main():
     new_name = module.params.get('new_name')
     inventory = module.params.get('inventory')
     organization = module.params.get('organization')
-    source_script = module.params.get('source_script')
     credential = module.params.get('credential')
     ee = module.params.get('execution_environment')
     source_project = module.params.get('source_project')
@@ -256,8 +250,6 @@ def main():
         inventory_source_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
     if source_project is not None:
         inventory_source_fields['source_project'] = module.resolve_name_to_id('projects', source_project)
-    if source_script is not None:
-        inventory_source_fields['source_script'] = module.resolve_name_to_id('inventory_scripts', source_script)
 
     OPTIONAL_VARS = (
         'description',

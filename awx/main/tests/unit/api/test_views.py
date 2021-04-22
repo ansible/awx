@@ -32,7 +32,6 @@ class TestApiRootView:
             'teams',
             'credentials',
             'inventory',
-            'inventory_scripts',
             'inventory_sources',
             'groups',
             'hosts',

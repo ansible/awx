@@ -100,7 +100,6 @@ class ApiVersionRootView(APIView):
         data['tokens'] = reverse('api:o_auth2_token_list', request=request)
         data['metrics'] = reverse('api:metrics_view', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
-        data['inventory_scripts'] = reverse('api:inventory_script_list', request=request)
         data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
         data['inventory_updates'] = reverse('api:inventory_update_list', request=request)
         data['groups'] = reverse('api:group_list', request=request)

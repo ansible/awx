@@ -8,7 +8,6 @@ from awx.api.versioning import reverse
 from awx.main.middleware import URLModificationMiddleware
 from awx.main.models import (  # noqa
     Credential,
-    CustomInventoryScript,
     Group,
     Host,
     Instance,
@@ -202,19 +201,6 @@ def test_inventory_source(get, admin_user):
     test_source.save()
     response = get(url, user=admin_user, expect=200)
     assert response.data['related']['named_url'].endswith('/test_source++/')
-
-
-@pytest.mark.django_db
-def test_inventory_script(get, admin_user):
-    test_script = CustomInventoryScript.objects.create(name='test_script')
-    url = reverse('api:inventory_script_detail', kwargs={'pk': test_script.pk})
-    response = get(url, user=admin_user, expect=200)
-    assert response.data['related']['named_url'].endswith('/test_script++/')
-    test_org = Organization.objects.create(name='test_org')
-    test_script.organization = test_org
-    test_script.save()
-    response = get(url, user=admin_user, expect=200)
-    assert response.data['related']['named_url'].endswith('/test_script++test_org/')
 
 
 @pytest.mark.django_db

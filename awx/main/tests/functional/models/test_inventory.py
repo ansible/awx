@@ -174,7 +174,7 @@ class TestSCMClean:
 @pytest.mark.django_db
 class TestInventorySourceInjectors:
     def test_extra_credentials(self, project, credential):
-        inventory_source = InventorySource.objects.create(name='foo', source='custom', source_project=project)
+        inventory_source = InventorySource.objects.create(name='foo', source='scm', source_project=project)
         inventory_source.credentials.add(credential)
         assert inventory_source.get_cloud_credential() == credential  # for serializer
         assert inventory_source.get_extra_credentials() == [credential]

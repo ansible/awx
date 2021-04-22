@@ -125,68 +125,10 @@ class Inventories(page.PageList, Inventory):
 page.register_page([resources.inventories, resources.related_inventories], Inventories)
 
 
-class InventoryScript(HasCopy, HasCreate, base.Base):
-
-    dependencies = [Organization]
-
-    def payload(self, organization, **kwargs):
-        payload = PseudoNamespace(
-            name=kwargs.get('name') or 'Inventory Script - {}'.format(random_title()),
-            description=kwargs.get('description') or random_title(10),
-            organization=organization.id,
-            script=kwargs.get('script') or self._generate_script(),
-        )
-        return payload
-
-    def create_payload(self, name='', description='', organization=Organization, script='', **kwargs):
-        self.create_and_update_dependencies(organization)
-        payload = self.payload(name=name, description=description, organization=self.ds.organization, script=script, **kwargs)
-        payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
-        return payload
-
-    def create(self, name='', description='', organization=Organization, script='', **kwargs):
-        payload = self.create_payload(name=name, description=description, organization=organization, script=script, **kwargs)
-        return self.update_identity(InventoryScripts(self.connection).post(payload))
-
-    def _generate_script(self):
-        script = '\n'.join(
-            [
-                '#!/usr/bin/env python',
-                '# -*- coding: utf-8 -*-',
-                'import json',
-                'inventory = dict()',
-                'inventory["{0}"] = dict()',
-                'inventory["{0}"]["hosts"] = list()',
-                'inventory["{0}"]["hosts"].append("{1}")',
-                'inventory["{0}"]["hosts"].append("{2}")',
-                'inventory["{0}"]["hosts"].append("{3}")',
-                'inventory["{0}"]["hosts"].append("{4}")',
-                'inventory["{0}"]["hosts"].append("{5}")',
-                'inventory["{0}"]["vars"] = dict(ansible_host="127.0.0.1", ansible_connection="local")',
-                'print(json.dumps(inventory))',
-            ]
-        )
-        group_name = re.sub(r"[\']", "", "group_{}".format(random_title(non_ascii=False)))
-        host_names = [re.sub(r"[\':]", "", "host_{}".format(random_utf8())) for _ in range(5)]
-
-        return script.format(group_name, *host_names)
-
-
-page.register_page([resources.inventory_script, (resources.inventory_scripts, 'post'), (resources.inventory_script_copy, 'post')], InventoryScript)
-
-
-class InventoryScripts(page.PageList, InventoryScript):
-
-    pass
-
-
-page.register_page([resources.inventory_scripts], InventoryScripts)
-
-
 class Group(HasCreate, HasVariables, base.Base):
 
     dependencies = [Inventory]
-    optional_dependencies = [Credential, InventoryScript]
+    optional_dependencies = [Credential]
     NATURAL_KEY = ('name', 'inventory')
 
     @property
@@ -215,9 +157,8 @@ class Group(HasCreate, HasVariables, base.Base):
 
         return payload
 
-    def create_payload(self, name='', description='', inventory=Inventory, credential=None, source_script=None, **kwargs):
-        credential, source_script = filter_by_class((credential, Credential), (source_script, InventoryScript))
-        self.create_and_update_dependencies(inventory, credential, source_script)
+    def create_payload(self, name='', description='', inventory=Inventory, credential=None, **kwargs):
+        self.create_and_update_dependencies(inventory, credential)
         credential = self.ds.credential if credential else None
         payload = self.payload(inventory=self.ds.inventory, credential=credential, name=name, description=description, **kwargs)
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
@@ -356,10 +297,10 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
 
     optional_schedule_fields = tuple()
     dependencies = [Inventory]
-    optional_dependencies = [Credential, InventoryScript, Project]
+    optional_dependencies = [Credential, Project]
     NATURAL_KEY = ('organization', 'name', 'inventory')
 
-    def payload(self, inventory, source='custom', credential=None, source_script=None, project=None, **kwargs):
+    def payload(self, inventory, source='scm', credential=None, project=None, **kwargs):
         payload = PseudoNamespace(
             name=kwargs.get('name') or 'InventorySource - {}'.format(random_title()),
             description=kwargs.get('description') or random_title(10),
@@ -369,8 +310,6 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
 
         if credential:
             payload.credential = credential.id
-        if source_script:
-            payload.source_script = source_script.id
         if project:
             payload.source_project = project.id
 
@@ -390,52 +329,27 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
 
         return payload
 
-    def create_payload(
-        self, name='', description='', source='custom', inventory=Inventory, credential=None, source_script=InventoryScript, project=None, **kwargs
-    ):
-        if source != 'custom' and source_script == InventoryScript:
-            source_script = None
+    def create_payload(self, name='', description='', source='scm', inventory=Inventory, credential=None, project=None, **kwargs):
         if source == 'scm':
             kwargs.setdefault('overwrite_vars', True)
+            kwargs.setdefault('source_path', 'inventories/script_migrations/script_source.py')
             if project is None:
                 project = Project
 
-        inventory, credential, source_script, project = filter_by_class(
-            (inventory, Inventory), (credential, Credential), (source_script, InventoryScript), (project, Project)
-        )
-        self.create_and_update_dependencies(inventory, credential, source_script, project)
+        inventory, credential, project = filter_by_class((inventory, Inventory), (credential, Credential), (project, Project))
+        self.create_and_update_dependencies(inventory, credential, project)
 
         if credential:
             credential = self.ds.credential
-        if source_script:
-            source_script = self.ds.inventory_script
         if project:
             project = self.ds.project
 
-        payload = self.payload(
-            inventory=self.ds.inventory,
-            source=source,
-            credential=credential,
-            source_script=source_script,
-            project=project,
-            name=name,
-            description=description,
-            **kwargs
-        )
+        payload = self.payload(inventory=self.ds.inventory, source=source, credential=credential, project=project, name=name, description=description, **kwargs)
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload
 
-    def create(self, name='', description='', source='custom', inventory=Inventory, credential=None, source_script=InventoryScript, project=None, **kwargs):
-        payload = self.create_payload(
-            name=name,
-            description=description,
-            source=source,
-            inventory=inventory,
-            credential=credential,
-            source_script=source_script,
-            project=project,
-            **kwargs
-        )
+    def create(self, name='', description='', source='scm', inventory=Inventory, credential=None, project=None, **kwargs):
+        payload = self.create_payload(name=name, description=description, source=source, inventory=inventory, credential=credential, project=project, **kwargs)
         return self.update_identity(InventorySources(self.connection).post(payload))
 
     def update(self):

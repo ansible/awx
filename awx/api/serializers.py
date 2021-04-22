@@ -43,7 +43,7 @@ from polymorphic.models import PolymorphicModel
 
 # AWX
 from awx.main.access import get_user_capabilities
-from awx.main.constants import SCHEDULEABLE_PROVIDERS, ACTIVE_STATES, CENSOR_VALUE
+from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE
 from awx.main.models import (
     ActivityStream,
     AdHocCommand,
@@ -51,7 +51,6 @@ from awx.main.models import (
     Credential,
     CredentialInputSource,
     CredentialType,
-    CustomInventoryScript,
     ExecutionEnvironment,
     Group,
     Host,
@@ -92,6 +91,7 @@ from awx.main.models import (
     WorkflowJobTemplate,
     WorkflowJobTemplateNode,
     StdoutMaxBytesExceeded,
+    CLOUD_INVENTORY_SOURCES,
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import get_roles_on_resource, role_summary_fields_generator
@@ -167,8 +167,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('id', 'name', 'source', 'last_updated', 'status'),
-    'custom_inventory_script': DEFAULT_SUMMARY_FIELDS,
-    'source_script': DEFAULT_SUMMARY_FIELDS,
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
     'instance_group': ('id', 'name', 'controller_id', 'is_container_group'),
@@ -1984,49 +1982,6 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
         model = Group
 
 
-class CustomInventoryScriptSerializer(BaseSerializer):
-
-    script = serializers.CharField(trim_whitespace=False)
-    show_capabilities = ['edit', 'delete', 'copy']
-    capabilities_prefetch = [{'edit': 'admin'}]
-
-    class Meta:
-        model = CustomInventoryScript
-        fields = ('*', "script", "organization")
-
-    def validate_script(self, value):
-        if not value.startswith("#!"):
-            raise serializers.ValidationError(_('Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python'))
-        return value
-
-    def to_representation(self, obj):
-        ret = super(CustomInventoryScriptSerializer, self).to_representation(obj)
-        if obj is None:
-            return ret
-        request = self.context.get('request', None)
-        if (
-            request.user not in obj.admin_role
-            and not request.user.is_superuser
-            and not request.user.is_system_auditor
-            and not (obj.organization is not None and request.user in obj.organization.auditor_role)
-        ):
-            ret['script'] = None
-        return ret
-
-    def get_related(self, obj):
-        res = super(CustomInventoryScriptSerializer, self).get_related(obj)
-        res.update(
-            dict(
-                object_roles=self.reverse('api:inventory_script_object_roles_list', kwargs={'pk': obj.pk}),
-                copy=self.reverse('api:inventory_script_copy', kwargs={'pk': obj.pk}),
-            )
-        )
-
-        if obj.organization:
-            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
-        return res
-
-
 class InventorySourceOptionsSerializer(BaseSerializer):
     credential = DeprecatedCredentialField(help_text=_('Cloud credential to use for inventory updates.'))
 
@@ -2035,7 +1990,6 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             '*',
             'source',
             'source_path',
-            'source_script',
             'source_vars',
             'credential',
             'enabled_var',
@@ -2053,8 +2007,6 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
         if obj.credential:  # TODO: remove when 'credential' field is removed
             res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential})
-        if obj.source_script:
-            res['source_script'] = self.reverse('api:inventory_script_detail', kwargs={'pk': obj.source_script.pk})
         return res
 
     def validate_source_vars(self, value):
@@ -2063,34 +2015,6 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             if env_k in settings.INV_ENV_VARIABLE_BLOCKED:
                 raise serializers.ValidationError(_("`{}` is a prohibited environment variable".format(env_k)))
         return ret
-
-    def validate(self, attrs):
-        # TODO: Validate source
-        errors = {}
-
-        source = attrs.get('source', self.instance and self.instance.source or '')
-        source_script = attrs.get('source_script', self.instance and self.instance.source_script or '')
-        if source == 'custom':
-            if source_script is None or source_script == '':
-                errors['source_script'] = _("If 'source' is 'custom', 'source_script' must be provided.")
-            else:
-                try:
-                    if not self.instance:
-                        dest_inventory = attrs.get('inventory', None)
-                        if not dest_inventory:
-                            errors['inventory'] = _("Must provide an inventory.")
-                    else:
-                        dest_inventory = self.instance.inventory
-                    if dest_inventory and source_script.organization != dest_inventory.organization:
-                        errors['source_script'] = _("The 'source_script' does not belong to the same organization as the inventory.")
-                except Exception:
-                    errors['source_script'] = _("'source_script' doesn't exist.")
-                    logger.exception('Problem processing source_script validation.')
-
-        if errors:
-            raise serializers.ValidationError(errors)
-
-        return super(InventorySourceOptionsSerializer, self).validate(attrs)
 
     # TODO: remove when old 'credential' fields are removed
     def get_summary_fields(self, obj):
@@ -4808,7 +4732,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         return summary_fields
 
     def validate_unified_job_template(self, value):
-        if type(value) == InventorySource and value.source not in SCHEDULEABLE_PROVIDERS:
+        if type(value) == InventorySource and value.source not in CLOUD_INVENTORY_SOURCES:
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
         elif type(value) == Project and value.scm_type == '':
             raise serializers.ValidationError(_('Manual Project cannot have a schedule set.'))

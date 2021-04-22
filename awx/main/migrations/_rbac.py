@@ -28,7 +28,6 @@ def create_roles(apps, schema_editor):
             'Inventory',
             'Project',
             'Credential',
-            'CustomInventoryScript',
             'JobTemplate',
         ]
     ]
@@ -46,6 +45,21 @@ def delete_all_user_roles(apps, schema_editor):
     user_content_type = ContentType.objects.get_for_model(User)
     for role in Role.objects.filter(content_type=user_content_type).iterator():
         role.delete()
+
+
+def delete_all_custom_script_roles(apps, schema_editor):
+    ContentType = apps.get_model('contenttypes', "ContentType")
+    Role = apps.get_model('main', "Role")
+    try:
+        cis_type = ContentType.objects.get(model='custominventoryscript')
+    except ContentType.DoesNotExist:
+        return
+    role_ct = 0
+    for role in Role.objects.filter(content_type=cis_type).iterator():
+        role.delete()
+        role_ct += 1
+    if role_ct:
+        logger.debug('Deleted {} roles corresponding to custom inventory sources.'.format(role_ct))
 
 
 UNIFIED_ORG_LOOKUPS = {

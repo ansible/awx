@@ -52,7 +52,7 @@ from awx.main.utils import _inventory_updates
 from awx.main.utils.safe_yaml import sanitize_jinja
 
 
-__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript', 'SmartInventoryMembership']
+__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership']
 
 logger = logging.getLogger('awx.main.models.inventory')
 
@@ -821,7 +821,6 @@ class InventorySourceOptions(BaseModel):
         ('openstack', _('OpenStack')),
         ('rhv', _('Red Hat Virtualization')),
         ('tower', _('Ansible Tower')),
-        ('custom', _('Custom Script')),
     ]
 
     # From the options of the Django management base command
@@ -844,13 +843,6 @@ class InventorySourceOptions(BaseModel):
         max_length=1024,
         blank=True,
         default='',
-    )
-    source_script = models.ForeignKey(
-        'CustomInventoryScript',
-        null=True,
-        default=None,
-        blank=True,
-        on_delete=models.SET_NULL,
     )
     source_vars = models.TextField(
         blank=True,
@@ -1328,7 +1320,6 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
     class Meta:
         app_label = 'main'
-        unique_together = [('name', 'organization')]
         ordering = ('name',)
 
     script = prevent_search(
@@ -1337,21 +1328,6 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
             default='',
             help_text=_('Inventory script contents'),
         )
-    )
-    organization = models.ForeignKey(
-        'Organization',
-        related_name='custom_inventory_scripts',
-        help_text=_('Organization owning this inventory script'),
-        blank=False,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
-
-    admin_role = ImplicitRoleField(
-        parent_role='organization.admin_role',
-    )
-    read_role = ImplicitRoleField(
-        parent_role=['organization.auditor_role', 'organization.member_role', 'admin_role'],
     )
 
     def get_absolute_url(self, request=None):

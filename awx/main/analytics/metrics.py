@@ -31,7 +31,6 @@ def metrics():
         registry=REGISTRY,
     )
     SCHEDULE_COUNT = Gauge('awx_schedules_total', 'Number of schedules', registry=REGISTRY)
-    INV_SCRIPT_COUNT = Gauge('awx_inventory_scripts_total', 'Number of invetory scripts', registry=REGISTRY)
     USER_SESSIONS = Gauge(
         'awx_sessions_total',
         'Number of sessions',
@@ -160,7 +159,6 @@ def metrics():
     HOST_COUNT.labels(type='active').set(current_counts['active_host_count'])
 
     SCHEDULE_COUNT.set(current_counts['schedule'])
-    INV_SCRIPT_COUNT.set(current_counts['custom_inventory_script'])
     CUSTOM_VENVS.set(current_counts['custom_virtualenvs'])
 
     USER_SESSIONS.labels(type='all').set(current_counts['active_sessions'])

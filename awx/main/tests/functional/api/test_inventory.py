@@ -144,14 +144,10 @@ def test_async_inventory_deletion_deletes_related_jt(delete, get, job_template, 
     assert jdata['inventory'] is None
 
 
-@pytest.mark.parametrize('order_by', ('script', '-script', 'script,pk', '-script,pk'))
+@pytest.mark.parametrize('order_by', ('extra_vars', '-extra_vars', 'extra_vars,pk', '-extra_vars,pk'))
 @pytest.mark.django_db
 def test_list_cannot_order_by_unsearchable_field(get, organization, alice, order_by):
-    for i, script in enumerate(('#!/bin/a', '#!/bin/b', '#!/bin/c')):
-        custom_script = organization.custom_inventory_scripts.create(name="I%d" % i, script=script)
-        custom_script.admin_role.members.add(alice)
-
-    get(reverse('api:inventory_script_list'), alice, QUERY_STRING='order_by=%s' % order_by, expect=403)
+    get(reverse('api:job_list'), alice, QUERY_STRING='order_by=%s' % order_by, expect=403)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [(None, 403), ('admin_role', 201), ('update_role', 403), ('adhoc_role', 403), ('use_role', 403)])

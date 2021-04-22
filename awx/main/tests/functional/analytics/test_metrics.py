@@ -18,7 +18,6 @@ EXPECTED_VALUES = {
     'awx_hosts_total': 1.0,
     'awx_hosts_total': 1.0,
     'awx_schedules_total': 1.0,
-    'awx_inventory_scripts_total': 1.0,
     'awx_sessions_total': 0.0,
     'awx_sessions_total': 0.0,
     'awx_sessions_total': 0.0,
@@ -44,7 +43,6 @@ def test_metrics_counts(organization_factory, job_template_factory, workflow_job
     models.Team(organization=objs.organization).save()
     models.Host(inventory=jt.inventory).save()
     models.Schedule(rrule='DTSTART;TZID=America/New_York:20300504T150000', unified_job_template=jt.job_template).save()
-    models.CustomInventoryScript(organization=objs.organization).save()
 
     output = metrics()
     gauges = text_string_to_metric_families(output.decode('UTF-8'))

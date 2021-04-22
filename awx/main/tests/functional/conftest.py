@@ -26,7 +26,7 @@ from rest_framework.test import (
 
 from awx.main.models.credential import CredentialType, Credential
 from awx.main.models.jobs import JobTemplate, SystemJobTemplate
-from awx.main.models.inventory import Group, Inventory, InventoryUpdate, InventorySource, CustomInventoryScript
+from awx.main.models.inventory import Group, Inventory, InventoryUpdate, InventorySource
 from awx.main.models.organization import (
     Organization,
     Team,
@@ -538,11 +538,6 @@ def inventory_source_factory(inventory_factory):
 @pytest.fixture
 def inventory_update(inventory_source):
     return InventoryUpdate.objects.create(inventory_source=inventory_source, source=inventory_source.source)
-
-
-@pytest.fixture
-def inventory_script(organization):
-    return CustomInventoryScript.objects.create(name='test inv script', organization=organization, script='#!/usr/bin/python')
 
 
 @pytest.fixture
