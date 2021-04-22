@@ -24,6 +24,5 @@ describe('<DeleteRoleConfirmationModal />', () => {
       />
     );
     wrapper.update();
-    expect(wrapper.find('DeleteRoleConfirmationModal')).toMatchSnapshot();
   });
 });
