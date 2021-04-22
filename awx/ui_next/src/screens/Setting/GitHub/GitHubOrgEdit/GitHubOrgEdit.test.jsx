@@ -16,9 +16,13 @@ describe('<GitHubOrgEdit />', () => {
   let wrapper;
   let history;
 
-  beforeEach(() => {
-    SettingsAPI.updateAll.mockResolvedValue({});
-    SettingsAPI.readCategory.mockResolvedValue({
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  beforeEach(async () => {
+    await SettingsAPI.updateAll.mockResolvedValue({});
+    await SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SOCIAL_AUTH_GITHUB_ORG_CALLBACK_URL:
           'https://towerhost/sso/complete/github-org/',
@@ -29,13 +33,6 @@ describe('<GitHubOrgEdit />', () => {
         SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP: null,
       },
     });
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  beforeEach(async () => {
     history = createMemoryHistory({
       initialEntries: ['/settings/github/organization/edit'],
     });
@@ -79,7 +76,7 @@ describe('<GitHubOrgEdit />', () => {
   });
 
   test('should successfully send default values to api on form revert all', async () => {
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    await expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
     expect(wrapper.find('RevertAllAlert')).toHaveLength(0);
     await act(async () => {
       wrapper
@@ -94,8 +91,8 @@ describe('<GitHubOrgEdit />', () => {
         .invoke('onClick')();
     });
     wrapper.update();
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
+    await expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
+    await expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
       SOCIAL_AUTH_GITHUB_ORG_KEY: '',
       SOCIAL_AUTH_GITHUB_ORG_SECRET: '',
       SOCIAL_AUTH_GITHUB_ORG_NAME: '',
@@ -122,8 +119,8 @@ describe('<GitHubOrgEdit />', () => {
     await act(async () => {
       wrapper.find('Form').invoke('onSubmit')();
     });
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
+    await expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
+    await expect(SettingsAPI.updateAll).toHaveBeenCalledWith({
       SOCIAL_AUTH_GITHUB_ORG_KEY: '',
       SOCIAL_AUTH_GITHUB_ORG_SECRET: '',
       SOCIAL_AUTH_GITHUB_ORG_NAME: 'new org',
@@ -160,19 +157,19 @@ describe('<GitHubOrgEdit />', () => {
         data: { detail: 'An error occurred' },
       },
     };
-    SettingsAPI.updateAll.mockImplementation(() => Promise.reject(error));
+    await SettingsAPI.updateAll.mockImplementation(() => Promise.reject(error));
     expect(wrapper.find('FormSubmitError').length).toBe(0);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
+    await expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(0);
     await act(async () => {
       wrapper.find('Form').invoke('onSubmit')();
     });
     wrapper.update();
     expect(wrapper.find('FormSubmitError').length).toBe(1);
-    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
+    await expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
   });
 
   test('should display ContentError on throw', async () => {
-    SettingsAPI.readCategory.mockImplementationOnce(() =>
+    await SettingsAPI.readCategory.mockImplementationOnce(() =>
       Promise.reject(new Error())
     );
     await act(async () => {

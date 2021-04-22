@@ -9,82 +9,80 @@ import {
 import { JobTemplatesAPI, SchedulesAPI } from '../../api';
 import Schedule from './Schedule';
 
-jest.mock('../../api/models/JobTemplates');
-jest.mock('../../api/models/Schedules');
-jest.mock('../../api/models/WorkflowJobTemplates');
-
-SchedulesAPI.readDetail.mockResolvedValue({
-  data: {
-    url: '/api/v2/schedules/1',
-    rrule:
-      'DTSTART;TZID=America/New_York:20200220T000000 RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1',
-    id: 1,
-    summary_fields: {
-      unified_job_template: {
-        id: 1,
-        name: 'Mock JT',
-        description: '',
-        unified_job_type: 'job',
-      },
-      user_capabilities: {
-        edit: true,
-        delete: true,
-      },
-      created_by: {
-        id: 1,
-        username: 'admin',
-        first_name: '',
-        last_name: '',
-      },
-      modified_by: {
-        id: 1,
-        username: 'admin',
-        first_name: '',
-        last_name: '',
-      },
-    },
-    created: '2020-03-03T20:38:54.210306Z',
-    modified: '2020-03-03T20:38:54.210336Z',
-    name: 'Mock JT Schedule',
-    next_run: '2020-02-20T05:00:00Z',
-  },
-});
-
-SchedulesAPI.createPreview.mockResolvedValue({
-  data: {
-    local: [],
-    utc: [],
-  },
-});
-
-SchedulesAPI.readCredentials.mockResolvedValue({
-  data: {
-    count: 0,
-    results: [],
-  },
-});
-
-JobTemplatesAPI.readLaunch.mockResolvedValue({
-  data: {
-    ask_credential_on_launch: false,
-    ask_diff_mode_on_launch: false,
-    ask_inventory_on_launch: false,
-    ask_job_type_on_launch: false,
-    ask_limit_on_launch: false,
-    ask_scm_branch_on_launch: false,
-    ask_skip_tags_on_launch: false,
-    ask_tags_on_launch: false,
-    ask_variables_on_launch: false,
-    ask_verbosity_on_launch: false,
-    survey_enabled: false,
-  },
-});
+jest.mock('../../api');
 
 describe('<Schedule />', () => {
   let wrapper;
   let history;
   const unifiedJobTemplate = { id: 1, name: 'Mock JT' };
-  beforeAll(async () => {
+
+  beforeEach(async () => {
+    SchedulesAPI.readDetail.mockResolvedValue({
+      data: {
+        url: '/api/v2/schedules/1',
+        rrule:
+          'DTSTART;TZID=America/New_York:20200220T000000 RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1',
+        id: 1,
+        summary_fields: {
+          unified_job_template: {
+            id: 1,
+            name: 'Mock JT',
+            description: '',
+            unified_job_type: 'job',
+          },
+          user_capabilities: {
+            edit: true,
+            delete: true,
+          },
+          created_by: {
+            id: 1,
+            username: 'admin',
+            first_name: '',
+            last_name: '',
+          },
+          modified_by: {
+            id: 1,
+            username: 'admin',
+            first_name: '',
+            last_name: '',
+          },
+        },
+        created: '2020-03-03T20:38:54.210306Z',
+        modified: '2020-03-03T20:38:54.210336Z',
+        name: 'Mock JT Schedule',
+        next_run: '2020-02-20T05:00:00Z',
+      },
+    });
+
+    SchedulesAPI.createPreview.mockResolvedValue({
+      data: {
+        local: [],
+        utc: [],
+      },
+    });
+
+    SchedulesAPI.readCredentials.mockResolvedValue({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+
+    JobTemplatesAPI.readLaunch.mockResolvedValue({
+      data: {
+        ask_credential_on_launch: false,
+        ask_diff_mode_on_launch: false,
+        ask_inventory_on_launch: false,
+        ask_job_type_on_launch: false,
+        ask_limit_on_launch: false,
+        ask_scm_branch_on_launch: false,
+        ask_skip_tags_on_launch: false,
+        ask_tags_on_launch: false,
+        ask_variables_on_launch: false,
+        ask_verbosity_on_launch: false,
+        survey_enabled: false,
+      },
+    });
     history = createMemoryHistory({
       initialEntries: ['/templates/job_template/1/schedules/1/details'],
     });

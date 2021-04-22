@@ -69,10 +69,10 @@ const mockOrganizations = {
 
 describe('<OrganizationsList />', () => {
   let wrapper;
-  beforeEach(() => {
-    CredentialsAPI.read.mockResolvedValue({ data: { count: 0 } });
-    OrganizationsAPI.read.mockResolvedValue(mockOrganizations);
-    OrganizationsAPI.readOptions.mockResolvedValue({
+  beforeEach(async () => {
+    await CredentialsAPI.read.mockResolvedValue({ data: { count: 0 } });
+    await OrganizationsAPI.read.mockResolvedValue(mockOrganizations);
+    await OrganizationsAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
           GET: {},
@@ -82,7 +82,7 @@ describe('<OrganizationsList />', () => {
     });
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('Initially renders successfully', async () => {

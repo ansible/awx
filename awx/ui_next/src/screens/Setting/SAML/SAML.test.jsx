@@ -12,8 +12,8 @@ jest.mock('../../../api');
 describe('<SAML />', () => {
   let wrapper;
 
-  beforeEach(() => {
-    SettingsAPI.readCategory.mockResolvedValue({
+  beforeEach(async () => {
+    await SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SOCIAL_AUTH_SAML_CALLBACK_URL: 'https://towerhost/sso/complete/saml/',
         SOCIAL_AUTH_SAML_METADATA_URL: 'https://towerhost/sso/metadata/saml/',

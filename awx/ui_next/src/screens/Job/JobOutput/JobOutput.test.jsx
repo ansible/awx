@@ -82,13 +82,6 @@ describe('<JobOutput />', () => {
   let wrapper;
   const mockJob = mockJobData;
   const mockJobEvents = mockJobEventsData;
-  beforeAll(() => {
-    jest.setTimeout(5000 * 4);
-  });
-
-  afterAll(() => {
-    jest.setTimeout(5000);
-  });
   beforeEach(() => {
     JobsAPI.readEvents.mockResolvedValue({
       data: {
@@ -211,7 +204,7 @@ describe('<JobOutput />', () => {
   });
 
   test('should show error dialog for failed deletion', async () => {
-    JobsAPI.destroy.mockRejectedValue(
+    await JobsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
           config: {
@@ -265,15 +258,14 @@ describe('<JobOutput />', () => {
   });
 
   test('filter should trigger api call and display correct rows', async () => {
-    jest.setTimeout(5000 * 4);
     const searchBtn = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
     await act(async () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
     await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
-    JobsAPI.readEvents.mockClear();
-    JobsAPI.readEvents.mockResolvedValueOnce({
+    await JobsAPI.readEvents.mockClear();
+    await JobsAPI.readEvents.mockResolvedValueOnce({
       data: mockFilteredJobEventsData,
     });
     await act(async () => {

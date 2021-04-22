@@ -6,7 +6,7 @@ require('@babel/polyfill');
 
 configure({ adapter: new Adapter() });
 
-jest.setTimeout(5000 * 4);
+jest.setTimeout(50000);
 
 // apply polyfills for jsdom
 require('@nteract/mockument');

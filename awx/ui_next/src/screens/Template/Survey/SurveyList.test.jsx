@@ -5,17 +5,17 @@ import SurveyList from './SurveyList';
 import { JobTemplatesAPI } from '../../../api';
 import mockJobTemplateData from '../shared/data.job_template.json';
 
-jest.mock('../../../api/models/JobTemplates');
-
-const surveyData = {
-  name: 'Survey',
-  description: 'description for survey',
-  spec: [
-    { question_name: 'Foo', type: 'text', default: 'Bar', variable: 'foo' },
-  ],
-};
+jest.mock('../../../api');
 
 describe('<SurveyList />', () => {
+  const surveyData = {
+    name: 'Survey',
+    description: 'description for survey',
+    spec: [
+      { question_name: 'Foo', type: 'text', default: 'Bar', variable: 'foo' },
+    ],
+  };
+
   test('expect component to mount successfully', async () => {
     let wrapper;
     await act(async () => {
@@ -26,7 +26,7 @@ describe('<SurveyList />', () => {
 
   test('should toggle survey', async () => {
     const toggleSurvey = jest.fn();
-    JobTemplatesAPI.update.mockResolvedValue();
+    await JobTemplatesAPI.update.mockResolvedValue();
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(

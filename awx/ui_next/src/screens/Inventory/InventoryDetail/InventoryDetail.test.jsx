@@ -62,7 +62,7 @@ function expectDetailToMatch(wrapper, label, value) {
 
 describe('<InventoryDetail />', () => {
   beforeEach(async () => {
-    CredentialTypesAPI.read.mockResolvedValue({
+    await CredentialTypesAPI.read.mockResolvedValue({
       data: {
         results: [
           {
@@ -74,7 +74,7 @@ describe('<InventoryDetail />', () => {
     });
   });
   test('should render details', async () => {
-    InventoriesAPI.readInstanceGroups.mockResolvedValue({
+    await InventoriesAPI.readInstanceGroups.mockResolvedValue({
       data: {
         results: associatedInstanceGroups,
       },
@@ -120,7 +120,7 @@ describe('<InventoryDetail />', () => {
   });
 
   test('should load instance groups', async () => {
-    InventoriesAPI.readInstanceGroups.mockResolvedValue({
+    await InventoriesAPI.readInstanceGroups.mockResolvedValue({
       data: {
         results: associatedInstanceGroups,
       },
@@ -133,7 +133,7 @@ describe('<InventoryDetail />', () => {
       );
     });
     wrapper.update();
-    expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledWith(
+    await expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledWith(
       mockInventory.id
     );
     const chip = wrapper.find('Chip').at(0);
@@ -142,7 +142,7 @@ describe('<InventoryDetail />', () => {
   });
 
   test('should not load instance groups', async () => {
-    InventoriesAPI.readInstanceGroups.mockResolvedValue({
+    await InventoriesAPI.readInstanceGroups.mockResolvedValue({
       data: {
         results: [],
       },
@@ -155,7 +155,7 @@ describe('<InventoryDetail />', () => {
       );
     });
     wrapper.update();
-    expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledWith(
+    await expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledWith(
       mockInventory.id
     );
     expect(wrapper.find(`Detail[label="Instance Groups"]`)).toHaveLength(0);

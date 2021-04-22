@@ -119,8 +119,8 @@ function JobTemplateForm({
         return;
       }
       const { data } = await JobTemplatesAPI.readInstanceGroups(template.id);
-      setFieldValue('initialInstanceGroups', data.results);
-      setFieldValue('instanceGroups', [...data.results]);
+      setFieldValue('initialInstanceGroups', data?.results);
+      setFieldValue('instanceGroups', [...data?.results]);
     }, [setFieldValue, template])
   );
 

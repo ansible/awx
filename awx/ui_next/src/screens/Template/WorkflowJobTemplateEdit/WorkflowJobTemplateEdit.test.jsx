@@ -42,7 +42,6 @@ const mockTemplate = {
   variables: '---',
   execution_environment: 1,
 };
-
 const mockExecutionEnvironment = [
   {
     id: 1,
@@ -51,11 +50,9 @@ const mockExecutionEnvironment = [
     image: 'quay.io/ansible/awx-ee',
   },
 ];
-
 describe('<WorkflowJobTemplateEdit/>', () => {
   let wrapper;
   let history;
-
   beforeEach(async () => {
     LabelsAPI.read = async () => ({
       data: {
@@ -73,11 +70,9 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         count: 1,
       },
     });
-
     UsersAPI.readAdminOfOrganizations.mockResolvedValue({
       data: { count: 1, results: [{ id: 1 }] },
     });
-
     await act(async () => {
       history = createMemoryHistory({
         initialEntries: ['/templates/workflow_job_template/6/edit'],
@@ -102,11 +97,9 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
   });
-
   test('renders successfully', () => {
     expect(wrapper.find('WorkflowJobTemplateEdit').length).toBe(1);
   });
-
   test('api is called to properly to save the updated template.', async () => {
     await act(async () => {
       wrapper.find('input#wfjt-name').simulate('change', {
@@ -128,7 +121,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         target: { value: 'Apollo and Athena', name: 'description' },
       });
     });
-
     wrapper.update();
     await waitForElement(
       wrapper,
@@ -136,29 +128,23 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       el => el.length > 0
     );
     wrapper.find('input#wfjt-scm-branch').instance().value = 'main';
-
     act(() => {
       wrapper
         .find('SelectOption')
         .find('button[aria-label="Label 3"]')
         .prop('onClick')();
     });
-
     wrapper.update();
-
     act(() =>
       wrapper
         .find('SelectOption')
         .find('button[aria-label="Label 1"]')
         .prop('onClick')()
     );
-
     wrapper.update();
-
     await act(async () => {
       wrapper.find('WorkflowJobTemplateForm').invoke('handleSubmit')();
     });
-
     expect(WorkflowJobTemplatesAPI.update).toHaveBeenCalledWith(6, {
       name: 'Alex',
       description: 'Apollo and Athena',
@@ -185,7 +171,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     wrapper.update();
     await expect(WorkflowJobTemplatesAPI.associateLabel).toBeCalledTimes(1);
   });
-
   test('handleCancel navigates the user to the /templates', () => {
     act(() => {
       wrapper.find('WorkflowJobTemplateForm').invoke('handleCancel')();
@@ -194,7 +179,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       '/templates/workflow_job_template/6/details'
     );
   });
-
   test('throwing error renders FormSubmitError component', async () => {
     const error = {
       response: {
@@ -215,7 +199,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       error
     );
   });
-
   test('system admin can edit a workflow without provide an org', async () => {
     const templateWithoutOrg = {
       id: 6,
@@ -241,7 +224,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       variables: '---',
       execution_environment: 1,
     };
-
     let newWrapper;
     await act(async () => {
       newWrapper = mountWithContexts(
@@ -265,15 +247,12 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         data: { detail: 'An error occurred' },
       },
     });
-
     WorkflowJobTemplatesAPI.update.mockResolvedValue();
-
     await act(async () => {
       newWrapper.find('input#wfjt-description').simulate('change', {
         target: { value: 'bar', name: 'description' },
       });
     });
-
     await act(async () => {
       await newWrapper.find('Button[aria-label="Save"]').simulate('click');
     });

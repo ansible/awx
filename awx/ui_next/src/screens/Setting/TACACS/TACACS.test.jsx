@@ -7,23 +7,25 @@ import { SettingsAPI } from '../../../api';
 import mockAllOptions from '../shared/data.allSettingOptions.json';
 import TACACS from './TACACS';
 
-jest.mock('../../../api/models/Settings');
-SettingsAPI.readCategory.mockResolvedValue({
-  data: {
-    TACACSPLUS_HOST: 'mockhost',
-    TACACSPLUS_PORT: 49,
-    TACACSPLUS_SECRET: '$encrypted$',
-    TACACSPLUS_SESSION_TIMEOUT: 5,
-    TACACSPLUS_AUTH_PROTOCOL: 'ascii',
-  },
-});
+jest.mock('../../../api');
 
 describe('<TACACS />', () => {
   let wrapper;
 
+  beforeEach(async () => {
+    await SettingsAPI.readCategory.mockResolvedValue({
+      data: {
+        TACACSPLUS_HOST: 'mockhost',
+        TACACSPLUS_PORT: 49,
+        TACACSPLUS_SECRET: '$encrypted$',
+        TACACSPLUS_SESSION_TIMEOUT: 5,
+        TACACSPLUS_AUTH_PROTOCOL: 'ascii',
+      },
+    });
+  });
+
   afterEach(() => {
-    wrapper.unmount();
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('should render TACACS+ details', async () => {

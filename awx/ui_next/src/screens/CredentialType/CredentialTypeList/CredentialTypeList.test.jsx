@@ -9,8 +9,7 @@ import {
 import { CredentialTypesAPI, CredentialsAPI } from '../../../api';
 import CredentialTypeList from './CredentialTypeList';
 
-jest.mock('../../../api/models/CredentialTypes');
-jest.mock('../../../api/models/Credentials');
+jest.mock('../../../api');
 
 const credentialTypes = {
   data: {
@@ -43,10 +42,10 @@ const options = { data: { actions: { POST: true } } };
 describe('<CredentialTypeList', () => {
   let wrapper;
 
-  beforeEach(() => {
-    CredentialsAPI.read.mockResolvedValue({ data: { count: 0 } });
-    CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
-    CredentialTypesAPI.readOptions.mockResolvedValue(options);
+  beforeEach(async () => {
+    await CredentialsAPI.read.mockResolvedValue({ data: { count: 0 } });
+    await CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
+    await CredentialTypesAPI.readOptions.mockResolvedValue(options);
   });
 
   test('should mount successfully', async () => {
@@ -73,7 +72,7 @@ describe('<CredentialTypeList', () => {
   });
 
   test('should delete item successfully', async () => {
-    CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
+    await CredentialTypesAPI.read.mockResolvedValue(credentialTypes);
     await act(async () => {
       wrapper = mountWithContexts(<CredentialTypeList />);
     });
@@ -109,7 +108,7 @@ describe('<CredentialTypeList', () => {
   });
 
   test('should not render add button', async () => {
-    CredentialTypesAPI.readOptions.mockResolvedValue({
+    await CredentialTypesAPI.readOptions.mockResolvedValue({
       data: { actions: { POST: false } },
     });
     await act(async () => {

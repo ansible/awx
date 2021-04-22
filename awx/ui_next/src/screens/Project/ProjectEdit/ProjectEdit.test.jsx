@@ -83,19 +83,15 @@ describe('<ProjectEdit />', () => {
   };
 
   beforeEach(async () => {
-    await ProjectsAPI.readOptions.mockImplementation(
-      () => projectOptionsResolve
-    );
-    await CredentialTypesAPI.read.mockImplementationOnce(
-      () => scmCredentialResolve
-    );
-    await CredentialTypesAPI.read.mockImplementationOnce(
-      () => insightsCredentialResolve
+    await ProjectsAPI.readOptions.mockResolvedValueOnce(projectOptionsResolve);
+    await CredentialTypesAPI.read.mockResolvedValueOnce(scmCredentialResolve);
+    await CredentialTypesAPI.read.mockResolvedValueOnce(
+      insightsCredentialResolve
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('initially renders successfully', async () => {
@@ -107,7 +103,7 @@ describe('<ProjectEdit />', () => {
 
   test('handleSubmit should post to the api', async () => {
     const history = createMemoryHistory();
-    ProjectsAPI.update.mockResolvedValueOnce({
+    await ProjectsAPI.update.mockResolvedValueOnce({
       data: { ...projectData },
     });
     await act(async () => {
@@ -131,7 +127,7 @@ describe('<ProjectEdit />', () => {
     const error = new Error('oops');
     const realConsoleError = global.console.error;
     global.console.error = jest.fn();
-    ProjectsAPI.update.mockImplementation(() => Promise.reject(error));
+    await ProjectsAPI.update.mockImplementation(() => Promise.reject(error));
     await act(async () => {
       wrapper = mountWithContexts(
         <ProjectEdit project={{ ...projectData, scm_type: 'manual' }} />,

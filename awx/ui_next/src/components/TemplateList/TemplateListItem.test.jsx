@@ -249,7 +249,7 @@ describe('<TemplateListItem />', () => {
   });
 
   test('should render proper alert modal on copy error', async () => {
-    JobTemplatesAPI.copy.mockRejectedValue(new Error());
+    await JobTemplatesAPI.copy.mockRejectedValue(new Error());
 
     const wrapper = mountWithContexts(
       <table>

@@ -7,9 +7,7 @@ import {
 import { CredentialTypesAPI, InventoriesAPI, CredentialsAPI } from '../../api';
 import AdHocCommands from './AdHocCommands';
 
-jest.mock('../../api/models/CredentialTypes');
-jest.mock('../../api/models/Inventories');
-jest.mock('../../api/models/Credentials');
+jest.mock('../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
@@ -32,8 +30,8 @@ const adHocItems = [
 ];
 
 describe('<AdHocCommands />', () => {
-  beforeEach(() => {
-    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+  beforeEach(async () => {
+    await InventoriesAPI.readAdHocOptions.mockResolvedValue({
       data: {
         actions: {
           GET: {
@@ -48,7 +46,7 @@ describe('<AdHocCommands />', () => {
         },
       },
     });
-    CredentialTypesAPI.read.mockResolvedValue({
+    await CredentialTypesAPI.read.mockResolvedValue({
       data: { count: 1, results: [{ id: 1, name: 'cred' }] },
     });
   });
@@ -101,8 +99,10 @@ describe('<AdHocCommands />', () => {
   });
 
   test('should submit properly', async () => {
-    InventoriesAPI.launchAdHocCommands.mockResolvedValue({ data: { id: 1 } });
-    CredentialsAPI.read.mockResolvedValue({
+    await InventoriesAPI.launchAdHocCommands.mockResolvedValue({
+      data: { id: 1 },
+    });
+    await CredentialsAPI.read.mockResolvedValue({
       data: {
         results: credentials,
         count: 5,
@@ -321,7 +321,7 @@ describe('<AdHocCommands />', () => {
   });
 
   test('should open alert modal when error on fetching data', async () => {
-    InventoriesAPI.readAdHocOptions.mockRejectedValue(
+    await InventoriesAPI.readAdHocOptions.mockRejectedValue(
       new Error({
         response: {
           config: {

@@ -9,8 +9,7 @@ import {
 import { ApplicationsAPI } from '../../../api';
 import ApplicationAdd from './ApplicationAdd';
 
-jest.mock('../../../api/models/Applications');
-jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -44,7 +43,7 @@ const onSuccessfulAdd = jest.fn();
 describe('<ApplicationAdd/>', () => {
   let wrapper;
   test('should render properly', async () => {
-    ApplicationsAPI.readOptions.mockResolvedValue(options);
+    await ApplicationsAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
       wrapper = mountWithContexts(
         <ApplicationAdd onSuccessfulAdd={onSuccessfulAdd} />

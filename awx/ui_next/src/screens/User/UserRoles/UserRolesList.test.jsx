@@ -94,8 +94,8 @@ const roles = {
 };
 
 describe('<UserRolesList />', () => {
-  beforeEach(() => {
-    UsersAPI.readOptions.mockResolvedValue({
+  beforeEach(async () => {
+    await UsersAPI.readOptions.mockResolvedValue({
       data: {
         actions: { GET: {}, POST: {} },
         related_search_fields: [],
@@ -104,11 +104,11 @@ describe('<UserRolesList />', () => {
   });
   let wrapper;
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     wrapper.unmount();
   });
   test('should render properly', async () => {
-    UsersAPI.readRoles.mockResolvedValue(roles);
+    await UsersAPI.readRoles.mockResolvedValue(roles);
 
     await act(async () => {
       wrapper = mountWithContexts(<UserRolesList user={user} />);
@@ -118,7 +118,7 @@ describe('<UserRolesList />', () => {
   });
 
   test('should create proper detailUrl', async () => {
-    UsersAPI.readRoles.mockResolvedValue(roles);
+    await UsersAPI.readRoles.mockResolvedValue(roles);
 
     await act(async () => {
       wrapper = mountWithContexts(<UserRolesList user={user} />);
@@ -143,7 +143,7 @@ describe('<UserRolesList />', () => {
     );
   });
   test('should not render add button when user cannot create other users and user cannot edit this user', async () => {
-    UsersAPI.readRoleOptions.mockResolvedValueOnce({
+    await UsersAPI.readRoleOptions.mockResolvedValueOnce({
       data: {
         actions: {
           GET: {},
@@ -152,7 +152,7 @@ describe('<UserRolesList />', () => {
       },
     });
 
-    UsersAPI.readRoles.mockResolvedValue({
+    await UsersAPI.readRoles.mockResolvedValue({
       data: {
         results: [
           {
@@ -212,7 +212,7 @@ describe('<UserRolesList />', () => {
     );
   });
   test('should open and close wizard', async () => {
-    UsersAPI.readRoles.mockResolvedValue(roles);
+    await UsersAPI.readRoles.mockResolvedValue(roles);
     await act(async () => {
       wrapper = mountWithContexts(<UserRolesList user={user} />);
     });
@@ -229,7 +229,7 @@ describe('<UserRolesList />', () => {
     expect(wrapper.find('PFWizard').length).toBe(0);
   });
   test('should render disassociate modal', async () => {
-    UsersAPI.readRoles.mockResolvedValue(roles);
+    await UsersAPI.readRoles.mockResolvedValue(roles);
 
     await act(async () => {
       wrapper = mountWithContexts(<UserRolesList user={user} />);
@@ -261,15 +261,15 @@ describe('<UserRolesList />', () => {
         .find('button[aria-label="Confirm disassociate"]')
         .prop('onClick')()
     );
-    expect(RolesAPI.disassociateUserRole).toBeCalledWith(4, 18);
+    await expect(RolesAPI.disassociateUserRole).toBeCalledWith(4, 18);
     wrapper.update();
     expect(
       wrapper.find('AlertModal[aria-label="Disassociate role"]').length
     ).toBe(0);
   });
   test('should throw disassociation error', async () => {
-    UsersAPI.readRoles.mockResolvedValue(roles);
-    RolesAPI.disassociateUserRole.mockRejectedValue(
+    await UsersAPI.readRoles.mockResolvedValue(roles);
+    await RolesAPI.disassociateUserRole.mockRejectedValue(
       new Error({
         response: {
           config: {
@@ -316,7 +316,7 @@ describe('<UserRolesList />', () => {
     expect(wrapper.find('AlertModal[title="Error!"]').length).toBe(1);
   });
   test('user with sys admin privilege should show empty state', async () => {
-    UsersAPI.readRoles.mockResolvedValue({
+    await UsersAPI.readRoles.mockResolvedValue({
       data: {
         results: [
           {

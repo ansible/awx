@@ -191,42 +191,42 @@ const mockExecutionEnvironment = [
 ];
 
 describe('<JobTemplateEdit />', () => {
-  beforeEach(() => {
-    JobTemplatesAPI.readCredentials.mockResolvedValue({
+  beforeEach(async () => {
+    await JobTemplatesAPI.readCredentials.mockResolvedValue({
       data: mockRelatedCredentials,
     });
-    ProjectsAPI.readPlaybooks.mockResolvedValue({
+    await ProjectsAPI.readPlaybooks.mockResolvedValue({
       data: mockRelatedProjectPlaybooks,
     });
-    InventoriesAPI.readOptions.mockResolvedValue({
+    await InventoriesAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {}, POST: {} } },
     });
-    ProjectsAPI.readOptions.mockResolvedValue({
+    await ProjectsAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {}, POST: {} } },
     });
-    LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
-    CredentialsAPI.read.mockResolvedValue({
+    await LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+    await CredentialsAPI.read.mockResolvedValue({
       data: {
         results: [],
         count: 0,
       },
     });
-    CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
+    await CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
 
-    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+    await ExecutionEnvironmentsAPI.read.mockResolvedValue({
       data: {
         results: mockExecutionEnvironment,
         count: 1,
       },
     });
-    LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
-    JobTemplatesAPI.readCredentials.mockResolvedValue({
+    await LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+    await JobTemplatesAPI.readCredentials.mockResolvedValue({
       data: mockRelatedCredentials,
     });
-    JobTemplatesAPI.readInstanceGroups.mockReturnValue({
+    await JobTemplatesAPI.readInstanceGroups.mockReturnValue({
       data: { results: mockInstanceGroups },
     });
-    ProjectsAPI.readDetail.mockReturnValue({
+    await ProjectsAPI.readDetail.mockReturnValue({
       id: 1,
       allow_override: true,
       name: 'foo',
