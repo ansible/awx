@@ -9,6 +9,7 @@ from awx.main.tasks import RunInventoryUpdate
 from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob, ExecutionEnvironment
 from awx.main.constants import CLOUD_PROVIDERS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.tests import data
+from awx.main.utils.execution_environments import to_container_path
 
 from django.conf import settings
 
@@ -111,7 +112,7 @@ def read_content(private_data_dir, raw_env, inventory_update):
             continue  # Ansible runner
         abs_file_path = os.path.join(private_data_dir, filename)
         file_aliases[abs_file_path] = filename
-        runner_path = abs_file_path.replace(private_data_dir, '/runner')  # host path to container path
+        runner_path = to_container_path(abs_file_path, private_data_dir)
         if runner_path in inverse_env:
             referenced_paths.add(abs_file_path)
             alias = 'file_reference'

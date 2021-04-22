@@ -1532,7 +1532,7 @@ class RunJob(BaseTask):
         cred_files = private_data_files.get('credentials', {})
         for cloud_cred in job.cloud_credentials:
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack':
-                env['OS_CLIENT_CONFIG_FILE'] = os.path.join('/runner', 'env', os.path.basename(cred_files.get(cloud_cred, '')))
+                env['OS_CLIENT_CONFIG_FILE'] = to_container_path(cred_files.get(cloud_cred, ''), private_data_dir)
 
         for network_cred in job.network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
@@ -1564,8 +1564,7 @@ class RunJob(BaseTask):
                 for path in config_values[config_setting].split(':'):
                     if path not in paths:
                         paths = [config_values[config_setting]] + paths
-            # FIXME: again, figure out more elegant way for inside container
-            paths = [os.path.join('/runner', folder)] + paths
+            paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
         return env
@@ -2391,8 +2390,7 @@ class RunInventoryUpdate(BaseTask):
                 for path in config_values[config_setting].split(':'):
                     if path not in paths:
                         paths = [config_values[config_setting]] + paths
-            # FIXME: containers
-            paths = [os.path.join('/runner', folder)] + paths
+            paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
         return env
@@ -2421,14 +2419,14 @@ class RunInventoryUpdate(BaseTask):
 
         # Add arguments for the source inventory file/script/thing
         rel_path = self.pseudo_build_inventory(inventory_update, private_data_dir)
-        container_location = os.path.join('/runner', rel_path)  # TODO: make container paths elegant
+        container_location = os.path.join(CONTAINER_ROOT, rel_path)
         source_location = os.path.join(private_data_dir, rel_path)
 
         args.append('-i')
         args.append(container_location)
 
         args.append('--output')
-        args.append(os.path.join('/runner', 'artifacts', str(inventory_update.id), 'output.json'))
+        args.append(os.path.join(CONTAINER_ROOT, 'artifacts', str(inventory_update.id), 'output.json'))
 
         if os.path.isdir(source_location):
             playbook_dir = container_location
@@ -2479,10 +2477,9 @@ class RunInventoryUpdate(BaseTask):
          - SCM, where source needs to live in the project folder
         """
         src = inventory_update.source
-        container_dir = '/runner'  # TODO: make container paths elegant
         if src == 'scm' and inventory_update.source_project_update:
-            return os.path.join(container_dir, 'project')
-        return container_dir
+            return os.path.join(CONTAINER_ROOT, 'project')
+        return CONTAINER_ROOT
 
     def build_playbook_path_relative_to_cwd(self, inventory_update, private_data_dir):
         return None
