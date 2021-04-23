@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { t } from '@lingui/macro';
 
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -12,37 +12,49 @@ import {
   Redirect,
   Link,
 } from 'react-router-dom';
+import useRequest from '../../util/useRequest';
 import { ResourceAccessList } from '../../components/ResourceAccessList';
 import ContentError from '../../components/ContentError';
+import ContentLoading from '../../components/ContentLoading';
 import RoutedTabs from '../../components/RoutedTabs';
 import CredentialDetail from './CredentialDetail';
 import CredentialEdit from './CredentialEdit';
 import { CredentialsAPI } from '../../api';
 
 function Credential({ setBreadcrumb }) {
-  const [credential, setCredential] = useState(null);
-  const [contentError, setContentError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
   const { pathname } = useLocation();
+
   const match = useRouteMatch({
     path: '/credentials/:id',
   });
   const { id } = useParams();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data } = await CredentialsAPI.readDetail(id);
-        setBreadcrumb(data);
-        setCredential(data);
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setHasContentLoading(false);
-      }
+  const {
+    request: fetchCredential,
+    result: { credential },
+    isLoading: hasContentLoading,
+    error: contentError,
+  } = useRequest(
+    useCallback(async () => {
+      const { data } = await CredentialsAPI.readDetail(id);
+      return {
+        credential: data,
+      };
+    }, [id]),
+    {
+      credential: null,
     }
-    fetchData();
-  }, [id, pathname, setBreadcrumb]);
+  );
+
+  useEffect(() => {
+    fetchCredential();
+  }, [fetchCredential, pathname]);
+
+  useEffect(() => {
+    if (credential) {
+      setBreadcrumb(credential);
+    }
+  }, [credential, setBreadcrumb]);
 
   const tabsArray = [
     {
