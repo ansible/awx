@@ -36,7 +36,7 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 """
 
 
-def trivial_slicing(key, since, until):
+def trivial_slicing(key, since, until, last_gather):
     if since is not None:
         return [(since, until)]
 
@@ -45,11 +45,11 @@ def trivial_slicing(key, since, until):
     horizon = until - timedelta(weeks=4)
     last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
     last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
-    last_entry = max(last_entries.get(key) or settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
+    last_entry = max(last_entries.get(key) or last_gather, horizon)
     return [(last_entry, until)]
 
 
-def four_hour_slicing(key, since, until):
+def four_hour_slicing(key, since, until, last_gather):
     if since is not None:
         last_entry = since
     else:
@@ -58,7 +58,7 @@ def four_hour_slicing(key, since, until):
         horizon = until - timedelta(weeks=4)
         last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
         last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
-        last_entry = max(last_entries.get(key) or settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
+        last_entry = max(last_entries.get(key) or last_gather, horizon)
 
     start, end = last_entry, None
     while start < until:
@@ -67,15 +67,14 @@ def four_hour_slicing(key, since, until):
         start = end
 
 
-def events_slicing(key, since, until):
+def events_slicing(key, since, until, last_gather):
     from awx.conf.models import Setting
 
-    last_gather = settings.AUTOMATION_ANALYTICS_LAST_GATHER
     last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
     last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
     horizon = until - timedelta(weeks=4)
 
-    lower = since or last_gather or horizon
+    lower = since or last_gather
     if not since and last_entries.get(key):
         lower = horizon
     pk_values = models.JobEvent.objects.filter(created__gte=lower, created__lte=until).aggregate(Min('pk'), Max('pk'))
