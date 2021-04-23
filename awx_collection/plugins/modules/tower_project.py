@@ -204,6 +204,7 @@ def wait_for_project_update(module, last_request):
     wait = module.params.get('wait')
     timeout = module.params.get('timeout')
     interval = module.params.get('interval')
+    scm_revision_original = last_request['scm_revision']
 
     if 'current_update' in last_request['summary_fields']:
         running = True
@@ -229,9 +230,14 @@ def wait_for_project_update(module, last_request):
         start = time.time()
 
         # Invoke wait function
-        module.wait_on_url(
+        result_final = module.wait_on_url(
             url=result['json']['url'], object_name=module.get_item_name(last_request), object_type='Project Update', timeout=timeout, interval=interval
         )
+
+        # Set Changed to correct value depending on if hash changed Also output refspec comparision
+        module.json_output['changed'] = True
+        if result_final['json']['scm_revision'] == scm_revision_original:
+            module.json_output['changed'] = False
 
     module.exit_json(**module.json_output)
 
@@ -380,9 +386,20 @@ def main():
         on_change = wait_for_project_update
 
     # If the state was present and we can let the module build or update the existing project, this will return on its own
-    module.create_or_update_if_needed(
-        project, project_fields, endpoint='projects', item_type='project', associations=association_fields, on_create=on_change, on_update=on_change
+    response = module.create_or_update_if_needed(
+        project,
+        project_fields,
+        endpoint='projects',
+        item_type='project',
+        associations=association_fields,
+        on_create=on_change,
+        on_update=on_change,
+        auto_exit=not update_project,
     )
+
+    if update_project:
+        wait_for_project_update(module, response)
+    module.exit_json(**module.json_output)
 
 
 if __name__ == '__main__':
