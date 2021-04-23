@@ -34,7 +34,7 @@ export default function useWsProjects(initialProject) {
       // to `Pending`, then `Waiting`, then `Running`, then result
       // (which are `successful`, `failed`, `error`, `cancelled`.
       // For second sync, if the status response is `pending` and we have
-      // running and waiting jobs, we should not update our UI to `Pending`,
+      // running or waiting jobs, we should not update our UI to `Pending`,
       // otherwise our most recent sync tooltip UI will lose our current running
       // job and we cannot navigate to the job link through the link provided
       // by most recent sync tooltip.

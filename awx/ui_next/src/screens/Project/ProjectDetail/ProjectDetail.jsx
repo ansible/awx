@@ -208,7 +208,10 @@ function ProjectDetail({ project, i18n }) {
           </Button>
         )}
         {summary_fields.user_capabilities?.start && (
-          <ProjectSyncButton projectId={project.id} />
+          <ProjectSyncButton
+            projectId={project.id}
+            lastJobStatus={summary_fields.last_job.status}
+          />
         )}
         {summary_fields.user_capabilities?.delete && (
           <DeleteButton
