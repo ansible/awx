@@ -366,7 +366,7 @@ def _events_table(since, full_path, until, tbl, **kwargs):
                          {tbl}.uuid,
                          {tbl}.parent_uuid,
                          {tbl}.event,
-                         {event_data}->'task_action' AS task_action,
+                         task_action,
                          (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
                          {tbl}.failed,
                          {tbl}.changed,
@@ -377,12 +377,12 @@ def _events_table(since, full_path, until, tbl, **kwargs):
                          {tbl}.job_id,
                          {tbl}.host_id,
                          {tbl}.host_name,
-                         CAST({event_data}->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
-                         CAST({event_data}->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
-                         {event_data}->'duration' AS duration,
-                         {event_data}->'res'->'warnings' AS warnings,
-                         {event_data}->'res'->'deprecations' AS deprecations
-                         FROM {tbl}
+                         CAST(x.start AS TIMESTAMP WITH TIME ZONE) AS start,
+                         CAST(x.end AS TIMESTAMP WITH TIME ZONE) AS end,
+                         x.duration AS duration,
+                         x.res->'warnings' AS warnings,
+                         x.res->'deprecations' AS deprecations
+                         FROM {tbl}, json_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "start" text, "end" text)
                          WHERE ({tbl}.id > {since} AND {tbl}.id <= {until})
                          ORDER BY {tbl}.id ASC) TO STDOUT WITH CSV HEADER'''
 
