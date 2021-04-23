@@ -61,9 +61,13 @@ function TemplateSurvey({ template, canEdit, i18n }) {
 
   const { request: deleteSurvey, error: deleteError } = useRequest(
     useCallback(async () => {
-      await JobTemplatesAPI.destroySurvey(templateId);
+      if (templateType === 'workflow_job_template') {
+        await WorkflowJobTemplatesAPI.destroySurvey(templateId);
+      } else {
+        await JobTemplatesAPI.destroySurvey(templateId);
+      }
       setSurvey(null);
-    }, [templateId, setSurvey])
+    }, [templateId, setSurvey, templateType])
   );
 
   const { request: toggleSurvey, error: toggleError } = useRequest(
