@@ -47,7 +47,11 @@ function HostToggle({
 
   return (
     <Fragment>
-      <Tooltip content={tooltip} position="top">
+      <Tooltip
+        content={tooltip}
+        position="top"
+        css="white-space: nowrap; --pf-c-table--cell--WhiteSpace: nowrap"
+      >
         <Switch
           className={className}
           css="display: inline-flex;"

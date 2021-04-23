@@ -6,7 +6,8 @@ import { RolesAPI, TeamsAPI, UsersAPI } from '../../api';
 import AddResourceRole from '../AddRole/AddResourceRole';
 import AlertModal from '../AlertModal';
 import DataListToolbar from '../DataListToolbar';
-import PaginatedDataList, { ToolbarAddButton } from '../PaginatedDataList';
+import PaginatedTable, { HeaderRow, HeaderCell } from '../PaginatedTable';
+import { ToolbarAddButton } from '../PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import useRequest, { useDeleteItems } from '../../util/useRequest';
 import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';
@@ -148,7 +149,7 @@ function ResourceAccessList({ apiModel, resource }) {
 
   return (
     <>
-      <PaginatedDataList
+      <PaginatedTable
         error={contentError}
         hasContentLoading={isLoading || isDeleteLoading}
         items={accessRecords}
@@ -156,20 +157,6 @@ function ResourceAccessList({ apiModel, resource }) {
         pluralizedItemName={t`Roles`}
         qsConfig={QS_CONFIG}
         toolbarSearchColumns={toolbarSearchColumns}
-        toolbarSortColumns={[
-          {
-            name: t`Username`,
-            key: 'username',
-          },
-          {
-            name: t`First Name`,
-            key: 'first_name',
-          },
-          {
-            name: t`Last Name`,
-            key: 'last_name',
-          },
-        ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderToolbar={props => (
@@ -188,7 +175,15 @@ function ResourceAccessList({ apiModel, resource }) {
             }
           />
         )}
-        renderItem={accessRecord => (
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+            <HeaderCell sortKey="username">{t`Username`}</HeaderCell>
+            <HeaderCell sortKey="first_name">{t`First name`}</HeaderCell>
+            <HeaderCell sortKey="last_name">{t`Last name`}</HeaderCell>
+            <HeaderCell>{t`Roles`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(accessRecord, index) => (
           <ResourceAccessListItem
             key={accessRecord.id}
             accessRecord={accessRecord}
@@ -197,6 +192,7 @@ function ResourceAccessList({ apiModel, resource }) {
               setDeletionRole(role);
               setShowDeleteModal(true);
             }}
+            rowIndex={index}
           />
         )}
       />
