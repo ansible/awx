@@ -37,7 +37,7 @@ from awx.main.models.credential import ManagedCredentialType
 from awx.main import tasks
 from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
-from awx.main.utils.execution_environments import CONTAINER_ROOT, to_container_path, to_host_path
+from awx.main.utils.execution_environments import CONTAINER_ROOT, to_host_path
 
 from awx.main.utils.licensing import Licenser
 
