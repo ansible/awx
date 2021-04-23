@@ -46,7 +46,6 @@ describe('<ToolbarDeleteButton />', () => {
       <ToolbarDeleteButton onDelete={() => {}} itemsToDelete={[]} />
     );
     expect(wrapper.find('button')).toHaveLength(1);
-    expect(wrapper.find('ToolbarDeleteButton')).toMatchSnapshot();
   });
 
   test('should open confirmation modal', async () => {

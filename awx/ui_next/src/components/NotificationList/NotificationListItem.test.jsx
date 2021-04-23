@@ -42,7 +42,6 @@ describe('<NotificationListItem canToggleNotifications />', () => {
         </tbody>
       </table>
     );
-    expect(wrapper.find('NotificationListItem')).toMatchSnapshot();
     expect(wrapper.find('Switch').length).toBe(3);
   });
 
