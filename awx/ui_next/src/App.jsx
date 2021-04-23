@@ -94,7 +94,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
           {children}
         </ErrorBoundary>
       </Route>
-    )
+    );
   }
 
   if (authRedirectTo !== null) setAuthRedirectTo(pathname);

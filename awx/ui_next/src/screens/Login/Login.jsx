@@ -39,7 +39,7 @@ const Login = styled(PFLogin)`
   }
 `;
 
-function AWXLogin({ alt, i18n, isAuthenticated }) {
+function AWXLogin({ alt, isAuthenticated }) {
   const { authRedirectTo, isSessionExpired, setAuthRedirectTo } = useSession();
 
   const {

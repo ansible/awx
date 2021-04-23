@@ -1,7 +1,6 @@
 import React, {
   useContext,
   useEffect,
-  useMemo,
   useState,
   useRef,
   useCallback,
@@ -128,27 +127,19 @@ function SessionProvider({ children }) {
     clearInterval(sessionIntervalId.current);
   }, []);
 
-  const value = useMemo(
-    () => ({
-      logout,
-      authRedirectTo,
-      setAuthRedirectTo,
-      handleSessionContinue,
-      sessionCountdown,
-      isSessionExpired,
-    }),
-    [
-      logout,
-      authRedirectTo,
-      setAuthRedirectTo,
-      handleSessionContinue,
-      sessionCountdown,
-      isSessionExpired,
-    ]
-  );
-
   return (
-    <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
+    <SessionContext.Provider
+      value={{
+        authRedirectTo,
+        handleSessionContinue,
+        isSessionExpired,
+        logout,
+        sessionCountdown,
+        setAuthRedirectTo,
+      }}
+    >
+      {children}
+    </SessionContext.Provider>
   );
 }
 
