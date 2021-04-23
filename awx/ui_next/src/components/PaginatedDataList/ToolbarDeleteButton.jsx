@@ -17,7 +17,6 @@ import {
   DropdownItem,
   Tooltip,
 } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
 import { KebabifiedContext } from '../../contexts/Kebabified';
@@ -95,7 +94,6 @@ function ToolbarDeleteButton({
   deleteDetailsRequests,
   warningMessage,
   deleteMessage,
-  i18n,
   cannotDelete,
 }) {
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
@@ -145,21 +143,24 @@ function ToolbarDeleteButton({
     if (itemsToDelete.some(cannotDelete)) {
       return (
         <div>
-          {errorMessage
-            ? `${errorMessage}: ${itemsUnableToDelete}`
-            : i18n._(
-                t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}`
-              )}
+          {errorMessage ? (
+            <>
+              <span>{errorMessage}</span>
+              <span>{`: ${itemsUnableToDelete}`}</span>
+            </>
+          ) : (
+            t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}`
+          )}
         </div>
       );
     }
     if (itemsToDelete.length) {
-      return i18n._(t`Delete`);
+      return t`Delete`;
     }
-    return i18n._(t`Select a row to delete`);
+    return t`Select a row to delete`;
   };
 
-  const modalTitle = i18n._(t`Delete ${pluralizedItemName}?`);
+  const modalTitle = t`Delete ${pluralizedItemName}?`;
 
   const isDisabled =
     itemsToDelete.length === 0 || itemsToDelete.some(cannotDelete);
@@ -201,7 +202,7 @@ function ToolbarDeleteButton({
     return (
       <AlertModal
         isOpen={deleteMessageError}
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={() => {
           toggleModal(false);
           setDeleteMessageError();
@@ -230,7 +231,7 @@ function ToolbarDeleteButton({
               toggleModal(true);
             }}
           >
-            {i18n._(t`Delete`)}
+            {t`Delete`}
           </DropdownItem>
         </Tooltip>
       ) : (
@@ -240,11 +241,11 @@ function ToolbarDeleteButton({
               variant="secondary"
               isLoading={isLoading}
               spinnerAriaValueText={isLoading ? 'Loading' : undefined}
-              aria-label={i18n._(t`Delete`)}
+              aria-label={t`Delete`}
               onClick={() => toggleModal(true)}
               isDisabled={isDisabled}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </Button>
           </div>
         </Tooltip>
@@ -261,25 +262,25 @@ function ToolbarDeleteButton({
               ouiaId="delete-modal-confirm"
               key="delete"
               variant="danger"
-              aria-label={i18n._(t`confirm delete`)}
+              aria-label={t`confirm delete`}
               isDisabled={Boolean(
                 deleteDetails && itemsToDelete[0]?.type === 'credential_type'
               )}
               onClick={handleDelete}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </Button>,
             <Button
               key="cancel"
               variant="link"
-              aria-label={i18n._(t`cancel delete`)}
+              aria-label={t`cancel delete`}
               onClick={() => toggleModal(false)}
             >
-              {i18n._(t`Cancel`)}
+              {t`Cancel`}
             </Button>,
           ]}
         >
-          <div>{i18n._(t`This action will delete the following:`)}</div>
+          <div>{t`This action will delete the following:`}</div>
           {itemsToDelete.map(item => (
             <span key={item.id}>
               <strong>{item.name || item.username || item.image}</strong>
@@ -303,16 +304,14 @@ ToolbarDeleteButton.propTypes = {
   onDelete: func.isRequired,
   itemsToDelete: arrayOf(ItemToDelete).isRequired,
   pluralizedItemName: string,
-  errorMessage: string,
   warningMessage: node,
   cannotDelete: func,
 };
 
 ToolbarDeleteButton.defaultProps = {
   pluralizedItemName: 'Items',
-  errorMessage: '',
   warningMessage: null,
   cannotDelete: item => !item.summary_fields.user_capabilities.delete,
 };
 
-export default withI18n()(ToolbarDeleteButton);
+export default ToolbarDeleteButton;
