@@ -14,6 +14,8 @@
     wfjt_name: "AWX-Collection-tests-tower_workflow_job_template-wfjt-{{ test_id }}"
     email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
     webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ test_id }}"
+    project_inv: "AWX-Collection-tests-tower_inventory_source-inv-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_inv_source: "AWX-Collection-tests-tower_inventory_source-inv-source-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create an SCM Credential
   tower_credential:
@@ -66,6 +68,27 @@
     scm_type: git
     scm_url: https://github.com/ansible/ansible-tower-samples.git
     scm_credential: "{{ scm_cred_name }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Add a Tower inventory
+  tower_inventory:
+    description: Test inventory
+    organization: Default
+    name: "{{ project_inv }}"
+
+- name: Create a source inventory
+  tower_inventory_source:
+    name: "{{ project_inv_source }}"
+    description: Source for Test inventory
+    inventory: "{{ project_inv }}"
+    source_project: "{{ demo_project_name }}"
+    source_path: "/inventories/inventory.ini"
+    overwrite: true
+    source: scm
   register: result
 
 - assert:
@@ -324,6 +347,106 @@
       - "'Non_Existing_Organization' in result.msg"
       - "result.total_results == 0"
 
+- name: Create a workflow job template with schema in template
+  awx.awx.tower_workflow_job_template:
+    name: "{{ wfjt_name }}"
+    inventory: Demo Inventory
+    extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
+    schema:
+      - identifier: node101
+        unified_job_template:
+          name: "{{ project_inv_source }}"
+          inventory:
+            organization:
+              name: Default
+          type: inventory_source
+        related:
+          failure_nodes:
+            - identifier: node201
+      - identifier: node201
+        unified_job_template:
+          organization:
+            name: Default
+          name: "{{ jt1_name }}"
+          type: job_template
+        credentials: []
+        related:
+          success_nodes:
+            - identifier: node301
+      - identifier: node202
+        unified_job_template:
+          organization:
+            name: Default
+          name: "{{ demo_project_name }}"
+          type: project
+      - all_parents_must_converge: false
+        identifier: node301
+        unified_job_template:
+          organization:
+            name: Default
+          name: "{{ jt2_name }}"
+          type: job_template
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Kick off a workflow and wait for it
+  tower_workflow_launch:
+    workflow_template: "{{ wfjt_name }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - "'id' in result['job_info']"
+
+- name: Destroy previous schema for one that fails
+  awx.awx.tower_workflow_job_template:
+    name: "{{ wfjt_name }}"
+    destroy_current_schema: true
+    schema:
+      - identifier: node101
+        unified_job_template:
+          organization:
+            name: Default
+          name: "{{ jt1_name }}"
+          type: job_template
+        credentials: []
+        related:
+          success_nodes:
+            - identifier: node201
+      - identifier: node201
+        unified_job_template:
+          name: "{{ project_inv_source }}"
+          inventory:
+            organization:
+              name: Default
+          type: inventory_source
+  register: result
+
+- name: Kick off a workflow and wait for it
+  tower_workflow_launch:
+    workflow_template: "{{ wfjt_name }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+
+- name: Delete a workflow job template
+  awx.awx.tower_workflow_job_template:
+    name: "{{ wfjt_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Delete the Job Template
   tower_job_template:
     name: "{{ jt1_name }}"
@@ -347,6 +470,28 @@
     job_type: run
     state: absent
   register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the inventory source
+  tower_inventory_source:
+    name: "{{ project_inv_source }}"
+    inventory: "{{ project_inv }}"
+    source: scm
+    state: absent
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the inventory
+  tower_inventory:
+    description: Test inventory
+    organization: Default
+    name: "{{ project_inv }}"
+    state: absent
 
 - assert:
     that:

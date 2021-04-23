@@ -474,7 +474,7 @@ class TowerAPIModule(TowerModule):
         #    1. None if the existing_item is already defined (so no create needs to happen)
         #    2. The response from Tower from calling the patch on the endpont. It's up to you to process the response and exit from the module
         # Note: common error codes from the Tower API can cause the module to fail
-
+        response = None
         if not endpoint:
             self.fail_json(msg="Unable to create new {0} due to missing endpoint".format(item_type))
 
@@ -522,8 +522,11 @@ class TowerAPIModule(TowerModule):
         elif auto_exit:
             self.exit_json(**self.json_output)
         else:
-            last_data = response['json']
-            return last_data
+            if response is not None:
+                last_data = response['json']
+                return last_data
+            else:
+                return
 
     def _encrypted_changed_warning(self, field, old, warning=False):
         if not warning:
