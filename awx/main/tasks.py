@@ -381,7 +381,7 @@ def gather_analytics():
     from rest_framework.fields import DateTimeField
 
     last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
-    last_time = DateTimeField().to_internal_value(last_gather.value) if last_gather else None
+    last_time = DateTimeField().to_internal_value(last_gather.value) if last_gather and last_gather.value else None
     gather_time = now()
 
     if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
