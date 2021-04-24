@@ -356,13 +356,15 @@ def _copy_table(table, query, path):
     return file.file_list()
 
 
-def _events_table(since, full_path, until, tbl, **kwargs):
+def _events_table(since, full_path, until, tbl, project_job_created=False, **kwargs):
     def query(event_data):
         # TODO: conditional job_created based on if the column exists or not in the table
         # {tbl}.job_created,
+
         return f'''COPY (SELECT {tbl}.id,
                          {tbl}.created,
                          {tbl}.modified,
+                         {tbl + '.job_created' if project_job_created else 'NULL'} as job_created,
                          {tbl}.uuid,
                          {tbl}.parent_uuid,
                          {tbl}.event,
@@ -392,14 +394,14 @@ def _events_table(since, full_path, until, tbl, **kwargs):
         return _copy_table(table='events', query=query(f"replace({tbl}.event_data::text, '\\u0000', '')::json"), path=full_path)
 
 
-@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing_unpartitioned)
+@register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=events_slicing_unpartitioned)
 def events_table_unpartitioned(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, '_unpartitioned_main_jobevent', **kwargs)
 
 
-@register('events_table', '1.2', format='csv', description=_('Automation task records'), expensive=events_slicing_partitioned_modified)
+@register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=events_slicing_partitioned_modified)
 def events_table_partitioned_modified(since, full_path, until, **kwargs):
-    return _events_table(since, full_path, until, 'main_jobevent', **kwargs)
+    return _events_table(since, full_path, until, 'main_jobevent', project_job_created=True, **kwargs)
 
 
 @register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
