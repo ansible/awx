@@ -743,3 +743,37 @@ class TowerAPIModule(TowerModule):
     def wait_output(self, response):
         for k in ('id', 'status', 'elapsed', 'started', 'finished'):
             self.json_output[k] = response['json'].get(k)
+
+    def wait_on_workflow_node_url(self, url, object_name, object_type, timeout=30, interval=10, **kwargs):
+        # Grab our start time to compare against for the timeout
+        start = time.time()
+        result = self.get_endpoint(url, **kwargs)
+
+        while result["json"]["count"] == 0:
+            # If we are past our time out fail with a message
+            if timeout and timeout < time.time() - start:
+                # Account for Legacy messages
+                self.json_output["msg"] = "Monitoring of {0} - {1} aborted due to timeout, {2}".format(object_type, object_name, url)
+                self.wait_output(result)
+                self.fail_json(**self.json_output)
+
+            # Put the process to sleep for our interval
+            time.sleep(interval)
+            result = self.get_endpoint(url, **kwargs)
+
+        if object_type == "Workflow Approval":
+            # Approval jobs have no elapsed time so return
+            return result["json"]["results"][0]
+        else:
+            # Removed time so far from timeout.
+            revised_timeout = timeout - (time.time() - start)
+            # Now that Job has been found, wait for it to finish
+            result = self.wait_on_url(
+                url=result["json"]["results"][0]["related"]["job"],
+                object_name=object_name,
+                object_type=object_type,
+                timeout=revised_timeout,
+                interval=interval,
+            )
+        self.json_output["job_data"] = result["json"]
+        return result
