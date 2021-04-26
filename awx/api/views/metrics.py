@@ -32,7 +32,7 @@ class MetricsView(APIView):
     renderer_classes = [renderers.PlainTextRenderer, renderers.PrometheusJSONRenderer, renderers.BrowsableAPIRenderer]
 
     def get(self, request):
-        ''' Show Metrics Details '''
+        '''Show Metrics Details'''
         if request.user.is_superuser or request.user.is_system_auditor:
             metrics_to_show = ''
             if not request.query_params.get('subsystemonly', "0") == "1":

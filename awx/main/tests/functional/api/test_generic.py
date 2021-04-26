@@ -79,7 +79,7 @@ def test_filterable_fields(options, instance, admin_user):
 
 @pytest.mark.django_db
 def test_handle_content_type(post, admin):
-    ''' Tower should return 415 when wrong content type is in HTTP requests '''
+    '''Tower should return 415 when wrong content type is in HTTP requests'''
     post(reverse('api:project_list'), {'name': 't', 'organization': None}, admin, content_type='text/html', expect=415)
 
 

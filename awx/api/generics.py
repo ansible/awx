@@ -789,7 +789,7 @@ class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
         return super(RetrieveUpdateAPIView, self).partial_update(request, *args, **kwargs)
 
     def update_filter(self, request, *args, **kwargs):
-        ''' scrub any fields the user cannot/should not put/patch, based on user context.  This runs after read-only serialization filtering '''
+        '''scrub any fields the user cannot/should not put/patch, based on user context.  This runs after read-only serialization filtering'''
         pass
 
 

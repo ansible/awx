@@ -43,7 +43,7 @@ class ApiRootView(APIView):
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request, format=None):
-        ''' List supported API versions '''
+        '''List supported API versions'''
 
         v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
         data = OrderedDict()
@@ -78,7 +78,7 @@ class ApiVersionRootView(APIView):
     swagger_topic = 'Versioning'
 
     def get(self, request, format=None):
-        ''' List top level resources '''
+        '''List top level resources'''
         data = OrderedDict()
         data['ping'] = reverse('api:api_v2_ping_view', request=request)
         data['instances'] = reverse('api:instance_list', request=request)
