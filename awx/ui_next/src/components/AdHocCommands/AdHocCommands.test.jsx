@@ -103,6 +103,7 @@ describe('<AdHocCommands />', () => {
         },
       },
     });
+    InventoriesAPI.readDetail.mockResolvedValue({ data: { organization: 1 } });
     CredentialTypesAPI.read.mockResolvedValue({
       data: { results: [{ id: 1 }] },
     });
@@ -135,6 +136,10 @@ describe('<AdHocCommands />', () => {
 
   test('should submit properly', async () => {
     InventoriesAPI.launchAdHocCommands.mockResolvedValue({ data: { id: 1 } });
+    InventoriesAPI.readDetail.mockResolvedValue({
+      data: { organization: 1 },
+    });
+
     CredentialsAPI.read.mockResolvedValue({
       data: {
         results: credentials,
@@ -149,6 +154,9 @@ describe('<AdHocCommands />', () => {
         ],
         count: 2,
       },
+    });
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
     });
     await act(async () => {
       wrapper = mountWithContexts(
@@ -275,6 +283,9 @@ describe('<AdHocCommands />', () => {
         },
       },
     });
+    InventoriesAPI.readDetail.mockResolvedValue({
+      data: { organization: 1 },
+    });
     CredentialTypesAPI.read.mockResolvedValue({
       data: {
         results: [
@@ -306,6 +317,9 @@ describe('<AdHocCommands />', () => {
         ],
         count: 2,
       },
+    });
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
     });
     await act(async () => {
       wrapper = mountWithContexts(

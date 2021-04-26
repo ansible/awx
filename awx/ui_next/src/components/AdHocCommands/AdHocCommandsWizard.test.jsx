@@ -41,6 +41,7 @@ describe('<AdHocCommandsWizard/>', () => {
           verbosityOptions={verbosityOptions}
           onCloseWizard={() => {}}
           credentialTypeId={1}
+          organizationId={1}
         />
       );
     });
@@ -107,6 +108,9 @@ describe('<AdHocCommandsWizard/>', () => {
         ],
         count: 2,
       },
+    });
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
     });
     CredentialsAPI.read.mockResolvedValue({
       data: {

@@ -35,22 +35,29 @@ function AdHocCommands({ adHocItems, i18n, hasListItems, onLaunchLoading }) {
   }, [isKebabified, isWizardOpen, onKebabModalChange]);
 
   const {
-    result: { moduleOptions, credentialTypeId, isAdHocDisabled },
+    result: {
+      moduleOptions,
+      credentialTypeId,
+      isAdHocDisabled,
+      organizationId,
+    },
     request: fetchData,
     error: fetchError,
   } = useRequest(
     useCallback(async () => {
-      const [options, cred] = await Promise.all([
+      const [options, { data }, cred] = await Promise.all([
         InventoriesAPI.readAdHocOptions(id),
+        InventoriesAPI.readDetail(id),
         CredentialTypesAPI.read({ namespace: 'ssh' }),
       ]);
       return {
         moduleOptions: options.data.actions.GET.module_name.choices,
         credentialTypeId: cred.data.results[0].id,
         isAdHocDisabled: !options.data.actions.POST,
+        organizationId: data.organization,
       };
     }, [id]),
-    { moduleOptions: [], isAdHocDisabled: true }
+    { moduleOptions: [], isAdHocDisabled: true, organizationId: null }
   );
   useEffect(() => {
     fetchData();
@@ -141,6 +148,7 @@ function AdHocCommands({ adHocItems, i18n, hasListItems, onLaunchLoading }) {
       {isWizardOpen && (
         <AdHocCommandsWizard
           adHocItems={adHocItems}
+          organizationId={organizationId}
           moduleOptions={moduleOptions}
           verbosityOptions={verbosityOptions}
           credentialTypeId={credentialTypeId}

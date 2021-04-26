@@ -6,18 +6,18 @@ import { Form, FormGroup } from '@patternfly/react-core';
 import { ExecutionEnvironmentsAPI } from '../../api';
 import Popover from '../Popover';
 
-import { parseQueryString, getQSConfig } from '../../util/qs';
+import { parseQueryString, getQSConfig, mergeParams } from '../../util/qs';
 import useRequest from '../../util/useRequest';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import OptionsList from '../OptionsList';
 
-const QS_CONFIG = getQSConfig('execution_environemts', {
+const QS_CONFIG = getQSConfig('execution_environments', {
   page: 1,
   page_size: 5,
   order_by: 'name',
 });
-function AdHocExecutionEnvironmentStep() {
+function AdHocExecutionEnvironmentStep({ organizationId }) {
   const history = useHistory();
   const [executionEnvironmentField, , executionEnvironmentHelpers] = useField(
     'execution_environment'
@@ -26,21 +26,51 @@ function AdHocExecutionEnvironmentStep() {
     error,
     isLoading,
     request: fetchExecutionEnvironments,
-    result: { executionEnvironments, executionEnvironmentsCount },
+    result: {
+      executionEnvironments,
+      executionEnvironmentsCount,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
+      const globallyAvailableParams = { or__organization__isnull: 'True' };
+      const organizationIdParams = organizationId
+        ? { or__organization__id: organizationId }
+        : {};
 
-      const {
-        data: { results, count },
-      } = await ExecutionEnvironmentsAPI.read(params);
-
+      const [
+        {
+          data: { results, count },
+        },
+        actionsResponse,
+      ] = await Promise.all([
+        ExecutionEnvironmentsAPI.read(
+          mergeParams(params, {
+            ...globallyAvailableParams,
+            ...organizationIdParams,
+          })
+        ),
+        ExecutionEnvironmentsAPI.readOptions(),
+      ]);
       return {
         executionEnvironments: results,
         executionEnvironmentsCount: count,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
-    }, [history.location.search]),
-    { executionEnvironments: [], executionEnvironmentsCount: 0 }
+    }, [history.location.search, organizationId]),
+    {
+      executionEnvironments: [],
+      executionEnvironmentsCount: 0,
+      relatedSearchableKeys: [],
+      searchableKeys: [],
+    }
   );
 
   useEffect(() => {
@@ -62,11 +92,12 @@ function AdHocExecutionEnvironmentStep() {
         aria-label={t`Execution Environments`}
         labelIcon={
           <Popover
-            content={t`Select the Execution Environment you want this command to run inside`}
+            content={t`Select the Execution Environment you want this command to run inside.`}
           />
         }
       >
         <OptionsList
+          isLoading={isLoading}
           value={executionEnvironmentField.value || []}
           options={executionEnvironments}
           optionCount={executionEnvironmentsCount}
@@ -75,7 +106,7 @@ function AdHocExecutionEnvironmentStep() {
           searchColumns={[
             {
               name: t`Name`,
-              key: 'name',
+              key: 'name__icontains',
               isDefault: true,
             },
             {
@@ -94,6 +125,8 @@ function AdHocExecutionEnvironmentStep() {
             },
           ]}
           name="execution_environment"
+          searchableKeys={searchableKeys}
+          relatedSearchableKeys={relatedSearchableKeys}
           selectItem={value => {
             executionEnvironmentHelpers.setValue([value]);
           }}

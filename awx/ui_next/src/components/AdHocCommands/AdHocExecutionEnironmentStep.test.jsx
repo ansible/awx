@@ -22,10 +22,13 @@ describe('<AdHocExecutionEnvironmentStep />', () => {
         count: 2,
       },
     });
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {} } },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik>
-          <AdHocExecutionEnvironmentStep />
+          <AdHocExecutionEnvironmentStep organizationId={1} />
         </Formik>
       );
     });
