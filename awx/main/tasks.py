@@ -1279,6 +1279,10 @@ class BaseTask(object):
                 if k in job_env:
                     job_env[k] = v
             self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command), job_cwd=runner_config.cwd, job_env=job_env)
+        elif status_data['status'] == 'error':
+            result_traceback = status_data.get('result_traceback', None)
+            if result_traceback:
+                self.instance = self.update_model(self.instance.pk, result_traceback=result_traceback)
 
     def check_handler(self, config):
         """
@@ -3002,12 +3006,19 @@ class AWXReceptorJob:
                 # TODO: There should be a more efficient way of getting this information
                 receptor_work_list = receptor_ctl.simple_command("work list")
                 detail = receptor_work_list[self.unit_id]['Detail']
+                state_name = receptor_work_list[self.unit_id]['StateName']
+
                 if 'exceeded quota' in detail:
                     logger.warn(detail)
                     log_name = self.task.instance.log_format
                     logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
                     self.task.update_model(self.task.instance.pk, status='pending')
                     return
+
+                # If ansible-runner ran, but an error occured at runtime, the traceback information
+                # is saved via the status_handler passed in to the processor.
+                if state_name == 'Succeeded':
+                    return res
 
                 raise RuntimeError(detail)
 
