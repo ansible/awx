@@ -9,7 +9,6 @@ import FormField, {
   CheckboxField,
   PasswordField,
   FormSubmitError,
-  TextAndCheckboxField,
 } from '../../../components/FormField';
 import { useConfig } from '../../../contexts/Config';
 import getDocsBaseUrl from '../../../util/getDocsBaseUrl';
@@ -23,6 +22,7 @@ import {
   integer,
   number as numberValidator,
 } from '../../../util/validators';
+import MultipleChoiceField from './MultipleChoiceField';
 
 function AnswerTypeField() {
   const [field] = useField({
@@ -86,16 +86,16 @@ function SurveyQuestionForm({
     max: question?.max || 1024,
     default: question?.default || '',
     choices: question?.choices || '',
-    formattedChoices: [{ choice: '', isDefault: false }],
+    formattedChoices: [{ choice: '', isDefault: false, id: 0 }],
     new_question: !question,
   };
   if (question?.type === 'multiselect' || question?.type === 'multiplechoice') {
-    const newQuestions = question.choices.split('\n').map(c => {
+    const newQuestions = question.choices.split('\n').map((c, i) => {
       if (question.default.split('\n').includes(c)) {
-        return { choice: c, isDefault: true };
+        return { choice: c, isDefault: true, id: i };
       }
 
-      return { choice: c, isDefault: false };
+      return { choice: c, isDefault: false, id: i };
     });
 
     initialValues = {
@@ -218,11 +218,8 @@ function SurveyQuestionForm({
               />
             )}
             {['multiplechoice', 'multiselect'].includes(formik.values.type) && (
-              <TextAndCheckboxField
-                id="question-options"
-                name="choices"
+              <MultipleChoiceField
                 label={t`Multiple Choice Options`}
-                validate={required()}
                 tooltip={
                   <>
                     <span>{t`Refer to the`} </span>
@@ -236,7 +233,6 @@ function SurveyQuestionForm({
                     {t`for more information.`}
                   </>
                 }
-                isRequired
               />
             )}
           </FormColumnLayout>

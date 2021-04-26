@@ -74,8 +74,8 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
                 : defaultAnswers.concat(`${choice}\n`);
           }
         });
-        submittedData.default = defaultAnswers;
-        submittedData.choices = choices;
+        submittedData.default = defaultAnswers.trim();
+        submittedData.choices = choices.trim();
       }
 
       await updateSurvey([

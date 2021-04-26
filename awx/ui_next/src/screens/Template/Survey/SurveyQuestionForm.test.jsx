@@ -149,13 +149,13 @@ describe('<SurveyQuestionForm />', () => {
     });
     await selectType(wrapper, 'multiplechoice');
 
-    expect(wrapper.find('TextAndCheckboxField').length).toBe(1);
-    expect(wrapper.find('TextAndCheckboxField').find('TextInput').length).toBe(
+    expect(wrapper.find('MultipleChoiceField').length).toBe(1);
+    expect(wrapper.find('MultipleChoiceField').find('TextInput').length).toBe(
       1
     );
     expect(
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('Button[aria-label="Click to toggle default value"]').length
     ).toBe(1);
   });
@@ -174,13 +174,13 @@ describe('<SurveyQuestionForm />', () => {
     });
     await selectType(wrapper, 'multiselect');
 
-    expect(wrapper.find('TextAndCheckboxField').length).toBe(1);
-    expect(wrapper.find('TextAndCheckboxField').find('TextInput').length).toBe(
+    expect(wrapper.find('MultipleChoiceField').length).toBe(1);
+    expect(wrapper.find('MultipleChoiceField').find('TextInput').length).toBe(
       1
     );
     expect(
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('Button[aria-label="Click to toggle default value"]').length
     ).toBe(1);
   });
@@ -249,8 +249,8 @@ describe('<SurveyQuestionForm />', () => {
     await selectType(wrapper, 'multiselect');
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(0)
         .prop('onChange')('alex')
@@ -260,7 +260,7 @@ describe('<SurveyQuestionForm />', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(false);
     await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
     wrapper.update();
@@ -268,28 +268,28 @@ describe('<SurveyQuestionForm />', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(true);
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(0)
         .prop('onKeyUp')({ key: 'Enter' })
     );
     wrapper.update();
-    expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
+    expect(wrapper.find('MultipleChoiceField').find('InputGroup').length).toBe(
       2
     );
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(1)
         .prop('onChange')('spencer')
     );
     wrapper.update();
-    expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
+    expect(wrapper.find('MultipleChoiceField').find('InputGroup').length).toBe(
       2
     );
     await act(() => wrapper.find('Button[ouiaId="spencer"]').prop('onClick')());
@@ -298,7 +298,7 @@ describe('<SurveyQuestionForm />', () => {
       wrapper
         .find('Button[ouiaId="spencer"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(true);
     await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
     wrapper.update();
@@ -306,7 +306,7 @@ describe('<SurveyQuestionForm />', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(false);
   });
 
@@ -325,7 +325,7 @@ describe('<SurveyQuestionForm />', () => {
     await selectType(wrapper, 'multiplechoice');
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(0)
         .prop('onChange')('alex')
@@ -335,7 +335,7 @@ describe('<SurveyQuestionForm />', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(false);
     await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
     wrapper.update();
@@ -343,14 +343,14 @@ describe('<SurveyQuestionForm />', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(true);
-    expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
+    expect(wrapper.find('MultipleChoiceField').find('InputGroup').length).toBe(
       1
     );
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(0)
         .prop('onKeyUp')({ key: 'Enter' })
@@ -358,13 +358,13 @@ describe('<SurveyQuestionForm />', () => {
     wrapper.update();
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(1)
         .prop('onChange')('spencer')
     );
     wrapper.update();
-    expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
+    expect(wrapper.find('MultipleChoiceField').find('InputGroup').length).toBe(
       2
     );
     await act(() => wrapper.find('Button[ouiaId="spencer"]').prop('onClick')());
@@ -374,13 +374,13 @@ describe('<SurveyQuestionForm />', () => {
       wrapper
         .find('Button[ouiaId="spencer"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(true);
     expect(
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(false);
   });
 });

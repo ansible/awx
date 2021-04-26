@@ -37,18 +37,11 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
                 : defaultAnswers.concat(`${choice}\n`);
           }
         });
-        formData.default = defaultAnswers;
-        formData.choices = choices;
+        formData.default = defaultAnswers.trim();
+        formData.choices = choices.trim();
       }
       delete formData.formattedChoices;
 
-      if (formData.type === 'multiselect') {
-        formData.default = formData.default
-          .split('\n')
-          .filter(v => v !== '' || '\n')
-          .map(v => v.trim())
-          .join('\n');
-      }
       const newSpec = survey.spec ? survey.spec.concat(formData) : [formData];
 
       await updateSurvey(newSpec);

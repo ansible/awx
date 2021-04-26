@@ -9,16 +9,16 @@ import {
 } from '@patternfly/react-core';
 import PFCheckIcon from '@patternfly/react-icons/dist/js/icons/check-icon';
 import styled from 'styled-components';
-import Popover from '../Popover';
+import Popover from '../../../components/Popover';
 
 const InputGroup = styled(PFInputGroup)`
   padding-bottom: 5px;
 `;
+
 const CheckIcon = styled(PFCheckIcon)`
   color: var(--pf-c-button--m-plain--disabled--Color);
   ${props =>
-    props.isSelected &&
-    `color: var(--pf-c-button--m-secondary--active--Color)`};
+    props.selected && `color: var(--pf-c-button--m-secondary--active--Color)`};
 `;
 
 const validate = () => {
@@ -33,7 +33,7 @@ const validate = () => {
     return message;
   };
 };
-function TextAndCheckboxField({ label, tooltip }) {
+function MultipleChoiceField({ label, tooltip }) {
   const [
     formattedChoicesField,
     formattedChoicesMeta,
@@ -50,6 +50,8 @@ function TextAndCheckboxField({ label, tooltip }) {
     <FormGroup
       label={label}
       isRequired
+      name="formattedChoices"
+      id="formattedChoices"
       helperText={
         !formattedChoicesField.value[0].choice.trim().length
           ? t`Type answer then click checkbox on right to select answer as default.`
@@ -64,10 +66,10 @@ function TextAndCheckboxField({ label, tooltip }) {
       validated={isValid ? 'default' : 'error'}
       labelIcon={<Popover content={tooltip} />}
     >
-      {formattedChoicesField.value.map(({ choice, isDefault }, i) => (
-        <InputGroup>
+      {formattedChoicesField.value.map(({ choice, isDefault, id }, i) => (
+        <InputGroup key={id}>
           <TextInput
-            aria-label={choice}
+            aria-label={choice || t`new choice`}
             onKeyUp={e => {
               if (
                 e.key === 'Enter' &&
@@ -78,6 +80,7 @@ function TextAndCheckboxField({ label, tooltip }) {
                   formattedChoicesField.value.concat({
                     choice: '',
                     isDefault: false,
+                    id: i + 1,
                   })
                 );
               }
@@ -96,36 +99,51 @@ function TextAndCheckboxField({ label, tooltip }) {
             }}
             value={choice}
             onChange={value => {
-              const newValues = formattedChoicesField.value.map((cfv, index) =>
-                i === index ? { choice: value, isDefault: false } : cfv
+              const newValues = formattedChoicesField.value.map(
+                (choiceField, index) =>
+                  i === index
+                    ? { choice: value, isDefault: false, id: choiceField.id }
+                    : choiceField
               );
               formattedChoicesHelpers.setValue(newValues);
             }}
           />
-
           <Button
             variant="control"
             aria-label={t`Click to toggle default value`}
             ouiaId={choice}
             isDisabled={!choice.trim()}
             onClick={() => {
-              const newValues = formattedChoicesField.value.map((cfv, index) =>
-                i === index
-                  ? { choice: cfv.choice, isDefault: !cfv.isDefault }
-                  : cfv
+              const newValues = formattedChoicesField.value.map(
+                (choiceField, index) =>
+                  i === index
+                    ? {
+                        choice: choiceField.choice,
+                        isDefault: !choiceField.isDefault,
+                        id: choiceField.id,
+                      }
+                    : choiceField
               );
               const singleSelectValues = formattedChoicesField.value.map(
-                (cfv, index) =>
+                (choiceField, index) =>
                   i === index
-                    ? { choice: cfv.choice, isDefault: !cfv.isDefault }
-                    : { choice: cfv.choice, isDefault: false }
+                    ? {
+                        choice: choiceField.choice,
+                        isDefault: !choiceField.isDefault,
+                        id: choiceField.id,
+                      }
+                    : {
+                        choice: choiceField.choice,
+                        isDefault: false,
+                        id: choiceField.id,
+                      }
               );
               return typeField.value === 'multiplechoice'
                 ? formattedChoicesHelpers.setValue(singleSelectValues)
                 : formattedChoicesHelpers.setValue(newValues);
             }}
           >
-            <CheckIcon isSelected={isDefault} />
+            <CheckIcon selected={isDefault} />
           </Button>
         </InputGroup>
       ))}
@@ -133,4 +151,4 @@ function TextAndCheckboxField({ label, tooltip }) {
   );
 }
 
-export default TextAndCheckboxField;
+export default MultipleChoiceField;

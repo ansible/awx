@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import TextAndCheckboxField from './TextAndCheckboxField';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import MultipleChoiceField from './MultipleChoiceField';
 
-describe('<TextAndCheckboxField/>', () => {
+describe('<MultipleChoiceField/>', () => {
   test('should activate default values, multiselect', async () => {
     let wrapper;
 
@@ -20,7 +20,7 @@ describe('<TextAndCheckboxField/>', () => {
             type: 'multiselect',
           }}
         >
-          <TextAndCheckboxField id="question-options" name="choices" />
+          <MultipleChoiceField id="question-options" name="choices" />
         </Formik>
       );
     });
@@ -29,7 +29,7 @@ describe('<TextAndCheckboxField/>', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(true);
     await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
     wrapper.update();
@@ -37,22 +37,22 @@ describe('<TextAndCheckboxField/>', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(false);
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(0)
         .prop('onKeyUp')({ key: 'Enter' })
     );
     wrapper.update();
-    expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
+    expect(wrapper.find('MultipleChoiceField').find('InputGroup').length).toBe(
       3
     );
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(2)
         .prop('onChange')('spencer')
@@ -65,7 +65,7 @@ describe('<TextAndCheckboxField/>', () => {
       wrapper
         .find('Button[ouiaId="spencer"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(true);
     await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
     wrapper.update();
@@ -73,7 +73,7 @@ describe('<TextAndCheckboxField/>', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(true);
   });
 
@@ -85,14 +85,14 @@ describe('<TextAndCheckboxField/>', () => {
         <Formik
           initialValues={{
             formattedChoices: [
-              { choice: 'alex', isDefault: true },
-              { choice: 'apollo', isDefault: false },
-              { choice: 'athena', isDefault: false },
+              { choice: 'alex', isDefault: true, id: 1 },
+              { choice: 'apollo', isDefault: false, id: 2 },
+              { choice: 'athena', isDefault: false, id: 3 },
             ],
             type: 'multiplechoice',
           }}
         >
-          <TextAndCheckboxField id="question-options" name="choices" />
+          <MultipleChoiceField id="question-options" name="choices" />
         </Formik>
       );
     });
@@ -101,7 +101,7 @@ describe('<TextAndCheckboxField/>', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(true);
     await act(() => wrapper.find('Button[ouiaId="alex"]').prop('onClick')());
     wrapper.update();
@@ -109,14 +109,14 @@ describe('<TextAndCheckboxField/>', () => {
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(false);
-    expect(wrapper.find('TextAndCheckboxField').find('InputGroup').length).toBe(
+    expect(wrapper.find('MultipleChoiceField').find('InputGroup').length).toBe(
       3
     );
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(0)
         .prop('onKeyUp')({ key: 'Enter' })
@@ -124,7 +124,7 @@ describe('<TextAndCheckboxField/>', () => {
     wrapper.update();
     await act(async () =>
       wrapper
-        .find('TextAndCheckboxField')
+        .find('MultipleChoiceField')
         .find('TextInput')
         .at(2)
         .prop('onChange')('spencer')
@@ -138,13 +138,13 @@ describe('<TextAndCheckboxField/>', () => {
       wrapper
         .find('Button[ouiaId="spencer"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(true);
     expect(
       wrapper
         .find('Button[ouiaId="alex"]')
         .find('CheckIcon')
-        .prop('isSelected')
+        .prop('selected')
     ).toBe(false);
   });
 });
