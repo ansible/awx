@@ -103,10 +103,6 @@ describe('<InventoryHostList />', () => {
     jest.resetAllMocks();
   });
 
-  test('initially renders successfully', () => {
-    expect(wrapper.find('InventoryHostList').length).toBe(1);
-  });
-
   test('should fetch hosts from api and render them in the list', async () => {
     expect(InventoriesAPI.readHosts).toHaveBeenCalled();
     expect(wrapper.find('InventoryHostItem').length).toBe(3);
@@ -114,49 +110,66 @@ describe('<InventoryHostList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper.find('DataListCheck[id="select-host-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(false);
 
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-host-1"]').invoke('onChange')(
-        true
-      );
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')(true);
     });
 
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-host-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(true);
 
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-host-1"]').invoke('onChange')(
-        false
-      );
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')(false);
     });
 
     wrapper.update();
     expect(
-      wrapper.find('DataListCheck[id="select-host-1"]').props().checked
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
-    wrapper.find('DataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(false);
+    expect.assertions(9);
+    wrapper.find('.pf-c-table__check').forEach(el => {
+      expect(el.find('input').props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(true);
+    wrapper.find('.pf-c-table__check').forEach(el => {
+      expect(el.find('input').props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('DataListCheck').forEach(el => {
-      expect(el.props().checked).toBe(false);
+    wrapper.find('.pf-c-table__check').forEach(el => {
+      expect(el.find('input').props().checked).toBe(false);
     });
   });
 
@@ -196,7 +209,12 @@ describe('<InventoryHostList />', () => {
 
   test('delete button is disabled if user does not have delete capabilities on a selected host', async () => {
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-host-3"]').invoke('onChange')();
+      // wrapper.find('DataListCheck[id="select-host-3"]').invoke('onChange')();
+      wrapper
+        .find('.pf-c-table__check')
+        .at(2)
+        .find('input')
+        .invoke('onChange')();
     });
     wrapper.update();
     expect(wrapper.find('ToolbarDeleteButton button').props().disabled).toBe(
@@ -207,7 +225,11 @@ describe('<InventoryHostList />', () => {
   test('should call api delete hosts for each selected host', async () => {
     HostsAPI.destroy = jest.fn();
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-host-1"]').invoke('onChange')();
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {
@@ -230,7 +252,11 @@ describe('<InventoryHostList />', () => {
       })
     );
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-host-1"]').invoke('onChange')();
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {
@@ -252,7 +278,11 @@ describe('<InventoryHostList />', () => {
       Promise.reject(new Error())
     );
     await act(async () => {
-      wrapper.find('DataListCheck[id="select-host-1"]').invoke('onChange')();
+      wrapper
+        .find('.pf-c-table__check')
+        .first()
+        .find('input')
+        .invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {

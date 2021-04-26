@@ -37,7 +37,7 @@ function InventoryHostItem({
       </Td>
       <ActionsTd dataLabel={t`Actions`} gridColumns="auto 40px">
         <HostToggle host={host} />
-        {host.summary_fields.user_capabilities?.edit && (
+        {host.summary_fields.user_capabilities?.edit ? (
           <Tooltip content={t`Edit Host`} position="top">
             <Button
               ouiaId={`${host.id}-edit-button`}
@@ -48,7 +48,7 @@ function InventoryHostItem({
               <PencilAltIcon />
             </Button>
           </Tooltip>
-        )}
+        ) : null}
       </ActionsTd>
     </Tr>
   );
