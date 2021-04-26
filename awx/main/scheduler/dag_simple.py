@@ -2,7 +2,7 @@ from collections import deque
 
 
 class SimpleDAG(object):
-    ''' A simple implementation of a directed acyclic graph '''
+    '''A simple implementation of a directed acyclic graph'''
 
     def __init__(self):
         self.nodes = []

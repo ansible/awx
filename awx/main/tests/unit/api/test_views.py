@@ -311,7 +311,7 @@ class TestSurveySpecValidation:
 
     @pytest.mark.parametrize('_type', ['integer', 'float'])
     def test_survey_spec_element_number_empty_default(self, _type):
-        """ Assert that empty default is allowed for answer. """
+        """Assert that empty default is allowed for answer."""
         spec = self.spec_from_element({'type': _type, 'default': ''})
         r = JobTemplateSurveySpec._validate_spec_data(spec, {})
         assert r is None

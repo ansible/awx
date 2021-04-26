@@ -207,7 +207,7 @@ class DashboardView(APIView):
     swagger_topic = 'Dashboard'
 
     def get(self, request, format=None):
-        ''' Show Dashboard Details '''
+        '''Show Dashboard Details'''
         data = OrderedDict()
         data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view', request=request)}
         user_inventory = get_user_queryset(request.user, models.Inventory)
@@ -542,7 +542,7 @@ class ScheduleUnifiedJobsList(SubListAPIView):
 
 
 class AuthView(APIView):
-    ''' List enabled single-sign-on endpoints '''
+    '''List enabled single-sign-on endpoints'''
 
     authentication_classes = []
     permission_classes = (AllowAny,)
@@ -1233,7 +1233,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.UserSerializer
 
     def update_filter(self, request, *args, **kwargs):
-        ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins '''
+        '''make sure non-read-only fields that can only be edited by admins, are only edited by admins'''
         obj = self.get_object()
         can_change = request.user.can_access(models.User, 'change', obj, request.data)
         can_admin = request.user.can_access(models.User, 'admin', obj, request.data)
@@ -1596,7 +1596,7 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
 
 
 class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
-    ''' the list of groups a host is directly a member of '''
+    '''the list of groups a host is directly a member of'''
 
     model = models.Group
     serializer_class = serializers.GroupSerializer
@@ -1618,7 +1618,7 @@ class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
 
 
 class HostAllGroupsList(SubListAPIView):
-    ''' the list of all groups of which the host is directly or indirectly a member '''
+    '''the list of all groups of which the host is directly or indirectly a member'''
 
     model = models.Group
     serializer_class = serializers.GroupSerializer
@@ -1858,7 +1858,7 @@ class GroupPotentialChildrenList(SubListAPIView):
 
 
 class GroupHostsList(HostRelatedSearchMixin, ControlledByScmMixin, SubListCreateAttachDetachAPIView):
-    ''' the list of hosts directly below a group '''
+    '''the list of hosts directly below a group'''
 
     model = models.Host
     serializer_class = serializers.HostSerializer
@@ -1883,7 +1883,7 @@ class GroupHostsList(HostRelatedSearchMixin, ControlledByScmMixin, SubListCreate
 
 
 class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
-    ''' the list of all hosts below a group, even including subgroups '''
+    '''the list of all hosts below a group, even including subgroups'''
 
     model = models.Host
     serializer_class = serializers.HostSerializer
