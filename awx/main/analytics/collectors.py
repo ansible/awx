@@ -356,37 +356,37 @@ def _copy_table(table, query, path):
     return file.file_list()
 
 
-def _events_table(since, full_path, until, tbl, project_job_created=False, **kwargs):
+def _events_table(since, full_path, until, tbl, project_job_created=False, order_by=True, **kwargs):
     def query(event_data):
-        # TODO: conditional job_created based on if the column exists or not in the table
-        # {tbl}.job_created,
-
-        return f'''COPY (SELECT {tbl}.id,
-                         {tbl}.created,
-                         {tbl}.modified,
-                         {tbl + '.job_created' if project_job_created else 'NULL'} as job_created,
-                         {tbl}.uuid,
-                         {tbl}.parent_uuid,
-                         {tbl}.event,
-                         task_action,
-                         (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
-                         {tbl}.failed,
-                         {tbl}.changed,
-                         {tbl}.playbook,
-                         {tbl}.play,
-                         {tbl}.task,
-                         {tbl}.role,
-                         {tbl}.job_id,
-                         {tbl}.host_id,
-                         {tbl}.host_name,
-                         CAST(x.start AS TIMESTAMP WITH TIME ZONE) AS start,
-                         CAST(x.end AS TIMESTAMP WITH TIME ZONE) AS end,
-                         x.duration AS duration,
-                         x.res->'warnings' AS warnings,
-                         x.res->'deprecations' AS deprecations
-                         FROM {tbl}, json_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "start" text, "end" text)
-                         WHERE ({tbl}.id > {since} AND {tbl}.id <= {until})
-                         ORDER BY {tbl}.id ASC) TO STDOUT WITH CSV HEADER'''
+        query = f'''COPY (SELECT {tbl}.id,
+                          {tbl}.created,
+                          {tbl}.modified,
+                          {tbl + '.job_created' if project_job_created else 'NULL'} as job_created,
+                          {tbl}.uuid,
+                          {tbl}.parent_uuid,
+                          {tbl}.event,
+                          task_action,
+                          (CASE WHEN event = 'playbook_on_stats' THEN event_data END) as playbook_on_stats,
+                          {tbl}.failed,
+                          {tbl}.changed,
+                          {tbl}.playbook,
+                          {tbl}.play,
+                          {tbl}.task,
+                          {tbl}.role,
+                          {tbl}.job_id,
+                          {tbl}.host_id,
+                          {tbl}.host_name,
+                          CAST(x.start AS TIMESTAMP WITH TIME ZONE) AS start,
+                          CAST(x.end AS TIMESTAMP WITH TIME ZONE) AS end,
+                          x.duration AS duration,
+                          x.res->'warnings' AS warnings,
+                          x.res->'deprecations' AS deprecations
+                          FROM {tbl}, json_to_record({event_data}) AS x("res" json, "duration" text, "task_action" text, "start" text, "end" text)
+                          WHERE ({tbl}.id > {since} AND {tbl}.id <= {until})'''
+        if order_by:
+            query += f' ORDER BY {tbl}.id ASC'
+        query += ') TO STDOUT WITH CSV HEADER'
+        return query
 
     try:
         return _copy_table(table='events', query=query(f"{tbl}.event_data::json"), path=full_path)
@@ -401,7 +401,7 @@ def events_table_unpartitioned(since, full_path, until, **kwargs):
 
 @register('events_table', '1.3', format='csv', description=_('Automation task records'), expensive=events_slicing_partitioned_modified)
 def events_table_partitioned_modified(since, full_path, until, **kwargs):
-    return _events_table(since, full_path, until, 'main_jobevent', project_job_created=True, **kwargs)
+    return _events_table(since, full_path, until, 'main_jobevent', project_job_created=True, order_by=False, **kwargs)
 
 
 @register('unified_jobs_table', '1.2', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
