@@ -25,10 +25,19 @@ import {
 import MultipleChoiceField from './MultipleChoiceField';
 
 function AnswerTypeField() {
-  const [field] = useField({
+  const [field, meta, helpers] = useField({
     name: 'type',
     validate: required(t`Select a value for this field`),
   });
+  const [choicesField, choicesMeta, choicesHelpers] = useField(
+    'formattedChoices'
+  );
+
+  const singleDefault = choicesField.value.map((c, i) =>
+    i === 0
+      ? { choice: c.choice, isDefault: true, id: c.id }
+      : { choice: c.choice, isDefault: false, id: c.id }
+  );
 
   return (
     <FormGroup
@@ -46,6 +55,28 @@ function AnswerTypeField() {
       <AnsibleSelect
         id="question-type"
         {...field}
+        onChange={(e, val) => {
+          helpers.setValue(val);
+
+          // Edit Mode: Makes the first choice the default value if
+          // the type switches from multiselect, to multiple choice
+          if (
+            val === 'multiplechoice' &&
+            ['multiplechoice', 'multiselect'].includes(meta.initialValue) &&
+            val !== meta.initialValue
+          ) {
+            choicesHelpers.setValue(singleDefault);
+          }
+
+          // Edit Mode: Resets Multiple choice or Multiselect values if the user move type
+          // back to one of those values
+          if (
+            ['multiplechoice', 'multiselect'].includes(val) &&
+            val === meta.initialValue
+          ) {
+            choicesHelpers.setValue(choicesMeta.initialValue);
+          }
+        }}
         data={[
           { key: 'text', value: 'text', label: t`Text` },
           { key: 'textarea', value: 'textarea', label: t`Textarea` },
@@ -265,8 +296,4 @@ SurveyQuestionForm.defaultProps = {
   question: null,
   submitError: null,
 };
-<<<<<<< HEAD
-
-=======
->>>>>>> updates strings
 export default SurveyQuestionForm;
