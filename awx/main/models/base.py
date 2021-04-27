@@ -354,7 +354,7 @@ class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
 
 
 class CommonModel(PrimordialModel):
-    ''' a base model where the name is unique '''
+    '''a base model where the name is unique'''
 
     class Meta:
         abstract = True
@@ -366,7 +366,7 @@ class CommonModel(PrimordialModel):
 
 
 class CommonModelNameNotUnique(PrimordialModel):
-    ''' a base model where the name is not unique '''
+    '''a base model where the name is not unique'''
 
     class Meta:
         abstract = True

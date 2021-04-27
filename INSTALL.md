@@ -78,6 +78,8 @@ spec:
   tower_ingress_type: Ingress
 ```
 
+> If a custom AWX image is needed, see [these docs](./docs/build_awx_image.md) on how to build and use it.
+
 And then creating the AWX object in the Kubernetes API:
 
 ```

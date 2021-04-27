@@ -1224,7 +1224,7 @@ class UnifiedJob(
         raise NotImplementedError  # Implement in subclass.
 
     def websocket_emit_data(self):
-        ''' Return extra data that should be included when submitting data to the browser over the websocket connection '''
+        '''Return extra data that should be included when submitting data to the browser over the websocket connection'''
         websocket_data = dict(type=self.job_type_name)
         if self.spawned_by_workflow:
             websocket_data.update(dict(workflow_job_id=self.workflow_job_id, workflow_node_id=self.workflow_node_id))

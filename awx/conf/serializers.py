@@ -28,7 +28,7 @@ class SettingSerializer(BaseSerializer):
 
 
 class SettingCategorySerializer(serializers.Serializer):
-    """Serialize setting category """
+    """Serialize setting category"""
 
     url = serializers.CharField(read_only=True)
     slug = serializers.CharField(read_only=True)
