@@ -13,9 +13,18 @@ import {
   InventoriesAPI,
   ProjectsAPI,
   CredentialTypesAPI,
+  ExecutionEnvironmentsAPI,
+  CredentialsAPI,
 } from '../../../api';
 
-jest.mock('../../../api');
+jest.mock('../../../api/models/ExecutionEnvironments');
+jest.mock('../../../api/models/WorkflowJobTemplates');
+jest.mock('../../../api/models/Labels');
+jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/Projects');
+jest.mock('../../../api/models/CredentialTypes');
+jest.mock('../../../api/models/Credentials');
 
 describe('<WorkflowJobTemplateForm/>', () => {
   let wrapper;
@@ -61,7 +70,12 @@ describe('<WorkflowJobTemplateForm/>', () => {
       },
     });
     OrganizationsAPI.read.mockResolvedValue({
-      results: [{ id: 1 }, { id: 2 }],
+      data: {
+        results: [
+          { id: 1, name: 'Organization 1' },
+          { id: 2, name: 'Organization 2' },
+        ],
+      },
     });
     InventoriesAPI.read.mockResolvedValue({
       results: [
@@ -76,6 +90,18 @@ describe('<WorkflowJobTemplateForm/>', () => {
       data: { actions: { GET: {}, POST: {} } },
     });
     ProjectsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+    ExecutionEnvironmentsAPI.read.mockResolvedValue({
+      data: { results: [] },
+    });
+    ExecutionEnvironmentsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+    CredentialsAPI.read.mockResolvedValue({
+      data: { results: [] },
+    });
+    CredentialsAPI.readOptions.mockResolvedValue({
       data: { actions: { GET: {}, POST: {} } },
     });
 
