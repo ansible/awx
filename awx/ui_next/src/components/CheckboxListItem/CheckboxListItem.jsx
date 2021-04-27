@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
   DataListItem,
-  DataListItemRow,
+  DataListItemRow as PFDataListItemRow,
   DataListItemCells,
   DataListCheck,
   Radio,
 } from '@patternfly/react-core';
-import DataListCell from '../DataListCell';
+import _DataListCell from '../DataListCell';
 
 const Label = styled.label`
   ${({ isDisabled }) =>
@@ -16,6 +16,18 @@ const Label = styled.label`
     `
     opacity: 0.5;
   `}
+`;
+
+const DataListItemRow = styled(PFDataListItemRow)`
+  && {
+    align-items: center;
+  }
+`;
+
+const DataListCell = styled(_DataListCell)`
+  && {
+    margin-left: 10px;
+  }
 `;
 
 const CheckboxListItem = ({
@@ -29,7 +41,6 @@ const CheckboxListItem = ({
   onSelect,
 }) => {
   const CheckboxRadio = isRadio ? Radio : DataListCheck;
-
   return (
     <DataListItem
       key={itemId}
