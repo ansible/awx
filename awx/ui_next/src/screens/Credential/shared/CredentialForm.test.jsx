@@ -5,6 +5,7 @@ import machineCredential from './data.machineCredential.json';
 import gceCredential from './data.gceCredential.json';
 import scmCredential from './data.scmCredential.json';
 import galaxyCredential from './data.galaxyCredential.json';
+import towerCredential from './data.towerCredential.json';
 import credentialTypesArr from './data.credentialTypes.json';
 import CredentialForm from './CredentialForm';
 
@@ -378,7 +379,7 @@ describe('<CredentialForm />', () => {
       gceFieldExpects();
     });
 
-    test('should display from fields for galaxy/automation hub credentials', async () => {
+    test('should display form fields for galaxy/automation hub credentials', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
           <CredentialForm
@@ -396,6 +397,35 @@ describe('<CredentialForm />', () => {
         wrapper.find('FormGroup[label="Organization"]').prop('isRequired')
       ).toBe(true);
       expect(wrapper.find('FormGroup[label="Credential Type"]').length).toBe(1);
+    });
+
+    test('should display form fields for tower credentials', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <CredentialForm
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            credential={towerCredential}
+            credentialTypes={credentialTypes}
+          />
+        );
+      });
+      expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
+      expect(
+        wrapper.find('FormGroup[label="Organization"]').prop('isRequired')
+      ).toBe(false);
+      expect(wrapper.find('FormGroup[label="Credential Type"]').length).toBe(1);
+      expect(
+        wrapper.find('FormGroup[label="Ansible Tower Hostname"]').length
+      ).toBe(1);
+      expect(wrapper.find('FormGroup[label="Username"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="Password"]').length).toBe(1);
+      expect(wrapper.find('FormGroup[label="OAuth Token"]').length).toBe(1);
+      expect(
+        wrapper.find('Checkbox#credential-verify_ssl').prop('isChecked')
+      ).toBe(false);
     });
   });
 });
