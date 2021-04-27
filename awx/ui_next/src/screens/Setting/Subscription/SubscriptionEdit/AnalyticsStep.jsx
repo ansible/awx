@@ -46,8 +46,8 @@ function AnalyticsStep({ i18n }) {
       <p>
         <Trans>
           By default, we collect and transmit analytics data on the serice usage
-          to Red Hat. There are two categories of data collected by the service. For
-          more information, see{' '}
+          to Red Hat. There are two categories of data collected by the service.
+          For more information, see{' '}
           <Button
             component="a"
             href={`${getDocsBaseUrl(
