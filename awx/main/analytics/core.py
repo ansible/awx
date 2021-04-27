@@ -116,6 +116,51 @@ def package(target, data, timestamp):
         return None
 
 
+def calculate_collection_interval(since, until):
+    _now = now()
+
+    # Make sure that the endpoints are not in the future.
+    if until is not None and until > _now:
+        until = _now
+        logger.warning(f"End of the collection interval is in the future, setting to {_now}.")
+    if since is not None and since > _now:
+        since = _now
+        logger.warning(f"Start of the collection interval is in the future, setting to {_now}.")
+
+    # The value of `until` needs to be concrete, so resolve it.  If it wasn't passed in,
+    # set it to `now`, but only if that isn't more than 4 weeks ahead of a passed-in
+    # `since` parameter.
+    if since is not None:
+        if until is not None:
+            if until > since + timedelta(weeks=4):
+                until = since + timedelta(weeks=4)
+                logger.warning(f"End of the collection interval is greater than 4 weeks from start, setting end to {until}.")
+        else:  # until is None
+            until = min(since + timedelta(weeks=4), _now)
+    elif until is None:
+        until = _now
+
+    if since and since >= until:
+        logger.warning("Start of the collection interval is later than the end, ignoring request.")
+        raise ValueError
+
+    # The ultimate beginning of the interval needs to be compared to 4 weeks prior to
+    # `until`, but we want to keep `since` empty if it wasn't passed in because we use that
+    # case to know whether to use the bookkeeping settings variables to decide the start of
+    # the interval.
+    horizon = until - timedelta(weeks=4)
+    if since is not None and since < horizon:
+        since = horizon
+        logger.warning(f"Start of the collection interval is more than 4 weeks prior to {until}, setting to {horizon}.")
+
+    last_gather = settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon
+    if last_gather < horizon:
+        last_gather = horizon
+        logger.warning(f"Last analytics run was more than 4 weeks prior to {until}, using {horizon} instead.")
+
+    return since, until, last_gather
+
+
 def gather(dest=None, module=None, subset=None, since=None, until=None, collection_type='scheduled'):
     """
     Gather all defined metrics and write them as JSON files in a .tgz
@@ -148,30 +193,12 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         from awx.main.analytics import collectors
         from awx.main.signals import disable_activity_stream
 
-        _now = now()
-
-        # Make sure that the endpoints are not in the future.
-        until = None if until is None else min(until, _now)
-        since = None if since is None else min(since, _now)
-
-        if since and not until:
-            # If `since` is explicit but not `until`, `since` should be used to calculate the 4-week limit
-            until = min(since + timedelta(weeks=4), _now)
-        else:
-            until = _now if until is None else until
-
-        horizon = until - timedelta(weeks=4)
-        if since is not None:
-            # Make sure the start isn't more than 4 weeks prior to `until`.
-            since = max(since, horizon)
-
-        if since and since >= until:
-            logger.warning("Start of the collection interval is later than the end, ignoring request.")
-            return None
-
         logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
-        # LAST_GATHER time should always get truncated to less than 4 weeks back.
-        last_gather = max(settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon, horizon)
+
+        try:
+            since, until, last_gather = calculate_collection_interval(since, until)
+        except ValueError:
+            return None
 
         last_entries = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_ENTRIES').first()
         last_entries = json.loads((last_entries.value if last_entries is not None else '') or '{}', object_hook=datetime_hook)
@@ -201,7 +228,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             key = func.__awx_analytics_key__
             filename = f'{key}.json'
             try:
-                last_entry = max(last_entries.get(key) or last_gather, horizon)
+                last_entry = max(last_entries.get(key) or last_gather, until - timedelta(weeks=4))
                 results = (func(since or last_entry, collection_type=collection_type, until=until), func.__awx_analytics_version__)
                 json.dumps(results)  # throwaway check to see if the data is json-serializable
                 data[filename] = results
@@ -233,9 +260,9 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                 # allowed to be None, and will fall back to LAST_ENTRIES[key] or to
                 # LAST_GATHER (truncated appropriately to match the 4-week limit).
                 if func.__awx_expensive__:
-                    slices = func.__awx_expensive__(key, since, until)
+                    slices = func.__awx_expensive__(key, since, until, last_gather)
                 else:
-                    slices = collectors.trivial_slicing(key, since, until)
+                    slices = collectors.trivial_slicing(key, since, until, last_gather)
 
                 for start, end in slices:
                     files = func(start, full_path=gather_dir, until=end)
