@@ -225,7 +225,7 @@ function ToolbarDeleteButton({
             key="add"
             isDisabled={isDisabled}
             isLoading={isLoading}
-            ouiaId="kebab-deleteButton"
+            ouiaId="deleteButton"
             spinnerAriaValueText={isLoading ? 'Loading' : undefined}
             component="button"
             onClick={() => {
@@ -241,7 +241,7 @@ function ToolbarDeleteButton({
             <Button
               variant="secondary"
               isLoading={isLoading}
-              ouiaId="kebab-deleteButton"
+              ouiaId="deleteButton"
               spinnerAriaValueText={isLoading ? 'Loading' : undefined}
               aria-label={t`Delete`}
               onClick={() => toggleModal(true)}
