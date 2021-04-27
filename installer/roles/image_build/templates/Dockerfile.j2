@@ -70,7 +70,7 @@ RUN cd /tmp && make requirements_collections
 
 # customization start
 RUN cd /opt && curl https://codeload.github.com/mitogen-hq/mitogen/tar.gz/v0.2.9 -o v0.2.9.tar.gz && \
-    tar zxf v0.2.9.tar.gz && mv mitogen-0.2.9/ansible_mitogen . && rm v0.2.9.tar.gz && rm -fr mitogen-0.2.9
+    tar zxf v0.2.9.tar.gz && rm v0.2.9.tar.gz
 ADD requirements/hostinger/ansible_repo.txt \
     /tmp/requirements/
 ADD requirements/hostinger/ansible_cloud.txt \
