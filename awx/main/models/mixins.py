@@ -532,6 +532,7 @@ class WebhookTemplateMixin(models.Model):
     SERVICES = [
         ('github', "GitHub"),
         ('gitlab', "GitLab"),
+        ('generic', "Generic"),
     ]
 
     webhook_service = models.CharField(max_length=16, choices=SERVICES, blank=True, help_text=_('Service that webhook requests will be accepted from'))

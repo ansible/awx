@@ -96,6 +96,7 @@ options:
       choices:
         - github
         - gitlab
+        - generic
     webhook_credential:
       description:
         - Personal Access Token for posting back the status to the service API
@@ -676,7 +677,7 @@ def main():
         ask_inventory_on_launch=dict(type='bool'),
         ask_scm_branch_on_launch=dict(type='bool'),
         ask_limit_on_launch=dict(type='bool'),
-        webhook_service=dict(choices=['github', 'gitlab']),
+        webhook_service=dict(choices=['github', 'gitlab', 'generic']),
         webhook_credential=dict(),
         labels=dict(type="list", elements='str'),
         notification_templates_started=dict(type="list", elements='str'),

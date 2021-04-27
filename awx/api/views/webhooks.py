@@ -225,3 +225,43 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
         # analysis by attackers.
         if not hmac.compare_digest(force_bytes(obj.webhook_key), self.get_signature()):
             raise PermissionDenied
+
+
+# todo receiver
+class GenericWebhookReceiver(WebhookReceiverBase):
+    service = 'generic'
+
+    ref_keys = {'Push Hook': 'checkout_sha', 'Tag Push Hook': 'checkout_sha', 'Merge Request Hook': 'object_attributes.last_commit.id'}
+
+    def get_event_type(self):
+        return self.request.META.get('HTTP_X_GENERIC_EVENT')
+
+    def get_event_guid(self):
+        # GitLab does not provide a unique identifier on events, so construct one.
+        h = sha1()
+        h.update(force_bytes(self.request.body))
+        return h.hexdigest()
+
+    def get_event_status_api(self):
+        if self.get_event_type() != 'Merge Request Hook':
+            return
+        project = self.request.data.get('project', {})
+        repo_url = project.get('web_url')
+        if not repo_url:
+            return
+        parsed = urllib.parse.urlparse(repo_url)
+
+        return "{}://{}/api/v4/projects/{}/statuses/{}".format(parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
+
+    def get_signature(self):
+        return force_bytes(self.request.META.get('HTTP_X_GITLAB_TOKEN') or '')
+
+    def check_signature(self, obj):
+        if not obj.webhook_key:
+            raise PermissionDenied
+
+        # GitLab only returns the secret token, not an hmac hash.  Use
+        # the hmac `compare_digest` helper function to prevent timing
+        # analysis by attackers.
+        if not hmac.compare_digest(force_bytes(obj.webhook_key), self.get_signature()):
+            raise PermissionDenied

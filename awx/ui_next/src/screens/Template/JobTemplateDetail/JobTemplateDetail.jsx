@@ -142,6 +142,17 @@ function JobTemplateDetail({ i18n, template }) {
     </TextList>
   );
 
+  function webhook_translation(alias) {
+   if (alias === 'github'){
+    return i18n._(t`GitHub`)
+    }
+
+    if (alias === 'gitlab') {
+      return i18n._(t`GitLab`)
+    }
+    return i18n._(t`Generic`)
+  }
+
   const inventoryValue = (kind, id) => {
     const inventorykind = kind === 'smart' ? 'smart_inventory' : 'inventory';
 
@@ -249,9 +260,7 @@ function JobTemplateDetail({ i18n, template }) {
           <Detail
             label={i18n._(t`Webhook Service`)}
             value={
-              webhook_service === 'github'
-                ? i18n._(t`GitHub`)
-                : i18n._(t`GitLab`)
+              webhook_translation(webhook_service)
             }
           />
         )}

@@ -114,6 +114,12 @@ function WebhookSubForm({ i18n, templateType }) {
       label: i18n._(t`GitLab`),
       isDisabled: false,
     },
+    {
+      value: 'generic',
+      key: 'generic',
+      label: i18n._(t`Generic`),
+      isDisabled: false,
+    },
   ];
 
   if (error || webhookKeyError) {
