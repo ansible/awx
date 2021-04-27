@@ -82,9 +82,9 @@ function ScheduleListItem({
         {Boolean(isMissingInventory || isMissingSurvey) && (
           <span>
             <Tooltip
-              content={[isMissingInventory, isMissingSurvey].map(message => (
-                <div key={message}>{message}</div>
-              ))}
+              content={[isMissingInventory, isMissingSurvey].map(message =>
+                message ? <div key={message}>{message}</div> : null
+              )}
               position="right"
             >
               <ExclamationTriangleIcon />
