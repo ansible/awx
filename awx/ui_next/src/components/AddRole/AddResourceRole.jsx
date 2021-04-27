@@ -203,7 +203,9 @@ function AddResourceRole({ onSave, onClose, roles, i18n, resource, onError }) {
             dataCy="add-role-users"
             onClick={() => handleResourceSelect('users')}
           />
-          {resource?.type === 'credential' && !resource?.organization ? null : (
+          {resource?.type === 'team' ||
+          (resource?.type === 'credential' &&
+            !resource?.organization) ? null : (
             <SelectableCard
               isSelected={selectedResource === 'teams'}
               label={i18n._(t`Teams`)}
