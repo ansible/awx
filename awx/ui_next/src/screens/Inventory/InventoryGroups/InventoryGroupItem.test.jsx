@@ -18,12 +18,16 @@ describe('<InventoryGroupItem />', () => {
 
   beforeEach(() => {
     wrapper = mountWithContexts(
-      <InventoryGroupItem
-        group={mockGroup}
-        inventoryId={1}
-        isSelected={false}
-        onSelect={() => {}}
-      />
+      <table>
+        <tbody>
+          <InventoryGroupItem
+            group={mockGroup}
+            inventoryId={1}
+            isSelected={false}
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
     );
   });
 
@@ -40,12 +44,16 @@ describe('<InventoryGroupItem />', () => {
     copyMockGroup.summary_fields.user_capabilities.edit = false;
 
     wrapper = mountWithContexts(
-      <InventoryGroupItem
-        group={copyMockGroup}
-        inventoryId={1}
-        isSelected={false}
-        onSelect={() => {}}
-      />
+      <table>
+        <tbody>
+          <InventoryGroupItem
+            group={copyMockGroup}
+            inventoryId={1}
+            isSelected={false}
+            onSelect={() => {}}
+          />
+        </tbody>
+      </table>
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
   });

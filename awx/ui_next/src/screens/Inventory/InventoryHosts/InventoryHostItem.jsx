@@ -1,12 +1,11 @@
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-
 import { t } from '@lingui/macro';
-import { Button, Tooltip } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { ActionsTd } from '../../../components/PaginatedTable';
+import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 
 import HostToggle from '../../../components/HostToggle';
 import { Host } from '../../../types';
@@ -37,18 +36,19 @@ function InventoryHostItem({
       </Td>
       <ActionsTd dataLabel={t`Actions`} gridColumns="auto 40px">
         <HostToggle host={host} />
-        {host.summary_fields.user_capabilities?.edit ? (
-          <Tooltip content={t`Edit Host`} position="top">
-            <Button
-              ouiaId={`${host.id}-edit-button`}
-              variant="plain"
-              component={Link}
-              to={`${editUrl}`}
-            >
-              <PencilAltIcon />
-            </Button>
-          </Tooltip>
-        ) : null}
+        <ActionItem
+          visible={host.summary_fields.user_capabilities?.edit}
+          tooltip={t`Edit host`}
+        >
+          <Button
+            ouiaId={`${host.id}-edit-button`}
+            variant="plain"
+            component={Link}
+            to={`${editUrl}`}
+          >
+            <PencilAltIcon />
+          </Button>
+        </ActionItem>
       </ActionsTd>
     </Tr>
   );
