@@ -403,4 +403,68 @@ describe('<ScheduleAdd />', () => {
     expect(SchedulesAPI.associateCredential).toBeCalledWith(3, 10);
     expect(SchedulesAPI.associateCredential).toBeCalledWith(3, 20);
   });
+
+  test('should submit survey with default values properly, without opening prompt wizard', async () => {
+    let scheduleSurveyWrapper;
+    await act(async () => {
+      scheduleSurveyWrapper = mountWithContexts(
+        <ScheduleAdd
+          apiModel={JobTemplatesAPI}
+          resource={{
+            id: 700,
+            type: 'job_template',
+            inventory: 2,
+            summary_fields: { credentials: [] },
+          }}
+          launchConfig={launchConfig}
+          surveyConfig={{
+            spec: [
+              {
+                question_name: 'text',
+                question_description: '',
+                required: true,
+                type: 'text',
+                variable: 'text',
+                min: 0,
+                max: 1024,
+                default: 'text variable',
+                choices: '',
+                new_question: true,
+              },
+              {
+                question_name: 'mc',
+                question_description: '',
+                required: true,
+                type: 'multiplechoice',
+                variable: 'mc',
+                min: 0,
+                max: 1024,
+                default: 'first',
+                choices: 'first\nsecond',
+                new_question: true,
+              },
+            ],
+          }}
+        />
+      );
+    });
+    await act(async () => {
+      scheduleSurveyWrapper.find('Formik').invoke('onSubmit')({
+        description: 'test description',
+        end: 'never',
+        frequency: 'none',
+        interval: 1,
+        name: 'Run once schedule',
+        startDateTime: '2020-03-25T10:00:00',
+        timezone: 'America/New_York',
+      });
+    });
+    expect(JobTemplatesAPI.createSchedule).toHaveBeenCalledWith(700, {
+      description: 'test description',
+      name: 'Run once schedule',
+      extra_data: { mc: 'first', text: 'text variable' },
+      rrule:
+        'DTSTART;TZID=America/New_York:20200325T100000 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
+    });
+  });
 });
