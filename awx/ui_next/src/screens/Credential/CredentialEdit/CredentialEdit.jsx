@@ -14,6 +14,7 @@ import ContentLoading from '../../../components/ContentLoading';
 import CredentialForm from '../shared/CredentialForm';
 import useRequest from '../../../util/useRequest';
 import { useConfig } from '../../../contexts/Config';
+import { Credential } from '../../../types';
 
 function CredentialEdit({ credential }) {
   const history = useHistory();
@@ -198,7 +199,7 @@ function CredentialEdit({ credential }) {
 }
 
 CredentialEdit.propTypes = {
-  credential: PropTypes.objectOf(PropTypes.object).isRequired,
+  credential: Credential.isRequired,
 };
 
 export { CredentialEdit as _CredentialEdit };
