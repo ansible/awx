@@ -14,7 +14,6 @@ There are two named-URL-related Tower configuration settings available under `/a
     "inventories": "<name>++<organization.name>",
     "users": "<username>",
     "applications": "<name>++<organization.name>",
-    "inventory_scripts": "<name>++<organization.name>",
     "labels": "<name>++<organization.name>",
     "credential_types": "<name>+<kind>",
     "notification_templates": "<name>++<organization.name>",
