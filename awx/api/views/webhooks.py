@@ -1,5 +1,6 @@
 from hashlib import sha1
 import hmac
+import hashlib
 import logging
 import urllib.parse
 
@@ -83,7 +84,9 @@ class WebhookReceiverBase(APIView):
 
     def get_event_ref(self):
         key = self.ref_keys.get(self.get_event_type(), '')
+        print("key:", key)
         value = self.request.data
+        print("value:", value)
         for element in key.split('.'):
             try:
                 if element.isdigit():
@@ -237,10 +240,26 @@ class GenericWebhookReceiver(WebhookReceiverBase):
         return self.request.META.get('HTTP_X_GENERIC_EVENT')
 
     def get_event_guid(self):
-        # GitLab does not provide a unique identifier on events, so construct one.
         h = sha1()
         h.update(force_bytes(self.request.body))
         return h.hexdigest()
+
+    def get_event_ref(self):
+        key = self.ref_keys.get(self.get_event_type(), '')
+        print("key:", key)
+        value = self.request.data
+        print("value:", value)
+        for element in key.split('.'):
+            try:
+                if element.isdigit():
+                    value = value[int(element)]
+                else:
+                    value = (value or {}).get(element)
+            except Exception:
+                value = None
+        if value == '00000000000000000000000000000000000000':  # a deleted ref
+            value = None
+        return value
 
     def get_event_status_api(self):
         if self.get_event_type() != 'Merge Request Hook':
@@ -251,17 +270,19 @@ class GenericWebhookReceiver(WebhookReceiverBase):
             return
         parsed = urllib.parse.urlparse(repo_url)
 
-        return "{}://{}/api/v4/projects/{}/statuses/{}".format(parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
+        return "{}://{}/api/projects/{}/statuses/{}".format(parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
 
     def get_signature(self):
-        return force_bytes(self.request.META.get('HTTP_X_GITLAB_TOKEN') or '')
+        return force_bytes(self.request.META.get('HTTP_X_GENERIC_TOKEN') or '')
 
     def check_signature(self, obj):
+        print(obj.webhook_key, self.get_signature())
+        print(hmac.compare_digest(force_bytes(obj.webhook_key), self.get_signature()))
         if not obj.webhook_key:
             raise PermissionDenied
 
-        # GitLab only returns the secret token, not an hmac hash.  Use
-        # the hmac `compare_digest` helper function to prevent timing
-        # analysis by attackers.
-        if not hmac.compare_digest(force_bytes(obj.webhook_key), self.get_signature()):
+        # Developer to hash secret
+        # $ echo "Hello world" | openssl dgst -sha256 -hmac ABCDEFG
+        h = hmac.new(force_bytes(obj.webhook_key), self.get_signature(), hashlib.sha256)
+        if not h.digest():
             raise PermissionDenied
