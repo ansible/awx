@@ -49,7 +49,7 @@ def mock_awx_ping_response(self, method, url, **kwargs):
 
 
 def test_version_warning(collection_import, silence_warning):
-    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').ControllerAPIModule
     cli_data = {'ANSIBLE_MODULE_ARGS': {}}
     testargs = ['module_file2.py', json.dumps(cli_data)]
     with mock.patch.object(sys, 'argv', testargs):
@@ -64,7 +64,7 @@ def test_version_warning(collection_import, silence_warning):
 
 
 def test_version_warning_strictness_awx(collection_import, silence_warning):
-    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').ControllerAPIModule
     cli_data = {'ANSIBLE_MODULE_ARGS': {}}
     testargs = ['module_file2.py', json.dumps(cli_data)]
     # Compare 1.0.0 to 1.2.3 (major matches)
@@ -87,7 +87,7 @@ def test_version_warning_strictness_awx(collection_import, silence_warning):
 
 
 def test_version_warning_strictness_tower(collection_import, silence_warning):
-    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').ControllerAPIModule
     cli_data = {'ANSIBLE_MODULE_ARGS': {}}
     testargs = ['module_file2.py', json.dumps(cli_data)]
     # Compare 1.2.0 to 1.2.3 (major/minor matches)
@@ -112,7 +112,7 @@ def test_version_warning_strictness_tower(collection_import, silence_warning):
 
 
 def test_type_warning(collection_import, silence_warning):
-    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').ControllerAPIModule
     cli_data = {'ANSIBLE_MODULE_ARGS': {}}
     testargs = ['module_file2.py', json.dumps(cli_data)]
     with mock.patch.object(sys, 'argv', testargs):
@@ -128,7 +128,7 @@ def test_type_warning(collection_import, silence_warning):
 
 def test_duplicate_config(collection_import, silence_warning):
     # imports done here because of PATH issues unique to this test suite
-    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').ControllerAPIModule
     data = {'name': 'zigzoom', 'zig': 'zoom', 'tower_username': 'bob', 'tower_config_file': 'my_config'}
 
     with mock.patch.object(TowerAPIModule, 'load_config') as mock_load:
@@ -152,7 +152,7 @@ def test_no_templated_values(collection_import):
     Those replacements should happen at build time, so they should not be
     checked into source.
     """
-    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').ControllerAPIModule
     assert TowerAPIModule._COLLECTION_VERSION == "0.0.1-devel", (
         'The collection version is templated when the collection is built ' 'and the code should retain the placeholder of "0.0.1-devel".'
     )
