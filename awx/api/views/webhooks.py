@@ -230,14 +230,15 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
             raise PermissionDenied
 
 
-# todo receiver
 class GenericWebhookReceiver(WebhookReceiverBase):
     service = 'generic'
-
+    
+    # Until issues/5209 is unblocked, providing fallbacks to BitBucket
+    
     ref_keys = {'Push Hook': 'checkout_sha', 'Tag Push Hook': 'checkout_sha', 'Merge Request Hook': 'object_attributes.last_commit.id'}
 
     def get_event_type(self):
-        return self.request.META.get('HTTP_X_GENERIC_EVENT')
+        return self.request.META.get('HTTP_X_GENERIC_EVENT') or self.request.META.get('HTTP_X_EVENT_KEY')
 
     def get_event_guid(self):
         h = sha1()
@@ -273,7 +274,7 @@ class GenericWebhookReceiver(WebhookReceiverBase):
         return "{}://{}/api/projects/{}/statuses/{}".format(parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
 
     def get_signature(self):
-        return force_bytes(self.request.META.get('HTTP_X_GENERIC_TOKEN') or '')
+        return force_bytes(self.request.META.get('HTTP_X_GENERIC_TOKEN') or self.request.META.get('HTTP_X_HUB_SIGNATURE') or '')
 
     def check_signature(self, obj):
         print(obj.webhook_key, self.get_signature())
