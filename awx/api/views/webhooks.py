@@ -83,9 +83,7 @@ class WebhookReceiverBase(APIView):
 
     def get_event_ref(self):
         key = self.ref_keys.get(self.get_event_type(), '')
-        print("key:", key)
         value = self.request.data
-        print("value:", value)
         for element in key.split('.'):
             try:
                 if element.isdigit():
@@ -283,7 +281,7 @@ class GenericWebhookReceiver(WebhookReceiverBase):
         '''
         config = self.request.data.get('config', {})
         self.ref_keys = config.get('reference_keys') if 'reference_keys' in config else self.default_ref_keys
-        self.api_endpoint = config.get('api_endpoint') if 'api_endpoint' in config else ''
+        self.api_endpoint = config.get('api_endpoint') if 'api_endpoint' in config else None
 
     def get_event_guid(self):
         h = sha1()
