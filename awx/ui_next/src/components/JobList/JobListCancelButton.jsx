@@ -58,13 +58,13 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
                 one="You do not have permission to cancel the following job:"
                 other="You do not have permission to cancel the following jobs:"
               />
-              {cannotCancelPermissions.map((job, i) =>
-                i === cannotCancelPermissions.length - 1 ? (
-                  <strong> {job}</strong>
-                ) : (
-                  <strong> {job},</strong>
-                )
-              )}
+              {cannotCancelPermissions.map((job, i) => (
+                <strong key={job}>
+                  {' '}
+                  {job}
+                  {i !== cannotCancelPermissions.length - 1 ? ',' : ''}
+                </strong>
+              ))}
             </div>
           )}
           {cannotCancelNotRunning.length > 0 && (
@@ -74,13 +74,13 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
                 one="You cannot cancel the following job because it is not running:"
                 other="You cannot cancel the following jobs because they are not running:"
               />
-              {cannotCancelNotRunning.map((job, i) =>
-                i === cannotCancelNotRunning.length - 1 ? (
-                  <strong> {job}</strong>
-                ) : (
-                  <strong> {job},</strong>
-                )
-              )}
+              {cannotCancelNotRunning.map((job, i) => (
+                <strong key={job}>
+                  {' '}
+                  {job}
+                  {i !== cannotCancelNotRunning.length - 1 ? ',' : ''}
+                </strong>
+              ))}
             </div>
           )}
         </div>
