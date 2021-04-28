@@ -5,14 +5,14 @@
     inv_name: "AWX-Collection-tests-tower_host-inv-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create an Inventory
-  tower_inventory:
+  inventory:
     name: "{{ inv_name }}"
     organization: Default
     state: present
   register: result
 
 - name: Create a Host
-  tower_host:
+  host:
     name: "{{ host_name }}"
     inventory: "{{ result.id }}"
     state: present
@@ -25,7 +25,7 @@
       - "result is changed"
 
 - name: Delete a Host
-  tower_host:
+  host:
     name: "{{ result.id }}"
     inventory: "{{ inv_name }}"
     state: absent
@@ -36,7 +36,7 @@
       - "result is changed"
 
 - name: Check module fails with correct msg
-  tower_host:
+  host:
     name: test-host
     description: Host Description
     inventory: test-non-existing-inventory

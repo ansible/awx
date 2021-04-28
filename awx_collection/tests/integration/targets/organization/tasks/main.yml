@@ -9,13 +9,13 @@
     group_name1: "AWX-Collection-tests-tower_instance_group-group1-{{ test_id }}"
 
 - name: Make sure {{ org_name }} is not there
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     state: absent
   register: result
 
 - name: "Create a new organization"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     galaxy_credentials:
       - Ansible Galaxy
@@ -25,7 +25,7 @@
     that: "result is changed"
 
 - name: "Make sure making the same org is not a change"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
   register: result
 
@@ -44,7 +44,7 @@
       - "result is changed"
 
 - name: "Pass in all parameters"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     description: "A description"
     instance_groups:
@@ -56,7 +56,7 @@
       - "result is changed"
 
 - name: "Change the description"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     description: "A new description"
   register: result
@@ -71,7 +71,7 @@
     state: absent
 
 - name: "Remove the organization"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     state: absent
   register: result
@@ -81,7 +81,7 @@
       - "result is changed"
 
 - name: "Remove a missing organization"
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     state: absent
   register: result
@@ -92,7 +92,7 @@
 
 # Test behaviour common to all tower modules
 - name: Check that SSL is available and verify_ssl is enabled (task must fail)
-  tower_organization:
+  organization:
     name: Default
     validate_certs: true
   ignore_errors: true
@@ -104,6 +104,6 @@
       - "'CERTIFICATE_VERIFY_FAILED' in check_ssl_is_used['msg']"
 
 - name: Check that verify_ssl is disabled (task must not fail)
-  tower_organization:
+  organization:
     name: Default
     validate_certs: false

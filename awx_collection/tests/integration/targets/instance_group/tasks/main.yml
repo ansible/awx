@@ -11,7 +11,7 @@
 
 - block:
     - name: Create an OpenShift Credential
-      tower_credential:
+      credential:
         name: "{{ cred_name1 }}"
         organization: "Default"
         credential_type: "OpenShift or Kubernetes API Bearer Token"
@@ -70,7 +70,7 @@
         - "{{ group_name2 }}"
 
     - name: Delete the credential
-      tower_credential:
+      credential:
         name: "{{ cred_name1 }}"
         organization: "Default"
         credential_type: "OpenShift or Kubernetes API Bearer Token"

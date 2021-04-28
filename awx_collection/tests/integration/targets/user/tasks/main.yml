@@ -4,7 +4,7 @@
     username: "AWX-Collection-tests-tower_user-user-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create a User
-  tower_user:
+  user:
     username: "{{ username }}"
     first_name: Joe
     password: "{{ 65535 | random | to_uuid }}"
@@ -16,7 +16,7 @@
       - "result is changed"
 
 - name: Change a User by ID
-  tower_user:
+  user:
     username: "{{ result.id }}"
     last_name: User
     email: joe@example.org
@@ -28,7 +28,7 @@
       - "result is changed"
 
 - name: Check idempotency
-  tower_user:
+  user:
     username: "{{ username }}"
     first_name: Joe
     last_name: User
@@ -39,7 +39,7 @@
       - "result is not changed"
 
 - name: Delete a User
-  tower_user:
+  user:
     username: "{{ username }}"
     email: joe@example.org
     state: absent
@@ -50,7 +50,7 @@
       - "result is changed"
 
 - name: Create an Auditor
-  tower_user:
+  user:
     first_name: Joe
     last_name: Auditor
     username: "{{ username }}"
@@ -65,7 +65,7 @@
       - "result is changed"
 
 - name: Delete an Auditor
-  tower_user:
+  user:
     username: "{{ username }}"
     email: joe@example.org
     state: absent
@@ -76,7 +76,7 @@
       - "result is changed"
 
 - name: Create a Superuser
-  tower_user:
+  user:
     first_name: Joe
     last_name: Super
     username: "{{ username }}"
@@ -91,7 +91,7 @@
       - "result is changed"
 
 - name: Delete a Superuser
-  tower_user:
+  user:
     username: "{{ username }}"
     email: joe@example.org
     state: absent
@@ -102,7 +102,7 @@
       - "result is changed"
 
 - name: Test tower SSL parameter
-  tower_user:
+  user:
     first_name: Joe
     last_name: User
     username: "{{ username }}"

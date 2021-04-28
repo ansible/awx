@@ -12,19 +12,19 @@
 
 - block:
     - name: Create some organizations
-      tower_organization:
+      organization:
         name: "{{ item }}"
       loop:
         - "{{ org_name1 }}"
         - "{{ org_name2 }}"
 
     - name: Create an inventory
-      tower_inventory:
+      inventory:
         name: "{{ inventory_name1 }}"
         organization: "{{ org_name1 }}"
 
     - name: Export all tower assets
-      tower_export:
+      export:
         all: true
       register: all_assets
 
@@ -35,7 +35,7 @@
           - all_assets['assets']['organizations'] | length() >= 2
 
     - name: Export all inventories
-      tower_export:
+      export:
         inventory: 'all'
       register: inventory_export
 
@@ -48,7 +48,7 @@
 
     # This mimics the example in the module
     - name: Export an all and a specific
-      tower_export:
+      export:
         inventory: 'all'
         organizations: "{{ org_name1 }}"
       register: mixed_export
@@ -63,13 +63,13 @@
 
   always:
     - name: Remove our inventory
-      tower_inventory:
+      inventory:
         name: "{{ inventory_name1 }}"
         organization: "{{ org_name1 }}"
         state: absent
 
     - name: Remove test organizations
-      tower_organization:
+      organization:
         name: "{{ item }}"
         state: absent
       loop:

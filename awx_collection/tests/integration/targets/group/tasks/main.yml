@@ -10,14 +10,14 @@
     host_name3: "AWX-Collection-test-tower_group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create an Inventory
-  tower_inventory:
+  inventory:
     name: "{{ inv_name }}"
     organization: Default
     state: present
   register: result
 
 - name: Create a Group
-  tower_group:
+  group:
     name: "{{ group_name1 }}"
     inventory: "{{ result.id }}"
     state: present
@@ -30,7 +30,7 @@
       - "result is changed"
 
 - name: Create a Group
-  tower_group:
+  group:
     name: "{{ group_name2 }}"
     inventory: "{{ inv_name }}"
     state: present
@@ -43,7 +43,7 @@
       - "result is changed"
 
 - name: Create a Group
-  tower_group:
+  group:
     name: "{{ group_name3 }}"
     inventory: "{{ inv_name }}"
     state: present
@@ -56,7 +56,7 @@
       - "result is changed"
 
 - name: add hosts
-  tower_host:
+  host:
     name: "{{ item }}"
     inventory: "{{ inv_name }}"
   loop:
@@ -65,7 +65,7 @@
     - "{{ host_name3 }}"
 
 - name: Create a Group with hosts and sub group
-  tower_group:
+  group:
     name: "{{ group_name1 }}"
     inventory: "{{ inv_name }}"
     hosts:
@@ -79,7 +79,7 @@
   register: result
 
 - name: Create a Group with hosts and sub group
-  tower_group:
+  group:
     name: "{{ group_name1 }}"
     inventory: "{{ inv_name }}"
     hosts:
@@ -100,7 +100,7 @@
       - group1_host_count  == "3"
 
 - name: Delete a Group
-  tower_group:
+  group:
     name: "{{ group_name1 }}"
     inventory: "{{ inv_name }}"
     state: absent
@@ -111,7 +111,7 @@
       - "result is changed"
 
 - name: Delete a Group
-  tower_group:
+  group:
     name: "{{ group_name2 }}"
     inventory: "{{ inv_name }}"
     state: absent
@@ -122,7 +122,7 @@
       - "result is changed"
 
 - name: Delete a Group
-  tower_group:
+  group:
     name: "{{ group_name3 }}"
     inventory: "{{ inv_name }}"
     state: absent
@@ -133,7 +133,7 @@
       - "result is not changed"
 
 - name: Check module fails with correct msg
-  tower_group:
+  group:
     name: test-group
     description: Group Description
     inventory: test-non-existing-inventory
@@ -149,7 +149,7 @@
       - "result.total_results == 0"
 
 - name: add hosts
-  tower_host:
+  host:
     name: "{{ item }}"
     inventory: "{{ inv_name }}"
   loop:
@@ -158,14 +158,14 @@
     - "{{ host_name3 }}"
 
 - name: add mid level group
-  tower_group:
+  group:
     name: "{{ group_name2 }}"
     inventory: "{{ inv_name }}"
     hosts:
       - "{{ host_name3 }}"
 
 - name: add top group
-  tower_group:
+  group:
     name: "{{ group_name3 }}"
     inventory: "{{ inv_name }}"
     hosts:
@@ -175,19 +175,19 @@
       - "{{ group_name2 }}"
 
 - name: Delete the parent group
-  tower_group:
+  group:
     name: "{{ group_name3 }}"
     inventory: "{{ inv_name }}"
     state: absent
 
 - name: Delete the child group
-  tower_group:
+  group:
     name: "{{ group_name2 }}"
     inventory: "{{ inv_name }}"
     state: absent
 
 - name: Delete an Inventory
-  tower_inventory:
+  inventory:
     name: "{{ inv_name }}"
     organization: Default
     state: absent

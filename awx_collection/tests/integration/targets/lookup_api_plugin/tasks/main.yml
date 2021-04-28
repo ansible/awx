@@ -16,7 +16,7 @@
     group_name: "AWX-Collection-tests-tower_api_lookup-group1-{{ test_id }}"
 
 - name: Get our collection package
-  tower_meta:
+  meta:
   register: tower_meta
 
 - name: Generate the name of our plugin
@@ -24,7 +24,7 @@
     plugin_name: "{{ tower_meta.prefix }}.tower_api"
 
 - name: Create all of our users
-  tower_user:
+  user:
     username: "{{ item }}"
     is_superuser: true
     password: "{{ test_id }}"
@@ -43,7 +43,7 @@
           - "'DNE' in results.msg"
 
     - name: Create our hosts
-      tower_host:
+      host:
         name: "{{ item }}"
         inventory: "Demo Inventory"
       loop: "{{ hosts }}"
@@ -200,7 +200,7 @@
         label: "{{ item['name'] }}"
 
     - name: Make sure user 'john' is an org admin of the default org if the user exists
-      tower_role:
+      role:
         organization: Default
         role: admin
         user: "{{ usernames[0] }}"
@@ -213,7 +213,7 @@
           - tower_role_revoke is skipped
 
     - name: Create an inventory group with all 'foo' hosts
-      tower_group:
+      group:
         name: "{{ group_name }}"
         inventory: "Demo Inventory"
         hosts: >-
@@ -229,20 +229,20 @@
 
   always:
     - name: Cleanup group
-      tower_group:
+      group:
         name: "{{ group_name }}"
         inventory: "Demo Inventory"
         state: absent
 
     - name: Cleanup hosts
-      tower_host:
+      host:
         name: "{{ item }}"
         inventory: "Demo Inventory"
         state: absent
       loop: "{{ hosts }}"
 
     - name: Cleanup users
-      tower_user:
+      user:
         username: "{{ item }}"
         state: absent
       loop: "{{ usernames }}"

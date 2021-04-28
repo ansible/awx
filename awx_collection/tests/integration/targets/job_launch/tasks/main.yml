@@ -70,7 +70,7 @@
       - "result.status == 'pending'"
 
 - name: Create a project for testing extra_vars
-  tower_project:
+  project:
     name: "{{ proj_name }}"
     organization: Default
     scm_type: git
@@ -216,7 +216,7 @@
       - "result is changed"
 
 - name: Delete the extra_vars project
-  tower_project:
+  project:
     name: "{{ proj_name }}"
     organization: Default
     state: absent

@@ -9,7 +9,7 @@
     project_name1: "AWX-Collection-tests-tower_project_update-project-{{ test_id }}"
 
 - name: Create a git project without credentials without waiting
-  tower_project:
+  project:
     name: "{{ project_name1 }}"
     organization: Default
     scm_type: git
@@ -56,7 +56,7 @@
       - result is not changed
 
 - name: Delete the test project 1
-  tower_project:
+  project:
     name: "{{ project_name1 }}"
     organization: Default
     state: absent

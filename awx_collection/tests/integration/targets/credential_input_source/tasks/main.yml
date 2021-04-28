@@ -11,7 +11,7 @@
 
 - block:
     - name: Add Tower credential Lookup
-      tower_credential:
+      credential:
         description: Credential for Testing Source
         name: "{{ src_cred_name }}"
         credential_type: CyberArk AIM Central Credential Provider Lookup
@@ -26,7 +26,7 @@
           - "src_cred_result is changed"
 
     - name: Add Tower credential Target
-      tower_credential:
+      credential:
         description: Credential for Testing Target
         name: "{{ target_cred_name }}"
         credential_type: Machine
@@ -55,7 +55,7 @@
           - "result is changed"
 
     - name: Add Second Tower credential Lookup
-      tower_credential:
+      credential:
         description: Credential for Testing Source Change
         name: "{{ src_cred_name }}-2"
         credential_type: CyberArk AIM Central Credential Provider Lookup
@@ -89,7 +89,7 @@
           - "result is changed"
 
     - name: Remove Tower credential Lookup
-      tower_credential:
+      credential:
         name: "{{ src_cred_name }}"
         organization: Default
         credential_type: CyberArk AIM Central Credential Provider Lookup
@@ -97,7 +97,7 @@
       register: result
 
     - name: Remove Alt Tower credential Lookup
-      tower_credential:
+      credential:
         name: "{{ src_cred_name }}-2"
         organization: Default
         credential_type: CyberArk AIM Central Credential Provider Lookup
@@ -105,7 +105,7 @@
       register: result
 
     - name: Remove Tower credential
-      tower_credential:
+      credential:
         name: "{{ target_cred_name }}"
         organization: Default
         credential_type: Machine

@@ -23,7 +23,7 @@
           - "result is changed"
 
     - name: Create an Insights Credential
-      tower_credential:
+      credential:
         name: "{{ cred_name1 }}"
         organization: Default
         kind: insights
@@ -38,7 +38,7 @@
           - "result is changed"
 
     - name: Create an Inventory
-      tower_inventory:
+      inventory:
         name: "{{ inv_name1 }}"
         organization: Default
         insights_credential: "{{ result.id }}"
@@ -52,7 +52,7 @@
           - "result is changed"
 
     - name: Test Inventory module idempotency
-      tower_inventory:
+      inventory:
         name: "{{ result.id }}"
         organization: Default
         insights_credential: "{{ cred_name1 }}"
@@ -64,7 +64,7 @@
           - "result is not changed"
 
     - name: Copy an inventory
-      tower_inventory:
+      inventory:
         name: "copy_{{ inv_name1 }}"
         copy_from: "{{ inv_name1 }}"
         organization: Default
@@ -77,7 +77,7 @@
           - result.copied
 
     - name: Delete an Inventory
-      tower_inventory:
+      inventory:
         name: "copy_{{ inv_name1 }}"
         organization: Default
         state: absent
@@ -88,7 +88,7 @@
           - "result is changed"
 
     - name: Fail Change Regular to Smart
-      tower_inventory:
+      inventory:
         name: "{{ inv_name1 }}"
         organization: Default
         kind: smart
@@ -100,7 +100,7 @@
           - "result is failed"
 
     - name: Create a smart inventory
-      tower_inventory:
+      inventory:
         name: "{{ inv_name2 }}"
         organization: Default
         kind: smart
@@ -112,7 +112,7 @@
           - "result is changed"
 
     - name: Delete a smart inventory
-      tower_inventory:
+      inventory:
         name: "{{ inv_name2 }}"
         organization: Default
         kind: smart
@@ -125,7 +125,7 @@
           - "result is changed"
 
     - name: Delete an Inventory
-      tower_inventory:
+      inventory:
         name: "{{ inv_name1 }}"
         organization: Default
         state: absent
@@ -136,7 +136,7 @@
           - "result is changed"
 
     - name: Delete a Non-Existent Inventory
-      tower_inventory:
+      inventory:
         name: "{{ inv_name1 }}"
         organization: Default
         state: absent
@@ -147,7 +147,7 @@
           - "result is not changed"
 
     - name: Check module fails with correct msg
-      tower_inventory:
+      inventory:
         name: test-inventory
         description: Inventory Description
         organization: test-non-existing-org
@@ -164,7 +164,7 @@
 
   always:
     - name: Delete Inventories
-      tower_inventory:
+      inventory:
         name: "{{ item }}"
         organization: Default
         state: absent
@@ -179,7 +179,7 @@
         state: absent
 
     - name: Delete Insights Credential
-      tower_credential:
+      credential:
         name: "{{ cred_name1 }}"
         organization: "Default"
         kind: insights

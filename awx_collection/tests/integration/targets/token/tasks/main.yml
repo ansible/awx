@@ -5,7 +5,7 @@
 
 - name: Try to use a token as a dict which is missing the token parameter
   tower_job_list:
-    tower_oauthtoken:
+    oauthtoken:
       not_token: "This has no token entry"
   register: results
   ignore_errors: true
@@ -17,7 +17,7 @@
 
 - name: Try to use a token as a list
   tower_job_list:
-    tower_oauthtoken:
+    oauthtoken:
       - dummy_token
   register: results
   ignore_errors: true
@@ -28,7 +28,7 @@
       - '"The provided tower_oauthtoken type was not valid (list). Valid options are str or dict." == results.msg'
 
 - name: Try to delete a token with no existing_token or existing_token_id
-  tower_token:
+  token:
     state: absent
   register: results
   ignore_errors: true
@@ -39,7 +39,7 @@
       # We don't assert a message here because it's handled by ansible
 
 - name: Try to delete a token with both existing_token or existing_token_id
-  tower_token:
+  token:
     existing_token:
       id: 1234
     existing_token_id: 1234
@@ -55,7 +55,7 @@
 
 - block:
     - name: Create a Token
-      tower_token:
+      token:
         description: '{{ token_description }}'
         scope: "write"
         state: present
@@ -73,7 +73,7 @@
 
   always:
     - name: Delete our Token with our own token
-      tower_token:
+      token:
         existing_token: "{{ tower_token }}"
         tower_oauthtoken: "{{ tower_token }}"
         state: absent
@@ -86,7 +86,7 @@
 
 - block:
     - name: Create a second token
-      tower_token:
+      token:
         description: '{{ token_description }}'
         scope: "write"
         state: present
@@ -98,7 +98,7 @@
 
   always:
     - name: Delete the second Token with our own token
-      tower_token:
+      token:
         existing_token_id: "{{ tower_token['id'] }}"
         tower_oauthtoken: "{{ tower_token }}"
         state: absent

@@ -5,18 +5,18 @@
   vars:
     tower_settings: "{{ lookup('awx.awx.tower_api', 'config/') }}"
 
-- tower_inventory:
+- inventory:
     name: localhost
     organization: Default
 
-- tower_host:
+- host:
     name: localhost
     inventory: localhost
     variables:
       ansible_connection: local
 
 - name: create an unused SSH / Machine credential
-  tower_credential:
+  credential:
     name: dummy
     kind: ssh
     ssh_key_data: |
@@ -29,7 +29,7 @@
 
 - block:
     - name: Add a path to a setting
-      tower_settings:
+      settings:
         name: AWX_ISOLATION_SHOW_PATHS
         value: "[{{ project_base_dir }}]"
 
@@ -44,12 +44,12 @@
 
   always:
     - name: Delete path from setting
-      tower_settings:
+      settings:
         name: AWX_ISOLATION_SHOW_PATHS
         value: []
 
     - name: Delete dummy credential
-      tower_credential:
+      credential:
         name: dummy
         kind: ssh
         state: absent

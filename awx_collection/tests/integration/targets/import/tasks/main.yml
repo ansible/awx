@@ -11,7 +11,7 @@
 
 - block:
     - name: "Import something"
-      tower_import:
+      import:
         assets:
           organizations:
             - name: "{{ org_name1 }}"
@@ -33,7 +33,7 @@
           - import_output is changed
 
     - name: "Import the same thing again"
-      tower_import:
+      import:
         assets:
           organizations:
             - name: "{{ org_name1 }}"
@@ -82,7 +82,7 @@
         dest: ./org.json
 
     - name: "Load assets from a file"
-      tower_import:
+      import:
         assets: "{{ lookup('file', 'org.json') | from_json() }}"
       register: import_output
 
@@ -92,7 +92,7 @@
 
   always:
     - name: Remove organizations
-      tower_organization:
+      organization:
         name: "{{ item }}"
         state: absent
       loop:

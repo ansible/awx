@@ -16,12 +16,12 @@
 - block:
 
     - name: "Create a new organization"
-      tower_organization:
+      organization:
         name: "{{ org_name }}"
       register: created_org
 
     - name: Create a git project without credentials
-      tower_project:
+      project:
         name: "{{ project_name }}"
         organization: "{{ org_name }}"
         scm_type: git
@@ -29,13 +29,13 @@
         wait: true
 
     - name: Create an Inventory
-      tower_inventory:
+      inventory:
         name: "{{ inv_name }}"
         organization: "{{ org_name }}"
         state: present
 
     - name: Create another inventory w/ same name, different org
-      tower_inventory:
+      inventory:
         name: "{{ inv_name }}"
         organization: Default
         state: present
@@ -114,18 +114,18 @@
 
   always:
     - name: Delete Inventory
-      tower_inventory:
+      inventory:
         name: "{{ inv_name }}"
         organization: Default
         state: absent
 
     - name: Delete Project
-      tower_project:
+      project:
         name: "{{ project_name }}"
         organization: Default
         state: absent
 
     - name: "Remove the organization"
-      tower_organization:
+      organization:
         name: "{{ org_name }}"
         state: absent

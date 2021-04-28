@@ -11,24 +11,24 @@
     org_name: "AWX-Collection-tests-tower_tower_ad_hoc_command-org-{{ test_id }}"
 
 - name: Create a New Organization
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
 
 - name: Create an Inventory
-  tower_inventory:
+  inventory:
     name: "{{ inv_name }}"
     organization: "{{ org_name }}"
     state: present
 
 - name: Add localhost to the Inventory
-  tower_host:
+  host:
     name: localhost
     inventory: "{{ inv_name }}"
     variables:
       ansible_connection: local
 
 - name: Create a Credential
-  tower_credential:
+  credential:
     name: "{{ ssh_cred_name }}"
     organization: "{{ org_name }}"
     credential_type: 'Machine'
@@ -76,19 +76,19 @@
       - "'Does not exist' in result.response['json']['module_name'][0]"
 
 - name: Delete the Credential
-  tower_credential:
+  credential:
     name: "{{ ssh_cred_name }}"
     organization: "{{ org_name }}"
     credential_type: 'Machine'
     state: absent
 
 - name: Delete the Inventory
-  tower_inventory:
+  inventory:
     name: "{{ inv_name }}"
     organization: "{{ org_name }}"
     state: absent
 
 - name: Remove the Organization
-  tower_organization:
+  organization:
     name: "{{ org_name }}"
     state: absent

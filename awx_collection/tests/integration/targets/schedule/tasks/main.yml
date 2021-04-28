@@ -8,7 +8,7 @@
     sched1: "AWX-Collection-tests-tower_schedule-sched1-{{ test_id }}"
 
 - name: Try to create without an rrule
-  tower_schedule:
+  schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
@@ -22,7 +22,7 @@
       - "'Unable to create schedule {{ sched1 }}' in result.msg"
 
 - name: Create with options that the JT does not support
-  tower_schedule:
+  schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
@@ -48,7 +48,7 @@
       - "'Unable to create schedule {{ sched1 }}' in result.msg"
 
 - name: Build a real schedule
-  tower_schedule:
+  schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
@@ -60,7 +60,7 @@
       - result is changed
 
 - name: Rebuild the same schedule
-  tower_schedule:
+  schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
@@ -72,7 +72,7 @@
       - result is not changed
 
 - name: Disable a schedule
-  tower_schedule:
+  schedule:
     name: "{{ sched1 }}"
     state: present
     enabled: "false"
@@ -83,6 +83,6 @@
       - result is changed
 
 - name: Delete the schedule
-  tower_schedule:
+  schedule:
     name: "{{ sched1 }}"
     state: absent

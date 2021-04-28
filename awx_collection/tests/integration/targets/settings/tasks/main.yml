@@ -1,11 +1,11 @@
 ---
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS to a baseline
-  tower_settings:
+  settings:
     name: AWX_ISOLATION_SHOW_PATHS
     value: '["/var/lib/awx/projects/"]'
 
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS to get an error back from Tower
-  tower_settings:
+  settings:
     settings:
       AWX_ISOLATION_SHOW_PATHS:
         'not': 'a valid'
@@ -18,7 +18,7 @@
       - "result is failed"
 
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS
-  tower_settings:
+  settings:
     name: AWX_ISOLATION_SHOW_PATHS
     value: '["/var/lib/awx/projects/", "/tmp"]'
   register: result
@@ -28,7 +28,7 @@
       - "result is changed"
 
 - name: Attempt to set the value of AWX_ISOLATION_BASE_PATH to what it already is
-  tower_settings:
+  settings:
     name: AWX_ISOLATION_BASE_PATH
     value: /tmp
   register: result
@@ -41,7 +41,7 @@
       - "result is not changed"
 
 - name: Apply a single setting via settings
-  tower_settings:
+  settings:
     name: AWX_ISOLATION_SHOW_PATHS
     value: '["/var/lib/awx/projects/", "/var/tmp"]'
   register: result
@@ -51,7 +51,7 @@
       - "result is changed"
 
 - name: Apply multiple setting via settings with no change
-  tower_settings:
+  settings:
     settings:
       AWX_ISOLATION_BASE_PATH: /tmp
       AWX_ISOLATION_SHOW_PATHS: ["/var/lib/awx/projects/", "/var/tmp"]
@@ -65,7 +65,7 @@
       - "result is not changed"
 
 - name: Apply multiple setting via settings with change
-  tower_settings:
+  settings:
     settings:
       AWX_ISOLATION_BASE_PATH: /tmp
       AWX_ISOLATION_SHOW_PATHS: []
@@ -76,7 +76,7 @@
       - "result is changed"
 
 - name: Handle an omit value
-  tower_settings:
+  settings:
     name: AWX_ISOLATION_BASE_PATH
     value: '{{ junk_var | default(omit) }}'
   register: result

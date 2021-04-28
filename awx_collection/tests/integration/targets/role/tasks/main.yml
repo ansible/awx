@@ -13,7 +13,7 @@
 
 - block:
     - name: Create a User
-      tower_user:
+      user:
         first_name: Joe
         last_name: User
         username: "{{ username }}"
@@ -27,7 +27,7 @@
           - "result is changed"
 
     - name: Create a project
-      tower_project:
+      project:
         name: "{{ project_name }}"
         organization: Default
         scm_type: git
@@ -55,7 +55,7 @@
           - "result is changed"
 
     - name: Add Joe to the update role of the default Project with lookup Organization
-      tower_role:
+      role:
         user: "{{ username }}"
         role: update
         lookup_organization: Default
@@ -71,7 +71,7 @@
           - "result is changed"
 
     - name: Add Joe to the new project by ID
-      tower_role:
+      role:
         user: "{{ username }}"
         role: update
         project: "{{ project_info['id'] }}"
@@ -92,7 +92,7 @@
         state: present
 
     - name: Add Joe to workflow execute role
-      tower_role:
+      role:
         user: "{{ username }}"
         role: execute
         workflow: test-role-workflow
@@ -107,7 +107,7 @@
           - "result is changed"
 
     - name: Add Joe to workflow execute role, no-op
-      tower_role:
+      role:
         user: "{{ username }}"
         role: execute
         workflow: test-role-workflow
@@ -119,7 +119,7 @@
           - "result is not changed"
 
     - name: Add Joe to workflow approve role
-      tower_role:
+      role:
         user: "{{ username }}"
         role: approval
         workflow: test-role-workflow
@@ -132,7 +132,7 @@
 
   always:
     - name: Delete a User
-      tower_user:
+      user:
         username: "{{ username }}"
         email: joe@example.org
         state: absent
@@ -151,7 +151,7 @@
       register: result
 
     - name: Delete the project
-      tower_project:
+      project:
         name: "{{ project_name }}"
         organization: Default
         state: absent

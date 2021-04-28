@@ -1,6 +1,6 @@
 ---
 - name: Get our collection package
-  tower_meta:
+  meta:
   register: tower_meta
 
 - name: Generate the name of our plugin

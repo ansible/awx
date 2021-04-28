@@ -5,7 +5,7 @@
     proj_name: "AWX-Collection-tests-tower_job_wait-long_running-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Assure that the demo project exists
-  tower_project:
+  project:
     name: "{{ proj_name }}"
     scm_type: 'git'
     scm_url: 'https://github.com/ansible/test-playbooks.git'
@@ -131,7 +131,7 @@
     state: absent
 
 - name: Delete the project
-  tower_project:
+  project:
     name: "{{ proj_name }}"
     organization: Default
     state: absent

@@ -14,7 +14,7 @@
   import_tasks: create_project_dir.yml
 
 - name: Create a manual project
-  tower_project:
+  project:
     name: "{{ project_name }}"
     organization: Default
     scm_type: manual
@@ -26,7 +26,7 @@
       - "result is changed"
 
 - name: Delete a manual project
-  tower_project:
+  project:
     name: "{{ project_name }}"
     organization: Default
     state: absent

@@ -11,7 +11,7 @@
 
 - block:
     - name: Create an application
-      tower_application:
+      application:
         name: "{{ app1_name }}"
         authorization_grant_type: "password"
         client_type: "public"
@@ -24,7 +24,7 @@
           - "result is changed"
 
     - name: Delete our application
-      tower_application:
+      application:
         name: "{{ app1_name }}"
         organization: "Default"
         state: absent
@@ -35,7 +35,7 @@
           - "result is changed"
 
     - name: Create a second application
-      tower_application:
+      application:
         name: "{{ app2_name }}"
         authorization_grant_type: "authorization-code"
         client_type: "confidential"
@@ -52,7 +52,7 @@
           - "result is changed"
 
     - name: Create an all trusting application
-      tower_application:
+      application:
         name: "{{ app3_name }}"
         organization: "Default"
         description: "All Trusting Application"
@@ -68,7 +68,7 @@
 
   always:
     - name: Delete our application
-      tower_application:
+      application:
         name: "{{ item }}"
         organization: "Default"
         state: absent

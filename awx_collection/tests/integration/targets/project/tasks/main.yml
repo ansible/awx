@@ -11,7 +11,7 @@
 
 - block:
     - name: Create an SCM Credential
-      tower_credential:
+      credential:
         name: "{{ scm_cred_name }}"
         organization: Default
         kind: scm
@@ -22,7 +22,7 @@
           - result is changed
 
     - name: Create a git project without credentials and wait
-      tower_project:
+      project:
         name: "{{ project_name1 }}"
         organization: Default
         scm_type: git
@@ -35,7 +35,7 @@
           - result is changed
 
     - name: Recreate the project to validate not changed
-      tower_project:
+      project:
         name: "{{ project_name1 }}"
         organization: Default
         scm_type: git
@@ -49,7 +49,7 @@
           - result is not changed
 
     - name: Create organizations
-      tower_organization:
+      organization:
         name: "{{ org_name }}"
       register: result
 
@@ -58,7 +58,7 @@
           - result is changed
 
     - name: Create credential
-      tower_credential:
+      credential:
         kind: scm
         name: "{{ cred_name }}"
         organization: "{{ org_name }}"
@@ -69,7 +69,7 @@
           - result is changed
 
     - name: Create a new test project in check_mode
-      tower_project:
+      project:
         name: "{{ project_name2 }}"
         organization: "{{ org_name }}"
         scm_type: git
@@ -78,7 +78,7 @@
       check_mode: true
 
     - name: "Copy tower project from {{ project_name1 }}"
-      tower_project:
+      project:
         name: "{{ project_name2 }}"
         copy_from: "{{ project_name1 }}"
         organization: "{{ org_name }}"
@@ -94,7 +94,7 @@
           - result.copied
 
     - name: Check module fails with correct msg when given non-existing org as param
-      tower_project:
+      project:
         name: "{{ project_name2 }}"
         organization: Non_Existing_Org
         scm_type: git
@@ -111,7 +111,7 @@
           - "result.total_results == 0"
 
     - name: Check module fails with correct msg when given non-existing credential as param
-      tower_project:
+      project:
         name: "{{ project_name2 }}"
         organization: "{{ org_name }}"
         scm_type: git
@@ -128,7 +128,7 @@
           - "result.total_results == 0"
 
     - name: Create a git project without credentials without waiting
-      tower_project:
+      project:
         name: "{{ project_name3 }}"
         organization: Default
         scm_type: git
@@ -142,7 +142,7 @@
           - result is changed
 
     - name: Update the project and wait. Verify not changed as no change made to repo and refspec not changed
-      tower_project:
+      project:
         name: "{{ project_name3 }}"
         organization: Default
         scm_type: git
@@ -192,19 +192,19 @@
         state: absent
 
     - name: Delete the test project 3
-      tower_project:
+      project:
         name: "{{ project_name3 }}"
         organization: Default
         state: absent
 
     - name: Delete the test project 2
-      tower_project:
+      project:
         name: "{{ project_name2 }}"
         organization: "{{ org_name }}"
         state: absent
 
     - name: Delete the SCM Credential
-      tower_credential:
+      credential:
         name: "{{ scm_cred_name }}"
         organization: Default
         kind: scm
@@ -216,7 +216,7 @@
           - result is changed
 
     - name: Delete the test project 1
-      tower_project:
+      project:
         name: "{{ project_name1 }}"
         organization: Default
         state: absent
@@ -227,7 +227,7 @@
           - result is changed
 
     - name: Delete credential
-      tower_credential:
+      credential:
         kind: scm
         name: "{{ cred_name }}"
         organization: "{{ org_name }}"
@@ -239,7 +239,7 @@
           - result is changed
 
     - name: Delete the organization
-      tower_organization:
+      organization:
         name: "{{ org_name }}"
         state: absent
       register: result

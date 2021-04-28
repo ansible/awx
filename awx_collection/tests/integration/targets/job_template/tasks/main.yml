@@ -25,7 +25,7 @@
   register: result
 
 - name: Create a Demo Project
-  tower_project:
+  project:
     name: "{{ proj1 }}"
     organization: Default
     state: present
@@ -34,20 +34,20 @@
   register: proj_result
 
 - name: Create Credential1
-  tower_credential:
+  credential:
     name: "{{ cred1 }}"
     organization: Default
     kind: tower
   register: cred1_result
 
 - name: Create Credential2
-  tower_credential:
+  credential:
     name: "{{ cred2 }}"
     organization: Default
     kind: ssh
 
 - name: Create Credential3
-  tower_credential:
+  credential:
     name: "{{ cred3 }}"
     organization: Default
     kind: ssh
@@ -374,7 +374,7 @@
       - "result is changed"
 
 - name: Delete the Demo Project
-  tower_project:
+  project:
     name: "{{ proj1 }}"
     organization: Default
     state: absent
@@ -383,21 +383,21 @@
   register: result
 
 - name: Delete Credential1
-  tower_credential:
+  credential:
     name: "{{ cred1 }}"
     organization: Default
     kind: tower
     state: absent
 
 - name: Delete Credential2
-  tower_credential:
+  credential:
     name: "{{ cred2 }}"
     organization: Default
     kind: ssh
     state: absent
 
 - name: Delete Credential3
-  tower_credential:
+  credential:
     name: "{{ cred3 }}"
     organization: Default
     kind: ssh
