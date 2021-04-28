@@ -234,51 +234,51 @@ class GenericWebhookReceiver(WebhookReceiverBase):
     service = 'generic'
     
     # Until issues/5209 is unblocked, providing fallbacks to BitBucket
-    
-    ref_keys = {'Push Hook': 'checkout_sha', 'Tag Push Hook': 'checkout_sha', 'Merge Request Hook': 'object_attributes.last_commit.id'}
+
+    default_ref_keys = {'Push Hook': 'checkout_sha', 'Tag Push Hook': 'checkout_sha', 'Merge Request Hook': 'checkout_sha'}
 
     def get_event_type(self):
         return self.request.META.get('HTTP_X_GENERIC_EVENT') or self.request.META.get('HTTP_X_EVENT_KEY')
+
+    def get_overrides(self):
+        '''
+        As this is a generic webhook, the ability to customise the behaviour of AWX dynamically is necessary.
+        To achieve this, a config can be provided as part of the payload:
+        "config" : {
+            "reference_keys" : {
+                "Merge Request Hook" : "commit_hash"
+                "Branch Deleted" : "branch_name"
+            },
+            "api_endpoint" : "www.github.com/commits/1234/build/status"
+        }
+        '''
+        config = self.request.data.get('config', {})
+        self.ref_keys = config.get('reference_keys') if 'reference_keys' in config else self.default_ref_keys
+        self.api_endpoint = config.get('api_endpoint') if 'api_endpoint' in config else ''
 
     def get_event_guid(self):
         h = sha1()
         h.update(force_bytes(self.request.body))
         return h.hexdigest()
 
-    def get_event_ref(self):
-        key = self.ref_keys.get(self.get_event_type(), '')
-        print("key:", key)
-        value = self.request.data
-        print("value:", value)
-        for element in key.split('.'):
-            try:
-                if element.isdigit():
-                    value = value[int(element)]
-                else:
-                    value = (value or {}).get(element)
-            except Exception:
-                value = None
-        if value == '00000000000000000000000000000000000000':  # a deleted ref
-            value = None
-        return value
-
     def get_event_status_api(self):
-        if self.get_event_type() != 'Merge Request Hook':
+        if not self.get_event_type() in self.ref_keys.keys():
             return
         project = self.request.data.get('project', {})
+        
         repo_url = project.get('web_url')
         if not repo_url:
             return
         parsed = urllib.parse.urlparse(repo_url)
 
-        return "{}://{}/api/projects/{}/statuses/{}".format(parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
+        return self.api_endpoint or "{}://{}/api/projects/{}/statuses/{}".format(parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
 
     def get_signature(self):
         return force_bytes(self.request.META.get('HTTP_X_GENERIC_TOKEN') or self.request.META.get('HTTP_X_HUB_SIGNATURE') or '')
 
     def check_signature(self, obj):
-        print(obj.webhook_key, self.get_signature())
-        print(hmac.compare_digest(force_bytes(obj.webhook_key), self.get_signature()))
+        self.get_overrides()
+
         if not obj.webhook_key:
             raise PermissionDenied
 
