@@ -120,6 +120,7 @@ function NotificationTemplatesList({ i18n }) {
   };
 
   const canAdd = actions && actions.POST;
+  const alertGroupDataCy = 'notification-template-alerts';
 
   return (
     <>
@@ -227,7 +228,7 @@ function NotificationTemplatesList({ i18n }) {
         {i18n._(t`Failed to delete one or more notification template.`)}
         <ErrorDetail error={deletionError} />
       </AlertModal>
-      <AlertGroup data-cy="notification-template-alerts" isToast>
+      <AlertGroup data-cy={alertGroupDataCy} isToast>
         {testToasts
           .filter(notification => notification.status !== 'pending')
           .map(notification => (

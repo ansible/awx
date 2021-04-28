@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { CardBody } from '../../../components/Card';
 import {
   CredentialsAPI,
