@@ -1,6 +1,5 @@
-from hashlib import sha1
+from hashlib import sha1, sha256
 import hmac
-import hashlib
 import logging
 import urllib.parse
 
@@ -253,7 +252,6 @@ class GenericWebhookReceiver(WebhookReceiverBase):
         'pr:comment:added': 'pullRequest.fromRef.latestCommit',
         'pr:comment:edited': 'pullRequest.fromRef.latestCommit',
         'pr:comment:deleted': 'pullRequest.fromRef.latestCommit',
-
         # Bitbucket Cloud, aka bitbucket.org
         'repo:push': 'push.changes.0.new.target.hash',
         'repo:commit_comment_created': 'commit.hash',
@@ -266,7 +264,7 @@ class GenericWebhookReceiver(WebhookReceiverBase):
         'pullrequest:comment_created': 'pullrequest.source.commit',
         'pullrequest:comment_updated': 'pullrequest.source.commit',
         'pullrequest:comment_deleted': 'pullrequest.source.commit',
-    }    
+    }
 
     def get_event_type(self):
         return self.request.META.get('HTTP_X_GENERIC_EVENT') or self.request.META.get('HTTP_X_EVENT_KEY')
@@ -280,7 +278,7 @@ class GenericWebhookReceiver(WebhookReceiverBase):
                 "Merge Request Hook" : "commit_hash",
                 "Branch Deleted" : "branch_name"
             },
-            "api_endpoint" : "www.github.com/commits/1234/build/status"
+            "api_endpoint" : "http://www.github.com/commits/1234/build/status"
         }
         '''
         config = self.request.data.get('config', {})
@@ -295,7 +293,7 @@ class GenericWebhookReceiver(WebhookReceiverBase):
     def get_event_status_api(self):
         if not self.get_event_type() in self.ref_keys.keys():
             return
-        
+
         return self.api_endpoint
 
     def get_signature(self):
@@ -309,6 +307,6 @@ class GenericWebhookReceiver(WebhookReceiverBase):
 
         # Developer to hash secret
         # $ echo "Hello world" | openssl dgst -sha256 -hmac ABCDEFG
-        h = hmac.new(force_bytes(obj.webhook_key), self.get_signature(), hashlib.sha256)
+        h = hmac.new(force_bytes(obj.webhook_key), self.get_signature(), sha256)
         if not h.digest():
             raise PermissionDenied
