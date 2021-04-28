@@ -809,7 +809,7 @@ def main():
         existing_spec = None
         if existing_item:
             spec_endpoint = existing_item.get('related', {}).get('survey_spec')
-            existing_spec = module.get_endpoint(spec_endpoint)
+            existing_spec = module.get_endpoint(spec_endpoint)['json']
         if new_spec != existing_spec:
             module.json_output['changed'] = True
             if existing_item and module.has_encrypted_values(existing_spec):
