@@ -232,10 +232,41 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
 
 class GenericWebhookReceiver(WebhookReceiverBase):
     service = 'generic'
-    
+
     # Until issues/5209 is unblocked, providing fallbacks to BitBucket
 
-    default_ref_keys = {'Push Hook': 'checkout_sha', 'Tag Push Hook': 'checkout_sha', 'Merge Request Hook': 'checkout_sha'}
+    default_ref_keys = {
+        # Bitbucket Server
+        'repo:refs_changed': 'changes.0.toHash',
+        'repo:comment:added': 'commit',
+        'repo:comment:edited': 'commit',
+        'repo:comment:deleted': 'commit',
+        'pr:opened': 'pullRequest.fromRef.latestCommit',
+        'pr:modified': 'pullRequest.fromRef.latestCommit',
+        'pr:reviewer:updated': 'pullRequest.fromRef.latestCommit',
+        'pr:reviewer:approved': 'pullRequest.fromRef.latestCommit',
+        'pr:reviewer:unapproved': 'pullRequest.fromRef.latestCommit',
+        'pr:reviewer:needs_work': 'pullRequest.fromRef.latestCommit',
+        'pr:merged': 'pullRequest.fromRef.latestCommit',
+        'pr:declined': 'pullRequest.fromRef.latestCommit',
+        'pr:deleted': 'pullRequest.fromRef.latestCommit',
+        'pr:comment:added': 'pullRequest.fromRef.latestCommit',
+        'pr:comment:edited': 'pullRequest.fromRef.latestCommit',
+        'pr:comment:deleted': 'pullRequest.fromRef.latestCommit',
+
+        # Bitbucket Cloud, aka bitbucket.org
+        'repo:push': 'push.changes.0.new.target.hash',
+        'repo:commit_comment_created': 'commit.hash',
+        'pullrequest:created': 'pullrequest.source.commit',
+        'pullrequest:updated': 'pullrequest.source.commit',
+        'pullrequest:approved': 'pullrequest.source.commit',
+        'pullrequest:unapproved': 'pullrequest.source.commit',
+        'pullrequest:fulfilled': 'pullrequest.source.commit',
+        'pullrequest:rejected': 'pullrequest.source.commit',
+        'pullrequest:comment_created': 'pullrequest.source.commit',
+        'pullrequest:comment_updated': 'pullrequest.source.commit',
+        'pullrequest:comment_deleted': 'pullrequest.source.commit',
+    }    
 
     def get_event_type(self):
         return self.request.META.get('HTTP_X_GENERIC_EVENT') or self.request.META.get('HTTP_X_EVENT_KEY')
@@ -246,7 +277,7 @@ class GenericWebhookReceiver(WebhookReceiverBase):
         To achieve this, a config can be provided as part of the payload:
         "config" : {
             "reference_keys" : {
-                "Merge Request Hook" : "commit_hash"
+                "Merge Request Hook" : "commit_hash",
                 "Branch Deleted" : "branch_name"
             },
             "api_endpoint" : "www.github.com/commits/1234/build/status"
@@ -264,14 +295,8 @@ class GenericWebhookReceiver(WebhookReceiverBase):
     def get_event_status_api(self):
         if not self.get_event_type() in self.ref_keys.keys():
             return
-        project = self.request.data.get('project', {})
         
-        repo_url = project.get('web_url')
-        if not repo_url:
-            return
-        parsed = urllib.parse.urlparse(repo_url)
-
-        return self.api_endpoint or "{}://{}/api/projects/{}/statuses/{}".format(parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
+        return self.api_endpoint
 
     def get_signature(self):
         return force_bytes(self.request.META.get('HTTP_X_GENERIC_TOKEN') or self.request.META.get('HTTP_X_HUB_SIGNATURE') or '')
