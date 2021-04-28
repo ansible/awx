@@ -53,7 +53,7 @@ describe('<Metrics/>', () => {
         .prop('onClick')({}, 'instance 1');
     });
     wrapper.update();
-    await act(() => {
+    await act(async () => {
       wrapper.find('Select[ouiaId="Metric-select"]').prop('onToggle')(true);
     });
     wrapper.update();

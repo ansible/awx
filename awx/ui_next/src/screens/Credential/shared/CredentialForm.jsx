@@ -157,7 +157,7 @@ function CredentialFormFields({ i18n, initialTypeId, credentialTypes }) {
         <SelectOption
           key={credType.value}
           value={credType.value}
-          dataCy={`${credType.id}-credential-type-select-option`}
+          data-cy={`${credType.id}-credential-type-select-option`}
         >
           {credType.label}
         </SelectOption>

@@ -81,7 +81,8 @@
           "gridColumns",
           "rows",
           "href",
-          "modifier"
+          "modifier",
+          "data-cy"
         ],
         "ignore": ["Ansible", "Tower", "JSON", "YAML", "lg"],
         "ignoreComponent": [
