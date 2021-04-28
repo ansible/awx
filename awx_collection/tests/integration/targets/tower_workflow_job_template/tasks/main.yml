@@ -300,6 +300,124 @@
     that:
       - "result is changed"
 
+- name: Add Survey to Copied workflow job template
+  tower_workflow_job_template:
+    name: "copy_{{ wfjt_name }}"
+    organization: Default
+    survey_spec:
+      name: Basic Survey
+      description: Basic Survey
+      spec:
+        - question_description: Name
+          min: 0
+          default: ''
+          max: 128
+          required: true
+          choices: ''
+          new_question: true
+          variable: basic_name
+          question_name: Basic Name
+          type: text
+        - question_description: Choosing yes or no.
+          min: 0
+          default: 'yes'
+          max: 0
+          required: true
+          choices: |-
+            yes
+            no
+          new_question: true
+          variable: option_true_false
+          question_name: Choose yes or no?
+          type: multiplechoice
+        - question_description: ''
+          min: 0
+          default: ''
+          max: 0
+          required: true
+          choices: |-
+            group1
+            group2
+            group3
+          new_question: true
+          variable: target_groups
+          question_name: 'Select Group:'
+          type: multiselect
+        - question_name: password
+          question_description: ''
+          required: true
+          type: password
+          variable: password
+          min: 0
+          max: 1024
+          default: ''
+          choices: ''
+          new_question: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Re add survey to workflow job template expected not changed.
+  tower_workflow_job_template:
+    name: "copy_{{ wfjt_name }}"
+    organization: Default
+    survey_spec:
+      name: Basic Survey
+      description: Basic Survey
+      spec:
+        - question_description: Name
+          min: 0
+          default: ''
+          max: 128
+          required: true
+          choices: ''
+          new_question: true
+          variable: basic_name
+          question_name: Basic Name
+          type: text
+        - question_description: Choosing yes or no.
+          min: 0
+          default: 'yes'
+          max: 0
+          required: true
+          choices: |-
+            yes
+            no
+          new_question: true
+          variable: option_true_false
+          question_name: Choose yes or no?
+          type: multiplechoice
+        - question_description: ''
+          min: 0
+          default: ''
+          max: 0
+          required: true
+          choices: |-
+            group1
+            group2
+            group3
+          new_question: true
+          variable: target_groups
+          question_name: 'Select Group:'
+          type: multiselect
+        - question_name: password
+          question_description: ''
+          required: true
+          type: password
+          variable: password
+          min: 0
+          max: 1024
+          default: ''
+          choices: ''
+          new_question: true
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
 - name: Delete copied workflow job template
   tower_workflow_job_template:
     name: "copy_{{ wfjt_name }}"
