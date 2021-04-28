@@ -90,14 +90,13 @@ describe('<InventoryDetail />', () => {
     expectDetailToMatch(wrapper, 'Name', mockInventory.name);
     expectDetailToMatch(wrapper, 'Description', mockInventory.description);
     expectDetailToMatch(wrapper, 'Type', 'Inventory');
+    const link = wrapper.find('Detail[label="Organization"]').find('Link');
+
     const org = wrapper.find('Detail[label="Organization"]');
-    expect(org.prop('value')).toMatchInlineSnapshot(`
-      <Link
-        to="/organizations/1/details"
-      >
-        The Organization
-      </Link>
-    `);
+
+    expect(link.prop('to')).toEqual('/organizations/1/details');
+    expect(org.length).toBe(1);
+
     const vars = wrapper.find('VariablesDetail');
     expect(vars).toHaveLength(1);
     expect(vars.prop('value')).toEqual(mockInventory.variables);

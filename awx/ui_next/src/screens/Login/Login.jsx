@@ -131,12 +131,12 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
   }
 
   const HeaderBrand = (
-    <Brand dataCy="brand-logo" src={logo} alt={alt || brandName} />
+    <Brand data-cy="brand-logo" src={logo} alt={alt || brandName} />
   );
   const Header = <LoginHeader headerBrand={HeaderBrand} />;
   const Footer = (
     <LoginFooter
-      dataCy="login-footer"
+      data-cy="login-footer"
       dangerouslySetInnerHTML={{
         __html: sanitizeHtml(loginInfo),
       }}
@@ -146,7 +146,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
   return (
     <Login header={Header} footer={Footer}>
       <LoginMainHeader
-        dataCy="login-header"
+        data-cy="login-header"
         title={
           brandName
             ? i18n._(t`Welcome to Ansible ${brandName}! Please Sign In.`)
@@ -163,7 +163,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
         >
           {formik => (
             <LoginForm
-              dataCy="login-form"
+              data-cy="login-form"
               className={authError ? 'pf-m-error' : ''}
               helperText={helperText}
               isLoginButtonDisabled={isAuthenticating}
@@ -193,7 +193,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
             variant="error"
             title={i18n._(t`Error!`)}
             onClose={dismissLoginInfoError}
-            dataCy="login-info-error"
+            data-cy="login-info-error"
           >
             {i18n._(
               t`Failed to fetch custom login configuration settings.  System defaults will be shown instead.`
@@ -211,7 +211,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'azuread-oauth2') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-azure"
+                      data-cy="social-auth-azure"
                       href={loginUrl}
                       key={authKey}
                     >
@@ -224,7 +224,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github"
+                      data-cy="social-auth-github"
                       href={loginUrl}
                       key={authKey}
                     >
@@ -237,7 +237,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-org') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-org"
+                      data-cy="social-auth-github-org"
                       href={loginUrl}
                       key={authKey}
                     >
@@ -252,7 +252,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-team') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-team"
+                      data-cy="social-auth-github-team"
                       href={loginUrl}
                       key={authKey}
                     >
@@ -265,7 +265,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-enterprise') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-enterprise"
+                      data-cy="social-auth-github-enterprise"
                       href={loginUrl}
                       key={authKey}
                     >
@@ -280,7 +280,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-enterprise-org') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-enterprise-org"
+                      data-cy="social-auth-github-enterprise-org"
                       href={loginUrl}
                       key={authKey}
                     >
@@ -297,7 +297,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'github-enterprise-team') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-github-enterprise-team"
+                      data-cy="social-auth-github-enterprise-team"
                       href={loginUrl}
                       key={authKey}
                     >
@@ -314,7 +314,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                 if (authKey === 'google-oauth2') {
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-google"
+                      data-cy="social-auth-google"
                       href={loginUrl}
                       key={authKey}
                     >
@@ -328,7 +328,7 @@ function AWXLogin({ alt, i18n, isAuthenticated }) {
                   const samlIDP = authKey.split(':')[1] || null;
                   return (
                     <LoginMainFooterLinksItem
-                      dataCy="social-auth-saml"
+                      data-cy="social-auth-saml"
                       href={loginUrl}
                       key={authKey}
                     >

@@ -136,7 +136,7 @@ describe('<ScheduleEdit />', () => {
           resource={{
             id: 700,
             type: 'job_template',
-            iventory: 1,
+            inventory: 1,
             summary_fields: {
               credentials: [
                 { name: 'job template credential', id: 75, kind: 'ssh' },
