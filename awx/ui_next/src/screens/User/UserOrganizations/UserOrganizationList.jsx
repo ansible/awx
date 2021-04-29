@@ -18,7 +18,7 @@ const QS_CONFIG = getQSConfig('organizations', {
   type: 'organization',
 });
 
-function UserOrganizationsList() {
+function UserOrganizationList() {
   const location = useLocation();
   const { id: userId } = useParams();
 
@@ -77,4 +77,4 @@ function UserOrganizationsList() {
   );
 }
 
-export default UserOrganizationsList;
+export default UserOrganizationList;
