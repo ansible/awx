@@ -1169,7 +1169,8 @@ class BaseTask(object):
                     # that will enforce that we wait a full second before starting again
                     self.recent_event_timings.clear()
                     self.recent_event_timings.append(first_window_time)
-                event_data['skip_websocket_message'] = True
+                event_data.setdefault('event_data', {})
+                event_data['event_data']['skip_websocket_message'] = True
             else:
                 if self.recent_event_timings[0] == self.recent_event_timings[-1]:
                     logger.info('Starting a window of event emission, will pause if I see too many')
