@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -20,7 +20,7 @@ const QS_CONFIG = getQSConfig('host', {
 
 function SmartInventoryHostList({ i18n, inventory }) {
   const location = useLocation();
-
+  const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const {
     result: { hosts, count },
     error: contentError,
@@ -56,7 +56,7 @@ function SmartInventoryHostList({ i18n, inventory }) {
     <>
       <PaginatedDataList
         contentError={contentError}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isAdHocLaunchLoading}
         items={hosts}
         itemCount={count}
         pluralizedItemName={i18n._(t`Hosts`)}
@@ -98,6 +98,7 @@ function SmartInventoryHostList({ i18n, inventory }) {
                     <AdHocCommands
                       adHocItems={selected}
                       hasListItems={count > 0}
+                      onLaunchLoading={setIsAdHocLaunchLoading}
                     />,
                   ]
                 : []

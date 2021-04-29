@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/react-icons';
 import { Tooltip } from '@patternfly/react-core';
@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import Wizard from '../Wizard';
 import AdHocCredentialStep from './AdHocCredentialStep';
 import AdHocDetailsStep from './AdHocDetailsStep';
+import AdHocExecutionEnvironmentStep from './AdHocExecutionEnvironmentStep';
 
 const AlertText = styled.div`
   color: var(--pf-global--danger-color--200);
@@ -23,11 +24,11 @@ const ExclamationCircleIcon = styled(PFExclamationCircleIcon)`
 
 function AdHocCommandsWizard({
   onLaunch,
-  i18n,
   moduleOptions,
   verbosityOptions,
   onCloseWizard,
   credentialTypeId,
+  organizationId,
 }) {
   const [currentStepId, setCurrentStepId] = useState(1);
   const [enableLaunch, setEnableLaunch] = useState(false);
@@ -57,17 +58,17 @@ function AdHocCommandsWizard({
       key: 1,
       name: hasDetailsStepError ? (
         <AlertText>
-          {i18n._(t`Details`)}
+          {t`Details`}
           <Tooltip
             position="right"
-            content={i18n._(t`This step contains errors`)}
+            content={t`This step contains errors`}
             trigger="click mouseenter focus"
           >
             <ExclamationCircleIcon />
           </Tooltip>
         </AlertText>
       ) : (
-        i18n._(t`Details`)
+        t`Details`
       ),
       component: (
         <AdHocDetailsStep
@@ -76,12 +77,25 @@ function AdHocCommandsWizard({
         />
       ),
       enableNext: enabledNextOnDetailsStep(),
-      nextButtonText: i18n._(t`Next`),
+      nextButtonText: t`Next`,
     },
     {
       id: 2,
       key: 2,
-      name: i18n._(t`Machine credential`),
+      name: t`Execution Environment`,
+      component: (
+        <AdHocExecutionEnvironmentStep organizationId={organizationId} />
+      ),
+      // Removed this line when https://github.com/patternfly/patternfly-react/issues/5729 is fixed
+      stepNavItemProps: { style: { 'white-space': 'nowrap' } },
+      enableNext: true,
+      nextButtonText: t`Next`,
+      canJumpTo: currentStepId >= 2,
+    },
+    {
+      id: 3,
+      key: 3,
+      name: t`Machine credential`,
       component: (
         <AdHocCredentialStep
           credentialTypeId={credentialTypeId}
@@ -89,7 +103,7 @@ function AdHocCommandsWizard({
         />
       ),
       enableNext: enableLaunch && Object.values(errors).length === 0,
-      nextButtonText: i18n._(t`Launch`),
+      nextButtonText: t`Launch`,
       canJumpTo: currentStepId >= 2,
     },
   ];
@@ -106,10 +120,10 @@ function AdHocCommandsWizard({
         onLaunch(values);
       }}
       steps={steps}
-      title={i18n._(t`Run command`)}
+      title={t`Run command`}
       nextButtonText={currentStep.nextButtonText || undefined}
-      backButtonText={i18n._(t`Back`)}
-      cancelButtonText={i18n._(t`Cancel`)}
+      backButtonText={t`Back`}
+      cancelButtonText={t`Cancel`}
     />
   );
 }
@@ -128,6 +142,7 @@ const FormikApp = withFormik({
       module_name: '',
       extra_vars: '---',
       job_type: 'run',
+      execution_environment: '',
     };
   },
 })(AdHocCommandsWizard);
@@ -139,4 +154,4 @@ FormikApp.propTypes = {
   onCloseWizard: PropTypes.func.isRequired,
   credentialTypeId: PropTypes.number.isRequired,
 };
-export default withI18n()(FormikApp);
+export default FormikApp;

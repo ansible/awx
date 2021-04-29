@@ -23,6 +23,7 @@ const QS_CONFIG = getQSConfig('host', {
 
 function InventoryHostList({ i18n }) {
   const [selected, setSelected] = useState([]);
+  const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const { id } = useParams();
   const { search } = useLocation();
 
@@ -106,7 +107,7 @@ function InventoryHostList({ i18n }) {
     <>
       <PaginatedDataList
         contentError={contentError}
-        hasContentLoading={isLoading || isDeleteLoading}
+        hasContentLoading={isLoading || isDeleteLoading || isAdHocLaunchLoading}
         items={hosts}
         itemCount={hostCount}
         pluralizedItemName={i18n._(t`Hosts`)}
@@ -152,6 +153,7 @@ function InventoryHostList({ i18n }) {
               <AdHocCommands
                 adHocItems={selected}
                 hasListItems={hostCount > 0}
+                onLaunchLoading={setIsAdHocLaunchLoading}
               />,
               <ToolbarDeleteButton
                 key="delete"

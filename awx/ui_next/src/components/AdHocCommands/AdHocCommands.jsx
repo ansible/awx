@@ -12,10 +12,9 @@ import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
 import { KebabifiedContext } from '../../contexts/Kebabified';
-import ContentLoading from '../ContentLoading';
 import ContentError from '../ContentError';
 
-function AdHocCommands({ adHocItems, i18n, hasListItems }) {
+function AdHocCommands({ adHocItems, i18n, hasListItems, onLaunchLoading }) {
   const history = useHistory();
   const { id } = useParams();
 
@@ -36,22 +35,29 @@ function AdHocCommands({ adHocItems, i18n, hasListItems }) {
   }, [isKebabified, isWizardOpen, onKebabModalChange]);
 
   const {
-    result: { moduleOptions, credentialTypeId, isAdHocDisabled },
+    result: {
+      moduleOptions,
+      credentialTypeId,
+      isAdHocDisabled,
+      organizationId,
+    },
     request: fetchData,
     error: fetchError,
   } = useRequest(
     useCallback(async () => {
-      const [options, cred] = await Promise.all([
+      const [options, { data }, cred] = await Promise.all([
         InventoriesAPI.readAdHocOptions(id),
+        InventoriesAPI.readDetail(id),
         CredentialTypesAPI.read({ namespace: 'ssh' }),
       ]);
       return {
         moduleOptions: options.data.actions.GET.module_name.choices,
         credentialTypeId: cred.data.results[0].id,
         isAdHocDisabled: !options.data.actions.POST,
+        organizationId: data.organization,
       };
     }, [id]),
-    { moduleOptions: [], isAdHocDisabled: true }
+    { moduleOptions: [], isAdHocDisabled: true, organizationId: null }
   );
   useEffect(() => {
     fetchData();
@@ -76,19 +82,20 @@ function AdHocCommands({ adHocItems, i18n, hasListItems }) {
   );
 
   const handleSubmit = async values => {
-    const { credential, ...remainingValues } = values;
+    const { credential, execution_environment, ...remainingValues } = values;
     const newCredential = credential[0].id;
 
     const manipulatedValues = {
       credential: newCredential,
+      execution_environment: execution_environment[0]?.id,
       ...remainingValues,
     };
     await launchAdHocCommands(manipulatedValues);
   };
-
-  if (isLaunchLoading) {
-    return <ContentLoading />;
-  }
+  useEffect(() => onLaunchLoading(isLaunchLoading), [
+    isLaunchLoading,
+    onLaunchLoading,
+  ]);
 
   if (error && isWizardOpen) {
     return (
@@ -141,6 +148,7 @@ function AdHocCommands({ adHocItems, i18n, hasListItems }) {
       {isWizardOpen && (
         <AdHocCommandsWizard
           adHocItems={adHocItems}
+          organizationId={organizationId}
           moduleOptions={moduleOptions}
           verbosityOptions={verbosityOptions}
           credentialTypeId={credentialTypeId}

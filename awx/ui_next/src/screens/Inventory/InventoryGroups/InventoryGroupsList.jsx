@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -30,6 +30,7 @@ function cannotDelete(item) {
 function InventoryGroupsList({ i18n }) {
   const location = useLocation();
   const { id: inventoryId } = useParams();
+  const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
 
   const {
     result: {
@@ -107,7 +108,7 @@ function InventoryGroupsList({ i18n }) {
     <>
       <PaginatedDataList
         contentError={contentError}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isAdHocLaunchLoading}
         items={groups}
         itemCount={groupCount}
         qsConfig={QS_CONFIG}
@@ -174,6 +175,7 @@ function InventoryGroupsList({ i18n }) {
               <AdHocCommands
                 adHocItems={selected}
                 hasListItems={groupCount > 0}
+                onLaunchLoading={setIsAdHocLaunchLoading}
               />,
               <Tooltip content={renderTooltip()} position="top" key="delete">
                 <InventoryGroupsDeleteModal
