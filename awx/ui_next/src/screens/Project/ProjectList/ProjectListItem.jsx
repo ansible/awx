@@ -169,7 +169,10 @@ function ProjectListItem({
             visible={project.summary_fields.user_capabilities.start}
             tooltip={i18n._(t`Sync Project`)}
           >
-            <ProjectSyncButton projectId={project.id} />
+            <ProjectSyncButton
+              projectId={project.id}
+              lastJobStatus={project.summary_fields.last_job.status}
+            />
           </ActionItem>
           <ActionItem
             visible={project.summary_fields.user_capabilities.edit}
