@@ -2,8 +2,7 @@
 
 import datetime
 import logging
-from collections import defaultdict, deque
-import time
+from collections import defaultdict
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -60,33 +59,10 @@ def create_host_status_counts(event_data):
 
 MINIMAL_EVENTS = set(['playbook_on_play_start', 'playbook_on_task_start', 'playbook_on_stats', 'EOF'])
 
-MAX_WEBSOCKET_EVENT_RATE = 30
-
-# TODO: these should be job-specific, this is the easy part, that is the hard part
-emit_times = deque(maxlen=MAX_WEBSOCKET_EVENT_RATE)
-
 
 def emit_event_detail(event):
-
-    # websocket rate limiting logic
     if settings.UI_LIVE_UPDATES_ENABLED is False and event.event not in MINIMAL_EVENTS:
         return
-    cpu_time = time.time()
-    if emit_times:
-        first_window_time = emit_times[0]
-        inverse_effective_rate = cpu_time - first_window_time
-        if inverse_effective_rate < 1.0:
-            if emit_times[0] != emit_times[-1]:
-                logger.info('Too many events chief, not broadcasting because that would be crazy')
-                # this is to smooth out jumpiness, we clear the events except for the last one
-                # that will enforce that we wait a full second before starting again
-                emit_times.clear()
-                emit_times.append(first_window_time)
-            return
-        elif emit_times[0] == emit_times[-1]:
-            logger.info('Starting a window of emit emission, will pause if I see too many')
-    emit_times.append(cpu_time)
-
     cls = event.__class__
     relation = {
         JobEvent: 'job_id',

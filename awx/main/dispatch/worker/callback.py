@@ -142,7 +142,8 @@ class CallbackBrokerWorker(BaseWorker):
                             logger.exception('Database Error Saving Job Event')
                 duration_to_save = time.perf_counter() - duration_to_save
                 for e in events:
-                    emit_event_detail(e)
+                    if not e.event_data.get('skip_websocket_message', False):
+                        emit_event_detail(e)
             self.buff = {}
             self.last_flush = time.time()
             # only update metrics if we saved events
