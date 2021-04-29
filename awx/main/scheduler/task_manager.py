@@ -6,7 +6,6 @@ from datetime import timedelta
 import logging
 import uuid
 import json
-import random
 from types import SimpleNamespace
 
 # Django
@@ -253,14 +252,6 @@ class TaskManager:
         }
         dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
 
-        controller_node = None
-        if task.supports_isolation() and rampart_group.controller_id:
-            try:
-                controller_node = rampart_group.choose_online_controller_node()
-            except IndexError:
-                logger.debug("No controllers available in group {} to run {}".format(rampart_group.name, task.log_format))
-                return
-
         task.status = 'waiting'
 
         (start_status, opts) = task.pre_start()
@@ -277,38 +268,24 @@ class TaskManager:
                 task.send_notification_templates('running')
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 schedule_task_manager()
-            elif not task.supports_isolation() and rampart_group.controller_id:
-                # non-Ansible jobs on isolated instances run on controller
-                task.instance_group = rampart_group.controller
-                task.execution_node = random.choice(list(rampart_group.controller.instances.all().values_list('hostname', flat=True)))
-                logger.debug('Submitting isolated {} to queue {} on node {}.'.format(task.log_format, task.instance_group.name, task.execution_node))
-            elif controller_node:
-                task.instance_group = rampart_group
-                task.execution_node = instance.hostname
-                task.controller_node = controller_node
-                logger.debug('Submitting isolated {} to queue {} controlled by {}.'.format(task.log_format, task.execution_node, controller_node))
             elif rampart_group.is_container_group:
                 # find one real, non-containerized instance with capacity to
                 # act as the controller for k8s API interaction
                 match = None
-                for group in InstanceGroup.objects.all():
-                    if group.is_container_group or group.controller_id:
-                        continue
+                for group in InstanceGroup.objects.filter(is_container_group=False):
                     match = group.fit_task_to_most_remaining_capacity_instance(task, group.instances.all())
                     if match:
                         break
                 task.instance_group = rampart_group
                 if match is None:
                     logger.warn('No available capacity to run containerized <{}>.'.format(task.log_format))
+                elif task.can_run_containerized and any(ig.is_container_group for ig in task.preferred_instance_groups):
+                    task.controller_node = match.hostname
                 else:
-                    if task.supports_isolation():
-                        task.controller_node = match.hostname
-                    else:
-                        # project updates and inventory updates don't *actually* run in pods,
-                        # so just pick *any* non-isolated, non-containerized host and use it
-                        # as the execution node
-                        task.execution_node = match.hostname
-                        logger.debug('Submitting containerized {} to queue {}.'.format(task.log_format, task.execution_node))
+                    # project updates and inventory updates don't *actually* run in pods, so
+                    # just pick *any* non-containerized host and use it as the execution node
+                    task.execution_node = match.hostname
+                    logger.debug('Submitting containerized {} to queue {}.'.format(task.log_format, task.execution_node))
             else:
                 task.instance_group = rampart_group
                 if instance is not None:

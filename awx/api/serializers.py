@@ -170,7 +170,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'inventory_source': ('id', 'name', 'source', 'last_updated', 'status'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
-    'instance_group': ('id', 'name', 'controller_id', 'is_container_group'),
+    'instance_group': ('id', 'name', 'is_container_group'),
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
@@ -4818,10 +4818,6 @@ class InstanceGroupSerializer(BaseSerializer):
     )
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance group'), read_only=True)
     instances = serializers.SerializerMethodField()
-    is_controller = serializers.BooleanField(help_text=_('Indicates whether instance group controls any other group'), read_only=True)
-    is_isolated = serializers.BooleanField(
-        help_text=_('Indicates whether instances in this group are isolated.' 'Isolated groups have a designated controller group.'), read_only=True
-    )
     is_container_group = serializers.BooleanField(
         required=False,
         help_text=_('Indicates whether instances in this group are containerized.' 'Containerized groups have a designated Openshift or Kubernetes cluster.'),
@@ -4869,9 +4865,6 @@ class InstanceGroupSerializer(BaseSerializer):
             "jobs_running",
             "jobs_total",
             "instances",
-            "controller",
-            "is_controller",
-            "is_isolated",
             "is_container_group",
             "credential",
             "policy_instance_percentage",
@@ -4885,8 +4878,6 @@ class InstanceGroupSerializer(BaseSerializer):
         res = super(InstanceGroupSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_group_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instances'] = self.reverse('api:instance_group_instance_list', kwargs={'pk': obj.pk})
-        if obj.controller_id:
-            res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
         if obj.credential:
             res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential_id})
 
@@ -4898,10 +4889,6 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('Duplicate entry {}.').format(instance_name))
             if not Instance.objects.filter(hostname=instance_name).exists():
                 raise serializers.ValidationError(_('{} is not a valid hostname of an existing instance.').format(instance_name))
-            if Instance.objects.get(hostname=instance_name).is_isolated():
-                raise serializers.ValidationError(_('Isolated instances may not be added or removed from instances groups via the API.'))
-            if self.instance and self.instance.controller_id is not None:
-                raise serializers.ValidationError(_('Isolated instance group membership may not be managed via the API.'))
         if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
         return value

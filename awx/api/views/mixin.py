@@ -85,15 +85,6 @@ class InstanceGroupMembershipMixin(object):
                     ig_obj.save(update_fields=['policy_instance_list'])
         return response
 
-    def is_valid_relation(self, parent, sub, created=False):
-        if sub.is_isolated():
-            return {'error': _('Isolated instances may not be added or removed from instances groups via the API.')}
-        if self.parent_model is InstanceGroup:
-            ig_obj = self.get_parent_object()
-            if ig_obj.controller_id is not None:
-                return {'error': _('Isolated instance group membership may not be managed via the API.')}
-        return None
-
     def unattach_validate(self, request):
         (sub_id, res) = super(InstanceGroupMembershipMixin, self).unattach_validate(request)
         if res:

@@ -588,7 +588,7 @@ class UnifiedJob(
         blank=True,
         default='',
         editable=False,
-        help_text=_("The instance that managed the isolated execution environment."),
+        help_text=_("The instance that managed the execution environment."),
     )
     notifications = models.ManyToManyField(
         'Notification',
@@ -736,10 +736,6 @@ class UnifiedJob(
     @classmethod
     def _get_task_class(cls):
         raise NotImplementedError  # Implement in subclasses.
-
-    @classmethod
-    def supports_isolation(cls):
-        return False
 
     @property
     def can_run_containerized(self):
@@ -1402,12 +1398,11 @@ class UnifiedJob(
     @property
     def preferred_instance_groups(self):
         """
-        Return Instance/Rampart Groups preferred by this unified job templates
+        Return Instance/Rampart Groups preferred by this unified job template
         """
         if not self.unified_job_template:
             return []
-        template_groups = [x for x in self.unified_job_template.instance_groups.all()]
-        return template_groups
+        return list(self.unified_job_template.instance_groups.all())
 
     @property
     def global_instance_groups(self):
@@ -1466,9 +1461,6 @@ class UnifiedJob(
 
     def get_queue_name(self):
         return self.controller_node or self.execution_node or get_local_queuename()
-
-    def is_isolated(self):
-        return bool(self.controller_node)
 
     @property
     def is_container_group_task(self):

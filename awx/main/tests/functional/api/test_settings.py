@@ -5,8 +5,6 @@
 # Python
 import pytest
 
-from django.conf import settings
-
 # AWX
 from awx.api.versioning import reverse
 from awx.conf.models import Setting
@@ -320,60 +318,6 @@ def test_logging_aggregator_connection_test_valid(put, post, admin):
     # "Test" the logger
     url = reverse('api:setting_logging_test')
     post(url, {}, user=admin, expect=202)
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize(
-    'setting_name',
-    [
-        'AWX_ISOLATED_CHECK_INTERVAL',
-        'AWX_ISOLATED_LAUNCH_TIMEOUT',
-        'AWX_ISOLATED_CONNECTION_TIMEOUT',
-    ],
-)
-def test_isolated_job_setting_validation(get, patch, admin, setting_name):
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
-    patch(url, user=admin, data={setting_name: -1}, expect=400)
-
-    data = get(url, user=admin).data
-    assert data[setting_name] != -1
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize(
-    'key, expected',
-    [
-        ['AWX_ISOLATED_PRIVATE_KEY', '$encrypted$'],
-        ['AWX_ISOLATED_PUBLIC_KEY', 'secret'],
-    ],
-)
-def test_isolated_keys_readonly(get, patch, delete, admin, key, expected):
-    Setting.objects.create(key=key, value='secret').save()
-    assert getattr(settings, key) == 'secret'
-
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
-    resp = get(url, user=admin)
-    assert resp.data[key] == expected
-
-    patch(url, user=admin, data={key: 'new-secret'})
-    assert getattr(settings, key) == 'secret'
-
-    delete(url, user=admin)
-    assert getattr(settings, key) == 'secret'
-
-
-@pytest.mark.django_db
-def test_isolated_key_flag_readonly(get, patch, delete, admin):
-    settings.AWX_ISOLATED_KEY_GENERATION = True
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
-    resp = get(url, user=admin)
-    assert resp.data['AWX_ISOLATED_KEY_GENERATION'] is True
-
-    patch(url, user=admin, data={'AWX_ISOLATED_KEY_GENERATION': False})
-    assert settings.AWX_ISOLATED_KEY_GENERATION is True
-
-    delete(url, user=admin)
-    assert settings.AWX_ISOLATED_KEY_GENERATION is True
 
 
 @pytest.mark.django_db

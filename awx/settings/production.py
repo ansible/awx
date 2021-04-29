@@ -40,8 +40,6 @@ ANSIBLE_VENV_PATH = os.path.join(BASE_VENV_PATH, "ansible")
 # Tower base virtualenv paths and enablement
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
-AWX_ISOLATED_USERNAME = 'awx'
-
 # Store a snapshot of default settings at this point before loading any
 # customizable config files.
 DEFAULTS_SNAPSHOT = {}
@@ -90,15 +88,5 @@ except IOError:
         raise
 
 # The below runs AFTER all of the custom settings are imported.
-
-CELERYBEAT_SCHEDULE.update(
-    {  # noqa
-        'isolated_heartbeat': {
-            'task': 'awx.main.tasks.awx_isolated_heartbeat',
-            'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),  # noqa
-            'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},  # noqa
-        }
-    }
-)
 
 DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63])  # noqa

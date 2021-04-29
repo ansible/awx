@@ -35,9 +35,6 @@ LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'  #
 LOGGING['handlers']['task_system'] = LOGGING['handlers']['console'].copy()  # noqa
 COLOR_LOGS = True
 
-# Pipe management playbook output to console
-LOGGING['loggers']['awx.isolated.manager.playbooks']['propagate'] = True  # noqa
-
 # celery is annoyingly loud when docker containers start
 LOGGING['loggers'].pop('celery', None)  # noqa
 # avoid awx.main.dispatch WARNING-level scaling worker up/down messages
@@ -66,10 +63,6 @@ CALLBACK_QUEUE = "callback_tasks"
 # when updating SCM projects
 # Note: This setting may be overridden by database settings.
 AWX_ROLES_ENABLED = True
-
-AWX_ISOLATED_USERNAME = 'root'
-AWX_ISOLATED_CHECK_INTERVAL = 1
-AWX_ISOLATED_PERIODIC_CHECK = 30
 
 # Disable Pendo on the UI for development/test.
 # Note: This setting may be overridden by database settings.
@@ -135,17 +128,6 @@ if "pytest" in sys.modules:
             },
         }
     }
-
-
-CELERYBEAT_SCHEDULE.update(
-    {  # noqa
-        'isolated_heartbeat': {
-            'task': 'awx.main.tasks.awx_isolated_heartbeat',
-            'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),  # noqa
-            'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},  # noqa
-        }
-    }
-)
 
 CLUSTER_HOST_ID = socket.gethostname()
 

@@ -142,7 +142,7 @@ class InstanceManager(models.Manager):
             pod_ip = os.environ.get('MY_POD_IP')
             registered = self.register(ip_address=pod_ip)
             is_container_group = settings.IS_K8S
-            RegisterQueue('tower', None, 100, 0, [], is_container_group).register()
+            RegisterQueue('tower', 100, 0, [], is_container_group).register()
             return registered
         else:
             return (False, self.me())
@@ -154,9 +154,6 @@ class InstanceManager(models.Manager):
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
-
-    def all_non_isolated(self):
-        return self.exclude(rampart_groups__controller__isnull=False)
 
 
 class InstanceGroupManager(models.Manager):

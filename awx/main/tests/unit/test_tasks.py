@@ -645,102 +645,6 @@ class TestAdhocRun(TestJobExecution):
         assert extra_vars['awx_user_name'] == "angry-spud"
 
 
-@pytest.mark.skip(reason="Isolated code path needs updating after runner integration")
-class TestIsolatedExecution(TestJobExecution):
-
-    ISOLATED_HOST = 'some-isolated-host'
-    ISOLATED_CONTROLLER_HOST = 'some-isolated-controller-host'
-
-    @pytest.fixture
-    def job(self):
-        job = Job(pk=1, id=1, project=Project(), inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
-        job.controller_node = self.ISOLATED_CONTROLLER_HOST
-        job.execution_node = self.ISOLATED_HOST
-        return job
-
-    def test_with_ssh_credentials(self, job):
-        ssh = CredentialType.defaults['ssh']()
-        credential = Credential(pk=1, credential_type=ssh, inputs={'username': 'bob', 'password': 'secret', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY})
-        credential.inputs['password'] = encrypt_field(credential, 'password')
-        job.credentials.add(credential)
-
-        private_data = tempfile.mkdtemp(prefix='awx_')
-        self.task.build_private_data_dir = mock.Mock(return_value=private_data)
-
-        def _mock_job_artifacts(*args, **kw):
-            artifacts = os.path.join(private_data, 'artifacts')
-            if not os.path.exists(artifacts):
-                os.makedirs(artifacts)
-            if 'run_isolated.yml' in args[0]:
-                for filename, data in (
-                    ['status', 'successful'],
-                    ['rc', '0'],
-                    ['stdout', 'IT WORKED!'],
-                ):
-                    with open(os.path.join(artifacts, filename), 'w') as f:
-                        f.write(data)
-            return ('successful', 0)
-
-        self.run_pexpect.side_effect = _mock_job_artifacts
-        self.task.run(self.pk)
-
-        playbook_run = self.run_pexpect.call_args_list[0][0]
-        assert ' '.join(playbook_run[0]).startswith(
-            ' '.join(
-                [
-                    'ansible-playbook',
-                    'run_isolated.yml',
-                    '-u',
-                    settings.AWX_ISOLATED_USERNAME,
-                    '-T',
-                    str(settings.AWX_ISOLATED_CONNECTION_TIMEOUT),
-                    '-i',
-                    self.ISOLATED_HOST + ',',
-                    '-e',
-                ]
-            )
-        )
-        extra_vars = playbook_run[0][playbook_run[0].index('-e') + 1]
-        extra_vars = json.loads(extra_vars)
-        assert extra_vars['dest'] == '/tmp'
-        assert extra_vars['src'] == private_data
-
-    def test_systemctl_failure(self):
-        # If systemctl fails, read the contents of `artifacts/systemctl_logs`
-        mock_get = mock.Mock()
-        ssh = CredentialType.defaults['ssh']()
-        credential = Credential(
-            pk=1,
-            credential_type=ssh,
-            inputs={
-                'username': 'bob',
-            },
-        )
-        self.instance.credentials.add(credential)
-
-        private_data = tempfile.mkdtemp(prefix='awx_')
-        self.task.build_private_data_dir = mock.Mock(return_value=private_data)
-        inventory = json.dumps({"all": {"hosts": ["localhost"]}})
-
-        def _mock_job_artifacts(*args, **kw):
-            artifacts = os.path.join(private_data, 'artifacts')
-            if not os.path.exists(artifacts):
-                os.makedirs(artifacts)
-            if 'run_isolated.yml' in args[0]:
-                for filename, data in (['daemon.log', 'ERROR IN RUN.PY'],):
-                    with open(os.path.join(artifacts, filename), 'w') as f:
-                        f.write(data)
-            return ('successful', 0)
-
-        self.run_pexpect.side_effect = _mock_job_artifacts
-
-        with mock.patch('time.sleep'):
-            with mock.patch('requests.get') as mock_get:
-                mock_get.return_value = mock.Mock(content=inventory)
-                with pytest.raises(Exception):
-                    self.task.run(self.pk, self.ISOLATED_HOST)
-
-
 class TestJobCredentials(TestJobExecution):
     @pytest.fixture
     def job(self, execution_environment):
@@ -1625,7 +1529,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         assert 'AWS_ACCESS_KEY_ID' not in env
         assert 'AWS_SECRET_ACCESS_KEY' not in env
@@ -1645,7 +1549,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         safe_env = build_safe_env(env)
 
@@ -1669,7 +1573,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         safe_env = {}
         credentials = task.build_credentials_list(inventory_update)
@@ -1706,7 +1610,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         safe_env = build_safe_env(env)
 
@@ -1736,7 +1640,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         safe_env = build_safe_env(env)
 
@@ -1763,7 +1667,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         def run(expected_gce_zone):
             private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+            env = task.build_env(inventory_update, private_data_dir, private_data_files)
             safe_env = {}
             credentials = task.build_credentials_list(inventory_update)
             for credential in credentials:
@@ -1797,7 +1701,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         path = os.path.join(private_data_dir, os.path.basename(env['OS_CLIENT_CONFIG_FILE']))
         shade_config = open(path, 'r').read()
@@ -1832,7 +1736,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
         safe_env = build_safe_env(env)
 
         assert env["FOREMAN_SERVER"] == "https://example.org"
@@ -1856,7 +1760,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        env = task.build_env(inventory_update, private_data_dir, False)
+        env = task.build_env(inventory_update, private_data_dir)
 
         safe_env = build_safe_env(env)
 
@@ -1888,7 +1792,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        env = task.build_env(inventory_update, private_data_dir, False)
+        env = task.build_env(inventory_update, private_data_dir)
         safe_env = {}
         credentials = task.build_credentials_list(inventory_update)
         for credential in credentials:
@@ -1919,7 +1823,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         assert env['FOO'] == 'BAR'
 

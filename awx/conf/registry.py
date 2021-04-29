@@ -92,11 +92,7 @@ class SettingsRegistry(object):
                 continue
             if kwargs.get('category_slug', None) in slugs_to_ignore:
                 continue
-            if (
-                read_only in {True, False}
-                and kwargs.get('read_only', False) != read_only
-                and setting not in ('INSTALL_UUID', 'AWX_ISOLATED_PRIVATE_KEY', 'AWX_ISOLATED_PUBLIC_KEY')
-            ):
+            if read_only in {True, False} and kwargs.get('read_only', False) != read_only and setting != 'INSTALL_UUID':
                 # Note: Doesn't catch fields that set read_only via __init__;
                 # read-only field kwargs should always include read_only=True.
                 continue

@@ -174,12 +174,7 @@ init:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
-	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --instance_percent=100;\
-	if [ "$(AWX_GROUP_QUEUES)" == "tower,thepentagon" ]; then \
-		$(MANAGEMENT_COMMAND) provision_instance --hostname=isolated; \
-		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
-		$(MANAGEMENT_COMMAND) generate_isolated_key > /awx_devel/awx/main/isolated/authorized_keys; \
-	fi;
+	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --instance_percent=100;
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
