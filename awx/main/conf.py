@@ -345,6 +345,17 @@ register(
 )
 
 register(
+    'MAX_WEBSOCKET_EVENT_RATE',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=30,
+    label=_('Job Event Maximum Websocket Messages Per Second'),
+    help_text=_('Maximum number of messages to update the UI live job output with per second. Value of 0 means no limit.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'SCHEDULE_MAX_JOBS',
     field_class=fields.IntegerField,
     min_value=1,
