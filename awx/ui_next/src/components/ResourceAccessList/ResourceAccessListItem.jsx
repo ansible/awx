@@ -1,7 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
 import { func } from 'prop-types';
-
 import { t } from '@lingui/macro';
 import { Chip } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
 import { RolesAPI, TeamsAPI, UsersAPI } from '../../api';
 import AddResourceRole from '../AddRole/AddResourceRole';
