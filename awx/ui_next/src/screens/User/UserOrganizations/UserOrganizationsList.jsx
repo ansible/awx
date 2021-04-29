@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
-
 import { useLocation, useParams } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
-import PaginatedDataList from '../../../components/PaginatedDataList';
+import PaginatedTable, {
+  HeaderRow,
+  HeaderCell,
+} from '../../../components/PaginatedTable';
 import useRequest from '../../../util/useRequest';
 import { UsersAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
@@ -47,14 +49,20 @@ function UserOrganizationsList() {
   }, [fetchOrgs]);
 
   return (
-    <PaginatedDataList
+    <PaginatedTable
       items={organizations}
       contentError={contentError}
       hasContentLoading={isLoading}
       itemCount={count}
       pluralizedItemName={t`Organizations`}
       qsConfig={QS_CONFIG}
-      renderItem={organization => (
+      headerRow={
+        <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+          <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+          <HeaderCell>{t`Description`}</HeaderCell>
+        </HeaderRow>
+      }
+      renderRow={(organization, index) => (
         <UserOrganizationListItem
           key={organization.id}
           value={organization.name}
@@ -62,6 +70,7 @@ function UserOrganizationsList() {
           detailUrl={`/organizations/${organization.id}/details`}
           onSelect={() => {}}
           isSelected={false}
+          rowIndex={index}
         />
       )}
     />
