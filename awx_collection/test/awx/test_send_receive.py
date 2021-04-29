@@ -30,7 +30,7 @@ def test_receive_send_jt(run_module, admin_user, mocker, silence_deprecation):
     jt.admin_role.members.add(admin_user)  # work around send/receive bug
 
     # receive everything
-    result = run_module('tower_receive', dict(all=True), admin_user)
+    result = run_module('receive', dict(all=True), admin_user)
 
     assert 'assets' in result, result
     assets = result['assets']
@@ -47,7 +47,7 @@ def test_receive_send_jt(run_module, admin_user, mocker, silence_deprecation):
     # recreate everything
     with mocker.patch('sys.stdin.isatty', return_value=True):
         with mocker.patch('tower_cli.models.base.MonitorableResource.wait'):
-            result = run_module('tower_send', dict(assets=json.dumps(assets)), admin_user)
+            result = run_module('send', dict(assets=json.dumps(assets)), admin_user)
 
     assert not result.get('failed'), result
 

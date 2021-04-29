@@ -14,12 +14,12 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_instance_group
+module: instance_group
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "4.0"
-short_description: create, update, or destroy Ansible Tower instance groups.
+short_description: create, update, or destroy Automation Controller instance groups.
 description:
-    - Create, update, or destroy Ansible Tower instance groups. See
+    - Create, update, or destroy Automation Controller instance groups. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:

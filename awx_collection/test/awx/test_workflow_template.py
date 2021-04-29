@@ -10,7 +10,7 @@ from awx.main.models import WorkflowJobTemplate, JobTemplate, Project, Inventory
 @pytest.mark.django_db
 def test_create_workflow_job_template(run_module, admin_user, organization, survey_spec, silence_deprecation):
     result = run_module(
-        'tower_workflow_template',
+        'workflow_template',
         {
             'name': 'foo-workflow',
             'organization': organization.name,
@@ -37,7 +37,7 @@ def test_with_nested_workflow(run_module, admin_user, organization, silence_depr
     wfjt1 = WorkflowJobTemplate.objects.create(name='first', organization=organization)
 
     result = run_module(
-        'tower_workflow_template',
+        'workflow_template',
         {'name': 'foo-workflow', 'organization': organization.name, 'schema': [{'workflow': wfjt1.name}], 'state': 'present'},
         admin_user,
     )
@@ -58,7 +58,7 @@ def test_schema_with_branches(run_module, admin_user, organization, silence_depr
     inv_src = InventorySource.objects.create(inventory=inv, name='AWS servers', source='ec2')
 
     result = run_module(
-        'tower_workflow_template',
+        'workflow_template',
         {
             'name': 'foo-workflow',
             'organization': organization.name,
@@ -96,7 +96,7 @@ def test_schema_with_branches(run_module, admin_user, organization, silence_depr
 @pytest.mark.django_db
 def test_with_missing_ujt(run_module, admin_user, organization, silence_deprecation):
     result = run_module(
-        'tower_workflow_template', {'name': 'foo-workflow', 'organization': organization.name, 'schema': [{'foo': 'bar'}], 'state': 'present'}, admin_user
+        'workflow_template', {'name': 'foo-workflow', 'organization': organization.name, 'schema': [{'foo': 'bar'}], 'state': 'present'}, admin_user
     )
     assert result.get('failed', False), result
     assert 'You should provide exactly one of the attributes job_template,' in result['msg']

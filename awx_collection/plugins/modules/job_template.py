@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_job_template
+module: job_template
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Ansible Tower job templates.
+short_description: create, update, or destroy Automation Controller job templates.
 description:
-    - Create, update, or destroy Ansible Tower job templates. See
+    - Create, update, or destroy Automation Controller job templates. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -305,7 +305,7 @@ notes:
 
 EXAMPLES = '''
 - name: Create Tower Ping job template
-  tower_job_template:
+  job_template:
     name: "Ping"
     job_type: "run"
     organization: "Default"
@@ -320,20 +320,20 @@ EXAMPLES = '''
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
 
 - name: Add start notification to Job Template
-  tower_job_template:
+  job_template:
     name: "Ping"
     notification_templates_started:
       - Notification1
       - Notification2
 
 - name: Remove Notification1 start notification from Job Template
-  tower_job_template:
+  job_template:
     name: "Ping"
     notification_templates_started:
       - Notification2
 
 - name: Copy Job Template
-  tower_job_template:
+  job_template:
     name: copy job template
     copy_from: test job template
     job_type: "run"

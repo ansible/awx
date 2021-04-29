@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_settings
+module: settings
 author: "Nikhil Jain (@jainnikhil30)"
-short_description: Modify Ansible Tower settings.
+short_description: Modify Automation Controller settings.
 description:
-    - Modify Ansible Tower settings. See
+    - Modify Automation Controller settings. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -42,25 +42,25 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Set the value of AWX_ISOLATION_BASE_PATH
-  tower_settings:
+  settings:
     name: AWX_ISOLATION_BASE_PATH
     value: "/tmp"
   register: testing_settings
 
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS
-  tower_settings:
+  settings:
     name: "AWX_ISOLATION_SHOW_PATHS"
     value: "'/var/lib/awx/projects/', '/tmp'"
   register: testing_settings
 
 - name: Set the LDAP Auth Bind Password
-  tower_settings:
+  settings:
     name: "AUTH_LDAP_BIND_PASSWORD"
     value: "Password"
   no_log: true
 
 - name: Set all the LDAP Auth Bind Params
-  tower_settings:
+  settings:
     settings:
       AUTH_LDAP_BIND_PASSWORD: "password"
       AUTH_LDAP_USER_ATTR_MAP:

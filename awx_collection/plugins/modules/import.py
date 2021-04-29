@@ -14,12 +14,12 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_import
+module: import
 author: "John Westcott (@john-westcott-iv)"
 version_added: "3.7"
-short_description: import resources into Ansible Tower.
+short_description: import resources into Automation Controller.
 description:
-    - Import assets into Ansible Tower. See
+    - Import assets into Automation Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     assets:
@@ -35,16 +35,16 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Export all assets
-  tower_export:
+  export:
     all: True
   register: export_output
 
 - name: Import all tower assets from our export
-  tower_import:
+  import:
     assets: "{{ export_output.assets }}"
 
 - name: Load data from a json file created by a command like awx export --organization Default
-  tower_import:
+  import:
     assets: "{{ lookup('file', 'org.json') | from_json() }}"
 '''
 

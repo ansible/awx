@@ -14,13 +14,13 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_workflow_job_template
+module: workflow_job_template
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: create, update, or destroy Ansible Tower workflow job templates.
+short_description: create, update, or destroy Automation Controller workflow job templates.
 description:
-    - Create, update, or destroy Ansible Tower workflow job templates.
+    - Create, update, or destroy Automation Controller workflow job templates.
     - Replaces the deprecated tower_workflow_template module.
-    - Use the tower_workflow_job_template_node after this, or use the schema paramater to build the workflow's graph
+    - Use the tower_workflow_job_template_node after this, or use the schema parameter to build the workflow's graph
 options:
     name:
       description:
@@ -328,13 +328,13 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Create a workflow job template
-  tower_workflow_job_template:
+  workflow_job_template:
     name: example-workflow
     description: created by Ansible Playbook
     organization: Default
 
 - name: Create a workflow job template with schema in template
-  awx.awx.tower_workflow_job_template:
+  awx.awx.workflow_job_template:
     name: example-workflow
     inventory: Demo Inventory
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
@@ -391,13 +391,13 @@ EXAMPLES = '''
   register: result
 
 - name: Copy a workflow job template
-  tower_workflow_job_template:
+  workflow_job_template:
     name: copy-workflow
     copy_from: example-workflow
     organization: Foo
 
 - name: Create a workflow job template with schema in template
-  awx.awx.tower_workflow_job_template:
+  awx.awx.workflow_job_template:
     name: example-workflow
     inventory: Demo Inventory
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}

@@ -21,7 +21,7 @@ class ControllerAPIModule(ControllerModule):
     # Those values can be found in awx/api/generics.py line 204
     collection_to_version = {
         'awx': 'AWX',
-        'tower': 'Red Hat Ansible Tower',
+        'tower': 'Red Hat Automation Controller',
     }
     session = None
     IDENTITY_FIELDS = {'users': 'username', 'workflow_job_template_nodes': 'identifier', 'instances': 'hostname'}
@@ -302,7 +302,7 @@ class ControllerAPIModule(ControllerModule):
             # Attempt to get a token from /api/v2/tokens/ by giving it our username/password combo
             # If we have a username and password, we need to get a session cookie
             login_data = {
-                "description": "Ansible Tower Module Token",
+                "description": "Automation Controller Module Token",
                 "application": None,
                 "scope": "write",
             }

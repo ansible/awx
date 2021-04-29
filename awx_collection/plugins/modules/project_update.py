@@ -11,11 +11,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.0', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_project_update
+module: project_update
 author: "Sean Sullivan (@sean-m-sullivan)"
-short_description: Update a Project in Ansible Tower
+short_description: Update a Project in Automation Controller
 description:
-    - Update a Ansible Tower Project. See
+    - Update a Automation Controller Project. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -67,12 +67,12 @@ status:
 
 EXAMPLES = '''
 - name: Launch a project with a timeout of 10 seconds
-  tower_project_update:
+  project_update:
     project: "Networking Project"
     timeout: 10
 
 - name: Launch a Project with extra_vars without waiting
-  tower_project_update:
+  project_update:
     project: "Networking Project"
     wait: False
 '''

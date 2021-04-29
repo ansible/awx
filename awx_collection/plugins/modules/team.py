@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_team
+module: team
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Ansible Tower team.
+short_description: create, update, or destroy Automation Controller team.
 description:
-    - Create, update, or destroy Ansible Tower teams. See
+    - Create, update, or destroy Automation Controller teams. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -51,7 +51,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Create tower team
-  tower_team:
+  team:
     name: Team Name
     description: Team Description
     organization: test-org

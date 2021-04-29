@@ -10,7 +10,7 @@ __metaclass__ = type
 
 class ModuleDocFragment(object):
 
-    # Ansible Tower documentation fragment
+    # Automation Controller documentation fragment
     DOCUMENTATION = r'''
 options:
   tower_host:

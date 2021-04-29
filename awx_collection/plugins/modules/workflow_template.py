@@ -14,13 +14,13 @@ ANSIBLE_METADATA = {'status': ['deprecated'], 'supported_by': 'community', 'meta
 
 DOCUMENTATION = '''
 ---
-module: tower_workflow_template
+module: workflow_template
 deprecated:
   removed_in: "14.0.0"
   why: Deprecated in favor of C(_workflow_job_template) and C(_workflow_job_template_node) modules.
   alternative: Use M(tower_workflow_job_template) and M(_workflow_job_template_node) instead.
 author: "Adrien Fleury (@fleu42)"
-short_description: create, update, or destroy Ansible Tower workflow template.
+short_description: create, update, or destroy Automation Controller workflow template.
 description:
     - A tower-cli based module for CRUD actions on workflow job templates.
     - Enables use of the old schema functionality.
@@ -92,13 +92,13 @@ extends_documentation_fragment: awx.awx.auth_legacy
 
 
 EXAMPLES = '''
-- tower_workflow_template:
+- workflow_template:
     name: Workflow Template
     description: My very first Workflow Template
     organization: My optional Organization
     schema: "{{ lookup('file', 'my_workflow.json') }}"
 
-- tower_workflow_template:
+- workflow_template:
     name: Workflow Template
     state: absent
 '''

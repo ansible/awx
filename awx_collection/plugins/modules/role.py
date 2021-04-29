@@ -14,12 +14,12 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_role
+module: role
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: grant or revoke an Ansible Tower role.
+short_description: grant or revoke an Automation Controller role.
 description:
     - Roles are used for access control, this module is for managing user access to server resources.
-    - Grant or revoke Ansible Tower roles to users. See U(https://www.ansible.com/tower) for an overview.
+    - Grant or revoke Automation Controller roles to users. See U(https://www.ansible.com/tower) for an overview.
 options:
     user:
       description:
@@ -131,14 +131,14 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add jdoe to the member role of My Team
-  tower_role:
+  role:
     user: jdoe
     target_team: "My Team"
     role: member
     state: present
 
 - name: Add Joe to multiple job templates and a workflow
-  tower_role:
+  role:
     user: joe
     role: execute
     workflow: test-role-workflow

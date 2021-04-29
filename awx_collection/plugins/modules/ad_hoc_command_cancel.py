@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_ad_hoc_command_cancel
+module: ad_hoc_command_cancel
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Cancel an Ansible Tower Ad Hoc Command.
+short_description: Cancel an Automation Controller Ad Hoc Command.
 description:
-    - Cancel Ansible Tower ad hoc command. See
+    - Cancel Automation Controller ad hoc command. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     command_id:
@@ -47,7 +47,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Cancel command
-  tower_ad_hoc_command_cancel:
+  ad_hoc_command_cancel:
     command_id: command.id
 '''
 

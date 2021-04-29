@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_application
+module: application
 author: "Geoffrey Bacheot (@jffz)"
-short_description: create, update, or destroy Ansible Tower applications
+short_description: create, update, or destroy Automation Controller applications
 description:
-    - Create, update, or destroy Ansible Tower applications. See
+    - Create, update, or destroy Automation Controller applications. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -69,7 +69,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add Foo application
-  tower_application:
+  application:
     name: "Foo"
     description: "Foo bar application"
     organization: "test"
@@ -78,7 +78,7 @@ EXAMPLES = '''
     client-type: public
 
 - name: Add Foo application
-  tower_application:
+  application:
     name: "Foo"
     description: "Foo bar application"
     organization: "test"

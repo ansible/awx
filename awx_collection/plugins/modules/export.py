@@ -14,12 +14,12 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_export
+module: export
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "3.7"
-short_description: export resources from Ansible Tower.
+short_description: export resources from Automation Controller.
 description:
-    - Export assets from Ansible Tower.
+    - Export assets from Automation Controller.
 options:
     all:
       description:
@@ -83,15 +83,15 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Export all tower assets
-  tower_export:
+  export:
     all: True
 
 - name: Export all inventories
-  tower_export:
+  export:
     inventory: 'all'
 
 - name: Export a job template named "My Template" and all Credentials
-  tower_export:
+  export:
     job_template: "My Template"
     credential: 'all'
 '''

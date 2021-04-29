@@ -9,7 +9,7 @@
     irc_not: "AWX-Collection-tests-tower_notification_template-irc-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Test deprecation warnings with legacy name
-  tower_notification_template:
+  notification_template:
     name: "{{ slack_not }}"
     organization: Default
     notification_type: slack
@@ -54,7 +54,7 @@
       - result['deprecations'] | length() == 25
 
 - name: Create Slack notification with custom messages
-  tower_notification_template:
+  notification_template:
     name: "{{ slack_not }}"
     organization: Default
     notification_type: slack
@@ -76,7 +76,7 @@
       - result is changed
 
 - name: Delete Slack notification
-  tower_notification_template:
+  notification_template:
     name: "{{ slack_not }}"
     organization: Default
     state: absent
@@ -87,7 +87,7 @@
       - result is changed
 
 - name: Add webhook notification
-  tower_notification_template:
+  notification_template:
     name: "{{ webhook_not }}"
     organization: Default
     notification_type: webhook
@@ -102,7 +102,7 @@
       - result is changed
 
 - name: Delete webhook notification
-  tower_notification_template:
+  notification_template:
     name: "{{ webhook_not }}"
     organization: Default
     state: absent
@@ -113,7 +113,7 @@
       - result is changed
 
 - name: Add email notification
-  tower_notification_template:
+  notification_template:
     name: "{{ email_not }}"
     organization: Default
     notification_type: email
@@ -134,7 +134,7 @@
       - result is changed
 
 - name: Copy email notification
-  tower_notification_template:
+  notification_template:
     name: "copy_{{ email_not }}"
     copy_from: "{{ email_not }}"
     organization: Default
@@ -145,7 +145,7 @@
       - result.copied
 
 - name: Delete copied email notification
-  tower_notification_template:
+  notification_template:
     name: "copy_{{ email_not }}"
     organization: Default
     state: absent
@@ -156,7 +156,7 @@
       - result is changed
 
 - name: Delete email notification
-  tower_notification_template:
+  notification_template:
     name: "{{ email_not }}"
     organization: Default
     state: absent
@@ -167,7 +167,7 @@
       - result is changed
 
 - name: Add twilio notification
-  tower_notification_template:
+  notification_template:
     name: "{{ twillo_not }}"
     organization: Default
     notification_type: twilio
@@ -184,7 +184,7 @@
       - result is changed
 
 - name: Delete twilio notification
-  tower_notification_template:
+  notification_template:
     name: "{{ twillo_not }}"
     organization: Default
     state: absent
@@ -195,7 +195,7 @@
       - result is changed
 
 - name: Add PagerDuty notification
-  tower_notification_template:
+  notification_template:
     name: "{{ pd_not }}"
     organization: Default
     notification_type: pagerduty
@@ -211,7 +211,7 @@
       - result is changed
 
 - name: Delete PagerDuty notification
-  tower_notification_template:
+  notification_template:
     name: "{{ pd_not }}"
     organization: Default
     state: absent
@@ -222,7 +222,7 @@
       - result is changed
 
 - name: Add IRC notification
-  tower_notification_template:
+  notification_template:
     name: "{{ irc_not }}"
     organization: Default
     notification_type: irc
@@ -241,7 +241,7 @@
       - result is changed
 
 - name: Delete IRC notification
-  tower_notification_template:
+  notification_template:
     name: "{{ irc_not }}"
     organization: Default
     state: absent

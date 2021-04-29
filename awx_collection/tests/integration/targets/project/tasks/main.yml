@@ -158,7 +158,7 @@
           - result is not changed
 
     - name: Create a job template that overrides the project scm_branch
-      tower_job_template:
+      job_template:
         name: "{{ jt1 }}"
         project: "{{ project_name3 }}"
         inventory: "Demo Inventory"
@@ -166,7 +166,7 @@
         playbook: debug.yml
 
     - name: Launch "{{ jt1 }}"
-      tower_job_launch:
+      job_launch:
         job_template: "{{ jt1 }}"
       register: result
 
@@ -175,7 +175,7 @@
           - result is changed
 
     - name: "wait for job {{ result.id }}"
-      tower_job_wait:
+      job_wait:
         job_id: "{{ result.id }}"
       register: job
 
@@ -185,7 +185,7 @@
 
   always:
     - name: Delete the test job_template
-      tower_job_template:
+      job_template:
         name: "{{ jt1 }}"
         project: "{{ project_name3 }}"
         inventory: "Demo Inventory"

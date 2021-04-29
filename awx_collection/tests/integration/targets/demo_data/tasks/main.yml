@@ -9,7 +9,7 @@
     scm_type: git
     state: absent
   loop: >
-    {{ query('awx.awx.tower_api', 'projects',
+    {{ query('awx.awx.controller_api', 'projects',
        query_params={'organization__isnull': true, 'name': 'Demo Project'})
     }}
   loop_control:
@@ -38,7 +38,7 @@
   register: result
 
 - name: Assure that demo job template exists
-  tower_job_template:
+  job_template:
     name: "Demo Job Template"
     project: "Demo Project"
     inventory: "Demo Inventory"

@@ -1,6 +1,6 @@
 ---
 - name: Launch a Job Template
-  tower_job_launch:
+  job_launch:
     job_template: "Demo Job Template"
   register: job
 
@@ -9,7 +9,7 @@
       - "job is changed"
 
 - name: Cancel the job
-  tower_job_cancel:
+  job_cancel:
     job_id: "{{ job.id }}"
   register: results
 
@@ -18,7 +18,7 @@
       - results is changed
 
 - name: Cancel an already canceled job (assert failure)
-  tower_job_cancel:
+  job_cancel:
     job_id: "{{ job.id }}"
     fail_if_not_running: true
   register: results
@@ -29,7 +29,7 @@
       - results is failed
 
 - name: Check module fails with correct msg
-  tower_job_cancel:
+  job_cancel:
     job_id: 9999999999
   register: result
   ignore_errors: true

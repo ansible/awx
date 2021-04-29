@@ -40,7 +40,7 @@
           - project_info is changed
 
     - name: Create job templates
-      tower_job_template:
+      job_template:
         name: "{{ item }}"
         project: "{{ project_name }}"
         inventory: "Demo Inventory"
@@ -86,7 +86,7 @@
           - "result is changed"
 
     - name: Create a workflow
-      tower_workflow_job_template:
+      workflow_job_template:
         name: test-role-workflow
         organization: Default
         state: present
@@ -139,7 +139,7 @@
       register: result
 
     - name: Delete job templates
-      tower_job_template:
+      job_template:
         name: "{{ item }}"
         project: "{{ project_name }}"
         inventory: "Demo Inventory"

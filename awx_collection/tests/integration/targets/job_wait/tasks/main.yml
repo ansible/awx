@@ -13,7 +13,7 @@
     organization: Default
 
 - name: Create a job template
-  tower_job_template:
+  job_template:
     name: "{{ jt_name }}"
     playbook: "sleep.yml"
     job_type: run
@@ -23,7 +23,7 @@
       sleep_interval: 300
 
 - name: Check deprecation warnings
-  tower_job_wait:
+  job_wait:
     min_interval: 10
     max_interval: 20
     job_id: "99999999"
@@ -35,7 +35,7 @@
       - "'Min and max interval have been deprecated, please use interval instead; interval will be set to 15'"
 
 - name: Validate that interval superceeds min/max
-  tower_job_wait:
+  job_wait:
     min_interval: 10
     max_interval: 20
     interval: 12
@@ -49,7 +49,7 @@
         'min and max interval have been depricated, please use interval instead, interval will be set to 12'"
 
 - name: Check module fails with correct msg
-  tower_job_wait:
+  job_wait:
     job_id: "99999999"
   register: result
   ignore_errors: true
@@ -61,7 +61,7 @@
         'Unable to wait on job 99999999; that ID does not exist in Tower.'"
 
 - name: Launch Demo Job Template (take happy path)
-  tower_job_launch:
+  job_launch:
     job_template: "Demo Job Template"
   register: job
 
@@ -70,7 +70,7 @@
       - job is changed
 
 - name: Wait for the Job to finish
-  tower_job_wait:
+  job_wait:
     job_id: "{{ job.id }}"
   register: wait_results
 
@@ -82,7 +82,7 @@
       - "'id' in wait_results"
 
 - name: Launch a long running job
-  tower_job_launch:
+  job_launch:
     job_template: "{{ jt_name }}"
   register: job
 
@@ -91,7 +91,7 @@
       - job is changed
 
 - name: Timeout waiting for the job to complete
-  tower_job_wait:
+  job_wait:
     job_id: "{{ job.id }}"
     timeout: 5
   ignore_errors: true
@@ -104,13 +104,13 @@
       - "'id' in wait_results"
 
 - name: Async cancel the long running job
-  tower_job_cancel:
+  job_cancel:
     job_id: "{{ job.id }}"
   async: 3600
   poll: 0
 
 - name: Wait for the job to exit on cancel
-  tower_job_wait:
+  job_wait:
     job_id: "{{ job.id }}"
   register: wait_results
   ignore_errors: true
@@ -122,7 +122,7 @@
       - "wait_results.msg == 'Job with id {{ job.id }} failed' or 'Job with id={{ job.id }} failed, error: Job failed.'"
 
 - name: Delete the job template
-  tower_job_template:
+  job_template:
     name: "{{ jt_name }}"
     playbook: "sleep.yml"
     job_type: run
@@ -147,25 +147,25 @@
     wfjt_name2: "AWX-Collection-tests-tower_workflow_launch--wfjt1-{{ test_id1 }}"
 
 - name: Create our workflow
-  tower_workflow_job_template:
+  workflow_job_template:
     name: "{{ wfjt_name2 }}"
     state: present
 
 - name: Add a node
-  tower_workflow_job_template_node:
+  workflow_job_template_node:
     workflow_job_template: "{{ wfjt_name2 }}"
     unified_job_template: "Demo Job Template"
     identifier: leaf
   register: new_node
 
 - name: Kick off a workflow
-  tower_workflow_launch:
+  workflow_launch:
     workflow_template: "{{ wfjt_name2 }}"
   ignore_errors: true
   register: workflow
 
 - name: Wait for the Workflow Job to finish
-  tower_job_wait:
+  job_wait:
     job_id: "{{ workflow.job_info.id }}"
     job_type: "workflow_jobs"
   register: wait_workflow_results
@@ -178,6 +178,6 @@
       - "'id' in wait_workflow_results"
 
 - name: Clean up test workflow
-  tower_workflow_job_template:
+  workflow_job_template:
     name: "{{ wfjt_name2 }}"
     state: absent

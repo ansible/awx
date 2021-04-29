@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_credential
+module: credential
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Ansible Tower credential.
+short_description: create, update, or destroy Automation Controller credential.
 description:
-    - Create, update, or destroy Ansible Tower credentials. See
+    - Create, update, or destroy Automation Controller credentials. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -56,7 +56,7 @@ options:
       description:
         - >-
           Credential inputs where the keys are var names used in templating.
-          Refer to the Ansible Tower documentation for example syntax.
+          Refer to the Automation Controller documentation for example syntax.
         - Any fields in this dict will take prescedence over any fields mentioned below (i.e. host, username, etc)
       type: dict
     update_secrets:
@@ -204,7 +204,7 @@ notes:
 
 EXAMPLES = '''
 - name: Add tower machine credential
-  tower_credential:
+  credential:
     name: Team Name
     description: Team Description
     organization: test-org
@@ -213,7 +213,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Create a valid SCM credential from a private_key file
-  tower_credential:
+  credential:
     name: SCM Credential
     organization: Default
     state: present
@@ -230,7 +230,7 @@ EXAMPLES = '''
   register: aws_ssh_key
 
 - name: Add Credential Into Tower
-  tower_credential:
+  credential:
     name: Workshop Credential
     credential_type: Machine
     organization: Default
@@ -240,7 +240,7 @@ EXAMPLES = '''
   delegate_to: localhost
 
 - name: Add Credential with Custom Credential Type
-  tower_credential:
+  credential:
     name: Workshop Credential
     credential_type: MyCloudCredential
     organization: Default
@@ -249,7 +249,7 @@ EXAMPLES = '''
     tower_host: https://localhost
 
 - name: Create a Vaiult credential (example for notes)
-  tower_credential:
+  credential:
     name: Example password
     credential_type: Vault
     organization: Default
@@ -258,7 +258,7 @@ EXAMPLES = '''
       vault_id: 'My ID'
 
 - name: Bad password update (will replace vault_id)
-  tower_credential:
+  credential:
     name: Example password
     credential_type: Vault
     organization: Default
@@ -266,14 +266,14 @@ EXAMPLES = '''
       vault_password: 'new_password'
 
 - name: Another bad password update (will replace vault_id)
-  tower_credential:
+  credential:
     name: Example password
     credential_type: Vault
     organization: Default
     vault_password: 'new_password'
 
 - name: A safe way to update a password and keep vault_id
-  tower_credential:
+  credential:
     name: Example password
     credential_type: Vault
     organization: Default
@@ -282,7 +282,7 @@ EXAMPLES = '''
       vault_id: 'My ID'
 
 - name: Copy Credential
-  tower_credential:
+  credential:
     name: Copy password
     copy_from: Example password
     credential_type: Vault

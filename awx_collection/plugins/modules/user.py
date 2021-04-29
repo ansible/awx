@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_user
+module: user
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: create, update, or destroy Ansible Tower users.
+short_description: create, update, or destroy Automation Controller users.
 description:
-    - Create, update, or destroy Ansible Tower users. See
+    - Create, update, or destroy Automation Controller users. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     username:
@@ -72,7 +72,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add tower user
-  tower_user:
+  user:
     username: jdoe
     password: foobarbaz
     email: jdoe@example.org
@@ -82,7 +82,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add tower user as a system administrator
-  tower_user:
+  user:
     username: jdoe
     password: foobarbaz
     email: jdoe@example.org
@@ -91,7 +91,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add tower user as a system auditor
-  tower_user:
+  user:
     username: jdoe
     password: foobarbaz
     email: jdoe@example.org
@@ -100,7 +100,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Delete tower user
-  tower_user:
+  user:
     username: jdoe
     email: jdoe@example.org
     state: absent

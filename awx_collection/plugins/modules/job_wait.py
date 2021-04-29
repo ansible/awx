@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_job_wait
+module: job_wait
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: Wait for Ansible Tower job to finish.
+short_description: Wait for Automation Controller job to finish.
 description:
-    - Wait for Ansible Tower job to finish and report success or failure. See
+    - Wait for Automation Controller job to finish and report success or failure. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     job_id:
@@ -58,12 +58,12 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Launch a job
-  tower_job_launch:
+  job_launch:
     job_template: "My Job Template"
   register: job
 
 - name: Wait for job max 120s
-  tower_job_wait:
+  job_wait:
     job_id: "{{ job.id }}"
     timeout: 120
 '''

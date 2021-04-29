@@ -22,7 +22,7 @@ def test_create_token(run_module, admin_user):
         'tower_config_file': None,
     }
 
-    result = run_module('tower_token', module_args, admin_user)
+    result = run_module('token', module_args, admin_user)
     assert result.get('changed'), result
 
     tokens = OAuth2AccessToken.objects.filter(description='barfoo')

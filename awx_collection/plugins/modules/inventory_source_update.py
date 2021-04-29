@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_inventory_source_update
+module: inventory_source_update
 author: "Bianca Henderson (@beeankha)"
 short_description: Update inventory source(s).
 description:
-    - Update Ansible Tower inventory source(s). See
+    - Update Automation Controller inventory source(s). See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -58,16 +58,16 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Update a single inventory source
-  tower_inventory_source_update:
+  inventory_source_update:
     name: "Example Inventory Source"
     inventory: "My Inventory"
     organization: Default
 
 - name: Update all inventory sources
-  tower_inventory_source_update:
+  inventory_source_update:
     name: "{{ item }}"
     inventory: "My Other Inventory"
-  loop: "{{ query('awx.awx.tower_api', 'inventory_sources', query_params={ 'inventory': 30 }, return_ids=True ) }}"
+  loop: "{{ query('awx.awx.controller_api', 'inventory_sources', query_params={ 'inventory': 30 }, return_ids=True ) }}"
 '''
 
 RETURN = '''

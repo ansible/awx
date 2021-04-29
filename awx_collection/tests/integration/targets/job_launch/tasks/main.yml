@@ -6,7 +6,7 @@
     proj_name: "AWX-Collection-tests-tower_job_launch-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Launch a Job Template
-  tower_job_launch:
+  job_launch:
     job_template: "Demo Job Template"
   register: result
 
@@ -16,7 +16,7 @@
       - "result.status == 'pending'"
 
 - name: Wait for a job template to complete
-  tower_job_wait:
+  job_wait:
     job_id: "{{ result.id }}"
     max_interval: 10
     timeout: 120
@@ -28,7 +28,7 @@
       - "result.status == 'successful'"
 
 - name: Check module fails with correct msg
-  tower_job_launch:
+  job_launch:
     job_template: "Non_Existing_Job_Template"
     inventory: "Demo Inventory"
   register: result
@@ -41,7 +41,7 @@
       - "'Non_Existing_Job_Template' in result.msg"
 
 - name: Create a Job Template for testing prompt on launch
-  tower_job_template:
+  job_template:
     name: "{{ jt_name1 }}"
     project: Demo Project
     playbook: hello_world.yml
@@ -54,7 +54,7 @@
   register: result
 
 - name: Launch job template with inventory and credential for prompt on launch
-  tower_job_launch:
+  job_launch:
     job_template: "{{ jt_name1 }}"
     inventory: "Demo Inventory"
     credential: "Demo Credential"
@@ -77,7 +77,7 @@
     scm_url: https://github.com/ansible/test-playbooks
 
 - name: Create the job template with survey
-  tower_job_template:
+  job_template:
     name: "{{ jt_name2 }}"
     project: "{{ proj_name }}"
     playbook: debug.yml
@@ -114,7 +114,7 @@
           new_question: true
 
 - name: Kick off a job template with survey
-  tower_job_launch:
+  job_launch:
     job_template: "{{ jt_name2 }}"
     extra_vars:
       basic_name: My First Variable
@@ -127,14 +127,14 @@
       - result is not failed
 
 - name: Prompt the job templates extra_vars on launch
-  tower_job_template:
+  job_template:
     name: "{{ jt_name2 }}"
     state: present
     ask_variables_on_launch: true
 
 
 - name: Kick off a job template with extra_vars
-  tower_job_launch:
+  job_launch:
     job_template: "{{ jt_name2 }}"
     extra_vars:
       basic_name: My First Variable
@@ -148,7 +148,7 @@
       - result is not failed
 
 - name: Create a Job Template for testing extra_vars
-  tower_job_template:
+  job_template:
     name: "{{ jt_name2 }}"
     project: "{{ proj_name }}"
     playbook: debug.yml
@@ -161,7 +161,7 @@
   register: result
 
 - name: Launch job template with inventory and credential for prompt on launch
-  tower_job_launch:
+  job_launch:
     job_template: "{{ jt_name2 }}"
     organization: Default
   register: result
@@ -171,7 +171,7 @@
       - "result is changed"
 
 - name: Wait for a job template to complete
-  tower_job_wait:
+  job_wait:
     job_id: "{{ result.id }}"
     max_interval: 10
     timeout: 120
@@ -183,7 +183,7 @@
       - "result.status == 'successful'"
 
 - name: Get the job
-  tower_job_list:
+  job_list:
     query: {"id": "{{result.id}}"}
   register: result
 
@@ -192,7 +192,7 @@
       - '{"foo": "bar"} | to_json in result.results[0].extra_vars'
 
 - name: Delete the first jt
-  tower_job_template:
+  job_template:
     name: "{{ jt_name1 }}"
     project: Demo Project
     playbook: hello_world.yml
@@ -204,7 +204,7 @@
       - "result is changed"
 
 - name: Delete the second jt
-  tower_job_template:
+  job_template:
     name: "{{ jt_name2 }}"
     project: "{{ proj_name }}"
     playbook: debug.yml

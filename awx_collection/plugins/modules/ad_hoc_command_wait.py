@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_ad_hoc_command_wait
+module: ad_hoc_command_wait
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Wait for Ansible Tower Ad Hoc Command to finish.
+short_description: Wait for Automation Controller Ad Hoc Command to finish.
 description:
-    - Wait for Ansible Tower ad hoc command to finish and report success or failure. See
+    - Wait for Automation Controller ad hoc command to finish and report success or failure. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     command_id:
@@ -41,14 +41,14 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Launch an ad hoc command
-  tower_ad_hoc_command:
+  ad_hoc_command:
     inventory: "Demo Inventory"
     credential: "Demo Credential"
     wait: false
   register: command
 
 - name: Wait for ad joc command max 120s
-  tower_ad_hoc_command_wait:
+  ad_hoc_command_wait:
     command_id: "{{ command.id }}"
     timeout: 120
 '''

@@ -31,7 +31,7 @@ def wfjt(organization):
 def test_create_workflow_job_template_node(run_module, admin_user, wfjt, job_template):
     this_identifier = '42🐉'
     result = run_module(
-        'tower_workflow_job_template_node',
+        'workflow_job_template_node',
         {
             'identifier': this_identifier,
             'workflow_job_template': 'foo-workflow',
@@ -58,7 +58,7 @@ def test_create_workflow_job_template_node_approval_node(run_module, admin_user,
     """This is a part of the API contract for creating approval nodes"""
     this_identifier = '42🐉'
     result = run_module(
-        'tower_workflow_job_template_node',
+        'workflow_job_template_node',
         {
             'identifier': this_identifier,
             'workflow_job_template': wfjt.name,
@@ -83,7 +83,7 @@ def test_create_workflow_job_template_node_approval_node(run_module, admin_user,
 @pytest.mark.django_db
 def test_make_use_of_prompts(run_module, admin_user, wfjt, job_template, machine_credential, vault_credential):
     result = run_module(
-        'tower_workflow_job_template_node',
+        'workflow_job_template_node',
         {
             'identifier': '42',
             'workflow_job_template': 'foo-workflow',
@@ -113,7 +113,7 @@ def test_create_with_edges(run_module, admin_user, wfjt, job_template):
     ]
 
     result = run_module(
-        'tower_workflow_job_template_node',
+        'workflow_job_template_node',
         {
             'identifier': '42',
             'workflow_job_template': 'foo-workflow',

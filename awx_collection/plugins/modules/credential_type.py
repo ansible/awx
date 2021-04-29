@@ -15,11 +15,11 @@ ANSIBLE_METADATA = {'status': ['preview'], 'supported_by': 'community', 'metadat
 
 DOCUMENTATION = '''
 ---
-module: tower_credential_type
+module: credential_type
 author: "Adrien Fleury (@fleu42)"
-short_description: Create, update, or destroy custom Ansible Tower credential type.
+short_description: Create, update, or destroy custom Automation Controller credential type.
 description:
-    - Create, update, or destroy Ansible Tower credential type. See
+    - Create, update, or destroy Automation Controller credential type. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -49,7 +49,7 @@ options:
       description:
         - >-
           Enter injectors using either JSON or YAML syntax. Refer to the
-          Ansible Tower documentation for example syntax.
+          Automation Controller documentation for example syntax.
       type: dict
     state:
       description:
@@ -62,7 +62,7 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- tower_credential_type:
+- credential_type:
     name: Nexus
     description: Credentials type for Nexus
     kind: cloud
@@ -71,7 +71,7 @@ EXAMPLES = '''
     state: present
     validate_certs: false
 
-- tower_credential_type:
+- credential_type:
     name: Nexus
     state: absent
 '''

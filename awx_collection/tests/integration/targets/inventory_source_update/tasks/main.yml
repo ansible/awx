@@ -42,7 +42,7 @@
       register: created_inventory
 
     - name: Create an Inventory Source (specifically connected to the randomly generated org)
-      tower_inventory_source:
+      inventory_source:
         name: "{{ inv_source1 }}"
         source: scm
         source_project: "{{ project_name }}"
@@ -52,7 +52,7 @@
         inventory: "{{ inv_name }}"
 
     - name: Create Another Inventory Source
-      tower_inventory_source:
+      inventory_source:
         name: "{{ inv_source2 }}"
         source: scm
         source_project: "{{ project_name }}"
@@ -62,7 +62,7 @@
         inventory: "{{ inv_name }}"
 
     - name: Create Yet Another Inventory Source (to make lookup plugin find multiple inv sources)
-      tower_inventory_source:
+      inventory_source:
         name: "{{ inv_source3 }}"
         source: scm
         source_project: "{{ project_name }}"
@@ -72,7 +72,7 @@
         inventory: "{{ inv_name }}"
 
     - name: Test Inventory Source Update
-      tower_inventory_source_update:
+      inventory_source_update:
         name: "{{ inv_source2 }}"
         inventory: "{{ inv_name }}"
         organization: Default
@@ -83,12 +83,12 @@
           - "result is changed"
 
     - name: Test Inventory Source Update for All Sources
-      tower_inventory_source_update:
+      inventory_source_update:
         name: "{{ item.name }}"
         inventory: "{{ inv_name }}"
         organization: Default
         wait: true
-      loop: "{{ query('awx.awx.tower_api', 'inventory_sources', query_params={ 'inventory': created_inventory.id }, expect_objects=True, return_objects=True) }}"
+      loop: "{{ query('awx.awx.controller_api', 'inventory_sources', query_params={ 'inventory': created_inventory.id }, expect_objects=True, return_objects=True) }}"
       loop_control:
         label: "{{ item.name }}"
       register: result
@@ -98,12 +98,12 @@
           - "result is changed"
 
     - name: Test Inventory Source Update for All Sources (using inventory_source as alias for name)
-      tower_inventory_source_update:
+      inventory_source_update:
         inventory_source: "{{ item.name }}"
         inventory: "{{ inv_name }}"
         organization: Default
         wait: true
-      loop: "{{ query('awx.awx.tower_api', 'inventory_sources', query_params={ 'inventory': created_inventory.id }, expect_objects=True, return_objects=True) }}"
+      loop: "{{ query('awx.awx.controller_api', 'inventory_sources', query_params={ 'inventory': created_inventory.id }, expect_objects=True, return_objects=True) }}"
       loop_control:
         label: "{{ item.name }}"
       register: result

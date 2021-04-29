@@ -96,7 +96,7 @@ EXAMPLES = '''
 {% endif %}
 '''
 
-from ..module_utils.tower_api import TowerAPIModule
+from ..module_utils.controller_api import ControllerAPIModule
 
 
 def main():
@@ -142,7 +142,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerAPIModule(argument_spec=argument_spec)
+    module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
 {% for option in item['json']['actions']['POST'] %}

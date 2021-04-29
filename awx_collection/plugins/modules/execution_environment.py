@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_execution_environment
+module: execution_environment
 author: "Shane McDonald (@shanemcd)"
-short_description: create, update, or destroy Execution Environments in Ansible Tower.
+short_description: create, update, or destroy Execution Environments in Automation Controller.
 description:
-    - Create, update, or destroy Execution Environments in Ansible Tower. See
+    - Create, update, or destroy Execution Environments in Automation Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -61,7 +61,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add EE to Tower
-  tower_execution_environment:
+  execution_environment:
     name: "My EE"
     image: quay.io/ansible/awx-ee
 '''

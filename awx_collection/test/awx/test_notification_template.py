@@ -35,7 +35,7 @@ def test_create_modify_notification_template(run_module, admin_user, organizatio
         'timeout': 4,
     }
     result = run_module(
-        'tower_notification_template',
+        'notification_template',
         dict(
             name='foo-notification-template',
             organization=organization.name,
@@ -54,7 +54,7 @@ def test_create_modify_notification_template(run_module, admin_user, organizatio
     # Test no-op, this is impossible if the notification_configuration is given
     # because we cannot determine if password fields changed
     result = run_module(
-        'tower_notification_template',
+        'notification_template',
         dict(
             name='foo-notification-template',
             organization=organization.name,
@@ -68,7 +68,7 @@ def test_create_modify_notification_template(run_module, admin_user, organizatio
     # Test a change in the configuration
     nt_config['timeout'] = 12
     result = run_module(
-        'tower_notification_template',
+        'notification_template',
         dict(
             name='foo-notification-template',
             organization=organization.name,
@@ -87,7 +87,7 @@ def test_create_modify_notification_template(run_module, admin_user, organizatio
 @pytest.mark.django_db
 def test_invalid_notification_configuration(run_module, admin_user, organization):
     result = run_module(
-        'tower_notification_template',
+        'notification_template',
         dict(
             name='foo-notification-template',
             organization=organization.name,
@@ -104,7 +104,7 @@ def test_invalid_notification_configuration(run_module, admin_user, organization
 def test_deprecated_to_modern_no_op(run_module, admin_user, organization):
     nt_config = {'url': 'http://www.example.com/hook', 'headers': {'X-Custom-Header': 'value123'}}
     result = run_module(
-        'tower_notification_template',
+        'notification_template',
         dict(
             name='foo-notification-template',
             organization=organization.name,
@@ -117,7 +117,7 @@ def test_deprecated_to_modern_no_op(run_module, admin_user, organization):
     assert result.pop('changed', None), result
 
     result = run_module(
-        'tower_notification_template',
+        'notification_template',
         dict(
             name='foo-notification-template',
             organization=organization.name,
@@ -142,7 +142,7 @@ def test_build_notification_message_undefined(run_module, admin_user, organizati
     custom_start_template = {'body': '{"started_by": "{{ job.summary_fields.created_by.username | default(\'My Placeholder\') }}"}'}
     messages = {'started': custom_start_template, 'success': None, 'error': None, 'workflow_approval': None}
     result = run_module(
-        'tower_notification_template',
+        'notification_template',
         dict(
             name='foo-notification-template',
             organization=organization.name,

@@ -10,19 +10,19 @@ __metaclass__ = type
 
 class ModuleDocFragment(object):
 
-    # Ansible Tower documentation fragment
+    # Automation Controller documentation fragment
     DOCUMENTATION = r'''
 options:
     host:
-        description: The network address of your Ansible Tower host.
+        description: The network address of your Automation Controller host.
         env:
             - name: TOWER_HOST
     username:
-        description: The user that you plan to use to access inventories on Ansible Tower.
+        description: The user that you plan to use to access inventories on Automation Controller.
         env:
             - name: TOWER_USERNAME
     password:
-        description: The password for your Ansible Tower user.
+        description: The password for your Automation Controller user.
         env:
             - name: TOWER_PASSWORD
     oauth_token:
@@ -32,7 +32,7 @@ options:
             - name: TOWER_OAUTH_TOKEN
     verify_ssl:
         description:
-            - Specify whether Ansible should verify the SSL certificate of Ansible Tower host.
+            - Specify whether Ansible should verify the SSL certificate of Automation Controller host.
             - Defaults to True, but this is handled by the shared module_utils code
         type: bool
         env:

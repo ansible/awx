@@ -14,15 +14,15 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['deprecated'], 'suppor
 
 DOCUMENTATION = '''
 ---
-module: tower_receive
+module: receive
 deprecated:
   removed_in: "14.0.0"
   why: Deprecated in favor of upcoming C(_export) module.
   alternative: Once published, use M(tower_export) instead.
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Receive assets from Ansible Tower.
+short_description: Receive assets from Automation Controller.
 description:
-    - Receive assets from Ansible Tower. See
+    - Receive assets from Automation Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     all:
@@ -102,17 +102,17 @@ extends_documentation_fragment: awx.awx.auth_legacy
 
 EXAMPLES = '''
 - name: Export all tower assets
-  tower_receive:
+  receive:
     all: True
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Export all inventories
-  tower_receive:
+  receive:
     inventory:
       - all
 
 - name: Export a job template named "My Template" and all Credentials
-  tower_receive:
+  receive:
     job_template:
       - "My Template"
     credential:

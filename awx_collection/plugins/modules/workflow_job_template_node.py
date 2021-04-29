@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_workflow_job_template_node
+module: workflow_job_template_node
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: create, update, or destroy Ansible Tower workflow job template nodes.
+short_description: create, update, or destroy Automation Controller workflow job template nodes.
 description:
-    - Create, update, or destroy Ansible Tower workflow job template nodes.
+    - Create, update, or destroy Automation Controller workflow job template nodes.
     - Use this to build a graph for a workflow, which dictates what the workflow runs.
     - Replaces the deprecated tower_workflow_template module schema command.
     - You can create nodes first, and link them afterwards, and not worry about ordering.
@@ -158,7 +158,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Create a node, follows tower_workflow_job_template example
-  tower_workflow_job_template_node:
+  workflow_job_template_node:
     identifier: my-first-node
     workflow: example-workflow
     unified_job_template: jt-for-node-use
@@ -167,7 +167,7 @@ EXAMPLES = '''
       foo_key: bar_value
 
 - name: Create parent node for prior node
-  tower_workflow_job_template_node:
+  workflow_job_template_node:
     identifier: my-root-node
     workflow: example-workflow
     unified_job_template: jt-for-node-use

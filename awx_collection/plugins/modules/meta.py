@@ -13,7 +13,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_meta
+module: meta
 author: "Alan Rominger (@alancoding)"
 short_description: Returns metadata about the collection this module lives in.
 description:
@@ -49,7 +49,7 @@ version:
 
 
 EXAMPLES = '''
-- tower_meta:
+- meta:
   register: result
 
 - name: Show details about the collection
@@ -57,7 +57,7 @@ EXAMPLES = '''
 
 - name: Load the UI setting without hard-coding the collection name
   debug:
-    msg: "{{ lookup(result.prefix + '.tower_api', 'settings/ui') }}"
+    msg: "{{ lookup(result.prefix + '.controller_api', 'settings/ui') }}"
 '''
 
 

@@ -21,7 +21,7 @@ def test_create_application(run_module, admin_user):
         'organization': 'foo',
     }
 
-    result = run_module('tower_application', module_args, admin_user)
+    result = run_module('application', module_args, admin_user)
     assert result.get('changed'), result
 
     application = OAuth2Application.objects.get(name='foo_app')

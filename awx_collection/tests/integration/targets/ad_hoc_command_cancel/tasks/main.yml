@@ -35,7 +35,7 @@
     state: present
 
 - name: Launch an Ad Hoc Command
-  tower_ad_hoc_command:
+  ad_hoc_command:
     inventory: "{{ inv_name }}"
     credential: "{{ ssh_cred_name }}"
     module_name: "command"
@@ -47,7 +47,7 @@
       - "command is changed"
 
 - name: Timeout waiting for the command to cancel
-  tower_ad_hoc_command_cancel:
+  ad_hoc_command_cancel:
     command_id: "{{ command.id }}"
     timeout: -1
   register: results
@@ -59,7 +59,7 @@
       - "results['msg'] == 'Monitoring of ad hoc command aborted due to timeout'"
 
 - name: Cancel the command with hard error if it's not running
-  tower_ad_hoc_command_cancel:
+  ad_hoc_command_cancel:
     command_id: "{{ command.id }}"
     fail_if_not_running: true
   register: results
@@ -70,7 +70,7 @@
       - results is failed
 
 - name: Cancel an already canceled command (assert failure)
-  tower_ad_hoc_command_cancel:
+  ad_hoc_command_cancel:
     command_id: "{{ command.id }}"
     fail_if_not_running: true
   register: results
@@ -81,7 +81,7 @@
       - results is failed
 
 - name: Check module fails with correct msg
-  tower_ad_hoc_command_cancel:
+  ad_hoc_command_cancel:
     command_id: 9999999999
   register: result
   ignore_errors: true

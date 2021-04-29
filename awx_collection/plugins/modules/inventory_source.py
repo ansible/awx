@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_inventory_source
+module: inventory_source
 author: "Adrien Fleury (@fleu42)"
-short_description: create, update, or destroy Ansible Tower inventory source.
+short_description: create, update, or destroy Automation Controller inventory source.
 description:
-    - Create, update, or destroy Ansible Tower inventory source. See
+    - Create, update, or destroy Automation Controller inventory source. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -138,7 +138,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add an inventory source
-  tower_inventory_source:
+  inventory_source:
     name: "source-inventory"
     description: Source for inventory
     inventory: previously-created-inventory

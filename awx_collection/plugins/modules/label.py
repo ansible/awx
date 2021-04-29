@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_label
+module: label
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Ansible Tower labels.
+short_description: create, update, or destroy Automation Controller labels.
 description:
-    - Create, update, or destroy Ansible Tower labels. See
+    - Create, update, or destroy Automation Controller labels. See
       U(https://www.ansible.com/tower) for an overview.
     - Note, labels can only be created via the Tower API, they can not be deleted.
       Once they are fully disassociated the API will clean them up on its own.
@@ -48,7 +48,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add label to tower organization
-  tower_label:
+  label:
     name: Custom Label
     organization: My Organization
 '''

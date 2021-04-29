@@ -35,7 +35,7 @@ def test_create_token(run_module, admin_user):
         'tower_config_file': None,
     }
 
-    result = run_module('tower_token', module_args, admin_user)
+    result = run_module('token', module_args, admin_user)
     assert result.get('changed'), result
 
     tokens = OAuth2AccessToken.objects.filter(description='barfoo')
@@ -128,7 +128,7 @@ While not strictly followed, the general flow of a test should be:
   - Cleanup created objects
 ```
     - name: Delete the credential
-      tower_credential:
+      credential:
         name: "{{ cred_name1 }}"
         organization: "Default"
         credential_type: "OpenShift or Kubernetes API Bearer Token"

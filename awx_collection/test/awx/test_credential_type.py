@@ -11,7 +11,7 @@ from awx.main.models import CredentialType
 def test_create_custom_credential_type(run_module, admin_user, silence_deprecation):
     # Example from docs
     result = run_module(
-        'tower_credential_type',
+        'credential_type',
         dict(
             name='Nexus',
             description='Credentials type for Nexus',
@@ -37,7 +37,7 @@ def test_create_custom_credential_type(run_module, admin_user, silence_deprecati
 @pytest.mark.django_db
 def test_changed_false_with_api_changes(run_module, admin_user):
     result = run_module(
-        'tower_credential_type',
+        'credential_type',
         dict(
             name='foo',
             kind='cloud',
@@ -50,7 +50,7 @@ def test_changed_false_with_api_changes(run_module, admin_user):
     assert result.get('changed'), result
 
     result = run_module(
-        'tower_credential_type',
+        'credential_type',
         dict(
             name='foo',
             inputs={"fields": [{"id": "env_value", "label": "foo", "default": "foo"}]},

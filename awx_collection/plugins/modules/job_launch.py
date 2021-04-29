@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_job_launch
+module: job_launch
 author: "Wayne Witzel III (@wwitzel3)"
 short_description: Launch an Ansible Job.
 description:
-    - Launch an Ansible Tower jobs. See
+    - Launch an Automation Controller jobs. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -107,12 +107,12 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Launch a job
-  tower_job_launch:
+  job_launch:
     job_template: "My Job Template"
   register: job
 
 - name: Launch a job template with extra_vars on remote Tower instance
-  tower_job_launch:
+  job_launch:
     job_template: "My Job Template"
     extra_vars:
       var1: "My First Variable"
@@ -121,13 +121,13 @@ EXAMPLES = '''
     job_type: run
 
 - name: Launch a job with inventory and credential
-  tower_job_launch:
+  job_launch:
     job_template: "My Job Template"
     inventory: "My Inventory"
     credential: "My Credential"
   register: job
 - name: Wait for job max 120s
-  tower_job_wait:
+  job_wait:
     job_id: "{{ job.id }}"
     timeout: 120
 '''

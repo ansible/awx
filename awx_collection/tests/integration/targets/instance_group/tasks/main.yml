@@ -26,7 +26,7 @@
           - "cred_result is changed"
 
     - name: Create an Instance Group
-      tower_instance_group:
+      instance_group:
         name: "{{ group_name1 }}"
         policy_instance_percentage: 34
         policy_instance_minimum: 12
@@ -38,7 +38,7 @@
           - "result is changed"
 
     - name: Update an Instance Group
-      tower_instance_group:
+      instance_group:
         name: "{{ result.id }}"
         policy_instance_percentage: 34
         policy_instance_minimum: 24
@@ -50,7 +50,7 @@
           - "result is changed"
 
     - name: Create a container group
-      tower_instance_group:
+      instance_group:
         name: "{{ group_name2 }}"
         credential: "{{ cred_result.id }}"
         is_container_group: true
@@ -62,7 +62,7 @@
 
   always:
     - name: Delete the instance groups
-      tower_instance_group:
+      instance_group:
         name: "{{ item }}"
         state: absent
       loop:

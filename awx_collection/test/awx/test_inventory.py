@@ -13,7 +13,7 @@ def test_inventory_create(run_module, admin_user, organization, insights_credent
     # Create an insights credential
 
     result = run_module(
-        'tower_inventory',
+        'inventory',
         {
             'name': 'foo-inventory',
             'organization': organization.name,
@@ -39,7 +39,7 @@ def test_inventory_create(run_module, admin_user, organization, insights_credent
 @pytest.mark.django_db
 def test_invalid_smart_inventory_create(run_module, admin_user, organization):
     result = run_module(
-        'tower_inventory',
+        'inventory',
         {'name': 'foo-inventory', 'organization': organization.name, 'kind': 'smart', 'host_filter': 'ansible', 'state': 'present'},
         admin_user,
     )
@@ -51,7 +51,7 @@ def test_invalid_smart_inventory_create(run_module, admin_user, organization):
 @pytest.mark.django_db
 def test_valid_smart_inventory_create(run_module, admin_user, organization):
     result = run_module(
-        'tower_inventory',
+        'inventory',
         {'name': 'foo-inventory', 'organization': organization.name, 'kind': 'smart', 'host_filter': 'name=my_host', 'state': 'present'},
         admin_user,
     )

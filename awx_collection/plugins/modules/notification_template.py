@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_notification_template
+module: notification_template
 author: "Samuel Carpentier (@samcarpentier)"
-short_description: create, update, or destroy Ansible Tower notification.
+short_description: create, update, or destroy Automation Controller notification.
 description:
-    - Create, update, or destroy Ansible Tower notifications. See
+    - Create, update, or destroy Automation Controller notifications. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -210,7 +210,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add Slack notification with custom messages
-  tower_notification_template:
+  notification_template:
     name: slack notification
     organization: Default
     notification_type: slack
@@ -229,7 +229,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add webhook notification
-  tower_notification_template:
+  notification_template:
     name: webhook notification
     notification_type: webhook
     notification_configuration:
@@ -240,7 +240,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add email notification
-  tower_notification_template:
+  notification_template:
     name: email notification
     notification_type: email
     notification_configuration:
@@ -257,7 +257,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add twilio notification
-  tower_notification_template:
+  notification_template:
     name: twilio notification
     notification_type: twilio
     notification_configuration:
@@ -270,7 +270,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add PagerDuty notification
-  tower_notification_template:
+  notification_template:
     name: pagerduty notification
     notification_type: pagerduty
     notification_configuration:
@@ -282,7 +282,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add IRC notification
-  tower_notification_template:
+  notification_template:
     name: irc notification
     notification_type: irc
     notification_configuration:
@@ -297,13 +297,13 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Delete notification
-  tower_notification_template:
+  notification_template:
     name: old notification
     state: absent
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Copy webhook notification
-  tower_notification_template:
+  notification_template:
     name: foo notification
     copy_from: email notification
     organization: Foo

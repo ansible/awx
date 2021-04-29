@@ -14,12 +14,12 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_credential_input_source
+module: credential_input_source
 author: "Tom Page (@Tompage1994)"
 version_added: "2.3"
-short_description: create, update, or destroy Ansible Tower credential input sources.
+short_description: create, update, or destroy Automation Controller credential input sources.
 description:
-    - Create, update, or destroy Ansible Tower credential input sources. See
+    - Create, update, or destroy Automation Controller credential input sources. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     description:
@@ -58,7 +58,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Use CyberArk Lookup credential as password source
-  tower_credential_input_source:
+  credential_input_source:
     input_field_name: password
     target_credential: new_cred
     source_credential: cyberark_lookup

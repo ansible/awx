@@ -21,7 +21,7 @@
 
 - name: Generate the name of our plugin
   set_fact:
-    plugin_name: "{{ tower_meta.prefix }}.tower_api"
+    plugin_name: "{{ tower_meta.prefix }}.controller_api"
 
 - name: Create all of our users
   user:
@@ -177,7 +177,7 @@
     # DOCS Example Tests
     - name: Load the UI settings
       set_fact:
-        tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui') }}"
+        tower_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui') }}"
 
     - assert:
         that:
@@ -185,7 +185,7 @@
 
     - name: Display the usernames of all admin users
       debug:
-        msg: "Admin users: {{ query('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
+        msg: "Admin users: {{ query('awx.awx.controller_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
       register: results
 
     - assert:
@@ -195,7 +195,7 @@
     - name: debug all organizations in a loop  # use query to return a list
       debug:
         msg: "Organization description={{ item['description'] }} id={{ item['id'] }}"
-      loop: "{{ query('awx.awx.tower_api', 'organizations') }}"
+      loop: "{{ query('awx.awx.controller_api', 'organizations') }}"
       loop_control:
         label: "{{ item['name'] }}"
 
@@ -206,7 +206,7 @@
         user: "{{ usernames[0] }}"
         state: absent
       register: tower_role_revoke
-      when: "query('awx.awx.tower_api', 'users', query_params={ 'username': 'DNE_TESTING' }) | length  == 1"
+      when: "query('awx.awx.controller_api', 'users', query_params={ 'username': 'DNE_TESTING' }) | length  == 1"
 
     - assert:
         that:
@@ -218,7 +218,7 @@
         inventory: "Demo Inventory"
         hosts: >-
           {{ query(
-               'awx.awx.tower_api',
+               'awx.awx.controller_api',
                 'hosts',
                 query_params={ 'name__endswith' : test_id, },
             ) | map(attribute='name') | list }}

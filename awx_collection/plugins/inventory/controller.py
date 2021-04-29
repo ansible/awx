@@ -11,9 +11,9 @@ plugin_type: inventory
 author:
   - Matthew Jones (@matburt)
   - Yunfan Zhang (@YunfanZhang42)
-short_description: Ansible dynamic inventory plugin for Ansible Tower.
+short_description: Ansible dynamic inventory plugin for Automation Controller.
 description:
-    - Reads inventories from Ansible Tower.
+    - Reads inventories from Automation Controller.
     - Supports reading configuration from both YAML config file and environment variables.
     - If reading from the YAML file, the file name must end with tower.(yml|yaml) or tower_inventory.(yml|yaml),
       the path in the command would be /path/to/tower_inventory.(yml|yaml). If some arguments in the config file
@@ -23,7 +23,7 @@ extends_documentation_fragment: awx.awx.auth_plugin
 options:
     inventory_id:
         description:
-            - The ID of the Ansible Tower inventory that you wish to import.
+            - The ID of the Automation Controller inventory that you wish to import.
             - This is allowed to be either the inventory primary key or its named URL slug.
             - Primary key values will be accepted as strings or integers, and URL slugs must be strings.
             - Named URL slugs follow the syntax of "inventory_name++organization_name".
@@ -32,7 +32,7 @@ options:
             - name: TOWER_INVENTORY
         required: True
     include_metadata:
-        description: Make extra requests to provide all group vars with metadata about the source Ansible Tower host.
+        description: Make extra requests to provide all group vars with metadata about the source Automation Controller host.
         type: bool
         default: False
 '''
@@ -59,7 +59,7 @@ inventory_id: the_ID_of_targeted_ansible_tower_inventory
 # export TOWER_USERNAME=YOUR_TOWER_USERNAME
 # export TOWER_PASSWORD=YOUR_TOWER_PASSWORD
 # export TOWER_INVENTORY=THE_ID_OF_TARGETED_INVENTORY
-# Read the inventory specified in TOWER_INVENTORY from Ansible Tower, and list them.
+# Read the inventory specified in TOWER_INVENTORY from Automation Controller, and list them.
 # The inventory path must always be @tower_inventory if you are reading all settings from environment variables.
 # ansible-inventory -i @tower_inventory --list
 '''

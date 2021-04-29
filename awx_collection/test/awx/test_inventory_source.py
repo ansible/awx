@@ -28,7 +28,7 @@ def project(base_inventory):
 def test_inventory_source_create(run_module, admin_user, base_inventory, project):
     source_path = '/var/lib/awx/example_source_path/'
     result = run_module(
-        'tower_inventory_source',
+        'inventory_source',
         dict(name='foo', inventory=base_inventory.name, state='present', source='scm', source_path=source_path, source_project=project.name),
         admin_user,
     )
@@ -49,7 +49,7 @@ def test_create_inventory_source_implied_org(run_module, admin_user):
     inv = Inventory.objects.create(name='test-inv', organization=org)
 
     # Credential is not required for ec2 source, because of IAM roles
-    result = run_module('tower_inventory_source', dict(name='Test Inventory Source', inventory='test-inv', source='ec2', state='present'), admin_user)
+    result = run_module('inventory_source', dict(name='Test Inventory Source', inventory='test-inv', source='ec2', state='present'), admin_user)
     assert result.pop('changed', None), result
 
     inv_src = InventorySource.objects.get(name='Test Inventory Source')
@@ -72,7 +72,7 @@ def test_create_inventory_source_multiple_orgs(run_module, admin_user):
     inv2 = Inventory.objects.create(name='test-inv', organization=org2)
 
     result = run_module(
-        'tower_inventory_source',
+        'inventory_source',
         dict(name='Test Inventory Source', inventory=inv2.name, organization='test-org-number-two', source='ec2', state='present'),
         admin_user,
     )
@@ -90,14 +90,14 @@ def test_create_inventory_source_multiple_orgs(run_module, admin_user):
 
 @pytest.mark.django_db
 def test_falsy_value(run_module, admin_user, base_inventory):
-    result = run_module('tower_inventory_source', dict(name='falsy-test', inventory=base_inventory.name, source='ec2', update_on_launch=True), admin_user)
+    result = run_module('inventory_source', dict(name='falsy-test', inventory=base_inventory.name, source='ec2', update_on_launch=True), admin_user)
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed', None), result
 
     inv_src = InventorySource.objects.get(name='falsy-test')
     assert inv_src.update_on_launch is True
 
-    result = run_module('tower_inventory_source', dict(name='falsy-test', inventory=base_inventory.name, source='ec2', update_on_launch=False), admin_user)
+    result = run_module('inventory_source', dict(name='falsy-test', inventory=base_inventory.name, source='ec2', update_on_launch=False), admin_user)
 
     inv_src.refresh_from_db()
     assert inv_src.update_on_launch is False
@@ -127,7 +127,7 @@ def test_falsy_value(run_module, admin_user, base_inventory):
 
 @pytest.mark.django_db
 def test_missing_required_credential(run_module, admin_user, base_inventory):
-    result = run_module('tower_inventory_source', dict(name='Test Azure Source', inventory=base_inventory.name, source='azure_rm', state='present'), admin_user)
+    result = run_module('inventory_source', dict(name='Test Azure Source', inventory=base_inventory.name, source='azure_rm', state='present'), admin_user)
     assert result.pop('failed', None) is True, result
 
     assert 'Credential is required for a cloud source' in result.get('msg', '')
@@ -136,7 +136,7 @@ def test_missing_required_credential(run_module, admin_user, base_inventory):
 @pytest.mark.django_db
 def test_source_project_not_for_cloud(run_module, admin_user, base_inventory, project):
     result = run_module(
-        'tower_inventory_source',
+        'inventory_source',
         dict(name='Test ec2 Inventory Source', inventory=base_inventory.name, source='ec2', state='present', source_project=project.name),
         admin_user,
     )
@@ -148,7 +148,7 @@ def test_source_project_not_for_cloud(run_module, admin_user, base_inventory, pr
 @pytest.mark.django_db
 def test_source_path_not_for_cloud(run_module, admin_user, base_inventory):
     result = run_module(
-        'tower_inventory_source',
+        'inventory_source',
         dict(name='Test ec2 Inventory Source', inventory=base_inventory.name, source='ec2', state='present', source_path='where/am/I'),
         admin_user,
     )
@@ -160,7 +160,7 @@ def test_source_path_not_for_cloud(run_module, admin_user, base_inventory):
 @pytest.mark.django_db
 def test_scm_source_needs_project(run_module, admin_user, base_inventory):
     result = run_module(
-        'tower_inventory_source',
+        'inventory_source',
         dict(
             name='SCM inventory without project', inventory=base_inventory.name, state='present', source='scm', source_path='/var/lib/awx/example_source_path/'
         ),

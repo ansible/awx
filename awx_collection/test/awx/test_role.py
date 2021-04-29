@@ -14,7 +14,7 @@ def test_grant_organization_permission(run_module, admin_user, organization, sta
     if state == 'absent':
         organization.admin_role.members.add(rando)
 
-    result = run_module('tower_role', {'user': rando.username, 'organization': organization.name, 'role': 'admin', 'state': state}, admin_user)
+    result = run_module('role', {'user': rando.username, 'organization': organization.name, 'role': 'admin', 'state': state}, admin_user)
     assert not result.get('failed', False), result.get('msg', result)
 
     if state == 'present':
@@ -31,7 +31,7 @@ def test_grant_workflow_permission(run_module, admin_user, organization, state):
     if state == 'absent':
         wfjt.execute_role.members.add(rando)
 
-    result = run_module('tower_role', {'user': rando.username, 'workflow': wfjt.name, 'role': 'execute', 'state': state}, admin_user)
+    result = run_module('role', {'user': rando.username, 'workflow': wfjt.name, 'role': 'execute', 'state': state}, admin_user)
     assert not result.get('failed', False), result.get('msg', result)
 
     if state == 'present':
@@ -49,7 +49,7 @@ def test_grant_workflow_list_permission(run_module, admin_user, organization, st
         wfjt.execute_role.members.add(rando)
 
     result = run_module(
-        'tower_role',
+        'role',
         {'user': rando.username, 'lookup_organization': wfjt.organization.name, 'workflows': [wfjt.name], 'role': 'execute', 'state': state},
         admin_user,
     )
@@ -69,7 +69,7 @@ def test_grant_workflow_approval_permission(run_module, admin_user, organization
     if state == 'absent':
         wfjt.execute_role.members.add(rando)
 
-    result = run_module('tower_role', {'user': rando.username, 'workflow': wfjt.name, 'role': 'approval', 'state': state}, admin_user)
+    result = run_module('role', {'user': rando.username, 'workflow': wfjt.name, 'role': 'approval', 'state': state}, admin_user)
     assert not result.get('failed', False), result.get('msg', result)
 
     if state == 'present':
@@ -81,7 +81,7 @@ def test_grant_workflow_approval_permission(run_module, admin_user, organization
 @pytest.mark.django_db
 def test_invalid_role(run_module, admin_user, project):
     rando = User.objects.create(username='rando')
-    result = run_module('tower_role', {'user': rando.username, 'project': project.name, 'role': 'adhoc', 'state': 'present'}, admin_user)
+    result = run_module('role', {'user': rando.username, 'project': project.name, 'role': 'adhoc', 'state': 'present'}, admin_user)
     assert result.get('failed', False)
     msg = result.get('msg')
     assert 'has no role adhoc_role' in msg

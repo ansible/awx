@@ -23,7 +23,7 @@ def test_create_organization(run_module, admin_user):
         'tower_config_file': None,
     }
 
-    result = run_module('tower_organization', module_args, admin_user)
+    result = run_module('organization', module_args, admin_user)
     assert result.get('changed'), result
 
     org = Organization.objects.get(name='foo')

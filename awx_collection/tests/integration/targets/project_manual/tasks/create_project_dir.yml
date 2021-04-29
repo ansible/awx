@@ -3,7 +3,7 @@
   set_fact:
     project_base_dir: "{{ tower_settings.project_base_dir }}"
   vars:
-    tower_settings: "{{ lookup('awx.awx.tower_api', 'config/') }}"
+    tower_settings: "{{ lookup('awx.awx.controller_api', 'config/') }}"
 
 - inventory:
     name: localhost
@@ -34,7 +34,7 @@
         value: "[{{ project_base_dir }}]"
 
     - name: Create a directory for manual project
-      tower_ad_hoc_command:
+      ad_hoc_command:
         credential: dummy
         inventory: localhost
         job_type: run

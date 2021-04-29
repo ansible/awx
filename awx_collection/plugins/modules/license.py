@@ -13,11 +13,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_license
+module: license
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Set the license for Ansible Tower
+short_description: Set the license for Automation Controller
 description:
-    - Get or Set Ansible Tower license. See
+    - Get or Set Automation Controller license. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     manifest:
@@ -39,7 +39,7 @@ RETURN = ''' # '''
 
 EXAMPLES = '''
 - name: Set the license using a file
-  tower_license:
+  license:
     manifest: "/tmp/my_manifest.zip"
 '''
 

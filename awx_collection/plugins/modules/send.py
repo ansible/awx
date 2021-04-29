@@ -14,15 +14,15 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['deprecated'], 'suppor
 
 DOCUMENTATION = '''
 ---
-module: tower_send
+module: send
 deprecated:
   removed_in: "14.0.0"
   why: Deprecated in favor of upcoming C(_import) module.
   alternative: Once published, use M(tower_import) instead.
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Send assets to Ansible Tower.
+short_description: Send assets to Automation Controller.
 description:
-    - Send assets to Ansible Tower. See
+    - Send assets to Automation Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     assets:
@@ -63,7 +63,7 @@ extends_documentation_fragment: awx.awx.auth_legacy
 
 EXAMPLES = '''
 - name: Import all tower assets
-  tower_send:
+  send:
     assets: "{{ export_output.assets }}"
     tower_config_file: "~/tower_cli.cfg"
 '''

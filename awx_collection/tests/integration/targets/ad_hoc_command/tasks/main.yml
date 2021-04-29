@@ -35,7 +35,7 @@
     state: present
 
 - name: Launch an Ad Hoc Command waiting for it to finish
-  tower_ad_hoc_command:
+  ad_hoc_command:
     inventory: "{{ inv_name }}"
     credential: "{{ ssh_cred_name }}"
     module_name: "command"
@@ -49,7 +49,7 @@
       - "result.status == 'successful'"
 
 - name: Launch an Ad Hoc Command without module argument
-  tower_ad_hoc_command:
+  ad_hoc_command:
     inventory: "Demo Inventory"
     credential: "{{ ssh_cred_name }}"
     module_name: "ping"
@@ -62,7 +62,7 @@
       - "result.status == 'successful'"
 
 - name: Check module fails with correct msg
-  tower_ad_hoc_command:
+  ad_hoc_command:
     inventory: "{{ inv_name }}"
     credential: "{{ ssh_cred_name }}"
     module_name: "Does not exist"

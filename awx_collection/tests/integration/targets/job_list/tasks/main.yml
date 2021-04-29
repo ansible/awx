@@ -1,6 +1,6 @@
 ---
 - name: Launch a Job Template
-  tower_job_launch:
+  job_launch:
     job_template: "Demo Job Template"
   register: job
 
@@ -10,7 +10,7 @@
       - "job.status == 'pending'"
 
 - name: List jobs w/ a matching primary key
-  tower_job_list:
+  job_list:
     query: {"id": "{{ job.id }}"}
   register: matching_jobs
 
@@ -19,7 +19,7 @@
       - "{{ matching_jobs.count }} == 1"
 
 - name: List failed jobs (which don't exist)
-  tower_job_list:
+  job_list:
     status: failed
     query: {"id": "{{ job.id }}"}
   register: successful_jobs
@@ -29,7 +29,7 @@
       - "{{ successful_jobs.count }} == 0"
 
 - name: Get ALL result pages!
-  tower_job_list:
+  job_list:
     all_pages: true
   register: all_page_query
 

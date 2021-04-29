@@ -35,7 +35,7 @@
     state: present
 
 - name: Check module fails with correct msg
-  tower_ad_hoc_command_wait:
+  ad_hoc_command_wait:
     command_id: "99999999"
   register: result
   ignore_errors: true
@@ -46,7 +46,7 @@
       - "result.msg == 'Unable to wait on ad hoc command 99999999; that ID does not exist in Tower.'"
 
 - name: Launch command module with sleep 10
-  tower_ad_hoc_command:
+  ad_hoc_command:
     inventory: "{{ inv_name }}"
     credential: "{{ ssh_cred_name }}"
     module_name: "command"
@@ -58,7 +58,7 @@
       - command is changed
 
 - name: Wait for the Job to finish
-  tower_ad_hoc_command_wait:
+  ad_hoc_command_wait:
     command_id: "{{ command.id }}"
   register: wait_results
 
@@ -70,7 +70,7 @@
       - "'id' in wait_results"
 
 - name: Launch a long running command
-  tower_ad_hoc_command:
+  ad_hoc_command:
     inventory: "{{ inv_name }}"
     credential: "{{ ssh_cred_name }}"
     module_name: "command"
@@ -82,7 +82,7 @@
       - command is changed
 
 - name: Timeout waiting for the command to complete
-  tower_ad_hoc_command_wait:
+  ad_hoc_command_wait:
     command_id: "{{ command.id }}"
     timeout: 1
   ignore_errors: true
@@ -95,13 +95,13 @@
       - "'id' in wait_results"
 
 - name: Async cancel the long-running command
-  tower_ad_hoc_command_cancel:
+  ad_hoc_command_cancel:
     command_id: "{{ command.id }}"
   async: 3600
   poll: 0
 
 - name: Wait for the command to exit on cancel
-  tower_ad_hoc_command_wait:
+  ad_hoc_command_wait:
     command_id: "{{ command.id }}"
   register: wait_results
   ignore_errors: true

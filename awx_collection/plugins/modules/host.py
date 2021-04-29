@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_host
+module: host
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Ansible Tower host.
+short_description: create, update, or destroy Automation Controller host.
 description:
-    - Create, update, or destroy Ansible Tower hosts. See
+    - Create, update, or destroy Automation Controller hosts. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -60,7 +60,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add tower host
-  tower_host:
+  host:
     name: localhost
     description: "Local Host Group"
     inventory: "Local Inventory"

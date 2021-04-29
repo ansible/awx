@@ -13,7 +13,7 @@
 - block:
 
     - name: Create an Instance Group
-      tower_instance_group:
+      instance_group:
         name: "{{ group_name1 }}"
         state: present
       register: result
@@ -174,7 +174,7 @@
         - "copy_{{ inv_name1 }}"
 
     - name: Delete the instance groups
-      tower_instance_group:
+      instance_group:
         name: "{{ group_name1 }}"
         state: absent
 

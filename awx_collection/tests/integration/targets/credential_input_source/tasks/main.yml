@@ -40,7 +40,7 @@
           - "target_cred_result is changed"
 
     - name: Add credential Input Source
-      tower_credential_input_source:
+      credential_input_source:
         input_field_name: password
         target_credential: "{{ target_cred_result.id }}"
         source_credential: "{{ src_cred_result.id }}"
@@ -66,7 +66,7 @@
       register: result
 
     - name: Change credential Input Source
-      tower_credential_input_source:
+      credential_input_source:
         input_field_name: password
         target_credential: "{{ target_cred_name }}"
         source_credential: "{{ src_cred_name }}-2"
@@ -78,7 +78,7 @@
 
   always:
     - name: Remove a Tower credential source
-      tower_credential_input_source:
+      credential_input_source:
         input_field_name: password
         target_credential: "{{ target_cred_name }}"
         state: absent

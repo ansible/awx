@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_schedule
+module: schedule
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: create, update, or destroy Ansible Tower schedules.
+short_description: create, update, or destroy Automation Controller schedules.
 description:
-    - Create, update, or destroy Ansible Tower schedules. See
+    - Create, update, or destroy Automation Controller schedules. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     rrule:
@@ -119,7 +119,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Build a schedule for Demo Job Template
-  tower_schedule:
+  schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
@@ -127,7 +127,7 @@ EXAMPLES = '''
   register: result
 
 - name: Build the same schedule using the rrule plugin
-  tower_schedule:
+  schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"

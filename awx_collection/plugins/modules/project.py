@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_project
+module: project
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Ansible Tower projects
+short_description: create, update, or destroy Automation Controller projects
 description:
-    - Create, update, or destroy Ansible Tower projects. See
+    - Create, update, or destroy Automation Controller projects. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -171,7 +171,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add tower project
-  tower_project:
+  project:
     name: "Foo"
     description: "Foo bar project"
     organization: "test"
@@ -179,7 +179,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add Tower Project with cache timeout
-  tower_project:
+  project:
     name: "Foo"
     description: "Foo bar project"
     organization: "test"
@@ -189,7 +189,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Copy tower project
-  tower_project:
+  project:
     name: copy
     copy_from: test
     description: Foo copy project

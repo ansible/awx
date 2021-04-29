@@ -11,11 +11,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_workflow_launch
+module: workflow_launch
 author: "John Westcott IV (@john-westcott-iv)"
-short_description: Run a workflow in Ansible Tower
+short_description: Run a workflow in Automation Controller
 description:
-    - Launch an Ansible Tower workflows. See
+    - Launch an Automation Controller workflows. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -77,12 +77,12 @@ job_info:
 
 EXAMPLES = '''
 - name: Launch a workflow with a timeout of 10 seconds
-  tower_workflow_launch:
+  workflow_launch:
     workflow_template: "Test Workflow"
     timeout: 10
 
 - name: Launch a Workflow with extra_vars without waiting
-  tower_workflow_launch:
+  workflow_launch:
     workflow_template: "Test workflow"
     extra_vars:
       var1: My First Variable

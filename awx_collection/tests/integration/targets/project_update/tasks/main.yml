@@ -22,7 +22,7 @@
       - project_create_result is changed
 
 - name: Update a project without waiting
-  tower_project_update:
+  project_update:
     name: "{{ project_name1 }}"
     organization: Default
     wait: false
@@ -33,7 +33,7 @@
       - result is changed
 
 - name: Update a project and wait
-  tower_project_update:
+  project_update:
     name: "{{ project_name1 }}"
     organization: Default
     wait: true
@@ -44,7 +44,7 @@
       - result is successful
 
 - name: Update a project by ID
-  tower_project_update:
+  project_update:
     name: "{{ project_create_result.id }}"
     organization: Default
     wait: true

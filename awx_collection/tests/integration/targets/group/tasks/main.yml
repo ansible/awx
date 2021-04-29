@@ -93,7 +93,7 @@
 
 - name: "Find number of hosts in {{ group_name1 }}"
   set_fact:
-    group1_host_count: "{{ lookup('awx.awx.tower_api', 'groups/{{result.id}}/all_hosts/') |length}}"
+    group1_host_count: "{{ lookup('awx.awx.controller_api', 'groups/{{result.id}}/all_hosts/') |length}}"
 
 - assert:
     that:

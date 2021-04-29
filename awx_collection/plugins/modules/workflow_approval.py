@@ -18,7 +18,7 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = """
 ---
-module: tower_workflow_approval
+module: workflow_approval
 author: "Sean Sullivan (@sean-m-sullivan)"
 short_description: Approve an approval node in a workflow job.
 description:
@@ -58,13 +58,13 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = """
 - name: Launch a workflow with a timeout of 10 seconds
-  tower_workflow_launch:
+  workflow_launch:
     workflow_template: "Test Workflow"
     wait: False
   register: workflow
 
 - name: Wait for approval node to activate and approve
-  tower_workflow_approval:
+  workflow_approval:
     workflow_job_id: "{{ workflow.id }}"
     name: Approve Me
     interval: 10

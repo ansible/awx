@@ -5,13 +5,13 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = """
-lookup: tower_api
+lookup: controller_api
 author: John Westcott IV (@john-westcott-iv)
 short_description: Search the API for objects
 requirements:
   - None
 description:
-  - Returns GET requests from the Ansible Tower API. See
+  - Returns GET requests from the Automation Controller API. See
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/index.html) for API usage.
   - For use that is cross-compatible between the awx.awx and ansible.tower collection
     see the tower_meta module
@@ -71,20 +71,20 @@ notes:
 EXAMPLES = """
 - name: Load the UI settings
   set_fact:
-    tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui') }}"
+    tower_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui') }}"
 
 - name: Load the UI settings specifying the connection info
   set_fact:
-    tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui' host='tower.example.com', username='admin', password=my_pass_var, verify_ssl=False) }}"
+    tower_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui' host='tower.example.com', username='admin', password=my_pass_var, verify_ssl=False) }}"
 
 - name: Report the usernames of all users with admin privs
   debug:
-    msg: "Admin users: {{ query('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
+    msg: "Admin users: {{ query('awx.awx.controller_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
 
 - name: debug all organizations in a loop  # use query to return a list
   debug:
     msg: "Organization description={{ item['description'] }} id={{ item['id'] }}"
-  loop: "{{ query('awx.awx.tower_api', 'organizations') }}"
+  loop: "{{ query('awx.awx.controller_api', 'organizations') }}"
   loop_control:
     label: "{{ item['name'] }}"
 
@@ -93,7 +93,7 @@ EXAMPLES = """
     organization: Default
     role: admin
     user: john
-  when: "lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'john' }) | length == 1"
+  when: "lookup('awx.awx.controller_api', 'users', query_params={ 'username': 'john' }) | length == 1"
 
 - name: Create an inventory group with all 'foo' hosts
   tower_group:
@@ -101,7 +101,7 @@ EXAMPLES = """
     inventory: "Demo Inventory"
     hosts: >-
       {{ query(
-           'awx.awx.tower_api',
+           'awx.awx.controller_api',
             'hosts',
             query_params={ 'name__startswith' : 'foo', },
         ) | map(attribute='name') | list }}

@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_job_list
+module: job_list
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: List Ansible Tower jobs.
+short_description: List Automation Controller jobs.
 description:
-    - List Ansible Tower jobs. See
+    - List Automation Controller jobs. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     status:
@@ -45,7 +45,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: List running jobs for the testing.yml playbook
-  tower_job_list:
+  job_list:
     status: running
     query: {"playbook": "testing.yml"}
     tower_config_file: "~/tower_cli.cfg"

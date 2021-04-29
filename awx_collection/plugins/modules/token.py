@@ -14,12 +14,12 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_token
+module: token
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "2.3"
-short_description: create, update, or destroy Ansible Tower tokens.
+short_description: create, update, or destroy Automation Controller tokens.
 description:
-    - Create or destroy Ansible Tower tokens. See
+    - Create or destroy Automation Controller tokens. See
       U(https://www.ansible.com/tower) for an overview.
     - In addition, the module sets an Ansible fact which can be passed into other
       tower_* modules as the parameter tower_oauthtoken. See examples for usage.
@@ -66,19 +66,19 @@ extends_documentation_fragment: awx.awx.auth
 EXAMPLES = '''
 - block:
     - name: Create a new token using an existing token
-      tower_token:
+      token:
         description: '{{ token_description }}'
         scope: "write"
         state: present
         tower_oauthtoken: "{{ my_existing_token }}"
 
     - name: Delete this token
-      tower_token:
+      token:
         existing_token: "{{ tower_token }}"
         state: absent
 
     - name: Create a new token using username/password
-      tower_token:
+      token:
         description: '{{ token_description }}'
         scope: "write"
         state: present
@@ -86,24 +86,24 @@ EXAMPLES = '''
         tower_password: "{{ my_password }}"
 
     - name: Use our new token to make another call
-      tower_job_list:
+      job_list:
         tower_oauthtoken: "{{ tower_token }}"
 
   always:
     - name: Delete our Token with the token we created
-      tower_token:
+      token:
         existing_token: "{{ tower_token }}"
         state: absent
       when: tower_token is defined
 
 - name: Delete a token by its id
-  tower_token:
+  token:
     existing_token_id: 4
     state: absent
 '''
 
 RETURN = '''
-tower_token:
+token:
   type: dict
   description: An Ansible Fact variable representing a Tower token object which can be used for auth in subsequent modules. See examples for usage.
   contains:

@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_job_cancel
+module: job_cancel
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: Cancel an Ansible Tower Job.
+short_description: Cancel an Automation Controller Job.
 description:
-    - Cancel Ansible Tower jobs. See
+    - Cancel Automation Controller jobs. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     job_id:
@@ -36,7 +36,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Cancel job
-  tower_job_cancel:
+  job_cancel:
     job_id: job.id
 '''
 

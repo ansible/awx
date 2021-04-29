@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: tower_group
+module: group
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Ansible Tower group.
+short_description: create, update, or destroy Automation Controller group.
 description:
-    - Create, update, or destroy Ansible Tower groups. See
+    - Create, update, or destroy Automation Controller groups. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -79,7 +79,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add tower group
-  tower_group:
+  group:
     name: localhost
     description: "Local Host Group"
     inventory: "Local Inventory"
@@ -87,7 +87,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add tower group
-  tower_group:
+  group:
     name: Cities
     description: "Local Host Group"
     inventory: Default Inventory

@@ -18,7 +18,7 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = """
 ---
-module: tower_workflow_node_wait
+module: workflow_node_wait
 author: "Sean Sullivan (@sean-m-sullivan)"
 short_description: Approve an approval node in a workflow job.
 description:
@@ -52,13 +52,13 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = """
 - name: Launch a workflow with a timeout of 10 seconds
-  tower_workflow_launch:
+  workflow_launch:
     workflow_template: "Test Workflow"
     wait: False
   register: workflow
 
 - name: Wait for a workflow node to finish
-  tower_workflow_node_wait:
+  workflow_node_wait:
     workflow_job_id: "{{ workflow.id }}"
     name: Approval Data Step
     timeout: 120
