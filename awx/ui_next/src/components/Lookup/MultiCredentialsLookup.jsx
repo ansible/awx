@@ -1,5 +1,11 @@
 import 'styled-components/macro';
-import React, { Fragment, useState, useCallback, useEffect } from 'react';
+import React, {
+  Fragment,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -26,6 +32,7 @@ async function loadCredentials(params, selectedCredentialTypeId) {
 }
 
 function MultiCredentialsLookup(props) {
+  const isMounted = useRef(null);
   const { value, onChange, onError, history, i18n } = props;
   const [selectedType, setSelectedType] = useState(null);
 
@@ -37,6 +44,9 @@ function MultiCredentialsLookup(props) {
   } = useRequest(
     useCallback(async () => {
       const types = await CredentialTypesAPI.loadAllTypes();
+      if (!isMounted.current) {
+        return;
+      }
       const match = types.find(type => type.kind === 'ssh') || types[0];
       setSelectedType(match);
       return types;
@@ -45,7 +55,11 @@ function MultiCredentialsLookup(props) {
   );
 
   useEffect(() => {
+    isMounted.current = true;
     fetchTypes();
+    return () => {
+      isMounted.current = false;
+    };
   }, [fetchTypes]);
 
   const {
@@ -71,6 +85,10 @@ function MultiCredentialsLookup(props) {
         loadCredentials(params, selectedType.id),
         CredentialsAPI.readOptions(),
       ]);
+
+      if (!isMounted.current) {
+        return;
+      }
 
       results.map(result => {
         if (result.kind === 'vault' && result.inputs?.vault_id) {
@@ -101,7 +119,11 @@ function MultiCredentialsLookup(props) {
   );
 
   useEffect(() => {
+    isMounted.current = true;
     fetchCredentials();
+    return () => {
+      isMounted.current = false;
+    };
   }, [fetchCredentials]);
 
   useEffect(() => {
