@@ -1160,7 +1160,9 @@ class BaseTask(object):
             # if last 30 events came in under 1 second ago
             if inverse_effective_rate < 1.0:
                 if self.recent_event_timings[0] != self.recent_event_timings[-1]:
-                    logger.info('Too many events chief, not broadcasting because that would be crazy')
+                    logger.info(
+                        'Too many events, skipping websocket {} broadcast for {} seconds'.format(self.instance.log_format, 1.0 - inverse_effective_rate)
+                    )
                     # this is to smooth out jumpiness, we clear the events except for the last one
                     # that will enforce that we wait a full second before starting again
                     self.recent_event_timings.clear()
@@ -1169,7 +1171,7 @@ class BaseTask(object):
                 event_data['event_data']['skip_websocket_message'] = True
             else:
                 if self.recent_event_timings[0] == self.recent_event_timings[-1]:
-                    logger.info('Starting a window of event emission, will pause if I see too many')
+                    logger.debug('Starting a window of event emission')
                 self.recent_event_timings.append(cpu_time)
         elif self.recent_event_timings.maxlen:
             self.recent_event_timings.append(time.time())
