@@ -209,7 +209,6 @@ describe('<InventoryHostList />', () => {
 
   test('delete button is disabled if user does not have delete capabilities on a selected host', async () => {
     await act(async () => {
-      // wrapper.find('DataListCheck[id="select-host-3"]').invoke('onChange')();
       wrapper
         .find('.pf-c-table__check')
         .at(2)
