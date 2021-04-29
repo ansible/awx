@@ -14,6 +14,7 @@ function ToolbarAddButton({
   isDisabled,
   defaultLabel = i18n._(t`Add`),
   showToggleIndicator,
+  ouiaId,
 }) {
   const { isKebabified } = useKebabifiedMenu();
 
@@ -26,6 +27,7 @@ function ToolbarAddButton({
   if (isKebabified) {
     return (
       <DropdownItem
+        ouiaId={ouiaId}
         key="add"
         isDisabled={isDisabled}
         component={linkTo ? Link : 'button'}
@@ -40,6 +42,7 @@ function ToolbarAddButton({
     return (
       <Tooltip content={defaultLabel} position="top">
         <Button
+          ouiaId={ouiaId}
           isDisabled={isDisabled}
           component={Link}
           to={linkTo}
@@ -53,6 +56,7 @@ function ToolbarAddButton({
   }
   return (
     <Button
+      ouiaId={ouiaId}
       icon={showToggleIndicator ? <CaretDownIcon /> : null}
       iconPosition={showToggleIndicator ? 'right' : null}
       variant="primary"

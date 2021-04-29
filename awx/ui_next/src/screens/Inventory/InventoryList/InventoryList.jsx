@@ -135,9 +135,11 @@ function InventoryList() {
   const addSmartInventory = t`Add smart inventory`;
   const addButton = (
     <AddDropDownButton
+      ouiaId="add-inventory-button"
       key="add"
       dropdownItems={[
         <DropdownItem
+          ouiaId="add-inventory-item"
           to={`${match.url}/inventory/add/`}
           component={Link}
           key={addInventory}
@@ -146,6 +148,7 @@ function InventoryList() {
           {addInventory}
         </DropdownItem>,
         <DropdownItem
+          ouiaId="add-smart-inventory-item"
           to={`${match.url}/smart_inventory/add/`}
           component={Link}
           key={addSmartInventory}

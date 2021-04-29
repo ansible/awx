@@ -143,6 +143,7 @@ function TemplateList({ defaultParams }) {
   if (canAddJT) {
     addDropDownButton.push(
       <DropdownItem
+        ouiaId="add-job-template-item"
         key={addTemplate}
         component={Link}
         to="/templates/job_template/add/"
@@ -155,6 +156,7 @@ function TemplateList({ defaultParams }) {
   if (canAddWFJT) {
     addDropDownButton.push(
       <DropdownItem
+        ouiaId="add-workflow-job-template-item"
         component={Link}
         to="/templates/workflow_job_template/add/"
         key={addWFTemplate}
@@ -165,7 +167,7 @@ function TemplateList({ defaultParams }) {
     );
   }
   const addButton = (
-    <AddDropDownButton key="add" dropdownItems={addDropDownButton} />
+    <AddDropDownButton ouiaId="add-template-button" key="add" dropdownItems={addDropDownButton} />
   );
 
   const deleteDetailsRequests = relatedResourceDeleteRequests.template(
