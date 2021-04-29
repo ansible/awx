@@ -100,6 +100,7 @@ function ContainerGroupDetails({ instanceGroup }) {
         {instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.delete && (
             <DeleteButton
+              ouiaId="container-group-detail-delete-button"
               name={name}
               modalTitle={t`Delete instance group`}
               onConfirm={deleteInstanceGroup}

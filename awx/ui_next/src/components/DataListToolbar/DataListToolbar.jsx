@@ -123,6 +123,7 @@ function DataListToolbar({
               <Dropdown
                 toggle={
                   <KebabToggle
+                    data-cy="actions-kebab-toogle"
                     onToggle={isOpen => {
                       if (!isKebabModalOpen) {
                         setIsKebabOpen(isOpen);
