@@ -169,7 +169,8 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
     for root, dirs, files in os.walk(module_directory):
         if root == module_directory:
             for filename in files:
-                if re.match('^tower_.*.py$', filename):
+                # must begin with a letter a-z, and end in .py
+                if re.match('^[a-z].*\.py$', filename):
                     module_name = filename[:-3]
                     option_comparison[module_name] = {
                         'endpoint': 'N/A',
