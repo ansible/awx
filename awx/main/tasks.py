@@ -1160,8 +1160,8 @@ class BaseTask(object):
             # if last 30 events came in under 1 second ago
             if inverse_effective_rate < 1.0:
                 if self.recent_event_timings[0] != self.recent_event_timings[-1]:
-                    logger.info(
-                        'Too many events, skipping websocket {} broadcast for {} seconds'.format(self.instance.log_format, 1.0 - inverse_effective_rate)
+                    logger.debug(
+                        'Too many events, skipping job {} websocket broadcast for {:.4f} seconds'.format(self.instance.id, 1.0 - inverse_effective_rate)
                     )
                     # this is to smooth out jumpiness, we clear the events except for the last one
                     # that will enforce that we wait a full second before starting again
