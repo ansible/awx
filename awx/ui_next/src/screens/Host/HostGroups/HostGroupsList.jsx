@@ -199,6 +199,7 @@ function HostGroupsList({ i18n, host }) {
               ...(canAdd
                 ? [
                     <ToolbarAddButton
+                      ouiaId="host-groups-add-button"
                       key="add"
                       onClick={() => setIsModalOpen(true)}
                     />,
@@ -227,6 +228,7 @@ function HostGroupsList({ i18n, host }) {
       />
       {isModalOpen && (
         <AssociateModal
+          ouiaId="associate-modal"
           header={i18n._(t`Groups`)}
           fetchRequest={fetchGroupsToAssociate}
           optionsRequest={fetchGroupsOptions}
