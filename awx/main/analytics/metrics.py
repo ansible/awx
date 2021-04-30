@@ -40,8 +40,8 @@ def metrics():
         registry=REGISTRY,
     )
     CUSTOM_VENVS = Gauge('awx_custom_virtualenvs_total', 'Number of virtualenvs', registry=REGISTRY)
-    RUNNING_JOBS = Gauge('awx_running_jobs_total', 'Number of running jobs on the Tower system', registry=REGISTRY)
-    PENDING_JOBS = Gauge('awx_pending_jobs_total', 'Number of pending jobs on the Tower system', registry=REGISTRY)
+    RUNNING_JOBS = Gauge('awx_running_jobs_total', 'Number of running jobs on the system', registry=REGISTRY)
+    PENDING_JOBS = Gauge('awx_pending_jobs_total', 'Number of pending jobs on the system', registry=REGISTRY)
     STATUS = Gauge(
         'awx_status_total',
         'Status of Job launched',
@@ -53,7 +53,7 @@ def metrics():
 
     INSTANCE_CAPACITY = Gauge(
         'awx_instance_capacity',
-        'Capacity of each node in a Tower system',
+        'Capacity of each node in the system',
         [
             'hostname',
             'instance_uuid',
@@ -62,7 +62,7 @@ def metrics():
     )
     INSTANCE_CPU = Gauge(
         'awx_instance_cpu',
-        'CPU cores on each node in a Tower system',
+        'CPU cores on each node in the system',
         [
             'hostname',
             'instance_uuid',
@@ -71,7 +71,7 @@ def metrics():
     )
     INSTANCE_MEMORY = Gauge(
         'awx_instance_memory',
-        'RAM (Kb) on each node in a Tower system',
+        'RAM (Kb) on each node in the system',
         [
             'hostname',
             'instance_uuid',
@@ -80,7 +80,7 @@ def metrics():
     )
     INSTANCE_INFO = Info(
         'awx_instance',
-        'Info about each node in a Tower system',
+        'Info about each node in the system',
         [
             'hostname',
             'instance_uuid',
@@ -107,7 +107,7 @@ def metrics():
     )
     INSTANCE_CONSUMED_CAPACITY = Gauge(
         'awx_instance_consumed_capacity',
-        'Consumed capacity of each node in a Tower system',
+        'Consumed capacity of each node in the system',
         [
             'hostname',
             'instance_uuid',
@@ -116,7 +116,7 @@ def metrics():
     )
     INSTANCE_REMAINING_CAPACITY = Gauge(
         'awx_instance_remaining_capacity',
-        'Remaining capacity of each node in a Tower system',
+        'Remaining capacity of each node in the system',
         [
             'hostname',
             'instance_uuid',

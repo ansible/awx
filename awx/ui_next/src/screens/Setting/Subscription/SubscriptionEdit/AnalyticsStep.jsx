@@ -45,8 +45,8 @@ function AnalyticsStep({ i18n }) {
       <Trans>User and Insights analytics</Trans>
       <p>
         <Trans>
-          By default, Tower collects and transmits analytics data on Tower usage
-          to Red Hat. There are two categories of data collected by Tower. For
+          By default, we collect and transmit analytics data on the serice usage
+          to Red Hat. There are two categories of data collected by the service. For
           more information, see{' '}
           <Button
             component="a"
@@ -71,7 +71,7 @@ function AnalyticsStep({ i18n }) {
           label={i18n._(t`User analytics`)}
           id="pendo-field"
           description={i18n._(t`This data is used to enhance
-                   future releases of the Tower Software and help
+                   future releases of the Software and help
                    streamline customer experience and success.`)}
         />
       </FormGroup>
@@ -83,8 +83,8 @@ function AnalyticsStep({ i18n }) {
           label={i18n._(t`Insights Analytics`)}
           id="insights-field"
           description={i18n._(t`This data is used to enhance
-                   future releases of the Tower Software and to provide
-                   Insights Analytics to Tower subscribers.`)}
+                   future releases of the Software and to provide
+                   Insights Analytics to subscribers.`)}
         />
       </FormGroup>
       {requireCredentialFields && (

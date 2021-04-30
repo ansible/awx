@@ -287,7 +287,7 @@ function HostFilterLookup({
           content={i18n._(
             t`Populate the hosts for this inventory by using a search
               filter. Example: ansible_facts.ansible_distribution:"RedHat".
-              Refer to the Ansible Tower documentation for further syntax and
+              Refer to the documentation for further syntax and
               examples.`
           )}
         />

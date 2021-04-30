@@ -169,7 +169,7 @@ describe('<LDAPEdit />', () => {
       AUTH_LDAP_GROUP_TYPE: 'MemberDNGroupType',
       AUTH_LDAP_GROUP_TYPE_PARAMS: { name_attr: 'cn', member_attr: 'member' },
       AUTH_LDAP_ORGANIZATION_MAP: {},
-      AUTH_LDAP_REQUIRE_GROUP: 'CN=Tower Users,OU=Users,DC=example,DC=com',
+      AUTH_LDAP_REQUIRE_GROUP: 'CN=Service Users,OU=Users,DC=example,DC=com',
       AUTH_LDAP_SERVER_URI: 'ldap://mock.example.com',
       AUTH_LDAP_START_TLS: false,
       AUTH_LDAP_USER_ATTR_MAP: {},

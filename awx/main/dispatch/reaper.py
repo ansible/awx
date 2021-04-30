@@ -18,7 +18,7 @@ def reap_job(j, status):
     j.start_args = ''  # blank field to remove encrypted passwords
     j.job_explanation += ' '.join(
         (
-            'Task was marked as running in Tower but was not present in',
+            'Task was marked as running but was not present in',
             'the job queue, so it has been marked as failed.',
         )
     )
@@ -37,7 +37,7 @@ def reap(instance=None, status='failed', excluded_uuids=[]):
     if me is None:
         (changed, me) = Instance.objects.get_or_register()
         if changed:
-            logger.info("Registered tower node '{}'".format(me.hostname))
+            logger.info("Registered node '{}'".format(me.hostname))
     now = tz_now()
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     jobs = UnifiedJob.objects.filter(

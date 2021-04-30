@@ -20,7 +20,7 @@ from rest_framework.fields import empty, SkipField
 
 import cachetools
 
-# Tower
+# AWX
 from awx.main.utils import encrypt_field, decrypt_field
 from awx.conf import settings_registry
 from awx.conf.models import Setting

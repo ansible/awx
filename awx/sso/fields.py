@@ -22,7 +22,7 @@ from rest_framework.fields import empty, Field, SkipField
 # This must be imported so get_subclasses picks it up
 from awx.sso.ldap_group_types import PosixUIDGroupType  # noqa
 
-# Tower
+# AWX
 from awx.conf import fields
 from awx.main.validators import validate_certificate
 from awx.sso.validators import (  # noqa

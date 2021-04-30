@@ -77,7 +77,7 @@ register(
     required=False,
     default='',
     label=_('Login redirect override URL'),
-    help_text=_('URL to which unauthorized users will be redirected to log in.  If blank, users will be sent to the Tower login page.'),
+    help_text=_('URL to which unauthorized users will be redirected to log in.  If blank, users will be sent to the login page.'),
     category=_('Authentication'),
     category_slug='authentication',
 )

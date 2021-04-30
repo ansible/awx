@@ -82,7 +82,7 @@ function InventoryFormFields({ i18n, credentialTypeId, inventory }) {
       <FormFullWidthLayout>
         <VariablesField
           tooltip={i18n._(
-            t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`
+            t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the documentation for example syntax`
           )}
           id="inventory-variables"
           name="variables"

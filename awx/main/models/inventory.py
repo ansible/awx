@@ -877,14 +877,14 @@ class InventorySourceOptions(BaseModel):
             '}'
             'The host would be marked enabled. If power_state where any '
             'value other than powered_on then the host would be disabled '
-            'when imported into Tower. If the key is not found then the '
+            'when imported. If the key is not found then the '
             'host will be enabled'
         ),
     )
     host_filter = models.TextField(
         blank=True,
         default='',
-        help_text=_('Regex where only matching hosts will be imported into Tower.'),
+        help_text=_('Regex where only matching hosts will be imported.'),
     )
     overwrite = models.BooleanField(
         default=False,

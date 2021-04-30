@@ -9,7 +9,7 @@ import re
 # Django
 from django.utils.translation import ugettext_lazy as _
 
-# Tower
+# AWX
 from awx.conf import fields
 
 

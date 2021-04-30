@@ -30,14 +30,14 @@ SECRET_KEY = None
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
-# The heartbeat file for the tower scheduler
+# The heartbeat file for the scheduler
 SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
 
 # Ansible base virtualenv paths and enablement
 BASE_VENV_PATH = os.path.realpath("/var/lib/awx/venv")
 ANSIBLE_VENV_PATH = os.path.join(BASE_VENV_PATH, "ansible")
 
-# Tower base virtualenv paths and enablement
+# Base virtualenv paths and enablement
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
 # Store a snapshot of default settings at this point before loading any

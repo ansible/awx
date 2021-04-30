@@ -1,7 +1,7 @@
 # Django REST Framework
 from rest_framework import serializers
 
-# Tower
+# AWX
 from awx.api.fields import VerbatimField
 from awx.api.serializers import BaseSerializer
 from awx.conf.models import Setting

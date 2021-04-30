@@ -1,6 +1,6 @@
-## Ansible Tower Capacity Determination and Job Impact
+## AWX Capacity Determination and Job Impact
 
-The Ansible Tower capacity system determines how many jobs can run on an Instance given the amount of resources
+The AWX capacity system determines how many jobs can run on an Instance given the amount of resources
 available to the Instance and the size of the jobs that are running (referred to hereafter as `Impact`).
 The algorithm used to determine this is based entirely on two things:
 
@@ -25,18 +25,18 @@ These concepts mean that, in general, Capacity and Impact is not a zero-sum syst
 ### Resource Determination For Capacity Algorithm
 
 The capacity algorithms are defined in order to determine how many `forks` a system is capable of running at the same time. This controls how
-many systems Ansible itself will communicate with simultaneously. Increasing the number of forks a Tower system is running will, in general,
+many systems Ansible itself will communicate with simultaneously. Increasing the number of forks a AWX system is running will, in general,
 allow jobs to run faster by performing more work in parallel. The tradeoff is that this will increase the load on the system which could cause work
 to slow down overall.
 
-Tower can operate in two modes when determining capacity. `mem_capacity` (the default) will allow you to overcommit CPU resources while protecting the system
+AWX can operate in two modes when determining capacity. `mem_capacity` (the default) will allow you to overcommit CPU resources while protecting the system
 from running out of memory. If most of your work is not CPU-bound, then selecting this mode will maximize the number of forks.
 
 
 #### Memory Relative Capacity
-`mem_capacity` is calculated relative to the amount of memory needed per-fork. Taking into account the overhead for Tower's internal components, this comes out
+`mem_capacity` is calculated relative to the amount of memory needed per-fork. Taking into account the overhead for AWX's internal components, this comes out
 to be about `100MB` per fork. When considering the amount of memory available to Ansible jobs the capacity algorithm will reserve 2GB of memory to account
-for the presence of other Tower services. The algorithm itself looks like this:
+for the presence of other AWX services. The algorithm itself looks like this:
 
     (mem - 2048) / mem_per_fork
 
@@ -44,7 +44,7 @@ As an example:
 
     (4096 - 2048) / 100 == ~20
 
-So a system with 4GB of memory would be capable of running 20 forks. The value `mem_per_fork` can be controlled by setting the Tower settings value
+So a system with 4GB of memory would be capable of running 20 forks. The value `mem_per_fork` can be controlled by setting the AWX settings value
 (or environment variable) `SYSTEM_TASK_FORKS_MEM` which defaults to `100`.
 
 
@@ -53,7 +53,7 @@ So a system with 4GB of memory would be capable of running 20 forks. The value `
 Often times Ansible workloads can be fairly CPU-bound. In these cases, sometimes reducing the simultaneous workload allows more tasks to run faster and reduces
 the average time-to-completion of those jobs.
 
-Just as the Tower `mem_capacity` algorithm uses the amount of memory needed per-fork, the `cpu_capacity` algorithm looks at the amount of CPU resources is needed
+Just as the AWX `mem_capacity` algorithm uses the amount of memory needed per-fork, the `cpu_capacity` algorithm looks at the amount of CPU resources is needed
 per fork. The baseline value for this is `4` forks per core. The algorithm itself looks like this:
 
     cpus * fork_per_cpu
@@ -62,7 +62,7 @@ For example, in a 4-core system:
 
     4 * 4 == 16
 
-The value `fork_per_cpu` can be controlled by setting the Tower settings value (or environment variable) `SYSTEM_TASK_FORKS_CPU`, which defaults to `4`.
+The value `fork_per_cpu` can be controlled by setting the AWX settings value (or environment variable) `SYSTEM_TASK_FORKS_CPU`, which defaults to `4`.
 
 ### Job Impacts Relative To Capacity
 
@@ -70,13 +70,13 @@ When selecting the capacity, it's important to understand how each job type affe
 
 It's helpful to understand what `forks` mean to Ansible: http://docs.ansible.com/ansible/latest/intro_configuration.html#forks
 
-The default forks value for ansible is `5`. However, if Tower knows that you're running against fewer systems than that, then the actual concurrency value
+The default forks value for ansible is `5`. However, if AWX knows that you're running against fewer systems than that, then the actual concurrency value
 will be lower.
 
-When a job is made to run, Tower will add `1` to the number of forks selected to compensate for the Ansible parent process. So if you are running a playbook against `5`
+When a job is made to run, AWX will add `1` to the number of forks selected to compensate for the Ansible parent process. So if you are running a playbook against `5`
 systems with a `forks` value of `5`, then the actual `forks` value from the perspective of Job Impact will be 6.
 
-#### Impact of Job Types in Tower
+#### Impact of Job Types in AWX
 
 Jobs and Ad-hoc jobs follow the above model, `forks + 1`.
 
@@ -88,7 +88,7 @@ Other job types have a fixed impact:
 
 ### Selecting the Right Capacity
 
-Selecting between a memory-focused capacity algorithm and a CPU-focused capacity for your Tower use means you'll be selecting between a minimum
+Selecting between a memory-focused capacity algorithm and a CPU-focused capacity for your AWX use means you'll be selecting between a minimum
 and maximum value. In the above examples, the CPU capacity would allow a maximum of 16 forks while the Memory capacity would allow 20. For some systems,
 the disparity between these can be large and oftentimes you may want to have a balance between these two.
 

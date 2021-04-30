@@ -124,7 +124,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
                 <>
                   {i18n._(t`If checked, any hosts and groups that were
           previously present on the external source but are now removed
-          will be removed from the Tower inventory. Hosts and groups
+          will be removed from the inventory. Hosts and groups
           that were not managed by the inventory source will be promoted
           to the next manually created group or if there is no manually
           created group to promote them into, they will be left in the "all"

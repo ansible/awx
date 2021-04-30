@@ -83,7 +83,7 @@ describe('<LDAPDetail />', () => {
       assertDetail(
         wrapper,
         'LDAP Require Group',
-        'CN=Tower Users,OU=Users,DC=example,DC=com'
+        'CN=Service Users,OU=Users,DC=example,DC=com'
       );
       assertDetail(wrapper, 'LDAP Deny Group', 'Not configured');
       assertVariableDetail(wrapper, 'LDAP User Search', '[]');

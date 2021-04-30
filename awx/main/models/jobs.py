@@ -162,7 +162,7 @@ class JobOptions(BaseModel):
     use_fact_cache = models.BooleanField(
         default=False,
         help_text=_(
-            "If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting "
+            "If enabled, the service will act as an Ansible Fact Cache Plugin; persisting "
             "facts at the end of a playbook run to the database and caching facts for use by Ansible."
         ),
     )

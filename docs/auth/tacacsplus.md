@@ -1,7 +1,7 @@
 # TACACS+
-[Terminal Access Controller Access-Control System Plus (TACACS+)](https://en.wikipedia.org/wiki/TACACS) is a protocol developed by Cisco to handle remote authentication and related services for networked access control through a centralized server. In specific, TACACS+ provides authentication, authorization and accounting (AAA) services. Ansible Tower currently utilizes its authentication service.
+[Terminal Access Controller Access-Control System Plus (TACACS+)](https://en.wikipedia.org/wiki/TACACS) is a protocol developed by Cisco to handle remote authentication and related services for networked access control through a centralized server. In specific, TACACS+ provides authentication, authorization and accounting (AAA) services. AWX currently utilizes its authentication service.
 
-TACACS+ is configured by Tower configuration and is available under `/api/v2/settings/tacacsplus/`. Here is a typical configuration with every configurable field included:
+TACACS+ is configured by settings configuration and is available under `/api/v2/settings/tacacsplus/`. Here is a typical configuration with every configurable field included:
 ```
 {
     "TACACSPLUS_HOST": "127.0.0.1",
@@ -21,7 +21,7 @@ Each field is explained below:
 | `TACACSPLUS_SESSION_TIMEOUT` | Integer             | 5                   | TACACS+ session timeout value in seconds.                          |
 | `TACACSPLUS_AUTH_PROTOCOL`   | String with choices | 'ascii'             | The authentication protocol used by TACACS+ client (choices are `ascii` and `pap`).                |
 
-Under the hood, Tower uses [open-source TACACS+ python client](https://github.com/ansible/tacacs_plus) to communicate with the remote TACACS+ server. During authentication, Tower passes username and password to TACACS+ client, which packs up auth information and sends it to the TACACS+ server. Based on what the server returns, Tower will invalidate login attempt if authentication fails. If authentication passes, Tower will create a user if she does not exist in database, and log the user in.
+Under the hood, AWX uses [open-source TACACS+ python client](https://github.com/ansible/tacacs_plus) to communicate with the remote TACACS+ server. During authentication, AWX passes username and password to TACACS+ client, which packs up auth information and sends it to the TACACS+ server. Based on what the server returns, AWX will invalidate login attempt if authentication fails. If authentication passes, AWX will create a user if she does not exist in database, and log the user in.
 
 ## Test Environment Setup
 
@@ -41,9 +41,9 @@ The playbook creates a user named 'tower' with ascii password default to 'login'
 
 ## Acceptance Criteria
 
-* All specified Tower configuration fields should be shown and configurable as documented.
-* A user defined by the TACACS+ server should be able to log into Tower.
-* User not defined by TACACS+ server should not be able to log into Tower via TACACS+.
-* A user existing in TACACS+ server but not in Tower should be created after the first successful log in.
+* All specified in configuration fields should be shown and configurable as documented.
+* A user defined by the TACACS+ server should be able to log into AWX.
+* User not defined by TACACS+ server should not be able to log into AWX via TACACS+.
+* A user existing in TACACS+ server but not in AWX should be created after the first successful log in.
 * TACACS+ backend should stop an authentication attempt after configured timeout and should not block the authentication pipeline in any case.
-* If exceptions occur on TACACS+ server side, the exception details should be logged in Tower, and Tower should not authenticate that user via TACACS+.
+* If exceptions occur on TACACS+ server side, the exception details should be logged in AWX, and AWX should not authenticate that user via TACACS+.

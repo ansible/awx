@@ -99,7 +99,7 @@ const SmartInventoryFormFields = withI18n()(({ i18n, inventory }) => {
           tooltip={i18n._(
             t`Enter inventory variables using either JSON or YAML syntax.
             Use the radio button to toggle between the two. Refer to the
-            Ansible Tower documentation for example syntax.`
+            documentation for example syntax.`
           )}
         />
       </FormFullWidthLayout>

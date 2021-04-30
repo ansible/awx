@@ -8,7 +8,7 @@ from django.db.models.signals import post_save, pre_delete, post_delete
 from django.core.cache import cache
 from django.dispatch import receiver
 
-# Tower
+# AWX
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 

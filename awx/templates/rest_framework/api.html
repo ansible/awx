@@ -39,8 +39,8 @@
           {% else %}
           <li><a href="{% url 'api:login' %}?next={{ request.get_full_path }}" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Log in"><span class="glyphicon glyphicon-log-in"></span>Log in</a></li>
           {% endif %}
-          <li><a href="//docs.ansible.com/ansible-tower/{{short_tower_version}}/html/towerapi/index.html" target="_blank" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="{% trans 'Ansible Tower API Guide' %}"><span class="glyphicon glyphicon-question-sign"></span><span class="visible-xs-inline">{% trans 'Ansible Tower API Guide' %}</span></a></li>
-          <li><a href="/" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="{% trans 'Back to Ansible Tower' %}"><span class="glyphicon glyphicon-circle-arrow-left"></span><span class="visible-xs-inline">{% trans 'Back to Ansible Tower' %}</span></a></li>
+          <li><a href="//docs.ansible.com/ansible-tower/{{short_tower_version}}/html/towerapi/index.html" target="_blank" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="{% trans 'API Guide' %}"><span class="glyphicon glyphicon-question-sign"></span><span class="visible-xs-inline">{% trans 'API Guide' %}</span></a></li>
+          <li><a href="/" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="{% trans 'Back to application' %}"><span class="glyphicon glyphicon-circle-arrow-left"></span><span class="visible-xs-inline">{% trans 'Back to application' %}</span></a></li>
           <li class="hidden-xs"><a href="#" class="resize" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="{% trans 'Resize' %}"><span class="glyphicon glyphicon-resize-full"></span></a></li>
         </ul>
       </div>
@@ -64,7 +64,7 @@
       <div class="col-sm-6">
       </div>
       <div class="col-sm-6 footer-copyright">
-        Copyright &copy; 2019 <a href="http://www.redhat.com" target="_blank">Red Hat</a>, Inc. All Rights Reserved.
+        Copyright &copy; 2021 <a href="http://www.redhat.com" target="_blank">Red Hat</a>, Inc. All Rights Reserved.
       </div>
     </div>
   </div>

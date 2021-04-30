@@ -88,7 +88,7 @@ const GitSubForm = ({
                 config
               )}/html/userguide/projects.html#manage-playbooks-using-source-control`}
             >
-              {i18n._(t`Ansible Tower Documentation.`)}
+              {i18n._(t`Documentation.`)}
             </a>
           </span>
         }

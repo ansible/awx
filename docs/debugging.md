@@ -131,12 +131,12 @@ WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes';
 
 Remote Debugging
 ----------------
-Python processes in Tower's development environment are kept running in the
+Python processes in AWX's development environment are kept running in the
 background via supervisord.  As such, interacting with them via Python's
 standard `pdb.set_trace()` isn't possible.
 
 Bundled in our container environment is a remote debugging tool, `sdb`.  You
-can use it to set remote breakpoints in Tower code and debug interactively over
+can use it to set remote breakpoints in AWX code and debug interactively over
 a telnet session:
 
 ```python
@@ -147,7 +147,7 @@ a telnet session:
         def run(self, pk, **kwargs):
             # This will set a breakpoint and open an interactive Python
             # debugger exposed on a random port between 7899-7999.  The chosen
-            # port will be reported as a warning in the Tower logs, e.g.,
+            # port will be reported as a warning in the AWX logs, e.g.,
             #
             # [2017-01-30 22:26:04,366: WARNING/Worker-11] Remote Debugger:7900: Please telnet into 0.0.0.0 7900.
             #
@@ -163,7 +163,7 @@ that encounters a breakpoint will wait until an active client is established
 (it won't handle additional tasks) and concludes the debugging session with
 a `continue` command.
 
-To simplify remote debugging session management, Tower's development
+To simplify remote debugging session management, AWX's development
 environment comes with tooling that can automatically discover open
 remote debugging sessions and automatically connect to them.  From your *host*
 machine (*i.e.*, _outside_ of the development container), you can run:

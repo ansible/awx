@@ -81,7 +81,7 @@ class ApiV2(base.Base):
     # Export methods
 
     def _export(self, _page, post_fields):
-        # Drop any (credential_type) assets that are being managed by the Tower instance.
+        # Drop any (credential_type) assets that are being managed by the instance.
         if _page.json.get('managed_by_tower'):
             log.debug("%s is managed by Tower, skipping.", _page.endpoint)
             return None

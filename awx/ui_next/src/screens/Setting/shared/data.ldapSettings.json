@@ -16,7 +16,7 @@
       "name_attr": "cn",
       "member_attr": "member"
   },
-  "AUTH_LDAP_REQUIRE_GROUP": "CN=Tower Users,OU=Users,DC=example,DC=com",
+  "AUTH_LDAP_REQUIRE_GROUP": "CN=Service Users,OU=Users,DC=example,DC=com",
   "AUTH_LDAP_DENY_GROUP": null,
   "AUTH_LDAP_USER_FLAGS_BY_GROUP": {},
   "AUTH_LDAP_ORGANIZATION_MAP": {},

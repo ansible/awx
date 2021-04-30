@@ -18,75 +18,64 @@ from django.utils.timezone import now
 
 base_dir = os.path.abspath(  # Convert into absolute path string
     os.path.join(  # Current file's grandparent directory
-        os.path.join(  # Current file's parent directory
-            os.path.dirname(  # Current file's directory
-                os.path.abspath(__file__)  # Current file path
-            ),
-            os.pardir
-        ),
-        os.pardir
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir),  # Current file's parent directory  # Current file's directory  # Current file path
+        os.pardir,
     )
 )
 
 if base_dir not in sys.path:
     sys.path.insert(1, base_dir)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings.development") # noqa
-django.setup() # noqa
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings.development")  # noqa
+django.setup()  # noqa
 
 
-from django.db import transaction # noqa
+from django.db import transaction  # noqa
 
 # awx
 from awx.main.models import (  # noqa
-    Credential, CredentialType, Group, Host, Inventory, Job, JobEvent,
-    JobHostSummary, JobTemplate, Label, Organization, PrimordialModel, Project,
-    Team, User, WorkflowJobTemplate, WorkflowJobTemplateNode,
+    Credential,
+    CredentialType,
+    Group,
+    Host,
+    Inventory,
+    Job,
+    JobEvent,
+    JobHostSummary,
+    JobTemplate,
+    Label,
+    Organization,
+    PrimordialModel,
+    Project,
+    Team,
+    User,
+    WorkflowJobTemplate,
+    WorkflowJobTemplateNode,
     batch_role_ancestor_rebuilding,
 )
 
-from awx.main.signals import ( # noqa
-    disable_activity_stream,
-    disable_computed_fields
-)
+from awx.main.signals import disable_activity_stream, disable_computed_fields  # noqa
 
 
 option_list = [
-    make_option('--organizations', action='store', type='int', default=3,
-                help='Number of organizations to create'),
-    make_option('--users', action='store', type='int', default=10,
-                help='Number of users to create'),
-    make_option('--teams', action='store', type='int', default=5,
-                help='Number of teams to create'),
-    make_option('--projects', action='store', type='int', default=10,
-                help='Number of projects to create'),
-    make_option('--job-templates', action='store', type='int', default=20,
-                help='Number of job templates to create'),
-    make_option('--credentials', action='store', type='int', default=5,
-                help='Number of credentials to create'),
-    make_option('--inventories', action='store', type='int', default=5,
-                help='Number of credentials to create'),
-    make_option('--inventory-groups', action='store', type='int', default=10,
-                help='Number of credentials to create'),
-    make_option('--inventory-hosts', action='store', type='int', default=40,
-                help='number of credentials to create'),
-    make_option('--wfjts', action='store', type='int', default=15,
-                help='number of workflow job templates to create'),
-    make_option('--nodes', action='store', type='int', default=200,
-                help='number of workflow job template nodes to create'),
-    make_option('--labels', action='store', type='int', default=100,
-                help='labels to create, will associate 10x as many'),
-    make_option('--jobs', action='store', type='int', default=200,
-                help='number of job entries to create'),
-    make_option('--job-events', action='store', type='int', default=500,
-                help='number of job event entries to create'),
-    make_option('--pretend', action='store_true',
-                help="Don't commit the data to the database"),
-    make_option('--preset', action='store', type='string', default='',
-                help="Preset data set to use"),
-    make_option('--prefix', action='store', type='string', default='',
-                help="Prefix generated names with this string"),
-    #make_option('--spread-bias', action='store', type='string', default='exponential',
+    make_option('--organizations', action='store', type='int', default=3, help='Number of organizations to create'),
+    make_option('--users', action='store', type='int', default=10, help='Number of users to create'),
+    make_option('--teams', action='store', type='int', default=5, help='Number of teams to create'),
+    make_option('--projects', action='store', type='int', default=10, help='Number of projects to create'),
+    make_option('--job-templates', action='store', type='int', default=20, help='Number of job templates to create'),
+    make_option('--credentials', action='store', type='int', default=5, help='Number of credentials to create'),
+    make_option('--inventories', action='store', type='int', default=5, help='Number of credentials to create'),
+    make_option('--inventory-groups', action='store', type='int', default=10, help='Number of credentials to create'),
+    make_option('--inventory-hosts', action='store', type='int', default=40, help='number of credentials to create'),
+    make_option('--wfjts', action='store', type='int', default=15, help='number of workflow job templates to create'),
+    make_option('--nodes', action='store', type='int', default=200, help='number of workflow job template nodes to create'),
+    make_option('--labels', action='store', type='int', default=100, help='labels to create, will associate 10x as many'),
+    make_option('--jobs', action='store', type='int', default=200, help='number of job entries to create'),
+    make_option('--job-events', action='store', type='int', default=500, help='number of job event entries to create'),
+    make_option('--pretend', action='store_true', help="Don't commit the data to the database"),
+    make_option('--preset', action='store', type='string', default='', help="Preset data set to use"),
+    make_option('--prefix', action='store', type='string', default='', help="Prefix generated names with this string"),
+    # make_option('--spread-bias', action='store', type='string', default='exponential',
     #            help='"exponential" to bias associations exponentially front loaded for - for ex'),
 ]
 parser = OptionParser(option_list=option_list)
@@ -97,8 +86,7 @@ options = vars(options)
 if options['preset']:
     print(' Using preset data numbers set ' + str(options['preset']))
     # Read the numbers of resources from presets file, if provided
-    presets_filename = os.path.abspath(os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), 'presets.tsv'))
+    presets_filename = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'presets.tsv'))
 
     with open(presets_filename) as f:
         text = f.read()
@@ -117,36 +105,36 @@ if options['preset']:
         options['prefix'] = options['preset']
 
 
-n_organizations    = int(options['organizations'])
-n_users            = int(options['users'])
-n_teams            = int(options['teams'])
-n_projects         = int(options['projects'])
-n_job_templates    = int(options['job_templates'])
-n_credentials      = int(options['credentials'])
-n_inventories      = int(options['inventories'])
+n_organizations = int(options['organizations'])
+n_users = int(options['users'])
+n_teams = int(options['teams'])
+n_projects = int(options['projects'])
+n_job_templates = int(options['job_templates'])
+n_credentials = int(options['credentials'])
+n_inventories = int(options['inventories'])
 n_inventory_groups = int(options['inventory_groups'])
-n_inventory_hosts  = int(options['inventory_hosts'])
-n_wfjts            = int(options['wfjts'])
-n_nodes            = int(options['nodes'])
-n_labels           = int(options['labels'])
-n_jobs             = int(options['jobs'])
-n_job_events       = int(options['job_events'])
-prefix             = options['prefix']
+n_inventory_hosts = int(options['inventory_hosts'])
+n_wfjts = int(options['wfjts'])
+n_nodes = int(options['nodes'])
+n_labels = int(options['labels'])
+n_jobs = int(options['jobs'])
+n_job_events = int(options['job_events'])
+prefix = options['prefix']
 
-organizations    = []
-users            = []
-teams            = []
-projects         = []
-job_templates    = []
-credentials      = []
-inventories      = []
+organizations = []
+users = []
+teams = []
+projects = []
+job_templates = []
+credentials = []
+inventories = []
 inventory_groups = []
-inventory_hosts  = []
-wfjts            = []
-nodes            = []
-labels           = []
-jobs             = []
-#job_events       = []
+inventory_hosts = []
+wfjts = []
+nodes = []
+labels = []
+jobs = []
+# job_events       = []
 
 
 def spread(n, m):
@@ -162,7 +150,7 @@ def spread(n, m):
 
     for i in range(m):
         n_in_this_slot = n // 2
-        n-= n_in_this_slot
+        n -= n_in_this_slot
         ret[i] += n_in_this_slot
     if n > 0 and len(ret):
         ret[0] += n
@@ -170,7 +158,7 @@ def spread(n, m):
 
 
 ids = defaultdict(lambda: 0)
-bulk_data_description = 'From Tower bulk-data script'
+bulk_data_description = 'From AWX bulk-data script'
 
 
 # function to cycle through a list
@@ -211,38 +199,37 @@ startTime = datetime.now()
 def make_the_data():
     with disable_activity_stream():
         with batch_role_ancestor_rebuilding(), disable_computed_fields():
-            admin, created      = User.objects.get_or_create(username = 'admin', is_superuser=True)
+            admin, created = User.objects.get_or_create(username='admin', is_superuser=True)
             if created:
                 admin.is_superuser = True
                 admin.save()
                 admin.set_password('test')
                 admin.save()
 
-            org_admin, created  = User.objects.get_or_create(username = 'org_admin')
+            org_admin, created = User.objects.get_or_create(username='org_admin')
             if created:
                 org_admin.set_password('test')
                 org_admin.save()
 
-            org_member, created = User.objects.get_or_create(username = 'org_member')
+            org_member, created = User.objects.get_or_create(username='org_member')
             if created:
                 org_member.set_password('test')
                 org_member.save()
 
-            prj_admin, created  = User.objects.get_or_create(username = 'prj_admin')
+            prj_admin, created = User.objects.get_or_create(username='prj_admin')
             if created:
                 prj_admin.set_password('test')
                 prj_admin.save()
 
-            jt_admin, created   = User.objects.get_or_create(username = 'jt_admin')
+            jt_admin, created = User.objects.get_or_create(username='jt_admin')
             if created:
                 jt_admin.set_password('test')
                 jt_admin.save()
 
-            inv_admin, created  = User.objects.get_or_create(username = 'inv_admin')
+            inv_admin, created = User.objects.get_or_create(username='inv_admin')
             if created:
                 inv_admin.set_password('test')
                 inv_admin.save()
-
 
             print('# Creating %d organizations' % n_organizations)
             for i in range(n_organizations):
@@ -266,7 +253,7 @@ def make_the_data():
                 for i in range(n):
                     ids['user'] += 1
                     user_id = ids['user']
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, organizations[org_idx].name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, organizations[org_idx].name, i + 1))
                     sys.stdout.flush()
                     user, _ = User.objects.get_or_create(username='%suser-%d' % (prefix, user_id))
                     organizations[org_idx].member_role.members.add(user)
@@ -286,12 +273,12 @@ def make_the_data():
                 for i in range(n):
                     ids['team'] += 1
                     team_id = ids['team']
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i + 1))
                     sys.stdout.flush()
                     team, _ = Team.objects.get_or_create(
-                        name='%s Team %d Org %d' % (prefix, team_id, org_idx), organization=org,
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen))
+                        name='%s Team %d Org %d' % (prefix, team_id, org_idx),
+                        organization=org,
+                        defaults=dict(created_by=next(creator_gen), modified_by=next(modifier_gen)),
                     )
                     teams.append(team)
                 org_idx += 1
@@ -318,7 +305,6 @@ def make_the_data():
                 for team in org_teams:
                     team.member_role.members.add(org_users[0])
 
-
             print('# Creating %d credentials for users' % (n_credentials - n_credentials // 2))
             user_idx = 0
             for n in spread(n_credentials - n_credentials // 2, n_users):
@@ -330,9 +316,8 @@ def make_the_data():
                     credential_id = ids['credential']
                     credential, _ = Credential.objects.get_or_create(
                         name='%s Credential %d User %d' % (prefix, credential_id, user_idx),
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen)),
-                        credential_type=CredentialType.objects.filter(namespace='ssh').first()
+                        defaults=dict(created_by=next(creator_gen), modified_by=next(modifier_gen)),
+                        credential_type=CredentialType.objects.filter(namespace='ssh').first(),
                     )
                     credential.admin_role.members.add(user)
                     credentials.append(credential)
@@ -353,9 +338,8 @@ def make_the_data():
                     credential_id = ids['credential']
                     credential, _ = Credential.objects.get_or_create(
                         name='%s Credential %d team %d' % (prefix, credential_id, team_idx),
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen)),
-                        credential_type=CredentialType.objects.filter(namespace='ssh').first()
+                        defaults=dict(created_by=next(creator_gen), modified_by=next(modifier_gen)),
+                        credential_type=CredentialType.objects.filter(namespace='ssh').first(),
                     )
                     credential.admin_role.parents.add(team.member_role)
                     credentials.append(credential)
@@ -369,22 +353,33 @@ def make_the_data():
                 for i in range(n):
                     ids['project'] += 1
                     project_id = ids['project']
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i + 1))
                     sys.stdout.flush()
                     project, _ = Project.objects.get_or_create(
                         name='%s Project %d Org %d' % (prefix, project_id, org_idx),
                         organization=org,
                         defaults=dict(
-                            created_by=next(creator_gen), modified_by=next(modifier_gen),
+                            created_by=next(creator_gen),
+                            modified_by=next(modifier_gen),
                             scm_url='https://github.com/ansible/test-playbooks.git',
                             scm_type='git',
                             playbook_files=[
-                                "check.yml", "debug-50.yml", "debug.yml", "debug2.yml",
-                                "debug_extra_vars.yml", "dynamic_inventory.yml",
-                                "environ_test.yml", "fail_unless.yml", "pass_unless.yml",
-                                "pause.yml", "ping-20.yml", "ping.yml",
-                                "setfact_50.yml", "vault.yml"
-                            ])
+                                "check.yml",
+                                "debug-50.yml",
+                                "debug.yml",
+                                "debug2.yml",
+                                "debug_extra_vars.yml",
+                                "dynamic_inventory.yml",
+                                "environ_test.yml",
+                                "fail_unless.yml",
+                                "pass_unless.yml",
+                                "pause.yml",
+                                "ping-20.yml",
+                                "ping.yml",
+                                "setfact_50.yml",
+                                "vault.yml",
+                            ],
+                        ),
                     )
                     projects.append(project)
                     if org_idx == 0 and i == 0:
@@ -393,7 +388,6 @@ def make_the_data():
                 org_idx += 1
                 print('')
 
-
             print('# Creating %d inventories' % n_inventories)
             org_idx = 0
             for n in spread(n_inventories, min(n_inventories // 4 + 1, n_organizations)):
@@ -401,14 +395,13 @@ def make_the_data():
                 for i in range(n):
                     ids['inventory'] += 1
                     inventory_id = ids['inventory']
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i + 1))
                     sys.stdout.flush()
                     inventory, _ = Inventory.objects.get_or_create(
                         name='%s Inventory %d Org %d' % (prefix, inventory_id, org_idx),
                         organization=org,
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen)),
-                        variables='{"ansible_connection": "local"}'
+                        defaults=dict(created_by=next(creator_gen), modified_by=next(modifier_gen)),
+                        variables='{"ansible_connection": "local"}',
                     )
                     inventories.append(inventory)
                     if org_idx == 0 and i == 0:
@@ -416,7 +409,6 @@ def make_the_data():
 
                 org_idx += 1
                 print('')
-
 
             print('# Creating %d inventory_groups' % n_inventory_groups)
             inv_idx = 0
@@ -426,13 +418,12 @@ def make_the_data():
                 for i in range(n):
                     ids['group'] += 1
                     group_id = ids['group']
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, inventory.name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, inventory.name, i + 1))
                     sys.stdout.flush()
                     group, _ = Group.objects.get_or_create(
                         name='%s Group %d Inventory %d' % (prefix, group_id, inv_idx),
                         inventory=inventory,
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen))
+                        defaults=dict(created_by=next(creator_gen), modified_by=next(modifier_gen)),
                     )
                     # Have each group have up to 3 parent groups
                     for parent_n in range(3):
@@ -447,7 +438,6 @@ def make_the_data():
                 inv_idx += 1
                 print('')
 
-
             print('# Creating %d inventory_hosts' % n_inventory_hosts)
             group_idx = 0
             for n in spread(n_inventory_hosts, n_inventory_groups):
@@ -455,13 +445,12 @@ def make_the_data():
                 for i in range(n):
                     ids['host'] += 1
                     host_id = ids['host']
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, group.name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, group.name, i + 1))
                     sys.stdout.flush()
                     host, _ = Host.objects.get_or_create(
                         name='%s.host-%06d.group-%05d.dummy' % (prefix, host_id, group_idx),
                         inventory=group.inventory,
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen))
+                        defaults=dict(created_by=next(creator_gen), modified_by=next(modifier_gen)),
                     )
                     # Add the host to up to 3 groups
                     host.groups.add(group)
@@ -482,7 +471,7 @@ def make_the_data():
                 for i in range(n):
                     ids['job_template'] += 1
                     job_template_id = ids['job_template']
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, project.name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, project.name, i + 1))
                     sys.stdout.flush()
 
                     inventory = None
@@ -499,7 +488,8 @@ def make_the_data():
                             created_by=next(creator_gen),
                             modified_by=next(modifier_gen),
                             playbook="debug.yml",
-                            **extra_kwargs)
+                            **extra_kwargs
+                        ),
                     )
                     job_template.credentials.add(next(credential_gen))
                     if ids['job_template'] % 7 == 0:
@@ -522,14 +512,13 @@ def make_the_data():
                 for i in range(n):
                     ids['wfjts'] += 1
                     wfjt_id = ids['wfjts']
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i + 1))
                     sys.stdout.flush()
                     wfjt, _ = WorkflowJobTemplate.objects.get_or_create(
                         name='%s WFJT %d Org %d' % (prefix, wfjt_id, org_idx),
                         description=bulk_data_description,
                         organization=org,
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen))
+                        defaults=dict(created_by=next(creator_gen), modified_by=next(modifier_gen)),
                     )
                     wfjt._is_new = _
                     wfjts.append(wfjt)
@@ -550,19 +539,13 @@ def make_the_data():
                 wfjt_nodes = []
                 for i in range(n):
                     ids['nodes'] += 1
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, wfjt.name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, wfjt.name, i + 1))
                     sys.stdout.flush()
-                    kwargs = dict(
-                        workflow_job_template=wfjt,
-                        unified_job_template=next(jt_gen),
-                        modified=now()
-                    )
+                    kwargs = dict(workflow_job_template=wfjt, unified_job_template=next(jt_gen), modified=now())
                     if i % 2 == 0:
                         # only apply inventories for every other node
                         kwargs['inventory'] = next(inv_gen)
-                    node, _ = WorkflowJobTemplateNode.objects.get_or_create(
-                        **kwargs
-                    )
+                    node, _ = WorkflowJobTemplateNode.objects.get_or_create(**kwargs)
                     if i % 3 == 0:
                         # only apply prompted credential every 3rd node
                         node.credentials.add(next(cred_gen))
@@ -599,8 +582,7 @@ def make_the_data():
                     label, _ = Label.objects.get_or_create(
                         name='%sL_%do%d' % (prefix, label_id, org_idx),
                         organization=org,
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen))
+                        defaults=dict(created_by=next(creator_gen), modified_by=next(modifier_gen)),
                     )
                     labels.append(label)
                 org_idx += 1
@@ -643,7 +625,7 @@ def make_the_data():
             for n in spread(n_jobs, n_job_templates):
                 job_template = job_templates[job_template_idx]
                 for i in range(n):
-                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i+ 1))
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i + 1))
                     sys.stdout.flush()
                     if len(jobs) % 4 == 0:
                         job_stat = 'failed'
@@ -653,8 +635,10 @@ def make_the_data():
                         job_stat = 'successful'
                     job, _ = Job.objects.get_or_create(
                         job_template=job_template,
-                        status=job_stat, name="%s-%d" % (job_template.name, job_i),
-                        project=job_template.project, inventory=job_template.inventory,
+                        status=job_stat,
+                        name="%s-%d" % (job_template.name, job_i),
+                        project=job_template.project,
+                        inventory=job_template.inventory,
                     )
                     for ec in job_template.credentials.all():
                         job.credentials.add(ec)
@@ -675,13 +659,12 @@ def make_the_data():
                             if job_template.inventory:
                                 inv_groups = [g for g in job_template.inventory.groups.all()]
                                 if len(inv_groups):
-                                    JobHostSummary.objects.bulk_create([
-                                        JobHostSummary(
-                                            job=job, host=h, host_name=h.name, processed=1,
-                                            created=now(), modified=now()
-                                        )
-                                        for h in inv_groups[group_idx % len(inv_groups)].hosts.all()[:100]
-                                    ])
+                                    JobHostSummary.objects.bulk_create(
+                                        [
+                                            JobHostSummary(job=job, host=h, host_name=h.name, processed=1, created=now(), modified=now())
+                                            for h in inv_groups[group_idx % len(inv_groups)].hosts.all()[:100]
+                                        ]
+                                    )
                     group_idx += 1
                 job_template_idx += 1
                 if n:
@@ -703,15 +686,7 @@ def make_the_data():
                         n_subgroup = n % MAX_BULK_CREATE
                     sys.stdout.write('\r   Creating %d job events for job %d, subgroup: %d' % (n, job.id, j + 1))
                     sys.stdout.flush()
-                    JobEvent.objects.bulk_create([
-                        JobEvent(
-                            created=now(),
-                            modified=now(),
-                            job=job,
-                            event='runner_on_ok'
-                        )
-                        for i in range(n_subgroup)
-                    ])
+                    JobEvent.objects.bulk_create([JobEvent(created=now(), modified=now(), job=job, event='runner_on_ok') for i in range(n_subgroup)])
                 job_idx += 1
                 if n:
                     print('')
