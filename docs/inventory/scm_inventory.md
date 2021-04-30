@@ -82,7 +82,7 @@ Some test scenarios to look at:
    `group_vars`, `host_vars`, etc.
  - Test scripts in the project repo
  - Test scripts that use environment variables provided by a credential
-   in Tower
+   in AWX
  - Test multiple inventories that use the same project, pointing to different
    files / directories inside of the project
  - Feature works correctly even if project doesn't have any playbook files
@@ -127,7 +127,7 @@ access to the source-control, a user may want to restrict which instance
 groups the inventory update runs on.
 
 If the inventory source is set to update on project update, it will run
-on the same instance (inside of the Tower cluster) as the project update.
+on the same instance (inside of the AWX cluster) as the project update.
 This can be restricted by limiting the instance groups of the organization
 that contains the `source_project` of the inventory source.
 

@@ -1,7 +1,7 @@
 Coding Standards and Practices
 ==============================
 
-This is not meant to be a style document so much as a practices document for ensuring performance and convention in the Ansible Tower API.
+This is not meant to be a style document so much as a practices document for ensuring performance and convention in the AWX API.
 
 Paginate Everything
 ===================

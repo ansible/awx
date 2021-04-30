@@ -16,8 +16,7 @@ from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_valu
 
 class Command(BaseCommand):
     """
-    Regenerate a new SECRET_KEY value and re-encrypt every secret in the
-    Tower database.
+    Regenerate a new SECRET_KEY value and re-encrypt every secret in the database.
     """
 
     @transaction.atomic

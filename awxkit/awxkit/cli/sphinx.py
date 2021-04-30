@@ -45,7 +45,7 @@ def render():
     # Sphinx document from.
     for e in ('TOWER_HOST', 'TOWER_USERNAME', 'TOWER_PASSWORD'):
         if not os.environ.get(e):
-            raise SystemExit('Please specify a valid {} for a real (running) Tower install.'.format(e))  # noqa
+            raise SystemExit('Please specify a valid {} for a real (running) installation.'.format(e))  # noqa
     cli = CLI()
     cli.parse_args(['awx', '--help'])
     cli.connect()

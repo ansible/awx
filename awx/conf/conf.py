@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-# Tower
+# AWX
 from awx.conf import fields, register
 from awx.conf import settings_registry
 

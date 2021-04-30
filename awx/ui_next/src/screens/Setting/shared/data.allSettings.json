@@ -113,7 +113,7 @@
   "AUTH_LDAP_GROUP_SEARCH":["DC=example,DC=com","SCOPE_SUBTREE","(objectClass=group)"],
   "AUTH_LDAP_GROUP_TYPE":"MemberDNGroupType",
   "AUTH_LDAP_GROUP_TYPE_PARAMS":{"name_attr":"cn","member_attr":"member"},
-  "AUTH_LDAP_REQUIRE_GROUP":"CN=Tower Users,OU=Users,DC=example,DC=com",
+  "AUTH_LDAP_REQUIRE_GROUP":"CN=Service Users,OU=Users,DC=example,DC=com",
   "AUTH_LDAP_DENY_GROUP":null,
   "AUTH_LDAP_USER_FLAGS_BY_GROUP":{"is_superuser":["cn=superusers"]},
   "AUTH_LDAP_ORGANIZATION_MAP":{},

@@ -34,8 +34,8 @@ if MODE == 'production':
     except FileNotFoundError:
         pass
     except ValueError as e:
-        logger.error("Missing or incorrect metadata for Tower version.  Ensure Tower was installed using the setup playbook.")
-        raise Exception("Missing or incorrect metadata for Tower version.  Ensure Tower was installed using the setup playbook.") from e
+        logger.error("Missing or incorrect metadata for controller version.  Ensure controller was installed using the setup playbook.")
+        raise Exception("Missing or incorrect metadata for controller version.  Ensure controller was installed using the setup playbook.") from e
 
 
 # Return the default Django WSGI application.

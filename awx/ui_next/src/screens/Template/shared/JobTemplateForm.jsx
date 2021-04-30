@@ -352,7 +352,7 @@ function JobTemplateForm({
             label={i18n._(t`Credentials`)}
             promptId="template-ask-credential-on-launch"
             promptName="ask_credential_on_launch"
-            tooltip={i18n._(t`Select credentials that allow Tower to access the nodes this job will be ran
+            tooltip={i18n._(t`Select credentials for accessing the nodes this job will be ran
                 against. You can only select one credential of each type. For machine credentials (SSH),
                 checking "Prompt on launch" without selecting credentials will require you to select a machine
                 credential at run time. If you select credentials and check "Prompt on launch", the selected
@@ -393,7 +393,7 @@ function JobTemplateForm({
               t`Pass extra command line variables to the playbook. This is the
               -e or --extra-vars command line parameter for ansible-playbook.
               Provide key/value pairs using either YAML or JSON. Refer to the
-              Ansible Tower documentation for example syntax.`
+              documentation for example syntax.`
             )}
           />
           <FormColumnLayout>
@@ -502,7 +502,7 @@ function JobTemplateForm({
                 tooltip={i18n._(t`Tags are useful when you have a large
                     playbook, and you want to run a specific part of a
                     play or task. Use commas to separate multiple tags.
-                    Refer to Ansible Tower documentation for details on
+                    Refer to the documentation for details on
                     the usage of tags.`)}
               >
                 <TagMultiSelect
@@ -518,7 +518,7 @@ function JobTemplateForm({
                 tooltip={i18n._(t`Skip tags are useful when you have a
                     large playbook, and you want to skip specific parts of a
                     play or task. Use commas to separate multiple tags. Refer
-                    to Ansible Tower documentation for details on the usage
+                    to the documentation for details on the usage
                     of tags.`)}
               >
                 <TagMultiSelect

@@ -35,7 +35,7 @@ function AnswerTypeField({ i18n }) {
         <Popover
           content={i18n._(
             t`Choose an answer type or format you want as the prompt for the user.
-          Refer to the Ansible Tower Documentation for more additional
+          Refer to the Documentation for more additional
           information about each option.`
           )}
         />

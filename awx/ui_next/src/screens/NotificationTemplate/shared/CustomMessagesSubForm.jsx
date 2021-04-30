@@ -96,7 +96,7 @@ function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
                   config
                 )}/html/userguide/notifications.html#create-custom-notifications`}
               >
-                {i18n._(t`Ansible Tower Documentation.`)}
+                {i18n._(t`Documentation.`)}
               </a>
             </small>
           </Text>

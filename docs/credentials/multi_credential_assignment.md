@@ -168,7 +168,7 @@ Vault credentials in AWX now have an optional field, `vault_id`, which is
 analogous to the `--vault-id` argument to `ansible-playbook`.  To run
 a playbook which makes use of multiple Vault passwords:
 
-1.  Make a Vault credential in Tower for each Vault password; specify the Vault
+1.  Make a Vault credential in AWX for each Vault password; specify the Vault
     ID as a field on the credential and input the password (which will be
     encrypted and stored).
 2.  Assign multiple Vault credentials to the job template via the new

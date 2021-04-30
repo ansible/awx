@@ -476,7 +476,7 @@ function WebhookFields({ i18n }) {
           label={i18n._(t`HTTP Headers`)}
           mode="javascript"
           tooltip={i18n._(t`Specify HTTP Headers in JSON format. Refer to
-        the Ansible Tower documentation for example syntax.`)}
+        the documentation for example syntax.`)}
           rows={5}
         />
       </FormFullWidthLayout>

@@ -220,7 +220,7 @@ def get_awx_http_client_headers():
     license = get_license().get('license_type', 'UNLICENSED')
     headers = {
         'Content-Type': 'application/json',
-        'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Tower', get_awx_version(), license),
+        'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Automation Platform', get_awx_version(), license),
     }
     return headers
 
@@ -234,7 +234,7 @@ def get_licenser(*args, **kwargs):
         else:
             return OpenLicense()
     except Exception as e:
-        raise ValueError(_('Error importing Tower License: %s') % e)
+        raise ValueError(_('Error importing License: %s') % e)
 
 
 def update_scm_url(scm_type, url, username=True, password=True, check_special_cases=True, scp_format=False):

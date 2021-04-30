@@ -94,7 +94,7 @@ describe('<MiscSystemDetail />', () => {
       'Automation Analytics upload URL',
       'https://example.com'
     );
-    assertDetail(wrapper, 'Base URL of the Tower host', 'https://towerhost');
+    assertDetail(wrapper, 'Base URL of the service', 'https://towerhost');
     assertDetail(wrapper, 'Enable HTTP Basic Auth', 'On');
     assertDetail(wrapper, 'Gather data for Automation Analytics', 'Off');
     assertDetail(wrapper, 'Idle Time Force Log Out', '30000000000 seconds');

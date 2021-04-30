@@ -137,7 +137,7 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 # Absolute filesystem path to the directory to store logs
 LOG_ROOT = '/var/log/tower/'
 
-# The heartbeat file for the tower scheduler
+# The heartbeat file for the scheduler
 SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
 
 # Django gettext files path: locale/<lang-code>/LC_MESSAGES/django.po, django.mo
@@ -167,7 +167,7 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
-# If Tower is behind a reverse proxy/load balancer, use this setting to
+# If we is behind a reverse proxy/load balancer, use this setting to
 # allow the proxy IP addresses from which Tower should trust custom
 # REMOTE_HOST_HEADERS header values
 # REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
@@ -178,7 +178,7 @@ PROXY_IP_ALLOWED_LIST = []
 
 CUSTOM_VENV_PATHS = []
 
-# Warning: this is a placeholder for a configure tower-in-tower setting
+# Warning: this is a placeholder for a database setting
 # This should not be set via a file.
 DEFAULT_EXECUTION_ENVIRONMENT = None
 
@@ -568,7 +568,7 @@ GALAXY_IGNORE_CERTS = False
 # Note: This setting may be overridden by database settings.
 AWX_ISOLATION_SHOW_PATHS = []
 
-# The directory in which Tower will create new temporary directories for job
+# The directory in which the service will create new temporary directories for job
 # execution and isolation (such as credential files and custom
 # inventory scripts).
 # Note: This setting may be overridden by database settings.
@@ -585,7 +585,7 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
 
-# Enables Insights data collection for Ansible Tower.
+# Enables Insights data collection.
 # Note: This setting may be overridden by database settings.
 INSIGHTS_TRACKING_STATE = False
 
@@ -738,7 +738,7 @@ LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
 
 # The number of retry attempts for websocket session establishment
-# If you're encountering issues establishing websockets in clustered Tower,
+# If you're encountering issues establishing websockets in a cluster,
 # raising this value can help
 CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
 

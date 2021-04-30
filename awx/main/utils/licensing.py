@@ -231,7 +231,7 @@ class Licenser(object):
             raise error
         except OSError as error:
             raise OSError(
-                'Unable to open certificate bundle {}. Check that Ansible Tower is running on Red Hat Enterprise Linux.'.format(verify)
+                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
             ) from error  # noqa
         subs.raise_for_status()
 
@@ -258,7 +258,7 @@ class Licenser(object):
             raise error
         except OSError as error:
             raise OSError(
-                'Unable to open certificate bundle {}. Check that Ansible Tower is running on Red Hat Enterprise Linux.'.format(verify)
+                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
             ) from error  # noqa
         orgs.raise_for_status()
 

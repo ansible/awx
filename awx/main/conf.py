@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 # Django REST Framework
 from rest_framework import serializers
 
-# Tower
+# AWX
 from awx.conf import fields, register, register_validate
 from awx.main.models import ExecutionEnvironment
 
@@ -58,8 +58,8 @@ register(
     field_class=fields.URLField,
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
-    label=_('Base URL of the Tower host'),
-    help_text=_('This setting is used by services like notifications to render ' 'a valid url to the Tower host.'),
+    label=_('Base URL of the service'),
+    help_text=_('This setting is used by services like notifications to render ' 'a valid url to the service.'),
     category=_('System'),
     category_slug='system',
 )
@@ -84,8 +84,8 @@ register(
     field_class=fields.StringListField,
     label=_('Proxy IP Allowed List'),
     help_text=_(
-        "If Tower is behind a reverse proxy/load balancer, use this setting "
-        "to configure the proxy IP addresses from which Tower should trust "
+        "If the service is behind a reverse proxy/load balancer, use this setting "
+        "to configure the proxy IP addresses from which the service should trust "
         "custom REMOTE_HOST_HEADERS header values. "
         "If this setting is an empty list (the default), the headers specified by "
         "REMOTE_HOST_HEADERS will be trusted unconditionally')"
@@ -172,7 +172,7 @@ register(
 register(
     'INSTALL_UUID',
     field_class=fields.CharField,
-    label=_('Unique identifier for an AWX/Tower installation'),
+    label=_('Unique identifier for an installation'),
     category=_('System'),
     category_slug='system',
     read_only=True,
@@ -223,7 +223,7 @@ register(
     help_text=_(
         'Ansible allows variable substitution via the Jinja2 templating '
         'language for --extra-vars. This poses a potential security '
-        'risk where Tower users with the ability to specify extra vars at job '
+        'risk where users with the ability to specify extra vars at job '
         'launch time can use Jinja2 templates to run arbitrary Python.  It is '
         'recommended that this value be set to "template" or "never".'
     ),
@@ -235,7 +235,7 @@ register(
     'AWX_ISOLATION_BASE_PATH',
     field_class=fields.CharField,
     label=_('Job execution path'),
-    help_text=_('The directory in which Tower will create new temporary directories for job execution and isolation (such as credential files).'),
+    help_text=_('The directory in which the service will create new temporary directories for job execution and isolation (such as credential files).'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -266,7 +266,7 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Gather data for Automation Analytics'),
-    help_text=_('Enables Tower to gather data on automation and send it to Red Hat.'),
+    help_text=_('Enables the service to gather data on automation and send it to Red Hat Insights.'),
     category=_('System'),
     category_slug='system',
 )
@@ -537,8 +537,8 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
-    label=_('Cluster-wide Tower unique identifier.'),
-    help_text=_('Useful to uniquely identify Tower instances.'),
+    label=_('Cluster-wide unique identifier.'),
+    help_text=_('Useful to uniquely identify instances.'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -573,7 +573,7 @@ register(
     label=_('Enable/disable HTTPS certificate verification'),
     help_text=_(
         'Flag to control enable/disable of certificate verification'
-        ' when LOG_AGGREGATOR_PROTOCOL is "https". If enabled, Tower\'s'
+        ' when LOG_AGGREGATOR_PROTOCOL is "https". If enabled, the'
         ' log handler will verify certificate sent by external log aggregator'
         ' before establishing connection.'
     ),

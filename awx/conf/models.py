@@ -7,7 +7,7 @@ import json
 # Django
 from django.db import models
 
-# Tower
+# AWX
 from awx.main.models.base import CreatedModifiedModel, prevent_search
 from awx.main.fields import JSONField
 from awx.main.utils import encrypt_field

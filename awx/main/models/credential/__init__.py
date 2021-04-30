@@ -89,7 +89,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         related_name='credentials',
         null=False,
         on_delete=models.CASCADE,
-        help_text=_('Specify the type of credential you want to create. Refer ' 'to the Ansible Tower documentation for details on each type.'),
+        help_text=_('Specify the type of credential you want to create. Refer ' 'to the documentation for details on each type.'),
     )
     managed_by_tower = models.BooleanField(default=False, editable=False)
     organization = models.ForeignKey(
@@ -101,7 +101,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         related_name='credentials',
     )
     inputs = CredentialInputField(
-        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the Ansible Tower documentation for example syntax.')
+        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.')
     )
     admin_role = ImplicitRoleField(
         parent_role=[
@@ -343,12 +343,12 @@ class CredentialType(CommonModelNameNotUnique):
     managed_by_tower = models.BooleanField(default=False, editable=False)
     namespace = models.CharField(max_length=1024, null=True, default=None, editable=False)
     inputs = CredentialTypeInputField(
-        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the Ansible Tower documentation for example syntax.')
+        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.')
     )
     injectors = CredentialTypeInjectorField(
         blank=True,
         default=dict,
-        help_text=_('Enter injectors using either JSON or YAML syntax. ' 'Refer to the Ansible Tower documentation for example syntax.'),
+        help_text=_('Enter injectors using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.'),
     )
 
     @classmethod
@@ -752,7 +752,7 @@ ManagedCredentialType(
                 'help_text': ugettext_noop(
                     'OpenStack domains define administrative boundaries. '
                     'It is only needed for Keystone v3 authentication '
-                    'URLs. Refer to Ansible Tower documentation for '
+                    'URLs. Refer to the documentation for '
                     'common scenarios.'
                 ),
             },
@@ -1032,9 +1032,7 @@ ManagedCredentialType(
                 'label': ugettext_noop('OAuth Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ugettext_noop(
-                    'An OAuth token to use to authenticate to Tower with.' 'This should not be set if username/password are being used.'
-                ),
+                'help_text': ugettext_noop('An OAuth token to use to authenticate with.' 'This should not be set if username/password are being used.'),
             },
             {'id': 'verify_ssl', 'label': ugettext_noop('Verify SSL'), 'type': 'boolean', 'secret': False},
         ],
