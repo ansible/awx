@@ -24,15 +24,15 @@
       with_fileglob:
         - "{{ collection_path }}/plugins/inventory/*.py"
         - "{{ collection_path }}/plugins/lookup/*.py"
-        - "{{ collection_path }}/plugins/modules/tower_*.py"
+        - "{{ collection_path }}/plugins/modules/*.py"
       loop_control:
         label: "{{ item | basename }}"
 
     - name: Change inventory file to support desired namespace and package names
       replace:
         path: "{{ collection_path }}/plugins/inventory/controller.py"
-        regexp: "^    NAME = 'awx.awx.tower'  # REPLACE$"
-        replace: "    NAME = '{{ collection_namespace }}.{{ collection_package }}.tower'  # REPLACE"
+        regexp: "^    NAME = 'awx.awx.controller'  # REPLACE$"
+        replace: "    NAME = '{{ collection_namespace }}.{{ collection_package }}.controller'  # REPLACE"
 
     - name: get list of test files
       find:

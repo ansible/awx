@@ -16,7 +16,7 @@
     group_name: "AWX-Collection-tests-tower_api_lookup-group1-{{ test_id }}"
 
 - name: Get our collection package
-  meta:
+  controller_meta:
   register: tower_meta
 
 - name: Generate the name of our plugin

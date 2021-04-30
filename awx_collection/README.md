@@ -1,4 +1,4 @@
-# AWX Ansible Collection
+# Tower Ansible Collection
 
 [comment]: # (*******************************************************)
 [comment]: # (*                                                     *)
@@ -12,7 +12,7 @@
 [comment]: # (*  upon build of the collection                       *)
 [comment]: # (*******************************************************)
 
-This Ansible collection allows for easy interaction with an AWX server via Ansible playbooks.
+This Ansible collection allows for easy interaction with an Ansible Tower server via Ansible playbooks.
 
 This source for this collection lives in the `awx_collection` folder inside of the
 AWX source.
@@ -22,12 +22,7 @@ doc fragment.
 
 ## Building and Installing
 
-This collection templates the `galaxy.yml` file it uses.
-Run `make build_collection` from the root folder of the AWX source tree.
-This will create the `tar.gz` file inside the `awx_collection` folder
-with the current AWX version, for example: `awx_collection/awx-awx-9.2.0.tar.gz`.
-
-Installing the `tar.gz` involves no special instructions.
+This collection should be installed from [Content Hub](https://cloud.redhat.com/ansible/automation-hub/ansible/tower/)
 
 ## Running
 
@@ -63,11 +58,9 @@ oauth_token = LEdCpKVKc4znzffcpQL5vLG8oyeku6
 
 ## Release and Upgrade Notes
 
-Notable releases of the `awx.awx` collection:
+Notable releases of the `ansible.controller` collection:
 
- - 7.0.0 is intended to be identical to the content prior to the migration, aside from changes necessary to function as a collection.
- - 11.0.0 has no non-deprecated modules that depend on the deprecated `tower-cli` [PyPI](https://pypi.org/project/ansible-tower-cli/).
- - 0.0.1-devel is the version you should see if installing from source, which is intended for development and expected to be unstable.
+ - 3.7.0 initial release
 
 The following notes are changes that may require changes to playbooks:
 
@@ -96,38 +89,6 @@ The following notes are changes that may require changes to playbooks:
  - `tower_credential` no longer supports passing a file name to ssh_key_data.
  - The HipChat `notification_type` has been removed and can no longer be created using the `tower_notification_template` module.
 
-## Running Unit Tests
-
-Tests to verify compatibility with the most recent AWX code are in `awx_collection/test/awx`.
-These can be ran by `make test_collection` in the development container.
-
-To run outside of the development container, or to run against
-Ansible source, set up a working environment:
-
-```
-mkvirtualenv my_new_venv
-# may need to replace psycopg2 with psycopg2-binary in requirements/requirements.txt
-pip install -r requirements/requirements.txt -r requirements/requirements_dev.txt -r requirements/requirements_git.txt
-make clean-api
-pip install -e <path to your Ansible>
-pip install -e .
-pip install -e awxkit
-py.test awx_collection/test/awx/
-```
-
-## Running Integration Tests
-
-The integration tests require a virtualenv with `ansible` >= 2.9 and `awxkit`.
-The collection must first be installed, which can be done using `make install_collection`.
-You also need a configuration file, as described in the running section.
-
-Run the tests:
-
-```
-# ansible-test must be run from the directory in which the collection is installed
-cd ~/.ansible/collections/ansible_collections/awx/awx/
-ansible-test integration
-```
 
 ## Licensing
 

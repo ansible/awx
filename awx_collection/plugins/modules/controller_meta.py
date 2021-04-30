@@ -13,7 +13,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported
 
 DOCUMENTATION = '''
 ---
-module: meta
+module: controller_meta
 author: "Alan Rominger (@alancoding)"
 short_description: Returns metadata about the collection this module lives in.
 description:
@@ -49,7 +49,7 @@ version:
 
 
 EXAMPLES = '''
-- meta:
+- controller_meta:
   register: result
 
 - name: Show details about the collection
@@ -66,7 +66,7 @@ from ..module_utils.controller_api import ControllerAPIModule
 
 def main():
     module = ControllerAPIModule(argument_spec={})
-    namespace = {'awx': 'awx', 'tower': 'ansible'}.get(module._COLLECTION_TYPE, 'unknown')
+    namespace = {'awx': 'awx', 'controller': 'ansible'}.get(module._COLLECTION_TYPE, 'unknown')
     namespace_name = '{0}.{1}'.format(namespace, module._COLLECTION_TYPE)
     module.exit_json(prefix=namespace_name, name=module._COLLECTION_TYPE, namespace=namespace, version=module._COLLECTION_VERSION)
 

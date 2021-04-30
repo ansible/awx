@@ -5,7 +5,7 @@
 
 - name: Try to use a token as a dict which is missing the token parameter
   job_list:
-    oauthtoken:
+    tower_oauthtoken:
       not_token: "This has no token entry"
   register: results
   ignore_errors: true
@@ -17,7 +17,7 @@
 
 - name: Try to use a token as a list
   job_list:
-    oauthtoken:
+    tower_oauthtoken:
       - dummy_token
   register: results
   ignore_errors: true

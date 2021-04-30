@@ -25,7 +25,7 @@ no_module_for_endpoint = []
 # Some modules work on the related fields of an endpoint. These modules will not have an auto-associated endpoint
 no_endpoint_for_module = [
     'import',
-    'meta',
+    'controller_meta',
     'export',
     'inventory_source_update',
     'job_launch',
@@ -170,7 +170,7 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
         if root == module_directory:
             for filename in files:
                 # must begin with a letter a-z, and end in .py
-                if re.match('^[a-z].*\.py$', filename):
+                if re.match(r'^[a-z].*.py$', filename):
                     module_name = filename[:-3]
                     option_comparison[module_name] = {
                         'endpoint': 'N/A',

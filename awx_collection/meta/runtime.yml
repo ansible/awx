@@ -75,7 +75,7 @@ plugin_routing:
     tower_settings:
       redirect: settings
     tower_meta:
-      redirect: meta
+      redirect: controller_meta
     tower_export:
       redirect: export
     tower_ad_hoc_command_cancel:

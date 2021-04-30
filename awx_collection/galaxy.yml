@@ -19,8 +19,8 @@ homepage: https://www.ansible.com/
 issues: https://github.com/ansible/awx/issues?q=is%3Aissue+label%3Acomponent%3Aawx_collection
 license:
   - GPL-3.0-only
-name: awx
-namespace: awx
+name: controller
+namespace: ansible
 readme: README.md
 repository: https://github.com/ansible/awx
 tags:
