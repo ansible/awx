@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
   parseQueryString,
   replaceParams,
   encodeNonDefaultQueryString,
 } from './qs';
+import useIsMounted from './useIsMounted';
 
 /*
  * The useRequest hook accepts a request function and returns an object with
@@ -22,14 +23,7 @@ export default function useRequest(makeRequest, initialValue) {
   const [result, setResult] = useState(initialValue);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const isMounted = useRef(null);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const isMounted = useIsMounted();
 
   return {
     result,

@@ -1,11 +1,5 @@
 import 'styled-components/macro';
-import React, {
-  Fragment,
-  useState,
-  useCallback,
-  useEffect,
-  useRef,
-} from 'react';
+import React, { Fragment, useState, useCallback, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -18,6 +12,7 @@ import OptionsList from '../OptionsList';
 import useRequest from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
+import useIsMounted from '../../util/useIsMounted';
 
 const QS_CONFIG = getQSConfig('credentials', {
   page: 1,
@@ -32,9 +27,9 @@ async function loadCredentials(params, selectedCredentialTypeId) {
 }
 
 function MultiCredentialsLookup(props) {
-  const isMounted = useRef(null);
   const { value, onChange, onError, history, i18n } = props;
   const [selectedType, setSelectedType] = useState(null);
+  const isMounted = useIsMounted();
 
   const {
     result: credentialTypes,
@@ -44,22 +39,18 @@ function MultiCredentialsLookup(props) {
   } = useRequest(
     useCallback(async () => {
       const types = await CredentialTypesAPI.loadAllTypes();
-      if (!isMounted.current) {
-        return;
-      }
       const match = types.find(type => type.kind === 'ssh') || types[0];
-      setSelectedType(match);
+      if (isMounted.current) {
+        setSelectedType(match);
+      }
       return types;
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
     }, []),
     []
   );
 
   useEffect(() => {
-    isMounted.current = true;
     fetchTypes();
-    return () => {
-      isMounted.current = false;
-    };
   }, [fetchTypes]);
 
   const {
@@ -85,10 +76,6 @@ function MultiCredentialsLookup(props) {
         loadCredentials(params, selectedType.id),
         CredentialsAPI.readOptions(),
       ]);
-
-      if (!isMounted.current) {
-        return;
-      }
 
       results.map(result => {
         if (result.kind === 'vault' && result.inputs?.vault_id) {
@@ -119,11 +106,7 @@ function MultiCredentialsLookup(props) {
   );
 
   useEffect(() => {
-    isMounted.current = true;
     fetchCredentials();
-    return () => {
-      isMounted.current = false;
-    };
   }, [fetchCredentials]);
 
   useEffect(() => {

@@ -47,6 +47,7 @@ import {
   removeParams,
   getQSConfig,
 } from '../../../util/qs';
+import useIsMounted from '../../../util/useIsMounted';
 
 const QS_CONFIG = getQSConfig('job_output', {
   order_by: 'start_line',
@@ -275,10 +276,10 @@ const cache = new CellMeasurerCache({
 function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const location = useLocation();
   const listRef = useRef(null);
-  const isMounted = useRef(false);
   const previousWidth = useRef(0);
   const jobSocketCounter = useRef(0);
   const interval = useRef(null);
+  const isMounted = useIsMounted();
   const history = useHistory();
   const [contentError, setContentError] = useState(null);
   const [cssMap, setCssMap] = useState({});
@@ -292,7 +293,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const [results, setResults] = useState({});
 
   useEffect(() => {
-    isMounted.current = true;
     loadJobEvents();
 
     if (isJobRunning(job.status)) {
@@ -319,7 +319,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         ws.close();
       }
       clearInterval(interval.current);
-      isMounted.current = false;
     };
   }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 

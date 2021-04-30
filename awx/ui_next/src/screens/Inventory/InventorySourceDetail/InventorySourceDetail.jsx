@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -23,6 +23,7 @@ import Popover from '../../../components/Popover';
 import useRequest from '../../../util/useRequest';
 import { InventorySourcesAPI } from '../../../api';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
+import useIsMounted from '../../../util/useIsMounted';
 
 function InventorySourceDetail({ inventorySource, i18n }) {
   const {
@@ -57,7 +58,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
   } = inventorySource;
   const [deletionError, setDeletionError] = useState(false);
   const history = useHistory();
-  const isMounted = useRef(null);
+  const isMounted = useIsMounted();
 
   const {
     result: sourceChoices,
@@ -75,11 +76,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
   );
 
   useEffect(() => {
-    isMounted.current = true;
     fetchSourceChoices();
-    return () => {
-      isMounted.current = false;
-    };
   }, [fetchSourceChoices]);
 
   const handleDelete = async () => {

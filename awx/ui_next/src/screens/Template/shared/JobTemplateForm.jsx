@@ -45,6 +45,7 @@ import { JobTemplatesAPI } from '../../../api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
+import useIsMounted from '../../../util/useIsMounted';
 
 const { origin } = document.location;
 
@@ -67,6 +68,7 @@ function JobTemplateForm({
   const [enableWebhooks, setEnableWebhooks] = useState(
     Boolean(template.webhook_service)
   );
+  const isMounted = useIsMounted();
 
   const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
@@ -119,8 +121,11 @@ function JobTemplateForm({
         return;
       }
       const { data } = await JobTemplatesAPI.readInstanceGroups(template.id);
-      setFieldValue('initialInstanceGroups', data.results);
-      setFieldValue('instanceGroups', [...data.results]);
+      if (isMounted.current) {
+        setFieldValue('initialInstanceGroups', data.results);
+        setFieldValue('instanceGroups', [...data.results]);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setFieldValue, template])
   );
 
