@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React from 'react';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { Tr, Td } from '@patternfly/react-table';
@@ -11,14 +11,7 @@ import { ActionsTd, ActionItem } from '../../../components/PaginatedTable';
 import { Host } from '../../../types';
 import HostToggle from '../../../components/HostToggle';
 
-function HostListItem({
-  i18n,
-  host,
-  isSelected,
-  onSelect,
-  detailUrl,
-  rowIndex,
-}) {
+function HostListItem({ host, isSelected, onSelect, detailUrl, rowIndex }) {
   const labelId = `check-action-${host.id}`;
 
   return (
@@ -29,14 +22,14 @@ function HostListItem({
           isSelected,
           onSelect,
         }}
-        dataLabel={i18n._(t`Selected`)}
+        dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+      <Td id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{host.name}</b>
         </Link>
       </Td>
-      <Td dataLabel={i18n._(t`Inventory`)}>
+      <Td dataLabel={t`Inventory`}>
         {host.summary_fields.inventory && (
           <Link
             to={`/inventories/inventory/${host.summary_fields.inventory.id}/details`}
@@ -45,15 +38,15 @@ function HostListItem({
           </Link>
         )}
       </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)} gridColumns="auto 40px">
+      <ActionsTd dataLabel={t`Actions`} gridColumns="auto 40px">
         <HostToggle host={host} />
         <ActionItem
           visible={host.summary_fields.user_capabilities.edit}
-          tooltip={i18n._(t`Edit Host`)}
+          tooltip={t`Edit Host`}
         >
           <Button
             ouiaId={`${host.id}-edit-button}`}
-            aria-label={i18n._(t`Edit Host`)}
+            aria-label={t`Edit Host`}
             variant="plain"
             component={Link}
             to={`/hosts/${host.id}/edit`}
@@ -73,4 +66,4 @@ HostListItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(HostListItem);
+export default HostListItem;

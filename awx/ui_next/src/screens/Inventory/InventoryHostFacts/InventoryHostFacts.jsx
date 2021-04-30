@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Host } from '../../../types';
 import { CardBody } from '../../../components/Card';
@@ -10,7 +10,7 @@ import ContentLoading from '../../../components/ContentLoading';
 import useRequest from '../../../util/useRequest';
 import { HostsAPI } from '../../../api';
 
-function InventoryHostFacts({ i18n, host }) {
+function InventoryHostFacts({ host }) {
   const { request, isLoading, error, result } = useRequest(
     useCallback(async () => {
       const { data } = await HostsAPI.readFacts(host.id);
@@ -35,7 +35,7 @@ function InventoryHostFacts({ i18n, host }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <VariablesDetail label={i18n._(t`Facts`)} rows="auto" value={result} />
+        <VariablesDetail label={t`Facts`} rows="auto" value={result} />
       </DetailList>
     </CardBody>
   );
@@ -45,4 +45,4 @@ InventoryHostFacts.propTypes = {
   host: Host.isRequired,
 };
 
-export default withI18n()(InventoryHostFacts);
+export default InventoryHostFacts;

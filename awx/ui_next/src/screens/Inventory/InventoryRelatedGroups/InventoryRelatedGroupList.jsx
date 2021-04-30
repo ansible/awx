@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useParams, useLocation, Link } from 'react-router-dom';
 
@@ -24,7 +24,7 @@ const QS_CONFIG = getQSConfig('group', {
   page_size: 20,
   order_by: 'name',
 });
-function InventoryRelatedGroupList({ i18n }) {
+function InventoryRelatedGroupList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const [associateError, setAssociateError] = useState(null);
@@ -126,8 +126,8 @@ function InventoryRelatedGroupList({ i18n }) {
 
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_groups/add`;
 
-  const addExistingGroup = i18n._(t`Add existing group`);
-  const addNewGroup = i18n._(t`Add new group`);
+  const addExistingGroup = t`Add existing group`;
+  const addNewGroup = t`Add new group`;
   const addButton = (
     <AddDropDownButton
       key="add"
@@ -158,27 +158,27 @@ function InventoryRelatedGroupList({ i18n }) {
         hasContentLoading={isLoading || isAdHocLaunchLoading}
         items={groups}
         itemCount={itemCount}
-        pluralizedItemName={i18n._(t`Related Groups`)}
+        pluralizedItemName={t`Related Groups`}
         qsConfig={QS_CONFIG}
         onRowClick={handleSelect}
         toolbarSearchColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name__icontains',
             isDefault: true,
           },
           {
-            name: i18n._(t`Created By (Username)`),
+            name: t`Created By (Username)`,
             key: 'created_by__username__icontains',
           },
           {
-            name: i18n._(t`Modified By (Username)`),
+            name: t`Modified By (Username)`,
             key: 'modified_by__username__icontains',
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: t`Name`,
             key: 'name',
           },
         ]}
@@ -204,7 +204,7 @@ function InventoryRelatedGroupList({ i18n }) {
                 key="disassociate"
                 onDisassociate={disassociateGroups}
                 itemsToDisassociate={selected}
-                modalTitle={i18n._(t`Disassociate related group(s)?`)}
+                modalTitle={t`Disassociate related group(s)?`}
               />,
             ]}
           />
@@ -223,29 +223,29 @@ function InventoryRelatedGroupList({ i18n }) {
       />
       {isModalOpen && (
         <AssociateModal
-          header={i18n._(t`Groups`)}
+          header={t`Groups`}
           fetchRequest={fetchGroupsToAssociate}
           optionsRequest={fetchGroupsOptions}
           isModalOpen={isModalOpen}
           onAssociate={associateGroup}
           onClose={() => setIsModalOpen(false)}
-          title={i18n._(t`Select Groups`)}
+          title={t`Select Groups`}
         />
       )}
       {error && (
         <AlertModal
           isOpen={error}
           onClose={dismissError}
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           variant="error"
         >
           {associateError
-            ? i18n._(t`Failed to associate.`)
-            : i18n._(t`Failed to disassociate one or more groups.`)}
+            ? t`Failed to associate.`
+            : t`Failed to disassociate one or more groups.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
     </>
   );
 }
-export default withI18n()(InventoryRelatedGroupList);
+export default InventoryRelatedGroupList;

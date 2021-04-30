@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { Link, Redirect, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -25,7 +25,7 @@ function filterByPrefix(data, prefix) {
     }, {});
 }
 
-function LDAPDetail({ i18n }) {
+function LDAPDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
   const {
@@ -87,39 +87,39 @@ function LDAPDetail({ i18n }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Settings`)}
+          {t`Back to Settings`}
         </>
       ),
       link: `/settings`,
       id: 99,
     },
     {
-      name: i18n._(t`Default`),
+      name: t`Default`,
       link: `${baseURL}/default/details`,
       id: 0,
     },
     {
-      name: i18n._(t`LDAP1`),
+      name: t`LDAP1`,
       link: `${baseURL}/1/details`,
       id: 1,
     },
     {
-      name: i18n._(t`LDAP2`),
+      name: t`LDAP2`,
       link: `${baseURL}/2/details`,
       id: 2,
     },
     {
-      name: i18n._(t`LDAP3`),
+      name: t`LDAP3`,
       link: `${baseURL}/3/details`,
       id: 3,
     },
     {
-      name: i18n._(t`LDAP4`),
+      name: t`LDAP4`,
       link: `${baseURL}/4/details`,
       id: 4,
     },
     {
-      name: i18n._(t`LDAP5`),
+      name: t`LDAP5`,
       link: `${baseURL}/5/details`,
       id: 5,
     },
@@ -158,11 +158,11 @@ function LDAPDetail({ i18n }) {
           <CardActionsRow>
             <Button
               ouiaId="ldap-detail-edit-button"
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
               component={Link}
               to={`${baseURL}/${category}/edit`}
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           </CardActionsRow>
         )}
@@ -171,4 +171,4 @@ function LDAPDetail({ i18n }) {
   );
 }
 
-export default withI18n()(LDAPDetail);
+export default LDAPDetail;

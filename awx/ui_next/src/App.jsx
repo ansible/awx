@@ -105,8 +105,8 @@ function App() {
           </Route>
           <ProtectedRoute>
             <ConfigProvider>
-              <AppContainer navRouteConfig={getRouteConfig(i18n)}>
-                <AuthorizedRoutes routeConfig={getRouteConfig(i18n)} />
+              <AppContainer navRouteConfig={getRouteConfig()}>
+                <AuthorizedRoutes routeConfig={getRouteConfig()} />
               </AppContainer>
             </ConfigProvider>
           </ProtectedRoute>

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { string, bool, func } from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
@@ -18,7 +18,7 @@ function CredentialListItem({
   detailUrl,
   isSelected,
   onSelect,
-  i18n,
+
   fetchCredentials,
   rowIndex,
 }) {
@@ -50,22 +50,22 @@ function CredentialListItem({
           isSelected,
           onSelect,
         }}
-        dataLabel={i18n._(t`Selected`)}
+        dataLabel={t`Selected`}
       />
-      <Td id={labelId} dataLabel={i18n._(t`Name`)}>
+      <Td id={labelId} dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
           <b>{credential.name}</b>
         </Link>
       </Td>
-      <Td dataLabel={i18n._(t`Type`)}>
+      <Td dataLabel={t`Type`}>
         {credential.summary_fields.credential_type.name}
       </Td>
-      <ActionsTd dataLabel={i18n._(t`Actions`)}>
-        <ActionItem visible={canEdit} tooltip={i18n._(t`Edit Credential`)}>
+      <ActionsTd dataLabel={t`Actions`}>
+        <ActionItem visible={canEdit} tooltip={t`Edit Credential`}>
           <Button
             ouiaId={`${credential.id}-edit-button`}
             isDisabled={isDisabled}
-            aria-label={i18n._(t`Edit Credential`)}
+            aria-label={t`Edit Credential`}
             variant="plain"
             component={Link}
             to={`/credentials/${credential.id}/edit`}
@@ -74,7 +74,7 @@ function CredentialListItem({
           </Button>
         </ActionItem>
         <ActionItem
-          tooltip={i18n._(t`Copy Credential`)}
+          tooltip={t`Copy Credential`}
           visible={credential.summary_fields.user_capabilities.copy}
         >
           <CopyButton
@@ -82,7 +82,7 @@ function CredentialListItem({
             onCopyStart={handleCopyStart}
             onCopyFinish={handleCopyFinish}
             copyItem={copyCredential}
-            errorMessage={i18n._(t`Failed to copy credential.`)}
+            errorMessage={t`Failed to copy credential.`}
           />
         </ActionItem>
       </ActionsTd>
@@ -97,4 +97,4 @@ CredentialListItem.propTypes = {
   onSelect: func.isRequired,
 };
 
-export default withI18n()(CredentialListItem);
+export default CredentialListItem;

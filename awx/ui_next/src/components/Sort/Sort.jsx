@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { useLocation, withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import {
@@ -31,7 +31,7 @@ const NoOptionDropdown = styled.div`
   border-bottom-color: var(--pf-global--BorderColor--200);
 `;
 
-function Sort({ columns, qsConfig, onSort, i18n }) {
+function Sort({ columns, qsConfig, onSort }) {
   const location = useLocation();
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
@@ -126,7 +126,7 @@ function Sort({ columns, qsConfig, onSort, i18n }) {
 
           <Button
             variant={ButtonVariant.control}
-            aria-label={i18n._(t`Sort`)}
+            aria-label={t`Sort`}
             onClick={handleSort}
           >
             <SortIcon />
@@ -147,4 +147,4 @@ Sort.defaultProps = {
   onSort: null,
 };
 
-export default withI18n()(withRouter(Sort));
+export default withRouter(Sort);

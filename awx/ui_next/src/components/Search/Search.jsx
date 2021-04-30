@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { withRouter } from 'react-router-dom';
 import {
@@ -32,7 +32,7 @@ const NoOptionDropdown = styled.div`
 
 function Search({
   columns,
-  i18n,
+
   onSearch,
   onReplaceSearch,
   onRemove,
@@ -174,8 +174,8 @@ function Search({
           <Select
             variant={SelectVariant.single}
             className="simpleKeySelect"
-            aria-label={i18n._(t`Simple key select`)}
-            typeAheadAriaLabel={i18n._(t`Simple key select`)}
+            aria-label={t`Simple key select`}
+            typeAheadAriaLabel={t`Simple key select`}
             onToggle={setIsSearchDropdownOpen}
             onSelect={handleDropdownSelect}
             selections={searchColumnName}
@@ -253,10 +253,10 @@ function Search({
                 maxHeight={maxSelectHeight}
               >
                 <SelectOption key="true" value="true">
-                  {booleanLabels.true || i18n._(t`Yes`)}
+                  {booleanLabels.true || t`Yes`}
                 </SelectOption>
                 <SelectOption key="false" value="false">
-                  {booleanLabels.false || i18n._(t`No`)}
+                  {booleanLabels.false || t`No`}
                 </SelectOption>
               </Select>
             )) || (
@@ -271,7 +271,7 @@ function Search({
                       'number') ||
                     'search'
                   }
-                  aria-label={i18n._(t`Search text input`)}
+                  aria-label={t`Search text input`}
                   value={searchValue}
                   onChange={setSearchValue}
                   onKeyDown={handleTextKeyDown}
@@ -281,7 +281,7 @@ function Search({
                   <Button
                     variant={ButtonVariant.control}
                     isDisabled={!searchValue || isDisabled}
-                    aria-label={i18n._(t`Search submit button`)}
+                    aria-label={t`Search submit button`}
                     onClick={handleSearch}
                   >
                     <SearchIcon />
@@ -332,4 +332,4 @@ Search.defaultProps = {
   maxSelectHeight: '300px',
 };
 
-export default withI18n()(withRouter(Search));
+export default withRouter(Search);

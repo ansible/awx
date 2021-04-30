@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
 import SubscriptionDetail from './SubscriptionDetail';
 import SubscriptionEdit from './SubscriptionEdit';
 import ContentError from '../../../components/ContentError';
 
-function Subscription({ i18n }) {
+function Subscription() {
   const baseURL = '/settings/subscription';
   const baseRoute = useRouteMatch({
     path: '/settings/subscription',
@@ -27,7 +27,7 @@ function Subscription({ i18n }) {
           </Route>
           <Route key="not-found" path={`${baseURL}/*`}>
             <ContentError isNotFound>
-              <Link to={baseURL}>{i18n._(t`View Settings`)}</Link>
+              <Link to={baseURL}>{t`View Settings`}</Link>
             </ContentError>
           </Route>
         </Switch>
@@ -36,4 +36,4 @@ function Subscription({ i18n }) {
   );
 }
 
-export default withI18n()(Subscription);
+export default Subscription;

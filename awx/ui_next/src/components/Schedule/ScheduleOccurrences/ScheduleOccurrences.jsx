@@ -2,7 +2,7 @@ import 'styled-components/macro';
 import React, { useState } from 'react';
 import { shape } from 'prop-types';
 import styled from 'styled-components';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { formatDateString, formatDateStringUTC } from '../../../util/dates';
@@ -22,7 +22,7 @@ const OccurrencesLabel = styled.div`
   }
 `;
 
-function ScheduleOccurrences({ preview = { local: [], utc: [] }, i18n }) {
+function ScheduleOccurrences({ preview = { local: [], utc: [] } }) {
   const [mode, setMode] = useState('local');
 
   if (preview.local.length < 2) {
@@ -39,8 +39,8 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] }, i18n }) {
         <Split hasGutter>
           <SplitItem>
             <OccurrencesLabel>
-              <span>{i18n._(t`Occurrences`)}</span>
-              <span>{i18n._(t`(Limited to first 10)`)}</span>
+              <span>{t`Occurrences`}</span>
+              <span>{t`(Limited to first 10)`}</span>
             </OccurrencesLabel>
           </SplitItem>
           <SplitItem>
@@ -80,4 +80,4 @@ ScheduleOccurrences.defaultProps = {
   preview: { local: [], utc: [] },
 };
 
-export default withI18n()(ScheduleOccurrences);
+export default ScheduleOccurrences;

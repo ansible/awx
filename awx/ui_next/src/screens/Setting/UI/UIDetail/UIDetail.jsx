@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -16,7 +16,7 @@ import { useSettings } from '../../../../contexts/Settings';
 import { pluck } from '../../shared/settingUtils';
 import { SettingDetail } from '../../shared';
 
-function UIDetail({ i18n }) {
+function UIDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
 
@@ -45,14 +45,14 @@ function UIDetail({ i18n }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to Settings`)}
+          {t`Back to Settings`}
         </>
       ),
       link: `/settings`,
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/settings/ui/details`,
       id: 0,
     },
@@ -91,12 +91,12 @@ function UIDetail({ i18n }) {
         {me?.is_superuser && (
           <CardActionsRow>
             <Button
-              aria-label={i18n._(t`Edit`)}
+              aria-label={t`Edit`}
               component={Link}
               to="/settings/ui/edit"
               ouiaId="ui-detail-edit-button"
             >
-              {i18n._(t`Edit`)}
+              {t`Edit`}
             </Button>
           </CardActionsRow>
         )}
@@ -105,4 +105,4 @@ function UIDetail({ i18n }) {
   );
 }
 
-export default withI18n()(UIDetail);
+export default UIDetail;

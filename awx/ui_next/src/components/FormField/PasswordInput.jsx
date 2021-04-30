@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import {
@@ -12,15 +12,7 @@ import {
 import { EyeIcon, EyeSlashIcon } from '@patternfly/react-icons';
 
 function PasswordInput(props) {
-  const {
-    autocomplete,
-    id,
-    name,
-    validate,
-    isRequired,
-    isDisabled,
-    i18n,
-  } = props;
+  const { autocomplete, id, name, validate, isRequired, isDisabled } = props;
   const [inputType, setInputType] = useState('password');
   const [field, meta] = useField({ name, validate });
 
@@ -32,13 +24,11 @@ function PasswordInput(props) {
 
   return (
     <>
-      <Tooltip
-        content={inputType === 'password' ? i18n._(t`Show`) : i18n._(t`Hide`)}
-      >
+      <Tooltip content={inputType === 'password' ? t`Show` : t`Hide`}>
         <Button
           ouiaId={`${id}-toggle`}
           variant={ButtonVariant.control}
-          aria-label={i18n._(t`Toggle Password`)}
+          aria-label={t`Toggle Password`}
           onClick={handlePasswordToggle}
           isDisabled={isDisabled}
         >
@@ -80,4 +70,4 @@ PasswordInput.defaultProps = {
   isDisabled: false,
 };
 
-export default withI18n()(PasswordInput);
+export default PasswordInput;

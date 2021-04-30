@@ -55,7 +55,7 @@ export function dateToInputDateTime(dateObj) {
   return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
 }
 
-export function getRRuleDayConstants(dayString, i18n) {
+export function getRRuleDayConstants(dayString) {
   switch (dayString) {
     case 'sunday':
       return RRule.SU;
@@ -86,6 +86,6 @@ export function getRRuleDayConstants(dayString, i18n) {
     case 'weekendDay':
       return [RRule.SA, RRule.SU];
     default:
-      throw new Error(i18n._(t`Unrecognized day string`));
+      throw new Error(t`Unrecognized day string`);
   }
 }

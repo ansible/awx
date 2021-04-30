@@ -12,7 +12,7 @@ const isValueMissing = val => {
 
 export default function useCredentialPasswordsStep(
   launchConfig,
-  i18n,
+
   showStep,
   visitedSteps
 ) {
@@ -27,12 +27,10 @@ export default function useCredentialPasswordsStep(
           id: STEP_ID,
           name: (
             <StepName hasErrors={hasError} id="credential-passwords-step">
-              {i18n._(t`Credential passwords`)}
+              {t`Credential passwords`}
             </StepName>
           ),
-          component: (
-            <CredentialPasswordsStep launchConfig={launchConfig} i18n={i18n} />
-          ),
+          component: <CredentialPasswordsStep launchConfig={launchConfig} />,
           enableNext: true,
         }
       : null,
@@ -51,7 +49,7 @@ export default function useCredentialPasswordsStep(
     },
     validate: () => {
       const setPasswordFieldError = fieldName => {
-        setFieldError(fieldName, i18n._(t`This field may not be blank`));
+        setFieldError(fieldName, t`This field may not be blank`);
       };
 
       if (

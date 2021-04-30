@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 import { UsersAPI } from '../../../api';
@@ -26,7 +26,7 @@ const QS_CONFIG = getQSConfig('user', {
   order_by: 'username',
 });
 
-function UserList({ i18n }) {
+function UserList() {
   const location = useLocation();
   const match = useRouteMatch();
 
@@ -110,21 +110,21 @@ function UserList({ i18n }) {
             hasContentLoading={hasContentLoading}
             items={users}
             itemCount={itemCount}
-            pluralizedItemName={i18n._(t`Users`)}
+            pluralizedItemName={t`Users`}
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
             toolbarSearchColumns={[
               {
-                name: i18n._(t`Username`),
+                name: t`Username`,
                 key: 'username__icontains',
                 isDefault: true,
               },
               {
-                name: i18n._(t`First Name`),
+                name: t`First Name`,
                 key: 'first_name__icontains',
               },
               {
-                name: i18n._(t`Last Name`),
+                name: t`Last Name`,
                 key: 'last_name__icontains',
               },
             ]}
@@ -152,24 +152,18 @@ function UserList({ i18n }) {
                     key="delete"
                     onDelete={handleUserDelete}
                     itemsToDelete={selected}
-                    pluralizedItemName={i18n._(t`Users`)}
+                    pluralizedItemName={t`Users`}
                   />,
                 ]}
               />
             )}
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
-                <HeaderCell sortKey="username">
-                  {i18n._(t`Username`)}
-                </HeaderCell>
-                <HeaderCell sortKey="first_name">
-                  {i18n._(t`First Name`)}
-                </HeaderCell>
-                <HeaderCell sortKey="last_name">
-                  {i18n._(t`Last Name`)}
-                </HeaderCell>
-                <HeaderCell>{i18n._(t`Role`)}</HeaderCell>
-                <HeaderCell>{i18n._(t`Actions`)}</HeaderCell>
+                <HeaderCell sortKey="username">{t`Username`}</HeaderCell>
+                <HeaderCell sortKey="first_name">{t`First Name`}</HeaderCell>
+                <HeaderCell sortKey="last_name">{t`Last Name`}</HeaderCell>
+                <HeaderCell>{t`Role`}</HeaderCell>
+                <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }
             renderRow={(user, index) => (
@@ -194,10 +188,10 @@ function UserList({ i18n }) {
         <AlertModal
           isOpen={deletionError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={clearDeletionError}
         >
-          {i18n._(t`Failed to delete one or more users.`)}
+          {t`Failed to delete one or more users.`}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
@@ -205,4 +199,4 @@ function UserList({ i18n }) {
   );
 }
 
-export default withI18n()(UserList);
+export default UserList;

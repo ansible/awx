@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Button, FormGroup, Modal } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { func } from 'prop-types';
 import {
@@ -9,7 +9,7 @@ import {
 } from '../../../../../contexts/Workflow';
 import AnsibleSelect from '../../../../../components/AnsibleSelect';
 
-function LinkModal({ header, i18n, onConfirm }) {
+function LinkModal({ header, onConfirm }) {
   const dispatch = useContext(WorkflowDispatchContext);
   const { linkToEdit } = useContext(WorkflowStateContext);
   const [linkType, setLinkType] = useState(
@@ -20,8 +20,8 @@ function LinkModal({ header, i18n, onConfirm }) {
       width={600}
       header={header}
       isOpen
-      title={i18n._(t`Workflow Link`)}
-      aria-label={i18n._(t`Workflow link modal`)}
+      title={t`Workflow Link`}
+      aria-label={t`Workflow link modal`}
       onClose={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
       actions={[
         <Button
@@ -29,24 +29,24 @@ function LinkModal({ header, i18n, onConfirm }) {
           id="link-confirm"
           key="save"
           variant="primary"
-          aria-label={i18n._(t`Save link changes`)}
+          aria-label={t`Save link changes`}
           onClick={() => onConfirm(linkType)}
         >
-          {i18n._(t`Save`)}
+          {t`Save`}
         </Button>,
         <Button
           ouiaId="link-cancel-button"
           id="link-cancel"
           key="cancel"
           variant="link"
-          aria-label={i18n._(t`Cancel link changes`)}
+          aria-label={t`Cancel link changes`}
           onClick={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
         >
-          {i18n._(t`Cancel`)}
+          {t`Cancel`}
         </Button>,
       ]}
     >
-      <FormGroup fieldId="link-select" label={i18n._(t`Run`)}>
+      <FormGroup fieldId="link-select" label={t`Run`}>
         <AnsibleSelect
           id="link-select"
           name="linkType"
@@ -55,17 +55,17 @@ function LinkModal({ header, i18n, onConfirm }) {
             {
               value: 'always',
               key: 'always',
-              label: i18n._(t`Always`),
+              label: t`Always`,
             },
             {
               value: 'success',
               key: 'success',
-              label: i18n._(t`On Success`),
+              label: t`On Success`,
             },
             {
               value: 'failure',
               key: 'failure',
-              label: i18n._(t`On Failure`),
+              label: t`On Failure`,
             },
           ]}
           onChange={(event, value) => {
@@ -81,4 +81,4 @@ LinkModal.propTypes = {
   onConfirm: func.isRequired,
 };
 
-export default withI18n()(LinkModal);
+export default LinkModal;

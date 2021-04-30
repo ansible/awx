@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,7 +22,7 @@ const Grid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 `;
 
-function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
+function UserAndTeamAccessAdd({ title, onFetchData, apiModel }) {
   const [selectedResourceType, setSelectedResourceType] = useState(null);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -70,10 +70,10 @@ function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
   const steps = [
     {
       id: 1,
-      name: i18n._(t`Add resource type`),
+      name: t`Add resource type`,
       component: (
         <Grid>
-          {getResourceAccessConfig(i18n).map(resource => (
+          {getResourceAccessConfig().map(resource => (
             <SelectableCard
               key={resource.selectedResource}
               isSelected={
@@ -91,7 +91,7 @@ function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
     },
     {
       id: 2,
-      name: i18n._(t`Select items from list`),
+      name: t`Select items from list`,
       component: selectedResourceType && (
         <SelectResourceStep
           searchColumns={selectedResourceType.searchColumns}
@@ -100,7 +100,7 @@ function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
           onRowClick={handleResourceSelect}
           fetchItems={selectedResourceType.fetchItems}
           fetchOptions={selectedResourceType.fetchOptions}
-          selectedLabel={i18n._(t`Selected`)}
+          selectedLabel={t`Selected`}
           selectedResourceRows={resourcesSelected}
           sortedColumnKey="username"
         />
@@ -110,7 +110,7 @@ function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
     },
     {
       id: 3,
-      name: i18n._(t`Select roles to apply`),
+      name: t`Select roles to apply`,
       component: resourcesSelected?.length > 0 && (
         <SelectRoleStep
           onRolesClick={handleRoleSelect}
@@ -118,12 +118,12 @@ function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
           selectedListKey={
             selectedResourceType === 'users' ? 'username' : 'name'
           }
-          selectedListLabel={i18n._(t`Selected`)}
+          selectedListLabel={t`Selected`}
           selectedResourceRows={resourcesSelected}
           selectedRoleRows={rolesSelected}
         />
       ),
-      nextButtonText: i18n._(t`Save`),
+      nextButtonText: t`Save`,
       canJumpTo: stepIdReached >= 3,
     },
   ];
@@ -131,13 +131,13 @@ function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
   if (error) {
     return (
       <AlertModal
-        aria-label={i18n._(t`Associate role error`)}
+        aria-label={t`Associate role error`}
         isOpen={error}
         variant="error"
-        title={i18n._(t`Error!`)}
+        title={t`Error!`}
         onClose={dismissError}
       >
-        {i18n._(t`Failed to associate role`)}
+        {t`Failed to associate role`}
         <ErrorDetail error={error} />
       </AlertModal>
     );
@@ -149,20 +149,20 @@ function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
         <DropdownItem
           key="add"
           component="button"
-          aria-label={i18n._(t`Add`)}
+          aria-label={t`Add`}
           onClick={() => setIsWizardOpen(true)}
         >
-          {i18n._(t`Add`)}
+          {t`Add`}
         </DropdownItem>
       ) : (
         <Button
           ouiaId="access-add-button"
           variant="primary"
-          aria-label={i18n._(t`Add`)}
+          aria-label={t`Add`}
           onClick={() => setIsWizardOpen(true)}
           key="add"
         >
-          {i18n._(t`Add`)}
+          {t`Add`}
         </Button>
       )}
       {isWizardOpen && (
@@ -181,4 +181,4 @@ function UserAndTeamAccessAdd({ i18n, title, onFetchData, apiModel }) {
   );
 }
 
-export default withI18n()(UserAndTeamAccessAdd);
+export default UserAndTeamAccessAdd;

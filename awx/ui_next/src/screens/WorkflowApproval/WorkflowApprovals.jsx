@@ -1,31 +1,28 @@
 import React, { useState, useCallback } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import WorkflowApprovalList from './WorkflowApprovalList';
 import WorkflowApproval from './WorkflowApproval';
 import ScreenHeader from '../../components/ScreenHeader/ScreenHeader';
 
-function WorkflowApprovals({ i18n }) {
+function WorkflowApprovals() {
   const match = useRouteMatch();
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
-    '/workflow_approvals': i18n._(t`Workflow Approvals`),
+    '/workflow_approvals': t`Workflow Approvals`,
   });
 
-  const updateBreadcrumbConfig = useCallback(
-    workflowApproval => {
-      if (!workflowApproval) {
-        return;
-      }
-      const { id } = workflowApproval;
-      setBreadcrumbConfig({
-        '/workflow_approvals': i18n._(t`Workflow Approvals`),
-        [`/workflow_approvals/${id}`]: workflowApproval.name,
-        [`/workflow_approvals/${id}/details`]: i18n._(t`Details`),
-      });
-    },
-    [i18n]
-  );
+  const updateBreadcrumbConfig = useCallback(workflowApproval => {
+    if (!workflowApproval) {
+      return;
+    }
+    const { id } = workflowApproval;
+    setBreadcrumbConfig({
+      '/workflow_approvals': t`Workflow Approvals`,
+      [`/workflow_approvals/${id}`]: workflowApproval.name,
+      [`/workflow_approvals/${id}/details`]: t`Details`,
+    });
+  }, []);
 
   return (
     <>
@@ -45,4 +42,4 @@ function WorkflowApprovals({ i18n }) {
   );
 }
 
-export default withI18n()(WorkflowApprovals);
+export default WorkflowApprovals;

@@ -17,7 +17,7 @@ import {
   InputGroup,
   Modal,
 } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import ChipGroup from '../ChipGroup';
@@ -44,7 +44,7 @@ function Lookup(props) {
     renderItemChip,
     renderOptionsList,
     history,
-    i18n,
+
     isDisabled,
   } = props;
 
@@ -103,7 +103,7 @@ function Lookup(props) {
     <Fragment>
       <InputGroup onBlur={onBlur}>
         <Button
-          aria-label={i18n._(t`Search`)}
+          aria-label={t`Search`}
           id={id}
           onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
           variant={ButtonVariant.control}
@@ -126,8 +126,8 @@ function Lookup(props) {
 
       <Modal
         variant="large"
-        title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
-        aria-label={i18n._(t`Lookup modal`)}
+        title={t`Select ${header || t`Items`}`}
+        aria-label={t`Lookup modal`}
         isOpen={isModalOpen}
         onClose={closeModal}
         actions={[
@@ -138,16 +138,16 @@ function Lookup(props) {
             onClick={save}
             isDisabled={required && selectedItems.length === 0}
           >
-            {i18n._(t`Select`)}
+            {t`Select`}
           </Button>,
           <Button
             ouiaId="modal-cancel-button"
             key="cancel"
             variant="link"
             onClick={closeModal}
-            aria-label={i18n._(t`Cancel lookup`)}
+            aria-label={t`Cancel lookup`}
           >
-            {i18n._(t`Cancel`)}
+            {t`Cancel`}
           </Button>,
         ]}
       >
@@ -197,4 +197,4 @@ Lookup.defaultProps = {
 };
 
 export { Lookup as _Lookup };
-export default withI18n()(withRouter(Lookup));
+export default withRouter(Lookup);

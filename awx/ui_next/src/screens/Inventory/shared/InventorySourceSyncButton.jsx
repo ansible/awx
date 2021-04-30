@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Button, Tooltip } from '@patternfly/react-core';
@@ -9,7 +9,7 @@ import AlertModal from '../../../components/AlertModal/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
 import { InventoryUpdatesAPI, InventorySourcesAPI } from '../../../api';
 
-function InventorySourceSyncButton({ source, icon, i18n }) {
+function InventorySourceSyncButton({ source, icon }) {
   const {
     isLoading: startSyncLoading,
     error: startSyncError,
@@ -55,27 +55,27 @@ function InventorySourceSyncButton({ source, icon, i18n }) {
   return (
     <>
       {['running', 'pending', 'updating'].includes(source.status) ? (
-        <Tooltip content={i18n._(t`Cancel sync process`)} position="top">
+        <Tooltip content={t`Cancel sync process`} position="top">
           <Button
             ouiaId={`${source}-cancel-sync-button`}
             isDisabled={cancelSyncLoading || startSyncLoading}
-            aria-label={i18n._(t`Cancel sync source`)}
+            aria-label={t`Cancel sync source`}
             variant={icon ? 'plain' : 'secondary'}
             onClick={cancelSyncProcess}
           >
-            {icon ? <MinusCircleIcon /> : i18n._(t`Cancel sync`)}
+            {icon ? <MinusCircleIcon /> : t`Cancel sync`}
           </Button>
         </Tooltip>
       ) : (
-        <Tooltip content={i18n._(t`Start sync process`)} position="top">
+        <Tooltip content={t`Start sync process`} position="top">
           <Button
             ouiaId={`${source}-sync-button`}
             isDisabled={cancelSyncLoading || startSyncLoading}
-            aria-label={i18n._(t`Start sync source`)}
+            aria-label={t`Start sync source`}
             variant={icon ? 'plain' : 'secondary'}
             onClick={startSyncProcess}
           >
-            {icon ? <SyncIcon /> : i18n._(t`Sync`)}
+            {icon ? <SyncIcon /> : t`Sync`}
           </Button>
         </Tooltip>
       )}
@@ -83,10 +83,10 @@ function InventorySourceSyncButton({ source, icon, i18n }) {
         <AlertModal
           isOpen={startError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissStartError}
         >
-          {i18n._(t`Failed to sync inventory source.`)}
+          {t`Failed to sync inventory source.`}
           <ErrorDetail error={startError} />
         </AlertModal>
       )}
@@ -94,10 +94,10 @@ function InventorySourceSyncButton({ source, icon, i18n }) {
         <AlertModal
           isOpen={cancelError}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissCancelError}
         >
-          {i18n._(t`Failed to cancel inventory source sync.`)}
+          {t`Failed to cancel inventory source sync.`}
           <ErrorDetail error={cancelError} />
         </AlertModal>
       )}
@@ -115,4 +115,4 @@ InventorySourceSyncButton.propTypes = {
   icon: PropTypes.bool,
 };
 
-export default withI18n()(InventorySourceSyncButton);
+export default InventorySourceSyncButton;

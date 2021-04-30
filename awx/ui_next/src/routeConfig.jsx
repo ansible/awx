@@ -1,4 +1,5 @@
-import { t } from '@lingui/macro';
+import React from 'react';
+import { Trans } from '@lingui/macro';
 
 import ActivityStream from './screens/ActivityStream';
 import Applications from './screens/Application';
@@ -21,137 +22,133 @@ import Users from './screens/User';
 import WorkflowApprovals from './screens/WorkflowApproval';
 import { Jobs } from './screens/Job';
 
-// Ideally, this should just be a regular object that we export, but we
-// need the i18n. When lingui3 arrives, we will be able to import i18n
-// directly and we can replace this function with a simple export.
-
-function getRouteConfig(i18n) {
+function getRouteConfig() {
   return [
     {
-      groupTitle: i18n._(t`Views`),
+      groupTitle: <Trans>Views</Trans>,
       groupId: 'views_group',
       routes: [
         {
-          title: i18n._(t`Dashboard`),
+          title: <Trans>Dashboard</Trans>,
           path: '/home',
           screen: Dashboard,
         },
         {
-          title: i18n._(t`Jobs`),
+          title: <Trans>Jobs</Trans>,
           path: '/jobs',
           screen: Jobs,
         },
         {
-          title: i18n._(t`Schedules`),
+          title: <Trans>Schedules</Trans>,
           path: '/schedules',
           screen: Schedules,
         },
         {
-          title: i18n._(t`Activity Stream`),
+          title: <Trans>Activity Stream</Trans>,
           path: '/activity_stream',
           screen: ActivityStream,
         },
         {
-          title: i18n._(t`Workflow Approvals`),
+          title: <Trans>Workflow Approvals</Trans>,
           path: '/workflow_approvals',
           screen: WorkflowApprovals,
         },
       ],
     },
     {
-      groupTitle: i18n._(t`Resources`),
+      groupTitle: <Trans>Resources</Trans>,
       groupId: 'resources_group',
       routes: [
         {
-          title: i18n._(t`Templates`),
+          title: <Trans>Templates</Trans>,
           path: '/templates',
           screen: Templates,
         },
         {
-          title: i18n._(t`Credentials`),
+          title: <Trans>Credentials</Trans>,
           path: '/credentials',
           screen: Credentials,
         },
         {
-          title: i18n._(t`Projects`),
+          title: <Trans>Projects</Trans>,
           path: '/projects',
           screen: Projects,
         },
         {
-          title: i18n._(t`Inventories`),
+          title: <Trans>Inventories</Trans>,
           path: '/inventories',
           screen: Inventory,
         },
         {
-          title: i18n._(t`Hosts`),
+          title: <Trans>Hosts</Trans>,
           path: '/hosts',
           screen: Hosts,
         },
       ],
     },
     {
-      groupTitle: i18n._(t`Access`),
+      groupTitle: <Trans>Access</Trans>,
       groupId: 'access_group',
       routes: [
         {
-          title: i18n._(t`Organizations`),
+          title: <Trans>Organizations</Trans>,
           path: '/organizations',
           screen: Organizations,
         },
         {
-          title: i18n._(t`Users`),
+          title: <Trans>Users</Trans>,
           path: '/users',
           screen: Users,
         },
         {
-          title: i18n._(t`Teams`),
+          title: <Trans>Teams</Trans>,
           path: '/teams',
           screen: Teams,
         },
       ],
     },
     {
-      groupTitle: i18n._(t`Administration`),
+      groupTitle: <Trans>Administration</Trans>,
       groupId: 'administration_group',
       routes: [
         {
-          title: i18n._(t`Credential Types`),
+          title: <Trans>Credential Types</Trans>,
           path: '/credential_types',
           screen: CredentialTypes,
         },
         {
-          title: i18n._(t`Notifications`),
+          title: <Trans>Notifications</Trans>,
           path: '/notification_templates',
           screen: NotificationTemplates,
         },
         {
-          title: i18n._(t`Management Jobs`),
+          title: <Trans>Management Jobs</Trans>,
           path: '/management_jobs',
           screen: ManagementJobs,
         },
         {
-          title: i18n._(t`Instance Groups`),
+          title: <Trans>Instance Groups</Trans>,
           path: '/instance_groups',
           screen: InstanceGroups,
         },
         {
-          title: i18n._(t`Applications`),
+          title: <Trans>Applications</Trans>,
           path: '/applications',
           screen: Applications,
         },
         {
-          title: i18n._(t`Execution Environments`),
+          title: <Trans>Execution Environments</Trans>,
           path: '/execution_environments',
           screen: ExecutionEnvironments,
         },
       ],
     },
     {
-      groupTitle: i18n._(t`Settings`),
+      groupTitle: <Trans>Settings</Trans>,
       groupId: 'settings',
       routes: [
         {
-          title: i18n._(t`Settings`),
+          title: <Trans>Settings</Trans>,
           path: '/settings',
           screen: Settings,
         },

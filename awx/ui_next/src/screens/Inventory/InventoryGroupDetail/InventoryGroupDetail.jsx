@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { t } from '@lingui/macro';
 
 import { Button } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { useHistory, useParams } from 'react-router-dom';
 import { VariablesDetail } from '../../../components/CodeEditor';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -15,7 +15,7 @@ import {
 } from '../../../components/DetailList';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
 
-function InventoryGroupDetail({ i18n, inventoryGroup }) {
+function InventoryGroupDetail({ inventoryGroup }) {
   const {
     summary_fields: { created_by, modified_by, user_capabilities },
     created,
@@ -32,23 +32,15 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
     <CardBody>
       <DetailList gutter="sm">
         <Detail
-          label={i18n._(t`Name`)}
+          label={t`Name`}
           value={name}
           dataCy="inventory-group-detail-name"
         />
-        <Detail label={i18n._(t`Description`)} value={description} />
-        <VariablesDetail
-          label={i18n._(t`Variables`)}
-          value={variables}
-          rows={4}
-        />
+        <Detail label={t`Description`} value={description} />
+        <VariablesDetail label={t`Variables`} value={variables} rows={4} />
+        <UserDateDetail label={t`Created`} date={created} user={created_by} />
         <UserDateDetail
-          label={i18n._(t`Created`)}
-          date={created}
-          user={created_by}
-        />
-        <UserDateDetail
-          label={i18n._(t`Last Modified`)}
+          label={t`Last Modified`}
           date={modified}
           user={modified_by}
         />
@@ -58,14 +50,14 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
           <Button
             ouiaId="inventory-group-detail-edit-button"
             variant="primary"
-            aria-label={i18n._(t`Edit`)}
+            aria-label={t`Edit`}
             onClick={() =>
               history.push(
                 `/inventories/inventory/${params.id}/groups/${params.groupId}/edit`
               )
             }
           >
-            {i18n._(t`Edit`)}
+            {t`Edit`}
           </Button>
         )}
         {user_capabilities?.delete && (
@@ -81,15 +73,15 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
       {error && (
         <AlertModal
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           isOpen={error}
           onClose={() => setError(false)}
         >
-          {i18n._(t`Failed to delete group ${inventoryGroup.name}.`)}
+          {t`Failed to delete group ${inventoryGroup.name}.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
     </CardBody>
   );
 }
-export default withI18n()(InventoryGroupDetail);
+export default InventoryGroupDetail;

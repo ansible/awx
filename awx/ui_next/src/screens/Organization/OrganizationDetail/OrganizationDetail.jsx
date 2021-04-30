@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useHistory, useRouteMatch } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
 import { OrganizationsAPI } from '../../../api';
@@ -22,7 +22,7 @@ import { useConfig } from '../../../contexts/Config';
 import ExecutionEnvironmentDetail from '../../../components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceDeleteDetails';
 
-function OrganizationDetail({ i18n, organization }) {
+function OrganizationDetail({ organization }) {
   const {
     params: { id },
   } = useRouteMatch();
@@ -88,13 +88,13 @@ function OrganizationDetail({ i18n, organization }) {
     <CardBody>
       <DetailList>
         <Detail
-          label={i18n._(t`Name`)}
+          label={t`Name`}
           value={name}
           dataCy="organization-detail-name"
         />
-        <Detail label={i18n._(t`Description`)} value={description} />
+        <Detail label={t`Description`} value={description} />
         {license_info?.license_type !== 'open' && (
-          <Detail label={i18n._(t`Max Hosts`)} value={`${max_hosts}`} />
+          <Detail label={t`Max Hosts`} value={`${max_hosts}`} />
         )}
         <ExecutionEnvironmentDetail
           virtualEnvironment={custom_virtualenv}
@@ -102,19 +102,19 @@ function OrganizationDetail({ i18n, organization }) {
           isDefaultEnvironment
         />
         <UserDateDetail
-          label={i18n._(t`Created`)}
+          label={t`Created`}
           date={created}
           user={summary_fields.created_by}
         />
         <UserDateDetail
-          label={i18n._(t`Last Modified`)}
+          label={t`Last Modified`}
           date={modified}
           user={summary_fields.modified_by}
         />
         {instanceGroups && instanceGroups.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Instance Groups`)}
+            label={t`Instance Groups`}
             value={
               <ChipGroup numChips={5} totalChips={instanceGroups.length}>
                 {instanceGroups.map(ig => (
@@ -129,7 +129,7 @@ function OrganizationDetail({ i18n, organization }) {
         {galaxy_credentials && galaxy_credentials.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Galaxy Credentials`)}
+            label={t`Galaxy Credentials`}
             value={
               <ChipGroup numChips={5} totalChips={galaxy_credentials.length}>
                 {galaxy_credentials.map(credential => (
@@ -148,26 +148,24 @@ function OrganizationDetail({ i18n, organization }) {
         {summary_fields.user_capabilities.edit && (
           <Button
             ouiaId="organization-detail-edit-button"
-            aria-label={i18n._(t`Edit`)}
+            aria-label={t`Edit`}
             component={Link}
             to={`/organizations/${id}/edit`}
           >
-            {i18n._(t`Edit`)}
+            {t`Edit`}
           </Button>
         )}
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.delete && (
             <DeleteButton
               name={name}
-              modalTitle={i18n._(t`Delete Organization`)}
+              modalTitle={t`Delete Organization`}
               onConfirm={deleteOrganization}
               isDisabled={isLoading}
               deleteDetailsRequests={deleteDetailsRequests}
-              deleteMessage={i18n._(
-                t`This organization is currently being by other resources. Are you sure you want to delete it?`
-              )}
+              deleteMessage={t`This organization is currently being by other resources. Are you sure you want to delete it?`}
             >
-              {i18n._(t`Delete`)}
+              {t`Delete`}
             </DeleteButton>
           )}
       </CardActionsRow>
@@ -176,10 +174,10 @@ function OrganizationDetail({ i18n, organization }) {
         <AlertModal
           isOpen={error}
           variant="error"
-          title={i18n._(t`Error!`)}
+          title={t`Error!`}
           onClose={dismissError}
         >
-          {i18n._(t`Failed to delete organization.`)}
+          {t`Failed to delete organization.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}
@@ -187,4 +185,4 @@ function OrganizationDetail({ i18n, organization }) {
   );
 }
 
-export default withI18n()(OrganizationDetail);
+export default OrganizationDetail;

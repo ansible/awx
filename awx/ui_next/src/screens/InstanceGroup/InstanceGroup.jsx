@@ -7,7 +7,7 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -23,7 +23,7 @@ import InstanceGroupDetails from './InstanceGroupDetails';
 import InstanceGroupEdit from './InstanceGroupEdit';
 import InstanceList from './Instances/InstanceList';
 
-function InstanceGroup({ i18n, setBreadcrumb }) {
+function InstanceGroup({ setBreadcrumb }) {
   const { id } = useParams();
   const { pathname } = useLocation();
 
@@ -54,24 +54,24 @@ function InstanceGroup({ i18n, setBreadcrumb }) {
       name: (
         <>
           <CaretLeftIcon />
-          {i18n._(t`Back to instance groups`)}
+          {t`Back to instance groups`}
         </>
       ),
       link: '/instance_groups',
       id: 99,
     },
     {
-      name: i18n._(t`Details`),
+      name: t`Details`,
       link: `/instance_groups/${id}/details`,
       id: 0,
     },
     {
-      name: i18n._(t`Instances`),
+      name: t`Instances`,
       link: `/instance_groups/${id}/instances`,
       id: 1,
     },
     {
-      name: i18n._(t`Jobs`),
+      name: t`Jobs`,
       link: `/instance_groups/${id}/jobs`,
       id: 2,
     },
@@ -84,11 +84,9 @@ function InstanceGroup({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response?.status === 404 && (
               <span>
-                {i18n._(t`Instance group not found.`)}
+                {t`Instance group not found.`}
                 {''}
-                <Link to="/instance_groups">
-                  {i18n._(t`View all instance groups`)}
-                </Link>
+                <Link to="/instance_groups">{t`View all instance groups`}</Link>
               </span>
             )}
           </ContentError>
@@ -140,4 +138,4 @@ function InstanceGroup({ i18n, setBreadcrumb }) {
   );
 }
 
-export default withI18n()(InstanceGroup);
+export default InstanceGroup;

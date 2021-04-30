@@ -1,6 +1,6 @@
 import React, { Fragment, useContext } from 'react';
 import { Button } from '@patternfly/react-core';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import {
   WorkflowDispatchContext,
@@ -8,46 +8,44 @@ import {
 } from '../../../../../contexts/Workflow';
 import AlertModal from '../../../../../components/AlertModal';
 
-function LinkDeleteModal({ i18n }) {
+function LinkDeleteModal() {
   const dispatch = useContext(WorkflowDispatchContext);
   const { linkToDelete } = useContext(WorkflowStateContext);
   return (
     <AlertModal
       variant="danger"
-      title={i18n._(t`Remove Link`)}
+      title={t`Remove Link`}
       isOpen={linkToDelete}
       onClose={() => dispatch({ type: 'SET_LINK_TO_DELETE', value: null })}
       actions={[
         <Button
           ouiaId="link-remove-confirm-button"
           id="confirm-link-removal"
-          aria-label={i18n._(t`Confirm link removal`)}
+          aria-label={t`Confirm link removal`}
           key="remove"
           onClick={() => dispatch({ type: 'DELETE_LINK' })}
           variant="danger"
         >
-          {i18n._(t`Remove`)}
+          {t`Remove`}
         </Button>,
         <Button
           ouiaId="link-remove-cancel-button"
           id="cancel-link-removal"
-          aria-label={i18n._(t`Cancel link removal`)}
+          aria-label={t`Cancel link removal`}
           key="cancel"
           onClick={() => dispatch({ type: 'SET_LINK_TO_DELETE', value: null })}
           variant="link"
         >
-          {i18n._(t`Cancel`)}
+          {t`Cancel`}
         </Button>,
       ]}
     >
-      <p>{i18n._(t`Are you sure you want to remove this link?`)}</p>
+      <p>{t`Are you sure you want to remove this link?`}</p>
       {!linkToDelete.isConvergenceLink && (
         <Fragment>
           <br />
           <p>
-            {i18n._(
-              t`Removing this link will orphan the rest of the branch and cause it to be executed immediately on launch.`
-            )}
+            {t`Removing this link will orphan the rest of the branch and cause it to be executed immediately on launch.`}
           </p>
         </Fragment>
       )}
@@ -55,4 +53,4 @@ function LinkDeleteModal({ i18n }) {
   );
 }
 
-export default withI18n()(LinkDeleteModal);
+export default LinkDeleteModal;

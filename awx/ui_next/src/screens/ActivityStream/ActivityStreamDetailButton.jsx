@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { Button, Modal } from '@patternfly/react-core';
 import { SearchPlusIcon } from '@patternfly/react-icons';
@@ -9,7 +9,7 @@ import { formatDateString } from '../../util/dates';
 import { DetailList, Detail } from '../../components/DetailList';
 import { VariablesDetail } from '../../components/CodeEditor';
 
-function ActivityStreamDetailButton({ i18n, streamItem, user, description }) {
+function ActivityStreamDetailButton({ streamItem, user, description }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const setting = streamItem?.summary_fields?.setting;
@@ -22,7 +22,7 @@ function ActivityStreamDetailButton({ i18n, streamItem, user, description }) {
     <>
       <Button
         ouiaId={`${streamItem.id}-view-details-button`}
-        aria-label={i18n._(t`View event details`)}
+        aria-label={t`View event details`}
         variant="plain"
         component="button"
         onClick={() => setIsOpen(true)}
@@ -32,28 +32,25 @@ function ActivityStreamDetailButton({ i18n, streamItem, user, description }) {
       <Modal
         variant="large"
         isOpen={isOpen}
-        title={i18n._(t`Event detail`)}
-        aria-label={i18n._(t`Event detail modal`)}
+        title={t`Event detail`}
+        aria-label={t`Event detail modal`}
         onClose={() => setIsOpen(false)}
       >
         <DetailList gutter="sm">
           <Detail
-            label={i18n._(t`Time`)}
+            label={t`Time`}
             value={formatDateString(streamItem.timestamp)}
           />
-          <Detail label={i18n._(t`Initiated by`)} value={user} />
+          <Detail label={t`Initiated by`} value={user} />
           <Detail
-            label={i18n._(t`Setting category`)}
+            label={t`Setting category`}
             value={setting && setting[0]?.category}
           />
-          <Detail
-            label={i18n._(t`Setting name`)}
-            value={setting && setting[0]?.name}
-          />
-          <Detail fullWidth label={i18n._(t`Action`)} value={description} />
+          <Detail label={t`Setting name`} value={setting && setting[0]?.name} />
+          <Detail fullWidth label={t`Action`} value={description} />
           {streamItem?.changes && (
             <VariablesDetail
-              label={i18n._(t`Changes`)}
+              label={t`Changes`}
               rows={changeRows}
               value={streamItem?.changes}
             />
@@ -64,4 +61,4 @@ function ActivityStreamDetailButton({ i18n, streamItem, user, description }) {
   );
 }
 
-export default withI18n()(ActivityStreamDetailButton);
+export default ActivityStreamDetailButton;

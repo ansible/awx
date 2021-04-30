@@ -3,16 +3,16 @@ import { string, func } from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import CaretDownIcon from '@patternfly/react-icons/dist/js/icons/caret-down-icon';
-import { withI18n } from '@lingui/react';
+
 import { t } from '@lingui/macro';
 import { useKebabifiedMenu } from '../../contexts/Kebabified';
 
 function ToolbarAddButton({
   linkTo,
   onClick,
-  i18n,
+
   isDisabled,
-  defaultLabel = i18n._(t`Add`),
+  defaultLabel = t`Add`,
   showToggleIndicator,
 }) {
   const { isKebabified } = useKebabifiedMenu();
@@ -72,4 +72,4 @@ ToolbarAddButton.defaultProps = {
   onClick: null,
 };
 
-export default withI18n()(ToolbarAddButton);
+export default ToolbarAddButton;
