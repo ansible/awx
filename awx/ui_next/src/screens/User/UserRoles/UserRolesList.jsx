@@ -147,17 +147,11 @@ function UserRolesList({ user }) {
             isDefault: true,
           },
         ]}
-        toolbarSortColumns={[
-          {
-            name: t`ID`,
-            key: 'id',
-          },
-        ]}
         toolbarSearchableKeys={searchableKeys}
         toolbarRelatedSearchableKeys={relatedSearchableKeys}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
-            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Name`}</HeaderCell>
             <HeaderCell>{t`Type`}</HeaderCell>
             <HeaderCell>{t`Role`}</HeaderCell>
           </HeaderRow>

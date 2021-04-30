@@ -44,14 +44,8 @@ describe('<UserRolesListItem/>', () => {
     );
     const cells = wrapper.find('Td');
     expect(cells.at(0).text()).toBe('template delete project');
-    expect(
-      cells.at(1).text()
-      // wrapper.find('PFDataListCell[aria-label="Resource type"]').text()
-    ).toContain('Job Template');
-    expect(
-      cells.at(2).text()
-      // wrapper.find('PFDataListCell[aria-label="Resource role"]').text()
-    ).toContain('Admin');
+    expect(cells.at(1).text()).toContain('Job Template');
+    expect(cells.at(2).text()).toContain('Admin');
   });
 
   test('should render deletable chip', () => {
@@ -103,7 +97,6 @@ describe('<UserRolesListItem/>', () => {
         .find('Td')
         .at(0)
         .text()
-      // wrapper.find('PFDataListCell[aria-label="Resource name"]').text()
     ).toBe('System');
   });
 });

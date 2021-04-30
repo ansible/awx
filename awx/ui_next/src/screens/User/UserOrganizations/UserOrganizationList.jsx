@@ -56,6 +56,9 @@ function UserOrganizationList() {
       itemCount={count}
       pluralizedItemName={t`Organizations`}
       qsConfig={QS_CONFIG}
+      toolbarSearchColumns={[
+        { name: t`Name`, key: 'name__icontains', isDefault: true },
+      ]}
       headerRow={
         <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
           <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
