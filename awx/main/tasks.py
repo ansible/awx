@@ -3045,6 +3045,7 @@ class AWXReceptorJob:
         pod_spec = {**default_pod_spec, **pod_spec_override}
 
         pod_spec['spec']['containers'][0]['image'] = ee.image
+        pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
 
         if self.task:
             pod_spec['metadata'] = deepmerge(
