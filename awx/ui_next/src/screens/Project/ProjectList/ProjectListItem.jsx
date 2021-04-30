@@ -93,6 +93,14 @@ function ProjectListItem({
   const missingExecutionEnvironment =
     project.custom_virtualenv && !project.default_environment;
 
+  let job = null;
+
+  if (project.summary_fields?.current_job) {
+    job = project.summary_fields.current_job;
+  } else if (project.summary_fields?.last_job) {
+    job = project.summary_fields.last_job;
+  }
+
   return (
     <>
       <Tr id={`${project.id}`}>
@@ -132,14 +140,14 @@ function ProjectListItem({
           )}
         </Td>
         <Td dataLabel={i18n._(t`Status`)}>
-          {project.summary_fields.last_job && (
+          {job && (
             <Tooltip
               position="top"
-              content={generateLastJobTooltip(project.summary_fields.last_job)}
-              key={project.summary_fields.last_job.id}
+              content={generateLastJobTooltip(job)}
+              key={job.id}
             >
-              <Link to={`/jobs/project/${project.summary_fields.last_job.id}`}>
-                <StatusLabel status={project.summary_fields.last_job.status} />
+              <Link to={`/jobs/project/${job.id}`}>
+                <StatusLabel status={job.status} />
               </Link>
             </Tooltip>
           )}
@@ -171,7 +179,7 @@ function ProjectListItem({
           >
             <ProjectSyncButton
               projectId={project.id}
-              lastJobStatus={project.summary_fields.last_job.status}
+              lastJobStatus={job && job.status}
             />
           </ActionItem>
           <ActionItem
