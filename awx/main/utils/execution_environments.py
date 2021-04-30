@@ -20,6 +20,7 @@ def get_default_pod_spec():
                 {
                     "image": get_default_execution_environment().image,
                     "name": 'worker',
+                    "args": ['ansible-runner', 'worker', '--private-data-dir=/runner'],
                 }
             ],
         },
