@@ -24,7 +24,6 @@ import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
 import { OrganizationsAPI, ProjectsAPI } from '../../api';
-import useWsProject from './useWsProject';
 
 function Project({ i18n, setBreadcrumb }) {
   const { me = {} } = useConfig();
@@ -33,7 +32,7 @@ function Project({ i18n, setBreadcrumb }) {
 
   const {
     request: fetchProjectAndRoles,
-    result: { projectDetail, isNotifAdmin },
+    result: { project, isNotifAdmin },
     isLoading: hasContentLoading,
     error: contentError,
   } = useRequest(
@@ -59,12 +58,12 @@ function Project({ i18n, setBreadcrumb }) {
         data.summary_fields.credentials = results;
       }
       return {
-        projectDetail: data,
+        project: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
       };
     }, [id]),
     {
-      projectDetail: null,
+      project: null,
       notifAdminRes: null,
     }
   );
@@ -74,12 +73,10 @@ function Project({ i18n, setBreadcrumb }) {
   }, [fetchProjectAndRoles, location.pathname]);
 
   useEffect(() => {
-    if (projectDetail) {
-      setBreadcrumb(projectDetail);
+    if (project) {
+      setBreadcrumb(project);
     }
-  }, [projectDetail, setBreadcrumb]);
-
-  const project = useWsProject(projectDetail);
+  }, [project, setBreadcrumb]);
 
   const loadScheduleOptions = useCallback(() => {
     return ProjectsAPI.readScheduleOptions(project.id);

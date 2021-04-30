@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import WS from 'jest-websocket-mock';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import useWsProject from './useWsProject';
 
 function TestInner() {
@@ -65,11 +65,12 @@ describe('useWsProject', () => {
       summary_fields: {
         last_job: {
           id: 1,
-          status: 'running',
-          finished: null,
+          status: 'successful',
+          finished: '2020-07-02T16:25:31.839071Z',
         },
       },
     };
+
     await act(async () => {
       wrapper = await mountWithContexts(<Test project={project} />);
     });
@@ -85,15 +86,18 @@ describe('useWsProject', () => {
       })
     );
     expect(
+      wrapper.find('TestInner').prop('project').summary_fields.current_job
+    ).toBeUndefined();
+    expect(
       wrapper.find('TestInner').prop('project').summary_fields.last_job.status
-    ).toEqual('running');
+    ).toEqual('successful');
 
     await act(async () => {
       mockServer.send(
         JSON.stringify({
           group_name: 'jobs',
           project_id: 1,
-          status: 'pending',
+          status: 'running',
           type: 'project_update',
           unified_job_id: 2,
           unified_job_template_id: 1,
@@ -103,13 +107,13 @@ describe('useWsProject', () => {
     wrapper.update();
 
     expect(
-      wrapper.find('TestInner').prop('project').summary_fields.last_job
+      wrapper.find('TestInner').prop('project').summary_fields.current_job
     ).toEqual({
-      id: 1,
+      id: 2,
       status: 'running',
-      finished: null,
+      finished: undefined,
     });
-    // Should not update status to `Pending` if there is a current running or waiting job
+
     await act(async () => {
       mockServer.send(
         JSON.stringify({
@@ -117,7 +121,7 @@ describe('useWsProject', () => {
           project_id: 1,
           status: 'successful',
           type: 'project_update',
-          unified_job_id: 1,
+          unified_job_id: 2,
           unified_job_template_id: 1,
           finished: '2020-07-02T16:28:31.839071Z',
         })
@@ -126,9 +130,9 @@ describe('useWsProject', () => {
     wrapper.update();
 
     expect(
-      wrapper.find('TestInner').prop('project').summary_fields.last_job
+      wrapper.find('TestInner').prop('project').summary_fields.current_job
     ).toEqual({
-      id: 1,
+      id: 2,
       status: 'successful',
       finished: '2020-07-02T16:28:31.839071Z',
     });

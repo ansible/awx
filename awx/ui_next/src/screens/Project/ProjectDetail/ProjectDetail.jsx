@@ -24,6 +24,7 @@ import { relatedResourceDeleteRequests } from '../../../util/getRelatedResourceD
 import ProjectSyncButton from '../shared/ProjectSyncButton';
 import StatusLabel from '../../../components/StatusLabel';
 import { formatDateString } from '../../../util/dates';
+import useWsProject from './useWsProject';
 
 function ProjectDetail({ project, i18n }) {
   const {
@@ -45,7 +46,7 @@ function ProjectDetail({ project, i18n }) {
     scm_update_cache_timeout,
     scm_url,
     summary_fields,
-  } = project;
+  } = useWsProject(project);
   const history = useHistory();
 
   const { request: deleteProject, isLoading, error: deleteError } = useRequest(
@@ -105,20 +106,28 @@ function ProjectDetail({ project, i18n }) {
     );
   };
 
+  let job = null;
+
+  if (summary_fields?.current_job) {
+    job = summary_fields.current_job;
+  } else if (summary_fields?.last_job) {
+    job = summary_fields.last_job;
+  }
+
   return (
     <CardBody>
       <DetailList gutter="sm">
         <Detail
           label={i18n._(t`Last Job Status`)}
           value={
-            summary_fields.last_job && (
+            job && (
               <Tooltip
                 position="top"
-                content={generateLastJobTooltip(summary_fields.last_job)}
-                key={summary_fields.last_job.id}
+                content={generateLastJobTooltip(job)}
+                key={job.id}
               >
-                <Link to={`/jobs/project/${summary_fields.last_job.id}`}>
-                  <StatusLabel status={summary_fields.last_job.status} />
+                <Link to={`/jobs/project/${job.id}`}>
+                  <StatusLabel status={job.status} />
                 </Link>
               </Tooltip>
             )
@@ -210,7 +219,7 @@ function ProjectDetail({ project, i18n }) {
         {summary_fields.user_capabilities?.start && (
           <ProjectSyncButton
             projectId={project.id}
-            lastJobStatus={summary_fields.last_job.status}
+            lastJobStatus={job && job.status}
           />
         )}
         {summary_fields.user_capabilities?.delete && (
