@@ -12,3 +12,6 @@ def test_execution_environment_creation(execution_environment, organization):
     assert execution_env.organization == organization
     assert execution_env.name == 'Hello Environment'
     assert execution_env.pull == 'missing'
+
+def test_login_update():
+    #fjsidfjdsifjdsi jfsdifjsdif jdsi
