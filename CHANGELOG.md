@@ -2,6 +2,18 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+# 19.1.0 (May 1, 2021)
+
+- Custom inventory scripts have been removed from the API https://github.com/ansible/awx/pull/9822
+  - Old scripts can be exported via `awx-manage export_custom_scripts`
+- Fixed a bug where ad-hoc commands targeted against multiple hosts would run against only 1 host https://github.com/ansible/awx/pull/9973
+- AWX will now look for a top-level requirements.yml when installing collections / roles in project updates https://github.com/ansible/awx/pull/9945
+- Improved error handling when Container Group pods fail to launch https://github.com/ansible/awx/pull/10025
+- Added ability to set server-side password policies using Django's AUTH_PASSWORD_VALIDATORS setting https://github.com/ansible/awx/pull/9999
+- Bumped versions of Ansible Runner & AWX EE https://github.com/ansible/awx/pull/10013
+  - If you have built any custom EEs on top of awx-ee 0.1.0, you will need to rebuild on top of 0.2.0.
+- Remove legacy resource profiling code https://github.com/ansible/awx/pull/9883
+
 # 19.0.0 (April 7, 2021)
 
 - AWX now runs on Python 3.8 (https://github.com/ansible/awx/pull/8778/)
