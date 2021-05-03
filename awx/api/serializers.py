@@ -4374,7 +4374,7 @@ class NotificationTemplateSerializer(BaseSerializer):
         return res
 
     def _recent_notifications(self, obj):
-        return [{'id': x.id, 'status': x.status, 'created': x.created} for x in obj.notifications.all().order_by('-created')[:5]]
+        return [{'id': x.id, 'status': x.status, 'created': x.created, 'error': x.error} for x in obj.notifications.all().order_by('-created')[:5]]
 
     def get_summary_fields(self, obj):
         d = super(NotificationTemplateSerializer, self).get_summary_fields(obj)
