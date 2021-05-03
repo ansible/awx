@@ -4,19 +4,25 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import { ConfigAPI, MeAPI, RootAPI } from '../../api';
+import { MeAPI, RootAPI } from '../../api';
 import { useAuthorizedPath } from '../../contexts/Config';
 import AppContainer from './AppContainer';
 
 jest.mock('../../api');
+jest.mock('../../util/bootstrapPendo');
+
+global.pendo = {
+  initialize: jest.fn(),
+};
 
 describe('<AppContainer />', () => {
   const version = '222';
 
   beforeEach(() => {
-    ConfigAPI.read.mockResolvedValue({
+    RootAPI.readAssetVariables.mockResolvedValue({
       data: {
-        version,
+        BRAND_NAME: 'AWX',
+        PENDO_API_KEY: '',
       },
     });
     MeAPI.read.mockResolvedValue({ data: { results: [{}] } });
@@ -52,7 +58,22 @@ describe('<AppContainer />', () => {
           {routeConfig.map(({ groupId }) => (
             <div key={groupId} id={groupId} />
           ))}
-        </AppContainer>
+        </AppContainer>,
+        {
+          context: {
+            config: {
+              analytics_status: 'detailed',
+              ansible_version: null,
+              custom_virtualenvs: [],
+              version: '9000',
+              me: { is_superuser: true },
+              toJSON: () => '/config/',
+              license_info: {
+                valid_key: true,
+              },
+            },
+          },
+        }
       );
     });
     wrapper.update();
@@ -70,6 +91,31 @@ describe('<AppContainer />', () => {
 
     expect(wrapper.find('#group_one').length).toBe(1);
     expect(wrapper.find('#group_two').length).toBe(1);
+
+    expect(global.pendo.initialize).toHaveBeenCalledTimes(1);
+  });
+
+  test('expected content is rendered', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AppContainer />, {
+        context: {
+          config: {
+            analytics_status: 'off',
+            ansible_version: null,
+            custom_virtualenvs: [],
+            version: '9000',
+            me: { is_superuser: true },
+            toJSON: () => '/config/',
+            license_info: {
+              valid_key: true,
+            },
+          },
+        },
+      });
+    });
+    wrapper.update();
+    expect(global.pendo.initialize).toHaveBeenCalledTimes(0);
   });
 
   test('opening the about modal renders prefetched config data', async () => {

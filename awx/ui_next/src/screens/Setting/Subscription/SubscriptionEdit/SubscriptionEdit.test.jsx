@@ -14,7 +14,6 @@ import {
 } from '../../../../api';
 import SubscriptionEdit from './SubscriptionEdit';
 
-jest.mock('./bootstrapPendo');
 jest.mock('../../../../api');
 
 const mockConfig = {

@@ -1,30 +1,26 @@
-import { UsersAPI } from '../../../../api';
+import { RootAPI, UsersAPI } from '../api';
 import bootstrapPendo from './bootstrapPendo';
 
 function buildPendoOptions(config, pendoApiKey) {
-  const tower_version = config.version.split('-')[0];
+  const towerVersion = config.version.split('-')[0];
   const trial = config.trial ? config.trial : false;
-  const options = {
+
+  return {
     apiKey: pendoApiKey,
     visitor: {
-      id: null,
+      id: 0,
       role: null,
     },
     account: {
-      id: null,
+      id: 'tower.ansible.com',
       planLevel: config.license_type,
       planPrice: config.instance_count,
       creationDate: config.license_date,
       trial,
-      tower_version,
+      tower_version: towerVersion,
       ansible_version: config.ansible_version,
     },
   };
-
-  options.visitor.id = 0;
-  options.account.id = 'tower.ansible.com';
-
-  return options;
 }
 
 async function buildPendoOptionsRole(options, config) {
@@ -45,14 +41,20 @@ async function buildPendoOptionsRole(options, config) {
   }
 }
 
-async function issuePendoIdentity(config, pendoApiKey) {
+async function issuePendoIdentity(config) {
+  if (!('license_info' in config)) {
+    config.license_info = {};
+  }
   config.license_info.analytics_status = config.analytics_status;
   config.license_info.version = config.version;
   config.license_info.ansible_version = config.ansible_version;
 
   if (config.analytics_status !== 'off') {
-    bootstrapPendo(pendoApiKey);
-    const pendoOptions = buildPendoOptions(config, pendoApiKey);
+    const {
+      data: { PENDO_API_KEY },
+    } = await RootAPI.readAssetVariables();
+    bootstrapPendo(PENDO_API_KEY);
+    const pendoOptions = buildPendoOptions(config, PENDO_API_KEY);
     const pendoOptionsWithRole = await buildPendoOptionsRole(
       pendoOptions,
       config

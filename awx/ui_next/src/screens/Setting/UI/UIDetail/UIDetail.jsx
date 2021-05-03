@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
@@ -19,6 +19,12 @@ import { SettingDetail } from '../../shared';
 function UIDetail() {
   const { me } = useConfig();
   const { GET: options } = useSettings();
+  const history = useHistory();
+  const { hardReload } = useLocation();
+
+  if (hardReload) {
+    history.go();
+  }
 
   const { isLoading, error, request, result: ui } = useRequest(
     useCallback(async () => {
