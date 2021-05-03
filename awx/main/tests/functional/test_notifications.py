@@ -124,6 +124,29 @@ def test_disallow_delete_when_notifications_pending(delete, user, notification_t
 
 
 @pytest.mark.django_db
+def test_notification_template_list_includes_notification_errors(get, user, notification_template):
+    Notification.objects.create(notification_template=notification_template, status='failed', error='failed to send')
+    Notification.objects.create(notification_template=notification_template, status='pending')
+    Notification.objects.create(notification_template=notification_template, status='successful')
+    url = reverse('api:notification_template_list')
+    u = user('superuser', True)
+    response = get(url, user=u)
+
+    assert response.status_code == 200
+    notifications = response.data['results'][0]['summary_fields']['recent_notifications']
+    assert len(notifications) == 3
+    statuses = [n['status'] for n in notifications]
+    assert set(statuses) == set(['failed', 'pending', 'successful'])
+    for n in notifications:
+        if n['status'] == 'successful':
+            assert n['error'] == ''
+        elif n['status'] == 'pending':
+            assert n['error'] == ''
+        elif n['status'] == 'failed':
+            assert n['error'] == 'failed to send'
+
+
+@pytest.mark.django_db
 def test_custom_environment_injection(post, user, organization):
     u = user('admin-poster', True)
     url = reverse('api:notification_template_list')
