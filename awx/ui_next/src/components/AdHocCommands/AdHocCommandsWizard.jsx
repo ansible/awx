@@ -87,7 +87,7 @@ function AdHocCommandsWizard({
         <AdHocExecutionEnvironmentStep organizationId={organizationId} />
       ),
       // Removed this line when https://github.com/patternfly/patternfly-react/issues/5729 is fixed
-      stepNavItemProps: { style: { 'white-space': 'nowrap' } },
+      stepNavItemProps: { style: { whiteSpace: 'nowrap' } },
       enableNext: true,
       nextButtonText: t`Next`,
       canJumpTo: currentStepId >= 2,
