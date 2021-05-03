@@ -1356,11 +1356,8 @@ class ExecutionEnvironmentAccess(BaseAccess):
             return Organization.accessible_objects(self.user, 'execution_environment_admin_role').exists()
         return self.check_related('organization', Organization, data, mandatory=True, role_field='execution_environment_admin_role')
 
+    @check_superuser
     def can_change(self, obj, data):
-        if obj.managed_by_tower:
-            raise PermissionDenied
-        if self.user.is_superuser:
-            return True
         if obj and obj.organization_id is None:
             raise PermissionDenied
         if self.user not in obj.organization.execution_environment_admin_role:
